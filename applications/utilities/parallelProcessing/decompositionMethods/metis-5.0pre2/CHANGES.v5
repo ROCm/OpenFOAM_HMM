@@ -1,0 +1,28 @@
+
+metis-5.0pre2
+------------------------------------------------------------------------
+r1437 | karypis | 2007-04-07 23:16:16 -0500 (Sat, 07 Apr 2007) | 3 lines
+
+- Added installation instructions and change-logs.
+- Tested 32bit & 64bit on 64bit architectures and passed tests.
+- Tested 32bit on 32bit architectures and passed tests.
+- strtoidx() addition for portable input file parsing
+- Restructured the internal memory allocation schemes for graph and
+  refinement data. This should enhance portability and make the code
+  easier to maintain.
+- Fixed some bad memory allocation calls (i.e., sizeof(x)/sizeof(idxtype). 
+  However, there are tons of those and need to be corrected once and for
+  all by eliminating workspace and the associated mallocs.
+- Added mprint/mscanf family of functions for portable formated I/O
+  of the idxtype datatype. The specifier for this datatype is %D.
+  All library routines use this function for printing. 
+  The implementation of these routines is not very efficient, but
+  that should do for now (in principle these routines should not be
+  used unless debugging).
+- Incorporated GKlib into METIS, which replaced many of its internal
+  functions. GKlib's malloc interface will enable graceful and clean
+  aborts (i.e., free all internally allocated memory) on fatal errors.
+  This will probably be available in the next pre-release.
+- Fixed the problems associated with metis.h that were identified by
+  David (flyspray Issue #9).
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+set -x
+
+wmake libso metis-5.0pre2/GKlib
+wmake libso metis-5.0pre2/libmetis
+
+wmake libso decompositionMethods
+(cd parMetisDecomp; ./Allwmake)

@@ -1,0 +1,48 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          fvSolution;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    pcorr           ICCG 1e-10 0;
+    pd              ICCG 1e-10 0;
+    pdFinal         ICCG 1e-08 0;
+    U               BICCG 1e-06 0;
+    k               BICCG 1e-08 0;
+    epsilon         BICCG 1e-08 0;
+    R               BICCG 1e-08 0;
+    nuTilda         BICCG 1e-08 0;
+}
+
+PISO
+{
+    momentumPredictor no;
+    nCorrectors     3;
+    nNonOrthogonalCorrectors 0;
+    nGammaCorr      1;
+    nGammaSubCycles 4;
+    cGamma          2;
+}
+
+
+// ************************************************************************* //

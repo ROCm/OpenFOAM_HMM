@@ -1,0 +1,153 @@
+
+Copyright 2001, Regents of the University of Minnesota.
+PARMGRIDGEN-1.0 was written by George Karypis (karypis@cs.umn.edu)
+and Irene Moulitsas (moulitsa@cs.umn.edu).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+THE SERIAL LIBRARY MGRIDGEN
+---------------------------
+
+INTRODUCTION
+------------
+
+MGRIDGEN is a software package for generating coarse grids.
+The documentation of MGRIDGEN can be found in the Doc/manual-parmgridgen.ps file.
+
+MGRIDGEN is written in ANSI C and should compile on Unix systems that have
+a ANSI C compiler. It has been extensively tested on the following
+architectures:
+
+   AIX
+   SunOS 
+   Solaris
+   IRIX 
+   Unicos
+   Linux
+   FreeBSD
+
+
+INSTALLATION INSTRUCTIONS
+-------------------------
+
+In order to build MGRIDGEN you need
+  (a) a C compiler that is ANSI compatible 
+  (b) make 
+
+Edit the file Makefile.in that resides in the same directory as this file 
+according to the requirements of your system. In particular you may need
+to modify the following:
+  1. The executable for GNU make (gmake)
+  2. The CC and LD variables, to be the name of the ANSI C compiler 
+     in your system. The GNU C compiler (gcc) will do. 
+  3. The settings for the AR and RANLIB variables that are suitable for
+     you system. Note that some systems do not have 'ranlib' but they use
+     'ar -ts' instead, or it is not needed all together. 
+  4. You can use COPTIONS and LDOPTIONS to provide additional command line
+     options that are required by your compiler and linker.
+
+
+After saving the modified Makefile.in, type 'make' at the prompt. This will
+build MGRIDGEN's library, and a program that tests the algorithm.
+Upon successful completion, make creates the following files:
+
+  MGridGen/IMlib/libIMlib.a
+  libmgrid.a
+  mgridgen
+
+Please read the instructions in the file Graphs/README on how to go and
+test the various programs.
+
+The header file mgridgen.h can be used to provide the prototype for the
+main routine in MGRIDGEN.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+THE PARALLEL LIBRARY PARMGRIDGEN
+--------------------------------
+
+INTRODUCTION
+------------
+
+PARMGRIDGEN is a parallel software package for generating coarse grids.
+The documentation of PARMGRIDGEN can be found in the Doc/manual-parmgridgen.ps
+file.
+
+PARMGRIDGEN  is written in ANSI C, using Message Passing Interface (MPI)
+for communication between the processors, and should compile on Unix systems
+that have a ANSI C compiler and an installation of MPI. It has been extensively
+tested on the following architectures:
+
+   AIX
+   IRIX
+   Unicos
+   Linux
+
+
+INSTALLATION INSTRUCTIONS
+-------------------------
+
+In order to build PARMGRIDGEN you need
+  (a) an MPI C compiler
+  (b) make
+
+Edit the file Makefile.in that resides in the same directory as this file
+according to the requirements of your system. In particular you may need
+to modify the following:
+  1. The executable for GNU make (gmake)
+  2. The CC and LD variables, to be the name of the ANSI C compiler 
+     in your system. The GNU C compiler (gcc) will do. 
+  3. The PARCC and PARLD variables, to be the name of the compiler in
+     your system. The default is to use mpicc from MPICH. 
+  4. The settings for the AR and RANLIB variables that are suitable for
+     you system. Note that some systems do not have 'ranlib' but they use
+     'ar -ts' instead, or it is not needed all together.
+  5. You can use COPTIONS and LDOPTIONS to provide additional command line
+     options that are required by your compiler and linker.
+
+
+After saving the modified Makefile.in, type 'make parallel' at the prompt. This
+will build PARMGRIDGEN's library, and a program that tests the algorithm.
+Upon successful completion, make creates the following files:
+
+  ParMGridGen/IMParMetis-2.0/libIMparmetis.a
+  libparmgrid.a
+  parmgridgen
+
+Please read the instructions in the file Graphs/README on how to go and
+test the various programs.
+
+The header file parmgridgen.h can be used to provide the prototype for the
+main routine in PARMGRIDGEN.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    NOTE-1: The results on your machine will most likely look different
+            because of differences in the random number generators.
+            Look if the test programs reports any 'incorrect' results.
+            If the test goes through correctly, then you have compiled
+            PARMGRIDGEN successfully!
+
+    NOTE-2: FYI, the header files mgridgen.h and parmgridgen.h contain
+            definitions for the datatypes to be used for integer and real
+            arithmetic. If you wish to switch to short (for integer) or
+            float (for real) you need to edit the files
+              o    MGridGen/IMlib/IMlib.h 
+              o    ParMGridGen/IMParMetis-2.0/ParMETISLib/struct.h
+            and comment the defintion accordigly.
+
+CONTACT INFORMATION
+-------------------
+
+If you have any comments, suggestions, or bug reports, please send them
+to moulitsa@cs.umn.edu.
+
+Any bug fixes and upgrades of the MGRIDGEN/PARMGRIDGEN package is available
+on WWW at URL: http://www.cs.umn.edu/~moulitsa/software.html
+
+
+Irene Moulitsas
+moulitsa@cs.umn.edu
+
+Tue Dec  4 18:24:47 CST 2001

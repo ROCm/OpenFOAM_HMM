@@ -1,0 +1,55 @@
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          testDict;
+}
+
+
+dimensions      [ 0 2 -2 0 0 0 0 ];
+internalField   uniform 1;
+
+active
+{
+    type            turbulentIntensityKineticEnergyInlet;
+    intensity       0.1;
+    value           $internalField;
+}
+
+
+inactive
+{
+    type            zeroGradient;
+}
+
+
+boundaryField
+{
+    Default_Boundary_Region
+    {
+        type            zeroGradient;
+    }
+
+    inlet_1  { $active }
+    inlet_2  { $inactive }
+    inlet_3  { $inactive }
+
+    #include "testDictInc"
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           #include "value";
+        x               5;
+        y               6;
+        another         #calc{x $x; y $y;};
+    }
+}

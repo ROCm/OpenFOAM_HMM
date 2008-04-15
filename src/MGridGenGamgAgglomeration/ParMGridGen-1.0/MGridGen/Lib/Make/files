@@ -1,0 +1,10 @@
+aratio.c
+coarsen.c
+kwayfm.c
+match.c
+merge.c
+mgridgen.c
+refine.c
+setup.c
+
+LIB = $(FOAM_LIBBIN)/libMGridGen

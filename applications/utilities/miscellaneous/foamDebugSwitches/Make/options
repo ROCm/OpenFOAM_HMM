@@ -1,0 +1,26 @@
+EXE_LIBS = \
+    -lLESfilters \
+    -lODE \
+    -lcompressibleLESmodels \
+    \
+    -lbasicThermophysicalModels \
+    -lfiniteVolume \
+    -lcombustionThermophysicalModels \
+    -lcompressibleTurbulenceModels \
+    -ldieselSpray \
+    -ledgeMesh \
+    -lengine \
+    -lerrorEstimation \
+    -ldynamicMesh \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModels \
+    -lincompressibleLESmodels \
+    -llagrangian \
+    -llaminarFlameSpeedModels \
+    -lliquids \
+    -lrandomProcesses \
+    -lsampling \
+    -lspecie \
+    -lthermophysicalFunctions \
+    -ltriSurface \
+    -lpdf

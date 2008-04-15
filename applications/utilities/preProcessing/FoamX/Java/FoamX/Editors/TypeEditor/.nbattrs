@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<attributes version="1.0">
+   <fileobject name="TypeParameter.java">
+      <attr name="NetBeansAttrDataObjectCompilerManager" serialvalue="aced00057372001e6f72672e6f70656e6964652e53657276696365547970652448616e646c6564612acc871b81080300024c0009636c6173734e616d657400124c6a6176612f6c616e672f537472696e673b4c00046e616d6571007e00017870740015466173744a6176616320436f6d70696c6174696f6e74002f6f72672e6e65746265616e732e6d6f64756c65732e6a6176612e466173744a61766163436f6d70696c65725479706578"/>
+   </fileobject>
+   <fileobject name="TypeEditorPanel.java">
+      <attr name="class_dependency_javax.swing.JPanel" stringvalue="TypeEditorPanel"/>
+   </fileobject>
+</attributes>

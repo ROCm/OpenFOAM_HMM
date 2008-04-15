@@ -1,0 +1,4 @@
+:q
+calcDivPhi.C
+
+EXE = $(FOAM_USER_APPBIN)/divPhi

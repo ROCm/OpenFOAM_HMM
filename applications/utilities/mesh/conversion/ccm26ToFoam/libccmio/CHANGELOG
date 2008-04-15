@@ -1,0 +1,120 @@
+2.6.1
+- Fixed a 1 byte buffer overrun if reading a node involves converting to a different data type than is stored.
+
+2.6.0
+- Altered CCM format to allow entries that are up to 2^64 bytes.  This involves
+  a number of changes to the core API:
+  - CCMIOGetDimensions and CCMIO*SetDataType* now take a CCMIOIndex.
+  - All CCMIORead(1|2|3)* and CCMIOWrite(1|2|3)* functions take a CCMIOIndex
+    for start and end, and x, y, z (as applicable).
+  - CCMIOSetDataType() requires all arguments in the variable-length argument
+    to be a CCMIOIndex.
+- Removed CCMIOWriteData, CCMIOWriteDataPoint, CCMIOReadData, CCMIOReadDataPoint
+- Removed CCMIOBuffer interface.
+
+2.5.12
+- Fixed failure in CCMIOGetDimensions on AIX.
+
+2.5.11
+- Fixed corruption problem on Solaris.
+
+2.5.10
+- Fixed problem reading old (pre-2.3.0) files with index != 0.
+
+2.5.9
+- Changed CCMIOCompress() to use mktemp() instead of tempnam();  this
+  eliminates any effects of the TMPDIR environment variable.
+
+2.5.8
+- Changed CCMIOWriteState() to no longer clear the problem state;  this
+  ensures that the .ccm file can be exactly overwritten in place.  (Otherwise
+  CCMIOWriteState() deletes stuff, and then ADF loses disk space)
+- Added CCMIOInvalidateEntity(), which guarantees that an entity is invalid.
+- Fixed a rare data corruption problem with fwrite caching.
+
+2.5.7
+- Added the adfdump program to help in debugging.  It makes an ascii file out
+  of the adf file.
+
+2.5.6
+- Changed code to allow the interface node to be either under cells or
+  topology.  This will be changed to just topology in a month.  2005-Sept-02
+- Also contains a fix to a crash caused by fwrite caching.
+
+2.5.5
+- Added fwrite/fread caching to the ADF library.  This improves NFS performance
+  on Linux 2.4 by an order of magnitude.
+- Fixed ADF library to properly handle the same file open multiple times.
+
+2.5.4
+- Added CCMIONewProstarSet() and CCMIOGetProstarSet() to store Prostar-type
+  cell sets, vertex sets, etc.
+
+2.5.3
+- Changed all Write functions to only write the dimension information when
+  start == kCCMIOStart, so buffered writing must now start from 0.
+  This significantly speeds up buffered writes.
+- Fixed a few bugs in the caching that was introduced in 2.5.0
+
+2.5.2
+- Changed ADF to only write the modification time when the file is closed.
+  This helps performance over Linux 2.4 NFS by 10 - 20%.
+
+2.5.1
+- ADF library updated from CGNS.
+
+2.5.0
+- Normalized sizes to be unsigned ints in function prototypes.
+- Fixed n^2 bug when writing large numbers of nodes.
+- Added processor nodes to allowed nodes for CCMIOGetEntityIndex().
+- Removed CCMIOWriteTop():  Use CCMIOWriteOpt1i() instead
+
+2.4.4
+- Added CCMIOWriteTop() (WRO).
+
+2.4.3
+2.4.2
+- Changes to the Makefiles and installation structure.  Also Wayne's private
+  functions.
+
+2.4.1
+- Fixed crash while reading old files and translating to a different data type
+  than stored on disk.
+2.4.0
+- Added solver restart node (kCCMIORestart), solver-specific restart data
+  (kCCMIORestartData), reference data node (kCCMIOReferenceData), and
+  physical constants (kCCMIOModelConstants).
+- Modified the ADF library to now write binary information at the beginning
+  of the file so that email clients and WinZip detect the file as binary.
+- Changed the format of multidimensional post data (e.g. vectors and tensors)
+  to be stored by component.
+- Added CCMIOWriteConstantFieldData*() to write a set of data that is all
+  the same value.  Reading this field will expand it back into copies of
+  that value in the resulting array.
+
+2.3.0
+- Added start and end parameters to all read and write functions for
+  buffered I/O.
+- All arrays must now be in C order (and dimensions in C dimensions) so
+  that buffering works properly.
+- CCMIOWriteFaces() has been split into CCMIOWriteFaces() and
+  CCMIOWriteFaceCells() (likewise for the read functions) in order to
+  properly buffer the face stream and the cells.
+
+2.2.0
+- Added kCCMIOFieldPhase node as a parent of the field data.
+- Added short names for prostar.
+- Tied file version node to library version.
+
+2.1.1
+- Added CCMIOGetOptInfo().
+- Added kCCMIOInterfaces as a node type.
+
+2.1.0
+- Changed name to CCM.
+- Added integer field data.
+- Added Lagrangian support.
+- State node now has a description.
+
+2.0.0
+- New SFF API requiring arrays to be written directly.

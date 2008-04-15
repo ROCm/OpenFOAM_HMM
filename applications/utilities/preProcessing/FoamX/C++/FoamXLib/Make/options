@@ -1,0 +1,7 @@
+#include "orbOptions"
+
+EXE_INC = \
+    $(ORB_INC) \
+    -I../FoamXServer
+
+LIB_LIBS = $(ORB_LIBS)

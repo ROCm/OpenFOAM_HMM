@@ -1,0 +1,34 @@
+include Makefile.in
+
+STRINGSOBJS  = $(PRGBUILDDIR)/strings$(OBJEXT)
+GKSORTOBJS   = $(PRGBUILDDIR)/gksort$(OBJEXT)
+                
+HEADERS = $(wildcard $(GKLIBINCDIR)/*.h)
+
+
+default: $(BUILDDIR)/strings$(EXEEXT) $(BUILDDIR)/gksort$(EXEEXT)
+
+
+$(BUILDDIR)/strings$(EXEEXT): $(STRINGSOBJS) $(GKLIBBUILDDIR)/libGKlib.a
+	$(LD)  $(LDOPTIONS) $(EXEOUTPUTFILE) $(STRINGSOBJS) $(LIBSDIR) $(LIBS) ; $(MERGEMANIFEST)
+	chmod 744 $@
+
+$(BUILDDIR)/gksort$(EXEEXT): $(GKSORTOBJS) $(GKLIBBUILDDIR)/libGKlib.a
+	$(LD)  $(LDOPTIONS) $(EXEOUTPUTFILE) $(GKSORTOBJS) $(LIBSDIR) $(LIBS) ; $(MERGEMANIFEST)
+	chmod 744 $@
+
+
+clean:
+	rm -rf $(PRGBUILDDIR) 
+
+realclean:
+	rm -rf $(PRGBUILDDIR) ;\
+        rm -rf $(BUILDDIR) ;
+
+
+$(STRINGSOBJS) : $(HEADERS) Makefile.in Makefile $(GKLIBBUILDDIR)/libGKlib.a
+
+
+$(PRGBUILDDIR)/%$(OBJEXT) : %.c
+	$(CC) $(CFLAGS) $(SOURCEFILE) $(OUTPUTFILE) 
+

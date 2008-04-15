@@ -1,0 +1,28 @@
+# Microsoft NMAKE File
+
+# Module specific variables
+MODNAM=ccmio
+
+# Include path and extra cpp options
+INCLUDEDIRS=-I.. 
+CPPDEFS=$(CPPDEFS) /D_WIN32 /DADFLIB
+
+# Lib path
+LIBDIRS=
+
+# Extra libraries
+#LIBS_EXTRA=ADF.LIB
+#LIBS_EXTRA_d=ADF_d.LIB
+
+# Link dependencies
+LINK_DEPS=
+
+# Build a static lib rather than a dll for now
+# because the ccmio code doesn't contain export
+# declarations
+STATICLIB=1
+
+
+# End of module specific variables
+
+!INCLUDE "$(DEV_HOME)\star\config\makelib.win"

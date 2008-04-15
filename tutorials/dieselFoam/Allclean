@@ -1,0 +1,11 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+case="aachenBomb"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+cleanCase $case
+

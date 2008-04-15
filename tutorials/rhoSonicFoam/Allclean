@@ -1,0 +1,20 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="forwardStep shockTube"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    cleanCase $case
+    if [ "$case" = "shockTube" ] 
+    then
+        rm -rf $case/0
+        cp -r $case/0.org $case/0
+        cleanSamples $case
+    fi
+done 
+

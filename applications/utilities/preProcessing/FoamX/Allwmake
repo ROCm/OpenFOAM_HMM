@@ -1,0 +1,6 @@
+#!/bin/sh
+set -x
+
+(cd Idl ; make)
+(cd C++ ; ./Allwmake)
+(cd Java ; wmake jar)

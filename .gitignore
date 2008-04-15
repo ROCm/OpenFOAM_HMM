@@ -1,0 +1,39 @@
+# git-ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+
+# editor and misc backup files - anywhere
+*~
+.*~
+*.orig
+*.bak
+
+# CVS recovered versions - anywhere
+.#*
+
+# objects and archives - anywhere
+*.[oa]
+*.la
+*.so
+
+# dependency files - anywhere
+*.dep
+
+# lnInclude folders - anywhere
+lnInclude
+
+# linux build folder(s) - anywhere
+linux*Gcc*[SD]POpt*
+
+# reinstate wmake/rules that look like build folders
+!wmake/rules/linux*
+
+# doxygen generated documentation
+doc/[Dd]oxygen/html
+doc/[Dd]oxygen/latex
+doc/[Dd]oxygen/man
+
+# source packages - anywhere
+*.tar.gz
+*.tgz
+
+# end-of-file

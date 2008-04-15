@@ -1,0 +1,73 @@
+all: qmake copy 
+	@eval `grep export qmake.vars | awk '{ $$1=""; $$2=""; print; }'`; \
+	if [ x$$MK_BUILDNAME = xwindows-x86 ]; then \
+	  MAKE="nmake -nologo"; \
+	  MAKEFLAGS=; \
+	else \
+	  MAKE=$(MAKE); \
+	fi; \
+	$${MAKE} -f Makefile.$(PROJECT)
+
+copy: qmake
+	@eval `grep export qmake.vars | awk '{ $$1=""; $$2=""; print; }'`; \
+	if [ x$$MK_BUILDNAME = xwindows-x86 ]; then \
+	  MAKE="nmake -nologo"; \
+	  MAKEFLAGS=; \
+	else \
+	  MAKE=$(MAKE); \
+	fi; \
+	#$${MAKE} -f Makefile.$(PROJECT) install_headers
+
+qmake:
+	$(PATHTOSRC)/config/runqmake $(PATHTOSRC) \
+	  -o Makefile.$(PROJECT) $(PROJECT).pro 2>&1 | tee qmake.vars
+
+
+
+test: tqmake tcopy
+# We need to make sure the main portion is build before we build the test.
+	@eval `grep export qmake.vars | awk '{ $$1=""; $$2=""; print; }'`; \
+	if [ x$$MK_BUILDNAME = xwindows-x86 ]; then \
+	  MAKE="nmake -nologo"; \
+	  MAKEFLAGS=; \
+	else \
+	  MAKE=$(MAKE); \
+	fi; \
+	$${MAKE} -f Makefile.$(PROJECT); \
+	if [ -d test ]; then cd test; $(MAKE) $@; fi
+
+tcopy: tqmake
+	@eval `grep export qmake.vars | awk '{ $$1=""; $$2=""; print; }'`; \
+	if [ x$$MK_BUILDNAME = xwindows-x86 ]; then \
+	  MAKE="nmake -nologo"; \
+	  MAKEFLAGS=; \
+	else \
+	  MAKE=$(MAKE); \
+	fi; \
+	#$${MAKE} -f Makefile.$(PROJECT) install_headers
+
+tqmake:
+	TEST=1; export TEST; \
+	$(PATHTOSRC)/config/runqmake $(PATHTOSRC) \
+	  -o Makefile.$(PROJECT) $(PROJECT).pro 2>&1 | tee qmake.vars
+
+
+
+clean: qmake
+	@eval `grep export qmake.vars | awk '{ $$1=""; $$2=""; print; }'`; \
+	if [ x$$MK_BUILDNAME = xwindows-x86 ]; then \
+	  MAKE="nmake -nologo"; \
+	  MAKEFLAGS=; \
+	else \
+	  MAKE=$(MAKE); \
+	fi; \
+	$${MAKE} -f Makefile.$(PROJECT) distclean; \
+	if [ -d test ]; then cd test; $(MAKE) $@; fi
+
+
+
+tags:
+	etags *.h *.cpp
+
+FORCE:
+

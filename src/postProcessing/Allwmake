@@ -1,0 +1,5 @@
+#!/bin/sh
+set -x
+
+wmake libo postCalc
+wmake libso forces

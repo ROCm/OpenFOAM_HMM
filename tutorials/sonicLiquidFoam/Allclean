@@ -1,0 +1,19 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+keepCases="decompressionTank"
+loseCases="decompressionTankFine"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $keepCases
+do
+    cleanCase $case
+done
+
+for case in $loseCases
+do
+    removeCase $case
+done

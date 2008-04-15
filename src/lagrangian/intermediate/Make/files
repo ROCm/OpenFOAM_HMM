@@ -1,0 +1,48 @@
+/* Parcels */
+parcels/derived/kinematicParcel/kinematicParcel.C
+parcels/derived/thermoParcel/thermoParcel.C
+parcels/derived/reactingParcel/reactingParcel.C
+
+/* Cloud base classes */
+clouds/baseClasses/kinematicCloud/kinematicCloud.C
+clouds/baseClasses/thermoCloud/thermoCloud.C
+clouds/baseClasses/reactingCloud/reactingCloud.C
+
+/* Injection mechanisms */
+clouds/derived/basicKinematicCloud/basicKinematicCloud.C
+clouds/derived/basicThermoCloud/basicThermoCloud.C
+clouds/derived/basicReactingCloud/basicReactingCloud.C
+
+/* kinematic parcel sub-models */
+parcels/derived/kinematicParcel/defineKinematicParcel.C
+parcels/derived/kinematicParcel/makeKinematicParcelDispersionModels.C
+parcels/derived/kinematicParcel/makeKinematicParcelDragModels.C
+parcels/derived/kinematicParcel/makeKinematicParcelInjectionModels.C
+parcels/derived/kinematicParcel/makeKinematicParcelHeatTransferModels.C
+parcels/derived/kinematicParcel/makeKinematicParcelWallInteractionModels.C
+
+/* thermo parcel sub-models */
+parcels/derived/thermoParcel/defineThermoParcel.C
+parcels/derived/thermoParcel/makeThermoParcelDispersionModels.C
+parcels/derived/thermoParcel/makeThermoParcelDragModels.C
+parcels/derived/thermoParcel/makeThermoParcelInjectionModels.C
+parcels/derived/thermoParcel/makeThermoParcelHeatTransferModels.C
+parcels/derived/thermoParcel/makeThermoParcelWallInteractionModels.C
+
+/* reacting parcel sub-models */
+parcels/derived/reactingParcel/defineReactingParcel.C
+parcels/derived/reactingParcel/makeReactingParcelCompositionModels.C
+parcels/derived/reactingParcel/makeReactingParcelDragModels.C
+parcels/derived/reactingParcel/makeReactingParcelDispersionModels.C
+parcels/derived/reactingParcel/makeReactingParcelInjectionModels.C
+parcels/derived/reactingParcel/makeReactingParcelHeatTransferModels.C
+parcels/derived/reactingParcel/makeReactingParcelMassTransferModels.C
+parcels/derived/reactingParcel/makeReactingParcelSurfaceReactionModels.C
+parcels/derived/reactingParcel/makeReactingParcelWallInteractionModels.C
+
+/* bolt-on models */
+submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
+submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
+
+
+LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

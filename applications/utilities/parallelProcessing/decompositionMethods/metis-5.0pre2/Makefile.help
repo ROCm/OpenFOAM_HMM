@@ -1,0 +1,50 @@
+-------------------------------------------------------------------------------
+This is the Makefile for building METIS's library and stand-alone programs. 
+
+***Important***
+METIS's Makefiles need to be processed using GNU's make, which is the default
+make system on Linux systems, and on other systems is sometimes called 'gmake'.
+
+The Makefile understands the following targets:
+  make all
+    Builds the library and all the stand-alone programs. The library and 
+    programs are placed in the build/<systype> directory where <systype> is 
+    the name of the system on which your are building METIS.
+
+    ***Important***
+    Make sure that you look at include/metis.h and change any of the 
+    parameters based on your target system and desired built.
+
+  make clean
+    Removes all object files that were generated as part of the build process
+    but it will leave the built libraries and stand-alone programs intact.
+    
+  make realclean
+    Removes both object files as well as libraries and stand-alone programs.
+
+
+The build system detects Linux, cygwin, SunOS, & Darwin systems. In the case
+of cygwin, it actually builds a MS Windows set of libraries and executables
+using Visual Studio 2005, using the command-line interface to the VC++ compiler
+(make sure that 'cl' is on the path).
+
+On any other system, the Makefiles default to using the cc compiler. If you 
+want to build METIS using another compiler you can do that by setting the 'CC' 
+variable on the command line. For example, 'make "CC=icc" all' will build 
+METIS using the icc (intel's) compiler. 
+
+In addition to 'CC' you can also set the following variables that are used by 
+the build system:
+  OPTFLAGS    Specifies optimization parameters (e.g., -O3)
+  CFLAGS      Specifies compiler-specific arguments. If you decide to specify 
+              this, make sure that you also provide -DUNIX as one of the 
+              options (e.g., "CFLAGS=-DUNIX -Wall").
+  LD          Specifies the linker. Defaults to CC.
+  LDOPTIONS   Specifies any options to be passed to the linker.
+
+Finally, the Makefiles understand the following variables, which are used for
+now only for development purposes:
+ useopenmp=1    Specifies if OpenMP will be used.
+ usegdb=1       Specifies that everything will be build with -g option.
+ withdebug=1    Turns on internal error and assertion checking.
+-------------------------------------------------------------------------------

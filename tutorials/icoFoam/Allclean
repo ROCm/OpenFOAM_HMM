@@ -1,0 +1,23 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+keepCases="cavity cavityGrade cavityClipped elbow"
+loseCases="cavityFine cavityHighRe"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $keepCases
+do
+    cleanCase $case
+    if [ "$case" = "elbow" ]
+    then
+        rm -rf $case/fluentInterface
+    fi
+done
+
+for case in $loseCases
+do
+    removeCase $case
+done

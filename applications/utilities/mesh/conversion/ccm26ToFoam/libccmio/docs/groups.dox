@@ -1,0 +1,8 @@
+/** \defgroup core Core API
+The Core API provides low-level access to the file.  In general this API
+is not necessary as the Intermediate API provides a more useful interface.
+*/
+
+/** \defgroup intermediate Intermediate API
+The Intermediate API provides a higher level method of accessing
+data than the Core API.  */

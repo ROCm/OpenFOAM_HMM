@@ -1,0 +1,3 @@
+magU.C
+
+EXE = $(FOAM_APPBIN)/magU

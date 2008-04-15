@@ -1,0 +1,4 @@
+polyDualMesh.C
+makePolyDualMesh.C
+
+EXE = $(FOAM_APPBIN)/polyDualMesh

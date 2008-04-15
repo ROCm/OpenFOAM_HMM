@@ -1,0 +1,39 @@
+The distribution of PARMGRIDGEN consists of a number of files arranged in four
+directories. The files contained in each directory are as follows:
+
+
+Doc/            Contains PARMGRIDGEN's user manual
+
+Graphs/         Contains some small sample meshes that can be used with
+                the stand-alone programs of MGRIDGEN and PARMGRIDGEN
+
+MGridGen/       Contains the serial library
+
+ParMGridGen/    Contains the parallel library
+
+mgridgen        Stand-alone serial program
+parmgridgen     Stand-alone parallel program
+
+The distribution of MGRIDGEN consists of a number of files arranged in three
+directories. The files contained in each directory are as follows:
+
+
+IMlib/          Contains some auxiliary routines
+
+Lib/            Contains the code for MGRIDGEN's library
+
+Programs/       Contains a comprehensive tester for MGRIDGEN's routines
+
+
+
+The distribution of PARMGRIDGEN consists of a number of files arranged in three
+directories. The files contained in each directory are as follows:
+
+
+IMParMetis-2.0/ Contains some auxiliary routins from ParMetis-2.0, modified
+                so as to fit our data types. 
+
+ParLib/         Contains the code for MGRIDGEN's library
+
+Programs/       Contains a comprehensive tester for PARMGRIDGEN's routines
+

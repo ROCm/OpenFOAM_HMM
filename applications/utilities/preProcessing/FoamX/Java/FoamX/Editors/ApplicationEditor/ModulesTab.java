@@ -1,0 +1,400 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+package FoamX.Editors.ApplicationEditor;
+
+import java.util.Vector;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.DefaultListModel;
+
+import FoamX.App;
+
+
+public class ModulesTab
+    extends javax.swing.JPanel
+{
+    //--------------------------------------------------------------------------
+
+    private ApplicationModel appModel_;
+    private DefaultListModel availableModulesListModel_;
+    private DefaultListModel selectedModulesListModel_;
+
+    //--------------------------------------------------------------------------
+    /** Constructor for ModulesTab. */
+
+    public ModulesTab(ApplicationModel appModel)
+    {
+        try
+        {
+            appModel_             = appModel;
+            availableModulesListModel_ = new DefaultListModel();
+            selectedModulesListModel_  = new DefaultListModel();
+
+            // Initialise the list of selected modules.
+            Vector appModules = appModel_.getAppModules();
+            for (int i=0; i <appModules.size(); i++)
+            {
+                selectedModulesListModel_.addElement(new ModuleDescriptor((String)appModules.get(i)));
+            }
+
+            // Initialise the list of available modules.
+            String[] modules = appModel_.getAvailableModules();
+            for (int i=0; i <modules.length; i++)
+            {
+                if (!appModules.contains(modules[i]))
+                {
+                    availableModulesListModel_.addElement(new ModuleDescriptor(modules[i]));
+                }
+            }
+
+            initComponents();
+
+            // Setup listeners for add/remove buttons.
+            availableModulesList_.getSelectionModel().addListSelectionListener
+            (
+                new ListSelectionListener()
+                {
+                    public void valueChanged(ListSelectionEvent evt)
+    {
+        updateButtons();
+    }
+                }
+            );
+            selectedModulesList_.getSelectionModel().addListSelectionListener
+            (
+                new ListSelectionListener()
+                {
+                    public void valueChanged(ListSelectionEvent evt)
+    {
+        updateButtons();
+    }
+                }
+            );
+
+            // Set initial button state.
+            updateButtons();
+        }
+        catch (Exception ex)
+        {
+            App.handleAllExceptions(ex);
+        }
+    }
+
+    //--------------------------------------------------------------------------
+
+    public void updateModel()
+    {
+        // Update the application modules vector.
+        Vector modules = appModel_.getAppModules();
+        modules.removeAllElements();
+        for (int i=0; i <selectedModulesListModel_.getSize(); i++)
+        {
+            ModuleDescriptor moduleDesc = (ModuleDescriptor)selectedModulesListModel_.getElementAt(i);
+            modules.add(i, moduleDesc.getModuleName());
+        }
+    }
+
+    //--------------------------------------------------------------------------
+
+    private void updateButtons()
+    {
+        addModuleButton_.setEnabled(!availableModulesList_.getSelectionModel().isSelectionEmpty());
+        removeModuleButton_.setEnabled(!selectedModulesList_.getSelectionModel().isSelectionEmpty());
+        addAllModulesButton_.setEnabled(availableModulesListModel_.size()> 0);
+        removeAllModulesButton_.setEnabled(selectedModulesListModel_.size()> 0);
+    }
+
+    //--------------------------------------------------------------------------
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the FormEditor.
+     */
+    private void initComponents() {//GEN-BEGIN:initComponents
+        availableModulesPanel_ = new javax.swing.JPanel();
+        leftScrollPane_ = new javax.swing.JScrollPane();
+        availableModulesList_ = new javax.swing.JList();
+        buttonPanel_ = new javax.swing.JPanel();
+        addModuleButton_ = new javax.swing.JButton();
+        addAllModulesButton_ = new javax.swing.JButton();
+        removeModuleButton_ = new javax.swing.JButton();
+        removeAllModulesButton_ = new javax.swing.JButton();
+        selectedModulesPanel_ = new javax.swing.JPanel();
+        rightScrollPane_ = new javax.swing.JScrollPane();
+        selectedModulesList_ = new javax.swing.JList();
+        
+        setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints gridBagConstraints1;
+        
+        setFont(new java.awt.Font("Dialog", 0, 10));
+        availableModulesPanel_.setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints gridBagConstraints2;
+        
+        availableModulesPanel_.setBorder(new javax.swing.border.TitledBorder(null, "Available Modules", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 10), java.awt.Color.black));
+        availableModulesList_.setModel(availableModulesListModel_);
+        availableModulesList_.setFont(new java.awt.Font("Dialog", 0, 10));
+        leftScrollPane_.setViewportView(availableModulesList_);
+        
+        gridBagConstraints2 = new java.awt.GridBagConstraints();
+        gridBagConstraints2.gridx = 0;
+        gridBagConstraints2.gridy = 0;
+        gridBagConstraints2.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints2.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints2.weightx = 1.0;
+        gridBagConstraints2.weighty = 1.0;
+        availableModulesPanel_.add(leftScrollPane_, gridBagConstraints2);
+        
+        gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.gridx = 0;
+        gridBagConstraints1.gridy = 0;
+        gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints1.insets = new java.awt.Insets(10, 10, 10, 10);
+        gridBagConstraints1.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints1.weightx = 1.0;
+        gridBagConstraints1.weighty = 1.0;
+        add(availableModulesPanel_, gridBagConstraints1);
+        
+        buttonPanel_.setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints gridBagConstraints3;
+        
+        addModuleButton_.setToolTipText("Add module");
+        addModuleButton_.setFont(new java.awt.Font("Dialog", 0, 10));
+        addModuleButton_.setText(">");
+        addModuleButton_.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addModuleButtonActionPerformed_(evt);
+            }
+        });
+        
+        gridBagConstraints3 = new java.awt.GridBagConstraints();
+        gridBagConstraints3.gridx = 0;
+        gridBagConstraints3.gridy = 0;
+        gridBagConstraints3.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints3.insets = new java.awt.Insets(10, 10, 5, 10);
+        buttonPanel_.add(addModuleButton_, gridBagConstraints3);
+        
+        addAllModulesButton_.setToolTipText("Add all modules");
+        addAllModulesButton_.setFont(new java.awt.Font("Dialog", 0, 10));
+        addAllModulesButton_.setText(">>");
+        addAllModulesButton_.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addAllModulesButtonActionPerformed_(evt);
+            }
+        });
+        
+        gridBagConstraints3 = new java.awt.GridBagConstraints();
+        gridBagConstraints3.gridx = 0;
+        gridBagConstraints3.gridy = 1;
+        gridBagConstraints3.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints3.insets = new java.awt.Insets(5, 10, 5, 10);
+        buttonPanel_.add(addAllModulesButton_, gridBagConstraints3);
+        
+        removeModuleButton_.setToolTipText("Remove module");
+        removeModuleButton_.setFont(new java.awt.Font("Dialog", 0, 10));
+        removeModuleButton_.setText("<");
+        removeModuleButton_.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeModuleButtonActionPerformed_(evt);
+            }
+        });
+        
+        gridBagConstraints3 = new java.awt.GridBagConstraints();
+        gridBagConstraints3.gridx = 0;
+        gridBagConstraints3.gridy = 2;
+        gridBagConstraints3.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints3.insets = new java.awt.Insets(25, 10, 5, 10);
+        buttonPanel_.add(removeModuleButton_, gridBagConstraints3);
+        
+        removeAllModulesButton_.setToolTipText("Remove all modules");
+        removeAllModulesButton_.setFont(new java.awt.Font("Dialog", 0, 10));
+        removeAllModulesButton_.setText("<<");
+        removeAllModulesButton_.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeAllModulesButtonActionPerformed_(evt);
+            }
+        });
+        
+        gridBagConstraints3 = new java.awt.GridBagConstraints();
+        gridBagConstraints3.gridx = 0;
+        gridBagConstraints3.gridy = 3;
+        gridBagConstraints3.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints3.insets = new java.awt.Insets(5, 10, 10, 10);
+        buttonPanel_.add(removeAllModulesButton_, gridBagConstraints3);
+        
+        gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.gridx = 1;
+        gridBagConstraints1.gridy = 0;
+        gridBagConstraints1.insets = new java.awt.Insets(10, 0, 10, 0);
+        add(buttonPanel_, gridBagConstraints1);
+        
+        selectedModulesPanel_.setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints gridBagConstraints4;
+        
+        selectedModulesPanel_.setBorder(new javax.swing.border.TitledBorder(null, "Required Modules", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 10), java.awt.Color.black));
+        selectedModulesList_.setModel(selectedModulesListModel_);
+        selectedModulesList_.setFont(new java.awt.Font("Dialog", 0, 10));
+        rightScrollPane_.setViewportView(selectedModulesList_);
+        
+        gridBagConstraints4 = new java.awt.GridBagConstraints();
+        gridBagConstraints4.gridx = 0;
+        gridBagConstraints4.gridy = 0;
+        gridBagConstraints4.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints4.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints4.weightx = 1.0;
+        gridBagConstraints4.weighty = 1.0;
+        selectedModulesPanel_.add(rightScrollPane_, gridBagConstraints4);
+        
+        gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.gridx = 2;
+        gridBagConstraints1.gridy = 0;
+        gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints1.insets = new java.awt.Insets(10, 10, 10, 10);
+        gridBagConstraints1.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints1.weightx = 1.0;
+        gridBagConstraints1.weighty = 1.0;
+        add(selectedModulesPanel_, gridBagConstraints1);
+        
+    }//GEN-END:initComponents
+
+    //--------------------------------------------------------------------------
+
+  private void removeAllModulesButtonActionPerformed_ (java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_removeAllModulesButtonActionPerformed_
+        // Remove all modules.
+        for (int i = 0; i <selectedModulesListModel_.size(); i++)
+        {
+            ModuleDescriptor moduleDesc = (ModuleDescriptor)selectedModulesListModel_.getElementAt(i);
+            availableModulesListModel_.addElement(moduleDesc);
+        }
+        selectedModulesListModel_.removeAllElements();
+        updateButtons();
+  }//GEN-LAST:event_removeAllModulesButtonActionPerformed_
+
+    //--------------------------------------------------------------------------
+
+  private void removeModuleButtonActionPerformed_ (java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_removeModuleButtonActionPerformed_
+        // Remove the selected module and add back into available list.
+        if (!selectedModulesList_.getSelectionModel().isSelectionEmpty())
+        {
+            int minIndex = selectedModulesList_.getSelectionModel().getMinSelectionIndex();
+            int maxIndex = selectedModulesList_.getSelectionModel().getMaxSelectionIndex();
+            // Need to remove from the top so that it doesn't get its knickers in a twist.
+            for (int i=maxIndex; i>= minIndex; i--)
+            {
+                ModuleDescriptor moduleDesc = (ModuleDescriptor)selectedModulesListModel_.getElementAt(i);
+                selectedModulesListModel_.removeElementAt(i);
+                availableModulesListModel_.addElement(moduleDesc);
+            }
+        }
+        selectedModulesList_.getSelectionModel().clearSelection();
+        updateButtons();
+  }//GEN-LAST:event_removeModuleButtonActionPerformed_
+
+    //--------------------------------------------------------------------------
+
+  private void addAllModulesButtonActionPerformed_ (java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_addAllModulesButtonActionPerformed_
+        // Add all modules.
+        for (int i = 0; i <availableModulesListModel_.size(); i++)
+        {
+            ModuleDescriptor moduleDesc = (ModuleDescriptor)availableModulesListModel_.getElementAt(i);
+            selectedModulesListModel_.addElement(moduleDesc);
+        }
+        availableModulesListModel_.removeAllElements();
+        updateButtons();
+  }//GEN-LAST:event_addAllModulesButtonActionPerformed_
+
+    //--------------------------------------------------------------------------
+
+  private void addModuleButtonActionPerformed_ (java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_addModuleButtonActionPerformed_
+        // Add the selected module.
+        if (!availableModulesList_.getSelectionModel().isSelectionEmpty())
+        {
+            int minIndex = availableModulesList_.getSelectionModel().getMinSelectionIndex();
+            int maxIndex = availableModulesList_.getSelectionModel().getMaxSelectionIndex();
+            // Need to remove from the top so that it doesn't get its knickers in a twist.
+            for (int i=maxIndex; i>= minIndex; i--)
+            {
+                ModuleDescriptor moduleDesc = (ModuleDescriptor)availableModulesListModel_.getElementAt(i);
+                availableModulesListModel_.removeElementAt(i);
+                selectedModulesListModel_.addElement(moduleDesc);
+            }
+        }
+        availableModulesList_.getSelectionModel().clearSelection();
+        updateButtons();
+  }//GEN-LAST:event_addModuleButtonActionPerformed_
+
+    //--------------------------------------------------------------------------
+
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JPanel availableModulesPanel_;
+  private javax.swing.JScrollPane leftScrollPane_;
+  private javax.swing.JList availableModulesList_;
+  private javax.swing.JPanel buttonPanel_;
+  private javax.swing.JButton addModuleButton_;
+  private javax.swing.JButton addAllModulesButton_;
+  private javax.swing.JButton removeModuleButton_;
+  private javax.swing.JButton removeAllModulesButton_;
+  private javax.swing.JPanel selectedModulesPanel_;
+  private javax.swing.JScrollPane rightScrollPane_;
+  private javax.swing.JList selectedModulesList_;
+  // End of variables declaration//GEN-END:variables
+
+    //--------------------------------------------------------------------------
+
+    private class ModuleDescriptor
+    {
+        private String moduleName_;
+
+        public ModuleDescriptor(String moduleName)
+        {
+            moduleName_ = moduleName;
+        }
+
+        public String toString()
+        {
+            return moduleName_;
+        }
+
+        public String getModuleName()
+        {
+            return moduleName_;
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+}
+
+
+
+
+

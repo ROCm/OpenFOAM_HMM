@@ -1,0 +1,11 @@
+comm.c
+debug.c
+grsetup.c
+ikeysort.c
+memory.c
+move.c
+parmgridgen.c
+setup.c
+util.c
+
+LIB = $(FOAM_LIBBIN)/libParMGridGen

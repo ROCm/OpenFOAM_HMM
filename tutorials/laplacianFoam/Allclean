@@ -1,0 +1,16 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="flange"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    cleanCase $case
+    rm -rf $case/Fieldview > /dev/null 2>&1
+    rm -rf $case/EnSight > /dev/null 2>&1
+done
+

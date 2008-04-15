@@ -1,0 +1,69 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           polyBoundaryMesh;
+    object          boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+(    inlet
+    {
+        type            patch;
+        physicalType    turbulentInlet;
+        startFace       715675;
+        nFaces          600;
+    }
+
+    outlet
+    {
+        type            patch;
+        physicalType    inletOutlet;
+        startFace       716275;
+        nFaces          1140;
+    }
+
+    upperWall
+    {
+        type            wall;
+        physicalType    fixedTemperatureWall;
+        startFace       717415;
+        nFaces          4460;
+    }
+
+    lowerWall
+    {
+        type            wall;
+        physicalType    fixedTemperatureWall;
+        startFace       721875;
+        nFaces          5000;
+    }
+
+    frontAndBack
+    {
+        type            cyclic;
+        physicalType    cyclic;
+        startFace       726875;
+        nFaces          24450;
+    }
+
+
+)
+
+// ************************************************************************* //

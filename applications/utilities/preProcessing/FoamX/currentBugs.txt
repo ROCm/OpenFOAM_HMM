@@ -1,0 +1,149 @@
+Bugs
+----
+
+1]
+(startup)
+The C++ codes read the ns.ref file as well as the Java.
+They should contact nsd directly. 04/02/03: C++ codes use commandline arguments
+passed through.
+
+2]
+(startup)
+- also if roots are incorrect and cannot be read) you get no warning.
+8/1/02: partially fixed: is warning message from FoamXCaseBrowser
+--> FOAM Warning : User specified root directory '"/aaaa/run/LES"' not found.
+Removing from root directories list.
+
+3]
+(startup)
+If licenseserver gets killed and restarted foamX gets confused.
+Unclear message. Should it be possible to reconnect (by rereading ns.ref?).
+
+4]
+(case opening)
+if mesh&fields are not consistent (changing number of patches)
+you get exception:
+FoamXError:
+Type mismatch, expected scalar, got invalidType
+in function FoamX::FoamXAny::SetValue(const FoamXServer::FoamXAny&)
+in file FoamXAny.C at line 87
+CANNOT REPRODUCE. 04/02/03. Adding patch to 'boundaryField' is no problem
+(not used). Deleting patch info from 'boundaryField' just makes it use default
+values.
+
+5]
+(create case)
+Application class is straight pull down instead of now hierarchical.
+
+6]
+(dictionary editor)
+Timeformat is Optional but
+- if they don't have it, it is scientific
+- if they do have it, it is general.
+
+7]
+(import mesh)
+If import is meshDescription only FoamX pops up box: "no mesh defined"
+Yes? What is the problem?
+
+8]
+no possibility of hand editing arguments. E.g. parallel running?
+
+9]
+parallel running tool
+
+10]
+Logs/Probes:
+- text tail log (should wait until log appears. Sleep is done on Java side)
+- text view log
+- graph tail var in log
+- graph view var in log
+- graph tail probe
+- graph view probe
+
+11]
+(process editor)
+On slow machine Corba can timeout (e.g. running foamProcessInfo on turner)
+leaving it in bad state.
+Ok if timeOut set to larger value.
+
+12]
+(run panel)
+Run a case (e.g. icoFoam) in foreground. Kill icoFoam process. 
+Upsets Corba and FoamX does not work anymore.
+CANNOT REPRODUCE. 4/02/03. It pops up panel saying 'icoFoam exited with
+return code 15'
+
+13]
+Cannot resolve URL from /FoamX/icons/small/maths/interpolationScheme.gif
+Cannot resolve URL from /FoamX/icons/small/maths/snGradScheme.gif
+
+14]
+in caseChooserDlg you are allowed to 'Open Case Browser'.
+Is not supported internally.
+
+15]
+No possibility of rereading dictionaries. But is supported for mesh & fields.
+
+16]
+caseBrowser tree does not get refreshed sometimes if case gets closed.
+
+17]
+If clone case fails the case list gets messed up. Unlock-case should remove
+any case from caseList in caseBrowser.
+
+18]
+Chris: for his tutorials: no boundary file. When opening case and then saving
+it overwrites fields with ones without all the carefully set boundary info.
+
+19]
+Start with arguments to open case automatically:
+runFoamX penfold $FOAM_RUN/icoFoam cavityTut
+Now in caseBrower busyCursor is still on.
+10/04/03. REMOVED busy cursor from openCase
+
+20]
+View Log file. - Followmode does not work.
+
+21]
+(simpleEditor)
+Does not have key shortcuts.
+
+
+**** APPEARANCE ***************************************************************
+
+22]
+Close button does not close all dictionary windows.
+Open e.g. field (say U), open boundary condition window.
+This (managed) window does not close.
+
+23] 
+(changes to button icons) 
+Open/Close_Case_Broswer (they are the same as start/stop FOAM run)
+perhaps a terminal for Open_Case_Browser 
+Close_case (looks like stop run)
+
+24] 
+(case setup)
+Tools are not accessible from the menu bar at the top of the screen.
+
+25]
+(case panel)
+Icons for fields dont work (icons for dictionary entries do!)
+(Chris)
+
+26] (dictionary editor) 
+Description of an individual entry in a dictionary in bottom panel of
+toplevel dictionaryEditor appears only in dictionaryEditor, not in any of the
+other editors.
+
+27]
+(case editor)
+Nice to know which time is set in database so when you are editing fields
+you know which one is being edited.
+
+28] 
+(menu bar)
+When editing a case there should be File -> Save Case (and other options)
+
+********************************************************************************

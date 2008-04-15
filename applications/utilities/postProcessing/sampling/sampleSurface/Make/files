@@ -1,0 +1,18 @@
+sampleSurface.C
+
+surfaces/surface/surface.C
+surfaces/constantIsoSurface/constantIsoSurface.C
+surfaces/interpolatedIsoSurface/interpolatedIsoSurface.C
+surfaces/constantPatch/constantPatch.C
+surfaces/interpolatedPatch/interpolatedPatch.C
+surfaces/constantPlane/constantPlane.C
+surfaces/interpolatedPlane/interpolatedPlane.C
+
+surfaceWriters/surfaceWriter/surfaceWriters.C
+surfaceWriters/foamFile/foamFileWriters.C
+surfaceWriters/dx/dxWriters.C
+surfaceWriters/raw/rawWriters.C
+surfaceWriters/vtk/vtkWriters.C
+surfaceWriters/stl/stlWriters.C
+
+EXE = $(FOAM_APPBIN)/sampleSurface

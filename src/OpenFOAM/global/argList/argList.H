@@ -1,0 +1,246 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::argList
+
+Description
+    Extract command arguments and options from the supplied
+    @a argc and @a argv.
+
+    Sequences with "(" ... ")" are transformed into a stringList.
+    For example,
+    @verbatim
+        program -listFiles \( *.txt \)
+    @endverbatim
+    in which the backslash-escaping has been used to avoid shell expansions,
+    would create a stringList:
+    @verbatim
+        ( "file1.txt" "file2.txt" ... "fileN.txt" )
+    @endverbatim
+
+    @par Default command-line options
+    @param -case \<dir\> \n
+        select an case directory instead of the current working directory
+    @param -parallel \n
+        specify case as a parallel job
+    @param -doc \n
+        display the documentation in browser
+    @param -help \n
+       print the usage
+
+    The environment variable @b FOAM_CASE is set to the path of the
+    global case (same for serial and parallel jobs).
+
+Note
+    - Adjustment of the valid (mandatory) arguments by directly manipulating
+      the static member argList::validArgs.
+    - Adjustment of the valid options by directly manipulating
+      the static member argList::validOptions.
+
+SourceFiles
+    argList.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef argList_H
+#define argList_H
+
+#include "stringList.H"
+#include "SubList.H"
+#include "SLList.H"
+#include "HashTable.H"
+#include "word.H"
+#include "fileName.H"
+#include "parRun.H"
+
+#include "sigFpe.H"
+#include "sigInt.H"
+#include "sigQuit.H"
+#include "sigSegv.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+class argList
+{
+    // Private data
+
+        stringList args_;
+        HashTable<string> options_;
+
+        word executable_;
+        fileName rootPath_;
+        fileName globalCase_;
+        fileName case_;
+
+        ParRunControl parRunControl_;
+
+        // Signal handlers
+        sigFpe sigFpe_;
+        sigInt sigInt_;
+        sigQuit sigQuit_;
+        sigSegv sigSegv_;
+
+
+    // Private member functions
+
+        void getRootCase();
+
+        //- Transcribe argv into internal args_
+        //  return true if any "(" ... ")" sequences were captured
+        bool regroupArgv(int& argc, char**& argv);
+
+
+public:
+
+    // Static data members
+
+        //- A list of valid (mandatory) arguments
+        static SLList<string> validArgs;
+
+        //- A list of valid options
+        static HashTable<string> validOptions;
+
+        //- A list of valid parallel options
+        static HashTable<string> validParOptions;
+
+        //! @cond ignore documentation for this class
+        class initValidTables
+        {
+        public:
+
+            initValidTables();
+        };
+        //! @endcond
+
+
+    // Constructors
+
+        //- Construct from argc and argv
+        //  checking the arguments and options as requested
+        argList
+        (
+            int& argc,
+            char**& argv,
+            bool checkArgs = true,
+            bool checkOpts = true
+        );
+
+
+    // Destructor
+
+        virtual ~argList();
+
+
+    // Member functions
+
+        // Access
+
+            //- Return arguments
+            const stringList& args() const
+            {
+                return args_;
+            }
+
+            //- Return additionl arguments,
+            //  i.e. those additional to the executable itself
+            stringList::subList additionalArgs() const;
+
+            //- Return options
+            const Foam::HashTable<string>& options() const
+            {
+                return options_;
+            }
+
+            //- Name of executable
+            const word& executable() const
+            {
+                return executable_;
+            }
+
+            //- Return root path
+            const fileName& rootPath() const
+            {
+                return rootPath_;
+            }
+
+            //- Return case name
+            const fileName& globalCaseName() const
+            {
+                return globalCase_;
+            }
+
+            //- Return case name for parallel run
+            //  or the global case for a serial run
+            const fileName& caseName() const
+            {
+                return case_;
+            }
+
+            //- Return the path
+            fileName path() const
+            {
+                return rootPath()/caseName();
+            }
+
+
+        // Edit
+
+            //- Remove the parallel options
+            static void noParallel();
+
+
+        // Print
+
+            //- Print usage
+            void printUsage() const;
+
+            //- Display documentation in browser
+            void displayDoc() const;
+
+
+        // Check
+
+            //- Check argument list
+            bool check(bool checkArgs = true, bool checkOpts = true) const;
+
+            //- Check root path and case path
+            bool checkRootCase() const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

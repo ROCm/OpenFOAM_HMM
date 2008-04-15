@@ -1,0 +1,12 @@
+chemistryModel = chemistryModel
+chemistrySolver = chemistrySolver
+
+$(chemistryModel)/chemistryModel.C
+
+$(chemistrySolver)/chemistrySolver/chemistrySolver.C
+$(chemistrySolver)/chemistrySolver/newChemistrySolver.C
+$(chemistrySolver)/sequential/sequential.C
+$(chemistrySolver)/EulerImplicit/EulerImplicit.C
+$(chemistrySolver)/ode/ode.C
+
+LIB = $(FOAM_LIBBIN)/libchemistryModel

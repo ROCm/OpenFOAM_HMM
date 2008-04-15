@@ -1,0 +1,38 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="decompressionTank decompressionTankFine"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+setDecompressionTankFine ()
+{
+    blockMeshDict="$case/constant/polyMesh/blockMeshDict"
+    controlDict="$case/system/controlDict"        
+    sed \
+    -e s/"30 20"/"120 80"/g \
+    -e s/"30 5"/"120 20"/g \
+    -e s/"25 5"/"100 20"/g \
+    -e s/"30 95"/"120 380"/g \
+    $blockMeshDict > temp.$$
+    mv temp.$$ $blockMeshDict
+    sed \
+    -e s/"\(deltaT[ \t]*\) 5e-07;"/"\1 1e-07;"/g \
+    -e s/"\(endTime[ \t]*\) 0.00025;"/"\1 0.00015;"/g \
+    $controlDict > temp.$$
+    mv temp.$$ $controlDict    
+}
+
+for case in $cases
+do
+    if [ "$case" = "decompressionTankFine" ] 
+    then
+        cloneCase decompressionTank $case
+        setDecompressionTankFine
+    fi
+#
+    runApplication blockMesh $case
+    runApplication $application $case
+done 

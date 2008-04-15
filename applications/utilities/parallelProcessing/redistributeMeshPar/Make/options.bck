@@ -1,0 +1,12 @@
+EXE_INC = \
+    -g -DFULLDEBUG -O0 \
+    -I$(LIB_SRC)/LESmodels \
+    -I$(LIB_SRC)/LESmodels/LESdeltas/lnInclude \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/finiteVolume/lnInclude
+
+EXE_LIBS = \
+    -lincompressibleLESmodels \
+    -lincompressibleTransportModels \
+    -lfiniteVolume \
+    -lfoamUtil

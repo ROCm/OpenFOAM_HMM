@@ -1,0 +1,87 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     wmakeLnInclude
+#
+# Description
+#     Link all the source files in the $1 directory into $1/lnInclude
+#
+#     Usage: wmakeLnInclude <directory> <ln options>
+#
+#------------------------------------------------------------------------------
+
+BASEDIR=""
+LNOPTION="-s"
+
+if [ $# = 1 ]
+then
+    BASEDIR=$1
+
+elif [ $# = 2 ]
+then
+    BASEDIR=$1
+    LNOPTION=$2
+
+else
+    echo $0: wrong number of arguments
+    echo "usage : wmakeLnInclude <dir> [-lnOption]"
+    exit 1
+fi
+
+if [ ! -d $BASEDIR ]
+then
+    echo Base directory $BASEDIR does not exist, exiting.
+    exit 0
+fi
+
+INCDIR=$BASEDIR/lnInclude
+
+if [ -d $INCDIR ]
+then
+    #echo $0: include directory $INCDIR already exists, exiting.
+    exit 0
+fi
+
+mkdir $INCDIR
+
+if [ ! -d $INCDIR ]
+then
+    echo $0: failed to create include directory $INCDIR
+    exit 0
+fi
+
+
+# Link include files
+# ~~~~~~~~~~~~~~~~~~
+
+echo $0: linking include files to $INCDIR
+echo
+
+cd $INCDIR
+find .. -name lnInclude -prune -o -name '.svn' -prune -o -name Make -prune \
+    -o \( -name '*.[hcHCx]*' -o -name '*.type' \) -exec ln $LNOPTION {} . \;
+
+#------------------------------------------------------------------------------

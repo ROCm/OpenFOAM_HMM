@@ -1,0 +1,15 @@
+default
+{
+    alphaK1         alphaK1     [0 0 0 0 0 0 0] 0.85034;
+    alphaK2         alphaK1     [0 0 0 0 0 0 0] 1.0;
+    alphaOmega1     alphaOmega1 [0 0 0 0 0 0 0] 0.5;
+    alphaOmega2     alphaOmega2 [0 0 0 0 0 0 0] 0.85616;
+    gamma1          gamma1      [0 0 0 0 0 0 0] 0.5532;
+    gamma2          gamma2      [0 0 0 0 0 0 0] 0.4403;
+    beta1           beta1       [0 0 0 0 0 0 0] 0.0750;
+    beta2           beta2       [0 0 0 0 0 0 0] 0.0828;
+    betaStar        betaStar    [0 0 0 0 0 0 0] 0.09;
+    a1              a1          [0 0 0 0 0 0 0] 0.31;
+    c1              c1          [0 0 0 0 0 0 0] 10;
+    Cmu             Cmu         [0 0 0 0 0 0 0] 0.09;
+};

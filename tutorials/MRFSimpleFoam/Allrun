@@ -1,0 +1,16 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="mixerVessel2D"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+compileApplication $currDir $application
+
+for case in $cases
+do
+    (cd $case ; ./makeMesh > log.makeMesh 2>&1)
+    runApplication $application $case
+done 

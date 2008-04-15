@@ -1,0 +1,12 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+case=hartmann
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+cleanCase $case
+cleanSamples $case
+

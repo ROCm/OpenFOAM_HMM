@@ -1,0 +1,29 @@
+probes/probes.C
+probes/probesFunctionObject.C
+
+cuttingPlane/cuttingPlane.C
+
+sampledSurface/patch/sampledPatch.C
+sampledSurface/plane/sampledPlane.C
+sampledSurface/surface/sampledSurface.C
+sampledSurface/surfaces/sampledSurfaces.C
+sampledSurface/surfacesFunctionObject/surfacesFunctionObject.C
+
+surfaceWriters/surfaceWriters.C
+surfaceWriters/foamFile/foamFileWriters.C
+surfaceWriters/dx/dxWriters.C
+surfaceWriters/raw/rawWriters.C
+surfaceWriters/vtk/vtkWriters.C
+surfaceWriters/stl/stlWriters.C
+surfaceWriters/null/nullWriters.C
+
+graphField/writePatchGraph.C
+graphField/writeCellGraph.C
+graphField/makeGraph.C
+
+meshToMesh = meshToMeshInterpolation/meshToMesh
+$(meshToMesh)/meshToMesh.C
+$(meshToMesh)/calculateMeshToMeshAddressing.C
+$(meshToMesh)/calculateMeshToMeshWeights.C
+
+LIB = $(FOAM_LIBBIN)/libsampling

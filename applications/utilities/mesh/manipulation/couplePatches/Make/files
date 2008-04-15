@@ -1,0 +1,3 @@
+couplePatches.C
+
+EXE = $(FOAM_APPBIN)/couplePatches

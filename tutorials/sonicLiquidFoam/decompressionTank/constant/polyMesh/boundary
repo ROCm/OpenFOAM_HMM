@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4.1                                 |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/dm2/henry/OpenFOAM/OpenFOAM-1.4.1/tutorials/sonicLiquidFoam";
+    case "decompressionTank";
+    instance "constant";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+5
+(
+outerWall
+{
+    type wall;
+    physicalType wall;
+    nFaces 225;
+    startFace 7275;
+}
+
+axis
+{
+    type symmetryPlane;
+    physicalType symmetryPlane;
+    nFaces 120;
+    startFace 7500;
+}
+
+nozzle
+{
+    type patch;
+    physicalType pressureOutlet;
+    nFaces 5;
+    startFace 7620;
+}
+
+back
+{
+    type empty;
+    physicalType empty;
+    nFaces 3725;
+    startFace 7625;
+}
+
+front
+{
+    type empty;
+    physicalType empty;
+    nFaces 3725;
+    startFace 11350;
+}
+)
+
+// ************************************************************************* //

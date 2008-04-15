@@ -1,0 +1,53 @@
+#!/bin/sh
+
+PATHTOSRC=$1
+shift
+
+RELEASEMODE=
+if [ "$RELEASE" = "1" -o "$release" = "1" ]; then
+    RELEASEMODE=release
+fi
+
+LIBMODE=dynamic
+if [ "$STATIC" = "1" -o "$static" = "1" ]; then
+    LIBMODE=static
+fi
+
+PROFILEMODE=
+if [ "${PROFILE}" ]; then
+    PROFILEMODE=${PROFILE}
+fi
+
+SRCDIR=`pwd`
+
+PATHTOCONFIG=$SRCDIR/$PATHTOSRC/config
+
+cd $PATHTOCONFIG
+
+GNU_MACHINE_TYPE=`./config.system`
+STAR_MACHINE_TYPE=`./config.gnu.to.star $GNU_MACHINE_TYPE $MACH_MOD`
+
+cd $SRCDIR
+
+if [ -r ADF_interface.c ]; then
+    ./make.version.sc < ADF_interface.c > version.pro
+elif [ -r ccmioversion.h ]; then
+    ./make.version.sc < ccmioversion.h > version.pro
+elif [ -r cgnslib.h ]; then
+    ./make.version.sc < cgnslib.h > version.pro
+fi
+
+QTDIR=$PATHTOCONFIG/$STAR_MACHINE_TYPE
+QMAKESPEC=$QTDIR
+
+#echo $RELEASEMODE
+
+UNIX=;
+if [ x${STAR_MACHINE_TYPE} = xwindows-x86-gcc ]; then UNIX=-unix; fi
+$QTDIR/qmake ${UNIX} -spec $QMAKESPEC \
+  "RELEASEMODE=$RELEASEMODE" \
+  "LIBMODE=$LIBMODE" \
+  "PROFILEMODE=$PROFILEMODE" \
+  "CC=$CC" \
+  "CXX=$CXX" \
+  $*

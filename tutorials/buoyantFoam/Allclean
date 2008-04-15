@@ -1,0 +1,20 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="hotRoom"
+utility=setHotRoom
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    cleanCase $case
+    if [ "$case" = "hotRoom" ] 
+    then
+        cp $case/0/T.org $case/0/T
+        wclean $case/$utility
+    fi
+done
+    

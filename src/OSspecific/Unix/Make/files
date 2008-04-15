@@ -1,0 +1,13 @@
+signals/sigFpe.C
+signals/sigSegv.C
+signals/sigInt.C
+signals/sigQuit.C
+timer.C
+fileStat.C
+Unix.C
+cpuTime/cpuTime.C
+clockTime/clockTime.C
+printStack.C
+/*dummyPrintStack.C*/
+
+LIB = $(FOAM_LIBBIN)/libOSspecific

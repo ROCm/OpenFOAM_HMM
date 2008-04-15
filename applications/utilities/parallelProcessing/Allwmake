@@ -1,0 +1,8 @@
+#!/bin/sh
+set -x
+
+(cd decompositionMethods; ./Allwmake)
+wmake decomposePar
+wmake reconstructPar
+wmake reconstructParMesh
+wmake redistributeMeshPar

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+casesWithBlockMeshDict="dahl"
+casesWithoutBlockMeshDict="tank3D"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $casesWithBlockMeshDict
+do
+    cleanCase $case
+done
+
+for case in $casesWithoutBlockMeshDict
+do
+    cleanTimeDirectories $case
+done
+

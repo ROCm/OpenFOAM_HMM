@@ -1,0 +1,31 @@
+#if defined(linux) || defined(linux64)
+
+    ORB_SYS_INC = -Wno-old-style-cast
+    ORB_SYS_LIB = -lssl -lcrypto -ldl -lpthread
+
+#elif defined(solaris)
+
+    ORB_SYS_INC = 
+    ORB_SYS_LIB = -ldl
+
+#elif defined(sgiN32) || defined(sgi64)
+
+    ORB_SYS_INC = 
+    ORB_SYS_LIB = 
+
+#else
+
+#   error architecture not supported for compiling FoamX
+
+#endif
+
+
+ORB_INC = \
+    -I$(MICO_ARCH_PATH)/include \
+    $(ORB_SYS_INC)
+
+ORB_LIBS = \
+    -L$(MICO_ARCH_PATH)/lib \
+    -lmicocoss$(MICO_VERSION) \
+    -lmico$(MICO_VERSION) \
+    $(ORB_SYS_LIB)

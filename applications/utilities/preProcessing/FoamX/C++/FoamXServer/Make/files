@@ -1,0 +1,3 @@
+FoamX.C
+
+LIB = $(FOAM_LIBBIN)/libFoamXServer

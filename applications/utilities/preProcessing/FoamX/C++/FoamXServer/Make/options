@@ -1,0 +1,4 @@
+#include "../../FoamXLib/Make/orbOptions"
+
+EXE_INC = $(ORB_INC)
+EXE_LIBS = $(ORB_LIBS)

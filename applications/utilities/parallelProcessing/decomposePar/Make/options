@@ -1,0 +1,11 @@
+EXE_INC = \
+    -I../decompositionMethods/decompositionMethods/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/lagrangian/basic/lnInclude
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -ldecompositionMethods \
+    -llagrangian \
+    -lmeshTools \
+   

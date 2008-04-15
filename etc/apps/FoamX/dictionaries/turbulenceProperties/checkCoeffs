@@ -1,0 +1,10 @@
+#!/bin/sh
+
+for f in `find . -name "*Coeffs.cfg" -type f`
+do
+    temp=`cat $f | head -1`
+    withCoeffs=`echo $temp | grep Coeffs`
+    if [ "$withCoeffs" == "" ] ; then
+        echo "$f is missing Coeffs"
+    fi	
+done

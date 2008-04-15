@@ -1,0 +1,12 @@
+EXE_INC = \
+    -I../sonicFoam \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/turbulenceModels
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -lcompressibleTurbulenceModels \
+    -lbasicThermophysicalModels \
+    -lspecie

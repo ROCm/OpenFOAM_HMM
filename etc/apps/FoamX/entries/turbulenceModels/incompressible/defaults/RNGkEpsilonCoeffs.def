@@ -1,0 +1,10 @@
+default
+{
+    Cmu                 Cmu [ 0 0 0 0 0 0 0 ] 0.0845 ;
+    C1                  C1 [ 0 0 0 0 0 0 0 ] 1.42 ;
+    C2                  C2 [ 0 0 0 0 0 0 0 ] 1.68 ;
+    alphak              alphaK [ 0 0 0 0 0 0 0 ] 1.39 ;
+    alphaEps            alphaEps [ 0 0 0 0 0 0 0 ] 1.39 ;
+    eta0                eta0 [ 0 0 0 0 0 0 0 ] 4.38 ;
+    beta                beta [ 0 0 0 0 0 0 0 ] 0.012 ;
+};

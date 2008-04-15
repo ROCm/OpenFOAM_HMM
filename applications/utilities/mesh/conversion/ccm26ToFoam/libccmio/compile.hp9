@@ -1,0 +1,49 @@
+#!/bin/sh -x
+
+PATH=/adapco/prog/bin:$PATH:/lnxsrv/prog; export PATH
+
+separator()
+{
+  set +x
+  echo
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo
+  set -x
+}
+
+exec > make.hp9.list 2>&1
+
+cd $1
+
+cvs update -r $3 -d -P
+
+
+
+separator
+# Compile hpux_11.00-pa8000
+MK_BUILDNAME=hpux_11.00-pa8000; export MK_BUILDNAME;
+make -k -f Makefile.qmake RELEASE=1 STATIC=1 MACH_MOD=32 all
+
+separator
+make -k -f Makefile.qmake RELEASE=1 STATIC=0 MACH_MOD=32 all
+
+separator
+make -f Makefile.qmake install
+
+
+
+separator
+# Compile hpux64_11.00-pa8000
+MK_BUILDNAME=hpux64_11.00-pa8000; export MK_BUILDNAME;
+make -k -f Makefile.qmake RELEASE=1 STATIC=1 all
+
+separator
+make -k -f Makefile.qmake RELEASE=1 STATIC=0 all
+
+separator
+make -f Makefile.qmake install
+
+echo Job "finished " `date` >> $2/make.hp9.list.batch

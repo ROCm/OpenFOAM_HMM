@@ -1,0 +1,35 @@
+#!/bin/sh -x
+
+PATH=/adapco/prog/bin:$PATH:/lnxsrv/prog; export PATH
+
+# Compile osf1_5.1-com
+MK_BUILDNAME=osf1_5.1-com; export MK_BUILDNAME;
+
+separator()
+{
+  set +x
+  echo
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<< separator >>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+  echo
+  set -x
+}
+
+exec > make.alpha24.list 2>&1
+
+cd $1
+
+cvs update -r $3 -d -P
+
+separator
+make -k -f Makefile.qmake RELEASE=1 STATIC=1 all
+
+separator
+make -k -f Makefile.qmake RELEASE=1 STATIC=0 all
+
+separator
+make -f Makefile.qmake install
+
+echo Job "finished " `date` >> $2/make.alpha24.list.batch

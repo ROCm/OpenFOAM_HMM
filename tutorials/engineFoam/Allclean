@@ -1,0 +1,26 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="kivaTest"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    if [ "$case" = "kivaTest" ]
+    then
+        mv $case/-180 temp180
+        rm -rf $case/0
+        cp $case/system/controlDict.1st $case/system/controlDict
+    fi
+
+    cleanCase $case
+
+    if [ "$case" = "kivaTest" ]
+    then
+        mv temp180 $case/-180
+    fi
+done
+

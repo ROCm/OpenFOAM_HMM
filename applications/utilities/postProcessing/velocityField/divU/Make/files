@@ -1,0 +1,3 @@
+calcDivU.C
+
+EXE = $(FOAM_APPBIN)/divU

@@ -1,0 +1,3 @@
+checkYPlus.C
+
+EXE = $(FOAM_APPBIN)/checkYPlus

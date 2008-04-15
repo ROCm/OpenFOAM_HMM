@@ -1,0 +1,196 @@
+SHELL = /bin/sh
+usegdb=1
+
+#*************************************************************************
+# System-specific compilation flags
+#*************************************************************************
+# Get some basic information about the system that you are working on
+cputype = $(shell uname -m | sed "s/\\ /_/g")
+systype = $(shell uname -s)
+ifeq ($(findstring CYGWIN, $(systype)),CYGWIN)
+#  systype = CYGWIN
+  systype = MSWIN
+  cputype = x86
+endif
+
+
+ifeq ($(systype),MSWIN)
+  #-------------------------------------------------------------------
+  # Visual Studio 2005 specific definitions
+  #-------------------------------------------------------------------
+  #Compiler information
+  CC = cl
+  OPTFLAGS = /Ox
+  COPTIONS = -DWIN32 -DMSC -D_CRT_SECURE_NO_DEPRECATE 
+
+  #Compile input/output file specification
+  SOURCEFILE = /c $<
+  OUTPUTFILE = /Fo$@
+
+  #Output specification for executables
+  EXEOUTPUTFILE = /Fe$@   # This option is when cl is used for linking
+
+  #Linker information
+  LDOPTIONS = /MT 
+  LD = $(CC)
+
+  #Library creation information
+  AR = lib /OUT:$@ 
+  RANLIB =
+
+  ifeq ($(openmp),yes)
+    COPTIONS  += -D__OPENMP__ /openmp 
+    LDOPTIONS += /openmp
+  endif
+
+  # Standard file extensions 
+  OBJEXT = .obj
+  LIBEXT = .lib
+  EXEEXT = .exe
+else
+  #-------------------------------------------------------------------
+  # These defs are common for Unix based systems
+  #-------------------------------------------------------------------
+  #Compiler information
+  CC = cc
+  OPTFLAGS = -O3 
+  COPTIONS = -DUNIX -pedantic -std=c99 
+
+  #Linker information
+  LDOPTIONS = 
+  LD = $(CC)
+
+  #Library creation information
+  AR = ar crv $@ 
+  RANLIB = ar -ts $@
+  RANLIB = ranlib $@
+
+  #Compile input/output file specification
+  SOURCEFILE = -c $<
+  OUTPUTFILE = -o $@
+
+  #Output specification for executables
+  EXEOUTPUTFILE = -o $@
+
+  # Standard file extensions 
+  OBJEXT = .o
+  LIBEXT = .a
+  EXEEXT = 
+
+
+
+  #-------------------------------------------------------------------
+  # Overide any of the common definitions based on the system
+  #-------------------------------------------------------------------
+  ifeq ($(systype),Linux)
+    ifeq ($(CC),icc) 
+      #Compiler information
+      OPTFLAGS = -O3 
+      COPTIONS = -DLINUX -DUNIX -std=c99 
+    else
+      #Compiler information
+      CC = gcc
+      OPTFLAGS = -O6 
+      COPTIONS += -DLINUX -D_FILE_OFFSET_BITS=64 
+    endif
+  endif
+
+  ifeq ($(systype),SunOS)
+    #Compiler information
+    OPTFLAGS = -xO4 
+    COPTIONS =-DSUNOS  
+  endif
+
+
+  ifeq ($(systype),Darwin)
+    #Compiler information
+    CC = gcc
+    OPTFLAGS = -O6 
+    COPTIONS += -DDARWINPPC 
+  endif
+
+  ifeq ($(systype),CYGWIN)
+    #Compiler information
+    OPTFLAGS = -O6
+    COPTIONS += -DCYGWIN 
+  endif
+endif
+
+
+
+#**************************************************************************
+# Deal with the build-specific options (if specified)
+#**************************************************************************
+ifdef usegdb
+  OPTFLAGS += -g
+endif
+
+ifdef ($(withdebug))
+  OPTFLAGS += -g
+  COPTIONS += -DDEBUG
+endif
+
+
+ifdef ($(useopenmp))
+  ifeq ($(systype),MSWIN)
+    COPTIONS  += -D__OPENMP__ /openmp 
+    LDOPTIONS += /openmp
+  endif
+
+  ifeq ($(systype),Linux)
+    ifeq ($(CC),icc) 
+      COPTIONS  += -D__OPENMP__ -openmp -openmp-report2
+      LDOPTIONS += -openmp
+    endif
+  endif
+endif
+
+
+
+#**************************************************************************
+# Setup the project-specific parameters of the build. This part of the
+# Makefile.in is different for different project.
+#**************************************************************************
+# Version of the build/source
+VERNUM   = 5.0pre2
+PKGNAME  = metis-$(VERNUM)
+
+# Create the build directory if it does not exist
+ifeq ($(systype),Darwin)
+  BINDIR    = $(HOME)
+else
+  BINDIR    = $(HOME)/work/bin/$(systype)-$(cputype)
+  $(shell mkdir -p $(BINDIR))
+endif
+BINDIR=
+
+TOPDIR      = ..
+
+BUILDDIR    = $(TOPDIR)/build/$(systype)-$(cputype)
+LIBBUILDDIR = $(BUILDDIR)/libmetis
+PRGBUILDDIR = $(BUILDDIR)/programs
+TSTBUILDDIR = $(BUILDDIR)/test
+
+GKLIBDIR      = $(TOPDIR)/GKlib
+GKLIBINCDIR   = $(GKLIBDIR)/trunk
+GKLIBBUILDDIR = $(GKLIBDIR)/builds/$(systype)-$(cputype)
+
+$(shell mkdir -p $(BUILDDIR))
+$(shell mkdir -p $(LIBBUILDDIR))
+$(shell mkdir -p $(PRGBUILDDIR))
+$(shell mkdir -p $(TSTBUILDDIR))
+
+
+
+INCLUDES = -I./ -I$(TOPDIR)/include -I$(GKLIBINCDIR) #-I$(TOPDIR)/config 
+CFLAGS   = $(COPTIONS) $(OPTFLAGS) $(INCLUDES)
+
+
+#Libraries needed for linking
+ifeq ($(systype),MSWIN)
+  #Library information
+  LIBS = $(BUILDDIR)/libmetis.lib
+else
+  LIBSDIR  = -L$(BUILDDIR) 
+  LIBS     = -lmetis -lm
+endif

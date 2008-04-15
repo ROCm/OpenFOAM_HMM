@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE attributes PUBLIC "-//NetBeans//DTD DefaultAttributes 1.0//EN" "http://www.netbeans.org/dtds/attributes-1_0.dtd">
+<attributes version="1.0">
+    <fileobject name="CompoundEditor.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="CompoundEditor"/>
+    </fileobject>
+    <fileobject name="SelectionEditor.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="SelectionEditor"/>
+    </fileobject>
+    <fileobject name="DimensionSetEditor.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="DimensionSetEditor"/>
+    </fileobject>
+    <fileobject name="ListEditor.java">
+        <attr name="class_dependency_javax.swing.AbstractAction" stringvalue="ListEditor.AddElementAction;ListEditor.DeleteElementAction"/>
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="ListEditor"/>
+    </fileobject>
+    <fileobject name="StringListEditor.java">
+        <attr name="NetBeansAttrDataObjectCompilerManager" serialvalue="aced00057372001e6f72672e6f70656e6964652e53657276696365547970652448616e646c6564612acc871b81080300024c0009636c6173734e616d657400124c6a6176612f6c616e672f537472696e673b4c00046e616d6571007e00017870740015466173744a6176616320436f6d70696c6174696f6e74002f6f72672e6e65746265616e732e6d6f64756c65732e6a6176612e466173744a61766163436f6d70696c65725479706578"/>
+        <attr name="class_dependency_javax.swing.AbstractAction" stringvalue="StringListEditor.AddElementAction;StringListEditor.DeleteElementAction"/>
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="StringListEditor"/>
+        <attr name="class_dependency_javax.swing.table.AbstractTableModel" stringvalue="StringListEditor.ListEntryModel"/>
+    </fileobject>
+    <fileobject name="ChoiceEditor.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="ChoiceEditor;CompoundEditor"/>
+        <attr name="class_dependency_FoamX.Editors.DictionaryEntryEditor.DictionaryEntryTableModel" stringvalue="CompoundEditor.CompoundEntryModel"/>
+    </fileobject>
+    <fileobject name="VectorSpaceEditor.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="VectorSpaceEditor"/>
+    </fileobject>
+</attributes>

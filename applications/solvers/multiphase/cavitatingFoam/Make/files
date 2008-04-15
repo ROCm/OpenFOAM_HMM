@@ -1,0 +1,8 @@
+cavitatingFoam.C
+compressibilityModels/compressibilityModel/compressibilityModel.C
+compressibilityModels/compressibilityModel/newCompressibilityModel.C
+compressibilityModels/linear/linear.C
+compressibilityModels/Wallis/Wallis.C
+compressibilityModels/Chung/Chung.C
+
+EXE = $(FOAM_APPBIN)/cavitatingFoam

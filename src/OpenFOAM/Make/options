@@ -1,0 +1,7 @@
+EXE_INC = \
+    -I$(LIB_SRC)/zlib-1.2.1
+
+LIB_LIBS = \
+    $(FOAM_LIBBIN)/libOSspecific.o \
+    -L$(FOAM_LIBBIN)/dummy -lPstream \
+    -lz

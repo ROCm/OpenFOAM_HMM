@@ -1,0 +1,41 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="nozzleFlow2D"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+. $tutorialPath/CleanFunctions
+
+runRefineMesh ()
+{
+    echo "Running refineMesh on $1"
+    refineMesh . $1 -dict > $1/log.refineMesh 2>&1
+}
+
+for case in $cases
+do
+    runApplication blockMesh $case
+
+    if [ "$case" = "nozzleFlow2D" ] ; then
+        i=1
+        if [ -f $case/log.cellSet ] ; then
+           i=3
+        fi
+        while [ "$i" -lt 3 ] ; do
+            if [ -f $case/log.cellSet ] ; then
+                mv $case/log.cellSet $case/log.cellSet.1
+            fi
+            cp $case/system/cellSetDict.${i} $case/system/cellSetDict
+            runApplication cellSet $case
+            runRefineMesh $case
+            cp -r $case/1e-08/polyMesh/* $case/constant/polyMesh
+            rm -rf $case/1e-08
+            i=`expr $i + 1`
+        done
+    cp $case/constant/polyMesh/boundary.org $case/constant/polyMesh/boundary
+    fi
+
+    runApplication $application $case
+done

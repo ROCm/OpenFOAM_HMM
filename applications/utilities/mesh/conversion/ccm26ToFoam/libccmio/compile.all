@@ -1,0 +1,130 @@
+#!/bin/sh
+
+set -x
+
+CWD=`pwd`
+if expr ${CWD} : /tmp_mnt 1>/dev/null 2>&1; then
+  CWD=`expr ${CWD} : "/tmp_mnt\(.*\)"`;
+fi
+
+# What version of MeshKernel are we going to compile?
+DATE=`date "+%F"`
+VERS=V`awk '/^#define kCCMIOMajorVersion/ { major = $3; } /^#define kCCMIOMinorVersion/ { minor = $3; } /^#define kCCMIORevision/ { revision = $3 } END { printf "%d-%02d-%03d\n", major, minor, revision; }' libccmio/ccmioversion.h`
+DELT=`cvs status -v README.make | awk "/${VERS}/ { print \\\$1; }"`
+VERS="${VERS}_${DATE}"
+if [ "${DELT}" ]; then
+  cvs tag -d "${DELT}"
+fi
+cvs tag "${VERS}"
+
+
+
+# Compile aix64_5.1-pwr4
+echo Job submitted `date` > make.ibm36.list.batch
+REMDIR=/u/xeon25/ibm36/starusers/wayne/libs/libccmio
+rsh ibm36 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -q 4 -t 2 \
+    -s \"${REMDIR}/compile.ibm36 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.ibm36.list.qlogerr -F make.ibm36.list.qlogerr \
+"
+
+
+
+# Compile hpux_11.00-pa8000
+# Compile hpux64_11.00-pa8000
+echo Job submitted `date` > make.hp9.list.batch
+REMDIR=/u1/hp9/starusers/wayne/libs/libccmio
+rsh hp9 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -s \"${REMDIR}/compile.hp9 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.hp9.list.qlogerr -F make.hp9.list.qlogerr \
+"
+
+
+
+# Compile hpux64_11.22-itanium2
+echo Job submitted `date` > make.hp10.list.batch
+REMDIR=/u1/hp10/starusers/wayne/libs/libccmio
+rsh hp10 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -q 0 -s \"${REMDIR}/compile.hp10 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.hp10.list.qlogerr -F make.hp10.list.qlogerr \
+"
+
+
+
+# Compile irix_6.5-mips3
+# Compile irix64_6.5-mips4
+echo Job submitted `date` > make.sg3.list.batch
+REMDIR=/u/xeon25/sg3/starusers/wayne/libs/libccmio
+rsh sg3 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -q 1 -s \"${REMDIR}/compile.sg3 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.sg3.list.qlogerr -F make.sg3.list.qlogerr \
+"
+
+
+
+# Compile linux_2.2-x86-glibc_2.2.0
+echo Job submitted `date` > make.linux1.list.batch
+REMDIR=/u/linux1/wayne/libs/libccmio
+rsh linux1 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -q 1 -s \"${REMDIR}/compile.linux1 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.linux1.list.qlogerr -F make.linux1.list.qlogerr \
+"
+
+
+
+# Compile linux_2.4-x86-glibc_2.3.2
+echo Job submitted `date` > make.linux17.list.batch
+REMDIR=/u1/linux17/starusers/wayne/libs/libccmio
+rsh linux17 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -q 1 -s \"${REMDIR}/compile.linux17 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.linux17.list.qlogerr -F make.linux17.list.qlogerr \
+"
+
+
+
+# Compile linux64_2.4-itanium-glibc_2.2.4
+echo Job submitted `date` > make.itanium.list.batch
+REMDIR=/u/itanium/starusers/wayne/libs/libccmio
+rsh itanium "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -q 0 -s \"${REMDIR}/compile.itanium ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.itanium.list.qlogerr -F make.itanium.list.qlogerr \
+"
+
+
+
+# Compile linux64_2.4-x86-glibc_2.2.5
+echo Job submitted `date` > make.hammer.list.batch
+REMDIR=/u/hammer/wayne/libs/libccmio
+rsh hammer "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -s \"${REMDIR}/compile.hammer ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.hammer.list.qlogerr -F make.hammer.list.qlogerr \
+"
+
+
+
+# Compile osf1_5.1-com
+echo Job submitted `date` > make.alpha24.list.batch
+REMDIR=/u/alpha24/starusers/wayne/libs/libccmio
+rsh alpha24 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -s \"${REMDIR}/compile.alpha24 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.alpha24.list.qlogerr -F make.alpha24.list.qlogerr \
+"
+
+
+# Compile sunos64_5.8-ultra
+echo Job submitted `date` > make.sun7.list.batch
+REMDIR=/u3/sun7/starusers/wayne/libs/libccmio
+rsh sun7 "\
+  cd ${CWD}; \
+  /usr/local/bin/qclient -s \"${REMDIR}/compile.sun7 ${REMDIR} ${CWD} ${VERS}\" \
+    -f make.sun7.list.qlogerr -F make.sun7.list.qlogerr \
+"

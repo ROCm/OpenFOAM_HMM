@@ -1,0 +1,18 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="dahl tank3D"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+for case in $cases
+do
+    if [ "$case" = "dahl" ] ; then
+        runApplication blockMesh $case
+    fi
+
+    runApplication $application $case
+done 
+

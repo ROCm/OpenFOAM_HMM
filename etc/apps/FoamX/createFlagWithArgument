@@ -1,0 +1,96 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# Script
+#     createFlagWithArgument
+#
+# Description
+#     Creates a FoamX configuration file for a command line flag with argument,
+#     e.g. -scale 0.1, in the $FOAMX_CONFIG/entries/arguments directory.
+#     The argument entry must be edited, e.g. to specify the type.
+#------------------------------------------------------------------------------
+
+writeFile () {
+cat <<EOF
+/*---------------------------------------------------------------------------*\\
+| =========                 |                                                 |
+| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\\\    /   O peration     | Version:  1.4                                   |
+|   \\\\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\\\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+$1
+{
+    type            selection;
+    displayName     "[$1]";
+    entries
+    {
+        off
+        {
+            type            compound;
+            entries {}
+        }
+
+        on
+        {
+            type            compound;
+            entries
+            {
+                $1
+                {
+                    type           string;
+                    default         "-$1";
+                    editable        0;
+                }
+
+                $2
+                {
+                    type           ****;
+                    default        ****;
+                }
+            }
+        }
+    }
+}
+EOF
+}
+
+if [ $# != 2 ] ; then
+    echo "Usage: $0 <flagName> <argumentName>"
+    exit 1
+fi
+
+FILE=$FOAMX_CONFIG/entries/arguments/$1.cfg
+if [ -e $FILE ] ; then
+    echo "File $FILE exists"
+    exit 1
+fi
+
+echo "Creating file $FILE"
+writeFile $1 $2 > $FILE
+
+echo "YOU MUST EDIT SOME ENTRIES (****) IN FILE:"
+echo "   $FILE"

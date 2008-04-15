@@ -1,0 +1,28 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="shockTube forwardStep"
+utility=setShock
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+for case in $cases
+do
+    runApplication blockMesh $case
+#
+    if [ "$case" = "shockTube" ] ; then
+        compileApplication ../sonicFoam/$case $utility
+        runApplication $utility $case
+    fi
+#
+    runApplication $application $case
+#
+    if [ "$case" = "shockTube" ] ; then
+        runApplication magU $case
+        runApplication sample $case
+    fi
+#
+done 
+

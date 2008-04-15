@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4.1                                 |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/dm2/henry/OpenFOAM/OpenFOAM-1.4.1/tutorials/XiFoam";
+    case "moriyoshiHomogeneous";
+    instance "constant";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+5
+(
+left
+{
+    type symmetryPlane;
+    physicalType symmetryPlane;
+    nFaces 35;
+    startFace 4795;
+}
+
+right
+{
+    type symmetryPlane;
+    physicalType symmetryPlane;
+    nFaces 35;
+    startFace 4830;
+}
+
+top
+{
+    type symmetryPlane;
+    physicalType symmetryPlane;
+    nFaces 70;
+    startFace 4865;
+}
+
+bottom
+{
+    type symmetryPlane;
+    physicalType symmetryPlane;
+    nFaces 70;
+    startFace 4935;
+}
+
+frontAndBack
+{
+    type empty;
+    physicalType empty;
+    nFaces 4900;
+    startFace 5005;
+}
+)
+
+// ************************************************************************* //

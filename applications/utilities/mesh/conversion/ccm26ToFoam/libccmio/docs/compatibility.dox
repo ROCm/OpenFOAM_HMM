@@ -1,0 +1,65 @@
+/** \page compatpage Backwards Compatibility
+As with all file formats, the CCM specification has undergone some
+changes in its history.&nbsp; Where possible, backwards compatibility
+has been included within the library itself.&nbsp; However, there have
+been a few hierarchical changes which the library cannot hide from the
+client.&nbsp; If backwards compatibility with these files is desired,
+the client will need to handle the case appropriately.&nbsp; These
+cases have been recorded below, along with sample code to handle
+it.&nbsp; The \ref readexample.cpp read example included contains
+appropriate handling for all cases.<br>
+<br>
+<h3>Addition of Phase Node (2.2.0)</h3>
+In version 2.2.0 it became necessary to
+support different material phases, each with their own sets of
+(possibly different) fields.&nbsp; The Phase entity was inserted
+between the FieldSet and the Field, so clients must be aware that there
+may be no Phase entity under FieldSet in older files.<br>
+<br>
+<b>Code:</b><br>
+<pre>
+    ...
+    bool oldFile = (CCMIONextEntity(NULL, solution, kCCMIOFieldPhase, &amp;i, &amp;phase) != kCCMIONoErr);
+    i = 0;
+    while (oldFile ||
+           CCMIONextEntity(NULL, solution, kCCMIOFieldPhase, &amp;i, &amp;phase)== kCCMIONoErr)
+    {
+        if (oldFile)
+            phase = solution;</pre>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;... <i>read data</i> ...</tt>
+<pre>        oldFile = false;
+    }
+    ...
+</pre>
+<h3>Multidimensional data stored as scalar components (2.4.0)<br>
+</h3>
+Some clients noted that often
+multidimensional data (i.e. vector data) was needed one component at a
+time.&nbsp; Since this can reduce the memory needed to compute
+secondary quantities, an important consideration for large data, the
+file format was changed to store multidimensional data as
+components.&nbsp; Previously all field data was read using
+CCMIOReadFieldData*().&nbsp; With this change only scalar data can be
+read with CCMIOReadFieldData*() and all multidimensional data must be
+read with CCMIOReadMultiDimensionalFieldData*().&nbsp; (The extra
+function was added to be consistent with prefering extra functions to
+extra parameters)&nbsp; However, CCMIOReadFieldData*() is still
+required to read older data.<br>
+<br>
+<b>Code:</b><br>
+<pre>
+    ...
+    CCMIOReadField(&amp;err, field, name, shortName, &amp;dims, &amp;datatype);
+    CCMIOEntitySize(&amp;err, fieldData, &amp;n, &amp;max);
+    CCMIOReadMultiDimensionalFieldData(&amp;err, field, kCCMIOVectorX, scalarID);
+    if (err == kCCMIOVersionErr)
+        data.size(n * dims);
+    else
+        data.size(n);
+    ...
+    while (CCMIONextEntity(NULL, field, kCCMIOFieldData, &amp;j, &amp;fieldData) == kCCMIONoErr)
+        ...
+        CCMIOReadFieldDataf(...);
+    ...
+</pre>
+*/

@@ -1,0 +1,199 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2006-07 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "massFlowRateInletVelocityFvPatchVectorField.H"
+#include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
+#include "fvPatchFieldMapper.H"
+#include "surfaceFields.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::
+massFlowRateInletVelocityFvPatchVectorField::
+massFlowRateInletVelocityFvPatchVectorField
+(
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF
+)
+:
+    fixedValueFvPatchField<vector>(p, iF),
+    massFlowRate_(0),
+    phiName_("phi"),
+    rhoName_("rho")
+{}
+
+Foam::
+massFlowRateInletVelocityFvPatchVectorField::
+massFlowRateInletVelocityFvPatchVectorField
+(
+    const massFlowRateInletVelocityFvPatchVectorField& ptf,
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
+    massFlowRate_(ptf.massFlowRate_),
+    phiName_(ptf.phiName_),
+    rhoName_(ptf.rhoName_)
+{}
+
+Foam::
+massFlowRateInletVelocityFvPatchVectorField::
+massFlowRateInletVelocityFvPatchVectorField
+(
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedValueFvPatchField<vector>(p, iF, dict),
+    massFlowRate_(readScalar(dict.lookup("massFlowRate"))),
+    phiName_("phi"),
+    rhoName_("rho")
+{
+    if (dict.found("phi"))
+    {
+        dict.lookup("phi") >> phiName_;
+    }
+
+    if (dict.found("rho"))
+    {
+        dict.lookup("rho") >> rhoName_;
+    }
+}
+
+Foam::
+massFlowRateInletVelocityFvPatchVectorField::
+massFlowRateInletVelocityFvPatchVectorField
+(
+    const massFlowRateInletVelocityFvPatchVectorField& ptf
+)
+:
+    fixedValueFvPatchField<vector>(ptf),
+    massFlowRate_(ptf.massFlowRate_),
+    phiName_(ptf.phiName_),
+    rhoName_(ptf.rhoName_)
+{}
+
+Foam::
+massFlowRateInletVelocityFvPatchVectorField::
+massFlowRateInletVelocityFvPatchVectorField
+(
+    const massFlowRateInletVelocityFvPatchVectorField& ptf,
+    const DimensionedField<vector, volMesh>& iF
+)
+:
+    fixedValueFvPatchField<vector>(ptf, iF),
+    massFlowRate_(ptf.massFlowRate_),
+    phiName_(ptf.phiName_),
+    rhoName_(ptf.rhoName_)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
+{
+    if (updated())
+    {
+        return;
+    }
+
+    // a simpler way of doing this would be nice
+    scalar avgU = -massFlowRate_/gSum(patch().magSf());
+
+    vectorField n = patch().nf();
+
+    const surfaceScalarField& phi = db().lookupObject<surfaceScalarField>
+    (
+        phiName_
+    );
+
+    if (phi.dimensions() == dimVelocity*dimArea)
+    {
+        // volumetric flow-rate
+        operator==(n*avgU);
+    }
+    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    {
+        const fvPatchField<scalar>& rhop =
+            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+
+        // mass flow-rate
+        operator==(n*avgU/rhop);
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()"
+        )   << "dimensions of phi are incorrect"
+            << "\n    on patch " << this->patch().name()
+            << " of field " << this->dimensionedInternalField().name()
+            << " in file " << this->dimensionedInternalField().objectPath()
+            << exit(FatalError);
+    }
+
+    fixedValueFvPatchField<vector>::updateCoeffs();
+}
+
+
+void Foam::massFlowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
+{
+    fvPatchField<vector>::write(os);
+
+    os.writeKeyword("massFlowRate") << massFlowRate_
+        << token::END_STATEMENT << nl;
+
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
+
+    if (rhoName_ != "rho")
+    {
+        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    }
+
+    writeEntry("value", os);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+   makePatchTypeField
+   (
+       fvPatchVectorField,
+       massFlowRateInletVelocityFvPatchVectorField
+   );
+}
+
+
+// ************************************************************************* //

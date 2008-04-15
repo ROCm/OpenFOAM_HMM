@@ -1,0 +1,7 @@
+adf_cond.c
+adf_ftoc.c
+cgns_error.c
+cgns_internals.c
+cgnslib.c
+
+LIB = $(FOAM_LIBBIN)/libcgns

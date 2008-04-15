@@ -1,0 +1,3 @@
+sigmaComponents.C
+
+EXE = $(FOAM_APPBIN)/sigmaComponents

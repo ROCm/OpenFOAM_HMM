@@ -1,0 +1,13 @@
+#!/bin/sh
+set -x
+
+( cd wmake && ./makeWmake )
+
+( cd src && ./Allwmake )
+
+( cd applications && ./Allwmake )
+
+if [ "$1" = doc ]
+then
+   ( cd doc && ./Allwmake)
+fi

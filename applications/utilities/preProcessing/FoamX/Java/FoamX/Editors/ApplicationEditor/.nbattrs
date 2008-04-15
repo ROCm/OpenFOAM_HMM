@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE attributes PUBLIC "-//NetBeans//DTD DefaultAttributes 1.0//EN" "http://www.netbeans.org/dtds/attributes-1_0.dtd">
+<attributes version="1.0">
+    <fileobject name="ApplicationDetailsTab.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="ApplicationDetailsTab"/>
+    </fileobject>
+    <fileobject name="FieldModelListener.java">
+        <attr name="EA-OpenIDE-Connection" serialvalue="aced0005737200146a6176612e7574696c2e4c696e6b65644c6973740c29535d4a608822030000787077040000000078"/>
+    </fileobject>
+    <fileobject name="BoundaryTypesTab.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="BoundaryTypesTab"/>
+        <attr name="class_dependency_javax.swing.AbstractAction" stringvalue="BoundaryTypesTab.DeleteBoundaryTypeAction;BoundaryTypesTab.AddBoundaryTypeAction"/>
+    </fileobject>
+    <fileobject name="BoundaryDefinitionPanel.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="BoundaryDefinitionPanel"/>
+    </fileobject>
+    <fileobject name="ApplicationClassExeption.java">
+        <attr name="template" serialvalue="aced0005737200266f72672e6f70656e6964652e7574696c2e696f2e4e624d61727368616c6c65644f626a6563746cd5cc1aa397c0f2020002490004686173685b00086f626a42797465737400025b4278700000001170"/>
+    </fileobject>
+    <fileobject name="ApplicationClassEditorDlg.java">
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="ApplicationClassEditorDlg"/>
+    </fileobject>
+    <fileobject name="BoundaryDefinitionModel.java">
+        <attr name="class_dependency_FoamX.Editors.ApplicationClassEditor.FieldModelListener" stringvalue="BoundaryDefinitionModel"/>
+        <attr name="class_dependency_javax.swing.table.AbstractTableModel" stringvalue="BoundaryDefinitionModel"/>
+    </fileobject>
+    <fileobject name="FieldsTab.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="FieldsTab"/>
+        <attr name="class_dependency_javax.swing.AbstractAction" stringvalue="FieldsTab.DeleteFieldAction;FieldsTab.AddFieldAction"/>
+    </fileobject>
+    <fileobject name="ModulesTab.java">
+        <attr name="class_dependency_javax.swing.JPanel" stringvalue="ModulesTab"/>
+    </fileobject>
+    <fileobject name="BrowseApplicationClassesDlg.java">
+        <attr name="class_dependency_FoamX.Util.FoamXListRenderer.FoamXListItem" stringvalue="BrowseApplicationClassesDlg.AppClassListItem"/>
+        <attr name="class_dependency_javax.swing.JDialog" stringvalue="BrowseApplicationClassesDlg"/>
+    </fileobject>
+</attributes>

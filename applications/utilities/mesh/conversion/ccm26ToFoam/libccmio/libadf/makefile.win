@@ -1,0 +1,20 @@
+# Microsoft NMAKE File
+
+# Module specific variables
+MODNAM=adf
+
+# Extra cpp options
+CPPDEFS=$(CPPDEFS) /D_WIN32 /DWINNT /DADFLIB
+
+# Lib path
+LIBDIRS=
+
+# Link dependencies
+LINK_DEPS=
+
+# Build a static lib rather than a dll
+STATICLIB=1
+
+# End of module specific variables
+
+!INCLUDE "$(DEV_HOME)\star\config\makelib.win"

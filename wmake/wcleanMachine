@@ -1,0 +1,80 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     wcleanMachine
+#
+# Description
+#     Searches all the directories below the current for the
+#     object file directories of the specified machine and then deletes them.
+#
+#     Usage: wcleanMachine <machineType>
+#
+#------------------------------------------------------------------------------
+
+if [ $# = 0 ]
+then
+   echo $0: wcleanMachine : Machine type expected, exiting !
+   exit 1
+fi
+
+
+if [ ! -d lib -o ! -d src ]
+then
+   echo $0: not in the project top level directory !
+   exit 1
+fi
+
+
+find `find .  -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d -name "*$1" \) -exec rm -r {} \;
+
+
+find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
+
+
+if [ -d lib/$1 ]
+then
+    rm -r lib/$1
+fi
+
+if [ applications/bin ]
+then
+    if [ -d applications/bin/$1 ]
+    then
+       rm -r applications/bin/$1
+    fi
+fi
+
+#if [ src/mpich-${MPICH_VERSION}/platforms/$1 ]
+#then
+#   rm -rf src/mpich-${MPICH_VERSION}/platforms/$1
+#fi
+
+#if [ src/mico-${MICO_VERSION}/platforms/$1 ]
+#then
+#   rm -rf src/mico-${MICO_VERSION}/platforms/$1
+#fi
+
+#------------------------------------------------------------------------------

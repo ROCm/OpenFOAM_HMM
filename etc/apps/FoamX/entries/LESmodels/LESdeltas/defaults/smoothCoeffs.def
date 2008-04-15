@@ -1,0 +1,11 @@
+default
+{
+    delta cubeRootVol;
+
+    cubeRootVolCoeffs
+    {
+        deltaCoeff 1;
+    }
+
+    maxDeltaRatio 1.1;
+}

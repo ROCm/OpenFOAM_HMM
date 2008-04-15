@@ -1,0 +1,192 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     runPatchTool
+#
+# Description
+#     Loader for PatchTool Java Patch Client.
+#
+#------------------------------------------------------------------------------
+# Set default JDK path.
+jdkhome="/usr/java/jdk1.4"
+
+Script=${0##*/}
+ScriptDir=`dirname $0`
+
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: $Script [-case dir]
+
+* starts the PatchTool client (Java PatchTool/patchTool).
+
+USAGE
+    exit 1
+}
+
+
+# getValue file var
+#   Prints value of 'var=value' in file.
+getValue() {
+    val=`grep "^[ \t]*$2[ \t]*=" $1 | sed -e "s/^[ \t]*$2[ \t]*=//" | head -1`
+    if [ -z "$val" ]; then
+        return 1
+    fi
+    echo "$val"
+    return 0
+}
+
+# getPID processName
+# Prints pid of named process (looks at users processes only)
+getPID() {
+    ps -u $LOGNAME -o 'pid,args' | fgrep "$1" | fgrep -v grep | head -1 | awk '{ print $1 }'
+}
+
+# cleanup
+# removes all excess processes and files. Used in signal handler
+cleanup() {
+    #- reset traps
+    trap 0 2 3 15
+
+    #- Did we start up something?
+    if [ "$XHB_PID" ]; then
+        #- clean up
+        kill "$XHB_PID"
+    fi
+}
+
+
+#-------------------------
+#
+# Main.
+#
+#-------------------------
+
+
+# If JAVA_PATH or JAVA_HOME are set, it overrides the default.
+if [ -n "$JAVA_PATH" ]; then
+    jdkhome=$JAVA_PATH
+elif [ -n "$JAVA_HOME" ]; then
+    jdkhome=$JAVA_HOME
+fi
+
+# check that the JDK exists.
+if [ -z "$jdkhome" ] ; then
+    echo "Java path not set. Please set JAVA_PATH to the JDK installation"
+    echo "directory."
+    echo ""
+    exit 1
+fi
+if [ ! -x "$jdkhome/bin/java" ] ; then
+    echo "Cannot find JDK at $jdkhome. Please set JAVA_PATH to the"
+    echo "JDK installation directory."
+    echo ""
+    exit 1
+fi
+
+# Make sure that the FoamX client configuration file is available.
+if [ ! -r "$FOAMX_CONFIG/FoamXClient.cfg" ] ; then
+    echo "Can't find FoamX FoamXClient.cfg file in $FOAMX_CONFIG."
+    exit 1
+fi
+
+# Make sure that the FoamX system directory is available.
+if [ ! -d "$FOAMX_CONFIG" ] ; then
+    echo "Can't find FoamX system directory at $FOAMX_CONFIG."
+    exit 1
+fi
+
+#- Get host and port from FoamX client client configuration file.
+#
+HOSTNAME=`getValue "$FOAMX_CONFIG/FoamXClient.cfg" 'org.omg.CORBA.ORBInitialHost'`
+if [ $? -ne 0 ]; then
+    HOSTNAME=`uname -n`
+fi
+HOSTPORT=`getValue "$FOAMX_CONFIG/FoamXClient.cfg" 'org.omg.CORBA.ORBInitialPort'`
+if [ $? -ne 0 ]; then
+    HOSTPORT=1234
+fi
+HOSTPORT=`expr $HOSTPORT + 1`
+
+# parse options
+if [ "$#" -gt 0 ]; then
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -case)
+        shift
+        caseDir=$1
+        [ "$#" -ge 1 ] || usage "'-case' option requires an argument"
+        cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
+        ;;
+    *)
+        usage "unknown option/argument: '$*'"
+        ;;
+    esac
+fi
+
+
+# Install handler for interrupts
+XHB_PID=''
+trap cleanup 0 2 3 15
+
+
+#- Use STARTUP flag to determine whether or not to run runFoamXHB
+pid=`getPID 'runPatchToolServer'`
+echo "runPatchToolServer : pid:$pid"
+
+if [ "$pid" ]; then
+    echo "Using running runPatchToolServer (pid $pid) ..."
+else
+    $ScriptDir/runPatchToolServer < /dev/null&
+    XHB_PID=$!
+fi
+
+
+#- For mico > 2.3.7 : force to use 1.0
+orbArgs="-ORBDefaultInitRef corbaloc:iiop:1.0:$HOSTNAME:$HOSTPORT"
+
+#------------------------------------------------------------------------------
+# Run PatchTool via jar file.
+PATCHTOOL_PATH=$FOAM_UTILITIES/mesh/manipulation/patchTool
+jars='.'
+for f in $PATCHTOOL_PATH/lib/*.jar
+do
+    echo "Using jar $f"
+    jars="${jars}:${f}"
+done
+set -x
+$jdkhome/bin/java \
+    -cp "$jars" \
+    -DFoamX.SystemPath=$WM_PROJECT_DIR \
+    -DFoamX.SystemConfigPath=$FOAMX_CONFIG \
+    -DFoamX.UserConfigPath=$FOAMX_CONFIG \
+    -DFoamX.PatchToolPath=$PATCHTOOL_PATH \
+    PatchTool/PatchTool $orbArgs $args
+
+#------------------------------------------------------------------------------

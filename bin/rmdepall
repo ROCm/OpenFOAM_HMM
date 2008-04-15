@@ -1,0 +1,2 @@
+#!/bin/sh
+find . \( -name '*.dep' \) -print | xargs -t rm

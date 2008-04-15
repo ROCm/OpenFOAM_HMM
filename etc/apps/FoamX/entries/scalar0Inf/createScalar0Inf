@@ -1,0 +1,23 @@
+#!/bin/csh
+
+if ( $#argv != 1 ) then
+    echo "Usage: createScalar0Inf <scalar0InfName>"
+    exit 1
+endif
+
+set file = $1.cfg
+if ( -e $file ) then
+	echo "Removing existing file $file"
+ 	rm $file
+endif
+
+echo "Creating file $file"
+touch $file
+echo $1 >> $file
+echo '{' >> $file
+echo '    type                scalar0Inf;' >> $file
+echo '    displayName         "'$1'";'  >> $file
+echo '    description         "'$1'";'  >> $file
+echo '    iconURL             "/FoamX/icons/small/maths/'$1'.gif";'  >> $file
+echo '}' >> $file
+

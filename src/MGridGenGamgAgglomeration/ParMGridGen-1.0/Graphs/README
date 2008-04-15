@@ -1,0 +1,121 @@
+
+This file contains one test problem
+
+M6.metis
+	This is a small 3D mesh corresponding to a M6 wing.
+
+You can use it to test various coarsening techniques.
+
+===========================================================================
+To run the serial code, for example, try something like
+
+	../mgridgen1.0 M6.metis 3 4 6 1 4 128
+
+Here is how the correct output should look like.
+
+prompt%: ../mgridgen1.0 M6.metis 3 4 6 1 4 128
+Parameters: M6.metis, Dim=3 [ 1  4] CType=4 RType=6 Nvtxs=24893 Nedges=351504
+Npoints: 7161, Coarsening Factor: 3.476190
+Aspect Ratios: Min : 1.211900e+01, Max : 1.784692e+01
+Aspect Ratios: Sum : 1.145611e+05, Wsum: 3.997483e+05
+Aspect Ratios: Surf: 1.473822e+06, Avg : 1.599792e+01
+Graph lmincut : 1.436660e+05
+Cell size: min=1, max=4
+CellSizeDist: [ 1   24] [ 2  819] [ 3 2041] [ 4 4277] 
+Total Time: 6.700000
+
+
+===========================================================================
+To run the parallel code try something like
+
+        mpirun -np 4 ../parmgridgen1.0 M6.metis 3 4 6 1 4 128
+
+
+An output file, named OUTPUT4.[0-3], will be generated for every processor.
+
+prompt% more OUTPUT4.0
+Nvtxs: 24893, Nedges: 351504
+------------------------ PARAMETERS --------------------------------------
+M6.metis, Dim=3 [ 1  4] CType=4 RType=6 Nvtxs=6223 Nedges=87156
+
+-------------------------- LOCAL --------------------------
+Npoints: 1883, Coarsening Factor: 3.459373
+Aspect Ratios: Min : 1.250444e+01, Max : 1.762476e+01
+Aspect Ratios: Sum : 3.005424e+04, Wsum: 1.044060e+05
+Aspect Ratios: Surf: 7.849518e+05, Avg : 1.596083e+01
+Graph lmincut : 3.818850e+04
+Cell size: min=1, max=4
+CellSizeDist: [ 1    9] [ 2  253] [ 3  485] [ 4 1136] 
+-------------------------- GLOBAL --------------------------
+Npoints: 7269, Coarsening Factor: 3.424543
+Aspect Ratios: Min : 1.198039e+01, Max : 1.800314e+01
+Aspect Ratios: Sum : 1.158327e+05, Wsum: 3.984295e+05
+Aspect Ratios: Surf: 1.475658e+06, Avg : 1.593517e+01
+Graph mincut : 1.440100e+05
+
+------------------------------ END ------------------------------
+Total Time = 8.627177
+
+prompt% more OUTPUT4.1
+M6.metis, Dim=3 [ 1  4] CType=4 RType=6 Nvtxs=6223 Nedges=89366
+
+-------------------------- LOCAL --------------------------
+Npoints: 1891, Coarsening Factor: 3.401904
+Aspect Ratios: Min : 1.277087e+01, Max : 1.800314e+01
+Aspect Ratios: Sum : 3.009639e+04, Wsum: 1.028172e+05
+Aspect Ratios: Surf: 6.049566e+05, Avg : 1.591559e+01
+Graph lmincut : 3.751350e+04
+Cell size: min=1, max=4
+CellSizeDist: [ 1    7] [ 2  265] [ 3  580] [ 4 1039] 
+-------------------------- GLOBAL --------------------------
+Npoints: 7269, Coarsening Factor: 3.424543
+Aspect Ratios: Min : 1.198039e+01, Max : 1.800314e+01
+Aspect Ratios: Sum : 1.158327e+05, Wsum: 3.984295e+05
+Aspect Ratios: Surf: 1.475658e+06, Avg : 1.593517e+01
+Graph mincut : 1.440100e+05
+
+------------------------------ END ------------------------------
+Total Time = 8.627194
+
+prompt% more OUTPUT4.2
+M6.metis, Dim=3 [ 1  4] CType=4 RType=6 Nvtxs=6223 Nedges=88490
+
+-------------------------- LOCAL --------------------------
+Npoints: 1735, Coarsening Factor: 3.393660
+Aspect Ratios: Min : 1.198039e+01, Max : 1.748248e+01
+Aspect Ratios: Sum : 2.759339e+04, Wsum: 9.412172e+04
+Aspect Ratios: Surf: 9.847982e+03, Avg : 1.590397e+01
+Graph lmincut : 3.376950e+04
+Cell size: min=1, max=4
+CellSizeDist: [ 1    8] [ 2  249] [ 3  530] [ 4  948] 
+-------------------------- GLOBAL --------------------------
+Npoints: 7269, Coarsening Factor: 3.424543
+Aspect Ratios: Min : 1.198039e+01, Max : 1.800314e+01
+Aspect Ratios: Sum : 1.158327e+05, Wsum: 3.984295e+05
+Aspect Ratios: Surf: 1.475658e+06, Avg : 1.593517e+01
+Graph mincut : 1.440100e+05
+
+------------------------------ END ------------------------------
+Total Time = 8.627183
+
+prompt% more OUTPUT4.3
+M6.metis, Dim=3 [ 1  4] CType=4 RType=6 Nvtxs=6224 Nedges=86492
+
+-------------------------- LOCAL --------------------------
+Npoints: 1760, Coarsening Factor: 3.442045
+Aspect Ratios: Min : 1.252911e+01, Max : 1.763729e+01
+Aspect Ratios: Sum : 2.808869e+04, Wsum: 9.708463e+04
+Aspect Ratios: Surf: 7.590192e+04, Avg : 1.595948e+01
+Graph lmincut : 3.453850e+04
+Cell size: min=1, max=4
+CellSizeDist: [ 1    6] [ 2  225] [ 3  514] [ 4 1015] 
+-------------------------- GLOBAL --------------------------
+Npoints: 7269, Coarsening Factor: 3.424543
+Aspect Ratios: Min : 1.198039e+01, Max : 1.800314e+01
+Aspect Ratios: Sum : 1.158327e+05, Wsum: 3.984295e+05
+Aspect Ratios: Surf: 1.475658e+06, Avg : 1.593517e+01
+Graph mincut : 1.440100e+05
+
+------------------------------ END ------------------------------
+Total Time = 8.627202
+

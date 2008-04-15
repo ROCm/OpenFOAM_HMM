@@ -1,0 +1,780 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+// Foam Dictionary.
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+    class           dictionary;
+    object          controlDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+hosts
+(
+);
+
+caseRoots
+(
+    "."
+    "$FOAM_RUN/tutorials/bubbleFoam"
+    "$FOAM_RUN/tutorials/buoyantFoam"
+    "$FOAM_RUN/tutorials/buoyantSimpleFoam"
+    "$FOAM_RUN/tutorials/channelOodles"
+    "$FOAM_RUN/tutorials/coodles"
+    "$FOAM_RUN/tutorials/dnsFoam"
+    "$FOAM_RUN/tutorials/electrostaticFoam"
+    "$FOAM_RUN/tutorials/engineFoam"
+    "$FOAM_RUN/tutorials/icoFoam"
+    "$FOAM_RUN/tutorials/interFoam"
+    "$FOAM_RUN/tutorials/laplacianFoam"
+    "$FOAM_RUN/tutorials/lesInterFoam"
+    "$FOAM_RUN/tutorials/mhdFoam"
+    "$FOAM_RUN/tutorials/oodles"
+    "$FOAM_RUN/tutorials/potentialFoam"
+    "$FOAM_RUN/tutorials/rasInterFoam"
+    "$FOAM_RUN/tutorials/rhoSonicFoam"
+    "$FOAM_RUN/tutorials/rhoTurbFoam"
+    "$FOAM_RUN/tutorials/scalarTransportFoam"
+    "$FOAM_RUN/tutorials/settlingFoam"
+    "$FOAM_RUN/tutorials/simpleFoam"
+    "$FOAM_RUN/tutorials/solidDisplacementFoam"
+    "$FOAM_RUN/tutorials/sonicFoam"
+    "$FOAM_RUN/tutorials/sonicLiquidFoam"
+    "$FOAM_RUN/tutorials/sonicTurbFoam"
+    "$FOAM_RUN/tutorials/turbFoam"
+    "$FOAM_RUN/tutorials/twoPhaseEulerFoam"
+    "$FOAM_RUN/tutorials/XiFoam"
+    "$FOAM_RUN/tutorials/Xoodles"
+);
+
+Documentation
+{
+    docBrowser        "kde-open %f";
+    doxyDocDirs
+    (
+        "$WM_PROJECT_USER_DIR/Doxygen/html"
+        "~OpenFOAM/Doxygen/html"
+        "$WM_PROJECT_DIR/doc/Doxygen/html"
+    );
+    doxySourceFileExt "_8C.html";
+}
+
+DebugSwitches
+{
+    aC11H10         0;
+    addCell         0;
+    addFace         0;
+    addPoint        0;
+    algebraicPair   0;
+    amgCoupledInterface 0;
+    amgInterfaceField 0;
+    anisotropic     0;
+    APIdiffCoefFunc 0;
+    Ar              0;
+    areaScalarField 0;
+    areaTensorField 0;
+    areaVectorField 0;
+    atomizationModel 0;
+    attachDetach    0;
+    backward        0;
+    basePatch       0;
+    basicMesh       0;
+    basicMixture    0;
+    basicThermo     0;
+    bC11H10         0;
+    BDCG            0;
+    BICCG           0;
+    BirdCarreau     0;
+    blended         0;
+    blobsSheetAtomization 0;
+    blobsSwirlInjector 0;
+    booleanSurface  0;
+    boundaryCutter  0;
+    boundaryMesh    0;
+    boundaryToFace  0;
+    bounded         0;
+    boundedBackward 0;
+    boxToCell       0;
+    boxToFace       0;
+    boxToPoint      0;
+    breakupModel    0;
+    C10H22          0;
+    C12H26          0;
+    C13H28          0;
+    C14H30          0;
+    C16H34          0;
+    C2H5OH          0;
+    C2H6            0;
+    C2H6O           0;
+    C3H6O           0;
+    C3H8            0;
+    C4H10O          0;
+    C6H14           0;
+    C6H6            0;
+    C7H16           0;
+    C7H8            0;
+    C8H10           0;
+    C8H18           0;
+    C9H20           0;
+    calculated      0;
+    CallbackRegistry 0;
+    Cartesian       0;
+    cell            0;
+    cellClassification 0;
+    cellCuts        0;
+    cellDistFuncs   0;
+    cellLimited     0;
+    cellList        0;
+    cellLooper      0;
+    cellMDLimited   0;
+    cellModeller    0;
+    cellPoint       0;
+    cellPointFace   0;
+    cellSet         0;
+    cellToCell      0;
+    cellToFace      0;
+    cellToPoint     0;
+    cellZone        0;
+    CH3OH           0;
+    chemistryReader 0;
+    chemkinReader   0;
+    ChomiakInjector 0;
+    clippedLinear   0;
+    Cloud           0;
+    CoEuler         0;
+    CoGamma2        0;
+    collisionModel  0;
+    commonRailInjector 0;
+    commSchedule    0;
+    componentMixed  0;
+    compound        0;
+    const           0;
+    constant        0;
+    constInjector   0;
+    coordinateSystem 0;
+    corrected       0;
+    coupled         0;
+    CrankNicholson  0;
+    CrossPowerLaw   0;
+    cubeRootVol     0;
+    cubic           0;
+    cubicCorrection 0;
+    cyclic          0;
+    cyclicLduCoupledInterface 0;
+    cyclicLduInterface 0;
+    cyclicLduInterfaceField 0;
+    cylindrical     0;
+    database        0;
+    dataSchedule    0;
+    DCG             0;
+    DeardorffDiffStress 0;
+    default         0;
+    definedHollowConeInjector 0;
+    definedInjector 0;
+    definedPressureSwirlInjector 0;
+    deformationEnergy 0;
+    diagonal        0;
+    diagonalSolver  0;
+    diagTensorField 0;
+    DIC             0;
+    DICGaussSeidel  0;
+    dictionary      0;
+    DILU            0;
+    dimensionedTypes 0;
+    dimensionSet    1;
+    directCombineFaces 0;
+    directDuplicatePoints 0;
+    directHexRef8   0;
+    directionMixed  0;
+    directMappedPatch 0;
+    directMeshCutAndRemove 0;
+    directPolyTopoChange 0;
+    directRemoveCells 0;
+    directRemoveFaces 0;
+    directRemovePoints 0;
+    disallowGenericFvPatchField 0;
+    disallowGenericPolyPatch 0;
+    dispersionLESModel 0;
+    dispersionModel 0;
+    dispersionRASModel 0;
+    distortionEnergy 0;
+    downwind        0;
+    dragModel       0;
+    dynMixedSmagorinsky 0;
+    dynOneEqEddy    0;
+    dynSmagorinsky  0;
+    edgeInterpolation 0;
+    edgeIntersections 0;
+    edgeList        0;
+    edgeScalarField 0;
+    edgeSurface     0;
+    edgeTensorField 0;
+    edgeVectorField 0;
+    elementScalarField 0;
+    elementTensorField 0;
+    elementVectorField 0;
+    empty           0;
+    engineMesh      0;
+    enrichedPatch   0;
+    entry           0;
+    ETAB            0;
+    Euler           0;
+    evaporationModel 0;
+    exponential     0;
+    extendedLeastSquares 0;
+    extendedLeastSquaresVectors 0;
+    fa              0;
+    faBoundaryMesh  0;
+    faceAreaPair    0;
+    FaceCellWave    0;
+    faceCoupleInfo  0;
+    faceLimited     0;
+    faceList        0;
+    faceMDLimited   0;
+    faceSet         0;
+    faceToCell      0;
+    faceToFace      0;
+    faceToPoint     0;
+    faceZone        0;
+    faMesh          0;
+    faPatchField    0;
+    faScalarMatrix  0;
+    faSchemes       0;
+    fastLduTriLookup 0;
+    faTensorMatrix  0;
+    faVectorMatrix  0;
+    FDIC            0;
+    featureEdgeMesh 0;
+    features        0;
+    fields          0;
+    fieldToCell     0;
+    file            0;
+    fileName        2;
+    finiteVolume    0;
+    fixedEnthalpy   0;
+    fixedFluxBuoyantPressure 0;
+    fixedFluxPressure 0;
+    fixedGradient   0;
+    fixedNormalSlip 0;
+    fixedUnburntEnthalpy 0;
+    fixedValue      0;
+    fixedValueOutflow 0;
+    fluxCorrectedVelocity 0;
+    foamChemistryReader 0;
+    FoamX           0;
+    FoamXError      0;
+    fourth          0;
+    freestream      0;
+    freestreamPressure 0;
+    fv              0;
+    fvMatrix        0;
+    fvMesh          0;
+    fvMeshDistribute 0;
+    fvMotionSolver  0;
+    fvPatchField    0;
+    fvScalarMatrix  0;
+    fvSchemes       0;
+    fvSolution      0;
+    fvSphericalTensorMatrix 0;
+    fvSymmTensorMatrix 0;
+    fvTensorMatrix  0;
+    fvVectorMatrix  0;
+    GAMG            0;
+    gamgAgglomeration 0;
+    gamgInterface   0;
+    gamgInterfaceField 0;
+    Gamma           0;
+    Gamma01         0;
+    Gamma2          0;
+    Gamma201        0;
+    Gamma2Limit     0;
+    Gamma2V         0;
+    GammaLimit      0;
+    GammaV          0;
+    Gauss           0;
+    GaussSeidel     0;
+    general         0;
+    geomCellLooper  0;
+    geometricFields 0;
+    geometricSurfacePatch 0;
+    global          0;
+    globalMeshData  0;
+    globalPoints    0;
+    globalProcessor 0;
+    gnuplot         0;
+    gradientDispersionRAS 0;
+    gradientEnthalpy 0;
+    gradientUnburntEnthalpy 0;
+    Gulders         0;
+    GuldersEGR      0;
+    H2O             0;
+    harmonic        0;
+    hashTable       0;
+    HashTable       0;
+    hCombustionThermo 0;
+    heatTransferModel 0;
+    hexCellLooper   0;
+    hexRef8         0;
+    hhuCombustionThermo 0;
+    hhuMixtureThermo<egrMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<egrMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<dieselMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<multiComponentMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<reactingMixture> 0;
+    hMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hollowConeInjector 0;
+    hThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    IC8H18          0;
+    ICCG            0;
+    IDEA            0;
+    IFstream        0;
+    indexedOctree   0;
+    indexedParticle 0;
+    injectorModel   0;
+    injectorType    0;
+    inletOutlet     0;
+    interpolations  0;
+    intersectedSurface 0;
+    inverseLinear   0;
+    IOobject        0;
+    IOptrList<injector> 0;
+    IOPtrList<injector> 0;
+    IOPtrList<MRFZone> 0;
+    IOPtrList<porousZone> 0;
+    jplot           0;
+    kEpsilon        0;
+    kOmegaSST       0;
+    KRR4            0;
+    labelField      0;
+    labelList       0;
+    labelListList   0;
+    labelToCell     0;
+    labelToFace     0;
+    labelToPoint    0;
+    LamBremhorstKE  0;
+    laminar         0;
+    laminarFlameSpeed 0;
+    laplace         0;
+    LaunderGibsonRSTM 0;
+    LaunderSharmaKE 0;
+    layerAdditionRemoval 0;
+    layered         0;
+    lduCoupledInterface 0;
+    lduInterface    0;
+    lduInterfaceField 0;
+    lduMatrix       1;
+    lduMesh         0;
+    leastSquares    0;
+    leastSquaresVectors 0;
+    LESdelta        0;
+    LESfilter       0;
+    LESmodel        0;
+    level           2;
+    licence         0;
+    LienCubicKE     0;
+    LienCubicKELowRe 0;
+    LienLeschzinerLowRe 0;
+    limited         0;
+    limitedCubic    0;
+    limitedCubic01  0;
+    limitedCubicV   0;
+    limitedGamma    0;
+    limitedLimitedCubic 0;
+    limitedLimitedLinear 0;
+    limitedLinear   0;
+    limitedLinear01 0;
+    limitedLinearV  0;
+    limitedMUSCL    0;
+    LimitedMUSCL    0;
+    limitedSuperBee 0;
+    limitedSurfaceInterpolationScheme 0;
+    limitedVanLeer  0;
+    linear          0;
+    linearUpwind    0;
+    linearUpwindV   0;
+    liquid          0;
+    LISA            0;
+    localBlended    0;
+    localMax        0;
+    localMin        0;
+    localPointRegion 0;
+    locDynOneEqEddy 0;
+    lowReOneEqEddy  0;
+    LRR             0;
+    LRRDiffStress   0;
+    MB              0;
+    mesh            0;
+    meshCutAndRemove 0;
+    meshCutter      0;
+    meshModifier    0;
+    meshMorphEngine 0;
+    meshSearch      0;
+    meshToMesh      0;
+    meshWave        0;
+    MeshWave        0;
+    midPoint        0;
+    minMod          0;
+    mixed           0;
+    mixedEnthalpy   0;
+    mixedSmagorinsky 0;
+    mixedUnburntEnthalpy 0;
+    modifyCell      0;
+    modifyFace      0;
+    modifyPoint     0;
+    motionDiff      0;
+    motionSmoother  0;
+    motionSolver    0;
+    movingWallVelocity 0;
+    multiDirRefinement 0;
+    multivariateSelection 0;
+    MUSCL           0;
+    MUSCL01         0;
+    muSgsWallFunction 0;
+    N2              0;
+    nbrToCell       0;
+    nearestToCell   0;
+    Newtonian       0;
+    noDragModel     0;
+    none            0;
+    NonlinearKEShih 0;
+    normal          0;
+    normalToFace    0;
+    NSRDSfunc0      0;
+    NSRDSfunc1      0;
+    NSRDSfunc14     0;
+    NSRDSfunc2      0;
+    NSRDSfunc3      0;
+    NSRDSfunc4      0;
+    NSRDSfunc5      0;
+    NSRDSfunc6      0;
+    NSRDSfunc7      0;
+    nuSgsWallFunction 0;
+    nutStandardRoughWallFunction 0;
+    nutStandardWallFunction 0;
+    nutWallFunction 0;
+    objectRegistry  0;
+    octree          0;
+    octreeDataEdges 0;
+    octreeDataFace  0;
+    octreeDataFaceList 0;
+    octreeDataTriSurface 0;
+    ODESolver       0;
+    off             0;
+    OFstream        0;
+    oneEqEddy       0;
+    orientedSurface 0;
+    ORourke         0;
+    oscillatingFixedValue 0;
+    outletInlet     0;
+    outletStabilised 0;
+    PackedList      0;
+    pair            0;
+    parabolicCylindrical 0;
+    parallelInfo    0;
+    parcel          0;
+    ParSortableList 0;
+    partialSlip     0;
+    passiveParticle 0;
+    patch           0;
+    patchEnhanced   0;
+    patchFields     0;
+    patchToFace     0;
+    PatchToPatchInterpolation 0;
+    patchZones      0;
+    PBiCG           0;
+    PCG             0;
+    pdf             0;
+    perfectInterface 0;
+    Phi             0;
+    PointEdgeWave   0;
+    pointIndexHitList 0;
+    PointPatchField 0;
+    pointPatchInterpolation 0;
+    pointScalarField 0;
+    pointScalarField::DimensionedInternalField 0;
+    pointSet        0;
+    pointSphericalTensorField 0;
+    pointSphericalTensorField::DimensionedInternalField 0;
+    pointSymmTensorField 0;
+    pointSymmTensorField::DimensionedInternalField 0;
+    pointTensorField 0;
+    pointTensorField::DimensionedInternalField 0;
+    pointToCell     0;
+    pointToFace     0;
+    pointToPoint    0;
+    pointVectorField 0;
+    pointVectorField::DimensionedInternalField 0;
+    pointZone       0;
+    polyBoundaryMesh 0;
+    polyMesh        0;
+    polyMeshMorphEngine 0;
+    polyTopoChange  0;
+    polyTopoChanger 0;
+    Prandtl         0;
+    pressureDirectedInletOutletVelocity 0;
+    pressureDirectedInletVelocity 0;
+    pressureInletOutletVelocity 0;
+    pressureInletUniformVelocity 0;
+    pressureInletVelocity 0;
+    pressureSwirlInjector 0;
+    pressureTransmissive 0;
+    primitiveMesh   0;
+    PrimitivePatch  0;
+    probes          0;
+    processor       0;
+    processorLduCoupledInterface 0;
+    processorLduInterface 0;
+    processorLduInterfaceField 0;
+    pseudoSolid     0;
+    Pstream         0;
+    pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>> 0;
+    pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>> 0;
+    pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>> 0;
+    quadratic       0;
+    QUICK           0;
+    QZeta           0;
+    RanzMarshall    0;
+    raw             0;
+    reaction        0;
+    realizableKE    0;
+    refinementHistory 0;
+    refinementIterator 0;
+    reflect         0;
+    regionSplit     0;
+    regIOobject     0;
+    ReitzDiwakar    0;
+    ReitzKHRT       0;
+    remove          0;
+    removeCell      0;
+    removeCells     0;
+    removeFace      0;
+    removeFaces     0;
+    removePoint     0;
+    repatchPolyMesh 0;
+    reverseLinear   0;
+    rhoMUSCL        0;
+    RK              0;
+    RNGkEpsilon     0;
+    RosinRammler    0;
+    rotatedBoxToCell 0;
+    rotatingPressureInletOutletVelocity 0;
+    rotatingTotalPressure 0;
+    RutlandFlashBoil 0;
+    saturateEvaporationModel 0;
+    scalarField     0;
+    scaleSimilarity 0;
+    setUpdater      0;
+    SFCD            0;
+    SFCDV           0;
+    shapeList       0;
+    shapeToCell     0;
+    SHF             0;
+    SIBS            0;
+    simple          0;
+    skewCorrected   0;
+    skewCorrectionVectors 0;
+    skewLinear      0;
+    sliced          0;
+    slidingInterface 0;
+    slip            0;
+    Smagorinsky     0;
+    Smagorinsky2    0;
+    smooth          0;
+    smoothSolver    0;
+    solution        0;
+    SpalartAllmaras 0;
+    spectEddyVisc   0;
+    spherical       0;
+    sphericalTensorField 0;
+    standardDragModel 0;
+    standardEvaporationModel 0;
+    static          0;
+    StaticHashTable 0;
+    steadyState     0;
+    stochasticDispersionRAS 0;
+    string          0;
+    SuperBee        0;
+    SuperBee01      0;
+    supersonicFreestream 0;
+    surfaceFeatures 0;
+    surfaceInterpolation 0;
+    surfaceInterpolationScheme 0;
+    surfaceIntersection 0;
+    surfaceNormalFixedValue 0;
+    surfacePatch    0;
+    surfacePatchIOList 0;
+    surfaceScalarField 0;
+    surfaceScalarField::DimensionedInternalField 0;
+    surfaceSnap     0;
+    surfaceSphericalTensorField 0;
+    surfaceSphericalTensorField::DimensionedInternalField 0;
+    surfaceSymmTensorField 0;
+    surfaceSymmTensorField::DimensionedInternalField 0;
+    surfaceTensorField 0;
+    surfaceTensorField::DimensionedInternalField 0;
+    surfaceToCell   0;
+    surfaceToPoint  0;
+    surfaceVectorField 0;
+    surfaceVectorField::DimensionedInternalField 0;
+    swirlInjector   0;
+    symmetryPlane   0;
+    symmTensorField 0;
+    syringePressure 0;
+    TAB             0;
+    tensorField     0;
+    tetFemMatrix    0;
+    tetFemScalarMatrix 0;
+    tetFemTensorMatrix 0;
+    tetFemVectorMatrix 0;
+    tetPointScalarField 0;
+    tetPointTensorField 0;
+    tetPointVectorField 0;
+    tetPolyMesh     0;
+    tetPolyPatchFields 0;
+    thermo          0;
+    thermophysicalFunction 0;
+    time            0;
+    timer           0;
+    timeVaryingMappedFixedValue 0;
+    timeVaryingUniformFixedValue 0;
+    topoAction      0;
+    topoCellLooper  0;
+    topoSet         0;
+    topoSetSource   0;
+    toroidal        0;
+    totalPressure   0;
+    totalTemperature 0;
+    trajectory      0;
+    transform       0;
+    transportModel  0;
+    treeDataTriSurface 0;
+    treeLeaf        0;
+    treeNode        0;
+    triSurface      0;
+    turbulenceModel 0;
+    turbulentInlet  0;
+    UMIST           0;
+    uncorrected     0;
+    undoableMeshCutter 0;
+    uniform         0;
+    uniformFixedValue 0;
+    unitInjector    0;
+    unix            0;
+    Unix            0;
+    upwind          0;
+    value           0;
+    valueStored     0;
+    vanDriest       0;
+    vanLeer         0;
+    vanLeer01       0;
+    vanLeerV        0;
+    vector          0;
+    vector2DField   0;
+    vectorField     0;
+    viscosityModel  0;
+    volPointInterpolation 0;
+    volScalarField  0;
+    volScalarField::DimensionedInternalField 0;
+    volSphericalTensorField 0;
+    volSphericalTensorField::DimensionedInternalField 0;
+    volSymmTensorField 0;
+    volSymmTensorField::DimensionedInternalField 0;
+    volTensorField  0;
+    volTensorField::DimensionedInternalField 0;
+    volVectorField  0;
+    volVectorField::DimensionedInternalField 0;
+    walkPatch       0;
+    wall            0;
+    wallBuoyantPressure 0;
+    wallHeatTransfer 0;
+    wallLayerCells  0;
+    wallModel       0;
+    waveTransmissive 0;
+    wedge           0;
+    weighted        0;
+    word            2;
+    writer          0;
+    xmgr            0;
+    zeroGradient    0;
+    zoneToCell      0;
+    zoneToFace      0;
+    zoneToPoint     0;
+}
+
+InfoSwitches
+{
+    writePrecision  6;
+    writeJobInfo    0;
+    FoamXwriteComments 0;
+}
+
+OptimisationSwitches
+{
+    fileModificationSkew 10;
+    commsType       nonBlocking; //scheduled; //blocking;
+    floatTransfer   1;
+    nProcsSimpleSum 0;
+}
+
+DimensionedConstants
+{
+	// SI units
+
+    //- Universal gas constant [J/(kmol K)]
+    R    8314.51;
+
+    //- Standard pressure [Pa]
+    Pstd 1.0e5;
+
+    //- Standard temperature [K]
+    Tstd 298.15;
+
+    //- Stefan-Boltzmann constant [J/(K4 m2 s)]
+    sigmaSB         sigmaSB [1 0 -3 -4 0 0 0] 5.670e-08;
+
+
+    /* USCS units
+
+    //- Universal gas constant [lbm ft2/(s2 kmol R)]
+    R    3406.78;
+
+    //- Standard pressure [lbm/(ft2)]
+    Pstd  2088.6;
+
+    //- Standard temperature [degR]
+    Tstd  536.67;
+
+    //- Stefan-Boltzmann constant [lbm /(degR4 ft s)]
+    sigmaSB         sigmaSB [1 0 -3 -4 0 0 0] 8.2292e-08;
+    */
+}
+
+
+// ************************************************************************* //

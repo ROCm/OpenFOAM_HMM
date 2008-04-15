@@ -1,0 +1,14 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="pitzDaily pitzDaily3D"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    cleanCase $case
+done
+

@@ -1,0 +1,85 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     foamCleanPath
+#
+# Description
+#     Usage: cleanPath path [wildcard] .. [wildcard]
+#
+#     Prints its argument (which should be a ':' separated path)
+#     without all
+#         - duplicate elements
+#         - non-accessible directories
+#         - elements whose start matches a wildcard
+#------------------------------------------------------------------------------
+
+if [ $# -eq 1 ]; then
+    dirList="$1"
+elif [ $# -gt 1 ]; then
+    dirList="$1"
+    shift
+    while [ 1 -le $# ] ; do
+        wildCard=$1
+        shift
+        dirList=`echo "$dirList" | sed -e "s@${wildCard}[^:]*:@@g"`
+    done
+else
+    echo "Usage: $0 path [wildcard]" 1>&2
+    echo "" 1>&2
+    echo "Prints argument path with all entries matching " 1>&2
+    echo "the wildcard removed." 1>&2
+    exit 1
+fi
+
+
+oldIFS="$IFS"
+IFS=':'
+
+newDirList=''
+
+for dir in $dirList
+do
+
+    #- non existing
+    if [ ! -e "$dir" ]; then
+        continue
+    fi
+
+    #- duplicate
+    dirListWithout=`echo ":${newDirList}:" | sed -e "s@:${dir}:@::@"`
+    if [ "$dirListWithout" != ":${newDirList}:" ]; then
+        continue
+    fi
+
+    newDirList="$newDirList:$dir"
+done
+
+IFS="$oldIFS"
+
+# Remove leading or trailing colons
+echo "$newDirList" | sed -e 's@^:@@' -e 's@:$@@'
+
+# -----------------------------------------------------------------------------

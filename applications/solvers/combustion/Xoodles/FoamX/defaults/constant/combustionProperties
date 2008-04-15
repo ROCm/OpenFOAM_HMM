@@ -1,0 +1,89 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          combustionProperties;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+laminarFlameSpeedCorrelation const;
+
+fuel            Propane;
+
+Su              Su [0 1 -1 0 0 0 0] 0.135;
+
+SuModel         transport;
+
+equivalenceRatio equivalenceRatio [0 0 0 0 0 0 0] 0.6;
+
+sigmaExt        sigmaExt [0 0 -1 0 0 0 0] 338;
+
+XiModel         transport;
+
+XiCoef          XiCoef [0 0 0 0 0 0 0] 0.62;
+
+XiShapeCoef     XiShapeCoef [0 0 0 0 0 0 0] 1;
+
+uPrimeCoef      uPrimeCoef [0 0 0 0 0 0 0] 1;
+
+GuldersCoeffs
+{
+    Methane
+    {
+        W               W [0 0 0 0 0 0 0] 0.422;
+        eta             eta [0 0 0 0 0 0 0] 0.15;
+        xi              xi [0 0 0 0 0 0 0] 5.18;
+        alpha           alpha [0 0 0 0 0 0 0] 2;
+        beta            beta [0 0 0 0 0 0 0] -0.5;
+        f               f [0 0 0 0 0 0 0] 2.3;
+    }
+    Propane
+    {
+        W               W [0 0 0 0 0 0 0] 0.446;
+        eta             eta [0 0 0 0 0 0 0] 0.12;
+        xi              xi [0 0 0 0 0 0 0] 4.95;
+        alpha           alpha [0 0 0 0 0 0 0] 1.77;
+        beta            beta [0 0 0 0 0 0 0] -0.2;
+        f               f [0 0 0 0 0 0 0] 2.3;
+    }
+    IsoOctane
+    {
+        W               W [0 0 0 0 0 0 0] 0.4658;
+        eta             eta [0 0 0 0 0 0 0] -0.326;
+        xi              xi [0 0 0 0 0 0 0] 4.48;
+        alpha           alpha [0 0 0 0 0 0 0] 1.56;
+        beta            beta [0 0 0 0 0 0 0] -0.22;
+        f               f [0 0 0 0 0 0 0] 2.3;
+    }
+}
+
+ignite          no;
+
+ignitionSites   
+(
+);
+
+ignitionSphereFraction  1;
+
+ignitionThickness       ignitionThickness [0 1 0 0 0 0 0] 0;
+ignitionCircleFraction  1;
+
+ignitionKernelArea      ignitionKernelArea [0 2 0 0 0 0 0] 0;
+
+// ************************************************************************* //

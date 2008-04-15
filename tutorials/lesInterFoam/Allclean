@@ -1,0 +1,16 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="nozzleFlow2D"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    cleanCase $case
+    if [ "$case" = "nozzleFlow2D" ] ; then
+        cp $case/constant/polyMesh/boundary.org $case/constant/polyMesh/boundary
+    fi
+done 

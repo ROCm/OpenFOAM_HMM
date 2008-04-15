@@ -1,0 +1,33 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="prism nacaAirfoil"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+runStarToFoam ()
+{
+    if [ -f $1/log.starToFoam ] ; then
+        echo "starToFoam already run on $1: remove log file to run"
+    else
+        echo "starToFoam: converting mesh $2"
+        starToFoam . $1 $2 > $1/log.starToFoam 2>&1
+    fi
+}
+
+for case in $cases
+do
+    if [ "$case" = "nacaAirfoil" ] ; then
+        runStarToFoam $case ${case}/prostar/${case}
+        mv ${case}/constant/polyMesh/boundary temp
+        sed -e s/"\([\t ]*type[\t ]*\)symmetryPlane"/"\1empty"/g \
+            temp > ${case}/constant/polyMesh/boundary
+        rm temp
+    else
+        runApplication blockMesh $case
+    fi
+    runApplication $application $case
+#    runApplication Mach $case
+done 

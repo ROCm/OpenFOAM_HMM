@@ -1,0 +1,164 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*----------------------------------------------------------------------------*/
+
+#include "surfacesFunctionObject.H"
+#include "addToRunTimeSelectionTable.H"
+#include "IOsampledSurfaces.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(surfacesFunctionObject, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        surfacesFunctionObject,
+        dictionary
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void Foam::surfacesFunctionObject::extractDict()
+{
+    if (dict_.found("region"))
+    {
+        dict_.lookup("region") >> regionName_;
+    }
+
+    if (dict_.found("dictionary"))
+    {
+        dict_.lookup("dictionary") >> dictName_;
+    }
+
+    if (dict_.found("interval"))
+    {
+        dict_.lookup("interval") >> interval_;
+    }
+
+    if (dict_.found("enabled"))
+    {
+        dict_.lookup("enabled") >> execution_;
+    }
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::surfacesFunctionObject::surfacesFunctionObject
+(
+    const Time& t,
+    const dictionary& dict
+)
+:
+    functionObject(),
+    time_(t),
+    dict_(dict),
+    regionName_(polyMesh::defaultRegion),
+    dictName_(),
+    interval_(0),
+    execution_(true)
+{
+    extractDict();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+// any possible side-effects?
+bool Foam::surfacesFunctionObject::start()
+{
+    extractDict();
+
+    if (execution_)
+    {
+        if (dictName_.size())
+        {
+            ptr_.reset
+            (
+                new IOsampledSurfaces
+                (
+                    time_.lookupObject<objectRegistry>(regionName_),
+                    dictName_
+                )
+            );
+        }
+        else
+        {
+            ptr_.reset
+            (
+                new sampledSurfaces
+                (
+                    time_.lookupObject<objectRegistry>(regionName_),
+                    dict_
+                )
+            );
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::surfacesFunctionObject::execute()
+{
+    if (execution_ && (interval_ <= 1 || !(time_.timeIndex() % interval_)) )
+    {
+        ptr_->write();
+    }
+
+    return true;
+}
+
+
+void Foam::surfacesFunctionObject::on()
+{
+    execution_ = true;
+}
+
+
+void Foam::surfacesFunctionObject::off()
+{
+    execution_ = false;
+}
+
+
+bool Foam::surfacesFunctionObject::read(const dictionary& dict)
+{
+    if (dict_ != dict)
+    {
+        dict_ = dict;
+        return start();
+    }
+    else
+    {
+        return false;
+    }
+}
+
+// ************************************************************************* //

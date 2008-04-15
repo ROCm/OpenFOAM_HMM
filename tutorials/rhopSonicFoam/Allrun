@@ -1,0 +1,19 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="shockTube wedge15Ma5"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+
+for case in $cases
+do
+    runApplication blockMesh $case
+#
+    if [ "$case" = "shockTube" ] ; then
+        runApplication setFields $case
+    fi
+#
+    runApplication $application $case
+done 
