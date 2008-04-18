@@ -36,4 +36,7 @@ doc/[Dd]oxygen/man
 *.tar.gz
 *.tgz
 
+# other 3rd party sources
+src/other
+
 # end-of-file
