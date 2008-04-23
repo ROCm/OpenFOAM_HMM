@@ -97,7 +97,7 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and subset of cells.
+        //- Construct from mesh and subset of faces.
         treeDataFace
         (
             const bool cacheBb,

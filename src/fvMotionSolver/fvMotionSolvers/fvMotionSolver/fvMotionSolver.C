@@ -62,7 +62,7 @@ void Foam::fvMotionSolver::movePoints(const pointField& p)
 
 void Foam::fvMotionSolver::updateMesh(const mapPolyMesh& mpm)
 {
-    motionSolver::updateMesh();
+    motionSolver::updateMesh(mpm);
     pointMesh_.updateMesh(mpm);
     vpi_.updateMesh();
 }

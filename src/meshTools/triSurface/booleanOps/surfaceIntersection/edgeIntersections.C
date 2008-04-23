@@ -34,8 +34,8 @@ Description
 #include "labelHashSet.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
-#include "octreeDataTriSurface.H"
-#include "octree.H"
+#include "treeDataTriSurface.H"
+#include "indexedOctree.H"
 #include "meshTools.H"
 #include "plane.H"
 #include "Random.H"
@@ -120,7 +120,7 @@ void Foam::edgeIntersections::intersectEdges
     }
 
     // Construct octree.
-    const octree<octreeDataTriSurface>& tree = querySurf2.tree();
+    const indexedOctree<treeDataTriSurface>& tree = querySurf2.tree();
 
 
     label nHits = 0;

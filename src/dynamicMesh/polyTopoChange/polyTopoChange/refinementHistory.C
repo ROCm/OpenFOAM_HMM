@@ -29,6 +29,7 @@ License
 #include "ListOps.H"
 #include "mapPolyMesh.H"
 #include "mapDistributePolyMesh.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -663,9 +664,11 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
     // Per visible cell the processor it goes to.
     labelList destination(visibleCells_.size());
 
-    forAll(map.subCellMap(), procI)
+    const labelListList& subCellMap = map.cellMap().subMap();
+
+    forAll(subCellMap, procI)
     {
-        const labelList& newToOld = map.subCellMap()[procI];
+        const labelList& newToOld = subCellMap[procI];
 
         forAll(newToOld, i)
         {
@@ -792,7 +795,7 @@ Pout<< "refinementHistory::distribute :"
         }
 
 
-        const labelList& subMap = map.subCellMap()[procI];
+        const labelList& subMap = subCellMap[procI];
 
         // New visible cells.
         labelList newVisibleCells(subMap.size(), -1);
@@ -873,7 +876,7 @@ Pout<< "refinementHistory::distribute :"
 
 
         // Combine visibleCell.
-        const labelList& constructMap = map.constructCellMap()[procI];
+        const labelList& constructMap = map.cellMap().constructMap()[procI];
 
         forAll(newVisibleCells, i)
         {

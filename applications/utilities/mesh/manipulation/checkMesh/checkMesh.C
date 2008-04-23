@@ -45,6 +45,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
 
 #   include "addTimeOptionsNoConstant.H"
 
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createPolyMesh.H"
+#   include "createNamedPolyMesh.H"
 
     bool firstCheck = true;
 

@@ -54,8 +54,8 @@ Description
 #include "cellInfo.H"
 #include "MeshWave.H"
 #include "edgeStats.H"
-#include "octreeDataTriSurface.H"
-#include "octree.H"
+#include "treeDataTriSurface.H"
+#include "indexedOctree.H"
 
 using namespace Foam;
 
@@ -185,7 +185,7 @@ void cutBySurface
             << " to the surface ..." << nl << endl;
 
         const pointField& pts = mesh.points();
-        const octree<octreeDataTriSurface>& tree = querySurf.tree();
+        const indexedOctree<treeDataTriSurface>& tree = querySurf.tree();
 
         label nRemoved = 0;
 
@@ -193,17 +193,9 @@ void cutBySurface
         {
             const point& pt = pts[pointI];
 
-            // Search in tight bounding box around pt.
-            treeBoundBox tightest
-            (
-                pt - vector(nearDist, nearDist, nearDist),
-                pt + vector(nearDist, nearDist, nearDist)
-            );
-            scalar tightestDist = mag(tightest.max() - tightest.min());
+            pointIndexHit hitInfo = tree.findNearest(pt, sqr(nearDist));
 
-            label triI = tree.findNearest(pt, tightest, tightestDist);
-
-            if (triI != -1 && tightestDist < nearDist)
+            if (hitInfo.hit())
             {
                 const labelList& pCells = mesh.pointCells()[pointI];
 

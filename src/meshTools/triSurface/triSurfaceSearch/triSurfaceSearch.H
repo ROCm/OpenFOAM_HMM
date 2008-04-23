@@ -40,7 +40,8 @@ SourceFiles
 #include "pointField.H"
 #include "boolList.H"
 #include "pointIndexHit.H"
-#include "treeBoundBox.H"
+#include "indexedOctree.H"
+#include "treeDataTriSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

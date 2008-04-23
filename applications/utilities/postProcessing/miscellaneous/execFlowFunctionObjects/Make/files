@@ -1,4 +1,4 @@
 execFlowFunctionObjects.C
 
-EXE = $(FOAM_USER_APPBIN)/execFlowFunctionObjects
+EXE = $(FOAM_APPBIN)/execFlowFunctionObjects
 

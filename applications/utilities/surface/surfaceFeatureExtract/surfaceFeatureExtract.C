@@ -51,16 +51,15 @@ void dumpBox(const treeBoundBox& bb, const fileName& fName)
 
 
     pointField boxPoints(bb.points());
-    edgeList boxEdges(bb.edges());
 
     forAll(boxPoints, i)
     {
         meshTools::writeOBJ(str, boxPoints[i]);
     }
 
-    forAll(boxEdges, i)
+    forAll(treeBoundBox::edges, i)
     {
-        const edge& e = boxEdges[i];
+        const edge& e = treeBoundBox::edges[i];
 
         str<< "l " << e[0]+1 <<  ' ' << e[1]+1 << nl;
     }

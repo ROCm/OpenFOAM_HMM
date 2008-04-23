@@ -915,14 +915,9 @@ void indexedOctree<Type>::traverseNode
         {
             faceID = 0;
 
-            //WarningIn("indexedOctree<Type>::traverseNode")
-            FatalErrorIn("indexedOctree<Type>::traverseNode")
-                << "Did not hit side of node box " << subBb
             WarningIn("indexedOctree<Type>::traverseNode")
                 << "Did not hit side of box " << subBb
                 << " with ray from " << start << " to " << end
-                //<< endl;
-                << abort(FatalError);
                 << endl;
         }
         else
@@ -938,14 +933,9 @@ void indexedOctree<Type>::traverseNode
         {
             faceID = 0;
 
-            //WarningIn("indexedOctree<Type>::traverseNode")
-            FatalErrorIn("indexedOctree<Type>::traverseNode")
-                << "Did not hit side of content box " << subBb
             WarningIn("indexedOctree<Type>::traverseNode")
                 << "Did not hit side of box " << subBb
                 << " with ray from " << start << " to " << end
-                //<< endl;
-                << abort(FatalError);
                 << endl;
         }
         else

@@ -47,6 +47,10 @@ octree/treeLeafName.C
 octree/pointIndexHitIOList.C
 
 indexedOctree/indexedOctreeName.C
+indexedOctree/treeDataCell.C
+indexedOctree/treeDataEdge.C
+indexedOctree/treeDataFace.C
+indexedOctree/treeDataPoint.C
 indexedOctree/treeDataTriSurface.C
 
 topoSets = sets/topoSets

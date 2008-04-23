@@ -86,7 +86,7 @@ projectPoints
 
     const ToPatch& masterFaces = targetPatch;
 
-    const typename ToPatch::PointFieldType& masterPoints = targetPatch.points();
+    const Field<PointType>& masterPoints = targetPatch.points();
 
     // Estimate face centre of target side
     Field<PointType> masterFaceCentres(targetPatch.size());

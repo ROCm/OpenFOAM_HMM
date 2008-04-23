@@ -28,8 +28,8 @@ Description
 
 #include "cellClassification.H"
 #include "triSurfaceSearch.H"
-#include "octree.H"
-#include "octreeDataTriSurface.H"
+#include "indexedOctree.H"
+#include "treeDataFace.H"
 #include "meshSearch.H"
 #include "cellInfo.H"
 #include "polyMesh.H"
@@ -141,11 +141,9 @@ Foam::boolList Foam::cellClassification::markFaces
         }
     }
 
-    octreeDataFace shapes(mesh_, allFaces);
-
     if (debug)
     {
-        Pout<< "Testing " << shapes.size() << " faces for piercing by surface"
+        Pout<< "Testing " << allFaceI << " faces for piercing by surface"
             << endl;
     }
 
@@ -164,13 +162,13 @@ Foam::boolList Foam::cellClassification::markFaces
     bbMax.y() += 2*tol;
     bbMax.z() += 2*tol;
 
-    octree<octreeDataFace> faceTree
+    indexedOctree<treeDataFace> faceTree
     (
+        treeDataFace(false, mesh_, allFaces),
         allBb,      // overall search domain
-        shapes,     // all information needed to do checks on faces
-        1,          // min levels
-        20.0,       // maximum ratio of cubes v.s. faces
-        10.0
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
     );
 
     const triSurface& surf = search.surface();
@@ -210,7 +208,7 @@ Foam::boolList Foam::cellClassification::markFaces
             }
             else
             {
-                label faceI = shapes.meshFaces()[pHit.index()];
+                label faceI = faceTree.shapes().faceLabels()[pHit.index()];
 
                 if (!cutFace[faceI])
                 {
