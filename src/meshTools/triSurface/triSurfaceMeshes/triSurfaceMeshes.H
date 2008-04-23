@@ -63,13 +63,8 @@ class triSurfaceMeshes
         //- Indices of all surfaces. Precalculated and stored.
         const labelList allSurfaces_;
 
-        //- Trees
-        mutable autoPtr<PtrList<indexedOctree<treeDataTriSurface> > > treesPtr_;
-
 
     // Private Member Functions
-
-        void calcTrees() const;
 
         //- Calculate sum of distances to nearest point on surfaces. Is used
         //  in minimisation to find intersection. Returns sum of (square of)
@@ -125,24 +120,11 @@ public:
         //- Construct from directory (io.instance()) and list of local filenames
         triSurfaceMeshes(const IOobject& io, const fileNameList&);
 
-        //- Clear derived storage
-        void clearOut();
-
 
     // Member Functions
 
         //- Get all surfaces in directory
         static fileNameList allNames(const IOobject&);
-
-        //- Get trees for searching
-        const PtrList<indexedOctree<treeDataTriSurface> >& trees() const
-        {
-            if (!treesPtr_.valid())
-            {
-                calcTrees();
-            }
-            return treesPtr_();
-        }
 
         //- Get names of surfaces
         fileNameList names() const;

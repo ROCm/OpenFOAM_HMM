@@ -136,7 +136,7 @@ void Foam::motionSolver::twoDCorrectPoints(pointField& p) const
 }
 
 
-void Foam::motionSolver::updateMesh()
+void Foam::motionSolver::updateMesh(const mapPolyMesh& mpm)
 {
     twoDPointCorrector_.updateMesh();
 }

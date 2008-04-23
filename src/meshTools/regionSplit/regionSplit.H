@@ -64,11 +64,21 @@ class regionSplit
 
     // Private Member Functions
 
+        //- Transfer faceRegion data from one face to the other (or vice versa)
+        void transferCoupledFaceRegion
+        (
+            const label faceI,
+            const label otherFaceI,
+
+            labelList& faceRegion,
+            DynamicList<label>& newChangedFaces
+        ) const;
 
         //- Given a seed cell label, fill cellRegion/faceRegion with markValue
         //  for contiguous region around it
         void fillSeedMask
         (
+            const List<labelPair>& explicitConnections,
             labelList& cellRegion,
             labelList& faceRegion,
             const label seedCellID,
@@ -79,6 +89,7 @@ class regionSplit
         label calcRegionSplit
         (
             const boolList& blockedFace,
+            const List<labelPair>& explicitConnections,
             labelList& cellRegion
         ) const;
 
@@ -95,6 +106,16 @@ public:
         //- Construct from mesh and whether face is blocked
         //  NOTE: blockedFace has to be consistent across coupled faces!
         regionSplit(const polyMesh&, const boolList& blockedFace);
+
+        //- Construct from mesh and whether face is blocked. Additional explicit
+        //  connections between normal boundary faces.
+        //  NOTE: blockedFace has to be consistent across coupled faces!
+        regionSplit
+        (
+            const polyMesh&,
+            const boolList& blockedFace,
+            const List<labelPair>&
+        );
 
     // Member Functions
 

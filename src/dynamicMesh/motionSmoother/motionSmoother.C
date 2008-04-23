@@ -566,7 +566,8 @@ void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
         displacement_[ppMeshPoints[patchPointI]] = patchDisp[patchPointI];
     }
 
-    // Copy internal point data to boundaryField for all affected patches
+    // Adapt the fixedValue bc's (i.e. copy internal point data to
+    // boundaryField for all affected patches)
     forAll(adaptPatchIDs_, i)
     {
         label patchI = adaptPatchIDs_[i];
@@ -614,6 +615,17 @@ void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
         vector::zero,   // null value
         false           // no separation
     );
+
+    // Adapt the fixedValue bc's (i.e. copy internal point data to
+    // boundaryField for all affected patches) to take the changes caused
+    // by multi-corner constraints into account.
+    forAll(adaptPatchIDs_, i)
+    {
+        label patchI = adaptPatchIDs_[i];
+
+        displacement_.boundaryField()[patchI] ==
+            displacement_.boundaryField()[patchI].patchInternalField();
+    }
 
     if (debug)
     {
@@ -798,6 +810,25 @@ bool Foam::motionSmoother::scaleMesh
     const label nAllowableErrors
 )
 {
+    List<labelPair> emptyBaffles;
+    return scaleMesh
+    (
+        checkFaces,
+        emptyBaffles,
+        smoothMesh,
+        nAllowableErrors
+    );
+}
+
+
+bool Foam::motionSmoother::scaleMesh
+(
+    labelList& checkFaces,
+    const List<labelPair>& baffles,
+    const bool smoothMesh,
+    const label nAllowableErrors
+)
+{
     if (!smoothMesh && adaptPatchIDs_.size() == 0)
     {
         FatalErrorIn("motionSmoother::scaleMesh(const bool")
@@ -832,7 +863,7 @@ bool Foam::motionSmoother::scaleMesh
 
     const scalar errorReduction =
         readScalar(paramDict_.lookup("errorReduction"));
-    const scalar nSmoothScale =
+    const label nSmoothScale =
         readLabel(paramDict_.lookup("nSmoothScale"));
 
 
@@ -893,7 +924,7 @@ bool Foam::motionSmoother::scaleMesh
 
     // Check. Returns parallel number of incorrect faces.
     faceSet wrongFaces(mesh_, "wrongFaces", mesh_.nFaces()/100+100);
-    checkMesh(false, mesh_, paramDict_, checkFaces, wrongFaces);
+    checkMesh(false, mesh_, paramDict_, checkFaces, baffles, wrongFaces);
 
     if (returnReduce(wrongFaces.size(), sumOp<label>()) <= nAllowableErrors)
     {

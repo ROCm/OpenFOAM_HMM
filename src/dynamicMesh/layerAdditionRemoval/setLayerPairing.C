@@ -157,6 +157,9 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
 //         Pout << "ptc: " << ptc << endl;
     }
 
+    reduce(nPointErrors, sumOp<label>());
+    reduce(nFaceErrors, sumOp<label>());
+
     if (nPointErrors > 0 || nFaceErrors > 0)
     {
         clearAddressing();

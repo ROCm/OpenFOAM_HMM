@@ -29,7 +29,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "boolList.H"
-#include "pointHit.H"
+#include "PointHit.H"
 #include "objectHit.H"
 #include "bandCompression.H"
 
@@ -40,12 +40,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
 template <class ToPatch>
-List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
+List<objectHit> PrimitivePatch<Face, FaceList, PointField, PointType>::
+projectPoints
 (
     const ToPatch& targetPatch,
-    const vectorField& projectionDirection,
+    const Field<PointType>& projectionDirection,
     const intersection::algorithm alg,
     const intersection::direction dir
 ) const
@@ -57,9 +65,9 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
     {
         FatalErrorIn
         (
-            "List<objectHit> PrimitivePatch<Face, FaceList, PointField>::"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             "projectPoints(const PrimitivePatch& "
-            "targetPatch, const vectorField& projectionDirection) const"
+            ", const Field<PointType>&) const"
         )   << "Projection direction field does not correspond to "
             << "patch points." << endl
             << "Size: " << projectionDirection.size()
@@ -78,10 +86,10 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
 
     const ToPatch& masterFaces = targetPatch;
 
-    const pointField& masterPoints = targetPatch.points();
+    const typename ToPatch::PointFieldType& masterPoints = targetPatch.points();
 
     // Estimate face centre of target side
-    vectorField masterFaceCentres(targetPatch.size());
+    Field<PointType> masterFaceCentres(targetPatch.size());
 
     forAll (masterFaceCentres, faceI)
     {
@@ -105,9 +113,10 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
         // Pick up slave point and direction
         const label curLocalPointLabel = slavePointOrder[pointI];
 
-        const point& curPoint = points_[slaveMeshPoints[curLocalPointLabel]];
+        const PointType& curPoint =
+            points_[slaveMeshPoints[curLocalPointLabel]];
 
-        const vector& curProjectionDir =
+        const PointType& curProjectionDir =
             projectionDirection[curLocalPointLabel];
 
         bool closer;
@@ -133,7 +142,7 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
                 doNSquaredSearch = false;
 
                 // Calculate intersection with curFace
-                pointHit curHit =
+                PointHit<PointType> curHit =
                     masterFaces[curFace].ray
                     (
                         curPoint,
@@ -169,7 +178,7 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
                     // face.  This is cooked (illogical!) for fastest
                     // surface walk.
                     // 
-                    point missPlanePoint =
+                    PointType missPlanePoint =
                         curPoint + curProjectionDir*curHit.distance();
 
                     const labelList& masterNbrs = masterFaceFaces[curFace];
@@ -224,7 +233,7 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
 
             forAll (masterFaces, faceI)
             {
-                pointHit curHit =
+                PointHit<PointType> curHit =
                     masterFaces[faceI].ray
                     (
                         curPoint,
@@ -279,12 +288,20 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectPoints
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
 template <class ToPatch>
-List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
+List<objectHit> PrimitivePatch<Face, FaceList, PointField, PointType>::
+projectFaceCentres
 (
     const ToPatch& targetPatch,
-    const vectorField& projectionDirection,
+    const Field<PointType>& projectionDirection,
     const intersection::algorithm alg,
     const intersection::direction dir
 ) const
@@ -296,9 +313,9 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
     {
         FatalErrorIn
         (
-            "labelList PrimitivePatch<Face, FaceList, PointField>::"
+            "labelList PrimitivePatch<Face, FaceList, PointField, PointType>::"
             "projectFaceCentres(const PrimitivePatch& "
-            "targetPatch, const vectorField& projectionDirection) const"
+            ", const Field<PointType>&) const"
         )   << "Projection direction field does not correspond to patch faces."
             << endl << "Size: " << projectionDirection.size()
             << " Number of points: " << this->size()
@@ -308,13 +325,13 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
     labelList slaveFaceOrder = bandCompression(faceFaces());
 
     // calculate master face centres
-    vectorField masterFaceCentres(targetPatch.size());
+    Field<PointType> masterFaceCentres(targetPatch.size());
 
     const labelListList& masterFaceFaces = targetPatch.faceFaces();
 
     const ToPatch& masterFaces = targetPatch;
 
-    const pointField& masterPoints = targetPatch.points();
+    const typename ToPatch::PointFieldType& masterPoints = targetPatch.points();
 
     forAll (masterFaceCentres, faceI)
     {
@@ -325,8 +342,8 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
     // Result
     List<objectHit> result(this->size());
 
-    const PrimitivePatch<Face, FaceList, PointField>& slaveFaces = *this;
-    const vectorField& slaveGlobalPoints = points();
+    const PrimitivePatch<Face, FaceList, PointField, PointType>& slaveFaces = *this;
+    const PointField& slaveGlobalPoints = points();
 
     // Algorithm:
     // Loop through all points of the slave side. For every point find the
@@ -373,7 +390,7 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
                 doNSquaredSearch = false;
 
                 // Calculate intersection with curFace
-                pointHit curHit =
+                PointHit<PointType> curHit =
                     masterFaces[curFace].ray
                     (
                         curFaceCentre,
@@ -408,7 +425,7 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
                     // Calculate the miss point.  This is
                     // cooked (illogical!) for fastest surface walk.
                     // 
-                    point missPlanePoint =
+                    PointType missPlanePoint =
                         curFaceCentre + curProjectionDir*curHit.distance();
 
                     sqrDistance = 
@@ -460,7 +477,7 @@ List<objectHit> PrimitivePatch<Face, FaceList, PointField>::projectFaceCentres
 
             forAll (masterFaces, faceI)
             {
-                pointHit curHit =
+                PointHit<PointType> curHit =
                     masterFaces[faceI].ray
                     (
                         curFaceCentre,

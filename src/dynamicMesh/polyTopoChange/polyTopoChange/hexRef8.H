@@ -74,7 +74,7 @@ class hexRef8
         //- Per point the refinement level
         labelIOList pointLevel_;
 
-        //- typcial edge length between unrefined points
+        //- Typical edge length between unrefined points
         const scalar level0Edge_;
 
         //- Refinement history
@@ -82,6 +82,12 @@ class hexRef8
 
         //- Face remover engine
         removeFaces faceRemover_;
+
+        //- Level of saved points
+        Map<label> savedPointLevel_;
+
+        //- Level of saved cells
+        Map<label> savedCellLevel_;
 
 
     // Private Member Functions
@@ -353,6 +359,11 @@ public:
                 return history_;
             }
 
+            //- Typical edge length between unrefined points
+            scalar level0EdgeLength() const
+            {
+                return level0Edge_;
+            }
 
         // Refinement
 
@@ -417,12 +428,38 @@ public:
             //  -midpoints added: added from cellPoints[0].
             labelListList setRefinement
             (
-                const labelList& cells, 
+                const labelList& cells,
                 polyTopoChange&
             );
 
             //- Update local numbering for changed mesh.
             void updateMesh(const mapPolyMesh&);
+
+
+            // Restoring : is where other processes delete and reinsert data.
+            //             These callbacks allow this to restore the cellLevel
+            //             and pointLevel for reintroduced points.
+            //             Is not related to undoing my refinement
+
+                //- Signal points/face/cells for which to store data
+                void storeData
+                (
+                    const labelList& pointsToStore,
+                    const labelList& facesToStore,
+                    const labelList& cellsToStore
+                );
+
+                //- Update local numbering + undo
+                //  Data to restore given as new pointlabel + stored pointlabel
+                //  (i.e. what was in pointsToStore)
+                void updateMesh
+                (
+                    const mapPolyMesh&,
+                    const Map<label>& pointsToRestore,
+                    const Map<label>& facesToRestore,
+                    const Map<label>& cellsToRestore
+                );
+
 
             //- Update local numbering for subsetted mesh.
             //  Gets new-to-old maps. Not compatible with unrefinement.

@@ -37,12 +37,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcEdgeLoops() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcEdgeLoops() : "
             << "calculating boundary edge loops"
             << endl;
@@ -54,7 +61,8 @@ void PrimitivePatch<Face, FaceList, PointField>::calcEdgeLoops() const
         // if already allocated
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcIntBdryEdges()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcIntBdryEdges()"
         )   << "edge loops already calculated"
             << abort(FatalError);
     }
@@ -154,7 +162,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcEdgeLoops() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcEdgeLoops() : "
             << "finished calculating boundary edge loops"
             << endl;
@@ -162,9 +170,15 @@ void PrimitivePatch<Face, FaceList, PointField>::calcEdgeLoops() const
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
 const labelListList&
-PrimitivePatch<Face, FaceList, PointField>::edgeLoops() const
+PrimitivePatch<Face, FaceList, PointField, PointType>::edgeLoops() const
 {
     if (!edgeLoopsPtr_)
     {

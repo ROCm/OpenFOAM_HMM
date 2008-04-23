@@ -433,148 +433,145 @@ void Foam::PointEdgeWave<Type>::updateFromPatchInfo
 template <class Type>
 void Foam::PointEdgeWave<Type>::handleProcPatches()
 {
-    if (Pstream::parRun())
+    const polyMesh& mesh = pMesh_();
+
+
+    // 1. Send all point info on processor patches. Send as
+    // face label + offset in face.
+
+    forAll(mesh.boundaryMesh(), patchI)
     {
-        const polyMesh& mesh = pMesh_();
+        const polyPatch& patch = mesh.boundaryMesh()[patchI];
 
-
-        // 1. Send all point info on processor patches. Send as
-        // face label + offset in face.
-
-        forAll(mesh.boundaryMesh(), patchI)
+        if (isA<processorPolyPatch>(patch))
         {
-            const polyPatch& patch = mesh.boundaryMesh()[patchI];
+            // Get all changed points in relative addressing
 
-            if (isA<processorPolyPatch>(patch))
-            {
-                // Get all changed points in relative addressing
+            DynamicList<Type> patchInfo(patch.nPoints());
+            DynamicList<label> patchPoints(patch.nPoints());
+            DynamicList<label> owner(patch.nPoints());
+            DynamicList<label> ownerIndex(patch.nPoints());
 
-                DynamicList<Type> patchInfo(patch.nPoints());
-                DynamicList<label> patchPoints(patch.nPoints());
-                DynamicList<label> owner(patch.nPoints());
-                DynamicList<label> ownerIndex(patch.nPoints());
-
-                getChangedPatchPoints
-                (
-                    patch,
-                    patchInfo,
-                    patchPoints,
-                    owner,
-                    ownerIndex
-                );
-
-                // Adapt for leaving domain
-                leaveDomain(patch, patch, patchPoints, patchInfo);
-
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patch);
-
-                if (debug)
-                {
-                    Pout<< "Processor patch " << patchI << ' ' << patch.name()
-                        << " communicating with " << procPatch.neighbProcNo()
-                        << "  Sending:" << patchInfo.size() << endl;
-                }
-
-                {
-                    OPstream toNeighbour
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
-
-                    toNeighbour << owner << ownerIndex << patchInfo;
-                }
-            }
-        }
-
-
-        //
-        // 2. Receive all point info on processor patches.
-        //
-
-        forAll(mesh.boundaryMesh(), patchI)
-        {
-            const polyPatch& patch = mesh.boundaryMesh()[patchI];
-
-            if (isA<processorPolyPatch>(patch))
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(patch);
-
-                List<Type> patchInfo;
-                labelList owner;
-                labelList ownerIndex;
-                {
-                    IPstream fromNeighbour
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
-
-                    fromNeighbour >> owner >> ownerIndex >> patchInfo;
-                }    
-
-                if (debug)
-                {
-                    Pout<< "Processor patch " << patchI << ' ' << patch.name()
-                        << " communicating with " << procPatch.neighbProcNo()
-                        << "  Received:" << patchInfo.size() << endl;
-                }
-
-                // Apply transform to received data for non-parallel planes
-                if (!procPatch.parallel())
-                {
-                    transform(procPatch.reverseT(), patchInfo);
-                }
-
-                updateFromPatchInfo
-                (
-                    patch,
-                    patch,
-                    owner,
-                    ownerIndex,
-                    patchInfo
-                );
-            }
-        }
-
-
-
-        //
-        // 3. Handle all shared points
-        //    (Note:irrespective if changed or not for now)
-        //
-
-        const globalMeshData& pd = mesh.globalData();
-
-        List<Type> sharedData(pd.nGlobalPoints());
-
-        forAll(pd.sharedPointLabels(), i)
-        {
-            label meshPointI = pd.sharedPointLabels()[i];
-
-            // Fill my entries in the shared points
-            sharedData[pd.sharedPointAddr()[i]] = allPointInfo_[meshPointI];
-        }
-
-        // Combine on master. Reduce operator has to handle a list and call
-        // Type.updatePoint for all elements
-        combineReduce(sharedData, listUpdateOp<Type>());
-
-        forAll(pd.sharedPointLabels(), i)
-        {
-            label meshPointI = pd.sharedPointLabels()[i];
-
-            // Retrieve my entries from the shared points
-            updatePoint
+            getChangedPatchPoints
             (
-                meshPointI,
-                sharedData[pd.sharedPointAddr()[i]],
-                propagationTol_,
-                allPointInfo_[meshPointI]
+                patch,
+                patchInfo,
+                patchPoints,
+                owner,
+                ownerIndex
+            );
+
+            // Adapt for leaving domain
+            leaveDomain(patch, patch, patchPoints, patchInfo);
+
+            const processorPolyPatch& procPatch =
+                refCast<const processorPolyPatch>(patch);
+
+            if (debug)
+            {
+                Pout<< "Processor patch " << patchI << ' ' << patch.name()
+                    << " communicating with " << procPatch.neighbProcNo()
+                    << "  Sending:" << patchInfo.size() << endl;
+            }
+
+            {
+                OPstream toNeighbour
+                (   
+                    Pstream::blocking,
+                    procPatch.neighbProcNo()
+                );
+
+                toNeighbour << owner << ownerIndex << patchInfo;
+            }
+        }
+    }
+
+
+    //
+    // 2. Receive all point info on processor patches.
+    //
+
+    forAll(mesh.boundaryMesh(), patchI)
+    {
+        const polyPatch& patch = mesh.boundaryMesh()[patchI];
+
+        if (isA<processorPolyPatch>(patch))
+        {
+            const processorPolyPatch& procPatch =
+                refCast<const processorPolyPatch>(patch);
+
+            List<Type> patchInfo;
+            labelList owner;
+            labelList ownerIndex;
+            {
+                IPstream fromNeighbour
+                (
+                    Pstream::blocking,
+                    procPatch.neighbProcNo()
+                );
+
+                fromNeighbour >> owner >> ownerIndex >> patchInfo;
+            }    
+
+            if (debug)
+            {
+                Pout<< "Processor patch " << patchI << ' ' << patch.name()
+                    << " communicating with " << procPatch.neighbProcNo()
+                    << "  Received:" << patchInfo.size() << endl;
+            }
+
+            // Apply transform to received data for non-parallel planes
+            if (!procPatch.parallel())
+            {
+                transform(procPatch.reverseT(), patchInfo);
+            }
+
+            updateFromPatchInfo
+            (
+                patch,
+                patch,
+                owner,
+                ownerIndex,
+                patchInfo
             );
         }
+    }
+
+
+
+    //
+    // 3. Handle all shared points
+    //    (Note:irrespective if changed or not for now)
+    //
+
+    const globalMeshData& pd = mesh.globalData();
+
+    List<Type> sharedData(pd.nGlobalPoints());
+
+    forAll(pd.sharedPointLabels(), i)
+    {
+        label meshPointI = pd.sharedPointLabels()[i];
+
+        // Fill my entries in the shared points
+        sharedData[pd.sharedPointAddr()[i]] = allPointInfo_[meshPointI];
+    }
+
+    // Combine on master. Reduce operator has to handle a list and call
+    // Type.updatePoint for all elements
+    combineReduce(sharedData, listUpdateOp<Type>());
+
+    forAll(pd.sharedPointLabels(), i)
+    {
+        label meshPointI = pd.sharedPointLabels()[i];
+
+        // Retrieve my entries from the shared points
+        updatePoint
+        (
+            meshPointI,
+            sharedData[pd.sharedPointAddr()[i]],
+            propagationTol_,
+            allPointInfo_[meshPointI]
+        );
     }
 }
 
@@ -716,7 +713,6 @@ Foam::PointEdgeWave<Type>::PointEdgeWave
     nChangedEdges_(0),
     nCyclicPatches_(countPatchType<cyclicPolyPatch>()),
     cycHalves_(2*nCyclicPatches_),
-    hasProcPatches_(countPatchType<processorPolyPatch>() > 0),
     nEvals_(0),
     nUnvisitedPoints_(pMesh_().nPoints()),
     nUnvisitedEdges_(pMesh_().nEdges())
@@ -898,7 +894,7 @@ Foam::label Foam::PointEdgeWave<Type>::edgeToPoint()
         // Transfer changed points across cyclic halves
         handleCyclicPatches();
     }
-    if (hasProcPatches_)
+    if (Pstream::parRun())
     {
         // Transfer changed points from neighbouring processors.
         handleProcPatches();
@@ -996,7 +992,7 @@ Foam::label Foam::PointEdgeWave<Type>::iterate(const label maxIter)
         // Transfer changed points across cyclic halves
         handleCyclicPatches();
     }
-    if (hasProcPatches_)
+    if (Pstream::parRun())
     {
         // Transfer changed points from neighbouring processors.
         handleProcPatches();

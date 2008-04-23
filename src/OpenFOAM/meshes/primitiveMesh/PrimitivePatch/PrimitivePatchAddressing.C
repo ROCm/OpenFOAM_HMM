@@ -46,13 +46,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcAddressing() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::calcAddressing() : "
-            << "calculating patch addressing"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "calcAddressing() : calculating patch addressing"
             << endl;
     }
 
@@ -62,7 +69,8 @@ void PrimitivePatch<Face, FaceList, PointField>::calcAddressing() const
         // if already allocated
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcAddressing()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcAddressing()"
         )   << "addressing already calculated"
             << abort(FatalError);
     }
@@ -244,7 +252,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcAddressing() const
             {
                 FatalErrorIn
                 (
-                    "PrimitivePatch<Face, FaceList, PointField>::"
+                    "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                     "calcAddressing()"
                 )   << "Error in internal edge insertion"
                     << abort(FatalError);
@@ -296,8 +304,8 @@ void PrimitivePatch<Face, FaceList, PointField>::calcAddressing() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::calcAddressing() : "
-            << "finished calculating patch addressing"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "calcAddressing() : finished calculating patch addressing"
             << endl;
     }
 }

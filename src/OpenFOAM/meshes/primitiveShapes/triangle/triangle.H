@@ -36,10 +36,10 @@ SourceFiles
 #ifndef triangle_H
 #define triangle_H
 
-#include "point.H"
 #include "intersection.H"
 #include "vector.H"
 #include "pointHit.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,23 +80,6 @@ class triangle
         PointRef a_, b_, c_;
 
     // Private member functions
-
-        //- Find intersection of triangle (origin V0, spanning edges
-        //  E0, E1) with infinite ray (origin P, direction dir) Based
-        //  on Graphics Gems - Fast Ray Triangle intersection.  Since
-        //  direction is coordinate axis there is no need to do
-        //  projection, we can directly check u,v components for
-        //  inclusion in triangle.
-        static bool intersection
-        (
-            const Point& baseVertex,
-            const vector& E0,
-            const vector& E1,
-            const vector& n,
-            const point& P,
-            const vector& dir,
-            point& pInter
-        );
 
         //- Fast distance to triangle calculation. From
         //  "Distance Between Point and Trangle in 3D"
@@ -181,6 +164,17 @@ public:
                 const vector& q,
                 const intersection::algorithm = intersection::FULL_RAY,
                 const intersection::direction dir = intersection::VECTOR
+            ) const;
+
+            //- Fast intersection with a ray.
+            //  For a hit, the pointHit.distance() is the line parameter t :
+            //  intersection=p+t*q. Only defined for VISIBLE, FULL_RAY or
+            //  HALF_RAY.
+            inline pointHit intersection
+            (
+                const point& p,
+                const vector& q,
+                const intersection::algorithm alg
             ) const;
 
             //- Return nearest point to p on triangle

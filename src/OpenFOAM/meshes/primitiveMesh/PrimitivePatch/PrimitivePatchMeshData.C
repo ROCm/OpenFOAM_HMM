@@ -34,12 +34,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcMeshData() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcMeshData() const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcMeshData() : "
                "calculating mesh data in PrimitivePatch"
             << endl;
@@ -51,7 +58,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcMeshData() const
     {
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             "calcMeshData()"
         )   << "meshPointsPtr_ or localFacesPtr_already allocated"
             << abort(FatalError);
@@ -105,7 +112,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcMeshData() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcMeshData() : "
                "finished calculating mesh data in PrimitivePatch"
             << endl;
@@ -113,12 +120,20 @@ void PrimitivePatch<Face, FaceList, PointField>::calcMeshData() const
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcMeshPointMap() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcMeshPointMap()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcMeshPointMap() : "
                "calculating mesh point map in PrimitivePatch"
             << endl;
@@ -130,7 +145,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcMeshPointMap() const
     {
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             "calcMeshPointMap()"
         )   << "meshPointMapPtr_ already allocated"
             << abort(FatalError);
@@ -148,7 +163,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcMeshPointMap() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcMeshPointMap() : "
                "finished calculating mesh point map in PrimitivePatch"
             << endl;
@@ -156,12 +171,20 @@ void PrimitivePatch<Face, FaceList, PointField>::calcMeshPointMap() const
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcLocalPoints() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcLocalPoints()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcLocalPoints() : "
                "calculating localPoints in PrimitivePatch"
             << endl;
@@ -173,16 +196,17 @@ void PrimitivePatch<Face, FaceList, PointField>::calcLocalPoints() const
     {
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcLocalPoints()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcLocalPoints()"
         )   << "localPointsPtr_already allocated"
             << abort(FatalError);
     }
 
     const labelList& meshPts = meshPoints();
 
-    localPointsPtr_ = new pointField(meshPts.size());
+    localPointsPtr_ = new Field<PointType>(meshPts.size());
 
-    pointField& locPts = *localPointsPtr_;
+    Field<PointType>& locPts = *localPointsPtr_;
 
     forAll (meshPts, pointI)
     {
@@ -191,7 +215,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcLocalPoints() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcLocalPoints() : "
             << "finished calculating localPoints in PrimitivePatch"
             << endl;
@@ -199,12 +223,20 @@ void PrimitivePatch<Face, FaceList, PointField>::calcLocalPoints() const
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcPointNormals() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointNormals()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcPointNormals() : "
                "calculating pointNormals in PrimitivePatch"
             << endl;
@@ -216,22 +248,27 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointNormals() const
     {
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcPointNormals()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcPointNormals()"
         )   << "pointNormalsPtr_already allocated"
             << abort(FatalError);
     }
 
-    const vectorField& faceUnitNormals = faceNormals();
+    const Field<PointType>& faceUnitNormals = faceNormals();
 
     const labelListList& pf = pointFaces();
 
-    pointNormalsPtr_ = new vectorField(meshPoints().size(), vector(0, 0, 0));
+    pointNormalsPtr_ = new Field<PointType>
+    (
+        meshPoints().size(),
+        PointType::zero
+    );
 
-    vectorField& n = *pointNormalsPtr_;
+    Field<PointType>& n = *pointNormalsPtr_;
 
     forAll (pf, pointI)
     {
-        vector& curNormal = n[pointI];
+        PointType& curNormal = n[pointI];
 
         const labelList& curFaces = pf[pointI];
 
@@ -245,7 +282,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointNormals() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcPointNormals() : "
                "finished calculating pointNormals in PrimitivePatch"
             << endl;
@@ -253,12 +290,20 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointNormals() const
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcFaceNormals() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcFaceNormals()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcFaceNormals() : "
                "calculating faceNormals in PrimitivePatch"
             << endl;
@@ -270,14 +315,15 @@ void PrimitivePatch<Face, FaceList, PointField>::calcFaceNormals() const
     {
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcFaceNormals()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcFaceNormals()"
         )   << "faceNormalsPtr_already allocated"
             << abort(FatalError);
     }
 
-    faceNormalsPtr_ = new vectorField(this->size());
+    faceNormalsPtr_ = new Field<PointType>(this->size());
 
-    vectorField& n = *faceNormalsPtr_;
+    Field<PointType>& n = *faceNormalsPtr_;
 
     forAll (n, faceI)
     {
@@ -287,7 +333,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcFaceNormals() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "calcFaceNormals() : "
                "finished calculating faceNormals in PrimitivePatch"
             << endl;

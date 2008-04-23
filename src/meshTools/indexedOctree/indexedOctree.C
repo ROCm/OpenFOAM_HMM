@@ -292,7 +292,7 @@ void indexedOctree<Type>::splitNodes
             {
                 label contentI = getContent(index);
 
-                if (contents[contentI].size() > minSize) 
+                if (contents[contentI].size() > minSize)
                 {
                     // Create node for content.
 
@@ -496,7 +496,7 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::getVolumeType
             return UNKNOWN;
         }
     }
-    else 
+    else
     {
         FatalErrorIn
         (
@@ -550,35 +550,21 @@ void indexedOctree<Type>::findNearest
 {
     const node& nod = nodes_[nodeI];
 
-    // Find the octant containing the sample
-    direction sampleOctant = nod.bb_.subOctant(sample);
+    // Determine order to walk through octants
+    FixedList<direction, 8> octantOrder;
+    nod.bb_.searchOrder(sample, octantOrder);
 
     // Go into all suboctants (one containing sample first) and update nearest.
-    // Order of visiting is if e.g. sampleOctant = 5:
-    //  5 1 2 3 4 0 6 7
     for (direction i = 0; i < 8; i++)
     {
-        direction octant;
-        if (i == 0)
-        {
-            // Use sampleOctant first
-            octant = sampleOctant;
-        }
-        else if (i == sampleOctant)
-        {
-            octant = 0;
-        }
-        else
-        {
-            octant = i;
-        }
+        direction octant = octantOrder[i];
 
         labelBits index = nod.subNodes_[octant];
 
         if (isNode(index))
         {
             label subNodeI = getNode(index);
- 
+
             const treeBoundBox& subBb = nodes_[subNodeI].bb_;
 
             if (intersects(subBb.min(), subBb.max(), nearestDistSqr, sample))
@@ -638,28 +624,14 @@ void indexedOctree<Type>::findNearest
     const node& nod = nodes_[nodeI];
     const treeBoundBox& nodeBb = nod.bb_;
 
-    // Estimate for where best to start searching
-    direction sampleOctant = treeBoundBox::subOctant(ln.centre());
+    // Determine order to walk through octants
+    FixedList<direction, 8> octantOrder;
+    nod.bb_.searchOrder(ln.centre(), octantOrder);
 
-    // Go into all suboctants (one containing sample first) and update tightest.
-    // Order of visiting is if e.g. sampleOctant = 5:
-    //  5 1 2 3 4 0 6 7
+    // Go into all suboctants (one containing sample first) and update nearest.
     for (direction i = 0; i < 8; i++)
     {
-        direction octant;
-        if (i == 0)
-        {
-            // Use sampleOctant first
-            octant = sampleOctant;
-        }
-        else if (i == sampleOctant)
-        {
-            octant = 0;
-        }
-        else
-        {
-            octant = i;
-        }
+        direction octant = octantOrder[i];
 
         labelBits index = nod.subNodes_[octant];
 
@@ -706,7 +678,7 @@ void indexedOctree<Type>::findNearest
 // Walk tree to neighbouring node. Gets current position as
 // node and octant in this node and walks in the direction given by
 // the faceID (one of treeBoundBox::LEFTBIT, RIGHTBIT etc.)
-// Returns false if edge of tree hit. 
+// Returns false if edge of tree hit.
 template <class Type>
 bool indexedOctree<Type>::walkToNeighbour
 (
@@ -734,22 +706,22 @@ bool indexedOctree<Type>::walkToNeighbour
         octantMask |= treeBoundBox::RIGHTHALF;  // valueMask already 0
     }
 
-    if ((faceID & treeBoundBox::BELOWBIT) != 0)
+    if ((faceID & treeBoundBox::BOTTOMBIT) != 0)
     {
         octantMask |= treeBoundBox::TOPHALF;
         valueMask |= treeBoundBox::TOPHALF;
     }
-    else if ((faceID & treeBoundBox::ABOVEBIT) != 0)
+    else if ((faceID & treeBoundBox::TOPBIT) != 0)
     {
         octantMask |= treeBoundBox::TOPHALF;
     }
 
-    if ((faceID & treeBoundBox::BEHINDBIT) != 0)
+    if ((faceID & treeBoundBox::BACKBIT) != 0)
     {
         octantMask |= treeBoundBox::FRONTHALF;
         valueMask |= treeBoundBox::FRONTHALF;
     }
-    else if ((faceID & treeBoundBox::INFRONTBIT) != 0)
+    else if ((faceID & treeBoundBox::FRONTBIT) != 0)
     {
         octantMask |= treeBoundBox::FRONTHALF;
     }
@@ -830,20 +802,20 @@ direction indexedOctree<Type>::getFace(const treeBoundBox& bb, const point& pt)
 
     if (pt.y() <= bb.min().y())
     {
-        faceID |= treeBoundBox::BELOWBIT;
+        faceID |= treeBoundBox::BOTTOMBIT;
     }
     if (pt.y() >= bb.max().y())
     {
-        faceID |= treeBoundBox::ABOVEBIT;
+        faceID |= treeBoundBox::TOPBIT;
     }
 
     if (pt.z() <= bb.min().z())
     {
-        faceID |= treeBoundBox::BEHINDBIT;
+        faceID |= treeBoundBox::BACKBIT;
     }
     if (pt.z() >= bb.max().z())
     {
-        faceID |= treeBoundBox::INFRONTBIT;
+        faceID |= treeBoundBox::FRONTBIT;
     }
     return faceID;
 }
@@ -943,9 +915,14 @@ void indexedOctree<Type>::traverseNode
         {
             faceID = 0;
 
+            //WarningIn("indexedOctree<Type>::traverseNode")
+            FatalErrorIn("indexedOctree<Type>::traverseNode")
+                << "Did not hit side of node box " << subBb
             WarningIn("indexedOctree<Type>::traverseNode")
                 << "Did not hit side of box " << subBb
                 << " with ray from " << start << " to " << end
+                //<< endl;
+                << abort(FatalError);
                 << endl;
         }
         else
@@ -961,9 +938,14 @@ void indexedOctree<Type>::traverseNode
         {
             faceID = 0;
 
+            //WarningIn("indexedOctree<Type>::traverseNode")
+            FatalErrorIn("indexedOctree<Type>::traverseNode")
+                << "Did not hit side of content box " << subBb
             WarningIn("indexedOctree<Type>::traverseNode")
                 << "Did not hit side of box " << subBb
                 << " with ray from " << start << " to " << end
+                //<< endl;
+                << abort(FatalError);
                 << endl;
         }
         else
@@ -1074,52 +1056,57 @@ pointIndexHit indexedOctree<Type>::findLine
     const point& end
 ) const
 {
-    const treeBoundBox& treeBb = nodes_[0].bb_;
+    pointIndexHit hitInfo;
 
-    direction startBit = treeBb.posBits(start);
-    direction endBit = treeBb.posBits(end);
-
-    if (startBit&endBit != 0)
+    if (nodes_.size() > 0)
     {
-        // Both start and end outside domain and in same block.
-        return pointIndexHit(false, vector::zero, -1);
-    }
+        const treeBoundBox& treeBb = nodes_[0].bb_;
 
-    point trackStart(start);
-    point trackEnd(end);
+        direction startBit = treeBb.posBits(start);
+        direction endBit = treeBb.posBits(end);
 
-    if (startBit != 0)
-    {
-        // Track start to inside domain.
-        if (!treeBb.intersects(start, end, trackStart))
+        if (startBit&endBit != 0)
         {
+            // Both start and end outside domain and in same block.
             return pointIndexHit(false, vector::zero, -1);
         }
-    }
 
-    if (endBit != 0)
-    {
-        // Track end to inside domain.
-        if (!treeBb.intersects(end, trackStart, trackEnd))
+        point trackStart(start);
+        point trackEnd(end);
+
+        if (startBit != 0)
         {
-            return pointIndexHit(false, vector::zero, -1);
+            // Track start to inside domain.
+            if (!treeBb.intersects(start, end, trackStart))
+            {
+                return pointIndexHit(false, vector::zero, -1);
+            }
         }
+
+        if (endBit != 0)
+        {
+            // Track end to inside domain.
+            if (!treeBb.intersects(end, trackStart, trackEnd))
+            {
+                return pointIndexHit(false, vector::zero, -1);
+            }
+        }
+
+        // Find lowest level tree node that start is in.
+        labelBits index = findNode(0, trackStart);
+
+        label parentNodeI = getNode(index);
+        direction octant = getOctant(index);
+
+        hitInfo = findLine
+        (
+            findAny,
+            trackStart,
+            trackEnd,
+            parentNodeI,
+            octant
+        );
     }
-
-    // Find lowest level tree node that start is in.
-    labelBits index = findNode(0, trackStart);
-
-    label parentNodeI = getNode(index);
-    direction octant = getOctant(index);
-
-    pointIndexHit hitInfo = findLine
-    (
-        findAny,
-        trackStart,
-        trackEnd,
-        parentNodeI,
-        octant
-    );
 
     return hitInfo;
 }
@@ -1234,7 +1221,6 @@ void indexedOctree<Type>::writeOBJ
     label vertI = 0;
 
     // Dump bounding box
-    edgeList bbEdges(subBb.edges());
     pointField bbPoints(subBb.points());
 
     label pointVertI = vertI;
@@ -1244,38 +1230,38 @@ void indexedOctree<Type>::writeOBJ
         vertI++;
     }
 
-    forAll(bbEdges, i)
+    forAll(treeBoundBox::edges, i)
     {
-        const edge& e = bbEdges[i];
+        const edge& e = treeBoundBox::edges[i];
 
         str<< "l " << e[0]+pointVertI+1 << ' ' << e[1]+pointVertI+1 << nl;
     }
 
 
-    // Dump triangles
-    if (isContent(index))
-    {
-        const labelList& indices = contents_[getContent(index)];
-        const triSurface& surf = shapes_.surface();
-        const pointField& points = surf.points();
-
-        forAll(indices, i)
-        {
-            label shapeI = indices[i];
-
-            const labelledTri& f = surf[shapeI];
-
-            meshTools::writeOBJ(str, points[f[0]]);
-            vertI++;
-            meshTools::writeOBJ(str, points[f[1]]);
-            vertI++;
-            meshTools::writeOBJ(str, points[f[2]]);
-            vertI++;
-
-            str<< "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI << ' '
-                << vertI-2 << nl;
-        }
-    }
+    //// Dump triangles
+    //if (isContent(index))
+    //{
+    //    const labelList& indices = contents_[getContent(index)];
+    //    const triSurface& surf = shapes_.surface();
+    //    const pointField& points = surf.points();
+    //
+    //    forAll(indices, i)
+    //    {
+    //        label shapeI = indices[i];
+    //
+    //        const labelledTri& f = surf[shapeI];
+    //
+    //        meshTools::writeOBJ(str, points[f[0]]);
+    //        vertI++;
+    //        meshTools::writeOBJ(str, points[f[1]]);
+    //        vertI++;
+    //        meshTools::writeOBJ(str, points[f[2]]);
+    //        vertI++;
+    //
+    //        str<< "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI << ' '
+    //            << vertI-2 << nl;
+    //    }
+    //}
 }
 
 
@@ -1321,6 +1307,11 @@ indexedOctree<Type>::indexedOctree
     contents_(0),
     nodeTypes_(0)
 {
+    if (shapes.size() == 0)
+    {
+        return;
+    }
+
     // Start off with one node with all shapes in it.
     DynamicList<node> nodes(label(shapes.size() / maxLeafRatio));
     DynamicList<labelList> contents(label(shapes.size() / maxLeafRatio));
@@ -1380,7 +1371,7 @@ indexedOctree<Type>::indexedOctree
         if (nOldNodes == nodes.size())
         {
             break;
-        }   
+        }
     }
 
     // Shrink
@@ -1411,6 +1402,7 @@ indexedOctree<Type>::indexedOctree
 
         if (compactI == contents_.size())
         {
+            // Transferred all contents to contents_ (in order breadth first)
             break;
         }
 
@@ -1468,15 +1460,22 @@ pointIndexHit indexedOctree<Type>::findNearest
     label nearestShapeI = -1;
     point nearestPoint;
 
-    findNearest
-    (
-        0,
-        sample,
+    if (nodes_.size() == 0)
+    {
+        nearestPoint = vector::zero;
+    }
+    else
+    {
+        findNearest
+        (
+            0,
+            sample,
 
-        nearestDistSqr,
-        nearestShapeI,
-        nearestPoint
-    );
+            nearestDistSqr,
+            nearestShapeI,
+            nearestPoint
+        );
+    }
 
     return pointIndexHit(nearestShapeI != -1, nearestPoint, nearestShapeI);
 }
@@ -1493,16 +1492,23 @@ pointIndexHit indexedOctree<Type>::findNearest
     label nearestShapeI = -1;
     point nearestPoint;
 
-    findNearest
-    (
-        0,
-        ln,
+    if (nodes_.size() == 0)
+    {
+        nearestPoint = vector::zero;
+    }
+    else
+    {
+        findNearest
+        (
+            0,
+            ln,
 
-        tightest,
-        nearestShapeI,
-        linePoint,
-        nearestPoint
-    );
+            tightest,
+            nearestShapeI,
+            linePoint,
+            nearestPoint
+        );
+    }
 
     return pointIndexHit(nearestShapeI != -1, nearestPoint, nearestShapeI);
 }
@@ -1538,7 +1544,10 @@ labelList indexedOctree<Type>::findBox(const boundBox& searchBox) const
     // Storage for labels of shapes inside bb. Size estimate.
     labelHashSet elements(shapes_.size() / 100);
 
-    findBox(0, searchBox, elements);
+    if (nodes_.size() > 0)
+    {
+        findBox(0, searchBox, elements);
+    }
 
     return elements.toc();
 }
@@ -1552,6 +1561,12 @@ labelBits indexedOctree<Type>::findNode
     const point& sample
 ) const
 {
+    if (nodes_.size() == 0)
+    {
+        // Empty tree. Return what?
+        return nodePlusOctant(nodeI, 0);
+    }
+
     const node& nod = nodes_[nodeI];
 
     direction octant = nod.bb_.subOctant(sample);
@@ -1583,6 +1598,11 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::getVolumeType
     const point& sample
 ) const
 {
+    if (nodes_.size() == 0)
+    {
+        return UNKNOWN;
+    }
+
     if (nodeTypes_.size() != 8*nodes_.size())
     {
         // Calculate type for every octant of node.

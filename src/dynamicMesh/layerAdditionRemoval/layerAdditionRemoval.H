@@ -109,6 +109,9 @@ class layerAdditionRemoval
             //- Return faces pairing in a layer (not automatic!)
             const labelList& facesPairing() const;
 
+            //- Calculate the offset to the next layer
+            tmp<vectorField> extrusionDir() const;
+
             //- Add a layer of cells
             void addCellLayer(polyTopoChange&) const;
 

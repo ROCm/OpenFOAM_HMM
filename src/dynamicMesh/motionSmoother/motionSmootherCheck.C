@@ -52,6 +52,28 @@ bool Foam::motionSmoother::checkMesh
     labelHashSet& wrongFaces
 )
 {
+    List<labelPair> emptyBaffles;
+    return checkMesh
+    (
+        report,
+        mesh,
+        dict,
+        checkFaces,
+        emptyBaffles,
+        wrongFaces
+    );
+}
+
+bool Foam::motionSmoother::checkMesh
+(
+    const bool report,
+    const polyMesh& mesh,
+    const dictionary& dict,
+    const labelList& checkFaces,
+    const List<labelPair>& baffles,
+    labelHashSet& wrongFaces
+)
+{
     const scalar maxNonOrtho(readScalar(dict.lookup("maxNonOrtho")));
     const scalar minVol(readScalar(dict.lookup("minVol")));
     const scalar maxConcave(readScalar(dict.lookup("maxConcave")));
@@ -79,6 +101,7 @@ bool Foam::motionSmoother::checkMesh
             mesh.cellCentres(),
             mesh.faceAreas(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -102,6 +125,7 @@ bool Foam::motionSmoother::checkMesh
             mesh.cellCentres(),
             mesh.points(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -171,6 +195,7 @@ bool Foam::motionSmoother::checkMesh
             mesh.faceCentres(),
             mesh.faceAreas(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -195,6 +220,7 @@ bool Foam::motionSmoother::checkMesh
             mesh.faceCentres(),
             mesh.faceAreas(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -217,6 +243,7 @@ bool Foam::motionSmoother::checkMesh
             mesh,
             mesh.cellVolumes(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -329,6 +356,28 @@ bool Foam::motionSmoother::checkMesh
     );
 }
 
+bool Foam::motionSmoother::checkMesh
+(
+    const bool report,
+    const dictionary& dict,
+    const polyMeshGeometry& meshGeom,
+    const labelList& checkFaces,
+    labelHashSet& wrongFaces
+)
+{
+    List<labelPair> emptyBaffles;
+
+    return checkMesh
+    (
+        report,
+        dict,
+        meshGeom,
+        checkFaces,
+        emptyBaffles,
+        wrongFaces
+     );
+}
+
 
 bool Foam::motionSmoother::checkMesh
 (
@@ -336,6 +385,7 @@ bool Foam::motionSmoother::checkMesh
     const dictionary& dict,
     const polyMeshGeometry& meshGeom,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet& wrongFaces
 )
 {
@@ -363,6 +413,7 @@ bool Foam::motionSmoother::checkMesh
             report,
             maxNonOrtho,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -384,6 +435,7 @@ bool Foam::motionSmoother::checkMesh
             minVol,
             meshGeom.mesh().points(),
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -439,6 +491,7 @@ bool Foam::motionSmoother::checkMesh
             maxIntSkew,
             maxBounSkew,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -459,6 +512,7 @@ bool Foam::motionSmoother::checkMesh
             report,
             minWeight,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 
@@ -479,6 +533,7 @@ bool Foam::motionSmoother::checkMesh
             report,
             minVolRatio,
             checkFaces,
+            baffles,
             &wrongFaces
         );
 

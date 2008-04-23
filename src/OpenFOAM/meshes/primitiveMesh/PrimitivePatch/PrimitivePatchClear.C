@@ -36,13 +36,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::clearGeom()
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::clearGeom()
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::clearGeom() : "
-            << "clearing geometric data"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "clearGeom() : clearing geometric data"
             << endl;
     }
 
@@ -52,13 +58,19 @@ void PrimitivePatch<Face, FaceList, PointField>::clearGeom()
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::clearTopology()
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::clearTopology()
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::clearTopology() : "
-            << "clearing patch addressing"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "clearTopology() : clearing patch addressing"
             << endl;
     }
 
@@ -87,12 +99,18 @@ void PrimitivePatch<Face, FaceList, PointField>::clearTopology()
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::clearPatchMeshAddr()
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::clearPatchMeshAddr()
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "clearPatchMeshAddr() : "
             << "clearing patch-mesh addressing"
             << endl;
@@ -104,8 +122,14 @@ void PrimitivePatch<Face, FaceList, PointField>::clearPatchMeshAddr()
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::clearOut()
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::clearOut()
 {
     clearGeom();
     clearTopology();

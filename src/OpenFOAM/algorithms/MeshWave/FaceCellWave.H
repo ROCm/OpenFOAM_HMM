@@ -32,8 +32,7 @@ Description
 
     Handles parallel and cyclics and non-parallel cyclics.
 
-Note
-    Whether to propagate depends on the return value of Type::update
+    Note: whether to propagate depends on the return value of Type::update
     which returns true (i.e. propagate) if the value changes by more than a
     certain tolerance.
     This tolerance can be very strict for normal face-cell and parallel
@@ -105,9 +104,6 @@ class FaceCellWave
 
         //- Contains cyclics
         bool hasCyclicPatches_;
-
-        //- Contains processor patches
-        bool hasProcPatches_;
 
         //- Number of evaluations
         label nEvals_;

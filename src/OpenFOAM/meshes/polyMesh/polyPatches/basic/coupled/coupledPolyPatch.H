@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::coupledPolyPatch
+    coupledPolyPatch
 
 Description
     coupledPolyPatch is an abstract base class for patches that couple regions
@@ -64,34 +64,29 @@ class coupledPolyPatch
         //- Neighbour-cell transformation tensor
         mutable tensorField reverseT_;
 
+public:
 
-    // Private static data
+    // Static data members
 
-        //- Relative tolerance (for geometric matching). Is factor of
-        //  maximum edge length per face.
-        static scalar matchTol_;
+        //- Relative tolerance (for geometric matching).
+        static scalar matchTol;
 
 
 protected:
 
     // Protected Member Functions
 
-        //- Calculate the uniform transformation tensors
-        void calcTransformTensors
-        (
-            const vector& Cf,
-            const vector& Cr,
-            const vector& nf,
-            const vector& nr
-        ) const;
-
         //- Calculate the transformation tensors
+        //  smallDist : matching distance per face
+        //  absTol    : absolute error in normal
         void calcTransformTensors
         (
             const vectorField& Cf,
             const vectorField& Cr,
             const vectorField& nf,
-            const vectorField& nr
+            const vectorField& nr,
+            const scalarField& smallDist,
+            const scalar absTol = matchTol
         ) const;
 
         //- Initialise the calculation of the patch geometry
@@ -123,7 +118,7 @@ protected:
         static void writeOBJ
         (
             const fileName&,
-            const faceList&,
+            const UList<face>&,
             const pointField&
         );
 
@@ -137,10 +132,18 @@ protected:
         );
 
         //- Calculate face centres
-        static pointField calcFaceCentres(const faceList&, const pointField&);
+        static pointField calcFaceCentres
+        (
+            const UList<face>&,
+            const pointField&
+        );
 
         //- Get f[0] for all faces
-        static pointField getAnchorPoints(const faceList&, const pointField&);
+        static pointField getAnchorPoints
+        (
+            const UList<face>&,
+            const pointField&
+        );
 
         //- Is face (in old face labels) in current patch?
         bool inPatch
@@ -161,7 +164,7 @@ protected:
         //  from face centre to any of the face vertices.
         static scalarField calcFaceTol
         (
-            const faceList& faces,
+            const UList<face>& faces,
             const pointField& points,
             const pointField& faceCentres
         );

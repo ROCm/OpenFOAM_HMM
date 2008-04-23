@@ -26,7 +26,7 @@ Class
     Foam::indexedOctree
 
 Description
-    An indexedOctree is ...
+    Non-pointer based hierarchical recursive searching
 
 SourceFiles
     indexedOctree.C
@@ -299,7 +299,7 @@ private:
                 return labelBits(i + 1, octant);
             }
 
-            //- Fempty to subNodes_ entry
+            //- From empty to subNodes_ entry
             static labelBits emptyPlusOctant
             (
                 const direction octant

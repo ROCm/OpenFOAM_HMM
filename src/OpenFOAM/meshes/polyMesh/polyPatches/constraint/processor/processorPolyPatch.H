@@ -219,18 +219,6 @@ public:
             return !owner();
         }
 
-        //- Force calculation of transformation tensors
-        void calcTransformTensors
-        (
-            const vectorField& Cf,
-            const vectorField& Cr,
-            const vectorField& nf,
-            const vectorField& nr
-        ) const
-        {
-            coupledPolyPatch::calcTransformTensors(Cf, Cr, nf, nr);
-        }
-
         //- Return processor-neighbbour patch face centres
         const vectorField& neighbFaceCentres() const
         {
@@ -249,12 +237,14 @@ public:
             return neighbFaceCellCentres_;
         }
 
-        //- Return neighbour point labels. This is for my local point the
-        //  corresponding local point on the other side.
+        //- Return neighbour point labels. This is for my local point (-1 or)
+        //  the corresponding local point on the other side. It is -1 if
+        //  there are multiple corresponding points on this or the other side
+        //  (can happen for cyclics being converted into proc patches)
         const labelList& neighbPoints() const;
 
-        //- Return neighbour edge labels. This is for my local edge the
-        //  corresponding local edge on the other side.
+        //- Return neighbour edge labels. This is for my local edge (-1 or) the
+        //  corresponding local edge on the other side. See above for -1 cause.
         const labelList& neighbEdges() const;
 
 

@@ -37,23 +37,51 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-treeBoundBox treeBoundBox::greatBox
+const treeBoundBox treeBoundBox::greatBox
 (
     vector(-GREAT, -GREAT, -GREAT),
     vector(GREAT, GREAT, GREAT)
 );
 
 
+const faceList treeBoundBox::faces
+(
+    Foam::IStringStream
+    (
+        "6("
+        "4(0 4 6 2)" // left
+        "4(1 3 7 5)" // right
+        "4(0 1 5 4)" // bottom
+        "4(2 6 7 3)" // top
+        "4(0 2 3 1)" // back
+        "4(4 5 7 6)" // front
+        ")"
+    )()
+);
+
+
+const edgeList treeBoundBox::edges
+(
+    //treeBoundBox::edges()
+    Foam::IStringStream
+    (
+       //(E01)(E13)(E23)(E02)(E45)(E57)(E67)(E46)(E04)(E15)(E37)(E26)
+       //  0    1    2    3    4    5    6    7    8    9   10   11
+        "12((0 1)(1 3)(2 3)(0 2)(4 5)(5 7)(6 7)(4 6)(0 4)(1 5)(3 7)(2 6))"
+    )()
+);
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct as the bounding box of the given pointField
-treeBoundBox::treeBoundBox(const pointField& points)
+treeBoundBox::treeBoundBox(const UList<point>& points)
 :
     boundBox()
 {
     if (points.size() == 0)
     {
-        WarningIn("treeBoundBox::treeBoundBox(const pointField& points)")
+        WarningIn("treeBoundBox::treeBoundBox(const UList<point>&)")
             << "cannot find bounding box for zero sized pointField"
             << "returning zero" << endl;
 
@@ -63,10 +91,41 @@ treeBoundBox::treeBoundBox(const pointField& points)
     min() = points[0];
     max() = points[0];
 
-    forAll(points, i)
+    for (label i = 1; i < points.size(); i++)
     {
         min() = ::Foam::min(min(), points[i]);
         max() = ::Foam::max(max(), points[i]);
+    }
+}
+
+
+// Construct as the bounding box of the given pointField
+treeBoundBox::treeBoundBox
+(
+    const UList<point>& points,
+    const labelList& meshPoints
+)
+:
+    boundBox()
+{
+    if (meshPoints.size() == 0)
+    {
+        WarningIn
+        (
+            "treeBoundBox::treeBoundBox(const UList<point>&, const labelList)"
+        )   << "cannot find bounding box for zero sized pointField"
+            << "returning zero" << endl;
+
+        return;
+    }
+
+    min() = points[meshPoints[0]];
+    max() = points[meshPoints[0]];
+
+    for (label i = 1; i < meshPoints.size(); i++)
+    {
+        min() = ::Foam::min(min(), points[meshPoints[i]]);
+        max() = ::Foam::max(max(), points[meshPoints[i]]);
     }
 }
 
@@ -80,104 +139,18 @@ treeBoundBox::treeBoundBox(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar treeBoundBox::minDim() const
-{
-    return ::Foam::min
-    (
-        max().x() - min().x(),
-        ::Foam::min
-        (
-            max().y() - min().y(),
-            max().z() - min().z()
-        )
-    );
-}
-
-
-scalar treeBoundBox::maxDim() const
-{
-    return ::Foam::max
-    (
-        max().x() - min().x(),
-        ::Foam::max
-        (
-            max().y() - min().y(),
-            max().z() - min().z()
-        )
-    );
-}
-
-
-scalar treeBoundBox::avgDim() const
-{
-    return
-    (
-        (max().x() - min().x()) +
-        (max().y() - min().y()) +
-        (max().z() - min().z())
-    )/3.0;
-}
-
-
-scalar treeBoundBox::typDim() const
-{
-    return avgDim();
-}
-
-
-point treeBoundBox::mid() const
-{
-    return 0.5*(min() + max());
-}
-
-
 pointField treeBoundBox::points() const
 {
     pointField points(8);
-    label pointI = 0;
+    forAll(points, octant)
+    {
+        points[octant] = corner(octant);
 
-    points[pointI++] = min();
-    points[pointI++] = point(min().x(), max().y(), min().z());
-    points[pointI++] = point(max().x(), max().y(), min().z());
-    points[pointI++] = point(max().x(), min().y(), min().z());
-
-    points[pointI++] = point(min().x(), min().y(), max().z());
-    points[pointI++] = point(min().x(), max().y(), max().z());
-    points[pointI++] = max();
-    points[pointI++] = point(max().x(), min().y(), max().z());
-
+    }
     return points;
 }
 
 
-edgeList treeBoundBox::edges() const
-{
-    edgeList edges(12);
-    label edgeI = 0;
-
-    // bottom face
-    edges[edgeI++] = edge(0, 1);
-    edges[edgeI++] = edge(1, 2);
-    edges[edgeI++] = edge(2, 3);
-    edges[edgeI++] = edge(3, 0);
-
-    // top face
-    edges[edgeI++] = edge(4, 5);
-    edges[edgeI++] = edge(5, 6);
-    edges[edgeI++] = edge(6, 7);
-    edges[edgeI++] = edge(7, 4);
-
-    // side edges
-    edges[edgeI++] = edge(0, 4);
-    edges[edgeI++] = edge(1, 5);
-    edges[edgeI++] = edge(2, 6);
-    edges[edgeI++] = edge(3, 7);
-
-    return edges;
-}
-
-
-// Octant to bounding box
 treeBoundBox treeBoundBox::subBbox(const direction octant) const
 {
     if (octant > 7)
@@ -362,7 +335,7 @@ bool treeBoundBox::intersects
             }
         }
 
-        if (ptBits & BELOWBIT)
+        if (ptBits & BOTTOMBIT)
         {
             // Intersect with plane V=min, n=0,-1,0
             if (Foam::mag(vec.y()) > VSMALL)
@@ -373,7 +346,7 @@ bool treeBoundBox::intersects
                 pt.z() = pt.z() + vec.z()*s;
             }
         }
-        if (ptBits & ABOVEBIT)
+        if (ptBits & TOPBIT)
         {
             // Intersect with plane V=max, n=0,1,0
             if (Foam::mag(vec.y()) > VSMALL)
@@ -385,7 +358,7 @@ bool treeBoundBox::intersects
             }
         }
 
-        if (ptBits & BEHINDBIT)
+        if (ptBits & BACKBIT)
         {
             // Intersect with plane V=min, n=0,0,-1
             if (Foam::mag(vec.z()) > VSMALL)
@@ -396,7 +369,7 @@ bool treeBoundBox::intersects
                 pt.z() = min().z();
             }
         }
-        if (ptBits & INFRONTBIT)
+        if (ptBits & FRONTBIT)
         {
             // Intersect with plane V=max, n=0,0,1
             if (Foam::mag(vec.z()) > VSMALL)
@@ -487,20 +460,20 @@ direction treeBoundBox::posBits(const point& pt) const
 
     if (pt.y() < min().y())
     {
-        posBits |= BELOWBIT;
+        posBits |= BOTTOMBIT;
     }
     if (pt.y() > max().y())
     {
-        posBits |= ABOVEBIT;
+        posBits |= TOPBIT;
     }
 
     if (pt.z() < min().z())
     {
-        posBits |= BEHINDBIT;
+        posBits |= BACKBIT;
     }
     if (pt.z() > max().z())
     {
-        posBits |= INFRONTBIT;
+        posBits |= FRONTBIT;
     }
     return posBits;
 }

@@ -310,10 +310,7 @@ Foam::scalar Foam::polyMeshGeometry::calcSkewness
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::polyMeshGeometry::polyMeshGeometry
-(
-    const polyMesh& mesh
-)
+Foam::polyMeshGeometry::polyMeshGeometry(const polyMesh& mesh)
 :
     mesh_(mesh)
 {
@@ -358,6 +355,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     const vectorField& cellCentres,
     const vectorField& faceAreas,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 )
 {
@@ -453,6 +451,36 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
         }
     }
 
+    forAll(baffles, i)
+    {
+        label face0 = baffles[i].first();
+        label face1 = baffles[i].second();
+
+        const point& ownCc = cellCentres[own[face0]];
+
+        scalar dDotS = checkNonOrtho
+        (
+            mesh,
+            report,
+            severeNonorthogonalityThreshold,
+            face0,
+            faceAreas[face0],
+            cellCentres[own[face1]] - ownCc,
+
+            severeNonOrth,
+            errorNonOrth,
+            setPtr
+         );
+
+        if (dDotS < minDDotS)
+        {
+            minDDotS = dDotS;
+        }
+
+        sumDDotS += dDotS;
+        nDDotS++;
+    }
+
     reduce(minDDotS, minOp<scalar>());
     reduce(sumDDotS, sumOp<scalar>());
     reduce(nDDotS, sumOp<label>());
@@ -515,6 +543,7 @@ bool Foam::polyMeshGeometry::checkFacePyramids
     const vectorField& cellCentres,
     const pointField& p,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 )
 {
@@ -594,6 +623,74 @@ bool Foam::polyMeshGeometry::checkFacePyramids
         }
     }
 
+    forAll(baffles, i)
+    {
+        label face0 = baffles[i].first();
+        label face1 = baffles[i].second();
+
+        const point& ownCc = cellCentres[own[face0]];
+
+       // Create the owner pyramid - it will have negative volume
+        scalar pyrVolOwn = pyramidPointFaceRef
+        (
+            f[face0],
+            ownCc
+        ).mag(p);
+
+        if (pyrVolOwn > -minPyrVol)
+        {
+            if (report)
+            {
+                Pout<< "bool polyMeshGeometry::checkFacePyramids("
+                    << "const bool, const scalar, const pointField&"
+                    << ", const labelList&, labelHashSet*): "
+                    << "face " << face0 << " points the wrong way. " << endl
+                    << "Pyramid volume: " << -pyrVolOwn
+                    << " Face " << f[face0] << " area: " << f[face0].mag(p)
+                    << " Owner cell: " << own[face0] << endl
+                    << "Owner cell vertex labels: "
+                    << mesh.cells()[own[face0]].labels(f)
+                    << endl;
+            }
+
+
+            if (setPtr)
+            {
+                setPtr->insert(face0);
+            }
+
+            nErrorPyrs++;
+        }
+
+        // Create the neighbour pyramid - it will have positive volume
+        scalar pyrVolNbr =
+            pyramidPointFaceRef(f[face0], cellCentres[own[face1]]).mag(p);
+
+        if (pyrVolNbr < minPyrVol)
+        {
+            if (report)
+            {
+                Pout<< "bool polyMeshGeometry::checkFacePyramids("
+                    << "const bool, const scalar, const pointField&"
+                    << ", const labelList&, labelHashSet*): "
+                    << "face " << face0 << " points the wrong way. " << endl
+                    << "Pyramid volume: " << -pyrVolNbr
+                    << " Face " << f[face0] << " area: " << f[face0].mag(p)
+                    << " Neighbour cell: " << own[face1] << endl
+                    << "Neighbour cell vertex labels: "
+                    << mesh.cells()[own[face1]].labels(f)
+                    << endl;
+            }
+
+            if (setPtr)
+            {
+                setPtr->insert(face0);
+            }
+
+            nErrorPyrs++;
+        }
+    }
+
     reduce(nErrorPyrs, sumOp<label>());
 
     if (nErrorPyrs > 0)
@@ -633,6 +730,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
     const vectorField& faceCentres,
     const vectorField& faceAreas,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 )
 {
@@ -762,6 +860,43 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         }
     }
 
+    forAll(baffles, i)
+    {
+        label face0 = baffles[i].first();
+        label face1 = baffles[i].second();
+
+        const point& ownCc = cellCentres[own[face0]];
+
+        scalar skewness = calcSkewness
+        (
+            ownCc,
+            cellCentres[own[face1]],
+            faceCentres[face0]
+        );
+
+        // Check if the skewness vector is greater than the PN vector.
+        // This does not cause trouble but is a good indication of a poor
+        // mesh.
+        if (skewness > internalSkew)
+        {
+            if (report)
+            {
+                Pout<< "Severe skewness for face " << face0
+                    << " skewness = " << skewness << endl;
+            }
+
+            if (setPtr)
+            {
+                setPtr->insert(face0);
+            }
+
+            nWarnSkew++;
+        }
+
+        maxSkew = max(maxSkew, skewness);
+    }
+
+
     reduce(maxSkew, maxOp<scalar>());
     reduce(nWarnSkew, sumOp<label>());
 
@@ -804,6 +939,7 @@ bool Foam::polyMeshGeometry::checkFaceWeights
     const vectorField& faceCentres,
     const vectorField& faceAreas,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 )
 {
@@ -889,6 +1025,38 @@ bool Foam::polyMeshGeometry::checkFaceWeights
         }
     }
 
+    forAll(baffles, i)
+    {
+        label face0 = baffles[i].first();
+        label face1 = baffles[i].second();
+
+        const point& ownCc = cellCentres[own[face0]];
+        const point& fc = faceCentres[face0];
+        const vector& fa = faceAreas[face0];
+
+        scalar dOwn = mag(fa & (fc-ownCc));
+        scalar dNei = mag(fa & (cellCentres[own[face1]]-fc));
+        scalar weight = min(dNei,dOwn)/(dNei+dOwn+VSMALL);
+
+        if (weight < warnWeight)
+        {
+            if (report)
+            {
+                Pout<< "Small weighting factor for face " << face0
+                    << " weight = " << weight << endl;
+            }
+
+            if (setPtr)
+            {
+                setPtr->insert(face0);
+            }
+
+            nWarnWeight++;
+        }
+
+        minWeight = min(minWeight, weight);
+    }
+
     reduce(minWeight, minOp<scalar>());
     reduce(nWarnWeight, sumOp<label>());
 
@@ -928,6 +1096,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
     const polyMesh& mesh,
     const scalarField& cellVolumes,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 )
 {
@@ -988,6 +1157,39 @@ bool Foam::polyMeshGeometry::checkVolRatio
                 if (setPtr)
                 {
                     setPtr->insert(faceI);
+                }
+
+                nWarnRatio++;
+            }
+
+            minRatio = min(minRatio, ratio);
+        }
+    }
+
+    forAll(baffles, i)
+    {
+        label face0 = baffles[i].first();
+        label face1 = baffles[i].second();
+        
+        scalar ownVol = mag(cellVolumes[own[face0]]);
+
+        scalar neiVol = mag(cellVolumes[own[face1]]);
+
+        if (neiVol >= 0)
+        {
+            scalar ratio = min(ownVol, neiVol) / (max(ownVol, neiVol) + VSMALL);
+
+            if (ratio < warnRatio)
+            {
+                if (report)
+                {
+                    Pout<< "Small ratio for face " << face0
+                        << " ratio = " << ratio << endl;
+                }
+
+                if (setPtr)
+                {
+                    setPtr->insert(face0);
                 }
 
                 nWarnRatio++;
@@ -1704,6 +1906,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     const bool report,
     const scalar orthWarn,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 ) const
 {
@@ -1715,6 +1918,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
         cellCentres_,
         faceAreas_,
         checkFaces,
+        baffles,
         setPtr
     );
 }
@@ -1726,6 +1930,7 @@ bool Foam::polyMeshGeometry::checkFacePyramids
     const scalar minPyrVol,
     const pointField& p,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 ) const
 {
@@ -1737,6 +1942,7 @@ bool Foam::polyMeshGeometry::checkFacePyramids
         cellCentres_,
         p,
         checkFaces,
+        baffles,
         setPtr
     );
 }
@@ -1748,6 +1954,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
     const scalar internalSkew,
     const scalar boundarySkew,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 ) const
 {
@@ -1761,6 +1968,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         faceCentres_,
         faceAreas_,
         checkFaces,
+        baffles,
         setPtr
     );
 }
@@ -1771,6 +1979,7 @@ bool Foam::polyMeshGeometry::checkFaceWeights
     const bool report,
     const scalar warnWeight,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 ) const
 {
@@ -1783,6 +1992,7 @@ bool Foam::polyMeshGeometry::checkFaceWeights
         faceCentres_,
         faceAreas_,
         checkFaces,
+        baffles,
         setPtr
     );
 }
@@ -1793,6 +2003,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
     const bool report,
     const scalar warnRatio,
     const labelList& checkFaces,
+    const List<labelPair>& baffles,
     labelHashSet* setPtr
 ) const
 {
@@ -1803,6 +2014,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
         mesh_,
         cellVolumes_,
         checkFaces,
+        baffles,
         setPtr
     );
 }

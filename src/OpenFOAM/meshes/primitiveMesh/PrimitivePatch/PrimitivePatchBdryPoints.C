@@ -36,12 +36,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcBdryPoints() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcBdryPoints()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcBdryPoints() : "
             << "calculating boundary points"
             << endl;
@@ -53,7 +60,8 @@ void PrimitivePatch<Face, FaceList, PointField>::calcBdryPoints() const
         // if already allocated
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcBdryPoints()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcBdryPoints()"
         )   << "edge types already calculated"
             << abort(FatalError);
     }
@@ -75,7 +83,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcBdryPoints() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcBdryPoints() : "
             << "finished calculating boundary points"
             << endl;

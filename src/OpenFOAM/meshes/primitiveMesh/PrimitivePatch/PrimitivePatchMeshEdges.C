@@ -35,8 +35,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-labelList PrimitivePatch<Face, FaceList, PointField>::meshEdges
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
 (
     const edgeList& allEdges,
     const labelListList& cellEdges,
@@ -45,7 +52,7 @@ labelList PrimitivePatch<Face, FaceList, PointField>::meshEdges
 {
     if (debug)
     {
-        Info<< "labelList PrimitivePatch<Face, FaceList, PointField>"
+        Info<< "labelList PrimitivePatch<Face, FaceList, PointField, PointType>"
             << "::meshEdges() : "
             << "calculating labels of patch edges in mesh edge list"
             << endl;
@@ -106,8 +113,15 @@ labelList PrimitivePatch<Face, FaceList, PointField>::meshEdges
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-label PrimitivePatch<Face, FaceList, PointField>::whichEdge
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+label PrimitivePatch<Face, FaceList, PointField, PointType>::whichEdge
 (
     const edge& e
 ) const

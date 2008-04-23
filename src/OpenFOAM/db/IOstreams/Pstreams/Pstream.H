@@ -438,6 +438,38 @@ public:
             template <class T>
             static void listCombineScatter(List<T>& Value);
 
+        // Combine variants working on whole map at a time. Container needs to
+        // have iterators and find() defined.
+
+            template <class Container, class CombineOp>
+            static void mapCombineGather
+            (
+                const List<commsStruct>& comms,
+                Container& Values,
+                const CombineOp& cop
+            );
+
+            //- Like above but switches between linear/tree communication
+            template <class Container, class CombineOp>
+            static void mapCombineGather
+            (
+                Container& Values,
+                const CombineOp& cop
+            );
+
+            //- Scatter data. Reverse of combineGather
+            template <class Container>
+            static void mapCombineScatter
+            (
+                const List<commsStruct>& comms,
+                Container& Values
+            );
+
+            //- Like above but switches between linear/tree communication
+            template <class Container>
+            static void mapCombineScatter(Container& Values);
+            
+
 
         // Gather/scatter keeping the individual processor data separate.
         // Values is a List of size Pstream::nProcs() where

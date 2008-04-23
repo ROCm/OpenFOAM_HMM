@@ -27,7 +27,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-//#include "PrimitivePatch.H"
 #include "SLList.H"
 #include "boolList.H"
 
@@ -38,8 +37,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcLocalPointOrder() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::
+ calcLocalPointOrder() const
 {
     // Note: Cannot use bandCompressing as point-point addressing does
     // not exist and is not considered generally useful.
@@ -47,7 +53,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcLocalPointOrder() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcLocalPointOrder() : "
             << "calculating local point order"
             << endl;
@@ -59,7 +65,8 @@ void PrimitivePatch<Face, FaceList, PointField>::calcLocalPointOrder() const
         // if already allocated
         FatalErrorIn
         (
-            "PrimitivePatch<Face, FaceList, PointField>::calcLocalPointOrder()"
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcLocalPointOrder()"
         )   << "local point order already calculated"
             << abort(FatalError);
     }
@@ -126,7 +133,7 @@ void PrimitivePatch<Face, FaceList, PointField>::calcLocalPointOrder() const
 
     if (debug)
     {
-        Pout<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Pout<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
             << "calcLocalPointOrder() "
             << "finished calculating local point order"
             << endl;

@@ -178,6 +178,7 @@ public:
                 const vectorField& cellCentres,
                 const vectorField& faceAreas,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
@@ -190,6 +191,7 @@ public:
                 const vectorField& cellCentres,
                 const pointField& p,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet*
             );
 
@@ -204,6 +206,7 @@ public:
                 const vectorField& faceCentres,
                 const vectorField& faceAreas,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
@@ -217,6 +220,7 @@ public:
                 const vectorField& faceCentres,
                 const vectorField& faceAreas,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
@@ -228,6 +232,7 @@ public:
                 const polyMesh& mesh,
                 const scalarField& cellVolumes,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             );
 
@@ -302,6 +307,7 @@ public:
                 const bool report,
                 const scalar orthWarn,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -311,6 +317,7 @@ public:
                 const scalar minPyrVol,
                 const pointField& p,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -320,6 +327,7 @@ public:
                 const scalar internalSkew,
                 const scalar boundarySkew,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -328,6 +336,7 @@ public:
                 const bool report,
                 const scalar warnWeight,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 
@@ -336,6 +345,7 @@ public:
                 const bool report,
                 const scalar warnRatio,
                 const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet* setPtr
             ) const;
 

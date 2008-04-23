@@ -45,7 +45,7 @@ inline STLtriangle::STLtriangle
     const STLpoint& a,
     const STLpoint& b,
     const STLpoint& c,
-    short region
+    unsigned short region
 )
 :
     normal_(normal),
@@ -80,7 +80,7 @@ inline const STLpoint& STLtriangle::c() const
     return c_;
 }
 
-inline short STLtriangle::region() const
+inline unsigned short STLtriangle::region() const
 {
     return region_;
 }

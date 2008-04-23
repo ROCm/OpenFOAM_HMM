@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::combineFaces
+    combineFaces
 
 Description
     Combines boundary faces into single face. The faces get the patch
@@ -70,8 +70,12 @@ class combineFaces
         //- If undoable: per set the vertices of all the faces in the set.
         List<faceList> faceSetsVertices_;
 
-        //- If undoable: saved coordinates.
+        //- If undoable: saved point labels.
+        labelList savedPointLabels_;
+
+        //- If undoable: saved coordinates of above points.
         pointField savedPoints_;
+
 
 
     // Private Member Functions
@@ -109,6 +113,8 @@ class combineFaces
             const Map<label>& faceRegion
         ) const;
 
+
+
         //- Disallow default bitwise copy construct
         combineFaces(const combineFaces&);
 
@@ -135,6 +141,12 @@ public:
             const labelList& masterFace() const
             {
                 return masterFace_;
+            }
+
+            //- If undoable: set of original point labels of stored points
+            const labelList& savedPointLabels() const
+            {
+                return savedPointLabels_;
             }
 
 
@@ -168,14 +180,21 @@ public:
 
             //- Play commands into polyTopoChange to reinsert original faces.
             //  No other topo changes can be done inbetween setRefinement and
-            //  setUnrefinement. Gets the master face labels whose sets need
-            //  to be restored.
+            //  setUnrefinement. Can be called multiple times to undo parts
+            //  of the last setRefinement call.
+            //  Gets the master face labels whose sets need to be restored.
+            //  Returns maps from added restored point to
+            //  original point label (i.e. content of savedPointLabels_).
+            //  (only restoredPoints are actually set; rest are just for
+            //   generalness)
             void setUnrefinement
             (
                 const labelList& masterFaces,
-                polyTopoChange& meshMod
+                polyTopoChange& meshMod,
+                Map<label>& restoredPoints,
+                Map<label>& restoredFaces,
+                Map<label>& restoredCells
             );
-
 };
 
 

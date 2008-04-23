@@ -108,7 +108,7 @@ class triSurface
         bool read(Istream&);
 
         //- Generic read routine. Chooses reader based on extension.
-        bool read(const fileName&, const word& ext);
+        bool read(const fileName&, const word& ext, const bool check = true);
 
         bool readSTL(const fileName&);
         bool readSTLASCII(const fileName&);

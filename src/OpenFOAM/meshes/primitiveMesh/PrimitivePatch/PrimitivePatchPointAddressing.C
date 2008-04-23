@@ -37,13 +37,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcPointEdges() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointEdges()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::calcPointEdges() : "
-            << "calculating pointEdges"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "calcPointEdges() : calculating pointEdges"
             << endl;
     }
 
@@ -51,8 +59,11 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointEdges() const
     {
         // it is considered an error to attempt to recalculate
         // if already allocated
-        FatalErrorIn("PrimitivePatch<Face, FaceList, PointField>::calcPointEdges()")
-            << "pointEdges already calculated"
+        FatalErrorIn
+        (
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcPointEdges()"
+        )   << "pointEdges already calculated"
             << abort(FatalError);
     }
 
@@ -90,20 +101,28 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointEdges() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::calcPointEdges() "
-            << "finished calculating pointEdges"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "calcPointEdges() finished calculating pointEdges"
             << endl;
     }
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::calcPointFaces() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+void PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointFaces()
+ const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::calcPointFaces() : "
-            << "calculating pointFaces"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "calcPointFaces() : calculating pointFaces"
             << endl;
     }
 
@@ -111,8 +130,11 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointFaces() const
     {
         // it is considered an error to attempt to recalculate
         // if already allocated
-        FatalErrorIn("PrimitivePatch<Face, FaceList, PointField>::calcPointFaces()")
-            << "pointFaces already calculated"
+        FatalErrorIn
+        (
+            "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            "calcPointFaces()"
+        )   << "pointFaces already calculated"
             << abort(FatalError);
     }
 
@@ -154,8 +176,8 @@ void PrimitivePatch<Face, FaceList, PointField>::calcPointFaces() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::calcPointFaces() "
-            << "finished calculating pointFaces"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+            << "calcPointFaces() finished calculating pointFaces"
             << endl;
     }
 }

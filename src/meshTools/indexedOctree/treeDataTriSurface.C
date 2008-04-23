@@ -27,7 +27,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "treeDataTriSurface.H"
-#include "treeBoundBox.H"
 #include "triSurfaceTools.H"
 #include "triangleFuncs.H"
 #include "indexedOctree.H"
@@ -426,14 +425,12 @@ bool Foam::treeDataTriSurface::intersects
 
     const labelledTri& f = surface_[index];
 
-    const triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
-
     // Do quick rejection test
-    treeBoundBox triBb(tri.a(), tri.a());
-    triBb.min() = min(triBb.min(), tri.b());
-    triBb.max() = max(triBb.max(), tri.b());
-    triBb.min() = min(triBb.min(), tri.c());
-    triBb.max() = max(triBb.max(), tri.c());
+    treeBoundBox triBb(points[f[0]], points[f[0]]);
+    triBb.min() = min(triBb.min(), points[f[1]]);
+    triBb.max() = max(triBb.max(), points[f[1]]);
+    triBb.min() = min(triBb.min(), points[f[2]]);
+    triBb.max() = max(triBb.max(), points[f[2]]);
 
     const direction startBits(triBb.posBits(start));
     const direction endBits(triBb.posBits(end));
@@ -444,20 +441,16 @@ bool Foam::treeDataTriSurface::intersects
         return false;
     }
 
+    const triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
+
     const vector dir(end - start);
 
-    // Disable picking up intersections behind us.
-    scalar oldTol = intersection::setPlanarTol(0.0);
+    pointHit inter = tri.intersection(start, dir, intersection::HALF_RAY);
 
-    pointHit inter = tri.ray(start, dir, intersection::HALF_RAY);
-
-    intersection::setPlanarTol(oldTol);
-
-    if (inter.hit() && sqr(inter.distance()) <= magSqr(dir))
+    if (inter.hit() && inter.distance() <= 1)
     {
         // Note: no extra test on whether intersection is in front of us
-        // since using half_ray AND zero tolerance. (note that tolerance
-        // is used to look behind us)
+        // since using half_ray.
         intersectionPoint = inter.hitPoint();
 
         return true;

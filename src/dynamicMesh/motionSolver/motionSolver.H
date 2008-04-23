@@ -47,6 +47,7 @@ namespace Foam
 
 // Forward class declarations
 class polyMesh;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class motionSolver Declaration
@@ -122,7 +123,7 @@ public:
         virtual void solve() = 0;
 
         //- Update topology
-        virtual void updateMesh();
+        virtual void updateMesh(const mapPolyMesh&) = 0;
 };
 
 

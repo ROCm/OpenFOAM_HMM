@@ -36,90 +36,6 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-bool triangle<Point, PointRef>::intersection
-(
-    const Point& baseVertex,
-    const vector& E0,
-    const vector& E1,
-    const vector& n,
-    const point& P,
-    const vector& dir,
-    point& pInter
-)
-{
-    // Calculate intersection of ray with triangle plane
-    scalar denom = n & dir;
-
-    if (Foam::mag(denom) < SMALL)
-    {
-        // Parallel
-        pInter = P;
-        return false;
-    }
-    pInter = P + dir*(n & (baseVertex - P))/denom;
-
-    // Get largest component of normal
-    scalar magX = Foam::mag(n.x());
-    scalar magY = Foam::mag(n.y());
-    scalar magZ = Foam::mag(n.z());
-
-    label i0 = -1;
-    if ((magX >= magY) && (magX >= magZ))
-    {
-        i0 = 0;
-    }
-    else if ((magY >= magX) && (magY >= magZ))
-    {
-        i0 = 1;
-    }
-    else
-    {
-        i0 = 2;
-    }
-
-    // Get other components
-    label i1 = (i0 + 1) % 3;
-    label i2 = (i1 + 1) % 3;
-
-    scalar u1 = E0[i1];
-    scalar v1 = E0[i2];
-
-    scalar u2 = E1[i1];
-    scalar v2 = E1[i2];
-
-    scalar det = v2*u1 - u2*v1;
-
-    scalar u0 = pInter[i1] - baseVertex[i1];
-    scalar v0 = pInter[i2] - baseVertex[i2];
-
-    scalar alpha = 0;
-    scalar beta = 0;
-    bool hit = false;
-
-    if (Foam::mag(u1) < SMALL)
-    {
-        beta = u0/u2;
-        if ((beta >= 0) && (beta <= 1))
-        {
-            alpha = (v0 - beta*v2)/v1;
-            hit = ((alpha >= 0) && ((alpha + beta) <= 1));
-        }
-    }
-    else
-    {
-        beta = (v0*u1 - u0*v1)/det;
-        if ((beta >= 0) && (beta <= 1))
-        {
-            alpha = (u0 - beta*u2)/u1;
-            hit = ((alpha >= 0) && ((alpha + beta) <= 1));
-        }
-    }
-
-    return hit;
-}
-
-
-template<class Point, class PointRef>
 pointHit triangle<Point, PointRef>::nearestPoint
 (
     const Point& baseVertex,
@@ -447,19 +363,24 @@ inline pointHit triangle<Point, PointRef>::ray
         return inter;
     }
 
-    n /= area;
-
     vector q1 = q/Foam::mag(q);
 
     if (dir == intersection::CONTACT_SPHERE)
     {
+        n /= area;
+
         return ray(p, q1 - n, alg, intersection::VECTOR);
     }
 
     point pInter;
-
-    // Calculate planar hit tolerance as percentage of shortest edge length
-    bool hit = intersection(a_, E0, E1, n, p, q1, pInter);
+    bool hit;
+    {
+        // Reuse the fast ray intersection routine below in FULL_RAY
+        // mode since the original intersection routine has rounding problems.
+        pointHit fastInter = intersection(p, q1, intersection::FULL_RAY);
+        pInter = fastInter.rawPoint();
+        hit = fastInter.hit();
+    }
 
     scalar dist = q1 & (pInter - p);
 
@@ -502,9 +423,131 @@ inline pointHit triangle<Point, PointRef>::ray
         inter.setDistance(Foam::mag(pInter - p));
     }
 
+
     return inter;
 }
 
+
+// From "Fast, Minimum Storage Ray/Triangle Intersection"
+// Moeller/Trumbore.
+template<class Point, class PointRef>
+inline pointHit triangle<Point, PointRef>::intersection
+(
+    const point& orig,
+    const vector& dir,    
+    const intersection::algorithm alg
+) const
+{
+    const vector edge1 = b_ - a_;
+    const vector edge2 = c_ - a_;
+
+    // begin calculating determinant - also used to calculate U parameter
+    const vector pVec = dir ^ edge2;
+
+    // if determinant is near zero, ray lies in plane of triangle
+    const scalar det = edge1 & pVec;
+
+    // Initialise to miss
+    pointHit intersection(false, vector::zero, GREAT, false);
+
+    if (alg == intersection::VISIBLE)
+    {
+        // Culling branch
+        if (det < SMALL)
+        {
+            // return miss
+            return intersection;
+        }
+        /* calculate distance from a_ to ray origin */
+        const vector tVec = orig-a_;
+
+        /* calculate U parameter and test bounds */
+        scalar u = tVec & pVec;
+
+        if (u < 0.0 || u > det)
+        {
+            // return miss
+            return intersection;
+        }
+
+        /* prepare to test V parameter */
+        const vector qVec = tVec ^ edge1;
+
+        /* calculate V parameter and test bounds */
+        scalar v = dir & qVec;
+
+        if (v < 0.0 || u + v > det)
+        {
+            // return miss
+            return intersection;
+        }
+
+        /* calculate t, scale parameters, ray intersects triangle */
+        scalar t = edge2 & qVec;
+        scalar inv_det = 1.0 / det;
+        t *= inv_det;
+        u *= inv_det;
+        v *= inv_det;
+
+        intersection.setHit();
+        intersection.setPoint(a_ + u*edge1 + v*edge2);
+        intersection.setDistance(t);
+    }
+    else if (alg == intersection::HALF_RAY || alg == intersection::FULL_RAY)
+    {
+        // Non-culling branch
+        if (det > -SMALL && det < SMALL)
+        {
+            // return miss
+            return intersection;
+        }
+        const scalar inv_det = 1.0 / det;
+
+        /* calculate distance from a_ to ray origin */
+        const vector tVec = orig - a_;
+        /* calculate U parameter and test bounds */
+        const scalar u = (tVec & pVec)*inv_det;
+
+        if (u < 0.0 || u > 1.0)
+        {
+            // return miss
+            return intersection;
+        }
+        /* prepare to test V parameter */
+        const vector qVec = tVec ^ edge1;
+        /* calculate V parameter and test bounds */
+        const scalar v = (dir & qVec) * inv_det;
+
+        if (v < 0.0 || u + v > 1.0)
+        {
+            // return miss
+            return intersection;
+        }
+        /* calculate t, ray intersects triangle */
+        const scalar t = (edge2 & qVec) * inv_det;
+
+        if (alg == intersection::HALF_RAY && t < 0)
+        {
+            // return miss
+            return intersection;
+        }
+
+        intersection.setHit();
+        intersection.setPoint(a_ + u*edge1 + v*edge2);
+        intersection.setDistance(t);
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "triangle<Point, PointRef>::intersection(const point&"
+            ", const vector&, const intersection::algorithm)"
+        )   << "intersection only defined for VISIBLE, FULL_RAY or HALF_RAY"
+            << abort(FatalError);
+    }
+
+    return intersection;
+}
 
 
 template<class Point, class PointRef>

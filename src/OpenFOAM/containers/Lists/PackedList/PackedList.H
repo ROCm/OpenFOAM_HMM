@@ -164,9 +164,8 @@ public:
             //- Get value at index I
             inline unsigned int get(const label i) const;
 
-
-            //- Set value at index I
-            inline void set(const label i, const unsigned int val);
+            //- Set value at index I. Return true if value changed.
+            inline bool set(const label i, const unsigned int val);
 
 
     // Member operators

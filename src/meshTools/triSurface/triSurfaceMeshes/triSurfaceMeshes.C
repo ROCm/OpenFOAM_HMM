@@ -45,37 +45,6 @@ defineTypeNameAndDebug(triSurfaceMeshes, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::triSurfaceMeshes::calcTrees() const
-{
-    // Random number generator
-    Random rndGen(65431);
-
-    treesPtr_.reset(new PtrList<indexedOctree<treeDataTriSurface> >(size()));
-    PtrList<indexedOctree<treeDataTriSurface> >& trees = treesPtr_();
-
-    forAll(*this, i)
-    {
-        const triSurface& s = operator[](i);
-
-        // bb of surface
-        treeBoundBox bb(s.localPoints());
-
-        trees.set
-        (
-            i,
-            new indexedOctree<treeDataTriSurface>
-            (
-                treeDataTriSurface(s),
-                bb.extend(rndGen, 1E-3),    // slightly randomize bb
-                8,      // maxLevel
-                10,     // leafsize
-                3.0     // duplicity
-            )
-        );
-    }
-}
-
-
 // Calculate sum of distance to surfaces.
 Foam::scalar Foam::triSurfaceMeshes::sumDistSqr
 (
@@ -84,15 +53,13 @@ Foam::scalar Foam::triSurfaceMeshes::sumDistSqr
     const point& pt
 ) const
 {
-    const PtrList<indexedOctree<treeDataTriSurface> >& surfaceQueries = trees();
-
     scalar sum = 0;
 
     forAll(surfacesToTest, i)
     {
         label surfI = surfacesToTest[i];
 
-        pointIndexHit hit(surfaceQueries[surfI].findNearest(pt, initDistSqr));
+        pointIndexHit hit(operator[](surfI).findNearest(pt, initDistSqr));
 
         // Note: make it fall over if not hit.
         sum += magSqr(hit.hitPoint()-pt);
@@ -252,8 +219,7 @@ Foam::triSurfaceMeshes::triSurfaceMeshes
 )
 :
     PtrList<triSurfaceMesh>(names.size()),
-    allSurfaces_(identity(names.size())),
-    treesPtr_(NULL)
+    allSurfaces_(identity(names.size()))
 {
     forAll(names, i)
     {
@@ -262,20 +228,20 @@ Foam::triSurfaceMeshes::triSurfaceMeshes
 
         Info<< "Loading surface " << surfaceIO().name() << endl;
 
-        fileName fullPath = surfaceIO().filePath();
+        //fileName fullPath = surfaceIO().filePath();
+        //
+        //if (fullPath.size() == 0)
+        //{
+        //    FatalErrorIn
+        //    (
+        //        "triSurfaceMeshes::triSurfaceMeshes"
+        //        "(const IOobject&, const fileNameList&)"
+        //    )   << "Cannot load surface " << surfaceIO().name()
+        //        << " starting from path " << surfaceIO().path()
+        //        << exit(FatalError);
+        //}
 
-        if (fullPath.size() == 0)
-        {
-            FatalErrorIn
-            (
-                "triSurfaceMeshes::triSurfaceMeshes"
-                "(const IOobject&, const fileNameList&)"
-            )   << "Cannot load surface " << surfaceIO().name()
-                << " starting from path " << surfaceIO().path()
-                << exit(FatalError);
-        }
-
-        set(i, new triSurfaceMesh(surfaceIO(), fullPath));
+        set(i, new triSurfaceMesh(surfaceIO()));
 
         if (Pstream::master())
         {
@@ -285,12 +251,6 @@ Foam::triSurfaceMeshes::triSurfaceMeshes
             Pout.prefix() = oldPrefix;
         }
     }
-}
-
-
-void Foam::triSurfaceMeshes::clearOut()
-{
-    treesPtr_.reset(NULL);
 }
 
 
@@ -308,7 +268,7 @@ Foam::fileNameList Foam::triSurfaceMeshes::names() const
 
     forAll(surfNames, surfI)
     {
-        surfNames[surfI] = operator[](surfI).name();
+        surfNames[surfI] = operator[](surfI).IOobject::name();
     }
     return surfNames;
 }
@@ -323,13 +283,11 @@ Foam::label Foam::triSurfaceMeshes::findAnyIntersection
     pointIndexHit& hitInfo
 ) const
 {
-    const PtrList<indexedOctree<treeDataTriSurface> >& surfaceQueries = trees();
-
     forAll(surfaces, i)
     {
         label surfI = surfaces[i];
 
-        hitInfo = surfaceQueries[surfI].findLineAny(start, end);
+        hitInfo = operator[](surfI).findLineAny(start, end);
 
         if (hitInfo.hit())
         {
@@ -368,15 +326,13 @@ void Foam::triSurfaceMeshes::findAllIntersections
     List<pointIndexHit>& surfaceHitInfo
 ) const
 {
-    const PtrList<indexedOctree<treeDataTriSurface> >& surfaceQueries = trees();
-
-    DynamicList<label> hitSurfaces(surfaceQueries.size());
-    DynamicList<pointIndexHit> hitInfos(surfaceQueries.size());
-    DynamicList<scalar> hitDistSqr(surfaceQueries.size());
+    DynamicList<label> hitSurfaces(surfaces.size());
+    DynamicList<pointIndexHit> hitInfos(surfaces.size());
+    DynamicList<scalar> hitDistSqr(surfaces.size());
 
     const vector dirVec(end-start);
     const scalar magSqrDirVec(magSqr(dirVec));
-    const vector smallVec(1E-6*dirVec);
+    const vector smallVec(Foam::sqrt(SMALL)*dirVec);
 
     forAll(surfaces, i)
     {
@@ -388,7 +344,7 @@ void Foam::triSurfaceMeshes::findAllIntersections
         while (true)
         {
             // See if any intersection between pt and end
-            pointIndexHit inter = surfaceQueries[surfI].findLine(pt, end);
+            pointIndexHit inter = operator[](surfI).findLine(pt, end);
 
             if (!inter.hit())
             {
@@ -407,23 +363,26 @@ void Foam::triSurfaceMeshes::findAllIntersections
             }
         }
     }
-    hitSurfaces.shrink();
-    hitInfos.shrink();
-    hitDistSqr.shrink();
-
-    // Sort and transfer to arguments
-
     surfacesIndex.setSize(hitSurfaces.size());
     surfaceHitInfo.setSize(hitSurfaces.size());
 
-    // Sort from start to end.
-    SortableList<scalar> sortedDist(hitDistSqr);
-
-    forAll(sortedDist.indices(), newPos)
+    if (hitSurfaces.size() > 0)
     {
-        label oldPos = sortedDist.indices()[newPos];
-        surfacesIndex[newPos] = hitSurfaces[oldPos];
-        surfaceHitInfo[newPos] = hitInfos[oldPos];
+        // Sort and transfer to arguments
+
+        hitSurfaces.shrink();
+        hitInfos.shrink();
+        hitDistSqr.shrink();
+
+        // Sort from start to end.
+        SortableList<scalar> sortedDist(hitDistSqr);
+
+        forAll(sortedDist.indices(), newPos)
+        {
+            label oldPos = sortedDist.indices()[newPos];
+            surfacesIndex[newPos] = hitSurfaces[oldPos];
+            surfaceHitInfo[newPos] = hitInfos[oldPos];
+        }
     }
 }
 
@@ -461,8 +420,6 @@ void Foam::triSurfaceMeshes::findNearestIntersection
     pointIndexHit& hit2
 ) const
 {
-    const PtrList<indexedOctree<treeDataTriSurface> >& surfaceQueries = trees();
-
     surface1 = -1;
     // Initialize to endpoint
     hit1 = pointIndexHit(false, end, -1);
@@ -477,7 +434,7 @@ void Foam::triSurfaceMeshes::findNearestIntersection
         }
 
         // See if any intersection between start and current nearest
-        pointIndexHit inter = surfaceQueries[surfI].findLine
+        pointIndexHit inter = operator[](surfI).findLine
         (
             start,
             hit1.rawPoint()
@@ -509,7 +466,7 @@ void Foam::triSurfaceMeshes::findNearestIntersection
             }
 
             // See if any intersection between end and current nearest
-            pointIndexHit inter = surfaceQueries[surfI].findLine
+            pointIndexHit inter = operator[](surfI).findLine
             (
                 end,
                 hit2.rawPoint()
@@ -558,8 +515,6 @@ Foam::label Foam::triSurfaceMeshes::findNearest
     pointIndexHit& nearestHit
 ) const
 {
-    const PtrList<indexedOctree<treeDataTriSurface> >& surfaceQueries = trees();
-
     // nearest surface
     label minSurface = -1;
     scalar minDistSqr = Foam::sqr(GREAT);
@@ -570,7 +525,7 @@ Foam::label Foam::triSurfaceMeshes::findNearest
 
         pointIndexHit hit
         (
-            surfaceQueries[surfI].findNearest(pt, nearestDistSqr)
+            operator[](surfI).findNearest(pt, nearestDistSqr)
         );
 
         if (hit.hit())
@@ -734,7 +689,7 @@ Foam::surfaceLocation Foam::triSurfaceMeshes::facesIntersectionTrack
             if (debug)
             {
                 Pout<< "Nearest onto surface " << surfI
-                    << ' ' << operator[](surfI).name() << " : "
+                    << ' ' << operator[](surfI).IOobject::name() << " : "
                     << current.info() << " written as point " << vertI
                     << endl;
             }
@@ -769,7 +724,7 @@ Foam::surfaceLocation Foam::triSurfaceMeshes::facesIntersectionTrack
             if (debug)
             {
                 Pout<< "Nearest onto next surface " << nextSurfI
-                    << ' ' << operator[](nextSurfI).name() << " : "
+                    << ' ' << operator[](nextSurfI).IOobject::name() << " : "
                     << next.info() << endl;
             }
 
@@ -794,9 +749,10 @@ Foam::surfaceLocation Foam::triSurfaceMeshes::facesIntersectionTrack
                 if (debug)
                 {
                     Pout<< "Sliding along surface "
-                        << surfI << ' ' << operator[](surfI).name()
+                        << surfI << ' ' << operator[](surfI).IOobject::name()
                         << " in direction of "
-                        << nextSurfI << ' ' << operator[](nextSurfI).name()
+                        << nextSurfI << ' '
+                        << operator[](nextSurfI).IOobject::name()
                         << " stopped at " << current.info()
                         << " written as point " << vertI << endl;
                 }
@@ -849,8 +805,6 @@ Foam::pointIndexHit Foam::triSurfaceMeshes::facesIntersection
     const point& start
 ) const
 {
-    const PtrList<indexedOctree<treeDataTriSurface> >& surfaceQueries = trees();
-
     // Get four starting points. Take these as the projection of the
     // starting point onto the surfaces and the mid point
     List<point> nearest(surfacesToTest.size()+1);
@@ -863,7 +817,7 @@ Foam::pointIndexHit Foam::triSurfaceMeshes::facesIntersection
 
         pointIndexHit hit
         (
-            surfaceQueries[surfI].findNearest(start, initDistSqr)
+            operator[](surfI).findNearest(start, initDistSqr)
         );
 
         if (hit.hit())
@@ -879,7 +833,7 @@ Foam::pointIndexHit Foam::triSurfaceMeshes::facesIntersection
                 "(const labelList&, const scalar, const scalar, const point&)"
             )   << "Did not find point within distance "
                 << initDistSqr << " of starting point " << start
-                << " on surface " << operator[](surfI).name()
+                << " on surface " << operator[](surfI).IOobject::name()
                 << abort(FatalError);
         }
     }
@@ -914,7 +868,7 @@ Foam::pointIndexHit Foam::triSurfaceMeshes::facesIntersection
     if (converged)
     {
         // Project nearest onto 0th surface.
-        intersection = surfaceQueries[surfacesToTest[0]].findNearest
+        intersection = operator[](surfacesToTest[0]).findNearest
         (
             nearest[0],
             nearestDist[0]

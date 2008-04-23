@@ -23,36 +23,34 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::addPatchCellLayer
+    addPatchCellLayer
 
 Description
-    Adds layers of cells to outside of polyPatch.
-
-    Call setRefinement with offset vector for every patch point and number
-    of layers per patch face and number of layers per patch point.
-
+    Adds layers of cells to outside of polyPatch. Call setRefinement with
+    offset vector for every patch point and number of layers per patch face
+    and number of layers per patch point.
     - offset vector should be zero for any non-manifold point and synchronised
-      on coupled points before calling this.
+    on coupled points before calling this.
     - offset vector of zero will not add any points.
     - gets supplied the number of extruded layers both per face and per
       point. Usually the point nlayers is the max of surrounding face nlayers.
 
         point nlayers:
-        - (0)  : no extrusion. Any surrounding face being extruded becomes 'prism'
-        - (>0) : should be max of surrounding face nlayers.
+         0 : no extrusion. Any surrounding face being extruded becomes 'prism'
+        >0 : should be max of surrounding face nlayers.
 
     - differing face nlayers: 'termination' : (e.g. from 2 to 4 layers) match
       at original patch face side.
 
         E.g. 2 boundary faces on patches a,b. 2 layers for a, 3 for b.
 
-    @verbatim
         Was:
 
            a      b         <- patch of boundary face
         +------+------+
         |      |      |     <- original cells
         +------+------+
+
 
         Becomes:
 
@@ -63,16 +61,15 @@ Description
         +------+------+
         |      |      |     <- original cells
         +------+------+
-    @endverbatim
 
 
     - added faces get same patchID as face they are extruded from
     - 'side' faces (i.e. on the edge of pp) get the patchID of the
-      other patch they are connected to.
+    other patch they are connected to.
+
 
     E.g. 3 boundary faces on patches a,b. b gets extruded, a doesn't.
 
-    @verbatim
        a      b      b          <- patch of boundary face
     +------+------+------+
     |      |      |      |      <- cells
@@ -91,7 +88,6 @@ Description
     +------+------+------+      2. side-face gets patch a, not b.
     |      |      |      |
     +------+------+------+
-    @endverbatim
 
 
 SourceFiles
@@ -104,7 +100,7 @@ SourceFiles
 
 #include "labelList.H"
 #include "typeInfo.H"
-#include "pointField.H"
+#include "labelPair.H"
 #include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -116,6 +112,8 @@ namespace Foam
 class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
+class primitiveMesh;
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
                            Class addPatchCellLayer Declaration
@@ -123,6 +121,40 @@ class mapPolyMesh;
 
 class addPatchCellLayer
 {
+    // Private classes
+
+        // To combineReduce a labelList. Filters out duplicates.
+        class uniqueEqOp
+        {
+
+        public:
+
+            void operator()(labelList& x, const labelList& y) const
+            {
+                if (x.size() == 0)
+                {
+                    if (y.size() > 0)
+                    {
+                        x = y;
+                    }
+                }
+                else
+                {
+                    forAll(y, yi)
+                    {
+                        if (findIndex(x, y[yi]) == -1)
+                        {
+                            label sz = x.size();
+                            x.setSize(sz+1);
+                            x[sz] = y[yi];
+                        }
+                    }
+                }
+            }
+        };
+
+
+
     // Private data
 
         //- Reference to mesh
@@ -142,12 +174,22 @@ class addPatchCellLayer
 
     // Private Member Functions
 
+        //- Per patch edge the pp faces (in global indices) using it. Uses
+        //  uniqueEqOp() to remove duplicates.
+        labelListList calcGlobalEdgeFaces
+        (
+            const polyMesh& mesh,
+            const globalIndex& globalFaces,
+            const indirectPrimitivePatch& pp,
+            const labelList& meshEdges
+        );
+
         //- Get the face on the other side of the edge.
         static label nbrFace
         (
-            const indirectPrimitivePatch&,
-            const label patchEdgeI,
-            const label patchFaceI
+            const labelListList& edgeFaces,
+            const label edgeI,
+            const label faceI
         );
 
         //- Add vertex to face if unique.
@@ -156,21 +198,22 @@ class addPatchCellLayer
         bool sameEdgeNeighbour
         (
             const indirectPrimitivePatch& pp,
+            const labelListList& globalEdgeFaces,
             const boolList& doneEdge,
-            const label thisFaceI,
-            const label nbrFaceI,
+            const label thisGlobalFaceI,
+            const label nbrGlobalFaceI,
             const label edgeI
         ) const;
 
-        //- Get index on face that hasn't been handled yet.
-        void getStartEdge
+        labelPair getEdgeString
         (
             const indirectPrimitivePatch& pp,
+            const labelListList& globalEdgeFaces,
             const boolList& doneEdge,
             const label patchFaceI,
-            label& startFp,
-            label& nbrFaceI
+            const label globalFaceI
         ) const;
+
 
         //- Add face between layer-1 and layer.
         label addSideFace
@@ -254,6 +297,8 @@ public:
             //  Note: firstDisplacement has to be parallel synchronised before
             //        calling this routine. Only if all procs sharing a point
             //        get a cell should firstDisplacement be <> 0
+            //  Note: cells get added from owner cells of patch faces
+            //        (instead of e.g. from patch faces)
            void setRefinement
            (
                const scalar expansionRatio,
@@ -278,8 +323,8 @@ public:
                 (
                     1.0,            // expansion ration
                     pp,
-                    labelList(pp.nPoints(), nLayers),
                     labelList(pp.size(), nLayers),
+                    labelList(pp.nPoints(), nLayers),
                     overallDisplacement / nLayers,
                     meshMod
                 );
@@ -294,6 +339,15 @@ public:
                 const mapPolyMesh&,
                 const labelList& faceMap,   // new to old patch faces
                 const labelList& pointMap   // new to old patch points
+            );
+
+        // Helper
+
+            //- Per patch edge the corresponding mesh edge
+            static labelList calcMeshEdges
+            (
+                const primitiveMesh& mesh,
+                const indirectPrimitivePatch&
             );
 };
 

@@ -504,13 +504,22 @@ bool triSurface::read(Istream& is)
 
 
 // Read from file in given format
-bool triSurface::read(const fileName& name, const word& ext)
+bool triSurface::read(const fileName& name, const word& ext, const bool check)
 {
+    if (check && !exists(name))
+    {
+        FatalErrorIn
+        (
+            "triSurface::read(const fileName&, const word&, const bool)"
+        )   << "Cannnot read " << name << exit(FatalError);
+    }
+
     if (ext == "gz")
     {
         fileName unzipName = name.lessExt();
 
-        return read(unzipName, unzipName.ext());
+        // Do not check for existence. Let IFstream do the unzipping.
+        return read(unzipName, unzipName.ext(), false);
     }
     else if (ext == "ftr")
     {
@@ -1203,10 +1212,27 @@ void triSurface::write(const Time& d) const
 
 void triSurface::writeStats(Ostream& os) const
 {
+    // Calculate bounding box without any additional addressing
+    // Copy of treeBoundBox code. Cannot use meshTools from triSurface...
+    boundBox bb;
+    forAll(*this, triI)
+    {
+        const labelledTri& f = operator[](triI);
+
+        forAll(f, fp)
+        {
+            const point& pt = points()[f[fp]];
+            bb.min() = ::Foam::min(bb.min(), pt);
+            bb.max() = ::Foam::max(bb.max(), pt);
+        }
+    }
+
+    // Unfortunately nPoints constructs meshPoints() ...
+
     os  << "Triangles    : " << size() << endl
-        << "Edges        : " << nEdges() << endl
+        //<< "Edges        : " << nEdges() << endl
         << "Vertices     : " << nPoints() << endl
-        << "Bounding Box : " << boundBox(localPoints(), false) << endl;
+        << "Bounding Box : " << bb << endl;
 }
 
 

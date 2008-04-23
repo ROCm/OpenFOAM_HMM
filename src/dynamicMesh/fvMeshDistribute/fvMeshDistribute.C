@@ -196,29 +196,38 @@ void Foam::fvMeshDistribute::printMeshInfo(const fvMesh& mesh)
             << endl;
     }
 
-    Pout<< "PointZones:" << endl;
-    forAll(mesh.pointZones(), zoneI)
+    if (mesh.pointZones().size() > 0)
     {
-        const pointZone& pz = mesh.pointZones()[zoneI];
-        Pout<< "    " << zoneI << " name:" << pz.name()
-            << " size:" << pz.size()
-            << endl;
+        Pout<< "PointZones:" << endl;
+        forAll(mesh.pointZones(), zoneI)
+        {
+            const pointZone& pz = mesh.pointZones()[zoneI];
+            Pout<< "    " << zoneI << " name:" << pz.name()
+                << " size:" << pz.size()
+                << endl;
+        }
     }
-    Pout<< "FaceZones:" << endl;
-    forAll(mesh.faceZones(), zoneI)
+    if (mesh.faceZones().size() > 0)
     {
-        const faceZone& fz = mesh.faceZones()[zoneI];
-        Pout<< "    " << zoneI << " name:" << fz.name()
-            << " size:" << fz.size()
-            << endl;
+        Pout<< "FaceZones:" << endl;
+        forAll(mesh.faceZones(), zoneI)
+        {
+            const faceZone& fz = mesh.faceZones()[zoneI];
+            Pout<< "    " << zoneI << " name:" << fz.name()
+                << " size:" << fz.size()
+                << endl;
+        }
     }
-    Pout<< "CellZones:" << endl;
-    forAll(mesh.cellZones(), zoneI)
+    if (mesh.cellZones().size() > 0)
     {
-        const cellZone& cz = mesh.cellZones()[zoneI];
-        Pout<< "    " << zoneI << " name:" << cz.name()
-            << " size:" << cz.size()
-            << endl;
+        Pout<< "CellZones:" << endl;
+        forAll(mesh.cellZones(), zoneI)
+        {
+            const cellZone& cz = mesh.cellZones()[zoneI];
+            Pout<< "    " << zoneI << " name:" << cz.name()
+                << " size:" << cz.size()
+                << endl;
+        }
     }
 }
 
@@ -269,7 +278,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
 
     if (nonEmptyPatchI == -1)
     {
-        FatalErrorIn("findNonEmptyPatch() const")
+        FatalErrorIn("fvMeshDistribute::findNonEmptyPatch() const")
             << "Cannot find a patch which is neither of type empty nor"
             << " coupled in patches " << patches.names() << endl
             << "There has to be at least one such patch for"
@@ -297,7 +306,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
         }
         else if (procPatchI != -1)
         {
-            FatalErrorIn("findNonEmptyPatch() const")
+            FatalErrorIn("fvMeshDistribute::findNonEmptyPatch() const")
                 << "Processor patches should be at end of patch list."
                 << endl
                 << "Have processor patch " << procPatchI
@@ -328,7 +337,7 @@ Foam::label Foam::fvMeshDistribute::addProcPatch
 
     if (polyPatches.findPatchID(patchName) != -1)
     {
-        FatalErrorIn("addProcPatch(const word&, const label)")
+        FatalErrorIn("fvMeshDistribute::addProcPatch(const word&, const label)")
             << "Cannot create patch " << patchName << " since already exists."
             << nl
             << "Current patch names:" << polyPatches.names()
@@ -385,7 +394,7 @@ void Foam::fvMeshDistribute::deleteTrailingPatch()
 
     if (polyPatches.size() == 0)
     {
-        FatalErrorIn("deleteTrailingPatch(fvMesh&)")
+        FatalErrorIn("fvMeshDistribute::deleteTrailingPatch(fvMesh&)")
             << "No patches in mesh"
             << abort(FatalError);
     }
@@ -403,7 +412,7 @@ void Foam::fvMeshDistribute::deleteTrailingPatch()
 
     if (nFaces != 0)
     {
-        FatalErrorIn("deleteTrailingPatch()")
+        FatalErrorIn("fvMeshDistribute::deleteTrailingPatch()")
             << "There are still " << nFaces << " faces in patch to be deleted "
             << sz-1 << ' ' << polyPatches[sz-1].name()
             << abort(FatalError);
@@ -563,10 +572,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
     {
         mesh_.movePoints(map().preMotionPoints());
     }
-    else
-    {
-        mesh_.clearOut();
-    }
 
     // Adapt constructMaps.
 
@@ -638,10 +643,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        mesh_.clearOut();
     }
 
     // Adapt constructMaps for merged points.
@@ -974,10 +975,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        mesh_.clearOut();
     }
 
     return map;
@@ -1468,6 +1465,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // during topo changes and we have to guarantee that all the fields
     // can be sent.
     mesh_.clearOut();
+    mesh_.resetMotion();
 
     const wordList volScalars(mesh_.names(volScalarField::typeName));
     checkEqualWordList(volScalars);

@@ -37,7 +37,7 @@ namespace Foam
     defineTypeNameAndDebug(coupledPolyPatch, 0);
 }
 
-Foam::scalar Foam::coupledPolyPatch::matchTol_ = 1E-3;
+Foam::scalar Foam::coupledPolyPatch::matchTol = 1E-3;
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -83,7 +83,7 @@ void Foam::coupledPolyPatch::writeOBJ
 void Foam::coupledPolyPatch::writeOBJ
 (
     const fileName& fName,
-    const faceList& faces,
+    const UList<face>& faces,
     const pointField& points
 )
 {
@@ -118,7 +118,7 @@ void Foam::coupledPolyPatch::writeOBJ
 
 Foam::pointField Foam::coupledPolyPatch::calcFaceCentres
 (
-    const faceList& faces,
+    const UList<face>& faces,
     const pointField& points
 )
 {
@@ -135,7 +135,7 @@ Foam::pointField Foam::coupledPolyPatch::calcFaceCentres
 
 Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 (
-    const faceList& faces,
+    const UList<face>& faces,
     const pointField& points
 )
 {
@@ -189,7 +189,7 @@ Foam::label Foam::coupledPolyPatch::whichPatch
 
 Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
 (
-    const faceList& faces,
+    const UList<face>& faces,
     const pointField& points,
     const pointField& faceCentres
 )
@@ -203,13 +203,13 @@ Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
 
         const face& f = faces[faceI];
 
-        scalar maxLen = -GREAT;
+        scalar maxLenSqr = -GREAT;
 
         forAll(f, fp)
         {
-            maxLen = max(maxLen, mag(points[f[fp]] - cc));
+            maxLenSqr = max(maxLenSqr, magSqr(points[f[fp]] - cc));
         }
-        tols[faceI] = matchTol_ * maxLen;
+        tols[faceI] = matchTol * Foam::sqrt(maxLenSqr);
     }
     return tols;
 }
@@ -251,68 +251,29 @@ Foam::label Foam::coupledPolyPatch::getRotation
 
 void Foam::coupledPolyPatch::calcTransformTensors
 (
-    const vector& Cf,
-    const vector& Cr,
-    const vector& nf,
-    const vector& nr
-) const
-{
-    if (debug)
-    {
-        Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
-            << "    nf:" << nf << nl
-            << "    nr:" << nr << nl
-            << "    mag(nf&nr):" << mag(nf & nr) << nl
-            << "    Cf:" << Cf << nl
-            << "    Cr:" << Cr << endl;
-    }
-
-    if (mag(nf & nr) < 1 - SMALL)
-    {
-        separation_.setSize(0);
-
-        forwardT_ = tensorField(1, rotationTensor(-nr, nf));
-        reverseT_ = tensorField(1, rotationTensor(nf, -nr));
-    }
-    else
-    {
-        forwardT_.setSize(0);
-        reverseT_.setSize(0);
-
-        vector separation = (nf & (Cr - Cf))*nf;
-
-        if (mag(separation) > SMALL)
-        {
-            separation_ = vectorField(1, separation);
-        }
-        else
-        {
-            separation_.setSize(0);
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "    separation_:" << separation_ << nl
-            << "    forwardT size:" << forwardT_.size() << endl;
-    }
-}
-
-
-void Foam::coupledPolyPatch::calcTransformTensors
-(
     const vectorField& Cf,
     const vectorField& Cr,
     const vectorField& nf,
-    const vectorField& nr
+    const vectorField& nr,
+    const scalarField& smallDist,
+    const scalar absTol
 ) const
 {
     if (debug)
     {
         Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
-            << "    size:" << size() << nl
+            << "    (half)size:" << Cf.size() << nl
+            << "    absTol:" << absTol << nl
             << "    sum(mag(nf & nr)):" << sum(mag(nf & nr)) << endl;
     }
+
+    // Tolerance calculation.
+    // - normal calculation: assume absTol is the absolute error in a
+    // single normal/transformation calculation. Consists both of numerical
+    // precision (on the order of SMALL and of writing precision
+    // (from e.g. decomposition)
+    // Then the overall error of summing the normals is sqrt(size())*absTol
+    // - separation calculation: pass in from the outside an allowable error.
 
     if (size() == 0)
     {
@@ -321,39 +282,104 @@ void Foam::coupledPolyPatch::calcTransformTensors
         forwardT_ = I;
         reverseT_ = I;
     }
-    else if (sum(mag(nf & nr)) < size() - 1E-12)
-    {
-        separation_.setSize(0);
-
-        forwardT_.setSize(size());
-        reverseT_.setSize(size());
-
-        forAll (forwardT_, facei)
-        {
-            forwardT_[facei] = rotationTensor(-nr[facei], nf[facei]);
-            reverseT_[facei] = rotationTensor(nf[facei], -nr[facei]);
-        }
-
-        if (sum(mag(forwardT_ - forwardT_[0])) < 1E-12)
-        {
-            forwardT_.setSize(1);
-            reverseT_.setSize(1);
-        }
-    }
     else
     {
-        forwardT_.setSize(0);
-        reverseT_.setSize(0);
+        scalar error = absTol*Foam::sqrt(1.0*Cf.size());
 
-        separation_ = (nf&(Cr - Cf))*nf;
-
-        if (sum(mag(separation_))/size() < 1E-12)
+        if (debug)
         {
-            separation_.setSize(0);
+            Pout<< "    error:" << error << endl;
         }
-        else if (sum(mag(separation_ - separation_[0]))/size() < 1E-12)
+
+        if (sum(mag(nf & nr)) < Cf.size()-error)
         {
-            separation_.setSize(1);
+            // Rotation, no separation
+
+            separation_.setSize(0);
+
+            forwardT_.setSize(Cf.size());
+            reverseT_.setSize(Cf.size());
+
+            forAll (forwardT_, facei)
+            {
+                forwardT_[facei] = rotationTensor(-nr[facei], nf[facei]);
+                reverseT_[facei] = rotationTensor(nf[facei], -nr[facei]);
+            }
+
+            if (debug)
+            {
+                Pout<< "    sum(mag(forwardT_ - forwardT_[0])):"
+                    << sum(mag(forwardT_ - forwardT_[0]))
+                    << endl;
+            }
+
+            if (sum(mag(forwardT_ - forwardT_[0])) < error)
+            {
+                forwardT_.setSize(1);
+                reverseT_.setSize(1);
+            }
+        }
+        else
+        {
+            forwardT_.setSize(0);
+            reverseT_.setSize(0);
+
+            separation_ = (nf&(Cr - Cf))*nf;
+
+            // Three situations:
+            // - separation is zero. No separation.
+            // - separation is same. Single separation vector.
+            // - separation differs per face. Separation vectorField.
+
+            // Check for different separation per face
+            bool sameSeparation = true;
+
+            forAll(separation_, facei)
+            {
+                scalar smallSqr = sqr(smallDist[facei]);
+
+                if (magSqr(separation_[facei] - separation_[0]) > smallSqr)
+                {
+                    if (debug)
+                    {
+                        Pout<< "    separation " << separation_[facei]
+                            << " at " << facei
+                            << " differs from separation[0] " << separation_[0]
+                            << " by more than local tolerance "
+                            << smallDist[facei]
+                            << ". Assuming non-uniform separation." << endl;
+                    }
+                    sameSeparation = false;
+                    break;
+                }
+            }
+
+            if (sameSeparation)
+            {
+                // Check for zero separation (at 0 so everywhere)
+                if (magSqr(separation_[0]) < sqr(smallDist[0]))
+                {
+                    if (debug)
+                    {
+                        Pout<< "    separation " << mag(separation_[0])
+                            << " less than local tolerance " << smallDist[0]
+                            << ". Assuming zero separation." << endl;
+                    }
+
+                    separation_.setSize(0);
+                }
+                else
+                {
+                    if (debug)
+                    {
+                        Pout<< "    separation " << mag(separation_[0])
+                            << " more than local tolerance " << smallDist[0]
+                            << ". Assuming uniform separation." << endl;
+                    }
+
+                    separation_.setSize(1);
+                }
+            }
         }
     }
 

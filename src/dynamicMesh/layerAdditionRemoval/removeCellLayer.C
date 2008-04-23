@@ -78,7 +78,7 @@ bool Foam::layerAdditionRemoval::validCollapse() const
             << nBoundaryHits << endl;
     }
 
-    if (nBoundaryHits > 0)
+    if (returnReduce(nBoundaryHits, sumOp<label>()) > 0)
     {
         return false;
     }

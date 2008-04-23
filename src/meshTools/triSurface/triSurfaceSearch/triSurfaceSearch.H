@@ -49,8 +49,8 @@ namespace Foam
 
 // Forward declaration of classes
 class triSurface;
-class octreeDataTriSurface;
-template<class Type> class octree;
+class treeDataTriSurface;
+template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
                            Class triSurfaceSearch Declaration
@@ -64,7 +64,7 @@ class triSurfaceSearch
         const triSurface& surface_;
 
         //- Octree for searches
-        const octree<octreeDataTriSurface>* treePtr_;
+        autoPtr<indexedOctree<treeDataTriSurface> > treePtr_;
 
 
     // Private Member Functions
@@ -89,16 +89,13 @@ public:
         //- Construct from surface. Holds reference to surface!
         triSurfaceSearch(const triSurface&);
 
-    // Destructor
-
-        ~triSurfaceSearch();
 
 
     // Member Functions
 
-        const octree<octreeDataTriSurface>& tree() const
+        const indexedOctree<treeDataTriSurface>& tree() const
         {
-            return *treePtr_;
+            return treePtr_();
         }
 
         const triSurface& surface() const

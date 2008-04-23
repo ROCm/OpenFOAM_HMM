@@ -21,6 +21,8 @@ coordinateSystems/coordinateRotation/coordinateRotation.C
 coordinateSystems/coordinateRotation/EulerCoordinateRotation.C
 coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C
 
+edgeFaceCirculator/edgeFaceCirculator.C
+
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
 
@@ -115,6 +117,10 @@ triSurface/octreeData/octreeDataTriSurface.C
 triSurface/octreeData/octreeDataTriSurfaceTreeLeaf.C
 
 triSurface/triangleFuncs/triangleFuncs.C
+
+triSurface/searchableSurface/searchableSurface.C
+triSurface/searchableSurface/triSurfaceMesh.C
+triSurface/searchableSurface/searchableBox.C
 
 triSurface/surfaceFeatures/surfaceFeatures.C
 

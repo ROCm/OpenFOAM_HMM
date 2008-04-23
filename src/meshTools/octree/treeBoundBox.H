@@ -26,7 +26,25 @@ Class
     Foam::treeBoundBox
 
 Description
-    Standard boundBox with extra functionality for use in octree.
+    Standard boundBox + extra functionality for use in octree.
+
+    Numbering of corner points is according to octant numbering.
+
+    On the back plane (z=0):
+
+    Y
+    ^
+    |
+    +--------+
+    |2      3|
+    |        |
+    |        |
+    |        |
+    |0      1|
+    +--------+->X
+
+    For the front plane add 4 to the point labels.
+
 
 SourceFiles
     treeBoundBoxI.H
@@ -40,7 +58,7 @@ SourceFiles
 #include "boundBox.H"
 #include "direction.H"
 #include "pointField.H"
-#include "edgeList.H"
+#include "faceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,21 +80,66 @@ public:
 
     // Static data members
 
-        static treeBoundBox greatBox;
+        static const treeBoundBox greatBox;
 
-        // Bits used for octant coding
-        static const direction RIGHTHALF   = 0x1 << 0;
-        static const direction TOPHALF     = 0x1 << 1;
-        static const direction FRONTHALF   = 0x1 << 2;
+        //- Bits used for octant/point coding. Every octant/corner point
+        //  is the combination of three faces.
+        enum octantBit
+        {
+            RIGHTHALF   = 0x1 << 0,
+            TOPHALF     = 0x1 << 1,
+            FRONTHALF   = 0x1 << 2
+        };
 
-        // Bits used for face coding
-        static const direction NOFACE     = 0;
-        static const direction LEFTBIT    = 0x1 << 0;
-        static const direction RIGHTBIT   = 0x1 << 1;
-        static const direction BELOWBIT   = 0x1 << 2;
-        static const direction ABOVEBIT   = 0x1 << 3;
-        static const direction BEHINDBIT  = 0x1 << 4;
-        static const direction INFRONTBIT = 0x1 << 5;
+        //- Face codes
+        enum faceId
+        {
+            LEFT   = 0,
+            RIGHT  = 1,
+            BOTTOM = 2,
+            TOP    = 3,
+            BACK   = 4,
+            FRONT  = 5
+        };
+
+        //- Bits used for face coding
+        enum faceBit
+        {
+            NOFACE    = 0,
+            LEFTBIT   = 0x1 << LEFT,
+            RIGHTBIT  = 0x1 << RIGHT,
+            BOTTOMBIT = 0x1 << BOTTOM,
+            TOPBIT    = 0x1 << TOP,
+            BACKBIT   = 0x1 << BACK,
+            FRONTBIT  = 0x1 << FRONT,
+        };
+
+        //- Edges codes.
+        //  E01 = edge between 0 and 1.
+        enum edgeId
+        {
+            E01 = 0,
+            E13 = 1,
+            E23 = 2,
+            E02 = 3,
+
+            E45 = 4,
+            E57 = 5,
+            E67 = 6,
+            E46 = 7,
+
+            E04 = 8,
+            E15 = 9,
+            E37 = 10,
+            E26 = 11
+        };
+
+        //- Face to point addressing
+        static const faceList faces;
+
+        //- Edge to point addressing
+        static const edgeList edges;
+
 
         //- Face on which neighbour is
         static direction neighbourFaceBits(const label&);
@@ -95,7 +158,10 @@ public:
 
         //- Construct as the bounding box of the given pointField. Local
         //  processor domain only (no reduce as in boundBox)
-        treeBoundBox(const pointField& points);
+        treeBoundBox(const UList<point>& points);
+
+        //- Construct as subset of points
+        treeBoundBox(const UList<point>&, const labelList& meshPoints);
 
         //- Construct from Istream
         treeBoundBox(Istream&);
@@ -106,28 +172,28 @@ public:
         // Access
 
             //- Smallest of length,height,width
-            scalar minDim() const;
+            inline scalar minDim() const;
 
             //- Largest of length,height,width
-            scalar maxDim() const;
+            inline scalar maxDim() const;
 
             //- Average of length,height,width
-            scalar avgDim() const;
+            inline scalar avgDim() const;
 
             //- Typical dimension length,height,width
-            scalar typDim() const;
+            inline scalar typDim() const;
 
-            //- vertex coordinates
+            //- vertex coordinates. In octant coding.
             pointField points() const;
-
-            //- edges expressed in terms of points()
-            edgeList edges() const;
 
 
         // Check
 
+            //- Corner point given octant
+            inline point corner(const direction) const;
+
             //- Calculates midpoint
-            point mid() const;
+            inline point mid() const;
 
             //- Sub box given by octant number. Midpoint calculated.
             treeBoundBox subBbox(const direction) const;
@@ -177,6 +243,15 @@ public:
                 const point& sample,
                 bool& onEdge
             );
+
+            //- Calculates optimal order to look for nearest to sample. First
+            //  will be the octant containing the sample, second the octant
+            //  with boundary nearest to the sample etc.
+            inline void searchOrder
+            (
+	         const point& sample,
+                 FixedList<direction, 8>& octantOrder 
+            ) const;
 
             //- Intersects other boundingbox?
             inline bool intersects(const treeBoundBox&) const;

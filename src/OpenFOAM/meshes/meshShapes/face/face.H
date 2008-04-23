@@ -188,7 +188,7 @@ public:
         //- Return potential intersection with face with a ray starting
         //  at p, direction n (does not need to be normalized)
         //  Does face-center decomposition and returns triangle intersection
-        //  point closest to p.
+        //  point closest to p. Face-center is calculated from point average.
         //  For a hit, the distance is signed.  Positive number
         //  represents the point in front of triangle
         //  In case of miss the point is the nearest point on the face
@@ -204,6 +204,19 @@ public:
             const pointField& meshPoints,
             const intersection::algorithm alg = intersection::FULL_RAY,
             const intersection::direction dir = intersection::VECTOR
+        ) const;
+
+        //- Fast intersection with a ray.
+        //  For a hit, the pointHit.distance() is the line parameter t :
+        //  intersection=p+t*q. Only defined for FULL_RAY or
+        //  HALF_RAY.
+        pointHit intersection
+        (
+            const point& p,
+            const vector& q,
+            const point& ctr,
+            const pointField& meshPoints,
+            const intersection::algorithm alg
         ) const;
 
         //- Return nearest point to face

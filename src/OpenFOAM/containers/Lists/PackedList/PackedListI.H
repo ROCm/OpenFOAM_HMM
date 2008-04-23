@@ -151,7 +151,7 @@ inline unsigned int PackedList<nBits>::operator[](const label i) const
 
 // Set value at i
 template<int nBits>
-inline void PackedList<nBits>::set(const label i, const unsigned int val)
+inline bool PackedList<nBits>::set(const label i, const unsigned int val)
 {
 #   ifdef DEBUGList
     checkIndex(i);
@@ -175,7 +175,11 @@ inline void PackedList<nBits>::set(const label i, const unsigned int val)
 
     unsigned int& elem = List<unsigned int>::operator[](intIndex(i));
 
+    unsigned int oldElem = elem;
+
     elem = (elem & ~shiftedMask) | shiftedVal;
+
+    return elem != oldElem;
 }
 
 

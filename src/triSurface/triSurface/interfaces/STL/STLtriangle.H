@@ -52,7 +52,7 @@ class STLtriangle
     // Private data
 
         STLpoint normal_, a_, b_, c_;
-        short region_;
+        unsigned short region_;
 
 
 public:
@@ -69,7 +69,7 @@ public:
             const STLpoint& a,
             const STLpoint& b,
             const STLpoint& c,
-            short region
+            unsigned short region
         );
 
         //- Construct from istream (read binary)
@@ -83,7 +83,7 @@ public:
             inline const STLpoint& a() const;
             inline const STLpoint& b() const;
             inline const STLpoint& c() const;
-            inline short region() const;
+            inline unsigned short region() const;
 
         // Read
 

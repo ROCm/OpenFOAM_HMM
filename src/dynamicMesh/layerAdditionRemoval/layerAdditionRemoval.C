@@ -197,11 +197,8 @@ bool Foam::layerAdditionRemoval::changeTopology() const
     // Layer removal:
     //     When the min thickness falls below the threshold, trigger removal.
 
-    const labelList& mc =
-        topoChanger().mesh().faceZones()[faceZoneID_.index()].masterCells();
-
-    const labelList& mf = topoChanger().mesh().faceZones()[faceZoneID_.index()];
-
+    const faceZone& fz = topoChanger().mesh().faceZones()[faceZoneID_.index()];
+    const labelList& mc = fz.masterCells();
 
     const scalarField& V = topoChanger().mesh().cellVolumes();
     const vectorField& S = topoChanger().mesh().faceAreas();
@@ -218,17 +215,62 @@ bool Foam::layerAdditionRemoval::changeTopology() const
     scalar minDelta = GREAT;
     scalar maxDelta = 0;
 
-    scalar curDelta;
-
-    forAll (mf, faceI)
+    forAll (fz, faceI)
     {
-        curDelta = V[mc[faceI]]/mag(S[mf[faceI]]);
+        scalar curDelta = V[mc[faceI]]/mag(S[fz[faceI]]);
         avgDelta += curDelta;
         minDelta = min(minDelta, curDelta);
         maxDelta = max(maxDelta, curDelta);
     }
 
-    avgDelta /= mf.size();
+    avgDelta /= fz.size();
+
+    ////MJ Alternative thickness determination
+    //{
+    //    // Edges on layer.
+    //    const Map<label>& zoneMeshPointMap = fz().meshPointMap();
+    //
+    //    label nDelta = 0;
+    //
+    //    // Edges with only one point on zone
+    //    const polyMesh& mesh = topoChanger().mesh();
+    //
+    //    forAll(mc, faceI)
+    //    {
+    //        const cell& cFaces = mesh.cells()[mc[faceI]];
+    //        const edgeList cellEdges(cFaces.edges(mesh.faces()));
+    //
+    //        forAll(cellEdges, i)
+    //        {
+    //            const edge& e = cellEdges[i];
+    //
+    //            if (zoneMeshPointMap.found(e[0]))
+    //            {
+    //                if (!zoneMeshPointMap.found(e[1]))
+    //                {
+    //                    scalar curDelta = e.mag(mesh.points());
+    //                    avgDelta += curDelta;
+    //                    nDelta++;
+    //                    minDelta = min(minDelta, curDelta);
+    //                    maxDelta = max(maxDelta, curDelta);
+    //                }
+    //            }
+    //            else
+    //            {
+    //                if (zoneMeshPointMap.found(e[1]))
+    //                {
+    //                    scalar curDelta = e.mag(mesh.points());
+    //                    avgDelta += curDelta;
+    //                    nDelta++;
+    //                    minDelta = min(minDelta, curDelta);
+    //                    maxDelta = max(maxDelta, curDelta);
+    //                }
+    //            }
+    //        }
+    //    }
+    //
+    //    avgDelta /= nDelta;
+    //}
 
     if (debug)
     {

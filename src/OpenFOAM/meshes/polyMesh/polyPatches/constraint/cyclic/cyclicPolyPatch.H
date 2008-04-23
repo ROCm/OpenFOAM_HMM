@@ -224,10 +224,12 @@ public:
 
     // Member Functions
 
-        //- Return connected points (in patch local point indexing)
+        //- Return connected points (in patch local point indexing). Demand
+        //  driven calculation. Does primitivePatch::clearOut after calculation!
         const edgeList& coupledPoints() const;
 
-        //- Return connected edges (in patch local edge indexing)
+        //- Return connected edges (in patch local edge indexing). Demand
+        //  driven calculation. Does primitivePatch::clearOut after calculation!
         const edgeList& coupledEdges() const;
 
 

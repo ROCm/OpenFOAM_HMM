@@ -157,7 +157,10 @@ void Foam::syncTools::syncPointMap
 
                     if (iter != pointValues.end())
                     {
-                        patchInfo.insert(nbrPts[i], iter());
+                        if (nbrPts[i] >= 0)
+                        {
+                            patchInfo.insert(nbrPts[i], iter());
+                        }
                     }
                 }
 
@@ -187,7 +190,7 @@ void Foam::syncTools::syncPointMap
                 if (!procPatch.parallel())
                 {
                     hasTransformation = true;
-                    transformList(procPatch.reverseT(), nbrPatchInfo);
+                    transformList(procPatch.forwardT(), nbrPatchInfo);
                 }
                 else if (applySeparation && procPatch.separated())
                 {
@@ -227,8 +230,8 @@ void Foam::syncTools::syncPointMap
                 refCast<const cyclicPolyPatch>(patches[patchI]);
             checkTransform(cycPatch, applySeparation);
 
-            const labelList& meshPts = cycPatch.meshPoints();
             const edgeList& coupledPoints = cycPatch.coupledPoints();
+            const labelList& meshPts = cycPatch.meshPoints();
 
             // Extract local values. Create map from nbrPoint to value.
             Map<T> half0Values(meshPts.size() / 20);
@@ -258,7 +261,8 @@ void Foam::syncTools::syncPointMap
             if (!cycPatch.parallel())
             {
                 hasTransformation = true;
-                transformList(cycPatch.forwardT(), half0Values);
+                transformList(cycPatch.reverseT(), half0Values);
+                transformList(cycPatch.forwardT(), half1Values);
             }
             else if (applySeparation && cycPatch.separated())
             {
@@ -315,137 +319,134 @@ void Foam::syncTools::syncPointMap
         {
             WarningIn
             (
-                "syncTools<class T, class CombineOp>::syncPointList"
-                "(const polyMesh&, UList<T>&, const CombineOp&, const T&"
+                "syncTools<class T, class CombineOp>::syncPointMap"
+                "(const polyMesh&, Map<T>&, const CombineOp&"
                 ", const bool)"
             )   << "There are decomposed cyclics in this mesh with"
                 << " transformations." << endl
                 << "This is not supported. The result will be incorrect"
                 << endl;
         }
-        else
+        // meshPoint per local index
+        const labelList& sharedPtLabels = pd.sharedPointLabels();
+        // global shared index per local index
+        const labelList& sharedPtAddr = pd.sharedPointAddr();
+
+        // Values on shared points. Keyed on global shared index.
+        Map<T> sharedPointValues(sharedPtAddr.size());
+
+
+        // Fill my entries in the shared points
+        forAll(sharedPtLabels, i)
         {
-            // meshPoint per local index
-            const labelList& sharedPtLabels = pd.sharedPointLabels();
-            // global shared index per local index
-            const labelList& sharedPtAddr = pd.sharedPointAddr();
+            label meshPointI = sharedPtLabels[i];
 
-            // Values on shared points. Keyed on global shared index.
-            Map<T> sharedPointValues(sharedPtAddr.size());
+            typename Map<T>::const_iterator fnd =
+                pointValues.find(meshPointI);
 
-
-            // Fill my entries in the shared points
-            forAll(sharedPtLabels, i)
+            if (fnd != pointValues.end())
             {
-                label meshPointI = sharedPtLabels[i];
-
-                typename Map<T>::const_iterator fnd =
-                    pointValues.find(meshPointI);
-
-                if (fnd != pointValues.end())
-                {
-                    combine
-                    (
-                        sharedPointValues,
-                        cop,
-                        sharedPtAddr[i],    // index
-                        fnd()               // value
-                    );
-                }
+                combine
+                (
+                    sharedPointValues,
+                    cop,
+                    sharedPtAddr[i],    // index
+                    fnd()               // value
+                );
             }
+        }
 
-            // Reduce on master.
+        // Reduce on master.
 
-            if (Pstream::parRun())
+        if (Pstream::parRun())
+        {
+            if (Pstream::master())
             {
-                if (Pstream::master())
+                // Receive the edges using shared points from the slave.
+                for
+                (
+                    int slave=Pstream::firstSlave();
+                    slave<=Pstream::lastSlave();
+                    slave++
+                )
                 {
-                    // Receive the edges using shared points from the slave.
-                    for
-                    (
-                        int slave=Pstream::firstSlave();
-                        slave<=Pstream::lastSlave();
-                        slave++
-                    )
-                    {
-                        IPstream fromSlave(Pstream::blocking, slave);
-                        Map<T> nbrValues(fromSlave);
+                    IPstream fromSlave(Pstream::blocking, slave);
+                    Map<T> nbrValues(fromSlave);
 
-                        // Merge neighbouring values with my values
-                        forAllConstIter(typename Map<T>, nbrValues, iter)
-                        {
-                            combine
-                            (
-                                sharedPointValues,
-                                cop,
-                                iter.key(), // edge
-                                iter()      // value
-                            );
-                        }
-                    }
-
-                    // Send back
-                    for
-                    (
-                        int slave=Pstream::firstSlave();
-                        slave<=Pstream::lastSlave();
-                        slave++
-                    )
+                    // Merge neighbouring values with my values
+                    forAllConstIter(typename Map<T>, nbrValues, iter)
                     {
-                        OPstream toSlave(Pstream::blocking, slave);
-                        toSlave << sharedPointValues;
-                    }
-                }
-                else
-                {
-                    // Send to master
-                    {
-                        OPstream toMaster
+                        combine
                         (
-                            Pstream::blocking,
-                            Pstream::masterNo()
+                            sharedPointValues,
+                            cop,
+                            iter.key(), // edge
+                            iter()      // value
                         );
-                        toMaster << sharedPointValues;
-                    }
-                    // Receive merged values
-                    {
-                        IPstream fromMaster
-                        (
-                            Pstream::blocking,
-                            Pstream::masterNo()
-                        );
-                        fromMaster >> sharedPointValues;
                     }
                 }
-            }
 
-
-            // Merge sharedPointValues (keyed on sharedPointAddr) into
-            // pointValues (keyed on mesh points).
-
-            // Map from global shared index to meshpoint
-            Map<label> sharedToMeshPoint(2*sharedPtAddr.size());
-            forAll(sharedPtAddr, i)
-            {
-                sharedToMeshPoint.insert(sharedPtAddr[i], sharedPtLabels[i]);
-            }
-
-            forAllConstIter(Map<label>, sharedToMeshPoint, iter)
-            {
-                // Do I have a value for my shared point
-                typename Map<T>::const_iterator sharedFnd =
-                    sharedPointValues.find(iter.key());
-
-                if (sharedFnd != sharedPointValues.end())
+                // Send back
+                for
+                (
+                    int slave=Pstream::firstSlave();
+                    slave<=Pstream::lastSlave();
+                    slave++
+                )
                 {
-                    combine
-                    (
-                        pointValues,
-                        cop,
-                        iter(),     // index
-                        sharedFnd() // value
-                    );
+                    OPstream toSlave(Pstream::blocking, slave);
+                    toSlave << sharedPointValues;
                 }
+            }
+            else
+            {
+                // Send to master
+                {
+                    OPstream toMaster
+                    (
+                        Pstream::blocking,
+                        Pstream::masterNo()
+                    );
+                    toMaster << sharedPointValues;
+                }
+                // Receive merged values
+                {
+                    IPstream fromMaster
+                    (
+                        Pstream::blocking,
+                        Pstream::masterNo()
+                    );
+                    fromMaster >> sharedPointValues;
+                }
+            }
+        }
+
+
+        // Merge sharedPointValues (keyed on sharedPointAddr) into
+        // pointValues (keyed on mesh points).
+
+        // Map from global shared index to meshpoint
+        Map<label> sharedToMeshPoint(2*sharedPtAddr.size());
+        forAll(sharedPtAddr, i)
+        {
+            sharedToMeshPoint.insert(sharedPtAddr[i], sharedPtLabels[i]);
+        }
+
+        forAllConstIter(Map<label>, sharedToMeshPoint, iter)
+        {
+            // Do I have a value for my shared point
+            typename Map<T>::const_iterator sharedFnd =
+                sharedPointValues.find(iter.key());
+
+            if (sharedFnd != sharedPointValues.end())
+            {
+                combine
+                (
+                    pointValues,
+                    cop,
+                    iter(),     // index
+                    sharedFnd() // value
+                );
             }
         }
     }
@@ -510,7 +511,11 @@ void Foam::syncTools::syncEdgeMap
                     if (iter != edgeValues.end())
                     {
                         const edge nbrEdge(nbrPts[e[0]], nbrPts[e[1]]);
-                        patchInfo.insert(nbrEdge, iter());
+
+                        if (nbrEdge[0] >= 0 && nbrEdge[1] >= 0)
+                        {
+                            patchInfo.insert(nbrEdge, iter());
+                        }
                     }
                 }
 
@@ -541,7 +546,7 @@ void Foam::syncTools::syncEdgeMap
 
                 if (!procPatch.parallel())
                 {
-                    transformList(procPatch.reverseT(), nbrPatchInfo);
+                    transformList(procPatch.forwardT(), nbrPatchInfo);
                 }
                 else if (applySeparation && procPatch.separated())
                 {
@@ -584,8 +589,8 @@ void Foam::syncTools::syncEdgeMap
                 refCast<const cyclicPolyPatch>(patches[patchI]);
             checkTransform(cycPatch, applySeparation);
 
-            const labelList& meshPts = cycPatch.meshPoints();
             const edgeList& coupledEdges = cycPatch.coupledEdges();
+            const labelList& meshPts = cycPatch.meshPoints();
             const edgeList& edges = cycPatch.edges();
 
             // Extract local values. Create map from nbrPoint to value.
@@ -627,7 +632,8 @@ void Foam::syncTools::syncEdgeMap
 
             if (!cycPatch.parallel())
             {
-                transformList(cycPatch.forwardT(), half0Values);
+                transformList(cycPatch.reverseT(), half0Values);
+                transformList(cycPatch.forwardT(), half1Values);
             }
             else if (applySeparation && cycPatch.separated())
             {
@@ -888,31 +894,22 @@ void Foam::syncTools::syncPointList
                     refCast<const processorPolyPatch>(patches[patchI]);
 
                 // Get data per patchPoint in neighbouring point numbers.
-                List<T> patchInfo(procPatch.nPoints());
+                List<T> patchInfo(procPatch.nPoints(), nullValue);
 
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
 
-                forAll(meshPts, pointI)
+                forAll(nbrPts, pointI)
                 {
-                    patchInfo[nbrPts[pointI]] = pointValues[meshPts[pointI]];
+                    label nbrPointI = nbrPts[pointI];
+                    if (nbrPointI >= 0 && nbrPointI < patchInfo.size())
+                    {
+                        patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
+                    }
                 }
 
-                if (contiguous<T>())
-                {
-                    OPstream::write
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo(),
-                        reinterpret_cast<const char*>(patchInfo.begin()),
-                        patchInfo.byteSize()
-                    );
-                }
-                else
-                {
-                    OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                    toNbr << patchInfo;
-                }
+                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                toNbr << patchInfo;
             }
         }
 
@@ -932,19 +929,9 @@ void Foam::syncTools::syncPointList
                 checkTransform(procPatch, applySeparation);
 
                 List<T> nbrPatchInfo(procPatch.nPoints());
-
-                if (contiguous<T>())
                 {
-                    IPstream::read
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo(),
-                        reinterpret_cast<char*>(nbrPatchInfo.begin()),
-                        nbrPatchInfo.byteSize()
-                    );
-                }
-                else
-                {
+                    // We do not know the number of points on the other side
+                    // so cannot use Pstream::read.
                     IPstream fromNbr
                     (
                         Pstream::blocking,
@@ -952,11 +939,23 @@ void Foam::syncTools::syncPointList
                     );
                     fromNbr >> nbrPatchInfo;
                 }
+                // Null any value which is not on neighbouring processor
+                label nbrSize = nbrPatchInfo.size();
+                nbrPatchInfo.setSize(procPatch.nPoints());
+                for
+                (
+                    label i = nbrSize;
+                    i < procPatch.nPoints();
+                    i++
+                )
+                {
+                    nbrPatchInfo[i] = nullValue;
+                }
 
                 if (!procPatch.parallel())
                 {
                     hasTransformation = true;
-                    transformList(procPatch.reverseT(), nbrPatchInfo);
+                    transformList(procPatch.forwardT(), nbrPatchInfo);
                 }
                 else if (applySeparation && procPatch.separated())
                 {
@@ -985,8 +984,8 @@ void Foam::syncTools::syncPointList
 
             checkTransform(cycPatch, applySeparation);
 
-            const labelList& meshPts = cycPatch.meshPoints();
             const edgeList& coupledPoints = cycPatch.coupledPoints();
+            const labelList& meshPts = cycPatch.meshPoints();
 
             List<T> half0Values(coupledPoints.size());
             List<T> half1Values(coupledPoints.size());
@@ -1005,12 +1004,12 @@ void Foam::syncTools::syncPointList
             if (!cycPatch.parallel())
             {
                 hasTransformation = true;
-                transformList(cycPatch.forwardT(), half0Values);
+                transformList(cycPatch.reverseT(), half0Values);
+                transformList(cycPatch.forwardT(), half1Values);
             }
             else if (applySeparation && cycPatch.separated())
             {
                 hasTransformation = true;
-
                 const vectorField& v = cycPatch.coupledPolyPatch::separation();
                 separateList(v, half0Values);
                 separateList(-v, half1Values);
@@ -1050,30 +1049,28 @@ void Foam::syncTools::syncPointList
                 << "This is not supported. The result will be incorrect"
                 << endl;
         }
-        else
+
+
+        // Values on shared points.
+        List<T> sharedPts(pd.nGlobalPoints(), nullValue);
+
+        forAll(pd.sharedPointLabels(), i)
         {
-            // Values on shared points.
-            List<T> sharedPts(pd.nGlobalPoints(), nullValue);
+            label meshPointI = pd.sharedPointLabels()[i];
+            // Fill my entries in the shared points
+            sharedPts[pd.sharedPointAddr()[i]] = pointValues[meshPointI];
+        }
 
-            forAll(pd.sharedPointLabels(), i)
-            {
-                label meshPointI = pd.sharedPointLabels()[i];
+        // Combine on master.
+        Pstream::listCombineGather(sharedPts, cop);
+        Pstream::listCombineScatter(sharedPts);
 
-                // Fill my entries in the shared points
-                sharedPts[pd.sharedPointAddr()[i]] = pointValues[meshPointI];
-            }
-
-            // Combine on master.
-            Pstream::listCombineGather(sharedPts, cop);
-            Pstream::listCombineScatter(sharedPts);
-
-            // Now we will all have the same information. Merge it back with
-            // my local information.
-            forAll(pd.sharedPointLabels(), i)
-            {
-                label meshPointI = pd.sharedPointLabels()[i];
-                pointValues[meshPointI] = sharedPts[pd.sharedPointAddr()[i]];
-            }
+        // Now we will all have the same information. Merge it back with
+        // my local information.
+        forAll(pd.sharedPointLabels(), i)
+        {
+            label meshPointI = pd.sharedPointLabels()[i];
+            pointValues[meshPointI] = sharedPts[pd.sharedPointAddr()[i]];
         }
     }
 }
@@ -1177,33 +1174,24 @@ void Foam::syncTools::syncEdgeList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                // Get region per patch edge in neighbouring edge numbers.
-                List<T> patchInfo(procPatch.nEdges());
-
                 const labelList& meshEdges = procPatch.meshEdges();
                 const labelList& neighbEdges = procPatch.neighbEdges();
 
-                forAll(meshEdges, edgeI)
+                // Get region per patch edge in neighbouring edge numbers.
+                List<T> patchInfo(procPatch.nEdges(), nullValue);
+
+                forAll(neighbEdges, edgeI)
                 {
-                    patchInfo[neighbEdges[edgeI]] =
-                        edgeValues[meshEdges[edgeI]];
+                    label nbrEdgeI = neighbEdges[edgeI];
+
+                    if (nbrEdgeI >= 0 && nbrEdgeI < patchInfo.size())
+                    {
+                        patchInfo[nbrEdgeI] = edgeValues[meshEdges[edgeI]];
+                    }
                 }
 
-                if (contiguous<T>())
-                {
-                    OPstream::write
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo(),
-                        reinterpret_cast<const char*>(patchInfo.begin()),
-                        patchInfo.byteSize()
-                    );
-                }
-                else
-                {
-                    OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                    toNbr << patchInfo;
-                }
+                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                toNbr << patchInfo;
             }
         }
 
@@ -1228,17 +1216,6 @@ void Foam::syncTools::syncEdgeList
                 // neighbouring patch edge. 
                 List<T> nbrPatchInfo(procPatch.nEdges());
 
-                if (contiguous<T>())
-                {
-                    IPstream::read
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo(),
-                        reinterpret_cast<char*>(nbrPatchInfo.begin()),
-                        nbrPatchInfo.byteSize()
-                    );
-                }
-                else
                 {
                     IPstream fromNeighb
                     (
@@ -1247,11 +1224,24 @@ void Foam::syncTools::syncEdgeList
                     );
                     fromNeighb >> nbrPatchInfo;
                 }
+                // Null any value which is not on neighbouring processor
+                label nbrSize = nbrPatchInfo.size();
+                nbrPatchInfo.setSize(procPatch.nEdges());
+                for
+                (
+                    label i = nbrSize;
+                    i < procPatch.nEdges();
+                    i++
+                )
+                {
+                    nbrPatchInfo[i] = nullValue;
+                }
+
 
                 if (!procPatch.parallel())
                 {
                     hasTransformation = true;
-                    transformList(procPatch.reverseT(), nbrPatchInfo);
+                    transformList(procPatch.forwardT(), nbrPatchInfo);
                 }
                 else if (applySeparation && procPatch.separated())
                 {
@@ -1299,7 +1289,8 @@ void Foam::syncTools::syncEdgeList
             if (!cycPatch.parallel())
             {
                 hasTransformation = true;
-                transformList(cycPatch.forwardT(), half0Values);
+                transformList(cycPatch.reverseT(), half0Values);
+                transformList(cycPatch.forwardT(), half1Values);
             }
             else if (applySeparation && cycPatch.separated())
             {
@@ -1344,30 +1335,28 @@ void Foam::syncTools::syncEdgeList
                 << "This is not supported. The result will be incorrect"
                 << endl;
         }
-        else
+
+        // Values on shared edges.
+        List<T> sharedPts(pd.nGlobalEdges(), nullValue);
+
+        forAll(pd.sharedEdgeLabels(), i)
         {
-            // Values on shared edges.
-            List<T> sharedPts(pd.nGlobalEdges(), nullValue);
+            label meshEdgeI = pd.sharedEdgeLabels()[i];
 
-            forAll(pd.sharedEdgeLabels(), i)
-            {
-                label meshEdgeI = pd.sharedEdgeLabels()[i];
+            // Fill my entries in the shared edges
+            sharedPts[pd.sharedEdgeAddr()[i]] = edgeValues[meshEdgeI];
+        }
 
-                // Fill my entries in the shared edges
-                sharedPts[pd.sharedEdgeAddr()[i]] = edgeValues[meshEdgeI];
-            }
+        // Combine on master.
+        Pstream::listCombineGather(sharedPts, cop);
+        Pstream::listCombineScatter(sharedPts);
 
-            // Combine on master.
-            Pstream::listCombineGather(sharedPts, cop);
-            Pstream::listCombineScatter(sharedPts);
-
-            // Now we will all have the same information. Merge it back with
-            // my local information.
-            forAll(pd.sharedEdgeLabels(), i)
-            {
-                label meshEdgeI = pd.sharedEdgeLabels()[i];
-                edgeValues[meshEdgeI] = sharedPts[pd.sharedEdgeAddr()[i]];
-            }
+        // Now we will all have the same information. Merge it back with
+        // my local information.
+        forAll(pd.sharedEdgeLabels(), i)
+        {
+            label meshEdgeI = pd.sharedEdgeLabels()[i];
+            edgeValues[meshEdgeI] = sharedPts[pd.sharedEdgeAddr()[i]];
         }
     }
 }
@@ -1478,11 +1467,11 @@ void Foam::syncTools::syncBoundaryFaceList
 
                 if (!procPatch.parallel())
                 {
-                    transformList(procPatch.reverseT(), nbrPatchInfo);
+                    transformList(procPatch.forwardT(), nbrPatchInfo);
                 }
                 else if (applySeparation && procPatch.separated())
                 {
-                    separateList(procPatch.separation(), nbrPatchInfo);
+                    separateList(-procPatch.separation(), nbrPatchInfo);
                 }
 
 
@@ -1514,8 +1503,8 @@ void Foam::syncTools::syncBoundaryFaceList
 
             if (!cycPatch.parallel())
             {
-                transformList(cycPatch.reverseT(), half1Values);
-                transformList(cycPatch.forwardT(), half0Values);
+                transformList(cycPatch.reverseT(), half0Values);
+                transformList(cycPatch.forwardT(), half1Values);
             }
             else if (applySeparation && cycPatch.separated())
             {

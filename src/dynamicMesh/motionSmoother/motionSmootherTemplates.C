@@ -209,7 +209,7 @@ Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
 
     forAll(patches, patchI)
     {
-        if (isA<processorPolyPatch>(patches[patchI]))
+        if (Pstream::parRun() && isA<processorPolyPatch>(patches[patchI]))
         {
             const processorPolyPatch& pp =
                 refCast<const processorPolyPatch>(patches[patchI]);

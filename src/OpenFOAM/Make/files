@@ -400,7 +400,8 @@ mapPolyMesh = $(polyMesh)/mapPolyMesh
 $(mapPolyMesh)/mapPolyMesh.C
 $(mapPolyMesh)/faceMapper/faceMapper.C
 $(mapPolyMesh)/cellMapper/cellMapper.C
-$(mapPolyMesh)/mapDistributePolyMesh/mapDistributePolyMesh.C
+$(mapPolyMesh)/mapDistribute/mapDistribute.C
+$(mapPolyMesh)/mapDistribute/mapDistributePolyMesh.C
 $(mapPolyMesh)/mapAddedPolyMesh.C
 
 PrimitivePatch = $(primitiveMesh)/PrimitivePatch

@@ -59,26 +59,85 @@ inline treeBoundBox::treeBoundBox(const boundBox& bb)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline scalar treeBoundBox::minDim() const
+{
+    return ::Foam::min
+    (
+        max().x() - min().x(),
+        ::Foam::min
+        (
+            max().y() - min().y(),
+            max().z() - min().z()
+        )
+    );
+}
+
+
+inline scalar treeBoundBox::maxDim() const
+{
+    return ::Foam::max
+    (
+        max().x() - min().x(),
+        ::Foam::max
+        (
+            max().y() - min().y(),
+            max().z() - min().z()
+        )
+    );
+}
+
+
+inline scalar treeBoundBox::avgDim() const
+{
+    return
+    (
+        (max().x() - min().x()) +
+        (max().y() - min().y()) +
+        (max().z() - min().z())
+    )/3.0;
+}
+
+
+inline scalar treeBoundBox::typDim() const
+{
+    return avgDim();
+}
+
+
+inline point treeBoundBox::mid() const
+{
+    return 0.5*(min() + max());
+}
+
+
+inline point treeBoundBox::corner(const direction octant) const
+{
+    return point
+    (
+        (octant&RIGHTHALF) ? max().x() : min().x(),
+        (octant&TOPHALF)   ? max().y() : min().y(),
+        (octant&FRONTHALF) ? max().z() : min().z()
+    );
+}
+
 // Returns octant in which sample resides. Reverse of subBbox.
 inline direction treeBoundBox::subOctant(const point& sample) const
 {
-    scalar midx = 0.5*(max().x() + min().x());
-    scalar midy = 0.5*(max().y() + min().y());
-    scalar midz = 0.5*(max().z() + min().z());
+    point mid = 0.5*(max() + min());
 
     direction octant = 0;
 
-    if (sample.x() > midx)
+    if (sample.x() > mid.x())
     {
         octant |= treeBoundBox::RIGHTHALF;
     }
 
-    if (sample.y() > midy)
+    if (sample.y() > mid.y())
     {
         octant |= treeBoundBox::TOPHALF;
     }
 
-    if (sample.z() > midz)
+    if (sample.z() > mid.z())
     {
         octant |= treeBoundBox::FRONTHALF;
     }
@@ -259,6 +318,97 @@ inline direction treeBoundBox::subOctant
     }
 
     return octant;
+}
+
+
+// Returns reference to octantOrder which defines the 
+// order to do the search.
+inline void treeBoundBox::searchOrder
+(
+    const point& sample,
+    FixedList<direction,8>& octantOrder
+) const
+{
+    vector dist = mid() - sample;
+
+    direction octant = 0;
+
+    if (dist.x() < 0)
+    {
+        octant |= treeBoundBox::RIGHTHALF;
+        dist.x() *= -1;
+    }
+
+    if (dist.y() < 0)
+    {
+        octant |= treeBoundBox::TOPHALF;
+        dist.y() *= -1;
+    }
+
+    if (dist.z() < 0)
+    {
+        octant |= treeBoundBox::FRONTHALF;
+	dist.z() *= -1;
+    }
+
+    direction min = 0;
+    direction mid = 0;
+    direction max = 0;
+
+    if( dist.x() < dist.y())
+    {
+        if( dist.y() < dist.z())
+	{
+	    min = treeBoundBox::RIGHTHALF;
+	    mid = treeBoundBox::TOPHALF;
+	    max = treeBoundBox::FRONTHALF;
+	}
+	else if( dist.z() < dist.x())
+	{
+	    min = treeBoundBox::FRONTHALF;
+            mid = treeBoundBox::RIGHTHALF;
+	    max = treeBoundBox::TOPHALF;
+	}
+	else
+	{
+	    min = treeBoundBox::RIGHTHALF;
+	    mid = treeBoundBox::FRONTHALF;
+	    max = treeBoundBox::TOPHALF;
+	}
+    }
+    else
+    {
+        if( dist.z() < dist.y())
+	{
+	    min = treeBoundBox::FRONTHALF;
+	    mid = treeBoundBox::TOPHALF;
+	    max = treeBoundBox::RIGHTHALF;	    
+	}
+	else if( dist.x() < dist.z())
+	{
+	    min = treeBoundBox::TOPHALF;
+	    mid = treeBoundBox::RIGHTHALF;
+	    max = treeBoundBox::FRONTHALF;
+	}
+	else
+	{
+	    min = treeBoundBox::TOPHALF;
+	    mid = treeBoundBox::FRONTHALF;
+	    max = treeBoundBox::RIGHTHALF;
+	}
+    }
+    // Primary subOctant
+    octantOrder[0] = octant;
+    // subOctants joined to the primary by faces.
+    octantOrder[1] = octant ^ min;
+    octantOrder[2] = octant ^ mid;
+    octantOrder[3] = octant ^ max;
+    // subOctants joined to the primary by edges.
+    octantOrder[4] = octantOrder[1] ^ mid;
+    octantOrder[5] = octantOrder[1] ^ max;
+    octantOrder[6] = octantOrder[2] ^ max;
+    // subOctants joined to the primary by corner.
+    octantOrder[7] = octantOrder[4] ^ max;
 }
 
 

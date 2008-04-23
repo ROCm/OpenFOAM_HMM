@@ -22,15 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "triSurfaceSearch.H"
-#include "octree.H"
+#include "indexedOctree.H"
 #include "boolList.H"
-#include "octreeDataTriSurface.H"
-#include "octreeDataPoint.H"
+#include "treeDataTriSurface.H"
 #include "triSurface.H"
 #include "line.H"
 #include "cpuTime.H"
@@ -53,10 +50,7 @@ triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
     surface_(surface),
     treePtr_(NULL)
 {
-    // Wrap surface information into helper object
-    octreeDataTriSurface shapes(surface_);
-
-    treeBoundBox treeBb(surface_.localPoints());
+    treeBoundBox treeBb(surface_.points(), surface_.meshPoints());
 
     scalar tol = 1E-6*treeBb.avgDim();
 
@@ -66,37 +60,28 @@ triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
     bbMin.z() -= tol;
 
     point& bbMax = treeBb.max();
-    bbMax.x() += tol;
-    bbMax.y() += tol;
-    bbMax.z() += tol;
+    bbMax.x() += 2*tol;
+    bbMax.y() += 2*tol;
+    bbMax.z() += 2*tol;
 
-    treePtr_ = new octree<octreeDataTriSurface>
+    treePtr_.reset
     (
-        treeBb,
-        shapes,
-        1,
-        100.0,
-        10.0
+        new indexedOctree<treeDataTriSurface>
+        (
+            treeDataTriSurface(surface_),
+            treeBb,
+            8,      // maxLevel
+            10,     // leafsize
+            3.0     // duplicity
+        )
     );
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-triSurfaceSearch::~triSurfaceSearch()
-{
-    if (treePtr_)
-    {
-        delete treePtr_;
-    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Determine inside/outside for samples
-boolList triSurfaceSearch::calcInside(const pointField& samples)
-    const
+boolList triSurfaceSearch::calcInside(const pointField& samples) const
 {
     boolList inside(samples.size());
 
@@ -104,14 +89,14 @@ boolList triSurfaceSearch::calcInside(const pointField& samples)
     {
         const point& sample = samples[sampleI];
 
-        if (!tree().octreeBb().contains(sample))
+        if (!tree().bb().contains(sample))
         {
             inside[sampleI] = false;
         }
         else if
         (
-            tree().getSampleType(sample)
-         == octree<octreeDataTriSurface>::INSIDE
+            tree().getVolumeType(sample)
+         == indexedOctree<treeDataTriSurface>::INSIDE
         )
         {
             inside[sampleI] = true;
@@ -133,39 +118,21 @@ labelList triSurfaceSearch::calcNearestTri
 {
     labelList nearest(samples.size());
 
+    const scalar nearestDistSqr = 0.25*magSqr(span);
+
+    pointIndexHit hitInfo;
+
     forAll(samples, sampleI)
     {
-        const point& sample = samples[sampleI];
+        hitInfo = tree().findNearest(samples[sampleI], nearestDistSqr);
 
-        treeBoundBox tightest(sample, sample);
-        tightest.min() -= span;
-        tightest.max() += span;
-
-        scalar tightestDist = Foam::GREAT;
-
-        nearest[sampleI] = tree().findNearest
-        (
-            sample,
-            tightest,
-            tightestDist
-        );
-    }
-
-
-    // Bit ropy - comparison of coordinate but is just check.
-    if (span == greatPoint)
-    {
-        forAll(nearest, sampleI)
+        if (hitInfo.hit())
         {
-            if (nearest[sampleI] == -1)
-            {
-                FatalErrorIn
-                (
-                    "triSurfaceSearch::calcNearestTri(const pointField&)"
-                )   << "Did not find point " << samples[sampleI]
-                    << " in octree spanning "
-                    << tree().octreeBb() << abort(FatalError);
-            }
+            nearest[sampleI] = hitInfo.index();
+        }
+        else
+        {
+            nearest[sampleI] = -1;
         }
     }
 
@@ -180,35 +147,24 @@ tmp<pointField> triSurfaceSearch::calcNearest
     const vector& span
 ) const
 {
-    const pointField& points = surface_.points();
+    const scalar nearestDistSqr = 0.25*magSqr(span);
 
     tmp<pointField> tnearest(new pointField(samples.size()));
     pointField& nearest = tnearest();
 
-    labelList nearestTri(calcNearestTri(samples, span));
+    pointIndexHit hitInfo;
 
-    forAll(nearestTri, sampleI)
+    forAll(samples, sampleI)
     {
-        label triI = nearestTri[sampleI];
+        hitInfo = tree().findNearest(samples[sampleI], nearestDistSqr);
 
-        if (triI == -1)
+        if (hitInfo.hit())
         {
-            nearest[sampleI] = greatPoint;
+            nearest[sampleI] = hitInfo.hitPoint();
         }
         else
         {
-            // Unfortunately octree does not return nearest point
-            // so we have to recalculate it.
-            const labelledTri& f = surface_[triI];
-
-            triPointRef tri
-            (
-                points[f[0]],
-                points[f[1]],
-                points[f[2]]
-            );
-
-            nearest[sampleI] = tri.nearestPoint(samples[sampleI]).rawPoint();
+            nearest[sampleI] = greatPoint;
         }
     }
 
@@ -219,40 +175,9 @@ tmp<pointField> triSurfaceSearch::calcNearest
 pointIndexHit triSurfaceSearch::nearest(const point& pt, const vector& span)
  const
 {
-    pointIndexHit pInter;
+    const scalar nearestDistSqr = 0.25*magSqr(span);
 
-    treeBoundBox tightest(pt, pt);
-    tightest.min() -= span;
-    tightest.max() += span;
-
-    scalar tightestDist = Foam::GREAT;
-
-    label triI = tree().findNearest(pt, tightest, tightestDist);
-
-    if (triI == -1)
-    {
-        pInter.setMiss();
-    }
-    else
-    {
-        pInter.setHit();
-        pInter.setIndex(triI);
-
-        const labelledTri& f = surface_[triI];
-
-        const pointField& points = surface_.points();
-
-        triPointRef tri
-        (
-            points[f[0]],
-            points[f[1]],
-            points[f[2]]
-        );
-
-        pInter.setPoint(tri.nearestPoint(pt).rawPoint());
-    }
-
-    return pInter;  
+    return tree().findNearest(pt, nearestDistSqr);
 }
 
 

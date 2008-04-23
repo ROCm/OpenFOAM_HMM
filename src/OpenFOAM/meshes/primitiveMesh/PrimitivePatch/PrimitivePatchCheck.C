@@ -38,8 +38,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-void PrimitivePatch<Face, FaceList, PointField>::visitPointRegion
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void PrimitivePatch<Face, FaceList, PointField, PointType>::visitPointRegion
 (
     const label pointI,
     const labelList& pFaces,
@@ -78,7 +84,8 @@ void PrimitivePatch<Face, FaceList, PointField>::visitPointRegion
         {
             FatalErrorIn
             (
-                "PrimitivePatch<Face, FaceList, PointField>::visitPointRegion"
+                "PrimitivePatch<Face, FaceList, PointField, PointType>::"
+                "visitPointRegion"
             )   << "Problem: cannot find edge out of " << fEdges
                 << "on face " << startFaceI << " that uses point " << pointI
                 << " and is not edge " << startEdgeI << abort(FatalError);
@@ -107,13 +114,19 @@ void PrimitivePatch<Face, FaceList, PointField>::visitPointRegion
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Face, template<class> class FaceList, class PointField>
-typename PrimitivePatch<Face, FaceList, PointField>::surfaceTopo
-PrimitivePatch<Face, FaceList, PointField>::surfaceType() const
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+typename PrimitivePatch<Face, FaceList, PointField, PointType>::surfaceTopo
+PrimitivePatch<Face, FaceList, PointField, PointType>::surfaceType() const
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "surfaceType() : "
                "calculating patch topology"
             << endl;
@@ -143,7 +156,7 @@ PrimitivePatch<Face, FaceList, PointField>::surfaceType() const
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "surfaceType() : "
                "finished calculating patch topology"
             << endl;
@@ -153,8 +166,14 @@ PrimitivePatch<Face, FaceList, PointField>::surfaceType() const
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
-bool PrimitivePatch<Face, FaceList, PointField>::checkTopology
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+bool PrimitivePatch<Face, FaceList, PointField, PointType>::checkTopology
 (
     const bool report,
     labelHashSet* setPtr
@@ -162,7 +181,7 @@ bool PrimitivePatch<Face, FaceList, PointField>::checkTopology
 {
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "checkTopology(const bool, labelHashSet&) : "
                "checking patch topology"
             << endl;
@@ -205,7 +224,7 @@ bool PrimitivePatch<Face, FaceList, PointField>::checkTopology
 
     if (debug)
     {
-        Info<< "PrimitivePatch<Face, FaceList, PointField>::"
+        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
                "checkTopology(const bool, labelHashSet&) : "
                "finished checking patch topology"
             << endl;
@@ -215,9 +234,15 @@ bool PrimitivePatch<Face, FaceList, PointField>::checkTopology
 }
 
 
-template<class Face, template<class> class FaceList, class PointField>
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
 bool
-PrimitivePatch<Face, FaceList, PointField>::checkPointManifold
+PrimitivePatch<Face, FaceList, PointField, PointType>::checkPointManifold
 (
     const bool report,
     labelHashSet* setPtr

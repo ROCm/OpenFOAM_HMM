@@ -527,7 +527,7 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
-        if (Pstream::parRun() && isA<processorPolyPatch>(patch))
+        if (isA<processorPolyPatch>(patch))
         {
             // Allocate buffers
             label nSendFaces;
@@ -580,7 +580,7 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
-        if (Pstream::parRun() && isA<processorPolyPatch>(patch))
+        if (isA<processorPolyPatch>(patch))
         {
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patch);
@@ -812,7 +812,6 @@ Foam::FaceCellWave<Type>::FaceCellWave
     changedCells_(mesh_.nCells()),
     nChangedCells_(0),
     hasCyclicPatches_(hasPatchType(cyclicPolyPatch::typeName)),
-    hasProcPatches_(hasPatchType(processorPolyPatch::typeName)),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces()),
@@ -843,7 +842,6 @@ Foam::FaceCellWave<Type>::FaceCellWave
     changedCells_(mesh_.nCells()),
     nChangedCells_(0),
     hasCyclicPatches_(hasPatchType(cyclicPolyPatch::typeName)),
-    hasProcPatches_(hasPatchType(processorPolyPatch::typeName)),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces()),
@@ -1031,7 +1029,7 @@ Foam::label Foam::FaceCellWave<Type>::cellToFace()
         // Transfer changed faces across cyclic halves
         handleCyclicPatches();
     }
-    if (hasProcPatches_)
+    if (Pstream::parRun())
     {
         // Transfer changed faces from neighbouring processors.
         handleProcPatches();
@@ -1060,7 +1058,7 @@ Foam::label Foam::FaceCellWave<Type>::iterate(const label maxIter)
         // Transfer changed faces across cyclic halves
         handleCyclicPatches();
     }
-    if (hasProcPatches_)
+    if (Pstream::parRun())
     {
         // Transfer changed faces from neighbouring processors.
         handleProcPatches();

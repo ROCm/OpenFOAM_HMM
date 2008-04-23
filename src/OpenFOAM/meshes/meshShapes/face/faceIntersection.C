@@ -133,6 +133,52 @@ pointHit face::ray
 }
 
 
+pointHit face::intersection
+(
+    const point& p,
+    const vector& q,
+    const point& ctr,
+    const pointField& meshPoints,
+    const intersection::algorithm alg
+) const
+{
+    scalar nearestHitDist = VGREAT;
+
+    // Initialize to miss, distance = GREAT
+    pointHit nearest(p);
+
+    const labelList& f = *this;
+
+    forAll(f, pI)
+    {
+        // Note: for best accuracy, centre point always comes last
+        pointHit curHit = triPointRef
+        (
+            meshPoints[f[pI]],
+            meshPoints[f[fcIndex(pI)]],
+            ctr
+        ).intersection(p, q, alg);
+
+        if (curHit.hit())
+        {
+            if (Foam::mag(curHit.distance()) < nearestHitDist)
+            {
+                nearestHitDist = Foam::mag(curHit.distance());
+                nearest.setHit();
+                nearest.setPoint(curHit.hitPoint());
+            }
+        }
+    }
+
+    if (nearest.hit())
+    {
+        nearest.setDistance(nearestHitDist);
+    }
+
+    return nearest;
+}
+
+
 pointHit face::nearestPoint
 (
     const point& p,

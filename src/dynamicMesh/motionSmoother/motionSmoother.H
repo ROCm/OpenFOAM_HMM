@@ -27,11 +27,11 @@ Class
 
 Description
     Given a displacement moves the mesh by scaling the displacement back
-    until there are no more mesh errors.
+    until there are no more mesh errors. Holds displacement field
+    (read upon construction since need boundary conditions) and scaling factor
+    and optional patch number on which to scale back displacement.
 
-    Holds displacement field (read upon construction since need boundary
-    conditions) and scaling factor and optional patch number on which to
-    scale back displacement.
+    E.g.
 
     E.g.
     @verbatim
@@ -59,6 +59,10 @@ Description
     has faces of pp get priority. This is currently handled in setDisplacement
     by resetting the internal displacement to zero before doing anything else.
     The combine operator used will give preference to non-zero values.
+
+    Note: various routines take baffles. These are sets of boundary faces
+    that are treated as a single internal face. This is a hack used to apply
+    movement to internal faces.
 
 SourceFiles
     motionSmoother.C
@@ -402,6 +406,15 @@ public:
                 const label nAllow = 0
             );
 
+            //- Move mesh (with baffles) with given scale.
+            bool scaleMesh
+            (
+                labelList& checkFaces,
+                const List<labelPair>& baffles,
+                const bool smoothMesh = true,
+                const label nAllow = 0
+            );
+
             //- Update topology
             void updateMesh();
 
@@ -428,6 +441,19 @@ public:
                 labelHashSet& wrongFaces
             );
 
+            //- Check (subset of mesh including baffles) with mesh settings 
+            //  in dict. Collects incorrect faces in set. Returns true if one
+            //  or more faces in error. Parallel ok.
+            static bool checkMesh
+            (
+                const bool report,
+                const polyMesh& mesh,
+                const dictionary& dict,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet& wrongFaces
+            );
+
             //- Check part of mesh with mesh settings in dict.
             //  Collects incorrect faces in set. Returns true if one or
             //  more faces in error. Parallel ok.
@@ -437,6 +463,19 @@ public:
                 const dictionary& dict,
                 const polyMeshGeometry&,
                 const labelList& checkFaces,
+                labelHashSet& wrongFaces
+            );
+
+            //- Check part of mesh including baffles with mesh settings in dict.
+            //  Collects incorrect faces in set. Returns true if one or
+            //  more faces in error. Parallel ok.
+            static bool checkMesh
+            (
+                const bool report,
+                const dictionary& dict,
+                const polyMeshGeometry&,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
                 labelHashSet& wrongFaces
             );
 

@@ -27,7 +27,8 @@ Class
 
 Description
     Wave propagation of information through grid. Every iteration
-    information goes through one layer of edges.
+    information goes through one layer of edges. Templated on information
+    that is transferred.
 
     Templated on information that is transferred.
     Handles parallel and cyclics. Only parallel reasonably tested. Cyclics
@@ -130,9 +131,6 @@ class PointEdgeWave
 
         //- For every cyclic patch two primitivePatches
         PtrList<primitivePatch> cycHalves_;
-
-        //- Contains processor patches
-        bool hasProcPatches_;
 
         //- Number of evaluations
         label nEvals_;
@@ -353,7 +351,6 @@ public:
         }
     }
 };
-
 
 } // End namespace Foam
 
