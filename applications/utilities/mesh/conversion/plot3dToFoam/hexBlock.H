@@ -145,7 +145,14 @@ public:
 
 
         //- Read block points either with or without blanking after every block.
-        void readPoints(const bool readBlank, Istream&);
+        //  If twoDThickness > 0 reads (half) the points and extrudes the
+        //  points in z direction.
+        void readPoints
+        (
+            const bool readBlank,
+            const scalar twoDThicknes,
+            Istream&
+        );
 };
 
 

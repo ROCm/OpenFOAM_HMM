@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Plot3d mesh (ascii format) converter.
+    Plot3d mesh (ascii/formatted format) converter.
 
     Work in progress! Handles ascii multiblock (and optionally singleBlock)
     format.
     By default expects blanking. Use -noBlank if none.
+    Use -2D <thickness> if 2D.
     Niklas Nordin has experienced a problem with lefthandedness of the blocks.
     The code should detect this automatically - see hexBlock::readPoints but
     if this goes wrong just set the blockHandedness_ variable to 'right'
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("scale", "scale factor");
     argList::validOptions.insert("noBlank", "");
     argList::validOptions.insert("singleBlock", "");
+    argList::validOptions.insert("2D", "thickness");
 
     argList args(argc, argv);
 
@@ -75,6 +77,13 @@ int main(int argc, char *argv[])
 
     bool readBlank = !args.options().found("noBlank");
     bool singleBlock = args.options().found("singleBlock");
+    scalar twoDThicknes = -1;
+    if (args.options().found("2D"))
+    {
+        twoDThicknes = readScalar(IStringStream(args.options()["2D"])());
+        Info<< "Reading 2D case by extruding points by " << twoDThicknes
+            << " in z direction." << nl << endl;
+    }
 
 
 #   include "createTime.H"
@@ -95,7 +104,7 @@ int main(int argc, char *argv[])
         plot3dFile >> nblock;
     }
 
-    Info << "Reading " << nblock << " blocks" << endl;
+    Info<< "Reading " << nblock << " blocks" << endl;
 
     PtrList<hexBlock> blocks(nblock);
 
@@ -104,20 +113,32 @@ int main(int argc, char *argv[])
 
         forAll (blocks, blockI)
         {
-            plot3dFile >> nx >> ny >> nz;
+            if (twoDThicknes > 0)
+            {
+                // Fake second set of points (done in readPoints below)
+                plot3dFile >> nx >> ny;
+                nz = 2;
+            }
+            else
+            {
+                plot3dFile >> nx >> ny >> nz;
+            }
+
+            Info<< "block " << blockI << " nx:" << nx
+                << " ny:" << ny << " nz:" << nz << endl;
 
             blocks.set(blockI, new hexBlock(nx, ny, nz));
         }
     }
 
-    Info << "Reading block points" << endl;
+    Info<< "Reading block points" << endl;
     label sumPoints(0);
     label nMeshCells(0);
 
     forAll (blocks, blockI)
     {
-        Info << "block " << blockI << ":" << nl;
-        blocks[blockI].readPoints(readBlank, plot3dFile);
+        Info<< "block " << blockI << ":" << nl;
+        blocks[blockI].readPoints(readBlank, twoDThicknes, plot3dFile);
         sumPoints += blocks[blockI].nBlockPoints();
         nMeshCells += blocks[blockI].nBlockCells();
         Info<< nl;
@@ -136,7 +157,6 @@ int main(int argc, char *argv[])
         }
     }
 
-
     // From old to new master point
     labelList oldToNew;
     pointField newPoints;
@@ -151,13 +171,17 @@ int main(int argc, char *argv[])
         newPoints
     );
 
+    Info<< "Merged points within " << SMALL << " distance. Merged from "
+        << oldToNew.size() << " down to " << newPoints.size()
+        << " points." << endl;
+
     // Scale the points
     if (scaleFactor > 1.0 + SMALL || scaleFactor < 1.0 - SMALL)
     {
         newPoints *= scaleFactor;
     }
 
-    Info << "Creating cells" << endl;
+    Info<< "Creating cells" << endl;
 
     cellShapeList cellShapes(nMeshCells);
 
@@ -190,7 +214,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info << "Creating boundary patches" << endl;
+    Info<< "Creating boundary patches" << endl;
 
     faceListList boundary(0);
     wordList patchNames(0);
@@ -220,10 +244,10 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << "Writing polyMesh" << endl;
+    Info<< "Writing polyMesh" << endl;
     pShapeMesh.write();
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

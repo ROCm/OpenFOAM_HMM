@@ -1,0 +1,21 @@
+/* include /home/pinky2/mattijs/pub/Delaunay/CGAL-3.1/make/makefile_i686_Linux-2.6.4-52-default_g++-3.4.3 */
+
+EXE_INC = \
+    /* -g -DFULLDEBUG -O0 $(CGAL_CXXFLAGS) */ \
+    -I$(FOAM_UTILITIES)/parallelProcessing/decompositionMethods/decompositionMethods/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(FOAM_SRC)/lagrangian/basic/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/edgeMesh/lnInclude \
+    -I$(LIB_SRC)/triSurface/lnInclude \
+
+LIB_LIBS = \
+    -ldecompositionMethods \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -llagrangian \
+    -lmeshTools \
+    -ledgeMesh \
+    -ltriSurface \
+ /*   $(CGAL_LDFLAGS) */

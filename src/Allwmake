@@ -41,6 +41,8 @@ wmake libso randomProcesses
 
 ( cd postProcessing && ./Allwmake )
 
+wmake libso autoMesh
+
 wmake libso errorEstimation
 
 

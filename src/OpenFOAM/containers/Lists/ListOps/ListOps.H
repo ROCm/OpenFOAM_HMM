@@ -1,3 +1,4 @@
+
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -26,7 +27,7 @@ InNamspace
     Foam
 
 Description
-    ListOps. Various functions to operate on Lists.
+    Various functions to operate on Lists.
 
 SourceFiles
     ListOps.C
@@ -66,6 +67,17 @@ template<class List>
 void inplaceReorder(const labelList& oldToNew, List&);
 
 
+// Variants to work with iterators and sparse tables. Need to have iterators
+// and insert()
+
+//- Map values. Do not map negative values.
+template<class Container>
+void inplaceMapValue(const labelList& oldToNew, Container&);
+//- Recreate with mapped keys. Remove elements with negative key.
+template<class Container>
+void inplaceMapKey(const labelList& oldToNew, Container&);
+
+
 //- Extract elements of List whose region is certain value. Use e.g.
 //  to extract all selected elements:
 //  subset<boolList, labelList>(selectedElems, true, lst);
@@ -103,11 +115,21 @@ labelList identity(const label len);
 //- Find first occurence of given element and return index,
 //  return -1 if not found. Linear search.
 template<class List>
-label findIndex(const List&, typename List::const_reference);
+label findIndex
+(
+    const List&,
+    typename List::const_reference,
+    const label start=0
+);
 
 //- Find all occurences of given element. Linear search.
 template<class List>
-labelList findIndices(const List&, typename List::const_reference);
+labelList findIndices
+(
+    const List&,
+    typename List::const_reference,
+    const label start=0
+);
 
 //- Opposite of findIndices: set values at indices to given value
 template<class List>
@@ -123,7 +145,7 @@ template<class List>
 List createWithValues
 (
     const label sz,
-    typename List::const_reference initValue,
+    const typename List::const_reference initValue,
     const labelList& indices,
     typename List::const_reference setValue
 );
@@ -131,25 +153,35 @@ List createWithValues
 //- Find index of max element (and larger than given element).
 //  return -1 if not found. Linear search.
 template<class List>
-label findMax(const List&);
+label findMax(const List&, const label start=0);
 
 
 //- Find index of min element (and less than given element).
 //  return -1 if not found. Linear search.
 template<class List>
-label findMin(const List&);
+label findMin(const List&, const label start=0);
 
 
 //- Find first occurence of given element in sorted list and return index,
 //  return -1 if not found. Binary search.
 template<class List>
-label findSortedIndex(const List&, typename List::const_reference);
+label findSortedIndex
+(
+    const List&,
+    typename List::const_reference,
+    const label start=0
+);
 
 
 //- Find last element < given value in sorted list and return index,
 //  return -1 if not found. Binary search.
 template<class List>
-label findLower(const List&, typename List::const_reference);
+label findLower
+(
+    const List&,
+    typename List::const_reference,
+    const label start=0
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -42,6 +42,7 @@ Description
 #include "demandDrivenData.H"
 #include "writePatch.H"
 #include "writePointSet.H"
+#include "IOobjectList.H"
 
 #include <stdio.h>
 
@@ -233,8 +234,10 @@ void writeVTK
 
 void printHelp(Ostream& os)
 {
-    os  << "Please type 'help', 'quit', 'time ddd'"
+    os  << "Please type 'help', 'list', 'quit', 'time ddd'"
         << " or a set command after prompt." << endl
+        << "'list' will show all current cell/face/point sets." << endl
+        << "'time ddd' will change the current time." << endl
         << endl
         << "A set command should be of the following form" << endl
         << endl
@@ -271,6 +274,47 @@ void printHelp(Ostream& os)
         << endl;
 }
 
+
+void printAllSets(const polyMesh& mesh, Ostream& os)
+{
+    IOobjectList objects
+    (
+        mesh,
+        mesh.pointsInstance(),
+        polyMesh::meshSubDir/"sets"
+    );
+    IOobjectList cellSets(objects.lookupClass(cellSet::typeName));
+    if (cellSets.size() > 0)
+    {
+        os  << "cellSets:" << endl;
+        forAllConstIter(IOobjectList, cellSets, iter)
+        {
+            cellSet set(*iter());
+            os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
+        }
+    }
+    IOobjectList faceSets(objects.lookupClass(faceSet::typeName));
+    if (faceSets.size() > 0)
+    {
+        os  << "faceSets:" << endl;
+        forAllConstIter(IOobjectList, faceSets, iter)
+        {
+            faceSet set(*iter());
+            os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
+        }
+    }
+    IOobjectList pointSets(objects.lookupClass(pointSet::typeName));
+    if (pointSets.size() > 0)
+    {
+        os  << "pointSets:" << endl;
+        forAllConstIter(IOobjectList, pointSets, iter)
+        {
+            pointSet set(*iter());
+            os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
+        }
+    }
+    os  << endl;
+}
 
 
 // Read command and execute. Return true if ok, false otherwise.
@@ -531,6 +575,12 @@ commandStatus parseType
 
         return INVALID;
     }
+    else if (setType == "list")
+    {
+        printAllSets(mesh, Pout);
+
+        return INVALID;
+    }
     else if (setType == "time")
     {
         scalar time = readScalar(is);
@@ -612,8 +662,9 @@ commandStatus parseType
         (
             "commandStatus parseType(Time&, polyMesh&, const word&"
             ", IStringStream&)"
-        )   << "Illegal set type " << setType << endl
-            << "Should be one of 'cellSet' 'faceSet' 'pointSet'"
+        )   << "Illegal command " << setType << endl
+            << "Should be one of 'help', 'list', 'time' or a set type :"
+            << " 'cellSet', 'faceSet', 'pointSet'"
             << endl;
 
         return INVALID;

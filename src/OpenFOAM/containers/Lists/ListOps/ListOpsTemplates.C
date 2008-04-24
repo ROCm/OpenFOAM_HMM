@@ -118,6 +118,54 @@ void Foam::inplaceReorder
 }
 
 
+template<class Container>
+void Foam::inplaceMapValue
+(
+    const labelList& oldToNew,
+    Container& lst
+)
+{
+    for
+    (
+        typename Container::iterator iter = lst.begin();
+        iter != lst.end();
+        ++iter
+    )
+    {
+        if (iter() >= 0)
+        {
+            iter() = oldToNew[iter()];
+        }
+    }
+}
+
+
+template<class Container>
+void Foam::inplaceMapKey
+(
+    const labelList& oldToNew,
+    Container& lst
+)
+{
+    Container newLst(lst);
+
+    for
+    (
+        typename Container::iterator iter = lst.begin();
+        iter != lst.end();
+        ++iter
+    )
+    {
+        if (iter.key() >= 0)
+        {
+            newLst.insert(oldToNew[iter.key()], iter());
+        }
+    }
+    
+    lst.transfer(newLst);
+}
+
+
 template<class T, class List>
 List Foam::subset(const UList<T>& regions, const T& region, const List& lst)
 {
@@ -221,11 +269,16 @@ void Foam::invertManyToMany
 
 
 template<class List>
-Foam::label Foam::findIndex(const List& l, typename List::const_reference t)
+Foam::label Foam::findIndex
+(
+    const List& l,
+    typename List::const_reference t,
+    const label start
+)
 {
     label index = -1;
 
-    forAll(l, i)
+    for (label i = start; i < l.size(); i++)
     {
         if (l[i] == t)
         {
@@ -242,13 +295,14 @@ template<class List>
 Foam::labelList Foam::findIndices
 (
     const List& l,
-    typename List::const_reference t
+    typename List::const_reference t,
+    const label start
 )
 {
     // Count occurrences
     label n = 0;
 
-    forAll(l, i)
+    for (label i = start; i < l.size(); i++)
     {
         if (l[i] == t)
         {
@@ -260,7 +314,7 @@ Foam::labelList Foam::findIndices
     labelList indices(n);
     n = 0;
 
-    forAll(l, i)
+    for (label i = start; i < l.size(); i++)
     {
         if (l[i] == t)
         {
@@ -291,7 +345,7 @@ template<class List>
 List Foam::createWithValues
 (
     const label sz,
-    typename List::const_reference initValue,
+    const typename List::const_reference initValue,
     const labelList& indices,
     typename List::const_reference setValue
 )
@@ -303,16 +357,16 @@ List Foam::createWithValues
 
 
 template<class List>
-Foam::label Foam::findMax(const List& l)
+Foam::label Foam::findMax(const List& l, const label start)
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label index = 0;
+    label index = start;
 
-    for (label i = 1; i < l.size(); i++)
+    for (label i = start+1; i < l.size(); i++)
     {
         if (l[i] > l[index])
         {
@@ -325,16 +379,16 @@ Foam::label Foam::findMax(const List& l)
 
 
 template<class List>
-Foam::label Foam::findMin(const List& l)
+Foam::label Foam::findMin(const List& l, const label start)
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label index = 0;
+    label index = start;
 
-    for (label i = 1; i < l.size(); i++)
+    for (label i = start+1; i < l.size(); i++)
     {
         if (l[i] < l[index])
         {
@@ -350,15 +404,16 @@ template<class List>
 Foam::label Foam::findSortedIndex
 (
     const List& l,
-    typename List::const_reference t
+    typename List::const_reference t,
+    const label start
 )
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label low = 0;
+    label low = start;
     label high = l.size() - 1;
 
     while (low <= high)
@@ -387,15 +442,16 @@ template<class List>
 Foam::label Foam::findLower
 (
     const List& l,
-    typename List::const_reference t
+    typename List::const_reference t,
+    const label start
 )
 {
-    if (l.size() == 0)
+    if (start >= l.size())
     {
         return -1;
     }
 
-    label low = 0;
+    label low = start;
     label high = l.size() - 1;
 
     while ((high - low) > 1)

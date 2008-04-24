@@ -87,7 +87,7 @@ void hexBlock::setHandedness()
 
     if (blockHandedness_ == noPoints)
     {
-        WarningIn("hexBlock::readPoints(const bool, Istream&)")
+        WarningIn("hexBlock::hexBlock::setHandedness()")
             << "Cannot determine orientation of block."
             << " Continuing as if right handed." << endl;
         blockHandedness_ = right;
@@ -105,35 +105,67 @@ hexBlock::hexBlock(const label nx, const label ny, const label nz)
     zDim_(nz - 1),
     blockHandedness_(noPoints),
     points_((xDim_ + 1)*(yDim_ + 1)*(zDim_ + 1))
-{
-    Pout<< "xDim:" << nx << " yDim:" << ny << " zDim:" << nz << endl;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void hexBlock::readPoints(const bool readBlank, Istream& is)
+void hexBlock::readPoints
+(
+    const bool readBlank,
+    const scalar twoDThicknes,
+    Istream& is
+)
 {
     scalar iBlank;
 
-    forAll (points_, i)
+    label nPoints = points_.size();
+
+    if (twoDThicknes > 0)
+    {
+        nPoints /= 2;
+    }
+
+    Info<< "Reading " << nPoints << " x coordinates..." << endl;
+    for (label i=0; i < nPoints; i++)
     {
         is >> points_[i].x();
     }
 
-    forAll (points_, i)
+    Info<< "Reading " << nPoints << " y coordinates..." << endl;
+    for (label i=0; i < nPoints; i++)
     {
         is >> points_[i].y();
     }
 
-    forAll (points_, i)
+    if (twoDThicknes > 0)
     {
-        is >> points_[i].z();
+        Info<< "Extruding " << nPoints << " points in z direction..." << endl;
+        // Duplicate points
+        for (label i=0; i < nPoints; i++)
+        {
+            points_[i+nPoints] = points_[i];
+        }
+        for (label i=0; i < nPoints; i++)
+        {
+            points_[i].z() = 0;
+            points_[i+nPoints].z() = twoDThicknes;
+        }
     }
+    else
+    {
+        Info<< "Reading " << nPoints << " z coordinates..." << endl;
+        for (label i=0; i < nPoints; i++)
+        {
+            is >> points_[i].z();
+        }
+    }
+
 
     if (readBlank)
     {
-        forAll (points_, i)
+        Info<< "Reading " << nPoints << " blanks..." << endl;
+        for (label i=0; i < nPoints; i++)
         {
             is >> iBlank;
         }
