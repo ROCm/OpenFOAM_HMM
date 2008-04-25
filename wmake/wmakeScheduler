@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -31,6 +31,8 @@
 #     - WM_HOSTS contains a list of hosts and number of concurrent processes
 #     eg,
 #        export WM_HOSTS="hostA:1 hostB:2 hostC:1"
+#     - WM_COLOURS contains a list of colours to cycle through
+#        export WM_COLOURS="black blue green cyan red magenta yellow"
 #
 #     Sources the relevant cshrc/bashrc if not set.
 #
@@ -54,14 +56,14 @@ lockDir=$HOME/.wmakeScheduler
 # count the total number of slots available and exit
 if [ "$1" = "-count" ]
 then
-   expr $(
-      for slotGroup in $WM_HOSTS
-      do
-         n=${slotGroup##*:}
-         if [ "$n" = "${slotGroup%%:*}" ]; then n=1; fi # missing ':'
-         echo "+ ${n:-1}"
-      done)
-   exit 0
+    expr $(
+        for slotGroup in $WM_HOSTS
+        do
+            n=${slotGroup##*:}
+            if [ "$n" = "${slotGroup%%:*}" ]; then n=1; fi # missing ':'
+            echo "+ ${n:-1}"
+        done)
+    exit 0
 fi
 
 # where to source WM_PROJECT settings in a remote shell
@@ -72,38 +74,42 @@ fi
 sourceFoam=false    # fallback command
 case $SHELL in
 */csh | */tcsh )    # [t]csh vs bash|ksh|sh
-   shellRc=cshrc
-   ;;
+    shellRc=cshrc
+    ;;
 *)
-   shellRc=bashrc
-   ;;
+    shellRc=bashrc
+    ;;
 esac
 
-# check ~/.$WM_PROJECT-$WM_PROJECT_VERSION
-# check <site>/etc
-# check <site>/.$WM_PROJECT-$WM_PROJECT_VERSION
+# check ~/.$WM_PROJECT-$WM_PROJECT_VERSION/
+# check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
+# check ~/.$WM_PROJECT/
+# check <installedProject>/etc/
+# check <installedProject/.$WM_PROJECT-$WM_PROJECT_VERSION/
 if [ "$WM_PROJECT" ]; then
 
-   : ${FOAM_DOT_DIR:=.$WM_PROJECT-$WM_PROJECT_VERSION}
+    : ${FOAM_DOT_DIR:=.$WM_PROJECT-$WM_PROJECT_VERSION}
 
-   for i in \
-      $HOME/$FOAM_DOT_DIR \
-      $WM_PROJECT_DIR/etc \
-      $WM_PROJECT_DIR/$FOAM_DOT_DIR \
-      ;
-   do
-      if [ -f "$i/$shellRc" ]; then
-         sourceFoam="$i/$shellRc"
-         break
-      fi
-   done
+    for i in \
+        $HOME/$FOAM_DOT_DIR \
+        $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
+        $HOME/.$WM_PROJECT \
+        $WM_PROJECT_DIR/etc \
+        $WM_PROJECT_DIR/$FOAM_DOT_DIR \
+        ;
+    do
+        if [ -f "$i/$shellRc" ]; then
+            sourceFoam="$i/$shellRc"
+            break
+        fi
+    done
 fi
 
 # Construct test string for remote execution.
 # Source WM_PROJECT settings if WM_PROJECT environment not set.
 case $sourceFoam in
-   */cshrc)  sourceFoam='if ( ! $?WM_PROJECT ) source '"$sourceFoam";;
-   */bashrc) sourceFoam='[ "$WM_PROJECT" ] || . '"$sourceFoam";;
+    */cshrc)  sourceFoam='if ( ! $?WM_PROJECT ) source '"$sourceFoam";;
+    */bashrc) sourceFoam='[ "$WM_PROJECT" ] || . '"$sourceFoam";;
 esac
 
 # quote double-quotes for remote command line
@@ -111,47 +117,95 @@ rcmd=$(echo $* | sed -e s/\"/\'\"\'/g)
 ## the same, without forking (not ksh, maybe not /bin/sh either)
 # rcmd=$(while [ "$#" -gt 0 ]; do echo "${1//\"/'\"'}"; shift; done)
 
-while :
+
+# Convert WM_COLOURS into an array
+declare colours
+nColours=0
+for col in $WM_COLOURS
 do
-   # 0.5 sec
-   usleep 500000
-
-   for slotGroup in $WM_HOSTS
-   do
-      # split 'host:N', but catch 'host:' and 'host' too
-      host=${slotGroup%%:*}
-      n=${slotGroup##*:}
-      if [ "$n" = "$host" ]; then n=1; fi # missing ':'
-      : ${n:=1}
-
-      ## echo "** slot=$slot host=$host n=$n"
-
-      i=0
-      while [ "$i" -lt "$n" ]
-      do
-         lock="$host:$i"
-         if [ ! -f "$lockDir/$lock" ]
-         then
-            touch "$lockDir/$lock"
-            #echo "ssh $host cd $PWD && $*"
-            if [ "$host" = "$HOST" ]
-            then
-               eval $*
-            elif [ -n "$JOB_ID" ]
-            then
-               qrsh -inherit -v PWD $host "$rcmd"
-            else
-               ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd"
-            fi
-            retval=$?
-            ## echo "** Releasing $lock"
-            rm -f "$lockDir/$lock" 2>/dev/null
-            exit $retval
-         fi
-         i=$(expr $i + 1)
-      done
-   done
+    colours[$nColours]=$col
+    ((nColours = $nColours + 1))
 done
 
+# Bashism: make pipe fail early. This make sure return value of compilation
+# is returned and not of colouring pipe.
+set -o pipefail
+
+# Define function to colour output by argument 1
+colourPipe(){
+    if [ "$1" ]; then
+        (while read line; do setterm -foreground $1; echo "$line" ; done)
+    else
+        cat
+    fi
+}
+
+
+colourIndex=0
+
+while :
+do
+    # 0.5 sec
+    usleep 500000
+
+    for slotGroup in $WM_HOSTS
+    do
+        # split 'host:N', but catch 'host:' and 'host' too
+        host=${slotGroup%%:*}
+        n=${slotGroup##*:}
+        if [ "$n" = "$host" ]; then n=1; fi # missing ':'
+        : ${n:=1}
+
+        i=0
+        while [ "$i" -lt "$n" ]
+        do
+            lock="$host:$i"
+            if [ ! -f "$lockDir/$lock" ]; then
+                # Set lock
+                touch "$lockDir/$lock"
+
+                # Set colour
+                colour=${colours[$colourIndex]}
+                #echo "** host=$host  colourIndex=$colourIndex  colour=$colour"
+
+                if [ "$host" = "$HOST" ]; then
+                    if [ "$colour" ]; then
+                        eval $* 2>&1 | colourPipe $colour
+                    else
+                        eval $*
+                fi
+                elif [ -n "$JOB_ID" ]; then
+                    if [ "$colour" ]; then
+                        qrsh -inherit -v PWD $host "$rcmd" 2>&1 | colourPipe $colour
+                    else
+                        qrsh -inherit -v PWD $host "$rcmd"
+                    fi
+                else
+                    if [ "$colour" ]; then
+                        ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | colourPipe $colour
+                    else
+                        ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd"
+                    fi
+                fi
+                retval=$?
+
+                # Release lock
+                rm -f "$lockDir/$lock" 2>/dev/null
+                exit $retval
+            fi
+            i=$(expr $i + 1)
+
+            # Cycle through colours
+            colourIndex=$(expr $colourIndex + 1)
+            if (( $colourIndex >= $nColours )); then
+                colourIndex=0
+            fi
+        done
+    done
+done
+
+if [ "$WM_COLOURS" ]; then
+    setterm -foreground default
+fi
 
 #------------------------------------------------------------------------------
