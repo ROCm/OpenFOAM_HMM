@@ -16,6 +16,9 @@
 *.so
 *.jar
 
+# Corefiles
+core
+
 # dependency files - anywhere
 *.dep
 
