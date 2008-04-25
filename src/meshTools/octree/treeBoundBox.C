@@ -22,13 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "treeBoundBox.H"
-#include "point.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,31 +41,36 @@ const treeBoundBox treeBoundBox::greatBox
 );
 
 
-const faceList treeBoundBox::faces
-(
-    Foam::IStringStream
-    (
-        "6("
-        "4(0 4 6 2)" // left
-        "4(1 3 7 5)" // right
-        "4(0 1 5 4)" // bottom
-        "4(2 6 7 3)" // top
-        "4(0 2 3 1)" // back
-        "4(4 5 7 6)" // front
-        ")"
-    )()
-);
+const label facesArray[6][4] =
+{
+        {0, 4, 6, 2}, // left
+        {1, 3, 7, 5}, // right
+        {0, 1, 5, 4}, // bottom
+        {2, 6, 7, 3}, // top
+        {0, 2, 3, 1}, // back
+        {4, 5, 7, 6}  // front
+};
+const faceList treeBoundBox::faces(initListList<face, label, 6, 4>(facesArray));
 
 
+const label edgesArray[12][2] =
+{
+    {0, 1}, //0
+    {1, 3},
+    {2, 3}, //2
+    {0, 2},
+    {4, 5}, //4
+    {5, 7},
+    {6, 7}, //6
+    {4, 6},
+    {0, 4}, //8
+    {1, 5},
+    {3, 7}, //10
+    {2, 6}
+};
 const edgeList treeBoundBox::edges
 (
-    //treeBoundBox::edges()
-    Foam::IStringStream
-    (
-       //(E01)(E13)(E23)(E02)(E45)(E57)(E67)(E46)(E04)(E15)(E37)(E26)
-       //  0    1    2    3    4    5    6    7    8    9   10   11
-        "12((0 1)(1 3)(2 3)(0 2)(4 5)(5 7)(6 7)(4 6)(0 4)(1 5)(3 7)(2 6))"
-    )()
+    initListList<edge, label, 12, 2>(edgesArray)
 );
 
 

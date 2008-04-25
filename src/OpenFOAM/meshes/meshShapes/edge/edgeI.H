@@ -39,6 +39,13 @@ inline Foam::edge::edge(const label a, const label b)
 }
 
 
+inline Foam::edge::edge(const FixedList<label, 2>& a)
+{
+    start() = a[0];
+    end() = a[1];
+}
+
+
 inline Foam::edge::edge(Istream& is)
 :
     FixedList<label, 2>(is)

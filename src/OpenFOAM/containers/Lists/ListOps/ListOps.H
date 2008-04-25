@@ -184,6 +184,12 @@ label findLower
 );
 
 
+//- To construct a (square) ListList from a C array. Has extra Container type
+//  to initialise e.g. faceList from arrays of labels.
+template<class Container, class T, int nRows, int nColumns>
+List<Container> initListList(const T[nRows][nColumns]);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

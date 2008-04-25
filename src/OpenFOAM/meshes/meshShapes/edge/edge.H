@@ -77,6 +77,9 @@ public:
         //- Construct from components
         inline edge(const label a, const label b);
 
+        //- Construct from FixedList
+        inline edge(const FixedList<label, 2>&);
+
         //- Construct from Istream
         inline edge(Istream&);
 

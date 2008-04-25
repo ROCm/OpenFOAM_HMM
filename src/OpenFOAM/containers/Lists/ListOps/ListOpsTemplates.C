@@ -486,4 +486,22 @@ Foam::label Foam::findLower
 }
 
 
+template<class Container, class T, int nRows, int nColumns>
+Foam::List<Container> Foam::initListList(const T elems[nRows][nColumns])
+{
+    List<Container> faces(nRows);
+
+    Container f(nColumns);
+    forAll(faces, faceI)
+    {
+        forAll(f, i)
+        {
+            f[i] = elems[faceI][i];
+        }
+        faces[faceI] = f;
+    }
+    return faces;
+}
+
+
 // ************************************************************************* //
