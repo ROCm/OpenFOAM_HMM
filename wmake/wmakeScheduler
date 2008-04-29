@@ -134,7 +134,7 @@ set -o pipefail
 # Define function to colour output by argument 1
 colourPipe(){
     if [ "$1" ]; then
-        (while read line; do setterm -foreground $1; echo "$line" ; done)
+        (while read line; do setterm -foreground $1; echo "$line" ; done; setterm -foreground default)
     else
         cat
     fi
@@ -173,13 +173,9 @@ do
                         eval $* 2>&1 | colourPipe $colour
                     else
                         eval $*
-                fi
-                elif [ -n "$JOB_ID" ]; then
-                    if [ "$colour" ]; then
-                        qrsh -inherit -v PWD $host "$rcmd" 2>&1 | colourPipe $colour
-                    else
-                        qrsh -inherit -v PWD $host "$rcmd"
                     fi
+                elif [ -n "$JOB_ID" ]; then
+                    qrsh -inherit -v PWD $host "$rcmd"
                 else
                     if [ "$colour" ]; then
                         ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | colourPipe $colour
