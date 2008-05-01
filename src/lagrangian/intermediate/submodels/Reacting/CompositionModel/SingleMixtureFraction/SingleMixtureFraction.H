@@ -28,7 +28,6 @@ Class
 
 Description
     Templated parcel single mixture fraction class
-
     - Each phase sums to a mass fraction of 1
 
 SourceFiles

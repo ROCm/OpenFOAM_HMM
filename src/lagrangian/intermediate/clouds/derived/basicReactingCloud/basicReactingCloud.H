@@ -26,7 +26,6 @@ Class
     Foam::basicReactingCloud
 
 Description
-    The basicReactingCloud
 
 SourceFiles
     basicReactingCloud.C

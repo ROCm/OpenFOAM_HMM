@@ -45,11 +45,11 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
 (
     ThermoCloud<ParcelType>& cloud,
     const constantProperties& constProps,
-    const interpolationCellPoint<scalar>& rhoInterp,
-    const interpolationCellPoint<vector>& UInterp,
-    const interpolationCellPoint<scalar>& muInterp,
-    const interpolationCellPoint<scalar>& TInterp,
-    const interpolationCellPoint<scalar>& cpInterp,
+    const interpolation<scalar>& rhoInterp,
+    const interpolation<vector>& UInterp,
+    const interpolation<scalar>& muInterp,
+    const interpolation<scalar>& TInterp,
+    const interpolation<scalar>& cpInterp,
     const vector& g
 )
 :
@@ -94,7 +94,9 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
         constProps
     ),
     T_(constProps.T0()),
-    cp_(constProps.cp0())
+    cp_(constProps.cp0()),
+    Tc_(0.0),
+    cpc_(0.0)
 {}
 
 
@@ -151,7 +153,7 @@ Foam::ThermoParcel<ParcelType>::trackData::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::interpolationCellPoint<Foam::scalar>&
+inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackData::TInterp() const
 {
     return TInterp_;
@@ -159,7 +161,7 @@ Foam::ThermoParcel<ParcelType>::trackData::TInterp() const
 
 
 template<class ParcelType>
-inline const Foam::interpolationCellPoint<Foam::scalar>&
+inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackData::cpInterp() const
 {
     return cpInterp_;

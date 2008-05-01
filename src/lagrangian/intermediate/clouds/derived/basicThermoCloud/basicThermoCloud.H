@@ -26,7 +26,6 @@ Class
     Foam::basicThermoCloud
 
 Description
-    The basicThermoCloud
 
 SourceFiles
     basicThermoCloud.C

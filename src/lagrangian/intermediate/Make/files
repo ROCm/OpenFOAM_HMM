@@ -44,5 +44,8 @@ parcels/derived/reactingParcel/makeReactingParcelWallInteractionModels.C
 submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
 submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
 
+/* integration schemes */
+IntegrationScheme/makeIntegrationSchemes.C
+
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

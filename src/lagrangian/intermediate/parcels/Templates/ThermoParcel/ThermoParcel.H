@@ -26,16 +26,14 @@ Class
     Foam::ThermoParcel
 
 Description
-    Thermodynamic parcel class with one-way coupling with the continuous
-    phase.
-
-    Includes Kinematic parcel sub-models, plus:
+    Thermodynamic parcel class with one/two-way coupling with the continuous
+    phase. Includes Kinematic parcel sub-models, plus:
     - heat transfer
 
 SourceFiles
-    thermoParcelI.H
+    ThermoParcelI.H
     ThermoParcel.C
-    thermoParcelIO.C
+    ThermoParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -75,72 +73,9 @@ class ThermoParcel
     public KinematicParcel<ParcelType>
 {
 
-    // Private data
-
-        //- Parcel properties
-
-            //- Temperature [K]
-            scalar T_;
-
-            //- Specific heat capacity [J/(kg.K)]
-            scalar cp_;
-
-
-protected:
-
-    // Protected member functions
-
-        template<class TrackingData>
-        void calcCoupled
-        (
-            TrackingData& td,
-            const label celli,
-            const scalar dt,
-            const scalar rhoc,
-            vector& Uc,
-            const scalar muc,
-            const scalar Tc,
-            const scalar cpc
-        );
-
-        template<class TrackingData>
-        void calcUncoupled
-        (
-            TrackingData& td,
-            const label celli,
-            const scalar dt,
-            const scalar rhoc,
-            vector& Uc,
-            const scalar muc,
-            const scalar Tc,
-            const scalar cpc
-        );
-
-        //- Calculate new particle temperature
-        template<class TrackingData>
-        scalar calcHeatTransfer
-        (
-            TrackingData& td,
-            const label celli,
-            const scalar dt,
-            const scalar rhoc,
-            const vector& Uc,
-            const scalar muc,
-            const scalar Tc,
-            const scalar cpc,
-            scalar& htc
-        );
-
-
 public:
 
-    //- Runtime type information
-    TypeName("ThermoParcel");
-
-    friend class Cloud<ParcelType>;
-
-
-    //- Class to hold particle constant properties
+    //- Class to hold thermo particle constant properties
     class constantProperties
     :
         public KinematicParcel<ParcelType>::constantProperties
@@ -180,7 +115,7 @@ public:
     };
 
 
-    //- Class used to pass tracking data to the trackToFace function
+    //- Class used to pass thermo tracking data to the trackToFace function
     class trackData
     :
         public KinematicParcel<ParcelType>::trackData
@@ -196,8 +131,8 @@ public:
 
             //- Interpolators for continuous phase fields
 
-                const interpolationCellPoint<scalar>& TInterp_;
-                const interpolationCellPoint<scalar>& cpInterp_;
+                const interpolation<scalar>& TInterp_;
+                const interpolation<scalar>& cpInterp_;
 
 
     public:
@@ -208,11 +143,11 @@ public:
             (
                 ThermoCloud<ParcelType>& cloud,
                 const constantProperties& constProps,
-                const interpolationCellPoint<scalar>& rhoInterp,
-                const interpolationCellPoint<vector>& UInterp,
-                const interpolationCellPoint<scalar>& muInterp,
-                const interpolationCellPoint<scalar>& TInterp,
-                const interpolationCellPoint<scalar>& cpInterp,
+                const interpolation<scalar>& rhoInterp,
+                const interpolation<vector>& UInterp,
+                const interpolation<scalar>& muInterp,
+                const interpolation<scalar>& TInterp,
+                const interpolation<scalar>& cpInterp,
                 const vector& g
             );
 
@@ -223,10 +158,74 @@ public:
 
             inline const constantProperties& constProps() const;
 
-            inline const interpolationCellPoint<scalar>& TInterp() const;
+            inline const interpolation<scalar>& TInterp() const;
 
-            inline const interpolationCellPoint<scalar>& cpInterp() const;
+            inline const interpolation<scalar>& cpInterp() const;
     };
+
+
+protected:
+
+    // Protected data
+
+        // Parcel properties
+
+            //- Temperature [K]
+            scalar T_;
+
+            //- Specific heat capacity [J/(kg.K)]
+            scalar cp_;
+
+
+        // Call-based quantities
+
+            //- Temperature
+            scalar Tc_;
+
+            //- Specific heat capacity
+            scalar cpc_;
+
+
+    // Protected member functions
+
+        virtual void updateCellQuantities
+        (
+            trackData& td,
+            const scalar dt,
+            const label celli
+        );
+
+        virtual void calcCoupled
+        (
+            trackData& td,
+            const scalar dt,
+            const label celli
+        );
+
+        virtual void calcUncoupled
+        (
+            trackData& td,
+            const scalar dt,
+            const label celli
+        );
+
+        //- Calculate new particle temperature
+        virtual scalar calcHeatTransfer
+        (
+            trackData& td,
+            const scalar dt,
+            const label celli,
+            scalar& htc,
+            scalar& dhTrans
+        );
+
+
+public:
+
+    //- Runtime type information
+    TypeName("ThermoParcel");
+
+    friend class Cloud<ParcelType>;
 
 
     // Constructors
@@ -270,30 +269,6 @@ public:
             //- Return specific heat capacity
             inline const scalar cp() const;
             inline scalar& cp();
-
-            //- Move parcel
-            template<class TrackingData>
-            bool move
-            (
-                 TrackingData&
-            );
-
-
-        //- Patch interaction
-
-            //- Overridable function to handle the particle hitting a wallPatch
-            template<class TrackingData>
-            void hitWallPatch
-            (
-                 const wallPolyPatch&,
-                 TrackingData& td
-            );
-
-            void hitWallPatch
-            (
-                 const wallPolyPatch&,
-                 int&
-            );
 
 
         // I-O

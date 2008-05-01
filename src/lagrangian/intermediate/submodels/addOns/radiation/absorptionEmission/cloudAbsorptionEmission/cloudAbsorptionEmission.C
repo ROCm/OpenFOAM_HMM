@@ -72,7 +72,7 @@ Foam::radiation::cloudAbsorptionEmission::~cloudAbsorptionEmission()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::cloudAbsorptionEmission::a() const
+Foam::radiation::cloudAbsorptionEmission::aDisp() const
 {
     tmp<volScalarField> ta
     (
@@ -107,7 +107,7 @@ Foam::radiation::cloudAbsorptionEmission::a() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::cloudAbsorptionEmission::e() const
+Foam::radiation::cloudAbsorptionEmission::eDisp() const
 {
     tmp<volScalarField> te
     (
@@ -132,7 +132,7 @@ Foam::radiation::cloudAbsorptionEmission::e() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::cloudAbsorptionEmission::E() const
+Foam::radiation::cloudAbsorptionEmission::EDisp() const
 {
     tmp<volScalarField> tE
     (

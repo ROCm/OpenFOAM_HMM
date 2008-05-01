@@ -27,7 +27,6 @@ Class
 
 Description
     Templated base class for kinematic cloud
-
     - Kinematic only
       - Dispersion model
       - Drag model
@@ -53,7 +52,8 @@ SourceFiles
 #include "volPointInterpolation.H"
 #include "fvMatrices.H"
 #include "fvm.H"
-//#include "DimensionedField.H"
+
+#include "IntegrationSchemesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,7 +108,7 @@ private:
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
-        const Time& runTime_;
+//        const Time& runTime_;
 
         //- Reference to the interpolation for the carrier phase to the parcels
         const volPointInterpolation& vpi_;
@@ -165,6 +165,11 @@ private:
             const dimensionedVector& g_;
 
 
+        // Interpolation
+
+            dictionary interpolationSchemes_;
+
+
         // References to the cloud sub-models
 
             //- Dispersion model
@@ -181,6 +186,12 @@ private:
             //- Wall interaction model
             autoPtr<WallInteractionModel<KinematicCloud<ParcelType> > >
                 wallInteractionModel_;
+
+
+        // Reference to the particle integration schemes
+
+            //- Velocity integration
+            autoPtr<vectorIntegrationScheme> UIntegrator_;
 
 
         // Counters
@@ -273,9 +284,6 @@ public:
                 //- Return refernce to the mesh
                 inline const fvMesh& mesh() const;
 
-                //- Return referece to the time database
-                inline const Time& runTime() const;
-
                 //- Retuen reference to the interpolation
                 inline const volPointInterpolation& vpi() const;
 
@@ -313,6 +321,12 @@ public:
                 inline const dimensionedVector& g() const;
 
 
+            // Interpolations
+
+                //- Return reference to the interpolation dictionary
+                inline const dictionary& interpolationSchemes() const;
+
+
             // Sub-models
 
                 //- Return reference to dispersion model
@@ -335,6 +349,12 @@ public:
                     wallInteraction() const;
 
 
+            // Integration schemes
+
+                //-Return reference to velocity integration
+                inline const vectorIntegrationScheme& UIntegrator() const;
+
+
             // Sources
 
                 // Momentum
@@ -345,8 +365,11 @@ public:
                     //- Coefficient for carrier phase U equation
                     inline DimensionedField<scalar, volMesh>& UCoeff();
 
-                    //- Momentum source term
-                    inline tmp<fvVectorMatrix> SU(volVectorField& U) const;
+                    //- Return tmp momentum source term - fully explicit
+                    inline tmp<DimensionedField<vector, volMesh> > SU1() const;
+
+                    //- Return tmp momentum source term - semi-implicit
+                    inline tmp<fvVectorMatrix> SU2(volVectorField& U) const;
 
 
 

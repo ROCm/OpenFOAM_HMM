@@ -27,7 +27,6 @@ Class
 
 Description
     Templated base class for thermodynamic cloud
-
     - Adds to kinematic cloud
       - Heat transfer
 
@@ -85,6 +84,12 @@ class ThermoCloud
             //- Heat transfer model
             autoPtr<HeatTransferModel<ThermoCloud<ParcelType> > >
                 heatTransferModel_;
+
+
+        // Reference to the particle integration schemes
+
+            //- Temperature integration
+            autoPtr<scalarIntegrationScheme> TIntegrator_;
 
 
         // Modelling options
@@ -154,6 +159,12 @@ public:
                     heatTransfer() const;
 
 
+            // Integration schemes
+
+                //-Return reference to velocity integration
+                inline const scalarIntegrationScheme& TIntegrator() const;
+
+
             // Modelling options
 
                 //- Radiation flag
@@ -170,8 +181,11 @@ public:
                     //- Coefficient for carrier phase h equation
                     inline DimensionedField<scalar, volMesh>& hCoeff();
 
-                    //- Enthalpy source term
-                    inline tmp<fvScalarMatrix> Sh(volScalarField& h) const;
+                    //- return tmp enthalpy source term - fully explicit
+                    inline tmp<DimensionedField<scalar, volMesh> > Sh1() const;
+
+                    //- Return tmp enthalpy source term - semi-implicit
+                    inline tmp<fvScalarMatrix> Sh2(volScalarField& h) const;
 
 
                 // Radiation - overrides thermoCloud virtual abstract members

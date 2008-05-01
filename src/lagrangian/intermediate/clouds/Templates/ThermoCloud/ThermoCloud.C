@@ -63,13 +63,21 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             *this
         )
     ),
+    TIntegrator_
+    (
+        scalarIntegrationScheme::New
+        (
+            "T",
+            this->particleProperties().subDict("integrationSchemes")
+        )
+    ),
     radiation_(this->particleProperties().lookup("radiation")),
     hTrans_
     (
         IOobject
         (
-            this->cloudName() + "hTrans",
-            this->runTime().timeName(),
+            this->name() + "hTrans",
+            this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -82,8 +90,8 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     (
         IOobject
         (
-            this->cloudName() + "hCoeff",
-            this->runTime().timeName(),
+            this->name() + "hCoeff",
+            this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -119,21 +127,50 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     const volScalarField& T = carrierThermo_.T();
     const volScalarField cp = carrierThermo_.Cp();
 
-    interpolationCellPoint<scalar> rhoInterp(this->vpi(), this->rho());
-    interpolationCellPoint<vector> UInterp(this->vpi(), this->U());
-    interpolationCellPoint<scalar> muInterp(this->vpi(), this->mu());
-    interpolationCellPoint<scalar> TInterp(this->vpi(), T);
-    interpolationCellPoint<scalar> cpInterp(this->vpi(), cp);
+    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        this->rho()
+    );
+
+    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        this->U()
+    );
+
+    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        this->mu()
+    );
+
+    autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        T
+    );
+
+    autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        cp
+    );
 
     typename ParcelType::trackData td
     (
         *this,
         constProps_,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        TInterp,
-        cpInterp,
+        rhoInterpolator(),
+        UInterpolator(),
+        muInterpolator(),
+        TInterpolator(),
+        cpInterpolator(),
         this->g().value()
     );
 
@@ -165,123 +202,8 @@ void Foam::ThermoCloud<ParcelType>::inject
     TrackingData& td
 )
 {
+    // Injection is same as for KinematicCloud<ParcelType>
     KinematicCloud<ParcelType>::inject(td);
-/*
-    scalar time = this->runTime().value();
-
-    scalar pRho = td.constProps().rho0();
-
-    // Number of parcels to introduce during this timestep
-    const label nParcels = this->injection().nParcelsToInject
-    (
-        this->nInjections(),
-        this->time0(),
-        time
-    );
-
-    // Return if no parcels are required
-    if (!nParcels)
-    {
-        this->postInjectCheck();
-        return;
-    }
-
-    // Volume of particles to introduce during this timestep
-    scalar pVolume = this->injection().volume
-    (
-         this->time0(),
-         time,
-         this->meshInfo()
-    );
-
-    // Volume fraction to introduce during this timestep
-    scalar pVolumeFraction =
-        this->injection().volumeFraction(this->time0(), time);
-
-    // Duration of injection period during this timestep
-    scalar deltaT = min
-    (
-        this->runTime().deltaT().value(),
-        min
-        (
-            time - this->injection().timeStart(),
-            this->injection().timeEnd() - this->time0()
-        )
-    );
-
-    // Pad injection time if injection starts during this timestep
-    scalar padTime = max
-    (
-        0.0,
-        this->injection().timeStart() - this->time0()
-    );
-
-    // Introduce new parcels linearly with time
-    for (label iParcel=0; iParcel<nParcels; iParcel++)
-    {
-        // Calculate the pseudo time of injection for parcel 'iParcel'
-        scalar timeInj = this->time0() + padTime + deltaT*iParcel/nParcels;
-
-        // Determine injected parcel properties
-        vector pPosition = this->injection().position
-        (
-            iParcel,
-            timeInj,
-            this->meshInfo(),
-            this->rndGen()
-        );
-
-        // Diameter of parcels
-        scalar pDiameter = this->injection().d0(iParcel, timeInj);
-
-        // Number of particles per parcel
-        scalar pNumberOfParticles = this->setNumberOfParticles
-        (
-            nParcels,
-            pDiameter,
-            pVolumeFraction,
-            pRho,
-            pVolume
-        );
-
-        // Velocity of parcels
-        vector pU = this->injection().velocity(iParcel, timeInj);
-
-        // Determine the injection cell
-        label pCell = -1;
-        this->setInjectorCellAndPosition(pCell, pPosition);
-
-        if (pCell >= 0)
-        {
-            // construct the parcel that is to be injected
-            ParcelType* pPtr = new ParcelType
-            (
-                td.cloud(),
-                this->parcelTypeId(),
-                pPosition,
-                pCell,
-                pDiameter,
-                pU,
-                pNumberOfParticles,
-                td.constProps()
-            );
-
-            scalar dt = time - timeInj;
-
-            pPtr->stepFraction() = (this->runTime().deltaT().value() - dt)
-                /this->runTime().deltaT().value();
-
-            this->injectParcel(td, pPtr);
-         }
-    }
-
-    this->postInjectCheck();
-
-    if (debug)
-    {
-        this->dumpParticlePositions();
-    }
-*/
 }
 
 

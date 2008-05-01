@@ -26,7 +26,6 @@ Class
     Foam::LagrangianField
 
 Description
-    Lagrangian Field
 
 SourceFiles
     LagrangianFieldI.H

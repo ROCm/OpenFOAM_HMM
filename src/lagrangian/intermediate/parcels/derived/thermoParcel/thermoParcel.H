@@ -26,7 +26,7 @@ Class
     Foam::thermoParcel
 
 Description
-    Foam::thermoParcel
+
 
 SourceFiles
     thermoParcel.C

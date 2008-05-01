@@ -26,10 +26,6 @@ Class
     Foam::DispersionRASModel
 
 Description
-    Templated dispersion RAS model
-
-SourceFiles
-    DispersionRASModel.C
 
 \*---------------------------------------------------------------------------*/
 

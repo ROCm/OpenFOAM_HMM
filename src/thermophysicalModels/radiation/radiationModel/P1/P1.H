@@ -93,7 +93,7 @@ public:
     // Constructors
 
         //- Construct from components
-        P1(const fvMesh& mesh, const basicThermo& thermo);
+        P1(const volScalarField& T);
 
 
     // Destructor
@@ -118,7 +118,7 @@ public:
             virtual tmp<volScalarField> Rp() const;
 
             //- Source term component (constant)
-            virtual tmp<volScalarField> Ru() const;
+            virtual tmp<DimensionedField<scalar, volMesh> > Ru() const;
 };
 
 

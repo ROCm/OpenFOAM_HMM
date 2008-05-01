@@ -27,12 +27,10 @@ Class
 
 Description
     Manual injection
-
-    For manual injection,
     - User specifies
-      -# Total mass to inject
-      -# Parcel positions in file \<positionsFile\>
-      -# Initial parcel velocity
+      - Total mass to inject
+      - Parcel positions in file <positionsFile>
+      - Initial parcel velocity
     - Parcel diameters obtained by PDF model
     - All parcels introduced at the start of the calculation
 

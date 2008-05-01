@@ -41,11 +41,13 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(0),
     d_(0.0),
     U_(vector::zero),
-    Ur_(vector::zero),
-    nParticle_(0),
+    nParticle_(0.0),
     rho_(0.0),
     tTurb_(0.0),
-    UTurb_(vector::zero)
+    UTurb_(vector::zero),
+    rhoc_(0.0),
+    Uc_(vector::zero),
+    muc_(0.0)
 {
     if (readFields)
     {
@@ -54,8 +56,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
             typeId_ = readLabel(is);
             d_ = readScalar(is);
             is >> U_;
-            is >> Ur_;
-            nParticle_ = readLabel(is);
+            nParticle_ = readScalar(is);
             rho_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
@@ -68,7 +69,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
                 sizeof(typeId_)
               + sizeof(d_)
               + sizeof(U_)
-              + sizeof(Ur_)
               + sizeof(nParticle_)
               + sizeof(rho_)
               + sizeof(tTurb_)
@@ -106,9 +106,6 @@ void Foam::KinematicParcel<ParcelType>::readFields
     IOField<vector> U(c.fieldIOobject("U"));
     c.checkFieldIOobject(c, U);
 
-    IOField<vector> Ur(c.fieldIOobject("Ur"));
-    c.checkFieldIOobject(c, Ur);
-
     IOField<scalar> nParticle(c.fieldIOobject("nParticle"));
     c.checkFieldIOobject(c, nParticle);
 
@@ -129,7 +126,6 @@ void Foam::KinematicParcel<ParcelType>::readFields
         p.typeId_ = typeId[i];
         p.d_ = d[i];
         p.U_ = U[i];
-        p.Ur_ = Ur[i];
         p.nParticle_ = nParticle[i];
         p.rho_ = rho[i];
         p.tTurb_ = tTurb[i];
@@ -152,7 +148,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields
     IOField<label> typeId(c.fieldIOobject("typeId"), np);
     IOField<scalar> d(c.fieldIOobject("d"), np);
     IOField<vector> U(c.fieldIOobject("U"), np);
-    IOField<vector> Ur(c.fieldIOobject("Ur"), np);
     IOField<scalar> nParticle(c.fieldIOobject("nParticle"), np);
     IOField<scalar> rho(c.fieldIOobject("rho"), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb"), np);
@@ -166,7 +161,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields
         typeId[i] = p.typeId();
         d[i] = p.d();
         U[i] = p.U();
-        Ur[i] = p.Ur();
         nParticle[i] = p.nParticle();
         rho[i] = p.rho();
         tTurb[i] = p.tTurb();
@@ -177,7 +171,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields
     typeId.write();
     d.write();
     U.write();
-    Ur.write();
     nParticle.write();
     rho.write();
     tTurb.write();
@@ -200,7 +193,6 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.typeId()
             << token::SPACE << p.d()
             << token::SPACE << p.U()
-            << token::SPACE << p.Ur()
             << token::SPACE << p.nParticle()
             << token::SPACE << p.rho()
             << token::SPACE << p.tTurb()
@@ -211,11 +203,10 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const Particle<ParcelType>& >(p);
         os.write
         (
-            reinterpret_cast<const char*>(&p.typeId()),
+            reinterpret_cast<const char*>(p.typeId()),
             sizeof(p.typeId())
           + sizeof(p.d())
           + sizeof(p.U())
-          + sizeof(p.Ur())
           + sizeof(p.nParticle())
           + sizeof(p.rho())
           + sizeof(p.tTurb())

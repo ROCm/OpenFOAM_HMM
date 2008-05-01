@@ -26,7 +26,7 @@ Class
     Foam::reactingParcel
 
 Description
-    Foam::reactingParcel
+
 
 SourceFiles
     reactingParcel.C

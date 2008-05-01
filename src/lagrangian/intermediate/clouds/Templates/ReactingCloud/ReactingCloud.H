@@ -27,7 +27,6 @@ Class
 
 Description
     Templated base class for reactive cloud
-
     - Adds to kinematic cloud
       - Heat transfer
 
@@ -182,13 +181,15 @@ public:
                     inline PtrList<DimensionedField<scalar, volMesh> >&
                         rhoTrans();
 
-                    //- Retun tmp mass source for field i
+                    //- Return tmp mass source for field i
+                    //  Fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho(const label i) const;
+                        Srho1(const label i) const;
 
-                    //- Retun tmp total mass source for carrier phase
+                    //- Return tmp total mass source for carrier phase
+                    //  Fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho() const;
+                        Srho1() const;
 
 
         // Check

@@ -89,18 +89,33 @@ public:
 
     // Member Operators
 
-        // Edit
-
         // Access
 
-            //- Return absorption coefficient
-            tmp<volScalarField> a() const;
+            // Absorption coefficient
 
-            //- Return emission coefficient
-            tmp<volScalarField> e() const;
+                //- Absorption coefficient for continuous phase
+                tmp<volScalarField> aCont() const;
 
-            //- Return emission contribution
-            tmp<volScalarField> E() const;
+                //- Absorption coefficient for dispersed phase
+                tmp<volScalarField> aDisp() const;
+
+
+            // Emission coefficient
+
+                //- Emission coefficient for continuous phase
+                tmp<volScalarField> eCont() const;
+
+                //- Emission coefficient for dispersed phase
+                tmp<volScalarField> eDisp() const;
+
+
+            // Emission contribution
+
+                //- Emission contribution for continuous phase
+                tmp<volScalarField> ECont() const;
+
+                //- Emission contribution for continuous phase
+                tmp<volScalarField> EDisp() const;
 };
 
 

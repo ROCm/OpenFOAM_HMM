@@ -26,7 +26,7 @@ Class
     Foam::kinematicParcel
 
 Description
-    Foam::kinematicParcel
+
 
 SourceFiles
     kinematicParcel.C

@@ -26,7 +26,6 @@ Class
     Foam::Cloud
 
 Description
-    Foam::Cloud
 
 SourceFiles
     Cloud.C
@@ -74,7 +73,6 @@ class Cloud
     // Private data
 
         const polyMesh& polyMesh_;
-        const word cloudName_;
         const faceList& allFaces_;
         const vectorField& points_;
         const cellList& cellFaces_;
@@ -152,12 +150,6 @@ public:
                 return polyMesh_;
             }
 
-            //- Return the cloud name reference
-            const word& cloudName() const
-            {
-                return cloudName_;
-            }
-
             //- Is this global face an internal face?
             bool internalFace(const label facei) const
             {
@@ -211,6 +203,11 @@ public:
             iterator end()
             {
                 return IDLList<ParticleType>::end();
+            };
+
+            void clear()
+            {
+                return IDLList<ParticleType>::clear();
             };
 
 

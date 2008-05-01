@@ -73,7 +73,7 @@ public:
     // Constructors
 
         //- Construct from components
-        noRadiation(const fvMesh& mesh, const basicThermo& thermo);
+        noRadiation(const volScalarField& T);
 
 
     // Destructor
@@ -95,7 +95,7 @@ public:
             tmp<volScalarField> Rp() const;
 
             //- Source term component (constant)
-            tmp<volScalarField> Ru() const;
+            tmp<DimensionedField<scalar, volMesh> > Ru() const;
 };
 
 

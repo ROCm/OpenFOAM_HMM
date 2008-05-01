@@ -25,6 +25,7 @@ License
 Class
     Foam::HeatTransferModel
 
+
 Description
     Templated heat transfer model class
 

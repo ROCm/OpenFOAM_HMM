@@ -26,7 +26,6 @@ Class
     Foam::Particle
 
 Description
-    Foam::Particle
 
 \*---------------------------------------------------------------------------*/
 
@@ -79,6 +78,41 @@ class Particle
     public IDLList<ParticleType>::link
 {
 
+public:
+
+    //- Class used to pass tracking data to the trackToFace function
+    class trackData
+    {
+
+        // Private data
+
+            //- Reference to the cloud containing this particle
+            Cloud<ParticleType>& cloud_;
+
+
+    public:
+
+        bool switchProcessor;
+        bool keepParticle;
+
+
+        // Constructors
+
+            inline trackData
+            (
+                Cloud<ParticleType>& cloud
+            );
+
+
+        // Member functions
+
+            //- Return a reference to the cloud
+            inline Cloud<ParticleType>& cloud();
+    };
+
+
+private:
+
     // Private data
 
         //- Reference to the particle cloud
@@ -108,7 +142,7 @@ class Particle
             const vector& to,
             const label facei,
             const scalar stepFraction
-        );
+        ) const;
 
         //- Return the 'lambda' value for the position, p, on the face,
         // where, p = from + lamda*(to - from)
@@ -118,13 +152,13 @@ class Particle
             const vector& from,
             const vector& to,
             const label facei
-        );
+        ) const;
 
         //- Return the faces between position and cell centre
         labelList findFaces
         (
             const vector& position
-        );
+        ) const;
 
         //- Return the faces between position and cell centre
         labelList findFaces
@@ -132,80 +166,91 @@ class Particle
             const vector& position,
             const label celli,
             const scalar stepFraction
-        );
+        ) const;
 
 
 protected:
 
+    // Patch interactions
+
         //- Overridable function to handle the particle hitting a wedgePatch
-        template<class TrackingData>
+        template<class TrackData>
         void hitWedgePatch
         (
             const wedgePolyPatch&,
-            TrackingData& td
+            TrackData& td
         );
 
-        //- Overridable function to handle the particle hitting a symmetryPatch
-        template<class TrackingData>
+        //- Overridable function to handle the particle hitting a
+        //  symmetryPatch
+        template<class TrackData>
         void hitSymmetryPatch
         (
             const symmetryPolyPatch&,
-            TrackingData& td
+            TrackData& td
         );
 
         //- Overridable function to handle the particle hitting a cyclicPatch
-        template<class TrackingData>
+        template<class TrackData>
         void hitCyclicPatch
         (
             const cyclicPolyPatch&,
-            TrackingData& td
+            TrackData& td
         );
 
-        //- Overridable function to handle the particle hitting a processorPatch
-        template<class TrackingData>
+        //- Overridable function to handle the particle hitting a
+        //  processorPatch
+        template<class TrackData>
         void hitProcessorPatch
         (
             const processorPolyPatch&,
-            TrackingData& td
+            TrackData& td
         );
 
         //- Overridable function to handle the particle hitting a wallPatch
-        template<class TrackingData>
+        template<class TrackData>
         void hitWallPatch
         (
             const wallPolyPatch&,
-            TrackingData& td
+            TrackData& td
         );
 
-        //- Overridable function to handle the particle hitting a general patch
-        template<class TrackingData>
+        //- Overridable function to handle the particle hitting a
+        //  general patch
+        template<class TrackData>
         void hitPatch
         (
             const polyPatch&,
-            TrackingData& td
+            TrackData& td
         );
+
+
+    // Transformations
 
         //- Transform the position the particle
         //  according to the given transformation tensor
-        void transformPosition(const tensor& T);
+        virtual void transformPosition(const tensor& T);
 
         //- Transform the physical properties of the particle
         //  according to the given transformation tensor
-        void transformProperties(const tensor& T);
+        virtual void transformProperties(const tensor& T);
 
         //- Transform the physical properties of the particle
         //  according to the given separation vector
-        void transformProperties(const vector& separation);
+        virtual void transformProperties(const vector& separation);
+
+
+    // Parallel transfer
 
         //- Convert global addressing to the processor patch
         //  local equivalents
-        template<class TrackingData>
-        void prepareForParallelTransfer(const label patchi, TrackingData& td);
+        template<class TrackData>
+        void prepareForParallelTransfer(const label patchi, TrackData& td);
 
         //- Convert processor patch addressing to the global equivalents
         //  and set the celli to the face-neighbour
-        template<class TrackingData>
-        void correctAfterParallelTransfer(const label patchi, TrackingData& td);
+        template<class TrackData>
+        void correctAfterParallelTransfer(const label patchi, TrackData& td);
 
 
 public:
@@ -215,36 +260,6 @@ public:
 
     //- Runtime type information
     TypeName("Particle");
-
-
-    //- Class used to pass tracking data to the trackToFace function
-    class trackData
-    {
-
-        // Private data
-
-            //- Reference to the cloud containing this particle
-            Cloud<ParticleType>& cloud_;
-
-
-    public:
-
-        bool switchProcessor;
-        bool keepParticle;
-
-
-        // Constructors
-
-            inline trackData
-            (
-                Cloud<ParticleType>& cloud
-            );
-
-
-        // Member functions
-
-            inline Cloud<ParticleType>& cloud();
-    };
 
 
     // Constructors
@@ -265,7 +280,8 @@ public:
             bool readFields = true
         );
 
-        //- Factory class to read-construct particles used for parallel transfer
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
         class iNew
         {
 
@@ -288,7 +304,7 @@ public:
         };
 
 
-    // Destructor
+    //- Destructor
 
         virtual ~Particle()
         {}
@@ -299,7 +315,7 @@ public:
         // Access
 
             //- Return true if particle is in cell
-            inline bool inCell();
+            inline bool inCell() const;
 
             //- Return true if position is in cell i
             inline bool inCell
@@ -307,7 +323,7 @@ public:
                 const vector& position,
                 const label celli,
                 const scalar stepFraction
-            );
+            ) const;
 
             //- Return current particle position
             inline const vector& position() const;
@@ -337,7 +353,11 @@ public:
             inline label patch(const label facei) const;
 
             //- Which face of this patch is this particle on
-            inline label patchFace(const label patchi, const label facei) const;
+            inline label patchFace
+            (
+                const label patchi,
+                const label facei
+            ) const;
 
             //- The nearest distance to a wall that
             //  the particle can be in the n direction
@@ -359,14 +379,14 @@ public:
             //  the fraction of the time-step completed.
             //  Returns the boundary face index if the track stops at the
             //  boundary, -1 otherwise.
-            template<class TrackingData>
+            template<class TrackData>
             label track
             (
                 const vector& endPosition,
-                TrackingData& td
+                TrackData& td
             );
 
-            //- Calls the templated track with dummy TrackingData
+            //- Calls the templated track with dummy TrackData
             label track(const vector& endPosition);
 
             //- Track particle to a given position and returns 1.0 if the
@@ -375,17 +395,18 @@ public:
             //  completed.
             //  on entry 'stepFraction()' should be set to the fraction of the
             //  time-step at which the tracking starts.
-            template<class TrackingData>
+            template<class TrackData>
             scalar trackToFace
             (
                 const vector& endPosition,
-                TrackingData& td
+                TrackData& td
             );
 
-            //- Calls the templated trackToFace with dummy TrackingData
+            //- Calls the templated trackToFace with dummy TrackData
             scalar trackToFace(const vector& endPosition);
 
-            //- Return the index of the face to be used in the interpolation routine
+            //- Return the index of the face to be used in the interpolation
+            //  routine
             inline label faceInterpolation() const;
 
 

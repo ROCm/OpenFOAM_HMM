@@ -26,7 +26,7 @@ Class
     Foam::polyMeshInfo
 
 Description
-    Foam::polyMeshInfo
+
 
 SourceFiles
     polyMeshInfo.C

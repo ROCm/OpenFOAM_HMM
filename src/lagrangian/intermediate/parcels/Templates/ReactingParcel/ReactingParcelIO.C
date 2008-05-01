@@ -42,7 +42,8 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
     YMixture_(0),
     YGas_(0),
     YLiquid_(0),
-    YSolid_(0)
+    YSolid_(0),
+    pc_(0.0)
 {
     if (readFields)
     {
