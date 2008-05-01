@@ -71,7 +71,7 @@ void Smagorinsky::correct(const tmp<volTensorField>& gradU)
     volScalarField b = (2.0/3.0)*tr(D);
     volScalarField c = 2*ck_*delta()*(dev(D) && D);
 
-    k_ = sqr((2*b + sqrt(sqr(b) + 4*a*c))/(2*a));
+    k_ = sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a));
 
     muSgs_ = ck_*rho()*delta()*sqrt(k_);
     muSgs_.correctBoundaryConditions();

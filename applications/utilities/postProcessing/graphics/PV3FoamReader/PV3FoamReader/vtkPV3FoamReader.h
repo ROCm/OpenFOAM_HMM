@@ -41,7 +41,9 @@ class vtkDataArraySelection;
 class vtkCallbackCommand;
 
 
-class VTK_IO_EXPORT vtkPV3FoamReader : public vtkMultiBlockDataSetAlgorithm
+class VTK_IO_EXPORT vtkPV3FoamReader
+:
+    public vtkMultiBlockDataSetAlgorithm
 {
 public:
 

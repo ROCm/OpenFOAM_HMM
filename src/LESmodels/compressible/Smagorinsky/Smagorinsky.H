@@ -38,8 +38,8 @@ Description
     where
 
         D = symm(grad(U));
-        k = (2*ck/ce)*delta^2*grad(U):dev(D)
-        nuSgs = ck*sqrt(k)*delta
+        k from rho*D:B + ce*rho*k^3/2/delta = 0
+        muSgs = ck*rho*sqrt(k)*delta
     @endverbatim
 
 SourceFiles

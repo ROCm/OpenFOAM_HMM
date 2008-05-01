@@ -33,7 +33,7 @@ Description
     @verbatim
         d/dt(rho*k) + div(rho*U*k) - div(muEff*grad(k))
         =
-        -rho*B*L - ce*rho*k^3/2/delta
+        -rho*D:B - ce*rho*k^3/2/delta
 
     and
 
@@ -42,7 +42,7 @@ Description
     where
 
         D = symm(grad(U));
-        nuSgs = ck*sqrt(k)*delta
+        muSgs = ck*rho*sqrt(k)*delta
     @endverbatim
 
 
@@ -114,7 +114,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", muSgs_ + mu())
             );

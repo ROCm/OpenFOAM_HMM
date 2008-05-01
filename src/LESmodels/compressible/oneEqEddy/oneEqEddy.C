@@ -43,7 +43,6 @@ addToRunTimeSelectionTable(LESmodel, oneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 oneEqEddy::oneEqEddy
 (
     const volScalarField& rho,

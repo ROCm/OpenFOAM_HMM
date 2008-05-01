@@ -40,6 +40,7 @@ SourceFiles
 
 #include "HashPtrTable.H"
 #include "OFstream.H"
+#include "polyMesh.H"
 #include "pointField.H"
 #include "volFieldsFwd.H"
 
@@ -205,6 +206,10 @@ public:
 
         //- Update for changes of mesh
         virtual void movePoints(const pointField&)
+        {}
+
+        //- Update for changes of mesh due to readUpdate
+        virtual void readUpdate(const polyMesh::readUpdateState state)
         {}
 
         //- Sample a volume field at all locations

@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -99,14 +99,14 @@ public:
         virtual void write();
 
         //- Update for changes of mesh
-        void updateMesh(const mapPolyMesh& mpm)
+        virtual void updateMesh(const mapPolyMesh& mpm)
         {
             read();
             OutputFilter::updateMesh(mpm);
         }
 
         //- Update for changes of mesh
-        void movePoints(const pointField& points)
+        virtual void movePoints(const pointField& points)
         {
             read();
             OutputFilter::movePoints(points);

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::vtkPV3Foam
+    vtkPV3Foam
 
 Description
 
@@ -65,6 +65,7 @@ SourceFiles
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
 class vtkDataArraySelection;
+class vtkDataSet;
 class vtkMultiBlockDataSet;
 class vtkPoints;
 class vtkPV3FoamReader;
@@ -187,6 +188,33 @@ class vtkPV3Foam
 
 
     // Private Member Functions
+
+        // Convenience method use to convert the readers from VTK 5
+        // multiblock API to the current composite data infrastructure
+        void AddToBlock
+        (
+            vtkMultiBlockDataSet* output,
+            unsigned int blockNo,
+            unsigned int datasetNo,
+            vtkDataSet* dataset
+        );
+
+        // Convenience method use to convert the readers from VTK 5
+        // multiblock API to the current composite data infrastructure
+        vtkDataSet* GetDataSetFromBlock
+        (
+            vtkMultiBlockDataSet* output,
+            unsigned int blockNo,
+            unsigned int datasetNo
+        );
+
+        // Convenience method use to convert the readers from VTK 5
+        // multiblock API to the current composite data infrastructure
+        label GetNumberOfDataSets
+        (
+            vtkMultiBlockDataSet* output,
+            unsigned int blockNo
+        );
 
         //- Reset data counters
         void resetCounters();
