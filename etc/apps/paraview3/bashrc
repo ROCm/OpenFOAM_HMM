@@ -45,7 +45,7 @@ fi
 
 export ParaView_VERSION=3
 
-export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/ParaView3.2.1
+export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/ParaView3.3-cvs
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_OPTIONS
 
 export PYTHONPATH=$PYTHONPATH:$ParaView_DIR/bin:$ParaView_DIR/Utilities/VTKPythonWrapping
