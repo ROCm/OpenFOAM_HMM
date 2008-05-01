@@ -890,6 +890,7 @@ void Foam::autoHexMeshDriver::preSmoothPatch
 
     if (debug_)
     {
+        const_cast<Time&>(mesh_.time())++;
         Pout<< "Writing patch smoothed mesh to time " << mesh_.time().timeName()
             << endl;
         mesh_.write();
@@ -1171,6 +1172,7 @@ void Foam::autoHexMeshDriver::scaleMesh
         }
         if (debug_)
         {
+            const_cast<Time&>(mesh_.time())++;
             Pout<< "Writing scaled mesh to time " << mesh_.time().timeName()
                 << endl;
             mesh_.write();
@@ -1179,8 +1181,6 @@ void Foam::autoHexMeshDriver::scaleMesh
             meshMover.displacement().write();
             tmp<pointScalarField> magDisp(mag(meshMover.displacement()));
             magDisp().write();
-
-            const_cast<Time&>(mesh_.time())++;
         }
     }
 

@@ -1492,7 +1492,8 @@ void Foam::autoHexMeshDriver::doMesh()
             // Pre-smooth patch vertices (so before determining nearest)
             preSmoothPatch(nInitErrors, baffles, meshMover);
 
-            // Calculate displacement at every patch point. Insert into meshMover.
+            // Calculate displacement at every patch point. Insert into
+            // meshMover.
             calcNearestSurface(snapDist, meshMover);
 
             // Get smoothly varying internal displacement field.
