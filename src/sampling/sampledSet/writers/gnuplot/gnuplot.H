@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,94 +23,68 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IOOutputFilter
+    Foam::gnuplot
 
 Description
-    IOdictionary wrapper around OutputFilter to allow them to read from
-    their associated dictionaries.
 
 SourceFiles
-    IOOutputFilter.C
+    gnuplot.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOOutputFilter_H
-#define IOOutputFilter_H
+#ifndef gnuplot_H
+#define gnuplot_H
 
-#include "IOdictionary.H"
-#include "pointFieldFwd.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class mapPolyMesh;
-
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                           Class gnuplot Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class OutputFilter>
-class IOOutputFilter
+template<class Type>
+class gnuplot
 :
-    public IOdictionary,
-    public OutputFilter
+    public writer<Type>
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct and assignment
-        IOOutputFilter(const IOOutputFilter&);
-        void operator=(const IOOutputFilter&);
-
 
 public:
 
+    //- Runtime type information
+    TypeName("gnuplot");
+
+
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
-        IOOutputFilter
-        (
-            const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
-            const bool loadFromFile = false
-        );
-
+        //- Construct null
+        gnuplot();
 
     // Destructor
 
-        virtual ~IOOutputFilter();
+        virtual ~gnuplot();
 
 
     // Member Functions
 
-        //- Return name
-        virtual const word& name() const
-        {
-            return IOdictionary::name();
-        }
+        // Write
 
-        //- Read the probes
-        virtual bool read();
+            virtual fileName getFileName
+            (
+                const coordSet&,
+                const wordList&
+            ) const;
 
-        //- Sample and write
-        virtual void write();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {
-            read();
-            OutputFilter::updateMesh(mpm);
-        }
-
-        //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
-        {
-            read();
-            OutputFilter::movePoints(points);
-        }
+            void write
+            (
+                const coordSet&,
+                const wordList&,
+                const List<const Field<Type>*>&,
+                Ostream& os
+            ) const;
 };
 
 
@@ -121,7 +95,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IOOutputFilter.C"
+#   include "gnuplot.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

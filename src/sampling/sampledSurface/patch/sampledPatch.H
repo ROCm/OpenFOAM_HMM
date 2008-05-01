@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    sampledPatch
+    Foam::sampledPatch
 
 Description
 
@@ -84,10 +84,11 @@ class sampledPatch
         tmp<Field<Type> >
         interpolateField(const interpolation<Type>&) const;
 
+
 public:
 
     //- Runtime type information
-      TypeName("sampledPatch");
+    TypeName("sampledPatch");
 
 
     // Constructors
@@ -95,8 +96,8 @@ public:
         //- Construct from components
         sampledPatch
         (
-            const polyMesh& mesh,
             const word& name,
+            const polyMesh& mesh,
             const word& patchName,
             const bool triangulate = true
         );
@@ -104,6 +105,7 @@ public:
         //- Construct from dictionary
         sampledPatch
         (
+            const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
@@ -210,18 +212,20 @@ public:
             const interpolation<tensor>&
         ) const;
 
-
-      // Write
-
         //- Write
         virtual void print(Ostream&) const;
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "sampledPatchTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

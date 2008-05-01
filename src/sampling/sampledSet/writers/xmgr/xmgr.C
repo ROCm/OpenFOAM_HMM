@@ -24,62 +24,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#include "xmgr.H"
+#include "coordSet.H"
+#include "fileName.H"
+#include "OFstream.H"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
+// Construct from components
+template<class Type>
+Foam::xmgr<Type>::xmgr()
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
+    writer<Type>()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
+template<class Type>
+Foam::xmgr<Type>::~xmgr()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
+template<class Type>
+Foam::fileName Foam::xmgr<Type>::getFileName
+(
+    const coordSet& points,
+    const wordList& valueSetNames
+) const
 {
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return this->getBaseName(points, valueSetNames) + ".agr";
 }
 
 
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
+template<class Type>
+void Foam::xmgr<Type>::write
+(
+    const coordSet& points,
+    const wordList& valueSetNames,
+    const List<const Field<Type>*>& valueSets,
+    Ostream& os
+) const
 {
-    OutputFilter::write();
+    os  << "@title \"" << points.name() << '"' << endl
+        << "@xaxis label " << '"' << points.axis() << '"' << endl;
+
+    forAll(valueSets, i)
+    {
+        os  << "@s" << i << " legend " << '"'
+            << valueSetNames[i] << '"' << endl
+            << "@target G0.S" << i << endl
+            << "@type xy" << endl;
+
+        writeTable(points, *valueSets[i], os);
+
+        os << endl;
+    }
 }
 
 

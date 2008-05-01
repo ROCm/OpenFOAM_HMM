@@ -39,7 +39,6 @@ namespace Foam
     addNamedToRunTimeSelectionTable(sampledSurface, sampledPlane, word, plane);
 }
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledPlane::createGeometry()
@@ -79,56 +78,11 @@ void Foam::sampledPlane::createGeometry()
         }
     }
 
-    print(Pout);
-    Pout << endl;
-}
-
-
-template <class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::sampledPlane::sampleField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vField
-) const
-{
-    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
-}
-
-
-template <class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::sampledPlane::interpolateField
-(
-    const interpolation<Type>& interpolator
-) const
-{
-    // One value per point
-    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
-    Field<Type>& values = tvalues();
-
-    boolList pointDone(points().size(), false);
-
-    forAll(faces(), cutFaceI)
+    if (debug)
     {
-        const face& f = faces()[cutFaceI];
-
-        forAll(f, faceVertI)
-        {
-            label pointI = f[faceVertI];
-
-            if (!pointDone[pointI])
-            {
-                values[pointI] = interpolator.interpolate
-                (
-                    points()[pointI],
-                    meshCells()[cutFaceI]
-                );
-                pointDone[pointI] = true;
-            }
-        }
+        print(Pout);
+        Pout << endl;
     }
-
-    return tvalues;
 }
 
 
@@ -136,14 +90,14 @@ Foam::sampledPlane::interpolateField
 
 Foam::sampledPlane::sampledPlane
 (
-    const polyMesh& mesh,
     const word& name,
+    const polyMesh& mesh,
     const plane& planeDesc,
     const word& zoneName,
     const bool triangulate
 )
 :
-    sampledSurface(mesh, name, triangulate),
+    sampledSurface(name, mesh, triangulate),
     cuttingPlane(planeDesc),
     zoneName_(zoneName),
     faces_(0),
@@ -153,14 +107,13 @@ Foam::sampledPlane::sampledPlane
     if (zoneName_.size())
     {
         zoneId = mesh.cellZones().findZoneID(zoneName_);
-        if (zoneId < 0)
+        if (debug && zoneId < 0)
         {
             Info<< "cellZone \"" << zoneName_
                 << "\" not found - using entire mesh"
                 << endl;
         }
     }
-
 
     if (zoneId < 0)
     {
@@ -171,18 +124,18 @@ Foam::sampledPlane::sampledPlane
         reCut(mesh, mesh.cellZones()[zoneId]);
     }
 
-
     createGeometry();
 }
 
 
 Foam::sampledPlane::sampledPlane
 (
+    const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    sampledSurface(mesh, dict),
+    sampledSurface(name, mesh, dict),
     cuttingPlane(plane(dict.lookup("basePoint"), dict.lookup("normalVector"))),
     zoneName_(word::null),
     faces_(0),
@@ -207,7 +160,7 @@ Foam::sampledPlane::sampledPlane
     {
         dict.lookup("zone") >> zoneName_;
         zoneId = mesh.cellZones().findZoneID(zoneName_);
-        if (zoneId < 0)
+        if (debug && zoneId < 0)
         {
             Info<< "cellZone \"" << zoneName_
                 << "\" not found - using entire mesh"
@@ -262,10 +215,6 @@ void Foam::sampledPlane::correct(const bool meshChanged)
 }
 
 
-//
-// sample volume field
-//
-
 Foam::tmp<Foam::scalarField>
 Foam::sampledPlane::sample
 (
@@ -314,10 +263,6 @@ Foam::sampledPlane::sample
     return sampleField(vField);
 }
 
-
-//
-// interpolate
-//
 
 Foam::tmp<Foam::scalarField>
 Foam::sampledPlane::interpolate
@@ -376,5 +321,6 @@ void Foam::sampledPlane::print(Ostream& os) const
         << "  faces:" << faces().size()
         << "  points:" << points().size();
 }
+
 
 // ************************************************************************* //

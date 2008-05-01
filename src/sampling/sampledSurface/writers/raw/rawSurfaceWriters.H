@@ -22,65 +22,42 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    rawSurfaceWriters
+
+Description
+
+SourceFiles
+    rawSurfaceWriters.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#ifndef rawSurfaceWriters_H
+#define rawSurfaceWriters_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "rawSurfaceWriter.H"
+#include "surfaceWriters.H"
+#include "fieldTypes.H"
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
+namespace Foam
 {
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
-{
-    OutputFilter::write();
-}
+typedef rawSurfaceWriter<scalar> rawSurfaceWriterScalarWriter;
+typedef rawSurfaceWriter<vector> rawSurfaceWriterVectorWriter;
+typedef rawSurfaceWriter<sphericalTensor> rawSurfaceWriterSphericalTensorWriter;
+typedef rawSurfaceWriter<symmTensor> rawSurfaceWriterSymmTensorWriter;
+typedef rawSurfaceWriter<tensor> rawSurfaceWriterTensorWriter;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

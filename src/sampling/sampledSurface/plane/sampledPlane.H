@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    sampledPlane
+    Foam::sampledPlane
 
 Description
 
@@ -80,10 +80,11 @@ class sampledPlane
         tmp<Field<Type> >
         interpolateField(const interpolation<Type>&) const;
 
+
 public:
 
     //- Runtime type information
-      TypeName("sampledPlane");
+    TypeName("sampledPlane");
 
 
     // Constructors
@@ -91,8 +92,8 @@ public:
         //- Construct from components
         sampledPlane
         (
-            const polyMesh& mesh,
             const word& name,
+            const polyMesh& mesh,
             const plane& planeDesc,
             const word& zoneName = word::null,
             const bool triangulate = true
@@ -101,6 +102,7 @@ public:
         //- Construct from dictionary
         sampledPlane
         (
+            const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
@@ -213,18 +215,20 @@ public:
             const interpolation<tensor>&
         ) const;
 
-
-      // Write
-
         //- Write
         virtual void print(Ostream&) const;
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "sampledPlaneTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

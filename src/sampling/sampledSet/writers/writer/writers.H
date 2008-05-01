@@ -22,65 +22,38 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+InClass
+    Foam::writer
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#ifndef writers_H
+#define writers_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "writer.H"
+#include "fieldTypes.H"
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
+namespace Foam
 {
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
-{
-    OutputFilter::write();
-}
+typedef writer<scalar> scalarWriter;
+typedef writer<vector> vectorWriter;
+typedef writer<sphericalTensor> sphericalTensorWriter;
+typedef writer<symmTensor> symmTensorWriter;
+typedef writer<tensor> tensorWriter;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

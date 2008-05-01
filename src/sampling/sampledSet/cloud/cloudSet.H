@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,22 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IOOutputFilter
+    Foam::cloudSet
 
 Description
-    IOdictionary wrapper around OutputFilter to allow them to read from
-    their associated dictionaries.
 
 SourceFiles
-    IOOutputFilter.C
+    cloudSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOOutputFilter_H
-#define IOOutputFilter_H
+#ifndef cloudSet_H
+#define cloudSet_H
 
-#include "IOdictionary.H"
-#include "pointFieldFwd.H"
+#include "sampledSet.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,83 +44,81 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class mapPolyMesh;
+class passiveParticle;
+template<class Type> class particle;
 
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                           Class cloudSet Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class OutputFilter>
-class IOOutputFilter
+class cloudSet
 :
-    public IOdictionary,
-    public OutputFilter
+    public sampledSet
 {
+    // Private data
+
+        //- Sampling points
+        List<point> sampleCoords_;
+
+
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        IOOutputFilter(const IOOutputFilter&);
-        void operator=(const IOOutputFilter&);
+        //- Samples all points in sampleCoords.
+        void calcSamples
+        (
+            DynamicList<point>& samplingPts,
+            DynamicList<label>& samplingCells,
+            DynamicList<label>& samplingFaces,
+            DynamicList<label>& samplingSegments,
+            DynamicList<scalar>& samplingCurveDist
+        ) const;
 
+        //- Uses calcSamples to obtain samples. Copies them into *this.
+        void genSamples();
 
 public:
 
+    //- Runtime type information
+    TypeName("cloud");
+
+
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
-        IOOutputFilter
+        //- Construct from components
+        cloudSet
         (
-            const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
-            const bool loadFromFile = false
+            const word& name,
+            const polyMesh& mesh,
+            meshSearch& searchEngine,
+            const word& axis,
+            const List<point>& sampleCoords
+        );
+
+        //- Construct from dictionary
+        cloudSet
+        (
+            const word& name,
+            const polyMesh& mesh,
+            meshSearch& searchEngine,
+            const dictionary& dict
         );
 
 
     // Destructor
 
-        virtual ~IOOutputFilter();
+        virtual ~cloudSet();
 
 
     // Member Functions
 
-        //- Return name
-        virtual const word& name() const
-        {
-            return IOdictionary::name();
-        }
-
-        //- Read the probes
-        virtual bool read();
-
-        //- Sample and write
-        virtual void write();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {
-            read();
-            OutputFilter::updateMesh(mpm);
-        }
-
-        //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
-        {
-            read();
-            OutputFilter::movePoints(points);
-        }
+        //- Get reference point
+        virtual point getRefPoint(const List<point>&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "IOOutputFilter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

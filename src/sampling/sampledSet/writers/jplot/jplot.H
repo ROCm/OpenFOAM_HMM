@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,22 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IOOutputFilter
+    Foam::jplot
 
 Description
-    IOdictionary wrapper around OutputFilter to allow them to read from
-    their associated dictionaries.
 
 SourceFiles
-    IOOutputFilter.C
+    jplot.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOOutputFilter_H
-#define IOOutputFilter_H
+#ifndef jplot_H
+#define jplot_H
 
-#include "IOdictionary.H"
-#include "pointFieldFwd.H"
+#include "writer.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,71 +44,57 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                           Class jplot Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class OutputFilter>
-class IOOutputFilter
+template<class Type>
+class jplot
 :
-    public IOdictionary,
-    public OutputFilter
+    public writer<Type>
 {
+
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        IOOutputFilter(const IOOutputFilter&);
-        void operator=(const IOOutputFilter&);
-
+        //- Write header
+        Ostream& writeHeader(Ostream& os) const;
 
 public:
 
+    //- Runtime type information
+    TypeName("jplot");
+
+
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
-        IOOutputFilter
-        (
-            const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
-            const bool loadFromFile = false
-        );
-
+        //- Construct null
+        jplot();
 
     // Destructor
 
-        virtual ~IOOutputFilter();
+        virtual ~jplot();
 
 
     // Member Functions
 
-        //- Return name
-        virtual const word& name() const
-        {
-            return IOdictionary::name();
-        }
+        // Access
 
-        //- Read the probes
-        virtual bool read();
+        // Write
 
-        //- Sample and write
-        virtual void write();
+            virtual fileName getFileName
+            (
+                const coordSet&,
+                const wordList&
+            ) const;
 
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {
-            read();
-            OutputFilter::updateMesh(mpm);
-        }
-
-        //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
-        {
-            read();
-            OutputFilter::movePoints(points);
-        }
+            void write
+            (
+                const coordSet&,
+                const wordList&,
+                const List<const Field<Type>*>&,
+                Ostream& os
+            ) const;
 };
 
 
@@ -121,7 +105,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IOOutputFilter.C"
+#   include "jplot.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

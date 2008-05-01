@@ -22,65 +22,34 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::sampledSurfacesFunctionObject
+
+Description
+    FunctionObject wrapper around surfaces to allow them to be created via the
+    functions list within controlDict.
+
+SourceFiles
+    sampledSurfacesFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#ifndef sampledSurfacesFunctionObject_H
+#define sampledSurfacesFunctionObject_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "sampledSurfaces.H"
+#include "OutputFilterFunctionObject.H"
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
+namespace Foam
 {
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    typedef OutputFilterFunctionObject<sampledSurfaces>
+        sampledSurfacesFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
-{
-    OutputFilter::write();
-}
-
+#endif
 
 // ************************************************************************* //

@@ -24,62 +24,76 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#include "gnuplot.H"
+#include "clock.H"
+#include "coordSet.H"
+#include "fileName.H"
+#include "OFstream.H"
+#include "addToRunTimeSelectionTable.H"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
+// Construct from components
+template<class Type>
+Foam::gnuplot<Type>::gnuplot()
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
+    writer<Type>()
 {}
-
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
+template<class Type>
+Foam::gnuplot<Type>::~gnuplot()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
+template<class Type>
+Foam::fileName Foam::gnuplot<Type>::getFileName
+(
+    const coordSet& points,
+    const wordList& valueSetNames
+) const
 {
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return this->getBaseName(points, valueSetNames) + ".gplt";
 }
 
 
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
+template<class Type>
+void Foam::gnuplot<Type>::write
+(
+    const coordSet& points,
+    const wordList& valueSetNames,
+    const List<const Field<Type>*>& valueSets,
+    Ostream& os
+) const
 {
-    OutputFilter::write();
+    os  << "set term postscript color" << endl
+        << "set output \"" << points.name() << ".ps\"" << endl
+        << "plot";
+
+    bool firstField = true;
+
+    forAll(valueSets, i)
+    {
+        if (!firstField)
+        {
+            os << ',';
+        }
+        firstField = false;
+
+        os  << "'-' title \"" << valueSetNames[i] << "\" with lines";
+    }
+    os << endl;
+
+
+    forAll(valueSets, i)
+    {
+        os << endl;
+        writeTable(points, *valueSets[i], os);
+    }
 }
 
 

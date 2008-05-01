@@ -24,62 +24,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#include "sampledPlane.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
+template <class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::sampledPlane::sampleField
 (
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
+    const GeometricField<Type, fvPatchField, volMesh>& vField
+) const
 {
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
 }
 
 
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
+template <class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::sampledPlane::interpolateField
+(
+    const interpolation<Type>& interpolator
+) const
 {
-    OutputFilter::write();
+    // One value per point
+    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
+    Field<Type>& values = tvalues();
+
+    boolList pointDone(points().size(), false);
+
+    forAll(faces(), cutFaceI)
+    {
+        const face& f = faces()[cutFaceI];
+
+        forAll(f, faceVertI)
+        {
+            label pointI = f[faceVertI];
+
+            if (!pointDone[pointI])
+            {
+                values[pointI] = interpolator.interpolate
+                (
+                    points()[pointI],
+                    meshCells()[cutFaceI]
+                );
+                pointDone[pointI] = true;
+            }
+        }
+    }
+
+    return tvalues;
 }
 
 

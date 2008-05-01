@@ -41,7 +41,6 @@ namespace Foam
     addNamedToRunTimeSelectionTable(sampledSurface, sampledPatch, word, patch);
 }
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledPatch::createGeometry()
@@ -98,79 +97,11 @@ void Foam::sampledPatch::createGeometry()
         }
     }
 
-    Pout << *this << endl;
-}
-
-
-template <class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::sampledPatch::sampleField
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vField
-) const
-{
-    // One value per face
-    tmp<Field<Type> > tvalues(new Field<Type>(patchFaceLabels_.size()));
-    Field<Type>& values = tvalues();
-
-    if (patchIndex() != -1)
+    if (debug)
     {
-        const Field<Type>& bField = vField.boundaryField()[patchIndex()];
-
-        forAll(patchFaceLabels_, elemI)
-        {
-            values[elemI] = bField[patchFaceLabels_[elemI]];
-        }
+        print(Pout);
+        Pout << endl;
     }
-
-    return tvalues;
-}
-
-
-template <class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::sampledPatch::interpolateField
-(
-    const interpolation<Type>& interpolator
-) const
-{
-    // One value per vertex
-    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
-    Field<Type>& values = tvalues();
-
-    if (patchIndex() != -1)
-    {
-        const polyPatch& patch = mesh().boundaryMesh()[patchIndex()];
-        const labelList& own = mesh().faceOwner();
-
-        boolList pointDone(points().size(), false);
-
-        forAll(faces(), cutFaceI)
-        {
-            const face& f = faces()[cutFaceI];
-
-            forAll(f, faceVertI)
-            {
-                label pointI = f[faceVertI];
-
-                if (!pointDone[pointI])
-                {
-                    label faceI = patchFaceLabels()[cutFaceI] + patch.start();
-                    label cellI = own[faceI];
-
-                    values[pointI] = interpolator.interpolate
-                    (
-                        points()[pointI],
-                        cellI,
-                        faceI
-                    );
-                    pointDone[pointI] = true;
-                }
-            }
-        }
-    }
-
-    return tvalues;
 }
 
 
@@ -178,13 +109,13 @@ Foam::sampledPatch::interpolateField
 
 Foam::sampledPatch::sampledPatch
 (
-    const polyMesh& mesh,
     const word& name,
+    const polyMesh& mesh,
     const word& patchName,
     const bool triangulate
 )
 :
-    sampledSurface(mesh, name, triangulate),
+    sampledSurface(name, mesh, triangulate),
     patchName_(patchName),
     patchIndex_(mesh.boundaryMesh().findPatchID(patchName_)),
     points_(0),
@@ -197,11 +128,12 @@ Foam::sampledPatch::sampledPatch
 
 Foam::sampledPatch::sampledPatch
 (
+    const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    sampledSurface(mesh, dict),
+    sampledSurface(name, mesh, dict),
     patchName_(dict.lookup("patchName")),
     patchIndex_(mesh.boundaryMesh().findPatchID(patchName_)),
     points_(0),
@@ -228,10 +160,6 @@ void Foam::sampledPatch::correct(const bool meshChanged)
     }
 }
 
-
-//
-// sample volume field
-//
 
 Foam::tmp<Foam::scalarField>
 Foam::sampledPatch::sample
@@ -281,10 +209,6 @@ Foam::sampledPatch::sample
     return sampleField(vField);
 }
 
-
-//
-// interpolate
-//
 
 Foam::tmp<Foam::scalarField>
 Foam::sampledPatch::interpolate
@@ -343,6 +267,5 @@ void Foam::sampledPatch::print(Ostream& os) const
         << "  points:" << points().size();
 }
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -23,43 +23,40 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::probes
+    Foam::sampledSurfaces
 
 Description
-    Set of locations to sample.
-
-    Call write() to sample and write files.
+    Set of surfaces to sample.
+    Call sampledSurfaces.write() to sample&write files.
 
 SourceFiles
-    probes.C
+    sampledSurfaces.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef probes_H
-#define probes_H
+#ifndef sampledSurfaces_H
+#define sampledSurfaces_H
 
-#include "HashPtrTable.H"
-#include "OFstream.H"
-#include "polyMesh.H"
-#include "pointField.H"
+#include "sampledSurface.H"
+#include "surfaceWriter.H"
 #include "volFieldsFwd.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class objectRegistry;
-class dictionary;
 class fvMesh;
-class mapPolyMesh;
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                          Class probes Declaration
+                      Class sampledSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
-class probes
+class sampledSurfaces
+:
+    public PtrList<sampledSurface>
 {
     // Private classes
 
@@ -70,40 +67,102 @@ class probes
             public wordList
         {
         public:
+
+            //- Surface formatter
+            autoPtr<surfaceWriter<Type> > formatter;
+
             //- Construct null
             fieldGroup()
             :
-                wordList()
+                wordList(0),
+                formatter(NULL)
             {}
 
-            //- Construct for a list of field names
-            fieldGroup(const wordList& fieldNames)
+            //- Construct for a particular surface format
+            fieldGroup(const word& writeFormat)
             :
-                wordList(fieldNames)
+                wordList(0),
+                formatter(surfaceWriter<Type>::New(writeFormat))
             {}
+
+            //- Construct for a particular surface format
+            //  and a list of field names
+            fieldGroup
+            (
+                const word& writeFormat,
+                const wordList& fieldNames
+            )
+            :
+                wordList(fieldNames),
+                formatter(surfaceWriter<Type>::New(writeFormat))
+            {}
+
+            void operator=(const word& writeFormat)
+            {
+                formatter = surfaceWriter<Type>::New(writeFormat);
+            }
+
+            void operator=(const wordList& fieldNames)
+            {
+                wordList::operator=(fieldNames);
+            }
         };
+
+
+        //- Class used for surface merging information
+        class mergeInfo
+        {
+        public:
+            pointField points;
+            faceList   faces;
+            labelList  pointsMap;
+        };
+
+
+    // Static data members
+
+        //- output verbosity
+        static bool verbose_;
 
 
     // Private data
 
-        //- Name of this set of probes,
-        //  Also used as the name of the probes directory.
+        //- Name of this set of surfaces,
+        //  Also used as the name of the sampledSurfaces directory.
         word name_;
 
-        //- Const reference to objectRegistry
-        const objectRegistry& obr_;
+        //- Const reference to fvMesh
+        const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
         bool loadFromFiles_;
 
+        //- output path
+        fileName outputPath_;
+
+        //- pointMesh for interpolation
+        autoPtr<pointMesh> pMeshPtr_;
+
+        //- volPointInterpolation for interpolation
+        autoPtr<volPointInterpolation> pInterpPtr_;
+
 
         // Read from dictonary
 
-            //- Names of fields to probe
+            //- Names of fields to sample
             wordList fieldNames_;
 
-            //- Locations to probe
-            vectorField probeLocations_;
+            //- Interpolation scheme to use
+            word interpolationScheme_;
+
+            //- Output format to use
+            word writeFormat_;
+
+
+        // surfaces
+
+            //- Information for merging surfaces
+            List<mergeInfo> mergeList_;
 
 
         // Calculated
@@ -115,58 +174,58 @@ class probes
             fieldGroup<symmTensor> symmTensorFields_;
             fieldGroup<tensor> tensorFields_;
 
-            // Cells to be probed (obtained from the locations)
-            labelList cellList_;
-
-            //- Current open files
-            HashPtrTable<OFstream> probeFilePtrs_;
-
 
     // Private Member Functions
 
-        //- Find cells containing probes
-        void findCells(const fvMesh&);
-
-        //- classify field types, return true if nFields > 0
+        //- Classify field types, return true if nFields > 0
         bool checkFieldTypes();
+
+        //- Merge points on surfaces
+        void mergeSurfaces();
 
         //- Find the fields in the list of the given type, return count
         template<class Type>
-        label countFields
+        label grep
         (
             fieldGroup<Type>& fieldList,
             const wordList& fieldTypes
         ) const;
 
-        //- Sample and write a particular volume field
+        //- Set interpolator for the field
         template<class Type>
-        void sampleAndWrite
+        autoPtr<interpolation<Type> > setInterpolator
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
+        //- Sample and write a particular volume field
+        template<class Type>
+        void sampleAndWrite
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const surfaceWriter<Type>& formatter
+        );
+
         //- Sample and write all the fields of the given type
         template <class Type>
-        void sampleAndWrite(const fieldGroup<Type>&);
+        void sampleAndWrite(fieldGroup<Type>&);
 
-        //- Disallow default bitwise copy construct
-        probes(const probes&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const probes&);
+        //- Disallow default bitwise copy construct and assignment
+        sampledSurfaces(const sampledSurfaces&);
+        void operator=(const sampledSurfaces&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("probes");
+    TypeName("surfaces");
 
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
-        probes
+        //- Construct for given objectRegistry and dictionary
+        //  allow the possibility to load fields from files
+        sampledSurfaces
         (
             const word& name,
             const objectRegistry&,
@@ -177,7 +236,7 @@ public:
 
     // Destructor
 
-        virtual ~probes();
+        virtual ~sampledSurfaces();
 
 
     // Member Functions
@@ -188,40 +247,26 @@ public:
             return name_;
         }
 
-        //- Cells to be probed (obtained from the locations)
-        const labelList& cells() const
-        {
-            return cellList_;
-        }
+        //- set verbosity level
+        void verbose(const bool verbosity = true);
 
         //- Sample and write
         virtual void write();
 
-        //- Read the probes
+        //- Read the sampledSurfaces
         virtual void read(const dictionary&);
 
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh&)
-        {}
+        //- Correct for mesh changes
+        void correct();
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
-        {}
+        virtual void updateMesh(const mapPolyMesh&);
+
+        //- Update for mesh point-motion
+        virtual void movePoints(const pointField&);
 
         //- Update for changes of mesh due to readUpdate
-        virtual void readUpdate(const polyMesh::readUpdateState state)
-        {}
-
-        //- Sample a volume field at all locations
-        template<class Type>
-        tmp<Field<Type> > sample
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        ) const;
-
-        //- Sample a single field on all sample locations
-        template <class Type>
-        tmp<Field<Type> > sample(const word& fieldName) const;
+        virtual void readUpdate(const polyMesh::readUpdateState state);
 };
 
 
@@ -232,7 +277,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "probesTemplates.C"
+#   include "sampledSurfacesTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

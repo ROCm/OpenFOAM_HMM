@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,94 +23,114 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IOOutputFilter
+    Foam::dx
 
 Description
-    IOdictionary wrapper around OutputFilter to allow them to read from
-    their associated dictionaries.
 
 SourceFiles
-    IOOutputFilter.C
+    dx.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOOutputFilter_H
-#define IOOutputFilter_H
+#ifndef dx_H
+#define dx_H
 
-#include "IOdictionary.H"
-#include "pointFieldFwd.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class mapPolyMesh;
-
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                           Class dx Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class OutputFilter>
-class IOOutputFilter
+template<class Type>
+class dx
 :
-    public IOdictionary,
-    public OutputFilter
+    public surfaceWriter<Type>
 {
+
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        IOOutputFilter(const IOOutputFilter&);
-        void operator=(const IOOutputFilter&);
+        void writeDXGeometry
+        (
+            const pointField& points,
+            const faceList& faces,
+            Ostream& os
+        ) const;
 
+        void writeDXData
+        (
+            const pointField& points,
+            const scalarField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const vectorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const sphericalTensorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const symmTensorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const tensorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXTrailer(Ostream& os) const;
 
 public:
 
+    //- Runtime type information
+    TypeName("dx");
+
+
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
-        IOOutputFilter
-        (
-            const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
-            const bool loadFromFile = false
-        );
+        //- Construct null
+        dx();
 
 
     // Destructor
 
-        virtual ~IOOutputFilter();
+        virtual ~dx();
 
 
     // Member Functions
 
-        //- Return name
-        virtual const word& name() const
-        {
-            return IOdictionary::name();
-        }
+        // Write
 
-        //- Read the probes
-        virtual bool read();
-
-        //- Sample and write
-        virtual void write();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {
-            read();
-            OutputFilter::updateMesh(mpm);
-        }
-
-        //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
-        {
-            read();
-            OutputFilter::movePoints(points);
-        }
+        //- Writes single surface to file.
+        virtual void write
+        (
+            const fileName& samplePath,
+            const fileName& timeDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const fileName& fieldName,
+            const Field<Type>& values,
+            const bool verbose = false
+        ) const;
 };
 
 
@@ -121,7 +141,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IOOutputFilter.C"
+#   include "dx.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

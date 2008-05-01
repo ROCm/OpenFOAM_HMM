@@ -24,63 +24,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOOutputFilter.H"
-#include "Time.H"
+#include "sampledSurfacesFunctionObject.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const bool readFromFiles
-)
-:
-    IOdictionary
+namespace Foam
+{
+    defineNamedTemplateTypeNameAndDebug(sampledSurfacesFunctionObject, 0);
+
+    addToRunTimeSelectionTable
     (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-Foam::IOOutputFilter<OutputFilter>::~IOOutputFilter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class OutputFilter>
-bool Foam::IOOutputFilter<OutputFilter>::read()
-{
-    if (regIOobject::read())
-    {
-        OutputFilter::read(*this);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+        functionObject,
+        sampledSurfacesFunctionObject,
+        dictionary
+    );
 }
-
-
-template<class OutputFilter>
-void Foam::IOOutputFilter<OutputFilter>::write()
-{
-    OutputFilter::write();
-}
-
 
 // ************************************************************************* //

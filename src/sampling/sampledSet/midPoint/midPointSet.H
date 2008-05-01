@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,22 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IOOutputFilter
+    Foam::midPointSet
 
 Description
-    IOdictionary wrapper around OutputFilter to allow them to read from
-    their associated dictionaries.
 
 SourceFiles
-    IOOutputFilter.C
+    midPointSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOOutputFilter_H
-#define IOOutputFilter_H
+#ifndef midPointSet_H
+#define midPointSet_H
 
-#include "IOdictionary.H"
-#include "pointFieldFwd.H"
+#include "faceOnlySet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,83 +43,60 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class mapPolyMesh;
+class passiveParticle;
+template<class Type> class particle;
+class meshSearch;
 
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                           Class midPointSet Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class OutputFilter>
-class IOOutputFilter
+class midPointSet
 :
-    public IOdictionary,
-    public OutputFilter
+    public faceOnlySet
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        IOOutputFilter(const IOOutputFilter&);
-        void operator=(const IOOutputFilter&);
-
+        void genSamples();
 
 public:
 
+    //- Runtime type information
+    TypeName("midPoint");
+
+
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
-        IOOutputFilter
+        //- Construct from components
+        midPointSet
         (
-            const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
-            const bool loadFromFile = false
+            const word& name,
+            const polyMesh& mesh,
+            meshSearch& searchEngine,
+            const word& axis,
+            const point& start,
+            const point& end
+        );
+
+        //- Construct from dictionary
+        midPointSet
+        (
+            const word& name,
+            const polyMesh& mesh,
+            meshSearch& searchEngine,
+            const dictionary& dict
         );
 
 
     // Destructor
 
-        virtual ~IOOutputFilter();
-
-
-    // Member Functions
-
-        //- Return name
-        virtual const word& name() const
-        {
-            return IOdictionary::name();
-        }
-
-        //- Read the probes
-        virtual bool read();
-
-        //- Sample and write
-        virtual void write();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {
-            read();
-            OutputFilter::updateMesh(mpm);
-        }
-
-        //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
-        {
-            read();
-            OutputFilter::movePoints(points);
-        }
+        virtual ~midPointSet();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "IOOutputFilter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
