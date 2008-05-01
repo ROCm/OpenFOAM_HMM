@@ -46,9 +46,9 @@ Foam::basicKinematicCloud::basicKinematicCloud
     const dimensionedVector& g
 )
 :
-    KinematicCloud<kinematicParcel>(cloudType, vpi, rho, U, mu, g)
+    KinematicCloud<basicKinematicParcel>(cloudType, vpi, rho, U, mu, g)
 {
-    kinematicParcel::readFields(*this);
+    basicKinematicParcel::readFields(*this);
 }
 
 
@@ -62,31 +62,31 @@ Foam::basicKinematicCloud::~basicKinematicCloud()
 
 void Foam::basicKinematicCloud::evolve()
 {
-    KinematicCloud<kinematicParcel>::evolve();
+    KinematicCloud<basicKinematicParcel>::evolve();
 }
 
 
 void Foam::basicKinematicCloud::move
 (
-    KinematicParcel<kinematicParcel>::trackData& td
+    KinematicParcel<basicKinematicParcel>::trackData& td
 )
 {
-    KinematicCloud<kinematicParcel>::move(td);
+    KinematicCloud<basicKinematicParcel>::move(td);
 }
 
 
 void Foam::basicKinematicCloud::inject
 (
-    KinematicParcel<kinematicParcel>::trackData& td
+    KinematicParcel<basicKinematicParcel>::trackData& td
 )
 {
-    KinematicCloud<kinematicParcel>::inject(td);
+    KinematicCloud<basicKinematicParcel>::inject(td);
 }
 
 
 void Foam::basicKinematicCloud::writeFields() const
 {
-    kinematicParcel::writeFields(*this);
+    basicKinematicParcel::writeFields(*this);
 }
 
 

@@ -24,29 +24,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
-#include "ReactingCloud.H"
+#include "basicThermoParcel.H"
+#include "ThermoCloud.H"
+#include "NoInjection.H"
+#include "ManualInjection.H"
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(Cloud<reactingParcel>, 0);
+    makeInjectionModel(KinematicCloud<basicThermoParcel>);
 
-    defineParcelTypeNameAndDebug(KinematicParcel<reactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicParcel<reactingParcel>, 0);
-    defineParcelTypeNameAndDebug(ThermoParcel<reactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(ThermoParcel<reactingParcel>, 0);
-    defineParcelTypeNameAndDebug(ReactingParcel<reactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(ReactingParcel<reactingParcel>, 0);
+    // Add instances of injection model to the table
+    makeInjectionModelType(NoInjection, KinematicCloud, basicThermoParcel);
 
-    defineParcelTypeNameAndDebug(KinematicCloud<reactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicCloud<reactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ThermoCloud<reactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ThermoCloud<reactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ReactingCloud<reactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ReactingCloud<reactingParcel>, 0);
-
+    makeInjectionModelType(ManualInjection, KinematicCloud, basicThermoParcel);
 };
 
 

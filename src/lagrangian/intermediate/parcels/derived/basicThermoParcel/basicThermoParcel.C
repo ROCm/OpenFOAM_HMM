@@ -24,42 +24,61 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
-#include "KinematicCloud.H"
-#include "NoDispersion.H"
-#include "GradientDispersionRAS.H"
-#include "StochasticDispersionRAS.H"
+#include "basicThermoParcel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeDispersionModel(KinematicCloud<reactingParcel>);
-
-    defineNamedTemplateTypeNameAndDebug
-    (
-        DispersionRASModel<KinematicCloud<reactingParcel> >,
-        0
-    );
-
-    // Add instances of dispersion model to the table
-    makeDispersionModelType
-    (
-        NoDispersion,
-        KinematicCloud,
-        reactingParcel
-    );
-    makeDispersionModelType
-    (
-        GradientDispersionRAS,
-        KinematicCloud,
-        reactingParcel
-    );
-    makeDispersionModelType
-    (
-        StochasticDispersionRAS,
-        KinematicCloud,
-        reactingParcel
-    );
+    defineTypeNameAndDebug(basicThermoParcel, 0);
+    defineParticleTypeNameAndDebug(basicThermoParcel, 0);
+    defineParcelTypeNameAndDebug(basicThermoParcel, 0);
 };
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::basicThermoParcel::basicThermoParcel
+(
+    ThermoCloud<basicThermoParcel>& owner,
+    const label typeId,
+    const vector position,
+    const label celli,
+    const scalar d0,
+    const vector U0,
+    const scalar nParticle0,
+    const constantProperties& constProps
+)
+:
+    ThermoParcel<basicThermoParcel>
+    (
+        owner,
+        typeId,
+        position,
+        celli,
+        d0,
+        U0,
+        nParticle0,
+        constProps
+    )
+{}
+
+
+Foam::basicThermoParcel::basicThermoParcel
+(
+    const Cloud<basicThermoParcel>& cloud,
+    Istream& is,
+    bool readFields
+)
+:
+    ThermoParcel<basicThermoParcel>(cloud, is, readFields)
+{}
+
+
+// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
+
+Foam::basicThermoParcel::~basicThermoParcel()
+{}
 
 
 // ************************************************************************* //

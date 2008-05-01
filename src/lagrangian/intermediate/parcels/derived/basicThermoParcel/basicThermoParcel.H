@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::kinematicParcel
+    Foam::basicThermoParcel
 
 Description
 
 
 SourceFiles
-    kinematicParcel.C
+    basicThermoParcel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kinematicParcel_H
-#define kinematicParcel_H
+#ifndef basicThermoParcel_H
+#define basicThermoParcel_H
 
-#include "KinematicParcel.H"
+#include "ThermoParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,58 +44,57 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class kinematicParcel Declaration
+                         Class basicThermoParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-class kinematicParcel
+class basicThermoParcel
 :
-    public KinematicParcel<kinematicParcel>
+    public ThermoParcel<basicThermoParcel>
 {
 
 public:
 
-    //- Run-time type information
-    TypeName("kinematicParcel");
-
+    //- Runtime type information
+    TypeName("basicThermoParcel");
 
     // Constructors
 
-        //- Construct from components
-        kinematicParcel
-        (
-            KinematicCloud<kinematicParcel>& owner,
+       //- Construct from components
+       basicThermoParcel
+       (
+            ThermoCloud<basicThermoParcel>& owner,
             const label typeId,
-            const vector& position,
+            const vector position,
             const label celli,
             const scalar d0,
-            const vector& U0,
+            const vector U0,
             const scalar nParticle0,
             const constantProperties& constProps
         );
 
         //- Construct from Istream
-        kinematicParcel
+        basicThermoParcel
         (
-            const Cloud<kinematicParcel>& c,
+            const Cloud<basicThermoParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct and return a clone
-        autoPtr<kinematicParcel> clone() const
+        autoPtr<basicThermoParcel> clone() const
         {
-            return autoPtr<kinematicParcel>(new kinematicParcel(*this));
+            return autoPtr<basicThermoParcel>(new basicThermoParcel(*this));
         }
 
 
     // Destructors
 
-        virtual ~kinematicParcel();
+        virtual ~basicThermoParcel();
 };
 
 
 template<>
-inline bool contiguous<kinematicParcel>()
+inline bool contiguous<basicThermoParcel>()
 {
     return true;
 }

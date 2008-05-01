@@ -23,21 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::reactingParcel
+    Foam::basicKinematicParcel
 
 Description
 
 
 SourceFiles
-    reactingParcel.C
-    reactingParcelIO.C
+    basicKinematicParcel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef reactingParcel_H
-#define reactingParcel_H
+#ifndef basicKinematicParcel_H
+#define basicKinematicParcel_H
 
-#include "ReactingParcel.H"
+#include "KinematicParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,63 +44,61 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class reactingParcel Declaration
+                         Class basicKinematicParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-class reactingParcel
+class basicKinematicParcel
 :
-    public ReactingParcel<reactingParcel>
+    public KinematicParcel<basicKinematicParcel>
 {
 
 public:
 
     //- Run-time type information
-    TypeName("reactingParcel");
+    TypeName("basicKinematicParcel");
+
 
     // Constructors
 
         //- Construct from components
-        reactingParcel
+        basicKinematicParcel
         (
-             ReactingCloud<reactingParcel>& owner,
-             const label typeId,
-             const vector& position,
-             const label celli,
-             const scalar d0,
-             const vector& U0,
-             const scalar nParticle0,
-             const scalarField& YGas0,
-             const scalarField& YLiquid0,
-             const scalarField& YSolid0,
-             const scalarField& YMixture0,
-             const constantProperties& constProps
+            KinematicCloud<basicKinematicParcel>& owner,
+            const label typeId,
+            const vector& position,
+            const label celli,
+            const scalar d0,
+            const vector& U0,
+            const scalar nParticle0,
+            const constantProperties& constProps
         );
 
         //- Construct from Istream
-        reactingParcel
+        basicKinematicParcel
         (
-            const Cloud<reactingParcel>& c,
+            const Cloud<basicKinematicParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct and return a clone
-        autoPtr<reactingParcel> clone() const
+        autoPtr<basicKinematicParcel> clone() const
         {
-            return autoPtr<reactingParcel>(new reactingParcel(*this));
+            return autoPtr<basicKinematicParcel>
+                (new basicKinematicParcel(*this));
         }
 
 
-    // Destructors
+    //- Destructor
 
-        virtual ~reactingParcel();
+        virtual ~basicKinematicParcel();
 };
 
 
 template<>
-inline bool contiguous<reactingParcel>()
+inline bool contiguous<basicKinematicParcel>()
 {
-    return false; // Now have scalar lists/fields (mass fractions)
+    return true;
 }
 
 

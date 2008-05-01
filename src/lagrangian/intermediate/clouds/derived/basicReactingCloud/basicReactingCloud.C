@@ -47,7 +47,7 @@ Foam::basicReactingCloud::basicReactingCloud
     PtrList<specieReactingProperties>& gases
 )
 :
-    ReactingCloud<reactingParcel>
+    ReactingCloud<basicReactingParcel>
     (
         cloudType,
         vpi,
@@ -58,7 +58,7 @@ Foam::basicReactingCloud::basicReactingCloud
         gases
     )
 {
-    reactingParcel::readFields(*this);
+    basicReactingParcel::readFields(*this);
 }
 
 
@@ -67,31 +67,31 @@ Foam::basicReactingCloud::basicReactingCloud
 
 void Foam::basicReactingCloud::evolve()
 {
-    ReactingCloud<reactingParcel>::evolve();
+    ReactingCloud<basicReactingParcel>::evolve();
 }
 
 
 void Foam::basicReactingCloud::move
 (
-    ReactingParcel<reactingParcel>::trackData& td
+    ReactingParcel<basicReactingParcel>::trackData& td
 )
 {
-    ReactingCloud<reactingParcel>::move(td);
+    ReactingCloud<basicReactingParcel>::move(td);
 }
 
 
 void Foam::basicReactingCloud::inject
 (
-    ReactingParcel<reactingParcel>::trackData& td
+    ReactingParcel<basicReactingParcel>::trackData& td
 )
 {
-    ReactingCloud<reactingParcel>::inject(td);
+    ReactingCloud<basicReactingParcel>::inject(td);
 }
 
 
 void Foam::basicReactingCloud::writeFields() const
 {
-    reactingParcel::writeFields(*this);
+    basicReactingParcel::writeFields(*this);
 }
 
 

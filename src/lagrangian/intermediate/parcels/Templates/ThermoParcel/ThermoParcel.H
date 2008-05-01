@@ -67,7 +67,7 @@ Ostream& operator<<
                        Class ThermoParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class ParcelType>
+template<class ParcelType>
 class ThermoParcel
 :
     public KinematicParcel<ParcelType>
@@ -188,31 +188,11 @@ protected:
 
     // Protected member functions
 
-        virtual void updateCellQuantities
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
-        virtual void calcCoupled
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
-        virtual void calcUncoupled
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
         //- Calculate new particle temperature
-        virtual scalar calcHeatTransfer
+        template<class TrackData>
+        scalar calcHeatTransfer
         (
-            trackData& td,
+            TrackData& td,
             const scalar dt,
             const label celli,
             scalar& htc,
@@ -269,6 +249,36 @@ public:
             //- Return specific heat capacity
             inline const scalar cp() const;
             inline scalar& cp();
+
+
+        // Main calculation loop
+
+            //- Update cell based quantities
+            template<class TrackData>
+            void updateCellQuantities
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Coupled calculation with the continuous phase
+            template<class TrackData>
+            void calcCoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Uncoupled calculation with the continuous phase
+            template<class TrackData>
+            void calcUncoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label
+            );
 
 
         // I-O

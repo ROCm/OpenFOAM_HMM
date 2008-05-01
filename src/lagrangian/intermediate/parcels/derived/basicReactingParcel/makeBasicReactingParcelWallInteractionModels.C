@@ -24,40 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kinematicParcel.H"
+#include "basicReactingParcel.H"
 #include "KinematicCloud.H"
-#include "NoDispersion.H"
-#include "GradientDispersionRAS.H"
-#include "StochasticDispersionRAS.H"
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
 
 namespace Foam
 {
-    makeDispersionModel(KinematicCloud<kinematicParcel>);
+    makeWallInteractionModel(KinematicCloud<basicReactingParcel>);
+//    makeWallInteractionModel(ReactingCloud<basicReactingParcel>);
 
-    defineNamedTemplateTypeNameAndDebug
+    // Add instances of wall interaction model to the table
+    makeWallInteractionModelType
     (
-        DispersionRASModel<KinematicCloud<kinematicParcel> >,
-        0
-    );
-
-    // Add instances of dispersion model to the table
-    makeDispersionModelType
-    (
-        NoDispersion,
+        Rebound,
         KinematicCloud,
-        kinematicParcel
+        basicReactingParcel
     );
-    makeDispersionModelType
+    makeWallInteractionModelType
     (
-        GradientDispersionRAS,
+        StandardWallInteraction,
         KinematicCloud,
-        kinematicParcel
-    );
-    makeDispersionModelType
-    (
-        StochasticDispersionRAS,
-        KinematicCloud,
-        kinematicParcel
+        basicReactingParcel
     );
 };
 

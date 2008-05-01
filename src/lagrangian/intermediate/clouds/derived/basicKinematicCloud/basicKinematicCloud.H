@@ -37,7 +37,7 @@ SourceFiles
 #define basicKinematicCloud_H
 
 #include "KinematicCloud.H"
-#include "kinematicParcel.H"
+#include "basicKinematicParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ namespace Foam
 
 class basicKinematicCloud
 :
-    public KinematicCloud<kinematicParcel>
+    public KinematicCloud<basicKinematicParcel>
 {
 
     // Private member functions
@@ -97,13 +97,13 @@ public:
             //- Move the parcels
             void move
             (
-                KinematicParcel<kinematicParcel>::trackData& td
+                KinematicParcel<basicKinematicParcel>::trackData& td
             );
 
             //- Inject more parcels
             void inject
             (
-                KinematicParcel<kinematicParcel>::trackData& td
+                KinematicParcel<basicKinematicParcel>::trackData& td
             );
 
 

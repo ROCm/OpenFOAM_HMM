@@ -24,20 +24,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
+#include "basicReactingParcel.H"
 #include "ReactingCloud.H"
-#include "NoSurfaceReaction.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
 
 namespace Foam
 {
-    makeSurfaceReactionModel(ReactingCloud<reactingParcel>);
+    makeInjectionModel(KinematicCloud<basicReactingParcel>);
 
-    // Add instances of surface reaction model to the table
-    makeSurfaceReactionModelType
+    // Add instances of injection model to the table
+    makeInjectionModelType
     (
-        NoSurfaceReaction,
-        ReactingCloud,
-        reactingParcel
+        ManualInjection,
+        KinematicCloud,
+        basicReactingParcel
+    );
+    makeInjectionModelType
+    (
+        NoInjection,
+        KinematicCloud,
+        basicReactingParcel
     );
 };
 

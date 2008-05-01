@@ -36,7 +36,7 @@ SourceFiles
 #define basicReactingCloud_H
 
 #include "ReactingCloud.H"
-#include "reactingParcel.H"
+#include "basicReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 
 class basicReactingCloud
 :
-    public ReactingCloud<reactingParcel>
+    public ReactingCloud<basicReactingParcel>
 {
 
     // Private Member Functions
@@ -91,13 +91,13 @@ public:
             //- Move the parcels
             void move
             (
-                ReactingParcel<reactingParcel>::trackData& td
+                ReactingParcel<basicReactingParcel>::trackData& td
             );
 
             //- Inject more parcels
             void inject
             (
-                ReactingParcel<reactingParcel>::trackData& td
+                ReactingParcel<basicReactingParcel>::trackData& td
             );
 
 

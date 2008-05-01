@@ -24,18 +24,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
+#include "basicKinematicParcel.H"
 #include "KinematicCloud.H"
-#include "NoDrag.H"
-#include "SphereDrag.H"
+#include "NoDispersion.H"
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
 
 namespace Foam
 {
-    makeDragModel(KinematicCloud<reactingParcel>);
+    makeDispersionModel(KinematicCloud<basicKinematicParcel>);
 
-    // Add instances of drag model to the table
-    makeDragModelType(NoDrag, KinematicCloud, reactingParcel);
-    makeDragModelType(SphereDrag, KinematicCloud, reactingParcel);
+    defineNamedTemplateTypeNameAndDebug
+    (
+        DispersionRASModel<KinematicCloud<basicKinematicParcel> >,
+        0
+    );
+
+    // Add instances of dispersion model to the table
+    makeDispersionModelType
+    (
+        NoDispersion,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeDispersionModelType
+    (
+        GradientDispersionRAS,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeDispersionModelType
+    (
+        StochasticDispersionRAS,
+        KinematicCloud,
+        basicKinematicParcel
+    );
 };
 
 

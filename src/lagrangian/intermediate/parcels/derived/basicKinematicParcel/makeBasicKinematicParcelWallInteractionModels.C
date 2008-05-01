@@ -24,17 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kinematicParcel.H"
+#include "basicKinematicParcel.H"
 #include "KinematicCloud.H"
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
 
 namespace Foam
 {
-//    defineTemplateTypeNameAndDebug(IOPosition<kinematicParcel>, 0);
+    makeWallInteractionModel(KinematicCloud<basicKinematicParcel>);
 
-    defineTemplateTypeNameAndDebug(Cloud<kinematicParcel>, 0);
-
-    defineParcelTypeNameAndDebug(KinematicCloud<kinematicParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicCloud<kinematicParcel>, 0);
+    // Add instances of wall interaction model to the table
+    makeWallInteractionModelType
+    (
+        Rebound,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeWallInteractionModelType
+    (
+        StandardWallInteraction,
+        KinematicCloud,
+        basicKinematicParcel
+    );
 };
 
 

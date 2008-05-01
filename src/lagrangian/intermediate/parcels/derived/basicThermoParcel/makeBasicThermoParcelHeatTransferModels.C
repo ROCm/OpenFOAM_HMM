@@ -24,18 +24,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
-#include "ReactingCloud.H"
-#include "ManualInjection.H"
-#include "NoInjection.H"
+#include "basicThermoParcel.H"
+#include "ThermoCloud.H"
+#include "NoHeatTransfer.H"
+#include "RanzMarshall.H"
 
 namespace Foam
 {
-    makeInjectionModel(KinematicCloud<reactingParcel>);
+    makeHeatTransferModel(ThermoCloud<basicThermoParcel>);
 
-    // Add instances of injection model to the table
-    makeInjectionModelType(ManualInjection, KinematicCloud, reactingParcel);
-    makeInjectionModelType(NoInjection, KinematicCloud, reactingParcel);
+    // Add instances of heat transfer model to the table
+    makeHeatTransferModelType(NoHeatTransfer, ThermoCloud, basicThermoParcel);
+    makeHeatTransferModelType(RanzMarshall, ThermoCloud, basicThermoParcel);
 };
 
 

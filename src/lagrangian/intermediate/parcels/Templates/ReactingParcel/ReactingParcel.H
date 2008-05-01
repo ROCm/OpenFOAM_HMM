@@ -187,31 +187,11 @@ protected:
 
     // Protected member functions
 
-        virtual void updateCellQuantities
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
-        virtual void calcCoupled
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
-        virtual void calcUncoupled
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
         //- Calculate mass transfer
-        virtual void calcMassTransfer
+        template<class TrackData>
+        void calcMassTransfer
         (
-            trackData& td,
+            TrackData& td,
             const scalar dt,
             const scalar T0,
             const scalar T1,
@@ -219,9 +199,10 @@ protected:
         );
 
         //- Calculate surface reactions
-        virtual void calcSurfaceReactions
+        template<class TrackData>
+        void calcSurfaceReactions
         (
-            trackData& td,
+            TrackData& td,
             const scalar dt,
             const label celli,
             const scalar T0,
@@ -296,6 +277,36 @@ public:
             //- Return initial mass
             inline const scalar mass0() const;
             inline scalar& mass0();
+
+
+        // Main calculation loop
+
+            //- Update cell based quantities
+            template<class TrackData>
+            void updateCellQuantities
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Coupled calculation with the continuous phase
+            template<class TrackData>
+            void calcCoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Uncoupled calculation with the continuous phase
+            template<class TrackData>
+            void calcUncoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label
+            );
 
 
         // I-O

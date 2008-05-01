@@ -24,65 +24,69 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoCloud.H"
+#include "basicReactingParcel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(basicThermoCloud, 0);
+    defineTypeNameAndDebug(basicReactingParcel, 0);
+    defineParticleTypeNameAndDebug(basicReactingParcel, 0);
+    defineParcelTypeNameAndDebug(basicReactingParcel, 0);
 };
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicThermoCloud::basicThermoCloud
+Foam::basicReactingParcel::basicReactingParcel
 (
-    const word& cloudType,
-    const volPointInterpolation& vpi,
-    const volScalarField& rho,
-    const volVectorField& U,
-    const dimensionedVector& g,
-    basicThermo& thermo
+    ReactingCloud<basicReactingParcel>& owner,
+    const label typeId,
+    const vector& position,
+    const label celli,
+    const scalar d0,
+    const vector& U0,
+    const scalar nParticle0,
+    const scalarField& YGas0,
+    const scalarField& YLiquid0,
+    const scalarField& YSolid0,
+    const scalarField& YMixture0,
+    const constantProperties& constProps
 )
 :
-    ThermoCloud<basicThermoParcel>(cloudType, vpi, rho, U, g, thermo)
-{
-    basicThermoParcel::readFields(*this);
-}
+    ReactingParcel<basicReactingParcel>
+    (
+        owner,
+        typeId,
+        position,
+        celli,
+        d0,
+        U0,
+        nParticle0,
+        YGas0,
+        YLiquid0,
+        YSolid0,
+        YMixture0,
+        constProps
+    )
+{}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::basicThermoCloud::evolve()
-{
-    ThermoCloud<basicThermoParcel>::evolve();
-}
-
-
-void Foam::basicThermoCloud::move
+Foam::basicReactingParcel::basicReactingParcel
 (
-    ThermoParcel<basicThermoParcel>::trackData& td
+    const Cloud<basicReactingParcel>& cloud,
+    Istream& is,
+    bool readFields
 )
-{
-    // Move the parcels
-    ThermoCloud<basicThermoParcel>::move(td);
-}
+:
+    ReactingParcel<basicReactingParcel>(cloud, is, readFields)
+{}
 
 
-void Foam::basicThermoCloud::inject
-(
-    ThermoParcel<basicThermoParcel>::trackData& td
-)
-{
-    ThermoCloud<basicThermoParcel>::inject(td);
-}
+// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-
-void Foam::basicThermoCloud::writeFields() const
-{
-    basicThermoParcel::writeFields(*this);
-}
+Foam::basicReactingParcel::~basicReactingParcel()
+{}
 
 
 // ************************************************************************* //

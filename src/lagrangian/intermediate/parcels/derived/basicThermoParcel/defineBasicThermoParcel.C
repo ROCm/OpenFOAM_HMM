@@ -24,61 +24,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kinematicParcel.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "basicThermoParcel.H"
+#include "ThermoCloud.H"
 
 namespace Foam
 {
-    defineTypeNameAndDebug(kinematicParcel, 0);
-    defineParticleTypeNameAndDebug(kinematicParcel, 0);
-    defineParcelTypeNameAndDebug(kinematicParcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<basicThermoParcel>, 0);
+
+    defineParcelTypeNameAndDebug(KinematicParcel<basicThermoParcel>, 0);
+//    defineTemplateTypeNameAndDebug(KinematicParcel<basicThermoParcel>, 0);
+    defineParcelTypeNameAndDebug(ThermoParcel<basicThermoParcel>, 0);
+    defineTemplateTypeNameAndDebug(ThermoParcel<basicThermoParcel>, 0);
+
+    defineParcelTypeNameAndDebug(KinematicCloud<basicThermoParcel>, 0);
+//    defineTemplateTypeNameAndDebug(KinematicCloud<basicThermoParcel>, 0);
+
+    defineParcelTypeNameAndDebug(ThermoCloud<basicThermoParcel>, 0);
+//    defineTemplateTypeNameAndDebug(ThermoCloud<basicThermoParcel>, 0);
 };
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::kinematicParcel::kinematicParcel
-(
-    KinematicCloud<kinematicParcel>& owner,
-    const label typeId,
-    const vector& position,
-    const label celli,
-    const scalar d0,
-    const vector& U0,
-    const scalar nParticle0,
-    const constantProperties& constProps
-)
-:
-    KinematicParcel<kinematicParcel>
-    (
-        owner,
-        typeId,
-        position,
-        celli,
-        d0,
-        U0,
-        nParticle0,
-        constProps
-    )
-{}
-
-
-Foam::kinematicParcel::kinematicParcel
-(
-    const Cloud<kinematicParcel>& cloud,
-    Istream& is,
-    bool readFields
-)
-:
-    KinematicParcel<kinematicParcel>(cloud, is, readFields)
-{}
-
-
-// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
-
-Foam::kinematicParcel::~kinematicParcel()
-{}
 
 
 // ************************************************************************* //

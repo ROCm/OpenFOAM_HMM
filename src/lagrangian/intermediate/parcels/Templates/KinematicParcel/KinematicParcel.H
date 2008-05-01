@@ -72,7 +72,7 @@ Ostream& operator<<
                          Class KinematicParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class ParcelType>
+template<class ParcelType>
 class KinematicParcel
 :
     public Particle<ParcelType>
@@ -95,7 +95,7 @@ public:
 
     public:
 
-        // Constructors
+        //- Constructor
         constantProperties
         (
             const dictionary& dict
@@ -212,30 +212,11 @@ protected:
 
     // Protected member functions
 
-        virtual void updateCellQuantities
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
-        virtual void calcCoupled
-        (
-            trackData& td,
-            const scalar dt,
-            const label celli
-        );
-
-        virtual void calcUncoupled
-        (
-            trackData& td,
-            const scalar dt
-        );
-
         //- Calculate new particle velocity
-        virtual vector calcVelocity
+        template<class TrackData>
+        vector calcVelocity
         (
-            trackData& td,
+            TrackData& td,
             const scalar dt,
             scalar& Cud,
             vector& dUTrans
@@ -336,12 +317,43 @@ public:
             inline scalar areaS() const;
 
 
+        // Main calculation loop
+
+            //- Update cell based quantities
+            template<class TrackData>
+            void updateCellQuantities
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Coupled calculation with the continuous phase
+            template<class TrackData>
+            void calcCoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Uncoupled calculation with the continuous phase
+            template<class TrackData>
+            void calcUncoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label
+            );
+
+
         // Tracking
 
             //- Move the parcel
-            virtual bool move
+            template<class TrackData>
+            bool move
             (
-                trackData& td
+                TrackData& td
             );
 
 

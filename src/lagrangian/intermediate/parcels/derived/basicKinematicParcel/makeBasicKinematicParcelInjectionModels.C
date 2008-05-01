@@ -24,34 +24,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
-#include "ThermoCloud.H"
-#include "NoMassTransfer.H"
-#include "ConstantRateDevolatilisation.H"
-#include "SingleKineticRateDevolatilisation.H"
+#include "basicKinematicParcel.H"
+#include "KinematicCloud.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
 
 namespace Foam
 {
-    makeMassTransferModel(ReactingCloud<reactingParcel>);
+    makeInjectionModel(KinematicCloud<basicKinematicParcel>);
 
-    // Add instances of mass transfer model to the table
-    makeMassTransferModelType
+    // Add instances of injection model to the table
+    makeInjectionModelType
     (
-        NoMassTransfer,
-        ReactingCloud,
-        reactingParcel
+        ManualInjection,
+        KinematicCloud,
+        basicKinematicParcel
     );
-    makeMassTransferModelType
+    makeInjectionModelType
     (
-        ConstantRateDevolatilisation,
-        ReactingCloud,
-        reactingParcel
-    );
-    makeMassTransferModelType
-    (
-        SingleKineticRateDevolatilisation,
-        ReactingCloud,
-        reactingParcel
+        NoInjection,
+        KinematicCloud,
+        basicKinematicParcel
     );
 };
 

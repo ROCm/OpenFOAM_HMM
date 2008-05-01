@@ -24,23 +24,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoParcel.H"
-#include "ThermoCloud.H"
+#include "basicReactingParcel.H"
+#include "KinematicCloud.H"
+#include "NoDispersion.H"
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(Cloud<thermoParcel>, 0);
+    makeDispersionModel(KinematicCloud<basicReactingParcel>);
 
-    defineParcelTypeNameAndDebug(KinematicParcel<thermoParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicParcel<thermoParcel>, 0);
-    defineParcelTypeNameAndDebug(ThermoParcel<thermoParcel>, 0);
-    defineTemplateTypeNameAndDebug(ThermoParcel<thermoParcel>, 0);
+    defineNamedTemplateTypeNameAndDebug
+    (
+        DispersionRASModel<KinematicCloud<basicReactingParcel> >,
+        0
+    );
 
-    defineParcelTypeNameAndDebug(KinematicCloud<thermoParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicCloud<thermoParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ThermoCloud<thermoParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ThermoCloud<thermoParcel>, 0);
+    // Add instances of dispersion model to the table
+    makeDispersionModelType
+    (
+        NoDispersion,
+        KinematicCloud,
+        basicReactingParcel
+    );
+    makeDispersionModelType
+    (
+        GradientDispersionRAS,
+        KinematicCloud,
+        basicReactingParcel
+    );
+    makeDispersionModelType
+    (
+        StochasticDispersionRAS,
+        KinematicCloud,
+        basicReactingParcel
+    );
 };
 
 

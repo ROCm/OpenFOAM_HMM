@@ -29,9 +29,10 @@ License
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::updateCellQuantities
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -43,9 +44,10 @@ void Foam::ReactingParcel<ParcelType>::updateCellQuantities
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcCoupled
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -190,9 +192,10 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcUncoupled
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -315,9 +318,10 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcMassTransfer
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const scalar T0,
     const scalar T1,
@@ -377,9 +381,10 @@ void Foam::ReactingParcel<ParcelType>::calcMassTransfer
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcSurfaceReactions
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli,
     const scalar T0,

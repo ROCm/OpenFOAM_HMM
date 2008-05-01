@@ -40,7 +40,6 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
-//#include "KinematicCloud.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

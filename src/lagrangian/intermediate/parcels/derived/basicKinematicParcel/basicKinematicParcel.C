@@ -24,30 +24,61 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
-#include "KinematicCloud.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+#include "basicKinematicParcel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeWallInteractionModel(KinematicCloud<reactingParcel>);
-//    makeWallInteractionModel(ReactingCloud<reactingParcel>);
-
-    // Add instances of wall interaction model to the table
-    makeWallInteractionModelType
-    (
-        Rebound,
-        KinematicCloud,
-        reactingParcel
-    );
-    makeWallInteractionModelType
-    (
-        StandardWallInteraction,
-        KinematicCloud,
-        reactingParcel
-    );
+    defineTypeNameAndDebug(basicKinematicParcel, 0);
+    defineParticleTypeNameAndDebug(basicKinematicParcel, 0);
+    defineParcelTypeNameAndDebug(basicKinematicParcel, 0);
 };
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::basicKinematicParcel::basicKinematicParcel
+(
+    KinematicCloud<basicKinematicParcel>& owner,
+    const label typeId,
+    const vector& position,
+    const label celli,
+    const scalar d0,
+    const vector& U0,
+    const scalar nParticle0,
+    const constantProperties& constProps
+)
+:
+    KinematicParcel<basicKinematicParcel>
+    (
+        owner,
+        typeId,
+        position,
+        celli,
+        d0,
+        U0,
+        nParticle0,
+        constProps
+    )
+{}
+
+
+Foam::basicKinematicParcel::basicKinematicParcel
+(
+    const Cloud<basicKinematicParcel>& cloud,
+    Istream& is,
+    bool readFields
+)
+:
+    KinematicParcel<basicKinematicParcel>(cloud, is, readFields)
+{}
+
+
+// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
+
+Foam::basicKinematicParcel::~basicKinematicParcel()
+{}
 
 
 // ************************************************************************* //

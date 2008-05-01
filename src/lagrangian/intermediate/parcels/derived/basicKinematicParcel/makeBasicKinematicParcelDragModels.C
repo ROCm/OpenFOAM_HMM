@@ -24,16 +24,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kinematicParcel.H"
+#include "basicKinematicParcel.H"
 #include "KinematicCloud.H"
-#include "NoHeatTransfer.H"
+#include "NoDrag.H"
+#include "SphereDrag.H"
 
 namespace Foam
 {
-    makeHeatTransferModel(KinematicCloud<kinematicParcel>);
+    makeDragModel(KinematicCloud<basicKinematicParcel>);
 
-    // Add instances of heat transfer model to the table
-    makeHeatTransferModelType(NoHeatTransfer, KinematicCloud, kinematicParcel);
+    // Add instances of drag model to the table
+    makeDragModelType(NoDrag, KinematicCloud, basicKinematicParcel);
+    makeDragModelType(SphereDrag, KinematicCloud, basicKinematicParcel);
 };
 
 

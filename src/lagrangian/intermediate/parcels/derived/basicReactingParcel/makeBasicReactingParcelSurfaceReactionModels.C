@@ -24,69 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingParcel.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "basicReactingParcel.H"
+#include "ReactingCloud.H"
+#include "NoSurfaceReaction.H"
 
 namespace Foam
 {
-    defineTypeNameAndDebug(reactingParcel, 0);
-    defineParticleTypeNameAndDebug(reactingParcel, 0);
-    defineParcelTypeNameAndDebug(reactingParcel, 0);
-};
+    makeSurfaceReactionModel(ReactingCloud<basicReactingParcel>);
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::reactingParcel::reactingParcel
-(
-    ReactingCloud<reactingParcel>& owner,
-    const label typeId,
-    const vector& position,
-    const label celli,
-    const scalar d0,
-    const vector& U0,
-    const scalar nParticle0,
-    const scalarField& YGas0,
-    const scalarField& YLiquid0,
-    const scalarField& YSolid0,
-    const scalarField& YMixture0,
-    const constantProperties& constProps
-)
-:
-    ReactingParcel<reactingParcel>
+    // Add instances of surface reaction model to the table
+    makeSurfaceReactionModelType
     (
-        owner,
-        typeId,
-        position,
-        celli,
-        d0,
-        U0,
-        nParticle0,
-        YGas0,
-        YLiquid0,
-        YSolid0,
-        YMixture0,
-        constProps
-    )
-{}
-
-
-Foam::reactingParcel::reactingParcel
-(
-    const Cloud<reactingParcel>& cloud,
-    Istream& is,
-    bool readFields
-)
-:
-    ReactingParcel<reactingParcel>(cloud, is, readFields)
-{}
-
-
-// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
-
-Foam::reactingParcel::~reactingParcel()
-{}
+        NoSurfaceReaction,
+        ReactingCloud,
+        basicReactingParcel
+    );
+};
 
 
 // ************************************************************************* //

@@ -29,9 +29,10 @@ License
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ThermoParcel<ParcelType>::updateCellQuantities
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -44,9 +45,10 @@ void Foam::ThermoParcel<ParcelType>::updateCellQuantities
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ThermoParcel<ParcelType>::calcCoupled
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -112,9 +114,10 @@ void Foam::ThermoParcel<ParcelType>::calcCoupled
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::ThermoParcel<ParcelType>::calcUncoupled
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -146,9 +149,10 @@ void Foam::ThermoParcel<ParcelType>::calcUncoupled
 
 
 template<class ParcelType>
+template <class TrackData>
 Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli,
     scalar& htc,
@@ -200,8 +204,6 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     scalar Tnew = td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
-
-    Info<< "T_, Tnew = " << T_ << ", " << Tnew << endl;
 
     dhTrans = -this->mass()*cp_*(Tnew - T_);
 

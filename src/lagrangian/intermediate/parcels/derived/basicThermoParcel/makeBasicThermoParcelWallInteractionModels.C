@@ -24,19 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoParcel.H"
-#include "ThermoCloud.H"
-#include "NoInjection.H"
-#include "ManualInjection.H"
+#include "basicThermoParcel.H"
+#include "KinematicCloud.H"
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
 
 namespace Foam
 {
-    makeInjectionModel(KinematicCloud<thermoParcel>);
+    makeWallInteractionModel(KinematicCloud<basicThermoParcel>);
 
-    // Add instances of injection model to the table
-    makeInjectionModelType(NoInjection, KinematicCloud, thermoParcel);
-
-    makeInjectionModelType(ManualInjection, KinematicCloud, thermoParcel);
+    // Add instances of wall interaction model to the table
+    makeWallInteractionModelType
+    (
+        Rebound,
+        KinematicCloud,
+        basicThermoParcel
+    );
+    makeWallInteractionModelType
+    (
+        StandardWallInteraction,
+        KinematicCloud,
+        basicThermoParcel
+    );
 };
 
 

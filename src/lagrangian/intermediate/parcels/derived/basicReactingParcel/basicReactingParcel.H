@@ -23,20 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::thermoParcel
+    Foam::basicReactingParcel
 
 Description
 
 
 SourceFiles
-    thermoParcel.C
+    basicReactingParcel.C
+    basicReactingParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoParcel_H
-#define thermoParcel_H
+#ifndef basicReactingParcel_H
+#define basicReactingParcel_H
 
-#include "ThermoParcel.H"
+#include "ReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,59 +45,64 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class thermoParcel Declaration
+                        Class basicReactingParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-class thermoParcel
+class basicReactingParcel
 :
-    public ThermoParcel<thermoParcel>
+    public ReactingParcel<basicReactingParcel>
 {
 
 public:
 
-    //- Runtime type information
-    TypeName("thermoParcel");
+    //- Run-time type information
+    TypeName("basicReactingParcel");
 
     // Constructors
 
-       //- Construct from components
-       thermoParcel
-       (
-            ThermoCloud<thermoParcel>& owner,
-            const label typeId,
-            const vector position,
-            const label celli,
-            const scalar d0,
-            const vector U0,
-            const scalar nParticle0,
-            const constantProperties& constProps
+        //- Construct from components
+        basicReactingParcel
+        (
+             ReactingCloud<basicReactingParcel>& owner,
+             const label typeId,
+             const vector& position,
+             const label celli,
+             const scalar d0,
+             const vector& U0,
+             const scalar nParticle0,
+             const scalarField& YGas0,
+             const scalarField& YLiquid0,
+             const scalarField& YSolid0,
+             const scalarField& YMixture0,
+             const constantProperties& constProps
         );
 
         //- Construct from Istream
-        thermoParcel
+        basicReactingParcel
         (
-            const Cloud<thermoParcel>& c,
+            const Cloud<basicReactingParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct and return a clone
-        autoPtr<thermoParcel> clone() const
+        autoPtr<basicReactingParcel> clone() const
         {
-            return autoPtr<thermoParcel>(new thermoParcel(*this));
+            return autoPtr<basicReactingParcel>
+                (new basicReactingParcel(*this));
         }
 
 
     // Destructors
 
-        virtual ~thermoParcel();
+        virtual ~basicReactingParcel();
 };
 
 
 template<>
-inline bool contiguous<thermoParcel>()
+inline bool contiguous<basicReactingParcel>()
 {
-    return true;
+    return false; // Now have scalar lists/fields (mass fractions)
 }
 
 

@@ -24,61 +24,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoParcel.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "basicKinematicParcel.H"
+#include "KinematicCloud.H"
 
 namespace Foam
 {
-    defineTypeNameAndDebug(thermoParcel, 0);
-    defineParticleTypeNameAndDebug(thermoParcel, 0);
-    defineParcelTypeNameAndDebug(thermoParcel, 0);
+//    defineTemplateTypeNameAndDebug(IOPosition<basicKinematicParcel>, 0);
+
+    defineTemplateTypeNameAndDebug(Cloud<basicKinematicParcel>, 0);
+
+    defineParcelTypeNameAndDebug(KinematicCloud<basicKinematicParcel>, 0);
+//    defineTemplateTypeNameAndDebug(KinematicCloud<basicKinematicParcel>, 0);
 };
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::thermoParcel::thermoParcel
-(
-    ThermoCloud<thermoParcel>& owner,
-    const label typeId,
-    const vector position,
-    const label celli,
-    const scalar d0,
-    const vector U0,
-    const scalar nParticle0,
-    const constantProperties& constProps
-)
-:
-    ThermoParcel<thermoParcel>
-    (
-        owner,
-        typeId,
-        position,
-        celli,
-        d0,
-        U0,
-        nParticle0,
-        constProps
-    )
-{}
-
-
-Foam::thermoParcel::thermoParcel
-(
-    const Cloud<thermoParcel>& cloud,
-    Istream& is,
-    bool readFields
-)
-:
-    ThermoParcel<thermoParcel>(cloud, is, readFields)
-{}
-
-
-// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
-
-Foam::thermoParcel::~thermoParcel()
-{}
 
 
 // ************************************************************************* //

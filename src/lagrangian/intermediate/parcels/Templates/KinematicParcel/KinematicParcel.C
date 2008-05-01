@@ -30,9 +30,10 @@ License
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -55,9 +56,10 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::calcCoupled
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     const label celli
 )
@@ -103,10 +105,12 @@ void Foam::KinematicParcel<ParcelType>::calcCoupled
 
 
 template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::calcUncoupled
 (
-    trackData& td,
-    const scalar dt
+    TrackData& td,
+    const scalar dt,
+    const label
 )
 {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,9 +130,10 @@ void Foam::KinematicParcel<ParcelType>::calcUncoupled
 
 
 template<class ParcelType>
+template<class TrackData>
 Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 (
-    trackData& td,
+    TrackData& td,
     const scalar dt,
     scalar& Cud,
     vector& dUTrans
@@ -192,12 +197,15 @@ Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
+template<class TrackData>
 bool Foam::KinematicParcel<ParcelType>::move
 (
-    trackData& td
+    TrackData& td
 )
 {
+    ParcelType& p = static_cast<ParcelType&>(*this);
+
     td.switchProcessor = false;
     td.keepParticle = true;
 
@@ -205,7 +213,7 @@ bool Foam::KinematicParcel<ParcelType>::move
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
     const scalar deltaT = mesh.time().deltaT().value();
-    scalar tEnd = (1.0 - this->stepFraction())*deltaT;
+    scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 
     while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
@@ -215,33 +223,33 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         // Remember which cell the Parcel is in
         // since this will change if a face is hit
-        label celli = this->cell();
+        label celli = p.cell();
 
-        dt *= this->trackToFace(this->position() + dt*U_, td);
+        dt *= p.trackToFace(p.position() + dt*U_, td);
 
         tEnd -= dt;
-        this->stepFraction() = 1.0 - tEnd/deltaT;
+        p.stepFraction() = 1.0 - tEnd/deltaT;
 
         // Update cell based properties
-        updateCellQuantities(td, dt, celli);
+        p.updateCellQuantities(td, dt, celli);
 
         if (td.cloud().coupled())
         {
-            calcCoupled(td, dt, celli);
+            p.calcCoupled(td, dt, celli);
         }
         else
         {
-            calcUncoupled(td, dt);
+            p.calcUncoupled(td, dt, celli);
         }
 
-        if (this->onBoundary() && td.keepParticle)
+        if (p.onBoundary() && td.keepParticle)
         {
-            if (this->face() > -1)
+            if (p.face() > -1)
             {
                 if
                 (
                     isType<processorPolyPatch>
-                        (pbMesh[this->patch(this->face())])
+                        (pbMesh[p.patch(p.face())])
                 )
                 {
                     td.switchProcessor = true;
@@ -254,8 +262,8 @@ bool Foam::KinematicParcel<ParcelType>::move
 }
 
 
-template <class ParcelType>
-template <class TrackData>
+template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 (
     const processorPolyPatch&,
@@ -266,7 +274,7 @@ void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 (
     const processorPolyPatch&,
@@ -275,8 +283,8 @@ void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 {}
 
 
-template <class ParcelType>
-template <class TrackData>
+template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
     const wallPolyPatch& wpp,
@@ -287,7 +295,7 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
     const wallPolyPatch&,
@@ -296,8 +304,8 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
 {}
 
 
-template <class ParcelType>
-template <class TrackData>
+template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitPatch
 (
     const polyPatch&,
@@ -308,7 +316,7 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::hitPatch
 (
     const polyPatch&,
@@ -317,7 +325,7 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 {}
 
 
-template <class ParcelType>
+template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::transformProperties
 (
     const tensor& T
@@ -328,7 +336,7 @@ void Foam::KinematicParcel<ParcelType>::transformProperties
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::transformProperties
 (
     const vector& separation

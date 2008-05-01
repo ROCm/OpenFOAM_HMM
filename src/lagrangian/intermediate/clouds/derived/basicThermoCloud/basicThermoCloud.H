@@ -36,7 +36,7 @@ SourceFiles
 #define basicThermoCloud_H
 
 #include "ThermoCloud.H"
-#include "thermoParcel.H"
+#include "basicThermoParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 
 class basicThermoCloud
 :
-    public ThermoCloud<thermoParcel>
+    public ThermoCloud<basicThermoParcel>
 {
 
     // Private Member Functions
@@ -94,13 +94,13 @@ public:
             //- Move the parcels
             void move
             (
-                ThermoParcel<thermoParcel>::trackData& td
+                ThermoParcel<basicThermoParcel>::trackData& td
             );
 
             //- Inject more parcels
             void inject
             (
-                ThermoParcel<thermoParcel>::trackData& td
+                ThermoParcel<basicThermoParcel>::trackData& td
             );
 
 

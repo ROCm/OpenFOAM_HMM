@@ -24,22 +24,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kinematicParcel.H"
-#include "KinematicCloud.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+#include "basicReactingParcel.H"
+#include "ThermoCloud.H"
+#include "NoHeatTransfer.H"
+#include "RanzMarshall.H"
 
 namespace Foam
 {
-    makeWallInteractionModel(KinematicCloud<kinematicParcel>);
+    makeHeatTransferModel(ThermoCloud<basicReactingParcel>);
 
-    // Add instances of wall interaction model to the table
-    makeWallInteractionModelType(Rebound, KinematicCloud, kinematicParcel);
-    makeWallInteractionModelType
+    // Add instances of heat transfer model to the table
+    makeHeatTransferModelType
     (
-        StandardWallInteraction,
-        KinematicCloud,
-        kinematicParcel
+        NoHeatTransfer,
+        ThermoCloud,
+        basicReactingParcel
+    );
+    makeHeatTransferModelType
+    (
+        RanzMarshall,
+        ThermoCloud,
+        basicReactingParcel
     );
 };
 
