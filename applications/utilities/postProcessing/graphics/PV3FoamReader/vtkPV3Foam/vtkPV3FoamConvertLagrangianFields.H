@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::vtkPV3Foam
+Class
+    vtkPV3Foam
 
 \*---------------------------------------------------------------------------*/
 
@@ -102,7 +102,7 @@ void Foam::vtkPV3Foam::convertLagrangianField
 {
     vtkUnstructuredGrid* lagrangianMesh = vtkUnstructuredGrid::SafeDownCast
     (
-        output->GetDataSet(LAGRANGIAN, 0)
+        GetDataSetFromBlock(output, LAGRANGIAN, 0)
     );
 
     vtkFloatArray *pointTypes = vtkFloatArray::New();
@@ -144,7 +144,7 @@ void Foam::vtkPV3Foam::convertLagrangianField
 {
     vtkUnstructuredGrid* lagrangianMesh = vtkUnstructuredGrid::SafeDownCast
     (
-        output->GetDataSet(LAGRANGIAN, 0)
+        GetDataSetFromBlock(output, LAGRANGIAN, 0)
     );
 
     vtkFloatArray *pointScalars = vtkFloatArray::New();
