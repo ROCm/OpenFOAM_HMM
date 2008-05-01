@@ -141,7 +141,7 @@ inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 {
     Scalar maga = mag(a);
     Scalar magb = mag(b);
-    
+
     if (maga > magb)
     {
         return maga*sqrt(1.0 + sqr(magb/maga));
