@@ -22,45 +22,33 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Useful dimension sets.
-
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+const Foam::dimensionSet Foam::dimless(0, 0, 0, 0, 0, 0, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const Foam::dimensionSet Foam::dimMass(1, 0, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimLength(0, 1, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimTime(0, 0, 1, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimTemperature(0, 0, 0, 1, 0, 0, 0);
+const Foam::dimensionSet Foam::dimMoles(0, 0, 0, 0, 1, 0, 0);
+const Foam::dimensionSet Foam::dimCurrent(0, 0, 0, 0, 0, 1, 0);
+const Foam::dimensionSet Foam::dimLuminousIntensity(0, 0, 0, 0, 0, 0, 1);
 
-const dimensionSet dimless(0, 0, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimArea(0, 2, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimVolume(0, 3, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimVol(0, 3, 0, 0, 0, 0, 0);
 
-const dimensionSet dimMass(1, 0, 0, 0, 0, 0, 0);
-const dimensionSet dimLength(0, 1, 0, 0, 0, 0, 0);
-const dimensionSet dimTime(0, 0, 1, 0, 0, 0, 0);
-const dimensionSet dimTemperature(0, 0, 0, 1, 0, 0, 0);
-const dimensionSet dimMoles(0, 0, 0, 0, 1, 0, 0);
-const dimensionSet dimCurrent(0, 0, 0, 0, 0, 1, 0);
-const dimensionSet dimLuminousIntensity(0, 0, 0, 0, 0, 0, 1);
+const Foam::dimensionSet Foam::dimDensity(1, -3, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimForce(1, 1, -2, 0, 0, 0, 0);
 
-const dimensionSet dimArea(0, 2, 0, 0, 0, 0, 0);
-const dimensionSet dimVolume(0, 3, 0, 0, 0, 0, 0);
-const dimensionSet dimVol(0, 3, 0, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimVelocity(0, 1, -1, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimPressure(1, -1, -2, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimGasConstant(0, 2, -2, -1, 0, 0, 0);
+const Foam::dimensionSet Foam::dimSpecificHeatCapacity(0, 2, -2, -1, 0, 0, 0);
 
-const dimensionSet dimDensity(1, -3, 0, 0, 0, 0, 0);
-const dimensionSet dimForce(1, 1, -2, 0, 0, 0, 0);
-
-const dimensionSet dimVelocity(0, 1, -1, 0, 0, 0, 0);
-const dimensionSet dimPressure(1, -1, -2, 0, 0, 0, 0);
-const dimensionSet dimGasConstant(0, 2, -2, -1, 0, 0, 0);
-const dimensionSet dimSpecificHeatCapacity(0, 2, -2, -1, 0, 0, 0);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
