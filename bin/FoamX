@@ -227,7 +227,7 @@ do
     echo "Using jar $f"
     jars="${jars}:${f}"
 done
-$jdkhome/bin/java \
+java \
     -cp "$jars" \
     -DFoamX.SystemPath=$WM_PROJECT_DIR \
     -DFoamX.SystemConfigPath=$FOAMX_CONFIG \
