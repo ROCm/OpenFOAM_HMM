@@ -1111,6 +1111,7 @@ void Foam::autoHexMeshDriver::smoothDisplacement(motionSmoother& meshMover)
 
     if (debug_)
     {
+        const_cast<Time&>(mesh_.time())++;
         Pout<< "Writing smoothed mesh to time " << mesh_.time().timeName()
             << endl;
         mesh_.write();

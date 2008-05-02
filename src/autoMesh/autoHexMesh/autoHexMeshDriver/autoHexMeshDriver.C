@@ -1116,6 +1116,10 @@ void Foam::autoHexMeshDriver::splitAndMergeBaffles
         keepPoints_[0]
     );
 
+    if (debug_)
+    {
+        const_cast<Time&>(mesh_.time())++;
+    }
 
     // Duplicate points on baffles that are on more than one cell
     // region. This will help snapping pull them to separate surfaces.
