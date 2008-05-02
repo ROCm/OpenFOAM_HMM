@@ -1,5 +1,6 @@
 fvMotionSolvers/fvMotionSolver/fvMotionSolver.C
 fvMotionSolvers/velocity/laplacian/velocityLaplacianFvMotionSolver.C
+fvMotionSolvers/displacement/interpolation/displacementInterpolationFvMotionSolver.C
 fvMotionSolvers/displacement/laplacian/displacementLaplacianFvMotionSolver.C
 fvMotionSolvers/displacement/SBRStress/displacementSBRStressFvMotionSolver.C
 

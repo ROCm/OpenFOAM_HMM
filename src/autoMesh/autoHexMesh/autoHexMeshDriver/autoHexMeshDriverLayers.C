@@ -2882,8 +2882,7 @@ void Foam::autoHexMeshDriver::addLayers
 
         if (debug_)
         {
-            Info<< "*** Writing layer mesh to "
-                << mesh_.time().timeName() << endl;
+            Info<< "Writing layer mesh to " << mesh_.time().timeName() << endl;
             newMesh.write();
             cellSet addedCellSet
             (
