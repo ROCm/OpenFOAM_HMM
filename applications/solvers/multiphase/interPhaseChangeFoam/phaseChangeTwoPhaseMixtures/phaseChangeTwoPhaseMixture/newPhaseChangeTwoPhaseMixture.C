@@ -22,65 +22,59 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Probe locations.
-
 \*---------------------------------------------------------------------------*/
 
-#include "argList.H"
-#include "IOprobes.H"
-
-using namespace Foam;
+#include "phaseChangeTwoPhaseMixture.H"
+#include "twoPhaseMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
-int main(int argc, char *argv[])
+Foam::autoPtr<Foam::phaseChangeTwoPhaseMixture>
+Foam::phaseChangeTwoPhaseMixture::New
+(
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    const word& alpha1Name
+)
 {
-
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    IOprobes sniff(mesh, "probesDict", true);
-
-    for (label i=startTime; i<endTime; i++)
-    {
-        runTime.setTime(Times[i], i);
-        Info<< "Time = " << runTime.timeName() << endl;
-
-        // Handle geometry/topology changes
-        polyMesh::readUpdateState state = mesh.readUpdate();
-
-        if
+    IOdictionary transportPropertiesDict
+    (
+        IOobject
         (
-            state == polyMesh::POINTS_MOVED
-         || state == polyMesh::TOPO_CHANGE
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
         )
-        {
-            sniff.read();
-        }
+    );
 
-        sniff.write();
+    word phaseChangeTwoPhaseMixtureTypeName
+    (
+        transportPropertiesDict.lookup("phaseChangeTwoPhaseMixture")
+    );
 
-        Info<< endl;
+    Info<< "Selecting phaseChange model "
+        << phaseChangeTwoPhaseMixtureTypeName << endl;
+
+    componentsConstructorTable::iterator cstrIter =
+        componentsConstructorTablePtr_
+            ->find(phaseChangeTwoPhaseMixtureTypeName);
+
+    if (cstrIter == componentsConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "phaseChangeTwoPhaseMixture::New"
+        )   << "Unknown phaseChangeTwoPhaseMixture type "
+            << phaseChangeTwoPhaseMixtureTypeName << endl << endl
+            << "Valid  phaseChangeTwoPhaseMixtures are : " << endl
+            << componentsConstructorTablePtr_->toc()
+            << exit(FatalError);
     }
 
-
-    Info<< "End\n" << endl;
-
-    return 0;
+    return autoPtr<phaseChangeTwoPhaseMixture>(cstrIter()(U, phi, alpha1Name));
 }
 
 
