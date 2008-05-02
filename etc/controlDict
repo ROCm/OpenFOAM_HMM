@@ -75,781 +75,778 @@ Documentation
 
 DebugSwitches
 {
-    APIdiffCoefFunc
-    Ar
-    BICCG
-    BirdCarreau
-    C10H22
-    C12H26
-    C13H28
-    C14H30
-    C16H34
-    C2H5OH
-    C2H6
-    C2H6O
-    C3H6O
-    C3H8
-    C4H10O
-    C6H14
-    C6H6
-    C7H16
-    C7H8
-    C8H10
-    C8H18
-    C9H20
-    CH3OH
-    CallbackRegistry
-    CarnahanStarling
-    ChomiakInjector
-    Cloud<indexedParticle>
-    Cloud<kinematicParcel>
-    Cloud<parcel>
-    Cloud<passiveParticle>
-    Cloud<reactingParcel>
-    Cloud<thermoParcel>
-    Cloud<trackedParticle>
-    CoEuler
-    CompositionModel
-    ConstantRateDevolatilisation
-    CrankNicholson
-    CrossPowerLaw
-    Cs
-    DIC
-    DICGaussSeidel
-    DILU
-    DILUGaussSeidel
-    DeardorffDiffStress
-    DispersionModel
-    DispersionRASModel
-    DragModel
-    ETAB
-    Ergun
-    Euler
-    EulerImplicit
-    EulerRotation
-    FDIC
-    FaceCellWave
-    GAMG
-    GAMGAgglomeration
-    GAMGInterface
-    GAMGInterfaceField
-    Gamma
-    Gamma01
-    GammaV
-    Gauss
-    GaussSeidel
-    Gibilaro
-    Gidaspow
-    GidaspowErgunWenYu
-    GidaspowSchillerNaumann
-    GradientDispersionRAS
-    Gulders
-    GuldersEGR
-    H2O
-    HashTable
-    HeatTransferModel
-    HrenyaSinclair
-    IC8H18
-    ICCG
-    IDEA
-    IFstream
-    IOPtrList<MRFZone>
-    IOPtrList<coordinateSystem>
-    IOPtrList<injector>
-    IOPtrList<porousZone>
-    IOobject
-    InjectionModel
-    JohnsonJackson
-    KRR4
-    KinematicCloud<kinematicParcel>
-    KinematicCloud<reactingParcel>
-    KinematicCloud<thermoParcel>
-    KinematicParcel<reactingParcel>
-    KinematicParcel<thermoParcel>
-    LESdelta
-    LESfilter
-    LESmodel
-    LISA
-    LRR
-    LRRDiffStress
-    LamBremhorstKE
-    LaunderGibsonRSTM
-    LaunderSharmaKE
-    LduMatrix
-    LienCubicKE
-    LienCubicKELowRe
-    LienLeschzinerLowRe
-    List<bool>
-    List<complex>
-    List<complexVector>
-    List<edge>
-    List<label>
-    List<scalar>
-    List<sphericalTensor>
-    List<symmTensor>
-    List<tensor>
-    List<vector>
-    Lun
-    LunSavage
-    MB
-    MC
-    MCV
-    MUSCL
-    MUSCL01
-    MUSCLV
-    ManualInjection
-    MarshakRadiation
-    MarshakRadiationFixedT
-    MassTransferModel
-    MeshWave
-    Minmod
-    MinmodV
-    N2
-    NSRDSfunc0
-    NSRDSfunc1
-    NSRDSfunc14
-    NSRDSfunc2
-    NSRDSfunc3
-    NSRDSfunc4
-    NSRDSfunc5
-    NSRDSfunc6
-    NSRDSfunc7
-    Newtonian
-    NoDispersion
-    NoDrag
-    NoHeatTransfer
-    NoInjection
-    NoMassTransfer
-    NoSurfaceReaction
-    NonlinearKEShih
-    ODE
-    ODESolver
-    OFstream
-    ORourke
-    OSPRE
-    OSPREV
-    P1
-    PBiCG
-    PCG
-    PackedList
-    ParSortableList
-    PatchToPatchInterpolation
-    Phi
-    PointEdgeWave
-    Prandtl
-    PrimitivePatch
-    Pstream
-    QUICK
-    QUICKV
-    QZeta
-    RK
-    RNGkEpsilon
-    RanzMarshall
-    ReactingCloud<reactingParcel>
-    ReactingParcel<reactingParcel>
-    Rebound
-    ReitzDiwakar
-    ReitzKHRT
-    RosinRammler
-    RutlandFlashBoil
-    SDA
-    SFCD
-    SFCDV
-    SHF
-    SIBS
-    SKA
-    SLTS
-    STARCDRotation
-    Schaeffer
-    SchillerNaumann
-    SinclairJackson
-    SingleKineticRateDevolatilisation
-    SingleMixtureFraction
-    Smagorinsky
-    SmoothSolver
-    SpalartAllmaras
-    SphereDrag
-    StandardWallInteraction
-    StaticHashTable
-    StochasticDispersionRAS
-    SuperBee
-    SuperBeeV
-    SurfaceReactionModel
-    Syamlal
-    SyamlalOBrien
-    SyamlalRogersOBrien
-    TAB
-    ThermoCloud<reactingParcel>
-    ThermoCloud<thermoParcel>
-    ThermoParcel<reactingParcel>
-    ThermoParcel<thermoParcel>
-    UMIST
-    UMISTV
-    Unix
-    WallInteractionModel
-    WenYu
-    aC11H10
-    absorptionEmissionModel
-    addCell
-    addFace
-    addPatchCellLayer
-    addPoint
-    advective
-    algebraicPair
-    angularOscillatingDisplacement
-    angularOscillatingVelocity
-    anisotropic
-    ash
-    atomizationModel
-    attachDetach
-    autoHexMeshDriver
-    bC11H10
-    backward
-    basePatch
-    basicKinematicCloud
-    basicMixture
-    basicReactingCloud
-    basicThermo
-    basicThermoCloud
-    binaryAbsorptionEmission
-    blended
-    blobsSheetAtomization
-    blobsSwirlInjector
-    booleanSurface
-    boundaryCutter
-    boundaryMesh
-    boundaryToFace
-    boundedBackward
-    boxToCell
-    boxToFace
-    boxToPoint
-    breakupModel
-    calculated
-    cartesian
-    cell
-    cellClassification
-    cellCuts
-    cellDistFuncs
-    cellLimited
-    cellList
-    cellLooper
-    cellMDLimited
-    cellMotion
-    cellPoint
-    cellPointFace
-    cellPointWeight
-    cellSet
-    cellToCell
-    cellToFace
-    cellToPoint
-    cellZone
-    chemistryReader
-    chemistrySolver
-    chemkinReader
-    clippedLinear
-    cloud
-    cloudAbsorptionEmission
-    cloudScatter
-    collisionModel
-    combineFaces
-    commSchedule
-    commonRailInjector
-    compound
-    conductivityModel
-    constInjector
-    constant
-    constantAbsorptionEmission
-    constantGammaContactAngle
-    constantScatter
-    coordinateRotation
-    coordinateSystem
-    corrected
-    coupled
-    cubeRootVol
-    cubic
-    curve
-    cyclic
-    cyclicLduInterface
-    cyclicLduInterfaceField
-    cylindrical
-    dataSchedule
-    decompositionMethod
-    definedHollowConeInjector
-    definedInjector
-    definedPressureSwirlInjector
-    diagTensorField
-    diagonal
-    dictionary
-    dimensionSet
-    directMapped
-    directMappedPatch
-    directionMixed
-    directional
-    disallowDefaultFvsPatchField
-    disallowGenericFvPatchField
-    disallowGenericPointPatchField
-    disallowGenericPolyPatch
-    dispersionLESModel
-    dispersionModel
-    dispersionRASModel
-    displacementComponentLaplacian
-    displacementInterpolation
-    displacementLaplacian
-    displacementSBRStress
-    downwind
-    dragModel
-    duplicatePoints
-    dx
-    dynMixedSmagorinsky
-    dynOneEqEddy
-    dynSmagorinsky
-    dynamicFvMesh
-    dynamicGammaContactAngle
-    dynamicInkJetFvMesh
-    dynamicMotionSolverFvMesh
-    dynamicRefineFvMesh
-    edgeIntersections
-    edgeList
-    edgeSurface
-    empty
-    engineMesh
-    enrichedPatch
-    errorDrivenRefinement
-    evaporationModel
-    exponential
-    extendedLeastSquares
-    extendedLeastSquaresVectors
-    face
-    faceAreaPair
-    faceCoupleInfo
-    faceLimited
-    faceList
-    faceMDLimited
-    faceSet
-    faceToCell
-    faceToFace
-    faceToPoint
-    faceZone
-    fan
-    featureEdgeMesh
-    fieldToCell
-    file
-    fileName
-    filteredLinear
-    filteredLinear2
-    filteredLinear2V
-    fixedEnthalpy
-    fixedFluxBuoyantPressure
-    fixedFluxPressure
-    fixedGradient
-    fixedNormalSlip
-    fixedUnburntEnthalpy
-    fixedValue
-    fluxCorrectedVelocity
-    foamChemistryReader
-    foamFile
-    forceCoeffs
-    forces
-    fourth
-    freestream
-    freestreamPressure
-    frictionalStressModel
-    functionObject
-    fv
-    fvMesh
-    fvMeshDistribute
-    fvMotionSolver
-    fvPatchField
-    fvScalarMatrix
-    fvSchemes
-    fvSphericalTensorMatrix
-    fvSymmTensorMatrix
-    fvTensorMatrix
-    fvVectorMatrix
-    fvsPatchField
-    gammaContactAngle
-    gammaFixedPressure
-    general
-    generic
-    genericPatch
-    geomCellLooper
-    geometricSurfacePatch
-    global
-    globalMeshData
-    globalPoints
-    gnuplot
-    gradientDispersionRAS
-    gradientEnthalpy
-    gradientUnburntEnthalpy
-    granularPressureModel
-    hCombustionThermo
-    hMixtureThermo<dieselMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hMixtureThermo<multiComponentMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hMixtureThermo<reactingMixture>
-    hMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hThermo<pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    harmonic
-    heatTransferModel
-    hexCellLooper
-    hexRef8
-    hhuCombustionThermo
-    hhuMixtureThermo<egrMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hhuMixtureThermo<egrMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hhuMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hhuMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hhuMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hhuMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>
-    hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>
-    hierarchical
-    hollowConeInjector
-    include
-    indexedOctree
-    indexedParticle
-    injectorModel
-    injectorType
-    inletOutlet
-    inletOutletTotalTemperature
-    inputMode
-    interfaceCompression
-    intersectedSurface
-    inverseDistance
-    inverseFaceDistance
-    inversePointDistance
-    inverseVolume
-    jplot
-    jumpCyclic
-    kEpsilon
-    kOmegaSST
-    kinematicCloud
-    kinematicParcel
-    labelField
-    labelList
-    labelListList
-    labelToCell
-    labelToFace
-    labelToPoint
-    laminar
-    laminarFlameSpeed
-    laplace
-    layerAdditionRemoval
-    layered
-    lduInterface
-    lduInterfaceField
-    lduMatrix
-    lduMesh
-    leastSquares
-    leastSquaresVectors
-    level
-    limited
-    limitedCubic
-    limitedCubic01
-    limitedCubicV
-    limitedGamma
-    limitedLimitedCubic
-    limitedLimitedLinear
-    limitedLinear
-    limitedLinear01
-    limitedLinearV
-    limitedMUSCL
-    limitedSurfaceInterpolationScheme
-    limitedVanLeer
-    linear
-    linearUpwind
-    linearUpwindV
-    liquid
-    locDynOneEqEddy
-    localBlended
-    localMax
-    localMin
-    localPointRegion
-    lowReOneEqEddy
-    manual
-    massFlowRateInletVelocity
-    meshCutAndRemove
-    meshCutter
-    meshModifier
-    meshRefinement
-    meshSearch
-    meshToMesh
-    metis
-    midPoint
-    midPointAndFace
-    mixed
-    mixedEnthalpy
-    mixedSmagorinsky
-    mixedUnburntEnthalpy
-    mixerFvMesh
-    modifyCell
-    modifyFace
-    modifyPoint
-    motionDiffusivity
-    motionDirectional
-    motionSmoother
-    motionSolver
-    movingConeTopoFvMesh
-    movingWallVelocity
-    muSgsWallFunction
-    multiDirRefinement
-    multivariateSelection
-    mutStandardRoughWallFunction
-    nbrToCell
-    nearestToCell
-    noAbsorptionEmission
-    noDragModel
-    noRadiation
-    none
-    normal
-    normalToFace
-    nuSgsWallFunction
-    null
-    nutStandardRoughWallFunction
-    nutStandardWallFunction
-    nutWallFunction
-    objectRegistry
-    octree
-    octreeDataEdges
-    octreeDataFace
-    octreeDataFaceList
-    octreeDataTriSurface
-    off
-    offsetTriSurfaceMesh
-    oneEqEddy
-    orientedSurface
-    oscillatingDisplacement
-    oscillatingFixedValue
-    oscillatingVelocity
-    outletInlet
-    outletStabilised
-    pair
-    parabolicCylindrical
-    parcel
-    partialSlip
-    passiveParticle
-    patch
-    patchToFace
-    patchZones
-    pdf
-    perfectInterface
-    pointIndexHitList
-    pointPatchField
-    pointPatchInterpolation
-    pointScalarField
-    pointScalarField::DimensionedInternalField
-    pointSet
-    pointSphericalTensorField
-    pointSphericalTensorField::DimensionedInternalField
-    pointSymmTensorField
-    pointSymmTensorField::DimensionedInternalField
-    pointTensorField
-    pointTensorField::DimensionedInternalField
-    pointToCell
-    pointToFace
-    pointToPoint
-    pointVectorField
-    pointVectorField::DimensionedInternalField
-    pointZone
-    polyBoundaryMesh
-    polyMesh
-    polyMeshGeometry
-    polyMeshInfo
-    polyTopoChange
-    polyTopoChanger
-    pressureDirectedInletOutletVelocity
-    pressureDirectedInletVelocity
-    pressureInletOutletVelocity
-    pressureInletUniformVelocity
-    pressureInletVelocity
-    pressureSwirlInjector
-    primitiveMesh
-    primitiveMeshGeometry
-    probes
-    processor
-    processorLduInterface
-    processorLduInterfaceField
-    pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>
-    pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>
-    pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>
-    quadratic
-    radialModel
-    radiationModel
-    raw
-    reactingCloud
-    reactingParcel
-    reaction
-    realizableKE
-    refinementHistory
-    refinementIterator
-    reflect
-    regIOobject
-    regionSplit
-    remove
-    removeCell
-    removeCells
-    removeFace
-    removeFaces
-    removePoint
-    removePoints
-    reverseLinear
-    rotatedBoxToCell
-    rotatingPressureInletOutletVelocity
-    rotatingTotalPressure
-    sampledPatch
-    sampledPlane
-    sampledSet
-    sampledSurface
-    saturateEvaporationModel
-    scalarAverageField
-    scalarField
-    scalarRange
-    scaleSimilarity
-    scatterModel
-    searchableBox
-    searchableSurface
-    sequential
-    setUpdater
-    sets
-    shapeList
-    shapeToCell
-    simple
-    skewCorrected
-    skewCorrectionVectors
-    sliced
-    slidingInterface
-    slip
-    smooth
-    smoothSolver
-    solid
-    solidBodyMotionFunction
-    solidBodyMotionFvMesh
-    solution
-    spectEddyVisc
-    sphereToCell
-    spherical
-    sphericalTensorAverageField
-    sphericalTensorField
-    standardDragModel
-    standardEvaporationModel
-    static
-    staticFvMesh
-    steadyState
-    stl
-    stochasticDispersionRAS
-    string
-    supersonicFreestream
-    surfaceFeatures
-    surfaceInterpolation
-    surfaceInterpolationScheme
-    surfaceIntersection
-    surfaceNormalFixedValue
-    surfacePatch
-    surfacePatchIOList
-    surfaceScalarField
-    surfaceScalarField::DimensionedInternalField
-    surfaceSlipDisplacement
-    surfaceSphericalTensorField
-    surfaceSphericalTensorField::DimensionedInternalField
-    surfaceSymmTensorField
-    surfaceSymmTensorField::DimensionedInternalField
-    surfaceTensorField
-    surfaceTensorField::DimensionedInternalField
-    surfaceToCell
-    surfaceToPoint
-    surfaceVectorField
-    surfaceVectorField::DimensionedInternalField
-    surfaceWriter
-    surfaces
-    swirlInjector
-    symmTensorAverageField
-    symmTensorField
-    symmetryPlane
-    syringePressure
-    tensorAverageField
-    tensorField
-    thermoCloud
-    thermoParcel
-    thermophysicalFunction
-    time
-    timeVaryingGammaContactAngle
-    timeVaryingMappedFixedValue
-    timeVaryingUniformFixedValue
-    timer
-    topoAction
-    topoCellLooper
-    topoChangerFvMesh
-    topoSet
-    topoSetSource
-    toroidal
-    totalPressure
-    totalTemperature
-    trackedParticle
-    trajectory
-    transform
-    treeDataCell
-    treeDataFace
-    treeDataTriSurface
-    treeLeaf
-    treeNode
-    triSurface
-    triSurfaceMesh
-    triSurfaceMeshes
-    turbulenceModel
-    turbulentInlet
-    turbulentIntensityKineticEnergyInlet
-    turbulentMixingLengthDissipationRateInlet
-    uncorrected
-    undoableMeshCutter
-    uniform
-    uniformFixedValue
-    unitInjector
-    upwind
-    value
-    vanAlbada
-    vanAlbadaV
-    vanDriest
-    vanLeer
-    vanLeer01
-    vanLeerV
-    vector2DField
-    vectorAverageField
-    vectorField
-    velocityComponentLaplacian
-    velocityLaplacian
-    viscosityModel
-    volPointInterpolation
-    volScalarField
-    volScalarField::DimensionedInternalField
-    volSphericalTensorField
-    volSphericalTensorField::DimensionedInternalField
-    volSymmTensorField
-    volSymmTensorField::DimensionedInternalField
-    volTensorField
-    volTensorField::DimensionedInternalField
-    volVectorField
-    volVectorField::DimensionedInternalField
-    vtk
-    walkPatch
-    wall
-    wallHeatTransfer
-    wallLayerCells
-    wallModel
-    waveTransmissive
-    wedge
-    weighted
-    word
-    writer
-    xmgr
-    zeroGradient
-    zoneToCell
-    zoneToFace
-    zoneToPoint
+    APIdiffCoefFunc     0;
+    Ar                  0;
+    BICCG               0;
+    BirdCarreau         0;
+    C10H22              0;
+    C12H26              0;
+    C13H28              0;
+    C14H30              0;
+    C16H34              0;
+    C2H5OH              0;
+    C2H6                0;
+    C2H6O               0;
+    C3H6O               0;
+    C3H8                0;
+    C4H10O              0;
+    C6H14               0;
+    C6H6                0;
+    C7H16               0;
+    C7H8                0;
+    C8H10               0;
+    C8H18               0;
+    C9H20               0;
+    CH3OH               0;
+    CallbackRegistry    0;
+    CarnahanStarling    0;
+    ChomiakInjector     0;
+    Cloud<indexedParticle>  0;
+    Cloud<kinematicParcel>  0;
+    Cloud<parcel>           0;
+    Cloud<passiveParticle>  0;
+    Cloud<reactingParcel>   0;
+    Cloud<thermoParcel>     0;
+    Cloud<trackedParticle>  0;
+    CoEuler             0;
+    CompositionModel    0;
+    ConstantRateDevolatilisation    0;
+    CrankNicholson      0;
+    CrossPowerLaw       0;
+    Cs                  0;
+    DIC                 0;
+    DICGaussSeidel      0;
+    DILU                0;
+    DILUGaussSeidel     0;
+    DeardorffDiffStress 0;
+    DispersionModel     0;
+    DispersionRASModel  0;
+    DragModel           0;
+    ETAB                0;
+    Ergun               0;
+    Euler               0;
+    EulerImplicit       0;
+    EulerRotation       0;
+    FDIC                0;
+    FaceCellWave        0;
+    GAMG                0;
+    GAMGAgglomeration   0;
+    GAMGInterface       0;
+    GAMGInterfaceField  0;
+    Gamma               0;
+    Gamma01             0;
+    GammaV              0;
+    Gauss               0;
+    GaussSeidel         0;
+    Gibilaro            0;
+    Gidaspow            0;
+    GidaspowErgunWenYu  0;
+    GidaspowSchillerNaumann 0;
+    GradientDispersionRAS   0;
+    Gulders             0;
+    GuldersEGR          0;
+    H2O                 0;
+    HashTable           0;
+    HeatTransferModel   0;
+    HrenyaSinclair      0;
+    IC8H18              0;
+    ICCG                0;
+    IDEA                0;
+    IFstream            0;
+    IOPtrList<MRFZone>  0;
+    IOPtrList<coordinateSystem> 0;
+    IOPtrList<injector> 0;
+    IOPtrList<porousZone>   0;
+    IOobject            0;
+    InjectionModel      0;
+    JohnsonJackson      0;
+    KRR4                0;
+    KinematicCloud<kinematicParcel> 0;
+    KinematicCloud<reactingParcel>  0;
+    KinematicCloud<thermoParcel>    0;
+    KinematicParcel<reactingParcel> 0;
+    KinematicParcel<thermoParcel>   0;
+    LESdelta            0;
+    LESfilter           0;
+    LESmodel            0;
+    LISA                0;
+    LRR                 0;
+    LRRDiffStress       0;
+    LamBremhorstKE      0;
+    LaunderGibsonRSTM   0;
+    LaunderSharmaKE     0;
+    LduMatrix           1;
+    LienCubicKE         0;
+    LienCubicKELowRe    0;
+    LienLeschzinerLowRe 0;
+    List<bool>          0;
+    List<complex>       0;
+    List<complexVector> 0;
+    List<edge>          0;
+    List<label>         0;
+    List<scalar>        0;
+    List<sphericalTensor>   0;
+    List<symmTensor>    0;
+    List<tensor>        0;
+    List<vector>        0;
+    Lun                 0;
+    LunSavage           0;
+    MB                  0;
+    MC                  0;
+    MCV                 0;
+    MUSCL               0;
+    MUSCL01             0;
+    MUSCLV              0;
+    ManualInjection     0;
+    MarshakRadiation    0;
+    MarshakRadiationFixedT  0;
+    MassTransferModel   0;
+    MeshWave            0;
+    Minmod              0;
+    MinmodV             0;
+    N2                  0;
+    NSRDSfunc0          0;
+    NSRDSfunc1          0;
+    NSRDSfunc14         0;
+    NSRDSfunc2          0;
+    NSRDSfunc3          0;
+    NSRDSfunc4          0;
+    NSRDSfunc5          0;
+    NSRDSfunc6          0;
+    NSRDSfunc7          0;
+    Newtonian           0;
+    NoDispersion        0;
+    NoDrag              0;
+    NoHeatTransfer      0;
+    NoInjection         0;
+    NoMassTransfer      0;
+    NoSurfaceReaction   0;
+    NonlinearKEShih     0;
+    ODE                 0;
+    ODESolver           0;
+    OFstream            0;
+    ORourke             0;
+    OSPRE               0;
+    OSPREV              0;
+    P1                  0;
+    PBiCG               0;
+    PCG                 0;
+    PackedList          0;
+    ParSortableList     0;
+    PatchToPatchInterpolation 0;
+    Phi                 0;
+    PointEdgeWave       0;
+    Prandtl             0;
+    PrimitivePatch      0;
+    Pstream             0;
+    QUICK               0;
+    QUICKV              0;
+    QZeta               0;
+    RK                  0;
+    RNGkEpsilon         0;
+    RanzMarshall        0;
+    ReactingCloud<reactingParcel> 0;
+    ReactingParcel<reactingParcel> 0;
+    Rebound             0;
+    ReitzDiwakar        0;
+    ReitzKHRT           0;
+    RosinRammler        0;
+    RutlandFlashBoil    0;
+    SDA                 0;
+    SFCD                0;
+    SFCDV               0;
+    SHF                 0;
+    SIBS                0;
+    SKA                 0;
+    SLTS                0;
+    STARCDRotation      0;
+    Schaeffer           0;
+    SchillerNaumann     0;
+    SinclairJackson     0;
+    SingleKineticRateDevolatilisation 0;
+    SingleMixtureFraction   0;
+    Smagorinsky         0;
+    SmoothSolver        0;
+    SpalartAllmaras     0;
+    SphereDrag          0;
+    StandardWallInteraction 0;
+    StaticHashTable     0;
+    StochasticDispersionRAS 0;
+    SuperBee            0;
+    SuperBeeV           0;
+    SurfaceReactionModel 0;
+    Syamlal             0;
+    SyamlalOBrien       0;
+    SyamlalRogersOBrien 0;
+    TAB                 0;
+    ThermoCloud<reactingParcel> 0;
+    ThermoCloud<thermoParcel> 0;
+    ThermoParcel<reactingParcel> 0;
+    ThermoParcel<thermoParcel> 0;
+    UMIST               0;
+    UMISTV              0;
+    Unix                0;
+    WallInteractionModel 0;
+    WenYu               0;
+    aC11H10             0;
+    absorptionEmissionModel 0;
+    addCell             0;
+    addFace             0;
+    addPatchCellLayer   0;
+    addPoint            0;
+    advective           0;
+    algebraicPair       0;
+    angularOscillatingDisplacement 0;
+    angularOscillatingVelocity 0;
+    anisotropic         0;
+    ash                 0;
+    atomizationModel    0;
+    attachDetach        0;
+    autoHexMeshDriver   0;
+    bC11H10             0;
+    backward            0;
+    basePatch           0;
+    basicKinematicCloud 0;
+    basicMixture        0;
+    basicReactingCloud  0;
+    basicThermo         0;
+    basicThermoCloud    0;
+    binaryAbsorptionEmission 0;
+    blended             0;
+    blobsSheetAtomization 0;
+    blobsSwirlInjector  0;
+    booleanSurface      0;
+    boundaryCutter      0;
+    boundaryMesh        0;
+    boundaryToFace      0;
+    boundedBackward     0;
+    boxToCell           0;
+    boxToFace           0;
+    boxToPoint          0;
+    breakupModel        0;
+    calculated          0;
+    cartesian           0;
+    cell                0;
+    cellClassification  0;
+    cellCuts            0;
+    cellDistFuncs       0;
+    cellLimited         0;
+    cellList            0;
+    cellLooper          0;
+    cellMDLimited       0;
+    cellMotion          0;
+    cellPoint           0;
+    cellPointFace       0;
+    cellPointWeight     0;
+    cellSet             0;
+    cellToCell          0;
+    cellToFace          0;
+    cellToPoint         0;
+    cellZone            0;
+    chemistryReader     0;
+    chemistrySolver     0;
+    chemkinReader       0;
+    clippedLinear       0;
+    cloud               0;
+    cloudAbsorptionEmission 0;
+    cloudScatter        0;
+    collisionModel      0;
+    combineFaces        0;
+    commSchedule        0;
+    commonRailInjector  0;
+    compound            0;
+    conductivityModel   0;
+    constInjector       0;
+    constant            0;
+    constantAbsorptionEmission 0;
+    constantGammaContactAngle 0;
+    constantScatter     0;
+    coordinateRotation  0;
+    coordinateSystem    0;
+    corrected           0;
+    coupled             0;
+    cubeRootVol         0;
+    cubic               0;
+    curve               0;
+    cyclic              0;
+    cyclicLduInterface  0;
+    cyclicLduInterfaceField 0;
+    cylindrical         0;
+    dataSchedule        0;
+    decompositionMethod 0;
+    definedHollowConeInjector 0;
+    definedInjector     0;
+    definedPressureSwirlInjector 0;
+    diagTensorField     0;
+    diagonal            0;
+    dictionary          0;
+    dimensionSet        1;
+    directMapped        0;
+    directMappedPatch   0;
+    directionMixed      0;
+    directional         0;
+    disallowDefaultFvsPatchField 0;
+    disallowGenericFvPatchField 0;
+    disallowGenericPointPatchField 0;
+    disallowGenericPolyPatch 0;
+    dispersionLESModel  0;
+    dispersionModel     0;
+    dispersionRASModel  0;
+    displacementComponentLaplacian 0;
+    displacementInterpolation 0;
+    displacementLaplacian 0;
+    displacementSBRStress 0;
+    downwind            0;
+    dragModel           0;
+    duplicatePoints     0;
+    dx                  0;
+    dynMixedSmagorinsky 0;
+    dynOneEqEddy        0;
+    dynSmagorinsky      0;
+    dynamicFvMesh       0;
+    dynamicGammaContactAngle 0;
+    dynamicInkJetFvMesh 0;
+    dynamicMotionSolverFvMesh 0;
+    dynamicRefineFvMesh 0;
+    edgeIntersections   0;
+    edgeList            0;
+    edgeSurface         0;
+    empty               0;
+    engineMesh          0;
+    enrichedPatch       0;
+    errorDrivenRefinement   0;
+    evaporationModel    0;
+    exponential         0;
+    extendedLeastSquares    0;
+    extendedLeastSquaresVectors 0;
+    face                0;
+    faceAreaPair        0;
+    faceCoupleInfo      0;
+    faceLimited         0;
+    faceList            0;
+    faceMDLimited       0;
+    faceSet             0;
+    faceToCell          0;
+    faceToFace          0;
+    faceToPoint         0;
+    faceZone            0;
+    fan                 0;
+    featureEdgeMesh     0;
+    fieldToCell         0;
+    file                0;
+    fileName            0;
+    filteredLinear      0;
+    filteredLinear2     0;
+    filteredLinear2V    0;
+    fixedEnthalpy       0;
+    fixedFluxBuoyantPressure 0;
+    fixedFluxPressure   0;
+    fixedGradient       0;
+    fixedNormalSlip     0;
+    fixedUnburntEnthalpy 0;
+    fixedValue          0;
+    fluxCorrectedVelocity   0;
+    foamChemistryReader 0;
+    foamFile            0;
+    forceCoeffs         0;
+    forces              0;
+    fourth              0;
+    freestream          0;
+    freestreamPressure  0;
+    frictionalStressModel   0;
+    functionObject      0;
+    fv                  0;
+    fvMesh              0;
+    fvMeshDistribute    0;
+    fvMotionSolver      0;
+    fvPatchField        0;
+    fvScalarMatrix      0;
+    fvSchemes           0;
+    fvSphericalTensorMatrix 0;
+    fvSymmTensorMatrix  0;
+    fvTensorMatrix      0;
+    fvVectorMatrix      0;
+    fvsPatchField       0;
+    gammaContactAngle   0;
+    gammaFixedPressure  0;
+    general             0;
+    generic             0;
+    genericPatch        0;
+    geomCellLooper      0;
+    geometricSurfacePatch   0;
+    global              0;
+    globalMeshData      0;
+    globalPoints        0;
+    gnuplot             0;
+    gradientDispersionRAS   0;
+    gradientEnthalpy        0;
+    gradientUnburntEnthalpy 0;
+    granularPressureModel   0;
+    hCombustionThermo   0;
+    hMixtureThermo<dieselMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<multiComponentMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<reactingMixture> 0;
+    hMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    harmonic            0;
+    heatTransferModel   0;
+    hexCellLooper       0;
+    hexRef8             0;
+    hhuCombustionThermo 0;
+    hhuMixtureThermo<egrMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<egrMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hierarchical        0;
+    hollowConeInjector  0;
+    indexedOctree       0;
+    indexedParticle     0;
+    injectorModel       0;
+    injectorType        0;
+    inletOutlet         0;
+    inletOutletTotalTemperature 0;
+    inputMode           0;
+    interfaceCompression 0;
+    intersectedSurface  0;
+    inverseDistance     0;
+    inverseFaceDistance 0;
+    inversePointDistance 0;
+    inverseVolume       0;
+    jplot               0;
+    jumpCyclic          0;
+    kEpsilon            0;
+    kOmegaSST           0;
+    kinematicCloud      0;
+    kinematicParcel     0;
+    labelField          0;
+    labelList           0;
+    labelListList       0;
+    labelToCell         0;
+    labelToFace         0;
+    labelToPoint        0;
+    laminar             0;
+    laminarFlameSpeed   0;
+    laplace             0;
+    layerAdditionRemoval 0;
+    layered             0;
+    lduInterface        0;
+    lduInterfaceField   0;
+    lduMatrix           0;
+    lduMesh             0;
+    leastSquares        0;
+    leastSquaresVectors 0;
+    level               2;
+    limited             0;
+    limitedCubic        0;
+    limitedCubic01      0;
+    limitedCubicV       0;
+    limitedGamma        0;
+    limitedLimitedCubic 0;
+    limitedLimitedLinear 0;
+    limitedLinear       0;
+    limitedLinear01     0;
+    limitedLinearV      0;
+    limitedMUSCL        0;
+    limitedSurfaceInterpolationScheme 0;
+    limitedVanLeer      0;
+    linear              0;
+    linearUpwind        0;
+    linearUpwindV       0;
+    liquid              0;
+    locDynOneEqEddy     0;
+    localBlended        0;
+    localMax            0;
+    localMin            0;
+    localPointRegion    0;
+    lowReOneEqEddy      0;
+    manual              0;
+    massFlowRateInletVelocity 0;
+    meshCutAndRemove    0;
+    meshCutter          0;
+    meshModifier        0;
+    meshRefinement      0;
+    meshSearch          0;
+    meshToMesh          0;
+    metis               0;
+    midPoint            0;
+    midPointAndFace     0;
+    mixed               0;
+    mixedEnthalpy       0;
+    mixedSmagorinsky    0;
+    mixedUnburntEnthalpy 0;
+    mixerFvMesh         0;
+    modifyCell          0;
+    modifyFace          0;
+    modifyPoint         0;
+    motionDiffusivity   0;
+    motionDirectional   0;
+    motionSmoother      0;
+    motionSolver        0;
+    movingConeTopoFvMesh 0;
+    movingWallVelocity  0;
+    muSgsWallFunction   0;
+    multiDirRefinement  0;
+    multivariateSelection 0;
+    mutStandardRoughWallFunction 0;
+    nbrToCell           0;
+    nearestToCell       0;
+    noAbsorptionEmission 0;
+    noDragModel         0;
+    noRadiation         0;
+    none                0;
+    normal              0;
+    normalToFace        0;
+    nuSgsWallFunction   0;
+    nutStandardRoughWallFunction 0;
+    nutStandardWallFunction 0;
+    nutWallFunction     0;
+    objectRegistry      0;
+    octree              0;
+    octreeDataEdges     0;
+    octreeDataFace      0;
+    octreeDataFaceList  0;
+    octreeDataTriSurface 0;
+    off                 0;
+    offsetTriSurfaceMesh 0;
+    oneEqEddy           0;
+    orientedSurface     0;
+    oscillatingDisplacement 0;
+    oscillatingFixedValue 0;
+    oscillatingVelocity 0;
+    outletInlet         0;
+    outletStabilised    0;
+    pair                0;
+    parabolicCylindrical 0;
+    parcel              0;
+    partialSlip         0;
+    passiveParticle     0;
+    patch               0;
+    patchToFace         0;
+    patchZones          0;
+    pdf                 0;
+    perfectInterface    0;
+    pointIndexHitList   0;
+    pointPatchField     0;
+    pointPatchInterpolation 0;
+    pointScalarField    0;
+    pointScalarField::DimensionedInternalField 0;
+    pointSet            0;
+    pointSphericalTensorField 0;
+    pointSphericalTensorField::DimensionedInternalField 0;
+    pointSymmTensorField 0;
+    pointSymmTensorField::DimensionedInternalField 0;
+    pointTensorField    0;
+    pointTensorField::DimensionedInternalField 0;
+    pointToCell         0;
+    pointToFace         0;
+    pointToPoint        0;
+    pointVectorField    0;
+    pointVectorField::DimensionedInternalField 0;
+    pointZone           0;
+    polyBoundaryMesh    0;
+    polyMesh            0;
+    polyMeshGeometry    0;
+    polyMeshInfo        0;
+    polyTopoChange      0;
+    polyTopoChanger     0;
+    pressureDirectedInletOutletVelocity 0;
+    pressureDirectedInletVelocity 0;
+    pressureInletOutletVelocity 0;
+    pressureInletUniformVelocity 0;
+    pressureInletVelocity 0;
+    pressureSwirlInjector 0;
+    primitiveMesh       0;
+    primitiveMeshGeometry 0;
+    probes              0;
+    processor           0;
+    processorLduInterface 0;
+    processorLduInterfaceField 0;
+    pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>> 0;
+    pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>> 0;
+    pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>> 0;
+    quadratic           0;
+    radialModel         0;
+    radiationModel      0;
+    raw                 0;
+    reactingCloud       0;
+    reactingParcel      0;
+    reaction            0;
+    realizableKE        0;
+    refinementHistory   0;
+    refinementIterator  0;
+    reflect             0;
+    regIOobject         0;
+    regionSplit         0;
+    remove              0;
+    removeCell          0;
+    removeCells         0;
+    removeFace          0;
+    removeFaces         0;
+    removePoint         0;
+    removePoints        0;
+    reverseLinear       0;
+    rotatedBoxToCell    0;
+    rotatingPressureInletOutletVelocity 0;
+    rotatingTotalPressure 0;
+    sampledPatch        0;
+    sampledPlane        0;
+    sampledSet          0;
+    sampledSurface      0;
+    saturateEvaporationModel 0;
+    scalarAverageField  0;
+    scalarField         0;
+    scalarRange         0;
+    scaleSimilarity     0;
+    scatterModel        0;
+    searchableBox       0;
+    searchableSurface   0;
+    sequential          0;
+    setUpdater          0;
+    sets                0;
+    shapeList           0;
+    shapeToCell         0;
+    simple              0;
+    skewCorrected       0;
+    skewCorrectionVectors 0;
+    sliced              0;
+    slidingInterface    0;
+    slip                0;
+    smooth              0;
+    smoothSolver        0;
+    solid               0;
+    solidBodyMotionFunction 0;
+    solidBodyMotionFvMesh 0;
+    solution            0;
+    spectEddyVisc       0;
+    sphereToCell        0;
+    spherical           0;
+    sphericalTensorAverageField 0;
+    sphericalTensorField 0;
+    standardDragModel   0;
+    standardEvaporationModel 0;
+    staticFvMesh        0;
+    steadyState         0;
+    stl                 0;
+    stochasticDispersionRAS 0;
+    string              0;
+    supersonicFreestream 0;
+    surfaceFeatures     0;
+    surfaceInterpolation 0;
+    surfaceInterpolationScheme 0;
+    surfaceIntersection 0;
+    surfaceNormalFixedValue 0;
+    surfacePatch        0;
+    surfacePatchIOList  0;
+    surfaceScalarField  0;
+    surfaceScalarField::DimensionedInternalField 0;
+    surfaceSlipDisplacement 0;
+    surfaceSphericalTensorField 0;
+    surfaceSphericalTensorField::DimensionedInternalField 0;
+    surfaceSymmTensorField 0;
+    surfaceSymmTensorField::DimensionedInternalField 0;
+    surfaceTensorField 0;
+    surfaceTensorField::DimensionedInternalField 0;
+    surfaceToCell       0;
+    surfaceToPoint      0;
+    surfaceVectorField  0;
+    surfaceVectorField::DimensionedInternalField 0;
+    surfaceWriter       0;
+    surfaces            0;
+    swirlInjector       0;
+    symmTensorAverageField 0;
+    symmTensorField     0;
+    symmetryPlane       0;
+    syringePressure     0;
+    tensorAverageField  0;
+    tensorField         0;
+    thermoCloud         0;
+    thermoParcel        0;
+    thermophysicalFunction 0;
+    time                0;
+    timeVaryingGammaContactAngle 0;
+    timeVaryingMappedFixedValue 0;
+    timeVaryingUniformFixedValue 0;
+    timer               0;
+    topoAction          0;
+    topoCellLooper      0;
+    topoChangerFvMesh   0;
+    topoSet             0;
+    topoSetSource       0;
+    toroidal            0;
+    totalPressure       0;
+    totalTemperature    0;
+    trackedParticle     0;
+    trajectory          0;
+    transform           0;
+    treeDataCell        0;
+    treeDataFace        0;
+    treeDataTriSurface  0;
+    treeLeaf            0;
+    treeNode            0;
+    triSurface          0;
+    triSurfaceMesh      0;
+    triSurfaceMeshes    0;
+    turbulenceModel     0;
+    turbulentInlet      0;
+    turbulentIntensityKineticEnergyInlet 0;
+    turbulentMixingLengthDissipationRateInlet 0;
+    uncorrected         0;
+    undoableMeshCutter  0;
+    uniform             0;
+    uniformFixedValue   0;
+    unitInjector        0;
+    upwind              0;
+    value               0;
+    vanAlbada           0;
+    vanAlbadaV          0;
+    vanDriest           0;
+    vanLeer             0;
+    vanLeer01           0;
+    vanLeerV            0;
+    vector2DField       0;
+    vectorAverageField  0;
+    vectorField         0;
+    velocityComponentLaplacian 0;
+    velocityLaplacian   0;
+    viscosityModel      0;
+    volPointInterpolation 0;
+    volScalarField      0;
+    volScalarField::DimensionedInternalField 0;
+    volSphericalTensorField 0;
+    volSphericalTensorField::DimensionedInternalField 0;
+    volSymmTensorField  0;
+    volSymmTensorField::DimensionedInternalField 0;
+    volTensorField      0;
+    volTensorField::DimensionedInternalField 0;
+    volVectorField      0;
+    volVectorField::DimensionedInternalField 0;
+    vtk                 0;
+    walkPatch           0;
+    wall                0;
+    wallHeatTransfer    0;
+    wallLayerCells      0;
+    wallModel           0;
+    waveTransmissive    0;
+    wedge               0;
+    weighted            0;
+    word                0;
+    writer              0;
+    xmgr                0;
+    zeroGradient        0;
+    zoneToCell          0;
+    zoneToFace          0;
+    zoneToPoint         0;
 }
 
 InfoSwitches
