@@ -42,6 +42,7 @@ fi
 for dir in lib applications/bin
 do
    if [ -d $dir ]
+   then
       rm -rf $dir/*
    fi
 done
