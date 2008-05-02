@@ -22,25 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Dimension set for the base types.
-    This type may be used to implement rigorous dimension checking
-    for algebraic manipulation.
-
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionSet.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from Istream
-dimensionSet::dimensionSet(Istream& is)
+Foam::dimensionSet::dimensionSet(Istream& is)
 {
     is >> *this;
 }
@@ -48,7 +37,7 @@ dimensionSet::dimensionSet(Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, dimensionSet& dset)
+Foam::Istream& Foam::operator>>(Istream& is, dimensionSet& dset)
 {
     // Read begining of dimensionSet
     if (token(is) != token::BEGIN_SQR)
@@ -95,7 +84,7 @@ Istream& operator>>(Istream& is, dimensionSet& dset)
 }
 
 
-Ostream& operator<<(Ostream& os, const dimensionSet& dset)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dimensionSet& dset)
 {
     os << token::BEGIN_SQR;
 
@@ -111,9 +100,5 @@ Ostream& operator<<(Ostream& os, const dimensionSet& dset)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
