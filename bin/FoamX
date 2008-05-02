@@ -30,8 +30,6 @@
 #     Loader for FoamX Java Client.
 #
 #------------------------------------------------------------------------------
-# Set default JDK path.
-jdkhome="/usr/java/jdk1.4"
 
 Script=${0##*/}
 
@@ -76,18 +74,19 @@ cleanup() {
 }
 
 
-# isValid jobControlFile
-isValid() {
-    grep 'startDate' $1 > /dev/null &&   \
-    grep 'startTime' $1 > /dev/null &&   \
-    grep 'userName' $1 > /dev/null &&    \
-    grep 'foamVersion' $1 > /dev/null && \
-    grep 'code' $1 > /dev/null &&        \
-    grep 'currentDir' $1 > /dev/null &&  \
-    grep 'argList' $1 > /dev/null
+## isValid jobControlFile
+#isValid() {
+#    grep 'startDate' $1 > /dev/null &&   \
+#    grep 'startTime' $1 > /dev/null &&   \
+#    grep 'userName' $1 > /dev/null &&    \
+#    grep 'foamVersion' $1 > /dev/null && \
+#    grep 'code' $1 > /dev/null &&        \
+#    grep 'currentDir' $1 > /dev/null &&  \
+#    grep 'argList' $1 > /dev/null
+#
+#    return $?
+#}
 
-    return $?
-}
 
 #-------------------------
 #
@@ -95,33 +94,12 @@ isValid() {
 #
 #-------------------------
 
-# If JAVA_PATH or JAVA_HOME are set, it overrides the default.
-if [ -n "$JAVA_PATH" ]; then
-    jdkhome=$JAVA_PATH
-elif [ -n "$JAVA_HOME" ]; then
-    jdkhome=$JAVA_HOME
-fi
-
-# check that the JDK exists.
-if [ -z "$jdkhome" ] ; then
-    echo "Java path not set. Please set JAVA_PATH to the JDK installation"
-    echo "directory."
-    echo ""
-    exit 1
-fi
-if [ ! -x "$jdkhome/bin/java" ] ; then
-    echo "Cannot find JDK at $jdkhome. Please set JAVA_PATH to the"
-    echo "JDK installation directory."
-    echo ""
-    exit 1
-fi
-
-if [ -z "$FOAM_JOB_DIR" ]; then
-    echo "FOAM_JOB_DIR environment variable not set. This should point to the"
-    echo "Foam jobControl directory."
-    echo ""
-    exit 1
-fi
+#if [ -z "$FOAM_JOB_DIR" ]; then
+#    echo "FOAM_JOB_DIR environment variable not set. This should point to the"
+#    echo "Foam jobControl directory."
+#    echo ""
+#    exit 1
+#fi
 
 # Make sure that the FoamX configuration directory is available.
 if [ ! -d "$FOAMX_CONFIG" ] ; then
@@ -232,12 +210,8 @@ if [ "$XHB_PID" ]; then
 fi
 
 #- For mico > 2.3.7 : force to use 1.0
-if [ `uname -s` = 'AIX' ]; then
-    orbArgs=''
-else
-    #orbArgs="-ORBDefaultInitRef corbaloc:iiop:1.0:$HOSTNAME:$HOSTPORT"
-    orbArgs="-ORBDefaultInitRef corbaloc:iiop:1.0:$HOSTNAME:$HOSTPORT -ORBInitialPort $HOSTPORT -ORBInitialHost $HOSTNAME"
-fi
+#orbArgs="-ORBDefaultInitRef corbaloc:iiop:1.0:$HOSTNAME:$HOSTPORT"
+orbArgs="-ORBDefaultInitRef corbaloc:iiop:1.0:$HOSTNAME:$HOSTPORT -ORBInitialPort $HOSTPORT -ORBInitialHost $HOSTNAME"
 #echo "Starting Java with ORB arguments : $orbArgs"
 
 # Set Language to English

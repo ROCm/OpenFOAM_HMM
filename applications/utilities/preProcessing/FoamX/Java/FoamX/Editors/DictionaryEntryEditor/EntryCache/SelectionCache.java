@@ -127,7 +127,7 @@ public class SelectionCache
             );
             editor.setTitle(displayName_);
 
-            editor.show();
+            editor.setVisible(true);
             // Update the cached display string.
             displayValue_ = getSelectionDisplayString();
             // Signal that editing has stopped.

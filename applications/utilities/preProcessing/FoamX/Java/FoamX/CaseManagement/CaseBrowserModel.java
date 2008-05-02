@@ -172,10 +172,10 @@ public class CaseBrowserModel
             keyMap_.clear();
 
             // Loop over all host nodes.
-            Enumeration enum = hostMap_.keys();
-            while (enum.hasMoreElements())
+            Enumeration iter = hostMap_.keys();
+            while (iter.hasMoreElements())
             {
-                String hostName = (String)enum.nextElement();
+                String hostName = (String)iter.nextElement();
 
                 // Get host node.
                 DefaultMutableTreeNode hostNode = 
@@ -306,10 +306,10 @@ public class CaseBrowserModel
 //    {
 //
 //        // Loop over all host nodes.
-//        Enumeration enum = hostMap_.keys();
-//        while (enum.hasMoreElements())
+//        itereration iter = hostMap_.keys();
+//        while (iter.hasMoreElements())
 //        {
-//            String hostName = (String)enum.nextElement();
+//            String hostName = (String)iter.nextElement();
 //
 //            // Get host node.
 //            DefaultMutableTreeNode hostNode = 
@@ -862,10 +862,10 @@ public class CaseBrowserModel
         keyMap_.clear();
 
         // Loop over all host nodes.
-        Enumeration enum = hostMap_.keys();
-        while (enum.hasMoreElements())
+        Enumeration iter = hostMap_.keys();
+        while (iter.hasMoreElements())
         {
-            String hostName = (String)enum.nextElement();
+            String hostName = (String)iter.nextElement();
 
             // Get host node.
             DefaultMutableTreeNode hostNode =

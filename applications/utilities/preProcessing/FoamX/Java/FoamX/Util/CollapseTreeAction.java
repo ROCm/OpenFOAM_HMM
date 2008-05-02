@@ -62,10 +62,10 @@ public class CollapseTreeAction
             TreeModel model = tree_.getModel();
 
             DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
-            Enumeration enum = root.depthFirstEnumeration();
-            while (enum.hasMoreElements())
+            Enumeration iter = root.depthFirstEnumeration();
+            while (iter.hasMoreElements())
             {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)enum.nextElement();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode)iter.nextElement();
                 TreePath tp = new TreePath(node.getPath());
                 tree_.collapsePath(tp);
             }

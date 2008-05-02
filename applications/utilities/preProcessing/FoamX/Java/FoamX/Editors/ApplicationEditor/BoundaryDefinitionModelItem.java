@@ -314,12 +314,12 @@ public class BoundaryDefinitionModelItem
                 patchPhysicalTypeDesc_.patchType(patchType_);
 
                 // Set the patch field types.
-                Enumeration enum = patchFieldTypeMap_.keys();
+                Enumeration iter = patchFieldTypeMap_.keys();
                 StringPair[] patchFieldTypes = new StringPair[patchFieldTypeMap_.size()];
                 int nField = 0;
-                while (enum.hasMoreElements())
+                while (iter.hasMoreElements())
                 {
-                    String fieldName            = (String)enum.nextElement();
+                    String fieldName            = (String)iter.nextElement();
                     String patchFieldType       = (String)patchFieldTypeMap_.get(fieldName);
                     patchFieldTypes[nField++] = new StringPair(fieldName, patchFieldType);
                 }

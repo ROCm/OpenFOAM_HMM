@@ -335,10 +335,10 @@ public class WindowManager
         {
             int x = 0;
 
-            Enumeration enum = windowMap_.elements();
-            while (enum.hasMoreElements())
+            Enumeration iter = windowMap_.elements();
+            while (iter.hasMoreElements())
             {
-                FoamXInternalFrame frame = (FoamXInternalFrame)enum.nextElement();
+                FoamXInternalFrame frame = (FoamXInternalFrame)iter.nextElement();
 
                 frame.setBounds(x, x, defaultFrameWidth_, defaultFrameHeight_);
                 x += 20;

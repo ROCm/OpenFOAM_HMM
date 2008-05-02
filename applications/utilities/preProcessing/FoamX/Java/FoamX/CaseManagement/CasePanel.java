@@ -1295,7 +1295,7 @@ public class CasePanel
                             "controlDict",
                             null
                         );
-                        runPanel.show();
+                        runPanel.setVisible(true);
                     }
                 }
             }
