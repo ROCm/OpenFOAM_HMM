@@ -86,15 +86,15 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                     this->cloudName() + "rhoTrans" + name(i),
-                     this->runTime().timeName(),
+                     this->name() + "rhoTrans" + name(i),
+                     this->db().time().timeName(),
                      this->db(),
                      IOobject::NO_READ,
                      IOobject::NO_WRITE,
                      false
                 ),
                 this->mesh(),
-                dimensionedScalar("zero", dimensionSet(1, 0, 0, 0, 0), 0.0)
+                dimensionedScalar("zero", dimMass, 0.0)
             )
         );
     }
@@ -128,44 +128,64 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     const volScalarField cp = carrierThermo_.Cp();
     const volScalarField& p = carrierThermo_.p();
 
-    interpolationCellPoint<scalar> rhoInterp(this->vpi(), this->rho());
-    interpolationCellPoint<vector> UInterp(this->vpi(), this->U());
-    interpolationCellPoint<scalar> muInterp(this->vpi(), this->mu());
-    interpolationCellPoint<scalar> TInterp(this->vpi(), T);
-    interpolationCellPoint<scalar> cpInterp(this->vpi(), cp);
-    interpolationCellPoint<scalar> pInterp(this->vpi(), p);
+    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        this->rho()
+    );
+
+    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        this->U()
+    );
+
+    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        this->mu()
+    );
+
+    autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        T
+    );
+
+    autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        cp
+    );
+
+    autoPtr<interpolation<scalar> > pInterpolator = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->vpi(),
+        p
+    );
 
     typename ParcelType::trackData td
     (
         *this,
         constProps_,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        TInterp,
-        cpInterp,
-        pInterp,
+        rhoInterpolator(),
+        UInterpolator(),
+        muInterpolator(),
+        TInterpolator(),
+        cpInterpolator(),
+        pInterpolator(),
         this->g().value()
     );
 
     inject(td);
 
-    move(td);
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ReactingCloud<ParcelType>::move
-(
-    TrackingData& td
-)
-{
-    if (this->coupled())
-    {
-        resetSourceTerms();
-    }
-    Cloud<ParcelType>::move(td);
+    this->move(td);
 }
 
 
@@ -176,7 +196,7 @@ void Foam::ReactingCloud<ParcelType>::inject
     TrackingData& td
 )
 {
-    scalar time = this->runTime().value();
+    scalar time = this->db().time().value();
 
     scalar pRho = td.constProps().rho0();
 
@@ -191,7 +211,7 @@ void Foam::ReactingCloud<ParcelType>::inject
     // Return if no parcels are required
     if (!nParcels)
     {
-        postInjectCheck();
+        this->postInjectCheck();
         return;
     }
 
@@ -213,7 +233,7 @@ void Foam::ReactingCloud<ParcelType>::inject
     // Duration of injection period during this timestep
     scalar deltaT = min
     (
-        this->runTime().deltaT().value(),
+        this->db().time().deltaT().value(),
         min
         (
             time - this->injection().timeStart(),
@@ -284,38 +304,19 @@ void Foam::ReactingCloud<ParcelType>::inject
 
             scalar dt = time - timeInj;
 
-            pPtr->stepFraction() = (this->runTime().deltaT().value() - dt)
-                /this->runTime().deltaT().value();
+            pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
+                /this->db().time().deltaT().value();
 
-            injectParcel(td, pPtr);
+            this->injectParcel(td, pPtr);
          }
     }
 
-    postInjectCheck();
+    this->postInjectCheck();
 
     if (debug)
     {
         this->dumpParticlePositions();
     }
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ReactingCloud<ParcelType>::injectParcel
-(
-    TrackingData& td,
-    ParcelType* p
-)
-{
-    ThermoCloud<ParcelType>::injectParcel(td, p);
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::postInjectCheck()
-{
-    ThermoCloud<ParcelType>::postInjectCheck();
 }
 
 

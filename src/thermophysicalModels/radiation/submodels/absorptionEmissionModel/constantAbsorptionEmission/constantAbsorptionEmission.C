@@ -70,7 +70,7 @@ Foam::radiation::constantAbsorptionEmission::~constantAbsorptionEmission()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::constantAbsorptionEmission::a() const
+Foam::radiation::constantAbsorptionEmission::aCont() const
 {
     tmp<volScalarField> ta
     (
@@ -95,7 +95,7 @@ Foam::radiation::constantAbsorptionEmission::a() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::constantAbsorptionEmission::e() const
+Foam::radiation::constantAbsorptionEmission::eCont() const
 {
     tmp<volScalarField> te
     (
@@ -119,7 +119,8 @@ Foam::radiation::constantAbsorptionEmission::e() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::constantAbsorptionEmission::E() const
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::constantAbsorptionEmission::ECont() const
 {
     tmp<volScalarField> tE
     (

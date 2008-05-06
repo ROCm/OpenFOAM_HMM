@@ -60,7 +60,6 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh),
     polyMesh_(pMesh),
-    cloudName_("defaultCloud"),
     allFaces_(pMesh.faces()),
     points_(pMesh.points()),
     cellFaces_(pMesh.cells()),
@@ -83,7 +82,6 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh, cloudName),
     polyMesh_(pMesh),
-    cloudName_(cloudName),
     allFaces_(pMesh.faces()),
     points_(pMesh.points()),
     cellFaces_(pMesh.cells()),

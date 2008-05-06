@@ -38,8 +38,7 @@ namespace radiation
 
 autoPtr<radiationModel> radiationModel::New
 (
-    const fvMesh& mesh,
-    const basicThermo& thermo
+    const volScalarField& T
 )
 {
     word radiationModelTypeName;
@@ -53,8 +52,8 @@ autoPtr<radiationModel> radiationModel::New
             IOobject
             (
                 "radiationProperties",
-                mesh.time().constant(),
-                mesh.db(),
+                T.mesh().time().constant(),
+                T.mesh().db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )
@@ -73,7 +72,7 @@ autoPtr<radiationModel> radiationModel::New
     {
         FatalErrorIn
         (
-            "radiationModel::New(const fvMesh&, const basicThermo&)"
+            "radiationModel::New(const volScalarField&)"
         )   << "Unknown radiationModel type " << radiationModelTypeName
             << nl << nl
             << "Valid radiationModel types are :" << nl
@@ -81,7 +80,7 @@ autoPtr<radiationModel> radiationModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<radiationModel>(cstrIter()(mesh, thermo));
+    return autoPtr<radiationModel>(cstrIter()(T));
 }
 
 

@@ -26,7 +26,6 @@ Class
     Foam::DispersionModel
 
 Description
-    Templated dispersion model class
 
 \*---------------------------------------------------------------------------*/
 

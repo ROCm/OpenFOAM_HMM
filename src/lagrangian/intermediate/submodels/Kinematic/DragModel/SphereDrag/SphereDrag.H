@@ -74,10 +74,7 @@ public:
 
         bool active() const;
 
-        scalar Cd
-        (
-            const scalar Re
-        ) const;
+        scalar Cd(const scalar Re) const;
 };
 
 

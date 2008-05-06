@@ -26,7 +26,6 @@ Class
     Foam::basicThermoCloud
 
 Description
-    The basicThermoCloud
 
 SourceFiles
     basicThermoCloud.C
@@ -37,7 +36,7 @@ SourceFiles
 #define basicThermoCloud_H
 
 #include "ThermoCloud.H"
-#include "thermoParcel.H"
+#include "basicThermoParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +49,7 @@ namespace Foam
 
 class basicThermoCloud
 :
-    public ThermoCloud<thermoParcel>
+    public ThermoCloud<basicThermoParcel>
 {
 
     // Private Member Functions
@@ -85,30 +84,15 @@ public:
         );
 
 
+    //- Destructor
+
+        ~basicThermoCloud();
+
+
     // Member Functions
 
-        // Edit
-
-            //- Evolve the spray (move, inject)
-            void evolve();
-
-            //- Move the parcels
-            void move
-            (
-                ThermoParcel<thermoParcel>::trackData& td
-            );
-
-            //- Inject more parcels
-            void inject
-            (
-                ThermoParcel<thermoParcel>::trackData& td
-            );
-
-
-        // I-O
-
-            //- Write fields
-            void writeFields() const;
+        //- Write fields
+        void writeFields() const;
 };
 
 

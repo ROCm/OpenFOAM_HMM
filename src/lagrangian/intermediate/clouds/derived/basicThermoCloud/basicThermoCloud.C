@@ -46,42 +46,23 @@ Foam::basicThermoCloud::basicThermoCloud
     basicThermo& thermo
 )
 :
-    ThermoCloud<thermoParcel>(cloudType, vpi, rho, U, g, thermo)
+    ThermoCloud<basicThermoParcel>(cloudType, vpi, rho, U, g, thermo)
 {
-    thermoParcel::readFields(*this);
+    basicThermoParcel::readFields(*this);
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::basicThermoCloud::~basicThermoCloud()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::basicThermoCloud::evolve()
-{
-    ThermoCloud<thermoParcel>::evolve();
-}
-
-
-void Foam::basicThermoCloud::move
-(
-    ThermoParcel<thermoParcel>::trackData& td
-)
-{
-    // Move the parcels
-    ThermoCloud<thermoParcel>::move(td);
-}
-
-
-void Foam::basicThermoCloud::inject
-(
-    ThermoParcel<thermoParcel>::trackData& td
-)
-{
-    ThermoCloud<thermoParcel>::inject(td);
-}
-
-
 void Foam::basicThermoCloud::writeFields() const
 {
-    thermoParcel::writeFields(*this);
+    basicThermoParcel::writeFields(*this);
 }
 
 

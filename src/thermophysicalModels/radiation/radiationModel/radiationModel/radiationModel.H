@@ -73,8 +73,8 @@ protected:
 
     // Protected data
 
-        //- Reference to the thermo package
-        const basicThermo& thermo_;
+        //- Reference to the temperature field
+        const volScalarField& T_;
 
         //- Reference to the mesh
         const fvMesh& mesh_;
@@ -120,10 +120,9 @@ public:
              radiationModel,
              dictionary,
              (
-                 const fvMesh& mesh,
-                 const basicThermo& thermo
+                 const volScalarField& T
              ),
-             (mesh, thermo)
+             (T)
          );
 
 
@@ -133,8 +132,7 @@ public:
         radiationModel
         (
             const word& type,
-            const fvMesh& mesh,
-            const basicThermo& thermo
+            const volScalarField& T
         );
 
 
@@ -143,8 +141,7 @@ public:
          //- Return a reference to the selected radiation model
          static autoPtr<radiationModel> New
          (
-             const fvMesh& mesh,
-             const basicThermo& thermo
+             const volScalarField& T
          );
 
 
@@ -170,12 +167,12 @@ public:
             virtual tmp<volScalarField> Rp() const = 0;
 
             //- Source term component (constant)
-            virtual tmp<volScalarField> Ru() const = 0;
+            virtual tmp<DimensionedField<scalar, volMesh> > Ru() const = 0;
 
-            //- Source term
+            //- Enthalpy source term
             virtual tmp<fvScalarMatrix> Sh
             (
-                volScalarField& h
+                basicThermo& thermo
             ) const;
 };
 

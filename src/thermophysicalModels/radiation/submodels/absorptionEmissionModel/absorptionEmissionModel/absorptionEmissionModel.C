@@ -56,4 +56,165 @@ Foam::radiation::absorptionEmissionModel::~absorptionEmissionModel()
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::a() const
+{
+    return aDisp() + aCont();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::aCont() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "aCont",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::aDisp() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "aDisp",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::e() const
+{
+    return eDisp() + eCont();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::eCont() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "eCont",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::eDisp() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "eDisp",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::E() const
+{
+    return EDisp() + ECont();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::ECont() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "ECont",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimLength/pow3(dimTime), 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::EDisp() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "EDisp",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimLength/pow3(dimTime), 0.0)
+        )
+    );
+}
+
+
 // ************************************************************************* //

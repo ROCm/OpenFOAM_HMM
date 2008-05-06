@@ -69,7 +69,7 @@ public:
     //- Runtime type information
     TypeName("absorptionEmissionModel");
 
-    // Declare runtime constructor selection table
+    //- Declare runtime constructor selection table
 
         declareRunTimeSelectionTable
         (
@@ -94,7 +94,7 @@ public:
         );
 
 
-    // Selector
+    //- Selector
 
         static autoPtr<absorptionEmissionModel> New
         (
@@ -103,7 +103,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
 
         virtual ~absorptionEmissionModel();
 
@@ -112,14 +112,40 @@ public:
 
         // Access
 
-            //- Return absorption coefficient
-            virtual tmp<volScalarField> a() const = 0;
+            // Absorption coefficient
 
-            //- Return emission coefficient
-            virtual tmp<volScalarField> e() const = 0;
+                //- Absorption coefficient (net)
+                virtual tmp<volScalarField> a() const;
 
-            //- Return emission contribution
-            virtual tmp<volScalarField> E() const = 0;
+                //- Absorption coefficient for continuous phase
+                virtual tmp<volScalarField> aCont() const;
+
+                //- Absorption coefficient for dispersed phase
+                virtual tmp<volScalarField> aDisp() const;
+
+
+            // Emission coefficient
+
+                //- Emission coefficient (net)
+                virtual tmp<volScalarField> e() const;
+
+                //- Return emission coefficient for continuous phase
+                virtual tmp<volScalarField> eCont() const;
+
+                //- Return emission coefficient for dispersed phase
+                virtual tmp<volScalarField> eDisp() const;
+
+
+            // Emission contribution
+
+                //- Emission contribution (net)
+                virtual tmp<volScalarField> E() const;
+
+                //- Emission contribution for continuous phase
+                virtual tmp<volScalarField> ECont() const;
+
+                //- Emission contribution for dispersed phase
+                virtual tmp<volScalarField> EDisp() const;
 };
 
 

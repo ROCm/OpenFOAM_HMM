@@ -26,16 +26,14 @@ Class
     Foam::ReactingParcel
 
 Description
-    Reacting parcel class with one-way coupling with the continuous
-    phase.
-
-    Includes thermo parcel sub-models, plus:
+    Reactinf parcel class with one/two-way coupling with the continuous
+    phase. Includes thermo parcel sub-models, plus:
     - combustion
 
 SourceFiles
-    reactingParcelI.H
+    ReactingParcelI.H
     ReactingParcel.C
-    reactingParcelIO.C
+    ReactingParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -75,96 +73,9 @@ class ReactingParcel
     public ThermoParcel<ParcelType>
 {
 
-    // Private data
-
-        //- Initial particle mass
-        scalar mass0_;
-
-        //- Mass fractions of mixture
-        scalarField YMixture_;
-
-        //- Mass fractions of gases
-        scalarField YGas_;
-
-        //- Mass fractions of liquids
-        scalarField YLiquid_;
-
-        //- Mass fractions of solids
-        scalarField YSolid_;
-
-        //- Flag to say that the particle is allowed to combust
-        //  Only true one ALL volatiles have been evolved from the particle
-        bool canCombust_;
-
-
-protected:
-
-    // Protected member functions
-
-        template<class TrackingData>
-        void calcCoupled
-        (
-            TrackingData& td,
-            const label celli,
-            const scalar dt,
-            const scalar rhoc,
-            vector& Uc,
-            const scalar muc,
-            const scalar Tc,
-            const scalar Cpc,
-            const scalar pc
-        );
-
-        template<class TrackingData>
-        void calcUncoupled
-        (
-            TrackingData& td,
-            const label celli,
-            const scalar dt,
-            const scalar rhoc,
-            vector& Uc,
-            const scalar muc,
-            const scalar Tc,
-            const scalar Cpc,
-            const scalar pc
-        );
-
-        //- Calculate mass transfer
-        template<class TrackingData>
-        void calcMassTransfer
-        (
-            TrackingData& td,
-            const scalar dt,
-            const scalar T0,
-            const scalar T1,
-            scalarList& dMassMT
-        );
-
-        //- Calculate surface reactions
-        template<class TrackingData>
-        void calcSurfaceReactions
-        (
-            TrackingData& td,
-            const scalar dt,
-            const label celli,
-            const scalar rhoc,
-            const scalar Tc,
-            const scalar T0,
-            const scalar T1,
-            scalar& dMassMTSR,
-            scalarList& dMassMT
-        );
-
-
 public:
 
-    //- Runtime type information
-    TypeName("ReactingParcel");
-
-    friend class Cloud<ParcelType>;
-
-
-    //- Class to hold particle constant properties
+    //- Class to hold reacting particle constant properties
     class constantProperties
     :
         public ThermoParcel<ParcelType>::constantProperties
@@ -172,31 +83,27 @@ public:
 
         // Private data
 
-            //- Vapourisation temperature
+            //- Vapourisation temperature [K]
             const scalar Tvap_;
 
-            //- Boiling point
+            //- Boiling point [K]
             const scalar Tbp_;
 
 
     public:
 
-        // Constructors
-        constantProperties
-        (
-            const dictionary& dict
-        );
+        //- Constructor
+        constantProperties(const dictionary& dict);
 
-        // Member functions
+        //- Return const access to the vapourisation temperature
+        inline const scalar Tvap() const;
 
-            // Access
-
-            inline const scalar Tvap() const;
-            inline const scalar Tbp() const;
+        //- Return const access to the boiling point
+        inline const scalar Tbp() const;
     };
 
 
-    //- Class used to pass tracking data to the trackToFace function
+    //- Class used to pass reacting tracking data to the trackToFace function
     class trackData
     :
         public ThermoParcel<ParcelType>::trackData
@@ -210,36 +117,108 @@ public:
             //- Particle constant properties
             const constantProperties& constProps_;
 
-            //- Interpolators for continuous phase fields
+            //- Interpolator for continuous phase pressure field
+            const interpolation<scalar>& pInterp_;
 
-                const interpolationCellPoint<scalar>& pInterp_;
 
     public:
 
         // Constructors
 
+            //- Construct from components
             inline trackData
             (
                 ReactingCloud<ParcelType>& cloud,
                 const constantProperties& constProps,
-                const interpolationCellPoint<scalar>& rhoInterp,
-                const interpolationCellPoint<vector>& UInterp,
-                const interpolationCellPoint<scalar>& muInterp,
-                const interpolationCellPoint<scalar>& TInterp,
-                const interpolationCellPoint<scalar>& CpInterp,
-                const interpolationCellPoint<scalar>& pInterp,
+                const interpolation<scalar>& rhoInterp,
+                const interpolation<vector>& UInterp,
+                const interpolation<scalar>& muInterp,
+                const interpolation<scalar>& TInterp,
+                const interpolation<scalar>& CpInterp,
+                const interpolation<scalar>& pInterp,
                 const vector& g
             );
 
 
         // Member functions
 
+            //- Return access to the owner cloud
             inline ReactingCloud<ParcelType>& cloud();
 
+            //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
 
-            inline const interpolationCellPoint<scalar>& pInterp() const;
+            //- Return conat access to the interpolator for continuous
+            //  phase pressure field
+            inline const interpolation<scalar>& pInterp() const;
     };
+
+
+protected:
+
+    // Protected data
+
+        // Parcel properties
+
+            //- Initial particle mass [kg]
+            scalar mass0_;
+
+            //- Mass fractions of mixture []
+            scalarField YMixture_;
+
+            //- Mass fractions of gases []
+            scalarField YGas_;
+
+            //- Mass fractions of liquids []
+            scalarField YLiquid_;
+
+            //- Mass fractions of solids []
+            scalarField YSolid_;
+
+            //- Flag to say that the particle is allowed to combust
+            //  Only true after volatile content falls below threshold value
+            bool canCombust_;
+
+
+        // Cell-based quantities
+
+            //- Pressure [Pa]
+            scalar pc_;
+
+
+    // Protected member functions
+
+        //- Calculate mass transfer
+        template<class TrackData>
+        void calcMassTransfer
+        (
+            TrackData& td,
+            const scalar dt,
+            const scalar T0,
+            const scalar T1,
+            scalarList& dMassMT
+        );
+
+        //- Calculate surface reactions
+        template<class TrackData>
+        void calcSurfaceReactions
+        (
+            TrackData& td,
+            const scalar dt,
+            const label celli,
+            const scalar T0,
+            const scalar T1,
+            scalar& dMassMTSR,
+            scalarList& dMassMT
+        );
+
+
+public:
+
+    //- Runtime type information
+    TypeName("ReactingParcel");
+
+    friend class Cloud<ParcelType>;
 
 
     // Constructors
@@ -301,27 +280,41 @@ public:
             inline scalar& mass0();
 
 
-        // Tracking
+        // Main calculation loop
 
-            //- Move parcel
-            template<class TrackingData>
-            bool move
+            //- Update cell based quantities
+            template<class TrackData>
+            void updateCellQuantities
             (
-                TrackingData&
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Coupled calculation with the continuous phase
+            template<class TrackData>
+            void calcCoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label celli
+            );
+
+            //- Uncoupled calculation with the continuous phase
+            template<class TrackData>
+            void calcUncoupled
+            (
+                TrackData& td,
+                const scalar dt,
+                const label
             );
 
 
         // I-O
 
-            static void readFields
-            (
-                ReactingCloud<ParcelType>& c
-            );
+            static void readFields(ReactingCloud<ParcelType>& c);
 
-            static void writeFields
-            (
-                const ReactingCloud<ParcelType>& c
-            );
+            static void writeFields(const ReactingCloud<ParcelType>& c);
 };
 
 

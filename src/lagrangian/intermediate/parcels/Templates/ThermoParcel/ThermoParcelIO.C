@@ -39,7 +39,9 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 :
     KinematicParcel<ParcelType>(cloud, is, readFields),
     T_(0.0),
-    cp_(0.0)
+    cp_(0.0),
+    Tc_(0.0),
+    cpc_(0.0)
 {
     if (readFields)
     {

@@ -26,7 +26,6 @@ Class
     Foam::indexedParticle
 
 Description
-    An indexed Particle
 
 SourceFiles
     indexedParticleI.H

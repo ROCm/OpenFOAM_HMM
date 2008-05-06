@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::radiation::cloudAbsorptionEmission
+    Foam::cloudAbsorptionEmission
 
 Description
     Retrieves absorption/emission data from a cloud object
@@ -86,18 +86,24 @@ public:
 
     // Member Operators
 
-        // Edit
-
         // Access
 
-            //- Return absorption coefficient
-            tmp<volScalarField> a() const;
+            // Absorption coefficient
 
-            //- Return emission coefficient
-            tmp<volScalarField> e() const;
+                //- Absorption coefficient for dispersed phase
+                tmp<volScalarField> aDisp() const;
 
-            //- Return emission contribution
-            tmp<volScalarField> E() const;
+
+            // Emission coefficient
+
+                //- Emission coefficient for dispersed phase
+                tmp<volScalarField> eDisp() const;
+
+
+            // Emission contribution
+
+                //- Return emission contribution for dispersed phase
+                tmp<volScalarField> EDisp() const;
 };
 
 

@@ -25,6 +25,7 @@ License
 Class
     Foam::HeatTransferModel
 
+
 Description
     Templated heat transfer model class
 
@@ -39,7 +40,6 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
-//#include "KinematicCloud.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

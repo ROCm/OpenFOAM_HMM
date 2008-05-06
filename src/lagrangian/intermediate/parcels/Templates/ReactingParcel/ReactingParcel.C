@@ -29,28 +29,47 @@ License
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
-template<class TrackingData>
+template<class TrackData>
+void Foam::ReactingParcel<ParcelType>::updateCellQuantities
+(
+    TrackData& td,
+    const scalar dt,
+    const label celli
+)
+{
+    ThermoParcel<ParcelType>::updateCellQuantities(td, dt, celli);
+
+    pc_ = td.pInterp().interpolate(this->position(), celli);
+}
+
+
+template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcCoupled
 (
-    TrackingData& td,
-    const label celli,
+    TrackData& td,
     const scalar dt,
-    const scalar rhoc,
-    vector& Uc,
-    const scalar muc,
-    const scalar Tc,
-    const scalar cpc,
-    const scalar pc
+    const label celli
 )
 {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Define local properties at beginning of timestep
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const vector U0 = this->U();
-    const scalar T0 = this->T();
+    const vector U0 = this->U_;
     const scalar mass0 = this->mass();
-    const scalar cp0 = this->cp();
-    const scalar np0 = this->nParticle();
+    const scalar np0 = this->nParticle_;
+    const scalar T0 = this->T_;
+    const scalar cp0 = this->cp_;
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Initialise transfer terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Momentum transfer from the particle to the carrier phase
+    vector dUTrans = vector::zero;
+
+    // Enthalpy transfer from the particle to the carrier phase
+    scalar dhTrans = 0.0;
 
     // Mass transfer from particle to carrier phase
     // - components exist in particle already
@@ -69,14 +88,14 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // Calculate heat transfer - update T
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
-    scalar T1 = calcHeatTransfer(td, celli, dt, rhoc, Uc, muc, Tc, cpc, htc);
+    scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate velocity - update U
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar Cud = 0.0;
-    const vector U1 = calcVelocity(td, dt, rhoc, Uc, muc, Cud);
+    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,18 +107,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate surface reactions
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    calcSurfaceReactions
-    (
-        td,
-        dt,
-        celli,
-        rhoc,
-        Tc,
-        T0,
-        T1,
-        dMassMTSR,
-        dMassSR
-    );
+    calcSurfaceReactions(td, dt, celli, T0, T1, dMassMTSR, dMassSR);
 
     // New total mass
     const scalar mass1 = mass0 - sum(dMassMT) - dMassMTSR;
@@ -112,7 +120,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // Specific heat capacity of non-volatile components
     const scalar cpNonVolatile =
         (
-            YMixture_[1]*td.cloud().composition().cpLiquid(YLiquid_, pc, Tc)
+            YMixture_[1]*td.cloud().composition().cpLiquid(YLiquid_, pc_, this->Tc_)
           + YMixture_[2]*td.cloud().composition().cpSolid(YSolid_)
         )/(YMixture_[1] + YMixture_[2]);
 
@@ -129,18 +137,18 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // Transfer mass lost from particle to carrier mass source
     forAll(dMassMT, i)
     {
-        td.cloud().rhoTrans(i)[celli] +=
-            np0*(dMassMT[i] + dMassSR[i]);
+        td.cloud().rhoTrans(i)[celli] += np0*(dMassMT[i] + dMassSR[i]);
     }
 
     // Update momentum transfer
-    td.cloud().UTrans()[celli] += np0*(mass0*U0 - mass1*U1);
+    td.cloud().UTrans()[celli] += np0*dUTrans;
 
     // Accumulate coefficient to be applied in carrier phase momentum coupling
     td.cloud().UCoeff()[celli] += np0*mass0*Cud;
 
     // Update enthalpy transfer
-    td.cloud().hTrans()[celli] += np0*(mass0*cp0*T0 - mass1*cp1*T1);
+//    td.cloud().hTrans()[celli] += np0*(mass0*cp0*T0 - mass1*cp1*T1);
+    td.cloud().hTrans()[celli] += np0*((mass0*cp0 - mass1*cp1)*T0 + dhTrans);
 
     // Accumulate coefficient to be applied in carrier phase enthalpy coupling
     td.cloud().hCoeff()[celli] += np0*htc*this->areaS();
@@ -166,44 +174,48 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     else
     {
-        this->U() = U1;
-        this->T() = T1;
-        this->cp() = cp1;
+        this->U_ = U1;
+        this->T_ = T1;
+        this->cp_ = cp1;
 
         // Update particle density or diameter
         if (td.cloud().massTransfer().changesVolume())
         {
-            this->d() = cbrt(mass1/this->rho()*6.0/mathematicalConstant::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
         }
         else
         {
-            this->rho() = mass1/this->volume();
+            this->rho_ = mass1/this->volume();
         }
     }
 }
 
 
 template<class ParcelType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcUncoupled
 (
-    TrackingData& td,
-    const label celli,
+    TrackData& td,
     const scalar dt,
-    const scalar rhoc,
-    vector& Uc,
-    const scalar muc,
-    const scalar Tc,
-    const scalar cpc,
-    const scalar pc
+    const label celli
 )
 {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Define local properties at beginning of timestep
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const scalar T0 = this->T();
+    const scalar T0 = this->T_;
     const scalar mass0 = this->mass();
 //    const scalar cp0 = this->cp();
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Initialise transfer terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Momentum transfer from the particle to the carrier phase
+    vector dUTrans = vector::zero;
+
+    // Enthalpy transfer from the particle to the carrier phase
+    scalar dhTrans = 0.0;
 
     // Mass transfer from particle to carrier phase
     // - components exist in particle already
@@ -222,7 +234,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // Calculate heat transfer - update T
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
-    scalar T1 = calcHeatTransfer(td, celli, dt, rhoc, Uc, muc, Tc, cpc, htc);
+    scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
     // Limit new temp max by vapourisarion temperature
     T1 = min(td.constProps().Tvap(), T1);
@@ -231,8 +243,8 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate velocity - update U
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Fd = 0.0;
-    const vector U1 = calcVelocity(td, dt, rhoc, Uc, muc, Fd);
+    scalar Cud = 0.0;
+    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -249,8 +261,6 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
         td,
         dt,
         celli,
-        rhoc,
-        Tc,
         T0,
         T1,
         dMassMTSR,
@@ -268,7 +278,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // Specific heat capacity of non-volatile components
     const scalar cpNonVolatile =
         (
-            YMixture_[1]*td.cloud().composition().cpLiquid(YLiquid_, pc, Tc)
+            YMixture_[1]*td.cloud().composition().cpLiquid(YLiquid_, pc_, this->Tc_)
           + YMixture_[2]*td.cloud().composition().cpSolid(YSolid_)
         )/(YMixture_[1] + YMixture_[2]);
 
@@ -290,28 +300,28 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     else
     {
-        this->U() = U1;
-        this->T() = T1;
-        this->cp() = cp1;
+        this->U_ = U1;
+        this->T_ = T1;
+        this->cp_ = cp1;
 
         // Update particle density or diameter
         if (td.cloud().massTransfer().changesVolume())
         {
-            this->d() = cbrt(mass1/this->rho()*6.0/mathematicalConstant::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
         }
         else
         {
-            this->rho() = mass1/this->volume();
+            this->rho_ = mass1/this->volume();
         }
     }
 }
 
 
 template<class ParcelType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcMassTransfer
 (
-    TrackingData& td,
+    TrackData& td,
     const scalar dt,
     const scalar T0,
     const scalar T1,
@@ -333,8 +343,8 @@ void Foam::ReactingParcel<ParcelType>::calcMassTransfer
     if
     (
         !td.cloud().massTransfer().active()
-     || this->T()<td.constProps().Tvap()
-     || this->T()<td.constProps().Tbp()
+     || this->T_<td.constProps().Tvap()
+     || this->T_<td.constProps().Tbp()
     )
     {
         return;
@@ -371,14 +381,12 @@ void Foam::ReactingParcel<ParcelType>::calcMassTransfer
 
 
 template<class ParcelType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::calcSurfaceReactions
 (
-    TrackingData& td,
+    TrackData& td,
     const scalar dt,
     const label celli,
-    const scalar rhoc,
-    const scalar Tc,
     const scalar T0,
     const scalar T1,
     scalar& dMassMTSR,
@@ -397,11 +405,11 @@ void Foam::ReactingParcel<ParcelType>::calcSurfaceReactions
     (
         dt,
         celli,
-        this->d(),
+        this->d_,
         T0,
         T1,
-        Tc,
-        rhoc,
+        this->Tc_,
+        this->rhoc_,
         this->mass(),
         YGas_,
         YLiquid_,
@@ -414,92 +422,6 @@ void Foam::ReactingParcel<ParcelType>::calcSurfaceReactions
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class ParcelType>
-template<class TrackingData>
-bool Foam::ReactingParcel<ParcelType>::move
-(
-    TrackingData& td
-)
-{
-    td.switchProcessor = false;
-    td.keepParticle = true;
-
-    const polyMesh& mesh = td.cloud().pMesh();
-    const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
-
-    const scalar deltaT = mesh.time().deltaT().value();
-    scalar tEnd = (1.0 - this->stepFraction())*deltaT;
-    const scalar dtMax = tEnd;
-
-    while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
-    {
-        // Set the Lagrangian time-step
-        scalar dt = min(dtMax, tEnd);
-
-        // Remember which cell the parcel is in
-        // since this will change if a face is hit
-        label celli = this->cell();
-
-        dt *= trackToFace(this->position() + dt*this->U(), td);
-
-        tEnd -= dt;
-
-        this->stepFraction() = 1.0 - tEnd/deltaT;
-
-        // Avoid div0 in reacting sub-models
-        if (dt < SMALL)
-        {
-            break;
-        }
-
-        cellPointWeight cpw
-        (
-            mesh,
-            this->position(),
-            celli,
-            this->faceInterpolation()
-        );
-        scalar rhoc = td.rhoInterp().interpolate(cpw);
-        vector Uc = td.UInterp().interpolate(cpw);
-        scalar muc = td.muInterp().interpolate(cpw);
-        scalar Tc = td.TInterp().interpolate(cpw);
-        scalar cpc = td.cpInterp().interpolate(cpw);
-        scalar pc = td.pInterp().interpolate(cpw);
-
-        Uc = td.cloud().dispersion().update
-        (
-            dt,
-            celli,
-            this->U(),
-            Uc,
-            this->UTurb(),
-            this->tTurb()
-        );
-
-        if (td.cloud().coupled())
-        {
-            calcCoupled(td, celli, dt, rhoc, Uc, muc, Tc, cpc, pc);
-        }
-        else
-        {
-            calcUncoupled(td, celli, dt, rhoc, Uc, muc, Tc, cpc, pc);
-        }
-
-        if (this->onBoundary() && td.keepParticle)
-        {
-            if (this->face() > -1)
-            {
-                if (isType<processorPolyPatch>(pbMesh[this->patch(this->face())]))
-                {
-                    td.switchProcessor = true;
-                }
-            }
-        }
-    }
-
-    return td.keepParticle;
-}
 
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //

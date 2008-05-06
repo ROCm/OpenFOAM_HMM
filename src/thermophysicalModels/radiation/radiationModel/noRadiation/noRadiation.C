@@ -51,13 +51,9 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::radiation::noRadiation::noRadiation
-(
-    const fvMesh& mesh,
-    const basicThermo& thermo
-)
+Foam::radiation::noRadiation::noRadiation(const volScalarField& T)
 :
-    radiationModel(typeName, mesh, thermo)
+    radiationModel(typeName, T)
 {}
 
 
@@ -99,8 +95,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
             dimensionedScalar
             (
                 "Rp",
-                radiation::sigmaSB.dimensions()/dimLength
-                   *pow3(dimTemperature),
+                radiation::sigmaSB.dimensions()/dimLength,
                 0.0
             )
         )
@@ -108,11 +103,12 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Ru() const
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::radiation::noRadiation::Ru() const
 {
-    return tmp<volScalarField>
+    return tmp<DimensionedField<scalar, volMesh> >
     (
-        new volScalarField
+        new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
