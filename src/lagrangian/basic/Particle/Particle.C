@@ -39,7 +39,7 @@ template<class ParticleType>
 Foam::labelList Foam::Particle<ParticleType>::findFaces
 (
     const vector& position
-)
+) const
 {
     const polyMesh& mesh = cloud_.polyMesh_;
     const labelList& faces = mesh.cells()[celli_];
@@ -69,7 +69,7 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
     const vector& position,
     const label celli,
     const scalar stepFraction
-)
+) const
 {
     const polyMesh& mesh = cloud_.polyMesh_;
     const labelList& faces = mesh.cells()[celli];
@@ -94,11 +94,11 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::prepareForParallelTransfer
 (
     const label patchi,
-    TrackingData& td
+    TrackData& td
 )
 {
     // Convert the face index to be local to the processor patch
@@ -107,11 +107,11 @@ void Foam::Particle<ParticleType>::prepareForParallelTransfer
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 (
     const label patchi,
-    TrackingData& td
+    TrackData& td
 )
 {
     const processorPolyPatch& ppp =
@@ -156,7 +156,15 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
     }
 
     // Reset the face index for the next tracking operation
-    facei_ = -1;
+    if (stepFraction_ > (1.0 - SMALL))
+    {
+        stepFraction_ = 1.0;
+        facei_ = -1;
+    }
+    else
+    {
+        facei_ += ppp.start();
+    }
 }
 
 
@@ -181,11 +189,11 @@ Foam::Particle<ParticleType>::Particle
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 Foam::label Foam::Particle<ParticleType>::track
 (
     const vector& endPosition,
-    TrackingData& td
+    TrackData& td
 )
 {
     facei_ = -1;
@@ -200,6 +208,7 @@ Foam::label Foam::Particle<ParticleType>::track
 }
 
 
+
 template<class ParticleType>
 Foam::label Foam::Particle<ParticleType>::track(const vector& endPosition)
 {
@@ -207,13 +216,12 @@ Foam::label Foam::Particle<ParticleType>::track(const vector& endPosition)
     return track(endPosition, dummyTd);
 }
 
-
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 Foam::scalar Foam::Particle<ParticleType>::trackToFace
 (
     const vector& endPosition,
-    TrackingData& td
+    TrackData& td
 )
 {
     const polyMesh& mesh = cloud_.polyMesh_;
@@ -301,8 +309,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             {
                 FatalErrorIn
                 (
-                    "Particle::trackToFace"
-                    "(const vector&, TrackingData&)"
+                    "Particle::trackToFace(const vector&, TrackData&)"
                 )<< "addressing failure" << nl
                  << abort(FatalError);
             }
@@ -389,7 +396,6 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     return trackFraction;
 }
 
-
 template<class ParticleType>
 Foam::scalar Foam::Particle<ParticleType>::trackToFace
 (
@@ -399,7 +405,6 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     int dummyTd;
     return trackToFace(endPosition, dummyTd);
 }
-
 
 template<class ParticleType>
 void Foam::Particle<ParticleType>::transformPosition(const tensor& T)
@@ -419,11 +424,11 @@ void Foam::Particle<ParticleType>::transformProperties(const vector&)
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::hitWedgePatch
 (
     const wedgePolyPatch& wpp,
-    TrackingData&
+    TrackData&
 )
 {
     vector nf = wpp.faceAreas()[wpp.whichFace(facei_)];
@@ -434,11 +439,11 @@ void Foam::Particle<ParticleType>::hitWedgePatch
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::hitSymmetryPatch
 (
     const symmetryPolyPatch& spp,
-    TrackingData&
+    TrackData&
 )
 {
     vector nf = spp.faceAreas()[spp.whichFace(facei_)];
@@ -449,11 +454,11 @@ void Foam::Particle<ParticleType>::hitSymmetryPatch
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::hitCyclicPatch
 (
     const cyclicPolyPatch& cpp,
-    TrackingData&
+    TrackData&
 )
 {
     label patchFacei_ = cpp.whichFace(facei_);
@@ -481,31 +486,31 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::hitProcessorPatch
 (
     const processorPolyPatch& spp,
-    TrackingData& td
+    TrackData& td
 )
 {}
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::hitWallPatch
 (
     const wallPolyPatch& spp,
-    TrackingData&
+    TrackData&
 )
 {}
 
 
 template<class ParticleType>
-template<class TrackingData>
+template<class TrackData>
 void Foam::Particle<ParticleType>::hitPatch
 (
     const polyPatch& spp,
-    TrackingData&
+    TrackData&
 )
 {}
 

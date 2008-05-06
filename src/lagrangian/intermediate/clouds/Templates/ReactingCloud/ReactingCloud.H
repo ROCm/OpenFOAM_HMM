@@ -27,7 +27,6 @@ Class
 
 Description
     Templated base class for reactive cloud
-
     - Adds to kinematic cloud
       - Heat transfer
 
@@ -115,6 +114,13 @@ class ReactingCloud
         void operator=(const ReactingCloud&);
 
 
+protected:
+
+    //- Inject more parcels
+    template<class TrackingData>
+    void inject(TrackingData& td);
+
+
 public:
 
     //- Runtime type information
@@ -136,7 +142,7 @@ public:
         );
 
 
-    // Destructors
+    // Destructor
 
         virtual ~ReactingCloud();
 
@@ -182,50 +188,24 @@ public:
                     inline PtrList<DimensionedField<scalar, volMesh> >&
                         rhoTrans();
 
-                    //- Retun tmp mass source for field i
+                    //- Return tmp mass source for field i
+                    //  Fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho(const label i) const;
+                        Srho1(const label i) const;
 
-                    //- Retun tmp total mass source for carrier phase
+                    //- Return tmp total mass source for carrier phase
+                    //  Fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho() const;
+                        Srho1() const;
 
 
-        // Check
-
-            //- Post-injection checks
-            void postInjectCheck();
-
-
-        // Edit
+        // Cloud evolution functions
 
             //- Reset the spray source terms
             void resetSourceTerms();
 
             //- Evolve the spray (move, inject)
             void evolve();
-
-            //- Move the parcels
-            template<class TrackingData>
-            void move
-            (
-                TrackingData& td
-            );
-
-            //- Inject parcel if it is valid - delete otherwise
-            template<class TrackingData>
-            void injectParcel
-            (
-                TrackingData& td,
-                ParcelType* p
-            );
-
-            //- Inject more parcels
-            template<class TrackingData>
-            void inject
-            (
-                TrackingData& td
-            );
 };
 
 

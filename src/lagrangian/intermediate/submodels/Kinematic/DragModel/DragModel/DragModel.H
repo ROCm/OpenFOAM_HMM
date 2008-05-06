@@ -25,6 +25,7 @@ License
 Class
     Foam::DragModel
 
+
 Description
     Templated drag model class
 
@@ -121,10 +122,7 @@ public:
         virtual bool active() const = 0;
 
         //- Return drag coefficient
-        virtual scalar Cd
-        (
-            const scalar Re
-        ) const = 0;
+        virtual scalar Cd(const scalar Re) const = 0;
 
         //- Return linearised coefficient for velocity equation
         //  Drag force per unit particle mass = Cu(U - Up)

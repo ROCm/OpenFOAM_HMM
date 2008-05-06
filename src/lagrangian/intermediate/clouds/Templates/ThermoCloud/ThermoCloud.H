@@ -27,7 +27,6 @@ Class
 
 Description
     Templated base class for thermodynamic cloud
-
     - Adds to kinematic cloud
       - Heat transfer
 
@@ -87,6 +86,12 @@ class ThermoCloud
                 heatTransferModel_;
 
 
+        // Reference to the particle integration schemes
+
+            //- Temperature integration
+            autoPtr<scalarIntegrationScheme> TIntegrator_;
+
+
         // Modelling options
 
             //- Include radiation
@@ -111,6 +116,13 @@ class ThermoCloud
         void operator=(const ThermoCloud&);
 
 
+protected:
+
+    //- Inject more parcels
+    template<class TrackingData>
+    void inject(TrackingData& td);
+
+
 public:
 
     //- Runtime type information
@@ -131,7 +143,7 @@ public:
         );
 
 
-    // Destructors
+    // Destructor
 
         virtual ~ThermoCloud();
 
@@ -154,6 +166,12 @@ public:
                     heatTransfer() const;
 
 
+            // Integration schemes
+
+                //-Return reference to velocity integration
+                inline const scalarIntegrationScheme& TIntegrator() const;
+
+
             // Modelling options
 
                 //- Radiation flag
@@ -170,8 +188,11 @@ public:
                     //- Coefficient for carrier phase h equation
                     inline DimensionedField<scalar, volMesh>& hCoeff();
 
-                    //- Enthalpy source term
-                    inline tmp<fvScalarMatrix> Sh(volScalarField& h) const;
+                    //- return tmp enthalpy source term - fully explicit
+                    inline tmp<DimensionedField<scalar, volMesh> > Sh1() const;
+
+                    //- Return tmp enthalpy source term - semi-implicit
+                    inline tmp<fvScalarMatrix> Sh2(volScalarField& h) const;
 
 
                 // Radiation - overrides thermoCloud virtual abstract members
@@ -186,48 +207,13 @@ public:
                     inline tmp<volScalarField> sigmap() const;
 
 
-        // Check
-
-            //- Post-injection checks
-            void postInjectCheck();
-
-
-        // Edit
-
-            //- Reset the spray source terms
-            void resetSourceTerms();
+        // Cloud evolution functions
 
             //- Evolve the spray (move, inject)
             void evolve();
 
-
-        // Tracking
-
-            //- Move the particles under the influence of the given
-            //  gravitational acceleration
-            template<class TrackingData>
-            void move
-            (
-                TrackingData& td
-            );
-
-
-        // Injection
-
-            //- Inject parcel if it is valid - delete otherwise
-            template<class TrackingData>
-            void injectParcel
-            (
-                TrackingData& td,
-                ParcelType* p
-            );
-
-            //- Inject more parcels
-            template<class TrackingData>
-            void inject
-            (
-                TrackingData& td
-            );
+            //- Reset the spray source terms
+            void resetSourceTerms();
 };
 
 

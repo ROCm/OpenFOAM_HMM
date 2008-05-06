@@ -26,7 +26,8 @@ Class
     Foam::radiation::constantAbsorptionEmission
 
 Description
-    Constant radiation absorption and emission coefficients
+    Constant radiation absorption and emission coefficients for continuous
+    phase
 
 SourceFiles
     constantAbsorptionEmission.C
@@ -92,18 +93,24 @@ public:
 
     // Member Operators
 
-        // Edit
-
         // Access
 
-            //- Return absorption coefficient
-            tmp<volScalarField> a() const;
+            // Absorption coefficient
 
-            //- Return emission coefficient
-            tmp<volScalarField> e() const;
+                //- Absorption coefficient for continuous phase
+                tmp<volScalarField> aCont() const;
 
-            //- Return emission contribution
-            tmp<volScalarField> E() const;
+
+            // Emission coefficient
+
+                //- Emission coefficient for continuous phase
+                tmp<volScalarField> eCont() const;
+
+
+            // Emission contribution
+
+                //- Emission contribution for continuous phase
+                tmp<volScalarField> ECont() const;
 };
 
 

@@ -43,12 +43,12 @@ inline Foam::ReactingParcel<ParcelType>::trackData::trackData
 (
     ReactingCloud<ParcelType>& cloud,
     const constantProperties& constProps,
-    const interpolationCellPoint<scalar>& rhoInterp,
-    const interpolationCellPoint<vector>& UInterp,
-    const interpolationCellPoint<scalar>& muInterp,
-    const interpolationCellPoint<scalar>& TInterp,
-    const interpolationCellPoint<scalar>& CpInterp,
-    const interpolationCellPoint<scalar>& pInterp,
+    const interpolation<scalar>& rhoInterp,
+    const interpolation<vector>& UInterp,
+    const interpolation<scalar>& muInterp,
+    const interpolation<scalar>& TInterp,
+    const interpolation<scalar>& CpInterp,
+    const interpolation<scalar>& pInterp,
     const vector& g
 )
 :
@@ -101,7 +101,8 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     YMixture_(YMixture0),
     YGas_(YGas0),
     YLiquid_(YLiquid0),
-    YSolid_(YSolid0)
+    YSolid_(YSolid0),
+    pc_(0.0)
 {
     // Set initial parcel mass
     mass0_ = this->mass();
@@ -145,7 +146,7 @@ Foam::ReactingParcel<ParcelType>::trackData::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::interpolationCellPoint<Foam::scalar>&
+inline const Foam::interpolation<Foam::scalar>&
 Foam::ReactingParcel<ParcelType>::trackData::pInterp() const
 {
     return pInterp_;

@@ -53,6 +53,14 @@ Foam::ThermoCloud<ParcelType>::heatTransfer() const
 
 
 template<class ParcelType>
+inline const Foam::scalarIntegrationScheme&
+Foam::ThermoCloud<ParcelType>::TIntegrator() const
+{
+    return TIntegrator_;
+}
+
+
+template<class ParcelType>
 inline const bool Foam::ThermoCloud<ParcelType>::radiation() const
 {
     return radiation_;
@@ -76,17 +84,54 @@ Foam::ThermoCloud<ParcelType>::hCoeff()
 
 
 template<class ParcelType>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::ThermoCloud<ParcelType>::Sh1() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tSh1
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "Sh1",
+                this->db().time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar
+            (
+                "zero",
+                dimMass/dimLength/pow3(dimTime),
+                0.0
+            )
+        )
+    );
+
+    scalarField& Sh1 = tSh1().field();
+    Sh1 = hTrans_/(this->mesh().V()*this->db().time().deltaT());
+
+    return tSh1;
+}
+
+
+template<class ParcelType>
 inline Foam::tmp<Foam::fvScalarMatrix>
-Foam::ThermoCloud<ParcelType>::Sh(volScalarField& h) const
+Foam::ThermoCloud<ParcelType>::Sh2(volScalarField& h) const
 {
     const volScalarField cp = carrierThermo_.Cp();
 
-    Info<< "hTrans min/max = "
-        << min(hTrans_) << ", " << max(hTrans_) << endl;
-    Info<< "hCoeff min/max = "
-        << min(hCoeff_) << ", " << max(hCoeff_) << endl;
+    if (debug)
+    {
+        Info<< "hTrans min/max = "
+            << min(hTrans_) << ", " << max(hTrans_) << endl;
+        Info<< "hCoeff min/max = "
+            << min(hCoeff_) << ", " << max(hCoeff_) << endl;
+    }
 
-    return hTrans_/(this->mesh().V()*this->runTime().deltaT())
+    return hTrans_/(this->mesh().V()*this->db().time().deltaT())
          - fvm::Sp(hCoeff_/(cp*this->mesh().V()), h)
          + hCoeff_/(cp*this->mesh().V())*h;
 }
@@ -102,30 +147,34 @@ Foam::ThermoCloud<ParcelType>::Ep() const
         (
             IOobject
             (
-                this->cloudName() + "radiationEp",
-                this->runTime().timeName(),
+                this->name() + "radiationEp",
+                this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0.0)
+            dimensionedScalar("zero", dimMass/dimLength/pow3(dimTime), 0.0)
         )
     );
 
-    scalarField& Ep = tEp().internalField();
-    const scalarField& V = this->pMesh().cellVolumes();
-    const scalar epsilon = constProps_.epsilon0();
-
-    forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+    // Need to check if coupled as field is created on-the-fly
+    if (radiation_ && this->coupled())
     {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-        Ep[cellI] += p.nParticle()*p.areaP()*pow4(p.T());
-    }
+        scalarField& Ep = tEp().internalField();
+        const scalarField& V = this->mesh().V();
+        const scalar epsilon = constProps_.epsilon0();
 
-    Ep *= epsilon*radiation::sigmaSB.value()/(V*mathematicalConstant::pi);
+        forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+        {
+            const ParcelType& p = iter();
+            const label cellI = p.cell();
+            Ep[cellI] += p.nParticle()*p.areaP()*pow4(p.T());
+        }
+
+        Ep *= epsilon*radiation::sigmaSB.value()/V;
+    }
 
     return tEp;
 }
@@ -141,30 +190,34 @@ Foam::ThermoCloud<ParcelType>::ap() const
         (
             IOobject
             (
-                this->cloudName() + "radiationAp",
-                this->runTime().timeName(),
+                this->name() + "radiationAp",
+                this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimensionSet(0, -1, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
         )
     );
 
-    scalarField& ap = tap().internalField();
-    const scalarField& V = this->pMesh().cellVolumes();
-    const scalar epsilon = constProps_.epsilon0();
-
-    forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+    // Need to check if coupled as field is created on-the-fly
+    if (radiation_ && this->coupled())
     {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-        ap[cellI] += p.nParticle()*p.areaP();
-    }
+        scalarField& ap = tap().internalField();
+        const scalarField& V = this->mesh().V();
+        const scalar epsilon = constProps_.epsilon0();
 
-    ap *= epsilon/V;
+        forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+        {
+            const ParcelType& p = iter();
+            const label cellI = p.cell();
+            ap[cellI] += p.nParticle()*p.areaP();
+        }
+
+        ap *= epsilon/V;
+    }
 
     return tap;
 }
@@ -180,32 +233,36 @@ Foam::ThermoCloud<ParcelType>::sigmap() const
         (
             IOobject
             (
-                this->cloudName() + "radiationSigmap",
-                this->runTime().timeName(),
+                this->name() + "radiationSigmap",
+                this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimensionSet(0, -1, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
         )
     );
 
-    scalarField& sigmap = tsigmap().internalField();
-
-    const scalarField& V = this->pMesh().cellVolumes();
-    const scalar epsilon = constProps_.epsilon0();
-    const scalar f = constProps_.f0();
-
-    forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+    // Need to check if coupled as field is created on-the-fly
+    if (radiation_ && this->coupled())
     {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-        sigmap[cellI] += p.nParticle()*p.areaP();
-    }
+        scalarField& sigmap = tsigmap().internalField();
 
-    sigmap *= (1.0 - f)*(1.0 - epsilon)/V;
+        const scalarField& V = this->mesh().V();
+        const scalar epsilon = constProps_.epsilon0();
+        const scalar f = constProps_.f0();
+
+        forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+        {
+            const ParcelType& p = iter();
+            const label cellI = p.cell();
+            sigmap[cellI] += p.nParticle()*p.areaP();
+        }
+
+        sigmap *= (1.0 - f)*(1.0 - epsilon)/V;
+    }
 
     return tsigmap;
 }

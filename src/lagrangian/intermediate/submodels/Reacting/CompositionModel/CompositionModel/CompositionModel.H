@@ -25,9 +25,9 @@ License
 Class
     Foam::CompositionModel
 
-Description
-    Templated reacting parcel composition model class.
 
+Description
+    Templated reacting parcel composition model class
     Consists of gases (via thermo package), liquids and solids
 
 SourceFiles

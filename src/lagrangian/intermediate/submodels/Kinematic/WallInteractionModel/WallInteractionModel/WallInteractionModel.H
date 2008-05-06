@@ -25,6 +25,7 @@ License
 Class
     Foam::WallInteractionModel
 
+
 Description
     Templated wall interaction model class
 

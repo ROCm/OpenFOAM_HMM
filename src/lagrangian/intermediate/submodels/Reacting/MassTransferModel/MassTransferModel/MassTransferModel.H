@@ -25,6 +25,7 @@ License
 Class
     Foam::MassTransferModel
 
+
 Description
     Templated mass transfer model class
 

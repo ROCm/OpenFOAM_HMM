@@ -46,8 +46,7 @@ namespace Foam
 Foam::radiation::radiationModel::radiationModel
 (
     const word& type,
-    const fvMesh& mesh,
-    const basicThermo& thermo
+    const volScalarField& T
 )
 :
     IOdictionary
@@ -55,18 +54,18 @@ Foam::radiation::radiationModel::radiationModel
         IOobject
         (
             "radiationProperties",
-            mesh.time().constant(),
-            mesh.db(),
+            T.mesh().time().constant(),
+            T.mesh().db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
-    thermo_(thermo),
-    mesh_(mesh),
+    T_(T),
+    mesh_(T.mesh()),
     radiation_(lookup("radiation")),
     radiationModelCoeffs_(subDict(type + "Coeffs")),
     absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
-    scatter_(scatterModel::New(*this, mesh))
+    scatter_(scatterModel::New(*this, mesh_))
 {}
 
 
@@ -96,18 +95,18 @@ bool Foam::radiation::radiationModel::read()
 
 Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Sh
 (
-    volScalarField& h
+    basicThermo& thermo
 ) const
 {
-    const volScalarField cp = thermo_.Cp();
-    const volScalarField& T = thermo_.T();
-    const volScalarField T3 = pow3(T);
+    volScalarField& h = thermo.h();
+    const volScalarField cp = thermo.Cp();
+    const volScalarField T3 = pow3(T_);
 
     return
     (
         Ru()
-      - fvm::Sp(Rp()*T3/cp, h)
-      - Rp()*T3*(T - h/cp)
+      - fvm::Sp(4.0*Rp()*T3/cp, h)
+      - Rp()*T3*(T_ - 4.0*h/cp)
     );
 }
 

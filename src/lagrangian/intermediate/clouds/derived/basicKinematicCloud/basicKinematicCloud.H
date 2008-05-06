@@ -37,7 +37,7 @@ SourceFiles
 #define basicKinematicCloud_H
 
 #include "KinematicCloud.H"
-#include "kinematicParcel.H"
+#include "basicKinematicParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ namespace Foam
 
 class basicKinematicCloud
 :
-    public KinematicCloud<kinematicParcel>
+    public KinematicCloud<basicKinematicParcel>
 {
 
     // Private member functions
@@ -82,35 +82,15 @@ public:
         );
 
 
-    // Destructors
+    //- Destructor
 
         ~basicKinematicCloud();
 
 
     // Member functions
 
-        // Edit
-
-            //- Evolve the spray (move, inject)
-            void evolve();
-
-            //- Move the parcels
-            void move
-            (
-                KinematicParcel<kinematicParcel>::trackData& td
-            );
-
-            //- Inject more parcels
-            void inject
-            (
-                KinematicParcel<kinematicParcel>::trackData& td
-            );
-
-
-        // I-O
-
-            //- Write fields
-            void writeFields() const;
+        //- Write fields
+        void writeFields() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

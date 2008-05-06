@@ -26,7 +26,6 @@ Class
     Foam::basicReactingCloud
 
 Description
-    The basicReactingCloud
 
 SourceFiles
     basicReactingCloud.C
@@ -37,7 +36,7 @@ SourceFiles
 #define basicReactingCloud_H
 
 #include "ReactingCloud.H"
-#include "reactingParcel.H"
+#include "basicReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +49,7 @@ namespace Foam
 
 class basicReactingCloud
 :
-    public ReactingCloud<reactingParcel>
+    public ReactingCloud<basicReactingParcel>
 {
 
     // Private Member Functions
@@ -67,6 +66,7 @@ public:
     //- Runtime type information
     TypeName("basicReactingCloud");
 
+
     // Constructors
 
         //- Construct given carrier gas fields
@@ -82,30 +82,15 @@ public:
         );
 
 
+    //- Destructor
+
+        ~basicReactingCloud();
+
+
     // Member Functions
 
-        // Edit
-
-            //- Evolve the spray (move, inject)
-            void evolve();
-
-            //- Move the parcels
-            void move
-            (
-                ReactingParcel<reactingParcel>::trackData& td
-            );
-
-            //- Inject more parcels
-            void inject
-            (
-                ReactingParcel<reactingParcel>::trackData& td
-            );
-
-
-        // I-O
-
-            //- Write fields
-            void writeFields() const;
+        //- Write fields
+        void writeFields() const;
 };
 
 

@@ -40,7 +40,7 @@ inline scalar Particle<ParticleType>::lambda
     const vector& to,
     const label facei,
     const scalar stepFraction
-)
+) const
 {
     const polyMesh& mesh = cloud_.polyMesh_;
     bool movingMesh = mesh.moving();
@@ -71,7 +71,6 @@ inline scalar Particle<ParticleType>::lambda
 
         // for a moving mesh we need to reconstruct the old
         // Sf and Cf from oldPoints (they aren't stored)
-        // NN.
 
         const vectorField& oldPoints = mesh.oldPoints();
 
@@ -100,7 +99,7 @@ inline scalar Particle<ParticleType>::lambda
             // find center of rotation
             vector omega = Sf0 ^ Sf;
             scalar magOmega = mag(omega);
-            omega /= magOmega+SMALL;
+            omega /= magOmega + SMALL;
             vector n0 = omega ^ Sf0;
             scalar lam = ((Cf - Cf0) & Sf)/(n0 & Sf);
             vector r0 = Cf0 + lam*n0;
@@ -188,7 +187,7 @@ inline scalar Particle<ParticleType>::lambda
     const vector& from,
     const vector& to,
     const label facei
-)
+) const
 {
     const polyMesh& mesh = cloud_.polyMesh_;
 
@@ -235,7 +234,7 @@ inline scalar Particle<ParticleType>::lambda
 
 
 template<class ParticleType>
-inline bool Particle<ParticleType>::inCell()
+inline bool Particle<ParticleType>::inCell() const
 {
     labelList faces = findFaces(position_);
 
@@ -249,7 +248,7 @@ inline bool Particle<ParticleType>::inCell
     const vector& position,
     const label celli,
     const scalar stepFraction
-)
+) const
 {
     labelList faces = findFaces(position, celli, stepFraction);
 
@@ -277,7 +276,6 @@ inline Cloud<ParticleType>& Particle<ParticleType>::trackData::cloud()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return reference to the particle cloud
 template<class ParticleType>
 inline const Cloud<ParticleType>& Particle<ParticleType>::cloud() const
 {
@@ -313,7 +311,6 @@ inline label Particle<ParticleType>::face() const
 }
 
 
-//- Is the particle on a boundary face?
 template<class ParticleType>
 inline bool Particle<ParticleType>::onBoundary() const
 {

@@ -46,7 +46,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
         IOobject
         (
             positionsFile_,
-            owner.runTime().constant(),
+            owner.db().time().constant(),
             owner.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE

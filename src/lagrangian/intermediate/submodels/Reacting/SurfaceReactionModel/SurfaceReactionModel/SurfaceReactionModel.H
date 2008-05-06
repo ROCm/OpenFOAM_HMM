@@ -25,6 +25,7 @@ License
 Class
     Foam::SurfaceReactionModel
 
+
 Description
     Templated surface reaction model class
 

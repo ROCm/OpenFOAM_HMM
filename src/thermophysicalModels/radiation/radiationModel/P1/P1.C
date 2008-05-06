@@ -53,13 +53,9 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::radiation::P1::P1
-(
-    const fvMesh& mesh,
-    const basicThermo& thermo
-)
+Foam::radiation::P1::P1(const volScalarField& T)
 :
-    radiationModel(typeName, mesh, thermo),
+    radiationModel(typeName, T),
     G_
     (
         IOobject
@@ -143,12 +139,10 @@ void Foam::radiation::P1::correct()
     {
         return;
     }
-
     a_ = absorptionEmission_->a();
     e_ = absorptionEmission_->e();
     E_ = absorptionEmission_->E();
     const volScalarField sigmaEff = scatter_->sigmaEff();
-    const volScalarField& T = thermo_.T();
 
     // Construct diffusion
     const volScalarField gamma
@@ -170,7 +164,7 @@ void Foam::radiation::P1::correct()
         fvm::laplacian(gamma, G_)
       - fvm::Sp(a_, G_)
      ==
-      - 4.0*(e_*radiation::sigmaSB*pow4(T) + mathematicalConstant::pi*E_)
+      - 4.0*(e_*radiation::sigmaSB*pow4(T_) + E_)
     );
 }
 
@@ -187,17 +181,26 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::P1::Rp() const
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
-            4.0*e_*radiation::sigmaSB
+            4.0*absorptionEmission_->eCont()*radiation::sigmaSB
         )
     );
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::P1::Ru() const
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::radiation::P1::Ru() const
 {
-    return a_*G_ - 4.0*mathematicalConstant::pi*E_;
+    const DimensionedField<scalar, volMesh>& G =
+        G_.dimensionedInternalField();
+    const DimensionedField<scalar, volMesh> E =
+        absorptionEmission_->ECont()().dimensionedInternalField();
+    const DimensionedField<scalar, volMesh> a =
+        absorptionEmission_->aCont()().dimensionedInternalField();
+
+    return  a*G - 4.0*E;
 }
 
 

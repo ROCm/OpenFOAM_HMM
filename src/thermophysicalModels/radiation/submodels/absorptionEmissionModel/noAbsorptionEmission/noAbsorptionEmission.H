@@ -54,12 +54,6 @@ class noAbsorptionEmission
     public absorptionEmissionModel
 {
 
-    // Private data
-
-        //- Coefficients dictionary
-        dictionary coeffsDict_;
-
-
 public:
 
     //- Runtime type information
@@ -79,22 +73,6 @@ public:
     // Destructor
 
         ~noAbsorptionEmission();
-
-
-    // Member Operators
-
-        // Edit
-
-        // Access
-
-            //- Return absorption coefficient
-            tmp<volScalarField> a() const;
-
-            //- Return emission coefficient
-            tmp<volScalarField> e() const;
-
-            //- Return emission contribution
-            tmp<volScalarField> E() const;
 };
 
 

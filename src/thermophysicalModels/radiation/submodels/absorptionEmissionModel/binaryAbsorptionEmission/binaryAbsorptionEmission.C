@@ -74,21 +74,45 @@ Foam::radiation::binaryAbsorptionEmission::~binaryAbsorptionEmission()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::binaryAbsorptionEmission::a() const
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::binaryAbsorptionEmission::aCont() const
 {
-    return model1_->a() + model2_->a();
+    return model1_->aCont() + model2_->aCont();
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::binaryAbsorptionEmission::e() const
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::binaryAbsorptionEmission::aDisp() const
 {
-    return model1_->e() + model2_->e();
+    return model1_->aDisp() + model2_->aDisp();
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::binaryAbsorptionEmission::E() const
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::binaryAbsorptionEmission::eCont() const
 {
-    return model1_->E() + model2_->E();
+    return model1_->eCont() + model2_->eCont();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::binaryAbsorptionEmission::eDisp() const
+{
+    return model1_->eDisp() + model2_->eDisp();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::binaryAbsorptionEmission::ECont() const
+{
+    return model1_->ECont() + model2_->ECont();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::binaryAbsorptionEmission::EDisp() const
+{
+    return model1_->EDisp() + model2_->EDisp();
 }
 
 

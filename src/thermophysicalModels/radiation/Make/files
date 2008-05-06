@@ -24,8 +24,8 @@ submodels/absorptionEmissionModel/binaryAbsorptionEmission/binaryAbsorptionEmiss
 
 
 /* Boundary conditions */
-boundaryConditions/MarshakRadiation/MarshakRadiationMixedFvPatchScalarField.C
-boundaryConditions/MarshakRadiationFixedT/MarshakRadiationFixedTMixedFvPatchScalarField.C
+derivedFvPatchFields/MarshakRadiation/MarshakRadiationMixedFvPatchScalarField.C
+derivedFvPatchFields/MarshakRadiationFixedT/MarshakRadiationFixedTMixedFvPatchScalarField.C
 
 
 LIB = $(FOAM_LIBBIN)/libradiation

@@ -30,6 +30,8 @@ License
 #include "InjectionModel.H"
 #include "WallInteractionModel.H"
 
+#include "IntegrationScheme.H"
+
 #include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
@@ -153,7 +155,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     kinematicCloud(),
     cloudType_(cloudType),
     mesh_(rho.mesh()),
-    runTime_(rho.time()),
     vpi_(vpi),
     particleProperties_
     (
@@ -170,7 +171,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
     rndGen_(label(0)),
-    time0_(runTime_.value()),
+    time0_(this->db().time().value()),
     parcelBasisType_(particleProperties_.lookup("parcelBasisType")),
     parcelBasis_(pbNumber),
     massTotal_
@@ -182,6 +183,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     U_(U),
     mu_(mu),
     g_(g),
+    interpolationSchemes_(particleProperties_.subDict("interpolationSchemes")),
     dispersionModel_
     (
         DispersionModel<KinematicCloud<ParcelType> >::New
@@ -214,6 +216,14 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
+    UIntegrator_
+    (
+        vectorIntegrationScheme::New
+        (
+            "U",
+            particleProperties_.subDict("integrationSchemes")
+        )
+    ),
     nInjections_(0),
     nParcelsAdded_(0),
     nParcelsAddedTotal_(0),
@@ -221,8 +231,8 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         IOobject
         (
-            this->cloudName() + "UTrans",
-            runTime_.timeName(),
+            this->name() + "UTrans",
+            this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -235,8 +245,8 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         IOobject
         (
-            this->cloudName() + "UCoeff",
-            runTime_.timeName(),
+            this->name() + "UCoeff",
+            this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -288,17 +298,37 @@ void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
-    interpolationCellPoint<scalar> rhoInterp(vpi_, rho_);
-    interpolationCellPoint<vector> UInterp(vpi_, U_);
-    interpolationCellPoint<scalar> muInterp(vpi_, mu_);
+    autoPtr<interpolation<scalar> > rhoInterpolator =
+        interpolation<scalar>::New
+        (
+            interpolationSchemes_,
+            vpi_,
+            rho_
+        );
+
+    autoPtr<interpolation<vector> > UInterpolator =
+        interpolation<vector>::New
+        (
+            interpolationSchemes_,
+            vpi_,
+            U_
+        );
+
+    autoPtr<interpolation<scalar> > muInterpolator =
+        interpolation<scalar>::New
+        (
+            interpolationSchemes_,
+            vpi_,
+            mu_
+        );
 
     typename ParcelType::trackData td
     (
         *this,
         constProps_,
-        rhoInterp,
-        UInterp,
-        muInterp,
+        rhoInterpolator(),
+        UInterpolator(),
+        muInterpolator(),
         g_.value()
     );
 
@@ -330,7 +360,7 @@ void Foam::KinematicCloud<ParcelType>::inject
     TrackingData& td
 )
 {
-    scalar time = runTime_.value();
+    scalar time = this->db().time().value();
 
     scalar pRho = td.constProps().rho0();
 
@@ -363,7 +393,7 @@ void Foam::KinematicCloud<ParcelType>::inject
     // Duration of injection period during this timestep
     scalar deltaT = min
     (
-        runTime().deltaT().value(),
+        this->db().time().deltaT().value(),
         min
         (
             time - this->injection().timeStart(),
@@ -430,8 +460,8 @@ void Foam::KinematicCloud<ParcelType>::inject
 
             scalar dt = time - timeInj;
 
-            pPtr->stepFraction() = (runTime_.deltaT().value() - dt)
-                /runTime_.deltaT().value();
+            pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
+                /this->time().deltaT().value();
 
             this->injectParcel(td, pPtr);
          }
@@ -466,7 +496,7 @@ void Foam::KinematicCloud<ParcelType>::postInjectCheck()
 {
     if (nParcelsAdded_)
     {
-        Pout<< "\n--> Cloud: " << this->cloudName() << nl <<
+        Pout<< "\n--> Cloud: " << this->name() << nl <<
                "    Added " << nParcelsAdded_ <<  " new parcels" << nl << endl;
     }
 
@@ -474,7 +504,7 @@ void Foam::KinematicCloud<ParcelType>::postInjectCheck()
     nParcelsAdded_ = 0;
 
     // Set time for start of next injection
-    time0_ = runTime_.value();
+    time0_ = this->db().time().value();
 
     // Increment number of injections
     nInjections_++;
@@ -484,7 +514,7 @@ void Foam::KinematicCloud<ParcelType>::postInjectCheck()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
-    Info<< "Cloud name: " << this->cloudName() << nl
+    Info<< "Cloud name: " << this->name() << nl
         << "    Parcels added during this run   = "
         << returnReduce(nParcelsAddedTotal_, sumOp<label>()) << nl
         << "    Mass introduced during this run = "
@@ -502,8 +532,8 @@ void Foam::KinematicCloud<ParcelType>::dumpParticlePositions() const
 {
     OFstream pObj
     (
-        this->runTime().path()/"parcelPositions_"
-      + this->cloudName() + "_"
+        this->db().time().path()/"parcelPositions_"
+      + this->name() + "_"
       + name(this->nInjections_) + ".obj"
     );
 

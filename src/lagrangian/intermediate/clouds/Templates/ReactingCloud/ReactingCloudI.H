@@ -92,15 +92,15 @@ Foam::ReactingCloud<ParcelType>::rhoTrans()
 
 template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ReactingCloud<ParcelType>::Srho(const label i) const
+Foam::ReactingCloud<ParcelType>::Srho1(const label i) const
 {
-    return rhoTrans_[i]/(this->runTime().deltaT()*this->mesh().V());
+    return rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
 }
 
 
 template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ReactingCloud<ParcelType>::Srho() const
+Foam::ReactingCloud<ParcelType>::Srho1() const
 {
     tmp<DimensionedField<scalar, volMesh> > trhoTrans
     (
@@ -108,8 +108,8 @@ Foam::ReactingCloud<ParcelType>::Srho() const
         (
             IOobject
             (
-                this->cloudName() + "rhoTrans",
-                this->runTime().timeName(),
+                this->name() + "rhoTrans",
+                this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
@@ -120,13 +120,13 @@ Foam::ReactingCloud<ParcelType>::Srho() const
         )
     );
 
-    DimensionedField<scalar, volMesh>& sourceField = trhoTrans();
+    scalarField& sourceField = trhoTrans().field();
     forAll (rhoTrans_, i)
     {
         sourceField += rhoTrans_[i];
     }
 
-    return trhoTrans/(this->runTime().deltaT()*this->mesh().V());
+    return trhoTrans/(this->db().time().deltaT()*this->mesh().V());
 }
 
 // ************************************************************************* //

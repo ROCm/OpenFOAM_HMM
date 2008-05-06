@@ -26,7 +26,6 @@ Class
     Foam::passiveParticle
 
 Description
-    A passive Particle
 
 SourceFiles
     passiveParticleI.H
