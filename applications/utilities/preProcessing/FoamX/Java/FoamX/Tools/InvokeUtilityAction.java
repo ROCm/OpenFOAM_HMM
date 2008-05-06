@@ -343,7 +343,7 @@ public class InvokeUtilityAction
                 desc.name + "Dict",
                 controlDict
             );
-            runPanel.show();
+            runPanel.setVisible(true);
         }
         catch (Exception ex)
         {

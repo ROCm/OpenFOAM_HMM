@@ -179,7 +179,7 @@ public class FileEditor
             simpleEditor_.openFile(workFile_);
         }
 
-        simpleEditor_.show();
+        simpleEditor_.setVisible(true);
     }
 
 

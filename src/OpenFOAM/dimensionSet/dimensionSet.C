@@ -22,31 +22,20 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Dimension set for the base types.
-    This type may be used to implement rigorous dimension checking
-    for algebraic manipulation.
-
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(dimensionSet, 1);
-
-const scalar dimensionSet::smallExponent = SMALL;
+defineTypeNameAndDebug(Foam::dimensionSet, 1);
+const Foam::scalar Foam::dimensionSet::smallExponent = SMALL;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-dimensionSet::dimensionSet
+Foam::dimensionSet::dimensionSet
 (
     const scalar mass,
     const scalar length,
@@ -67,7 +56,7 @@ dimensionSet::dimensionSet
 }
 
 
-dimensionSet::dimensionSet
+Foam::dimensionSet::dimensionSet
 (
     const scalar mass,
     const scalar length,
@@ -88,7 +77,7 @@ dimensionSet::dimensionSet
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool dimensionSet::dimensionless() const
+bool Foam::dimensionSet::dimensionless() const
 {
     bool Dimensionless = true;
 
@@ -105,7 +94,7 @@ bool dimensionSet::dimensionless() const
 }
 
 
-void dimensionSet::reset(const dimensionSet& ds)
+void Foam::dimensionSet::reset(const dimensionSet& ds)
 {
     for (int Dimension=0; Dimension<nDimensions; Dimension++)
     {
@@ -116,18 +105,18 @@ void dimensionSet::reset(const dimensionSet& ds)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-scalar dimensionSet::operator[](const dimensionType type) const
+Foam::scalar Foam::dimensionSet::operator[](const dimensionType type) const
 {
     return exponents_[type];
 }
 
-scalar& dimensionSet::operator[](const dimensionType type)
+Foam::scalar& Foam::dimensionSet::operator[](const dimensionType type)
 {
     return exponents_[type];
 }
 
 
-bool dimensionSet::operator==(const dimensionSet& ds) const
+bool Foam::dimensionSet::operator==(const dimensionSet& ds) const
 {
     bool equall = true;
 
@@ -141,13 +130,13 @@ bool dimensionSet::operator==(const dimensionSet& ds) const
     return equall;
 }
 
-bool dimensionSet::operator!=(const dimensionSet& ds) const
+bool Foam::dimensionSet::operator!=(const dimensionSet& ds) const
 {
     return !(operator==(ds));
 }
 
 
-bool dimensionSet::operator=(const dimensionSet& ds) const
+bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
     {
@@ -161,7 +150,7 @@ bool dimensionSet::operator=(const dimensionSet& ds) const
 }
 
 
-bool dimensionSet::operator+=(const dimensionSet& ds) const
+bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
     {
@@ -174,7 +163,7 @@ bool dimensionSet::operator+=(const dimensionSet& ds) const
     return true;
 }
 
-bool dimensionSet::operator-=(const dimensionSet& ds) const
+bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
     {
@@ -187,14 +176,14 @@ bool dimensionSet::operator-=(const dimensionSet& ds) const
     return true;
 }
 
-bool dimensionSet::operator*=(const dimensionSet& ds)
+bool Foam::dimensionSet::operator*=(const dimensionSet& ds)
 {
     reset((*this)*ds);
 
     return true;
 }
 
-bool dimensionSet::operator/=(const dimensionSet& ds)
+bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 {
     reset((*this)/ds);
 
@@ -204,7 +193,7 @@ bool dimensionSet::operator/=(const dimensionSet& ds)
 
 // * * * * * * * * * * * * * * * Friend functions * * * * * * * * * * * * * * //
 
-dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 {
     if (dimensionSet::debug && ds1 != ds2)
     {
@@ -217,7 +206,7 @@ dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2)
     return ds1;
 }
 
-dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 {
     if (dimensionSet::debug && ds1 != ds2)
     {
@@ -231,19 +220,27 @@ dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2)
 }
 
 
-dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::cmptMultiply
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     return ds1*ds2;
 }
 
 
-dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::cmptDivide
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     return ds1/ds2;
 }
 
 
-dimensionSet pow(const dimensionSet& ds, const scalar p)
+Foam::dimensionSet Foam::pow(const dimensionSet& ds, const scalar p)
 {
     dimensionSet dimPow
     (
@@ -259,7 +256,11 @@ dimensionSet pow(const dimensionSet& ds, const scalar p)
     return dimPow;
 }
 
-dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& dS)
+Foam::dimensionSet Foam::pow
+(
+    const dimensionSet& ds,
+    const dimensionedScalar& dS
+)
 {
     if (dimensionSet::debug && !dS.dimensions().dimensionless())
     {
@@ -282,7 +283,11 @@ dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& dS)
     return dimPow;
 }
 
-dimensionSet pow(const dimensionedScalar& dS, const dimensionSet& ds)
+Foam::dimensionSet Foam::pow
+(
+    const dimensionedScalar& dS,
+    const dimensionSet& ds
+)
 {
     if
     (
@@ -299,67 +304,67 @@ dimensionSet pow(const dimensionedScalar& dS, const dimensionSet& ds)
 }
 
 
-dimensionSet sqr(const dimensionSet& ds)
+Foam::dimensionSet Foam::sqr(const dimensionSet& ds)
 {
     return pow(ds, 2);
 }
 
-dimensionSet pow3(const dimensionSet& ds)
+Foam::dimensionSet Foam::pow3(const dimensionSet& ds)
 {
     return pow(ds, 3);
 }
 
-dimensionSet pow4(const dimensionSet& ds)
+Foam::dimensionSet Foam::pow4(const dimensionSet& ds)
 {
     return pow(ds, 4);
 }
 
-dimensionSet pow5(const dimensionSet& ds)
+Foam::dimensionSet Foam::pow5(const dimensionSet& ds)
 {
     return pow(ds, 5);
 }
 
-dimensionSet pow6(const dimensionSet& ds)
+Foam::dimensionSet Foam::pow6(const dimensionSet& ds)
 {
     return pow(ds, 6);
 }
 
-dimensionSet sqrt(const dimensionSet& ds)
+Foam::dimensionSet Foam::sqrt(const dimensionSet& ds)
 {
     return pow(ds, 0.5);
 }
 
-dimensionSet magSqr(const dimensionSet& ds)
+Foam::dimensionSet Foam::magSqr(const dimensionSet& ds)
 {
     return pow(ds, 2);
 }
 
-dimensionSet mag(const dimensionSet& ds)
+Foam::dimensionSet Foam::mag(const dimensionSet& ds)
 {
     return ds;
 }
 
-dimensionSet sign(const dimensionSet&)
+Foam::dimensionSet Foam::sign(const dimensionSet&)
 {
     return dimless;
 }
 
-dimensionSet pos(const dimensionSet&)
+Foam::dimensionSet Foam::pos(const dimensionSet&)
 {
     return dimless;
 }
 
-dimensionSet neg(const dimensionSet&)
+Foam::dimensionSet Foam::neg(const dimensionSet&)
 {
     return dimless;
 }
 
-dimensionSet inv(const dimensionSet& ds)
+Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 {
     return dimless/ds;
 }
 
-dimensionSet trans(const dimensionSet& ds)
+Foam::dimensionSet Foam::trans(const dimensionSet& ds)
 {
     if (dimensionSet::debug && !ds.dimensionless())
     {
@@ -371,7 +376,7 @@ dimensionSet trans(const dimensionSet& ds)
     return ds;
 }
 
-dimensionSet transform(const dimensionSet& ds)
+Foam::dimensionSet Foam::transform(const dimensionSet& ds)
 {
     return ds;
 }
@@ -379,12 +384,16 @@ dimensionSet transform(const dimensionSet& ds)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-dimensionSet operator-(const dimensionSet& ds)
+Foam::dimensionSet Foam::operator-(const dimensionSet& ds)
 {
     return ds;
 }
 
-dimensionSet operator+(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator+
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     dimensionSet dimSum(ds1);
 
@@ -400,7 +409,11 @@ dimensionSet operator+(const dimensionSet& ds1, const dimensionSet& ds2)
     return dimSum;
 }
 
-dimensionSet operator-(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator-
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     dimensionSet dimDifference(ds1);
 
@@ -416,7 +429,11 @@ dimensionSet operator-(const dimensionSet& ds1, const dimensionSet& ds2)
     return dimDifference;
 }
 
-dimensionSet operator*(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator*
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     dimensionSet dimProduct(ds1);
 
@@ -428,7 +445,11 @@ dimensionSet operator*(const dimensionSet& ds1, const dimensionSet& ds2)
     return dimProduct;
 }
 
-dimensionSet operator/(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator/
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     dimensionSet dimQuotient(ds1);
 
@@ -441,24 +462,32 @@ dimensionSet operator/(const dimensionSet& ds1, const dimensionSet& ds2)
 }
 
 
-dimensionSet operator&(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator&
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     return ds1*ds2;
 }
 
-dimensionSet operator^(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator^
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     return ds1*ds2;
 }
 
-dimensionSet operator&&(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::operator&&
+(
+    const dimensionSet& ds1,
+    const dimensionSet& ds2
+)
 {
     return ds1*ds2;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

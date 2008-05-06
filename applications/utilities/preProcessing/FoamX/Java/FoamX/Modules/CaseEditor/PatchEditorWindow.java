@@ -211,7 +211,7 @@ public class PatchEditorWindow
 
         // Initialise and show the boundary type selector dialog.
         PatchPhysicalTypeSelectorDlg dlg = new PatchPhysicalTypeSelectorDlg(null, patchModel_);
-        dlg.show();
+        dlg.setVisible(true);
 
         // If the dialog wasn't cancelled, update the boundary type name.
         if (!dlg.wasCancelled())

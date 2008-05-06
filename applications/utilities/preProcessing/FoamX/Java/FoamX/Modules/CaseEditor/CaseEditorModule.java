@@ -1783,7 +1783,7 @@ public class CaseEditorModule
                         CaseBrowserPanel.SELECT_CASE_MODE
                     );
 
-                caseChooser.show();
+                caseChooser.setVisible(true);
 
                 if 
                 (

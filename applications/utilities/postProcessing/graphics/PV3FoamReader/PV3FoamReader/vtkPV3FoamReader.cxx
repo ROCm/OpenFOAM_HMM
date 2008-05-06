@@ -210,7 +210,7 @@ int vtkPV3FoamReader::RequestData
     if
     (
         (UpdateGUIOld == GetUpdateGUI())
-     || (output->GetNumberOfDataSets(0) == 0)
+     || (output->GetNumberOfBlocks() == 0)
     )
     {
         foamData_->Update(output);

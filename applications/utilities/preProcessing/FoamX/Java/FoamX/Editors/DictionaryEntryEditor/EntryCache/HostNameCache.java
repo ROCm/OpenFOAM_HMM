@@ -124,7 +124,7 @@ public class HostNameCache
             // Pop up host chooser panel
             HostChooserDlg hostChooser =
                 new HostChooserDlg(App.getRootFrame());
-            hostChooser.show();
+            hostChooser.setVisible(true);
 
             if (hostChooser.getHostName() != null)
             {

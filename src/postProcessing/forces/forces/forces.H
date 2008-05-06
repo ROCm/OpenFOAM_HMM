@@ -50,6 +50,7 @@ SourceFiles
 #include "Tuple2.H"
 #include "OFstream.H"
 #include "Switch.H"
+#include "pointFieldFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +60,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class forces Declaration
@@ -204,6 +206,14 @@ public:
 
         //- Calculate and return forces and moment
         virtual forcesMoments calcForcesMoment() const;
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
+
+        //- Update for changes of mesh
+        virtual void movePoints(const pointField&)
+        {}
 };
 
 

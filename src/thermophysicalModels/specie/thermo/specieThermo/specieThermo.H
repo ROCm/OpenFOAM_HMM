@@ -207,12 +207,12 @@ public:
             inline scalar Kc(const scalar T) const;
 
             //- Equilibrium constant [] i.t.o. mole-fractions
-            //  For low pressures (where the gas mixture is near perfect) 
+            //  For low pressures (where the gas mixture is near perfect)
             //  Kx = Kp(pstd/p)^nui
             inline scalar Kx(const scalar T, const scalar p) const;
 
             //- Equilibrium constant [] i.t.o. number of moles
-            //  For low pressures (where the gas mixture is near perfect) 
+            //  For low pressures (where the gas mixture is near perfect)
             //  Kn = Kp(n*pstd/p)^nui where n = number of moles in mixture
             inline scalar Kn
             (

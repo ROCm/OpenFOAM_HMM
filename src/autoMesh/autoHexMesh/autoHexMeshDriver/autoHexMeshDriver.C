@@ -1116,6 +1116,10 @@ void Foam::autoHexMeshDriver::splitAndMergeBaffles
         keepPoints_[0]
     );
 
+    if (debug_)
+    {
+        const_cast<Time&>(mesh_.time())++;
+    }
 
     // Duplicate points on baffles that are on more than one cell
     // region. This will help snapping pull them to separate surfaces.
@@ -1492,7 +1496,8 @@ void Foam::autoHexMeshDriver::doMesh()
             // Pre-smooth patch vertices (so before determining nearest)
             preSmoothPatch(nInitErrors, baffles, meshMover);
 
-            // Calculate displacement at every patch point. Insert into meshMover.
+            // Calculate displacement at every patch point. Insert into
+            // meshMover.
             calcNearestSurface(snapDist, meshMover);
 
             // Get smoothly varying internal displacement field.

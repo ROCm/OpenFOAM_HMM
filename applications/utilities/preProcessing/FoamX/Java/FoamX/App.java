@@ -176,7 +176,7 @@ public class App
 
         mainFrame_.initialise(args);
 
-        mainFrame_.show();
+        mainFrame_.setVisible(true);
     }
 
     //--------------------------------------------------------------------------

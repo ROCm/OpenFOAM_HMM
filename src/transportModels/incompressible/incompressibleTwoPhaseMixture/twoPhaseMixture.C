@@ -119,7 +119,7 @@ tmp<volScalarField> twoPhaseMixture::mu() const
 {
     volScalarField limitedAlpha1 = min(max(alpha1_, scalar(0)), scalar(1));
 
-    return tmp<volScalarField> 
+    return tmp<volScalarField>
     (
         new volScalarField
         (
@@ -136,7 +136,7 @@ tmp<surfaceScalarField> twoPhaseMixture::muf() const
     surfaceScalarField alpha1f =
         min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1));
 
-    return tmp<surfaceScalarField> 
+    return tmp<surfaceScalarField>
     (
         new surfaceScalarField
         (
@@ -150,10 +150,10 @@ tmp<surfaceScalarField> twoPhaseMixture::muf() const
 
 tmp<surfaceScalarField> twoPhaseMixture::nuf() const
 {
-    surfaceScalarField alpha1f = 
+    surfaceScalarField alpha1f =
         min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1));
 
-    return tmp<surfaceScalarField> 
+    return tmp<surfaceScalarField>
     (
         new surfaceScalarField
         (
@@ -171,7 +171,11 @@ bool twoPhaseMixture::read()
 {
     if (transportModel::read())
     {
-        if (nuModel1_().read(*this) && nuModel2_().read(*this))
+        if
+        (
+            nuModel1_().read(subDict(phase1Name_))
+         && nuModel2_().read(subDict(phase2Name_))
+        )
         {
             nuModel1_->viscosityProperties().lookup("rho") >> rho1_;
             nuModel2_->viscosityProperties().lookup("rho") >> rho2_;

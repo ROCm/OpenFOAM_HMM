@@ -174,7 +174,7 @@ public class CompoundCache
             );
             editor.setTitle(displayName_);
 
-            editor.show();
+            editor.setVisible(true);
             // Update the cached display string.
             displayValue_ = getCompoundDisplayString(3);
             // Signal that editing has stopped.

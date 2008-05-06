@@ -1720,7 +1720,7 @@ public class CaseBrowserPanel
                                 null,
                                 context.getCaseBrowser()
                             );
-                        processEditor.show();
+                        processEditor.setVisible(true);
                     }
                 }
             }
@@ -1795,7 +1795,7 @@ public class CaseBrowserPanel
                                 dictHolder.value
                             );
                         compoundEditor.setTitle("OpenFOAM Dictionary");
-                        compoundEditor.show();
+                        compoundEditor.setVisible(true);
 
                         if (dictHolder.value.modified())
                         {
@@ -2511,7 +2511,7 @@ public class CaseBrowserPanel
                         }
 
                         // Show the dialog.
-                        dlg.show();
+                        dlg.setVisible(true);
 
                         if (!dlg.wasCancelled())
                         {
@@ -2881,7 +2881,7 @@ public class CaseBrowserPanel
                                 controlDict.getDictEntry()
                             );
                         compoundEditor.setTitle("Clone Case");
-                        compoundEditor.show();
+                        compoundEditor.setVisible(true);
 
                         // Show busy cursor.
                         BusyCursor busyCursor = new BusyCursor

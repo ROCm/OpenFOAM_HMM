@@ -168,7 +168,7 @@ public class RunPanel
             }
 
 
-            show();
+            setVisible(true);
         }
         catch(FoamXError fxErr)
         {
@@ -607,7 +607,7 @@ public class RunPanel
         // Pop up host chooser panel
         HostChooserDlg hostChooser =
             new HostChooserDlg(parent_);
-        hostChooser.show();
+        hostChooser.setVisible(true);
 
         if (hostChooser.getHostName() != null)
         {
@@ -680,7 +680,7 @@ public class RunPanel
                     JDialog dialog = pane.createDialog(this, "FoamX...");
                     dialog.setModal(false);
                     dialog.pack();
-                    dialog.show();
+                    dialog.setVisible(true);
 
                     // Install new file change listener
                     StringHolder holder = new StringHolder();
@@ -755,7 +755,7 @@ public class RunPanel
                             parent_,
                             argumentsEntry.getDictEntry()
                         );
-                    compoundEditor.show();
+                    compoundEditor.setVisible(true);
 
                     // Update displayed value
                     setArgsField(false, argumentsEntry);
@@ -791,7 +791,7 @@ public class RunPanel
                     controlDict_.getDictEntry()
                 );
 
-            compoundEditor.show();
+            compoundEditor.setVisible(true);
 
             DictionaryEntryCache argumentsEntry =
                 controlDict_.getSubEntry("arguments");

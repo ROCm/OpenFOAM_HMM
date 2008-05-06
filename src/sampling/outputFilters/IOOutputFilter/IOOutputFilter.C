@@ -48,7 +48,7 @@ Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
             IOobject::NO_WRITE
         )
     ),
-    OutputFilter(name(), obr, *this, readFromFiles)
+    OutputFilter(OutputFilter::typeName, obr, *this, readFromFiles)
 {}
 
 

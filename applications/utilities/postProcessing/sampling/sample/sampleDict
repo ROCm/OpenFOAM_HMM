@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,47 +10,47 @@ FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "/home/penfold/mattijs/foam/mattijs2.1/run/icoFoam";
-    case            "cavity";
-    instance        "system";
-    local           "";
-
     class           dictionary;
+    location        system;
     object          sampleDict;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// interpolationScheme : choice of
-//	cell            : use cell-centre value only; constant over cells
-//	cellPoint       : use cell-centre and vertex values
-//	cellPointFace   : use cell-centre, vertex and face values.
-// 1] vertex values determined from neighbouring cell-centre values
-// 2] face values determined using the current face interpolation scheme
-//    for the field (linear, gamma, etc.)
-interpolationScheme cellPoint;
-
-
-// writeFormat : choice of
+// Set output format : choice of
 //      xmgr
 //      jplot
 //      gnuplot
 //      raw
-writeFormat raw;
+setFormat raw;
+
+// Surface output format. Choice of
+//      null        : suppress output
+//      foamFile    : separate points, faces and values file
+//      dx          : DX scalar or vector format
+//      vtk         : VTK ascii format
+//      raw         : x y z value format for use with e.g. gnuplot 'splot'.
+//      stl         : ascii stl. Does not contain values!
+surfaceFormat vtk;
+
+// interpolationScheme. choice of
+//	cell          : use cell-centre value only; constant over cells (default)
+//	cellPoint     : use cell-centre and vertex values
+//	cellPointFace : use cell-centre, vertex and face values.
+// 1] vertex values determined from neighbouring cell-centre values
+// 2] face values determined using the current face interpolation scheme
+//    for the field (linear, gamma, etc.)
+interpolationScheme cellPointFace;
+
+// Fields to sample.
+fields
+(
+    p
+    U
+);
 
 
-// sampling definition:
-//
-// Dictionary with fields
-//      type : type of sampling method
-//      name : name of samples. Used e.g. as filename
-//      axis : how to write point coordinate
-//      ...  : depending on method
-//
-//
-// sample: choice of
+// Set sampling definition: choice of
 //      uniform             evenly distributed points on line
 //      face                one point per face intersection
 //      midPoint            one point per cell, inbetween two face intersections
@@ -60,8 +60,7 @@ writeFormat raw;
 //                          tracking
 //      cloud               specified points, uses findCell
 //
-//
-// axis: how to write point coordinate. Choice of 
+// axis: how to write point coordinate. Choice of
 // - x/y/z: x/y/z coordinate only
 // - xyz: three columns
 //  (probably does not make sense for anything but raw)
@@ -72,11 +71,11 @@ writeFormat raw;
 //      uniform, face, midPoint, midPointAndFace : start and end coordinate
 //      uniform: extra number of sampling points
 //      curve, cloud: list of coordinates
-sampleSets
+sets
 (
-    uniform
+    lineX1
     {
-        name        lineX1;
+        type        uniform;
         axis        distance;
 
         //- cavity
@@ -85,9 +84,9 @@ sampleSets
         nPoints     10;
     }
 
-    face
+    lineX2
     {
-        name        lineX2;
+        type        face;
         axis        x;
 
         //- flangeHex
@@ -106,14 +105,69 @@ sampleSets
 );
 
 
-// Fields to sample.
-fields
+// Surface sampling definition: choice of
+//      plane : values on plane defined by point, normal.
+//      patch : values on patch.
+surfaces
 (
-    p
-    mag(U)
-    U.component(1)
-    R.component(0)
+    constantPlane
+    {
+        type            plane;
+        basePoint       (0.0501 0.0501 0.005);
+        normalVector    (0.1 0.1 1);
+
+        //- Optional: restrict to a particular zone
+        // zoneName        zone1;
+
+        // Optional: whether to leave as faces or triangulate (=default)
+        triangulate     false;
+    }
+
+    interpolatedPlane
+    {
+        type            plane;
+        // make plane relative to the coordinateSystem (Cartesian)
+        coordinateSystem
+        {
+            origin      (0.0501 0.0501 0.005);
+        }
+        basePoint       (0 0 0);
+        normalVector    (0.1 0.1 1);
+        triangulate     false;
+        interpolate     true;
+    }
+
+    movingWall_constant
+    {
+        type            patch;
+        patchName       movingWall;
+        triangulate     false;
+    }
+
+    movingWall_interpolated
+    {
+        type            patch;
+        patchName       movingWall;
+        triangulate     false;
+        interpolate     true;
+    }
+
+/* not yet (re)implemented --
+    constantIso
+    {
+        name            iso;
+        field           rho;
+        value           0.5;
+    }
+    someIso
+    {
+        type            iso;
+        field           rho;
+        value           0.5;
+        interpolate     true;
+    }
+ */
 );
 
 
-// ************************************************************************* //
+// *********************************************************************** //

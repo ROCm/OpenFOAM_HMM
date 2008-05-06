@@ -54,7 +54,9 @@ class twoPhaseMixture
 :
     public transportModel
 {
-    // Private data
+protected:
+
+    // Protected data
 
         word phase1Name_;
         word phase2Name_;
@@ -141,7 +143,7 @@ public:
         tmp<surfaceScalarField> muf() const;
 
         //- Return the kinematic laminar viscosity
-        tmp<volScalarField> nu() const
+        virtual tmp<volScalarField> nu() const
         {
             return nu_;
         }
@@ -149,14 +151,14 @@ public:
         //- Return the face-interpolated dynamic laminar viscosity
         tmp<surfaceScalarField> nuf() const;
 
-        //- Correct the laminar viscosity 
-        void correct()
+        //- Correct the laminar viscosity
+        virtual void correct()
         {
             calcNu();
         }
 
         //- Read base transportProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

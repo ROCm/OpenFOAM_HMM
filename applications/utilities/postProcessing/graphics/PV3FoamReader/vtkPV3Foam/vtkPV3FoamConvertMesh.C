@@ -65,7 +65,8 @@ void Foam::vtkPV3Foam::convertMeshVolume
         vtkUnstructuredGrid* ugrid = vtkUnstructuredGrid::New();
         SetName(ugrid, "internalMesh");
         addVolumeMesh(mesh, ugrid, superCells_);
-        output->SetDataSet(VOLUME, 0, ugrid);
+        AddToBlock(output, VOLUME, 0, ugrid);
+//        reader_->SetBlock(output->GetNumberOfBlocks(), ugrid);
         selectedRegionDatasetIds_[VOLUME] = 0;
         ugrid->Delete();
     }
@@ -96,7 +97,7 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
 
             vtkUnstructuredGrid* ugrid = vtkUnstructuredGrid::New();
             addLagrangianMesh(mesh, ugrid);
-            output->SetDataSet(LAGRANGIAN, 0, ugrid);
+            AddToBlock(output, LAGRANGIAN, 0, ugrid);
             selectedRegionDatasetIds_[LAGRANGIAN] = 0;
             ugrid->Delete();
         }
@@ -141,8 +142,8 @@ void Foam::vtkPV3Foam::convertMeshPatches
                 const label patchId = mesh.boundaryMesh()
                     .findPatchID(regionName);
                 addPatchMesh(patches[patchId], ugrid);
-                const label nextId = output->GetNumberOfDataSets(VOLUME);
-                output->SetDataSet(VOLUME, nextId, ugrid);
+                const label nextId = GetNumberOfDataSets(output, VOLUME);
+                AddToBlock(output, VOLUME, nextId, ugrid);
                 selectedRegionDatasetIds_[i] = nextId;
                 ugrid->Delete();
             }
@@ -188,14 +189,14 @@ void Foam::vtkPV3Foam::convertMeshCellSet
 
                 vtkUnstructuredGrid* ugrid = vtkUnstructuredGrid::New();
                 SetName(ugrid, cSetName.c_str());
-                const label nextId = output->GetNumberOfDataSets(CELLSET);
+                const label nextId = GetNumberOfDataSets(output, CELLSET);
                 addVolumeMesh
                 (
                     subsetter.subMesh(),
                     ugrid,
                     superCellSetCells_[nextId]
                 );
-                output->SetDataSet(CELLSET, nextId, ugrid);
+                AddToBlock(output, CELLSET, nextId, ugrid);
                 selectedRegionDatasetIds_[i] = nextId;
                 ugrid->Delete();
             }
@@ -245,8 +246,8 @@ void Foam::vtkPV3Foam::convertMeshFaceSet
                     fSet,
                     ugrid
                 );
-                const label nextId = output->GetNumberOfDataSets(FACESET);
-                output->SetDataSet(FACESET, nextId, ugrid);
+                const label nextId = GetNumberOfDataSets(output, FACESET);
+                AddToBlock(output, FACESET, nextId, ugrid);
                 selectedRegionDatasetIds_[i] = nextId;
                 ugrid->Delete();
             }
@@ -296,8 +297,8 @@ void Foam::vtkPV3Foam::convertMeshPointSet
                     pSet,
                     ugrid
                 );
-                const label nextId = output->GetNumberOfDataSets(POINTSET);
-                output->SetDataSet(POINTSET, nextId, ugrid);
+                label nextId = GetNumberOfDataSets(output, POINTSET);
+                AddToBlock(output, POINTSET, nextId, ugrid);
                 selectedRegionDatasetIds_[i] = nextId;
                 ugrid->Delete();
             }

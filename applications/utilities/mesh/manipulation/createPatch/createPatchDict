@@ -22,6 +22,10 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Tolerance used in matching faces. Absolute tolerance is span of
+// face times this factor.
+matchTolerance 1E-3;
+
 patches
 (
     {

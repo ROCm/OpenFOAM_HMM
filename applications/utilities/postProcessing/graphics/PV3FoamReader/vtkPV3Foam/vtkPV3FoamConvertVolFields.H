@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::vtkPV3Foam
+Class
+    vtkPV3Foam
 
 \*---------------------------------------------------------------------------*/
 
@@ -177,10 +177,10 @@ void Foam::vtkPV3Foam::convertVolField
 {
     vtkUnstructuredGrid* internalMesh = vtkUnstructuredGrid::SafeDownCast
     (
-        output->GetDataSet(VOLUME, 0)
+        GetDataSetFromBlock(output, VOLUME, 0)
     );
 
-    vtkFloatArray *cellTypes = vtkFloatArray::New();
+    vtkFloatArray* cellTypes = vtkFloatArray::New();
     cellTypes->SetNumberOfTuples(superCells_.size());
     cellTypes->SetNumberOfComponents(Type::nComponents);
     cellTypes->Allocate(Type::nComponents*superCells_.size());
@@ -220,7 +220,7 @@ void Foam::vtkPV3Foam::convertVolField
 {
     vtkUnstructuredGrid* internalMesh = vtkUnstructuredGrid::SafeDownCast
     (
-        output->GetDataSet(VOLUME, 0)
+        GetDataSetFromBlock(output, VOLUME, 0)
     );
 
     vtkFloatArray *cellScalars = vtkFloatArray::New();

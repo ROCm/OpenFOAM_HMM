@@ -283,7 +283,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
 
         if (debug_)
         {
-            Pout<< "**Writing merged-faces mesh to time "
+            Pout<< "Writing merged-faces mesh to time "
                 << mesh_.time().timeName() << nl << endl;
             mesh_.write();
         }
@@ -583,7 +583,7 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
 
         if (debug_)
         {
-            Pout<< "**Writing merged-edges mesh to time "
+            Pout<< "Writing merged-edges mesh to time "
                 << mesh_.time().timeName() << nl << endl;
             mesh_.write();
         }
@@ -2882,8 +2882,7 @@ void Foam::autoHexMeshDriver::addLayers
 
         if (debug_)
         {
-            Info<< "*** Writing layer mesh to "
-                << mesh_.time().timeName() << endl;
+            Info<< "Writing layer mesh to " << mesh_.time().timeName() << endl;
             newMesh.write();
             cellSet addedCellSet
             (

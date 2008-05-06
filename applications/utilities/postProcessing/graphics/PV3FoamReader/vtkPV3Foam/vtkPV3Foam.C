@@ -37,6 +37,7 @@ License
 // VTK includes
 #include "vtkCharArray.h"
 #include "vtkDataArraySelection.h"
+#include "vtkDataSet.h"
 #include "vtkFieldData.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkRenderer.h"
@@ -53,6 +54,69 @@ defineTypeNameAndDebug(Foam::vtkPV3Foam, 0);
 #include "vtkPV3FoamAddFields.H"
 
 #include "vtkPV3FoamUpdateInformationFields.H"
+
+
+void Foam::vtkPV3Foam::AddToBlock
+(
+    vtkMultiBlockDataSet* output,
+    unsigned int blockNo,
+    unsigned int datasetNo,
+    vtkDataSet* dataset
+)
+{
+    vtkDataObject* blockDO = output->GetBlock(blockNo);
+    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
+    if (blockDO && !block)
+    {
+        FatalErrorIn("Foam::vtkPV3Foam::AddToBlock")
+            << "Block already has a vtkDataSet assigned to it" << nl << endl;
+        return;
+    }
+
+    if (!block)
+    {
+        block = vtkMultiBlockDataSet::New();
+        output->SetBlock(blockNo, block);
+        block->Delete();
+    }
+
+    block->SetBlock(datasetNo, dataset);
+}
+
+
+vtkDataSet* Foam::vtkPV3Foam::GetDataSetFromBlock
+(
+    vtkMultiBlockDataSet* output,
+    unsigned int blockNo,
+    unsigned int datasetNo
+)
+{
+    vtkDataObject* blockDO = output->GetBlock(blockNo);
+    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
+    if (block)
+    {
+        return vtkDataSet::SafeDownCast(block->GetBlock(datasetNo));
+    }
+
+    return 0;
+}
+
+
+Foam::label Foam::vtkPV3Foam::GetNumberOfDataSets
+(
+    vtkMultiBlockDataSet* output,
+    unsigned int blockNo
+)
+{
+    vtkDataObject* blockDO = output->GetBlock(blockNo);
+    vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
+    if (block)
+    {
+        return block->GetNumberOfBlocks();
+    }
+
+    return 0;
+}
 
 
 void Foam::vtkPV3Foam::resetCounters()
@@ -481,11 +545,11 @@ void Foam::vtkPV3Foam::Update
     if (debug)
     {
         Info<< "Number of data sets after update" << nl
-            << "    VOLUME = " << output->GetNumberOfDataSets(VOLUME) << nl
-            << "    LAGRANGIAN = " << output->GetNumberOfDataSets(LAGRANGIAN)
-            << nl << "    CELLSET = " << output->GetNumberOfDataSets(CELLSET)
-            << nl << "    FACESET = " << output->GetNumberOfDataSets(FACESET)
-            << nl << "    POINTSET = " << output->GetNumberOfDataSets(POINTSET)
+            << "    VOLUME = " << GetNumberOfDataSets(output, VOLUME) << nl
+            << "    LAGRANGIAN = " << GetNumberOfDataSets(output, LAGRANGIAN)
+            << nl << "    CELLSET = " << GetNumberOfDataSets(output, CELLSET)
+            << nl << "    FACESET = " << GetNumberOfDataSets(output, FACESET)
+            << nl << "    POINTSET = " << GetNumberOfDataSets(output, POINTSET)
             << endl;
     }
 }

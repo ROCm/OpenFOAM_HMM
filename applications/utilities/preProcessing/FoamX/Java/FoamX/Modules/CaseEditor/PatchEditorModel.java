@@ -193,11 +193,11 @@ public class PatchEditorModel
             }
 
             // Now that the map is initialised, build the tree.
-            Enumeration enum = boundaryDefMap_.elements();
-            while (enum.hasMoreElements())
+            Enumeration iter = boundaryDefMap_.elements();
+            while (iter.hasMoreElements())
             {
                 DefaultMutableTreeNode node =
-                    (DefaultMutableTreeNode)enum.nextElement();
+                    (DefaultMutableTreeNode)iter.nextElement();
                 BoundaryDefinitionModelItem nodeInfo =
                     (BoundaryDefinitionModelItem)node.getUserObject();
 

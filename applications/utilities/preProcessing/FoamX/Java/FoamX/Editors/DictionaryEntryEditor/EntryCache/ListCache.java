@@ -189,7 +189,7 @@ public class ListCache
                 );
                 editor.setTitle(displayName_);
 
-                editor.show();
+                editor.setVisible(true);
                 // Signal that editing has stopped.
                 editor_.stopCellEditing();
             }

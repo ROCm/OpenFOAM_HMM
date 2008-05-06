@@ -137,11 +137,11 @@ public class CaseManager
             int caseNo = 0;
 
             // Close all cases.
-            Enumeration enum = caseMap_.elements();
-            while (enum.hasMoreElements())
+            Enumeration iter = caseMap_.elements();
+            while (iter.hasMoreElements())
             {
                 // Get next case.
-                CasePanel casePanel = (CasePanel)enum.nextElement();
+                CasePanel casePanel = (CasePanel)iter.nextElement();
 
                 // Give option of saving if modified
                 casePanel.checkAndSave
@@ -176,11 +176,11 @@ public class CaseManager
             //    );
             //caseNo = 0;
             //// Close all cases.
-            //enum = casePostMap_.elements();
-            //while (enum.hasMoreElements())
+            //iter = casePostMap_.elements();
+            //while (iter.hasMoreElements())
             //{
             //    // Get next case.
-            //    CasePostPanel casePostPanel = (CasePostPanel)enum.nextElement();
+            //    CasePostPanel casePostPanel = (CasePostPanel)iter.nextElement();
             //
             //    // Do exactly if 'close case' on casePostPanel was pressed
             //    casePostClosed

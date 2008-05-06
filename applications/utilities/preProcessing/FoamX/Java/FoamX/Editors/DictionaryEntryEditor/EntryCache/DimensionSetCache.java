@@ -139,7 +139,7 @@ public class DimensionSetCache
 
             editor.setTitle(displayName_);
 
-            editor.show();
+            editor.setVisible(true);
             // Update value in case it has been updated.
             getEntryValue();
             // Signal that editing has stopped.

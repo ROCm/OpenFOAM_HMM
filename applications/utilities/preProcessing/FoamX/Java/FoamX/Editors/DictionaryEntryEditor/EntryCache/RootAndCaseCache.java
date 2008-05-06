@@ -187,7 +187,7 @@ public class RootAndCaseCache
                     App.getRootFrame(),
                     CaseBrowserPanel.SELECT_CASE_MODE
                 );
-            caseChooser.show();
+            caseChooser.setVisible(true);
 
             if 
             (

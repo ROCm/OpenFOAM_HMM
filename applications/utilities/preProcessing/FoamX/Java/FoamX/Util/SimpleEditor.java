@@ -700,6 +700,6 @@ public class SimpleEditor extends JFrame implements FileListener
 
         frame.openFile(file);
 
-        frame.show();
+        frame.setVisible(true);
     }
 }

@@ -327,7 +327,7 @@ public class ProcessEditor extends javax.swing.JDialog
                 labels, values
             );
 
-        dlg.show();
+        dlg.setVisible(true);
     }
 
 

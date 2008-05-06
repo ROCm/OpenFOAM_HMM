@@ -129,7 +129,7 @@ public class RootDirCache
                     App.getRootFrame(),
                     CaseBrowserPanel.SELECT_ROOT_MODE
                 );
-            caseChooser.show();
+            caseChooser.setVisible(true);
 
             if 
             (
