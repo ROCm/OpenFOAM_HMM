@@ -181,11 +181,11 @@ void turbulentInletFvPatchField<Type>::updateCoeffs()
         scalar rmsCorr = sqrt(12*(2*alpha_ - sqr(alpha_)))/alpha_;
 
         patchField =
-            (rmsCorr*(1 - alpha_))*patchField
-          + (rmsCorr*alpha_)*
+            (1 - alpha_)*patchField
+          + alpha_*
             (
                 referenceField_
-              + cmptMultiply
+              + rmsCorr*cmptMultiply
                 (
                     randomField - 0.5*pTraits<Type>::one,
                     fluctuationScale_
