@@ -29,4 +29,4 @@ laminarFlameSpeed/SCOPE/SCOPELaminarFlameSpeed.C
 
 PDRFoam.C
 
-EXE = $(FOAM_USER_APPBIN)/PDRFoam
+EXE = $(FOAM_APPBIN)/PDRFoam
