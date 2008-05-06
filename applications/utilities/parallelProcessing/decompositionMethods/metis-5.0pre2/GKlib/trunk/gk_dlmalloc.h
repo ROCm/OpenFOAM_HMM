@@ -584,7 +584,13 @@ MAX_RELEASE_CHECK_RATE   default: 255 unless not HAVE_MMAP
 #endif  /* MMAP_CLEARS */
 #ifndef HAVE_MREMAP
 #ifdef linux
-#define HAVE_MREMAP 1
+/*
+ * From http://glaros.dtc.umn.edu/flyspray/task/29
+ * workaround bug in mremap:
+ * http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=457337
+ */
+/* #define HAVE_MREMAP 1 */
+#define HAVE_MREMAP 0
 #else   /* linux */
 #define HAVE_MREMAP 0
 #endif  /* linux */
