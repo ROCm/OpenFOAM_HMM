@@ -244,6 +244,25 @@ protected:
             const scalar pVolume
         );
 
+        //- Inject more parcels
+        template<class TrackingData>
+        void inject(TrackingData& td);
+
+        //- Inject parcel if it is valid - delete otherwise
+        template<class TrackingData>
+        void injectParcel
+        (
+            TrackingData& td,
+            ParcelType* p
+        );
+
+        //- Move the parcels
+        template<class TrackingData>
+        void move(TrackingData& td);
+
+        //- Post-injection checks
+        void postInjectCheck();
+
 
 public:
 
@@ -264,7 +283,7 @@ public:
         );
 
 
-    // Destructors
+    // Destructor
 
         virtual ~KinematicCloud();
 
@@ -375,9 +394,6 @@ public:
 
         // Check
 
-            //- Post-injection checks
-            void postInjectCheck();
-
             //- Total mass injected
             inline const scalar massInjected() const;
 
@@ -411,35 +427,13 @@ public:
                 inline const tmp<volScalarField> alpha() const;
 
 
-        // Edit
+        // Cloud evolution functions
 
             //- Reset the spray source terms
             void resetSourceTerms();
 
             //- Evolve the spray (move, inject)
             void evolve();
-
-            //- Move the parcels
-            template<class TrackingData>
-            void move
-            (
-                TrackingData& td
-            );
-
-            //- Inject parcel if it is valid - delete otherwise
-            template<class TrackingData>
-            void injectParcel
-            (
-                TrackingData& td,
-                ParcelType* p
-            );
-
-            //- Inject more parcels
-            template<class TrackingData>
-            void inject
-            (
-                TrackingData& td
-            );
 };
 
 

@@ -83,27 +83,23 @@ public:
 
         // Private data
 
-            //- Vapourisation temperature
+            //- Vapourisation temperature [K]
             const scalar Tvap_;
 
-            //- Boiling point
+            //- Boiling point [K]
             const scalar Tbp_;
 
 
     public:
 
-        // Constructors
-        constantProperties
-        (
-            const dictionary& dict
-        );
+        //- Constructor
+        constantProperties(const dictionary& dict);
 
-        // Member functions
+        //- Return const access to the vapourisation temperature
+        inline const scalar Tvap() const;
 
-            // Access
-
-            inline const scalar Tvap() const;
-            inline const scalar Tbp() const;
+        //- Return const access to the boiling point
+        inline const scalar Tbp() const;
     };
 
 
@@ -121,14 +117,15 @@ public:
             //- Particle constant properties
             const constantProperties& constProps_;
 
-            //- Interpolators for continuous phase fields
+            //- Interpolator for continuous phase pressure field
+            const interpolation<scalar>& pInterp_;
 
-                const interpolation<scalar>& pInterp_;
 
     public:
 
         // Constructors
 
+            //- Construct from components
             inline trackData
             (
                 ReactingCloud<ParcelType>& cloud,
@@ -145,10 +142,14 @@ public:
 
         // Member functions
 
+            //- Return access to the owner cloud
             inline ReactingCloud<ParcelType>& cloud();
 
+            //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
 
+            //- Return conat access to the interpolator for continuous
+            //  phase pressure field
             inline const interpolation<scalar>& pInterp() const;
     };
 
@@ -159,19 +160,19 @@ protected:
 
         // Parcel properties
 
-            //- Initial particle mass
+            //- Initial particle mass [kg]
             scalar mass0_;
 
-            //- Mass fractions of mixture
+            //- Mass fractions of mixture []
             scalarField YMixture_;
 
-            //- Mass fractions of gases
+            //- Mass fractions of gases []
             scalarField YGas_;
 
-            //- Mass fractions of liquids
+            //- Mass fractions of liquids []
             scalarField YLiquid_;
 
-            //- Mass fractions of solids
+            //- Mass fractions of solids []
             scalarField YSolid_;
 
             //- Flag to say that the particle is allowed to combust
@@ -181,7 +182,7 @@ protected:
 
         // Cell-based quantities
 
-            //- Pressure
+            //- Pressure [Pa]
             scalar pc_;
 
 
@@ -311,15 +312,9 @@ public:
 
         // I-O
 
-            static void readFields
-            (
-                ReactingCloud<ParcelType>& c
-            );
+            static void readFields(ReactingCloud<ParcelType>& c);
 
-            static void writeFields
-            (
-                const ReactingCloud<ParcelType>& c
-            );
+            static void writeFields(const ReactingCloud<ParcelType>& c);
 };
 
 

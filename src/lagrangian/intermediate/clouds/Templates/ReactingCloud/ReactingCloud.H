@@ -114,6 +114,13 @@ class ReactingCloud
         void operator=(const ReactingCloud&);
 
 
+protected:
+
+    //- Inject more parcels
+    template<class TrackingData>
+    void inject(TrackingData& td);
+
+
 public:
 
     //- Runtime type information
@@ -135,7 +142,7 @@ public:
         );
 
 
-    // Destructors
+    // Destructor
 
         virtual ~ReactingCloud();
 
@@ -192,41 +199,13 @@ public:
                         Srho1() const;
 
 
-        // Check
-
-            //- Post-injection checks
-            void postInjectCheck();
-
-
-        // Edit
+        // Cloud evolution functions
 
             //- Reset the spray source terms
             void resetSourceTerms();
 
             //- Evolve the spray (move, inject)
             void evolve();
-
-            //- Move the parcels
-            template<class TrackingData>
-            void move
-            (
-                TrackingData& td
-            );
-
-            //- Inject parcel if it is valid - delete otherwise
-            template<class TrackingData>
-            void injectParcel
-            (
-                TrackingData& td,
-                ParcelType* p
-            );
-
-            //- Inject more parcels
-            template<class TrackingData>
-            void inject
-            (
-                TrackingData& td
-            );
 };
 
 

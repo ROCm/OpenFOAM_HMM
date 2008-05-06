@@ -96,17 +96,14 @@ public:
     public:
 
         //- Constructor
-        constantProperties
-        (
-            const dictionary& dict
-        );
+        constantProperties(const dictionary& dict);
 
         // Member functions
 
-            // Access
-
+            //- Return const access to the particle density
             inline const scalar rho0() const;
 
+            //- Return const access to the minimum particle mass
             inline const scalar minParticleMass() const;
     };
 
@@ -125,10 +122,16 @@ public:
             //- Particle constant properties
             const constantProperties& constProps_;
 
-            //- Interpolators for continuous phase fields
 
+            // Interpolators for continuous phase fields
+
+                //- Density interpolator
                 const interpolation<scalar>& rhoInterp_;
+
+                //- Velocity interpolator
                 const interpolation<vector>& UInterp_;
+
+                //- Dynamic viscosity interpolator
                 const interpolation<scalar>& muInterp_;
 
             //- Local gravitational or other body-force acceleration
@@ -137,13 +140,10 @@ public:
 
    public:
 
-        bool switchProcessor;
-        bool keepParticle;
-
-
         // Constructors
 
-            inline trackData
+           //- Construct from components
+           inline trackData
             (
                 KinematicCloud<ParcelType>& cloud,
                 const constantProperties& constProps,
@@ -156,16 +156,25 @@ public:
 
         // Member functions
 
+            //- Return access to the owner cloud
             inline KinematicCloud<ParcelType>& cloud();
 
+            //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
 
+            //- Return conat access to the interpolator for continuous
+            //  phase density field
             inline const interpolation<scalar>& rhoInterp() const;
 
+            //- Return conat access to the interpolator for continuous
+            //  phase velocity field
             inline const interpolation<vector>& UInterp() const;
 
+            //- Return conat access to the interpolator for continuous
+            //  phase dynamic viscosity field
             inline const interpolation<scalar>& muInterp() const;
 
+            // Return const access to the gravitational acceleration vector
             inline const vector& g() const;
     };
 
@@ -200,13 +209,13 @@ protected:
 
         // Cell-based quantities
 
-            // - Density
+            // - Density [kg/m3]
             scalar rhoc_;
 
-            // - Velocity
+            // - Velocity [m/s]
             vector Uc_;
 
-            // - Viscosity
+            // - Viscosity [Pa.s]
             scalar muc_;
 
 
@@ -351,10 +360,7 @@ public:
 
             //- Move the parcel
             template<class TrackData>
-            bool move
-            (
-                TrackData& td
-            );
+            bool move(TrackData& td);
 
 
         // Patch interactions
@@ -410,24 +416,18 @@ public:
 
             //- Transform the physical properties of the particle
             //  according to the given transformation tensor
-            virtual void transformProperties(const tensor& T);
+            void transformProperties(const tensor& T);
 
             //- Transform the physical properties of the particle
             //  according to the given separation vector
-            virtual void transformProperties(const vector& separation);
+            void transformProperties(const vector& separation);
 
 
         // I-O
 
-            static void readFields
-            (
-                KinematicCloud<ParcelType>& c
-            );
+            static void readFields(KinematicCloud<ParcelType>& c);
 
-            static void writeFields
-            (
-                const KinematicCloud<ParcelType>& c
-            );
+            static void writeFields(const KinematicCloud<ParcelType>& c);
 
 
     // Ostream Operator

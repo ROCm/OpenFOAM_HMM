@@ -185,22 +185,7 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 
     inject(td);
 
-    move(td);
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ReactingCloud<ParcelType>::move
-(
-    TrackingData& td
-)
-{
-    if (this->coupled())
-    {
-        resetSourceTerms();
-    }
-    Cloud<ParcelType>::move(td);
+    this->move(td);
 }
 
 
@@ -226,7 +211,7 @@ void Foam::ReactingCloud<ParcelType>::inject
     // Return if no parcels are required
     if (!nParcels)
     {
-        postInjectCheck();
+        this->postInjectCheck();
         return;
     }
 
@@ -322,35 +307,16 @@ void Foam::ReactingCloud<ParcelType>::inject
             pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
                 /this->db().time().deltaT().value();
 
-            injectParcel(td, pPtr);
+            this->injectParcel(td, pPtr);
          }
     }
 
-    postInjectCheck();
+    this->postInjectCheck();
 
     if (debug)
     {
         this->dumpParticlePositions();
     }
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ReactingCloud<ParcelType>::injectParcel
-(
-    TrackingData& td,
-    ParcelType* p
-)
-{
-    ThermoCloud<ParcelType>::injectParcel(td, p);
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::postInjectCheck()
-{
-    ThermoCloud<ParcelType>::postInjectCheck();
 }
 
 

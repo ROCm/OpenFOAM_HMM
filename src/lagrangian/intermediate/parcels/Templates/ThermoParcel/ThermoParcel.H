@@ -99,10 +99,7 @@ public:
     public:
 
         // Constructors
-        constantProperties
-        (
-            const dictionary& dict
-        );
+        constantProperties(const dictionary& dict);
 
         // Member functions
 
@@ -129,9 +126,12 @@ public:
             //- Particle constant properties
             const constantProperties& constProps_;
 
-            //- Interpolators for continuous phase fields
+            // Interpolators for continuous phase fields
 
+                //- Temperature field interpolator
                 const interpolation<scalar>& TInterp_;
+
+                //- Scpecific heat capacity field interpolator
                 const interpolation<scalar>& cpInterp_;
 
 
@@ -139,6 +139,7 @@ public:
 
         // Constructors
 
+            //- Construct from components
             inline trackData
             (
                 ThermoCloud<ParcelType>& cloud,
@@ -154,12 +155,18 @@ public:
 
         // Member functions
 
+            //- Return access to the owner cloud
             inline ThermoCloud<ParcelType>& cloud();
 
+            //- Return const access to the owner cloud
             inline const constantProperties& constProps() const;
 
+            //- Return conat access to the interpolator for continuous
+            //  phase temperature field
             inline const interpolation<scalar>& TInterp() const;
 
+            //- Return conat access to the interpolator for continuous
+            //  phase specific heat capacity field
             inline const interpolation<scalar>& cpInterp() const;
     };
 
@@ -179,10 +186,10 @@ protected:
 
         // Call-based quantities
 
-            //- Temperature
+            //- Temperature [K]
             scalar Tc_;
 
-            //- Specific heat capacity
+            //- Specific heat capacity [J/(kg.K)]
             scalar cpc_;
 
 
@@ -283,15 +290,9 @@ public:
 
         // I-O
 
-            static void readFields
-            (
-                ThermoCloud<ParcelType>& c
-            );
+            static void readFields(ThermoCloud<ParcelType>& c);
 
-            static void writeFields
-            (
-                const ThermoCloud<ParcelType>& c
-            );
+            static void writeFields(const ThermoCloud<ParcelType>& c);
 };
 
 

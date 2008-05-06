@@ -82,35 +82,15 @@ public:
         );
 
 
-    // Destructors
+    //- Destructor
 
         ~basicKinematicCloud();
 
 
     // Member functions
 
-        // Edit
-
-            //- Evolve the spray (move, inject)
-            void evolve();
-
-            //- Move the parcels
-            void move
-            (
-                KinematicParcel<basicKinematicParcel>::trackData& td
-            );
-
-            //- Inject more parcels
-            void inject
-            (
-                KinematicParcel<basicKinematicParcel>::trackData& td
-            );
-
-
-        // I-O
-
-            //- Write fields
-            void writeFields() const;
+        //- Write fields
+        void writeFields() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -60,34 +60,9 @@ Foam::basicKinematicCloud::~basicKinematicCloud()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::basicKinematicCloud::evolve()
-{
-    KinematicCloud<basicKinematicParcel>::evolve();
-}
-
-
-void Foam::basicKinematicCloud::move
-(
-    KinematicParcel<basicKinematicParcel>::trackData& td
-)
-{
-    KinematicCloud<basicKinematicParcel>::move(td);
-}
-
-
-void Foam::basicKinematicCloud::inject
-(
-    KinematicParcel<basicKinematicParcel>::trackData& td
-)
-{
-    KinematicCloud<basicKinematicParcel>::inject(td);
-}
-
-
 void Foam::basicKinematicCloud::writeFields() const
 {
     basicKinematicParcel::writeFields(*this);
 }
-
 
 // ************************************************************************* //

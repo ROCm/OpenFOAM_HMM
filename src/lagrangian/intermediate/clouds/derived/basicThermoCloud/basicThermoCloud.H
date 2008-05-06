@@ -84,30 +84,15 @@ public:
         );
 
 
+    //- Destructor
+
+        ~basicThermoCloud();
+
+
     // Member Functions
 
-        // Edit
-
-            //- Evolve the spray (move, inject)
-            void evolve();
-
-            //- Move the parcels
-            void move
-            (
-                ThermoParcel<basicThermoParcel>::trackData& td
-            );
-
-            //- Inject more parcels
-            void inject
-            (
-                ThermoParcel<basicThermoParcel>::trackData& td
-            );
-
-
-        // I-O
-
-            //- Write fields
-            void writeFields() const;
+        //- Write fields
+        void writeFields() const;
 };
 
 

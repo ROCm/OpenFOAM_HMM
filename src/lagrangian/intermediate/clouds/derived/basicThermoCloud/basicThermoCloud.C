@@ -52,32 +52,13 @@ Foam::basicThermoCloud::basicThermoCloud
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::basicThermoCloud::~basicThermoCloud()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::basicThermoCloud::evolve()
-{
-    ThermoCloud<basicThermoParcel>::evolve();
-}
-
-
-void Foam::basicThermoCloud::move
-(
-    ThermoParcel<basicThermoParcel>::trackData& td
-)
-{
-    // Move the parcels
-    ThermoCloud<basicThermoParcel>::move(td);
-}
-
-
-void Foam::basicThermoCloud::inject
-(
-    ThermoParcel<basicThermoParcel>::trackData& td
-)
-{
-    ThermoCloud<basicThermoParcel>::inject(td);
-}
-
 
 void Foam::basicThermoCloud::writeFields() const
 {

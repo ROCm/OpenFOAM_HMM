@@ -176,22 +176,7 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 
     inject(td);
 
-    move(td);
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ThermoCloud<ParcelType>::move
-(
-    TrackingData& td
-)
-{
-    if (this->coupled())
-    {
-        resetSourceTerms();
-    }
-    Cloud<ParcelType>::move(td);
+    this->move(td);
 }
 
 
@@ -204,25 +189,6 @@ void Foam::ThermoCloud<ParcelType>::inject
 {
     // Injection is same as for KinematicCloud<ParcelType>
     KinematicCloud<ParcelType>::inject(td);
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ThermoCloud<ParcelType>::injectParcel
-(
-    TrackingData& td,
-    ParcelType* p
-)
-{
-    KinematicCloud<ParcelType>::injectParcel(td, p);
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::postInjectCheck()
-{
-    KinematicCloud<ParcelType>::postInjectCheck();
 }
 
 

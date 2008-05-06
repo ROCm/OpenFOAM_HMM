@@ -298,26 +298,29 @@ void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
-    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        vpi_,
-        rho_
-    );
+    autoPtr<interpolation<scalar> > rhoInterpolator =
+        interpolation<scalar>::New
+        (
+            interpolationSchemes_,
+            vpi_,
+            rho_
+        );
 
-    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
-    (
-        interpolationSchemes_,
-        vpi_,
-        U_
-    );
+    autoPtr<interpolation<vector> > UInterpolator =
+        interpolation<vector>::New
+        (
+            interpolationSchemes_,
+            vpi_,
+            U_
+        );
 
-    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        vpi_,
-        mu_
-    );
+    autoPtr<interpolation<scalar> > muInterpolator =
+        interpolation<scalar>::New
+        (
+            interpolationSchemes_,
+            vpi_,
+            mu_
+        );
 
     typename ParcelType::trackData td
     (

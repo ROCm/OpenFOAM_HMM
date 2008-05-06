@@ -62,32 +62,13 @@ Foam::basicReactingCloud::basicReactingCloud
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::basicReactingCloud::~basicReactingCloud()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-void Foam::basicReactingCloud::evolve()
-{
-    ReactingCloud<basicReactingParcel>::evolve();
-}
-
-
-void Foam::basicReactingCloud::move
-(
-    ReactingParcel<basicReactingParcel>::trackData& td
-)
-{
-    ReactingCloud<basicReactingParcel>::move(td);
-}
-
-
-void Foam::basicReactingCloud::inject
-(
-    ReactingParcel<basicReactingParcel>::trackData& td
-)
-{
-    ReactingCloud<basicReactingParcel>::inject(td);
-}
-
 
 void Foam::basicReactingCloud::writeFields() const
 {

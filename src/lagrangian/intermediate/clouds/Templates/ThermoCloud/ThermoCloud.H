@@ -116,6 +116,13 @@ class ThermoCloud
         void operator=(const ThermoCloud&);
 
 
+protected:
+
+    //- Inject more parcels
+    template<class TrackingData>
+    void inject(TrackingData& td);
+
+
 public:
 
     //- Runtime type information
@@ -136,7 +143,7 @@ public:
         );
 
 
-    // Destructors
+    // Destructor
 
         virtual ~ThermoCloud();
 
@@ -200,48 +207,13 @@ public:
                     inline tmp<volScalarField> sigmap() const;
 
 
-        // Check
-
-            //- Post-injection checks
-            void postInjectCheck();
-
-
-        // Edit
-
-            //- Reset the spray source terms
-            void resetSourceTerms();
+        // Cloud evolution functions
 
             //- Evolve the spray (move, inject)
             void evolve();
 
-
-        // Tracking
-
-            //- Move the particles under the influence of the given
-            //  gravitational acceleration
-            template<class TrackingData>
-            void move
-            (
-                TrackingData& td
-            );
-
-
-        // Injection
-
-            //- Inject parcel if it is valid - delete otherwise
-            template<class TrackingData>
-            void injectParcel
-            (
-                TrackingData& td,
-                ParcelType* p
-            );
-
-            //- Inject more parcels
-            template<class TrackingData>
-            void inject
-            (
-                TrackingData& td
-            );
+            //- Reset the spray source terms
+            void resetSourceTerms();
 };
 
 
