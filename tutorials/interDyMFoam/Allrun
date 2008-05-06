@@ -1,0 +1,18 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="damBreakWithObstacle"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    runApplication blockMesh $case
+    runApplication setSet $case -batch createObstacle.setSet
+    runApplication subsetMesh $case c0 -patch walls
+    runApplication setFields $case -latestTime
+    runApplication $application $case
+done
