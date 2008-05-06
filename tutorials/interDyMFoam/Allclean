@@ -1,0 +1,13 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="damBreakWithObstacle"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/CleanFunctions
+
+for case in $cases
+do
+    cleanCase $case
+done 

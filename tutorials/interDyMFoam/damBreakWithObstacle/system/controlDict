@@ -24,7 +24,7 @@ FoamFile
 
 application interFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
