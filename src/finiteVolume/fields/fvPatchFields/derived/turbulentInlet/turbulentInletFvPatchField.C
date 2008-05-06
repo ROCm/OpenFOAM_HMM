@@ -44,6 +44,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     ranGen_(label(0)),
     fluctuationScale_(pTraits<Type>::zero),
     referenceField_(p.size()),
+    alpha_(0.1),
     curTimeIndex_(-1)
 {}
 
@@ -61,6 +62,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     ranGen_(label(0)),
     fluctuationScale_(ptf.fluctuationScale_),
     referenceField_(ptf.referenceField_, mapper),
+    alpha_(ptf.alpha_),
     curTimeIndex_(-1)
 {}
 
@@ -77,6 +79,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     ranGen_(label(0)),
     fluctuationScale_(pTraits<Type>(dict.lookup("fluctuationScale"))),
     referenceField_("referenceField", dict, p.size()),
+    alpha_(dict.lookupOrDefault<scalar>("alpha", 0.1)),
     curTimeIndex_(-1)
 {
     if (dict.found("value"))
@@ -103,6 +106,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     ranGen_(ptf.ranGen_),
     fluctuationScale_(ptf.fluctuationScale_),
     referenceField_(ptf.referenceField_),
+    alpha_(ptf.alpha_),
     curTimeIndex_(-1)
 {}
 
@@ -118,6 +122,7 @@ turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     ranGen_(ptf.ranGen_),
     fluctuationScale_(ptf.fluctuationScale_),
     referenceField_(ptf.referenceField_),
+    alpha_(ptf.alpha_),
     curTimeIndex_(-1)
 {}
 
@@ -170,9 +175,14 @@ void turbulentInletFvPatchField<Type>::updateCoeffs()
             ranGen_.randomise(randomField[facei]);
         }
 
-        patchField = 
-            0.9*patchField
-          + 0.1*
+        // Correction-factor proposed by Yi Wang to compensate for the loss
+        // of RMS fluctuation due to the temporal correlation introduced by
+        // the alpha parameter.
+        scalar rmsCorr = sqrt(12*(2*alpha_ - sqr(alpha_)))/alpha_;
+
+        patchField =
+            (rmsCorr*(1 - alpha_))*patchField
+          + (rmsCorr*alpha_)*
             (
                 referenceField_
               + cmptMultiply
