@@ -542,7 +542,7 @@ DebugSwitches
     layered             0;
     lduInterface        0;
     lduInterfaceField   0;
-    lduMatrix           0;
+    lduMatrix           1;
     lduMesh             0;
     leastSquares        0;
     leastSquaresVectors 0;
