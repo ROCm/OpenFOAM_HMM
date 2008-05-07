@@ -26,8 +26,9 @@ Application
     interDyMFoam
 
 Description
-    Solver for 2 incompressible fluids, which tracks the interface and includes
-    the option of mesh motion and mesh topology changes including adaptive
+    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    (volume of fluid) phase-fraction based interface capturing approach,
+    with optional mesh motion and mesh topology changes including adaptive
     re-meshing.
 
 \*---------------------------------------------------------------------------*/

@@ -40,6 +40,9 @@ doc/[Dd]oxygen/man
 *.tar.gz
 *.tgz
 
+# specific locations
+applications/utilities/preProcessing/FoamX/Java/Make/classes
+
 # other 3rd party sources
 src/other
 
