@@ -111,7 +111,7 @@ public:
     };
 
 
-private:
+protected:
 
     // Private data
 
@@ -168,8 +168,6 @@ private:
             const scalar stepFraction
         ) const;
 
-
-protected:
 
     // Patch interactions
 
