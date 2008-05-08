@@ -1069,6 +1069,147 @@ bool primitiveMesh::checkFaceFlatness
 }
 
 
+// Check 1D/2Dness of edges. Gets passed the non-empty directions and
+// checks all edges in the mesh whether they:
+// - have no component in a non-empty direction or
+// - are only in a singe non-empty direction.
+// Empty direction info is passed in as a vector of labels (synchronised)
+// which are 1 if the direction is non-empty, 0 if it is.
+bool primitiveMesh::checkEdgeAlignment
+(
+    const bool report,
+    const Vector<label>& directions,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkEdgeAlignment("
+            << "const bool, const Vector<label>&, labelHashSet*) const: "
+            << "checking edge alignment" << endl;
+    }
+
+    label nDirs = 0;
+    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+    {
+        if (directions[cmpt] == 1)
+        {
+            nDirs++;
+        }
+        else if (directions[cmpt] != 0)
+        {
+            FatalErrorIn
+            (
+                "primitiveMesh::checkEdgeAlignment"
+                "(const bool, const Vector<label>&, labelHashSet*)"
+            )   << "directions should contain 0 or 1 but is now " << directions
+                << exit(FatalError);
+        }
+    }
+
+    if (nDirs == vector::nComponents)
+    {
+        return false;
+    }
+
+
+
+    const pointField& p = points();
+    const faceList& fcs = faces();
+
+    EdgeMap<label> edgesInError;
+
+    forAll(fcs, faceI)
+    {
+        const face& f = fcs[faceI];
+
+        forAll(f, fp)
+        {
+            label p0 = f[fp];
+            label p1 = f.nextLabel(fp);
+            if (p0 < p1)
+            {
+                vector d(p[p1]-p[p0]);
+                scalar magD = mag(d);
+
+                if (magD > ROOTVSMALL)
+                {
+                    d /= magD;
+
+                    // Check how many empty directions are used by the edge.
+                    label nEmptyDirs = 0;
+                    label nNonEmptyDirs = 0;
+                    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+                    {
+                        if (mag(d[cmpt]) > 1e-6)
+                        {
+                            if (directions[cmpt] == 0)
+                            {
+                                nEmptyDirs++;
+                            }
+                            else
+                            {
+                                nNonEmptyDirs++;
+                            }
+                        }
+                    }
+
+                    if (nEmptyDirs == 0)
+                    {
+                        // Purely in ok directions.
+                    }
+                    else if (nEmptyDirs == 1)
+                    {
+                        // Ok if purely in empty directions.
+                        if (nNonEmptyDirs > 0)
+                        {
+                            edgesInError.insert(edge(p0, p1), faceI);
+                        }
+                    }
+                    else if (nEmptyDirs > 1)
+                    {
+                        // Always an error
+                        edgesInError.insert(edge(p0, p1), faceI);
+                    }
+                }
+            }
+        }
+    }
+
+    label nErrorEdges = returnReduce(edgesInError.size(), sumOp<label>());
+
+    if (nErrorEdges > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Number of edges not aligned with or perpendicular to "
+                << "non-empty directions: " << nErrorEdges << endl;
+        }
+
+        if (setPtr)
+        {
+            setPtr->resize(2*edgesInError.size());
+            forAllConstIter(EdgeMap<label>, edgesInError, iter)
+            {
+                setPtr->insert(iter.key()[0]);
+                setPtr->insert(iter.key()[1]);
+            }
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    All edges aligned with or perpendicular to "
+                << "non-empty directions." << endl;
+        }
+        return false;
+    }
+}
+
+
 bool primitiveMesh::checkUpperTriangular
 (
     const bool report,

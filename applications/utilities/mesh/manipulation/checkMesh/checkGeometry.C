@@ -4,6 +4,7 @@
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+#include "EdgeMap.H"
 
 Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
 {
@@ -21,12 +22,33 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     // Min length
     scalar minDistSqr = magSqr(1e-6*(globalBb.max() - globalBb.min()));
 
-    Info<< "    Mesh (non-empty) directions "
-        << (mesh.directions() + Vector<label>::one)/2 << endl;
-    
+    // Non-empty directions
+    const Vector<label> validDirs = (mesh.directions() + Vector<label>::one)/2;
+
+    Info<< "    Mesh (non-empty) directions " << validDirs << endl;
+
+    scalar nGeomDims = mesh.nGeometricD();
+
     Info<< "    Mesh (non-empty, non-wedge) dimensions "
-        << mesh.nGeometricD() << endl;
-    
+        << nGeomDims << endl;
+
+    if (nGeomDims < 3)
+    {
+        pointSet nonAlignedPoints(mesh, "nonAlignedEdges", mesh.nPoints()/100);
+
+        if (mesh.checkEdgeAlignment(true, validDirs, &nonAlignedPoints))
+        {
+            noFailedChecks++;
+
+            if (nonAlignedPoints.size() > 0)
+            {
+                Pout<< "  <<Writing " << nonAlignedPoints.size()
+                    << " points on non-aligned edges to set "
+                    << nonAlignedPoints.name() << endl;
+                nonAlignedPoints.write();
+            }
+        }
+    }
 
     if (mesh.checkClosedBoundary(true)) noFailedChecks++;
 
@@ -209,7 +231,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             cells.write();
         }
     }
-    
+
 
     return noFailedChecks;
 }
