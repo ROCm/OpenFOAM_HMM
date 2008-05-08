@@ -39,7 +39,7 @@ inline void Foam::word::stripInvalid()
         std::cerr
             << "word::stripInvalid() called for word "
             << this->c_str() << std::endl;
-        
+
         if (debug > 1)
         {
             std::cerr
@@ -65,25 +65,32 @@ inline Foam::word::word()
 {}
 
 
-inline Foam::word::word(const string& str)
+inline Foam::word::word(const string& s)
 :
-    string(str)
+    string(s)
 {
     stripInvalid();
 }
 
 
-inline Foam::word::word(const std::string& stdStr)
+inline Foam::word::word(const std::string& s)
 :
-    string(stdStr)
+    string(s)
 {
     stripInvalid();
 }
 
 
-inline Foam::word::word(const char* chars)
+inline Foam::word::word(const char* s)
 :
-    string(chars)
+    string(s)
+{
+    stripInvalid();
+}
+
+inline Foam::word::word(const char* s, const size_type n)
+:
+    string(s, n)
 {
     stripInvalid();
 }
