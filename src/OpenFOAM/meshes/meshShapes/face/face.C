@@ -438,7 +438,7 @@ int Foam::face::compare(const face& a, const face& b)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void Foam::face::collapse()
+Foam::label Foam::face::collapse()
 {
     if (size() > 1)
     {
@@ -458,6 +458,8 @@ void Foam::face::collapse()
 
         setSize(ci);
     }
+
+    return size();
 }
 
 
@@ -693,6 +695,47 @@ Foam::edgeList Foam::face::edges() const
     e[points.size() - 1] = edge(points[points.size() - 1], points[0]);
 
     return e;
+}
+
+
+int Foam::face::edgeDirection(const edge& e) const
+{
+    if (size() > 2)
+    {
+        edge found(-1,-1);
+
+        // find start/end points - this breaks down for degenerate faces
+        forAll (*this, i)
+        {
+            if (operator[](i) == e.start())
+            {
+                found.start() = i;
+            }
+            else if (operator[](i) == e.end())
+            {
+                found.end() = i;
+            }
+        }
+
+        label diff = found.end() - found.start();
+        if (!diff || found.start() < 0 || found.end() < 0)
+        {
+            return 0;
+        }
+
+        // forward direction
+        if (diff == 1 || diff == 1 - size())
+        {
+            return 1;
+        }
+        // reverse direction
+        if (diff ==  -1 || diff == -1 + size())
+        {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 
