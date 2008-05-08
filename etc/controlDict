@@ -434,7 +434,7 @@ DebugSwitches
     featureEdgeMesh     0;
     fieldToCell         0;
     file                0;
-    fileName            0;
+    fileName            2;
     filteredLinear      0;
     filteredLinear2     0;
     filteredLinear2V    0;
@@ -840,7 +840,7 @@ DebugSwitches
     waveTransmissive    0;
     wedge               0;
     weighted            0;
-    word                0;
+    word                2;
     writer              0;
     xmgr                0;
     zeroGradient        0;
