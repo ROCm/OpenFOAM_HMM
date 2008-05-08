@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-07 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,93 +24,81 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformFixedValueFvPatchField.H"
+#include "timeVaryingMassFlowRateInletVelocityFvPatchVectorField.H"
+#include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
+#include "fvPatchFieldMapper.H"
+#include "surfaceFields.H"
 #include "Time.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
 Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
-timeVaryingUniformFixedValueFvPatchField
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF
+    const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<Type>(p, iF)
+    massFlowRateInletVelocityFvPatchVectorField(p, iF)
 {}
 
 
-template<class Type>
 Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
-timeVaryingUniformFixedValueFvPatchField
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 (
-    const timeVaryingUniformFixedValueFvPatchField<Type>& ptf,
+    const timeVaryingMassFlowRateInletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
+    const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    massFlowRateInletVelocityFvPatchVectorField(ptf, p, iF, mapper),
     timeDataFile_(ptf.timeDataFile_),
     timeSeries_(ptf.timeBounding())
 {}
 
 
-template<class Type>
 Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
-timeVaryingUniformFixedValueFvPatchField
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
+    const DimensionedField<vector, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF),
+    massFlowRateInletVelocityFvPatchVectorField(p, iF, dict),
     timeDataFile_(fileName(dict.lookup("timeDataFile")).expand()),
     timeSeries_(word(dict.lookup("timeBounding")))
-{
-   if (dict.found("value"))
-   {
-       fvPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
-   }
-   else
-   {
-       updateCoeffs();
-   }
-}
+{}
 
 
-template<class Type>
 Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
-timeVaryingUniformFixedValueFvPatchField
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 (
-    const timeVaryingUniformFixedValueFvPatchField<Type>& ptf
+    const timeVaryingMassFlowRateInletVelocityFvPatchVectorField& ptf
 )
 :
-    fixedValueFvPatchField<Type>(ptf),
+    massFlowRateInletVelocityFvPatchVectorField(ptf),
     timeDataFile_(ptf.timeDataFile_),
     timeSeries_(ptf.timeBounding())
 {}
 
 
-template<class Type>
 Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
-timeVaryingUniformFixedValueFvPatchField
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 (
-    const timeVaryingUniformFixedValueFvPatchField<Type>& ptf,
-    const DimensionedField<Type, volMesh>& iF
+    const timeVaryingMassFlowRateInletVelocityFvPatchVectorField& ptf,
+    const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<Type>(ptf, iF),
+    massFlowRateInletVelocityFvPatchVectorField(ptf, iF),
     timeDataFile_(ptf.timeDataFile_),
     timeSeries_(ptf.timeBounding())
 {}
@@ -118,9 +106,8 @@ timeVaryingUniformFixedValueFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Type
-Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
+Foam::scalar
+Foam::timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
 currentValue()
 {
     if (timeSeries_.size() == 0)
@@ -129,7 +116,7 @@ currentValue()
         {
             FatalErrorIn
             (
-                "timeVaryingUniformFixedValueFvPatchField"
+                "timeVaryingMassFlowRateInletVelocity"
                 "::currentValue()"
             )   << "timeDataFile not specified for Patch "
                 << this->patch().name()
@@ -151,7 +138,7 @@ currentValue()
         {
             FatalErrorIn
             (
-                "timeVaryingUniformFixedValueFvPatchField"
+                "timeVaryingMassFlowRateInletVelocity"
                 "::currentValue()"
             )   << "empty time series for Patch "
                 << this->patch().name()
@@ -163,31 +150,42 @@ currentValue()
 }
 
 
-template<class Type>
-void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::updateCoeffs()
+void Foam::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+updateCoeffs()
 {
-    if (this->updated())
+    if (updated())
     {
         return;
     }
 
-    fvPatchField<Type>::operator==(currentValue());
-    fixedValueFvPatchField<Type>::updateCoeffs();
+    massFlowRate() = currentValue();
+    massFlowRateInletVelocityFvPatchVectorField::updateCoeffs();
 }
 
 
-template<class Type>
-void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::write(Ostream& os) const
+void Foam::
+timeVaryingMassFlowRateInletVelocityFvPatchVectorField::
+write(Ostream& os) const
 {
-    fvPatchField<Type>::write(os);
+    massFlowRateInletVelocityFvPatchVectorField::write(os);
     os.writeKeyword("timeDataFile")
         << timeDataFile_ << token::END_STATEMENT << nl;
     os.writeKeyword("timeBounding")
         << timeBounding() << token::END_STATEMENT << nl;
-    this->writeEntry("value", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+   makePatchTypeField
+   (
+       fvPatchVectorField,
+       timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+   );
+}
+
 
 // ************************************************************************* //

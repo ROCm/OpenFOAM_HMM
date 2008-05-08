@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-07 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,130 +23,129 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::timeVaryingUniformFixedValueFvPatchField
+    Foam::timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 
 Description
-    A time-varying form of a uniform fixed value boundary condition.
+    A time-varying form of a massflow normal vector boundary condition.
 
     Example of the boundary condition specification:
     @verbatim
     inlet
     {
-        type            timeVaryingUniformFixedValue;
+        type            timeVaryingMassFlowRateInletVelocity;
+        massFlowRate    0.2;              // Massflow rate [kg/s]
+        value           uniform (0 0 0);  // placeholder
         timeDataFile   "time-series";
-        timeBounding    clamp;           // (error|warn|clamp|repeat)
+        timeBounding    repeat;           // (error|warn|clamp|repeat)
     }
     @endverbatim
 
 Note
-    This class is derived directly from a fixedValue patch rather than from
-    a uniformFixedValue patch.
+    - The value is positive inwards
+    - may not work correctly for transonic inlets!
+    - strange behaviour with potentialFoam since the U equation is not solved
 
 See Also
-    Foam::timeSeries and Foam::fixedValueFvPatchField
+    Foam::timeSeries and Foam::massFlowRateInletVelocityFvPatchVectorField
 
 SourceFiles
-    timeVaryingUniformFixedValueFvPatchField.C
+    timeVaryingMassFlowRateInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFvPatchField_H
-#define timeVaryingUniformFixedValueFvPatchField_H
+#ifndef timeVaryingMassFlowRateInletVelocityFvPatchVectorField_H
+#define timeVaryingMassFlowRateInletVelocityFvPatchVectorField_H
 
-#include "fixedValueFvPatchField.H"
+#include "massFlowRateInletVelocityFvPatchVectorField.H"
 #include "timeSeries.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-           Class timeVaryingUniformFixedValueFvPatch Declaration
+        Class timeVaryingMassFlowRateInletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class timeVaryingUniformFixedValueFvPatchField
+class timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 :
-    public fixedValueFvPatchField<Type>
+    public massFlowRateInletVelocityFvPatchVectorField
 {
     // Private data
 
-        //- file containing time/uniformFixedValue
+        //- file containing time/massFlowRate
         fileName timeDataFile_;
 
         //- the time series being used, including the bounding treatment
-        timeSeries<Type> timeSeries_;
+        timeSeries<scalar> timeSeries_;
 
         //- interpolate the value at the current time
-        Type currentValue();
+        scalar currentValue();
 
 public:
 
     //- Runtime type information
-    TypeName("timeVaryingUniformFixedValue");
+    TypeName("timeVaryingMassFlowRateInletVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        timeVaryingUniformFixedValueFvPatchField
+        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        timeVaryingUniformFixedValueFvPatchField
+        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
         //- Construct by mapping given patch field onto a new patch
-        timeVaryingUniformFixedValueFvPatchField
+        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
         (
-            const timeVaryingUniformFixedValueFvPatchField<Type>&,
+            const timeVaryingMassFlowRateInletVelocityFvPatchVectorField&,
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        timeVaryingUniformFixedValueFvPatchField
+        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
         (
-            const timeVaryingUniformFixedValueFvPatchField<Type>&
+            const timeVaryingMassFlowRateInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchVectorField> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchVectorField>
             (
-                new timeVaryingUniformFixedValueFvPatchField<Type>(*this)
+                new timeVaryingMassFlowRateInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        timeVaryingUniformFixedValueFvPatchField
+        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
         (
-            const timeVaryingUniformFixedValueFvPatchField<Type>&,
-            const DimensionedField<Type, volMesh>&
+            const timeVaryingMassFlowRateInletVelocityFvPatchVectorField&,
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchVectorField> clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<vector, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchVectorField>
             (
-                new timeVaryingUniformFixedValueFvPatchField<Type>(*this, iF)
+                new timeVaryingMassFlowRateInletVelocityFvPatchVectorField(*this, iF)
             );
         }
-
 
     // Member functions
 
@@ -159,32 +158,25 @@ public:
             }
 
             //- Return the time series used
-            const timeSeries<Type>& timeData() const
+            const timeSeries<scalar>& timeData() const
             {
                 return timeSeries_;
             }
-
 
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
-
         //- Write
         virtual void write(Ostream&) const;
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "timeVaryingUniformFixedValueFvPatchField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
