@@ -158,6 +158,12 @@ public:
             // Remove and return element specified by iterator
             inline link* remove(iterator&);
 
+            //- Replace oldLink with newLink and return element
+            link* replace(link* oldLink, link* newLink);
+
+            //- Replace oldIter with newLink and return element
+            inline link* replace(iterator& oldIter, link* newLink);
+
             //- Clear the list
             inline void clear();
 

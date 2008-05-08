@@ -123,6 +123,11 @@ class HashTable
         label nElmts_;
 
 
+    // Private Member Functions
+
+        //- Assign a new hashedEntry to a possibly already existing key
+        bool set(const Key& key, const T& newElmt, bool protect);
+
 public:
 
         //- Declare friendship with the HashPtrTable class
@@ -181,7 +186,10 @@ public:
         // Edit
 
             //- Insert a new hashedEntry
-            bool insert(const Key& key, const T& newElmt);
+            inline bool insert(const Key& key, const T& newElmt);
+
+            //- Assign a new hashedEntry, overwriting existing entries
+            inline bool set(const Key& key, const T& newElmt);
 
             //- Erase an hashedEntry specified by given iterator
             bool erase(const iterator& it);

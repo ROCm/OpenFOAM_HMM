@@ -202,7 +202,12 @@ List<Key> HashTable<T, Key, Hash>::toc() const
 
 
 template<class T, class Key, class Hash>
-bool HashTable<T, Key, Hash>::insert(const Key& key, const T& newEntry)
+bool HashTable<T, Key, Hash>::set
+(
+    const Key& key,
+    const T& newEntry,
+    const bool protect
+)
 {
     if (tableSize_ == 0)
     {
@@ -210,40 +215,70 @@ bool HashTable<T, Key, Hash>::insert(const Key& key, const T& newEntry)
     }
 
     label ii = Hash()(key, tableSize_);
+    hashedEntry* existing = 0;
+    hashedEntry* prev = 0;
 
-    for (hashedEntry* n=table_[ii]; n; n=n->next_)
+    for (hashedEntry* curr = table_[ii]; curr; curr = curr->next_)
     {
-        if (key == n->key_)
+        if (key == curr->key_)
+        {
+            existing = curr;
+            break;
+        }
+        prev = curr;
+    }
+
+    // not found, insert it at the head
+    if (!existing)
+    {
+        table_[ii] = new hashedEntry(key, table_[ii], newEntry);
+        nElmts_++;
+
+        if (double(nElmts_)/tableSize_ > 0.8)
         {
 #           ifdef FULLDEBUG
             if (debug)
             {
-                Info<< "HashTable<T, Key, Hash>::insert"
-                       "(const Key& key, T newEntry) : "
-                       "Cannot insert " << key << " already in hash table\n";
+                Info<< "HashTable<T, Key, Hash>::set"
+                    "(const Key& key, T newEntry) : "
+                    "Doubling table size\n";
             }
 #           endif
 
-            return false;
+            resize(2*tableSize_);
         }
     }
-
-    table_[ii] = new hashedEntry(key, table_[ii], newEntry);
-
-    nElmts_++;
-
-    if (double(nElmts_)/tableSize_ > 0.8)
+    else if (protect)
     {
+        // found - but protected from overwriting
+        // this corresponds to the STL 'insert' convention
 #       ifdef FULLDEBUG
         if (debug)
         {
-            Info<< "HashTable<T, Key, Hash>::insert"
-                   "(const Key& key, T newEntry) : "
-                   "Doubling table size\n";
+            Info<< "HashTable<T, Key, Hash>::set"
+                "(const Key& key, T newEntry, false) : "
+                "Cannot insert " << key << " already in hash table\n";
         }
 #       endif
+        return false;
+    }
+    else
+    {
+        // found - overwrite existing entry
+        // this corresponds to the Perl convention
+        hashedEntry* elemPtr = new hashedEntry(key, existing->next_, newEntry);
 
-        resize(2*tableSize_);
+        // replace existing element - within list or insert at the head
+        if (prev)
+        {
+            prev->next_ = elemPtr;
+        }
+        else
+        {
+            table_[ii] = elemPtr;
+        }
+
+        delete existing;
     }
 
     return true;

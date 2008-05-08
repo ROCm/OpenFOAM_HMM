@@ -229,6 +229,43 @@ DLListBase::link* DLListBase::remove(DLListBase::link* l)
 }
 
 
+DLListBase::link* DLListBase::replace
+(
+    DLListBase::link* oldLink,
+    DLListBase::link* newLink
+)
+{
+    link* ret = oldLink;
+
+    newLink->prev_ = oldLink->prev_;
+    newLink->next_ = oldLink->next_;
+
+    if (oldLink == first_ && first_ == last_)
+    {
+        first_ = newLink;
+        last_  = newLink;
+    }
+    else if (oldLink == first_)
+    {
+        first_ = newLink;
+        newLink->next_->prev_ = newLink;
+    }
+    else if (oldLink == last_)
+    {
+        last_ = newLink;
+        newLink->prev_->next_ = newLink;
+    }
+    else
+    {
+        newLink->prev_->next_ = newLink;
+        newLink->next_->prev_ = newLink;
+    }
+
+    ret->deregister();
+    return ret;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

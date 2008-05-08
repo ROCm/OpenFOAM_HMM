@@ -34,6 +34,7 @@ defineTypeNameAndDebug(Foam::dictionary, 0);
 
 const Foam::dictionary Foam::dictionary::null;
 
+#undef DICTIONARY_INPLACE_MERGE
 
 // * * * * * * * * * * * * * Private member functions  * * * * * * * * * * * //
 
@@ -53,7 +54,27 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
         }
         else
         {
+#ifdef DICTIONARY_INPLACE_MERGE
+            if (hashedEntries_.set(ePtr->keyword(), ePtr))
+            {
+                ePtr->name() = name_ + "::" + ePtr->keyword();
+                replace(iter(), ePtr);
+
+                return true;
+            }
+            else
+            {
+                IOWarningIn("dictionary::add(entry* ePtr)", (*this))
+                    << "problem replacing entry in dictionary "
+                    << name()
+                    << endl;
+
+                delete ePtr;
+                return false;
+            }
+#else
             remove(ePtr->keyword());
+#endif
         }
     }
 
@@ -517,8 +538,12 @@ bool Foam::dictionary::merge(const dictionary& dict)
             }
             else
             {
+#ifdef DICTIONARY_INPLACE_MERGE
+                add(iter().clone(*this).ptr(), true);
+#else
                 remove(keyword);
                 add(iter().clone(*this)());
+#endif
                 changed = true;
             }
         }
@@ -526,6 +551,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
         {
             // not found - just add
             add(iter().clone(*this)());
+            changed = true;
         }
     }
 
