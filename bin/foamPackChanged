@@ -24,66 +24,41 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamPack [outputDir]
+#     foamPackChanged <directory> <tarFile>
 #
 # Description
-#     Packs and compresses the OpenFOAM directory for release
+#     Packs and compresses files that have a corresponding .orig file
 #
 #------------------------------------------------------------------------------
-tmpFile=${TMPDIR:-/tmp}/foamPackFiles.$$
+tmpFile=${TMPDIR:-/tmp}/foamPackChanged.$$
 
-timeStamp=$(date +%Y-%m-%d)
-packDir=$WM_PROJECT-$WM_PROJECT_VERSION
-packFile=${packDir}_${timeStamp}.gtgz
+if [ $# -ne 2 ]; then
+   echo "Usage : ${0##*/} directory tarFile"
+   echo ""
+   echo "Packs and compresses files that have a corresponding .orig file"
+   echo ""
+   exit 1
+fi
 
-if [ ! -d $packDir ]
-then
+# canonical form (no double and no trailing dashes)
+packDir=$(echo "$1" | sed -e 's@//*@/@g' -e 's@/$@@')
+packFile=$2
+
+if [ ! -d $packDir ]; then
    echo "Error: directory $packDir does not exist"
    exit 1
 fi
 
-# add optional output directory
-if [ -d "$1" ]; then
-   packFile="$1/$packFile"
-fi
-
-if [ -f $packFile ]
-then
-   echo "Error: $packFile already exists"
-   exit 1
-fi
-
-# Create time stamp file
-# ~~~~~~~~~~~~~~~~~~~~~~
-
-echo $timeStamp 2>/dev/null > $packDir/.timeStamp
-
 # Clean up on termination and on Ctrl-C
 trap 'rm -f $tmpFile 2>/dev/null; exit 0' EXIT TERM INT
 
-
-# Pack and compress the packFile using GNU tar
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-echo
-echo "Packing foam version $packDir into $packFile"
-echo
-echo "finding and packing"
+fileCount=0
+cat /dev/null > $tmpFile
 
 find -H $packDir               \
-    ! -type d -type f          \
-    ! -name "*~"               \
- -a ! -name ".*~"              \
- -a ! -name "*.orig"           \
- -a ! -name "*.dep"            \
- -a ! -name "*.o"              \
- -a ! -name "*.so"             \
- -a ! -name "*.a"              \
- -a ! -name "core"             \
- -a ! -name "core.[1-9]*"      \
- -a ! -name "pvml.[1-9]*"      \
- -a ! -name "log[0-9]*"        \
- -a ! -name "so_locations"     \
+    ! -type d                  \
+    -type f                    \
+    -name "*.orig"             \
 | sed                          \
  -e "\@$packDir/lib/@d"        \
  -e "\@$packDir/src/other/mico-*/platforms@d"  \
@@ -91,24 +66,45 @@ find -H $packDir               \
  -e "\@$packDir/src/other/mpich-*/lib@d"       \
  -e "\@$packDir/src/other/lam-*/platforms@d"   \
  -e "\@$packDir/src/other/openmpi-*/platforms@d"   \
- -e '\@applications/bin/@d'       \
- -e '\@/t/@d'                     \
- -e '\@Make[.A-Za-z]*/[^/]*/@d'   \
- -e '\@doc/[Dd]oxygen/html@d'     \
- -e '\@doc/[Dd]oxygen/latex@d'    \
- -e '\@doc/[Dd]oxygen/man@d'      \
- -e '\@/lnInclude@d'              \
- -e '\@/ii_files@d'               \
- | tee $tmpFile
+ -e '\@applications/bin/@d'      \
+ -e '\@/t/@d'                    \
+ -e '\@Make[.A-Za-z]*/[^/]*/@d'  \
+ -e '\@[Dd]oxygen/html@d'        \
+ -e '\@[Dd]oxygen/latex@d'       \
+ -e '\@[Dd]oxygen/man@d'         \
+ -e "s@$packDir/*@@"             \
+ | \
+ (
+    while read file
+    do
+       (( fileCount=$fileCount + 1 ))
 
-tar czpf $packFile --files-from $tmpFile
+       file=${file%%.orig}
+
+       if [ -f "$packDir/$file" ]
+       then
+          echo $fileCount $file
+          echo $packDir/$file >> $tmpFile
+       else
+          echo "[MISSING]" $file
+       fi
+    done
+ )
+
+# file fileCount
+fileCount=$(cat $tmpFile | wc -l)
+echo "----------------------------------------------------------------------"
+echo "pack $fileCount updated (non-.orig) files"
+
+tar -czpf $packFile --files-from $tmpFile
 
 if [ $? = 0 ]
 then
-   echo "Finished packing and compressing $packDir into file $packFile"
+   echo "Finished packing changed files from $packDir into $packFile"
 else
-   echo "Error: failure packing $packDir into file $packFile"
+   echo "Error: failure packing changed files from $packDir into $packFile"
    rm -f $packFile 2>/dev/null
 fi
+echo "----------------------------------------------------------------------"
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------

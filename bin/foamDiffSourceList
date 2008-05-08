@@ -72,6 +72,7 @@ find -H $newDir                \
     ! -type d -type f          \
     ! -name "*~"               \
  -a ! -name ".*~"              \
+ -a ! -name ".#*"              \
  -a ! -name "*.orig"           \
  -a ! -name "*.dep"            \
  -a ! -name "*.o"              \
@@ -83,10 +84,11 @@ find -H $newDir                \
  -a ! -name "log[0-9]*"        \
 | sed                          \
  -e "\@$newDir/lib/@d"         \
- -e "\@$newDir/src/mico-[0-9.]*/platforms@d"  \
- -e "\@$newDir/src/mpich-[0-9.]*/platforms@d" \
- -e "\@$newDir/src/mpich-[0-9.]*/lib@d"       \
- -e "\@$newDir/src/lam-[0-9.]*/platforms@d"   \
+ -e "\@$newDir/src/other/mico-*/platforms@d"  \
+ -e "\@$newDir/src/other/mpich-*/platforms@d" \
+ -e "\@$newDir/src/other/mpich-*/lib@d"       \
+ -e "\@$newDir/src/other/lam-*/platforms@d"   \
+ -e "\@$newDir/src/other/openmpi-*/platforms@d"   \
  -e '\@applications/bin/@d'      \
  -e '\@/t/@d'                    \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'  \
@@ -118,7 +120,7 @@ find -H $newDir                \
     done
  )
 
-# file fileCount 
+# file fileCount
 fileCount=$(cat $tmpFile | wc -l)
 echo "----------------------------------------------------------------------"
 echo "pack $fileCount changed/new files"

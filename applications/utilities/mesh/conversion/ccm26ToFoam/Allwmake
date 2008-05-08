@@ -1,9 +1,9 @@
 #!/bin/sh
 set -x
 
-# Some fun: prostar uses ccmio2.3, Star-ccm+ uses ccmio2.4
+# compile cd-adapco's CCM library
+wmake libso libccmio/libadf
+wmake libso libccmio/libccmio
+wmake libso libccmio/libcgns
 
-(cd libccmio; wmake libso libadf)
-(cd libccmio; wmake libso libccmio)
-(cd libccmio; wmake libso libcgns)
-(cd ccm26ToFoam; wmake)
+wmake ccm26ToFoam
