@@ -26,7 +26,25 @@ Class
     Foam::engineTime
 
 Description
-    Foam::engineTime
+    Manage time in terms of engine RPM and crank-angle.
+
+    When engineTime is in effect, the userTime is reported in degrees
+    crank-angle instead of in seconds. The RPM to be used is specified in
+    @c constant/engineGeometry. If only a time conversion is required,
+    the geometric engine parameters can be dropped or set to zero.
+
+    For example,
+    @verbatim
+        rpm             rpm  [0 0 -1 0 0]  2000;
+
+        conRodLength    conRodLength  [0 1 0 0 0] 0.0;
+        bore            bore          [0 1 0 0 0] 0.0;
+        stroke          stroke        [0 1 0 0 0] 0.0;
+        clearance       clearance     [0 1 0 0 0] 0.0;
+    @endverbatim
+
+Note
+   The engineTime can currently only be selected at compile-time.
 
 SourceFiles
     engineTime.C
@@ -46,7 +64,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class engineTime Declaration
+                        Class engineTime Declaration
 \*---------------------------------------------------------------------------*/
 
 class engineTime
@@ -55,13 +73,16 @@ class engineTime
 {
     // Private data
 
-        IOdictionary engineGeometry_;
+        IOdictionary dict_;
 
+        //- RPM is required
+        dimensionedScalar rpm_;
+
+        //- Optional engine geometry parameters
         dimensionedScalar conRodLength_;
         dimensionedScalar bore_;
         dimensionedScalar stroke_;
         dimensionedScalar clearance_;
-        dimensionedScalar rpm_;
 
 
     // Private Member Functions
@@ -72,6 +93,8 @@ class engineTime
         //- Disallow default bitwise assignment
         void operator=(const engineTime&);
 
+        //- adjust read time values
+        void timeAdjustment();
 
 public:
 
@@ -84,7 +107,8 @@ public:
             const fileName& rootPath,
             const fileName& caseName,
             const fileName& systemName = "system",
-            const fileName& constantName = "constant"
+            const fileName& constantName = "constant",
+            const fileName& dictName = "engineGeometry"
         );
 
     // Destructor
@@ -116,7 +140,13 @@ public:
             //- Return the engine geometry dictionary
             const dictionary& engineDict() const
             {
-                return engineGeometry_;
+                return dict_;
+            }
+
+            //- Return the engines current operating RPM
+            const dimensionedScalar& rpm() const
+            {
+                return rpm_;
             }
 
             //- Return the engines connecting-rod length
@@ -143,12 +173,6 @@ public:
                 return clearance_;
             }
 
-            //- Return the engines current operating RPM
-            const dimensionedScalar& rpm() const
-            {
-                return rpm_;
-            }
-
 
             //- Return current crank-angle
             scalar theta() const;
@@ -173,16 +197,19 @@ public:
         // Member functions overriding the virtual functions in time
 
             //- Convert the user-time (CA deg) to real-time (s).
-            scalar userTimeToTime(const scalar theta) const;
+            virtual scalar userTimeToTime(const scalar theta) const;
 
             //- Convert the real-time (s) into user-time (CA deg)
-            scalar timeToUserTime(const scalar t) const;
+            virtual scalar timeToUserTime(const scalar t) const;
+
+            //- Read the control dictionary and set the write controls etc.
+            virtual void readDict();
 
 
         // Edit
 
             //- Read the controlDict and set all the parameters
-            bool read();
+            virtual bool read();
 };
 
 
