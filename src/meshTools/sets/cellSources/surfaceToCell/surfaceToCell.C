@@ -142,7 +142,7 @@ bool Foam::surfaceToCell::differingPointNormals
                     pointToNearest
                 );
 
-            if (pointTriI != cellTriI)
+            if (pointTriI != -1 && pointTriI != cellTriI)
             {
                 scalar cosAngle = normals[pointTriI] & normals[cellTriI];
 
