@@ -100,7 +100,7 @@ public:
 
     // Member Functions
 
-        //- Return the list of sorted point indices. Updated every sort.
+        //- Return the list of sorted indices. Updated every sort.
         const labelList& indices() const
         {
             return indices_;
@@ -111,6 +111,9 @@ public:
 
         //- Sort the list (if changed after construction time)
         void sort();
+
+        //- Sort the list (if changed after construction time)
+        void stableSort();
 
 
     // Member Operators
