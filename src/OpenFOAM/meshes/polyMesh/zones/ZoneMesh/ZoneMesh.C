@@ -76,12 +76,12 @@ void ZoneMesh<ZoneType>::calcZoneMap() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Read constructor given IOobject and a polyMesh reference
+// Read constructor given IOobject and a MeshType reference
 template<class ZoneType>
 ZoneMesh<ZoneType>::ZoneMesh
 (
     const IOobject& io,
-    const polyMesh& mesh
+    const MeshType& mesh
 )
 :
     PtrList<ZoneType>(),
@@ -122,7 +122,7 @@ ZoneMesh<ZoneType>::ZoneMesh
         is.check
         (
             "ZoneMesh::ZoneMesh"
-            "(const IOobject&, const polyMesh&)"
+            "(const IOobject&, const MeshType&)"
         );
 
         close();
@@ -140,7 +140,7 @@ template<class ZoneType>
 ZoneMesh<ZoneType>::ZoneMesh
 (
     const IOobject& io,
-    const polyMesh& mesh,
+    const MeshType& mesh,
     const label size
 )
 :
@@ -175,8 +175,8 @@ const Map<label>& ZoneMesh<ZoneType>::zoneMap() const
 }
 
 
-// Given a global object index, return the zone it is in.  If
-//object does not belong to any zones, return -1
+// Given a global object index, return the zone it is in.
+// If object does not belong to any zones, return -1
 template<class ZoneType>
 label ZoneMesh<ZoneType>::whichZone(const label objectIndex) const
 {

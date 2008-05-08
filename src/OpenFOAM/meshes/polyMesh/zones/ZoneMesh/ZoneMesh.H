@@ -69,8 +69,11 @@ class ZoneMesh
 {
     // Private data
 
+        //- Typedef in preparation of a second template parameter
+        typedef polyMesh MeshType;
+
         //- Reference to mesh
-        const polyMesh& mesh_;
+        const MeshType& mesh_;
 
         //- Map of zone labels for given element
         mutable Map<label>* zoneMapPtr_;
@@ -93,18 +96,18 @@ public:
 
     // Constructors
 
-        //- Read constructor given IOobject and a polyMesh reference
+        //- Read constructor given IOobject and a MeshType reference
         ZoneMesh
         (
             const IOobject&,
-            const polyMesh&
+            const MeshType&
         );
 
         //- Construct given size
         ZoneMesh
         (
             const IOobject&,
-            const polyMesh&,
+            const MeshType&,
             const label size
         );
 
@@ -116,7 +119,7 @@ public:
     // Member functions
 
         //- Return the mesh reference
-        const polyMesh& mesh() const
+        const MeshType& mesh() const
         {
             return mesh_;
         }
