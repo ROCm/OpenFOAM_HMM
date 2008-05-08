@@ -1,23 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
+|  \\    /   O peration     | Version:  1.4.2                                 |
 |   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          sprayProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      sprayProperties;
+    location    "constant";
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,11 +55,11 @@ wallModel       reflect;
 
 specConstAtomizationCoeffs
 {
-    dropletNozzleDiameterRatio 
+    dropletNozzleDiameterRatio
     (
         0.4
     );
-    sprayAngle      
+    sprayAngle
     (
         10
     );
@@ -142,9 +136,9 @@ hollowConeInjectorCoeffs
 {
     dropletPDF
     {
-        //pdfType           exponential;    
+        //pdfType           exponential;
         pdfType         RosinRammler;
-    
+
         RosinRammlerPDF
         {
             minValue        1.00e-6;
@@ -154,7 +148,7 @@ hollowConeInjectorCoeffs
             (
                 1.5e-4
             );
-    
+
             n
             (
                 3

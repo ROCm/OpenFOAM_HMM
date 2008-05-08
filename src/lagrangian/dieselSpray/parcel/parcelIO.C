@@ -38,17 +38,17 @@ Foam::parcel::parcel
 :
     Particle<parcel>(cloud, is),
 
-    fuelNames_
+    liquidComponents_
     (
         (cloud.pMesh().lookupObject<dictionary>("thermophysicalProperties"))
-       .lookup("liquidFuelComponents")
+       .lookup("liquidComponents")
     ),
-    X_(fuelNames_.size(), 0.0),
+    X_(liquidComponents_.size(), 0.0),
 
     tMom_(GREAT)
 {
 
-    label nX = fuelNames_.size();
+    label nX = X_.size();
 
     if (readFields)
     {
@@ -67,7 +67,7 @@ Foam::parcel::parcel
             is >> U_;
             is >> Uturb_;
             is >> n_;
-            for(label j=0; j<nX; j++)
+            for (label j=0; j<nX; j++)
             {
                 X_[j] = readScalar(is);
             }
@@ -79,7 +79,7 @@ Foam::parcel::parcel
                 reinterpret_cast<char*>(&d_),
                 sizeof(d_) + sizeof(T_) + sizeof(m_) + sizeof(y_)
               + sizeof(yDot_) + sizeof(ct_) + sizeof(ms_) + sizeof(tTurb_)
-              + sizeof(liquidCore_) + sizeof(injector_) 
+              + sizeof(liquidCore_) + sizeof(injector_)
               + sizeof(U_) + sizeof(Uturb_) + sizeof(n_)
             );
 
@@ -175,11 +175,10 @@ void Foam::parcel::readFields
         const parcel& p0 = iter();
 
         label nX = p0.X().size();
-        List<word> names(p0.fuelNames());
+        const List<word>& names = p0.liquidNames();
 
         for (label j=0; j<nX; j++)
         {
-
             IOField<scalar> X(c.fieldIOobject(names[j]));
 
             label i = 0;
@@ -262,8 +261,7 @@ void Foam::parcel::writeFields
         const parcel& p0 = iter();
 
         label nX = p0.X().size();
-
-        List<word> names(p0.fuelNames());
+        const List<word>& names = p0.liquidNames();
 
         for (label j=0; j<nX; j++)
         {
@@ -312,7 +310,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const parcel& p)
         (
             reinterpret_cast<const char*>(&p.d_),
             sizeof(p.d_) + sizeof(p.T_) + sizeof(p.m_) + sizeof(p.y_)
-          + sizeof(p.yDot_) + sizeof(p.ct_) + sizeof(p.ms_) + sizeof(p.tTurb_) 
+          + sizeof(p.yDot_) + sizeof(p.ct_) + sizeof(p.ms_) + sizeof(p.tTurb_)
           + sizeof(p.liquidCore_) + sizeof(p.injector_)
           + sizeof(p.U_) + sizeof(p.Uturb_) + sizeof(p.n_)
         );

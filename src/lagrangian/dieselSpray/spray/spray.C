@@ -63,7 +63,7 @@ Foam::spray::spray
     const dictionary& environmentalProperties
 )
 :
-    Cloud<parcel>(U.mesh()),
+    Cloud<parcel>(U.mesh(), false), // suppress className checking on positions
     runTime_(U.time()),
     time0_(runTime_.value()),
     mesh_(U.mesh()),

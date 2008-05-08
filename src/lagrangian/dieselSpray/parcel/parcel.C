@@ -38,21 +38,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineParticleTypeNameAndDebug(parcel, 0);
 defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-parcel::parcel
+Foam::parcel::parcel
 (
     const Cloud<parcel>& cloud,
     const vector& position,
-    const label celli,
+    const label cellI,
     const vector& n,
     const scalar d,
     const scalar T,
@@ -67,14 +66,13 @@ parcel::parcel
     const vector& U,
     const vector& Uturb,
     const scalarField& X,
-    const List<word>& fuelNames
+    const List<word>& liquidNames
 )
 :
-    Particle<parcel>(cloud, position, celli),
-
-    fuelNames_
+    Particle<parcel>(cloud, position, cellI),
+    liquidComponents_
     (
-        fuelNames
+        liquidNames
     ),
     d_(d),
     T_(T),
@@ -96,7 +94,7 @@ parcel::parcel
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool parcel::move(spray& sDB)
+bool Foam::parcel::move(spray& sDB)
 {
     const polyMesh& mesh = cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
@@ -329,7 +327,7 @@ bool parcel::move(spray& sDB)
 }
 
 
-void parcel::updateParcelProperties
+void Foam::parcel::updateParcelProperties
 (
     const scalar dt,
     spray& sDB,
@@ -638,18 +636,16 @@ void parcel::updateParcelProperties
 }
 
 
-void parcel::transformProperties(const tensor& T)
+void Foam::parcel::transformProperties(const tensor& T)
 {
     U_ = transform(T, U_);
 }
 
 
-void parcel::transformProperties(const vector&)
+void Foam::parcel::transformProperties(const vector&)
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

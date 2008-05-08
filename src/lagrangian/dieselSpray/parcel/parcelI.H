@@ -31,9 +31,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline const List<word>& parcel::liquidNames() const
+{
+    return liquidComponents_;
+}
+
 inline const List<word>& parcel::fuelNames() const
 {
-    return fuelNames_;
+    return liquidComponents_;
 }
 
 inline scalar parcel::d() const
@@ -115,7 +120,7 @@ inline scalar parcel::tTurb() const
 {
     return tTurb_;
 }
-   
+
 inline scalar& parcel::liquidCore()
 {
     return liquidCore_;
@@ -135,7 +140,7 @@ inline scalar parcel::injector() const
 {
     return injector_;
 }
-   
+
 inline const vector& parcel::U() const
 {
     return U_;
