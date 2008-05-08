@@ -42,85 +42,86 @@ fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
 
 basicFvPatchFields = $(fvPatchFields)/basic
-$(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
-$(basicFvPatchFields)/fixedValue/fixedValueFvPatchFields.C
-$(basicFvPatchFields)/fixedGradient/fixedGradientFvPatchFields.C
-$(basicFvPatchFields)/mixed/mixedFvPatchFields.C
-$(basicFvPatchFields)/transform/transformFvPatchFields.C
-$(basicFvPatchFields)/transform/transformFvPatchScalarField.C
-$(basicFvPatchFields)/directionMixed/directionMixedFvPatchFields.C
 $(basicFvPatchFields)/basicSymmetry/basicSymmetryFvPatchFields.C
 $(basicFvPatchFields)/basicSymmetry/basicSymmetryFvPatchScalarField.C
 $(basicFvPatchFields)/calculated/calculatedFvPatchFields.C
-$(basicFvPatchFields)/generic/genericFvPatchFields.C
-$(basicFvPatchFields)/sliced/slicedFvPatchFields.C
 $(basicFvPatchFields)/coupled/coupledFvPatchFields.C
+$(basicFvPatchFields)/directionMixed/directionMixedFvPatchFields.C
+$(basicFvPatchFields)/fixedGradient/fixedGradientFvPatchFields.C
+$(basicFvPatchFields)/fixedValue/fixedValueFvPatchFields.C
+$(basicFvPatchFields)/generic/genericFvPatchFields.C
+$(basicFvPatchFields)/mixed/mixedFvPatchFields.C
+$(basicFvPatchFields)/sliced/slicedFvPatchFields.C
+$(basicFvPatchFields)/transform/transformFvPatchFields.C
+$(basicFvPatchFields)/transform/transformFvPatchScalarField.C
+$(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
 
 constraintFvPatchFields = $(fvPatchFields)/constraint
-$(constraintFvPatchFields)/empty/emptyFvPatchFields.C
-$(constraintFvPatchFields)/wedge/wedgeFvPatchFields.C
-$(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
-$(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
 $(constraintFvPatchFields)/cyclic/cyclicFvPatchFields.C
+$(constraintFvPatchFields)/empty/emptyFvPatchFields.C
 $(constraintFvPatchFields)/jumpCyclic/jumpCyclicFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchScalarField.C
+$(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
+$(constraintFvPatchFields)/wedge/wedgeFvPatchFields.C
+$(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
 
 derivedFvPatchFields = $(fvPatchFields)/derived
-$(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/slip/slipFvPatchFields.C
-$(derivedFvPatchFields)/partialSlip/partialSlipFvPatchFields.C
-$(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
-$(derivedFvPatchFields)/surfaceNormalFixedValue/surfaceNormalFixedValueFvPatchVectorField.C
-$(derivedFvPatchFields)/inletOutlet/inletOutletFvPatchFields.C
-$(derivedFvPatchFields)/outletInlet/outletInletFvPatchFields.C
+$(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
+$(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/fan/fanFvPatchFields.C
+$(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
 $(derivedFvPatchFields)/fluxCorrectedVelocity/fluxCorrectedVelocityFvPatchVectorField.C
-$(derivedFvPatchFields)/movingWallVelocity/movingWallVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/freestream/freestreamFvPatchFields.C
 $(derivedFvPatchFields)/freestreamPressure/freestreamPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/pressureInletVelocity/pressureInletVelocityFvPatchVectorField.C
-$(derivedFvPatchFields)/pressureInletUniformVelocity/pressureInletUniformVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/inletOutlet/inletOutletFvPatchFields.C
+$(derivedFvPatchFields)/inletOutletTotalTemperature/inletOutletTotalTemperatureFvPatchScalarField.C
+$(derivedFvPatchFields)/massFlowRateInletVelocity/massFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/movingWallVelocity/movingWallVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/oscillatingFixedValue/oscillatingFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/outletInlet/outletInletFvPatchFields.C
+$(derivedFvPatchFields)/partialSlip/partialSlipFvPatchFields.C
+$(derivedFvPatchFields)/pressureDirectedInletOutletVelocity/pressureDirectedInletOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/pressureDirectedInletVelocity/pressureDirectedInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/pressureInletOutletVelocity/pressureInletOutletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/pressureInletUniformVelocity/pressureInletUniformVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/pressureInletVelocity/pressureInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingPressureInletOutletVelocity/rotatingPressureInletOutletVelocityFvPatchVectorField.C
-$(derivedFvPatchFields)/pressureDirectedInletOutletVelocity/pressureDirectedInletOutletVelocityFvPatchVectorField.C
-$(derivedFvPatchFields)/totalPressure/totalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/rotatingTotalPressure/rotatingTotalPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/totalTemperature/totalTemperatureFvPatchScalarField.C
-$(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
-$(derivedFvPatchFields)/waveTransmissive/waveTransmissiveFvPatchFields.C
+$(derivedFvPatchFields)/slip/slipFvPatchFields.C
 $(derivedFvPatchFields)/supersonicFreestream/supersonicFreestreamFvPatchVectorField.C
-$(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
-$(derivedFvPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/timeVaryingMappedFixedValue/timeVaryingMappedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/timeVaryingMappedFixedValue/AverageIOFields.C
-$(derivedFvPatchFields)/oscillatingFixedValue/oscillatingFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/surfaceNormalFixedValue/surfaceNormalFixedValueFvPatchVectorField.C
 $(derivedFvPatchFields)/syringePressure/syringePressureFvPatchScalarField.C
-$(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/massFlowRateInletVelocity/massFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/timeVaryingMappedFixedValue/AverageIOFields.C
+$(derivedFvPatchFields)/timeVaryingMappedFixedValue/timeVaryingMappedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/timeVaryingMassFlowRateInletVelocity/timeVaryingMassFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/totalPressure/totalPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/totalTemperature/totalTemperatureFvPatchScalarField.C
+$(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
 $(derivedFvPatchFields)/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
-$(derivedFvPatchFields)/inletOutletTotalTemperature/inletOutletTotalTemperatureFvPatchScalarField.C
-$(derivedFvPatchFields)/fan/fanFvPatchFields.C
+$(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/waveTransmissive/waveTransmissiveFvPatchFields.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
 
 basicFvsPatchFields = $(fvsPatchFields)/basic
 $(basicFvsPatchFields)/calculated/calculatedFvsPatchFields.C
-$(basicFvsPatchFields)/sliced/slicedFvsPatchFields.C
 $(basicFvsPatchFields)/coupled/coupledFvsPatchFields.C
 $(basicFvsPatchFields)/fixedValue/fixedValueFvsPatchFields.C
+$(basicFvsPatchFields)/sliced/slicedFvsPatchFields.C
 
 constraintFvsPatchFields = $(fvsPatchFields)/constraint
-$(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
-$(constraintFvsPatchFields)/wedge/wedgeFvsPatchFields.C
-$(constraintFvsPatchFields)/symmetry/symmetryFvsPatchFields.C
 $(constraintFvsPatchFields)/cyclic/cyclicFvsPatchFields.C
+$(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
 $(constraintFvsPatchFields)/processor/processorFvsPatchFields.C
+$(constraintFvsPatchFields)/symmetry/symmetryFvsPatchFields.C
+$(constraintFvsPatchFields)/wedge/wedgeFvsPatchFields.C
 
 
 fields/volFields/volFields.C
@@ -139,8 +140,9 @@ $(interpolation)/interpolationCellPoint/cellPointWeight/cellPointWeight.C
 $(interpolation)/interpolationCellPoint/makeInterpolationCellPoint.C
 $(interpolation)/interpolationCellPointFace/makeInterpolationCellPointFace.C
 
-interpolation/volPointInterpolation/pointPatchInterpolation/pointPatchInterpolation.C
-interpolation/volPointInterpolation/volPointInterpolation.C
+volPointInterpolation = interpolation/volPointInterpolation
+$(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C
+$(volPointInterpolation)/volPointInterpolation.C
 
 surfaceInterpolation = interpolation/surfaceInterpolation
 $(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
