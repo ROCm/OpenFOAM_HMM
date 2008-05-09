@@ -75,6 +75,9 @@ int main(int argc, char *argv[])
 #           include "correctPhi.H"
         }
 
+        // Keep the absolute fluxes for use in ddtPhiCorr
+        surfaceScalarField phiAbs("phiAbs", phi);
+
         // Make the fluxes relative to the mesh motion
         fvc::makeRelative(phi, U);
 
@@ -95,7 +98,11 @@ int main(int argc, char *argv[])
 
                 U = rAU*UEqn.H();
                 phi = (fvc::interpolate(U) & mesh.Sf());
-                    //+ fvc::ddtPhiCorr(rAU, U, phi);
+
+                if (ddtPhiCorr)
+                {
+                    phi += fvc::ddtPhiCorr(rAU, U, phiAbs);
+                }
 
                 adjustPhi(phi, U, p);
 
@@ -116,7 +123,7 @@ int main(int argc, char *argv[])
                     {
                         pEqn.solve(mesh.solver(p.name()));
                     }
-                
+
                     if (nonOrth == nNonOrthCorr)
                     {
                         phi -= pEqn.flux();
