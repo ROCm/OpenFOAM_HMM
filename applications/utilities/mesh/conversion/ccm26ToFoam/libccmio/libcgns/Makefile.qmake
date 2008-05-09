@@ -1,4 +1,0 @@
-PATHTOSRC = ../
-PROJECT = cgns
-
-include ../config/Makefile.main

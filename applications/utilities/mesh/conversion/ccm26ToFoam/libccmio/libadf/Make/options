@@ -1,6 +1,0 @@
-EXE_INC = \
-    -I..
-
-EXE_LIBS = \
-    -ladf
-

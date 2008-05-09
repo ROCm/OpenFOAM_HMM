@@ -1,9 +1,4 @@
 #!/bin/sh
 set -x
 
-# compile cd-adapco's CCM library
-wmake libso libccmio/libadf
-wmake libso libccmio/libccmio
-wmake libso libccmio/libcgns
-
 wmake ccm26ToFoam
