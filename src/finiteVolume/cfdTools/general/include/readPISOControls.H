@@ -25,3 +25,9 @@
     {
         nOuterCorr = readInt(piso.lookup("nOuterCorrectors"));
     }
+
+    bool ddtPhiCorr = false;
+    if (piso.found("ddtPhiCorr"))
+    {
+        ddtPhiCorr = Switch(piso.lookup("ddtPhiCorr"));
+    }

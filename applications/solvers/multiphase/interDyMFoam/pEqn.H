@@ -5,12 +5,12 @@
     volVectorField HU = UEqn.H();
     U = rAU*HU;
 
-    surfaceScalarField phiU
-    (
-        "phiU",
-        (fvc::interpolate(U) & mesh.Sf())
-    //+ fvc::ddtPhiCorr(rAU, rho, U, phiAbs)
-    );
+    surfaceScalarField phiU("phiU", (fvc::interpolate(U) & mesh.Sf()));
+
+    if (ddtPhiCorr)
+    {
+        phiU += fvc::ddtPhiCorr(rAU, rho, U, phiAbs);
+    }
 
     phi = phiU +
         (

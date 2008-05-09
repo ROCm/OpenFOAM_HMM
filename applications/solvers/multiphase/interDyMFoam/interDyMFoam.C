@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // Make the fluxes absolute
-        if (mesh.changing() && correctPhi)
+        if (mesh.changing())
         {
             fvc::makeAbsolute(phi, U);
         }
@@ -99,8 +99,11 @@ int main(int argc, char *argv[])
             #include "correctPhi.H"
         }
 
+        // Keep the absolute fluxes for use in ddtPhiCorr
+        surfaceScalarField phiAbs("phiAbs", phi);
+
         // Make the fluxes relative to the mesh motion
-        if (mesh.changing() && correctPhi)
+        if (mesh.changing())
         {
             fvc::makeRelative(phi, U);
         }
