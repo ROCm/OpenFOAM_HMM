@@ -112,9 +112,24 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        Uabs = Urel + SRF->U();
 
-        runTime.write();
+        if (runTime.outputTime())
+        {
+            volVectorField Uabs
+            (
+                IOobject
+                (
+                    "Uabs",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                Urel + SRF->U()
+            );
+
+            runTime.write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

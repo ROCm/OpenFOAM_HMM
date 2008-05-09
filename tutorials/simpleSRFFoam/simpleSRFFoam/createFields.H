@@ -26,22 +26,6 @@
         mesh
     );
 
-    // Create absolute velocity field (post-processing only)
-    // Will be updated before first use, so can be initialised by Urel
-    Info<< "Creating field Uabs\n" << endl;
-    volVectorField Uabs
-    (
-        IOobject
-        (
-            "Uabs",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        Urel
-    );
-
     Info<< "Reading/calculating face flux field phi\n" << endl;
     surfaceScalarField phi
     (
