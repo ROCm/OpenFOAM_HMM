@@ -35,7 +35,7 @@ namespace compressibilityModels
 {
 
 defineTypeNameAndDebug(Wallis, 0);
-addToRunTimeSelectionTable(compressibilityModel, Wallis, dictionary);
+addToRunTimeSelectionTable(barotropicCompressibilityModel, Wallis, dictionary);
 
 }
 }
@@ -48,7 +48,7 @@ Foam::compressibilityModels::Wallis::Wallis
     const volScalarField& gamma
 )
 :
-    compressibilityModel(compressibilityProperties, gamma),
+    barotropicCompressibilityModel(compressibilityProperties, gamma),
     psiv_(compressibilityProperties_.lookup("psiv")),
     psil_(compressibilityProperties_.lookup("psil")),
     rhovSat_(compressibilityProperties_.lookup("rhovSat")),
@@ -72,7 +72,7 @@ bool Foam::compressibilityModels::Wallis::read
     const dictionary& compressibilityProperties
 )
 {
-    compressibilityModel::read(compressibilityProperties);
+    barotropicCompressibilityModel::read(compressibilityProperties);
 
     compressibilityProperties_.lookup("psiv") >> psiv_;
     compressibilityProperties_.lookup("psil") >> psil_;

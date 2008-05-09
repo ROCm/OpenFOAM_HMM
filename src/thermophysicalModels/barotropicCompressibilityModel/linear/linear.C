@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Chung.H"
+#include "linear.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -34,59 +34,46 @@ namespace Foam
 namespace compressibilityModels
 {
 
-defineTypeNameAndDebug(Chung, 0);
-addToRunTimeSelectionTable(compressibilityModel, Chung, dictionary);
+defineTypeNameAndDebug(linear, 0);
+addToRunTimeSelectionTable(barotropicCompressibilityModel, linear, dictionary);
 
 }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::compressibilityModels::Chung::Chung
+Foam::compressibilityModels::linear::linear
 (
     const dictionary& compressibilityProperties,
     const volScalarField& gamma
 )
 :
-    compressibilityModel(compressibilityProperties, gamma),
+    barotropicCompressibilityModel(compressibilityProperties, gamma),
     psiv_(compressibilityProperties_.lookup("psiv")),
-    psil_(compressibilityProperties_.lookup("psil")),
-    rhovSat_(compressibilityProperties_.lookup("rhovSat")),
-    rholSat_(compressibilityProperties_.lookup("rholSat"))
+    psil_(compressibilityProperties_.lookup("psil"))
 {
     correct();
+    psi_.oldTime();
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::compressibilityModels::Chung::correct()
+void Foam::compressibilityModels::linear::correct()
 {
-    volScalarField sfa = sqrt
-    (
-        (rhovSat_/psiv_)
-       /((scalar(1) - gamma_)*rhovSat_/psiv_ + gamma_*rholSat_/psil_)
-    );
-
-    psi_ = sqr
-    (
-        ((scalar(1) - gamma_)/sqrt(psiv_) + gamma_*sfa/sqrt(psil_))
-       *sqrt(psiv_*psil_)/sfa
-    );
+    psi_ = gamma_*psiv_ + (scalar(1) - gamma_)*psil_;
 }
 
 
-bool Foam::compressibilityModels::Chung::read
+bool Foam::compressibilityModels::linear::read
 (
     const dictionary& compressibilityProperties
 )
 {
-    compressibilityModel::read(compressibilityProperties);
+    barotropicCompressibilityModel::read(compressibilityProperties);
 
     compressibilityProperties_.lookup("psiv") >> psiv_;
     compressibilityProperties_.lookup("psil") >> psil_;
-    compressibilityProperties_.lookup("rhovSat") >> rhovSat_;
-    compressibilityProperties_.lookup("rholSat") >> rholSat_;
 
     return true;
 }

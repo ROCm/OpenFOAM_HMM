@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressibilityModels::Chung
+    Foam::compressibilityModels::Wallis
 
 Description
-    Chung compressibility model.
+    Wallis compressibility model.
 
 SourceFiles
-    Chung.C
+    Wallis.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Chung_H
-#define Chung_H
+#ifndef Wallis_H
+#define Wallis_H
 
-#include "compressibilityModel.H"
+#include "barotropicCompressibilityModel.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,12 +47,12 @@ namespace compressibilityModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Chung Declaration
+                           Class Wallis Declaration
 \*---------------------------------------------------------------------------*/
 
-class Chung
+class Wallis
 :
-    public compressibilityModel
+    public barotropicCompressibilityModel
 {
     // Private data
 
@@ -66,13 +66,13 @@ class Chung
 public:
 
     //- Runtime type information
-    TypeName("Chung");
+    TypeName("Wallis");
 
 
     // Constructors
 
         //- construct from components
-        Chung
+        Wallis
         (
             const dictionary& compressibilityProperties,
             const volScalarField& gamma
@@ -81,13 +81,13 @@ public:
 
     // Destructor
 
-        ~Chung()
+        ~Wallis()
         {}
 
 
     // Member Functions
 
-        //- Correct the Chung compressibility
+        //- Correct the Wallis compressibility
         void correct();
 
         //- Read transportProperties dictionary

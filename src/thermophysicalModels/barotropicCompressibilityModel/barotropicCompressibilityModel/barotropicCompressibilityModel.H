@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressibilityModel
+    Foam::barotropicCompressibilityModel
 
 Description
 
 SourceFiles
-    compressibilityModel.C
-    newCompressibilityModel.C
+    barotropicCompressibilityModel.C
+    newbarotropicCompressibilityModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibilityModel_H
-#define compressibilityModel_H
+#ifndef barotropicCompressibilityModel_H
+#define barotropicCompressibilityModel_H
 
 #include "IOdictionary.H"
 #include "typeInfo.H"
@@ -49,10 +49,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class compressibilityModel Declaration
+                Class barotropicCompressibilityModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class compressibilityModel
+class barotropicCompressibilityModel
 {
 
 protected:
@@ -68,16 +68,16 @@ protected:
     // Private Member Functions
 
         //- Disallow copy construct
-        compressibilityModel(const compressibilityModel&);
+        barotropicCompressibilityModel(const barotropicCompressibilityModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const compressibilityModel&);
+        void operator=(const barotropicCompressibilityModel&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("compressibilityModel");
+    TypeName("barotropicCompressibilityModel");
 
 
     // Declare run-time constructor selection table
@@ -85,7 +85,7 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            compressibilityModel,
+            barotropicCompressibilityModel,
             dictionary,
             (
                 const dictionary& compressibilityProperties,
@@ -98,7 +98,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected compressibility model
-        static autoPtr<compressibilityModel> New
+        static autoPtr<barotropicCompressibilityModel> New
         (
             const dictionary& compressibilityProperties,
             const volScalarField& gamma
@@ -108,7 +108,7 @@ public:
     // Constructors
 
         //- Construct from components
-        compressibilityModel
+        barotropicCompressibilityModel
         (
             const dictionary& compressibilityProperties,
             const volScalarField& gamma
@@ -117,7 +117,7 @@ public:
 
     // Destructor
 
-        virtual ~compressibilityModel()
+        virtual ~barotropicCompressibilityModel()
         {}
 
 

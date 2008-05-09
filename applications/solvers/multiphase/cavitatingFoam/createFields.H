@@ -39,12 +39,13 @@
     );
     gamma.oldTime();
 
-    Info<< "Creating compressibilityModel\n" << endl;
-    autoPtr<compressibilityModel> psiModel = compressibilityModel::New
-    (
-        thermodynamicProperties,
-        gamma
-    );
+    Info<< "Creating barotropicompressibilityModel\n" << endl;
+    autoPtr<barotropicCompressibilityModel> psiModel =
+        barotropicCompressibilityModel::New
+        (
+            thermodynamicProperties,
+            gamma
+        );
 
     const volScalarField& psi = psiModel->psi();
 

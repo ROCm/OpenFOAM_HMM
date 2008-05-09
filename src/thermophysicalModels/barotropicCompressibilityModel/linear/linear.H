@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressibilityModels::Chung
+    Foam::compressibilityModels::linear
 
 Description
-    Chung compressibility model.
+    linear compressibility model.
 
 SourceFiles
-    Chung.C
+    linear.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Chung_H
-#define Chung_H
+#ifndef linear_H
+#define linear_H
 
-#include "compressibilityModel.H"
+#include "barotropicCompressibilityModel.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,32 +47,29 @@ namespace compressibilityModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Chung Declaration
+                           Class linear Declaration
 \*---------------------------------------------------------------------------*/
 
-class Chung
+class linear
 :
-    public compressibilityModel
+    public barotropicCompressibilityModel
 {
     // Private data
 
         dimensionedScalar psiv_;
         dimensionedScalar psil_;
 
-        dimensionedScalar rhovSat_;
-        dimensionedScalar rholSat_;
-
 
 public:
 
     //- Runtime type information
-    TypeName("Chung");
+    TypeName("linear");
 
 
     // Constructors
 
         //- construct from components
-        Chung
+        linear
         (
             const dictionary& compressibilityProperties,
             const volScalarField& gamma
@@ -81,13 +78,13 @@ public:
 
     // Destructor
 
-        ~Chung()
+        ~linear()
         {}
 
 
     // Member Functions
 
-        //- Correct the Chung compressibility
+        //- Correct the linear compressibility
         void correct();
 
         //- Read transportProperties dictionary

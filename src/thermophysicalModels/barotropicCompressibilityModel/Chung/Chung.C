@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Wallis.H"
+#include "Chung.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -34,21 +34,21 @@ namespace Foam
 namespace compressibilityModels
 {
 
-defineTypeNameAndDebug(Wallis, 0);
-addToRunTimeSelectionTable(compressibilityModel, Wallis, dictionary);
+defineTypeNameAndDebug(Chung, 0);
+addToRunTimeSelectionTable(barotropicCompressibilityModel, Chung, dictionary);
 
 }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::compressibilityModels::Wallis::Wallis
+Foam::compressibilityModels::Chung::Chung
 (
     const dictionary& compressibilityProperties,
     const volScalarField& gamma
 )
 :
-    compressibilityModel(compressibilityProperties, gamma),
+    barotropicCompressibilityModel(compressibilityProperties, gamma),
     psiv_(compressibilityProperties_.lookup("psiv")),
     psil_(compressibilityProperties_.lookup("psil")),
     rhovSat_(compressibilityProperties_.lookup("rhovSat")),
@@ -60,19 +60,28 @@ Foam::compressibilityModels::Wallis::Wallis
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::compressibilityModels::Wallis::correct()
+void Foam::compressibilityModels::Chung::correct()
 {
-    psi_ = (gamma_*rhovSat_ + (scalar(1) - gamma_)*rholSat_)
-         *(gamma_*psiv_/rhovSat_ + (scalar(1) - gamma_)*psil_/rholSat_);
+    volScalarField sfa = sqrt
+    (
+        (rhovSat_/psiv_)
+       /((scalar(1) - gamma_)*rhovSat_/psiv_ + gamma_*rholSat_/psil_)
+    );
+
+    psi_ = sqr
+    (
+        ((scalar(1) - gamma_)/sqrt(psiv_) + gamma_*sfa/sqrt(psil_))
+       *sqrt(psiv_*psil_)/sfa
+    );
 }
 
 
-bool Foam::compressibilityModels::Wallis::read
+bool Foam::compressibilityModels::Chung::read
 (
     const dictionary& compressibilityProperties
 )
 {
-    compressibilityModel::read(compressibilityProperties);
+    barotropicCompressibilityModel::read(compressibilityProperties);
 
     compressibilityProperties_.lookup("psiv") >> psiv_;
     compressibilityProperties_.lookup("psil") >> psil_;

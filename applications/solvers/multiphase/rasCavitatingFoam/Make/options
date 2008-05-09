@@ -4,10 +4,11 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
-    -IcompressibilityModels/compressibilityModel
+    -I$(LIB_SRC)/thermophysicalModels/barotropicCompressibilityModel/lnInclude
 
 EXE_LIBS = \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModels \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lbarotropicCompressibilityModel
 

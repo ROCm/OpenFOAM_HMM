@@ -24,58 +24,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "linear.H"
-#include "addToRunTimeSelectionTable.H"
+#include "barotropicCompressibilityModel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace compressibilityModels
-{
-
-defineTypeNameAndDebug(linear, 0);
-addToRunTimeSelectionTable(compressibilityModel, linear, dictionary);
-
-}
-}
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::compressibilityModels::linear::linear
+Foam::autoPtr<Foam::barotropicCompressibilityModel>
+Foam::barotropicCompressibilityModel::New
 (
     const dictionary& compressibilityProperties,
     const volScalarField& gamma
 )
-:
-    compressibilityModel(compressibilityProperties, gamma),
-    psiv_(compressibilityProperties_.lookup("psiv")),
-    psil_(compressibilityProperties_.lookup("psil"))
 {
-    correct();
-    psi_.oldTime();
-}
+    word bcModelTypeName
+    (
+        compressibilityProperties.lookup("barotropicCompressibilityModel")
+    );
 
+    Info<< "Selecting compressibility model "
+        << bcModelTypeName << endl;
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(bcModelTypeName);
 
-void Foam::compressibilityModels::linear::correct()
-{
-    psi_ = gamma_*psiv_ + (scalar(1) - gamma_)*psil_;
-}
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "barotropicCompressibilityModel::New(const volScalarField&)"
+        )   << "Unknown barotropicCompressibilityModel type "
+            << bcModelTypeName << endl << endl
+            << "Valid  barotropicCompressibilityModels are : " << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
 
-
-bool Foam::compressibilityModels::linear::read
-(
-    const dictionary& compressibilityProperties
-)
-{
-    compressibilityModel::read(compressibilityProperties);
-
-    compressibilityProperties_.lookup("psiv") >> psiv_;
-    compressibilityProperties_.lookup("psil") >> psil_;
-
-    return true;
+    return autoPtr<barotropicCompressibilityModel>
+    (
+        cstrIter()(compressibilityProperties, gamma)
+    );
 }
 
 

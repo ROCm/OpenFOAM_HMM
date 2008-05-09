@@ -22,62 +22,53 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+InClass
+    barotropicCompressibilityModel
+
 \*---------------------------------------------------------------------------*/
 
-#include "Wallis.H"
-#include "addToRunTimeSelectionTable.H"
+#include "barotropicCompressibilityModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace compressibilityModels
-{
-
-defineTypeNameAndDebug(Wallis, 0);
-addToRunTimeSelectionTable(compressibilityModel, Wallis, dictionary);
-
-}
+    defineTypeNameAndDebug(barotropicCompressibilityModel, 0);
+    defineRunTimeSelectionTable(barotropicCompressibilityModel, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::compressibilityModels::Wallis::Wallis
+Foam::barotropicCompressibilityModel::barotropicCompressibilityModel
 (
     const dictionary& compressibilityProperties,
     const volScalarField& gamma
 )
 :
-    compressibilityModel(compressibilityProperties, gamma),
-    psiv_(compressibilityProperties_.lookup("psiv")),
-    psil_(compressibilityProperties_.lookup("psil")),
-    rhovSat_(compressibilityProperties_.lookup("rhovSat")),
-    rholSat_(compressibilityProperties_.lookup("rholSat"))
-{
-    correct();
-}
+    compressibilityProperties_(compressibilityProperties),
+    psi_
+    (
+        IOobject
+        (
+            "psi",
+            gamma.mesh().time().timeName(),
+            gamma.mesh()
+        ),
+        gamma.mesh(),
+        dimensionedScalar("psi", dimensionSet(0, -2, 2, 0, 0), 0)
+    ),
+    gamma_(gamma)
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::compressibilityModels::Wallis::correct()
-{
-    psi_ = (gamma_*rhovSat_ + (scalar(1) - gamma_)*rholSat_)
-         *(gamma_*psiv_/rhovSat_ + (scalar(1) - gamma_)*psil_/rholSat_);
-}
-
-
-bool Foam::compressibilityModels::Wallis::read
+bool Foam::barotropicCompressibilityModel::read
 (
     const dictionary& compressibilityProperties
 )
 {
-    compressibilityModel::read(compressibilityProperties);
-
-    compressibilityProperties_.lookup("psiv") >> psiv_;
-    compressibilityProperties_.lookup("psil") >> psil_;
-    compressibilityProperties_.lookup("rhovSat") >> rhovSat_;
-    compressibilityProperties_.lookup("rholSat") >> rholSat_;
+    compressibilityProperties_ = compressibilityProperties;
 
     return true;
 }

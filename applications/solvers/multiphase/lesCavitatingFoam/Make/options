@@ -6,10 +6,11 @@ EXE_INC = \
     -I$(LIB_SRC)/LESmodels \
     -I$(LIB_SRC)/LESmodels/incompressible/lnInclude \
     -I$(LIB_SRC)/LESmodels/LESdeltas/lnInclude \
-    -IcompressibilityModels/compressibilityModel
+    -I$(LIB_SRC)/thermophysicalModels/barotropicCompressibilityModel/lnInclude
 
 EXE_LIBS = \
     -lincompressibleTransportModels \
     -lincompressibleLESmodels \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lbarotropicCompressibilityModel
 

@@ -1,6 +1,7 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -IcompressibilityModels/compressibilityModel
+    -I$(LIB_SRC)/thermophysicalModels/barotropicCompressibilityModel/lnInclude
 
 EXE_LIBS = \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lbarotropicCompressibilityModel

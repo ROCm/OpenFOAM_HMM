@@ -36,7 +36,7 @@ SourceFiles
 #ifndef Chung_H
 #define Chung_H
 
-#include "compressibilityModel.H"
+#include "barotropicCompressibilityModel.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,7 +52,7 @@ namespace compressibilityModels
 
 class Chung
 :
-    public compressibilityModel
+    public barotropicCompressibilityModel
 {
     // Private data
 
