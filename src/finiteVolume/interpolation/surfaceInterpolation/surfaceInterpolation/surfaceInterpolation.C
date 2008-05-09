@@ -162,11 +162,15 @@ void surfaceInterpolation::makeWeights() const
 
 
     // Set local references to mesh data
-    const surfaceVectorField& Cf = mesh_.Cf();
-    const volVectorField& C = mesh_.C();
+    // (note that we should not use fvMesh sliced fields at this point yet
+    //  since this causes a loop when generating weighting factors in
+    //  coupledFvPatchField evaluation phase)
     const unallocLabelList& owner = mesh_.owner();
     const unallocLabelList& neighbour = mesh_.neighbour();
-    const surfaceVectorField& Sf = mesh_.Sf();
+
+    const vectorField& Cf = mesh_.faceCentres();
+    const vectorField& C = mesh_.cellCentres();
+    const vectorField& Sf = mesh_.faceAreas();
 
     // ... and reference to the internal field of the weighting factors
     scalarField& w = weightingFactors.internalField();
