@@ -9,7 +9,7 @@
     (
         "phiU",
         (fvc::interpolate(U) & mesh.Sf())
-    //+ fvc::ddtPhiCorr(rAU, rho, U, phiAbs)
+      + fvc::ddtPhiCorr(rAU, rho, U, phiAbs)
     );
 
     phi = phiU +
