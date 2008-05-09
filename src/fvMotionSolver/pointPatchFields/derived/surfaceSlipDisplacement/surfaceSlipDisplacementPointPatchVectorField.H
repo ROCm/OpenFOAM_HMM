@@ -27,6 +27,21 @@ Class
 
 Description
     Displacement follows a triSurface. Use in a displacement fvMotionSolver.
+    Following is either
+    - NEAREST : nearest
+    - POINTNORMAL : intersection with point normal
+    - FIXEDNORMAL : intersection with fixed vector
+
+    Optionally (intersection only) removes a component ("wedgePlane") to
+    stay in 2D.
+
+    Needs:
+    - projectSurfaces : names of triSurfaceMeshes (in constant/triSurface)
+    - followMode : see above
+    - projectDirection : if followMode = fixedNormal
+    - wedgePlane : -1 or component to knock out of intersection normal
+    - frozenPointsZone : empty or name of pointZone containing points
+                         that do not move
 
 SourceFiles
     surfaceSlipDisplacementPointPatchVectorField.C
@@ -52,10 +67,30 @@ class surfaceSlipDisplacementPointPatchVectorField
 :
     public pointPatchVectorField
 {
+
+public:
+
+    // Public data types
+
+        enum followMode
+        {
+            NEAREST,
+            POINTNORMAL,
+            FIXEDNORMAL
+        };
+
+private:
+
     // Private data
+
+        //- follow mode names
+        static const NamedEnum<followMode, 3> followModeNames_;
 
         //- names of surfaces
         const fileNameList surfaceNames_;
+
+        //- How to follow/project onto surface
+        const followMode projectMode_;
 
         //- direction to project
         const vector projectDir_;
@@ -71,9 +106,6 @@ class surfaceSlipDisplacementPointPatchVectorField
 
 
     // Private Member Functions
-
-        ////- Calculate projection direction (normalised) at pointI.
-        //vector projectNormal(const label pointI, const point& pt) const;
 
         //- Disallow default bitwise assignment
         void operator=(const surfaceSlipDisplacementPointPatchVectorField&);
@@ -162,6 +194,12 @@ public:
 
         //- Surface to follow. Demand loads surfaceNames.
         const triSurfaceMeshes& surfaces() const;
+
+        //- Mode of projection/following
+        const followMode projectMode() const
+        {
+            return projectMode_;
+        }
 
         //- Direction to project back onto surface
         const vector& projectDir() const
