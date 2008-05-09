@@ -39,6 +39,7 @@ License
 #include "vtkDataArraySelection.h"
 #include "vtkDataSet.h"
 #include "vtkFieldData.h"
+#include "vtkInformation.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkRenderer.h"
 #include "vtkTextActor.h"
@@ -61,7 +62,8 @@ void Foam::vtkPV3Foam::AddToBlock
     vtkMultiBlockDataSet* output,
     unsigned int blockNo,
     unsigned int datasetNo,
-    vtkDataSet* dataset
+    vtkDataSet* dataset,
+    const char* datasetName
 )
 {
     vtkDataObject* blockDO = output->GetBlock(blockNo);
@@ -81,6 +83,10 @@ void Foam::vtkPV3Foam::AddToBlock
     }
 
     block->SetBlock(datasetNo, dataset);
+    block->GetMetaData(datasetNo)->Set
+    (
+        vtkCompositeDataSet::NAME(), datasetName
+    );
 }
 
 
@@ -138,25 +144,22 @@ void Foam::vtkPV3Foam::resetCounters()
 }
 
 
-void Foam::vtkPV3Foam::SetName
+void Foam::vtkPV3Foam::SetBlockName
 (
-    vtkUnstructuredGrid* vtkMesh,
+    vtkMultiBlockDataSet* blocks,
+    const int id,
     const char* name
 )
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::setName" << endl;
+        Info<< "entered Foam::vtkPV3Foam::setBlockName" << endl;
     }
-    vtkCharArray* nmArray =  vtkCharArray::New();
-    nmArray->SetName("Name");
-    size_t len = strlen(name);
-    nmArray->SetNumberOfTuples(static_cast<vtkIdType>(len) + 1);
-    char* copy = nmArray->GetPointer(0);
-    memcpy(copy, name, len);
-    copy[len] = '\0';
-    vtkMesh->GetFieldData()->AddArray(nmArray);
-    nmArray->Delete();
+
+    if (blocks->GetMetaData(id) != NULL)
+    {
+        blocks->GetMetaData(id)->Set(vtkCompositeDataSet::NAME(), name);
+    }
 }
 
 
@@ -423,7 +426,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
 
     // Set initial cloud name
     // TODO - TEMPORARY MEASURE UNTIL CAN PROCESS MULTIPLE CLOUDS
-    cloudName_ = "";
+    cloudName_ = "cloud1";
 }
 
 

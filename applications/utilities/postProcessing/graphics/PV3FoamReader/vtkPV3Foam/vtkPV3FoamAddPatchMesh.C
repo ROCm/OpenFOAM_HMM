@@ -49,8 +49,6 @@ void Foam::vtkPV3Foam::addPatchMesh
         Info<< "Adding patch: " << p.name() << endl;
     }
 
-    SetName(vtkPatch, p.name().c_str());
-
     if (debug)
     {
         Info<< "converting points" << endl;
