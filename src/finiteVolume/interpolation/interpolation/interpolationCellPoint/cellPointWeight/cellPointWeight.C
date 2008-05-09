@@ -49,7 +49,7 @@ void Foam::cellPointWeight::findTetrahedron
     }
 
     // Initialise closest triangle variables
-    scalar minUVWClose = GREAT;
+    scalar minUVWClose = VGREAT;
     label pointIClose = 0;
     label faceClose = 0;
 
@@ -198,7 +198,7 @@ void Foam::cellPointWeight::findTriangle
     }
 
     // Initialise closest triangle variables
-    scalar minUVClose = GREAT;
+    scalar minUVClose = VGREAT;
     label pointIClose = 0;
 
     // Decompose each face into triangles, making a tet when
