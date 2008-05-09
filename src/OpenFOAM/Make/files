@@ -126,6 +126,8 @@ IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
 $(IOdictionary)/IOdictionaryIO.C
 
+db/IOobjects/IOMap/IOMapName.C
+
 IOobject = db/IOobject
 $(IOobject)/IOobject.C
 $(IOobject)/IOobjectIO.C
