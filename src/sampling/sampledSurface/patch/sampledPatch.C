@@ -37,7 +37,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(sampledPatch, 0);
-    // addToRunTimeSelectionTable(sampledSurface, sampledPatch, word);
     addNamedToRunTimeSelectionTable(sampledSurface, sampledPatch, word, patch);
 }
 
@@ -140,6 +139,8 @@ Foam::sampledPatch::sampledPatch
     faces_(0),
     patchFaceLabels_(0)
 {
+    // default: non-triangulated
+    triangulate() = getBool(dict, "triangulate", false);
     createGeometry();
 }
 
