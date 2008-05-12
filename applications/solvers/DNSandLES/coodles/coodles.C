@@ -26,6 +26,7 @@ Application
     coodles
 
 Description
+    Compressible LES solver.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,15 +40,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -55,17 +53,17 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "hEqn.H"
-#           include "pEqn.H"
+            #include "hEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();

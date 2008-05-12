@@ -74,8 +74,6 @@ int main(int argc, char *argv[])
     #include "readCombustionProperties.H"
     #include "initContinuityErrs.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     Info<< "\nStarting time loop\n" << endl;
 
     for (runTime++; !runTime.end(); runTime++)

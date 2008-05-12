@@ -48,8 +48,6 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     Info<< "\nStarting time loop\n" << endl;
 
     for (runTime++; !runTime.end(); runTime++)

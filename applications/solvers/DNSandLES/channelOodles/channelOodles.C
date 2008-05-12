@@ -41,17 +41,13 @@ Description
 
 int main(int argc, char *argv[])
 {
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readTransportProperties.H"
-#   include "createFields.H"
-#   include "createAverages.H"
-#   include "initContinuityErrs.H"
-#   include "createGradP.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readTransportProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "createGradP.H"
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -59,9 +55,9 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
+        #include "readPISOControls.H"
 
-#       include "CourantNo.H"
+        #include "CourantNo.H"
 
         sgsModel->correct();
 
@@ -116,7 +112,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-#           include "continuityErrs.H"
+            #include "continuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();
@@ -126,12 +122,12 @@ int main(int argc, char *argv[])
         // Correct driving force for a constant mass flow rate
 
         // Extract the velocity in the flow direction
-        dimensionedScalar magUbarStar = 
+        dimensionedScalar magUbarStar =
             (flowDirection & U)().weightedAverage(mesh.V());
 
-        // Calculate the pressure gradient increment needed to 
+        // Calculate the pressure gradient increment needed to
         // adjust the average flow-rate to the correct value
-        dimensionedScalar gragPplus = 
+        dimensionedScalar gragPplus =
             (magUbar - magUbarStar)/rUA.weightedAverage(mesh.V());
 
         U += flowDirection*rUA*gragPplus;
@@ -141,14 +137,9 @@ int main(int argc, char *argv[])
         Info<< "Uncorrected Ubar = " << magUbarStar.value() << tab
             << "pressure gradient = " << gradP.value() << endl;
 
-
-#       include "calculateAverages.H"
-
         runTime.write();
 
-#       include "writeNaveragingSteps.H"
-
-#       include "writeGradP.H"
+        #include "writeGradP.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
