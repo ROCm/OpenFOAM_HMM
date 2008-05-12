@@ -66,8 +66,8 @@ void Foam::fieldAverage::resetLists(const label nItems)
     prime2MeanSymmTensorFields_.clear();
     prime2MeanSymmTensorFields_.setSize(nItems);
 
-    nSteps_.clear();
-    nSteps_.setSize(nItems, 1);
+    totalIter_.clear();
+    totalIter_.setSize(nItems, 1);
 
     totalTime_.clear();
     totalTime_.setSize(nItems, obr_.time().deltaT().value());
@@ -170,7 +170,7 @@ Foam::fieldAverage::fieldAverage
     meanSphericalTensorFields_(faItems_.size()),
     prime2MeanScalarFields_(faItems_.size()),
     prime2MeanSymmTensorFields_(faItems_.size()),
-    nSteps_(faItems_.size(), 1),
+    totalIter_(faItems_.size(), 1),
     totalTime_(faItems_.size(), obr_.time().deltaT().value())
 {
     // Check if the available mesh is an fvMesh otherise deactivate
@@ -239,7 +239,7 @@ void Foam::fieldAverage::calcAverages()
     Info<< "Calculating averages" << nl << endl;
     forAll(faItems_, i)
     {
-        nSteps_[i]++;
+        totalIter_[i]++;
         totalTime_[i] += obr_.time().deltaT().value();
     }
 
@@ -287,7 +287,7 @@ void Foam::fieldAverage::writeAveragingProperties() const
     {
         const word fieldName = faItems_[i].fieldName();
         propsDict.add(fieldName, dictionary());
-        propsDict.subDict(fieldName).add("nSteps", nSteps_[i]);
+        propsDict.subDict(fieldName).add("totalIter", totalIter_[i]);
         propsDict.subDict(fieldName).add("totalTime", totalTime_[i]);
     }
 
@@ -317,7 +317,7 @@ void Foam::fieldAverage::readAveragingProperties()
         {
             dictionary fieldDict(propsDict.subDict(fieldName));
 
-            nSteps_[i] = readLabel(fieldDict.lookup("nSteps"));
+            totalIter_[i] = readLabel(fieldDict.lookup("totalIter"));
             totalTime_[i] = readScalar(fieldDict.lookup("totalTime"));
         }
     }

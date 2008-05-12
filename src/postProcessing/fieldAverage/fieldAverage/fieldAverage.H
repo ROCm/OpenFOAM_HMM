@@ -29,19 +29,28 @@ Description
     Calculates the field averages given list of fieldAverageItems, e.g.
 
     @verbatim
+    fieldAverage1
+    {
+        // Type of functionObject
+        type fieldAverage;
+
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libfieldAverage.so");
+
+        // Fields to be probed. runTime modifiable!
         fields
         (
             U
             {
                 mean            on;
                 prime2Mean      on;
-                base            time; // ensemble
+                base            time;
             }
             p
             {
                 mean            on;
                 prime2Mean      on;
-                base            time; // ensemble
+                base            time;
             }
         );
     @endverbatim
@@ -133,8 +142,8 @@ protected:
 
         // Counters
 
-            //- Integration steps counter
-            List<label> nSteps_;
+            //- Iteration steps counter
+            List<label> totalIter_;
 
             //- Total time counter
             List<scalar> totalTime_;

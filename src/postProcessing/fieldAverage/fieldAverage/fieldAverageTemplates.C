@@ -138,8 +138,8 @@ void Foam::fieldAverage::calculateMeanFields
                 }
                 else
                 {
-                    alpha = scalar(nSteps_[i] - 1)/scalar(nSteps_[i]);
-                    beta = 1.0/scalar(nSteps_[i]);
+                    alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
+                    beta = 1.0/scalar(totalIter_[i]);
                 }
 
                 meanField = alpha*meanField + beta*baseField;
@@ -183,8 +183,8 @@ void Foam::fieldAverage::calculatePrime2MeanFields
                 }
                 else
                 {
-                    alpha = scalar(nSteps_[i] - 1)/scalar(nSteps_[i]);
-                    beta = 1.0/scalar(nSteps_[i]);
+                    alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
+                    beta = 1.0/scalar(totalIter_[i]);
                 }
 
                 prime2MeanField =
@@ -195,6 +195,7 @@ void Foam::fieldAverage::calculatePrime2MeanFields
         }
     }
 }
+
 
 template<class Type1, class Type2>
 void Foam::fieldAverage::addMeanSqrToPrime2Mean
