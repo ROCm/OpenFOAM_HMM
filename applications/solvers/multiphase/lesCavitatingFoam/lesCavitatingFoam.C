@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    cavitatingFoam
+    rasCavitatingFoam
 
 Description
 
@@ -31,6 +31,8 @@ Description
 
 #include "fvCFD.H"
 #include "barotropicCompressibilityModel.H"
+#include "twoPhaseMixture.H"
+#include "incompressible/LESmodel/LESmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,6 +47,7 @@ int main(int argc, char *argv[])
 #   include "readTransportProperties.H"
 #   include "readControls.H"
 #   include "createFields.H"
+#   include "createAverages.H"
 #   include "initContinuityErrs.H"
 #   include "compressibleCourantNo.H"
 #   include "setInitialDeltaT.H"
@@ -62,6 +65,8 @@ int main(int argc, char *argv[])
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        turbulence->correct();
+
         for (int outerCorr=0; outerCorr<nOuterCorr; outerCorr++)
         {
 #           include "rhoEqn.H"
@@ -73,6 +78,8 @@ int main(int argc, char *argv[])
 #               include "pEqn.H"
             }
         }
+
+#       include "calculateAverages.H"
 
         runTime.write();
 

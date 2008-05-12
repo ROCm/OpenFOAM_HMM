@@ -22,64 +22,60 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    coodles
-
-Description
-    Compressible LES solver.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "linear.H"
+#include "addToRunTimeSelectionTable.H"
 
-#define divDevRhoReff divDevRhoBeff
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+namespace Foam
 {
-    #include "setRootCase.H"
+namespace compressibilityModels
+{
 
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
+defineTypeNameAndDebug(linear, 0);
+addToRunTimeSelectionTable(barotropicCompressibilityModel, linear, dictionary);
 
-    Info<< "\nStarting time loop\n" << endl;
+}
+}
 
-    for (runTime++; !runTime.end(); runTime++)
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
+Foam::compressibilityModels::linear::linear
+(
+    const dictionary& compressibilityProperties,
+    const volScalarField& gamma
+)
+:
+    barotropicCompressibilityModel(compressibilityProperties, gamma),
+    psiv_(compressibilityProperties_.lookup("psiv")),
+    psil_(compressibilityProperties_.lookup("psil"))
+{
+    correct();
+    psi_.oldTime();
+}
 
-        #include "rhoEqn.H"
-        #include "UEqn.H"
 
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
-        {
-            #include "hEqn.H"
-            #include "pEqn.H"
-        }
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-        turbulence->correct();
+void Foam::compressibilityModels::linear::correct()
+{
+    psi_ = gamma_*psiv_ + (scalar(1) - gamma_)*psil_;
+}
 
-        rho = thermo->rho();
 
-        runTime.write();
+bool Foam::compressibilityModels::linear::read
+(
+    const dictionary& compressibilityProperties
+)
+{
+    barotropicCompressibilityModel::read(compressibilityProperties);
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
+    compressibilityProperties_.lookup("psiv") >> psiv_;
+    compressibilityProperties_.lookup("psil") >> psil_;
 
-    Info<< "End\n" << endl;
-
-    return(0);
+    return true;
 }
 
 

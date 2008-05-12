@@ -22,69 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    cavitatingFoam
+Typedef
+    IOfieldAverage
 
 Description
+    Instance of the generic IOOutputFilter for fieldAverage.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "barotropicCompressibilityModel.H"
+#ifndef IOfieldAverage_H
+#define IOfieldAverage_H
+
+#include "fieldAverage.H"
+#include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
-#   include "readControls.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.run())
-    {
-#       include "readControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
-
-        runTime++;
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        for (int outerCorr=0; outerCorr<nOuterCorr; outerCorr++)
-        {
-#           include "rhoEqn.H"
-#           include "gammaPsi.H"
-#           include "UEqn.H"
-
-            for (int corr=0; corr<nCorr; corr++)
-            {
-#               include "pEqn.H"
-            }
-        }
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "\n end \n";
-
-    return(0);
+    typedef IOOutputFilter<fieldAverage> IOFieldAverage;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

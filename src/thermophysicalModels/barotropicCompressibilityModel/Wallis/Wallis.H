@@ -22,69 +22,86 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    cavitatingFoam
+Class
+    Foam::compressibilityModels::Wallis
 
 Description
+    Wallis compressibility model.
+
+SourceFiles
+    Wallis.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#ifndef Wallis_H
+#define Wallis_H
+
 #include "barotropicCompressibilityModel.H"
+#include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
+{
+namespace compressibilityModels
 {
 
-#   include "setRootCase.H"
+/*---------------------------------------------------------------------------*\
+                           Class Wallis Declaration
+\*---------------------------------------------------------------------------*/
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
-#   include "readControls.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+class Wallis
+:
+    public barotropicCompressibilityModel
+{
+    // Private data
+
+        dimensionedScalar psiv_;
+        dimensionedScalar psil_;
+
+        dimensionedScalar rhovSat_;
+        dimensionedScalar rholSat_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("Wallis");
+
+
+    // Constructors
+
+        //- construct from components
+        Wallis
+        (
+            const dictionary& compressibilityProperties,
+            const volScalarField& gamma
+        );
+
+
+    // Destructor
+
+        ~Wallis()
+        {}
+
+
+    // Member Functions
+
+        //- Correct the Wallis compressibility
+        void correct();
+
+        //- Read transportProperties dictionary
+        bool read(const dictionary& compressibilityProperties);
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< "\nStarting time loop\n" << endl;
+} // End namespace compressibilityModels
+} // End namespace Foam
 
-    while (runTime.run())
-    {
-#       include "readControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-        runTime++;
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        for (int outerCorr=0; outerCorr<nOuterCorr; outerCorr++)
-        {
-#           include "rhoEqn.H"
-#           include "gammaPsi.H"
-#           include "UEqn.H"
-
-            for (int corr=0; corr<nCorr; corr++)
-            {
-#               include "pEqn.H"
-            }
-        }
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "\n end \n";
-
-    return(0);
-}
-
+#endif
 
 // ************************************************************************* //

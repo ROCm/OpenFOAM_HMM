@@ -22,65 +22,38 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    coodles
+Global
+    CourantNo
 
 Description
-    Compressible LES solver.
+    Calculates and outputs the mean and maximum Courant Numbers.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
+scalar CoNum = 0.0;
+scalar meanCoNum = 0.0;
+scalar acousticCoNum = 0.0;
 
-#define divDevRhoReff divDevRhoBeff
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+if (mesh.nInternalFaces())
 {
-    #include "setRootCase.H"
+    surfaceScalarField SfUfbyDelta = 
+        mesh.surfaceInterpolation::deltaCoeffs()*mag(phiv);
 
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
+    CoNum = max(SfUfbyDelta/mesh.magSf())
+        .value()*runTime.deltaT().value();
 
-    Info<< "\nStarting time loop\n" << endl;
+    meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
+        .value()*runTime.deltaT().value();
 
-    for (runTime++; !runTime.end(); runTime++)
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
-
-        #include "rhoEqn.H"
-        #include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
-        {
-            #include "hEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        rho = thermo->rho();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    acousticCoNum = max
+    (
+        mesh.surfaceInterpolation::deltaCoeffs()/sqrt(fvc::interpolate(psi))
+    ).value()*runTime.deltaT().value();
 }
 
+Info<< "phiv Courant Number mean: " << meanCoNum
+    << " max: " << CoNum
+    << " acoustic max: " << acousticCoNum
+    << endl;
 
 // ************************************************************************* //

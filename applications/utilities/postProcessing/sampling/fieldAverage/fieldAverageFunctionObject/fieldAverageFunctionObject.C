@@ -22,65 +22,22 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    coodles
-
-Description
-    Compressible LES solver.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "fieldAverageFunctionObject.H"
 
-#define divDevRhoReff divDevRhoBeff
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+namespace Foam
 {
-    #include "setRootCase.H"
+    defineNamedTemplateTypeNameAndDebug(fieldAverageFunctionObject, 0);
 
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    for (runTime++; !runTime.end(); runTime++)
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
-
-        #include "rhoEqn.H"
-        #include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
-        {
-            #include "hEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        rho = thermo->rho();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        fieldAverageFunctionObject,
+        dictionary
+    );
 }
-
 
 // ************************************************************************* //

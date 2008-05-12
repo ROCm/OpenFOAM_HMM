@@ -22,68 +22,46 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    cavitatingFoam
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
 #include "barotropicCompressibilityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+Foam::autoPtr<Foam::barotropicCompressibilityModel>
+Foam::barotropicCompressibilityModel::New
+(
+    const dictionary& compressibilityProperties,
+    const volScalarField& gamma
+)
 {
+    word bcModelTypeName
+    (
+        compressibilityProperties.lookup("barotropicCompressibilityModel")
+    );
 
-#   include "setRootCase.H"
+    Info<< "Selecting compressibility model "
+        << bcModelTypeName << endl;
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
-#   include "readControls.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(bcModelTypeName);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.run())
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-#       include "readControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
-
-        runTime++;
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        for (int outerCorr=0; outerCorr<nOuterCorr; outerCorr++)
-        {
-#           include "rhoEqn.H"
-#           include "gammaPsi.H"
-#           include "UEqn.H"
-
-            for (int corr=0; corr<nCorr; corr++)
-            {
-#               include "pEqn.H"
-            }
-        }
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        FatalErrorIn
+        (
+            "barotropicCompressibilityModel::New(const volScalarField&)"
+        )   << "Unknown barotropicCompressibilityModel type "
+            << bcModelTypeName << endl << endl
+            << "Valid  barotropicCompressibilityModels are : " << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
     }
 
-    Info<< "\n end \n";
-
-    return(0);
+    return autoPtr<barotropicCompressibilityModel>
+    (
+        cstrIter()(compressibilityProperties, gamma)
+    );
 }
 
 

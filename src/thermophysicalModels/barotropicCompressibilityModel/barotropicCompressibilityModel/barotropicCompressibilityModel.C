@@ -22,64 +22,55 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    coodles
-
-Description
-    Compressible LES solver.
+InClass
+    barotropicCompressibilityModel
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "barotropicCompressibilityModel.H"
 
-#define divDevRhoReff divDevRhoBeff
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+namespace Foam
 {
-    #include "setRootCase.H"
+    defineTypeNameAndDebug(barotropicCompressibilityModel, 0);
+    defineRunTimeSelectionTable(barotropicCompressibilityModel, dictionary);
+}
 
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-    Info<< "\nStarting time loop\n" << endl;
+Foam::barotropicCompressibilityModel::barotropicCompressibilityModel
+(
+    const dictionary& compressibilityProperties,
+    const volScalarField& gamma
+)
+:
+    compressibilityProperties_(compressibilityProperties),
+    psi_
+    (
+        IOobject
+        (
+            "psi",
+            gamma.mesh().time().timeName(),
+            gamma.mesh()
+        ),
+        gamma.mesh(),
+        dimensionedScalar("psi", dimensionSet(0, -2, 2, 0, 0), 0)
+    ),
+    gamma_(gamma)
+{}
 
-    for (runTime++; !runTime.end(); runTime++)
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-        #include "rhoEqn.H"
-        #include "UEqn.H"
+bool Foam::barotropicCompressibilityModel::read
+(
+    const dictionary& compressibilityProperties
+)
+{
+    compressibilityProperties_ = compressibilityProperties;
 
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
-        {
-            #include "hEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        rho = thermo->rho();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    return true;
 }
 
 

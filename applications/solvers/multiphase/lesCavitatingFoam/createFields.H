@@ -39,8 +39,8 @@
     );
     gamma.oldTime();
 
-    Info<< "Creating barotropicompressibilityModel\n" << endl;
-    autoPtr<barotropicCompressibilityModel> psiModel =
+    Info<< "Creating compressibilityModel\n" << endl;
+    autoPtr<barotropicCompressibilityModel> psiModel = 
         barotropicCompressibilityModel::New
         (
             thermodynamicProperties,
@@ -73,3 +73,13 @@
 
 #   include "createPhiv.H"
 #   include "compressibleCreatePhi.H"
+
+    Info<< "Reading transportProperties\n" << endl;
+
+    twoPhaseMixture twoPhaseProperties(U, phiv, "gamma");
+
+    // Create LES model
+    autoPtr<LESmodel> turbulence
+    (
+        LESmodel::New(U, phiv, twoPhaseProperties)
+    );

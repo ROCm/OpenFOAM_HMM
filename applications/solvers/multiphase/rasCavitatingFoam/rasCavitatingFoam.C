@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    cavitatingFoam
+    rasCavitatingFoam
 
 Description
 
@@ -31,6 +31,8 @@ Description
 
 #include "fvCFD.H"
 #include "barotropicCompressibilityModel.H"
+#include "twoPhaseMixture.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,6 +75,8 @@ int main(int argc, char *argv[])
 #               include "pEqn.H"
             }
         }
+
+        turbulence->correct();
 
         runTime.write();
 

@@ -22,65 +22,33 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    coodles
+Global
+    setDeltaT
 
 Description
-    Compressible LES solver.
+    Reset the timestep to maintain a constant maximum courant Number.
+    Reduction of time-step is imediate but increase is damped to avoid
+    unstable oscillations.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
-
-#define divDevRhoReff divDevRhoBeff
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+if (adjustTimeStep)
 {
-    #include "setRootCase.H"
+    scalar maxDeltaTFact =
+        min(maxCo/(CoNum + SMALL), maxAcousticCo/(acousticCoNum + SMALL));
 
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
+    scalar deltaTFact = min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
 
-    Info<< "\nStarting time loop\n" << endl;
-
-    for (runTime++; !runTime.end(); runTime++)
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
-
-        #include "rhoEqn.H"
-        #include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
-        {
-            #include "hEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        rho = thermo->rho();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    runTime.setDeltaT
+    (
+        min
+        (
+            deltaTFact*runTime.deltaT().value(),
+            maxDeltaT
+        )
+    );
+    
+    Info<< "deltaT = " <<  runTime.deltaT().value() << endl;
 }
-
 
 // ************************************************************************* //

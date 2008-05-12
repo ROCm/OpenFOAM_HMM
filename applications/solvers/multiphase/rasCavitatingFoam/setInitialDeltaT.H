@@ -22,65 +22,33 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    coodles
+Global
+    setInitialDeltaT
 
 Description
-    Compressible LES solver.
+    Set the initial timestep corresponding to the timestep adjustment
+    algorithm in setDeltaT
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
-
-#define divDevRhoReff divDevRhoBeff
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+if (adjustTimeStep)
 {
-    #include "setRootCase.H"
+#   include "CourantNo.H"
 
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    for (runTime++; !runTime.end(); runTime++)
+    if (CoNum > SMALL)
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        scalar maxDeltaTFact =
+            min(maxCo/(CoNum + SMALL), maxAcousticCo/(acousticCoNum + SMALL));
 
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
-
-        #include "rhoEqn.H"
-        #include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
-        {
-            #include "hEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        rho = thermo->rho();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        runTime.setDeltaT
+        (
+            min
+            (
+                maxDeltaTFact*runTime.deltaT().value(),
+                maxDeltaT
+            )
+        );
     }
-
-    Info<< "End\n" << endl;
-
-    return(0);
 }
-
 
 // ************************************************************************* //
