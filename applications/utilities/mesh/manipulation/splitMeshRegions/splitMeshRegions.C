@@ -1081,13 +1081,14 @@ label findCorrespondingZone
     // Determine same zone over all processors.
     reduce(zoneI, maxOp<label>());
 
+
+    // 2. All of cellZone present?
+
     if (zoneI == labelMax)
     {
         zoneI = -1;
     }
-
-    // 2. All of cellZone present?
-    if (zoneI != -1)
+    else if (zoneI != -1)
     {
         const cellZone& cz = cellZones[zoneI];
 
@@ -1095,10 +1096,13 @@ label findCorrespondingZone
         {
             if (cellRegion[cz[i]] != regionI)
             {
-                zoneI = labelMax;
+                zoneI = -1;
                 break;
             }
         }
+        // If one in error, all should be in error. Note that branch gets taken
+        // on all procs.
+        reduce(zoneI, minOp<label>());
     }
 
     return zoneI;
@@ -1144,12 +1148,36 @@ int main(int argc, char *argv[])
     const cellZoneMesh& cellZones = mesh.cellZones();
 
 
+    // Collect zone per cell
+    // ~~~~~~~~~~~~~~~~~~~~~
+    // - non-unique zoning
+    // - coupled zones
+
     // Existing zoneID
     labelList zoneID(mesh.nCells(), -1);
 
     forAll(cellZones, zoneI)
     {
-        setValues(zoneID, cellZones[zoneI], zoneI);
+        const cellZone& cz = cellZones[zoneI];
+
+        forAll(cz, i)
+        {
+            label cellI = cz[i];
+            if (zoneID[cellI] == -1)
+            {
+                zoneID[cellI] = zoneI;
+            }
+            else
+            {
+                FatalErrorIn(args.executable())
+                    << "Cell " << cellI << " with cell centre "
+                    << mesh.cellCentres()[cellI]
+                    << " is multiple zones. This is not allowed." << endl
+                    << "It is in zone " << cellZones[zoneID[cellI]].name()
+                    << " and in zone " << cellZones[zoneI].name()
+                    << exit(FatalError);
+            }
+        }
     }
 
     // Neighbour zoneID.
