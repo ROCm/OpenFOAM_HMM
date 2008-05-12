@@ -1,0 +1,194 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::fieldAverageItem
+
+Description
+    Helper class to describe what form of averaging to apply. A set will be
+    applied to each base field in Foam::fieldAverage, of the form:
+
+    @verbatim
+        {
+            mean            on;
+            prime2Mean      on;
+            base            time; // ensemble
+        }
+    @endverbatim
+
+SourceFiles
+    fieldAverageItem.C
+    fieldAverageItemIO.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef fieldAverageItem_H
+#define fieldAverageItem_H
+
+#include "NamedEnum.H"
+#include "Switch.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
+// Forward declaration of friend functions and operators
+class fieldAverageItem;
+Istream& operator>>(Istream&, fieldAverageItem&);
+Ostream& operator<<(Ostream&, const fieldAverageItem&);
+
+
+/*---------------------------------------------------------------------------*\
+                      Class fieldAverageItem Declaration
+\*---------------------------------------------------------------------------*/
+
+class fieldAverageItem
+{
+public:
+
+    // Public data
+
+        //- Enumeration defining the averaging base type
+        enum baseType
+        {
+            ENSEMBLE,
+            TIME
+        };
+
+
+private:
+
+    // Private data
+
+        //- Field name
+        word fieldName_;
+
+        //- Compute mean flag
+        Switch mean_;
+
+        //- Compute prime-squared mean flag
+        Switch prime2Mean_;
+
+        //- Averaging base type names
+        static const NamedEnum<baseType, 2> baseTypeNames_;
+
+        //- Averaging base type
+        baseType base_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+//        fieldAverageItem(const fieldAverageItem&);
+
+        //- Disallow default bitwise assignment
+//        void operator=(const fieldAverageItem&);
+
+
+public:
+
+    // Constructors
+
+        //- Construct null
+        fieldAverageItem();
+
+        //- Construct from Istream
+        fieldAverageItem(Istream&);
+
+        //- Construct as copy
+        fieldAverageItem(const fieldAverageItem&);
+
+
+    // Destructor
+
+        ~fieldAverageItem();
+
+
+    // Member Functions
+
+        // Access
+
+            //- Return const access to the field name
+            const word& fieldName() const
+            {
+                return fieldName_;
+            }
+
+            //- Return const access to the mean flag
+            const Switch& mean() const
+            {
+                return mean_;
+            }
+
+            //- Return const access to the prime-squared mean flag
+            const Switch& prime2Mean() const
+            {
+                return prime2Mean_;
+            }
+
+            //- Return averaging base type name
+            const word base() const
+            {
+                return baseTypeNames_[base_];
+            }
+
+            //- Return true if base is ensemble
+            Switch ensembleBase() const
+            {
+                return base_ == ENSEMBLE;
+            }
+
+            //- Return true if base is time
+            Switch timeBase() const
+            {
+                return base_ == TIME;
+            }
+
+
+    // Member Operators
+
+        void operator=(const fieldAverageItem&);
+
+
+    // IOstream Operators
+
+        friend Istream& operator>>(Istream&, fieldAverageItem&);
+        friend Ostream& operator<<(Ostream&, const fieldAverageItem&);
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

@@ -211,6 +211,34 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
 }
 
 
+Foam::entry* Foam::dictionary::lookupEntryPtr
+(
+    const word& keyword,
+    bool recusive
+)
+{
+    HashTable<entry*>::iterator iter = hashedEntries_.find(keyword);
+
+    if (iter == hashedEntries_.end())
+    {
+        if (recusive && &parent_ != &dictionary::null)
+        {
+            return const_cast<dictionary&>(parent_).lookupEntryPtr
+            (
+                keyword,
+                recusive
+            );
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
+    return iter();
+}
+
+
 const Foam::entry& Foam::dictionary::lookupEntry
 (
     const word& keyword,
@@ -274,6 +302,28 @@ const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
 const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 {
     if (const entry* entryPtr = lookupEntryPtr(keyword))
+    {
+        return entryPtr->dict();
+    }
+    else
+    {
+        // If keyword not found print error message ...
+        FatalIOErrorIn
+        (
+            "dictionary::subDict(const word& keyword) const",
+            *this
+        )   << " keyword " << keyword << " is undefined in dictionary "
+            << name()
+            << exit(FatalIOError);
+
+        return entryPtr->dict();
+    }
+}
+
+
+Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
+{
+    if (entry* entryPtr = lookupEntryPtr(keyword))
     {
         return entryPtr->dict();
     }
