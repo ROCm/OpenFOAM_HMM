@@ -44,15 +44,23 @@ Description
     }
     @endverbatim
 
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "IOobjectList.H"
+#include "IOPtrList.H"
 #include "volFields.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug(IOPtrList<entry>, 0);
+}
+
 
 
 // Main program:
@@ -89,38 +97,110 @@ int main(int argc, char *argv[])
         const word& fieldName = fieldIter().keyword();
         Info<< "Replacing entries in dictionary " << fieldName << endl;
 
-        // Read dictionary. (disable class type checking so we can load field)
-        Info<< "Loading dictionary " << fieldName << endl;
-        const word oldTypeName = IOdictionary::typeName;
-        const_cast<word&>(IOdictionary::typeName) = word::null;
-        IOdictionary fieldDict
-        (
-            IOobject
+        // Handle 'boundary' specially:
+        // - is PtrList of dictionaries
+        // - is in polyMesh/
+        if (fieldName == "boundary")
+        {
+            Info<< "Special handling of " << fieldName
+                << " as polyMesh/boundary file." << endl;
+
+            // Read PtrList of dictionary as dictionary.
+            const word oldTypeName = IOPtrList<entry>::typeName;
+            const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
+            IOPtrList<entry> dictList
             (
-                fieldName,
-                runTime.timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
-        const_cast<word&>(IOdictionary::typeName) = oldTypeName;
-        // Fake type back to what was in field
-        const_cast<word&>(fieldDict.type()) = fieldDict.headerClassName();
+                IOobject
+                (
+                    fieldName,
+                    runTime.findInstance(polyMesh::meshSubDir, fieldName),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+            const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
+            // Fake type back to what was in field
+            const_cast<word&>(dictList.type()) = dictList.headerClassName();
 
-        Info<< "Loaded dictionary " << fieldName
-            << " with entries " << fieldDict.toc() << endl;
+            // Temporary convert to dictionary
+            dictionary fieldDict;
+            forAll(dictList, i)
+            {
+                fieldDict.add(dictList[i].keyword(), dictList[i].dict());
+            }
 
-        // Get the replacement dictionary for the field
-        const dictionary& replaceDict = fieldIter().dict();
-        Info<< "Merging entries from " << replaceDict.toc() << endl;
+            Info<< "Loaded dictionary " << fieldName
+                << " with entries " << fieldDict.toc() << endl;
 
-        // Merge the replacements in
-        fieldDict.merge(replaceDict);
+            // Get the replacement dictionary for the field
+            const dictionary& replaceDict = fieldIter().dict();
+            Info<< "Merging entries from " << replaceDict.toc() << endl;
 
-        Info<< "Writing modified fieldDict " << fieldName << endl;
-        fieldDict.regIOobject::write();
+            // Merge the replacements in
+            fieldDict.merge(replaceDict);
+
+            Info<< "fieldDict:" << fieldDict << endl;
+
+            // Convert back into dictList
+            wordList doneKeys(dictList.size());
+
+            label nEntries = fieldDict.size();
+            forAll(dictList, i)
+            {
+                doneKeys[i] = dictList[i].keyword();
+                dictList.set(i, fieldDict.lookupEntry(doneKeys[i]).clone());
+                fieldDict.remove(doneKeys[i]);
+            }
+            // Add remaining entries
+            label sz = dictList.size();
+            dictList.setSize(nEntries);
+            forAllConstIter(dictionary, fieldDict, iter)
+            {
+                dictList.set(sz, iter().clone());
+            }
+
+            Info<< "Writing modified fieldDict " << fieldName << endl;
+            dictList.write();
+        }
+        else
+        {
+            // Read dictionary. (disable class type checking so we can load
+            // field)
+            Info<< "Loading dictionary " << fieldName << endl;
+            const word oldTypeName = IOdictionary::typeName;
+            const_cast<word&>(IOdictionary::typeName) = word::null;
+            IOdictionary fieldDict
+            (
+                IOobject
+                (
+                    fieldName,
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+            const_cast<word&>(IOdictionary::typeName) = oldTypeName;
+            // Fake type back to what was in field
+            const_cast<word&>(fieldDict.type()) = fieldDict.headerClassName();
+
+            Info<< "Loaded dictionary " << fieldName
+                << " with entries " << fieldDict.toc() << endl;
+
+            // Get the replacement dictionary for the field
+            const dictionary& replaceDict = fieldIter().dict();
+            Info<< "Merging entries from " << replaceDict.toc() << endl;
+
+            // Merge the replacements in
+            fieldDict.merge(replaceDict);
+
+            Info<< "Writing modified fieldDict " << fieldName << endl;
+            fieldDict.regIOobject::write();
+        }
     }
 
     Info<< endl;
