@@ -341,7 +341,7 @@ bool doCommand
                 parData.nTotalPoints()
             )
         )
-      / 10;
+      / (10*Pstream::nProcs());
 
 
     bool error = false;
