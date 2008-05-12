@@ -60,22 +60,19 @@ Description
 
 #define divDevRhoReff divDevRhoBeff
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-#   include "createMeshNoClear.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "readPISOControls.H"
-#   include "readCombustionProperties.H"
-#   include "createAverages.H"
-#   include "initContinuityErrs.H"
+    #include "createTime.H"
+    #include "createMeshNoClear.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "readPISOControls.H"
+    #include "readCombustionProperties.H"
+    #include "initContinuityErrs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,35 +82,31 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "compressibleCourantNo.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
         turbulence->correct();
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "ftEqn.H"
-#           include "bEqn.H"
-#           include "huEqn.H"
-#           include "hEqn.H"
+            #include "ftEqn.H"
+            #include "bEqn.H"
+            #include "huEqn.H"
+            #include "hEqn.H"
 
             if (!ign.ignited())
             {
                 hu == h;
             }
 
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
-#       include "calculateAverages.H"
-
         runTime.write();
-
-#       include "writeNaveragingSteps.H"
 
         rho = thermo->rho();
 
