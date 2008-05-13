@@ -31,7 +31,7 @@ License
 template<>
 const char* Foam::NamedEnum<Foam::fieldAverageItem::baseType, 2>::names[] =
 {
-    "ensemble",
+    "iteration",
     "time"
 };
 
@@ -46,7 +46,7 @@ Foam::fieldAverageItem::fieldAverageItem()
     fieldName_("unknown"),
     mean_(0),
     prime2Mean_(0),
-    base_(ENSEMBLE)
+    base_(ITER)
 {}
 
 

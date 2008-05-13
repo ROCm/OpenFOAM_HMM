@@ -1,9 +1,9 @@
 #!/bin/sh
 set -x
 
-( cd $FOAM_SRC/other && ./Allwmake )
-
 ( cd $FOAM_SRC/OpenFOAM && wmakeLnInclude . )
+
+( cd $FOAM_SRC/other && ./Allwmake )
 
 ( cd Pstream && ./Allwmake )
 

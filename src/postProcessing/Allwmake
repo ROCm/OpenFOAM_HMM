@@ -3,3 +3,5 @@ set -x
 
 wmake libo postCalc
 wmake libso forces
+wmake libso fieldAverage
+

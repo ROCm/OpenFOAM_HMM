@@ -33,7 +33,7 @@ Description
         {
             mean            on;
             prime2Mean      on;
-            base            time; // ensemble
+            base            time; // iteration
         }
     @endverbatim
 
@@ -77,7 +77,7 @@ public:
         //- Enumeration defining the averaging base type
         enum baseType
         {
-            ENSEMBLE,
+            ITER,
             TIME
         };
 
@@ -158,10 +158,10 @@ public:
                 return baseTypeNames_[base_];
             }
 
-            //- Return true if base is ensemble
-            Switch ensembleBase() const
+            //- Return true if base is ITER
+            Switch ITERBase() const
             {
-                return base_ == ENSEMBLE;
+                return base_ == ITER;
             }
 
             //- Return true if base is time
