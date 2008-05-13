@@ -72,6 +72,12 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createNamedMesh.H"
 
+    fileName regionPrefix = "";
+    if (regionName != fvMesh::defaultRegion)
+    {
+        regionPrefix = regionName;
+    }
+
     // Get the replacement rules from a dictionary
     IOdictionary dict
     (
@@ -113,7 +119,11 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     fieldName,
-                    runTime.findInstance(polyMesh::meshSubDir, fieldName),
+                    runTime.findInstance
+                    (
+                        regionPrefix/polyMesh::meshSubDir,
+                        fieldName
+                    ),
                     polyMesh::meshSubDir,
                     mesh,
                     IOobject::MUST_READ,
