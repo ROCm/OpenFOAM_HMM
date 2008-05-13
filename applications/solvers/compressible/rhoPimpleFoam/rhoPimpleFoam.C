@@ -43,23 +43,20 @@ Description
 
 int main(int argc, char *argv[])
 {
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPIMPLEControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPIMPLEControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
@@ -75,13 +72,13 @@ int main(int argc, char *argv[])
         int oCorr=0;
         do
         {
-#           include "UEqn.H"
-#           include "hEqn.H"
+            #include "UEqn.H"
+            #include "hEqn.H"
 
             // --- PISO loop
             for (int corr=0; corr<nCorr; corr++)
             {
-#               include "pEqn.H"
+                #include "pEqn.H"
             }
 
             turbulence->correct();
