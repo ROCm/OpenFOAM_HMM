@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 #   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
 #   include "readControls.H"
 #   include "createFields.H"
 #   include "initContinuityErrs.H"
