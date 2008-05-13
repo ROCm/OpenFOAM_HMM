@@ -1,4 +1,4 @@
-    surfaceScalarField muf =
+    surfaceScalarField muEff
     (
         "muEff",
         twoPhaseProperties.muf()

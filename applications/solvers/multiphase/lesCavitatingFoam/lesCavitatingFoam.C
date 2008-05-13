@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
 #   include "readThermodynamicProperties.H"
 #   include "readControls.H"
 #   include "createFields.H"
-#   include "createAverages.H"
 #   include "initContinuityErrs.H"
 #   include "compressibleCourantNo.H"
 #   include "setInitialDeltaT.H"
@@ -77,8 +76,6 @@ int main(int argc, char *argv[])
 #               include "pEqn.H"
             }
         }
-
-#       include "calculateAverages.H"
 
         runTime.write();
 
