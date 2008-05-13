@@ -23,11 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    checkYPlus
+    yPlusRAS
 
 Description
-    Calculates and reports yPlus for all wall patches, for each time in a
-    database.
+    Calculates and reports yPlus for all wall patches, for each time.
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,21 +39,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "addTimeOptions.H"
+    #include "setRootCase.H"
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
-
-#   include "createTime.H"
+    #include "createTime.H"
 
     // Get times list
     instantList Times = runTime.times();
 
     // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
+    #include "checkTimeOptions.H"
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+    #include "createMesh.H"
 
     for (label i=startTime; i<endTime; i++)
     {
@@ -64,18 +62,18 @@ int main(int argc, char *argv[])
 
         mesh.readUpdate();
 
-        Info << "Reading field p\n" << endl;
-        volScalarField p
+        volScalarField yPlus
         (
             IOobject
             (
-                "p",
+                "yPlus",
                 runTime.timeName(),
                 mesh,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
             ),
-            mesh
+            mesh,
+            dimensionedScalar("yPlus", dimless, 0.0)
         );
 
         Info << "Reading field U\n" << endl;
@@ -92,21 +90,7 @@ int main(int argc, char *argv[])
             mesh
         );
 
-        volScalarField yPlus
-        (
-            IOobject
-            (
-                "yPlus",
-                runTime.timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar("yPlus", dimless, 0.0)
-        );
-
-#       include "createPhi.H"
+        #include "createPhi.H"
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
@@ -115,15 +99,19 @@ int main(int argc, char *argv[])
             turbulenceModel::New(U, phi, laminarTransport)
         );
 
-        forAll (mesh.boundary(), patchI)
-        {
-            if (typeid(mesh.boundary()[patchI]) == typeid(wallFvPatch))
-            {
-                yPlus.boundaryField()[patchI] = turbulence->yPlus(patchI);
-                const scalarField& Yp = yPlus.boundaryField()[patchI];
+        const fvPatchList& patches = mesh.boundary();
 
-                Info<< "Patch " << patchI
-                    << " named " << mesh.boundary()[patchI].name()
+        forAll(patches, patchi)
+        {
+            const fvPatch& currPatch = patches[patchi];
+
+            if (typeid(currPatch) == typeid(wallFvPatch))
+            {
+                yPlus.boundaryField()[patchi] = turbulence->yPlus(patchi);
+                const scalarField& Yp = yPlus.boundaryField()[patchi];
+
+                Info<< "Patch " << patchi
+                    << " named " << currPatch.name()
                     << " y+ : min: " << min(Yp) << " max: " << max(Yp)
                     << " average: " << average(Yp) << nl << endl;
             }

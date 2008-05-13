@@ -26,7 +26,7 @@ Application
     yPlusLES
 
 Description
-    Calculates the yPlus of the near-wall cells for an LES.
+    Calculates and reports yPlus for all wall patches, for each time.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,21 +39,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "addTimeOptions.H"
+    #include "setRootCase.H"
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
-
-#   include "createTime.H"
+    #include "createTime.H"
 
     // Get times list
     instantList Times = runTime.times();
 
     // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
+    #include "checkTimeOptions.H"
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+    #include "createMesh.H"
 
     for (label i=startTime; i<endTime; i++)
     {
@@ -62,9 +61,6 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << endl;
 
         mesh.readUpdate();
-
-#       include "createFields.H"
-        volScalarField nuEff = sgsModel->nuEff();
 
         volScalarField yPlus
         (
@@ -80,8 +76,34 @@ int main(int argc, char *argv[])
             dimensionedScalar("yPlus", dimless, 0.0)
         );
 
-        const fvPatchList& patches = mesh.boundary();    
-    
+        Info<< "Reading field U\n" << endl;
+        volVectorField U
+        (
+            IOobject
+            (
+                "U",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh
+        );
+
+        #include "createPhi.H"
+
+        singlePhaseTransportModel laminarTransport(U, phi);
+
+        autoPtr<LESmodel> sgsModel
+        (
+            LESmodel::New(U, phi, laminarTransport)
+        );
+
+        volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
+        volScalarField nuEff = sgsModel->nuEff();
+
+        const fvPatchList& patches = mesh.boundary();
+
         forAll(patches, patchi)
         {
             const fvPatch& currPatch = patches[patchi];
@@ -96,6 +118,11 @@ int main(int argc, char *argv[])
                        *mag(U.boundaryField()[patchi].snGrad())
                     )
                    /sgsModel->nu().boundaryField()[patchi];
+
+                Info<< "Patch " << patchi
+                    << " named " << currPatch.name()
+                    << " y+ : min: " << min(Yp) << " max: " << max(Yp)
+                    << " average: " << average(Yp) << nl << endl;
             }
         }
 
