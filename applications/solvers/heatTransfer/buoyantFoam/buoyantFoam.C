@@ -27,7 +27,8 @@ Application
 
 Description
     Transient Solver for buoyant, turbulent flow of compressible fluids for
-    ventilation and heat-transfer.
+    ventilation and heat-transfer.  Turbulence is modelled using a run-time
+    selectable compressible RAS model.
 
 \*---------------------------------------------------------------------------*/
 
