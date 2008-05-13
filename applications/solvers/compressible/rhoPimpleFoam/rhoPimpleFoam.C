@@ -26,8 +26,11 @@ Application
     rhoSimpleFoam
 
 Description
-    Steady-state solver for turbulent flow of compressible fluids for
+    Transient solver for turbulent flow of compressible fluids for
     ventilation and heat-transfer.
+
+    Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
+    pseudo-transient simulations.
 
 \*---------------------------------------------------------------------------*/
 
