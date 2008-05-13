@@ -35,8 +35,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class ZoneType>
-void ZoneMesh<ZoneType>::calcZoneMap() const
+template<class ZoneType, class MeshType>
+void ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
 {
     // It is an error to attempt to recalculate cellEdges
     // if the pointer is already set
@@ -77,8 +77,8 @@ void ZoneMesh<ZoneType>::calcZoneMap() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Read constructor given IOobject and a MeshType reference
-template<class ZoneType>
-ZoneMesh<ZoneType>::ZoneMesh
+template<class ZoneType, class MeshType>
+ZoneMesh<ZoneType, MeshType>::ZoneMesh
 (
     const IOobject& io,
     const MeshType& mesh
@@ -136,8 +136,8 @@ ZoneMesh<ZoneType>::ZoneMesh
 
 
 // Construct given size. Zones will be set later
-template<class ZoneType>
-ZoneMesh<ZoneType>::ZoneMesh
+template<class ZoneType, class MeshType>
+ZoneMesh<ZoneType, MeshType>::ZoneMesh
 (
     const IOobject& io,
     const MeshType& mesh,
@@ -153,8 +153,8 @@ ZoneMesh<ZoneType>::ZoneMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ZoneType>
-ZoneMesh<ZoneType>::~ZoneMesh()
+template<class ZoneType, class MeshType>
+ZoneMesh<ZoneType, MeshType>::~ZoneMesh()
 {
     clearAddressing();
 }
@@ -163,8 +163,8 @@ ZoneMesh<ZoneType>::~ZoneMesh()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Map of zones for quick zone lookup
-template<class ZoneType>
-const Map<label>& ZoneMesh<ZoneType>::zoneMap() const
+template<class ZoneType, class MeshType>
+const Map<label>& ZoneMesh<ZoneType, MeshType>::zoneMap() const
 {
     if (!zoneMapPtr_)
     {
@@ -177,8 +177,8 @@ const Map<label>& ZoneMesh<ZoneType>::zoneMap() const
 
 // Given a global object index, return the zone it is in.
 // If object does not belong to any zones, return -1
-template<class ZoneType>
-label ZoneMesh<ZoneType>::whichZone(const label objectIndex) const
+template<class ZoneType, class MeshType>
+label ZoneMesh<ZoneType, MeshType>::whichZone(const label objectIndex) const
 {
     const Map<label>& zm = zoneMap();
     Map<label>::const_iterator zmIter = zm.find(objectIndex);
@@ -195,8 +195,8 @@ label ZoneMesh<ZoneType>::whichZone(const label objectIndex) const
 
 
 // Return a list of zone names
-template<class ZoneType>
-wordList ZoneMesh<ZoneType>::types() const
+template<class ZoneType, class MeshType>
+wordList ZoneMesh<ZoneType, MeshType>::types() const
 {
     const PtrList<ZoneType>& zones = *this;
 
@@ -212,8 +212,8 @@ wordList ZoneMesh<ZoneType>::types() const
 
 
 // Return a list of zone names
-template<class ZoneType>
-wordList ZoneMesh<ZoneType>::names() const
+template<class ZoneType, class MeshType>
+wordList ZoneMesh<ZoneType, MeshType>::names() const
 {
     const PtrList<ZoneType>& zones = *this;
 
@@ -228,8 +228,8 @@ wordList ZoneMesh<ZoneType>::names() const
 }
 
 
-template<class ZoneType>
-label ZoneMesh<ZoneType>::findZoneID(const word& zoneName) const
+template<class ZoneType, class MeshType>
+label ZoneMesh<ZoneType, MeshType>::findZoneID(const word& zoneName) const
 {
     const PtrList<ZoneType>& zones = *this;
 
@@ -255,8 +255,8 @@ label ZoneMesh<ZoneType>::findZoneID(const word& zoneName) const
 }
 
 
-template<class ZoneType>
-void ZoneMesh<ZoneType>::clearAddressing()
+template<class ZoneType, class MeshType>
+void ZoneMesh<ZoneType, MeshType>::clearAddressing()
 {
     deleteDemandDrivenData(zoneMapPtr_);
 
@@ -269,8 +269,8 @@ void ZoneMesh<ZoneType>::clearAddressing()
 }
 
 
-template<class ZoneType>
-void ZoneMesh<ZoneType>::clear()
+template<class ZoneType, class MeshType>
+void ZoneMesh<ZoneType, MeshType>::clear()
 {
     clearAddressing();
     PtrList<ZoneType>::clear();
@@ -278,8 +278,8 @@ void ZoneMesh<ZoneType>::clear()
 
 
 // Check zone definition
-template<class ZoneType>
-bool ZoneMesh<ZoneType>::checkDefinition(const bool report) const
+template<class ZoneType, class MeshType>
+bool ZoneMesh<ZoneType, MeshType>::checkDefinition(const bool report) const
 {
     bool inError = false;
 
@@ -294,8 +294,8 @@ bool ZoneMesh<ZoneType>::checkDefinition(const bool report) const
 
 
 // Correct zone mesh after moving points
-template<class ZoneType>
-void ZoneMesh<ZoneType>::movePoints(const pointField& p)
+template<class ZoneType, class MeshType>
+void ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
 {
     PtrList<ZoneType>& zones = *this;
 
@@ -307,8 +307,8 @@ void ZoneMesh<ZoneType>::movePoints(const pointField& p)
 
 
 // writeData member function required by regIOobject
-template<class ZoneType>
-bool ZoneMesh<ZoneType>::writeData(Ostream& os) const
+template<class ZoneType, class MeshType>
+bool ZoneMesh<ZoneType, MeshType>::writeData(Ostream& os) const
 {
     os << *this;
     return os.good();
@@ -317,8 +317,8 @@ bool ZoneMesh<ZoneType>::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class ZoneType>
-Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType>& zones)
+template<class ZoneType, class MeshType>
+Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones)
 {
     os  << zones.size() << nl << token::BEGIN_LIST;
 

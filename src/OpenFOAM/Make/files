@@ -348,8 +348,7 @@ faceZone = $(zones)/faceZone
 $(faceZone)/faceZone.C
 $(faceZone)/newFaceZone.C
 
-pointZones = $(zones)/pointZones
-pointZone = $(pointZones)/pointZone
+pointZone = $(zones)/pointZone
 $(pointZone)/pointZone.C
 $(pointZone)/newPointZone.C
 

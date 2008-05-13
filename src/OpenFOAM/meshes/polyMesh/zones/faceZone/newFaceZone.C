@@ -31,30 +31,27 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-autoPtr<faceZone> faceZone::New
+Foam::autoPtr<Foam::faceZone> Foam::faceZone::New
 (
     const word& name,
     const dictionary& dict,
     const label index,
-    const faceZoneMesh& bm
+    const faceZoneMesh& zm
 )
 {
     if (debug)
     {
         Info<< "faceZone::New(const word&, const dictionary&, const label, "
-               "const faceZoneMesh&) : constructing faceZone"
+               "const faceZoneMesh&) : constructing faceZone " << name
             << endl;
     }
 
-    word patchType(dict.lookup("type"));
+    word zoneType(dict.lookup("type"));
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(patchType);
+        dictionaryConstructorTablePtr_->find(zoneType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -63,18 +60,16 @@ autoPtr<faceZone> faceZone::New
             "faceZone::New(const word&, const dictionary&, "
             "const label, const faceZoneMesh&)",
             dict
-        )   << "Unknown faceZone type " << patchType << endl << endl
+        )   << "Unknown faceZone type " << zoneType << endl << endl
             << "Valid faceZone types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalIOError);
     }
 
-    return autoPtr<faceZone>(cstrIter()(name, dict, index, bm));
+    return autoPtr<faceZone>(cstrIter()(name, dict, index, zm));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

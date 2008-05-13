@@ -27,6 +27,7 @@ Class
 
 Description
     List of mesh zones
+
 SourceFiles
     ZoneMesh.C
 
@@ -52,25 +53,22 @@ class polyMesh;
 
 // Forward declaration of friend functions and operators
 
-template<class ZoneType> class ZoneMesh;
+template<class ZoneType, class MeshType> class ZoneMesh;
 
-template<class ZoneType>
-Ostream& operator<<(Ostream&, const ZoneMesh<ZoneType>&);
+template<class ZoneType, class MeshType>
+Ostream& operator<<(Ostream&, const ZoneMesh<ZoneType, MeshType>&);
 
 /*---------------------------------------------------------------------------*\
                            Class ZoneMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ZoneType>
+template<class ZoneType, class MeshType>
 class ZoneMesh
 :
     public PtrList<ZoneType>,
     public regIOobject
 {
     // Private data
-
-        //- Typedef in preparation of a second template parameter
-        typedef polyMesh MeshType;
 
         //- Reference to mesh
         const MeshType& mesh_;
@@ -85,7 +83,7 @@ class ZoneMesh
         ZoneMesh(const ZoneMesh&);
 
         //- Disallow assignment
-        void operator=(const ZoneMesh<ZoneType>&);
+        void operator=(const ZoneMesh<ZoneType, MeshType>&);
 
 
         //- Create zone map
@@ -96,7 +94,7 @@ public:
 
     // Constructors
 
-        //- Read constructor given IOobject and a MeshType reference
+        //- Read constructor given IOobject and a mesh reference
         ZoneMesh
         (
             const IOobject&,
@@ -159,10 +157,10 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<< <ZoneType>
+        friend Ostream& operator<< <ZoneType, MeshType>
         (
             Ostream&,
-            const ZoneMesh<ZoneType>&
+            const ZoneMesh<ZoneType, MeshType>&
         );
 };
 
