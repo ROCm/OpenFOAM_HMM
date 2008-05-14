@@ -36,7 +36,7 @@ License
 
 namespace Foam
 {
-    // Used to offset faces in Pstream::combineOffset
+    //- Used to offset faces in Pstream::combineOffset
     template <>
     class offsetOp<face>
     {
