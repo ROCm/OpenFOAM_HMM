@@ -26,6 +26,7 @@ Application
     rasCavitatingFoam
 
 Description
+    Transient cavitation code with RAS turbulence.
 
 \*---------------------------------------------------------------------------*/
 

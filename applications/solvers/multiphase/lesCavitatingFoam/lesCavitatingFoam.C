@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    rasCavitatingFoam
+    lesCavitatingFoam
 
 Description
+    Transient cavitation code with LES turbulence.
 
 \*---------------------------------------------------------------------------*/
 
