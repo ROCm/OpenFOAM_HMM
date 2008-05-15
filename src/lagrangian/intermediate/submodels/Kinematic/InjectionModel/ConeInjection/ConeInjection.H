@@ -94,7 +94,7 @@ class ConeInjection
         //- Outer cone angle relative to SOI [deg]
         const autoPtr<DataEntry<scalar> > thetaOuter_;
 
-        //- Parcel size PDF to SOI model
+        //- Parcel size PDF model
         const autoPtr<pdf> parcelPDF_;
 
 
