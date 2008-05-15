@@ -80,9 +80,9 @@ ConeInjectionCoeffs
 {
     SOI                                  0.001;
     duration                             0.005;
-    position                             (0.025 0.25 0.05);
+    position                             (0.25 0.25 0.05);
     direction                            (0 -1 0);
-    parcelsPerSecond                     1000000;
+    parcelsPerSecond                     10000;
     volumeFlowRate                       Constant;
     volumeFlowRateCoeffs
     {
