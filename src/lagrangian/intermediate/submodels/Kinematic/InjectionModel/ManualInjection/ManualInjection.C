@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "ManualInjection.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

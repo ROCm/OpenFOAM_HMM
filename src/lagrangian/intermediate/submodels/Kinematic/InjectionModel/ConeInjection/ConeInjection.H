@@ -29,8 +29,9 @@ Description
     Cone injection
     - User specifies
       - time of start of injection
-      - total mass to inject
       - injector position
+      - direction (along injection axis)
+      - parcel flow rate
       - parcel velocity
       - inner and outer cone angles
     - Parcel diameters obtained by PDF model
@@ -38,10 +39,6 @@ Description
 SourceFiles
     ConeInjection.C
 
-    ********************************************************************
-    TODO: Need to include 'lost' parcels - i.e. if nParcels = 0 due to
-          rounding error, but volume to introduce is > 0
-    ********************************************************************
 \*---------------------------------------------------------------------------*/
 
 #ifndef ConeInjection_H
@@ -108,6 +105,7 @@ class ConeInjection
 
             //- Second tangential vector
             vector tanVec2_;
+
 
 protected:
 
