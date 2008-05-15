@@ -63,6 +63,52 @@ class InjectionModel
         // Reference to the owner cloud class
         CloudType& owner_;
 
+        //- The coefficients dictionary
+        const dictionary coeffDict_;
+
+
+protected:
+
+    // Protected data
+
+        // Global injection properties
+
+            //- Start of injection [s]
+            scalar SOI_;
+
+            //- Total volume of parcels to introduce [m^3]
+            //  Initialised in the individual injection models
+            scalar volumeTotal_;
+
+
+        // Injection properties per Lagrangian time step
+
+            //- Time at start of injection time step [s]
+            scalar timeStep0_;
+
+            //- Number of parcels to introduce []
+            label nParcels_;
+
+            //- Volume of parcels to introduce [m^3]
+            scalar volume_;
+
+
+    // Protected member functions
+
+        //- Number of parcels to introduce over the time step
+        virtual label nParcelsToInject
+        (
+            const scalar time0,
+            const scalar time1
+        ) const = 0;
+
+        //- Volume of parcels to introduce over the time step
+        virtual scalar volumeToInject
+        (
+            const scalar time0,
+            const scalar time1
+        ) const = 0;
+
 
 public:
 
@@ -89,7 +135,8 @@ public:
         InjectionModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
 
 
@@ -109,11 +156,17 @@ public:
 
     // Access
 
-        //- Return the owner cloud object
+        //- Return const access the owner cloud object
         const CloudType& owner() const;
+
+        //- Return non-const access the owner cloud object for manipulation
+        CloudType& owner();
 
         //- Return the dictionary
         const dictionary& dict() const;
+
+        //- Return the coefficients dictionary
+        const dictionary& coeffDict() const;
 
 
     // Member Functions
@@ -121,59 +174,62 @@ public:
         //- Flag to indicate whether model activates injection model
         virtual bool active() const = 0;
 
-        //- Return the start-of-injection time
-        virtual scalar timeStart() const = 0;
 
-        //- Return the end-of-injection time
-        virtual scalar timeEnd() const = 0;
+        // Global information
 
-        //- Return the injection position
-        virtual vector position
-        (
-            const label iParcel,
-            const scalar time,
-            const polyMeshInfo& meshInfo,
-            Random& rndGen
-        ) const = 0;
+            //- Return the start-of-injection time
+            const scalar timeStart() const;
 
-        //- Return the number of parcels to intruduce between two times
-        virtual label nParcelsToInject
-        (
-            const label nInjections_,
-            const scalar time0,
-            const scalar time1
-        ) const = 0;
+            //- Return the total volume to be injected across the event
+            const scalar volumeTotal() const;
 
-        //- Return the volume of parcels to introduce between two times
-        virtual scalar volume
-        (
-            const scalar time0,
-            const scalar time1,
-            const polyMeshInfo& meshInfo
-        ) const = 0;
+            //- Return the end-of-injection time
+            virtual scalar timeEnd() const = 0;
 
-        //- Return the volume fraction to introduce between two times
-        virtual scalar volumeFraction
-        (
-            const scalar time0,
-            const scalar time1
-        ) const = 0;
 
-        //- Return the diameter of the parcel to introduce at a time
-        virtual scalar d0
-        (
-            const label iParcel,
-            const scalar time
-        ) const = 0;
+        // Per Lagrangian time step properties
 
-        //- Return the velocity of the parcel to introduce at a time
-        virtual vector velocity
-        (
-            const label iParcel,
-            const scalar time,
-            const polyMeshInfo& meshInfo,
-            Random& rndGen
-        ) const = 0;
+            //- Determine properties for next time step/injection interval
+            void prepareForNextTimeStep
+            (
+                const scalar time0,
+                const scalar time1
+            );
+
+            //- Return the number of parcels to introduce
+            const label nParcels() const;
+
+            //- Return the volume of parcels to introduce
+            const scalar volume() const;
+
+            //- Return the volume fraction to introduce
+            const scalar volumeFraction() const;
+
+
+        // Injection geometry
+
+            //- Return the injection position
+            virtual vector position
+            (
+                const label iParcel,
+                const scalar time,
+                const polyMeshInfo& meshInfo
+            ) = 0;
+
+            //- Return the velocity of the parcel to introduce at a time
+            virtual vector velocity
+            (
+                const label iParcel,
+                const scalar time,
+                const polyMeshInfo& meshInfo
+            ) = 0;
+
+            //- Return the diameter of the parcel to introduce at a time
+            virtual scalar d0
+            (
+                const label iParcel,
+                const scalar time
+            ) const = 0;
 };
 
 

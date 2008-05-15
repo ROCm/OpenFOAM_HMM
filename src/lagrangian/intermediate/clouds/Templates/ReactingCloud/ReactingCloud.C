@@ -200,13 +200,10 @@ void Foam::ReactingCloud<ParcelType>::inject
 
     scalar pRho = td.constProps().rho0();
 
+    this->injection().prepareForNextTimeStep(this->time0(), time);
+
     // Number of parcels to introduce during this timestep
-    const label nParcels = this->injection().nParcelsToInject
-    (
-        this->nInjections(),
-        this->time0(),
-        time
-    );
+    const label nParcels = this->injection().nParcels();
 
     // Return if no parcels are required
     if (!nParcels)
@@ -216,19 +213,10 @@ void Foam::ReactingCloud<ParcelType>::inject
     }
 
     // Volume of particles to introduce during this timestep
-    scalar pVolume = this->injection().volume
-    (
-         this->time0(),
-         time,
-         this->meshInfo()
-    );
+    scalar pVolume = this->injection().volume();
 
     // Volume fraction to introduce during this timestep
-    scalar pVolumeFraction = this->injection().volumeFraction
-    (
-        this->time0(),
-        time
-    );
+    scalar pVolumeFraction = this->injection().volumeFraction();
 
     // Duration of injection period during this timestep
     scalar deltaT = min
@@ -259,8 +247,7 @@ void Foam::ReactingCloud<ParcelType>::inject
         (
             iParcel,
             timeInj,
-            this->meshInfo(),
-            this->rndGen()
+            this->meshInfo()
         );
 
         // Diameter of parcels

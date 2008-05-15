@@ -29,6 +29,30 @@ License
 #include "NoInjection.H"
 #include "addToRunTimeSelectionTable.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::label Foam::NoInjection<CloudType>::nParcelsToInject
+(
+    const scalar,
+    const scalar
+) const
+{
+    return 0;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
+(
+    const scalar,
+    const scalar
+) const
+{
+    return 0.0;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -38,7 +62,7 @@ Foam::NoInjection<CloudType>::NoInjection
     CloudType& owner
 )
 :
-    InjectionModel<CloudType>(dict, owner)
+    InjectionModel<CloudType>(dict, owner, typeName)
 {}
 
 
@@ -59,13 +83,6 @@ bool Foam::NoInjection<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::NoInjection<CloudType>::timeStart() const
-{
-    return 0.0;
-}
-
-
-template<class CloudType>
 Foam::scalar Foam::NoInjection<CloudType>::timeEnd() const
 {
     return 0.0;
@@ -77,46 +94,22 @@ Foam::vector Foam::NoInjection<CloudType>::position
 (
     const label,
     const scalar,
-    const polyMeshInfo&,
-    Random&
-) const
+    const polyMeshInfo&
+)
 {
     return vector::zero;
 }
 
 
 template<class CloudType>
-Foam::label Foam::NoInjection<CloudType>::nParcelsToInject
+Foam::vector Foam::NoInjection<CloudType>::velocity
 (
     const label,
     const scalar,
-    const scalar
-) const
-{
-    return 0;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::NoInjection<CloudType>::volume
-(
-    const scalar,
-    const scalar,
     const polyMeshInfo&
-) const
+)
 {
-    return 0.0;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::NoInjection<CloudType>::volumeFraction
-(
-    const scalar,
-    const scalar
-) const
-{
-    return 0.0;
+    return vector::zero;
 }
 
 
@@ -128,19 +121,6 @@ Foam::scalar Foam::NoInjection<CloudType>::d0
 ) const
 {
     return 0.0;
-}
-
-
-template<class CloudType>
-Foam::vector Foam::NoInjection<CloudType>::velocity
-(
-    const label,
-    const scalar,
-    const polyMeshInfo&,
-    Random&
-) const
-{
-    return vector::zero;
 }
 
 

@@ -73,9 +73,6 @@ class ConeInjection
         //- Coefficients dictionary
         dictionary coeffDict_;
 
-        //- Start of injection [s]
-        const scalar SOI_;
-
         //- Injection duration [s]
         const scalar duration_;
 
@@ -103,9 +100,6 @@ class ConeInjection
         //- Parcel size PDF to SOI model
         const autoPtr<pdf> parcelPDF_;
 
-        //- Number of particles represented by each parcel
-//        scalar nParticlesPerParcel_;
-
 
         // Tangential vectors to the direction vector
 
@@ -114,6 +108,25 @@ class ConeInjection
 
             //- Second tangential vector
             vector tanVec2_;
+
+protected:
+
+    // Protected member functions
+
+        //- Number of parcels to introduce over the time step
+        label nParcelsToInject
+        (
+            const scalar time0,
+            const scalar time1
+        ) const;
+
+        //- Number of parcels to introduce over the time step
+        scalar volumeToInject
+        (
+            const scalar time0,
+            const scalar time1
+        ) const;
+
 
 public:
 
@@ -138,53 +151,37 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates injection model
         bool active() const;
 
-        scalar timeStart() const;
-
+        //- Return the end-of-injection time
         scalar timeEnd() const;
 
-        vector position
-        (
-            const label iParcel,
-            const scalar time,
-            const polyMeshInfo& meshInfo,
-            Random&
-        ) const;
 
-        label nParcelsToInject
-        (
-            const label,
-            const scalar time0,
-            const scalar time1
-        ) const;
+        // Injection geometry
 
-        scalar volume
-        (
-            const scalar,
-            const scalar,
-            const polyMeshInfo&
-        ) const;
+            //- Return the injection position
+            vector position
+            (
+                const label iParcel,
+                const scalar time,
+                const polyMeshInfo& meshInfo
+            );
 
-        scalar volumeFraction
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+            //- Return the velocity of the parcel to introduce at a time
+            vector velocity
+            (
+                const label,
+                const scalar time,
+                const polyMeshInfo& meshInfo
+            );
 
-        scalar d0
-        (
-            const label,
-            const scalar
-        ) const;
-
-        vector velocity
-        (
-            const label,
-            const scalar time,
-            const polyMeshInfo& meshInfo,
-            Random& rndGen
-        ) const;
+            //- Return the diameter of the parcel to introduce at a time
+            scalar d0
+            (
+                const label,
+                const scalar
+            ) const;
 };
 
 

@@ -53,6 +53,25 @@ class NoInjection
     public InjectionModel<CloudType>
 {
 
+protected:
+
+    // Protected member functions
+
+        //- Number of parcels to introduce over the time step
+        label nParcelsToInject
+        (
+            const scalar,
+            const scalar
+        ) const;
+
+        //- Volume of parcels to introduce over the time step
+        scalar volumeToInject
+        (
+            const scalar,
+            const scalar
+        ) const;
+
+
 public:
 
     //- Runtime type information
@@ -76,53 +95,37 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates injection model
         bool active() const;
 
-        scalar timeStart() const;
-
+        //- Return the end-of-injection time
         scalar timeEnd() const;
 
-        vector position
-        (
-            const label,
-            const scalar,
-            const polyMeshInfo&,
-            Random&
-        ) const;
 
-        label nParcelsToInject
-        (
-            const label,
-            const scalar,
-            const scalar
-        ) const;
+        // Injection geometry
 
-        scalar volume
-        (
-            const scalar,
-            const scalar,
-            const polyMeshInfo&
-        ) const;
+            //- Return the injection position
+            vector position
+            (
+                const label iParcel,
+                const scalar time,
+                const polyMeshInfo& meshInfo
+            );
 
-        scalar volumeFraction
-        (
-            const scalar,
-            const scalar
-        ) const;
+            //- Return the velocity of the parcel to introduce at a time
+            vector velocity
+            (
+                const label,
+                const scalar time,
+                const polyMeshInfo& meshInfo
+            );
 
-        scalar d0
-        (
-            const label,
-            const scalar
-        ) const;
-
-        vector velocity
-        (
-            const label,
-            const scalar,
-            const polyMeshInfo&,
-            Random&
-        ) const;
+            //- Return the diameter of the parcel to introduce at a time
+            scalar d0
+            (
+                const label,
+                const scalar
+            ) const;
 };
 
 
