@@ -23,27 +23,29 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::ManualInjection
+    Foam::ConeInjection
 
 Description
-    Manual injection
+    Cone injection
     - User specifies
-      - Total mass to inject
-      - Parcel positions in file <positionsFile>
-      - Initial parcel velocity
+      - time of start of injection
+      - total mass to inject
+      - injector position
+      - parcel velocity
+      - inner and outer cone angles
     - Parcel diameters obtained by PDF model
-    - All parcels introduced at the start of the calculation
-
-    NOTE - not suitable for 2-D slab/wedge simulations unless the positions
-           file describes 2-D data!
 
 SourceFiles
-    ManualInjection.C
+    ConeInjection.C
 
+    ********************************************************************
+    TODO: Need to include 'lost' parcels - i.e. if nParcels = 0 due to
+          rounding error, but volume to introduce is > 0
+    ********************************************************************
 \*---------------------------------------------------------------------------*/
 
-#ifndef manualInjection_H
-#define manualInjection_H
+#ifndef ConeInjection_H
+#define ConeInjection_H
 
 #include "InjectionModel.H"
 #include "pdf.H"
@@ -53,12 +55,15 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type>
+class DataEntry;
+
 /*---------------------------------------------------------------------------*\
-                          Class ManualInjection Declaration
+                       Class ConeInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ManualInjection
+class ConeInjection
 :
     public InjectionModel<CloudType>
 {
@@ -68,41 +73,58 @@ class ManualInjection
         //- Coefficients dictionary
         dictionary coeffDict_;
 
-        //- Time to introduce parcels
-        const scalar injectionTime_;
+        //- Start of injection [s]
+        const scalar SOI_;
 
-        //- Name of file containing positions data
-        const word positionsFile_;
+        //- Injection duration [s]
+        const scalar duration_;
 
-        //- Field of parcel positions
-        vectorIOField positions_;
+        //- Injector position [m]
+        const vector position_;
 
-        //- Field of parcel diameters
-        scalarField diameters_;
+        //- Injector direction []
+        vector direction_;
 
-        //- Initial parcel velocity
-        const vector U0_;
+        //- Number of parcels to introduce per second []
+        const label parcelsPerSecond_;
 
-        //- Total volume of parcels to introduce [m^3]
-        scalar volumeTotal_;
+        //- Volume flow rate of parcels to introduce relative to SOI [m^3]
+        const autoPtr<DataEntry<scalar> > volumeFlowRate_;
 
-        //- Parcel size PDF model
+        //- Parcel velocity magnitude relative to SOI [m/s]
+        const autoPtr<DataEntry<scalar> > Umag_;
+
+        //- Inner cone angle relative to SOI [deg]
+        const autoPtr<DataEntry<scalar> > thetaInner_;
+
+        //- Outer cone angle relative to SOI [deg]
+        const autoPtr<DataEntry<scalar> > thetaOuter_;
+
+        //- Parcel size PDF to SOI model
         const autoPtr<pdf> parcelPDF_;
 
         //- Number of particles represented by each parcel
-        scalar nParticlesPerParcel_;
+//        scalar nParticlesPerParcel_;
 
+
+        // Tangential vectors to the direction vector
+
+            //- First tangential vector
+            vector tanVec1_;
+
+            //- Second tangential vector
+            vector tanVec2_;
 
 public:
 
     //- Runtime type information
-    TypeName("ManualInjection");
+    TypeName("ConeInjection");
 
 
     // Constructors
 
         //- Construct from dictionary
-        ManualInjection
+        ConeInjection
         (
             const dictionary& dict,
             CloudType& owner
@@ -111,7 +133,7 @@ public:
 
     // Destructor
 
-        ~ManualInjection();
+        ~ConeInjection();
 
 
     // Member Functions
@@ -152,16 +174,16 @@ public:
 
         scalar d0
         (
-            const label iParcel,
+            const label,
             const scalar
         ) const;
 
         vector velocity
         (
             const label,
-            const scalar,
+            const scalar time,
             const polyMeshInfo& meshInfo,
-            Random&
+            Random& rndGen
         ) const;
 };
 
@@ -173,7 +195,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ManualInjection.C"
+#   include "ConeInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

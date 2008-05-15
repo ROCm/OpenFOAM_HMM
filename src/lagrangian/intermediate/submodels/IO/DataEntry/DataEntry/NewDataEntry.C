@@ -24,46 +24,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "InjectionModel.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectionModel<CloudType>::InjectionModel
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:   dict_(dict),
-    owner_(owner)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectionModel<CloudType>::~InjectionModel()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-const CloudType& Foam::InjectionModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::InjectionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewInjectionModel.C"
+template<class Type>
+Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
+(
+    const word& entryName,
+    const dictionary& dict
+)
+{
+    word DataEntryType(dict.lookup(entryName));
+
+    //    Info<< "Selecting DataEntry " << DataEntryType << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(DataEntryType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "DataEntry<Type>::New(const dictionary&"
+        )   << "Unknown DataEntry type "
+            << DataEntryType << " for " << entryName
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid DataEntry types are :" << nl
+            << dictionaryConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<DataEntry<Type> >(cstrIter()(entryName, dict));
+}
+
 
 // ************************************************************************* //

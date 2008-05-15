@@ -23,20 +23,28 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoInjection
+    Foam::Constant
 
 Description
-    Place holder for 'no injection' option
+    Templated basic entry that holds a constant value.
+
+    @verbatim
+        entry                    Constant
+        entryCoeffs
+        {
+            value                100.0; // Constant value
+        }
+    @endverbatim
 
 SourceFiles
-    NoInjection.C
+    Constant.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noInjection_H
-#define noInjection_H
+#ifndef Constant_H
+#define Constant_H
 
-#include "InjectionModel.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,96 +52,74 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class NoInjection Declaration
+                           Class Constant Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class NoInjection
+template<class Type>
+class Constant
 :
-    public InjectionModel<CloudType>
+    public DataEntry<Type>
 {
+    // Private data
+
+        Type value_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        Constant(const Constant<Type>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const Constant<Type>&);
+
 
 public:
 
-    //- Runtime type information
-    TypeName("NoInjection");
+    // Runtime type information
+    TypeName("Constant");
 
 
     // Constructors
 
-        //- Construct from components
-        NoInjection
+        //- Construct from dictionary
+        Constant
         (
-            const dictionary& dict,
-            CloudType& owner
+            const word& entryName,
+            const dictionary& dict
         );
 
 
-    // Destructor
+    //- Destructor
 
-        ~NoInjection();
+        ~Constant();
 
 
     // Member Functions
 
-        bool active() const;
+        //- Return constant value
+        Type value(const scalar) const;
 
-        scalar timeStart() const;
-
-        scalar timeEnd() const;
-
-        vector position
-        (
-            const label,
-            const scalar,
-            const polyMeshInfo&,
-            Random&
-        ) const;
-
-        label nParcelsToInject
-        (
-            const label,
-            const scalar,
-            const scalar
-        ) const;
-
-        scalar volume
-        (
-            const scalar,
-            const scalar,
-            const polyMeshInfo&
-        ) const;
-
-        scalar volumeFraction
-        (
-            const scalar,
-            const scalar
-        ) const;
-
-        scalar d0
-        (
-            const label,
-            const scalar
-        ) const;
-
-        vector velocity
-        (
-            const label,
-            const scalar,
-            const polyMeshInfo&,
-            Random&
-        ) const;
+        //- Integrate between two values
+        Type integrate(const scalar x1, const scalar x2) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<>
+Constant<label>::Constant(const word& entryName, const dictionary& dict);
+
+template<>
+Constant<scalar>::Constant(const word& entryName, const dictionary& dict);
+
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoInjection.C"
+#   include "Constant.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

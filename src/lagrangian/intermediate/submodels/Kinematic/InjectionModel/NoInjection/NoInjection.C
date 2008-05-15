@@ -135,7 +135,9 @@ template<class CloudType>
 Foam::vector Foam::NoInjection<CloudType>::velocity
 (
     const label,
-    const scalar
+    const scalar,
+    const polyMeshInfo&,
+    Random&
 ) const
 {
     return vector::zero;

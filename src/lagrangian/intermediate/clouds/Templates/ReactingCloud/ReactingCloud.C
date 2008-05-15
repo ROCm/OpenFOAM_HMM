@@ -277,7 +277,12 @@ void Foam::ReactingCloud<ParcelType>::inject
         );
 
         // Velocity of parcels
-        vector pU = this->injection().velocity(iParcel, timeInj);
+        vector pU = this->injection().velocity
+        (
+            iParcel,
+            timeInj,
+            this->meshInfo()
+        );
 
         // Determine the injection cell
         label pCell = -1;

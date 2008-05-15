@@ -24,46 +24,67 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "InjectionModel.H"
+#include "Constant.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::InjectionModel<CloudType>::InjectionModel
+template<class Type>
+Foam::Constant<Type>::Constant
 (
-    const dictionary& dict,
-    CloudType& owner
+    const word& entryName,
+    const dictionary& dict
 )
-:   dict_(dict),
-    owner_(owner)
+:
+    DataEntry<Type>(typeName, entryName, dict),
+    value_(this->dict_.lookup("value"))
+{}
+
+
+template<>
+Foam::Constant<Foam::label>::Constant
+(
+    const word& entryName,
+    const dictionary& dict
+)
+:
+    DataEntry<label>(typeName, entryName, dict),
+    value_(readLabel(this->dict_.lookup("value")))
+{}
+
+
+template<>
+Foam::Constant<Foam::scalar>::Constant
+(
+    const word& entryName,
+    const dictionary& dict
+)
+:
+    DataEntry<scalar>(typeName, entryName, dict),
+    value_(readScalar(this->dict_.lookup("value")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::InjectionModel<CloudType>::~InjectionModel()
+template<class Type>
+Foam::Constant<Type>::~Constant()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CloudType>
-const CloudType& Foam::InjectionModel<CloudType>::owner() const
+template<class Type>
+Type Foam::Constant<Type>::value(const scalar x) const
 {
-    return owner_;
+    return value_;
 }
 
 
-template<class CloudType>
-const Foam::dictionary& Foam::InjectionModel<CloudType>::dict() const
+template<class Type>
+Type Foam::Constant<Type>::integrate(const scalar x1, const scalar x2) const
 {
-    return dict_;
+    return (x2 - x1)*value_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "NewInjectionModel.C"
 
 // ************************************************************************* //

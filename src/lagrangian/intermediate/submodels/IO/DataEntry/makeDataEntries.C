@@ -24,46 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "InjectionModel.H"
+#include "DataEntry.H"
+#include "Constant.H"
+#include "Table.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "label.H"
+#include "scalar.H"
+#include "vector.H"
 
-template<class CloudType>
-Foam::InjectionModel<CloudType>::InjectionModel
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:   dict_(dict),
-    owner_(owner)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectionModel<CloudType>::~InjectionModel()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-const CloudType& Foam::InjectionModel<CloudType>::owner() const
+namespace Foam
 {
-    return owner_;
-}
+    makeDataEntry(label);
+    makeDataEntryType(Constant, label);
+    makeDataEntryType(Table, label);
 
+    makeDataEntry(scalar);
+    makeDataEntryType(Constant, scalar);
+    makeDataEntryType(Table, scalar);
 
-template<class CloudType>
-const Foam::dictionary& Foam::InjectionModel<CloudType>::dict() const
-{
-    return dict_;
-}
+    makeDataEntry(vector);
+    makeDataEntryType(Constant, vector);
+    makeDataEntryType(Table, vector);
+};
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "NewInjectionModel.C"
 
 // ************************************************************************* //

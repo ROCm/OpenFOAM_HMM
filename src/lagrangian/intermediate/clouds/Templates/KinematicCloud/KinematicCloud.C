@@ -437,7 +437,13 @@ void Foam::KinematicCloud<ParcelType>::inject
         );
 
         // Velocity of parcels
-        vector pU = this->injection().velocity(iParcel, timeInj);
+        vector pU = this->injection().velocity
+        (
+            iParcel,
+            timeInj,
+            this->meshInfo(),
+            rndGen_
+        );
 
         // Determine the injection cell
         label pCell = -1;
@@ -496,8 +502,9 @@ void Foam::KinematicCloud<ParcelType>::postInjectCheck()
 {
     if (nParcelsAdded_)
     {
-        Pout<< "\n--> Cloud: " << this->name() << nl <<
-               "    Added " << nParcelsAdded_ <<  " new parcels" << nl << endl;
+        Pout<< "\n--> Cloud: " << this->name() << nl
+            << "    Added " << nParcelsAdded_
+            <<  " new parcels" << nl << endl;
     }
 
     // Reset parcel counters

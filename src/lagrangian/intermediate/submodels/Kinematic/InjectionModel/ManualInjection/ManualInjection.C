@@ -129,8 +129,10 @@ Foam::vector Foam::ManualInjection<CloudType>::position
         }
         else
         {
-            FatalErrorIn("Foam::vector Foam::ManualInjection<CloudType>::position")
-                << "Could not determine 2-D case geometry" << nl
+            FatalErrorIn
+            (
+                "Foam::vector Foam::ManualInjection<CloudType>::position"
+            )   << "Could not determine 2-D case geometry" << nl
                 << abort(FatalError);
         }
     }
@@ -205,10 +207,19 @@ template<class CloudType>
 Foam::vector Foam::ManualInjection<CloudType>::velocity
 (
     const label,
-    const scalar
+    const scalar,
+    const polyMeshInfo& meshInfo,
+    Random&
 ) const
 {
-    return U0_;
+    vector vel = U0_;
+    if (meshInfo.caseIs2dSlab())
+    {
+        vel.component(meshInfo.emptyComponent()) =
+            meshInfo.centrePoint().component(meshInfo.emptyComponent());
+    }
+
+    return vel;
 }
 
 

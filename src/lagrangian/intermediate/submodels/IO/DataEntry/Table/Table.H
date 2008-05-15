@@ -23,20 +23,35 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoInjection
+    Foam::Table
 
 Description
-    Place holder for 'no injection' option
+    Templated table container data entry. Items are stored in a list of
+    Tuple2's. First column is always stored as scalar entries. Data is read
+    in the form, e.g. for (scalar, vector):
+
+    @verbatim
+        entry                    Table
+        entryCoeffs
+        {
+            table
+            (
+                0.0 (1 2 3)
+                1.0 (4 5 6)
+            )
+        }
+    @endverbatim
 
 SourceFiles
-    NoInjection.C
+    Table.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noInjection_H
-#define noInjection_H
+#ifndef Table_H
+#define Table_H
 
-#include "InjectionModel.H"
+#include "DataEntry.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,85 +59,57 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class NoInjection Declaration
+                           Class Table Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class NoInjection
+template<class Type>
+class Table
 :
-    public InjectionModel<CloudType>
+    public DataEntry<Type>
 {
+    // Private data
+
+       //- Table data
+       List<Tuple2<scalar, Type> > table_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        Table(const Table<Type>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const Table<Type>&);
+
 
 public:
 
-    //- Runtime type information
-    TypeName("NoInjection");
+    // Runtime type information
+    TypeName("Table");
 
 
     // Constructors
 
-        //- Construct from components
-        NoInjection
+        //- Construct from dictionary
+        Table
         (
-            const dictionary& dict,
-            CloudType& owner
+            const word& entryName,
+            const dictionary& dict
         );
 
 
-    // Destructor
+    //- Destructor
 
-        ~NoInjection();
+        ~Table();
 
 
     // Member Functions
 
-        bool active() const;
+        //- Return Table value
+        Type value(const scalar x) const;
 
-        scalar timeStart() const;
-
-        scalar timeEnd() const;
-
-        vector position
-        (
-            const label,
-            const scalar,
-            const polyMeshInfo&,
-            Random&
-        ) const;
-
-        label nParcelsToInject
-        (
-            const label,
-            const scalar,
-            const scalar
-        ) const;
-
-        scalar volume
-        (
-            const scalar,
-            const scalar,
-            const polyMeshInfo&
-        ) const;
-
-        scalar volumeFraction
-        (
-            const scalar,
-            const scalar
-        ) const;
-
-        scalar d0
-        (
-            const label,
-            const scalar
-        ) const;
-
-        vector velocity
-        (
-            const label,
-            const scalar,
-            const polyMeshInfo&,
-            Random&
-        ) const;
+        //- Integrate between two (scalar) values
+        Type integrate(const scalar x1, const scalar x2) const;
 };
 
 
@@ -133,7 +120,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoInjection.C"
+#   include "Table.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

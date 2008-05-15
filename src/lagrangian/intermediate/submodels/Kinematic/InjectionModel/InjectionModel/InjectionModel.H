@@ -63,9 +63,6 @@ class InjectionModel
         // Reference to the owner cloud class
         CloudType& owner_;
 
-        //- Random number generator
-        Random rndGen_;
-
 
 public:
 
@@ -117,9 +114,6 @@ public:
 
         //- Return the dictionary
         const dictionary& dict() const;
-
-        //- Return reference to random number
-        inline Random& rndGen();
 
 
     // Member Functions
@@ -176,7 +170,9 @@ public:
         virtual vector velocity
         (
             const label iParcel,
-            const scalar time
+            const scalar time,
+            const polyMeshInfo& meshInfo,
+            Random& rndGen
         ) const = 0;
 };
 
