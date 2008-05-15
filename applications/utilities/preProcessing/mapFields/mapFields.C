@@ -43,6 +43,31 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+int getTimeIndex
+(
+    const instantList& times,
+    const scalar t
+)
+{
+    int nearestIndex = -1;
+    scalar nearestDiff = Foam::GREAT;
+
+    forAll(times, timeIndex)
+    {
+        if (times[timeIndex].name() == "constant") continue;
+
+        scalar diff = fabs(times[timeIndex].value() - t);
+        if (diff < nearestDiff)
+        {
+            nearestDiff = diff;
+            nearestIndex = timeIndex;
+        }
+    }
+
+    return nearestIndex;
+}
+
+
 void mapConsistentMesh
 (
     const fvMesh& meshSource,
@@ -97,7 +122,7 @@ void mapConsistentMesh
 void mapSubMesh
 (
     const fvMesh& meshSource,
-    const fvMesh& meshTarget, 
+    const fvMesh& meshTarget,
     const HashTable<word>& patchMap,
     const wordList& cuttingPatches
 )
@@ -203,7 +228,7 @@ wordList addProcessorPatches
     {
         if (typeid(meshTarget.boundary()[patchi]) == typeid(processorFvPatch))
         {
-            if 
+            if
             (
                !cuttingPatchTable.found
                 (
@@ -219,7 +244,7 @@ wordList addProcessorPatches
             }
         }
     }
-    
+
     return cuttingPatchTable.toc();
 }
 
@@ -232,7 +257,9 @@ int main(int argc, char *argv[])
 
 #   include "createTimes.H"
 
-    runTimeSource.setTime(runTimeTarget);
+#   include "setTimeIndex.H"
+
+    runTimeSource.setTime(sourceTimes[sourceTimeIndex], sourceTimeIndex);
 
     Info<< "\nSource time: " << runTimeSource.value()
         << "\nTarget time: " << runTimeTarget.value()
@@ -255,9 +282,9 @@ int main(int argc, char *argv[])
                 false
             )
         );
-        
+
         mapFieldsDict.lookup("patchMap") >> patchMap;
-        
+
         mapFieldsDict.lookup("cuttingPatches") >>  cuttingPatches;
     }
 
@@ -302,7 +329,11 @@ int main(int argc, char *argv[])
                 caseDirSource/fileName(word("processor") + name(procI))
             );
 
-            runTimeSource.setTime(runTimeTarget);
+            runTimeSource.setTime
+            (
+                sourceTimes[sourceTimeIndex],
+                sourceTimeIndex
+            );
 
             fvMesh meshSource
             (
@@ -446,7 +477,11 @@ int main(int argc, char *argv[])
                 caseDirSource/fileName(word("processor") + name(procISource))
             );
 
-            runTimeSource.setTime(runTimeTarget);
+            runTimeSource.setTime
+            (
+                sourceTimes[sourceTimeIndex],
+                sourceTimeIndex
+            );
 
             fvMesh meshSource
             (
@@ -464,7 +499,7 @@ int main(int argc, char *argv[])
 
             for (int procITarget=0; procITarget<nProcsTarget; procITarget++)
             {
-                if 
+                if
                 (
                     !bbsTargetSet[procITarget]
                   || (
@@ -542,7 +577,7 @@ int main(int argc, char *argv[])
                 runTimeTarget
             )
         );
-        
+
         Info<< "Source mesh size: " << meshSource.nCells() << tab
             << "Target mesh size: " << meshTarget.nCells() << nl << endl;
 

@@ -1,6 +1,7 @@
     argList::validArgs.clear();
 
     argList::validOptions.insert("source", "dir");
+    argList::validOptions.insert("sourceTime", "scalar");
 
     argList::validOptions.erase(argList::validOptions.find("parallel"));
     argList::validOptions.insert("parallelSource", "");

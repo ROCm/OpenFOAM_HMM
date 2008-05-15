@@ -57,11 +57,11 @@ edges
 
 patches
 (
-    patch top
+    wall top
     (
         (13 15 14 12)
     )
-    patch bottom
+    wall bottom
     (
         (0 1 5 4)
         (1 8 10 5)
