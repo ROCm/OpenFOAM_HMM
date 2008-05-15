@@ -121,8 +121,8 @@ int main(int argc, char *argv[])
 
                 Info<< "Patch " << patchi
                     << " named " << currPatch.name()
-                    << " y+ : min: " << min(Yp) << " max: " << max(Yp)
-                    << " average: " << average(Yp) << nl << endl;
+                    << " y+ : min: " << min(yPlus) << " max: " << max(yPlus)
+                    << " average: " << average(yPlus) << nl << endl;
             }
         }
 
