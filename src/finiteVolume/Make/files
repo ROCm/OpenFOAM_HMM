@@ -102,6 +102,7 @@ $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFiel
 $(derivedFvPatchFields)/massFlowRateInletVelocity/massFlowRateInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
+$(derivedFvPatchFields)/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/inletOutletTotalTemperature/inletOutletTotalTemperatureFvPatchScalarField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 
@@ -259,6 +260,10 @@ cfdTools/general/porousMedia/porousZones.C
 cfdTools/general/MRF/MRFZone.C
 cfdTools/general/MRF/MRFZones.C
 cfdTools/general/fieldSources/timeActivatedExplicitSource/timeActivatedExplicitSource.C
+cfdTools/general/SRF/SRFModel/SRFModel/SRFModel.C
+cfdTools/general/SRF/SRFModel/SRFModel/newSRFModel.C
+cfdTools/general/SRF/SRFModel/rpm/rpm.C
+cfdTools/general/SRF/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 
 fvMeshCutSurface = fvMesh/fvMeshCutSurface
 

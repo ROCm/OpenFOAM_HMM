@@ -51,8 +51,6 @@ void Foam::vtkPV3Foam::addFaceSetMesh
         Info<< "entered add face set internal mesh" << endl;
     }
 
-    SetName(vtkMesh, "faceSetMesh");
-
     // Construct primitivePatch of faces in fSet.
 
     const faceList& faces = mesh.faces();

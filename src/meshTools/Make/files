@@ -67,6 +67,7 @@ $(cellSources)/fieldToCell/fieldToCell.C
 $(cellSources)/pointToCell/pointToCell.C
 $(cellSources)/shapeToCell/shapeToCell.C
 $(cellSources)/boxToCell/boxToCell.C
+$(cellSources)/regionToCell/regionToCell.C
 $(cellSources)/rotatedBoxToCell/rotatedBoxToCell.C
 $(cellSources)/labelToCell/labelToCell.C
 $(cellSources)/surfaceToCell/surfaceToCell.C

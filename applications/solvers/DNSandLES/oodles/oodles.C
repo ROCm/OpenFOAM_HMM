@@ -42,16 +42,11 @@ Description
 
 int main(int argc, char *argv[])
 {
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMeshNoClear.H"
-#   include "createFields.H"
-#   include "createAverages.H"
-#   include "initContinuityErrs.H"
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMeshNoClear.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -59,8 +54,8 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
 
         sgsModel->correct();
 
@@ -76,9 +71,7 @@ int main(int argc, char *argv[])
             solve(UEqn == -fvc::grad(p));
         }
 
-
         // --- PISO loop
-
         for (int corr=0; corr<nCorr; corr++)
         {
             volScalarField rUA = 1.0/UEqn.A();
@@ -113,18 +106,13 @@ int main(int argc, char *argv[])
                 }
             }
 
-#           include "continuityErrs.H"
+            #include "continuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();
         }
 
-
-#       include "calculateAverages.H"
-
         runTime.write();
-
-#       include "writeNaveragingSteps.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

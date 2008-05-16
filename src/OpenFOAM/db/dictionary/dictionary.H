@@ -87,7 +87,7 @@ public:
         //- Read dictionary from Istream
         bool read(Istream&);
 
-        //- Substitute the given keyword prepended by '$' with the 
+        //- Substitute the given keyword prepended by '$' with the
         //  corresponding sub-dictionary entries
         bool substituteKeyword(const word& keyword);
 
@@ -179,6 +179,11 @@ public:
             //  If recusive search parent dictionaries
             const entry* lookupEntryPtr(const word&, bool recusive=false) const;
 
+            //- Find and return an entry data stream pointer for manipulation
+            //  if present otherwise return NULL.
+            //  If recusive search parent dictionaries
+            entry* lookupEntryPtr(const word&, bool recusive=false);
+
             //- Find and return an entry data stream if present otherwise error.
             //  If recusive search parent dictionaries
             const entry& lookupEntry(const word&, bool recusive=false) const;
@@ -201,6 +206,9 @@ public:
 
             //- Find and return a sub-dictionary
             const dictionary& subDict(const word&) const;
+
+            //- Find and return a sub-dictionary for manipulation
+            dictionary& subDict(const word&);
 
             //- Return the table of contents
             wordList toc() const;
@@ -262,7 +270,7 @@ public:
             void clear();
 
 
-        // Write 
+        // Write
 
             void write(Ostream& os, bool subDict = true) const;
 
@@ -303,7 +311,7 @@ public:
 // those from dict2.
 // Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
-   
+
 // Combine dictionaries starting from the entries in dict one and then including
 // those from dict2.
 // Do not overwrite the entries from dict1.

@@ -50,8 +50,6 @@ void Foam::vtkPV3Foam::addPointSetMesh
         Info<< "entered add point set mesh" << endl;
     }
 
-    SetName(vtkMesh, "pointSetMesh");
-
     vtkPoints *vtkpoints = vtkPoints::New();
     vtkpoints->Allocate(mesh.nPoints());
 

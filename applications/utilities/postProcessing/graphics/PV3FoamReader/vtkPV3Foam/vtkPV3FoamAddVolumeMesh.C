@@ -57,8 +57,6 @@ void Foam::vtkPV3Foam::addVolumeMesh
         Info<< "entered add volume mesh" << endl;
     }
 
-    SetName(vtkMesh, "internalMesh");
-
     // Number of additional points needed by the decomposition of polyhedra
     label nAddPoints = 0;
 

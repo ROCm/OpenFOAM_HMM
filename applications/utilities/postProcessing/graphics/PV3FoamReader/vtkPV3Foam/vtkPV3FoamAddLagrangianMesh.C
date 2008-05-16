@@ -51,8 +51,6 @@ void Foam::vtkPV3Foam::addLagrangianMesh
         Info<< "entered add Lagrangian mesh" << endl;
     }
 
-    SetName(vtkMesh, "LagrangianMesh");
-
     fileNameList cloudDirs
     (
         readDir(mesh.time().timePath()/"lagrangian", fileName::DIRECTORY)

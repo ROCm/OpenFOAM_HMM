@@ -227,8 +227,8 @@ bool Foam::motionSmoother::checkMesh
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with interpolation weights (0..1)  < "
-            << setw(4) << minWeight
-            << "        : "
+            << setw(5) << minWeight
+            << "       : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -250,8 +250,8 @@ bool Foam::motionSmoother::checkMesh
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with volume ratio of neighbour cells < "
-            << setw(4) << minVolRatio
-            << "      : "
+            << setw(5) << minVolRatio
+            << "     : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -519,8 +519,8 @@ bool Foam::motionSmoother::checkMesh
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with interpolation weights (0..1)  < "
-            << setw(4) << minWeight
-            << "        : "
+            << setw(5) << minWeight
+            << "       : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -540,8 +540,8 @@ bool Foam::motionSmoother::checkMesh
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with volume ratio of neighbour cells < "
-            << setw(4) << minVolRatio
-            << "      : "
+            << setw(5) << minVolRatio
+            << "     : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;

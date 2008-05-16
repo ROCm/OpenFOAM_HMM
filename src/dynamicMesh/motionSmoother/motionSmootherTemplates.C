@@ -182,107 +182,37 @@ Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
     );
     GeometricField<Type, pointPatchField, pointMesh>& res = tres();
 
-
     const polyMesh& mesh = fld.mesh()();
 
-    scalarField sumWeight(mesh.nPoints(), 0.0);
 
+    // Sum local weighted values and weights
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Note: on coupled edges use only one edge (through isMasterEdge)
+    // This is done so coupled edges do not get counted double.
+
+    scalarField sumWeight(mesh.nPoints(), 0.0);
 
     const edgeList& edges = mesh.edges();
 
     forAll(edges, edgeI)
     {
-        const edge& e = edges[edgeI];
-        const scalar& w = edgeWeight[edgeI];
-
-        res[e[0]] += w*fld[e[1]];
-        sumWeight[e[0]] += w;
-
-        res[e[1]] += w*fld[e[0]];
-        sumWeight[e[1]] += w;
-    }
-
-
-    // Correct for coupled edges counted twice after summing below.
-
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(patches, patchI)
-    {
-        if (Pstream::parRun() && isA<processorPolyPatch>(patches[patchI]))
+        if (isMasterEdge_.get(edgeI) == 1)
         {
-            const processorPolyPatch& pp =
-                refCast<const processorPolyPatch>(patches[patchI]);
+            const edge& e = edges[edgeI];
+            const scalar w = edgeWeight[edgeI];
 
-            if (pp.myProcNo() < pp.neighbProcNo())
-            {
-                // Remove contribution of my edges to sum.
+            res[e[0]] += w*fld[e[1]];
+            sumWeight[e[0]] += w;
 
-                const labelList& meshEdges = pp.meshEdges();
-
-                forAll(meshEdges, i)
-                {
-                    label edgeI = meshEdges[i];
-                    const edge& e = edges[edgeI];
-                    const scalar& w = edgeWeight[edgeI];
-
-                    res[e[0]] -= w*fld[e[1]];
-                    sumWeight[e[0]] -= w;
-
-                    res[e[1]] -= w*fld[e[0]];
-                    sumWeight[e[1]] -= w;
-                }
-            }
-        }
-        else if (isA<cyclicPolyPatch>(patches[patchI]))
-        {
-            // Remove first half contribution.
-
-            const cyclicPolyPatch& pp =
-                refCast<const cyclicPolyPatch>(patches[patchI]);
-
-            SubList<face> half0Faces
-            (
-                mesh.faces(),
-                pp.size()/2,
-                pp.start()
-            );
-
-            labelList::subList half0Cells
-            (
-                mesh.faceOwner(),
-                pp.size()/2,
-                pp.start()
-            );
-
-            labelList meshEdges
-            (
-                primitivePatch(half0Faces, mesh.points()).meshEdges
-                (
-                    edges,
-                    mesh.cellEdges(),
-                    half0Cells
-                )
-            );
-
-            forAll(meshEdges, i)
-            {
-                label edgeI = meshEdges[i];
-                const edge& e = edges[edgeI];
-                const scalar& w = edgeWeight[edgeI];
-
-                res[e[0]] -= w*fld[e[1]];
-                sumWeight[e[0]] -= w;
-
-                res[e[1]] -= w*fld[e[0]];
-                sumWeight[e[1]] -= w;
-            }
+            res[e[1]] += w*fld[e[0]];
+            sumWeight[e[1]] += w;
         }
     }
 
-    // Still to be done: multiply shared edges.
-    // (mesh.globalData().sharedEdgeLabels()) However needs for us to keep
-    // count how many have already been corrected above.
+
+    // Add coupled contributions
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     syncTools::syncPointList
     (
@@ -302,6 +232,9 @@ Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
         false                   // separation
     );
 
+
+    // Average
+    // ~~~~~~~
 
     forAll(res, pointI)
     {
@@ -330,7 +263,6 @@ void Foam::motionSmoother::smooth
     const GeometricField<Type, pointPatchField, pointMesh>& fld,
     const scalarField& edgeWeight,
     const bool separation,
-
     GeometricField<Type, pointPatchField, pointMesh>& newFld
 ) const
 {
@@ -349,6 +281,7 @@ void Foam::motionSmoother::smooth
             newFld[pointI] = 0.5*fld[pointI] + 0.5*avgFld[pointI];
         }
     }
+
     newFld.correctBoundaryConditions();
     applyCornerConstraints(newFld);
 }

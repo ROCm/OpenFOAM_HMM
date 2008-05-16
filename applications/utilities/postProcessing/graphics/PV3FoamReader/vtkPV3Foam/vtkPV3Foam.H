@@ -196,7 +196,8 @@ class vtkPV3Foam
             vtkMultiBlockDataSet* output,
             unsigned int blockNo,
             unsigned int datasetNo,
-            vtkDataSet* dataset
+            vtkDataSet* dataset,
+            const char* datasetName
         );
 
         // Convenience method use to convert the readers from VTK 5
@@ -443,8 +444,13 @@ class vtkPV3Foam
             );
 
 
-        //- Set the name VTK objects
-        void SetName(vtkUnstructuredGrid* vtkMesh, const char* name);
+        //- Set the name of the block
+        void SetBlockName
+        (
+            vtkMultiBlockDataSet* blocks,
+            const int id,
+            const char* name
+        );
 
         //- Disallow default bitwise copy construct
         vtkPV3Foam(const vtkPV3Foam&);

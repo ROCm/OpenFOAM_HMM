@@ -65,6 +65,7 @@ SourceFiles
 #include "boolList.H"
 #include "labelHashSet.H"
 #include "Map.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -571,6 +572,14 @@ public:
                     const bool report,
                     const scalar warnFlatness,  // When to include in set.
                     labelHashSet* setPtr
+                ) const;
+
+                //- Check edge alignment for 1D/2D cases
+                bool checkEdgeAlignment
+                (
+                    const bool report,
+                    const Vector<label>& directions,
+                    labelHashSet* setPtr = NULL
                 ) const;
 
                 //- Check for unused points

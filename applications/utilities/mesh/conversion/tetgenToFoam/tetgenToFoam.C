@@ -56,18 +56,14 @@ NOTE:
 always. Might use some geometric check instead.
 - marked faces might not actually be boundary faces of mesh. This is not handled
 and you'll have to run without face file (-noFaceFile option)
-- default is to have indices starting at 1. Use -startAt0 if starting at 0.
-- all input is expected to be ordered.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
-#include "polyPatch.H"
 #include "cellModeller.H"
-#include "ListOps.H"
-#include <fstream>
 
 using namespace Foam;
 
@@ -79,7 +75,6 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("file prefix");
     argList::validOptions.insert("noFaceFile", "");
-    argList::validOptions.insert("startAt0", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -87,34 +82,29 @@ int main(int argc, char *argv[])
 
     bool readFaceFile = !args.options().found("noFaceFile");
 
-    bool startAt1 = !args.options().found("startAt0");
-
     fileName prefix(args.additionalArgs()[0]);
 
     fileName nodeFile(prefix + ".node");
     fileName eleFile(prefix + ".ele");
     fileName faceFile(prefix + ".face");
 
-    Info<< "Files:" << endl
-        << "    nodes : " << nodeFile << endl
-        << "    elems : " << eleFile << endl
-        << "    faces : " << faceFile << endl
-        << endl;
-
-
-    if (readFaceFile)
+    if (!readFaceFile)
     {
-        Info<< "Reading .file for boundary information" << nl << endl;
-    }
-    if (startAt1)
-    {
-        Info<< "Numbering in files starts at 1" << nl << endl;
+        Info<< "Files:" << endl
+            << "    nodes : " << nodeFile << endl
+            << "    elems : " << eleFile << endl
+            << endl;
     }
     else
     {
-        Info<< "Numbering in files starts at 0" << nl << endl;
-    }
+        Info<< "Files:" << endl
+            << "    nodes : " << nodeFile << endl
+            << "    elems : " << eleFile << endl
+            << "    faces : " << faceFile << endl
+            << endl;
 
+        Info<< "Reading .face file for boundary information" << nl << endl;
+    }
 
     if (!exists(nodeFile) || !exists(eleFile))
     {
@@ -134,7 +124,7 @@ int main(int argc, char *argv[])
     }
 
 
-    std::ifstream nodeStream(nodeFile.c_str());
+    IFstream nodeStream(nodeFile);
 
     //
     // Read nodes.
@@ -145,7 +135,7 @@ int main(int argc, char *argv[])
 
     do
     {
-        std::getline(nodeStream, line);
+        nodeStream.getLine(line);
     }
     while((line.size() > 0) && (line[0] == '#'));
 
@@ -169,61 +159,60 @@ int main(int argc, char *argv[])
     //
 
     pointField points(nNodes);
+    Map<label> nodeToPoint(nNodes);
 
-    label pointI = 0;
-
-    while (nodeStream.good())
     {
-        std::getline(nodeStream, line);
+        labelList pointIndex(nNodes);
 
-        if ((line.size() > 0) && (line[0] != '#'))
+        label pointI = 0;
+
+        while (nodeStream.good())
         {
-            IStringStream nodeLine(line);
+            nodeStream.getLine(line);
 
-            label nodeI;
-            scalar x, y, z;
-            label dummy;
-
-            nodeLine >> nodeI >> x >> y >> z;
-
-            for (label i = 0; i < nNodeAttr; i++)
+            if ((line.size() > 0) && (line[0] != '#'))
             {
-                nodeLine >> dummy;
-            }
+                IStringStream nodeLine(line);
 
-            if (hasRegion)
-            {
-                nodeLine >> dummy;
-            }
+                label nodeI;
+                scalar x, y, z;
+                label dummy;
 
-            // Store point and node number.
-            if
-            (
-                 (!startAt1 && nodeI != pointI)
-              || (startAt1 && nodeI-1 != pointI)
-            )
-            {
-                FatalErrorIn(args.executable())
-                    << "point numbering not consecutive for node " << nodeI
-                    << " or numbering starts"
-                    << " at 0 or 1. Perhaps rerun w/o -startAt0 option?"
-                    << exit(FatalError);
-            }
+                nodeLine >> nodeI >> x >> y >> z;
 
-            points[pointI++] = point(x, y, z);
+                for (label i = 0; i < nNodeAttr; i++)
+                {
+                    nodeLine >> dummy;
+                }
+
+                if (hasRegion)
+                {
+                    nodeLine >> dummy;
+                }
+
+                // Store point and node number.
+                points[pointI] = point(x, y, z);
+                nodeToPoint.insert(nodeI, pointI);
+                pointI++;
+            }
+        }
+        if (pointI != nNodes)
+        {
+            FatalIOErrorIn(args.executable().c_str(), nodeStream)
+                << "Only " << pointI << " nodes present instead of " << nNodes
+                << " from header." << exit(FatalIOError);
         }
     }
-
 
     //
     // read elements
     //
 
-    std::ifstream eleStream(eleFile.c_str());
+    IFstream eleStream(eleFile);
 
     do
     {
-        std::getline(eleStream, line);
+        eleStream.getLine(line);
     }
     while((line.size() > 0) && (line[0] == '#'));
 
@@ -242,10 +231,11 @@ int main(int argc, char *argv[])
 
     if (nPtsPerTet != 4)
     {
-        FatalErrorIn(args.executable()) << "Cannot handle tets with "
+        FatalIOErrorIn(args.executable().c_str(), eleStream)
+            << "Cannot handle tets with "
             << nPtsPerTet << " points per tetrahedron in .ele file" << endl
             << "Can only handle tetrahedra with four points"
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     if (nElemAttr != 0)
@@ -262,39 +252,27 @@ int main(int argc, char *argv[])
     labelList tetPoints(4);
 
     cellShapeList cells(nTets);
+    label cellI = 0;
 
     while (eleStream.good())
     {
-        std::getline(eleStream, line);
+        eleStream.getLine(line);
 
         if ((line.size() > 0) && (line[0] != '#'))
         {
             IStringStream eleLine(line);
 
             label elemI;
-
             eleLine >> elemI;
-
-            if (startAt1)
-            {
-                --elemI;
-            }
 
             for (label i = 0; i < 4; i++)
             {
                 label nodeI;
-
                 eleLine >> nodeI;
-
-                if (startAt1)
-                {
-                    --nodeI;
-                }
-
-                tetPoints[i] = nodeI;
+                tetPoints[i] = nodeToPoint[nodeI];
             }
 
-            cells[elemI] = cellShape(tet, tetPoints);
+            cells[cellI++] = cellShape(tet, tetPoints);
 
             // Skip attributes
             for (label i = 0; i < nElemAttr; i++)
@@ -321,11 +299,11 @@ int main(int argc, char *argv[])
         // read boundary faces
         //
 
-        std::ifstream faceStream(faceFile.c_str());
+        IFstream faceStream(faceFile);
 
         do
         {
-            std::getline(faceStream, line);
+            faceStream.getLine(line);
         }
         while((line.size() > 0) && (line[0] == '#'));
 
@@ -344,10 +322,11 @@ int main(int argc, char *argv[])
 
         if (nFaceAttr != 1)
         {
-            FatalErrorIn(args.executable()) << "Expect boundary markers to be"
+            FatalIOErrorIn(args.executable().c_str(), faceStream)
+                << "Expect boundary markers to be"
                 << " present in .face file." << endl
                 << "This is the second number in the header which is now:"
-                << nFaceAttr << exit(FatalError);
+                << nFaceAttr << exit(FatalIOError);
         }
 
         // List of Foam vertices per boundary face
@@ -357,6 +336,8 @@ int main(int argc, char *argv[])
         boundaryPatch.setSize(nFaces);
         boundaryPatch = -1;
 
+        label faceI = 0;
+
         // Region to patch conversion
         Map<label> regionToPatch;
 
@@ -364,35 +345,23 @@ int main(int argc, char *argv[])
 
         while (faceStream.good())
         {
-            std::getline(faceStream, line);
+            faceStream.getLine(line);
 
             if ((line.size() > 0) && (line[0] != '#'))
             {
                 IStringStream faceLine(line);
 
-                label faceI, dummy, region;
+                label tetGenFaceI, dummy, region;
 
-                faceLine >> faceI;
-
-                if (startAt1)
-                {
-                    --faceI;
-                }
+                faceLine >> tetGenFaceI;
 
                 // Read face and reverse orientation (Foam needs outwards
                 // pointing)
                 for (label i = 0; i < 3; i++)
                 {
                     label nodeI;
-
                     faceLine >> nodeI;
-
-                    if (startAt1)
-                    {
-                        --nodeI;
-                    }
-
-                    f[2-i] = nodeI;
+                    f[2-i] = nodeToPoint[nodeI];
                 }
 
                 boundaryFaces[faceI] = f;
@@ -431,6 +400,8 @@ int main(int argc, char *argv[])
                         faceLine >> dummy;
                     }
                 }
+
+                faceI++;
             }
         }
 

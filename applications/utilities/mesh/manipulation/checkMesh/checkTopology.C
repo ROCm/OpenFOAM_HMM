@@ -36,7 +36,9 @@ Foam::label Foam::checkTopology(const polyMesh& mesh, const bool allTopology)
         if (mesh.checkUpperTriangular(true, &faces))
         {
             noFailedChecks++;
-
+        }
+        if (faces.size() > 0)
+        {
             Pout<< "  <<Writing " << faces.size()
                 << " unordered faces to set " << faces.name() << endl;
             faces.write();

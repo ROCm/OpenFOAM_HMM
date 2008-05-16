@@ -26,8 +26,11 @@ Application
     lesInterFoam
 
 Description
-    Solver for 2 incompressible fluids capturing the interface.  Turbulence is
-    modelled using a runtime selectable incompressible LES model.
+    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    (volume of fluid) phase-fraction based interface capturing approach.
+    The momentum and other fluid properties are of the "mixture" and a single
+    momentum equation is solved.  Turbulence is modelled using a run-time
+    selectable incompressible LES model.
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,28 +41,21 @@ Description
 #include "twoPhaseMixture.H"
 #include "incompressible/LESmodel/LESmodel.H"
 
-#include "IFstream.H"
-#include "OFstream.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-
-#   include "createFields.H"
-//#   include "createAverages.H"
-
-#   include "readTimeControls.H"
-#   include "correctPhi.H"
-#   include "CourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "readPISOControls.H"
+    #include "initContinuityErrs.H"
+    #include "createFields.H"
+    #include "readTimeControls.H"
+    #include "correctPhi.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,31 +63,29 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-#       include "readPISOControls.H"
-#       include "readTimeControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
+        #include "readPISOControls.H"
+        #include "readTimeControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "gammaEqnSubCycle.H"
+        #include "gammaEqnSubCycle.H"
 
         turbulence->correct();
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=0; corr < nCorr; corr++)
         {
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
-#       include "continuityErrs.H"
-//#       include "calculateAverages.H"
+        #include "continuityErrs.H"
 
         runTime.write();
-//#       include "writeNaveragingSteps.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

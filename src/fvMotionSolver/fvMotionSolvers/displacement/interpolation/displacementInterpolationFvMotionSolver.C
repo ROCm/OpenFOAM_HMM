@@ -168,10 +168,28 @@ displacementInterpolationFvMotionSolver
             label zoneI = fZones.findZoneID(zoneName);
             const faceZone& fz = fZones[zoneI];
 
-            scalarField fzCoords = fz().localPoints().component(dir);
+            scalar minCoord = VGREAT;
+            scalar maxCoord = -VGREAT;
 
-            zoneCoordinates[2*i] = gMin(fzCoords);
-            zoneCoordinates[2*i+1] = gMax(fzCoords);
+            forAll(fz().meshPoints(), localI)
+            {
+                label pointI = fz().meshPoints()[localI];
+                const scalar coord = points0_[pointI][dir];
+                minCoord = min(minCoord, coord);
+                maxCoord = max(maxCoord, coord);
+            }
+
+            zoneCoordinates[2*i] = returnReduce(minCoord, minOp<scalar>());
+            zoneCoordinates[2*i+1] = returnReduce(maxCoord, maxOp<scalar>());
+
+            if (debug)
+            {
+                Pout<< "direction " << dir << " : "
+                    << "zone " << zoneName
+                    << " ranges from coordinate " << zoneCoordinates[2*i]
+                    << " to " << zoneCoordinates[2*i+1]
+                    << endl;
+            }
         }
         zoneCoordinates.sort();
 

@@ -13,7 +13,7 @@ runKivaToFoam ()
         echo "kivaToFoam already run on $1: remove log file to run"
     else
         echo "kivaToFoam: converting kiva file"
-        kivaToFoam . $1 -file $2 > $1/log.kivaToFoam 2>&1
+        kivaToFoam -case $1 -file $2 > $1/log.kivaToFoam 2>&1
     fi
 }
 
@@ -23,7 +23,7 @@ restartApplication ()
         echo "$1 already run on $2: remove log file to run"
     else
         echo "Running $1 on $2"
-        $1 . $2 > $2/log-2.$1 2>&1
+        $1 -case $2 > $2/log-2.$1 2>&1
     fi
 }
 
