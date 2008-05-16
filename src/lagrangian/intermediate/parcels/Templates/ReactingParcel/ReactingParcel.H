@@ -259,24 +259,37 @@ public:
 
         // Access
 
-            //- Return mass fractions of gases
+            //- Return const access to mass fractions of gases
             inline const scalarField& YGas() const;
+
+            //- Return const access to mass fractions of liquids
+            inline const scalarField& YLiquid() const;
+
+            //- Return const access to mass fractions of solids
+            inline const scalarField& YSolid() const;
+
+            //- Return const access to mass fractions of mixture
+            inline const scalarField& YMixture() const;
+
+            //- Return const access to initial mass
+            inline const scalar mass0() const;
+
+
+        // Edit
+
+            //- Return access to mass fractions of gases
             inline scalarField& YGas();
 
-            //- Return mass fractions of liquids
-            inline const scalarField& YLiquid() const;
+            //- Return access to mass fractions of liquids
             inline scalarField& YLiquid();
 
-            //- Return mass fractions of solids
-            inline const scalarField& YSolid() const;
+            //- Return access to mass fractions of solids
             inline scalarField& YSolid();
 
-            //- Return mass fractions of mixture
-            inline const scalarField& YMixture() const;
+            //- Return access to mass fractions of mixture
             inline scalarField& YMixture();
 
-            //- Return initial mass
-            inline const scalar mass0() const;
+            //- Return access to initial mass
             inline scalar& mass0();
 
 
