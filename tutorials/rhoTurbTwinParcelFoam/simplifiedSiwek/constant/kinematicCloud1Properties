@@ -23,7 +23,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Particle sub-models
-InjectionModel                           ConeInjection;
+InjectionModel                           ManualInjection;
 DragModel                                SphereDrag;
 DispersionModel                          StochasticDispersionRAS;
 WallInteractionModel                     StandardWallInteraction;
@@ -60,7 +60,7 @@ integrationSchemes
 
 ManualInjectionCoeffs
 {
-    injectionTime                        0;
+    SOI                                  0.0;
     positionsFile                        kinematicCloud1Positions;
     U0                                   (0 0 0);
     parcelPDF
