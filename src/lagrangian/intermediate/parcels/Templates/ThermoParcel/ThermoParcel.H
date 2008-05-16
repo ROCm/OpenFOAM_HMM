@@ -300,6 +300,15 @@ public:
             static void readFields(ThermoCloud<ParcelType>& c);
 
             static void writeFields(const ThermoCloud<ParcelType>& c);
+
+
+    // Ostream Operator
+
+        friend Ostream& operator<< <ParcelType>
+        (
+            Ostream&,
+            const ThermoParcel<ParcelType>&
+        );
 };
 
 

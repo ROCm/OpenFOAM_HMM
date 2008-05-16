@@ -328,6 +328,15 @@ public:
             static void readFields(ReactingCloud<ParcelType>& c);
 
             static void writeFields(const ReactingCloud<ParcelType>& c);
+
+
+    // Ostream Operator
+
+        friend Ostream& operator<< <ParcelType>
+        (
+            Ostream&,
+            const ReactingParcel<ParcelType>&
+        );
 };
 
 
