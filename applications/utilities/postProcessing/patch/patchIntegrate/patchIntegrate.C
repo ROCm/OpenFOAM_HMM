@@ -77,21 +77,45 @@ int main(int argc, char *argv[])
         {
             mesh.readUpdate();
 
-            Info<< "    Reading field " << fieldName << endl;
-            volScalarField field(fieldHeader, mesh);
-
             label patchi = mesh.boundaryMesh().findPatchID(patchName);
-
-            if (patchi >= 0)
+            if (patchi < 0)
             {
+                FatalError
+                    << "Unable to find patch " << patchName << nl
+                    << exit(FatalError);
+            }
+
+            if (fieldHeader.headerClassName() == "volScalarField")
+            {
+                Info<< "    Reading volScalarField " << fieldName << endl;
+                volScalarField field(fieldHeader, mesh);
+
+                vector sumField = sum
+                    (
+                        mesh.Sf().boundaryField()[patchi]
+                       *field.boundaryField()[patchi]
+                    );
+
                 Info<< "    Integral of " << fieldName << " over patch "
                     << patchName << '[' << patchi << ']' << " = "
-                    <<  sum
-                        (
-                            mesh.Sf().boundaryField()[patchi]
-                           *field.boundaryField()[patchi]
-                        )
-                    << endl;
+                    << sumField << nl;
+            }
+            else if (fieldHeader.headerClassName() == "surfaceScalarField")
+            {
+                Info<< "    Reading surfaceScalarField " << fieldName << endl;
+
+                surfaceScalarField field(fieldHeader, mesh);
+                scalar sumField = sum(field.boundaryField()[patchi]);
+
+                Info<< "    Integral of " << fieldName << " over patch "
+                    << patchName << '[' << patchi << ']' << " = "
+                    << sumField << nl;
+            }
+            else
+            {
+                FatalError
+                    << "Only possible to integrate volScalarFields "
+                    << "and surfaceScalarFields" << nl << exit(FatalError);
             }
         }
         else
