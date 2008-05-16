@@ -23,72 +23,93 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoMassTransfer
+    Foam::Table
 
 Description
-    Dummy mass transfer model for 'no mass transfer'
+    Templated table container data entry. Items are stored in a list of
+    Tuple2's. First column is always stored as scalar entries. Data is read
+    in the form, e.g. for (scalar, vector):
+
+    @verbatim
+        entry                    Table
+        entryCoeffs
+        {
+            table
+            (
+                0.0 (1 2 3)
+                1.0 (4 5 6)
+            )
+        }
+    @endverbatim
+
+SourceFiles
+    Table.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoMassTransfer_H
-#define NoMassTransfer_H
+#ifndef Table_H
+#define Table_H
 
-#include "MassTransferModel.H"
+#include "DataEntry.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                            Class NoMassTransfer Declaration
+                           Class Table Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class NoMassTransfer
+template<class Type>
+class Table
 :
-    public MassTransferModel<CloudType>
+    public DataEntry<Type>
 {
+    // Private data
+
+       //- Table data
+       List<Tuple2<scalar, Type> > table_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        Table(const Table<Type>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const Table<Type>&);
+
 
 public:
 
-    //- Runtime type information
-    TypeName("NoMassTransfer");
+    // Runtime type information
+    TypeName("Table");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoMassTransfer
+        Table
         (
-            const dictionary& dict,
-            CloudType& cloud
+            const word& entryName,
+            const dictionary& dict
         );
 
 
-    // Destructor
+    //- Destructor
 
-        ~NoMassTransfer();
+        ~Table();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates mass transfer model
-        bool active() const;
+        //- Return Table value
+        Type value(const scalar x) const;
 
-        //- Flag to indicate whether model changes particle volume
-        bool changesVolume() const;
-
-        //- Update model
-        scalar calculate
-        (
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalarField&,
-            const scalarField&,
-            const scalar,
-            bool&
-        ) const;
+        //- Integrate between two (scalar) values
+        Type integrate(const scalar x1, const scalar x2) const;
 };
 
 
@@ -99,7 +120,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoMassTransfer.C"
+#   include "Table.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

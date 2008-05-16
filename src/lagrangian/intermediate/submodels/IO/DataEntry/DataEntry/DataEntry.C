@@ -24,58 +24,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoHeatTransfer.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
+template<class Type>
+Foam::DataEntry<Type>::DataEntry
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const word& typeName,
+    const word& entryName,
+    const dictionary& dict
 )
 :
-    HeatTransferModel<CloudType>(dict, cloud, typeName)
+    dict_(dict.subDict(entryName + "Coeffs")),
+    entry_(entryName)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoHeatTransfer<CloudType>::~NoHeatTransfer()
+template<class Type>
+Foam::DataEntry<Type>::~DataEntry()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
-bool Foam::NoHeatTransfer<CloudType>::active() const
+template<class Type>
+const Foam::dictionary& Foam::DataEntry<Type>::dict() const
 {
-    return false;
-}
-
-
-template <class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
-(
-    const scalar,
-    const scalar
-) const
-{
-    notImplemented
-    (
-        "Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu"
-        "(const scalar, const scalar)"
-    );
-    return 0.0;
-}
-
-
-template <class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr() const
-{
-    notImplemented("Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr()");
-    return 0.0;
+    return dict_;
 }
 
 

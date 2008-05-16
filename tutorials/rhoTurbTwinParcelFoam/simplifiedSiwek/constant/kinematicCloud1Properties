@@ -23,7 +23,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Particle sub-models
-InjectionModel                           ManualInjection;
+InjectionModel                           ConeInjection;
 DragModel                                SphereDrag;
 DispersionModel                          StochasticDispersionRAS;
 WallInteractionModel                     StandardWallInteraction;
@@ -63,6 +63,46 @@ ManualInjectionCoeffs
     injectionTime                        0;
     positionsFile                        kinematicCloud1Positions;
     U0                                   (0 0 0);
+    parcelPDF
+    {
+        pdfType                          RosinRammler;
+        RosinRammlerPDF
+        {
+            minValue                     50.0e-06;
+            maxValue                     100.0e-06;
+            d                            (75.0e-06);
+            n                            (0.5);
+        }
+    }
+}
+
+ConeInjectionCoeffs
+{
+    SOI                                  0.001;
+    duration                             0.005;
+    position                             (0.25 0.25 0.05);
+    direction                            (0 -1 0);
+    parcelsPerSecond                     10000;
+    volumeFlowRate                       Constant;
+    volumeFlowRateCoeffs
+    {
+        value                            0.01;
+    }
+    Umag                                 Constant;
+    UmagCoeffs
+    {
+        value                            50.0;
+    }
+    thetaInner                           Constant;
+    thetaInnerCoeffs
+    {
+        value                            0.0;
+    }
+    thetaOuter                           Constant;
+    thetaOuterCoeffs
+    {
+        value                            30.0;
+    }
     parcelPDF
     {
         pdfType                          RosinRammler;

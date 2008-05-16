@@ -112,15 +112,13 @@ Foam::scalar Foam::KinematicCloud<ParcelType>::setNumberOfParticles
         {
             nP = pVolumeFraction*massTotal_/nParcels
                /(pRho*mathematicalConstant::pi/6.0*pow(pDiameter, 3));
+            break;
         }
-        break;
-
         case pbNumber:
         {
             nP = pVolumeFraction*massTotal_/(pRho*pVolume);
+            break;
         }
-        break;
-
         default:
         {
             nP = 0.0;
@@ -364,13 +362,10 @@ void Foam::KinematicCloud<ParcelType>::inject
 
     scalar pRho = td.constProps().rho0();
 
+    this->injection().prepareForNextTimeStep(time0_, time);
+
     // Number of parcels to introduce during this timestep
-    const label nParcels = this->injection().nParcelsToInject
-    (
-        nInjections_,
-        time0_,
-        time
-    );
+    const label nParcels = this->injection().nParcels();
 
     // Return if no parcels are required
     if (!nParcels)
@@ -380,15 +375,10 @@ void Foam::KinematicCloud<ParcelType>::inject
     }
 
     // Volume of particles to introduce during this timestep
-    scalar pVolume = this->injection().volume
-    (
-         time0_,
-         time,
-         this->meshInfo()
-    );
+    scalar pVolume = this->injection().volume();
 
     // Volume fraction to introduce during this timestep
-    scalar pVolumeFraction = this->injection().volumeFraction(time0_, time);
+    scalar pVolumeFraction = this->injection().volumeFraction();
 
     // Duration of injection period during this timestep
     scalar deltaT = min
@@ -419,8 +409,7 @@ void Foam::KinematicCloud<ParcelType>::inject
         (
             iParcel,
             timeInj,
-            this->meshInfo(),
-            rndGen_
+            this->meshInfo()
         );
 
         // Diameter of parcels
@@ -437,7 +426,12 @@ void Foam::KinematicCloud<ParcelType>::inject
         );
 
         // Velocity of parcels
-        vector pU = this->injection().velocity(iParcel, timeInj);
+        vector pU = this->injection().velocity
+        (
+            iParcel,
+            timeInj,
+            this->meshInfo()
+        );
 
         // Determine the injection cell
         label pCell = -1;
@@ -496,8 +490,9 @@ void Foam::KinematicCloud<ParcelType>::postInjectCheck()
 {
     if (nParcelsAdded_)
     {
-        Pout<< "\n--> Cloud: " << this->name() << nl <<
-               "    Added " << nParcelsAdded_ <<  " new parcels" << nl << endl;
+        Pout<< "\n--> Cloud: " << this->name() << nl
+            << "    Added " << nParcelsAdded_
+            <<  " new parcels" << nl << endl;
     }
 
     // Reset parcel counters

@@ -35,12 +35,11 @@ Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
     CloudType& owner
 )
 :
-    MassTransferModel<CloudType>(dict, owner),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    A0_(dimensionedScalar(coeffDict_.lookup("A0")).value()),
+    MassTransferModel<CloudType>(dict, owner, typeName),
+    A0_(dimensionedScalar(this->coeffDict().lookup("A0")).value()),
     volatileResidualCoeff_
     (
-        readScalar(coeffDict_.lookup("volatileResidualCoeff"))
+        readScalar(this->coeffDict().lookup("volatileResidualCoeff"))
     )
 {}
 

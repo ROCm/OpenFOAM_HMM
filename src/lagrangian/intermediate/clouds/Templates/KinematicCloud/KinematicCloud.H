@@ -363,6 +363,9 @@ public:
                 inline const InjectionModel<KinematicCloud<ParcelType> >&
                     injection() const;
 
+                inline InjectionModel<KinematicCloud<ParcelType> >&
+                    injection();
+
                 //- Return reference to wall interaction model
                 inline const WallInteractionModel<KinematicCloud<ParcelType> >&
                     wallInteraction() const;

@@ -48,6 +48,12 @@ class Rebound
 :
     public WallInteractionModel<CloudType>
 {
+    // Private data
+
+       //- Factor applied to velocity on rebound
+       //  Normal rebound = 1
+       scalar UFactor_;
+
 
 public:
 
@@ -72,8 +78,10 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates heat transfer model
         bool active() const;
 
+        //- Apply wall correction
         virtual void correct
         (
             const wallPolyPatch& wpp,

@@ -249,12 +249,19 @@ public:
 
         // Access
 
-            //- Return temperature
+            //- Return const access to temperature
             inline const scalar T() const;
+
+            //- Return const access to specific heat capacity
+            inline const scalar cp() const;
+
+
+        // Edit
+
+            //- Return access to temperature
             inline scalar& T();
 
-            //- Return specific heat capacity
-            inline const scalar cp() const;
+            //- Return access to specific heat capacity
             inline scalar& cp();
 
 
@@ -293,6 +300,15 @@ public:
             static void readFields(ThermoCloud<ParcelType>& c);
 
             static void writeFields(const ThermoCloud<ParcelType>& c);
+
+
+    // Ostream Operator
+
+        friend Ostream& operator<< <ParcelType>
+        (
+            Ostream&,
+            const ThermoParcel<ParcelType>&
+        );
 };
 
 
