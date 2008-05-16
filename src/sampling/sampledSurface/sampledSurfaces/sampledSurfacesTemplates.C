@@ -143,31 +143,39 @@ void Foam::sampledSurfaces::sampleAndWrite
                 }
 
                 // Write to time directory under outputPath_
-                formatter.write
-                (
-                    outputPath_,
-                    timeDir,
-                    s.name(),
-                    mergeList_[surfI].points,
-                    mergeList_[surfI].faces,
-                    fieldName,
-                    allValues
-                );
+                // skip surface without faces (eg, a failed cut-plane)
+                if (mergeList_[surfI].faces.size())
+                {
+                    formatter.write
+                    (
+                        outputPath_,
+                        timeDir,
+                        s.name(),
+                        mergeList_[surfI].points,
+                        mergeList_[surfI].faces,
+                        fieldName,
+                        allValues
+                    );
+                }
             }
         }
         else
         {
             // Write to time directory under outputPath_
-            formatter.write
-            (
-                outputPath_,
-                timeDir,
-                s.name(),
-                s.points(),
-                s.faces(),
-                fieldName,
-                values
-            );
+            // skip surface without faces (eg, a failed cut-plane)
+            if (s.faces().size())
+            {
+                formatter.write
+                (
+                    outputPath_,
+                    timeDir,
+                    s.name(),
+                    s.points(),
+                    s.faces(),
+                    fieldName,
+                    values
+                );
+            }
         }
     }
 }
