@@ -48,4 +48,8 @@ submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
 IntegrationScheme/makeIntegrationSchemes.C
 
 
+/* Data entries */
+submodels/IO/DataEntry/makeDataEntries.C
+
+
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

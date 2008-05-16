@@ -72,8 +72,10 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates drag model
         bool active() const;
 
+        //- Return drag coefficient
         scalar Cd(const scalar) const;
 };
 

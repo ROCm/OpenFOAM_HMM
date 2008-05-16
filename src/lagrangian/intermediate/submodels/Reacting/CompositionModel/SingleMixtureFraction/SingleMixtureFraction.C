@@ -35,23 +35,22 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
     CloudType& owner
 )
 :
-    CompositionModel<CloudType>(dict, owner),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
+    CompositionModel<CloudType>(dict, owner, typeName),
 
-    gasNames_(coeffDict_.lookup("gasNames")),
+    gasNames_(this->coeffDict().lookup("gasNames")),
     gasGlobalIds_(gasNames_.size(), -1),
-    YGas0_(coeffDict_.lookup("YGas0")),
-    YGasTot0_(readScalar(coeffDict_.lookup("YGasTot0"))),
+    YGas0_(this->coeffDict().lookup("YGas0")),
+    YGasTot0_(readScalar(this->coeffDict().lookup("YGasTot0"))),
 
-    liquidNames_(coeffDict_.lookup("liquidNames")),
+    liquidNames_(this->coeffDict().lookup("liquidNames")),
     liquidGlobalIds_(liquidNames_.size(), -1),
-    YLiquid0_(coeffDict_.lookup("YLiquid0")),
-    YLiquidTot0_(readScalar(coeffDict_.lookup("YLiquidTot0"))),
+    YLiquid0_(this->coeffDict().lookup("YLiquid0")),
+    YLiquidTot0_(readScalar(this->coeffDict().lookup("YLiquidTot0"))),
 
-    solidNames_(coeffDict_.lookup("solidNames")),
+    solidNames_(this->coeffDict().lookup("solidNames")),
     solidGlobalIds_(solidNames_.size(), -1),
-    YSolid0_(coeffDict_.lookup("YSolid0")),
-    YSolidTot0_(readScalar(coeffDict_.lookup("YSolidTot0"))),
+    YSolid0_(this->coeffDict().lookup("YSolid0")),
+    YSolidTot0_(readScalar(this->coeffDict().lookup("YSolidTot0"))),
 
     YMixture0_(3)
 {
@@ -73,7 +72,8 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
             Info<< "\nThermo package species composition comprises:" << endl;
             forAll (this->carrierThermo().composition().Y(), k)
             {
-                Info<< this->carrierThermo().composition().Y()[k].name() << endl;
+                Info<< this->carrierThermo().composition().Y()[k].name()
+                    << endl;
             }
 
             FatalErrorIn
@@ -255,12 +255,14 @@ Foam::SingleMixtureFraction<CloudType>::gasLocalId(const word& gasName) const
             return i;
         }
     }
+
     WarningIn
     (
         "Foam::label SingleMixtureFraction<CloudType>::"
         "gasLocalId(const word& gasName) const"
     )<< "Gas name " << gasName << " not found in gasNames_"
      << endl;
+
     return -1;
 }
 
@@ -276,12 +278,14 @@ Foam::SingleMixtureFraction<CloudType>::gasGlobalId(const word& gasName) const
             return gasGlobalIds_[i];
         }
     }
+
     WarningIn
     (
         "Foam::label SingleMixtureFraction<CloudType>::"
         "gasGlobalId(const word& gasName) const"
     )<< "Gas name " << gasName << " not found in gasNames_"
      << endl;
+
     return -1;
 }
 
@@ -329,12 +333,14 @@ Foam::SingleMixtureFraction<CloudType>::liquidLocalId(const word& liquidName) co
             return i;
         }
     }
+
     WarningIn
     (
         "Foam::label SingleMixtureFraction<CloudType>::"
         "liquidLocalId(const word& liquidName) const"
     )<< "Liquid name " << liquidName << " not found in liquidNames_"
      << endl;
+
     return -1;
 }
 
@@ -350,12 +356,14 @@ Foam::SingleMixtureFraction<CloudType>::liquidGlobalId(const word& liquidName) c
             return liquidGlobalIds_[i];
         }
     }
+
     WarningIn
     (
         "Foam::label SingleMixtureFraction<CloudType>::"
         "liquidGlobalId(const word& liquidName) const"
     )<< "Liquid name " << liquidName << " not found in liquidNames_"
      << endl;
+
     return -1;
 }
 
@@ -403,12 +411,14 @@ Foam::SingleMixtureFraction<CloudType>::solidLocalId(const word& solidName) cons
             return i;
         }
     }
+
     WarningIn
     (
         "Foam::label SingleMixtureFraction<CloudType>::"
         "SolididLocalId(const word& solidName) const"
     )<< "Solid name " << solidName << " not found in solidNames_"
      << endl;
+
     return -1;
 }
 
@@ -424,12 +434,14 @@ Foam::SingleMixtureFraction<CloudType>::solidGlobalId(const word& solidName) con
             return solidGlobalIds_[i];
         }
     }
+
     WarningIn
     (
         "Foam::label SingleMixtureFraction<CloudType>::"
         "solidGlobalId(const word& solidName) const"
     )<< "Solid name " << solidName << " not found in solidNames_"
      << endl;
+
     return -1;
 }
 

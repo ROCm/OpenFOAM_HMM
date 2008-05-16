@@ -24,20 +24,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ManualInjection.H"
+#include "ConeInjection.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::ManualInjection<CloudType>::nParcelsToInject
+Foam::label Foam::ConeInjection<CloudType>::nParcelsToInject
 (
     const scalar time0,
     const scalar time1
 ) const
 {
-    if ((0.0 >= time0) && (0.0 < time1))
+    if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return positions_.size();
+        return round((time1 - time0)*parcelsPerSecond_);
     }
     else
     {
@@ -47,16 +48,15 @@ Foam::label Foam::ManualInjection<CloudType>::nParcelsToInject
 
 
 template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
+Foam::scalar Foam::ConeInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
 ) const
 {
-    // All parcels introduced at SOI
-    if ((0.0 >= time0) && (0.0 < time1))
+    if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return this->volumeTotal_;
+        return volumeFlowRate_().integrate(time0, time1);
     }
     else
     {
@@ -68,27 +68,52 @@ Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::ManualInjection<CloudType>::ManualInjection
+Foam::ConeInjection<CloudType>::ConeInjection
 (
     const dictionary& dict,
     CloudType& owner
 )
 :
     InjectionModel<CloudType>(dict, owner, typeName),
-    positionsFile_(this->coeffDict().lookup("positionsFile")),
-    positions_
+    duration_(readScalar(this->coeffDict().lookup("duration"))),
+    position_(this->coeffDict().lookup("position")),
+    direction_(this->coeffDict().lookup("direction")),
+    parcelsPerSecond_
     (
-        IOobject
+        readScalar(this->coeffDict().lookup("parcelsPerSecond"))
+    ),
+    volumeFlowRate_
+    (
+        DataEntry<scalar>::New
         (
-            positionsFile_,
-            owner.db().time().constant(),
-            owner.mesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            "volumeFlowRate",
+            this->coeffDict()
         )
     ),
-    diameters_(positions_.size()),
-    U0_(this->coeffDict().lookup("U0")),
+    Umag_
+    (
+        DataEntry<scalar>::New
+        (
+            "Umag",
+            this->coeffDict()
+        )
+    ),
+    thetaInner_
+    (
+        DataEntry<scalar>::New
+        (
+            "thetaInner",
+            this->coeffDict()
+        )
+    ),
+    thetaOuter_
+    (
+        DataEntry<scalar>::New
+        (
+            "thetaOuter",
+            this->coeffDict()
+        )
+    ),
     parcelPDF_
     (
         pdf::New
@@ -96,53 +121,65 @@ Foam::ManualInjection<CloudType>::ManualInjection
             this->coeffDict().subDict("parcelPDF"),
             owner.rndGen()
         )
-    )
+    ),
+    tanVec1_(vector::zero),
+    tanVec2_(vector::zero)
 {
-    // Construct parcel diameters
-    forAll(diameters_, i)
+    // Normalise direction vector
+    direction_ /= mag(direction_);
+
+    // Determine direction vectors tangential to direction
+    vector tangent = vector::zero;
+    scalar magTangent = 0.0;
+
+    while (magTangent < SMALL)
     {
-        diameters_[i] = parcelPDF_->sample();
+        vector v = this->owner().rndGen().vector01();
+
+        tangent = v - (v & direction_)*direction_;
+        magTangent = mag(tangent);
     }
 
-    // Determine volume of particles to inject
-    this->volumeTotal_ = sum(pow(diameters_, 3))
-        *mathematicalConstant::pi/6.0;
+    tanVec1_ = tangent/magTangent;
+    tanVec2_ = direction_^tanVec1_;
+
+    // Set total volume to inject
+    this->volumeTotal_ = volumeFlowRate_().integrate(0.0, duration_);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::ManualInjection<CloudType>::~ManualInjection()
+Foam::ConeInjection<CloudType>::~ConeInjection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::ManualInjection<CloudType>::active() const
+bool Foam::ConeInjection<CloudType>::active() const
 {
     return true;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
+Foam::scalar Foam::ConeInjection<CloudType>::timeEnd() const
 {
-    // Not used
-    return 0.0;
+    return this->SOI_ + duration_;
 }
 
 
 template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::position
+Foam::vector Foam::ConeInjection<CloudType>::position
 (
-    const label iParcel,
-    const scalar time,
+    const label,
+    const scalar,
     const polyMeshInfo& meshInfo
 )
 {
-    vector pos = positions_[iParcel];
+    vector pos = position_;
     if (meshInfo.caseIs2d())
     {
         if (meshInfo.caseIs2dWedge())
@@ -158,7 +195,7 @@ Foam::vector Foam::ManualInjection<CloudType>::position
         {
             FatalErrorIn
             (
-                "Foam::vector Foam::ManualInjection<CloudType>::position"
+                "Foam::vector Foam::ConeInjection<CloudType>::position"
             )   << "Could not determine 2-D case geometry" << nl
                 << abort(FatalError);
         }
@@ -169,32 +206,50 @@ Foam::vector Foam::ManualInjection<CloudType>::position
 
 
 template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::velocity
+Foam::vector Foam::ConeInjection<CloudType>::velocity
 (
     const label,
-    const scalar,
+    const scalar time,
     const polyMeshInfo& meshInfo
 )
 {
-    vector vel = U0_;
+    const scalar deg2Rad = mathematicalConstant::pi/180.0;
+
+    scalar t = time - this->SOI_;
+    scalar ti = thetaInner_().value(t);
+    scalar to = thetaOuter_().value(t);
+    scalar coneAngle = this->owner().rndGen().scalar01()*(to - ti) + ti;
+
+    coneAngle *= deg2Rad;
+    scalar alpha = sin(coneAngle);
+    scalar dcorr = cos(coneAngle);
+    scalar beta =
+        2.0*mathematicalConstant::pi*this->owner().rndGen().scalar01();
+
+    vector normal = alpha*(tanVec1_*cos(beta) + tanVec2_*sin(beta));
+    vector dirVec = dcorr*direction_;
+    dirVec += normal;
+
+    // Remove empty component of velocity for slab cases
     if (meshInfo.caseIs2dSlab())
     {
-        vel.component(meshInfo.emptyComponent()) =
-            meshInfo.centrePoint().component(meshInfo.emptyComponent());
+        dirVec.component(meshInfo.emptyComponent()) = 0.0;
     }
 
-    return vel;
+    dirVec /= mag(dirVec);
+
+    return Umag_().value(t)*dirVec;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::d0
+Foam::scalar Foam::ConeInjection<CloudType>::d0
 (
-    const label iParcel,
+    const label,
     const scalar
 ) const
 {
-    return diameters_[iParcel];
+    return parcelPDF_().sample();
 }
 
 
