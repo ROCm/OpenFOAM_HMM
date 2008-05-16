@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 
             if (!noTopology)
             {
-                noFailedChecks += checkTopology(mesh, allTopology);
+                noFailedChecks += checkTopology(mesh, allTopology, allGeometry);
             }
 
             noFailedChecks += checkGeometry(mesh, allGeometry);

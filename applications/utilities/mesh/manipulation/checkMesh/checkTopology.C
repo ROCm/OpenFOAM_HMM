@@ -7,7 +7,12 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 
-Foam::label Foam::checkTopology(const polyMesh& mesh, const bool allTopology)
+Foam::label Foam::checkTopology
+(
+    const polyMesh& mesh,
+    const bool allTopology,
+    const bool allGeometry
+)
 {
     label noFailedChecks = 0;
 
@@ -142,39 +147,38 @@ Foam::label Foam::checkTopology(const polyMesh& mesh, const bool allTopology)
             << setw(20) << "Patch"
             << setw(9) << "Faces"
             << setw(9) << "Points"
-            << " Surface" << endl;
+            << setw(34) << "Surface topology";
+        if (allGeometry)
+        {
+            Pout<< " Bounding box";
+        }
+        Pout<< endl;
 
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
+                Pout<< "    "
+                    << setw(20) << pp.name()
+                    << setw(9) << pp.size()
+                    << setw(9) << pp.nPoints();
+
+
             primitivePatch::surfaceTopo pTyp = pp.surfaceType();
 
             if (pp.size() == 0)
             {
-                Pout<< "    "
-                    << setw(20) << pp.name()
-                    << setw(9) << pp.size()
-                    << setw(9) << pp.nPoints()
-                    << " ok (empty)" << endl;
+                Pout<< setw(34) << "ok (empty)";
             }
             else if (pTyp == primitivePatch::MANIFOLD)
             {
                 if (pp.checkPointManifold(true, &points))
                 {
-                    Pout<< "    " 
-                        << setw(20) << pp.name()
-                        << setw(9) << pp.size()
-                        << setw(9) << pp.nPoints()
-                        << " multiply connected (shared point)" << endl;
+                    Pout<< setw(34) << "multiply connected (shared point)";
                 }
                 else
                 {
-                    Pout<< "    "
-                        << setw(20) << pp.name()
-                        << setw(9) << pp.size()
-                        << setw(9) << pp.nPoints()
-                        << " ok (closed singly connected surface)" << endl;
+                    Pout<< setw(34) << "ok (closed singly connected)";
                 }
 
                 // Add points on non-manifold edges to make set complete
@@ -186,22 +190,35 @@ Foam::label Foam::checkTopology(const polyMesh& mesh, const bool allTopology)
 
                 if (pTyp == primitivePatch::OPEN)
                 {
-                    Pout<< "    "
-                        << setw(20) << pp.name()
-                        << setw(9) << pp.size()
-                        << setw(9) << pp.nPoints()
-                        << " ok (not multiply connected)" << endl;
+                    Pout<< setw(34) << "ok (non-closed singly connected)";
                 }
                 else
                 {
-                    Pout<< "    "
-                        << setw(20) << pp.name()
-                        << setw(9) << pp.size()
-                        << setw(9) << pp.nPoints()
-                        << " multiply connected surface (shared edge)"
-                        << endl;
+                    Pout<< setw(34) << "multiply connected (shared edge)";
                 }
             }
+
+            if (allGeometry)
+            {
+                const pointField& pts = pp.points();
+                const labelList& mp = pp.meshPoints();
+
+                boundBox bb(vector::zero, vector::zero);
+                if (returnReduce(mp.size(), sumOp<label>()) > 0)
+                {
+                    bb.min() = pts[mp[0]];
+                    bb.max() = pts[mp[0]];
+                    for (label i = 1; i < mp.size(); i++)
+                    {
+                        bb.min() = min(bb.min(), pts[mp[i]]);
+                        bb.max() = max(bb.max(), pts[mp[i]]);
+                    }
+                    reduce(bb.min(), minOp<vector>());
+                    reduce(bb.max(), maxOp<vector>());
+                }
+                Pout<< ' ' << bb;
+            }
+            Pout<< endl;
         }
 
         if (points.size() > 0)
