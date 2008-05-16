@@ -35,7 +35,7 @@ Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
     CloudType& cloud
 )
 :
-    HeatTransferModel<CloudType>(dict, cloud)
+    HeatTransferModel<CloudType>(dict, cloud, typeName)
 {}
 
 

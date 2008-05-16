@@ -51,9 +51,6 @@ class StandardWallInteraction
 
     // Private data
 
-        //- Coefficient dictionary
-        dictionary coeffDict_;
-
         //- Elasticity
         const scalar e_;
 
@@ -84,8 +81,10 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates heat transfer model
         bool active() const;
 
+        //- Apply wall correction
         virtual void correct
         (
             const wallPolyPatch& wpp,

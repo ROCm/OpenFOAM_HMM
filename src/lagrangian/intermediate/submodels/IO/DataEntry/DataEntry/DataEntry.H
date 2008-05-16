@@ -120,6 +120,9 @@ public:
             //- Return the dictionary
             const dictionary& dict() const;
 
+
+        // Evaluation
+
             //- Return value as a function of (scalar) independent variable
             virtual Type value(const scalar x) const = 0;
 

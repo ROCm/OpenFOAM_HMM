@@ -35,7 +35,7 @@ Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
     CloudType& owner
 )
 :
-    SurfaceReactionModel<CloudType>(dict, owner)
+    SurfaceReactionModel<CloudType>(dict, owner, typeName)
 {}
 
 

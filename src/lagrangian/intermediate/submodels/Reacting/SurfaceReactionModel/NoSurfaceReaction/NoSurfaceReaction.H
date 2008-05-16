@@ -72,8 +72,10 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates devolatisation model
         bool active() const;
 
+        //- Update surface reactions
         void calculate
         (
             const scalar dt,

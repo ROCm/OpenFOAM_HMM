@@ -66,6 +66,9 @@ class SurfaceReactionModel
         // reference to the owner cloud class
         CloudType& owner_;
 
+        //- The coefficients dictionary
+        const dictionary coeffDict_;
+
 
 public:
 
@@ -93,7 +96,8 @@ public:
         SurfaceReactionModel
         (
             const dictionary& dict,
-            CloudType& cloud
+            CloudType& cloud,
+            const word& type
         );
 
 
@@ -116,8 +120,11 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
-        //- Return the dictionary
+        //- Return the cloud dictionary
         const dictionary& dict() const;
+
+        //- Return the coefficients dictionary
+        const dictionary& coeffDict() const;
 
 
     // Member Functions
@@ -125,6 +132,7 @@ public:
         //- Flag to indicate whether model activates devolatisation model
         virtual bool active() const = 0;
 
+        //- Update surface reactions
         virtual void calculate
         (
             const scalar dt,

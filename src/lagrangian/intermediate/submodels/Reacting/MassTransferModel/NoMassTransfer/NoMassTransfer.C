@@ -35,7 +35,7 @@ Foam::NoMassTransfer<CloudType>::NoMassTransfer
     CloudType& cloud
 )
 :
-    MassTransferModel<CloudType>(dict, cloud)
+    MassTransferModel<CloudType>(dict, cloud, typeName)
 {}
 
 
