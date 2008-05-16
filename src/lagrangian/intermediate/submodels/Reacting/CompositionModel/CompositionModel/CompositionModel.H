@@ -70,6 +70,9 @@ class CompositionModel
         //- Reference to the owner injection class
         CloudType& owner_;
 
+        //- The coefficients dictionary
+        const dictionary& coeffDict_;
+
         //- Reference to the carrier phase thermo package
         hCombustionThermo& carrierThermo_;
 
@@ -108,7 +111,8 @@ public:
         CompositionModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
 
 
@@ -133,8 +137,11 @@ public:
             //- Return the cloud object
             const CloudType& owner() const;
 
-            //- Return the dictionary
+            //- Return the cloud dictionary
             const dictionary& dict() const;
+
+            //- Return the coefficients dictionary
+            const dictionary& coeffDict() const;
 
             //- Return the carrier phase thermo package
             const hCombustionThermo& carrierThermo() const;
@@ -216,6 +223,7 @@ public:
                  const scalar T
             ) const = 0;
 
+            //- Return specific heat caparcity for the liquid mixture
             virtual const scalar cpLiquid
             (
                 const scalarField& YLiquid,
@@ -223,6 +231,7 @@ public:
                 const scalar T
             ) const = 0;
 
+            //- Return specific heat caparcity for the solid mixture
             virtual const scalar cpSolid
             (
                 const scalarField& YSolid

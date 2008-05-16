@@ -23,83 +23,103 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoMassTransfer
+    Foam::Constant
 
 Description
-    Dummy mass transfer model for 'no mass transfer'
+    Templated basic entry that holds a constant value.
+
+    @verbatim
+        entry                    Constant
+        entryCoeffs
+        {
+            value                100.0; // Constant value
+        }
+    @endverbatim
+
+SourceFiles
+    Constant.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoMassTransfer_H
-#define NoMassTransfer_H
+#ifndef Constant_H
+#define Constant_H
 
-#include "MassTransferModel.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                            Class NoMassTransfer Declaration
+                           Class Constant Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class NoMassTransfer
+template<class Type>
+class Constant
 :
-    public MassTransferModel<CloudType>
+    public DataEntry<Type>
 {
+    // Private data
+
+        Type value_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        Constant(const Constant<Type>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const Constant<Type>&);
+
 
 public:
 
-    //- Runtime type information
-    TypeName("NoMassTransfer");
+    // Runtime type information
+    TypeName("Constant");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoMassTransfer
+        Constant
         (
-            const dictionary& dict,
-            CloudType& cloud
+            const word& entryName,
+            const dictionary& dict
         );
 
 
-    // Destructor
+    //- Destructor
 
-        ~NoMassTransfer();
+        ~Constant();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates mass transfer model
-        bool active() const;
+        //- Return constant value
+        Type value(const scalar) const;
 
-        //- Flag to indicate whether model changes particle volume
-        bool changesVolume() const;
-
-        //- Update model
-        scalar calculate
-        (
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalarField&,
-            const scalarField&,
-            const scalar,
-            bool&
-        ) const;
+        //- Integrate between two values
+        Type integrate(const scalar x1, const scalar x2) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<>
+Constant<label>::Constant(const word& entryName, const dictionary& dict);
+
+template<>
+Constant<scalar>::Constant(const word& entryName, const dictionary& dict);
+
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoMassTransfer.C"
+#   include "Constant.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

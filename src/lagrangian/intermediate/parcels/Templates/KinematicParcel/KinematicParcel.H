@@ -277,37 +277,57 @@ public:
             //- Return type id
             inline const label typeId() const;
 
-            //- Return diameter
+            //- Return const access to diameter
             inline const scalar d() const;
-            inline scalar& d();
 
-            //- Return velocity
+            //- Return const access to velocity
             inline const vector& U() const;
-            inline vector& U();
 
-            //- Return relative velocity
+            //- Return const access to relative velocity
             inline const vector& Ur() const;
-            inline vector& Ur();
 
-            //- Return number of particles
+            //- Return const access to number of particles
             inline const scalar nParticle() const;
-            inline scalar& nParticle();
 
-            //- Return density
+            //- Return const access to density
             inline const scalar rho() const;
-            inline scalar& rho();
 
-            //- Return time spent in turbulent eddy
+            //- Return const access to time spent in turbulent eddy
             inline const scalar tTurb() const;
-            inline scalar& tTurb();
 
-            //- Return turbulent velocity fluctuation
+            //- Return const access to turbulent velocity fluctuation
             inline const vector& UTurb() const;
-            inline vector& UTurb();
 
             //- The nearest distance to a wall that
             //  the particle can be in the n direction
             inline scalar wallImpactDistance(const vector& n) const;
+
+
+        // Edit
+
+            //- Return access to diameter
+            inline scalar& d();
+
+            //- Return access to velocity
+            inline vector& U();
+
+            //- Return access to relative velocity
+            inline vector& Ur();
+
+            //- Return access to number of particles
+            inline scalar& nParticle();
+
+            //- Return access to density
+            inline scalar& rho();
+
+            //- Return access to time spent in turbulent eddy
+            inline scalar& tTurb();
+
+            //- Return access to turbulent velocity fluctuation
+            inline vector& UTurb();
+
+
+        // Helper functions
 
             //- Return the index of the face to be used in the interpolation
             //  routine

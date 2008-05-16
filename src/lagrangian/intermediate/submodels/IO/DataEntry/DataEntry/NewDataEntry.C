@@ -24,58 +24,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoHeatTransfer.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
+template<class Type>
+Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const word& entryName,
+    const dictionary& dict
 )
-:
-    HeatTransferModel<CloudType>(dict, cloud, typeName)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::NoHeatTransfer<CloudType>::~NoHeatTransfer()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class CloudType>
-bool Foam::NoHeatTransfer<CloudType>::active() const
 {
-    return false;
-}
+    word DataEntryType(dict.lookup(entryName));
 
+    //    Info<< "Selecting DataEntry " << DataEntryType << endl;
 
-template <class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
-(
-    const scalar,
-    const scalar
-) const
-{
-    notImplemented
-    (
-        "Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu"
-        "(const scalar, const scalar)"
-    );
-    return 0.0;
-}
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(DataEntryType);
 
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "DataEntry<Type>::New(const dictionary&"
+        )   << "Unknown DataEntry type "
+            << DataEntryType << " for " << entryName
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid DataEntry types are :" << nl
+            << dictionaryConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
 
-template <class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr() const
-{
-    notImplemented("Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr()");
-    return 0.0;
+    return autoPtr<DataEntry<Type> >(cstrIter()(entryName, dict));
 }
 
 

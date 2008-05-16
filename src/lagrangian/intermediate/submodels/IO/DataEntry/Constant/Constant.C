@@ -24,58 +24,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoHeatTransfer.H"
+#include "Constant.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
+template<class Type>
+Foam::Constant<Type>::Constant
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const word& entryName,
+    const dictionary& dict
 )
 :
-    HeatTransferModel<CloudType>(dict, cloud, typeName)
+    DataEntry<Type>(typeName, entryName, dict),
+    value_(this->dict_.lookup("value"))
+{}
+
+
+template<>
+Foam::Constant<Foam::label>::Constant
+(
+    const word& entryName,
+    const dictionary& dict
+)
+:
+    DataEntry<label>(typeName, entryName, dict),
+    value_(readLabel(this->dict_.lookup("value")))
+{}
+
+
+template<>
+Foam::Constant<Foam::scalar>::Constant
+(
+    const word& entryName,
+    const dictionary& dict
+)
+:
+    DataEntry<scalar>(typeName, entryName, dict),
+    value_(readScalar(this->dict_.lookup("value")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoHeatTransfer<CloudType>::~NoHeatTransfer()
+template<class Type>
+Foam::Constant<Type>::~Constant()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
-bool Foam::NoHeatTransfer<CloudType>::active() const
+template<class Type>
+Type Foam::Constant<Type>::value(const scalar x) const
 {
-    return false;
+    return value_;
 }
 
 
-template <class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
-(
-    const scalar,
-    const scalar
-) const
+template<class Type>
+Type Foam::Constant<Type>::integrate(const scalar x1, const scalar x2) const
 {
-    notImplemented
-    (
-        "Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu"
-        "(const scalar, const scalar)"
-    );
-    return 0.0;
-}
-
-
-template <class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr() const
-{
-    notImplemented("Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr()");
-    return 0.0;
+    return (x2 - x1)*value_;
 }
 
 

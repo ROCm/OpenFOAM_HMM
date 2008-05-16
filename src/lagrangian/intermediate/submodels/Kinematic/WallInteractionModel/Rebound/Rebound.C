@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "Rebound.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -37,7 +35,8 @@ Foam::Rebound<CloudType>::Rebound
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud)
+    WallInteractionModel<CloudType>(dict, cloud, typeName),
+    UFactor_(readScalar(this->coeffDict().lookup("UFactor")))
 {}
 
 
@@ -71,9 +70,9 @@ void Foam::Rebound<CloudType>::correct
     scalar Un = U & nw;
     vector Ut = U - Un*nw;
 
-    if (Un > 0)
+    if (Un > 0.0)
     {
-        U -= 2.0*Un*nw;
+        U -= UFactor_*2.0*Un*nw;
     }
 
     U -= Ut;

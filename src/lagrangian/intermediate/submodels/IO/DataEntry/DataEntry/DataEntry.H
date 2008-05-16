@@ -23,24 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::WallInteractionModel
-
+    Foam::DataEntry
 
 Description
-    Templated wall interaction model class
 
 SourceFiles
-    WallInteractionModel.C
-    NewWallInteractionModel.C
+    DataEntry.C
+    NewDataEntry.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WallInteractionModel_H
-#define WallInteractionModel_H
+#ifndef DataEntry_H
+#define DataEntry_H
 
-#include "IOdictionary.H"
-#include "autoPtr.H"
-#include "runTimeSelectionTables.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,93 +44,90 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class WallInteractionModel Declaration
+                          Class DataEntry Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WallInteractionModel
+template<class Type>
+class DataEntry
 {
+    // Private Member Functions
 
-    // Private data
+        //- Disallow default bitwise copy construct
+        DataEntry(const DataEntry<Type>&);
 
-        //- The cloud dictionary
-        const dictionary& dict_;
+        //- Disallow default bitwise assignment
+        void operator=(const DataEntry<Type>&);
 
-        // reference to the owner cloud class
-        CloudType& owner_;
 
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
+protected:
+
+    // Protected data
+
+        //- Coefficients dictionary
+        const dictionary dict_;
+
+        //- Name of entry
+        const word entry_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WallInteractionModel");
+    TypeName("DataEntry")
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        WallInteractionModel,
+        DataEntry,
         dictionary,
         (
-            const dictionary& dict,
-            CloudType& owner
+            const word& entryName,
+            const dictionary& dict
         ),
-        (dict, owner)
+        (entryName, dict)
     );
 
 
-    // Constructors
+    // Constructor
 
-        //- Construct from components
-        WallInteractionModel
+        //- Construct from type name and dictionary
+        DataEntry
         (
-            const dictionary& dict,
-            CloudType& owner,
-            const word& type
+            const word& TypeName,
+            const word& entryName,
+            const dictionary& dict
         );
 
 
-    // Destructor
-
-        virtual ~WallInteractionModel();
-
-
-    // Selector
-
-        static autoPtr<WallInteractionModel<CloudType> > New
+    //- Selector
+        static autoPtr<DataEntry<Type> > New
         (
-            const dictionary& dict,
-            CloudType& owner
+            const word& entryName,
+            const dictionary& dict
         );
 
 
-    // Access
+    //- Destructor
 
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the dictionary
-        const dictionary& dict() const;
-
-        //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
+        virtual ~DataEntry();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const = 0;
+        // Access
 
-        //- Apply wall correction
-        virtual void correct
-        (
-            const wallPolyPatch& wpp,
-            const label faceId,
-            vector& U
-        ) const = 0;
+            //- Return the dictionary
+            const dictionary& dict() const;
+
+
+        // Evaluation
+
+            //- Return value as a function of (scalar) independent variable
+            virtual Type value(const scalar x) const = 0;
+
+            //- Integrate between two (scalar) values
+            virtual Type integrate(const scalar x1, const scalar x2) const = 0;
 };
 
 
@@ -144,30 +137,30 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeWallInteractionModel(CloudType)                                   \
+#define makeDataEntry(Type)                                                   \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(WallInteractionModel<CloudType>, 0);  \
+    defineNamedTemplateTypeNameAndDebug(DataEntry<Type>, 0);                  \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        WallInteractionModel<CloudType>,                                      \
+        DataEntry<Type>,                                                      \
         dictionary                                                            \
     );
 
 
-#define makeWallInteractionModelType(SS, CloudType, ParcelType)               \
+#define makeDataEntryType(SS, Type)                                           \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                         \
                                                                               \
-    WallInteractionModel<CloudType<ParcelType> >::                            \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    DataEntry<Type>::adddictionaryConstructorToTable<SS<Type> >               \
+        add##SS##Type##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WallInteractionModel.C"
+#   include "DataEntry.C"
+#   include "NewDataEntry.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
