@@ -37,9 +37,8 @@ Foam::RanzMarshall<CloudType>::RanzMarshall
     CloudType& cloud
 )
 :
-    HeatTransferModel<CloudType>(dict, cloud),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    Pr_(dimensionedScalar(coeffDict_.lookup("Pr")).value())
+    HeatTransferModel<CloudType>(dict, cloud, typeName),
+    Pr_(dimensionedScalar(this->coeffDict().lookup("Pr")).value())
 {}
 
 

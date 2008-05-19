@@ -140,6 +140,14 @@ Foam::KinematicCloud<ParcelType>::injection() const
 
 
 template<class ParcelType>
+inline Foam::InjectionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::injection()
+{
+    return injectionModel_();
+}
+
+
+template<class ParcelType>
 inline const Foam::WallInteractionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::wallInteraction() const
 {

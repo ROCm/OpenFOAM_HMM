@@ -70,7 +70,7 @@ integrationSchemes
 
 ManualInjectionCoeffs
 {
-    injectionTime                        0;
+    SOI                                  0.0;
     positionsFile                        thermoCloud1Positions;
     U0                                   (0 0 0);
     parcelPDF

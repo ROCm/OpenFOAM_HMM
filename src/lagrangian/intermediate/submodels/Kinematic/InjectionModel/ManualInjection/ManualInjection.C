@@ -24,9 +24,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "ManualInjection.H"
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::label Foam::ManualInjection<CloudType>::nParcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+) const
+{
+    if ((0.0 >= time0) && (0.0 < time1))
+    {
+        return positions_.size();
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+) const
+{
+    // All parcels introduced at SOI
+    if ((0.0 >= time0) && (0.0 < time1))
+    {
+        return this->volumeTotal_;
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,10 +74,8 @@ Foam::ManualInjection<CloudType>::ManualInjection
     CloudType& owner
 )
 :
-    InjectionModel<CloudType>(dict, owner),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    injectionTime_(readScalar(coeffDict_.lookup("injectionTime"))),
-    positionsFile_(coeffDict_.lookup("positionsFile")),
+    InjectionModel<CloudType>(dict, owner, typeName),
+    positionsFile_(this->coeffDict().lookup("positionsFile")),
     positions_
     (
         IOobject
@@ -53,12 +88,12 @@ Foam::ManualInjection<CloudType>::ManualInjection
         )
     ),
     diameters_(positions_.size()),
-    U0_(coeffDict_.lookup("U0")),
+    U0_(this->coeffDict().lookup("U0")),
     parcelPDF_
     (
         pdf::New
         (
-            coeffDict_.subDict("parcelPDF"),
+            this->coeffDict().subDict("parcelPDF"),
             owner.rndGen()
         )
     )
@@ -70,7 +105,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     }
 
     // Determine volume of particles to inject
-    volumeTotal_ = sum(pow(diameters_, 3))
+    this->volumeTotal_ = sum(pow(diameters_, 3))
         *mathematicalConstant::pi/6.0;
 }
 
@@ -92,13 +127,6 @@ bool Foam::ManualInjection<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::timeStart() const
-{
-    return injectionTime_;
-}
-
-
-template<class CloudType>
 Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 {
     // Not used
@@ -111,9 +139,8 @@ Foam::vector Foam::ManualInjection<CloudType>::position
 (
     const label iParcel,
     const scalar time,
-    const polyMeshInfo& meshInfo,
-    Random&
-) const
+    const polyMeshInfo& meshInfo
+)
 {
     vector pos = positions_[iParcel];
     if (meshInfo.caseIs2d())
@@ -129,8 +156,10 @@ Foam::vector Foam::ManualInjection<CloudType>::position
         }
         else
         {
-            FatalErrorIn("Foam::vector Foam::ManualInjection<CloudType>::position")
-                << "Could not determine 2-D case geometry" << nl
+            FatalErrorIn
+            (
+                "Foam::vector Foam::ManualInjection<CloudType>::position"
+            )   << "Could not determine 2-D case geometry" << nl
                 << abort(FatalError);
         }
     }
@@ -140,53 +169,21 @@ Foam::vector Foam::ManualInjection<CloudType>::position
 
 
 template<class CloudType>
-Foam::label Foam::ManualInjection<CloudType>::nParcelsToInject
+Foam::vector Foam::ManualInjection<CloudType>::velocity
 (
     const label,
-    const scalar time0,
-    const scalar time1
-) const
-{
-    if ((injectionTime_>=time0) && (injectionTime_<time1))
-    {
-        return positions_.size();
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::volume
-(
     const scalar,
-    const scalar,
-    const polyMeshInfo&
-) const
+    const polyMeshInfo& meshInfo
+)
 {
-    // Since all parcels are introduced at once, volume introduced in this time
-    // interval = total mass
-    return volumeTotal_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::volumeFraction
-(
-    const scalar time0,
-    const scalar time1
-) const
-{
-    if ((injectionTime_>=time0) && (injectionTime_<time1))
+    vector vel = U0_;
+    if (meshInfo.caseIs2dSlab())
     {
-        return 1;
+        vel.component(meshInfo.emptyComponent()) =
+            meshInfo.centrePoint().component(meshInfo.emptyComponent());
     }
-    else
-    {
-        return 0;
-    }
+
+    return vel;
 }
 
 
@@ -198,17 +195,6 @@ Foam::scalar Foam::ManualInjection<CloudType>::d0
 ) const
 {
     return diameters_[iParcel];
-}
-
-
-template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::velocity
-(
-    const label,
-    const scalar
-) const
-{
-    return U0_;
 }
 
 

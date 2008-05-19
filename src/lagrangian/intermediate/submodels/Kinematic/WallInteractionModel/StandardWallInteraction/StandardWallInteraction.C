@@ -37,10 +37,9 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    e_(dimensionedScalar(coeffDict_.lookup("e")).value()),
-    mu_(dimensionedScalar(coeffDict_.lookup("mu")).value())
+    WallInteractionModel<CloudType>(dict, cloud, typeName),
+    e_(dimensionedScalar(this->coeffDict().lookup("e")).value()),
+    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value())
 {}
 
 

@@ -35,13 +35,12 @@ Foam::SingleKineticRateDevolatilisation<CloudType>::SingleKineticRateDevolatilis
     CloudType& owner
 )
 :
-    MassTransferModel<CloudType>(dict, owner),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    A1_(dimensionedScalar(coeffDict_.lookup("A1")).value()),
-    E_(dimensionedScalar(coeffDict_.lookup("E")).value()),
+    MassTransferModel<CloudType>(dict, owner, typeName),
+    A1_(dimensionedScalar(this->coeffDict().lookup("A1")).value()),
+    E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
     volatileResidualCoeff_
     (
-        readScalar(coeffDict_.lookup("volatileResidualCoeff"))
+        readScalar(this->coeffDict().lookup("volatileResidualCoeff"))
     )
 {}
 

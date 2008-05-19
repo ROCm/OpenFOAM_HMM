@@ -23,10 +23,10 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-numberOfSubdomains 4;
+numberOfSubdomains 6;
 
-//method          metis;
-method          hierarchical;
+method          metis;
+//method          hierarchical;
 
 simpleCoeffs
 {

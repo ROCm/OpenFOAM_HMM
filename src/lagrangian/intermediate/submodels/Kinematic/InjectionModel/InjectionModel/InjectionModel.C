@@ -32,11 +32,17 @@ template<class CloudType>
 Foam::InjectionModel<CloudType>::InjectionModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :   dict_(dict),
     owner_(owner),
-    rndGen_(label(0))
+    coeffDict_(dict.subDict(type + "Coeffs")),
+    SOI_(readScalar(coeffDict_.lookup("SOI"))),
+    volumeTotal_(0.0),
+    timeStep0_(0.0),
+    nParcels_(0),
+    volume_(0.0)
 {}
 
 
@@ -57,6 +63,13 @@ const CloudType& Foam::InjectionModel<CloudType>::owner() const
 
 
 template<class CloudType>
+CloudType& Foam::InjectionModel<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
 const Foam::dictionary& Foam::InjectionModel<CloudType>::dict() const
 {
     return dict_;
@@ -64,9 +77,85 @@ const Foam::dictionary& Foam::InjectionModel<CloudType>::dict() const
 
 
 template<class CloudType>
-Foam::Random& Foam::InjectionModel<CloudType>::rndGen()
+const Foam::dictionary& Foam::InjectionModel<CloudType>::coeffDict() const
 {
-    return rndGen_;
+    return coeffDict_;
+}
+
+
+template<class CloudType>
+const Foam::scalar Foam::InjectionModel<CloudType>::timeStart() const
+{
+    return SOI_;
+}
+
+
+template<class CloudType>
+const Foam::scalar Foam::InjectionModel<CloudType>::volumeTotal() const
+{
+    return volumeTotal_;
+}
+
+
+template<class CloudType>
+const Foam::label Foam::InjectionModel<CloudType>::nParcels() const
+{
+    return nParcels_;
+}
+
+
+template<class CloudType>
+const Foam::scalar Foam::InjectionModel<CloudType>::volume() const
+{
+    return volume_;
+}
+
+
+template<class CloudType>
+const Foam::scalar Foam::InjectionModel<CloudType>::volumeFraction() const
+{
+    return volume_/volumeTotal_;
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    // Initialise values
+    nParcels_ = 0;
+    volume_ = 0.0;
+
+    // Return if not started injection event
+    if (time1 < SOI_)
+    {
+        timeStep0_ = time1;
+        return;
+    }
+
+    // Make times relative to SOI
+    scalar t0 = timeStep0_ - SOI_;
+    scalar t1 = time1 - SOI_;
+
+    // Number of parcels to inject
+    nParcels_ = nParcelsToInject(t0, t1);
+
+    // Volume of parcels to inject
+    volume_ = volumeToInject(t0, t1);
+
+    // Hold previous time if no parcels, but non-zero volume fraction
+    if ((nParcels_ == 0) && (volume_ > 0.0))
+    {
+        // hold value of timeStep0_
+    }
+    else
+    {
+        // advance value of timeStep0_
+        timeStep0_ = time1;
+    }
 }
 
 

@@ -57,9 +57,6 @@ class SingleMixtureFraction
 
     // Private data
 
-        //- The coefficient dictionary
-        const dictionary& coeffDict_;
-
         //- Parcel properties
 
             //- List of gas names
@@ -146,40 +143,58 @@ public:
 
         // Access
 
+            //- Return the list of composition names
             const wordList compositionNames() const;
 
+            //- Return the list of gas names
             const wordList& gasNames() const;
 
+            //- Return the list indices of gases in global thermo list
             const labelList& gasGlobalIds() const;
 
+            //- Return the list of gas mass fractions
             const scalarField& YGas0() const;
 
+            //- Return the total gas mass fraction
             const scalar YGasTot0() const;
 
+            //- Return the list of liquid names
             const wordList& liquidNames() const;
 
+            //- Return the list indices of liquid in global thermo list
             const labelList& liquidGlobalIds() const;
 
+            //- Return the list of liquid mass fractions
             const scalarField& YLiquid0() const;
 
+            //- Return the total liquid mass fraction
             const scalar YLiquidTot0() const;
 
+             //- Return the list of solid names
             const wordList& solidNames() const;
 
+            //- Return the list indices of solids in global thermo list
             const labelList& solidGlobalIds() const;
 
+            //- Return the list of solid mass fractions
             const scalarField& YSolid0() const;
 
+            //- Return the total solid mass fraction
             const scalar YSolidTot0() const;
 
+            //- Return the list of mixture mass fractions
             const scalarField& YMixture0() const;
 
+            //- Return the gas constant for the gas mixture
             const scalar RGas(const scalarField& YGas) const;
 
+            //- Return enthalpy for the gas mixture
             const scalar HGas(const scalarField& YGas, const scalar T) const;
 
+            //- Return specific heat caparcity for the gas mixture
             const scalar cpGas(const scalarField& YGas, const scalar T) const;
 
+            //- Return specific heat caparcity for the liquid mixture
             const scalar cpLiquid
             (
                 const scalarField& YLiquid,
@@ -187,6 +202,7 @@ public:
                 const scalar T
             ) const;
 
+            //- Return specific heat caparcity for the solid mixture
             const scalar cpSolid(const scalarField& YSolid) const;
 };
 

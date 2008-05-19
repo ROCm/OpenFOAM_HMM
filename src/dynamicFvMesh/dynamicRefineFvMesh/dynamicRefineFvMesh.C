@@ -742,16 +742,21 @@ labelList dynamicRefineFvMesh::selectRefineCells
         }
     }
 
-    Info<< "Selected " << returnReduce(candidates.size(), sumOp<label>())
+    // Guarantee 2:1 refinement after refinement
+    labelList consistentSet
+    (
+        meshCutter_.consistentRefinement
+        (
+            candidates.shrink(),
+            true               // Add to set to guarantee 2:1
+        )
+    );
+
+    Info<< "Selected " << returnReduce(consistentSet.size(), sumOp<label>())
         << " cells for refinement out of " << globalData().nTotalCells()
         << "." << endl;
 
-    // Guarantee 2:1 refinement across processor patches.
-    return meshCutter_.consistentRefinement
-    (
-        candidates.shrink(),
-        true               // Add to set to guarantee 2:1
-    );
+    return consistentSet;
 }
 
 
@@ -795,18 +800,23 @@ labelList dynamicRefineFvMesh::selectUnrefinePoints
     }
 
 
-    Info<< "Selected " << returnReduce(newSplitPoints.size(), sumOp<label>())
+    newSplitPoints.shrink();
+
+    // Guarantee 2:1 refinement after unrefinement
+    labelList consistentSet
+    (
+        meshCutter_.consistentUnrefinement
+        (
+            newSplitPoints,
+            false
+        )
+    );
+    Info<< "Selected " << returnReduce(consistentSet.size(), sumOp<label>())
         << " split points out of a possible "
         << returnReduce(splitPoints.size(), sumOp<label>())
         << "." << endl;
 
-    newSplitPoints.shrink();
-
-    return meshCutter_.consistentUnrefinement
-    (
-        newSplitPoints,
-        false
-    );
+    return consistentSet;
 }
 
 
