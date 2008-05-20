@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    autoHexMesh
+    snappyHexMesh
 
 Description
-    Automatic split hex mesher.
+    Automatic split hex mesher. Refines and snaps to surface.
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     (
        IOobject
        (
-            "autoHexMeshDict",
+            "snappyHexMeshDict",
             runTime.system(),
             mesh,
             IOobject::MUST_READ,
