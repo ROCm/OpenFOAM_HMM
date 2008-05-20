@@ -41,7 +41,7 @@ SourceFiles
 #define directMappedPolyPatch_H
 
 #include "polyPatch.H"
-#include "dataSchedule.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ class directMappedPolyPatch
 
         // Derived information
 
-            //- Communication schedule
+            //- Communication schedule.
             mutable autoPtr<List<labelPair> > schedulePtr_;
 
             //- Cells to sample per processor

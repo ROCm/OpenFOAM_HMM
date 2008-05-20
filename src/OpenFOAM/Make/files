@@ -327,7 +327,6 @@ $(polyBoundaryMesh)/polyBoundaryMesh.C
 $(polyBoundaryMesh)/polyBoundaryMeshEntries.C
 
 meshes/ProcessorTopology/commSchedule.C
-meshes/ProcessorTopology/dataSchedule.C
 
 globalMeshData = $(polyMesh)/globalMeshData
 $(globalMeshData)/globalMeshData.C
