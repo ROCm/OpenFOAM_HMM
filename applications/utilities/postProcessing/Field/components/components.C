@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
 
             bool processed = false;
             writeComponents<vector>(fieldHeader, mesh, processed);
-            writeComponents<symmTensor>(fieldHeader, mesh, processed);
             writeComponents<sphericalTensor>(fieldHeader, mesh, processed);
+            writeComponents<symmTensor>(fieldHeader, mesh, processed);
+            writeComponents<tensor>(fieldHeader, mesh, processed);
             if (!processed)
             {
                 FatalError
