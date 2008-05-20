@@ -132,8 +132,9 @@ protected:
             // Arithmetic mean fields
             PtrList<volScalarField> meanScalarFields_;
             PtrList<volVectorField> meanVectorFields_;
-            PtrList<volSymmTensorField> meanSymmTensorFields_;
             PtrList<volSphericalTensorField> meanSphericalTensorFields_;
+            PtrList<volSymmTensorField> meanSymmTensorFields_;
+            PtrList<volTensorField> meanTensorFields_;
 
             // Prime-squared fields - applicable to volVectorFields only
             PtrList<volScalarField> prime2MeanScalarFields_;

@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-export WM_PROJECT_VERSION=dev
+#export WM_PROJECT_VERSION=dev
 
 #!!User:
 #    either set $FOAM_INST_DIR before sourcing this file or set

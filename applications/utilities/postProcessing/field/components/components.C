@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    magU
+    components
 
 Description
-    Calculates and writes the scalar magnitude of the gradient of the velocity 
-    field U for each time
+    Writes scalar fields corresponding to each component of the supplied
+    field (name) for each time.
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,11 +35,53 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template <class Type>
+void writeComponents
+(
+    const IOobject& header,
+    const fvMesh& mesh,
+    bool& processed
+)
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    if (header.headerClassName() == fieldType::typeName)
+    {
+        Info<< "    Reading " << header.name() << endl;
+        fieldType field(header, mesh);
+
+        for (direction i=0; i<Type::nComponents; i++)
+        {
+            Info<< "    Calculating " << header.name()
+                << Type::componentNames[i] << endl;
+
+            volScalarField componentField
+            (
+                IOobject
+                (
+                    header.name() + word(Type::componentNames[i]),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ
+                ),
+                field.component(i)
+            );
+            componentField.write();
+        }
+
+        processed = true;
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
+    argList::validArgs.append("fieldName");
 
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"
+
+    word fieldName(args.additionalArgs()[0]);
 
 #   include "createTime.H"
 
@@ -59,49 +101,40 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << endl;
 
-        IOobject Uheader
+        IOobject fieldHeader
         (
-            "U",
+            fieldName,
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ
         );
 
         // Check U exists
-        if (Uheader.headerOk())
+        if (fieldHeader.headerOk())
         {
             mesh.readUpdate();
 
-            Info<< "    Reading U" << endl;
-            volVectorField U(Uheader, mesh);
-
-            Info<< "    Calculating magU" << endl;
-            volScalarField magU
-            (
-                IOobject
-                (
-                    "magU",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                mag(U)
-            );
-
-            Info << "mag(U): max: " << max(magU.internalField())
-                << " min: " << min(magU.internalField()) << endl;
-
-            magU.write();
+            bool processed = false;
+            writeComponents<vector>(fieldHeader, mesh, processed);
+            writeComponents<sphericalTensor>(fieldHeader, mesh, processed);
+            writeComponents<symmTensor>(fieldHeader, mesh, processed);
+            writeComponents<tensor>(fieldHeader, mesh, processed);
+            if (!processed)
+            {
+                FatalError
+                    << "Unable to process " << fieldName << nl
+                    << "No call to components for fields of type "
+                    << fieldHeader.headerClassName() << nl << nl
+                    << exit(FatalError);
+            }
         }
         else
         {
-            Info<< "    No U" << endl;
+            Info<< "    No " << fieldName << endl;
         }
 
         Info<< endl;
     }
-
-    Info<< "End\n" << endl;
 
     return(0);
 }
