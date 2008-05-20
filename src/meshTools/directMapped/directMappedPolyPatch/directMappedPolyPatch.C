@@ -199,6 +199,16 @@ void Foam::directMappedPolyPatch::calcMapping() const
             << "Mapping already calculated" << exit(FatalError);
     }
 
+    if (offset_ == vector::zero)
+    {
+        FatalErrorIn("directMappedPolyPatch::calcMapping() const")
+            << "Invalid offset " << offset_ << endl
+            << "Offset is the vector added to the patch face centres to"
+            << " find the cell supplying the data."
+            << exit(FatalError);
+    }
+
+
     // Get global list of all samples and the processor and face they come from.
     pointField samples;
     labelList patchFaceProcs;
