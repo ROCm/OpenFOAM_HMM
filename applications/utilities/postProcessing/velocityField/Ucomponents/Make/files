@@ -1,3 +1,0 @@
-Ucomponents.C
-
-EXE = $(FOAM_APPBIN)/Ucomponents
