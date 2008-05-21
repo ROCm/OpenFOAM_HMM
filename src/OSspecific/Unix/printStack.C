@@ -32,9 +32,7 @@ License
 #include "readHexLabel.H"
 
 #include <cxxabi.h>
-#ifndef darwin
 #include <execinfo.h>
-#endif
 #include <dlfcn.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
