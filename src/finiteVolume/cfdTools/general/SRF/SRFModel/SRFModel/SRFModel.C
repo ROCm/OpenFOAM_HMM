@@ -29,6 +29,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "SRFModel.H"
+#include "SRFVelocityFvPatchVectorField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -187,6 +188,56 @@ Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::U() const
             -omega_ ^ (mesh_.C() - axis_*(axis_ & mesh_.C()))
         )
     );
+}
+
+
+Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::Uabs() const
+{
+    const volVectorField Usrf = U();
+
+    tmp<volVectorField> tUabs
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                "Uabs",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            Usrf
+        )
+    );
+
+    // Add SRF contribution to internal field
+    tUabs().internalField() += Urel_.internalField();
+
+    // Add Urel boundary contributions
+    const volVectorField::GeometricBoundaryField& bvf = Urel_.boundaryField();
+
+    forAll(bvf, i)
+    {
+        if (isA<SRFVelocityFvPatchVectorField>(bvf[i]))
+        {
+            // Only include relative contributions from
+            // SRFVelocityFvPatchVectorField's
+            const SRFVelocityFvPatchVectorField& UrelPatch =
+                refCast<const SRFVelocityFvPatchVectorField>(bvf[i]);
+            if (UrelPatch.relative())
+            {
+                tUabs().boundaryField()[i] += Urel_.boundaryField()[i];
+            }
+        }
+        else
+        {
+            tUabs().boundaryField()[i] += Urel_.boundaryField()[i];
+        }
+    }
+
+    return tUabs;
 }
 
 
