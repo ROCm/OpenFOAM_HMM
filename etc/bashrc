@@ -175,11 +175,12 @@ wildCards="$FOAM_INST_DIR $HOME/$WM_PROJECT/$USER"
 cleanPath=`$cleanProg "$PATH" "$wildCards"` && PATH="$cleanPath"
 
 #- Clean LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=`$cleanProg "$LD_LIBRARY_PATH" "$wildCards"`
+cleanPath=`$cleanProg "$LD_LIBRARY_PATH" "$wildCards"` && LD_LIBRARY_PATH="$cleanPath"
 
 #- Clean MANPATH
-export MANPATH=`$cleanProg "$MANPATH" "$wildCards"`
+cleanPath=`$cleanProg "$MANPATH" "$wildCards"` && MANPATH="$cleanPath"
 
+export PATH LD_LIBRARY_PATH MANPATH
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -208,14 +209,17 @@ SOURCE $WM_PROJECT_DIR/etc/apps/cint/bashrc
 cleanPath=`$cleanProg "$PATH"` && PATH="$cleanPath"
 
 #- Clean LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=`$cleanProg "$LD_LIBRARY_PATH"`
+cleanPath=`$cleanProg "$LD_LIBRARY_PATH"` && LD_LIBRARY_PATH="$cleanPath"
 
 #- Clean MANPATH
-export MANPATH=`$cleanProg "$MANPATH"`
+cleanPath=`$cleanProg "$MANPATH"` && MANPATH="$cleanPath"
+
+export PATH LD_LIBRARY_PATH MANPATH
 
 #- Clean LD_PRELOAD
 if [ "$LD_PRELOAD" != "" ]; then
-    export LD_PRELOAD=`$cleanProg "$LD_PRELOAD"`
+    cleanPath=`$cleanProg "$LD_PRELOAD"` && LD_PRELOAD="$cleanPath"
+    export LD_PRELOAD
 fi
 
 
