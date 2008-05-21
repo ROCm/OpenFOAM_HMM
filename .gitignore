@@ -8,7 +8,7 @@
 *.bak
 
 # CVS recovered versions - anywhere
-.#*
+*\#*\#
 
 # objects and archives - anywhere
 *.[oa]
