@@ -22,49 +22,58 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    divPhi
+
 Description
-    Calculate the dual of a polyMesh. Adheres to all the feature&patch edges
+    Calculates and writes the divergence of the flux field phi. The
+    -noWrite option just outputs the max/min values without writing the
+    field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "argList.H"
-#include "Time.H"
-#include "polyDualMesh.H"
-#include "mathematicalConstants.H"
-
-using namespace Foam;
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
-    argList::noParallel();
-    argList::validArgs.append("feature angle[0-180]");
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createPolyMesh.H"
+    Info<< "    Reading phi" << endl;
+    surfaceScalarField phi
+    (
+        IOobject
+        (
+            "phi",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ
+        ),
+        mesh
+    );
 
-    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
+    Info<< "    Calculating divPhi" << endl;
+    volScalarField divPhi
+    (
+        IOobject
+        (
+            "divPhi",
+            runTime.timeName(),
+            mesh
+        ),
+        fvc::div(phi)
+    );
 
-    scalar minCos = Foam::cos(featureAngle * mathematicalConstant::pi/180.0);
+    Info<< "div(phi) max/min : "
+        << max(divPhi).value() << " "
+        << min(divPhi).value() << endl;
 
-    Info<< "Feature:" << featureAngle << endl
-        << "minCos :" << minCos << endl
-        << endl;
-
-    polyDualMesh dualMesh(mesh, minCos);
-
-    runTime++;
-
-    Pout<< "Writing dualMesh to " << runTime.timeName() << endl;
-
-    dualMesh.write();
-
-    Info << "End\n" << endl;
-
-    return 0;
+    if (writeResults)
+    {
+        divPhi.write();
+    }
 }
-
 
 // ************************************************************************* //

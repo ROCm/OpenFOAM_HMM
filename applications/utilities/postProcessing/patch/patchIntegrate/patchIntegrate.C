@@ -37,31 +37,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
     argList::validArgs.append("fieldName");
     argList::validArgs.append("patchName");
-
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
+#   include "createTime.H"
+    instantList timeDirs = timeSelector::select0(runTime, args);
+#   include "createMesh.H"
 
     word fieldName(args.additionalArgs()[0]);
     word patchName(args.additionalArgs()[1]);
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
 
         IOobject fieldHeader
@@ -77,21 +66,43 @@ int main(int argc, char *argv[])
         {
             mesh.readUpdate();
 
-            Info<< "    Reading field " << fieldName << endl;
-            volScalarField field(fieldHeader, mesh);
-
             label patchi = mesh.boundaryMesh().findPatchID(patchName);
-
-            if (patchi >= 0)
+            if (patchi < 0)
             {
+                FatalError
+                    << "Unable to find patch " << patchName << nl
+                    << exit(FatalError);
+            }
+
+            if (fieldHeader.headerClassName() == "volScalarField")
+            {
+                Info<< "    Reading volScalarField " << fieldName << endl;
+                volScalarField field(fieldHeader, mesh);
+                vector sumField = sum
+                (
+                    mesh.Sf().boundaryField()[patchi]
+                  * field.boundaryField()[patchi]
+                );
+
                 Info<< "    Integral of " << fieldName << " over patch "
                     << patchName << '[' << patchi << ']' << " = "
-                    <<  sum
-                        (
-                            mesh.Sf().boundaryField()[patchi]
-                           *field.boundaryField()[patchi]
-                        )
-                    << endl;
+                    << sumField << nl;
+            }
+            else if (fieldHeader.headerClassName() == "surfaceScalarField")
+            {
+                Info<< "    Reading surfaceScalarField " << fieldName << endl;
+                surfaceScalarField field(fieldHeader, mesh);
+                scalar sumField = sum(field.boundaryField()[patchi]);
+
+                Info<< "    Integral of " << fieldName << " over patch "
+                    << patchName << '[' << patchi << ']' << " = "
+                    << sumField << nl;
+            }
+            else
+            {
+                FatalError
+                    << "Only possible to integrate volScalarFields "
+                    << "and surfaceScalarFields" << nl << exit(FatalError);
             }
         }
         else
@@ -104,7 +115,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

@@ -83,6 +83,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "IOsampledSets.H"
 #include "IOsampledSurfaces.H"
 
@@ -93,28 +94,18 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-
-#   include "addTimeOptions.H"
+    timeSelector::addOptions();
 #   include "setRootCase.H"
-
 #   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
+    instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
     IOsampledSets sSets(mesh, "sampleDict", true);
     IOsampledSurfaces sSurfaces(mesh, "sampleDict", true);
 
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
 
         // Handle geometry/topology changes
@@ -128,7 +119,6 @@ int main(int argc, char *argv[])
 
         Info<< endl;
     }
-
 
     Info<< "End\n" << endl;
 

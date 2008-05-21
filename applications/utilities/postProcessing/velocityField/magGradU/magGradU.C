@@ -26,77 +26,61 @@ Application
     magGradU
 
 Description
-    Calculates and writes the scalar magnitude of velocity field U at each time
-   
+    Calculates and writes the scalar magnitude of the gradient of the
+    velocity field U.
+    The -noWrite option just outputs the max/min values without writing
+    the field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//  Main program:
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject Uheader
+    (
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (Uheader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        Info<< "    Reading U" << endl;
+        volVectorField U(Uheader, mesh);
 
-        Info<< "Time = " << runTime.timeName() << endl;
-
-        IOobject Uheader
+        Info<< "    Calculating magGradU" << endl;
+        volScalarField magGradU
         (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                "magGradU",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            mag(fvc::grad(U))
         );
 
-        // Check U exists
-        if (Uheader.headerOk())
+        Info<< "magGrad(U) max/min : "
+            << max(magGradU).value() << " "
+            << min(magGradU).value() << endl;
+
+        if (writeResults)
         {
-            mesh.readUpdate();
-
-            Info<< "    Reading U" << endl;
-            volVectorField U(Uheader, mesh);
-
-            Info<< "    Calculating magGradU" << endl;
-            volScalarField magGradU
-            (
-                IOobject
-                (
-                    "magGradU",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                mag(fvc::grad(U))
-            );
             magGradU.write();
         }
-        else
-        {
-            Info<< "    No U" << endl;
-        }
     }
-
-    return(0);
+    else
+    {
+        Info<< "    No U" << endl;
+    }
 }
 
 

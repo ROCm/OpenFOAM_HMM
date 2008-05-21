@@ -26,81 +26,58 @@ Application
     Lambda2
 
 Description
-    Calculates and writes the second largest eigenvalue of the sum of the 
-    square of the symmetrical and anti-symmetrical parts of the velocity 
-    gradient tensor, for each time.
+    Calculates and writes the second largest eigenvalue of the sum of the
+    square of the symmetrical and anti-symmetrical parts of the velocity
+    gradient tensor.
+    The -noWrite option has no meaning.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "tensorField.H"
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    IOobject Uheader
+    (
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (Uheader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        Info<< "    Reading U" << endl;
+        volVectorField U(Uheader, mesh);
 
-        Info<< "Time = " << runTime.timeName() << endl;
+        const volTensorField gradU(fvc::grad(U));
 
-        IOobject Uheader
+        volTensorField SSplusWW =
+            (symm(gradU) & symm(gradU)) + (skew(gradU) & skew(gradU));
+
+        volScalarField Lambda2
         (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                "Lambda2",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            -eigenValues(SSplusWW)().component(vector::Y)
         );
 
-        // Check U exists
-        if (Uheader.headerOk())
-        {
-            mesh.readUpdate();
-
-            Info<< "    Reading U" << endl;
-            volVectorField U(Uheader, mesh);
-
-            const volTensorField gradU(fvc::grad(U));
-
-            volTensorField SSplusWW =
-                (symm(gradU) & symm(gradU)) + (skew(gradU) & skew(gradU));
-
-            volScalarField Lambda2
-            (
-                IOobject
-                (
-                    "Lambda2",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                -eigenValues(SSplusWW)().component(vector::Y)
-            );
-
-            Info << "    Writing -Lambda2" << endl;
-            Lambda2.write();
-        }
+        Info << "    Writing -Lambda2" << endl;
+        Lambda2.write();
     }
-
-    return(0);
+    else
+    {
+        Info<< "    No U" << endl;
+    }
 }
 
 

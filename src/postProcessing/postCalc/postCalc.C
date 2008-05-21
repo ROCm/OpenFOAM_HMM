@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    divPhi
+    postCalc
 
 Description
-    Calculates and writes the divergence of phi U at each time
+    Generic wrapper for calculating a quantity at each time
 
 \*---------------------------------------------------------------------------*/
 
@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
     Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
-    forAll(timeDirs, timei)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(timeDirs[timei], timei);
+        runTime.setTime(timeDirs[timeI], timeI);
 
         Foam::Info<< "Time = " << runTime.timeName() << Foam::endl;
 

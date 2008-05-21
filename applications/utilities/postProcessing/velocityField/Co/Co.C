@@ -26,60 +26,56 @@ Application
     Co
 
 Description
-    Calculates and writes the Co number as a surfaceScalarField obtained from
-    field phi for each time
+    Calculates and writes the Co number as a surfaceScalarField obtained
+    from field phi.
+    The -noWrite option just outputs the max values without writing the
+    field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject phiHeader
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (phiHeader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        autoPtr<surfaceScalarField> CoPtr;
 
-        Info<< "Time = " << runTime.timeName() << endl;
+        Info<< "    Reading phi" << endl;
+        surfaceScalarField phi(phiHeader, mesh);
+        Info<< "    Calculating Co" << endl;
 
-        IOobject phiHeader
-        (
-            "phi",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        );
-
-        // Check U exists
-        if (phiHeader.headerOk())
+        if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
         {
-            mesh.readUpdate();
+            // compressible
+            volScalarField rho
+            (
+                IOobject
+                (
+                    "rho",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::MUST_READ
+                ),
+                mesh
+            );
 
-            Info<< "    Reading phi" << endl;
-            surfaceScalarField phi(phiHeader, mesh);
-
-            Info<< "    Calculating Co" << endl;
-
-            if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
-            {
-                surfaceScalarField Co
+            CoPtr.set
+            (
+                new surfaceScalarField
                 (
                     IOobject
                     (
@@ -88,30 +84,20 @@ int main(int argc, char *argv[])
                         mesh,
                         IOobject::NO_READ
                     ),
-                    mesh.surfaceInterpolation::deltaCoeffs()
-                   *(mag(phi)/mesh.magSf())
-                   *runTime.deltaT()
-                );
-
-                Info << "    Max Co = " << max(Co).value() << endl;
-                
-                Co.write();
-            }
-            else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
-            {
-                volScalarField rho
-                (
-                    IOobject
                     (
-                        "rho",
-                        runTime.timeName(),
-                        mesh,
-                        IOobject::MUST_READ
-                    ),
-                    mesh
-                );
- 
-                surfaceScalarField Co
+                        mesh.surfaceInterpolation::deltaCoeffs()
+                      * (mag(phi)/(fvc::interpolate(rho)*mesh.magSf()))
+                      * runTime.deltaT()
+                    )
+                )
+            );
+        }
+        else if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
+        {
+            // incompressible
+            CoPtr.set
+            (
+                new surfaceScalarField
                 (
                     IOobject
                     (
@@ -120,34 +106,32 @@ int main(int argc, char *argv[])
                         mesh,
                         IOobject::NO_READ
                     ),
-                    mesh.surfaceInterpolation::deltaCoeffs()
-                   *(mag(phi)/(fvc::interpolate(rho)*mesh.magSf()))
-                   *runTime.deltaT()
-                );
-
-                Info << "    Max Co = " << max(Co).value() << endl;
-                
-                Co.write();
-            }
-            else
-            {
-                FatalErrorIn(args.executable())
-                    << "Incorrect dimensions of phi: " << phi.dimensions()
-                    << abort(FatalError);
-            }
+                    (
+                        mesh.surfaceInterpolation::deltaCoeffs()
+                      * (mag(phi)/mesh.magSf())
+                      * runTime.deltaT()
+                    )
+                )
+            );
         }
         else
         {
-            Info<< "    No phi" << endl;
+            FatalErrorIn(args.executable())
+                << "Incorrect dimensions of phi: " << phi.dimensions()
+                    << abort(FatalError);
         }
 
-        Info<< endl;
+        Info<< "Co max : " << max(CoPtr()).value() << endl;
+
+        if (writeResults)
+        {
+            CoPtr().write();
+        }
     }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    else
+    {
+        Info<< "    No phi" << endl;
+    }
 }
-
 
 // ************************************************************************* //

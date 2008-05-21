@@ -22,8 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    foamFormatConvert
+
 Description
-    Converts all IOobjects associated with a case into the format specified 
+    Converts all IOobjects associated with a case into the format specified
     in the controlDict.
 
     Mainly used to convert binary mesh/field files to ASCII.
@@ -31,6 +34,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "Time.H"
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -47,22 +51,15 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-#   include "addTimeOptions.H"
-
+    timeSelector::addOptions();
 #   include "setRootCase.H"
 #   include "createTime.H"
+    Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    for (label i=startTime; i<endTime; i++)
+    forAll (timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
-        Info<< "    Time = " << runTime.timeName() << endl;
+        runTime.setTime(timeDirs[timeI], timeI);
+        Info<< "Time = " << runTime.timeName() << endl;
 
         // Convert all the standard mesh files
         writeMeshObject<cellIOList>("cells", runTime);
@@ -78,7 +75,7 @@ int main(int argc, char *argv[])
         {
             const word& headerClassName = iter()->headerClassName();
 
-            if 
+            if
             (
                 headerClassName == volScalarField::typeName
              || headerClassName == volVectorField::typeName
@@ -115,7 +112,6 @@ int main(int argc, char *argv[])
 
         Info<< endl;
     }
-
 
     Info<< "End\n" << endl;
 

@@ -22,56 +22,51 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    calcDivU
+Application
+    polyDualMesh
 
 Description
-    Calculates and writes the divergence of velocity field U
+    Calculate the dual of a polyMesh. Adheres to all the feature&patch edges
 
 \*---------------------------------------------------------------------------*/
 
-#include "calc.H"
-#include "fvc.H"
+#include "argList.H"
+#include "Time.H"
+#include "polyDualMesh.H"
+#include "mathematicalConstants.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
+int main(int argc, char *argv[])
 {
-    bool writeResults = !args.options().found("noWrite");
+    argList::noParallel();
+    argList::validArgs.append("feature angle[0-180]");
 
-    Info<< "    Reading U" << endl;
-    volVectorField U
-    (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        ),
-        mesh
-    );
+#   include "setRootCase.H"
+#   include "createTime.H"
+#   include "createPolyMesh.H"
 
-    Info<< "    Calculating divU" << endl;
-    volScalarField divU
-    (
-        IOobject
-        (
-            "divU",
-            runTime.timeName(),
-            mesh
-        ),
-        fvc::div(U)
-    );
+    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
-    Info<< "div(phi) max/min : "
-        << max(divU).value() << " "
-        << min(divU).value() << endl;
+    scalar minCos = Foam::cos(featureAngle * mathematicalConstant::pi/180.0);
 
-    if (writeResults)
-    {
-        divU.write();
-    }
+    Info<< "Feature:" << featureAngle << endl
+        << "minCos :" << minCos << endl
+        << endl;
+
+    polyDualMesh dualMesh(mesh, minCos);
+
+    runTime++;
+
+    Pout<< "Writing dualMesh to " << runTime.timeName() << endl;
+
+    dualMesh.write();
+
+    Info << "End\n" << endl;
+
+    return 0;
 }
 
 
