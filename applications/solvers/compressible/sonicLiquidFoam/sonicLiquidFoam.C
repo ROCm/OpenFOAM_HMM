@@ -26,7 +26,7 @@ Application
     sonicLiquidFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar flow of a 
+    Transient solver for trans-sonic/supersonic, laminar flow of a
     compressible liquid.
 
 \*---------------------------------------------------------------------------*/
