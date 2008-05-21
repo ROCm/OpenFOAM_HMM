@@ -71,8 +71,8 @@ frictionalPressure
     const dimensionedScalar& eta,
     const dimensionedScalar& p
 ) const
-{   
-    return 
+{
+    return
         dimensionedScalar("1e24", dimensionSet(1, -1, -2, 0, 0), 1e24)
        *pow(Foam::max(alpha - alphaMinFriction, scalar(0)), 10.0);
 }
@@ -89,7 +89,7 @@ frictionalPressurePrime
     const dimensionedScalar& p
 ) const
 {
-    return 
+    return
         dimensionedScalar("1e25", dimensionSet(1, -1, -2, 0, 0), 1e25)
        *pow(Foam::max(alpha - alphaMinFriction, scalar(0)), 9.0);
 }
@@ -129,8 +129,8 @@ Foam::tmp<Foam::volScalarField> Foam::SchaefferFrictionalStress::muf
     {
         if (alpha[celli] > alphaMax.value()-5e-2)
         {
-            muf_[celli] = 
-                0.5*alpha[celli]*pf[celli]*sin(phi.value())
+            muf_[celli] =
+                0.5*pf[celli]*sin(phi.value())
                /(
                     sqrt(1.0/6.0*(sqr(D[celli].xx() - D[celli].yy())
                   + sqr(D[celli].yy() - D[celli].zz())

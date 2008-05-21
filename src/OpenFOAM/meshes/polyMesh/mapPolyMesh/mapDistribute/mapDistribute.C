@@ -185,6 +185,78 @@ Foam::mapDistribute::mapDistribute
 {}
 
 
+Foam::mapDistribute::mapDistribute
+(
+    const labelList& sendProcs,
+    const labelList& recvProcs
+)
+:
+    constructSize_(sendProcs.size()),
+    schedulePtr_()
+{
+    if (sendProcs.size() != recvProcs.size())
+    {
+        FatalErrorIn
+        (
+            "mapDistribute::mapDistribute(const labelList&, const labelList&)"
+        )   << "The send and receive data is not the same length. sendProcs:"
+            << sendProcs.size() << " recvProcs:" << recvProcs.size()
+            << abort(FatalError);
+    }
+
+    // Per processor the number of samples we have to send/receive.
+    labelList nSend(Pstream::nProcs(), 0);
+    labelList nRecv(Pstream::nProcs(), 0);
+
+    forAll(sendProcs, sampleI)
+    {
+        label sendProc = sendProcs[sampleI];
+        label recvProc = recvProcs[sampleI];
+
+        // Note that also need to include local communication (both
+        // RecvProc and sendProc on local processor)
+
+        if (Pstream::myProcNo() == sendProc)
+        {
+            // I am the sender. Count destination processor.
+            nSend[recvProc]++;
+        }
+        if (Pstream::myProcNo() == recvProc)
+        {
+            // I am the receiver.
+            nRecv[sendProc]++;
+        }
+    }
+
+    subMap_.setSize(Pstream::nProcs());
+    constructMap_.setSize(Pstream::nProcs());
+    forAll(nSend, procI)
+    {
+        subMap_[procI].setSize(nSend[procI]);
+        constructMap_[procI].setSize(nRecv[procI]);
+    }
+    nSend = 0;
+    nRecv = 0;
+
+    forAll(sendProcs, sampleI)
+    {
+        label sendProc = sendProcs[sampleI];
+        label recvProc = recvProcs[sampleI];
+
+        if (Pstream::myProcNo() == sendProc)
+        {
+            // I am the sender. Store index I need to send.
+            subMap_[recvProc][nSend[recvProc]++] = sampleI;
+        }
+        if (Pstream::myProcNo() == recvProc)
+        {
+            // I am the receiver.
+            constructMap_[sendProc][nRecv[sendProc]++] = sampleI;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 

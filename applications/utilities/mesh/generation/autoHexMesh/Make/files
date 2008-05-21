@@ -1,3 +1,0 @@
-autoHexMesh.C
-
-EXE = $(FOAM_APPBIN)/autoHexMesh
