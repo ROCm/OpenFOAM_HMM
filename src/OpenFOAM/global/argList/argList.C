@@ -607,27 +607,33 @@ void Foam::argList::displayDoc() const
 {
     const dictionary& docDict = debug::controlDict().subDict("Documentation");
     List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
+    List<fileName> docExts(docDict.lookup("doxySourceFileExts"));
 
     fileName docFile;
     bool found = false;
 
     forAll(docDirs, dirI)
     {
-        docFile =
-            fileName(docDirs[dirI])/executable()
-          + fileName(docDict.lookup("doxySourceFileExt"));
-        docFile.expand();
-
-        if (exists(docFile))
+        forAll(docExts, extI)
         {
-            found = true;
+            docFile = docDirs[dirI]/executable() + docExts[extI];
+            docFile.expand();
+
+            if (exists(docFile))
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+        {
             break;
         }
     }
 
     if (found)
     {
-        string docBrowser = docDict.lookup("docBrowser");
+        string docBrowser(docDict.lookup("docBrowser"));
         docBrowser.replaceAll("%f", docFile);
 
         Info<< "Show documentation: " << docBrowser.c_str() << endl;
