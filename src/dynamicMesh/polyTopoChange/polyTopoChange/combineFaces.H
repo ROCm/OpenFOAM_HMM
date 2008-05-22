@@ -152,6 +152,15 @@ public:
 
         // Helper functions
 
+            //- Extract lists of all (non-coupled) boundary faces on selected
+            //  cells that can be merged. Uses getFaceRegions.
+            labelListList getMergeSets
+            (
+                const scalar featureCos,
+                const scalar minConcaveCos,
+                const labelHashSet& boundaryCells
+            ) const;
+
             //- Extract lists of all (non-coupled) boundary faces that can
             //  be merged. Uses getFaceRegions.
             labelListList getMergeSets
