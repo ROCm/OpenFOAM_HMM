@@ -26,22 +26,25 @@ Application
     magGrad
 
 Description
-    Calculates and writes the scalar magnitude of a scalar or vector field
-    at each time
+    Calculates and writes the magnitude of the gradient of a field for each
+    time
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//  Main program:
+
+#include "writeMagGradField.C"
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("field");
+    argList::validArgs.append("fieldName");
 
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"
+
+    word fieldName(args.additionalArgs()[0]);
 
 #   include "createTime.H"
 
@@ -50,8 +53,6 @@ int main(int argc, char *argv[])
 
     // set startTime and endTime depending on -time and -latestTime options
 #   include "checkTimeOptions.H"
-
-    const word fieldName(args.additionalArgs()[0]);
 
     runTime.setTime(Times[startTime], startTime);
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << endl;
 
-        IOobject header
+        IOobject fieldHeader
         (
             fieldName,
             runTime.timeName(),
@@ -71,55 +72,32 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ
         );
 
-        // Check U exists
-        if (header.headerOk())
+        // Check field "fieldName" exists
+        if (fieldHeader.headerOk())
         {
             mesh.readUpdate();
 
-            if (header.headerClassName() == volVectorField::typeName)
+            bool processed = false;
+            writeMagGradField<scalar>(fieldHeader, mesh, processed);
+            writeMagGradField<vector>(fieldHeader, mesh, processed);
+            if (!processed)
             {
-                Info<< "    Reading " << fieldName << endl;
-                volVectorField U(header, mesh);
-
-                volScalarField magGrad
-                (
-                    IOobject
-                    (
-                        "magGrad" + fieldName,
-                        runTime.timeName(),
-                        mesh,
-                        IOobject::NO_READ
-                    ),
-                    mag(fvc::grad(U))
-                );
-                Info<< "    Calculating " << magGrad.name() << endl;
-                magGrad.write();
-            }
-            else if (header.headerClassName() == volScalarField::typeName)
-            {
-                Info<< "    Reading " << fieldName << endl;
-                volScalarField U(header, mesh);
-
-                volScalarField magGrad
-                (
-                    IOobject
-                    (
-                        "magGrad" + fieldName,
-                        runTime.timeName(),
-                        mesh,
-                        IOobject::NO_READ
-                    ),
-                    mag(fvc::grad(U))
-                );
-                Info<< "    Calculating " << magGrad.name() << endl;
-                magGrad.write();
+                FatalError
+                    << "Unable to process " << fieldName << nl
+                    << "No call to magGrad for fields of type "
+                    << fieldHeader.headerClassName() << nl << nl
+                    << exit(FatalError);
             }
         }
         else
         {
             Info<< "    No " << fieldName << endl;
         }
+
+        Info<< endl;
     }
+
+    Info<< "End\n" << endl;
 
     return(0);
 }
