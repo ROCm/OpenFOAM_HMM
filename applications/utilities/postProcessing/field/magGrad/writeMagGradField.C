@@ -51,7 +51,7 @@ void writeMagGradField
         fieldType field(header, mesh);
 
         Info<< "    Calculating magGrad" << header.name() << endl;
-        volScalarField magField
+        volScalarField magGradField
         (
             IOobject
             (
@@ -62,7 +62,7 @@ void writeMagGradField
             ),
             mag(fvc::grad(field))
         );
-        magField.write();
+        magGradField.write();
 
         processed = true;
     }
