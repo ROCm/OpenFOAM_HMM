@@ -1,4 +1,4 @@
 buoyantSimpleRadiationFoam.C
 
-EXE = $(FOAM_USER_APPBIN)/buoyantSimpleRadiationFoam
+EXE = $(FOAM_APPBIN)/buoyantSimpleRadiationFoam
 
