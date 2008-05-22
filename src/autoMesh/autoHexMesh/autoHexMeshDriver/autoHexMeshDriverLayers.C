@@ -62,7 +62,15 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
     combineFaces faceCombiner(mesh_, true);
 
     // Get all sets of faces that can be merged
-    labelListList allFaceSets(faceCombiner.getMergeSets(minCos, concaveCos));
+    labelListList allFaceSets
+    (
+        faceCombiner.getMergeSets
+        (
+            minCos,
+            concaveCos,
+            meshRefinement::addedPatches(globalToPatch_)
+        )
+    );
 
     label nFaceSets = returnReduce(allFaceSets.size(), sumOp<label>());
 

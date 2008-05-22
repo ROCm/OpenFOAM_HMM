@@ -48,14 +48,43 @@ Class
 Foam::label Foam::meshRefinement::mergePatchFaces
 (
     const scalar minCos,
-    const scalar concaveCos
+    const scalar concaveCos,
+    const labelList& patchIDs
 )
 {
     // Patch face merging engine
     combineFaces faceCombiner(mesh_);
 
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Pick up all cells on boundary
+    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+
+    forAll(patchIDs, i)
+    {
+        label patchI = patchIDs[i];
+
+        const polyPatch& patch = patches[patchI];
+
+        if (!patch.coupled())
+        {
+            forAll(patch, i)
+            {
+                boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
+            }
+        }
+    }
+
     // Get all sets of faces that can be merged
-    labelListList mergeSets(faceCombiner.getMergeSets(minCos, concaveCos));
+    labelListList mergeSets
+    (
+        faceCombiner.getMergeSets
+        (
+            minCos,
+            concaveCos,
+            boundaryCells
+        )
+    );
 
     label nFaceSets = returnReduce(mergeSets.size(), sumOp<label>());
 

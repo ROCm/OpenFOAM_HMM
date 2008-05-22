@@ -293,27 +293,10 @@ Foam::combineFaces::combineFaces
 Foam::labelListList Foam::combineFaces::getMergeSets
 (
     const scalar featureCos,
-    const scalar minConcaveCos
+    const scalar minConcaveCos,
+    const labelHashSet& boundaryCells
 ) const
 {
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    // Pick up all cells on boundary
-    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& patch = patches[patchI];
-
-        if (!patch.coupled())
-        {
-            forAll(patch, i)
-            {
-                boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
-            }
-        }
-    }
-
     // Lists of faces that can be merged.
     DynamicList<labelList> allFaceSets(boundaryCells.size() / 10);
 
@@ -384,6 +367,34 @@ Foam::labelListList Foam::combineFaces::getMergeSets
     }
 
     return allFaceSets.shrink();
+}
+
+
+Foam::labelListList Foam::combineFaces::getMergeSets
+(
+    const scalar featureCos,
+    const scalar minConcaveCos
+) const
+{
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Pick up all cells on boundary
+    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& patch = patches[patchI];
+
+        if (!patch.coupled())
+        {
+            forAll(patch, i)
+            {
+                boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
+            }
+        }
+    }
+
+    return getMergeSets(featureCos, minConcaveCos, boundaryCells);
 }
 
 
