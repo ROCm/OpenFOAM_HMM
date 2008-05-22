@@ -132,6 +132,15 @@ public:
 
     // Member functions
 
+        // Access
+
+            //- Return const access to the relative flag
+            const Switch& relative() const
+            {
+                return relative_;
+            }
+
+
         // Mapping functions
 
             //- Map (and resize as needed) from self given a mapping object

@@ -85,6 +85,9 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
 
+            // Give patch area
+            Info<< "    Patch area = " << sum(mesh.Sf()) << endl;
+
             if (fieldHeader.headerClassName() == "volScalarField")
             {
                 Info<< "    Reading volScalarField " << fieldName << endl;
