@@ -34,39 +34,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void writeMagSqrField
-(
-    const IOobject& header,
-    const fvMesh& mesh,
-    bool& processed
-)
-{
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    if (header.headerClassName() == fieldType::typeName)
-    {
-        Info<< "    Reading " << header.name() << endl;
-        fieldType field(header, mesh);
-
-        Info<< "    Calculating magSqr" << header.name() << endl;
-        volScalarField magSqrField
-        (
-            IOobject
-            (
-                "magSqr" + header.name(),
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            magSqr(field)
-        );
-        magSqrField.write();
-
-        processed = true;
-    }
-}
-
+#include "writeMagSqrField.C"
 
 int main(int argc, char *argv[])
 {
