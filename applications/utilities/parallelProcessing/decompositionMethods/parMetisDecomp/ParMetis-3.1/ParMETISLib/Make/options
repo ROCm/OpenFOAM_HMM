@@ -1,8 +1,0 @@
-include $(RULES)/mplib$(WM_MPLIB)
-
-EXE_INC = $(PFLAGS) $(PINC)
-
-LIB_LIBS = \
-    $(PLIBS) \
-    -L$(FOAM_MPI_LIBBIN) \
-    -lmetis-parmetis

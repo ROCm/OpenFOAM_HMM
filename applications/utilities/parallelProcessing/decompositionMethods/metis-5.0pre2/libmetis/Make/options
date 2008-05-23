@@ -1,3 +1,0 @@
-EXE_INC = \
-    -I../include \
-    -I../GKlib/trunk
