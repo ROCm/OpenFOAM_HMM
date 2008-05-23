@@ -56,11 +56,11 @@ SourceFiles
 #define fvMeshSubset_H
 
 #include "fvMesh.H"
+#include "pointMesh.H"
 #include "fvPatchFieldMapper.H"
+#include "pointPatchFieldMapper.H"
 #include "GeometricField.H"
-#include "emptyFvPatchFields.H"
 #include "labelHashSet.H"
-#include "SubField.H"
 #include "surfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -119,6 +119,48 @@ public:
     };
 
 
+    //- Patch-field subset interpolation class
+    class pointPatchFieldSubset
+    :
+        public pointPatchFieldMapper
+    {
+        const labelList& directAddressing_;
+
+    public:
+
+        // Constructors
+
+            //- Construct given addressing
+            pointPatchFieldSubset(const labelList& directAddressing)
+            :
+                directAddressing_(directAddressing)
+            {}
+
+        // Destructor
+
+            virtual ~pointPatchFieldSubset()
+            {}
+
+
+        // Member Functions
+
+            label size() const
+            {
+                return directAddressing_.size();
+            }
+
+            bool direct() const
+            {
+                return true;
+            }
+
+            const unallocLabelList& directAddressing() const
+            {
+                return directAddressing_;
+            }
+    };
+
+
 private:
 
     // Private data
@@ -127,7 +169,9 @@ private:
         const fvMesh& baseMesh_;
 
         //- Subset mesh pointer
-        fvMesh* fvMeshSubsetPtr_;
+        autoPtr<fvMesh> fvMeshSubsetPtr_;
+
+        mutable autoPtr<pointMesh> pointMeshSubsetPtr_;
 
         //- Point mapping array
         labelList pointMap_;
@@ -185,11 +229,6 @@ public:
         explicit fvMeshSubset(const fvMesh&);
 
 
-    // Destructor
-
-        ~fvMeshSubset();
-
-
     // Member Functions
 
         // Edit
@@ -236,7 +275,13 @@ public:
 
             //- Return reference to subset mesh
             const fvMesh& subMesh() const;
+
             fvMesh& subMesh();
+
+            //- Return reference to demand-driven subset pointMesh
+            const pointMesh& subPointMesh() const;
+
+            pointMesh& subPointMesh();
 
             //- Return point map
             const labelList& pointMap() const;
@@ -275,7 +320,7 @@ public:
             //- Map surface field
             template<class Type>
             static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-             interpolate
+            interpolate
             (
                 const GeometricField<Type, fvsPatchField, surfaceMesh>&,
                 const fvMesh& sMesh,
@@ -288,6 +333,25 @@ public:
             interpolate
             (
                 const GeometricField<Type, fvsPatchField, surfaceMesh>&
+            ) const;
+
+            //- Map point field
+            template<class Type>
+            static tmp<GeometricField<Type, pointPatchField, pointMesh> >
+            interpolate
+            (
+                const GeometricField<Type, pointPatchField, pointMesh>&,
+                const pointMesh& sMesh,
+                const objectRegistry& reg,
+                const labelList& patchMap,
+                const labelList& pointMap
+            );
+
+            template<class Type>
+            tmp<GeometricField<Type, pointPatchField, pointMesh> >
+            interpolate
+            (
+                const GeometricField<Type, pointPatchField, pointMesh>&
             ) const;
 };
 

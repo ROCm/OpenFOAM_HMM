@@ -469,17 +469,12 @@ int main(int argc, char *argv[])
 
         // Construct pointMesh only if nessecary since constructs edge
         // addressing (expensive on polyhedral meshes)
-        autoPtr<pointMesh> pMeshPtr(NULL);
         if (noPointValues)
         {
             Info<< "    pointScalarFields : switched off"
                 << " (\"-noPointValues\" option)\n";
             Info<< "    pointVectorFields : switched off"
                 << " (\"-noPointValues\" option)\n";
-        }
-        else
-        {
-            pMeshPtr.reset(new pointMesh(mesh));
         }
 
         PtrList<pointScalarField> psf;
@@ -488,21 +483,56 @@ int main(int argc, char *argv[])
         PtrList<pointSymmTensorField> pSymmtf;
         PtrList<pointTensorField> ptf;
 
-        if (pMeshPtr.valid())
+        if (!noPointValues)
         {
-            readFields(pMeshPtr(), objects, selectedFields, psf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                psf
+            );
             print("    pointScalarFields          :", Info, psf);
 
-            readFields(pMeshPtr(), objects, selectedFields, pvf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                pvf
+            );
             print("    pointVectorFields          :", Info, pvf);
 
-            readFields(pMeshPtr(), objects, selectedFields, pSpheretf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                pSpheretf
+            );
             print("    pointSphericalTensorFields :", Info, pSpheretf);
 
-            readFields(pMeshPtr(), objects, selectedFields, pSymmtf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                pSymmtf
+            );
             print("    pointSymmTensorFields      :", Info, pSymmtf);
 
-            readFields(pMeshPtr(), objects, selectedFields, ptf);
+            readFields
+            (
+                vMesh,
+                vMesh.basePointMesh(),
+                objects,
+                selectedFields,
+                ptf
+            );
             print("    pointTensorFields          :", Info, ptf);
         }
         Info<< endl;
@@ -550,7 +580,7 @@ int main(int argc, char *argv[])
             writer.write(vSymmtf);
             writer.write(vtf);
 
-            if (pMeshPtr.valid())
+            if (!noPointValues)
             {
                 writeFuns::writePointDataHeader
                 (
@@ -567,7 +597,7 @@ int main(int argc, char *argv[])
                 writer.write(ptf);
 
                 // Interpolated volFields
-                volPointInterpolation pInterp(mesh, pMeshPtr());
+                volPointInterpolation pInterp(mesh, vMesh.pMesh());
                 writer.write(pInterp, vsf);
                 writer.write(pInterp, vvf);
                 writer.write(pInterp, vSpheretf);
@@ -705,7 +735,7 @@ int main(int argc, char *argv[])
             writer.write(vSymmtf);
             writer.write(vtf);
 
-            if (pMeshPtr.valid())
+            if (!noPointValues)
             {
                 writeFuns::writePointDataHeader
                 (
@@ -785,7 +815,7 @@ int main(int argc, char *argv[])
                         writer.write(vSymmtf);
                         writer.write(vtf);
 
-                        if (pMeshPtr.valid())
+                        if (!noPointValues)
                         {
                             writeFuns::writePointDataHeader
                             (

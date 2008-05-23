@@ -81,14 +81,17 @@ public:
    // Public static data
 
         // this must be consistent with the enumeration in "vtkCell.H"
-        static const label VTK_TRIANGLE   = 5;
-        static const label VTK_POLYGON    = 7;
-        static const label VTK_QUAD       = 9;
+        enum vtkTypes
+        {
+            VTK_TRIANGLE   = 5,
+            VTK_POLYGON    = 7,
+            VTK_QUAD       = 9,
 
-        static const label VTK_TETRA      = 10;
-        static const label VTK_PYRAMID    = 14;
-        static const label VTK_WEDGE      = 13;
-        static const label VTK_HEXAHEDRON = 12;
+            VTK_TETRA      = 10,
+            VTK_PYRAMID    = 14,
+            VTK_WEDGE      = 13,
+            VTK_HEXAHEDRON = 12,
+        };
 
     // Constructors
 

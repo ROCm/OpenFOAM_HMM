@@ -34,50 +34,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//template<class GeoField, class Mesh>
-template<class GeoField>
-void readFields
-(
-    const typename GeoField::Mesh& mesh,
-    const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
-    PtrList<GeoField>& fields
-)
-{
-    // Search list of objects for volScalarFields
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
-
-    // Construct the vol scalar fields
-    fields.setSize(fieldObjects.size());
-    label nFields = 0;
-
-    for
-    (
-        IOobjectList::iterator iter = fieldObjects.begin();
-        iter != fieldObjects.end();
-        ++iter
-    )
-    {
-        if (!selectedFields.size() || selectedFields.found(iter()->name()))
-        {
-            fields.set
-            (
-                nFields,
-                new GeoField
-                (
-                    *iter(),
-                    mesh
-                )
-            );
-
-            nFields++;
-        }
-    }
-
-    fields.setSize(nFields);
-}
-
-
 template<class GeoField>
 void readFields
 (

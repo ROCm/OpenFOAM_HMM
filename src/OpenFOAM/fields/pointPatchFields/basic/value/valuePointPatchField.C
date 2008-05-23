@@ -114,7 +114,7 @@ valuePointPatchField<Type>::valuePointPatchField
     const pointPatchFieldMapper& mapper
 )
 :
-    pointPatchField<Type>(ptf, iF),
+    pointPatchField<Type>(p, iF),
     Field<Type>(ptf, mapper)
 {}
 

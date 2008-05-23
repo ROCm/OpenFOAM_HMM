@@ -45,8 +45,7 @@ Foam::vtkMesh::vtkMesh
 :
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
-    setName_(setName),
-    topoPtr_(NULL)
+    setName_(setName)
 {
     if (setName.size() > 0)
     {
@@ -56,14 +55,6 @@ Foam::vtkMesh::vtkMesh
         // Set current subset
         subsetter_.setLargeCellSubset(currentSet);
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtkMesh::~vtkMesh()
-{
-    deleteDemandDrivenData(topoPtr_);
 }
 
 
@@ -78,11 +69,11 @@ Foam::polyMesh::readUpdateState Foam::vtkMesh::readUpdate()
         // Note: since fvMeshSubset has no movePoints() functionality reconstruct
         // the subset even if only movement.
 
-        deleteDemandDrivenData(topoPtr_);
+        topoPtr_.clear();
 
         if (setName_.size() > 0)
         {
-            Pout<< "Subsetting mesh based on cellSet " << setName_ << endl;
+            Info<< "Subsetting mesh based on cellSet " << setName_ << endl;
 
             // Read cellSet using whole mesh
             cellSet currentSet(baseMesh_, setName_);

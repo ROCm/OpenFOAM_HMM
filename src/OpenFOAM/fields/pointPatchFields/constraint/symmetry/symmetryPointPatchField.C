@@ -78,10 +78,10 @@ symmetryPointPatchField<Type>::symmetryPointPatchField
     const symmetryPointPatchField<Type>& ptf,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    basicSymmetryPointPatchField<Type>(ptf, iF)
+    basicSymmetryPointPatchField<Type>(ptf, p, iF, mapper)
 {
     if (!isType<symmetryPointPatch>(this->patch()))
     {
