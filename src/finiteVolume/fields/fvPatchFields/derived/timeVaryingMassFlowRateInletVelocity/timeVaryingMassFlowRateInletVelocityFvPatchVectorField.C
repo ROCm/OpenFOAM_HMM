@@ -72,7 +72,7 @@ timeVaryingMassFlowRateInletVelocityFvPatchVectorField
 )
 :
     massFlowRateInletVelocityFvPatchVectorField(p, iF, dict),
-    timeDataFile_(fileName(dict.lookup("timeDataFile")).expand()),
+    timeDataFile_(dict.lookup("timeDataFile")),
     timeSeries_(word(dict.lookup("timeBounding")))
 {}
 
@@ -112,7 +112,10 @@ currentValue()
 {
     if (timeSeries_.size() == 0)
     {
-        if (timeDataFile_.size() == 0)
+        fileName fName(timeDataFile_);
+        fName.expand();
+
+        if (fName.size() == 0)
         {
             FatalErrorIn
             (
@@ -124,10 +127,16 @@ currentValue()
         }
         else
         {
+            // relative path
+            if (fName[0] != '/')
+            {
+                fName = this->db().path()/fName;
+            }
+
             // just in case we change the interface to timeSeries
             word boundType = timeBounding();
 
-            IFstream(timeDataFile_)() >> timeSeries_;
+            IFstream(fName)() >> timeSeries_;
             timeSeries_.bounding(boundType);
 
             // be a bit paranoid and check that the list is okay
