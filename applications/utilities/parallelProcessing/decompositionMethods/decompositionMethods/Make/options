@@ -1,6 +1,0 @@
-EXE_INC = \
-    -I../metis-5.0pre2/include
-
-LIB_LIBS = \
-    -lmetis \
-    -lGKlib
