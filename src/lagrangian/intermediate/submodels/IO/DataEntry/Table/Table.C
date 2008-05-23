@@ -50,7 +50,6 @@ Foam::Table<Type>::Table
         ) << "Table is invalid (empty)" << nl
           << exit(FatalError);
     }
-    Info<< table_;
 }
 
 
@@ -72,27 +71,18 @@ Type Foam::Table<Type>::value(const scalar x) const
         return pTraits<Type>::zero;
     }
 
+    // Find i such that x(i) < x < x(i+1)
     label i = 0;
-    while ((table_[i].first() < x) && (i < table_.size()))
+    while ((table_[i+1].first() < x) && (i+1 < table_.size()))
     {
         i++;
     }
 
-    if (i == 0)
-    {
-        return table_[0].second();
-    }
-    else if (i == table_.size() - 1)
-    {
-        return table_[i-1].second();
-    }
-    else
-    {
-        return
-            (x - table_[i-1].first())/(table_[i].first() - table_[i-1].first())
-          * (table_[i].second() - table_[i-1].second())
-          + table_[i-1].second();
-    }
+    // Linear interpolation to find value
+    return
+        (x - table_[i].first())/(table_[i+1].first() - table_[i].first())
+      * (table_[i+1].second() - table_[i].second())
+      + table_[i].second();
 }
 
 
@@ -127,11 +117,11 @@ Type Foam::Table<Type>::integrate(const scalar x1, const scalar x2) const
     {
         sum +=
             (table_[i].second() + table_[i+1].second())
-        * (table_[i+1].first() - table_[i].first());
+          * (table_[i+1].first() - table_[i].first());
     }
     sum *= 0.5;
 
-    // Add table ends
+    // Add table ends (partial segments)
     if (id1 > 0)
     {
         sum += 0.5
@@ -147,5 +137,6 @@ Type Foam::Table<Type>::integrate(const scalar x1, const scalar x2) const
 
     return sum;
 }
+
 
 // ************************************************************************* //
