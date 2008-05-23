@@ -6,6 +6,7 @@
 .*~
 *.orig
 *.bak
+\#*\#
 
 # CVS recovered versions - anywhere
 .#*
