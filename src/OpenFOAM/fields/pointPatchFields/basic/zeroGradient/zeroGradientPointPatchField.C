@@ -65,7 +65,7 @@ zeroGradientPointPatchField<Type>::zeroGradientPointPatchField
     const pointPatchFieldMapper&
 )
 :
-    pointPatchField<Type>(ptf, iF)
+    pointPatchField<Type>(p, iF)
 {}
 
 

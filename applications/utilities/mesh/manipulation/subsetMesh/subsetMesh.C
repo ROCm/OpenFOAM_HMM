@@ -60,7 +60,7 @@ void subsetVolFields
 
         Info<< "Subsetting field " << fieldName << endl;
 
-        GeometricField<Type, fvPatchField, volMesh> volField    
+        GeometricField<Type, fvPatchField, volMesh> fld    
         (
             IOobject
             (
@@ -73,7 +73,7 @@ void subsetVolFields
             baseMesh
         );
 
-        subFields.set(i, subsetter.interpolate(volField));
+        subFields.set(i, subsetter.interpolate(fld));
     }
 }
 
@@ -94,7 +94,7 @@ void subsetSurfaceFields
 
         Info<< "Subsetting field " << fieldName << endl;
 
-        GeometricField<Type, fvsPatchField, surfaceMesh> volField    
+        GeometricField<Type, fvsPatchField, surfaceMesh> fld    
         (
             IOobject
             (
@@ -107,7 +107,42 @@ void subsetSurfaceFields
             baseMesh
         );
 
-        subFields.set(i, subsetter.interpolate(volField));
+        subFields.set(i, subsetter.interpolate(fld));
+    }
+}
+
+
+template<class Type>
+void subsetPointFields
+(
+    const fvMeshSubset& subsetter,
+    const pointMesh& pMesh,
+    const wordList& fieldNames,
+    PtrList<GeometricField<Type, pointPatchField, pointMesh> >& subFields
+)
+{
+    const fvMesh& baseMesh = subsetter.baseMesh();
+
+    forAll(fieldNames, i)
+    {
+        const word& fieldName = fieldNames[i];
+
+        Info<< "Subsetting field " << fieldName << endl;
+
+        GeometricField<Type, pointPatchField, pointMesh> fld    
+        (
+            IOobject
+            (
+                fieldName,
+                baseMesh.time().timeName(),
+                baseMesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            pMesh
+        );
+
+        subFields.set(i, subsetter.interpolate(fld));
     }
 }
 
@@ -163,7 +198,9 @@ int main(int argc, char *argv[])
 
     IOobjectList objects(mesh, runTime.timeName());
 
-    // Read vol fields and subset.
+
+    // Read vol fields and subset
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     wordList scalarNames(objects.names(volScalarField::typeName));
     PtrList<volScalarField> scalarFlds(scalarNames.size());
@@ -191,7 +228,9 @@ int main(int argc, char *argv[])
     PtrList<volTensorField> tensorFlds(tensorNames.size());
     subsetVolFields(subsetter, tensorNames, tensorFlds);
 
-    // Read surface fields and subset.
+
+    // Read surface fields and subset
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     wordList surfScalarNames(objects.names(surfaceScalarField::typeName));
     PtrList<surfaceScalarField> surfScalarFlds(surfScalarNames.size());
@@ -231,6 +270,59 @@ int main(int argc, char *argv[])
     subsetSurfaceFields(subsetter, surfTensorNames, surfTensorFlds);
 
 
+    // Read point fields and subset
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    pointMesh pMesh(mesh);
+
+    wordList pointScalarNames(objects.names(pointScalarField::typeName));
+    PtrList<pointScalarField> pointScalarFlds(pointScalarNames.size());
+    subsetPointFields(subsetter, pMesh, pointScalarNames, pointScalarFlds);
+
+    wordList pointVectorNames(objects.names(pointVectorField::typeName));
+    PtrList<pointVectorField> pointVectorFlds(pointVectorNames.size());
+    subsetPointFields(subsetter, pMesh, pointVectorNames, pointVectorFlds);
+
+    wordList pointSphericalTensorNames
+    (
+        objects.names(pointSphericalTensorField::typeName)
+    );
+    PtrList<pointSphericalTensorField> pointSphericalTensorFlds
+    (
+        pointSphericalTensorNames.size()
+    );
+    subsetPointFields
+    (
+        subsetter,
+        pMesh,
+        pointSphericalTensorNames,
+        pointSphericalTensorFlds
+    );
+
+    wordList pointSymmTensorNames
+    (
+        objects.names(pointSymmTensorField::typeName)
+    );
+    PtrList<pointSymmTensorField> pointSymmTensorFlds
+    (
+        pointSymmTensorNames.size()
+    );
+    subsetPointFields
+    (
+        subsetter,
+        pMesh,
+        pointSymmTensorNames,
+        pointSymmTensorFlds
+    );
+
+    wordList pointTensorNames(objects.names(pointTensorField::typeName));
+    PtrList<pointTensorField> pointTensorFlds(pointTensorNames.size());
+    subsetPointFields(subsetter, pMesh, pointTensorNames, pointTensorFlds);
+
+
+
+    // Write mesh and fields to new time
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     runTime++;
 
@@ -252,6 +344,18 @@ int main(int argc, char *argv[])
 
         vectorFlds[i].write();
     }
+    forAll(sphericalTensorFlds, i)
+    {
+        sphericalTensorFlds[i].rename(sphericalTensorNames[i]);
+
+        sphericalTensorFlds[i].write();
+    }
+    forAll(symmTensorFlds, i)
+    {
+        symmTensorFlds[i].rename(symmTensorNames[i]);
+
+        symmTensorFlds[i].write();
+    }
     forAll(tensorFlds, i)
     {
         tensorFlds[i].rename(tensorNames[i]);
@@ -272,12 +376,57 @@ int main(int argc, char *argv[])
 
         surfVectorFlds[i].write();
     }
+    forAll(surfSphericalTensorFlds, i)
+    {
+        surfSphericalTensorFlds[i].rename(surfSphericalTensorNames[i]);
+
+        surfSphericalTensorFlds[i].write();
+    }
+    forAll(surfSymmTensorFlds, i)
+    {
+        surfSymmTensorFlds[i].rename(surfSymmTensorNames[i]);
+
+        surfSymmTensorFlds[i].write();
+    }
     forAll(surfTensorNames, i)
     {
         surfTensorFlds[i].rename(surfTensorNames[i]);
 
         surfTensorFlds[i].write();
     }
+
+    // Point ones
+    forAll(pointScalarFlds, i)
+    {
+        pointScalarFlds[i].rename(pointScalarNames[i]);
+
+        pointScalarFlds[i].write();
+    }
+    forAll(pointVectorFlds, i)
+    {
+        pointVectorFlds[i].rename(pointVectorNames[i]);
+
+        pointVectorFlds[i].write();
+    }
+    forAll(pointSphericalTensorFlds, i)
+    {
+        pointSphericalTensorFlds[i].rename(pointSphericalTensorNames[i]);
+
+        pointSphericalTensorFlds[i].write();
+    }
+    forAll(pointSymmTensorFlds, i)
+    {
+        pointSymmTensorFlds[i].rename(pointSymmTensorNames[i]);
+
+        pointSymmTensorFlds[i].write();
+    }
+    forAll(pointTensorNames, i)
+    {
+        pointTensorFlds[i].rename(pointTensorNames[i]);
+
+        pointTensorFlds[i].write();
+    }
+
 
     Info << nl << "End" << endl;
 

@@ -66,10 +66,10 @@ processorPointPatchField<Type>::processorPointPatchField
     const processorPointPatchField<Type>& ptf,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    coupledPointPatchField<Type>(ptf, iF),
+    coupledPointPatchField<Type>(ptf, p, iF, mapper),
     procPatch_(refCast<const processorPointPatch>(ptf.patch()))
 {}
 

@@ -82,7 +82,7 @@ wedgePointPatchField<Type>::wedgePointPatchField
     const pointPatchFieldMapper&
 )
 :
-    pointPatchField<Type>(ptf, iF)
+    pointPatchField<Type>(p, iF)
 {
     if (!isType<wedgePointPatch>(this->patch()))
     {

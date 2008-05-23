@@ -82,10 +82,10 @@ globalPointPatchField<Type>::globalPointPatchField
     const globalPointPatchField<Type>& ptf,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    coupledPointPatchField<Type>(ptf, iF),
+    coupledPointPatchField<Type>(ptf, p, iF, mapper),
     globalPointPatch_(refCast<const globalPointPatch>(ptf.patch()))
 {
     if (!isType<globalPointPatch>(this->patch()))

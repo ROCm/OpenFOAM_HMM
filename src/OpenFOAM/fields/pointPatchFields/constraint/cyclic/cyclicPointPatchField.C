@@ -81,10 +81,10 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
     const cyclicPointPatchField<Type>& ptf,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    coupledPointPatchField<Type>(ptf, iF),
+    coupledPointPatchField<Type>(ptf, p, iF, mapper),
     cyclicPatch_(refCast<const cyclicPointPatch>(p))
 {
     if (!isType<cyclicPointPatch>(this->patch()))

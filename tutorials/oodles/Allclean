@@ -2,7 +2,7 @@
 
 currDir=`pwd`
 application=`basename $currDir`
-cases="pitzDaily"
+cases="pitzDaily pitzDailyDirectMapped"
 
 tutorialPath=`dirname $0`/..
 . $tutorialPath/CleanFunctions
