@@ -65,7 +65,7 @@ coupledPointPatchField<Type>::coupledPointPatchField
     const pointPatchFieldMapper&
 )
 :
-    pointPatchField<Type>(ptf, iF)
+    pointPatchField<Type>(p, iF)
 {}
 
 

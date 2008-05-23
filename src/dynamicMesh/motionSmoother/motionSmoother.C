@@ -1096,6 +1096,9 @@ void Foam::motionSmoother::updateMesh()
         isInternalPoint_.set(meshPoints[i], 0);
     }
 
+    // Calculate master edge addressing
+    isMasterEdge_ = syncTools::getMasterEdges(mesh_);
+
     makePatchPatchAddressing();
 }
 

@@ -1,4 +1,4 @@
-    label sourceTimeIndex = 0;
+    label sourceTimeIndex = runTimeSource.timeIndex();
     instantList sourceTimes = runTimeSource.times();
     if (args.options().found("sourceTime"))
     {

@@ -65,6 +65,9 @@ protected:
         //- Reference to the owner cloud class
         CloudType& owner_;
 
+        //- The coefficient dictionary
+        const dictionary coeffDict_;
+
 
 public:
 
@@ -91,7 +94,8 @@ public:
         MassTransferModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
 
 
@@ -114,8 +118,11 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
-        //- Return the dictionary
+        //- Return the cloud dictionary
         const dictionary& dict() const;
+
+        //- Return the coefficient dictionary
+        const dictionary& coeffDict() const;
 
 
     // Member Functions

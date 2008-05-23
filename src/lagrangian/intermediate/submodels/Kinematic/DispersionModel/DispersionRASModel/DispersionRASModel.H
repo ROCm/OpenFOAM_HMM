@@ -80,22 +80,11 @@ public:
 
     // Member Functions
 
+        //- Return const access to the turbulence model
         const compressible::turbulenceModel& turbulence() const
         {
             return turbulence_;
         }
-
-        virtual bool active() const = 0;
-
-        virtual vector update
-        (
-            const scalar dt,
-            const label celli,
-            const vector& U,
-            const vector& Uc,
-            vector& UTurb,
-            scalar& tTurb
-        ) = 0;
 };
 
 

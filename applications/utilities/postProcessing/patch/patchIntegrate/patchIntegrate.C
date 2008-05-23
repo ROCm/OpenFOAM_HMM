@@ -74,10 +74,14 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
 
+            // Give patch area
+            Info<< "    Patch area = " << sum(mesh.Sf()) << endl;
+
             if (fieldHeader.headerClassName() == "volScalarField")
             {
                 Info<< "    Reading volScalarField " << fieldName << endl;
                 volScalarField field(fieldHeader, mesh);
+
                 vector sumField = sum
                 (
                     mesh.Sf().boundaryField()[patchi]
@@ -91,6 +95,7 @@ int main(int argc, char *argv[])
             else if (fieldHeader.headerClassName() == "surfaceScalarField")
             {
                 Info<< "    Reading surfaceScalarField " << fieldName << endl;
+
                 surfaceScalarField field(fieldHeader, mesh);
                 scalar sumField = sum(field.boundaryField()[patchi]);
 

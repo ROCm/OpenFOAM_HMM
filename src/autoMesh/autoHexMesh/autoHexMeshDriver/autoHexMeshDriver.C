@@ -1183,7 +1183,8 @@ void Foam::autoHexMeshDriver::mergePatchFaces()
     meshRefiner.mergePatchFaces
     (
         Foam::cos(45*mathematicalConstant::pi/180.0),
-        Foam::cos(45*mathematicalConstant::pi/180.0)
+        Foam::cos(45*mathematicalConstant::pi/180.0),
+        meshRefinement::addedPatches(globalToPatch_)
     );
 
     if (debug_)

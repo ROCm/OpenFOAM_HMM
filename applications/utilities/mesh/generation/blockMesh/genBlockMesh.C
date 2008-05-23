@@ -105,16 +105,39 @@ int main(int argc, char *argv[])
 
     if (writeTopo)
     {
-        word objMeshFile(runTime.path()/"blockTopology.obj");
-
-        Info<< nl << "Dumping block structure as Lightwave obj format"
-            << " to " << objMeshFile << endl;
-
         // Write mesh as edges.
+        {
+            fileName objMeshFile("blockTopology.obj");
 
-        OFstream objStream(objMeshFile);
+            OFstream str(runTime.path()/objMeshFile);
 
-        blocks.writeTopology(objStream);
+            Info<< nl << "Dumping block structure as Lightwave obj format"
+                << " to " << objMeshFile << endl;
+
+            blocks.writeTopology(str);
+        }
+
+        // Write centres of blocks
+        {
+            fileName objCcFile("blockCentres.obj");
+
+            OFstream str(runTime.path()/objCcFile);
+
+            Info<< nl << "Dumping block centres as Lightwave obj format"
+                << " to " << objCcFile << endl;
+
+            const polyMesh& topo = blocks.topology();
+
+            const pointField& cellCentres = topo.cellCentres();
+
+            forAll(cellCentres, cellI)
+            {
+                //point cc = b.blockShape().centre(b.points());
+                const point& cc = cellCentres[cellI];
+
+                str << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
+            }
+        }
 
         Info<< nl << "end" << endl;
 

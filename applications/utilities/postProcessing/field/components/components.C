@@ -23,60 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    Ucomponents
+    components
 
 Description
     Writes scalar fields corresponding to each component of the supplied
-    field (name).
+    field (name) for each time.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template <class Type>
-void writeComponents
-(
-    const IOobject& header,
-    const fvMesh& mesh,
-    bool& processed
-)
-{
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    if (header.headerClassName() == fieldType::typeName)
-    {
-        Info<< "    Reading " << header.name() << endl;
-        fieldType field(header, mesh);
-
-        for (direction i=0; i<Type::nComponents; i++)
-        {
-            Info<< "    Calculating " << header.name()
-                << Type::componentNames[i] << endl;
-
-            volScalarField componentField
-            (
-                IOobject
-                (
-                    header.name() + word(Type::componentNames[i]),
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                field.component(i)
-            );
-            componentField.write();
-        }
-
-        processed = true;
-    }
-}
+#include "writeComponentFields.C"
 
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-    argList::validArgs.append("field1 ... fieldN");   // abuse for usage
+    argList::validArgs.append("fieldName1 .. fieldNameN"); // abuse for usage
 
     // setRootCase, but skip args check
     argList args(argc, argv, false);
@@ -86,7 +49,6 @@ int main(int argc, char *argv[])
     }
 
     const stringList& params = args.additionalArgs();
-
     if (!params.size())
     {
         Info<< nl << "must specify one or more fields" << nl;
@@ -95,7 +57,7 @@ int main(int argc, char *argv[])
     }
 
 #   include "createTime.H"
-    Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
     forAll(timeDirs, timeI)
@@ -121,10 +83,14 @@ int main(int argc, char *argv[])
             {
                 bool processed = false;
 
-                writeComponents<vector>(fieldHeader, mesh, processed);
-                writeComponents<sphericalTensor>(fieldHeader, mesh, processed);
-                writeComponents<symmTensor>(fieldHeader, mesh, processed);
-                writeComponents<tensor>(fieldHeader, mesh, processed);
+                writeComponentFields<vector>(fieldHeader, mesh, processed);
+                writeComponentFields<sphericalTensor>
+                (
+                    fieldHeader,
+                    mesh,
+                    processed
+                );
+
                 if (!processed)
                 {
                     FatalError

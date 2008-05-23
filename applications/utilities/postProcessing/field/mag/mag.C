@@ -26,51 +26,19 @@ Application
     mag
 
 Description
-    Calculates and writes the scalar magnitude of a field
+    Calculates and writes the magnitude of a field for each time
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-template<class Type>
-void writeMagField
-(
-    const IOobject& header,
-    const fvMesh& mesh,
-    bool& processed
-)
-{
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    if (header.headerClassName() == fieldType::typeName)
-    {
-        Info<< "    Reading " << header.name() << endl;
-        fieldType field(header, mesh);
-
-        Info<< "    Calculating mag" << header.name() << endl;
-        volScalarField magField
-        (
-            IOobject
-            (
-                "mag" + header.name(),
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            mag(field)
-        );
-        magField.write();
-
-        processed = true;
-    }
-}
-
+#include "writeMagField.C"
 
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-    argList::validArgs.append("field1 ... fieldN");   // abuse for usage
+    argList::validArgs.append("fieldName1 .. fieldNameN"); // abuse for usage
 
     // setRootCase, but skip args check
     argList args(argc, argv, false);
@@ -80,7 +48,6 @@ int main(int argc, char *argv[])
     }
 
     const stringList& params = args.additionalArgs();
-
     if (!params.size())
     {
         Info<< nl << "must specify one or more fields" << nl;
@@ -120,6 +87,7 @@ int main(int argc, char *argv[])
                 writeMagField<sphericalTensor>(fieldHeader, mesh, processed);
                 writeMagField<symmTensor>(fieldHeader, mesh, processed);
                 writeMagField<tensor>(fieldHeader, mesh, processed);
+
                 if (!processed)
                 {
                     FatalError

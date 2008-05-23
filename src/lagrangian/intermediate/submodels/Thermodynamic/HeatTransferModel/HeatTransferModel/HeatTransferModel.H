@@ -63,6 +63,9 @@ class HeatTransferModel
         //- Reference to the owner cloud class
         CloudType& owner_;
 
+        //- The coefficents dictionary
+        const dictionary coeffDict_;
+
 
 public:
 
@@ -89,7 +92,8 @@ public:
         HeatTransferModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
 
 
@@ -109,8 +113,11 @@ public:
 
     // Access
 
-        //- Return the dictionary
+        //- Return the cloud dictionary
         const dictionary& dict() const;
+
+        //- Return the coefficients dictionary
+        const dictionary& coeffDict() const;
 
         //- Return the owner cloud object
         const CloudType& owner() const;

@@ -77,7 +77,7 @@ surfaceSlipDisplacementPointPatchVectorField
     const dictionary& dict
 )
 :
-    pointPatchVectorField(p, iF),
+    pointPatchVectorField(p, iF, dict),
     surfaceNames_(dict.lookup("projectSurfaces")),
     projectMode_(followModeNames_.read(dict.lookup("followMode"))),
     projectDir_(dict.lookup("projectDirection")),

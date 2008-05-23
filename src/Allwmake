@@ -15,7 +15,7 @@ wmake libso edgeMesh
 wmake libso meshTools
 wmake libso finiteVolume
 
-( cd MGridGenGamgAgglomeration && ./Allwmake )
+( cd decompositionAgglomeration && ./Allwmake )
 
 wmake libso sampling
 

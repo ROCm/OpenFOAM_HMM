@@ -26,8 +26,9 @@ License
 
 #include "basicKinematicParcel.H"
 #include "KinematicCloud.H"
-#include "ManualInjection.H"
 #include "NoInjection.H"
+#include "ManualInjection.H"
+#include "ConeInjection.H"
 
 namespace Foam
 {
@@ -36,13 +37,19 @@ namespace Foam
     // Add instances of injection model to the table
     makeInjectionModelType
     (
+        NoInjection,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeInjectionModelType
+    (
         ManualInjection,
         KinematicCloud,
         basicKinematicParcel
     );
     makeInjectionModelType
     (
-        NoInjection,
+        ConeInjection,
         KinematicCloud,
         basicKinematicParcel
     );

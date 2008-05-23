@@ -26,9 +26,9 @@ License
 
 #include "directMappedPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "polyMesh.H"
 #include "ListListOps.H"
 #include "meshSearch.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -199,6 +199,16 @@ void Foam::directMappedPolyPatch::calcMapping() const
             << "Mapping already calculated" << exit(FatalError);
     }
 
+    if (offset_ == vector::zero)
+    {
+        FatalErrorIn("directMappedPolyPatch::calcMapping() const")
+            << "Invalid offset " << offset_ << endl
+            << "Offset is the vector added to the patch face centres to"
+            << " find the cell supplying the data."
+            << exit(FatalError);
+    }
+
+
     // Get global list of all samples and the processor and face they come from.
     pointField samples;
     labelList patchFaceProcs;
@@ -217,26 +227,22 @@ void Foam::directMappedPolyPatch::calcMapping() const
     // - cell sample is in (so source when mapping)
     //   sampleCells, sampleCellProcs.
 
+    // Determine schedule.
+    mapDistribute distMap(sampleCellProcs, patchFaceProcs);
 
-    // Determine the schedule
-    // ~~~~~~~~~~~~~~~~~~~~~~
+    // Rework the schedule to cell data to send, face data to receive.
+    schedulePtr_.reset(new List<labelPair>(distMap.schedule()));
 
-    dataSchedule mySchedule(sampleCellProcs, patchFaceProcs);
-
-    // Extract the scedule itself (reuse storage)
-    schedulePtr_.reset(new List<labelPair>(mySchedule, true));
-
-    const labelListList& sendOrder = mySchedule.sendOrder();
-    const labelListList& receiveOrder = mySchedule.receiveOrder();
+    const labelListList& subMap = distMap.subMap();
+    const labelListList& constructMap = distMap.constructMap();
 
     // Extract the particular data I need to send and receive.
-    sendCellLabelsPtr_.reset(new labelListList(sendOrder.size()));
+    sendCellLabelsPtr_.reset(new labelListList(subMap.size()));
     labelListList& sendCellLabels = sendCellLabelsPtr_();
 
-    forAll(sendOrder, procI)
+    forAll(subMap, procI)
     {
-        sendCellLabels[procI] =
-            IndirectList<label>(sampleCells, sendOrder[procI]);
+        sendCellLabels[procI] = IndirectList<label>(sampleCells, subMap[procI]);
 
         if (debug)
         {
@@ -245,13 +251,13 @@ void Foam::directMappedPolyPatch::calcMapping() const
         }
     }
 
-    receiveFaceLabelsPtr_.reset(new labelListList(receiveOrder.size()));
+    receiveFaceLabelsPtr_.reset(new labelListList(constructMap.size()));
     labelListList& receiveFaceLabels = receiveFaceLabelsPtr_();
 
-    forAll(receiveOrder, procI)
+    forAll(constructMap, procI)
     {
         receiveFaceLabels[procI] =
-            IndirectList<label>(patchFaces, receiveOrder[procI]);
+            IndirectList<label>(patchFaces, constructMap[procI]);
 
         if (debug)
         {

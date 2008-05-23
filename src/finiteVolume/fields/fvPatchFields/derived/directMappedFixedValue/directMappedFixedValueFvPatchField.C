@@ -78,7 +78,7 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 
@@ -111,7 +111,7 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 

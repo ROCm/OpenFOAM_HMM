@@ -160,6 +160,10 @@ class motionSmoother
         //- Is mesh point on boundary or not
         PackedList<1> isInternalPoint_;
 
+        //- Is edge master (always except if on coupled boundary and on
+        //  lower processor)
+        PackedList<1> isMasterEdge_;
+
         //- 2-D motion corrector
         twoDPointCorrector twoDCorrector_;
 
@@ -170,31 +174,6 @@ class motionSmoother
 
 
     // Private Member Functions
-
-        ////- (unweighted) average of all values on points connected via edges
-        ////  to pointI
-        //template <class Type>
-        //static Type avg
-        //(
-        //    const GeometricField<Type, pointPatchField, pointMesh>&,
-        //    const edgeList& edges,
-        //    const pointField& points,
-        //    const labelList& edgeLabels,
-        //    const label pointI
-        //);
-        //
-        ////- Distance weighted average. Is average with inverse distance
-        ////  weighting and varying edge-diffusivity.
-        //template <class Type>
-        //static Type avg
-        //(
-        //    const GeometricField<Type, pointPatchField, pointMesh>&,
-        //    const scalarField& edgeGamma,
-        //    const edgeList& edges,
-        //    const pointField& points,
-        //    const labelList& edgeLabels,
-        //    const label pointI
-        //);
 
         //- Average of connected points.
         template <class Type>
@@ -480,13 +459,6 @@ public:
             );
 
             // Helper functions to manipulate displacement vector.
-
-                ////- Point-jacobi smoothing of internal points
-                //template <class Type>
-                //void smooth
-                //(
-                //    GeometricField<Type, pointPatchField, pointMesh>&
-                //) const;
 
                 //- Fully explicit smoothing of internal points with varying
                 //  diffusivity.

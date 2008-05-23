@@ -66,7 +66,7 @@ basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
     const pointPatchFieldMapper&
 )
 :
-    pointPatchField<Type>(ptf, iF)
+    pointPatchField<Type>(p, iF)
 {}
 
 

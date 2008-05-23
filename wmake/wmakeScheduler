@@ -156,9 +156,6 @@ colourIndex=0
 
 while :
 do
-    # 0.5 sec
-    usleep 500000
-
     for slotGroup in $WM_HOSTS
     do
         # split 'host:N', but catch 'host:' and 'host' too
@@ -170,11 +167,8 @@ do
         i=0
         while [ "$i" -lt "$n" ]
         do
-            lock="$host:$i"
-            if [ ! -f "$lockDir/$lock" ]; then
-                # Set lock
-                touch "$lockDir/$lock"
-
+            lockFile="$lockDir/$host:$i"
+            if lockfile -r0 "$lockFile" 2>/dev/null; then
                 # Set colour
                 colour=${colours[$colourIndex]}
                 ## echo "** host=$host  colourIndex=$colourIndex  colour=$colour"
@@ -197,7 +191,7 @@ do
                 retval=$?
 
                 # Release lock
-                rm -f "$lockDir/$lock" 2>/dev/null
+                rm -f "$lockFile" 2>/dev/null
                 exit $retval
             fi
             i=$(expr $i + 1)
@@ -209,6 +203,8 @@ do
             fi
         done
     done
+    # Not found any free slots. Rest a bit.
+    sleep 1
 done
 
 if [ "$WM_COLOURS" ]; then

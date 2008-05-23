@@ -607,9 +607,8 @@ public:
             label mergePatchFaces
             (
                 const scalar minCos,
-                const scalar concaveCos
-                //const dictionary& motionDict,
-                //const labelList& globalToPatch
+                const scalar concaveCos,
+                const labelList& patchIDs
             );
 
             //- Remove points not used by any face or points used

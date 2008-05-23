@@ -39,6 +39,7 @@ SourceFiles
 
 #include "vtkTopo.H"
 #include "fvMeshSubset.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,14 +60,17 @@ class vtkMesh
         //- Reference to mesh
         fvMesh& baseMesh_;
 
-        //- Subsetting engine
+        //- Demand driven pointMesh
+        mutable autoPtr<pointMesh> pointMeshPtr_;
+
+        //- Subsetting engine + sub-fvMesh
         fvMeshSubset subsetter_;
 
         //- Current cellSet (or empty)
         const word setName_;
 
         //- Current decomposition of topology
-        mutable vtkTopo* topoPtr_;
+        mutable autoPtr<vtkTopo> topoPtr_;
 
 
 
@@ -87,11 +91,6 @@ public:
         vtkMesh(fvMesh& baseMesh, const word& setName = "");
 
 
-    // Destructor
-
-        ~vtkMesh();
-
-
     // Member Functions
 
         // Access
@@ -100,6 +99,15 @@ public:
             const fvMesh& baseMesh() const
             {
                 return baseMesh_;
+            }
+
+            const pointMesh& basePointMesh() const
+            {
+                if (!pointMeshPtr_.valid())
+                {
+                    pointMeshPtr_.reset(new pointMesh(baseMesh_));
+                }
+                return pointMeshPtr_();
             }
 
             const fvMeshSubset& subsetter() const
@@ -116,11 +124,11 @@ public:
             //- topology
             const vtkTopo& topo() const
             {
-                if (!topoPtr_)
+                if (!topoPtr_.valid())
                 {
-                    topoPtr_ = new vtkTopo(mesh());
+                    topoPtr_.reset(new vtkTopo(mesh()));
                 }
-                return *topoPtr_;
+                return topoPtr_();
             }
 
             //- Access either mesh or submesh
@@ -136,6 +144,19 @@ public:
                 }
             }
 
+            //- Access either pointMesh of base or pointMesh of subset
+            const pointMesh& pMesh() const
+            {
+                if (useSubMesh())
+                {
+                    return subsetter_.subPointMesh();
+                }
+                else
+                {
+                    return basePointMesh();
+                }
+            }
+
             //- Number of field cells
             label nFieldCells() const
             {
@@ -145,7 +166,7 @@ public:
             //- Number of field points
             label nFieldPoints() const
             {
-                return mesh().nPoints() + topo().addPointCellLabels().size();
+                return pMesh().size() + topo().addPointCellLabels().size();
             }
 
 
@@ -171,7 +192,6 @@ public:
                     return fld;
                 }
             }
-
 };
 
 

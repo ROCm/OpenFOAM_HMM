@@ -51,9 +51,6 @@ class RanzMarshall
 
     // Private data
 
-        // Coefficients dictionary
-        dictionary coeffDict_;
-
         // Prandtl number
         const scalar Pr_;
 
@@ -81,14 +78,17 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates heat transfer model
         bool active() const;
 
+        //- Nusselt number
         scalar Nu
         (
             const scalar Re,
             const scalar Pr
         ) const;
 
+        //- Prandtl number
         scalar Pr() const;
 };
 

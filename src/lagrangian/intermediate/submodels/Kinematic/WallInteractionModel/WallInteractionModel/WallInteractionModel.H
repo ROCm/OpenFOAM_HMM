@@ -63,6 +63,9 @@ class WallInteractionModel
         // reference to the owner cloud class
         CloudType& owner_;
 
+        //- The coefficients dictionary
+        const dictionary coeffDict_;
+
 
 public:
 
@@ -89,7 +92,8 @@ public:
         WallInteractionModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
 
 
@@ -109,11 +113,14 @@ public:
 
     // Access
 
+        //- Return the owner cloud object
+        const CloudType& owner() const;
+
         //- Return the dictionary
         const dictionary& dict() const;
 
-        //- Return the owner cloud object
-        const CloudType& owner() const;
+        //- Return the coefficients dictionary
+        const dictionary& coeffDict() const;
 
 
     // Member Functions

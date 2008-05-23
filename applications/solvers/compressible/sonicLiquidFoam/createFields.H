@@ -37,8 +37,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        rho0 + psi*(p - p0),
-        p.boundaryField().types()
+        rhoO + psi*p
     );
 
 

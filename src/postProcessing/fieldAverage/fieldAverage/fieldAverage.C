@@ -54,11 +54,14 @@ void Foam::fieldAverage::resetLists(const label nItems)
     meanVectorFields_.clear();
     meanVectorFields_.setSize(nItems);
 
+    meanSphericalTensorFields_.clear();
+    meanSphericalTensorFields_.setSize(nItems);
+
     meanSymmTensorFields_.clear();
     meanSymmTensorFields_.setSize(nItems);
 
-    meanSphericalTensorFields_.clear();
-    meanSphericalTensorFields_.setSize(nItems);
+    meanTensorFields_.clear();
+    meanTensorFields_.setSize(nItems);
 
     prime2MeanScalarFields_.clear();
     prime2MeanScalarFields_.setSize(nItems);
@@ -88,13 +91,17 @@ void Foam::fieldAverage::initialise()
         {
             addMeanFields<vector>(i, meanVectorFields_);
         }
+        else if (obr_.foundObject<volSphericalTensorField>(fieldName))
+        {
+            addMeanFields<sphericalTensor>(i, meanSphericalTensorFields_);
+        }
         else if (obr_.foundObject<volSymmTensorField>(fieldName))
         {
             addMeanFields<symmTensor>(i, meanSymmTensorFields_);
         }
-        else if (obr_.foundObject<volSphericalTensorField>(fieldName))
+        else if (obr_.foundObject<volTensorField>(fieldName))
         {
-            addMeanFields<sphericalTensor>(i, meanSphericalTensorFields_);
+            addMeanFields<tensor>(i, meanTensorFields_);
         }
         else
         {
@@ -166,8 +173,9 @@ Foam::fieldAverage::fieldAverage
     faItems_(dict.lookup("fields")),
     meanScalarFields_(faItems_.size()),
     meanVectorFields_(faItems_.size()),
-    meanSymmTensorFields_(faItems_.size()),
     meanSphericalTensorFields_(faItems_.size()),
+    meanSymmTensorFields_(faItems_.size()),
+    meanTensorFields_(faItems_.size()),
     prime2MeanScalarFields_(faItems_.size()),
     prime2MeanSymmTensorFields_(faItems_.size()),
     totalIter_(faItems_.size(), 1),
@@ -248,8 +256,9 @@ void Foam::fieldAverage::calcAverages()
 
     calculateMeanFields<scalar>(meanScalarFields_);
     calculateMeanFields<vector>(meanVectorFields_);
-    calculateMeanFields<symmTensor>(meanSymmTensorFields_);
     calculateMeanFields<sphericalTensor>(meanSphericalTensorFields_);
+    calculateMeanFields<symmTensor>(meanSymmTensorFields_);
+    calculateMeanFields<tensor>(meanTensorFields_);
 
     calculatePrime2MeanFields<scalar>(prime2MeanScalarFields_);
     calculatePrime2MeanFields<vector>(prime2MeanSymmTensorFields_);
@@ -260,8 +269,9 @@ void Foam::fieldAverage::writeAverages() const
 {
     writeFieldList<scalar>(meanScalarFields_);
     writeFieldList<vector>(meanVectorFields_);
-    writeFieldList<symmTensor>(meanSymmTensorFields_);
     writeFieldList<sphericalTensor>(meanSphericalTensorFields_);
+    writeFieldList<symmTensor>(meanSymmTensorFields_);
+    writeFieldList<tensor>(meanTensorFields_);
 
     writeFieldList<scalar>(prime2MeanScalarFields_);
     writeFieldList<symmTensor>(prime2MeanSymmTensorFields_);

@@ -32,10 +32,12 @@ template<class CloudType>
 Foam::HeatTransferModel<CloudType>::HeatTransferModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :   dict_(dict),
-    owner_(owner)
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
 {}
 
 
@@ -59,6 +61,13 @@ template<class CloudType>
 const Foam::dictionary& Foam::HeatTransferModel<CloudType>::dict() const
 {
     return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::HeatTransferModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
 }
 
 

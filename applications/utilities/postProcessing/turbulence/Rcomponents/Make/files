@@ -1,3 +1,0 @@
-Rcomponents.C
-
-EXE = $(FOAM_APPBIN)/Rcomponents

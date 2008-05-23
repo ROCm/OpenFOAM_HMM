@@ -171,6 +171,9 @@ public:
 
             //- Return velocity of SRF for complete mesh
             tmp<volVectorField> U() const;
+
+            //- Return absolute velocity for complete mesh
+            tmp<volVectorField> Uabs() const;
 };
 
 

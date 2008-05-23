@@ -32,10 +32,12 @@ template<class CloudType>
 Foam::CompositionModel<CloudType>::CompositionModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :   dict_(dict),
     owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs")),
     carrierThermo_(owner.carrierThermo()),
     gases_(owner.gases()),
     liquids_
@@ -81,6 +83,13 @@ template<class CloudType>
 const Foam::dictionary& Foam::CompositionModel<CloudType>::dict() const
 {
     return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::CompositionModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
 }
 
 

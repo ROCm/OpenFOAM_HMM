@@ -111,6 +111,14 @@ public:
             const bool reUse                // clone or reuse
         );
 
+        //- Construct from reverse addressing: per data item the send
+        //  processor and the receive processor. All processors get same data.
+        mapDistribute
+        (
+            const labelList& sendProcs,
+            const labelList& recvProcs
+        );
+
 
     // Member Functions
 

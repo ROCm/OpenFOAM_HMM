@@ -52,10 +52,6 @@ class ConstantRateDevolatilisation
 
     // Private data
 
-        //- Coefficients dictionary
-        dictionary coeffDict_;
-
-
         // Model constants
 
             //- Rate constant (suggested default = 12) [1/s]
@@ -90,10 +86,13 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates mass transfer model
         bool active() const;
 
+        //- Flag to indicate whether model changes particle volume
         bool changesVolume() const;
 
+        //- Update model
         scalar calculate
         (
             const scalar dt,
