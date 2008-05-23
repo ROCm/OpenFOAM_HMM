@@ -63,6 +63,17 @@ bool Foam::functionEntry::insert
         "primitiveEntry& entry, Istream& is)"
     );
 
+    if (!insertprimitiveEntryIstreamMemberFunctionTablePtr_)
+    {
+        cerr<<"functionEntry::insert"
+            << "(const word&, dictionary&, primitiveEntry&, Istream&)"
+            << " not yet initialized, function = "
+            << functionName.c_str() << std::endl;
+
+        // return true to keep reading anyhow
+        return true;
+    }
+
     insertprimitiveEntryIstreamMemberFunctionTable::iterator mfIter =
         insertprimitiveEntryIstreamMemberFunctionTablePtr_->find(functionName);
 
@@ -96,6 +107,17 @@ bool Foam::functionEntry::insert
         "functionEntry::insert"
         "(const word& functionName, dictionary& parentDict, Istream& is)"
     );
+
+    if (!insertdictionaryIstreamMemberFunctionTablePtr_)
+    {
+        cerr<<"functionEntry::insert"
+            << "(const word&, dictionary&, Istream&)"
+            << " not yet initialized, function = "
+            << functionName.c_str() << std::endl;
+
+        // Return true to keep reading
+        return true;
+    }
 
     insertdictionaryIstreamMemberFunctionTable::iterator mfIter =
         insertdictionaryIstreamMemberFunctionTablePtr_->find(functionName);
