@@ -119,6 +119,12 @@ public:
         //- Return edge line
         inline linePointRef line(const pointField&) const;
 
+        //- compare edges
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        static inline int compare(const edge&, const edge&);
+
 
     // Friend Operators
 
@@ -127,7 +133,7 @@ public:
 };
 
 
-//- Hash<edge> specialisation 
+//- Hash<edge> specialisation
 //  Simple commutative hash.
 template<>
 inline label Hash<edge>::operator()(const edge& e) const

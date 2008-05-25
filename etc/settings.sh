@@ -97,7 +97,14 @@ WM_COMPILER_INST=OpenFOAM
 
 case "$WM_COMPILER_INST" in
 OpenFOAM)
-    export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+    case "$WM_COMPILER" in
+    Gcc43)
+        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.3.0$WM_COMPILER_ARCH
+        ;;
+    Gcc)
+        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+        ;;
+    esac
 
     # Check that the compiler directory can be found
     if [ ! -d "$WM_COMPILER_DIR" ]

@@ -29,10 +29,8 @@ License
 #include "specie.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-namespace Foam
-{
-    const scalar liquidMixture::TrMax = 0.999;
-}
+
+const Foam::scalar Foam::liquidMixture::TrMax = 0.999;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -42,17 +40,35 @@ Foam::liquidMixture::liquidMixture
     const dictionary& thermophysicalProperties
 )
 :
-    components_(thermophysicalProperties.lookup("liquidFuelComponents")),
+    components_(thermophysicalProperties.lookup("liquidComponents")),
     properties_(components_.size())
 {
-
+    // use sub-dictionary "liquidProperties" if possible to avoid
+    // collisions with identically named gas-phase entries
+    // (eg, H2O liquid vs. gas)
     forAll(components_, i)
     {
-        properties_.set
+        const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
         (
-            i,
-            liquid::New(thermophysicalProperties.lookup(components_[i]))
+            "liquidProperties"
         );
+
+        if (subDictPtr)
+        {
+            properties_.set
+            (
+                i,
+                liquid::New(subDictPtr->lookup(components_[i]))
+            );
+        }
+        else
+        {
+            properties_.set
+            (
+                i,
+                liquid::New(thermophysicalProperties.lookup(components_[i]))
+            );
+        }
     }
 }
 
@@ -347,7 +363,7 @@ Foam::scalar Foam::liquidMixture::mu
             mu += x[i]*log(properties_[i].mu(p, Ti));
         }
     }
-    
+
     return exp(mu);
 }
 
@@ -390,7 +406,7 @@ Foam::scalar Foam::liquidMixture::K
             K += phii[i]*phii[j]*Kij;
         }
     }
-    
+
     return K;
 }
 
@@ -412,7 +428,7 @@ Foam::scalar Foam::liquidMixture::D
             Dinv += x[i]/properties_[i].D(p, Ti);
         }
     }
-    
+
     return 1.0/Dinv;
 }
 

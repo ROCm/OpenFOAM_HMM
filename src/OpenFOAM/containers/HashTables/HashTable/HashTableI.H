@@ -56,6 +56,19 @@ inline label HashTable<T, Key, Hash>::size() const
 }
 
 
+template<class T, class Key, class Hash>
+inline bool HashTable<T, Key, Hash>::insert(const Key& key, const T& newEntry)
+{
+    return set(key, newEntry, true);
+}
+
+
+template<class T, class Key, class Hash>
+inline bool HashTable<T, Key, Hash>::set(const Key& key, const T& newEntry)
+{
+    return set(key, newEntry, false);
+}
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -292,7 +305,7 @@ inline HashTable<T, Key, Hash>::const_iterator::const_iterator
 
 template<class T, class Key, class Hash>
 inline HashTable<T, Key, Hash>::const_iterator::const_iterator
-(   
+(
     const iterator& iter
 )
 :

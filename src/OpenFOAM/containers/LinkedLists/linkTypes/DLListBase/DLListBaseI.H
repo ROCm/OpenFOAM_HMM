@@ -148,6 +148,16 @@ inline DLListBase::link* DLListBase::remove(DLListBase::iterator& it)
 }
 
 
+inline DLListBase::link* DLListBase::replace
+(
+    DLListBase::iterator& oldIter,
+    DLListBase::link* newLink
+)
+{
+    return replace(oldIter.curElmt_, newLink);
+}
+
+
 // * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * * //
 
 inline DLListBase::iterator::iterator(DLListBase& s, link* elmt)

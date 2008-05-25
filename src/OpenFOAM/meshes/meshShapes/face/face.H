@@ -145,7 +145,8 @@ public:
     // Member Functions
 
         //- Collapse face by removing duplicate point labels
-        void collapse();
+        //  return the collapsed size
+        label collapse();
 
         //- Return the points corresponding to this face
         inline pointField points(const pointField& meshPoints) const;
@@ -251,6 +252,11 @@ public:
         //- Return n-th face edge
         inline edge faceEdge(const label n) const;
 
+        //- Return the edge direction on the face
+        //  -  0: edge not found on the face
+        //  - +1: forward (counter-clockwise) on the face
+        //  - -1: reverse (clockwise) on the face
+        int edgeDirection(const edge&) const;
 
         // Face splitting utilities
 

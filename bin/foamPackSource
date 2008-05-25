@@ -75,11 +75,11 @@ find -H $packDir               \
  -a ! -name "log[0-9]*"        \
 | sed                          \
  -e "\@$packDir/lib/@d"        \
- -e "\@$packDir/src/other/mico-[0-9.]*/platforms@d"  \
- -e "\@$packDir/src/other/mpich-[0-9.]*/platforms@d" \
- -e "\@$packDir/src/other/mpich-[0-9.]*/lib@d"       \
- -e "\@$packDir/src/other/lam-[0-9.]*/platforms@d"   \
- -e "\@$packDir/src/other/openmpi-[0-9.]*/platforms@d"   \
+ -e "\@$packDir/src/other/mico-*/platforms@d"  \
+ -e "\@$packDir/src/other/mpich-*/platforms@d" \
+ -e "\@$packDir/src/other/mpich-*/lib@d"       \
+ -e "\@$packDir/src/other/lam-*/platforms@d"   \
+ -e "\@$packDir/src/other/openmpi-*/platforms@d"   \
  -e '\@applications/bin/@d'       \
  -e '\@/t/@d'                     \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'   \

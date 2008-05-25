@@ -41,18 +41,26 @@ export CMAKE_HOME=$WM_PROJECT_INST_DIR/$WM_ARCH/cmake-2.4.6
 
 if [ -r $CMAKE_HOME ]; then
     export PATH=$CMAKE_HOME/bin:$PATH
+else
+    unset CMAKE_HOME
 fi
 
-export ParaView_VERSION=3
+# export ParaView_VERSION="3.3-cvs"
+export ParaView_VERSION=3.3
 
-export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/ParaView3.3-cvs
+export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/paraview-$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_OPTIONS
 
-export PYTHONPATH=$PYTHONPATH:$ParaView_DIR/bin:$ParaView_DIR/Utilities/VTKPythonWrapping
+if [ "$PYTHONPATH" ]; then
+    export PYTHONPATH=$PYTHONPATH:$ParaView_DIR/Utilities/VTKPythonWrapping
+else
+    export PYTHONPATH=$ParaView_DIR/Utilities/VTKPythonWrapping
+fi
+
 
 if [ -r $ParaView_DIR ]; then
     export PATH=$ParaView_DIR/bin:$PATH
-    export LD_LIBRARY_PATH=${ParaView_DIR}/bin:${LD_LIBRARY_PATH}
+    export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_VERSION:$LD_LIBRARY_PATH
 
     export PV_PLUGIN_PATH=$FOAM_LIBBIN
 fi

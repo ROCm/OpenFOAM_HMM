@@ -81,18 +81,35 @@ public:
             const label c
         );
 
+        //- Construct from a face, discarding excess points
+        inline triFace(const face&);
+
+        //- Construct from a labelList, discarding excess points
+        explicit inline triFace(const labelList&);
+
         //- Construct from Istream
         inline triFace(Istream&);
 
 
     // Member Functions
 
+        //- Collapse face by removing duplicate point labels
+        //  return the collapsed size, set collapsed point labels to -1
+        inline label collapse();
+
+        //- Return the edge direction on the face
+        //  - +1: forward (counter-clockwise) on the face
+        //  - -1: reverse (clockwise) on the face
+        //  -  0: edge not found on the face
+        inline int edgeDirection(const edge&) const;
+
+
         // Properties
 
             //- Return the points corresponding to this face
             inline pointField points(const pointField& points) const;
 
-            //- Return triagle as a face
+            //- Return triangle as a face
             inline face triFaceFace() const;
 
             //- Return number of edges
@@ -128,9 +145,14 @@ public:
                 const intersection::direction dir = intersection::VECTOR
             ) const;
 
-            //- Return the tetrahedron
+            //- Return the triangle
             inline triPointRef tri(const pointField&) const;
 
+        //- compare triFaces
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same face, but different orientation
+        static inline int compare(const triFace&, const triFace&);
 
     // Friend Operators
 
@@ -139,7 +161,7 @@ public:
 };
 
 
-//- Hash<triFace> specialisation 
+//- Hash<triFace> specialisation
 //  Simple commutative hash.
 template<>
 inline label Hash<triFace>::operator()(const triFace& t) const

@@ -28,7 +28,7 @@ Class
 Description
     A 1D array of objects of type \<T\>, where the size of the vector
     is known and used for subscript bounds checking, etc.
- 
+
     Storage is allocated on free-store during construction.
 
 SourceFiles
@@ -194,6 +194,12 @@ void sort(List<T>& a);
 
 template<class T, class Cmp>
 void sort(List<T>& a, const Cmp&);
+
+template<class T>
+void stableSort(List<T>& a);
+
+template<class T, class Cmp>
+void stableSort(List<T>& a, const Cmp&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -84,10 +84,13 @@ public:
         inline word();
 
         //- Construct as copy
-        inline word(const word& w);
+        inline word(const word&);
 
         //- Construct as copy of character array
         inline word(const char*);
+
+        //- Construct as copy with a maximum number of characters
+        inline word(const char*, const size_type);
 
         //- Construct as copy of string
         inline word(const string&);
@@ -96,7 +99,7 @@ public:
         inline word(const std::string&);
 
         //- Construct from Istream
-        word(Istream& is);
+        word(Istream&);
 
 
     // Member functions

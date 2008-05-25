@@ -26,6 +26,30 @@ License
 
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+
+// return
+//  -  0: different
+//  - +1: identical
+//  - -1: same edge, but different orientation
+inline int Foam::edge::compare(const edge& a, const edge& b)
+{
+    if (a[0] == b[0] && a[1] == b[1])
+    {
+        return 1;
+    }
+    else if (a[0] == b[1] && a[1] == b[0])
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::edge::edge()
@@ -146,17 +170,13 @@ inline Foam::linePointRef Foam::edge::line(const pointField& p) const
 
 inline bool Foam::operator==(const edge& a, const edge& b)
 {
-    return
-    (
-        (a[0] == b[0] && a[1] == b[1])
-     || (a[0] == b[1] && a[1] == b[0])
-    );
+    return edge::compare(a,b) != 0;
 }
 
 
 inline bool Foam::operator!=(const edge& a, const edge& b)
 {
-    return !(a == b);
+    return edge::compare(a,b) == 0;
 }
 
 

@@ -435,6 +435,20 @@ void sort(List<T>& a, const Cmp& cmp)
 }
 
 
+template<class T>
+void stableSort(List<T>& a)
+{
+    std::stable_sort(a.begin(), a.end());
+}
+
+
+template<class T, class Cmp>
+void stableSort(List<T>& a, const Cmp& cmp)
+{
+    std::stable_sort(a.begin(), a.end(), cmp);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 // Assignment to UList operator. Takes linear time.
