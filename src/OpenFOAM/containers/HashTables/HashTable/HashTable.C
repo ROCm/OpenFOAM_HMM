@@ -318,7 +318,8 @@ bool HashTable<T, Key, Hash>::erase(const iterator& cit)
             delete it.elmtPtr_;
 
             // Search back for previous non-zero table entry
-            while (--it.hashIndex_ >= 0 && !table_[it.hashIndex_]);
+            while (--it.hashIndex_ >= 0 && !table_[it.hashIndex_])
+            {}
 
             if (it.hashIndex_ >= 0)
             {

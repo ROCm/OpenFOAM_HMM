@@ -64,7 +64,8 @@ Type interpolateXY
     label n = xOld.size();
 
     label lo = 0;
-    for (lo=0; lo<n && xOld[lo]>x; ++lo);
+    for (lo=0; lo<n && xOld[lo]>x; ++lo)
+    {}
 
     label low = lo;
     if (low < n)
@@ -79,7 +80,8 @@ Type interpolateXY
     }
 
     label hi = 0;
-    for (hi=0; hi<n && xOld[hi]<x; ++hi);
+    for (hi=0; hi<n && xOld[hi]<x; ++hi)
+    {}
 
     label high = hi;
     if (high < n)

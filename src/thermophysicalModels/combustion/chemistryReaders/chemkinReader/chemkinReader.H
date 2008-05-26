@@ -198,7 +198,7 @@ private:
         HashTable<phase> speciePhase_;
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        HashPtrTable<reactionThermo> specieThermo_;
+        HashPtrTable<reactionThermo> speciesThermo_;
 
         //- Table of species composition
         HashTable<List<specieElement> > specieComposition_;
@@ -363,9 +363,9 @@ public:
         }
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        const HashPtrTable<reactionThermo>& specieThermo() const
+        const HashPtrTable<reactionThermo>& speciesThermo() const
         {
-            return specieThermo_;
+            return speciesThermo_;
         }
 
         //- Table of species composition

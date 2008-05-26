@@ -34,6 +34,7 @@ License
 #include "JobInfo.H"
 #include "labelList.H"
 
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -389,7 +390,8 @@ Foam::argList::argList
                         rootPath_/globalCase_/"processor"
                       + name(++nProcDirs)
                     )
-                );
+                )
+                {}
 
                 if (nProcDirs != Pstream::nProcs())
                 {

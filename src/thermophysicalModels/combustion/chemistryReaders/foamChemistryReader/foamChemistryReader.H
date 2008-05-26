@@ -60,7 +60,7 @@ class foamChemistryReader
     public chemistryReader
 {
         //- Table of the thermodynamic data given in the foamChemistry file
-        HashPtrTable<reactionThermo> specieThermo_;
+        HashPtrTable<reactionThermo> speciesThermo_;
 
         //- Table of species
         speciesTable speciesTable_;
@@ -113,9 +113,9 @@ public:
         }
 
         //- Table of the thermodynamic data given in the foamChemistry file
-        const HashPtrTable<reactionThermo>& specieThermo() const
+        const HashPtrTable<reactionThermo>& speciesThermo() const
         {
-            return specieThermo_;
+            return speciesThermo_;
         }
 
         //- List of the reactions

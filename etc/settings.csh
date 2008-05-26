@@ -86,7 +86,14 @@ set WM_COMPILER_INST=OpenFOAM
 
 switch ("$WM_COMPILER_INST")
 case OpenFOAM:
-    setenv WM_COMPILER_DIR $FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+    switch ("$WM_COMPILER")
+    case Gcc43:
+        setenv WM_COMPILER_DIR $FOAM_INST_DIR/$WM_ARCH/gcc-4.3.0$WM_COMPILER_ARCH
+    breaksw
+    case Gcc:
+        setenv WM_COMPILER_DIR $FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+    breaksw
+    endsw
 
     # Check that the compiler directory can be found
     if ( ! -d "$WM_COMPILER_DIR" ) then

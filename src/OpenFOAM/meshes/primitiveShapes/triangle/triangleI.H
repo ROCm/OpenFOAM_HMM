@@ -272,7 +272,7 @@ inline vector triangle<Point, PointRef>::circumCentre() const
 
     scalar c = c1 + c2 + c3;
 
-    return 
+    return
     (
         ((c2 + c3)*a_ + (c3 + c1)*b_ + (c1 + c2)*c_)/(2*c)
     );
@@ -397,7 +397,7 @@ inline pointHit triangle<Point, PointRef>::ray
 
     bool eligible =
         alg == intersection::FULL_RAY
-     || alg == intersection::HALF_RAY && dist > -planarPointTol
+     || (alg == intersection::HALF_RAY && dist > -planarPointTol)
      || (
             alg == intersection::VISIBLE
          && ((q1 & normal()) < -VSMALL)
@@ -434,7 +434,7 @@ template<class Point, class PointRef>
 inline pointHit triangle<Point, PointRef>::intersection
 (
     const point& orig,
-    const vector& dir,    
+    const vector& dir,
     const intersection::algorithm alg
 ) const
 {
@@ -617,7 +617,7 @@ inline bool triangle<Point, PointRef>::classify
     scalar beta = 0;
 
     bool hit = false;
-    
+
     if (Foam::mag(u1) < SMALL)
     {
         beta = u0/u2;

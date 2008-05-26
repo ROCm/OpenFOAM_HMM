@@ -52,7 +52,7 @@ namespace Foam
 
 /* * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * */
 
-const char* Foam::chemkinReader::reactionTypeNames[4] = 
+const char* Foam::chemkinReader::reactionTypeNames[4] =
 {
     "irreversible",
     "reversible",
@@ -154,7 +154,7 @@ void Foam::chemkinReader::checkCoeffs
             << " rate expression on line "
             << lineNo_-1 << ", should be "
             << nCoeffs << " but " << reactionCoeffs.size() << " supplied." << nl
-            << "Coefficients are " 
+            << "Coefficients are "
             << reactionCoeffs << nl
             << exit(FatalError);
     }
@@ -182,7 +182,7 @@ void Foam::chemkinReader::addReactionType
                         speciesTable_,
                         lhs.shrink(),
                         rhs.shrink(),
-                        specieThermo_
+                        speciesThermo_
                     ),
                     rr
                 )
@@ -201,7 +201,7 @@ void Foam::chemkinReader::addReactionType
                         speciesTable_,
                         lhs.shrink(),
                         rhs.shrink(),
-                        specieThermo_
+                        speciesThermo_
                     ),
                     rr
                 )
@@ -291,7 +291,7 @@ void Foam::chemkinReader::addPressureDependentReaction
                     << "Wrong number of coefficients for Troe rate expression"
                        " on line " << lineNo_-1 << ", should be 3 or 4 but "
                     << TroeCoeffs.size() << " supplied." << nl
-                    << "Coefficients are " 
+                    << "Coefficients are "
                     << TroeCoeffs << nl
                     << exit(FatalError);
             }
@@ -347,7 +347,7 @@ void Foam::chemkinReader::addPressureDependentReaction
                     << "Wrong number of coefficients for SRI rate expression"
                        " on line " << lineNo_-1 << ", should be 3 or 5 but "
                     << SRICoeffs.size() << " supplied." << nl
-                    << "Coefficients are " 
+                    << "Coefficients are "
                     << SRICoeffs << nl
                     << exit(FatalError);
             }
@@ -397,7 +397,7 @@ void Foam::chemkinReader::addPressureDependentReaction
             if (fofType < 4)
             {
                 FatalErrorIn("chemkinReader::addPressureDependentReaction")
-                    << "Fall-off function type " 
+                    << "Fall-off function type "
                     << fallOffFunctionNames[fofType]
                     << " on line " << lineNo_-1
                     << " not implemented"
@@ -459,7 +459,7 @@ void Foam::chemkinReader::addReaction
 
     // Calculate the unit conversion factor for the A coefficient
     // for the change from mol/cm^3 to kmol/m^3 concentraction units
-    const scalar concFactor = 0.001; 
+    const scalar concFactor = 0.001;
     scalar sumExp = 0.0;
     forAll (lhs, i)
     {
@@ -500,7 +500,7 @@ void Foam::chemkinReader::addReaction
                             speciesTable_,
                             lhs.shrink(),
                             rhs.shrink(),
-                            specieThermo_
+                            speciesThermo_
                         ),
                         ArrheniusReactionRate
                         (
@@ -553,7 +553,7 @@ void Foam::chemkinReader::addReaction
                             speciesTable_,
                             lhs.shrink(),
                             rhs.shrink(),
-                            specieThermo_
+                            speciesThermo_
                         ),
                         thirdBodyArrheniusReactionRate
                         (
@@ -658,7 +658,7 @@ void Foam::chemkinReader::addReaction
                             speciesTable_,
                             lhs.shrink(),
                             rhs.shrink(),
-                            specieThermo_
+                            speciesThermo_
                         ),
                         LandauTellerReactionRate
                         (
@@ -814,7 +814,8 @@ void Foam::chemkinReader::read
         yy_buffer_state* bufferPtr(yy_create_buffer(&thermoStream, yyBufSize));
         yy_switch_to_buffer(bufferPtr);
 
-        while(lex() != 0);
+        while(lex() != 0)
+        {}
 
         yy_delete_buffer(bufferPtr);
 
@@ -838,7 +839,8 @@ void Foam::chemkinReader::read
 
     initReactionKeywordTable();
 
-    while(lex() != 0);
+    while(lex() != 0)
+    {}
 
     yy_delete_buffer(bufferPtr);
 }
@@ -874,7 +876,7 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
     );
 
     fileName thermoFileName = fileName::null;
-    
+
     if (thermoDict.found("CHEMKINThermoFile"))
     {
         thermoFileName =

@@ -118,7 +118,7 @@ public:
     // Member Functions
 
         virtual const speciesTable& species() const = 0;
-        virtual const HashPtrTable<reactionThermo>& specieThermo() const = 0;
+        virtual const HashPtrTable<reactionThermo>& speciesThermo() const = 0;
         virtual const SLPtrList<reaction>& reactions() const = 0;
 };
 
