@@ -1,7 +1,7 @@
 #!/bin/sh
 set -x
 
-if [ "$ParaView_VERSION" != "3" -a "$ParaView_DIR" -a -r $ParaView_DIR ] ; then
+if [ "$ParaView_VERSION" != "3.3-cvs" -a "$ParaView_DIR" -a -r $ParaView_DIR ] ; then
     wmake libso vtkFoam
     (cd PVFoamReader; mkdir -p Make/$WM_OPTIONS > /dev/null 2>&1; cd Make/$WM_OPTIONS; cmake ../..; make)
 fi
