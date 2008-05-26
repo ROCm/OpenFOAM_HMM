@@ -1,0 +1,193 @@
+#!/bin/sh
+set -x
+
+# ParaView 3.x build script
+# - normally run from folder above source folder
+
+# use the version number and the installation location specified
+# in etc/apps/paraview3/{bashrc,cshrc}
+: ${ParaView_VERSION:=3.3}
+: ${ParaView_INST_DIR:=$WM_PROJECT_INST_DIR/paraview-$ParaView_VERSION}
+
+#!!User:
+# set to location of paraview sources and where to build paraview
+# PARAVIEW_SRC_DIR=$WM_PROJECT_INST_DIR/src/other/ParaView3
+PARAVIEW_SRC_DIR=/data/cfd2/work/cfdadmin/cvs/ParaView3
+PARAVIEW_BUILD_DIR=$PARAVIEW_SRC_DIR/platforms
+
+# TODO: extract the version number from the CMakeLists.txt variables:
+#       PARAVIEW_VERSION_MAJOR, and PARAVIEW_VERSION_MINOR
+# ParaView_VERSION="3.3"
+
+# SET(PARAVIEW_VERSION_MAJOR 3)
+# SET(PARAVIEW_VERSION_MINOR 3)
+
+#!!User:
+# select desired features, include Python whenever possible
+VERBOSE=OFF
+INCLUDE_MPI=OFF
+MPI_MAX_PROCS=32
+INCLUDE_PYTHON=ON
+INCLUDE_MESA=OFF
+
+# initialisation
+oldpwd=$PWD
+unset OBJ_ADD
+
+# always build shared libraries
+CMAKE_VARIABLES="-DBUILD_SHARED_LIBS:BOOL=ON"
+
+if [ "$VERBOSE" = ON ]; then
+   CMAKE_VARIABLES="$CMAKE_VARIABLES -DCMAKE_VERBOSE_MAKEFILE=TRUE"
+fi
+
+#****************************************************************************
+# FIX: Attempt to get around seg-fault when building documentation
+#CMAKE_VARIABLES="$CMAKE_VARIABLES -BUILD_DOCUMENTATION-ADVANCED:INTERNAL=0"
+#****************************************************************************
+
+# set python specific options
+# NOTE - you'll need both python and python-devel packages installed
+#      - might need to create a symbolic link to the python library
+#        - anything after the '.so' gets in the way...
+#      - might need to run cmake -> make twice to pick up all the links...
+if [ "$INCLUDE_PYTHON" = ON ]; then
+   PYTHON_INCLUDE_DIR=/usr/include/python2.5
+   PYTHON_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libpython2.5.so
+
+   if [ -d "$PYTHON_INCLUDE_DIR" ]; then
+      OBJ_ADD="$OBJ_ADD-py"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DPARAVIEW_ENABLE_PYTHON=ON"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DPYTHON_INCLUDE_PATH=$PYTHON_INCLUDE_DIR"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DPYTHON_LIBRARY=$PYTHON_LIBRARY"
+   else
+      echo "non-existent PYTHON_INCLUDE_DIR: $PYTHON_INCLUDE_DIR"
+   fi
+fi
+
+# set MPI specific options
+if [ "$INCLUDE_MPI" = ON ]; then
+   case "$WM_MPLIB" in
+   OPENMPI)
+      MPI_INCLUDE_PATH=$OPENMPI_ARCH_PATH/include
+      MPI_LIBRARY=$OPENMPI_ARCH_PATH/lib/libmpi.so
+      MPI_RUN=$OPENMPI_ARCH_PATH/bin/mpirun
+      ;;
+   LAM)
+      MPI_INCLUDE_PATH=$LAM_ARCH_PATH/include
+      MPI_LIBRARY=$LAM_ARCH_PATH/lib/libmpi.so
+      MPI_RUN=$LAM_ARCH_PATH/bin/mpirun
+      ;;
+   MPICH)
+      MPI_INCLUDE_PATH=$MPICH_ARCH_PATH/include
+      MPI_LIBRARY=$MPICH_ARCH_PATH/lib/libmpich.so
+      MPI_RUN=$MPICH_ARCH_PATH/bin/mpirun
+      ;;
+   *)
+      unset INCLUDE_MPI
+      ;;
+   esac
+
+   if [ "$INCLUDE_MPI" ]; then
+      OBJ_ADD="$OBJ_ADD-mpi"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DVTK_USE_MPI=ON"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DPARAVIEW_USE_MPI=ON"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DMPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DMPI_LIBRARY=$MPI_LIBRARY"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DVTK_MPIRUN_EXE=$MPI_RUN"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DVTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
+   else
+      echo "unknown/unsupported mpi: $WM_MPLIB"
+   fi
+fi
+
+# set MESA specific options
+if [ "$INCLUDE_MESA" = ON ]; then
+   MESA_INCLUDE_DIR=/usr/include/GL
+   MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
+
+   if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]; then
+      OBJ_ADD="$OBJ_ADD-mesa"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DVTK_OPENGL_HAS_OSMESA=ON"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DOSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
+      CMAKE_VARIABLES="$CMAKE_VARIABLES -DOSMESA_LIBRARY=$MESA_LIBRARY"
+   else
+      echo "no MESA information found ... skipping"
+   fi
+fi
+
+
+# finalize the build/install environment
+PARAVIEW_OBJ_DIR=$PARAVIEW_BUILD_DIR/$WM_OPTIONS$OBJ_ADD
+PARAVIEW_APP_DIR=$ParaView_INST_DIR/platforms/$WM_OPTIONS$OBJ_ADD
+
+# create paraview build folder
+mkdir -p $PARAVIEW_OBJ_DIR
+cd $PARAVIEW_OBJ_DIR
+
+#
+# make paraview
+#
+
+# provide a backdoor to skip cmake for repeated builds
+if [ -z "$build_no_cmake" ]
+then
+   cmake \
+      -DCMAKE_INSTALL_PREFIX=$PARAVIEW_APP_DIR \
+      $CMAKE_VARIABLES \
+      $PARAVIEW_SRC_DIR
+fi
+
+
+if [ -r /proc/cpuinfo ]; then
+   WM_NCOMPPROCS=`egrep "^processor" /proc/cpuinfo | wc -l`
+
+   [ $WM_NCOMPPROCS -le 8 ] || WM_NCOMPPROCS=8
+
+   make -j $WM_NCOMPPROCS
+else
+   make
+fi
+
+
+if [ -e "$PARAVIEW_OBJ_DIR/bin/paraview" ]; then
+   echo "Info: Installation completed - proceeding to install"
+   make install
+
+   # copy VTK headers to install directory
+   echo "Info: Copying VTK headers"
+   cp -r $PARAVIEW_SRC_DIR/VTK $PARAVIEW_APP_DIR
+   cp -r $PARAVIEW_OBJ_DIR/VTK/vtkConfigure.h $PARAVIEW_APP_DIR/VTK
+   cp -r $PARAVIEW_OBJ_DIR/VTK/vtkstd $PARAVIEW_APP_DIR/VTK
+
+   # copy all .so files to the lib folder
+   # - NOTE: shouldn't be necessary - but some libs not copied over to the
+   # install folder
+##   echo "Info: Copying libs"
+##   cp $PARAVIEW_OBJ_DIR/bin/*.so* $PARAVIEW_APP_DIR/lib/paraview-$ParaView_VERSION
+
+   echo "Info: Copying ParaViewConfig.cmake"
+   cp $PARAVIEW_OBJ_DIR/ParaViewConfig.cmake $PARAVIEW_APP_DIR
+
+   if [ "$OBJ_ADD" ]; then
+      echo "Creating symbolic link in $ParaView_INST_DIR/platforms from $WM_OPTIONS$OBJ_ADD to $WM_OPTIONS"
+      ( cd $ParaView_INST_DIR/platforms && ln -s $WM_OPTIONS$OBJ_ADD $WM_OPTIONS )
+   fi
+
+   echo "Installation complete"
+   echo "Set environment variables:"
+   echo " - ParaView_DIR to $PARAVIEW_APP_DIR"
+   echo " - ParaView_INST_DIR to $PARAVIEW_APP_DIR"
+   echo " - PV_PLUGIN_PATH to $FOAM_LIBBIN"
+   echo "Add $ParaView_INST_DIR/bin to PATH"
+   echo "Add $ParaView_INST_DIR/lib to LD_LIBRARY_PATH"
+
+   echo "done."
+else
+   echo "*** Error: Installation failed - see output window"
+fi
+
+# finalisation
+cd $oldpwd
+
+# ----------------------------------------------------------------- end-of-file
