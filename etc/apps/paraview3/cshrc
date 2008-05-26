@@ -45,10 +45,9 @@ else
     unset CMAKE_HOME
 endif
 
-# setenv ParaView_VERSION 3.3-cvs
-setenv ParaView_VERSION 3.3
+setenv ParaView_VERSION 3.3-cvs
 
-export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/paraview-$ParaView_VERSION
+export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/ParaView$ParaView_VERSION
 setenv ParaView_DIR $ParaView_INST_DIR/platforms/$WM_OPTIONS
 
 if ($?PYTHONPATH) then
