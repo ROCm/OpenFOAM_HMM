@@ -48,6 +48,7 @@ addCMakeVariable ()
     if [ -z "$1" ]; then
         echo "*** Error: addCMakeVariable()"
         echo "    No variable to add"
+        exit 1
     fi
 
     CMAKE_VARIABLES="$CMAKE_VARIABLES -D$1"
@@ -56,29 +57,37 @@ addCMakeVariable ()
 
 addMpiSupport ()
 {
-    OBJ_ADD="$OBJ_ADD-mpi"
-
-   # using OpenFOAM variables to identify location of MPI libraries
-   if [ "$WM_MPLIB" = "OPENMPI" ]; then
+    # using OpenFOAM variables to identify location of MPI libraries
+    case "$WM_MPLIB" in
+    OPENMPI)
         MPI_INCLUDE_PATH=$OPENMPI_ARCH_PATH/include
         MPI_LIBRARY=$OPENMPI_ARCH_PATH/lib/libmpi.so
         MPI_RUN=$OPENMPI_ARCH_PATH/bin/mpirun
-    elif [ "$WM_MPLIB" = "LAM" ]; then
+        ;;
+    LAM)
         MPI_INCLUDE_PATH=$LAM_ARCH_PATH/include
         MPI_LIBRARY=$LAM_ARCH_PATH/lib/libmpi.so
         MPI_RUN=$LAM_ARCH_PATH/bin/mpirun
-    elif [ "$WM_MPLIB" = "MPICH" ]; then
+        ;;
+    MPICH)
         MPI_INCLUDE_PATH=$MPICH_ARCH_PATH/include
         MPI_LIBRARY=$MPICH_ARCH_PATH/lib/libmpich.so
         MPI_RUN=$MPICH_ARCH_PATH/bin/mpirun
-    fi
+        ;;
+    *)
 
-    addCMakeVariable "VTK_USE_MPI=ON"
-    addCMakeVariable "PARAVIEW_USE_MPI=ON"
-    addCMakeVariable "MPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
-    addCMakeVariable "MPI_LIBRARY=$MPI_LIBRARY"
-    addCMakeVariable "VTK_MPIRUN_EXE=$MPI_RUN"
-    addCMakeVariable "VTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
+    if [ "$INCLUDE_MPI" ]; then
+        OBJ_ADD="$OBJ_ADD-mpi"
+        addCMakeVariable "VTK_USE_MPI=ON"
+        addCMakeVariable "PARAVIEW_USE_MPI=ON"
+        addCMakeVariable "MPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
+        addCMakeVariable "MPI_LIBRARY=$MPI_LIBRARY"
+        addCMakeVariable "VTK_MPIRUN_EXE=$MPI_RUN"
+        addCMakeVariable "VTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
+    else
+        echo "*** Error: unknown/unsupported mpi: $WM_MPLIB"
+        exit 1
+    fi
 }
 
 
@@ -130,14 +139,18 @@ addPythonSupport ()
 
 addMesaSupport ()
 {
-    OBJ_ADD="$OBJ_ADD-mesa"
-
     MESA_INCLUDE_DIR=/usr/include/GL
     MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
 
-    addCMakeVariable "VTK_OPENGL_HAS_OSMESA=ON"
-    addCMakeVariable "OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
-    addCMakeVariable "OSMESA_LIBRARY=$MESA_LIBRARY"
+    if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]; then
+        OBJ_ADD="$OBJ_ADD-mesa"
+        addCMakeVariable "VTK_OPENGL_HAS_OSMESA=ON"
+        addCMakeVariable "OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
+        addCMakeVariable "OSMESA_LIBRARY=$MESA_LIBRARY"
+    else
+        echo "*** Error: no MESA information found"
+        exit 1
+    fi
 }
 
 
@@ -168,10 +181,13 @@ buildParaView ()
     echo "    Target         : $PARAVIEW_OBJ_DIR"
 
     # make paraview
-    cmake \
-        -DCMAKE_INSTALL_PREFIX=$PARAVIEW_APP_DIR \
-        $CMAKE_VARIABLES \
-        $PARAVIEW_SRC_DIR
+    # provide a backdoor to skip cmake for repeated builds
+    if [ -z "$build_no_cmake" ]; then
+        cmake \
+            -DCMAKE_INSTALL_PREFIX=$PARAVIEW_APP_DIR \
+            $CMAKE_VARIABLES \
+            $PARAVIEW_SRC_DIR
+    fi
 
     if [ -r /proc/cpuinfo ]; then
         WM_NCOMPPROCS=`egrep "^processor" /proc/cpuinfo | wc -l`
