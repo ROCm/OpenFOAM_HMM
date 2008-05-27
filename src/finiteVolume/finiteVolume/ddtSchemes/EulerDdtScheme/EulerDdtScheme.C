@@ -471,8 +471,8 @@ EulerDdtScheme<Type>::fvcDdtPhiCorr
                        (
                            rA*rho.oldTime()*U.oldTime()
                        ) & mesh().Sf()
-                 )
-               )
+                   )
+                )
             )
         );
     }

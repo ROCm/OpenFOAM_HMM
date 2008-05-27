@@ -41,6 +41,7 @@ Description
 #include "twoPhaseMixture.H"
 #include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "probes.H"
+#include "EulerDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,7 +67,6 @@ int main(int argc, char *argv[])
     {
         #include "readControls.H"
         #include "CourantNo.H"
-
         #include "setDeltaT.H"
 
         runTime++;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         // Make the fluxes absolute
         if (mesh.changing())
         {
-            fvc::makeAbsolute(phi, U);
+            phi = fvc::interpolate(U) & mesh.Sf();
         }
 
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         }
 
         // Keep the absolute fluxes for use in ddtPhiCorr
-        surfaceScalarField phiAbs("phiAbs", phi);
+        surfaceScalarField phiAbs0("phiAbs0", phi);
 
         // Make the fluxes relative to the mesh motion
         if (mesh.changing())
@@ -124,8 +124,6 @@ int main(int argc, char *argv[])
         {
             #include "pEqn.H"
         }
-
-        #include "continuityErrs.H"
 
         p = pd + rho*gh;
 

@@ -182,7 +182,7 @@ void Foam::chemkinReader::addReactionType
                         speciesTable_,
                         lhs.shrink(),
                         rhs.shrink(),
-                        specieThermo_
+                        speciesThermo_
                     ),
                     rr
                 )
@@ -201,7 +201,7 @@ void Foam::chemkinReader::addReactionType
                         speciesTable_,
                         lhs.shrink(),
                         rhs.shrink(),
-                        specieThermo_
+                        speciesThermo_
                     ),
                     rr
                 )
@@ -500,7 +500,7 @@ void Foam::chemkinReader::addReaction
                             speciesTable_,
                             lhs.shrink(),
                             rhs.shrink(),
-                            specieThermo_
+                            speciesThermo_
                         ),
                         ArrheniusReactionRate
                         (
@@ -553,7 +553,7 @@ void Foam::chemkinReader::addReaction
                             speciesTable_,
                             lhs.shrink(),
                             rhs.shrink(),
-                            specieThermo_
+                            speciesThermo_
                         ),
                         thirdBodyArrheniusReactionRate
                         (
@@ -658,7 +658,7 @@ void Foam::chemkinReader::addReaction
                             speciesTable_,
                             lhs.shrink(),
                             rhs.shrink(),
-                            specieThermo_
+                            speciesThermo_
                         ),
                         LandauTellerReactionRate
                         (
@@ -814,7 +814,8 @@ void Foam::chemkinReader::read
         yy_buffer_state* bufferPtr(yy_create_buffer(&thermoStream, yyBufSize));
         yy_switch_to_buffer(bufferPtr);
 
-        while(lex() != 0);
+        while(lex() != 0)
+        {}
 
         yy_delete_buffer(bufferPtr);
 
@@ -838,7 +839,8 @@ void Foam::chemkinReader::read
 
     initReactionKeywordTable();
 
-    while(lex() != 0);
+    while(lex() != 0)
+    {}
 
     yy_delete_buffer(bufferPtr);
 }

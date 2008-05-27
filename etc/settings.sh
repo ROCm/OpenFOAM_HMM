@@ -97,7 +97,14 @@ WM_COMPILER_INST=OpenFOAM
 
 case "$WM_COMPILER_INST" in
 OpenFOAM)
-    export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+    case "$WM_COMPILER" in
+    Gcc43)
+        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.3.0$WM_COMPILER_ARCH
+        ;;
+    Gcc)
+        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+        ;;
+    esac
 
     # Check that the compiler directory can be found
     if [ ! -d "$WM_COMPILER_DIR" ]
@@ -134,7 +141,6 @@ export PATH=$MICO_ARCH_PATH/bin:$PATH
 export FOAMX_PATH=$FOAM_UTILITIES/preProcessing/FoamX
 # perhaps we can cut down a bit here
 for FOAMX_CONFIG in \
-    $HOME/.$WM_PROJECT-$WM_PROJECT_VERSION/apps/FoamX \
     $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION/apps/FoamX \
     $HOME/.$WM_PROJECT/apps/FoamX \
     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/apps/FoamX \

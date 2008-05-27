@@ -45,10 +45,9 @@ else
     unset CMAKE_HOME
 fi
 
-# export ParaView_VERSION="3.3-cvs"
-export ParaView_VERSION=3.3
+export ParaView_VERSION="3.3-cvs"
 
-export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/paraview-$ParaView_VERSION
+export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/ParaView$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_OPTIONS
 
 if [ "$PYTHONPATH" ]; then
@@ -60,7 +59,9 @@ fi
 
 if [ -r $ParaView_DIR ]; then
     export PATH=$ParaView_DIR/bin:$PATH
-    export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_VERSION:$LD_LIBRARY_PATH
+
+    # LD_LIBRARY_PATH may not be necessary
+    ## export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-3.3:$LD_LIBRARY_PATH
 
     export PV_PLUGIN_PATH=$FOAM_LIBBIN
 fi

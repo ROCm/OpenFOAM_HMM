@@ -49,8 +49,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class polyMesh;
-
 // Forward declaration of friend functions and operators
 
 template<class ZoneType, class MeshType> class ZoneMesh;
@@ -94,7 +92,7 @@ public:
 
     // Constructors
 
-        //- Read constructor given IOobject and a mesh reference
+        //- Read constructor given IOobject and a MeshType reference
         ZoneMesh
         (
             const IOobject&,

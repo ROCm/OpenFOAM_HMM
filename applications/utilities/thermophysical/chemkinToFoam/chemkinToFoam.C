@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         << "reactions" << cr.reactions() << ';' << endl;
 
     OFstream thermoFile(FOAMThermodynamicsFileName);
-    thermoFile<< cr.specieThermo() << endl;
+    thermoFile<< cr.speciesThermo() << endl;
 
     Info << "End\n" << endl;
 

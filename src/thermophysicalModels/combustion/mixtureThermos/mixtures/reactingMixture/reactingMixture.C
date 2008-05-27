@@ -45,7 +45,7 @@ reactingMixture::reactingMixture
     (
         thermoDict,
         autoPtr<chemistryReader>::operator()().species(),
-        autoPtr<chemistryReader>::operator()().specieThermo(),
+        autoPtr<chemistryReader>::operator()().speciesThermo(),
         mesh
     ),
     PtrList<chemistryReader::reaction>

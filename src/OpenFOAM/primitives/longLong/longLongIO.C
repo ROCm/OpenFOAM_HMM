@@ -73,7 +73,8 @@ long long readLongLong(Istream& is)
     static const label zeroOffset = int('0');
 
     // Get next non-whitespace character
-    while (is.read(c) && isspace(c));
+    while (is.read(c) && isspace(c))
+    {}
 
     do
     {

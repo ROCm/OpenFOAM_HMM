@@ -180,7 +180,7 @@ public:
                 return meshInfo_;
             }
 
-            const label size() const
+            label size() const
             {
                 return IDLList<ParticleType>::size();
             };

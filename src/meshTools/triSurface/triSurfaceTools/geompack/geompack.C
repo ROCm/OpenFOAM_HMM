@@ -4,6 +4,7 @@
 # include <fstream>
 # include <cmath>
 # include <ctime>
+# include <cstring>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ double d_epsilon ( void )
 //    D_EPSILON is a number R which is a power of 2 with the property that,
 //    to the precision of the computer's arithmetic,
 //      1 < 1 + R
-//    but 
+//    but
 //      1 = ( 1 + R / 2 )
 //
 //  Modified:
@@ -79,7 +80,7 @@ double d_max ( double x, double y )
   if ( y < x )
   {
     return x;
-  } 
+  }
   else
   {
     return y;
@@ -113,7 +114,7 @@ double d_min ( double x, double y )
   if ( y < x )
   {
     return y;
-  } 
+  }
   else
   {
     return x;
@@ -623,7 +624,7 @@ void d2vec_sort_quick_a ( int n, double a[] )
 }
 //******************************************************************************
 
-int diaedg ( double x0, double y0, double x1, double y1, double x2, double y2, 
+int diaedg ( double x0, double y0, double x1, double y1, double x2, double y2,
   double x3, double y3 )
 
 //******************************************************************************
@@ -660,7 +661,7 @@ int diaedg ( double x0, double y0, double x1, double y1, double x2, double y2,
 //
 //  Parameters:
 //
-//    Input, double X0, Y0, X1, Y1, X2, Y2, X3, Y3, the coordinates of the 
+//    Input, double X0, Y0, X1, Y1, X2, Y2, X3, Y3, the coordinates of the
 //    vertices of a quadrilateral, given in counter clockwise order.
 //
 //    Output, int DIAEDG, chooses a diagonal:
@@ -696,12 +697,12 @@ int diaedg ( double x0, double y0, double x1, double y1, double x2, double y2,
   dx32 = x3 - x2;
   dy32 = y3 - y2;
 
-  tola = tol * d_max ( fabs ( dx10 ), 
-               d_max ( fabs ( dy10 ), 
+  tola = tol * d_max ( fabs ( dx10 ),
+               d_max ( fabs ( dy10 ),
                d_max ( fabs ( dx30 ), fabs ( dy30 ) ) ) );
 
-  tolb = tol * d_max ( fabs ( dx12 ), 
-               d_max ( fabs ( dy12 ), 
+  tolb = tol * d_max ( fabs ( dx12 ),
+               d_max ( fabs ( dy12 ),
                d_max ( fabs ( dx32 ), fabs ( dy32 ) ) ) );
 
   ca = dx10 * dx30 + dy10 * dy30;
@@ -718,7 +719,7 @@ int diaedg ( double x0, double y0, double x1, double y1, double x2, double y2,
   else
   {
     tola = d_max ( tola, tolb );
-    s = ( dx10 * dy30 - dx30 * dy10 ) * cb 
+    s = ( dx10 * dy30 - dx30 * dy10 ) * cb
       + ( dx32 * dy12 - dx12 * dy32 ) * ca;
 
     if ( tola < s )
@@ -771,7 +772,7 @@ void dmat_transpose_print ( int m, int n, double a[], const char *title )
 }
 //******************************************************************************
 
-void dmat_transpose_print_some ( int m, int n, double a[], int ilo, int jlo, 
+void dmat_transpose_print_some ( int m, int n, double a[], int ilo, int jlo,
   int ihi, int jhi, const char *title )
 
 //******************************************************************************
@@ -909,7 +910,7 @@ void dmat_uniform ( int m, int n, double b, double c, int *seed, double r[] )
 //
 //    Input/output, int *SEED, the "seed" value.  Normally, this
 //    value should not be 0, otherwise the output value of SEED
-//    will still be 0, and D_UNIFORM will be 0.  On output, SEED has 
+//    will still be 0, and D_UNIFORM will be 0.  On output, SEED has
 //    been updated.
 //
 //    Output, double DMAT_UNIFORM[M*N], a matrix of pseudorandom values.
@@ -943,7 +944,7 @@ void dmat_uniform ( int m, int n, double b, double c, int *seed, double r[] )
 }
 //******************************************************************************
 
-int dtris2 ( int point_num, double point_xy[], int *tri_num, 
+int dtris2 ( int point_num, double point_xy[], int *tri_num,
   int tri_vert[], int tri_nabe[] )
 
 //******************************************************************************
@@ -1046,11 +1047,11 @@ int dtris2 ( int point_num, double point_xy[], int *tri_num,
 
     for ( j = 0; j <= 1; j++ )
     {
-      cmax = d_max ( fabs ( point_xy[2*(m-1)+j] ), 
+      cmax = d_max ( fabs ( point_xy[2*(m-1)+j] ),
                      fabs ( point_xy[2*(m1-1)+j] ) );
 
-      if ( tol * ( cmax + 1.0 ) 
-           < fabs ( point_xy[2*(m-1)+j] - point_xy[2*(m1-1)+j] ) ) 
+      if ( tol * ( cmax + 1.0 )
+           < fabs ( point_xy[2*(m-1)+j] - point_xy[2*(m1-1)+j] ) )
       {
         k = j;
         break;
@@ -1095,7 +1096,7 @@ int dtris2 ( int point_num, double point_xy[], int *tri_num,
     m = j;
 
     lr = lrline ( point_xy[2*(m-1)+0], point_xy[2*(m-1)+1],
-      point_xy[2*(m1-1)+0], point_xy[2*(m1-1)+1], 
+      point_xy[2*(m1-1)+0], point_xy[2*(m1-1)+1],
       point_xy[2*(m2-1)+0], point_xy[2*(m2-1)+1], 0.0 );
 
     if ( lr != 0 )
@@ -1182,8 +1183,8 @@ int dtris2 ( int point_num, double point_xy[], int *tri_num,
       m2 = tri_vert[3*(ltri-1)+0];
     }
 
-    lr = lrline ( point_xy[2*(m-1)+0], point_xy[2*(m-1)+1], 
-      point_xy[2*(m1-1)+0], point_xy[2*(m1-1)+1], 
+    lr = lrline ( point_xy[2*(m-1)+0], point_xy[2*(m-1)+1],
+      point_xy[2*(m1-1)+0], point_xy[2*(m1-1)+1],
       point_xy[2*(m2-1)+0], point_xy[2*(m2-1)+1], 0.0 );
 
     if ( 0 < lr )
@@ -1199,7 +1200,7 @@ int dtris2 ( int point_num, double point_xy[], int *tri_num,
       redg = (l % 3) + 1;
     }
 
-    vbedg ( point_xy[2*(m-1)+0], point_xy[2*(m-1)+1], point_num, 
+    vbedg ( point_xy[2*(m-1)+0], point_xy[2*(m-1)+1], point_num,
       point_xy, *tri_num, tri_vert, tri_nabe, &ltri, &ledg, &rtri, &redg );
 
     n = *tri_num + 1;
@@ -1255,7 +1256,7 @@ int dtris2 ( int point_num, double point_xy[], int *tri_num,
     ltri = n;
     ledg = 2;
 
-    error = swapec ( m, &top, &ltri, &ledg, point_num, point_xy, *tri_num, 
+    error = swapec ( m, &top, &ltri, &ledg, point_num, point_xy, *tri_num,
       tri_vert, tri_nabe, stack );
 
     if ( error != 0 )
@@ -1473,9 +1474,9 @@ void dvec_print ( int n, double a[], const char *title )
   }
 
   cout << "\n";
-  for ( i = 0; i <= n-1; i++ ) 
+  for ( i = 0; i <= n-1; i++ )
   {
-    cout << setw(6)  << i + 1 << "  " 
+    cout << setw(6)  << i + 1 << "  "
          << setw(14) << a[i]  << "\n";
   }
 
@@ -1600,8 +1601,8 @@ int i_modp ( int i, int j )
 //
 //  Formula:
 //
-//    If 
-//      NREM = I_MODP ( I, J ) 
+//    If
+//      NREM = I_MODP ( I, J )
 //      NMULT = ( I - NREM ) / J
 //    then
 //      I = J * NMULT + NREM
@@ -1620,7 +1621,7 @@ int i_modp ( int i, int j )
 //  Examples:
 //
 //        I         J     MOD  I_MODP   I_MODP Factorization
-// 
+//
 //      107        50       7       7    107 =  2 *  50 + 7
 //      107       -50       7       7    107 = -2 * -50 + 7
 //     -107        50      -7      43   -107 = -3 *  50 + 43
@@ -1640,7 +1641,7 @@ int i_modp ( int i, int j )
 //
 //    Input, int J, the number that divides I.
 //
-//    Output, int I_MODP, the nonnegative remainder when I is 
+//    Output, int I_MODP, the nonnegative remainder when I is
 //    divided by J.
 //
 {
@@ -1692,7 +1693,7 @@ int i_sign ( int i )
 //
 //    Output, int I_SIGN, the sign of I.
 {
-  if ( i < 0 ) 
+  if ( i < 0 )
   {
     return (-1);
   }
@@ -1809,7 +1810,7 @@ void imat_transpose_print ( int m, int n, int a[], const char *title )
 }
 //******************************************************************************
 
-void imat_transpose_print_some ( int m, int n, int a[], int ilo, int jlo, 
+void imat_transpose_print_some ( int m, int n, int a[], int ilo, int jlo,
   int ihi, int jhi, const char *title )
 
 //******************************************************************************
@@ -1962,7 +1963,7 @@ void ivec_heap_d ( int n, int a[] )
 //  Only nodes (N/2)-1 down to 0 can be "parent" nodes.
 //
   for ( i = (n/2)-1; 0 <= i; i-- )
-  { 
+  {
 //
 //  Copy the value out of the parent node.
 //  Position IFREE is now "open".
@@ -2180,7 +2181,7 @@ void ivec_sorted_unique ( int n, int a[], int *nuniq )
 
   for ( i = 1; i < n; i++ )
   {
-    if ( a[i] != a[*nuniq] ) 
+    if ( a[i] != a[*nuniq] )
     {
       *nuniq = *nuniq + 1;
       a[*nuniq] = a[i];
@@ -2192,7 +2193,7 @@ void ivec_sorted_unique ( int n, int a[], int *nuniq )
 }
 //******************************************************************************
 
-int lrline ( double xu, double yu, double xv1, double yv1, double xv2, 
+int lrline ( double xu, double yu, double xv1, double yv1, double xv2,
   double yv2, double dv )
 
 //******************************************************************************
@@ -2253,9 +2254,9 @@ int lrline ( double xu, double yu, double xv1, double yv1, double xv2,
   dxu = xu - xv1;
   dyu = yu - yv1;
 
-  tolabs = tol * d_max ( fabs ( dx ), 
-                 d_max ( fabs ( dy ), 
-                 d_max ( fabs ( dxu ), 
+  tolabs = tol * d_max ( fabs ( dx ),
+                 d_max ( fabs ( dy ),
+                 d_max ( fabs ( dxu ),
                  d_max ( fabs ( dyu ), fabs ( dv ) ) ) ) );
 
   t = dy * dxu - dx * dyu + dv * sqrt ( dx * dx + dy * dy );
@@ -2426,7 +2427,7 @@ int *points_delaunay_naive_2d ( int n, double p[], int *ntri )
 
 //********************************************************************
 //
-//  Purpose:  
+//  Purpose:
 //
 //    POINTS_DELAUNAY_NAIVE_2D computes the Delaunay triangulation in 2D.
 //
@@ -2456,7 +2457,7 @@ int *points_delaunay_naive_2d ( int n, double p[], int *ntri )
 //
 //    Joseph O'Rourke,
 //    Computational Geometry,
-//    Cambridge University Press, 
+//    Cambridge University Press,
 //    Second Edition, 1998, page 187.
 //
 //  Parameters:
@@ -2467,7 +2468,7 @@ int *points_delaunay_naive_2d ( int n, double p[], int *ntri )
 //
 //    Output, int *NTRI, the number of triangles.
 //
-//    Output, int POINTS_DELAUNAY_NAIVE_2D[3*NTRI], the indices of the 
+//    Output, int POINTS_DELAUNAY_NAIVE_2D[3*NTRI], the indices of the
 //    nodes making each triangle.
 //
 {
@@ -2506,34 +2507,34 @@ int *points_delaunay_naive_2d ( int n, double p[], int *ntri )
 //
 //  For each triple (I,J,K):
 //
-    for ( i = 0; i < n - 2; i++ ) 
+    for ( i = 0; i < n - 2; i++ )
     {
-      for ( j = i+1; j < n; j++ ) 
+      for ( j = i+1; j < n; j++ )
       {
-        for ( k = i+1; k < n; k++ ) 
+        for ( k = i+1; k < n; k++ )
         {
-          if ( j != k ) 
+          if ( j != k )
           {
-            xn = ( p[1+j*2] - p[1+i*2] ) * ( z[k] - z[i] ) 
+            xn = ( p[1+j*2] - p[1+i*2] ) * ( z[k] - z[i] )
                - ( p[1+k*2] - p[1+i*2] ) * ( z[j] - z[i] );
-            yn = ( p[0+k*2] - p[0+i*2] ) * ( z[j] - z[i] ) 
+            yn = ( p[0+k*2] - p[0+i*2] ) * ( z[j] - z[i] )
                - ( p[0+j*2] - p[0+i*2] ) * ( z[k] - z[i] );
-            zn = ( p[0+j*2] - p[0+i*2] ) * ( p[1+k*2] - p[1+i*2] ) 
+            zn = ( p[0+j*2] - p[0+i*2] ) * ( p[1+k*2] - p[1+i*2] )
                - ( p[0+k*2] - p[0+i*2] ) * ( p[1+j*2] - p[1+i*2] );
 
             flag = ( zn < 0 );
 
-            if ( flag ) 
+            if ( flag )
             {
-              for ( m = 0; m < n; m++ )  
+              for ( m = 0; m < n; m++ )
               {
-                flag = flag && ( ( p[0+m*2] - p[0+i*2] ) * xn 
-                               + ( p[1+m*2] - p[1+i*2] ) * yn 
+                flag = flag && ( ( p[0+m*2] - p[0+i*2] ) * xn
+                               + ( p[1+m*2] - p[1+i*2] ) * yn
                                + ( z[m] - z[i] ) * zn <= 0 );
               }
             }
 
-            if ( flag ) 
+            if ( flag )
             {
               if ( pass == 2 )
               {
@@ -2545,8 +2546,8 @@ int *points_delaunay_naive_2d ( int n, double p[], int *ntri )
             }
 
           }
-        }    
-      } 
+        }
+      }
     }
   }
 
@@ -2587,7 +2588,7 @@ int s_len_trim ( const char *s )
   n = strlen ( s );
   t = const_cast<char*>(s) + n - 1;
 
-  while ( 0 < n ) 
+  while ( 0 < n )
   {
     if ( *t != ' ' )
     {
@@ -2601,8 +2602,8 @@ int s_len_trim ( const char *s )
 }
 //******************************************************************************
 
-int swapec ( int i, int *top, int *btri, int *bedg, int point_num, 
-  double point_xy[], int tri_num, int tri_vert[], int tri_nabe[], 
+int swapec ( int i, int *top, int *btri, int *bedg, int point_num,
+  double point_xy[], int tri_num, int tri_vert[], int tri_nabe[],
   int stack[] )
 
 //******************************************************************************
@@ -2698,7 +2699,7 @@ int swapec ( int i, int *top, int *btri, int *bedg, int point_num,
 
   for ( ; ; )
   {
-    if ( *top <= 0 ) 
+    if ( *top <= 0 )
     {
       break;
     }
@@ -2741,7 +2742,7 @@ int swapec ( int i, int *top, int *btri, int *bedg, int point_num,
       c = tri_vert[3*(u-1)+1];
     }
 
-    swap = diaedg ( x, y, 
+    swap = diaedg ( x, y,
       point_xy[2*(a-1)+0], point_xy[2*(a-1)+1],
       point_xy[2*(c-1)+0], point_xy[2*(c-1)+1],
       point_xy[2*(b-1)+0], point_xy[2*(b-1)+1] );
@@ -3021,16 +3022,16 @@ double *triangle_circumcenter_2d ( double t[] )
 
   center = new double[DIM_NUM];
 
-  asq = ( t[0+1*2] - t[0+0*2] ) * ( t[0+1*2] - t[0+0*2] ) 
+  asq = ( t[0+1*2] - t[0+0*2] ) * ( t[0+1*2] - t[0+0*2] )
       + ( t[1+1*2] - t[1+0*2] ) * ( t[1+1*2] - t[1+0*2] );
 
-  csq = ( t[0+2*2] - t[0+0*2] ) * ( t[0+2*2] - t[0+0*2] ) 
+  csq = ( t[0+2*2] - t[0+0*2] ) * ( t[0+2*2] - t[0+0*2] )
       + ( t[1+2*2] - t[1+0*2] ) * ( t[1+2*2] - t[1+0*2] );
-  
+
   top1 =  ( t[1+1*2] - t[1+0*2] ) * csq - ( t[1+2*2] - t[1+0*2] ) * asq;
   top2 =  ( t[0+1*2] - t[0+0*2] ) * csq - ( t[0+2*2] - t[0+0*2] ) * asq;
 
-  bot  =  ( t[1+1*2] - t[1+0*2] ) * ( t[0+2*2] - t[0+0*2] )  
+  bot  =  ( t[1+1*2] - t[1+0*2] ) * ( t[0+2*2] - t[0+0*2] )
         - ( t[1+2*2] - t[1+0*2] ) * ( t[0+1*2] - t[0+0*2] );
 
   center[0] = t[0+0*2] + 0.5 * top1 / bot;
@@ -3042,7 +3043,7 @@ double *triangle_circumcenter_2d ( double t[] )
 }
 //******************************************************************************
 
-bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[], 
+bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[],
   int tri_num, int nod_tri[] )
 
 //******************************************************************************
@@ -3140,7 +3141,7 @@ bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[
   file_out << "%%Title: " << file_out_name << "\n";
   file_out << "%%CreationDate: " << date_time << "\n";
   file_out << "%%Pages: 1\n";
-  file_out << "%%Bounding Box: " << x_ps_min << "  " << y_ps_min << "  " 
+  file_out << "%%Bounding Box: " << x_ps_min << "  " << y_ps_min << "  "
            << x_ps_max << "  " << y_ps_max << "\n";
   file_out << "%%Document-Fonts: Times-Roman\n";
   file_out << "%%LanguageLevel: 1\n";
@@ -3199,17 +3200,17 @@ bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[
 
   for ( g = 0; g < g_num; g++ )
   {
-    x_ps = int(  
-      ( ( x_max - g_xy[0+g*2] ) * double( x_ps_min )  
-      + ( g_xy[0+g*2] - x_min ) * double( x_ps_max ) ) 
+    x_ps = int(
+      ( ( x_max - g_xy[0+g*2] ) * double( x_ps_min )
+      + ( g_xy[0+g*2] - x_min ) * double( x_ps_max ) )
       / ( x_max - x_min ) );
 
-    y_ps = int(  
-      ( ( y_max - g_xy[1+g*2] ) * double( y_ps_min )  
-      + ( g_xy[1+g*2] - y_min ) * double( y_ps_max ) ) 
+    y_ps = int(
+      ( ( y_max - g_xy[1+g*2] ) * double( y_ps_min )
+      + ( g_xy[1+g*2] - y_min ) * double( y_ps_max ) )
       / ( y_max - y_min ) );
 
-    file_out << "newpath " << x_ps << "  " 
+    file_out << "newpath " << x_ps << "  "
              << y_ps << " 5 0 360 arc closepath fill\n";
   }
 
@@ -3231,14 +3232,14 @@ bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[
 
       k = nod_tri[3*(t-1)+e-1];
 
-      x_ps = int(  
-        ( ( x_max - g_xy[0+(k-1)*2] ) * double( x_ps_min )  
-        + ( g_xy[0+(k-1)*2] - x_min ) * double( x_ps_max ) ) 
+      x_ps = int(
+        ( ( x_max - g_xy[0+(k-1)*2] ) * double( x_ps_min )
+        + ( g_xy[0+(k-1)*2] - x_min ) * double( x_ps_max ) )
         / ( x_max - x_min ) );
 
-      y_ps = int( 
-        ( ( y_max - g_xy[1+(k-1)*2] ) * double( y_ps_min )  
-        + ( g_xy[1+(k-1)*2] - y_min ) * double( y_ps_max ) ) 
+      y_ps = int(
+        ( ( y_max - g_xy[1+(k-1)*2] ) * double( y_ps_min )
+        + ( g_xy[1+(k-1)*2] - y_min ) * double( y_ps_max ) )
         / ( y_max - y_min ) );
 
       if ( j == 1 )
@@ -3269,7 +3270,7 @@ bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[
 }
 //******************************************************************************
 
-void triangulation_print ( int point_num, double xc[], int tri_num, 
+void triangulation_print ( int point_num, double xc[], int tri_num,
   int tri_vert[], int tri_nabe[] )
 
 //******************************************************************************
@@ -3356,7 +3357,7 @@ void triangulation_print ( int point_num, double xc[], int tri_num,
 
   imat_transpose_print ( 3, tri_num, tri_nabe, "  Triangle neighbors" );
 //
-//  Determine VERTEX_NUM, the number of vertices.  This is not 
+//  Determine VERTEX_NUM, the number of vertices.  This is not
 //  the same as the number of points!
 //
   vertex_list = new int[3*tri_num];
@@ -3439,7 +3440,7 @@ void triangulation_print ( int point_num, double xc[], int tri_num,
 }
 //******************************************************************************
 
-void vbedg ( double x, double y, int point_num, double point_xy[], int tri_num, 
+void vbedg ( double x, double y, int point_num, double point_xy[], int tri_num,
   int tri_vert[], int tri_nabe[], int *ltri, int *ledg, int *rtri, int *redg )
 
 //******************************************************************************

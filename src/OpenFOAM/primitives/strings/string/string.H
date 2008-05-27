@@ -49,6 +49,8 @@ SourceFiles
 #include "char.H"
 
 #include <string>
+#include <cstring>
+#include <cstdlib>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

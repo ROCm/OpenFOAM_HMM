@@ -1055,7 +1055,7 @@ pointIndexHit indexedOctree<Type>::findLine
         direction startBit = treeBb.posBits(start);
         direction endBit = treeBb.posBits(end);
 
-        if (startBit&endBit != 0)
+        if ((startBit & endBit) != 0)
         {
             // Both start and end outside domain and in same block.
             return pointIndexHit(false, vector::zero, -1);

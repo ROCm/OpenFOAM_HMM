@@ -220,7 +220,8 @@ HashTable<T, Key, Hash>::iterator::operator++()
     (
         ++hashIndex_ < curHashTable_.tableSize_
      && !(elmtPtr_ = curHashTable_.table_[hashIndex_])
-    );
+    )
+    {}
 
     if (hashIndex_ == curHashTable_.tableSize_)
     {
@@ -259,7 +260,8 @@ HashTable<T, Key, Hash>::begin()
 {
     label i = 0;
 
-    while (table_ && !table_[i] && ++i < tableSize_);
+    while (table_ && !table_[i] && ++i < tableSize_)
+    {}
 
     if (i == tableSize_)
     {
@@ -396,7 +398,8 @@ HashTable<T, Key, Hash>::const_iterator::operator++()
         (
             ++hashIndex_ < curHashTable_.tableSize_
          && !(elmtPtr_ = curHashTable_.table_[hashIndex_])
-        );
+        )
+        {}
     }
 
     return *this;
@@ -430,7 +433,8 @@ HashTable<T, Key, Hash>::begin() const
 {
     label i = 0;
 
-    while (table_ && !table_[i] && ++i < tableSize_);
+    while (table_ && !table_[i] && ++i < tableSize_)
+    {}
 
     if (i == tableSize_)
     {

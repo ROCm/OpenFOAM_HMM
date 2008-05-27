@@ -56,32 +56,35 @@ int main(int argc, char *argv[])
     {
 #       include "readControls.H"
 #       include "CourantNo.H"
-
-        p.storePrevIter();
-
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
-
 #       include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        bool meshChanged = mesh.update();
+        // Make the fluxes absolute
+        if (mesh.changing())
+        {
+            phi = fvc::interpolate(U) & mesh.Sf();
+        }
 
-        if (correctPhi && meshChanged)
+        mesh.update();
+
+        if (mesh.changing() && correctPhi)
         {
 #           include "correctPhi.H"
         }
 
         // Keep the absolute fluxes for use in ddtPhiCorr
-        surfaceScalarField phiAbs("phiAbs", phi);
+        surfaceScalarField phiAbs0("phiAbs0", phi);
 
         // Make the fluxes relative to the mesh motion
-        fvc::makeRelative(phi, U);
+        if (mesh.changing())
+        {
+            fvc::makeRelative(phi, U);
+        }
 
-        if (meshChanged && checkMeshCourantNo)
+        if (mesh.changing() && checkMeshCourantNo)
         {
 #           include "meshCourantNo.H"
         }
@@ -89,6 +92,8 @@ int main(int argc, char *argv[])
         // --- PIMPLE loop
         for (int ocorr=0; ocorr<nOuterCorr; ocorr++)
         {
+            p.storePrevIter();
+
 #           include "UEqn.H"
 
             // --- PISO loop
@@ -101,10 +106,50 @@ int main(int argc, char *argv[])
 
                 if (ddtPhiCorr)
                 {
-                    phi += fvc::ddtPhiCorr(rAU, U, phiAbs);
+                    if (mesh.changing())
+                    {
+                        dimensionedScalar rDeltaT = 1.0/mesh.time().deltaT();
+
+                        volScalarField V0byV
+                        (
+                            IOobject
+                            (
+                                "V0byV",
+                                mesh.time().timeName(),
+                                mesh
+                            ),
+                            mesh,
+                            dimensionedScalar("V0byV", dimless, 1),
+                            zeroGradientFvPatchScalarField::typeName
+                        );
+                        V0byV.dimensionedInternalField() = mesh.V0()/mesh.V();
+                        V0byV.correctBoundaryConditions();
+
+                        phi += rDeltaT*
+                        (
+                            fvc::interpolate(rAU*V0byV)*phiAbs0
+                          - (fvc::interpolate(rAU*V0byV*U.oldTime()) & mesh.Sf())
+                        );
+                    }
+                    else
+                    {
+                        phi += fvc::ddtPhiCorr(rAU, U, phiAbs0);
+                    }
                 }
 
-                adjustPhi(phi, U, p);
+                if (p.needReference())
+                {
+                    if (mesh.changing())
+                    {
+                        fvc::makeRelative(phi, U);
+                        adjustPhi(phi, U, p);
+                        fvc::makeAbsolute(phi, U);
+                    }
+                    else
+                    {
+                        adjustPhi(phi, U, p);
+                    }
+                }
 
                 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
                 {
@@ -138,11 +183,11 @@ int main(int argc, char *argv[])
                     p.relax();
                 }
 
-                // Make the fluxes relative to the mesh motion
-                fvc::makeRelative(phi, U);
-
                 U -= rAU*fvc::grad(p);
                 U.correctBoundaryConditions();
+
+                // Make the fluxes relative to the mesh motion
+                fvc::makeRelative(phi, U);
             }
         }
 
