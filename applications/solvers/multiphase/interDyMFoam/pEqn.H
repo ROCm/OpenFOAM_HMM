@@ -5,11 +5,6 @@
     U = rAU*UEqn.H();
     surfaceScalarField phiU("phiU", (fvc::interpolate(U) & mesh.Sf()));
 
-    if (ddtPhiCorr)
-    {
-        phiU += fvc::ddtPhiCorr(rAU, rho, U, phiAbs0);
-    }
-
     phi = phiU +
     (
         fvc::interpolate(interface.sigmaK())*fvc::snGrad(gamma)

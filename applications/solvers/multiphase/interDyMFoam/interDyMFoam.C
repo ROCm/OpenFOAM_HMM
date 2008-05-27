@@ -67,14 +67,15 @@ int main(int argc, char *argv[])
     {
         #include "readControls.H"
         #include "CourantNo.H"
+
+        // Make the fluxes absolute
+        fvc::makeAbsolute(phi, U);
+
         #include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
 
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
@@ -95,9 +96,6 @@ int main(int argc, char *argv[])
         {
             #include "correctPhi.H"
         }
-
-        // Keep the absolute fluxes for use in ddtPhiCorr
-        surfaceScalarField phiAbs0("phiAbs0", phi);
 
         // Make the fluxes relative to the mesh motion
         fvc::makeRelative(phi, U);

@@ -57,14 +57,14 @@ int main(int argc, char *argv[])
 #       include "readControls.H"
 #       include "CourantNo.H"
 
+        // Make the fluxes absolute
+        fvc::makeAbsolute(phi, U);
+
 #       include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
 
         mesh.update();
 
@@ -95,11 +95,6 @@ int main(int argc, char *argv[])
 
                 U = rAU*UEqn.H();
                 phi = (fvc::interpolate(U) & mesh.Sf());
-
-                if (ddtPhiCorr)
-                {
-                    phi += fvc::ddtPhiCorr(rAU, U, phi);
-                }
 
                 if (p.needReference())
                 {
