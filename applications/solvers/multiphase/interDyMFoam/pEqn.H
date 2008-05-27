@@ -7,30 +7,7 @@
 
     if (ddtPhiCorr)
     {
-        //phiU += fvc::ddtPhiCorr(rAU, rho, U, phiAbs0);
-
-        dimensionedScalar rDeltaT = 1.0/mesh.time().deltaT();
-
-        volScalarField V0byV
-        (
-            IOobject
-            (
-                "V0byV",
-                mesh.time().timeName(),
-                mesh
-            ),
-            mesh,
-            dimensionedScalar("V0byV", dimless, 1),
-            zeroGradientFvPatchScalarField::typeName
-        );
-        V0byV.dimensionedInternalField() = mesh.V0()/mesh.V();
-        V0byV.correctBoundaryConditions();
-
-        phiU += rDeltaT*
-        (
-            fvc::interpolate(rAU*rho.oldTime()*V0byV)*phiAbs0
-          - (fvc::interpolate(rAU*rho.oldTime()*V0byV*U.oldTime()) & mesh.Sf())
-        );
+        phiU += fvc::ddtPhiCorr(rAU, rho, U, phiAbs0);
     }
 
     phi = phiU +
@@ -41,16 +18,9 @@
 
     if (pd.needReference())
     {
-        if (mesh.changing())
-        {
-            fvc::makeRelative(phi, U);
-            adjustPhi(phi, U, pd);
-            fvc::makeAbsolute(phi, U);
-        }
-        else
-        {
-            adjustPhi(phi, U, pd);
-        }
+        fvc::makeRelative(phi, U);
+        adjustPhi(phi, U, pd);
+        fvc::makeAbsolute(phi, U);
     }
 
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
