@@ -162,7 +162,21 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     const T& e
 )
 {
-    operator()(size()) = e;
+    nextFree_++;
+
+    if (nextFree_ > List<T>::size())
+    {
+        List<T>::setSize
+        (
+            max
+            (
+                nextFree_,
+                label(SizeMult*List<T>::size()/SizeDiv + SizeInc)
+            )
+        );
+    }
+
+    this->operator[](nextFree_ - 1) = e;
 }
 
 
@@ -186,7 +200,7 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 (
-    const Foam::label i
+    const label i
 )
 {
     nextFree_ = max(nextFree_, i + 1);

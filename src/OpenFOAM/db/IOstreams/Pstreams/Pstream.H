@@ -125,7 +125,7 @@ public:
                 label above() const
                 {
                     return above_;
-                } 
+                }
 
                 const labelList& below() const
                 {
@@ -468,7 +468,7 @@ public:
             //- Like above but switches between linear/tree communication
             template <class Container>
             static void mapCombineScatter(Container& Values);
-            
+
 
 
         // Gather/scatter keeping the individual processor data separate.

@@ -130,7 +130,7 @@ public:
                 const Pstream::commsTypes commsType,
                 const UList<Type>&
             ) const;
-    
+
             //- Raw field receive function with data compression
             template<class Type>
             void compressedReceive

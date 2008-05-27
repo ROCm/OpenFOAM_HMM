@@ -511,7 +511,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         {
             boundaryError = true;
 
-            if (debug || report && Pstream::master())
+            if (debug || (report && Pstream::master()))
             {
                 Info<< " ***Inconsistent patches across processors, "
                        "processor 0 has patch names:" << allNames[0]

@@ -28,14 +28,9 @@ License
 #include "DynamicList.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void primitiveMesh::calcCellEdges() const
+void Foam::primitiveMesh::calcCellEdges() const
 {
     // Loop through all faces and mark up cells with edges of the face.
     // Check for duplicates
@@ -78,7 +73,7 @@ void primitiveMesh::calcCellEdges() const
                 if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
                     // Add the edge
-                    curCellEdges.append(curEdges[edgeI]);
+                    //curCellEdges.append(curEdges[edgeI]);
                 }
             }
         }
@@ -94,7 +89,7 @@ void primitiveMesh::calcCellEdges() const
                 if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
                     // add the edge
-                    curCellEdges.append(curEdges[edgeI]);
+                    //curCellEdges.append(curEdges[edgeI]);
                 }
             }
         }
@@ -113,7 +108,7 @@ void primitiveMesh::calcCellEdges() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::cellEdges() const
+const Foam::labelListList& Foam::primitiveMesh::cellEdges() const
 {
     if (!cePtr_)
     {
@@ -123,9 +118,5 @@ const labelListList& primitiveMesh::cellEdges() const
     return *cePtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

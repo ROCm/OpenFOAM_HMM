@@ -34,21 +34,15 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//  Get next 'valid character': i.e. not white space or comment.
-
-char ISstream::nextValid()
+char Foam::ISstream::nextValid()
 {
     char c = 0;
 
     for (;;)
     {
         // Get next non-whitespace character
-        while (get(c) && isspace(c));
+        while (get(c) && isspace(c))
+        {}
 
         // Return if stream is bad
         if (bad() || isspace(c))
@@ -67,7 +61,8 @@ char ISstream::nextValid()
 
             if (c == '/')  // This is the start of a C++ style one line comment
             {
-                while (get(c) && c != '\n');
+                while (get(c) && c != '\n')
+                {}
             }
             else if (c == '*')  // This is the start of a C style comment
             {
@@ -104,9 +99,5 @@ char ISstream::nextValid()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

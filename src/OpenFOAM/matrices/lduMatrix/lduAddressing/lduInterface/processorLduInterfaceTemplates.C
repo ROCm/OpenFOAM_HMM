@@ -54,7 +54,7 @@ void Foam::processorLduInterface::send
         IPstream::read
         (
             commsType,
-            neighbProcNo(), 
+            neighbProcNo(),
             receiveBuf_.begin(),
             receiveBuf_.size()
         );
@@ -92,7 +92,7 @@ void Foam::processorLduInterface::receive
         IPstream::read
         (
             commsType,
-            neighbProcNo(), 
+            neighbProcNo(),
             reinterpret_cast<char*>(f.begin()),
             f.byteSize()
         );
@@ -150,7 +150,7 @@ void Foam::processorLduInterface::compressedSend
         }
 
         reinterpret_cast<Type&>(fArray[nm1]) = f[f.size() - 1];
-        
+
         if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
         {
             OPstream::write
@@ -168,7 +168,7 @@ void Foam::processorLduInterface::compressedSend
             IPstream::read
             (
                 commsType,
-                neighbProcNo(), 
+                neighbProcNo(),
                 receiveBuf_.begin(),
                 receiveBuf_.size()
             );
