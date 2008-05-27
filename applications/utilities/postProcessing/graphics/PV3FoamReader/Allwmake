@@ -1,7 +1,18 @@
 #!/bin/sh
 set -x
 
-if [ "$ParaView_VERSION" = "3.3-cvs" -a "$ParaView_DIR" -a -r $ParaView_DIR ] ; then
-    wmake libso vtkPV3Foam
-    (cd PV3FoamReader; mkdir -p Make/$WM_OPTIONS > /dev/null 2>&1; cd Make/$WM_OPTIONS; cmake ../..; make)
+if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
+then
+   case "$ParaView_VERSION" in
+   3*)
+      wmake libso vtkPV3Foam
+      (
+         cd PV3FoamReader
+         mkdir -p Make/$WM_OPTIONS > /dev/null 2>&1
+         cd Make/$WM_OPTIONS
+         cmake ../..
+         make
+      )
+      ;;
+   esac
 fi
