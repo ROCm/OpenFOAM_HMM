@@ -141,7 +141,6 @@ export PATH=$MICO_ARCH_PATH/bin:$PATH
 export FOAMX_PATH=$FOAM_UTILITIES/preProcessing/FoamX
 # perhaps we can cut down a bit here
 for FOAMX_CONFIG in \
-    $HOME/.$WM_PROJECT-$WM_PROJECT_VERSION/apps/FoamX \
     $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION/apps/FoamX \
     $HOME/.$WM_PROJECT/apps/FoamX \
     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/apps/FoamX \

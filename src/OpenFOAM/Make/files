@@ -126,6 +126,8 @@ IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
 $(IOdictionary)/IOdictionaryIO.C
 
+db/IOobjects/IOMap/IOMapName.C
+
 IOobject = db/IOobject
 $(IOobject)/IOobject.C
 $(IOobject)/IOobjectIO.C
@@ -345,8 +347,7 @@ faceZone = $(zones)/faceZone
 $(faceZone)/faceZone.C
 $(faceZone)/newFaceZone.C
 
-pointZones = $(zones)/pointZones
-pointZone = $(pointZones)/pointZone
+pointZone = $(zones)/pointZone
 $(pointZone)/pointZone.C
 $(pointZone)/newPointZone.C
 

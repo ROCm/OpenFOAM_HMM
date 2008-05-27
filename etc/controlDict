@@ -5,22 +5,15 @@
 |   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
-// Foam Dictionary.
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-    class           dictionary;
-    object          controlDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
 }
 
+// NB: the #functions do not work here
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 hosts
@@ -63,14 +56,18 @@ caseRoots
 
 Documentation
 {
-    docBrowser        "kde-open %f";
+    docBrowser      "kde-open %f";
     doxyDocDirs
     (
         "$WM_PROJECT_USER_DIR/Doxygen/html"
         "~OpenFOAM/Doxygen/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
     );
-    doxySourceFileExt "_8C.html";
+    doxySourceFileExts
+    (
+        "App_8C.html"
+        "_8C.html"
+    );
 }
 
 DebugSwitches
@@ -280,9 +277,9 @@ DebugSwitches
     SyamlalRogersOBrien 0;
     TAB                 0;
     ThermoCloud<reactingParcel> 0;
-    ThermoCloud<thermoParcel> 0;
+    ThermoCloud<thermoParcel>   0;
     ThermoParcel<reactingParcel> 0;
-    ThermoParcel<thermoParcel> 0;
+    ThermoParcel<thermoParcel>  0;
     UMIST               0;
     UMISTV              0;
     Unix                0;
@@ -296,8 +293,8 @@ DebugSwitches
     addPoint            0;
     advective           0;
     algebraicPair       0;
-    angularOscillatingDisplacement 0;
-    angularOscillatingVelocity 0;
+    angularOscillatingDisplacement  0;
+    angularOscillatingVelocity  0;
     anisotropic         0;
     ash                 0;
     atomizationModel    0;
@@ -313,7 +310,7 @@ DebugSwitches
     basicThermoCloud    0;
     binaryAbsorptionEmission 0;
     blended             0;
-    blobsSheetAtomization 0;
+    blobsSheetAtomization   0;
     blobsSwirlInjector  0;
     booleanSurface      0;
     boundaryCutter      0;
@@ -358,8 +355,8 @@ DebugSwitches
     conductivityModel   0;
     constInjector       0;
     constant            0;
-    constantAbsorptionEmission 0;
-    constantGammaContactAngle 0;
+    constantAbsorptionEmission  0;
+    constantGammaContactAngle   0;
     constantScatter     0;
     coordinateRotation  0;
     coordinateSystem    0;
@@ -388,7 +385,7 @@ DebugSwitches
     disallowDefaultFvsPatchField 0;
     disallowGenericFvPatchField 0;
     disallowGenericPointPatchField 0;
-    disallowGenericPolyPatch 0;
+    disallowGenericPolyPatch    0;
     dispersionLESModel  0;
     dispersionModel     0;
     dispersionRASModel  0;

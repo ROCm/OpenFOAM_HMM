@@ -26,7 +26,24 @@ Class
     Foam::timeVaryingUniformFixedValueFvPatchField
 
 Description
-    Foam::timeVaryingUniformFixedValueFvPatchField
+    A time-varying form of a uniform fixed value boundary condition.
+
+    Example of the boundary condition specification:
+    @verbatim
+    inlet
+    {
+        type            timeVaryingUniformFixedValue;
+        timeDataFile   "time-series";
+        timeBounding    clamp;           // (error|warn|clamp|repeat)
+    }
+    @endverbatim
+
+Note
+    This class is derived directly from a fixedValue patch rather than from
+    a uniformFixedValue patch.
+
+See Also
+    Foam::timeSeries and Foam::fixedValueFvPatchField
 
 SourceFiles
     timeVaryingUniformFixedValueFvPatchField.C
@@ -36,7 +53,8 @@ SourceFiles
 #ifndef timeVaryingUniformFixedValueFvPatchField_H
 #define timeVaryingUniformFixedValueFvPatchField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "fixedValueFvPatchField.H"
+#include "timeSeries.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +62,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class timeVaryingUniformFixedValueFvPatch Declaration
+           Class timeVaryingUniformFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -54,13 +72,14 @@ class timeVaryingUniformFixedValueFvPatchField
 {
     // Private data
 
-        fileName timeDataFileName_;
+        //- file containing time/uniformFixedValue
+        fileName timeDataFile_;
 
-        scalarField times_;
-        Field<Type> values_;
+        //- the time series being used, including the bounding treatment
+        timeSeries<Type> timeSeries_;
 
-        void checkTable();
-
+        //- interpolate the value at the current time
+        Type currentValue();
 
 public:
 
@@ -85,8 +104,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given timeVaryingUniformFixedValueFvPatchField
-        //  onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         timeVaryingUniformFixedValueFvPatchField
         (
             const timeVaryingUniformFixedValueFvPatchField<Type>&,
@@ -134,16 +152,16 @@ public:
 
         // Access
 
-            //- Return the list of times in the interpolation table
-            const scalarField& times() const
+            //- Return the out-of-bounds treatment as a word
+            word timeBounding() const
             {
-                return times_;
+                return timeSeries_.bounding();
             }
 
-            //- Return the list of values in the interpolation table
-            const Field<Type>& values()
+            //- Return the time series used
+            const timeSeries<Type>& timeData() const
             {
-                return values_;
+                return timeSeries_;
             }
 
 

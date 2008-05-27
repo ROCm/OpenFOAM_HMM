@@ -1,4 +1,0 @@
-PATHTOSRC = ../
-PROJECT = ccmio
-
-include ../config/Makefile.main

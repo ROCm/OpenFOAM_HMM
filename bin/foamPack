@@ -85,6 +85,7 @@ find -H $packDir               \
  -a ! -name "log[0-9]*"        \
  -a ! -name "so_locations"     \
 | sed                          \
+ -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
  -e "\@$packDir/src/other/mico-*/platforms@d"  \
  -e "\@$packDir/src/other/mpich-*/platforms@d" \

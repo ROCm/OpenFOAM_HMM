@@ -26,8 +26,8 @@ Application
     decomposePar
 
 Description
-    Automatically decomposes a mesh and fields of a case for parallel execution
-    of FOAM.
+    Automatically decomposes a mesh and fields of a case for parallel
+    execution of OpenFOAM.
 
 \*---------------------------------------------------------------------------*/
 
@@ -62,11 +62,8 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 
     bool decomposeFieldsOnly(args.options().found("fields"));
-
     bool writeCellDist(args.options().found("cellDist"));
-
     bool filterPatches(args.options().found("filterPatches"));
-
     bool copyUniform(args.options().found("copyUniform"));
 
 #   include "createTime.H"
@@ -138,7 +135,7 @@ int main(int argc, char *argv[])
             const labelList& procIds = mesh.cellToProc();
             forAll(procIds, celli)
             {
-               cellDist[celli] = procIds[celli]; 
+               cellDist[celli] = procIds[celli];
             }
 
             cellDist.write();
@@ -368,20 +365,20 @@ int main(int argc, char *argv[])
 
 
     // Any uniform data to copy/link?
+    fileName uniformDir("uniform");
 
-    fileName uniformDir;
-
-    if (dir(runTime.timePath()/"uniform"))
+    if (dir(runTime.timePath()/uniformDir))
     {
-        uniformDir = runTime.timePath()/"uniform";
-
-        Info<< "Detected additional non-decomposed files in " << uniformDir
+        Info<< "Detected additional non-decomposed files in "
+            << runTime.timePath()/uniformDir
             << endl;
     }
-
+    else
+    {
+        uniformDir.clear();
+    }
 
     Info<< endl;
-
 
     // split the fields over processors
     for (label procI = 0; procI < mesh.nProcs(); procI++)
@@ -581,29 +578,31 @@ int main(int argc, char *argv[])
 
 
         // Any non-decomposed data to copy?
-        if (uniformDir.size() > 0)
+        if (uniformDir.size())
         {
+            const fileName timePath = processorDb.timePath();
+
             if (copyUniform || mesh.distributed())
             {
-                cp(uniformDir, processorDb.timePath()/"uniform");
+                cp
+                (
+                    runTime.timePath()/uniformDir,
+                    timePath/uniformDir
+                );
             }
             else
             {
-                fileName timePath = processorDb.timePath();
+                // link with relative paths
+                const string parentPath = string("..")/"..";
 
-                if (timePath[0] != '/')
-                {
-                    // Adapt uniformDir and timePath to be relative paths.
-                    string parentPath(string("..")/"..");
-                    fileName currentDir(cwd());
-                    chDir(timePath);
-                    ln(parentPath/uniformDir, parentPath/timePath/"uniform");
-                    chDir(currentDir);
-                }
-                else
-                {
-                    ln(uniformDir, timePath/"uniform");
-                }
+                fileName currentDir(cwd());
+                chDir(timePath);
+                ln
+                (
+                    parentPath/runTime.timeName()/uniformDir,
+                    uniformDir
+                );
+                chDir(currentDir);
             }
         }
     }

@@ -34,78 +34,80 @@ Description
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #include "writeComponentFields.C"
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("fieldName");
+    timeSelector::addOptions();
+    argList::validArgs.append("fieldName1 .. fieldNameN"); // abuse for usage
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
-
-    word fieldName(args.additionalArgs()[0]);
-
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    // setRootCase, but skip args check
+    argList args(argc, argv, false);
+    if (!args.checkRootCase())
     {
-        runTime.setTime(Times[i], i);
-
-        Info<< "Time = " << runTime.timeName() << endl;
-
-        IOobject fieldHeader
-        (
-            fieldName,
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        );
-
-        // Check U exists
-        if (fieldHeader.headerOk())
-        {
-            mesh.readUpdate();
-
-            bool processed = false;
-            writeComponentFields<vector>(fieldHeader, mesh, processed);
-            writeComponentFields<sphericalTensor>
-            (
-                fieldHeader,
-                mesh,
-                processed
-            );
-            writeComponentFields<symmTensor>(fieldHeader, mesh, processed);
-            writeComponentFields<tensor>(fieldHeader, mesh, processed);
-            if (!processed)
-            {
-                FatalError
-                    << "Unable to process " << fieldName << nl
-                    << "No call to components for fields of type "
-                    << fieldHeader.headerClassName() << nl << nl
-                    << exit(FatalError);
-            }
-        }
-        else
-        {
-            Info<< "    No " << fieldName << endl;
-        }
-
-        Info<< endl;
+        Foam::FatalError.exit();
     }
 
-    return(0);
-}
+    const stringList& params = args.additionalArgs();
+    if (!params.size())
+    {
+        Info<< nl << "must specify one or more fields" << nl;
+        args.printUsage();
+        FatalError.exit();
+    }
 
+#   include "createTime.H"
+    instantList timeDirs = timeSelector::select0(runTime, args);
+#   include "createMesh.H"
+
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+        Info<< "Time = " << runTime.timeName() << endl;
+        mesh.readUpdate();
+
+        forAll(params, paramI)
+        {
+            const word fieldName(params[paramI]);
+
+            IOobject fieldHeader
+            (
+                fieldName,
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ
+            );
+
+            // Check field exists
+            if (fieldHeader.headerOk())
+            {
+                bool processed = false;
+
+                writeComponentFields<vector>(fieldHeader, mesh, processed);
+                writeComponentFields<sphericalTensor>
+                (
+                    fieldHeader,
+                    mesh,
+                    processed
+                );
+
+                if (!processed)
+                {
+                    FatalError
+                        << "Unable to process " << fieldName << nl
+                        << "No call to components for fields of type "
+                        << fieldHeader.headerClassName() << nl << nl
+                        << exit(FatalError);
+                }
+            }
+            else
+            {
+                Info<< "    No " << fieldName << endl;
+            }
+        }
+    }
+
+    return 0;
+}
 
 // ************************************************************************* //

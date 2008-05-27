@@ -37,31 +37,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
     argList::validArgs.append("fieldName");
     argList::validArgs.append("patchName");
-
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
+#   include "createTime.H"
+    instantList timeDirs = timeSelector::select0(runTime, args);
+#   include "createMesh.H"
 
     word fieldName(args.additionalArgs()[0]);
     word patchName(args.additionalArgs()[1]);
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
 
         IOobject fieldHeader
@@ -94,10 +83,10 @@ int main(int argc, char *argv[])
                 volScalarField field(fieldHeader, mesh);
 
                 vector sumField = sum
-                    (
-                        mesh.Sf().boundaryField()[patchi]
-                       *field.boundaryField()[patchi]
-                    );
+                (
+                    mesh.Sf().boundaryField()[patchi]
+                  * field.boundaryField()[patchi]
+                );
 
                 Info<< "    Integral of " << fieldName << " over patch "
                     << patchName << '[' << patchi << ']' << " = "
@@ -131,7 +120,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

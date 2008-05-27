@@ -1,4 +1,0 @@
-PATHTOSRC = ../
-PROJECT = adf
-
-include ../config/Makefile.main

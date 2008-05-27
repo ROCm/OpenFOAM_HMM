@@ -1,3 +1,0 @@
-readexample.cpp
-
-EXE = $(FOAM_APPBIN)/readexample

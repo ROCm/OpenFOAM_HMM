@@ -26,9 +26,11 @@ Class
     Foam::sampledSurface
 
 Description
+    An abstract class for surfaces with sampling.
 
 SourceFiles
     sampledSurface.C
+    sampledSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -66,8 +68,8 @@ class sampledSurface
         //- Reference to mesh
         const polyMesh& mesh_;
 
-        //- Make triangles or keep faces
-        const bool triangulate_;
+        //- Triangulate faces or keep faces as it
+        bool triangulate_;
 
         //- Do we intend to interpolate the information?
         bool interpolate_;
@@ -84,56 +86,67 @@ class sampledSurface
         //- Face centres
         mutable vectorField* CfPtr_;
 
-
-        //- Read bool from dictionary. Return provided value if not found
-        static bool getBool(const dictionary&, const word&, const bool);
-
-        //- check field size matches surface size
-        template<class Type>
-        void checkFieldSize(const Field<Type>& field) const;
-
+        //- Total surface area
+        mutable scalar area_;
 
     // Make geometric data
 
+        //- Make Sf
         void makeSf() const;
 
+        //- Make magSf
         void makeMagSf() const;
 
+        //- Make Cf
         void makeCf() const;
 
+    // Service methods
 
-        //- project field onto surface
+        //- Check field size matches surface size
+        template<class Type>
+        bool checkFieldSize(const Field<Type>&) const;
+
+        //- Project field onto surface
         template<class ReturnType, class Type>
         void project
         (
-            Field<ReturnType>& res,
-            const Field<Type>& field
+            Field<ReturnType>&,
+            const Field<Type>&
         ) const;
 
-        //- project field onto surface
+        //- Project field onto surface
         template<class ReturnType, class Type>
         void project
         (
-            Field<ReturnType>& res,
-            const tmp<Field<Type> >& field
+            Field<ReturnType>&,
+            const tmp<Field<Type> >&
         ) const;
 
-        //- project field onto surface
+        //- Project field onto surface
         template<class ReturnType, class Type>
         tmp<Field<ReturnType> > project(const tmp<Field<Type> >&) const;
-
 
 protected:
 
     // Protected static functions
 
+        //- Read bool from dictionary. Return provided value if not found
+        static bool getBool(const dictionary&, const word&, const bool);
+
+    // Protected Member functions
+
         virtual void clearGeom() const;
 
+        //- Non-const access to triangulation
+        bool& triangulate()
+        {
+            return triangulate_;
+        }
 
 public:
 
     //- Runtime type information
-    TypeName("sampledSurface");
+      TypeName("sampledSurface");
 
 
     // Declare run-time constructor selection table
@@ -192,7 +205,7 @@ public:
 
     // Constructors
 
-        //- Construct from mesh, name
+        //- Construct from name, mesh
         sampledSurface
         (
             const word& name,
@@ -236,6 +249,7 @@ public:
 
       // Access
 
+        //- Access to the underlying mesh
         const polyMesh& mesh() const
         {
             return mesh_;
@@ -247,14 +261,13 @@ public:
             return name_;
         }
 
-
         //- interpolation requested for surface
         bool interpolate() const
         {
             return interpolate_;
         }
 
-        //- Triangulation requested for surface
+        //- triangulation requested for surface
         bool triangulate() const
         {
             return triangulate_;
@@ -278,6 +291,9 @@ public:
         //- Return face centres as vectorField
         virtual const vectorField& Cf() const;
 
+        //- The total surface area
+        scalar area() const;
+
         //- Integration of a field across the surface
         template<class Type>
         Type integrate(const Field<Type>&) const;
@@ -294,13 +310,20 @@ public:
         template<class Type>
         Type average(const tmp<Field<Type> >&) const;
 
-        // Project field onto surface
+        //- Project field onto surface
+        tmp<Field<scalar> > project(const Field<scalar>&) const;
 
-            tmp<Field<scalar> > project(const Field<scalar>&) const;
-            tmp<Field<scalar> > project(const Field<vector>&) const;
-            tmp<Field<vector> > project(const Field<sphericalTensor>&) const;
-            tmp<Field<vector> > project(const Field<symmTensor>&) const;
-            tmp<Field<vector> > project(const Field<tensor>&) const;
+        //- Project field onto surface
+        tmp<Field<scalar> > project(const Field<vector>&) const;
+
+        //- Project field onto surface
+        tmp<Field<vector> > project(const Field<sphericalTensor>&) const;
+
+        //- Project field onto surface
+        tmp<Field<vector> > project(const Field<symmTensor>&) const;
+
+        //- Project field onto surface
+        tmp<Field<vector> > project(const Field<tensor>&) const;
 
         //- Sample field on surface
         virtual tmp<scalarField> sample
@@ -340,7 +363,7 @@ public:
         ) const = 0;
 
 
-        //- interpolate field on surface
+        //- Interpolate field on surface
         virtual tmp<vectorField> interpolate
         (
             const interpolation<vector>&
@@ -364,17 +387,23 @@ public:
             const interpolation<tensor>&
         ) const = 0;
 
+
+      // Edit
+
         //- Rename
         virtual void rename(const word& newName)
         {
             name_ = newName;
         }
 
+
+      // Write
+
         //- Write
         virtual void print(Ostream&) const;
 
 
-    // IOstream operators
+       // IOstream operators
 
         friend Ostream& operator<<(Ostream&, const sampledSurface&);
 };

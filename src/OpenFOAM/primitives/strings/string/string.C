@@ -177,15 +177,7 @@ Foam::string& Foam::string::expand()
 
     if (size())
     {
-        // Expand initial '.' and './' into cwd
-        if (operator[](0) == '.')
-        {
-            if (size() == 1 || (size() > 1 && operator[](1) == '/'))
-            {
-                std::string::replace(0, 1, cwd());
-            }
-        }
-        else if (operator[](0) == '~')
+        if (operator[](0) == '~')
         {
             // Expand initial ~
             //   ~/        => home directory
@@ -215,6 +207,34 @@ Foam::string& Foam::string::expand()
             else
             {
                 *this = home(user)/file;
+            }
+        }
+        else
+        {
+            // expand a lone initial '.' and './' into CWD
+            // otherwise strip leading './' sequences
+            while
+            (
+                operator[](0) == '.'
+             && (size() == 1 || operator[](1) == '/')
+            )
+            {
+                // handle leading ".////" as well
+                size_type slashPos = 1;
+                while (size() > slashPos && operator[](slashPos) == '/')
+                {
+                    ++slashPos;
+                }
+
+                if (size() <= slashPos)
+                {
+                    *this = cwd();
+                    break;
+                }
+                else
+                {
+                    std::string::erase(0, slashPos);
+                }
             }
         }
     }

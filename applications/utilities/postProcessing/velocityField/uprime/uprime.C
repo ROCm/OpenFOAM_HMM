@@ -26,80 +26,60 @@ Application
     uprime
 
 Description
-    Calculates and writes the scalar field of uprime (sqrt(2/3 k)) at 
-    each time
+    Calculates and writes the scalar field of uprime (sqrt(2/3 k)).
+    The -noWrite option just outputs the max/min values without writing
+    the field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject kheader
+    (
+        "k",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (kheader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        Info<< "    Reading k" << endl;
+        volScalarField k(kheader, mesh);
 
-        Info<< "Time = " << runTime.timeName() << endl;
-
-        IOobject kheader
+        Info<< "    Calculating uprime" << endl;
+        volScalarField uprime
         (
-            "k",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                "uprime",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            sqrt((2.0/3.0)*k)
         );
 
-        // Check k exists
-        if (kheader.headerOk())
+        Info<< "uprime max/min : "
+            << max(uprime).value() << " "
+            << min(uprime).value() << endl;
+
+        if (writeResults)
         {
-            mesh.readUpdate();
-
-            Info<< "    Reading k" << endl;
-            volScalarField k(kheader, mesh);
-
-            Info<< "    Calculating uprime" << endl;
-            volScalarField uprime
-            (
-                IOobject
-                (
-                    "uprime",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                sqrt((2.0/3.0)*k)
-            );
             uprime.write();
         }
-        else
-        {
-            Info<< "    No k" << endl;
-        }
-
-        Info<< endl;
     }
-
-    return(0);
+    else
+    {
+        Info<< "    No k" << endl;
+    }
 }
-
 
 // ************************************************************************* //

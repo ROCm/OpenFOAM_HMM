@@ -26,44 +26,114 @@ Application
     Mach
 
 Description
-    Calculates and writes the local Mach number from the velocity field U at 
-    each time
+    Calculates and optionally writes the local Mach number from the velocity
+    field U at each time. The -nowrite option just outputs the max value
+    without writing the field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject Uheader
+    (
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
+    IOobject Theader
+    (
+        "T",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    if (file(runTime.constantPath()/"thermophysicalProperties"))
+    // Check U and T exists
+    if (Uheader.headerOk() && Theader.headerOk())
     {
-#       include "thermophysicalMach.H"
+        autoPtr<volScalarField> MachPtr;
+
+        volVectorField U(Uheader, mesh);
+
+        if (file(runTime.constantPath()/"thermophysicalProperties"))
+        {
+            // thermophysical Mach
+            autoPtr<basicThermo> thermo
+            (
+                basicThermo::New(mesh)
+            );
+
+            volScalarField Cp = thermo->Cp();
+            volScalarField Cv = thermo->Cv();
+
+            MachPtr.set
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        "Ma",
+                        runTime.timeName(),
+                        mesh
+                    ),
+                    mag(U)/(sqrt((Cp/Cv)*(Cp - Cv)*thermo->T()))
+                )
+            );
+        }
+        else
+        {
+            // thermodynamic Mach
+            IOdictionary thermoProps
+            (
+                IOobject
+                (
+                    "thermodynamicProperties",
+                    runTime.constant(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            dimensionedScalar R(thermoProps.lookup("R"));
+            dimensionedScalar Cv(thermoProps.lookup("Cv"));
+
+            volScalarField T(Theader, mesh);
+
+            MachPtr.set
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        "Ma",
+                        runTime.timeName(),
+                        mesh
+                    ),
+                    mag(U)/(sqrt(((Cv + R)/Cv)*R*T))
+                )
+            );
+        }
+
+        Info<< "Mach max : " << max(MachPtr()).value() << endl;
+
+        if (writeResults)
+        {
+            MachPtr().write();
+        }
     }
     else
     {
-#       include "thermodynamicMach.H"
+        Info<< "    Missing U or T" << endl;
     }
-
-    return(0);
 }
 
 

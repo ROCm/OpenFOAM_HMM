@@ -26,6 +26,7 @@ Class
     Foam::sampledPatch
 
 Description
+    A sampledSurface on a patch. Non-triangulated by default.
 
 SourceFiles
     sampledPatch.C
@@ -61,7 +62,7 @@ class sampledPatch
         //- Zero size or copy of patch.localPoints()
         pointField points_;
 
-        //- Triangulated faces
+        //- Faces (triangulated or non-triangulated)
         faceList faces_;
 
         //- Local patch face labels
@@ -99,7 +100,7 @@ public:
             const word& name,
             const polyMesh& mesh,
             const word& patchName,
-            const bool triangulate = true
+            const bool triangulate = false
         );
 
         //- Construct from dictionary

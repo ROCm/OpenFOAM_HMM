@@ -26,9 +26,10 @@ Class
     Foam::polyPatchID
 
 Description
-    A class holds the data needed to identify a patch in a dynamic
-    mesh.  The patch is identified by name and its index in the
-    boundary mesh is updated if the mesh has changed.
+    A class holds the data needed to identify a patch in a dynamic mesh.
+
+    The patch is identified by name and its index in the boundary mesh
+    is updated if the mesh has changed.
 
 \*---------------------------------------------------------------------------*/
 
@@ -112,7 +113,7 @@ public:
             {
                 index_ = bm.findPatchID(name_);
             }
-            
+
 
     // Ostream Operator
 

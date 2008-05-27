@@ -26,7 +26,7 @@ Application
     yPlusLES
 
 Description
-    Calculates and reports yPlus for all wall patches, for each time.
+    Calculates and reports yPlus for all wall patches, for the specified times.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,27 +39,16 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "addTimeOptions.H"
+    timeSelector::addOptions();
     #include "setRootCase.H"
+#   include "createTime.H"
+    instantList timeDirs = timeSelector::select0(runTime, args);
+#   include "createMesh.H"
 
-    #include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-    #include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-    #include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
+        runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
-
         mesh.readUpdate();
 
         volScalarField yPlus
@@ -90,7 +79,7 @@ int main(int argc, char *argv[])
             mesh
         );
 
-        #include "createPhi.H"
+#       include "createPhi.H"
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
@@ -131,7 +120,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

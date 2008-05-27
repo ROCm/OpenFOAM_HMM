@@ -26,10 +26,11 @@ Application
     flowType
 
 Description
-    Calculates and writes the flowType of velocity field U at each time
+    Calculates and writes the flowType of velocity field U.
+    The -noWrite option has no meaning.
 
-    The flow tye parameter is obtained from
-
+    The flow type parameter is obtained according to the following equation:
+    @verbatim
                  |D| - |Omega|
         lambda = -------------
                  |D| + |Omega|
@@ -37,79 +38,55 @@ Description
         -1 = rotational flow
          0 = simple shear flow
          1 = planar extensional flow
+    @endverbatim
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject Uheader
+    (
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (Uheader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        Info<< "    Reading U" << endl;
+        volVectorField U(Uheader, mesh);
 
-        Info<< "Time = " << runTime.timeName() << endl;
+        volTensorField gradU = fvc::grad(U);
+        volScalarField magD = mag(symm(gradU));
+        volScalarField magOmega = mag(skew(gradU));
+        dimensionedScalar smallMagD("smallMagD", magD.dimensions(), SMALL);
 
-        IOobject Uheader
+        Info<< "    Calculating flowType" << endl;
+
+        volScalarField flowType
         (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                "flowType",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            (magD - magOmega)/(magD + magOmega + smallMagD)
         );
 
-        // Check U exists
-        if (Uheader.headerOk())
-        {
-            mesh.readUpdate();
-
-            Info<< "    Reading U" << endl;
-            volVectorField U(Uheader, mesh);
-
-            volTensorField gradU = fvc::grad(U);
-            volScalarField magD = mag(symm(gradU));
-            volScalarField magOmega = mag(skew(gradU));
-            dimensionedScalar smallMagD("smallMagD", magD.dimensions(), SMALL);
-
-            Info<< "    Calculating flowType" << endl;
-            volScalarField flowType
-            (
-                IOobject
-                (
-                    "flowType",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                (magD - magOmega)/(magD + magOmega + smallMagD)
-            );
-
-            flowType.write();
-        }
-        else
-        {
-            Info<< "    No U" << endl;
-        }
+        flowType.write();
     }
-
-    return(0);
+    else
+    {
+        Info<< "    No U" << endl;
+    }
 }
 
 

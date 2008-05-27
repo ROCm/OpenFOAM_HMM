@@ -1,5 +1,0 @@
-ADF_fortran_2_c.c
-ADF_interface.c
-ADF_internals.c
-
-LIB = $(FOAM_LIBBIN)/libadf

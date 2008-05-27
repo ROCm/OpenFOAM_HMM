@@ -1,10 +1,8 @@
 #!/bin/sh
 set -x
 
-( cd $FOAM_SRC/OpenFOAM && wmakeLnInclude . )
-
-( cd $FOAM_SRC/other && ./Allwmake )
-
+( cd OpenFOAM && wmakeLnInclude . )
+( cd other && ./Allwmake )
 ( cd Pstream && ./Allwmake )
 
 wmake libo OSspecific/$WM_OS
@@ -15,7 +13,6 @@ wmake libso lagrangian/basic
 wmake libso triSurface
 wmake libso edgeMesh
 wmake libso meshTools
-
 wmake libso finiteVolume
 
 ( cd decompositionAgglomeration && ./Allwmake )
@@ -23,7 +20,6 @@ wmake libso finiteVolume
 wmake libso sampling
 
 wmake libso dynamicMesh
-
 wmake libso dynamicFvMesh
 wmake libso topoChangerFvMesh
 wmake libso fvMotionSolver
@@ -36,14 +32,10 @@ wmake libso randomProcesses
 ( cd transportModels && ./Allwmake )
 ( cd turbulenceModels && ./Allwmake )
 ( cd LESmodels && ./Allwmake )
-
 ( cd lagrangian && ./Allwmake )
-
 ( cd postProcessing && ./Allwmake )
 
 wmake libso autoMesh
-
 wmake libso errorEstimation
-
 
 # ----------------------------------------------------------------- end-of-file

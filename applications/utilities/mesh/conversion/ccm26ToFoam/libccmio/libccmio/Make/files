@@ -1,8 +1,0 @@
-ccmio.c
-ccmiocore.c
-ccmioprivate.c
-ccmioutility.c
-vector.c
-ccmioversion.c
-
-LIB = $(FOAM_LIBBIN)/libccmio

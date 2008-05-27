@@ -31,30 +31,27 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-autoPtr<cellZone> cellZone::New
+Foam::autoPtr<Foam::cellZone> Foam::cellZone::New
 (
     const word& name,
     const dictionary& dict,
     const label index,
-    const cellZoneMesh& bm
+    const cellZoneMesh& zm
 )
 {
     if (debug)
     {
         Info<< "cellZone::New(const word&, const dictionary&, const label, "
-               "const cellZoneMesh&) : constructing cellZone"
+               "const cellZoneMesh&) : constructing cellZone " << name
             << endl;
     }
 
-    word patchType(dict.lookup("type"));
+    word zoneType(dict.lookup("type"));
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(patchType);
+        dictionaryConstructorTablePtr_->find(zoneType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -63,18 +60,16 @@ autoPtr<cellZone> cellZone::New
             "cellZone::New(const word&, const dictionary&, "
             "const label, const cellZoneMesh&)",
             dict
-        )   << "Unknown cellZone type " << patchType << endl << endl
+        )   << "Unknown cellZone type " << zoneType << endl << endl
             << "Valid cellZone types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalIOError);
     }
 
-    return autoPtr<cellZone>(cstrIter()(name, dict, index, bm));
+    return autoPtr<cellZone>(cstrIter()(name, dict, index, zm));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
