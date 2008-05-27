@@ -28,48 +28,42 @@
 #
 # Description
 #     Build and install ParaView
-#     - run from folder above source folder
+#     - run from folder above ParaView source folder or place the
+#       ParaView source under $WM_PROJECT_INST_DIR
 #
 #------------------------------------------------------------------------------
-set -x
+. $WM_PROJECT_DIR/bin/tools/buildParaViewFunctions
 
-. $WM_PROJECT_DIR/bin/buildParaViewFunctions
+# set -x
 
 PARAVIEW_SRC="ParaView3.3-cvs"
-PARAVIEW_MAJOR_VERSION="3.2"
+PARAVIEW_MAJOR_VERSION="3.3"
 
-VERBOSE="OFF"
-INCLUDE_MPI="ON"
+VERBOSE=OFF
+INCLUDE_MPI=ON
 MPI_MAX_PROCS=32
-INCLUDE_PYTHON="ON"
+INCLUDE_PYTHON=ON
 #PYTHON_LIBRARY="/usr/lib64/libpython2.5.so.1.0"
 PYTHON_LIBRARY=""
-INCLUDE_MESA="OFF"
+INCLUDE_MESA=OFF
 
+set +x
+
+# provide a shortcut for repeated builds - use with caution
+if [ "$#" -gt 0 ]
+then
+   CMAKE_SKIP=YES
+fi
 
 initialiseVariables
 
-# set MPI specific options
-if [ "$INCLUDE_MPI" = "ON" ]; then
-    addMpiSupport
-fi
-
-# set python specific options
-if [ "$INCLUDE_PYTHON" = "ON" ]; then
-    addPythonSupport
-fi
-
-# set MESA specific options
-if [ "$INCLUDE_MESA" = "ON" ]; then
-    addMesaSupport
-fi
+addMpiSupport       # set MPI specific options
+addPythonSupport    # set python specific options
+addMesaSupport      # set MESA specific options
 
 buildParaView
-
 installParaView
 
-# finalisation
-cd $PWD
+echo "done"
 
-echo "done."
-
+#------------------------------------------------------------------------------
