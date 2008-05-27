@@ -31,12 +31,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-label readHexLabel(ISstream& is)
+Foam::label Foam::readHexLabel(ISstream& is)
 {
     register label result = 0;
 
@@ -48,7 +43,8 @@ label readHexLabel(ISstream& is)
     static const label alphaOffset = toupper('A') - 10;
 
     // Get next non-whitespace character
-    while (is.get(c) && isspace(c));
+    while (is.get(c) && isspace(c))
+    {}
 
     do
     {
@@ -76,9 +72,5 @@ label readHexLabel(ISstream& is)
     return result;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
