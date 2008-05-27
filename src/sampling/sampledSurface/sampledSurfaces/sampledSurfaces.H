@@ -27,7 +27,8 @@ Class
 
 Description
     Set of surfaces to sample.
-    Call sampledSurfaces.write() to sample&write files.
+
+    The write() method is used to sample and write files.
 
 SourceFiles
     sampledSurfaces.C
@@ -85,8 +86,7 @@ class sampledSurfaces
                 formatter(surfaceWriter<Type>::New(writeFormat))
             {}
 
-            //- Construct for a particular surface format
-            //  and a list of field names
+            //- Construct for a particular surface format and a list of field names
             fieldGroup
             (
                 const word& writeFormat,

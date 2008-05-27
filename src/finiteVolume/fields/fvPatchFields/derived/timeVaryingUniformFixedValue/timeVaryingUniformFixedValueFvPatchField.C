@@ -26,18 +26,14 @@ License
 
 #include "timeVaryingUniformFixedValueFvPatchField.H"
 #include "Time.H"
-#include "Tuple2.H"
 #include "IFstream.H"
-#include "interpolateXY.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
+Foam::
 timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
@@ -50,6 +46,7 @@ timeVaryingUniformFixedValueFvPatchField
 
 
 template<class Type>
+Foam::
 timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
@@ -60,11 +57,13 @@ timeVaryingUniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    timeDataFileName_(ptf.timeDataFileName_)
+    timeDataFile_(ptf.timeDataFile_),
+    timeSeries_(ptf.timeBounding())
 {}
 
 
 template<class Type>
+Foam::
 timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
@@ -74,20 +73,22 @@ timeVaryingUniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    timeDataFileName_(fileName(dict.lookup("timeDataFileName")).expand())
+    timeDataFile_(dict.lookup("timeDataFile")),
+    timeSeries_(word(dict.lookup("timeBounding")))
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
-    }
-    else
-    {
-        updateCoeffs();
-    }
+   if (dict.found("value"))
+   {
+       fvPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
+   }
+   else
+   {
+       updateCoeffs();
+   }
 }
 
 
 template<class Type>
+Foam::
 timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
@@ -95,11 +96,13 @@ timeVaryingUniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    timeDataFileName_(ptf.timeDataFileName_)
+    timeDataFile_(ptf.timeDataFile_),
+    timeSeries_(ptf.timeBounding())
 {}
 
 
 template<class Type>
+Foam::
 timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
@@ -108,108 +111,92 @@ timeVaryingUniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    timeDataFileName_(ptf.timeDataFileName_)
+    timeDataFile_(ptf.timeDataFile_),
+    timeSeries_(ptf.timeBounding())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void timeVaryingUniformFixedValueFvPatchField<Type>::checkTable()
+Type
+Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
+currentValue()
 {
-    const Time& tm = this->db().time();
-
-    if (times_.size() == 0)
+    if (timeSeries_.size() == 0)
     {
-        if (timeDataFileName_.size() == 0)
+        fileName fName(timeDataFile_);
+        fName.expand();
+
+        if (fName.size() == 0)
         {
             FatalErrorIn
             (
-                "timeVaryingUniformFixedValueFvPatchField<Type>"
-                "::checkTable()"
-            )   << "timeDataFileName not specified for Patch "
+                "timeVaryingUniformFixedValueFvPatchField"
+                "::currentValue()"
+            )   << "timeDataFile not specified for Patch "
                 << this->patch().name()
                 << exit(FatalError);
         }
         else
         {
-            IFstream str(timeDataFileName_);
-
-            List<Tuple2<scalar, Type> > timeValues(str);
-
-            times_.setSize(timeValues.size());
-            values_.setSize(timeValues.size());
-
-            forAll(timeValues, i)
+            // relative path
+            if (fName[0] != '/')
             {
-                times_[i] = timeValues[i].first();
-                values_[i] = timeValues[i].second();
+                fName = this->db().path()/fName;
             }
+
+            // just in case we change the interface to timeSeries
+            word boundType = timeBounding();
+
+            IFstream(fName)() >> timeSeries_;
+            timeSeries_.bounding(boundType);
+
+            // be a bit paranoid and check that the list is okay
+            timeSeries_.check();
+        }
+
+        if (timeSeries_.size() == 0)
+        {
+            FatalErrorIn
+            (
+                "timeVaryingUniformFixedValueFvPatchField"
+                "::currentValue()"
+            )   << "empty time series for Patch "
+                << this->patch().name()
+                << exit(FatalError);
         }
     }
 
-    if (tm.value() < times_[0])
-    {
-        WarningIn
-        (
-            "timeVaryingUniformFixedValueFvPatchField<Type>::checkTable()"
-        )   << "current time (" << tm.value()
-            << ") is less than the minimum in the data table ("
-            << times_[0] << ')' << endl
-            << "    Continuing with the value for the smallest time"
-            << endl;
-    }
-
-    if (tm.value() > times_[times_.size()-1])
-    {
-        WarningIn
-        (
-            "timeVaryingUniformFixedValueFvPatchField<Type>::checkTable()"
-        )   << "current time (" << tm.value()
-            << ") is greater than the maximum in the data table ("
-            << times_[times_.size()-1] << ')' << endl
-            << "    Continuing with the value for the largest time"
-            << endl;
-    }
+    return timeSeries_(this->db().time().timeOutputValue());
 }
 
 
 template<class Type>
-void timeVaryingUniformFixedValueFvPatchField<Type>::updateCoeffs()
+void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
         return;
     }
 
-    checkTable();
-
-    this->operator==
-    (
-        interpolateXY
-        (
-            this->db().time().value(),
-            times_,
-            values_
-        )
-    );
-
+    fvPatchField<Type>::operator==(currentValue());
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
 
 
 template<class Type>
-void timeVaryingUniformFixedValueFvPatchField<Type>::write(Ostream& os) const
+void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("timeDataFileName")
-        << timeDataFileName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("timeDataFile")
+        << timeDataFile_ << token::END_STATEMENT << nl;
+    os.writeKeyword("timeBounding")
+        << timeBounding() << token::END_STATEMENT << nl;
     this->writeEntry("value", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

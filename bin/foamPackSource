@@ -74,6 +74,7 @@ find -H $packDir               \
  -a ! -name "core.[1-9]*"      \
  -a ! -name "log[0-9]*"        \
 | sed                          \
+ -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
  -e "\@$packDir/src/other/mico-*/platforms@d"  \
  -e "\@$packDir/src/other/mpich-*/platforms@d" \

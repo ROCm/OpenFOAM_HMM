@@ -37,10 +37,11 @@ Description
 
 namespace Foam
 {
-    template<class Zone> class ZoneMesh;
+    template<class Zone, class MeshType> class ZoneMesh;
     class faceZone;
+    class polyMesh;
 
-    typedef ZoneMesh<faceZone> faceZoneMesh;
+    typedef ZoneMesh<faceZone, polyMesh> faceZoneMesh;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -34,7 +34,7 @@ defineTypeNameAndDebug(Foam::dictionary, 0);
 
 const Foam::dictionary Foam::dictionary::null;
 
-#undef DICTIONARY_INPLACE_MERGE
+#define DICTIONARY_INPLACE_MERGE
 
 // * * * * * * * * * * * * * Private member functions  * * * * * * * * * * * //
 
@@ -44,8 +44,8 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
 
     if (mergeEntry && iter != hashedEntries_.end())
     {
-        // can only merge dictionaries
-        if (ePtr->isDict() && iter()->isDict())
+        // merge dictionary with dictionary
+        if (iter()->isDict() && ePtr->isDict())
         {
             iter()->dict().merge(ePtr->dict());
             delete ePtr;
@@ -54,21 +54,24 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
         }
         else
         {
+            // replace existing dictionary with entry or vice versa
 #ifdef DICTIONARY_INPLACE_MERGE
-            if (hashedEntries_.set(ePtr->keyword(), ePtr))
+            IDLList<entry>::replace(iter(), ePtr);
+            delete iter();
+            hashedEntries_.erase(iter);
+
+            if (hashedEntries_.insert(ePtr->keyword(), ePtr))
             {
                 ePtr->name() = name_ + "::" + ePtr->keyword();
-                replace(iter(), ePtr);
-
                 return true;
             }
             else
             {
                 IOWarningIn("dictionary::add(entry* ePtr)", (*this))
-                    << "problem replacing entry in dictionary "
-                    << name()
+                    << "problem replacing entry in dictionary " << name()
                     << endl;
 
+                IDLList<entry>::remove(ePtr);
                 delete ePtr;
                 return false;
             }
@@ -81,7 +84,7 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
     if (hashedEntries_.insert(ePtr->keyword(), ePtr))
     {
         ePtr->name() = name_ + "::" + ePtr->keyword();
-        append(ePtr);
+        IDLList<entry>::append(ePtr);
 
         return true;
     }
@@ -92,7 +95,6 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
             << endl;
 
         delete ePtr;
-
         return false;
     }
 }
@@ -476,7 +478,7 @@ bool Foam::dictionary::changeKeyword
     {
         if (forceOverwrite)
         {
-            IDLList<entry>::remove(iter2());
+            IDLList<entry>::replace(iter2(), iter());
             delete iter2();
             hashedEntries_.erase(iter2);
         }
@@ -596,7 +598,7 @@ void Foam::dictionary::operator=(const dictionary& dict)
         ++iter
     )
     {
-        append(iter().clone(*this).ptr());
+        IDLList<entry>::append(iter().clone(*this).ptr());
     }
 
     name_ = dict.name();

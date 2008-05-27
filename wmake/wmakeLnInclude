@@ -29,59 +29,104 @@
 # Description
 #     Link all the source files in the $1 directory into $1/lnInclude
 #
-#     Usage: wmakeLnInclude <directory> <ln options>
+#     Usage: wmakeLnInclude [-f] <dir> [-lnOption]
 #
+#     The desired source files:
+#         *.C *.H *.h *.cxx
+#     Avoid
+#         *.c (C source)
+#         .#* (cvs recovered files)
+#------------------------------------------------------------------------------
+Script=${0##*/}
+
+usage() {
+   while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+   cat<<USAGE
+
+usage: $Script [-f] <dir> [-lnOption]
+
+    Link all the source files in the <dir> into <dir>/lnInclude
+    * Use '-f' to force an update when the lnInclude directory already exists.
+
+USAGE
+   exit 1
+}
+
 #------------------------------------------------------------------------------
 
-BASEDIR=""
-LNOPTION="-s"
+# simple option parsing
+unset forceUpdate
+unset findOpt
 
-if [ $# = 1 ]
+# simple parse options
+while [ "$#" -gt 0 ]
+do
+   case "$1" in
+   -h | -help)   # provide immediate help
+      usage
+      ;;
+   -f)
+      shift
+      forceUpdate=1
+      ;;
+   -*)
+      usage "unknown option/argument: '$*'"
+      ;;
+   *)
+      break
+      ;;
+   esac
+done
+
+baseDir=$1
+incDir=$baseDir/lnInclude
+
+if [ $# -eq 1 ]
 then
-    BASEDIR=$1
-
-elif [ $# = 2 ]
+   lnOpt="-s"
+elif [ $# -eq 2 ]
 then
-    BASEDIR=$1
-    LNOPTION=$2
-
+   lnOpt="$2"
 else
-    echo $0: wrong number of arguments
-    echo "usage : wmakeLnInclude <dir> [-lnOption]"
-    exit 1
+   usage "ERROR: wrong number of arguments"
 fi
 
-if [ ! -d $BASEDIR ]
+
+if [ ! -d $baseDir ]
 then
-    echo Base directory $BASEDIR does not exist, exiting.
-    exit 0
+   echo $Script: Base directory $baseDir does not exist, exiting.
+   exit 2
 fi
 
-INCDIR=$BASEDIR/lnInclude
-
-if [ -d $INCDIR ]
+if [ -d $incDir ]
 then
-    #echo $0: include directory $INCDIR already exists, exiting.
-    exit 0
+   if [ ! "$forceUpdate" ]
+   then
+      # echo $Script: include directory $incDir already exists, exiting.
+      exit 0
+   fi
+else
+   mkdir $incDir
 fi
 
-mkdir $INCDIR
-
-if [ ! -d $INCDIR ]
+if [ ! -d $incDir ]
 then
-    echo $0: failed to create include directory $INCDIR
-    exit 0
+   echo $Script: failed to create include directory $incDir
+   exit 0
 fi
 
 
 # Link include files
 # ~~~~~~~~~~~~~~~~~~
-
-echo $0: linking include files to $INCDIR
+echo $Script: linking include files to $incDir
 echo
 
-cd $INCDIR
-find .. -name lnInclude -prune -o -name '.svn' -prune -o -name Make -prune \
-    -o \( -name '*.[hcHCx]*' -o -name '*.type' \) -exec ln $LNOPTION {} . \;
+cd $incDir
+
+find .. $findOpt \
+    \( -name lnInclude -o -name -Make -o -name .svn -o -name config \) -prune  \
+ -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.type' \)  \
+ -a ! -name ".#*"     \
+ -exec ln $lnOpt {} . \;
 
 #------------------------------------------------------------------------------

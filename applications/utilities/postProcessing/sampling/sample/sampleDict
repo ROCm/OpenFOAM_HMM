@@ -108,6 +108,9 @@ sets
 // Surface sampling definition: choice of
 //      plane : values on plane defined by point, normal.
 //      patch : values on patch.
+//
+// 1] planes are triangulated by default
+// 2] patches are not triangulated by default
 surfaces
 (
     constantPlane
@@ -141,15 +144,15 @@ surfaces
     {
         type            patch;
         patchName       movingWall;
-        triangulate     false;
+        // Optional: whether to leave as faces (=default) or triangulate
     }
 
     movingWall_interpolated
     {
         type            patch;
         patchName       movingWall;
-        triangulate     false;
         interpolate     true;
+        // Optional: whether to leave as faces (=default) or triangulate
     }
 
 /* not yet (re)implemented --

@@ -870,21 +870,34 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
     specieNames_(10),
     speciesTable_(static_cast<const wordList&>(wordList()))
 {
-    fileName CHEMKINFileName
+    fileName chemkinFile
     (
         fileName(thermoDict.lookup("CHEMKINFile")).expand()
     );
 
-    fileName thermoFileName = fileName::null;
+    fileName thermoFile = fileName::null;
 
     if (thermoDict.found("CHEMKINThermoFile"))
     {
-        thermoFileName =
-            fileName(thermoDict.lookup("CHEMKINThermoFile")).expand();
+        thermoFile = fileName(thermoDict.lookup("CHEMKINThermoFile")).expand();
     }
 
-    read(CHEMKINFileName, thermoFileName);
-}
+    // allow relative file names
+    fileName relPath = thermoDict.name().path();
+    if (relPath.size())
+    {
+        if (chemkinFile.size() && chemkinFile[0] != '/')
+        {
+            chemkinFile = relPath/chemkinFile;
+        }
 
+        if (thermoFile.size() && thermoFile[0] != '/')
+        {
+            thermoFile = relPath/thermoFile;
+        }
+    }
+
+    read(chemkinFile, thermoFile);
+}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -83,6 +83,7 @@ find -H $newDir                \
  -a ! -name "core.[1-9]*"      \
  -a ! -name "log[0-9]*"        \
 | sed                          \
+ -e "\@$newDir/.git/@d"        \
  -e "\@$newDir/lib/@d"         \
  -e "\@$newDir/src/other/mico-*/platforms@d"  \
  -e "\@$newDir/src/other/mpich-*/platforms@d" \

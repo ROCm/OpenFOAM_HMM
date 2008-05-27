@@ -22,25 +22,19 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "sampledSurface.H"
 
 template<class Type>
-void Foam::sampledSurface::checkFieldSize(const Field<Type>& field) const
+bool Foam::sampledSurface::checkFieldSize(const Field<Type>& field) const
 {
-    if (!faces().size())
+    if (faces().size() == 0 || field.size() == 0)
     {
-        FatalErrorIn
-        (
-            "sampledSurface::checkFieldSize(const Field<Type>&) const"
-        )
-            << "empty surface"
-            << exit(FatalError);
+        return false;
     }
-    else if (field.size() != faces().size())
+
+    if (field.size() != faces().size())
     {
         FatalErrorIn
         (
@@ -51,34 +45,65 @@ void Foam::sampledSurface::checkFieldSize(const Field<Type>& field) const
             << ") != surface (" << faces().size() << ")"
             << exit(FatalError);
     }
+
+    return true;
 }
+
 
 template<class Type>
 Type Foam::sampledSurface::integrate(const Field<Type>& field) const
 {
-    checkFieldSize(field);
-    return sum(field * magSf());
+    Type value = pTraits<Type>::zero;
+
+    if (checkFieldSize(field))
+    {
+        value = sum(field * magSf());
+    }
+
+    reduce(value, sumOp<Type>());
+    return value;
 }
+
 
 template<class Type>
 Type Foam::sampledSurface::integrate(const tmp<Field<Type> >& field) const
 {
-    checkFieldSize(field());
-    return sum(field * magSf());
+    Type value = integrate(field());
+    field.clear();
+    return value;
 }
+
 
 template<class Type>
 Type Foam::sampledSurface::average(const Field<Type>& field) const
 {
-    checkFieldSize(field);
-    return sum(field * magSf()) / sum(magSf());
+    Type value = pTraits<Type>::zero;
+
+    if (checkFieldSize(field))
+    {
+        value = sum(field * magSf());
+    }
+
+    reduce(value, sumOp<Type>());
+
+    // avoid divide-by-zero
+    if (area())
+    {
+        return value / area();
+    }
+    else
+    {
+        return pTraits<Type>::zero;
+    }
 }
+
 
 template<class Type>
 Type Foam::sampledSurface::average(const tmp<Field<Type> >& field) const
 {
-    checkFieldSize(field());
-    return sum(field * magSf()) / sum(magSf());
+    Type value = average(field());
+    field.clear();
+    return value;
 }
 
 
@@ -89,16 +114,21 @@ void Foam::sampledSurface::project
     const Field<Type>& field
 ) const
 {
-    checkFieldSize(field);
-
-    const faceList& sampleFaces = faces();
-    const vectorField& norm = Sf();
-
-    forAll(sampleFaces, faceI)
+    if (checkFieldSize(field))
     {
-        res[faceI] = field[faceI] & (norm[faceI] / mag(norm[faceI]));
+        const vectorField& norm = Sf();
+
+        forAll(norm, faceI)
+        {
+            res[faceI] = field[faceI] & (norm[faceI] / mag(norm[faceI]));
+        }
+    }
+    else
+    {
+        res.clear();
     }
 }
+
 
 template<class ReturnType, class Type>
 void Foam::sampledSurface::project

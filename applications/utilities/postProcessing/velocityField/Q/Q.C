@@ -26,101 +26,85 @@ Application
     Q
 
 Description
-    Calculates and writes the second invariant of the velocity gradient tensor 
-    for each time.
+    Calculates and writes the second invariant of the velocity gradient tensor.
+    The -noWrite option just outputs the max/min values without writing
+    the field.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
+    bool writeResults = !args.options().found("noWrite");
 
-#   include "addTimeOptions.H"
-#   include "setRootCase.H"
+    IOobject Uheader
+    (
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createMesh.H"
-
-    for (label i=startTime; i<endTime; i++)
+    if (Uheader.headerOk())
     {
-        runTime.setTime(Times[i], i);
+        Info<< "    Reading U" << endl;
+        volVectorField U(Uheader, mesh);
+        volTensorField gradU = fvc::grad(U);
 
-        Info<< "Time = " << runTime.timeName() << endl;
-
-        IOobject Uheader
+        volScalarField Q
         (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
+            IOobject
+            (
+                "Q",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            0.5*(sqr(tr(gradU)) - tr(((gradU)&(gradU))))
         );
 
-        // Check U exists
-        if (Uheader.headerOk())
+        /*
+        // This is a second way of calculating Q, that delivers results
+        // very close, but not identical to the first approach.
+
+        volSymmTensorField S = symm(gradU);  // symmetric part of tensor
+        volTensorField W = skew(gradU);  // anti-symmetric part
+
+        volScalarField SS =  S&&S;
+        volScalarField WW =  W&&W;
+
+        volScalarField Q
+        (
+            IOobject
+            (
+                "Q",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            0.5*(WW - SS)
+        );
+        */
+
+        Info<< "mag(Q) max/min : "
+            << max(Q).value() << " "
+            << min(Q).value() << endl;
+
+        if (writeResults)
         {
-            mesh.readUpdate();
-
-            Info<< "    Reading U" << endl;
-            volVectorField U(Uheader, mesh);
-
-            volTensorField gradU = fvc::grad(U);
-
-            volScalarField Q
-            (
-                IOobject
-                (
-                    "Q",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                0.5*(sqr(tr(gradU)) - tr(((gradU)&(gradU))))
-            );
-
-            /*
-            // This is a second way of calculating Q, that delivers results
-            // very close, but not identical to the first approach.
-
-            volSymmTensorField S = symm(gradU);  // symmetric part of tensor
-            volTensorField W = skew(gradU);  // anti-symmetric part
-
-            volScalarField SS =  S&&S;
-            volScalarField WW =  W&&W;
-
-            volScalarField Q
-            (
-                IOobject
-                (
-                    "Q",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                0.5*(WW - SS)
-            );
-            */
-
-            Info << "    Writing Q" << endl;
             Q.write();
         }
     }
-
-    return(0);
+    else
+    {
+        Info<< "    No U" << endl;
+    }
 }
-
 
 // ************************************************************************* //

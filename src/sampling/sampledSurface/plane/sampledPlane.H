@@ -26,6 +26,7 @@ Class
     Foam::sampledPlane
 
 Description
+    A sampledSurface defined by a cuttingPlane. Triangulated by default.
 
 SourceFiles
     sampledPlane.C
@@ -57,7 +58,8 @@ class sampledPlane
         //- zone name (if restricted to zones)
         word zoneName_;
 
-        //- Triangulated faces in terms of intersection points
+        //- Triangulated faces in terms of intersection points.
+        //  Non-triangulated faces are obtained directly from cuttingPlane
         faceList faces_;
 
         //- For every triangulated face, the original cell in mesh
