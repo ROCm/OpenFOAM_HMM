@@ -58,8 +58,6 @@ endif
 
 if ( -r $ParaView_INST_DIR ) then
     set path=($ParaView_DIR/bin $path)
-    setenv LD_LIBRARY_PATH $ParaView_DIR/lib/paraview-$ParaView_VERSION:$LD_LIBRARY_PATH
-
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN
 endif
 

@@ -59,8 +59,6 @@ fi
 
 if [ -r $ParaView_DIR ]; then
     export PATH=$ParaView_DIR/bin:$PATH
-    export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_VERSION:$LD_LIBRARY_PATH
-
     export PV_PLUGIN_PATH=$FOAM_LIBBIN
 fi
 
