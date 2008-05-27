@@ -73,22 +73,18 @@ addMpiSupport ()
         MPI_RUN=$MPICH_ARCH_PATH/bin/mpirun
         ;;
     *)
-        unset MPI_INCLUDE_PATH
+        echo "*** Error: unknown/unsupported mpi: $WM_MPLIB"
+        exit 1
         ;;
     esac
 
-    if [ "$MPI_INCLUDE_PATH" ]; then
-        OBJ_ADD="$OBJ_ADD-mpi"
-        addCMakeVariable "VTK_USE_MPI=ON"
-        addCMakeVariable "PARAVIEW_USE_MPI=ON"
-        addCMakeVariable "MPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
-        addCMakeVariable "MPI_LIBRARY=$MPI_LIBRARY"
-        addCMakeVariable "VTK_MPIRUN_EXE=$MPI_RUN"
-        addCMakeVariable "VTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
-    else
-       echo "unknown/unsupported mpi: $WM_MPLIB"
-       INCLUDE_MPI=OFF
-    fi
+    OBJ_ADD="$OBJ_ADD-mpi"
+    addCMakeVariable "VTK_USE_MPI=ON"
+    addCMakeVariable "PARAVIEW_USE_MPI=ON"
+    addCMakeVariable "MPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
+    addCMakeVariable "MPI_LIBRARY=$MPI_LIBRARY"
+    addCMakeVariable "VTK_MPIRUN_EXE=$MPI_RUN"
+    addCMakeVariable "VTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
 }
 
 
@@ -142,20 +138,20 @@ addPythonSupport ()
 
 addMesaSupport ()
 {
-   [ "$INCLUDE_MESA" = ON ] || return
+    [ "$INCLUDE_MESA" = ON ] || return
 
-   MESA_INCLUDE_DIR=/usr/include/GL
-   MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
+    MESA_INCLUDE_DIR=/usr/include/GL
+    MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
 
-   if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]; then
-       OBJ_ADD="$OBJ_ADD-mesa"
-       addCMakeVariable "VTK_OPENGL_HAS_OSMESA=ON"
-       addCMakeVariable "OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
-       addCMakeVariable "OSMESA_LIBRARY=$MESA_LIBRARY"
-   else
-       echo "no MESA information found ... skipping"
-       INCLUDE_MESA=OFF
-   fi
+    if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]; then
+        OBJ_ADD="$OBJ_ADD-mesa"
+        addCMakeVariable "VTK_OPENGL_HAS_OSMESA=ON"
+        addCMakeVariable "OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
+        addCMakeVariable "OSMESA_LIBRARY=$MESA_LIBRARY"
+    else
+        echo "*** Error: no MESA information found"
+        exit 1
+    fi
 }
 
 
@@ -183,7 +179,7 @@ buildParaView ()
        exit 1
     }
 
-    #PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
+    # PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
     PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS
 
     # provide a shortcut for repeated builds - use with caution

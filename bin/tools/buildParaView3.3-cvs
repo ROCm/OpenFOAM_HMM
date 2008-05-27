@@ -64,6 +64,6 @@ addMesaSupport      # set MESA specific options
 buildParaView
 installParaView
 
-echo "done."
+echo "done"
 
 #------------------------------------------------------------------------------

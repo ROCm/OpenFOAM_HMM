@@ -42,7 +42,7 @@ setenv CMAKE_HOME $WM_PROJECT_INST_DIR/$WM_ARCH/cmake-2.4.6
 if ( -r $CMAKE_HOME ) then
     set path=($CMAKE_HOME/bin $path)
 else
-    unsetenv CMAKE_HOME
+    unset CMAKE_HOME
 endif
 
 setenv ParaView_VERSION 3.3-cvs
@@ -58,10 +58,6 @@ endif
 
 if ( -r $ParaView_INST_DIR ) then
     set path=($ParaView_DIR/bin $path)
-
-    # LD_LIBRARY_PATH may not be necessary
-    ## setenv LD_LIBRARY_PATH $ParaView_DIR/lib/paraview-3.3:$LD_LIBRARY_PATH
-
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN
 endif
 
