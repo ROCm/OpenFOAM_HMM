@@ -31,59 +31,71 @@
 #
 #------------------------------------------------------------------------------
 
+addCMakeVariable ()
+{
+    while [ -n "$1" ]
+    do
+        CMAKE_VARIABLES="$CMAKE_VARIABLES -D$1"
+        shift
+    done
+}
+
+
 initialiseVariables ()
 {
-    CMAKE_VARIABLES=""
-    PWD=`pwd`
-    OBJ_ADD=""
+    unset CMAKE_VARIABLES OBJ_ADD
 
-    if [ "$VERBOSE" = "ON" ]; then
+    if [ "$VERBOSE" = ON ]; then
         addCMakeVariable "CMAKE_VERBOSE_MAKEFILE=TRUE"
     fi
 }
 
 
-addCMakeVariable ()
-{
-    if [ -z "$1" ]; then
-        echo "*** Error: addCMakeVariable()"
-        echo "    No variable to add"
-    fi
-
-    CMAKE_VARIABLES="$CMAKE_VARIABLES -D$1"
-}
-
-
 addMpiSupport ()
 {
-    OBJ_ADD="$OBJ_ADD-mpi"
+    [ "$INCLUDE_MPI" = ON ] || return
 
-   # using OpenFOAM variables to identify location of MPI libraries
-   if [ "$WM_MPLIB" = "OPENMPI" ]; then
+    # using OpenFOAM variables to identify location of MPI libraries
+    case "$WM_MPLIB" in
+    OPENMPI)
         MPI_INCLUDE_PATH=$OPENMPI_ARCH_PATH/include
         MPI_LIBRARY=$OPENMPI_ARCH_PATH/lib/libmpi.so
         MPI_RUN=$OPENMPI_ARCH_PATH/bin/mpirun
-    elif [ "$WM_MPLIB" = "LAM" ]; then
+        ;;
+    LAM)
         MPI_INCLUDE_PATH=$LAM_ARCH_PATH/include
         MPI_LIBRARY=$LAM_ARCH_PATH/lib/libmpi.so
         MPI_RUN=$LAM_ARCH_PATH/bin/mpirun
-    elif [ "$WM_MPLIB" = "MPICH" ]; then
+        ;;
+    MPICH)
         MPI_INCLUDE_PATH=$MPICH_ARCH_PATH/include
         MPI_LIBRARY=$MPICH_ARCH_PATH/lib/libmpich.so
         MPI_RUN=$MPICH_ARCH_PATH/bin/mpirun
-    fi
+        ;;
+    *)
+        unset MPI_INCLUDE_PATH
+        ;;
+    esac
 
-    addCMakeVariable "VTK_USE_MPI=ON"
-    addCMakeVariable "PARAVIEW_USE_MPI=ON"
-    addCMakeVariable "MPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
-    addCMakeVariable "MPI_LIBRARY=$MPI_LIBRARY"
-    addCMakeVariable "VTK_MPIRUN_EXE=$MPI_RUN"
-    addCMakeVariable "VTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
+    if [ "$MPI_INCLUDE_PATH" ]; then
+        OBJ_ADD="$OBJ_ADD-mpi"
+        addCMakeVariable "VTK_USE_MPI=ON"
+        addCMakeVariable "PARAVIEW_USE_MPI=ON"
+        addCMakeVariable "MPI_INCLUDE_PATH=$MPI_INCLUDE_PATH"
+        addCMakeVariable "MPI_LIBRARY=$MPI_LIBRARY"
+        addCMakeVariable "VTK_MPIRUN_EXE=$MPI_RUN"
+        addCMakeVariable "VTK_MPI_MAX_NUMPROCS=$MPI_MAX_PROCS"
+    else
+       echo "unknown/unsupported mpi: $WM_MPLIB"
+       INCLUDE_MPI=OFF
+    fi
 }
 
 
 addPythonSupport ()
 {
+    [ "$INCLUDE_PYTHON" = ON ] || return
+
     WHICH_PYTHON=`which python`
     if [ -n "$WHICH_PYTHON" ]; then
         OBJ_ADD="$OBJ_ADD-py"
@@ -130,48 +142,81 @@ addPythonSupport ()
 
 addMesaSupport ()
 {
-    OBJ_ADD="$OBJ_ADD-mesa"
+   [ "$INCLUDE_MESA" = ON ] || return
 
-    MESA_INCLUDE_DIR=/usr/include/GL
-    MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
+   MESA_INCLUDE_DIR=/usr/include/GL
+   MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
 
-    addCMakeVariable "VTK_OPENGL_HAS_OSMESA=ON"
-    addCMakeVariable "OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
-    addCMakeVariable "OSMESA_LIBRARY=$MESA_LIBRARY"
+   if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]; then
+       OBJ_ADD="$OBJ_ADD-mesa"
+       addCMakeVariable "VTK_OPENGL_HAS_OSMESA=ON"
+       addCMakeVariable "OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR"
+       addCMakeVariable "OSMESA_LIBRARY=$MESA_LIBRARY"
+   else
+       echo "no MESA information found ... skipping"
+       INCLUDE_MESA=OFF
+   fi
 }
 
 
 buildParaView ()
 {
     # set general options
-    addCmakeVariable "DBUILD_SHARED_LIBS:BOOL=ON"
+    addCMakeVariable "BUILD_SHARED_LIBS:BOOL=ON"
 
     # set paraview environment
-    PARAVIEW_SRC_DIR=$PWD/$PARAVIEW_SRC
+    unset PARAVIEW_SRC_DIR
+    for i in $PWD $WM_PROJECT_INST_DIR
+    do
+       if [ -d $i/$PARAVIEW_SRC ]
+       then
+          PARAVIEW_SRC_DIR=$i/$PARAVIEW_SRC
+          break
+       fi
+    done
+
+    [ -d "$PARAVIEW_SRC_DIR" ] || {
+       echo "did not find $PARAVIEW_SRC in these directories:"
+       echo "  PWD=$PWD"
+       echo "  WM_PROJECT_INST_DIR=$WM_PROJECT_INST_DIR"
+       echo "abort build"
+       exit 1
+    }
+
     #PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
     PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS
 
-    # remove existing build folder if present
-    if [ -e "$PARAVIEW_OBJ_DIR" ]; then
-        rm -rf $PARAVIEW_OBJ_DIR
+    # provide a shortcut for repeated builds - use with caution
+    if [ "$CMAKE_SKIP" = YES ]
+    then
+
+       # change to build folder
+       cd $PARAVIEW_OBJ_DIR || exit 1
+
+    else
+
+       # remove existing build folder if present
+       if [ -e "$PARAVIEW_OBJ_DIR" ]; then
+           rm -rf $PARAVIEW_OBJ_DIR
+       fi
+
+       # create paraview build folder
+       mkdir -p $PARAVIEW_OBJ_DIR
+       cd $PARAVIEW_OBJ_DIR
+
+       echo "Building $PARAVIEW_SRC"
+       echo "    MPI support    : $INCLUDE_MPI"
+       echo "    Python support : $INCLUDE_PYTHON"
+       echo "    MESA support   : $INCLUDE_MESA"
+       echo "    Source         : $PARAVIEW_SRC_DIR"
+       echo "    Target         : $PARAVIEW_OBJ_DIR"
+
+       # make paraview
+       cmake \
+           -DCMAKE_INSTALL_PREFIX=$PARAVIEW_APP_DIR \
+           $CMAKE_VARIABLES \
+           $PARAVIEW_SRC_DIR
     fi
-
-    # create paraview build folder
-    mkdir -p $PARAVIEW_OBJ_DIR
-    cd $PARAVIEW_OBJ_DIR
-
-    echo "Building $PARAVIEW_SRC"
-    echo "    MPI support    : $INCLUDE_MPI"
-    echo "    Python support : $INCLUDE_PYTHON"
-    echo "    MESA support   : $INCLUDE_MESA"
-    echo "    Source         : $PARAVIEW_SRC_DIR"
-    echo "    Target         : $PARAVIEW_OBJ_DIR"
-
-    # make paraview
-    cmake \
-        -DCMAKE_INSTALL_PREFIX=$PARAVIEW_APP_DIR \
-        $CMAKE_VARIABLES \
-        $PARAVIEW_SRC_DIR
 
     if [ -r /proc/cpuinfo ]; then
         WM_NCOMPPROCS=`egrep "^processor" /proc/cpuinfo | wc -l`
@@ -201,10 +246,10 @@ installParaView ()
             -print
 
         # create a softlink to the $PARAVIEW_OBJ_DIR/bin folder
-        # - work-around for chosen install location
+        # - workaround for chosen install location
         echo "    Creating paraview $PARAVIEW_MAJOR_VERSION soft link to /bin"
-        ( mkdir lib && cd lib && ln -s ../bin \
-            paraview-$PARAVIEW_MAJOR_VERSION )
+        (  mkdir lib && cd lib && ln -s ../bin \
+            paraview-$PARAVIEW_MAJOR_VERSION  )
 
         # info on symlinks to screen
         echo ""
@@ -215,7 +260,16 @@ installParaView ()
         echo "    - ParaView_DIR to $PARAVIEW_OBJ_DIR"
         echo "    - PV_PLUGIN_PATH to $FOAM_LIBBIN"
         echo "    Add $PARAVIEW_OBJ_DIR/bin to PATH"
-        #echo "   Add $ParaView_INST_DIR/lib to LD_LIBRARY_PATH"
+        # echo "   Add $ParaView_INST_DIR/lib to LD_LIBRARY_PATH"
         echo "    ---"
     fi
 }
+
+
+# for good measure - clear a few variables before using any of the functions
+
+unset VERBOSE INCLUDE_MPI INCLUDE_PYTHON INCLUDE_MESA PYTHON_LIBRARY
+unset CMAKE_VARIABLES OBJ_ADD
+unset CMAKE_SKIP
+
+#------------------------------------------------------------------------------
