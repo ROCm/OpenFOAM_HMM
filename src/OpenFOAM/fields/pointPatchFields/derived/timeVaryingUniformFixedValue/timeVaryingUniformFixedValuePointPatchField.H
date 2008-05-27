@@ -26,7 +26,10 @@ Class
     Foam::timeVaryingUniformFixedValuePointPatchField
 
 Description
-    Foam::timeVaryingUniformFixedValuePointPatchField
+    A time-varying form of a uniform fixed value boundary condition.
+
+See Also
+    Foam::timeVaryingUniformFixedValueFvField
 
 SourceFiles
     timeVaryingUniformFixedValuePointPatchField.C
@@ -37,6 +40,7 @@ SourceFiles
 #define timeVaryingUniformFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchField.H"
+#include "timeSeries.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class timeVaryingUniformFixedValuePointPatchField Declaration
+        Class timeVaryingUniformFixedValuePointPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -54,13 +58,14 @@ class timeVaryingUniformFixedValuePointPatchField
 {
     // Private data
 
-        fileName timeDataFileName_;
+        //- file containing time/uniformFixedValue
+        fileName timeDataFile_;
 
-        scalarField times_;
-        Field<Type> values_;
+        //- the time series being used, including the bounding treatment
+        timeSeries<Type> timeSeries_;
 
-        void checkTable();
-
+        //- interpolate the value at the current time
+        Type currentValue();
 
 public:
 
@@ -85,7 +90,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         timeVaryingUniformFixedValuePointPatchField
         (
             const timeVaryingUniformFixedValuePointPatchField<Type>&,
@@ -105,10 +110,7 @@ public:
         {
             return autoPtr<pointPatchField<Type> >
             (
-                new timeVaryingUniformFixedValuePointPatchField<Type>
-                (
-                    *this
-                )
+                new timeVaryingUniformFixedValuePointPatchField<Type>(*this)
             );
         }
 
@@ -119,7 +121,6 @@ public:
             const DimensionedField<Type, pointMesh>&
         );
 
-
         //- Construct and return a clone setting internal field reference
         virtual autoPtr<pointPatchField<Type> > clone
         (
@@ -128,11 +129,7 @@ public:
         {
             return autoPtr<pointPatchField<Type> >
             (
-                new timeVaryingUniformFixedValuePointPatchField<Type>
-                (
-                    *this,
-                    iF
-                )
+                new timeVaryingUniformFixedValuePointPatchField<Type>(*this, iF)
             );
         }
 
@@ -141,16 +138,16 @@ public:
 
         // Access
 
-            //- Return the list of times in the interpolation table
-            const scalarField& times() const
+            //- Return the out-of-bounds treatment as a word
+            word timeBounding() const
             {
-                return times_;
+                return timeSeries_.bounding();
             }
 
-            //- Return the list of values in the interpolation table
-            const Field<Type>& values()
+            //- Return the time series used
+            const timeSeries<Type>& timeData() const
             {
-                return values_;
+                return timeSeries_;
             }
 
 
@@ -159,8 +156,9 @@ public:
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
-            //- Write
-            virtual void write(Ostream&) const;
+
+        //- Write
+        virtual void write(Ostream&) const;
 };
 
 
@@ -171,7 +169,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#    include "timeVaryingUniformFixedValuePointPatchField.C"
+#   include "timeVaryingUniformFixedValuePointPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
