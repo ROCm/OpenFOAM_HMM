@@ -22,21 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    components
-
-Description
-    Writes scalar fields corresponding to each component of the supplied
-    field (name) for each time.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template <class Type>
-void writeComponentFields
+template<class Type>
+void Foam::calcTypes::mag::writeMagField
 (
     const IOobject& header,
     const fvMesh& mesh,
@@ -50,24 +39,19 @@ void writeComponentFields
         Info<< "    Reading " << header.name() << endl;
         fieldType field(header, mesh);
 
-        for (direction i=0; i<Type::nComponents; i++)
-        {
-            Info<< "    Calculating " << header.name()
-                << Type::componentNames[i] << endl;
-
-            volScalarField componentField
+        Info<< "    Calculating mag" << header.name() << endl;
+        volScalarField magField
+        (
+            IOobject
             (
-                IOobject
-                (
-                    header.name() + word(Type::componentNames[i]),
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                field.component(i)
-            );
-            componentField.write();
-        }
+                "mag" + header.name(),
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            Foam::mag(field)
+        );
+        magField.write();
 
         processed = true;
     }

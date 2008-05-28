@@ -22,51 +22,34 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    magGrad
-
-Description
-    Calculates and writes the magnitude of the gradient of a field for each
-    time
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calcType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void writeMagGradField
+Foam::autoPtr<Foam::calcType> Foam::calcType::New
 (
-    const IOobject& header,
-    const fvMesh& mesh,
-    bool& processed
+    const word& calcTypeName
 )
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    Info<< "Selecting calcType " << calcTypeName << endl;
 
-    if (header.headerClassName() == fieldType::typeName)
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(calcTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        Info<< "    Reading " << header.name() << endl;
-        fieldType field(header, mesh);
-
-        Info<< "    Calculating magGrad" << header.name() << endl;
-        volScalarField magGradField
-        (
-            IOobject
-            (
-                "magGrad" + header.name(),
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            mag(fvc::grad(field))
-        );
-        magGradField.write();
-
-        processed = true;
+        FatalErrorIn("calcType::New()")
+            << "    unknown calcType type " << calcTypeName
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid calcType selections are: " << nl
+            << dictionaryConstructorTablePtr_->toc() << nl
+            << abort(FatalError);
     }
+
+    return autoPtr<calcType>(cstrIter()());
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

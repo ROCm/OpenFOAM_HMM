@@ -1,3 +1,0 @@
-components.C
-
-EXE = $(FOAM_APPBIN)/components

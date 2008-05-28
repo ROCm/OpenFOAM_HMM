@@ -1,3 +1,0 @@
-magSqr.C
-
-EXE = $(FOAM_APPBIN)/magSqr

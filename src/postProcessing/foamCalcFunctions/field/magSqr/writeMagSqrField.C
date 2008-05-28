@@ -22,20 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    mag
-
-Description
-    Calculates and writes the magnitude-squared of a field for each time
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type>
-void writeMagSqrField
+void Foam::calcTypes::magSqr::writeMagSqrField
 (
     const IOobject& header,
     const fvMesh& mesh,
@@ -59,7 +49,7 @@ void writeMagSqrField
                 mesh,
                 IOobject::NO_READ
             ),
-            magSqr(field)
+            Foam::magSqr(field)
         );
         magSqrField.write();
 
@@ -69,4 +59,3 @@ void writeMagSqrField
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-

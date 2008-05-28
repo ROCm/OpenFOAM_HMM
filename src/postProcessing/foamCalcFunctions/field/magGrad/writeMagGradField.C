@@ -22,20 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    mag
-
-Description
-    Calculates and writes the magnitude of a field for each time
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type>
-void writeMagField
+void Foam::calcTypes::magGrad::writeMagGradField
 (
     const IOobject& header,
     const fvMesh& mesh,
@@ -49,19 +39,19 @@ void writeMagField
         Info<< "    Reading " << header.name() << endl;
         fieldType field(header, mesh);
 
-        Info<< "    Calculating mag" << header.name() << endl;
-        volScalarField magField
+        Info<< "    Calculating magGrad" << header.name() << endl;
+        volScalarField magGradField
         (
             IOobject
             (
-                "mag" + header.name(),
+                "magGrad" + header.name(),
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ
             ),
-            mag(field)
+            Foam::mag(fvc::grad(field))
         );
-        magField.write();
+        magGradField.write();
 
         processed = true;
     }
