@@ -30,7 +30,7 @@ expMax              10.0;
 
 alphaMax            0.6;
 
-g0                  g0 [ 0 2 -2 0 0 0 0 ] 0 ;
+g0                  g0 [ 1 -1 -2 0 0 0 0 ] 0 ;
 
 packingLimiter      off;
 
