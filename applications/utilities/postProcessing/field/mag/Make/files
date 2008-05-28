@@ -1,3 +1,0 @@
-mag.C
-
-EXE = $(FOAM_APPBIN)/mag
