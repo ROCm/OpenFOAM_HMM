@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "CrankNicholsonDdtScheme.H"
@@ -69,7 +69,7 @@ CrankNicholsonDdtScheme<Type>::DDt0Field<GeoField>::DDt0Field
 )
 :
     GeoField(io, mesh, dimType),
-    startTimeIndex_(mesh.time().timeIndex()) 
+    startTimeIndex_(mesh.time().timeIndex())
 {}
 
 
@@ -324,7 +324,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
         {
             dimensionedScalar rDtCoef0 = rDtCoef0_(ddt0);
 
-            ddt0.dimensionedInternalField() = 
+            ddt0.dimensionedInternalField() =
             (
                 (rDtCoef0*dt)*(mesh().V0() - mesh().V00())
               - mesh().V00()*offCentre_(ddt0.dimensionedInternalField())
@@ -371,7 +371,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
         {
             scalar rDtCoef0 = rDtCoef0_(ddt0).value();
 
-            ddt0.internalField() = 
+            ddt0.internalField() =
             (
                 rDtCoef0*
                 (
@@ -380,7 +380,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
                 ) - mesh().V00()*offCentre_(ddt0.internalField())
             )/mesh().V0();
 
-            ddt0.boundaryField() = 
+            ddt0.boundaryField() =
             (
                 rDtCoef0*
                 (
@@ -461,7 +461,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
         {
             scalar rDtCoef0 = rDtCoef0_(ddt0).value();
 
-            ddt0.internalField() = 
+            ddt0.internalField() =
             (
                 rDtCoef0*rho.value()*
                 (
@@ -470,7 +470,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
                 ) - mesh().V00()*offCentre_(ddt0.internalField())
             )/mesh().V0();
 
-            ddt0.boundaryField() = 
+            ddt0.boundaryField() =
             (
                 rDtCoef0*rho.value()*
                 (
@@ -551,7 +551,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
         {
             scalar rDtCoef0 = rDtCoef0_(ddt0).value();
 
-            ddt0.internalField() = 
+            ddt0.internalField() =
             (
                 rDtCoef0*
                 (
@@ -562,7 +562,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdt
                 ) - mesh().V00()*offCentre_(ddt0.internalField())
             )/mesh().V0();
 
-            ddt0.boundaryField() = 
+            ddt0.boundaryField() =
             (
                 rDtCoef0*
                 (
@@ -658,7 +658,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
         {
             scalar rDtCoef0 = rDtCoef0_(ddt0).value();
 
-            ddt0.internalField() = 
+            ddt0.internalField() =
             (
                 rDtCoef0*
                 (
@@ -668,7 +668,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
               - mesh().V00()*offCentre_(ddt0.internalField())
             )/mesh().V0();
 
-            ddt0.boundaryField() = 
+            ddt0.boundaryField() =
             (
                 rDtCoef0*
                 (
@@ -693,7 +693,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
                  - offCentre_(ddt0());
         }
 
-        fvm.source() = 
+        fvm.source() =
         (
             rDtCoef*vf.oldTime().internalField()
           + offCentre_(ddt0.internalField())
@@ -740,7 +740,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
         {
             scalar rDtCoef0 = rDtCoef0_(ddt0).value();
 
-            ddt0.internalField() = 
+            ddt0.internalField() =
             (
                 rDtCoef0*rho.value()*
                 (
@@ -750,7 +750,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
               - mesh().V00()*offCentre_(ddt0.internalField())
             )/mesh().V0();
 
-            ddt0.boundaryField() = 
+            ddt0.boundaryField() =
             (
                 rDtCoef0*rho.value()*
                 (
@@ -775,7 +775,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
                  - offCentre_(ddt0());
         }
 
-        fvm.source() = 
+        fvm.source() =
         (
             rDtCoef*rho.value()*vf.oldTime().internalField()
           + offCentre_(ddt0.internalField())
@@ -823,7 +823,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
         {
             scalar rDtCoef0 = rDtCoef0_(ddt0).value();
 
-            ddt0.internalField() = 
+            ddt0.internalField() =
             (
                 rDtCoef0*
                 (
@@ -835,7 +835,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
               - mesh().V00()*offCentre_(ddt0.internalField())
             )/mesh().V0();
 
-            ddt0.boundaryField() = 
+            ddt0.boundaryField() =
             (
                 rDtCoef0*
                 (
@@ -865,7 +865,7 @@ CrankNicholsonDdtScheme<Type>::fvmDdt
             ) - offCentre_(ddt0());
         }
 
-        fvm.source() = 
+        fvm.source() =
         (
             rDtCoef*rho.oldTime().internalField()*vf.oldTime().internalField()
           + offCentre_(ddt0.internalField())
@@ -930,14 +930,14 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
     {
         if (evaluate(dUdt0))
         {
-            dUdt0 = 
+            dUdt0 =
                 rDtCoef0_(dUdt0)*(U.oldTime() - U.oldTime().oldTime())
               - offCentre_(dUdt0());
         }
 
         if (evaluate(dphidt0))
         {
-            dphidt0 = 
+            dphidt0 =
                 rDtCoef0_(dphidt0)*(phi.oldTime() - phi.oldTime().oldTime())
               - offCentre_(dphidt0());
         }
@@ -1065,7 +1065,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimVelocity
          && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
@@ -1117,7 +1117,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == rho.dimensions()*dimVelocity
          && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
@@ -1186,7 +1186,7 @@ tmp<surfaceScalarField> CrankNicholsonDdtScheme<Type>::meshPhi
 
     if (evaluate(meshPhi0))
     {
-        meshPhi0 = 
+        meshPhi0 =
             coef0_(meshPhi0)*mesh().phi().oldTime() - offCentre_(meshPhi0());
     }
 
