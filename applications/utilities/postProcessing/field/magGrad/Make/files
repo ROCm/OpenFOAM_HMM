@@ -1,3 +1,0 @@
-magGrad.C
-
-EXE = $(FOAM_APPBIN)/magGrad
