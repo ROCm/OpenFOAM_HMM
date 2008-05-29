@@ -28,15 +28,9 @@ License
 #include "face.H"
 #include "triPointRef.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-
-inline int triFace::compare(const triFace& a, const triFace& b)
+inline int Foam::triFace::compare(const triFace& a, const triFace& b)
 {
     if
     (
@@ -64,15 +58,14 @@ inline int triFace::compare(const triFace& a, const triFace& b)
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
-inline triFace::triFace()
+inline Foam::triFace::triFace()
 {}
 
 
-// Construct from components
-inline triFace::triFace
+inline Foam::triFace::triFace
 (
     const label a,
     const label b,
@@ -84,27 +77,20 @@ inline triFace::triFace
     operator[](2) = c;
 }
 
-// Construct from a face
-inline triFace::triFace(const face& f)
-:
-    FixedList<label, 3>(SubList<label>(f,3))
-{}
 
-// Construct from a labelList
-inline triFace::triFace(const labelList& l)
+inline Foam::triFace::triFace(const UList<label>& l)
 :
-    FixedList<label, 3>(SubList<label>(l,3))
+    FixedList<label, 3>(l)
 {}
 
 
-inline triFace::triFace(Istream& is)
+inline Foam::triFace::triFace(Istream& is)
 :
     FixedList<label, 3>(is)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 inline Foam::label Foam::triFace::collapse()
 {
@@ -133,8 +119,7 @@ inline Foam::label Foam::triFace::collapse()
 }
 
 
-// Return the points associated with this face
-inline pointField triFace::points(const pointField& points) const
+inline Foam::pointField Foam::triFace::points(const pointField& points) const
 {
     pointField p(3);
 
@@ -146,8 +131,7 @@ inline pointField triFace::points(const pointField& points) const
 }
 
 
-// Return triagle as a face
-inline face triFace::triFaceFace() const
+inline Foam::face Foam::triFace::triFaceFace() const
 {
     face f(3);
 
@@ -159,13 +143,13 @@ inline face triFace::triFaceFace() const
 }
 
 
-inline label triFace::nEdges() const
+inline Foam::label Foam::triFace::nEdges() const
 {
     return 3;
 }
 
 
-inline edgeList triFace::edges() const
+inline Foam::edgeList Foam::triFace::edges() const
 {
     edgeList e(3);
 
@@ -186,7 +170,7 @@ inline edgeList triFace::edges() const
 //  - +1: forward (counter-clockwise) on the face
 //  - -1: reverse (clockwise) on the face
 //  -  0: edge not found on the face
-inline int triFace::edgeDirection(const edge& e) const
+inline int Foam::triFace::edgeDirection(const edge& e) const
 {
     if
     (
@@ -213,7 +197,7 @@ inline int triFace::edgeDirection(const edge& e) const
 }
 
 
-inline point triFace::centre(const pointField& points) const
+inline Foam::point Foam::triFace::centre(const pointField& points) const
 {
     return (1.0/3.0)*
     (
@@ -224,13 +208,13 @@ inline point triFace::centre(const pointField& points) const
 }
 
 
-inline scalar triFace::mag(const pointField& points) const
+inline Foam::scalar Foam::triFace::mag(const pointField& points) const
 {
     return ::Foam::mag(normal(points));
 }
 
 
-inline vector triFace::normal(const pointField& points) const
+inline Foam::vector Foam::triFace::normal(const pointField& points) const
 {
     return 0.5*
     (
@@ -240,7 +224,7 @@ inline vector triFace::normal(const pointField& points) const
 }
 
 
-inline scalar triFace::sweptVol
+inline Foam::scalar Foam::triFace::sweptVol
 (
     const pointField& opts,
     const pointField& npts
@@ -273,7 +257,7 @@ inline scalar triFace::sweptVol
 }
 
 
-inline pointHit triFace::ray
+inline Foam::pointHit Foam::triFace::ray
 (
     const point& p,
     const vector& q,
@@ -291,7 +275,7 @@ inline pointHit triFace::ray
 }
 
 
-inline triPointRef triFace::tri(const pointField& points) const
+inline Foam::triPointRef Foam::triFace::tri(const pointField& points) const
 {
     return triPointRef
     (
@@ -304,20 +288,16 @@ inline triPointRef triFace::tri(const pointField& points) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline bool operator==(const triFace& a, const triFace& b)
+inline bool Foam::operator==(const triFace& a, const triFace& b)
 {
     return triFace::compare(a,b) != 0;
 }
 
 
-inline bool operator!=(const triFace& a, const triFace& b)
+inline bool Foam::operator!=(const triFace& a, const triFace& b)
 {
     return triFace::compare(a,b) == 0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
