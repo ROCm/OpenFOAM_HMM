@@ -53,6 +53,11 @@ class pTraits
 
 public:
 
+    pTraits(const primitive& p)
+    :
+        primitive(p)
+    {}
+
     pTraits(Istream& is)
     :
         primitive(is)
