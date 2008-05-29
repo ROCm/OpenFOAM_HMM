@@ -81,11 +81,8 @@ public:
             const label c
         );
 
-        //- Construct from a face, discarding excess points
-        inline triFace(const face&);
-
-        //- Construct from a labelList, discarding excess points
-        explicit inline triFace(const labelList&);
+        //- Construct from a UList<label>
+        explicit inline triFace(const UList<label>&);
 
         //- Construct from Istream
         inline triFace(Istream&);
