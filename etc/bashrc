@@ -63,9 +63,10 @@ export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 : ${WM_OS:=Unix}; export WM_OS
 
 
-# Compiler (if set to "" use the system compiler)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Compiler: set to Gcc, Gcc43 or Icc (for Intel's icc)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 export WM_COMPILER=Gcc43
+
 export WM_COMPILER_ARCH=
 export WM_COMPILER_LIB_ARCH=
 
@@ -105,13 +106,11 @@ Linux)
     # compiler specifics
     case `uname -m` in
     i686)
-        # export WM_COMPILER=I32
         ;;
 
     x86_64)
         case $WM_ARCH_OPTION in
         32)
-            # export WM_COMPILER=I64
             export WM_COMPILER_ARCH='-64'
             export WM_CC='gcc'
             export WM_CXX='g++'
@@ -122,7 +121,6 @@ Linux)
         64)
             WM_ARCH=linux64
             export WM_COMPILER_LIB_ARCH=64
-            # export WM_COMPILER=I64
             export WM_CC='gcc'
             export WM_CXX='g++'
             export WM_CFLAGS='-m64 -fPIC'
@@ -142,17 +140,6 @@ Linux)
         echo Unknown processor type `uname -m` for Linux
         ;;
     esac
-    ;;
-
-SunOS)
-    WM_ARCH=solaris
-    ;;
-
-IRIX*)
-    WM_ARCH=sgiN32
-    # export WM_ARCH=sgi64
-    # export WM_COMPILER_LIB_ARCH=/mabi=64
-    export WM_MPLIB=MPI
     ;;
 
 *)    	# an unsupported operating system
