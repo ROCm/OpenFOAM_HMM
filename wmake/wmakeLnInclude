@@ -125,7 +125,7 @@ cd $incDir
 
 find .. $findOpt \
     \( -name lnInclude -o -name -Make -o -name .svn -o -name config \) -prune  \
- -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.type' \)  \
+ -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
  -a ! -name ".#*"     \
  -exec ln $lnOpt {} . \;
 
