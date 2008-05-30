@@ -70,7 +70,11 @@ PtrList<SLList<label> > slPatchCellFaces;
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
+#if YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
+#else
+int yyFlexLexer::yywrap()
+#endif
 {
     return 1;
 }
@@ -393,7 +397,7 @@ int main(int argc, char *argv[])
     }
 
     // Warning: tet face order has changed between version 1.9.6 and 2.0
-    // 
+    //
     label faceIndex[7][6] =
     {
         {-1, -1, -1, -1, -1, -1}, // 0

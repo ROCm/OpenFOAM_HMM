@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 %{
@@ -51,7 +51,11 @@ int yyFlexLexer::yylex()
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
+#if YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
+#else
+int yyFlexLexer::yywrap()
+#endif
 {
     return 1;
 }
@@ -391,7 +395,8 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
     // Create the lexer obtaining the approximate number of vertices in the STL
     // from the file size
     STLLexer lexer(&STLstream.stdStream(), Foam::size(STLfileName)/400);
-    while(lexer.lex() != 0);
+    while(lexer.lex() != 0)
+    {}
 
     DynamicList<STLpoint>& STLpoints = lexer.STLpoints();
 

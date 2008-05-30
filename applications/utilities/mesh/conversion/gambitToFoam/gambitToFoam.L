@@ -78,7 +78,11 @@ label nValuesForPatchFaces = 0;
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
+#if YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
+#else
+int yyFlexLexer::yywrap()
+#endif
 {
     return 1;
 }
@@ -308,7 +312,7 @@ mtype                 {space}"MTYPE:"{space}
 
         label nodeI(readLabel(nodeStream));
 
-        // Note: coordinates must be read one at the time.  
+        // Note: coordinates must be read one at the time.
         scalar x = readScalar(nodeStream);
         scalar y = readScalar(nodeStream);
         scalar z = readScalar(nodeStream);
@@ -676,7 +680,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    
+
     labelList pointLookup(maxPointIndex + 1, -1);
 
     forAll (pointMap, pointI)
@@ -806,7 +810,7 @@ int main(int argc, char *argv[])
                     ]
                     [curFaces[faceI] - 1] // this gives a fluent face - 1
                 ];
-                
+
         }
     }
 
