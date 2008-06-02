@@ -158,7 +158,7 @@ export FOAMX_CONFIG
 
 case "$WM_MPLIB" in
 OPENMPI)
-    ompi_version=1.2.5
+    ompi_version=1.2.6
     export OPENMPI_HOME=$FOAM_SRC/other/openmpi-$ompi_version
     export OPENMPI_ARCH_PATH=$OPENMPI_HOME/platforms/$WM_OPTIONS
 
