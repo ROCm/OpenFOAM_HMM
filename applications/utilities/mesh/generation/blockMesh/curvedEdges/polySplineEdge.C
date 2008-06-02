@@ -22,28 +22,21 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    polySplineEdge class : representation of a spline via a polyLine
-
 \*---------------------------------------------------------------------------*/
-
-#include "error.H"
 
 #include "polySplineEdge.H"
 #include "BSpline.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(polySplineEdge, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(polySplineEdge, 0);
-
-// Add the curvedEdge constructor functions to the hash tables
-curvedEdge::addIstreamConstructorToTable<polySplineEdge>
-    addPolySplineEdgeIstreamConstructorToTable_;
+    // Add the curvedEdge constructor functions to the hash tables
+    curvedEdge::addIstreamConstructorToTable<polySplineEdge>
+        addPolySplineEdgeIstreamConstructorToTable_;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -56,7 +49,7 @@ curvedEdge::addIstreamConstructorToTable<polySplineEdge>
 // note that the points are evenly spaced in the parameter mu, not
 // in real space
 
-pointField polySplineEdge::intervening
+Foam::pointField Foam::polySplineEdge::intervening
 (
     const pointField& otherknots,
     const label nbetweenKnots,
@@ -72,7 +65,7 @@ pointField polySplineEdge::intervening
 
     label N = spl.nKnots();
     scalar init = 1.0/(N - 1);
-    scalar interval = (N - 3)/N;
+    scalar interval = (N - scalar(3))/N;
     interval /= otherknots.size() + 1;
     interval /= nbetweenKnots + 1;
 
@@ -93,8 +86,7 @@ pointField polySplineEdge::intervening
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-polySplineEdge::polySplineEdge
+Foam::polySplineEdge::polySplineEdge
 (
     const pointField& points,
     const label start,
@@ -118,14 +110,13 @@ polySplineEdge::polySplineEdge
 {}
 
 
-// Construct from Istream
-polySplineEdge::polySplineEdge
+Foam::polySplineEdge::polySplineEdge
 (
     const pointField& points,
     Istream& is
 )
 :
-    curvedEdge(points, readLabel(is), readLabel(is)),
+    curvedEdge(points, is),
     polyLine(pointField(0)),
     otherKnots_(is)
 {
@@ -144,23 +135,16 @@ polySplineEdge::polySplineEdge
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return the position of a point on the curve given by
-//  the parameter 0 <= lambda <= 1
-vector polySplineEdge::position(const scalar mu) const
+Foam::vector Foam::polySplineEdge::position(const scalar mu) const
 {
     return polyLine::position(mu);
 }
 
 
-//- Return the length of the curve
-scalar polySplineEdge::length() const
+Foam::scalar Foam::polySplineEdge::length() const
 {
     return polyLine::length();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
