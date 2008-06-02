@@ -126,7 +126,7 @@ public:
 
         //- Return linearised coefficient for velocity equation
         //  Drag force per unit particle mass = Cu(U - Up)
-        const scalar Cu
+        scalar Cu
         (
             const vector& Ur,
             const scalar d,

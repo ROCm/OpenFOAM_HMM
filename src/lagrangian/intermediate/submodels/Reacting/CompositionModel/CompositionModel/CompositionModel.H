@@ -207,24 +207,24 @@ public:
             virtual const scalarField& YMixture0() const = 0;
 
             //- Return the gas constant for the gas mixture
-            virtual const scalar RGas(const scalarField& YGas) const = 0;
+            virtual scalar RGas(const scalarField& YGas) const = 0;
 
             //- Return enthalpy for the gas mixture
-            virtual const scalar HGas
+            virtual scalar HGas
             (
                  const scalarField& YGas,
                  const scalar T
             ) const = 0;
 
             //- Return specific heat caparcity for the gas mixture
-            virtual const scalar cpGas
+            virtual scalar cpGas
             (
                  const scalarField& YGas,
                  const scalar T
             ) const = 0;
 
             //- Return specific heat caparcity for the liquid mixture
-            virtual const scalar cpLiquid
+            virtual scalar cpLiquid
             (
                 const scalarField& YLiquid,
                 const scalar p,
@@ -232,7 +232,7 @@ public:
             ) const = 0;
 
             //- Return specific heat caparcity for the solid mixture
-            virtual const scalar cpSolid
+            virtual scalar cpSolid
             (
                 const scalarField& YSolid
             ) const = 0;

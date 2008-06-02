@@ -175,7 +175,7 @@ public:
             // Modelling options
 
                 //- Radiation flag
-                inline const bool radiation() const;
+                inline bool radiation() const;
 
 
             // Sources
