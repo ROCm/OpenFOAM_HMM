@@ -73,7 +73,7 @@ void Foam::primitiveMesh::calcCellEdges() const
                 if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
                     // Add the edge
-                    //curCellEdges.append(curEdges[edgeI]);
+                    curCellEdges.append(curEdges[edgeI]);
                 }
             }
         }
@@ -89,7 +89,7 @@ void Foam::primitiveMesh::calcCellEdges() const
                 if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
                     // add the edge
-                    //curCellEdges.append(curEdges[edgeI]);
+                    curCellEdges.append(curEdges[edgeI]);
                 }
             }
         }
