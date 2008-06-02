@@ -318,11 +318,15 @@ inline scalar triangle<Point, PointRef>::quality() const
 template<class Point, class PointRef>
 inline scalar triangle<Point, PointRef>::sweptVol(const triangle& t) const
 {
-    return (1.0/6.0)*
+    return (1.0/12.0)*
     (
         ((t.a_ - a_) & ((b_ - a_)^(c_ - a_)))
       + ((t.b_ - b_) & ((c_ - b_)^(t.a_ - b_)))
       + ((c_ - t.c_) & ((t.b_ - t.c_)^(t.a_ - t.c_)))
+
+      + ((t.a_ - a_) & ((b_ - a_)^(c_ - a_)))
+      + ((b_ - t.b_) & ((t.a_ - t.b_)^(t.c_ - t.b_)))
+      + ((c_ - t.c_) & ((b_ - t.c_)^(t.a_ - t.c_)))
     );
 }
 

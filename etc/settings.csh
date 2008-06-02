@@ -157,7 +157,7 @@ endif
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set ompi_version=1.2.5
+    set ompi_version=1.2.6
     setenv OPENMPI_HOME $FOAM_SRC/other/openmpi-$ompi_version
     setenv OPENMPI_ARCH_PATH $OPENMPI_HOME/platforms/$WM_OPTIONS
 
