@@ -755,10 +755,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::mergeZoneBaffles
 
 Foam::scalarField Foam::autoHexMeshDriver::calcSnapDistance
 (
+    const dictionary& snapDict,
     const indirectPrimitivePatch& pp
 ) const
 {
-    const dictionary& snapDict = dict_.subDict("snapDict");
     // When to snap
     scalar snapTol(readScalar(snapDict.lookup("snapTol")));
 
@@ -826,12 +826,12 @@ Foam::labelList Foam::autoHexMeshDriver::getSurfacePatches() const
 
 void Foam::autoHexMeshDriver::preSmoothPatch
 (
+    const dictionary& snapDict,
     const label nInitErrors,
     const List<labelPair>& baffles,
     motionSmoother& meshMover
 ) const
 {
-    const dictionary& snapDict = dict_.subDict("snapDict");
     // Smoothing iterations
     label nSmoothPatch(readLabel(snapDict.lookup("nSmoothPatch")));
     // Snapping iterations
@@ -1076,15 +1076,17 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
 }
 
 
-void Foam::autoHexMeshDriver::smoothDisplacement(motionSmoother& meshMover)
- const
+void Foam::autoHexMeshDriver::smoothDisplacement
+(
+    const dictionary& snapDict,
+    motionSmoother& meshMover
+) const
 {
     const pointMesh& pMesh = meshMover.pMesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
 
     Info<< "Smoothing displacement ..." << endl;
 
-    const dictionary& snapDict = dict_.subDict("snapDict");
     // Smoothing iterations
     label nSmoothDisp(readLabel(snapDict.lookup("nSmoothDispl")));
 
@@ -1138,12 +1140,12 @@ void Foam::autoHexMeshDriver::smoothDisplacement(motionSmoother& meshMover)
 
 void Foam::autoHexMeshDriver::scaleMesh
 (
+    const dictionary& snapDict,
     const label nInitErrors,
     const List<labelPair>& baffles,
     motionSmoother& meshMover
 )
 {
-    const dictionary& snapDict = dict_.subDict("snapDict");
     // Snapping iterations
     label nSnap(readLabel(snapDict.lookup("nSnap")));
 

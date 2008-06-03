@@ -52,9 +52,9 @@ defineTypeNameAndDebug(autoHexMeshDriver, 0);
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Check writing tolerance before doing any serious work
-Foam::scalar Foam::autoHexMeshDriver::getMergeDistance() const
+Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
+ const
 {
-    const scalar mergeTol = readScalar(dict_.lookup("mergeTolerance"));
     const boundBox& meshBb = mesh_.bounds();
     scalar mergeDist = mergeTol*mag(meshBb.max() - meshBb.min());
     scalar writeTol = std::pow
@@ -70,7 +70,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance() const
 
     if (mesh_.time().writeFormat() == IOstream::ASCII && mergeTol < writeTol)
     {
-        FatalErrorIn("autoHexMeshDriver::getMergeDistance() const")
+        FatalErrorIn("autoHexMeshDriver::getMergeDistance(const scalar) const")
             << "Your current settings specify ASCII writing with "
             << IOstream::defaultPrecision() << " digits precision." << endl
             << "Your merging tolerance (" << mergeTol << ") is finer than this."
@@ -306,9 +306,8 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     curvature_(readScalar(dict_.lookup("curvature"))),
     nBufferLayers_(readLabel(dict_.lookup("nBufferLayers"))),
     keepPoints_(dict_.lookup("keepPoints")),
-    mergeDist_(getMergeDistance())
+    mergeDist_(getMergeDistance(readScalar(dict_.lookup("mergeTolerance"))))
 {
-
     if (debug_ > 0)
     {
         meshRefinement::debug = debug_;
@@ -471,17 +470,34 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
             {
                 if (nTrisPerRegion[i] > 0)
                 {
+                    label globalRegionI = surfaces().globalRegion(surfI, i);
+
+                    // Use optionally specified patch type and name
+                    word patchType = surfaces().patchType()[globalRegionI];
+                    if (patchType == "")
+                    {
+                        patchType = wallPolyPatch::typeName;
+                    }
+
+                    word patchName = surfaces().patchName()[globalRegionI];
+                    if (patchName == "")
+                    {
+                        patchName =
+                            surfaces().names()[surfI]
+                          + '_'
+                          + regions[i].name();
+                    }
+
                     label patchI = meshRefinement::addPatch
                     (
                         mesh,
-                        //s.searchableSurface::name() + '_' + regions[i].name(),
-                        surfaces().names()[surfI] + '_' + regions[i].name(),
-                        wallPolyPatch::typeName
+                        patchName,
+                        patchType
                     );
 
                     Info<< patchI << '\t' << regions[i].name() << nl;
 
-                    globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
+                    globalToPatch_[globalRegionI] = patchI;
                 }
             }
 
@@ -593,14 +609,282 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 }
 
 
+// Construct from separate dictionaries.
+Foam::autoHexMeshDriver::autoHexMeshDriver
+(
+    fvMesh& mesh,
+    const dictionary& controlDict,
+    const dictionary& refineDict,
+    const dictionary& decomposeDict
+)
+:
+    mesh_(mesh),
+    dict_(controlDict),
+    debug_(readLabel(controlDict.lookup("debug"))),
+    maxGlobalCells_(readLabel(refineDict.lookup("cellLimit"))),
+    maxLocalCells_(readLabel(refineDict.lookup("procCellLimit"))),
+    minRefineCells_(readLabel(refineDict.lookup("minimumRefine"))),
+    curvature_(readScalar(refineDict.lookup("curvature"))),
+    nBufferLayers_(readLabel(refineDict.lookup("nBufferLayers"))),
+    keepPoints_(refineDict.lookup("keepPoints")),
+    mergeDist_
+    (
+        getMergeDistance(readScalar(refineDict.lookup("mergeTolerance")))
+    )
+{
+    if (debug_ > 0)
+    {
+        meshRefinement::debug = debug_;
+        autoHexMeshDriver::debug = debug_;
+    }
+
+    Info<< "Overall cell limit                         : " << maxGlobalCells_
+        << endl;
+    Info<< "Per processor cell limit                   : " << maxLocalCells_
+        << endl;
+    Info<< "Minimum number of cells to refine          : " << minRefineCells_
+        << endl;
+    Info<< "Curvature                                  : " << curvature_
+        << nl << endl;
+    Info<< "Layers between different refinement levels : " << nBufferLayers_
+        << endl;
+
+    // Check keepPoints are sensible
+    findCells(keepPoints_);
+
+
+    // Read refinement shells
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< "Reading refinement shells." << endl;
+
+        PtrList<dictionary> shellDicts(refineDict.lookup("refinementShells"));
+
+        shells_.setSize(shellDicts.size());
+        shellLevels_.setSize(shellDicts.size());
+        shellRefineInside_.setSize(shellDicts.size());
+
+        forAll(shellDicts, i)
+        {
+            const dictionary& dict = shellDicts[i];
+
+            shells_.set
+            (
+                i,
+                searchableSurface::New
+                (
+                    dict.lookup("type"),
+                    dict.lookup("name"),
+                    mesh_.time(),
+                    dict
+                )
+            );
+            shellLevels_[i] = readLabel(dict.lookup("level"));
+            shellRefineInside_[i] = Switch(dict.lookup("refineInside"));
+
+            if (shellRefineInside_[i])
+            {
+                Info<< "Refinement level " << shellLevels_[i]
+                    << " for all cells inside " << shells_[i].name() << endl;
+            }
+            else
+            {
+                Info<< "Refinement level " << shellLevels_[i]
+                    << " for all cells outside " << shells_[i].name() << endl;
+            }
+        }
+
+        Info<< "Read refinement shells in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // Orient shell surfaces before any searching is done.
+        Info<< "Orienting triSurface shells so point far away is outside."
+            << endl;
+        orientOutside(shells_);
+        Info<< "Oriented shells in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+    }
+
+
+    // Read refinement surfaces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< "Reading surfaces and constructing search trees." << endl;
+
+        surfacesPtr_.reset
+        (
+            new refinementSurfaces
+            (
+                IOobject
+                (
+                    "",                                 // dummy name
+                    mesh_.time().constant(),            // directory
+                    "triSurface",                       // instance
+                    mesh_.time(),                       // registry
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                refineDict.lookup("surfaces")
+            )
+        );
+        Info<< "Read surfaces in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // Orient surfaces (if they're closed) before any searching is done.
+        Info<< "Orienting (closed) surfaces so keepPoint is outside." << endl;
+        forAll(surfaces(), i)
+        {
+            if (refinementSurfaces::isSurfaceClosed(surfaces()[i]))
+            {
+                refinementSurfaces::orientSurface
+                (
+                    keepPoints_[0],
+                    surfacesPtr_()[i]
+                );
+            }
+        }
+        Info<< "Oriented closed surfaces in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        Info<< "Setting refinement level of surface to be consistent"
+            << " with shells." << endl;
+        surfacesPtr_().setMinLevelFields
+        (
+            shells_,
+            shellLevels_,
+            shellRefineInside_
+        );
+        Info<< "Checked shell refinement in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+    }
+
+    // Check faceZones are synchronised
+    checkCoupledFaceZones();
+
+
+    // Add all the surface regions as patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< nl
+            << "Adding patches for surface regions" << nl
+            << "----------------------------------" << nl
+            << endl;
+
+        // From global region number to mesh patch.
+        globalToPatch_.setSize(surfaces().nRegions(), -1);
+
+        Info<< "Patch\tRegion" << nl
+            << "-----\t------"
+            << endl;
+
+        forAll(surfaces(), surfI)
+        {
+            const triSurfaceMesh& s = surfaces()[surfI];
+
+            Info<< surfaces().names()[surfI] << ':' << nl << nl;
+
+            const geometricSurfacePatchList& regions = s.patches();
+
+            labelList nTrisPerRegion(surfaces().countRegions(s));
+
+            forAll(regions, i)
+            {
+                if (nTrisPerRegion[i] > 0)
+                {
+                    label patchI = meshRefinement::addPatch
+                    (
+                        mesh,
+                        //s.searchableSurface::name() + '_' + regions[i].name(),
+                        surfaces().names()[surfI] + '_' + regions[i].name(),
+                        wallPolyPatch::typeName
+                    );
+
+                    Info<< patchI << '\t' << regions[i].name() << nl;
+
+                    globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
+                }
+            }
+
+            Info<< nl;
+        }
+        Info<< "Added patches in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+    }
+
+    // Parallel
+    // ~~~~~~~~
+
+    {
+        // Decomposition
+        decomposerPtr_ = decompositionMethod::New
+        (
+            decomposeDict,
+            mesh_
+        );
+        decompositionMethod& decomposer = decomposerPtr_();
+
+
+        if (Pstream::parRun() && !decomposer.parallelAware())
+        {
+            FatalErrorIn("autoHexMeshDriver::autoHexMeshDriver(const IOobject&, fvMesh&)")
+                << "You have selected decomposition method "
+                << decomposer.typeName
+                << " which is not parallel aware." << endl
+                << "Please select one that is (parMetis, hierarchical)"
+                << exit(FatalError);
+        }
+
+        // Mesh distribution engine (uses tolerance to reconstruct meshes)
+        distributorPtr_.reset(new fvMeshDistribute(mesh_, mergeDist_));
+    }
+
+
+    // Refinement engine
+    // ~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< nl
+            << "Determining initial surface intersections" << nl
+            << "-----------------------------------------" << nl
+            << endl;
+
+        // Main refinement engine
+        meshRefinerPtr_.reset
+        (
+            new meshRefinement
+            (
+                mesh,
+                mergeDist_,         // tolerance used in sorting coordinates
+                surfaces()
+            )
+        );
+        Info<< "Calculated surface intersections in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // Some stats
+        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
+
+        meshRefinerPtr_().write
+        (
+            debug_&meshRefinement::OBJINTERSECTIONS,
+            mesh_.time().path()/mesh_.time().timeName()
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Read explicit feature edges
-Foam::label Foam::autoHexMeshDriver::readFeatureEdges()
+Foam::label Foam::autoHexMeshDriver::readFeatureEdges
+(
+    const PtrList<dictionary>& featDicts
+)
 {
     Info<< "Reading external feature lines." << endl;
-
-    PtrList<dictionary> featDicts(dict_.lookup("features"));
 
     featureMeshes_.setSize(featDicts.size());
     featureLevels_.setSize(featDicts.size());
@@ -647,13 +931,13 @@ Foam::label Foam::autoHexMeshDriver::readFeatureEdges()
 
 Foam::label Foam::autoHexMeshDriver::featureEdgeRefine
 (
+    const PtrList<dictionary>& featDicts,
     const label maxIter,
     const label minRefine
 )
 {
     // Read explicit feature edges
-    readFeatureEdges();
-
+    readFeatureEdges(featDicts);
 
     meshRefinement& meshRefiner = meshRefinerPtr_();
 
@@ -1359,122 +1643,232 @@ void Foam::autoHexMeshDriver::writeMesh(const string& msg) const
 }
 
 
-void Foam::autoHexMeshDriver::doMesh()
-{
-    Switch doRefine(dict_.lookup("doRefine"));
-    Switch doSnap(dict_.lookup("doSnap"));
-    Switch doLayers(dict_.lookup("doLayers"));
 
-    Info<< "Do refinement : " << doRefine << nl
-        << "Do snapping   : " << doSnap << nl
-        << "Do layers     : " << doLayers << nl
+
+void Foam::autoHexMeshDriver::doRefine
+(
+    const dictionary& refineDict,
+    const bool prepareForSnapping
+)
+{
+    Info<< nl
+        << "Refinement phase" << nl
+        << "----------------" << nl
         << endl;
 
-    if (doRefine)
+    const_cast<Time&>(mesh_.time())++;
+
+    PtrList<dictionary> featDicts(refineDict.lookup("features"));
+
+    // Refine around feature edges
+    featureEdgeRefine
+    (
+        featDicts,
+        100,    // maxIter
+        0       // min cells to refine
+    );
+
+    // Refine based on surface
+    surfaceOnlyRefine
+    (
+        100     // maxIter
+    );
+
+    // Remove cells (a certain distance) beyond surface intersections
+    removeInsideCells
+    (
+        1       // nBufferLayers
+    );
+
+    // Internal mesh refinement
+    shellRefine
+    (
+        100    // maxIter
+    );
+
+    // Introduce baffles at surface intersections
+    baffleAndSplitMesh(prepareForSnapping);
+
+    // Mesh is at its finest. Do optional zoning.
+    zonify();
+
+    // Pull baffles apart
+    splitAndMergeBaffles(prepareForSnapping);
+
+    // Do something about cells with refined faces on the boundary
+    if (prepareForSnapping)
     {
-        Info<< nl
-            << "Refinement phase" << nl
-            << "----------------" << nl
-            << endl;
-
-        const_cast<Time&>(mesh_.time())++;
-
-        // Refine around feature edges
-        featureEdgeRefine
-        (
-            100,    // maxIter
-            0       // min cells to refine
-        );
-
-        // Refine based on surface
-        surfaceOnlyRefine
-        (
-            100     // maxIter
-        );
-
-        // Remove cells (a certain distance) beyond surface intersections
-        removeInsideCells
-        (
-            1       // nBufferLayers
-        );
-
-        // Internal mesh refinement
-        shellRefine
-        (
-            100    // maxIter
-        );
-
-        // Introduce baffles at surface intersections
-        baffleAndSplitMesh(doSnap);
-
-        // Mesh is at its finest. Do optional zoning.
-        zonify();
-
-        // Pull baffles apart
-        splitAndMergeBaffles(doSnap);
-
-        // Do something about cells with refined faces on the boundary
-        if (doSnap)
-        {
-            mergePatchFaces();
-        }
-
-        // Do final balancing. Keep zoned faces on one processor.
-        balance(true, false);
-
-        // Write mesh
-        writeMesh("Refined mesh");
+        mergePatchFaces();
     }
 
+    // Do final balancing. Keep zoned faces on one processor.
+    balance(true, false);
 
-    if (doSnap)
+    // Write mesh
+    writeMesh("Refined mesh");
+}
+
+
+void Foam::autoHexMeshDriver::doSnap
+(
+    const dictionary& snapDict,
+    const dictionary& motionDict
+)
+{
+    Info<< nl
+        << "Morphing phase" << nl
+        << "--------------" << nl
+        << endl;
+
+    const_cast<Time&>(mesh_.time())++;
+
+    // Get the labels of added patches.
+    labelList adaptPatchIDs(getSurfacePatches());
+
+    // Create baffles (pairs of faces that share the same points)
+    // Baffles stored as owner and neighbour face that have been created.
+    List<labelPair> baffles;
+    createZoneBaffles(baffles);
+
     {
-        Info<< nl
-            << "Morphing phase" << nl
-            << "--------------" << nl
+        autoPtr<indirectPrimitivePatch> ppPtr
+        (
+            meshRefinement::makePatch
+            (
+                mesh_,
+                adaptPatchIDs
+            )
+        );
+        indirectPrimitivePatch& pp = ppPtr();
+
+        // Distance to attact to nearest feature on surface
+        const scalarField snapDist(calcSnapDistance(snapDict, pp));
+
+
+        // Construct iterative mesh mover.
+        Info<< "Constructing mesh displacer ..." << endl;
+        Info<< "Using mesh parameters " << motionDict << nl << endl;
+
+        pointMesh pMesh(mesh_);
+
+        motionSmoother meshMover
+        (
+            mesh_,
+            pp,
+            adaptPatchIDs,
+            meshRefinement::makeDisplacementField(pMesh, adaptPatchIDs),
+            motionDict
+        );
+
+
+        // Check initial mesh
+        Info<< "Checking initial mesh ..." << endl;
+        labelHashSet wrongFaces(mesh_.nFaces()/100);
+        motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
+        const label nInitErrors = returnReduce
+        (
+            wrongFaces.size(),
+            sumOp<label>()
+        );
+
+        Info<< "Detected " << nInitErrors << " illegal faces"
+            << " (concave, zero area or negative cell pyramid volume)"
             << endl;
 
-        const_cast<Time&>(mesh_.time())++;
 
-        // Get the labels of added patches.
-        labelList adaptPatchIDs(getSurfacePatches());
+        Info<< "Checked initial mesh in = "
+            << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
 
-        // Create baffles (pairs of faces that share the same points)
-        // Baffles stored as owner and neighbour face that have been created.
-        List<labelPair> baffles;
-        createZoneBaffles(baffles);
+        // Pre-smooth patch vertices (so before determining nearest)
+        preSmoothPatch(snapDict, nInitErrors, baffles, meshMover);
+
+        // Calculate displacement at every patch point. Insert into
+        // meshMover.
+        calcNearestSurface(snapDist, meshMover);
+
+        // Get smoothly varying internal displacement field.
+        smoothDisplacement(snapDict, meshMover);
+
+        // Apply internal displacement to mesh.
+        scaleMesh(snapDict, nInitErrors, baffles, meshMover);
+    }
+
+    // Merge any introduced baffles.
+    mergeZoneBaffles(baffles);
+
+    // Write mesh.
+    writeMesh("Snapped mesh");
+}
+
+
+void Foam::autoHexMeshDriver::doLayers
+(
+    const dictionary& shrinkDict,
+    const dictionary& motionDict
+)
+{
+    Info<< nl
+        << "Shrinking and layer addition phase" << nl
+        << "----------------------------------" << nl
+        << endl;
+
+    const_cast<Time&>(mesh_.time())++;
+
+    Info<< "Using mesh parameters " << motionDict << nl << endl;
+
+    // Merge coplanar boundary faces
+    mergePatchFacesUndo(shrinkDict, motionDict);
+
+    // Per global region the number of layers (0 if no layer)
+    const labelList& numLayers = surfaces().numLayers();
+
+    // Patches that need to get a layer
+    DynamicList<label> patchIDs(numLayers.size());
+    label nFacesWithLayers = 0;
+    forAll(numLayers, region)
+    {
+        if (numLayers[region] > 0 && globalToPatch()[region] != -1)
+        {
+            label patchI = globalToPatch()[region];
+            patchIDs.append(patchI);
+            nFacesWithLayers += mesh_.boundaryMesh()[patchI].size();
+        }
+    }
+    patchIDs.shrink();
+
+    if (returnReduce(nFacesWithLayers, sumOp<label>()) == 0)
+    {
+        Info<< nl << "No layers to generate ..." << endl;
+    }
+    else
+    {
+        autoPtr<indirectPrimitivePatch> ppPtr
+        (
+            meshRefinement::makePatch
+            (
+                mesh_,
+                patchIDs
+            )
+        );
+        indirectPrimitivePatch& pp = ppPtr();
+
+        // Construct iterative mesh mover.
+        Info<< "Constructing mesh displacer ..." << endl;
 
         {
-            autoPtr<indirectPrimitivePatch> ppPtr
-            (
-                meshRefinement::makePatch
-                (
-                    mesh_,
-                    adaptPatchIDs
-                )
-            );
-            indirectPrimitivePatch& pp = ppPtr();
-
-            // Distance to attact to nearest feature on surface
-            const scalarField snapDist(calcSnapDistance(pp));
-
-
-            // Construct iterative mesh mover.
-            Info<< "Constructing mesh displacer ..." << endl;
-            const dictionary& motionDict = dict_.subDict("motionDict");
-            Info<< "Using mesh parameters " << motionDict << nl << endl;
-
             pointMesh pMesh(mesh_);
 
             motionSmoother meshMover
             (
                 mesh_,
                 pp,
-                adaptPatchIDs,
-                meshRefinement::makeDisplacementField(pMesh, adaptPatchIDs),
+                patchIDs,
+                meshRefinement::makeDisplacementField(pMesh, patchIDs),
                 motionDict
             );
 
+            // Check that outside of mesh is not multiply connected.
+            checkMeshManifold();
 
             // Check initial mesh
             Info<< "Checking initial mesh ..." << endl;
@@ -1490,119 +1884,46 @@ void Foam::autoHexMeshDriver::doMesh()
                 << " (concave, zero area or negative cell pyramid volume)"
                 << endl;
 
-
-            Info<< "Checked initial mesh in = "
-                << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
-
-            // Pre-smooth patch vertices (so before determining nearest)
-            preSmoothPatch(nInitErrors, baffles, meshMover);
-
-            // Calculate displacement at every patch point. Insert into
-            // meshMover.
-            calcNearestSurface(snapDist, meshMover);
-
-            // Get smoothly varying internal displacement field.
-            smoothDisplacement(meshMover);
-
-            // Apply internal displacement to mesh.
-            scaleMesh(nInitErrors, baffles, meshMover);
+            // Do all topo changes
+            addLayers(shrinkDict, motionDict, nInitErrors, meshMover);
         }
-
-        // Merge any introduced baffles.
-        mergeZoneBaffles(baffles);
 
         // Write mesh.
-        writeMesh("Snapped mesh");
+        writeMesh("Layer mesh");
+    }
+}
+
+
+void Foam::autoHexMeshDriver::doMesh()
+{
+    Switch wantRefine(dict_.lookup("doRefine"));
+    Switch wantSnap(dict_.lookup("doSnap"));
+    Switch wantLayers(dict_.lookup("doLayers"));
+
+    Info<< "Do refinement : " << wantRefine << nl
+        << "Do snapping   : " << wantSnap << nl
+        << "Do layers     : " << wantLayers << nl
+        << endl;
+
+    if (wantRefine)
+    {
+        doRefine(dict_, wantSnap);
     }
 
-
-    if (doLayers)
+    if (wantSnap)
     {
-        Info<< nl
-            << "Shrinking and layer addition phase" << nl
-            << "----------------------------------" << nl
-            << endl;
+        const dictionary& snapDict = dict_.subDict("snapDict");
+        const dictionary& motionDict = dict_.subDict("motionDict");
 
-        const_cast<Time&>(mesh_.time())++;
+        doSnap(snapDict, motionDict);
+    }
 
-        // Merge coplanar boundary faces
-        mergePatchFacesUndo();
+    if (wantLayers)
+    {
+        const dictionary& motionDict = dict_.subDict("motionDict");
+        const dictionary& shrinkDict = dict_.subDict("shrinkDict");
 
-        // Per global region the number of layers (0 if no layer)
-        labelList nLayers(readNumLayers());
-
-        // Patches that need to get a layer
-        DynamicList<label> patchIDs(nLayers.size());
-        label nFacesWithLayers = 0;
-        forAll(nLayers, region)
-        {
-            if (nLayers[region] > 0 && globalToPatch()[region] != -1)
-            {
-                label patchI = globalToPatch()[region];
-                patchIDs.append(patchI);
-                nFacesWithLayers += mesh_.boundaryMesh()[patchI].size();
-            }
-        }
-        patchIDs.shrink();
-
-        if (returnReduce(nFacesWithLayers, sumOp<label>()) == 0)
-        {
-            Info<< nl << "No layers to generate ..." << endl;
-        }
-        else
-        {
-            autoPtr<indirectPrimitivePatch> ppPtr
-            (
-                meshRefinement::makePatch
-                (
-                    mesh_,
-                    patchIDs
-                )
-            );
-            indirectPrimitivePatch& pp = ppPtr();
-
-            // Construct iterative mesh mover.
-            Info<< "Constructing mesh displacer ..." << endl;
-            const dictionary& motionDict = dict_.subDict("motionDict");
-            Info<< "Using mesh parameters " << motionDict << nl << endl;
-
-            {
-                pointMesh pMesh(mesh_);
-
-                motionSmoother meshMover
-                (
-                    mesh_,
-                    pp,
-                    patchIDs,
-                    meshRefinement::makeDisplacementField(pMesh, patchIDs),
-                    motionDict
-                );
-
-                // Check that outside of mesh is not multiply connected.
-                checkMeshManifold();
-
-                // Check initial mesh
-                Info<< "Checking initial mesh ..." << endl;
-                labelHashSet wrongFaces(mesh_.nFaces()/100);
-                motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
-                const label nInitErrors = returnReduce
-                (
-                    wrongFaces.size(),
-                    sumOp<label>()
-                );
-
-                Info<< "Detected " << nInitErrors << " illegal faces"
-                    << " (concave, zero area or negative cell pyramid volume)"
-                    << endl;
-
-
-                // Do all topo changes
-                addLayers(nInitErrors, meshMover);
-            }
-
-            // Write mesh.
-            writeMesh("Layer mesh");
-        }
+        doLayers(shrinkDict, motionDict);
     }
 }
 

@@ -73,37 +73,40 @@ Foam::refinementSurfaces::refinementSurfaces
     List<HashTable<label> > regionMinLevel(surfaceDicts.size());
     List<HashTable<label> > regionMaxLevel(surfaceDicts.size());
 
-    forAll(surfaceDicts, i)
+    labelList globalSurfLayers(surfaceDicts.size());
+    List<HashTable<label> > regionSurfLayers(surfaceDicts.size());
+
+    wordList globalPatchType(surfaceDicts.size());
+    List<HashTable<word> > regionPatchType(surfaceDicts.size());
+    List<HashTable<word> > regionPatchName(surfaceDicts.size());
+
+    forAll(surfaceDicts, surfI)
     {
-        const dictionary& dict = surfaceDicts[i];
+        const dictionary& dict = surfaceDicts[surfI];
 
-        names_[i] = word(dict.lookup("name"));
+        names_[surfI] = word(dict.lookup("name"));
 
-        globalMinLevel[i] = readLabel(dict.lookup("minRefinementLevel"));
-        globalMaxLevel[i] = readLabel(dict.lookup("maxRefinementLevel"));
+        // Global refinement level
+        globalMinLevel[surfI] = readLabel(dict.lookup("minRefinementLevel"));
+        globalMaxLevel[surfI] = readLabel(dict.lookup("maxRefinementLevel"));
 
-        if
-        (
-            globalMinLevel[i] < 0
-         || globalMaxLevel[i] < globalMinLevel[i]
-        )
-        {
-            FatalErrorIn
-            (
-                "refinementSurfaces::refinementSurfaces"
-                "(const IOobject&, const PtrList<dictionary>&)"
-            )   << "Illegal level specification for surface " << names_[i]
-                << " : minLevel:" << globalMinLevel[i]
-                << " maxLevel:" << globalMaxLevel[i]
-                << exit(FatalError);
-        }
+        // Global number of layers
+        globalSurfLayers[surfI] = readLabel(dict.lookup("surfaceLayers"));
 
+        // Global zone names per surface
         if (dict.found("faceZone"))
         {
-            dict.lookup("faceZone") >> faceZoneNames_[i];
-            dict.lookup("cellZone") >> cellZoneNames_[i];
-            dict.lookup("zoneInside") >> zoneInside_[i];
+            dict.lookup("faceZone") >> faceZoneNames_[surfI];
+            dict.lookup("cellZone") >> cellZoneNames_[surfI];
+            dict.lookup("zoneInside") >> zoneInside_[surfI];
         }
+
+        // Global patch name per surface
+        if (dict.found("patchType"))
+        {
+            dict.lookup("patchType") >> globalPatchType[surfI];
+        }
+
 
         if (dict.found("regions"))
         {
@@ -117,11 +120,71 @@ Foam::refinementSurfaces::refinementSurfaces
                 label min = readLabel(regionDict.lookup("minRefinementLevel"));
                 label max = readLabel(regionDict.lookup("maxRefinementLevel"));
 
-                regionMinLevel[i].insert(regionName, min);
-                regionMaxLevel[i].insert(regionName, max);
+                regionMinLevel[surfI].insert(regionName, min);
+                regionMaxLevel[surfI].insert(regionName, max);
+
+                label nLayers = readLabel(regionDict.lookup("surfaceLayers"));
+                regionSurfLayers[surfI].insert(regionName, nLayers);
+
+                if (regionDict.found("patchType"))
+                {
+                    regionPatchType[surfI].insert
+                    (
+                        regionName,
+                        regionDict.lookup("patchType")
+                    );
+                    regionPatchName[surfI].insert
+                    (
+                        regionName,
+                        regionDict.lookup("patchName")
+                    );
+                }
             }
         }
     }
+
+
+    // Check for duplicate surface or region names
+    {
+        HashTable<label> surfaceNames(names_.size());
+
+        forAll(names_, surfI)
+        {
+            if (!surfaceNames.insert(names_[surfI], surfI))
+            {
+                FatalErrorIn
+                (
+                    "refinementSurfaces::refinementSurfaces"
+                    "(const IOobject&, const PtrList<dictionary>&)"
+                )   << "Duplicate surface name " << names_[surfI] << endl
+                    << "Previous occurrence of name at surface "
+                    << surfaceNames[names_[surfI]]
+                    << exit(FatalError);
+            }
+
+            // Check for duplicate region names
+            const geometricSurfacePatchList& patches =
+                operator[](surfI).patches();
+
+            HashTable<label> regionNames(patches.size());
+            forAll(patches, i)
+            {
+                if (!regionNames.insert(patches[i].name(), i))
+                {
+                    FatalErrorIn
+                    (
+                        "refinementSurfaces::refinementSurfaces"
+                        "(const IOobject&, const PtrList<dictionary>&)"
+                    )   << "Duplicate region name " << patches[i].name()
+                        << " on surface " << names_[surfI] << endl
+                        << "Previous occurrence of region at index "
+                        << regionNames[patches[i].name()]
+                        << exit(FatalError);
+                }
+            }
+        }
+    }
+
 
     // Calculate closedness
     forAll(closed_, surfI)
@@ -151,37 +214,89 @@ Foam::refinementSurfaces::refinementSurfaces
         nRegions += operator[](surfI).patches().size();
     }
 
-    // From global region number to refinement level
+    // Rework surface specific information into information per global region
     minLevel_.setSize(nRegions);
     minLevel_ = 0;
     maxLevel_.setSize(nRegions);
     maxLevel_ = 0;
+    numLayers_.setSize(nRegions);
+    numLayers_ = 0;
+    patchName_.setSize(nRegions);
+    patchType_.setSize(nRegions);
 
     forAll(surfaceDicts, surfI)
     {
         const geometricSurfacePatchList& regions = operator[](surfI).patches();
 
+        // Initialise to global (i.e. per surface)
         forAll(regions, i)
         {
             minLevel_[regionOffset_[surfI] + i] = globalMinLevel[surfI];
             maxLevel_[regionOffset_[surfI] + i] = globalMaxLevel[surfI];
+            numLayers_[regionOffset_[surfI] + i] = globalSurfLayers[surfI];
+            patchType_[regionOffset_[surfI] + i] = globalPatchType[surfI];
         }
 
+        // Get the region names
+        wordList regionNames(regions.size());
+        forAll(regions, regionI)
+        {
+            regionNames[regionI] = regions[regionI].name();
+        }
+
+        // Overwrite with region specific information
         forAllConstIter(HashTable<label>, regionMinLevel[surfI], iter)
         {
-            // Find the patch
-            forAll(regions, regionI)
-            {
-                if (regions[regionI].name() == iter.key())
-                {
-                    label globalRegionI = regionOffset_[surfI] + regionI;
+            // Find the local region number.
+            label regionI = findIndex(regionNames, iter.key());
 
-                    minLevel_[globalRegionI] = iter();
-                    maxLevel_[globalRegionI] =
-                        regionMaxLevel[surfI][iter.key()];
-                    break;
-                }
+            if (regionI == -1)
+            {
+                FatalErrorIn
+                (
+                    "refinementSurfaces::refinementSurfaces"
+                    "(const IOobject&, const PtrList<dictionary>&)"
+                )   << "Cannot find region " << iter.key()
+                    << " in surface " << names_[surfI]
+                    << " which has regions " << regionNames
+                    << abort(FatalError);
             }
+            
+            label globalRegionI = regionOffset_[surfI] + regionI;
+
+            minLevel_[globalRegionI] = iter();
+            maxLevel_[globalRegionI] = regionMaxLevel[surfI][iter.key()];
+            numLayers_[globalRegionI] = regionSurfLayers[surfI][iter.key()];
+
+            // Check validity
+            if
+            (
+                minLevel_[globalRegionI] < 0
+             || maxLevel_[globalRegionI] < minLevel_[globalRegionI]
+             || numLayers_[globalRegionI] < 0
+            )
+            {
+                FatalErrorIn
+                (
+                    "refinementSurfaces::refinementSurfaces"
+                    "(const IOobject&, const PtrList<dictionary>&)"
+                )   << "Illegal level or layer specification for surface "
+                    << names_[surfI]
+                    << " : minLevel:" << minLevel_[globalRegionI]
+                    << " maxLevel:" << maxLevel_[globalRegionI]
+                    << " numLayers:" << numLayers_[globalRegionI]
+                    << exit(FatalError);
+            }
+        }
+
+        // Optional patch names and patch types
+        forAllConstIter(HashTable<word>, regionPatchName[surfI], iter)
+        {
+            label regionI = findIndex(regionNames, iter.key());
+            label globalRegionI = regionOffset_[surfI] + regionI;
+
+            patchName_[globalRegionI] = iter();
+            patchType_[globalRegionI] = regionPatchType[surfI][iter.key()];
         }
     }
 }

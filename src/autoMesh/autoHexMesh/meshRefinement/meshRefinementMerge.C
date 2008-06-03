@@ -57,7 +57,7 @@ Foam::label Foam::meshRefinement::mergePatchFaces
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // Pick up all cells on boundary
+    // Pick up all candidate cells on boundary
     labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
 
     forAll(patchIDs, i)
