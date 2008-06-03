@@ -1,3 +1,1 @@
-wmake libso ParMGridGen-1.0/MGridGen/IMlib
-wmake libso ParMGridGen-1.0/MGridGen/Lib
 wmake libso MGridGenGAMGAgglomeration

@@ -128,10 +128,15 @@ if [ "$WM_COMPILER_BIN" != "" ]; then
 fi
 
 
+# Third-party software
+# ~~~~~~~~~~~~~~~~~~~~
+thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
+
+
 # MICO
 # ~~~~
 export MICO_VERSION=2.3.12
-export MICO_PATH=$FOAM_SRC/other/mico-$MICO_VERSION
+export MICO_PATH=$thirdParty/mico-$MICO_VERSION
 export MICO_ARCH_PATH=$MICO_PATH/platforms/$WM_OPTIONS
 export PATH=$MICO_ARCH_PATH/bin:$PATH
 
@@ -159,7 +164,7 @@ export FOAMX_CONFIG
 case "$WM_MPLIB" in
 OPENMPI)
     ompi_version=1.2.6
-    export OPENMPI_HOME=$FOAM_SRC/other/openmpi-$ompi_version
+    export OPENMPI_HOME=$thirdParty/openmpi-$ompi_version
     export OPENMPI_ARCH_PATH=$OPENMPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find it's install directory
@@ -174,7 +179,7 @@ OPENMPI)
 
 LAM)
     lam_version=7.1.4
-    export LAMHOME=$FOAM_SRC/other/lam-$lam_version
+    export LAMHOME=$thirdParty/lam-$lam_version
     export LAM_ARCH_PATH=$LAMHOME/platforms/$WM_OPTIONS
 
     AddLib  $LAM_ARCH_PATH/lib
@@ -186,7 +191,7 @@ LAM)
 
 MPICH)
     mpich_version=1.2.4
-    export MPICH_PATH=$FOAM_SRC/other/mpich-$mpich_version
+    export MPICH_PATH=$thirdParty/mpich-$mpich_version
     export MPICH_ARCH_PATH=$MPICH_PATH/platforms/$WM_OPTIONS
     export MPICH_ROOT=$MPICH_ARCH_PATH
 
