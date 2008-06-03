@@ -28,13 +28,10 @@ License
 #include "Time.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
+Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
     const fvPatch& p,
@@ -46,25 +43,7 @@ timeVaryingUniformFixedValueFvPatchField
 
 
 template<class Type>
-Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
-timeVaryingUniformFixedValueFvPatchField
-(
-    const timeVaryingUniformFixedValueFvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    timeDataFile_(ptf.timeDataFile_),
-    timeSeries_(ptf.timeBounding())
-{}
-
-
-template<class Type>
-Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
+Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
     const fvPatch& p,
@@ -88,8 +67,23 @@ timeVaryingUniformFixedValueFvPatchField
 
 
 template<class Type>
-Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
+Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
+timeVaryingUniformFixedValueFvPatchField
+(
+    const timeVaryingUniformFixedValueFvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    timeDataFile_(ptf.timeDataFile_),
+    timeSeries_(ptf.timeBounding())
+{}
+
+
+template<class Type>
+Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
     const timeVaryingUniformFixedValueFvPatchField<Type>& ptf
@@ -102,8 +96,7 @@ timeVaryingUniformFixedValueFvPatchField
 
 
 template<class Type>
-Foam::
-timeVaryingUniformFixedValueFvPatchField<Type>::
+Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
 timeVaryingUniformFixedValueFvPatchField
 (
     const timeVaryingUniformFixedValueFvPatchField<Type>& ptf,
@@ -119,8 +112,7 @@ timeVaryingUniformFixedValueFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Type
-Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
+Type Foam::timeVaryingUniformFixedValueFvPatchField<Type>::
 currentValue()
 {
     if (timeSeries_.size() == 0)
@@ -186,7 +178,10 @@ void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::write(Ostream& os) const
+void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<Type>::write(os);
     os.writeKeyword("timeDataFile")
@@ -196,7 +191,5 @@ void Foam::timeVaryingUniformFixedValueFvPatchField<Type>::write(Ostream& os) co
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //
