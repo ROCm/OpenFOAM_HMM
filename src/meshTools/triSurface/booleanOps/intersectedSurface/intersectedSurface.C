@@ -281,7 +281,7 @@ void Foam::intersectedSurface::incCount
 // Calculate point to edge addressing for the face given by the edge
 // subset faceEdges. Constructs facePointEdges which for every point
 // gives a list of edge labels connected to it.
-Foam::Map<Foam::DynamicList<Foam::label> > 
+Foam::Map<Foam::DynamicList<Foam::label> >
 Foam::intersectedSurface::calcPointEdgeAddressing
 (
     const edgeSurface& eSurf,
@@ -349,7 +349,7 @@ Foam::intersectedSurface::calcPointEdgeAddressing
             (
                 "intersectedSurface::calcPointEdgeAddressing"
                 "(const edgeSurface&, const label)"
-            )   << "Point:" << iter.key() << " used by too few edges:"  
+            )   << "Point:" << iter.key() << " used by too few edges:"
                 << iter() << abort(FatalError);
         }
     }
@@ -501,7 +501,7 @@ Foam::label Foam::intersectedSurface::nextEdge
         {
             label stat = visited[edgeI];
 
-            const edge& e = edges[edgeI];   
+            const edge& e = edges[edgeI];
 
             // Find out whether walk of edge from prevVert would be acceptible.
             if
@@ -519,7 +519,7 @@ Foam::label Foam::intersectedSurface::nextEdge
             {
                 // Calculate angle of edge with respect to base e0, e1
                 vector vec =
-                    n ^ points[e.otherVertex(prevVertI)] - points[prevVertI];
+                    n ^ (points[e.otherVertex(prevVertI)] - points[prevVertI]);
 
                 vec /= mag(vec) + VSMALL;
 
@@ -591,7 +591,7 @@ Foam::face Foam::intersectedSurface::walkFace
 {
     const pointField& points = eSurf.points();
     const edgeList& edges = eSurf.edges();
-    
+
     // Overestimate size of face
     face f(eSurf.faceEdges()[faceI].size());
 
@@ -634,7 +634,7 @@ Foam::face Foam::intersectedSurface::walkFace
             break;
         }
 
-        // step from vertex to next edge        
+        // step from vertex to next edge
         edgeI = nextEdge
         (
             eSurf,
@@ -1132,7 +1132,7 @@ Foam::faceList Foam::intersectedSurface::splitFace
         {
             reverse(faces[i]);
         }
-    }    
+    }
 
     return faces;
 }
