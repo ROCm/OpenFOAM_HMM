@@ -1,9 +1,8 @@
+    argList::noParallel();
     argList::validArgs.clear();
+    argList::validArgs.append("source dir");
 
-    argList::validOptions.insert("source", "dir");
     argList::validOptions.insert("sourceTime", "scalar");
-
-    argList::validOptions.erase(argList::validOptions.find("parallel"));
     argList::validOptions.insert("parallelSource", "");
     argList::validOptions.insert("parallelTarget", "");
     argList::validOptions.insert("consistent", "");
@@ -18,14 +17,7 @@
     fileName rootDirTarget(args.rootPath());
     fileName caseDirTarget(args.globalCaseName());
 
-    if (!args.options().found("source"))
-    {
-        FatalErrorIn(args.executable())
-            << "Essential argument [-source dir] not provided"
-            << exit(FatalError);
-    }
-
-    fileName casePath(args.options()["source"]);
+    fileName casePath(args.additionalArgs()[0]);
     fileName rootDirSource = casePath.path();
     fileName caseDirSource = casePath.name();
 
