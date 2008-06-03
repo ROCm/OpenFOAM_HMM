@@ -241,6 +241,12 @@ installParaView ()
             "s,$PARAVIEW_SRC_DIR,\$ENV{ParaView_INST_DIR},g" {} ';' \
             -print
 
+        if [ "$INCLUDE_MPI" = ON ]; then
+            find . -iname \*.cmake -execdir sed -i \
+                "s,$OPENMPI_ARCH_PATH,\$ENV{OPENMPI_ARCH_PATH},g" {} ';' \
+                -print
+        fi
+
         # create a softlink to the $PARAVIEW_OBJ_DIR/bin folder
         # - workaround for chosen install location
         echo "    Creating paraview $PARAVIEW_MAJOR_VERSION soft link to /bin"
