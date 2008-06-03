@@ -235,12 +235,15 @@ installParaView ()
 
         cd $PARAVIEW_OBJ_DIR
 
-        # replace local links with ParaView_INST_DIR environment variables
+        # Replace PARAVIEW_SRC_DIR path with ParaView_INST_DIR
+        # environment variables
         echo "    Replacing path hard links"
         find . -iname \*.cmake -execdir sed -i \
             "s,$PARAVIEW_SRC_DIR,\$ENV{ParaView_INST_DIR},g" {} ';' \
             -print
 
+        # Replace local OPENMPI_ARCH_PATH path with OPENMPI_ARCH_PATH
+        # environment variables
         if [ "$INCLUDE_MPI" = ON ]; then
             find . -iname \*.cmake -execdir sed -i \
                 "s,$OPENMPI_ARCH_PATH,\$ENV{OPENMPI_ARCH_PATH},g" {} ';' \
