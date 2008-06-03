@@ -88,7 +88,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
 
 template <class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::rho0() const
 {
     return rho0_;
@@ -96,7 +96,7 @@ Foam::KinematicParcel<ParcelType>::constantProperties::rho0() const
 
 
 template <class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::minParticleMass() const
 {
     return minParticleMass_;
@@ -156,14 +156,14 @@ Foam::KinematicParcel<ParcelType>::trackData::g() const
 // * * * * * * * * * * KinematicParcel Member Functions  * * * * * * * * * * //
 
 template <class ParcelType>
-inline const Foam::label Foam::KinematicParcel<ParcelType>::typeId() const
+inline Foam::label Foam::KinematicParcel<ParcelType>::typeId() const
 {
     return typeId_;
 }
 
 
 template <class ParcelType>
-inline const Foam::scalar Foam::KinematicParcel<ParcelType>::d() const
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::d() const
 {
     return d_;
 }
@@ -216,7 +216,7 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::U()
 
 
 template <class ParcelType>
-inline const Foam::scalar Foam::KinematicParcel<ParcelType>::nParticle() const
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::nParticle() const
 {
     return nParticle_;
 }
@@ -230,7 +230,7 @@ inline Foam::scalar& Foam::KinematicParcel<ParcelType>::nParticle()
 
 
 template <class ParcelType>
-inline const Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
 {
     return rho_;
 }
@@ -244,7 +244,7 @@ inline Foam::scalar& Foam::KinematicParcel<ParcelType>::rho()
 
 
 template <class ParcelType>
-inline const Foam::scalar Foam::KinematicParcel<ParcelType>::tTurb() const
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::tTurb() const
 {
     return tTurb_;
 }

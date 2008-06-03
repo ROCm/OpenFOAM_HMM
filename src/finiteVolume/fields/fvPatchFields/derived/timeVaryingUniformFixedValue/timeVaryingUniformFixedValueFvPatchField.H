@@ -72,14 +72,15 @@ class timeVaryingUniformFixedValueFvPatchField
 {
     // Private data
 
-        //- file containing time/uniformFixedValue
+        //- File containing time/uniformFixedValue
         fileName timeDataFile_;
 
-        //- the time series being used, including the bounding treatment
+        //- The time series being used, including the bounding treatment
         timeSeries<Type> timeSeries_;
 
-        //- interpolate the value at the current time
+        //- Interpolate the value at the current time
         Type currentValue();
+
 
 public:
 

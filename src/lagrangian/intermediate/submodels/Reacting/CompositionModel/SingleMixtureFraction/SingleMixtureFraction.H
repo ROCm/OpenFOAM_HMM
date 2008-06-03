@@ -156,7 +156,7 @@ public:
             const scalarField& YGas0() const;
 
             //- Return the total gas mass fraction
-            const scalar YGasTot0() const;
+            scalar YGasTot0() const;
 
             //- Return the list of liquid names
             const wordList& liquidNames() const;
@@ -168,7 +168,7 @@ public:
             const scalarField& YLiquid0() const;
 
             //- Return the total liquid mass fraction
-            const scalar YLiquidTot0() const;
+            scalar YLiquidTot0() const;
 
              //- Return the list of solid names
             const wordList& solidNames() const;
@@ -180,22 +180,22 @@ public:
             const scalarField& YSolid0() const;
 
             //- Return the total solid mass fraction
-            const scalar YSolidTot0() const;
+            scalar YSolidTot0() const;
 
             //- Return the list of mixture mass fractions
             const scalarField& YMixture0() const;
 
             //- Return the gas constant for the gas mixture
-            const scalar RGas(const scalarField& YGas) const;
+            scalar RGas(const scalarField& YGas) const;
 
             //- Return enthalpy for the gas mixture
-            const scalar HGas(const scalarField& YGas, const scalar T) const;
+            scalar HGas(const scalarField& YGas, const scalar T) const;
 
             //- Return specific heat caparcity for the gas mixture
-            const scalar cpGas(const scalarField& YGas, const scalar T) const;
+            scalar cpGas(const scalarField& YGas, const scalar T) const;
 
             //- Return specific heat caparcity for the liquid mixture
-            const scalar cpLiquid
+            scalar cpLiquid
             (
                 const scalarField& YLiquid,
                 const scalar p,
@@ -203,7 +203,7 @@ public:
             ) const;
 
             //- Return specific heat caparcity for the solid mixture
-            const scalar cpSolid(const scalarField& YSolid) const;
+            scalar cpSolid(const scalarField& YSolid) const;
 };
 
 

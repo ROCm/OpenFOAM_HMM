@@ -298,7 +298,7 @@ public:
                 inline const word& cloudType() const;
 
                 //- Return the parcel type id
-                inline const label parcelTypeId() const;
+                inline label parcelTypeId() const;
 
                 //- Return refernce to the mesh
                 inline const fvMesh& mesh() const;
@@ -316,10 +316,10 @@ public:
             inline Random& rndGen();
 
             //- Return the start of injection interval time
-            inline const scalar time0() const;
+            inline scalar time0() const;
 
             //- Return a reference to the mass of particles to introduce
-            inline const scalar massTotal() const;
+            inline scalar massTotal() const;
 
 
             // References to the carrier gas fields
@@ -398,10 +398,10 @@ public:
         // Check
 
             //- Total mass injected
-            inline const scalar massInjected() const;
+            inline scalar massInjected() const;
 
             //- Total mass in system
-            inline const scalar massInSystem() const;
+            inline scalar massInSystem() const;
 
             //- Print cloud information
             void info() const;
@@ -413,10 +413,10 @@ public:
             // Counters
 
                 //- Return the number of injections
-                inline const label nInjections() const;
+                inline label nInjections() const;
 
                 //- Return the total number parcels added
-                inline const label nParcelsAddedTotal() const;
+                inline label nParcelsAddedTotal() const;
 
 
             // Fields

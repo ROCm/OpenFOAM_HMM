@@ -47,7 +47,7 @@ endif
 
 setenv ParaView_VERSION 3.3-cvs
 
-setenv ParaView_INST_DIR $WM_PROJECT_INST_DIR/ParaView$ParaView_VERSION
+setenv ParaView_INST_DIR $WM_PROJECT_INST_DIR/ThirdParty/ParaView$ParaView_VERSION
 setenv ParaView_DIR $ParaView_INST_DIR/platforms/$WM_OPTIONS
 
 if ($?PYTHONPATH) then
@@ -58,6 +58,7 @@ endif
 
 if ( -r $ParaView_INST_DIR ) then
     set path=($ParaView_DIR/bin $path)
+    setenv LD_LIBRARY_PATH $ParaView_DIR/bin:$LD_LIBRARY_PATH
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN
 endif
 

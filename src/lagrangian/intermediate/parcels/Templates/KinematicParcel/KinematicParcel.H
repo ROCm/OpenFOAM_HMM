@@ -101,10 +101,10 @@ public:
         // Member functions
 
             //- Return const access to the particle density
-            inline const scalar rho0() const;
+            inline scalar rho0() const;
 
             //- Return const access to the minimum particle mass
-            inline const scalar minParticleMass() const;
+            inline scalar minParticleMass() const;
     };
 
 
@@ -275,10 +275,10 @@ public:
         // Access
 
             //- Return type id
-            inline const label typeId() const;
+            inline label typeId() const;
 
             //- Return const access to diameter
-            inline const scalar d() const;
+            inline scalar d() const;
 
             //- Return const access to velocity
             inline const vector& U() const;
@@ -287,13 +287,13 @@ public:
             inline const vector& Ur() const;
 
             //- Return const access to number of particles
-            inline const scalar nParticle() const;
+            inline scalar nParticle() const;
 
             //- Return const access to density
-            inline const scalar rho() const;
+            inline scalar rho() const;
 
             //- Return const access to time spent in turbulent eddy
-            inline const scalar tTurb() const;
+            inline scalar tTurb() const;
 
             //- Return const access to turbulent velocity fluctuation
             inline const vector& UTurb() const;

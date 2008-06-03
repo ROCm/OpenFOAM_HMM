@@ -112,7 +112,7 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
 
 template<class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::ReactingParcel<ParcelType>::constantProperties::Tvap() const
 {
     return Tvap_;
@@ -120,7 +120,7 @@ Foam::ReactingParcel<ParcelType>::constantProperties::Tvap() const
 
 
 template<class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::ReactingParcel<ParcelType>::constantProperties::Tbp() const
 {
     return Tbp_;
@@ -212,7 +212,7 @@ inline Foam::scalarField& Foam::ReactingParcel<ParcelType>::YMixture()
 
 
 template<class ParcelType>
-inline const Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
+inline Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
 {
     return mass0_;
 }

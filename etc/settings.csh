@@ -121,10 +121,15 @@ if ($?WM_COMPILER_BIN) then
 endif
 
 
+# Third-party software
+# ~~~~~~~~~~~~~~~~~~~~
+set thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
+
+
 # MICO
 # ~~~~
 setenv MICO_VERSION 2.3.12
-setenv MICO_PATH $FOAM_SRC/other/mico-$MICO_VERSION
+setenv MICO_PATH $thirdParty/mico-$MICO_VERSION
 setenv MICO_ARCH_PATH $MICO_PATH/platforms/$WM_OPTIONS
 set path=($MICO_ARCH_PATH/bin $path)
 
@@ -158,7 +163,7 @@ endif
 switch ("$WM_MPLIB")
 case OPENMPI:
     set ompi_version=1.2.6
-    setenv OPENMPI_HOME $FOAM_SRC/other/openmpi-$ompi_version
+    setenv OPENMPI_HOME $thirdParty/openmpi-$ompi_version
     setenv OPENMPI_ARCH_PATH $OPENMPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find it's install directory
@@ -173,7 +178,7 @@ case OPENMPI:
 
 case LAM:
     set lam_version=7.1.4
-    setenv LAMHOME $FOAM_SRC/other/lam-$lam_version
+    setenv LAMHOME $thirdParty/lam-$lam_version
     setenv LAM_ARCH_PATH $LAMHOME/platforms/$WM_OPTIONS
 
     AddLib $LAM_ARCH_PATH/lib
@@ -185,7 +190,7 @@ case LAM:
 
 case MPICH:
     set mpich_version=1.2.4
-    setenv MPICH_PATH $FOAM_SRC/other/mpich-$mpich_version
+    setenv MPICH_PATH $thirdParty/mpich-$mpich_version
     setenv MPICH_ARCH_PATH $MPICH_PATH/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPICH_ARCH_PATH
 

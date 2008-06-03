@@ -34,7 +34,7 @@ inline const Foam::word& Foam::KinematicCloud<ParcelType>::cloudType() const
 
 
 template<class ParcelType>
-inline const Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
+inline Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
 {
     return parcelTypeId_;
 }
@@ -164,42 +164,42 @@ Foam::KinematicCloud<ParcelType>::UIntegrator() const
 
 
 template<class ParcelType>
-inline const Foam::label Foam::KinematicCloud<ParcelType>::nInjections() const
+inline Foam::label Foam::KinematicCloud<ParcelType>::nInjections() const
 {
     return nInjections_;
 }
 
 
 template<class ParcelType>
-inline const Foam::label Foam::KinematicCloud<ParcelType>::nParcelsAddedTotal() const
+inline Foam::label Foam::KinematicCloud<ParcelType>::nParcelsAddedTotal() const
 {
     return nParcelsAddedTotal_;
 }
 
 
 template<class ParcelType>
-inline const Foam::scalar Foam::KinematicCloud<ParcelType>::time0() const
+inline Foam::scalar Foam::KinematicCloud<ParcelType>::time0() const
 {
     return time0_;
 }
 
 
 template<class ParcelType>
-inline const Foam::scalar Foam::KinematicCloud<ParcelType>::massTotal() const
+inline Foam::scalar Foam::KinematicCloud<ParcelType>::massTotal() const
 {
     return massTotal_;
 }
 
 
 template<class ParcelType>
-inline const Foam::scalar Foam::KinematicCloud<ParcelType>::massInjected() const
+inline Foam::scalar Foam::KinematicCloud<ParcelType>::massInjected() const
 {
     return massInjected_;
 }
 
 
 template<class ParcelType>
-inline const Foam::scalar Foam::KinematicCloud<ParcelType>::massInSystem() const
+inline Foam::scalar Foam::KinematicCloud<ParcelType>::massInSystem() const
 {
     scalar sysMass = 0.0;
     forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)

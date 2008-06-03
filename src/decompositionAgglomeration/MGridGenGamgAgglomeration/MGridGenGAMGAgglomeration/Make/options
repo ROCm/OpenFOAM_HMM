@@ -1,4 +1,4 @@
-ParMGridGen = $(LIB_SRC)/decompositionAgglomeration/MGridGenGamgAgglomeration/ParMGridGen-1.0
+ParMGridGen = ${WM_PROJECT_INST_DIR}/ThirdParty/ParMGridGen-1.0
 
 TYPE_REAL=
 #if defined(SP)

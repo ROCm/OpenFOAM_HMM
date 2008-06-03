@@ -4,7 +4,7 @@ if [ $# -eq 0 ]; then
     find . \( -name '*.dep' \) -print | xargs -t rm
 elif [ $# -eq 1 ]; then
     echo "Removing all dep files containing $1..."
-    find . -name '*.dep' -exec grep "$1" '{}' \; | sed -e 's/:.*//' | xargs -t rm
+    find . -name '*.dep' -exec grep "$1" '{}' \; -exec rm '{}' \;
 else
     echo "Usage: `basename $0`        to remove all .dep files"
     echo "       `basename $0` <file> to remove all .dep files referring to <file>"

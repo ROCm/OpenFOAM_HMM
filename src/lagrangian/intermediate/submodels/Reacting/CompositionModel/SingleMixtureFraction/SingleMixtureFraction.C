@@ -307,8 +307,7 @@ Foam::SingleMixtureFraction<CloudType>::YGas0() const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::YGasTot0() const
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::YGasTot0() const
 {
     return YGasTot0_;
 }
@@ -323,8 +322,10 @@ Foam::SingleMixtureFraction<CloudType>::liquidNames() const
 
 
 template<class CloudType>
-Foam::label
-Foam::SingleMixtureFraction<CloudType>::liquidLocalId(const word& liquidName) const
+Foam::label Foam::SingleMixtureFraction<CloudType>::liquidLocalId
+(
+    const word& liquidName
+) const
 {
     forAll(liquidNames_, i)
     {
@@ -346,8 +347,10 @@ Foam::SingleMixtureFraction<CloudType>::liquidLocalId(const word& liquidName) co
 
 
 template<class CloudType>
-Foam::label
-Foam::SingleMixtureFraction<CloudType>::liquidGlobalId(const word& liquidName) const
+Foam::label Foam::SingleMixtureFraction<CloudType>::liquidGlobalId
+(
+    const word& liquidName
+) const
 {
     forAll(liquidNames_, i)
     {
@@ -385,8 +388,7 @@ Foam::SingleMixtureFraction<CloudType>::YLiquid0() const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::YLiquidTot0() const
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::YLiquidTot0() const
 {
     return YLiquidTot0_;
 }
@@ -401,8 +403,10 @@ Foam::SingleMixtureFraction<CloudType>::solidNames() const
 
 
 template<class CloudType>
-Foam::label
-Foam::SingleMixtureFraction<CloudType>::solidLocalId(const word& solidName) const
+Foam::label Foam::SingleMixtureFraction<CloudType>::solidLocalId
+(
+    const word& solidName
+) const
 {
     forAll(solidNames_, i)
     {
@@ -425,7 +429,10 @@ Foam::SingleMixtureFraction<CloudType>::solidLocalId(const word& solidName) cons
 
 template<class CloudType>
 Foam::label
-Foam::SingleMixtureFraction<CloudType>::solidGlobalId(const word& solidName) const
+Foam::SingleMixtureFraction<CloudType>::solidGlobalId
+(
+    const word& solidName
+) const
 {
     forAll(solidNames_, i)
     {
@@ -463,7 +470,7 @@ Foam::SingleMixtureFraction<CloudType>::YSolid0() const
 
 
 template<class CloudType>
-const Foam::scalar
+Foam::scalar
 Foam::SingleMixtureFraction<CloudType>::YSolidTot0() const
 {
     return YSolidTot0_;
@@ -479,8 +486,10 @@ Foam::SingleMixtureFraction<CloudType>::YMixture0() const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::RGas(const scalarField& YGas) const
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::RGas
+(
+    const scalarField& YGas
+) const
 {
     scalar RGasMixture = 0.0;
     forAll(YGas, i)
@@ -493,8 +502,7 @@ Foam::SingleMixtureFraction<CloudType>::RGas(const scalarField& YGas) const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::HGas
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::HGas
 (
     const scalarField& YGas,
     const scalar T
@@ -512,8 +520,7 @@ const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::cpGas
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::cpGas
 (
     const scalarField& YGas,
     const scalar T
@@ -531,8 +538,7 @@ const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::cpLiquid
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::cpLiquid
 (
     const scalarField& YLiquid,
     const scalar p,
@@ -552,8 +558,7 @@ const
 
 
 template<class CloudType>
-const Foam::scalar
-Foam::SingleMixtureFraction<CloudType>::cpSolid
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::cpSolid
 (
     const scalarField& YSolid
 )
