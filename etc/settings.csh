@@ -39,6 +39,7 @@ endif
 alias AddPath 'set path=(\!* $path) ; if ( ! -d \!* ) mkdir -p \!*'
 alias AddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; if ( ! -d \!* ) mkdir -p \!*'
 
+
 #- Add the system-specific executables path to the path
 set path=($WM_PROJECT_DIR/bin $FOAM_INST_DIR/$WM_ARCH/bin $path)
 
@@ -73,6 +74,11 @@ AddPath $FOAM_USER_APPBIN
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
 
+# Location of third-party software
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
+
+
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 set WM_COMPILER_BIN=
@@ -88,10 +94,10 @@ switch ("$WM_COMPILER_INST")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc43:
-        setenv WM_COMPILER_DIR $FOAM_INST_DIR/$WM_ARCH/gcc-4.3.0$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $thirdParty/gcc-4.3.0/platforms/$WM_ARCH
     breaksw
     case Gcc:
-        setenv WM_COMPILER_DIR $FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $thirdParty/gcc-4.2.2/platforms/$WM_ARCH
     breaksw
     endsw
 
@@ -119,11 +125,6 @@ if ($?WM_COMPILER_BIN) then
         setenv LD_LIBRARY_PATH ${WM_COMPILER_LIB}
     endif
 endif
-
-
-# Third-party software
-# ~~~~~~~~~~~~~~~~~~~~
-set thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
 
 
 # MICO

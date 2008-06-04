@@ -180,7 +180,7 @@ buildParaView ()
     }
 
     # PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
-    PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS
+    PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_ARCH$WM_COMPILER
 
     # provide a shortcut for repeated builds - use with caution
     if [ "$CMAKE_SKIP" = YES ]

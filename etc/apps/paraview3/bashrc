@@ -37,7 +37,7 @@ if [ "$PS1" -a "$foamDotFile" ]; then
     fi
 fi
 
-export CMAKE_HOME=$WM_PROJECT_INST_DIR/$WM_ARCH/cmake-2.4.6
+export CMAKE_HOME=$WM_PROJECT_INST_DIR/ThirdParty/cmake-2.4.6/platforms/$WM_ARCH
 
 if [ -r $CMAKE_HOME ]; then
     export PATH=$CMAKE_HOME/bin:$PATH
@@ -48,7 +48,7 @@ fi
 export ParaView_VERSION="3.3-cvs"
 
 export ParaView_INST_DIR=$WM_PROJECT_INST_DIR/ThirdParty/ParaView$ParaView_VERSION
-export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_OPTIONS
+export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
 
 if [ "$PYTHONPATH" ]; then
     export PYTHONPATH=$PYTHONPATH:$ParaView_DIR/Utilities/VTKPythonWrapping
