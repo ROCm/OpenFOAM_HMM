@@ -1,7 +1,0 @@
-default
-{
-
-    ce              ce [0 0 0 0 0 0 0] 1.05;
-    filter          simple;
-
-};

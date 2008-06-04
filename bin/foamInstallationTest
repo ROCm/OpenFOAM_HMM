@@ -27,7 +27,7 @@
 #     foamInstallationTest
 #
 # Description
-#     Checks the machine system, the installation of FOAM, and the user's 
+#     Checks the machine system, the installation of FOAM, and the user's
 #     personal configuration for running FOAM.
 #
 #------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ reportEnv () {
     else
         echo "`fixlen "$1" 21` --------- env variable not set ---------            $3"
     fi
-    
+
     ERROR="false"
     if [ "$EXISTS" = "no" ] || [ "$ON_PATH" = "no" ]; then
         ERROR="true"
@@ -168,7 +168,7 @@ reportEnv () {
         echo "WARNING: CRITICAL ERROR"
         echo
     fi
-    
+
 }
 
 findExec() {
@@ -184,7 +184,7 @@ findExec() {
                 return 0
             fi
             ;;
-        *)      
+        *)
             if [ ! -d "$d/$2" -a -x "$d/$2" ]; then
                 IFS=$OLD_IFS
                 echo "$d/$2"
@@ -205,9 +205,9 @@ reportExecutable () {
         echo "`fixlen "$1" 9`" "*** not installed ***"
         VERSION=""
         case $1 in
-            icoFoam) echo "          CRITICAL ERROR" 
+            icoFoam) echo "          CRITICAL ERROR"
             CRITICALERROR=`expr $CRITICALERROR + 1` ;;
-            gcc) echo "          CRITICAL ERROR" 
+            gcc) echo "          CRITICAL ERROR"
             CRITICALERROR=`expr $CRITICALERROR + 1`;;
             gtar) ;;
             gzip) ;;
@@ -238,9 +238,9 @@ reportExecutable () {
         echo "          foam settings: $APP_SPEC"
         echo "          current path : $APP_PATH"
         case $1 in
-            icoFoam) echo "          CRITICAL ERROR" 
+            icoFoam) echo "          CRITICAL ERROR"
             CRITICALERROR=`expr $CRITICALERROR + 1` ;;
-            gcc) echo "          CRITICAL ERROR" 
+            gcc) echo "          CRITICAL ERROR"
             CRITICALERROR=`expr $CRITICALERROR + 1`;;
             gtar) ;;
             gzip) ;;
@@ -316,7 +316,7 @@ case $OS in
         elif  [ "`echo $PINGTEST | grep "unknown host"`" != "" ] ; then
             RESULT="No_entry_for_\"$1\"_in_/etc/hosts"
         else
-            RESULT="Networking_cannot_reach_$1" 
+            RESULT="Networking_cannot_reach_$1"
         fi
         ;;
     *)
@@ -326,7 +326,7 @@ case $OS in
         elif  [ "`echo $PINGTEST | grep "unknown host"`" != "" ] ; then
             RESULT="No_entry_for_\"$1\"_in_/etc/hosts"
         else
-            RESULT="Networking_cannot_reach_$1" 
+            RESULT="Networking_cannot_reach_$1"
         fi
         ;;
 esac
@@ -349,7 +349,7 @@ EOF
 }
 
 checkTelnetPort () {
-if  [ -x "/usr/bin/telnet" ] || [ -x "/bin/telnet" ] ; then 
+if  [ -x "/usr/bin/telnet" ] || [ -x "/bin/telnet" ] ; then
     RESULT=`telnetPortTest $1 $2 2>&1 | egrep "onnect.* [t|r]"`
     if [ "`echo $RESULT | grep 'Connected to'`" ] ; then
         RESULT='Successful'
@@ -404,11 +404,11 @@ if [ `length $USER_NAME` -eq 0 ] ; then
 fi
 #
 case $USER_SHELL in
-    csh | tcsh) 
+    csh | tcsh)
         USER_CONFIG_TYPE="cshrc"
         echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
         ;;
-    bash | ksh) 
+    bash | ksh)
         USER_CONFIG_TYPE="bashrc"
         echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
         ;;
@@ -445,7 +445,7 @@ fi
 #
 if [ `length $USER_NAME` -eq 0 ]; then
     echo "`fixlen "User:" $WIDTH` ${USER_NAME}"
-    echo "FATAL ERROR: Cannot stat user name ${USER_NAME}." 
+    echo "FATAL ERROR: Cannot stat user name ${USER_NAME}."
     echo ""
     echo "             Contact your system administrator, "
     echo "             Foam${FOAM_VERSION} needs a valid "
@@ -529,7 +529,6 @@ echo ""
 reportEnv '$FOAM_USER_APPBIN' '$PATH' "no"
 reportEnv '$FOAM_APPBIN'      '$PATH' "yes"
 reportEnv '$WM_DIR'           '$PATH' "yes"
-reportEnv '$FOAMX_PATH'       '$PATH' "yes"
 reportEnv '$CEI_HOME'         '$PATH' "no"
 echo ""
 reportEnv '$JAVA_PATH'        '$PATH' "no"
@@ -562,7 +561,7 @@ reportExecutable gzip
 if [ "$OS" = "Linux" ]  ; then
     reportExecutable tar
 else
-    reportExecutable gtar 
+    reportExecutable gtar
 fi
 reportExecutable icoFoam "${FOAM_APPBIN}/icoFoam"
 hline #--------------------
@@ -606,12 +605,12 @@ hline #--------------------
 echo ""
 if [ $FATALERROR -gt 0 ] ; then
     echo "The system test has evoked $FATALERROR fatal error(s)."
-else 
+else
     echo "Base configuration ok."
 fi
 echo ""
 if [ $CRITICALERROR -gt 0 ]; then
-    echo "The foam installation contains $CRITICALERROR critical error(s)."  
+    echo "The foam installation contains $CRITICALERROR critical error(s)."
 else
     echo "Critical systems ok."
 fi

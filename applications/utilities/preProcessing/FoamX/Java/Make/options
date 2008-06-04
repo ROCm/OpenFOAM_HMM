@@ -1,6 +1,0 @@
-EXE_INC = -nowarn
-
-LIB_LIBS = \
-    META-INF/MANIFEST.MF \
-    resources \
-    FoamX/icons

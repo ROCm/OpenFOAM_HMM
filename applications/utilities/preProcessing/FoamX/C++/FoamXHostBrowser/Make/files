@@ -1,4 +1,0 @@
-FoamXHostBrowser.C
-IHostBrowserImpl.C
-
-EXE = $(FOAM_APPBIN)/FoamXHostBrowser

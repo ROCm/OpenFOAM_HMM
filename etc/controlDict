@@ -840,7 +840,6 @@ InfoSwitches
 {
     writePrecision  6;
     writeJobInfo    0;
-    FoamXwriteComments 0;
 }
 
 OptimisationSwitches
@@ -853,7 +852,7 @@ OptimisationSwitches
 
 DimensionedConstants
 {
-	// SI units
+    // SI units
 
     //- Universal gas constant [J/(kmol K)]
     R    8314.51;

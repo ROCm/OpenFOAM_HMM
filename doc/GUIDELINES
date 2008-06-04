@@ -186,7 +186,6 @@ Ignore test directories
   - */t/*
 
 Ignore applications that clutter everything
-  - preProcessing/FoamX
 
 Ignore application-specific classes
   - */applications/utilities/*.H
