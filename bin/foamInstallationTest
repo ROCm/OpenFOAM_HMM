@@ -532,7 +532,6 @@ reportEnv '$WM_DIR'           '$PATH' "yes"
 reportEnv '$CEI_HOME'         '$PATH' "no"
 echo ""
 reportEnv '$JAVA_PATH'        '$PATH' "no"
-reportEnv '$MICO_ARCH_PATH'   '$PATH' "yes"
 reportEnv '$LAM_ARCH_PATH'    '$PATH' "yes"
 reportEnv '$MPICH_ARCH_PATH'  '$PATH' "no"
 hline #--------------------
