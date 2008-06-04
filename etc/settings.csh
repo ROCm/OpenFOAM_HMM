@@ -135,6 +135,7 @@ case OPENMPI:
     set ompi_version=1.2.6
     setenv OPENMPI_HOME $thirdParty/openmpi-$ompi_version
     setenv OPENMPI_ARCH_PATH $OPENMPI_HOME/platforms/$WM_OPTIONS
+    setenv MPI_ARCH_PATH $OPENMPI_ARCH_PATH
 
     # Tell OpenMPI where to find it's install directory
     setenv OPAL_PREFIX $OPENMPI_ARCH_PATH
@@ -150,6 +151,7 @@ case LAM:
     set lam_version=7.1.4
     setenv LAMHOME $thirdParty/lam-$lam_version
     setenv LAM_ARCH_PATH $LAMHOME/platforms/$WM_OPTIONS
+    setenv MPI_ARCH_PATH $LAM_ARCH_PATH
 
     AddLib $LAM_ARCH_PATH/lib
     AddPath $LAM_ARCH_PATH/bin
@@ -163,6 +165,7 @@ case MPICH:
     setenv MPICH_PATH $thirdParty/mpich-$mpich_version
     setenv MPICH_ARCH_PATH $MPICH_PATH/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPICH_ARCH_PATH
+    setenv MPI_ARCH_PATH $MPICH_ARCH_PATH
 
     AddLib $MPICH_ARCH_PATH/lib
     AddPath $MPICH_ARCH_PATH/bin
@@ -176,6 +179,7 @@ case MPICH-GM:
     setenv MPICH_ARCH_PATH $MPICH_PATH
     setenv MPICH_ROOT $MPICH_ARCH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
+    setenv MPI_ARCH_PATH $MPICH_ARCH_PATH
 
     AddLib $MPICH_ARCH_PATH/lib
     AddLib $GM_LIB_PATH
@@ -186,14 +190,11 @@ case MPICH-GM:
 
 case GAMMA:
     setenv GAMMA_ARCH_PATH /usr
-
-    # AddLib $GAMMA_ARCH_PATH/lib
-    # AddPath $GAMMA_ARCH_PATH/bin
-
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/gamma
     breaksw
 
 case MPI:
+    setenv MPI_ARCH_PATH /opt/mpi
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpi
     breaksw
 

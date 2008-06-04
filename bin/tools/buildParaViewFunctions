@@ -55,26 +55,7 @@ addMpiSupport ()
 {
     [ "$INCLUDE_MPI" = ON ] || return
 
-    # using OpenFOAM variables to identify location of MPI libraries
-    case "$WM_MPLIB" in
-    OPENMPI)
-        MPI_ARCH_PATH=$OPENMPI_ARCH_PATH
-        MPI_LIBRARY=$OPENMPI_ARCH_PATH/lib/libmpi.so
-        ;;
-    LAM)
-        MPI_ARCH_PATH=$LAM_ARCH_PATH
-        MPI_LIBRARY=$LAM_ARCH_PATH/lib/libmpi.so
-        ;;
-    MPICH)
-        MPI_ARCH_PATH=$MPICH_ARCH_PATH
-        MPI_LIBRARY=$MPICH_ARCH_PATH/lib/libmpich.so
-        ;;
-    *)
-        echo "*** Error: unknown/unsupported mpi: $WM_MPLIB"
-        exit 1
-        ;;
-    esac
-
+    MPI_LIBRARY=$MPI_ARCH_PATH/lib/libmpi.so
     MPI_INCLUDE_PATH=$MPI_ARCH_PATH/include
     MPI_RUN=$MPI_ARCH_PATH/bin/mpirun
 
