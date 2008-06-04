@@ -2935,7 +2935,7 @@ void Foam::autoHexMeshDriver::addLayers
         << endl;
     addedCellSet.write();
 
-    faceSet layerFacesSet(mesh_, "layerFaces", findIndices(flaggedCells, true));
+    faceSet layerFacesSet(mesh_, "layerFaces", findIndices(flaggedFaces, true));
     Info<< "Writing "
         << returnReduce(layerFacesSet.size(), sumOp<label>())
         << " faces inside added layer to faceSet "
