@@ -99,7 +99,7 @@ public:
 
 typedef HashSet<> wordHashSet;
 
-   
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

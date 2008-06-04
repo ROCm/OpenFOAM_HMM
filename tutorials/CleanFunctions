@@ -54,7 +54,7 @@ cleanTimeDirectories ()
         rm -rf $1/${timeDir} > /dev/null 2>&1
         rm -rf $1/-${timeDir} > /dev/null 2>&1
         zeros=`printf %0${nZeros}d 0`
-        let nZeros=nZeros+1
+        nZeros=$(($nZeros + 1))
     done
     rm -rf $1/{[1-9]*,-[1-9]*,log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.foam} > /dev/null 2>&1
 }

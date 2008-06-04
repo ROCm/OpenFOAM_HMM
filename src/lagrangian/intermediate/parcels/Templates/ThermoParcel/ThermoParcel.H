@@ -105,10 +105,19 @@ public:
 
             // Access
 
-            inline const scalar T0() const;
-            inline const scalar cp0() const;
-            inline const scalar epsilon0() const;
-            inline const scalar f0() const;
+                //- Return const access to particle initial temperature [K]
+                inline scalar T0() const;
+
+                //- Return const access to particle specific heat capacity
+                //  [J/(kg.K)]
+                inline scalar cp0() const;
+
+                //- Return const access to Particle emissivity [] (radiation)
+                inline scalar epsilon0() const;
+
+                //- Return const access to Particle scattering factor []
+                //  (radiation)
+                inline scalar f0() const;
     };
 
 
@@ -250,10 +259,10 @@ public:
         // Access
 
             //- Return const access to temperature
-            inline const scalar T() const;
+            inline scalar T() const;
 
             //- Return const access to specific heat capacity
-            inline const scalar cp() const;
+            inline scalar cp() const;
 
 
         // Edit

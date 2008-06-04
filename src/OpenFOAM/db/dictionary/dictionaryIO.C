@@ -47,7 +47,8 @@ bool Foam::dictionary::read(Istream& is)
         is.putBack(currToken);
     }
 
-    while (!is.eof() && entry::New(*this, is));
+    while (!is.eof() && entry::New(*this, is))
+    {}
 
     // Remove the FoamFile header entry if it exists
     remove("FoamFile");

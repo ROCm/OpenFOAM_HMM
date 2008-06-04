@@ -1103,7 +1103,7 @@ void Foam::motionSmoother::updateMesh()
 }
 
 
-// Specialisaion of applyCornerConstraints for scalars because
+// Specialisation of applyCornerConstraints for scalars because
 // no constraint need be applied
 template<>
 void Foam::motionSmoother::applyCornerConstraints<Foam::scalar>

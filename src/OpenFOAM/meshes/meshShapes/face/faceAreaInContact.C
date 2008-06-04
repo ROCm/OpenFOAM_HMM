@@ -56,7 +56,7 @@ scalar face::areaInContact
 
     // Loop through vertexValue. If all greater that 0 return 0 (no contact);
     // if all less than zero return 1
-    // all zeros is assumed to be in contact. 
+    // all zeros is assumed to be in contact.
 
     bool allPositive = true;
     bool allNegative = true;
@@ -108,8 +108,8 @@ scalar face::areaInContact
 
         if
         (
-            vertexValue[vI] > 0 && vertexValue[vI + 1] < 0
-         || vertexValue[vI] < 0 && vertexValue[vI + 1] > 0
+            (vertexValue[vI] > 0 && vertexValue[vI + 1] < 0)
+         || (vertexValue[vI] < 0 && vertexValue[vI + 1] > 0)
         )
         {
             // Edge intersection. Calculate intersection point and add to list
@@ -133,8 +133,8 @@ scalar face::areaInContact
 
     if
     (
-        vertexValue[size() - 1] > 0 && vertexValue[0] < 0
-     || vertexValue[size() - 1] < 0 && vertexValue[0] > 0
+        (vertexValue[size() - 1] > 0 && vertexValue[0] < 0)
+     || (vertexValue[size() - 1] < 0 && vertexValue[0] > 0)
     )
     {
         // Edge intersection. Calculate intersection point and add to list

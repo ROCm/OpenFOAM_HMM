@@ -27,7 +27,7 @@
 #     foamSystemCheck
 #
 # Description
-#     Checks the machine system and the user's 
+#     Checks the machine system and the user's
 #     personal configuration for running FOAM.
 #
 #------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ checkSsh
 
 pingTest () {
 case $OS in
-    SunOS) 
+    SunOS)
         if [ -x '/usr/sbin/ping' ] ; then
             PINGTEST=`/usr/sbin/ping $1 2>&1`
             if [ -n "`echo $PINGTEST | grep 'alive'`" ] ; then
@@ -109,13 +109,13 @@ case $OS in
             elif [ -n "`echo $PINGTEST | grep 'unknown host'`" ] ; then
                RESULT="Unknown_host"
             else
-               RESULT="Networking_not_set" 
+               RESULT="Networking_not_set"
             fi
         else
             RESULT="Ping_not_installed_in_usual_path"
         fi
         ;;
-    *) 
+    *)
         if [ -x '/bin/ping' ] ; then
             PINGTEST=`/bin/ping -w 3 -c 1 $1 2>&1`
             if [ -n "`echo $PINGTEST | grep '1 received'`" ] ; then
@@ -145,19 +145,19 @@ EOF
 }
 
 checkTelnetPort () {
-if  [ -x "/usr/bin/telnet" ] || [ -x "/bin/telnet" ] ; then 
-    RESULT=`telnetPortTest $1 $2 2>&1 | egrep "onnect.* [t|r]"` 
-    if [ "`echo $RESULT | grep 'Connected to'`" ] ; then 
-        RESULT='Successful' 
+if  [ -x "/usr/bin/telnet" ] || [ -x "/bin/telnet" ] ; then
+    RESULT=`telnetPortTest $1 $2 2>&1 | egrep "onnect.* [t|r]"`
+    if [ "`echo $RESULT | grep 'Connected to'`" ] ; then
+        RESULT='Successful'
     elif [ "`echo $RESULT | grep 'Connection refused'`" ] ;
-    then 
-        RESULT='Unsuccessful, connection refused*' 
-    else 
-        RESULT="Not active*" 
-    fi 
-else 
-    RESULT='No_telnet_running:_cannot_check*' 
-fi 
+    then
+        RESULT='Unsuccessful, connection refused*'
+    else
+        RESULT="Not active*"
+    fi
+else
+    RESULT='No_telnet_running:_cannot_check*'
+fi
 }
 
 checkRsh () {
@@ -234,7 +234,7 @@ fi
 #
 if [ `length $USER_NAME` -eq 0 ]; then
     echo "`fixlen "User:" $WIDTH` ${USER_NAME}"
-    echo "FATALERROR: Cannot stat user name ${USER_NAME}." 
+    echo "FATALERROR: Cannot stat user name ${USER_NAME}."
     echo "            Foam${FOAM_VERSION} needs a valid user name."
     echo "            Contact your system administrator. "
     echo ""
@@ -243,20 +243,6 @@ else
     echo "`fixlen "User:" $WIDTH` ${USER_NAME}"
 fi
 #
-
-heading "Checking networking..."
-checkNetworking 
-if [ $SSHRSHOK -eq 1 ]; then
-    echo "(*) Only one of rsh or ssh is required and only by FoamX."
-elif [ $SSHRSHOK -gt 1  ]; then
-    echo "FATALERROR: No remote shell available."
-    echo "            FoamX requires passwordless "
-    echo "            'ssh' and/or 'rsh' to the current host."
-    echo "            Contact your system administrator if you intend "
-    echo "            to run FoamX."
-    echo
-    FATALERROR=`expr $FATALERROR + 1`
-fi
 
 echo ""
 echo ""

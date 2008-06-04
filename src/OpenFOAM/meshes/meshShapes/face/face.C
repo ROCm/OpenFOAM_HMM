@@ -632,9 +632,8 @@ Foam::scalar Foam::face::sweptVol
     // summing their swept volumes.
     // Changed to deal with small concavity by using a central decomposition
 
-    point centreOldPoint = Foam::average(points(oldPoints));
-
-    point centreNewPoint = Foam::average(points(newPoints));
+    point centreOldPoint = centre(oldPoints);
+    point centreNewPoint = centre(newPoints);
 
     label nPoints = size();
 

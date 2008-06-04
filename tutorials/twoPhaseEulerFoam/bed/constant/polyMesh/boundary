@@ -1,59 +1,49 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4.1                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format binary;
-
-    root "/home/dm2/henry/OpenFOAM/OpenFOAM-1.4.1/tutorials/twoPhaseEulerFoam";
-    case "bed";
-    instance "constant";
-    local "polyMesh";
-
-    class polyBoundaryMesh;
-    object boundary;
+    version     2.0;
+    format      binary;
+    class       polyBoundaryMesh;
+    object      boundary;
+    location    "constant/polyMesh";
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 4
 (
-top
-{
-    type patch;
-    physicalType inletOutlet;
-    nFaces 25;
-    startFace 6100;
-}
-
-bottom
-{
-    type patch;
-    physicalType inlet;
-    nFaces 25;
-    startFace 6125;
-}
-
-walls
-{
-    type wall;
-    physicalType wallFunctions;
-    nFaces 250;
-    startFace 6150;
-}
-
-frontBack
-{
-    type empty;
-    nFaces 6250;
-    startFace 6400;
-}
+    top
+    {
+        type            patch;
+        physicalType    inletOutlet;
+        nFaces          25;
+        startFace       6100;
+    }
+    bottom
+    {
+        type            patch;
+        physicalType    inlet;
+        nFaces          25;
+        startFace       6125;
+    }
+    walls
+    {
+        type            wall;
+        physicalType    wallFunctions;
+        nFaces          250;
+        startFace       6150;
+    }
+    frontBack
+    {
+        type            empty;
+        nFaces          6250;
+        startFace       6400;
+    }
 )
 
 // ************************************************************************* //

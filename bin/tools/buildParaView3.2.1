@@ -54,7 +54,10 @@ then
    CMAKE_SKIP=YES
 fi
 
-initialiseVariables
+# set paraview environment
+PARAVIEW_SRC_DIR=$PWD/$PARAVIEW_SRC
+#PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
+PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_ARCH$WM_COMPILER
 
 addMpiSupport       # set MPI specific options
 addPythonSupport    # set python specific options

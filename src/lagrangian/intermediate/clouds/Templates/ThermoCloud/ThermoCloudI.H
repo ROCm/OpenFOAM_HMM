@@ -61,7 +61,7 @@ Foam::ThermoCloud<ParcelType>::TIntegrator() const
 
 
 template<class ParcelType>
-inline const bool Foam::ThermoCloud<ParcelType>::radiation() const
+inline bool Foam::ThermoCloud<ParcelType>::radiation() const
 {
     return radiation_;
 }

@@ -84,35 +84,35 @@ const Foam::dictionary& Foam::InjectionModel<CloudType>::coeffDict() const
 
 
 template<class CloudType>
-const Foam::scalar Foam::InjectionModel<CloudType>::timeStart() const
+Foam::scalar Foam::InjectionModel<CloudType>::timeStart() const
 {
     return SOI_;
 }
 
 
 template<class CloudType>
-const Foam::scalar Foam::InjectionModel<CloudType>::volumeTotal() const
+Foam::scalar Foam::InjectionModel<CloudType>::volumeTotal() const
 {
     return volumeTotal_;
 }
 
 
 template<class CloudType>
-const Foam::label Foam::InjectionModel<CloudType>::nParcels() const
+Foam::label Foam::InjectionModel<CloudType>::nParcels() const
 {
     return nParcels_;
 }
 
 
 template<class CloudType>
-const Foam::scalar Foam::InjectionModel<CloudType>::volume() const
+Foam::scalar Foam::InjectionModel<CloudType>::volume() const
 {
     return volume_;
 }
 
 
 template<class CloudType>
-const Foam::scalar Foam::InjectionModel<CloudType>::volumeFraction() const
+Foam::scalar Foam::InjectionModel<CloudType>::volumeFraction() const
 {
     return volume_/volumeTotal_;
 }

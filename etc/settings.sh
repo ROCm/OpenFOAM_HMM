@@ -53,6 +53,7 @@ AddLib()
     fi
 }
 
+
 #- Add the system-specifc executables path to the path
 export PATH=$WM_PROJECT_DIR/bin:$FOAM_INST_DIR/$WM_ARCH/bin:$PATH
 
@@ -85,6 +86,12 @@ AddPath $FOAM_USER_APPBIN
 
 export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 
+
+# Location of third-party software
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
+
+
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 WM_COMPILER_BIN=
@@ -99,10 +106,10 @@ case "$WM_COMPILER_INST" in
 OpenFOAM)
     case "$WM_COMPILER" in
     Gcc43)
-        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.3.0$WM_COMPILER_ARCH
+        export WM_COMPILER_DIR=$thirdParty/gcc-4.3.0/platforms/$WM_ARCH$WM_COMPILER_ARCH
         ;;
     Gcc)
-        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+        export WM_COMPILER_DIR=$thirdParty/gcc-4.2.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
         ;;
     esac
 
@@ -131,31 +138,6 @@ fi
 # Third-party software
 # ~~~~~~~~~~~~~~~~~~~~
 thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
-
-
-# MICO
-# ~~~~
-export MICO_VERSION=2.3.12
-export MICO_PATH=$thirdParty/mico-$MICO_VERSION
-export MICO_ARCH_PATH=$MICO_PATH/platforms/$WM_OPTIONS
-export PATH=$MICO_ARCH_PATH/bin:$PATH
-
-
-# FoamX
-# ~~~~~
-export FOAMX_PATH=$FOAM_UTILITIES/preProcessing/FoamX
-# perhaps we can cut down a bit here
-for FOAMX_CONFIG in \
-    $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION/apps/FoamX \
-    $HOME/.$WM_PROJECT/apps/FoamX \
-    $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/apps/FoamX \
-    $WM_PROJECT_INST_DIR/site/apps/FoamX \
-    $WM_PROJECT_DIR/etc/apps/FoamX \
-    ;
-do
-    [ -d $FOAMX_CONFIG ] && break
-done
-export FOAMX_CONFIG
 
 
 # Communications library

@@ -24,12 +24,18 @@
 
         if (g0.value() > 0.0)
         {
-            surfaceScalarField alphaf = fvc::interpolate(alpha);
+            ppMagf = rUaAf*fvc::interpolate
+            (
+                (1.0/(rhoa*(alpha + scalar(0.0001))))
+               *g0*min(exp(preAlphaExp*(alpha - alphaMax)), expMax)
+            );
 
-            // Correct the particle-particle force magnitude
-            ppMagf = g0*rUaAf*min(exp(preAlphaExp*(alphaf - alphaMax)), expMax);
-
-            alphaEqn -= fvm::laplacian(ppMagf, alpha);
+            alphaEqn -= fvm::laplacian
+            (
+                (fvc::interpolate(alpha) + scalar(0.0001))*ppMagf,
+                alpha,
+                "laplacian(alphaPpMag,alpha)"
+            );
         }
 
         alphaEqn.relax();

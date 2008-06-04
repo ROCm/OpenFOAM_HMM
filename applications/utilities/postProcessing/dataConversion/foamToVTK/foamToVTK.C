@@ -322,15 +322,15 @@ int main(int argc, char *argv[])
     // Current mesh.
 #   include "createNamedMesh.H"
 
+    // VTK/ directory in the case
+    fileName fvPath(runTime.path()/"VTK");
     // Directory of mesh (region0 gets filtered out)
     fileName regionPrefix = "";
 
-    // make a directory called VTK in the case
-    fileName fvPath(runTime.path()/"VTK");
-
-    if (args.options().found("region"))
+    if (regionName != polyMesh::defaultRegion)
     {
         fvPath = fvPath/regionName;
+        regionPrefix = regionName;
     }
 
     if (dir(fvPath))
@@ -340,6 +340,7 @@ int main(int argc, char *argv[])
             args.options().found("time")
          || args.options().found("latestTime")
          || cellSetName.size() > 0
+         || regionName != polyMesh::defaultRegion
         )
         {
             Info<< "Keeping old VTK files in " << fvPath << nl << endl;

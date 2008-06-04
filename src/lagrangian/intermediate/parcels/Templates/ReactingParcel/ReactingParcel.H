@@ -95,11 +95,13 @@ public:
         //- Constructor
         constantProperties(const dictionary& dict);
 
-        //- Return const access to the vapourisation temperature
-        inline const scalar Tvap() const;
+        // Access
 
-        //- Return const access to the boiling point
-        inline const scalar Tbp() const;
+            //- Return const access to the vapourisation temperature
+            inline scalar Tvap() const;
+
+            //- Return const access to the boiling point
+            inline scalar Tbp() const;
     };
 
 
@@ -272,7 +274,7 @@ public:
             inline const scalarField& YMixture() const;
 
             //- Return const access to initial mass
-            inline const scalar mass0() const;
+            inline scalar mass0() const;
 
 
         // Edit

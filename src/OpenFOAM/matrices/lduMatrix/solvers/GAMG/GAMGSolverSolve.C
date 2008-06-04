@@ -172,7 +172,7 @@ void Foam::GAMGSolver::Vcycle
             {
                 scalar sf = scalingFactor
                 (
-                    reinterpret_cast<scalarField&>(ACf),
+                    const_cast<scalarField&>(ACf.operator const scalarField&()),
                     matrixLevels_[leveli],
                     coarseCorrFields[leveli],
                     interfaceLevelsBouCoeffs_[leveli],
@@ -192,7 +192,7 @@ void Foam::GAMGSolver::Vcycle
             // Correct the residual with the new solution
             matrixLevels_[leveli].Amul
             (
-                reinterpret_cast<scalarField&>(ACf),
+                const_cast<scalarField&>(ACf.operator const scalarField&()),
                 coarseCorrFields[leveli],
                 interfaceLevelsBouCoeffs_[leveli],
                 interfaceLevels_[leveli],
@@ -269,7 +269,7 @@ void Foam::GAMGSolver::Vcycle
 
             scalar sf = scalingFactor
             (
-                reinterpret_cast<scalarField&>(ACf),
+                const_cast<scalarField&>(ACf.operator const scalarField&()),
                 matrixLevels_[leveli],
                 coarseCorrFields[leveli],
                 interfaceLevelsBouCoeffs_[leveli],

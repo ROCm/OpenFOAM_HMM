@@ -178,10 +178,10 @@ public:
         // Global information
 
             //- Return the start-of-injection time
-            const scalar timeStart() const;
+            scalar timeStart() const;
 
             //- Return the total volume to be injected across the event
-            const scalar volumeTotal() const;
+            scalar volumeTotal() const;
 
             //- Return the end-of-injection time
             virtual scalar timeEnd() const = 0;
@@ -197,13 +197,13 @@ public:
             );
 
             //- Return the number of parcels to introduce
-            const label nParcels() const;
+            label nParcels() const;
 
             //- Return the volume of parcels to introduce
-            const scalar volume() const;
+            scalar volume() const;
 
             //- Return the volume fraction to introduce
-            const scalar volumeFraction() const;
+            scalar volumeFraction() const;
 
 
         // Injection geometry

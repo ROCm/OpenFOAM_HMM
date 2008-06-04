@@ -103,7 +103,7 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
 
 template <class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::T0() const
 {
     return T0_;
@@ -111,7 +111,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::T0() const
 
 
 template <class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::cp0() const
 {
     return cp0_;
@@ -119,7 +119,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::cp0() const
 
 
 template <class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::epsilon0() const
 {
     return epsilon0_;
@@ -127,7 +127,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::epsilon0() const
 
 
 template <class ParcelType>
-inline const Foam::scalar
+inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::f0() const
 {
     return f0_;
@@ -171,7 +171,7 @@ Foam::ThermoParcel<ParcelType>::trackData::cpInterp() const
 // * * * * * * * * * * ThermoParcel Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const Foam::scalar Foam::ThermoParcel<ParcelType>::T() const
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::T() const
 {
     return T_;
 }
@@ -185,7 +185,7 @@ inline Foam::scalar& Foam::ThermoParcel<ParcelType>::T()
 
 
 template<class ParcelType>
-inline const Foam::scalar Foam::ThermoParcel<ParcelType>::cp() const
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::cp() const
 {
     return cp_;
 }

@@ -176,16 +176,6 @@ DebugSwitches
     LienCubicKE         0;
     LienCubicKELowRe    0;
     LienLeschzinerLowRe 0;
-    List<bool>          0;
-    List<complex>       0;
-    List<complexVector> 0;
-    List<edge>          0;
-    List<label>         0;
-    List<scalar>        0;
-    List<sphericalTensor>   0;
-    List<symmTensor>    0;
-    List<tensor>        0;
-    List<vector>        0;
     Lun                 0;
     LunSavage           0;
     MB                  0;
@@ -850,7 +840,6 @@ InfoSwitches
 {
     writePrecision  6;
     writeJobInfo    0;
-    FoamXwriteComments 0;
 }
 
 OptimisationSwitches
@@ -863,7 +852,7 @@ OptimisationSwitches
 
 DimensionedConstants
 {
-	// SI units
+    // SI units
 
     //- Universal gas constant [J/(kmol K)]
     R    8314.51;

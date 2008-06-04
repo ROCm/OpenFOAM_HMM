@@ -1,8 +1,6 @@
 Notes for fluentMeshToFoam with zone preservation
 #################################################
 
-New options do not work with FoamX
-
 1. New option added:
     - writeSets: 
     Writes all Fluent boundaries faceSets preserving Fluent names
