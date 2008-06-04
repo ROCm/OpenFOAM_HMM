@@ -132,9 +132,8 @@ endif
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set ompi_version=1.2.6
-    setenv OPENMPI_HOME $thirdParty/openmpi-$ompi_version
-    setenv OPENMPI_ARCH_PATH $OPENMPI_HOME/platforms/$WM_OPTIONS
+    set ompi_version=openmpi-1.2.6
+    setenv OPENMPI_ARCH_PATH $thirdParty/$ompi_version/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find it's install directory
     setenv OPAL_PREFIX $OPENMPI_ARCH_PATH
@@ -142,32 +141,31 @@ case OPENMPI:
     AddLib $OPENMPI_ARCH_PATH/lib
     AddPath $OPENMPI_ARCH_PATH/bin
 
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/openmpi-$ompi_version
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$ompi_version
     unset ompi_version
     breaksw
 
 case LAM:
-    set lam_version=7.1.4
-    setenv LAMHOME $thirdParty/lam-$lam_version
+    set lam_version=lam-7.1.4
+    setenv LAMHOME $thirdParty/$lam_version
     setenv LAM_ARCH_PATH $LAMHOME/platforms/$WM_OPTIONS
 
     AddLib $LAM_ARCH_PATH/lib
     AddPath $LAM_ARCH_PATH/bin
 
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/lam-$lam_version
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$lam_version
     unset lam_version
     breaksw
 
 case MPICH:
-    set mpich_version=1.2.4
-    setenv MPICH_PATH $thirdParty/mpich-$mpich_version
-    setenv MPICH_ARCH_PATH $MPICH_PATH/platforms/$WM_OPTIONS
+    set mpich_version=mpich-1.2.4
+    setenv MPICH_ARCH_PATH $thirdParty/$mpich_version/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPICH_ARCH_PATH
 
     AddLib $MPICH_ARCH_PATH/lib
     AddPath $MPICH_ARCH_PATH/bin
 
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-$mpich_version
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpich_version
     unset mpich_version
     breaksw
 
