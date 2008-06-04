@@ -135,11 +135,6 @@ if [ "$WM_COMPILER_BIN" != "" ]; then
 fi
 
 
-# Third-party software
-# ~~~~~~~~~~~~~~~~~~~~
-thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
-
-
 # MICO
 # ~~~~
 export MICO_VERSION=2.3.12
