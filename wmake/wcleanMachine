@@ -72,9 +72,5 @@ fi
 #   rm -rf src/mpich-${MPICH_VERSION}/platforms/$1
 #fi
 
-#if [ src/mico-${MICO_VERSION}/platforms/$1 ]
-#then
-#   rm -rf src/mico-${MICO_VERSION}/platforms/$1
-#fi
 
 #------------------------------------------------------------------------------

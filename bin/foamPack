@@ -87,7 +87,6 @@ find -H $packDir               \
 | sed                          \
  -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
- -e "\@$packDir/src/other/mico-*/platforms@d"  \
  -e "\@$packDir/src/other/mpich-*/platforms@d" \
  -e "\@$packDir/src/other/mpich-*/lib@d"       \
  -e "\@$packDir/src/other/lam-*/platforms@d"   \

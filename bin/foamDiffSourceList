@@ -85,7 +85,6 @@ find -H $newDir                \
 | sed                          \
  -e "\@$newDir/.git/@d"        \
  -e "\@$newDir/lib/@d"         \
- -e "\@$newDir/src/other/mico-*/platforms@d"  \
  -e "\@$newDir/src/other/mpich-*/platforms@d" \
  -e "\@$newDir/src/other/mpich-*/lib@d"       \
  -e "\@$newDir/src/other/lam-*/platforms@d"   \
