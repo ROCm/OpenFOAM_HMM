@@ -90,6 +90,16 @@ int IPstream::read
 }
 
 
+void IPstream::waitRequests()
+{}
+
+
+bool IPstream::finishedRequest(const label)
+{
+     notImplemented("IPstream::finishedRequest()");
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

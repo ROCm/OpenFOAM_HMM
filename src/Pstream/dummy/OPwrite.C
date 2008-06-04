@@ -68,6 +68,17 @@ bool OPstream::write
 }
 
 
+void OPstream::waitRequests()
+{}
+
+
+bool OPstream::finishedRequest(const label)
+{
+    notImplemented("OPstream::finishedRequest()");
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

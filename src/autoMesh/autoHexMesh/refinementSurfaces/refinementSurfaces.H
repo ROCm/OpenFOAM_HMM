@@ -60,7 +60,7 @@ class refinementSurfaces
 {
     // Private data
 
-        //- Name (word)
+        //- Surface name (word)
         wordList names_;
 
         //- Per surface whether is closed
@@ -85,6 +85,16 @@ class refinementSurfaces
 
         //- From global region number to refinement level
         labelList maxLevel_;
+
+        //- From global region number to added layers
+        labelList numLayers_;
+
+        //- From global region number to patch name
+        wordList patchName_;
+
+        //- From global region number to patch name
+        wordList patchType_;
+
 
         //- Per surface refinement level adapted for shells.
         PtrList<triSurfaceLabelField> minLevelFields_;
@@ -167,6 +177,24 @@ public:
             const labelList& maxLevel() const
             {
                 return maxLevel_;
+            }
+
+            //- From global region number to added layers
+            const labelList& numLayers() const
+            {
+                return numLayers_;
+            }
+
+            //- From global region number to patch name. Patchnames can be empty
+            const wordList& patchName() const
+            {
+                return patchName_;
+            }
+
+            //- From global region number to patch name
+            const wordList& patchType() const
+            {
+                return patchType_;
             }
 
 

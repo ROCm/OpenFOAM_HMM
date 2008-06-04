@@ -34,9 +34,6 @@ Description
 #include "Time.H"
 #include "fvMesh.H"
 #include "autoHexMeshDriver.H"
-#include "pointMesh.H"
-#include "motionSmoother.H"
-#include "mapDistributePolyMesh.H"
 
 using namespace Foam;
 
@@ -52,6 +49,18 @@ int main(int argc, char *argv[])
     Info<< "Read mesh in = "
         << runTime.cpuTimeIncrement() << " s" << endl;
 
+    // Read decomposePar dictionary
+    IOdictionary decomposeDict
+    (
+        IOobject
+        (
+            "decomposeParDict",
+            runTime.system(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
 
     // Read meshing dictionary
     IOdictionary meshDict
@@ -66,24 +75,46 @@ int main(int argc, char *argv[])
        )
     );
 
-    // Read decomposePar dictionary
-    IOdictionary decomposeDict
+    // refinement parameters
+    const dictionary& refineDict = meshDict.subDict("refineDict");
+
+    // snap-to-surface parameters
+    const dictionary& snapDict = meshDict.subDict("snapDict");
+
+    // mesh motion and mesh quality parameters
+    const dictionary& motionDict = meshDict.subDict("motionDict");
+
+    // layer addition parameters
+    const dictionary& layerDict = meshDict.subDict("layerDict");
+
+
+    // Main meshing driver. Read surfaces. Determine initial intersections.
+    autoHexMeshDriver meshEngine
     (
-        IOobject
-        (
-            "decomposeParDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
+        mesh,
+        meshDict,       // global control parameters
+        refineDict,     // refinement parameters
+        decomposeDict
     );
 
-    // Main meshing driver. Read surfaces. Determine intersections.
-    autoHexMeshDriver meshEngine(mesh, meshDict, decomposeDict);
+    Switch wantRefine(meshDict.lookup("doRefine"));
+    Switch wantSnap(meshDict.lookup("doSnap"));
+    Switch wantLayers(meshDict.lookup("doLayers"));
 
-    // Do all: refine, snap, add layers
-    meshEngine.doMesh();
+    if (wantRefine)
+    {
+        meshEngine.doRefine(refineDict, wantSnap);
+    }
+
+    if (wantSnap)
+    {
+        meshEngine.doSnap(snapDict, motionDict);
+    }
+
+    if (wantLayers)
+    {
+        meshEngine.doLayers(layerDict, motionDict);
+    }
 
     Info<< "Finished meshing in = "
         << runTime.elapsedCpuTime() << " s." << endl;

@@ -61,6 +61,30 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
     // Patch face merging engine
     combineFaces faceCombiner(mesh_, true);
 
+    // Pick up all candidate cells on boundary
+    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+
+    {
+        labelList patchIDs(meshRefinement::addedPatches(globalToPatch_));
+
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+
+            const polyPatch& patch = patches[patchI];
+
+            if (!patch.coupled())
+            {
+                forAll(patch, i)
+                {
+                    boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
+                }
+            }
+        }
+    }
+
     // Get all sets of faces that can be merged
     labelListList allFaceSets
     (
@@ -68,7 +92,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
         (
             minCos,
             concaveCos,
-            meshRefinement::addedPatches(globalToPatch_)
+            boundaryCells
         )
     );
 
@@ -1164,91 +1188,9 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 //}
 
 
-Foam::labelList Foam::autoHexMeshDriver::readNumLayers() const
-{
-    // Read dictionary information
-    // (could already be extracted in refinementSurfaces?)
-
-    const PtrList<dictionary>& surfaceDicts = dict_.lookup("surfaces");
-
-    labelList globalSurfLayers(surfaceDicts.size());
-    List<HashTable<label> > regionSurfLayers(surfaceDicts.size());
-
-    forAll(surfaceDicts, surfI)
-    {
-        const dictionary& dict = surfaceDicts[surfI];
-
-        globalSurfLayers[surfI] = readLabel(dict.lookup("surfaceLayers"));
-
-        if (dict.found("regions"))
-        {
-            // Per-region layer information
-
-            PtrList<dictionary> regionDicts(dict.lookup("regions"));
-
-            forAll(regionDicts, dictI)
-            {
-                const dictionary& regionDict = regionDicts[dictI];
-
-                const word regionName(regionDict.lookup("name"));
-
-                label nLayers = readLabel(regionDict.lookup("surfaceLayers"));
-
-                Info<< "    region " << regionName << ':'<< nl
-                    << "        surface layers:" << nLayers << nl;
-
-                regionSurfLayers[surfI].insert(regionName, nLayers);
-            }
-        }
-    }
-
-
-    // Transfer per surface/region information into global region info
-
-    labelList nLayers(surfaces().minLevel().size(), 0);
-
-    forAll(surfaces(), surfI)
-    {
-        const geometricSurfacePatchList& regions = surfaces()[surfI].patches();
-
-        forAll(regions, regionI)
-        {
-            label global = surfaces().globalRegion(surfI, regionI);
-
-            // Initialise to surface-wise layers
-            nLayers[global] = globalSurfLayers[surfI];
-
-            // Override with region specific data if available
-            HashTable<label>::const_iterator iter =
-                regionSurfLayers[surfI].find(regions[regionI].name());
-
-            if (iter != regionSurfLayers[surfI].end())
-            {
-                nLayers[global] = iter();
-            }
-
-            // Check
-            if (nLayers[global] < 0)
-            {
-                FatalErrorIn
-                (
-                    "autoHexMeshDriver::readNumLayers()"
-                )   << "Illegal number of layers " << nLayers[global]
-                    << " for surface "
-                    << surfaces().names()[surfI]
-                    << " region " << regions[regionI].name() << endl
-                    << exit(FatalError);
-            }
-        }
-    }
-    return nLayers;
-}
-
-
 // No extrusion on faces with differing number of layers for points
 void Foam::autoHexMeshDriver::setNumLayers
 (
-    const labelList& nLayers,
     const labelList& patchIDs,
     const indirectPrimitivePatch& pp,
     pointField& patchDisp,
@@ -1259,13 +1201,15 @@ void Foam::autoHexMeshDriver::setNumLayers
     Info<< nl << "Handling points with inconsistent layer specification ..."
         << endl;
 
+    const labelList& nSurfLayers = surfaces().numLayers();
+
     // Build map from patch to layers
-    Map<label> patchToNLayers(nLayers.size());
-    forAll(nLayers, region)
+    Map<label> patchToNLayers(nSurfLayers.size());
+    forAll(nSurfLayers, region)
     {
         if (globalToPatch_[region] != -1)
         {
-            patchToNLayers.insert(globalToPatch_[region], nLayers[region]);
+            patchToNLayers.insert(globalToPatch_[region], nSurfLayers[region]);
         }
     }
 
@@ -2363,10 +2307,12 @@ void Foam::autoHexMeshDriver::getLayerCellsFaces
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::autoHexMeshDriver::mergePatchFacesUndo()
+void Foam::autoHexMeshDriver::mergePatchFacesUndo
+(
+    const dictionary& shrinkDict,
+    const dictionary& motionDict
+)
 {
-    const dictionary& shrinkDict = dict_.subDict("shrinkDict");
-
     const scalar featureAngle(readScalar(shrinkDict.lookup("featureAngle")));
     scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.0);
 
@@ -2390,9 +2336,6 @@ void Foam::autoHexMeshDriver::mergePatchFacesUndo()
         << concaveAngle << " degrees (0=straight, 180=fully concave)" << nl
         << endl;
 
-
-    const dictionary& motionDict = dict_.subDict("motionDict");
-
     label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
 
     nChanged += mergeEdgesUndo(minCos, motionDict);
@@ -2401,14 +2344,14 @@ void Foam::autoHexMeshDriver::mergePatchFacesUndo()
 
 void Foam::autoHexMeshDriver::addLayers
 (
+    const dictionary& shrinkDict,
+    const dictionary& motionDict,
     const scalar nAllowableErrors,
     motionSmoother& meshMover
 )
 {
     // Read some more dictionary settings
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const dictionary& shrinkDict = dict_.subDict("shrinkDict");
 
     // Min thickness per cell
     const scalar relMinThickness(readScalar(shrinkDict.lookup("minThickness")));
@@ -2506,7 +2449,6 @@ void Foam::autoHexMeshDriver::addLayers
 
     setNumLayers
     (
-        readNumLayers(),
         meshMover.adaptPatchIDs(),
         pp,
 
@@ -2923,7 +2865,7 @@ void Foam::autoHexMeshDriver::addLayers
         label nTotChanged = checkAndUnmark
         (
             addLayer,
-            dict_.subDict("motionDict"),
+            motionDict,
             pp,
             newMesh,
 

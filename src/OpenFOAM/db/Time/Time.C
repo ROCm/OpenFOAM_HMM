@@ -407,7 +407,7 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
 {
     instantList times = Time::findTimes(path());
 
-    // If there is only one time its "constant" so return it
+    // If there is only one time it is "constant" so return it
     if (times.size() == 1)
     {
         return times[0];

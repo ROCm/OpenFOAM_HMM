@@ -1,0 +1,314 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.0                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "/home/penfold/mattijs/foam/mattijs2.1/run/icoFoam";
+    case            "cavity";
+    instance        "system";
+    local           "";
+
+    class           dictionary;
+    object          autoHexMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Which phases to run.
+doRefine true;
+doSnap   true;
+doLayers true; // includes autoMergeFaces
+
+
+// Whether to dump intermediate meshes and print lots
+// 1 : write mesh
+// 2 : write volScalarField with cellLevel for postprocessing
+// 4 : write current intersections as .obj files
+debug 0;
+
+refineDict
+{
+    // Which part to keep.
+    // NOTE: This point should never be on a face, always inside a cell, even
+    // after refinement.
+    keepPoints ((3 0.28 0.43));
+
+    // Whether to remove/split cells likely to give problems when snapping
+    handleSnapProblems on;
+
+    // Merge tolerance. Is fraction of overall bounding box of initial mesh
+    mergeTolerance 1E-6;
+
+    // While refining maximum number of cells per processor. This is basically
+    // the number of cells that fit on a processor. If you choose this too small
+    // it will do just more refinement iterations to obtain a similar mesh.
+    procCellLimit 1000000;
+
+
+    // Overall cell limit (approximately). Refinement will stop immediately
+    // upon reaching this number so a refinement level might not complete.
+    // Note that this is the number of cells before removing the part which
+    // is not 'visible' from the keepPoint. The final number of cells might actually
+    // be a lot less.
+    cellLimit 2000000;
+
+
+    // The surface refinement loop might spend lots of iterations refining just a
+    // few cells. This setting will cause refinement to stop if <= minimumRefine
+    // are selected for refinement. Note: it will at least do one iteration
+    // (unless the number of cells to refine is 0)
+    minimumRefine 0;
+
+
+
+
+    // Number of buffer layers between different levels.
+    // 1 means normal 2:1 refinement restriction, larger means slower
+    // refinement.
+    nBufferLayers 1;
+
+
+    // Feature Edge Refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+
+    // External feature file. Read from constant/triSurface for now.
+    // Limitations:
+    // - either start or edge of any feature line has to be inside domain
+    //   and be visible from keepPoint on starting mesh.
+    // - refining cells containing features is separate phase before refining
+    //   based on surface.
+    // - no load balancing, no check for cellLimit is done while doing this.
+    features
+    (
+    //    {
+    //        file "someLine.eMesh";
+    //        level 2;
+    //    }
+    );
+
+
+    // Internal Mesh Refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Specifies the areas where the refinement has to be a certain level.
+    // These surfaces have to be closed. Refinement is either inside
+    // (refineInside = true) or outside. (note:insideness or outsideness
+    // is with respect to far away)
+    // Note:that even using these the transition can never be faster than
+    // nBufferLayers!
+    // Note:the refinement level can never be higher than any of the surfaces
+    // they overlap with. See below for the surface refinement level specification.
+    refinementShells
+    (
+        {
+            //type triSurfaceMesh;
+            //name cube1x1x1.stl;
+            type searchableBox;
+            name box1x1x1;
+            min (2.5 -0.5 -0.5);
+            max (3.5 0.5 0.5);
+
+            level 4;
+            refineInside true;
+        }
+    );
+
+
+    // Surface based refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Curvature. Cosine of angle between two neighbouring surface intersections.
+    // Only used if cell level > minLevel and < maxLevel.
+    curvature 0.5;
+
+
+    // Overall the refinement is according to the following rules:
+    // - if the cell-cell vector intersects a surface any cell that
+    //   is less refined than the minRefinementLevel of the surface gets refined.
+    // - else if the refinement level of the cell is between the
+    //   minRefinementLevel and maxRefinementLevel the cell gets refined if
+    //      - the normal of neighbouring surface intersections differ by more
+    //        than above curvature
+    //      - or if neighbouring surface intersections are on different surfaces or
+    //        different surface regions.
+
+
+    // surfaces
+    surfaces
+    (
+        {
+            name    sphere;
+            file    "sphere.stl";
+
+            // Surface wide refinement level
+            minRefinementLevel 1;
+            maxRefinementLevel 1;
+
+            // Layers
+            surfaceLayers 1;
+
+            // Region specific refinement level
+            regions
+            (
+                {
+                    name firstSolid;
+                    minRefinementLevel 3;
+                    maxRefinementLevel 3;
+                    surfaceLayers 2;
+                }
+                {
+                    name secondSolid;
+                    minRefinementLevel 1;
+                    maxRefinementLevel 1;
+                    surfaceLayers 1;
+                }
+            );
+        }
+    );
+}
+
+// For snapping
+snapDict
+{
+    //- Number of patch smoothing iterations before finding correspondence
+    //  to surface
+    nSmoothPatch 3;
+
+    //- Relative distance for points to be attracted by surface feature point
+    //  or edge. True distance is this factor times local
+    //  maximum edge length.
+    snapTol 4.0;
+
+    //- Whether to move internal mesh as well as boundary
+    smoothMesh true;
+
+    //- Number of mesh displacement smoothing iterations.
+    nSmoothDispl 30;
+
+    //- Maximum number of snapping relaxation iterations. Should stop
+    //  before upon reaching a correct mesh.
+    nSnap 5;
+}
+
+
+// For cell layers
+layerDict
+{
+    //- When not to extrude surface. 0 is flat surface, 90 is when two faces
+    //  make straight angle.
+    featureAngle 60;
+
+    //- Maximum number of snapping relaxation iterations. Should stop
+    //  before upon reaching a correct mesh.
+    nSnap 5;
+
+
+    //- Minimum thickness of cell layer. If for any reason layer cannot be
+    //  above minThickness do not add layer if thickness below minThickNess.
+    //  Relative to undistorted cell size
+    minThickness 0.25;
+
+    //- If points get not extruded do nGrow layers of connected faces that are
+    //  not grown. Is used to not do layers at all close to features.
+    nGrow 1;
+
+    // Expansion factor for layer mesh
+    expansionRatio 1.3;	
+
+    // Ratio of cell size in final added cell layer to cell size 
+    // outside layer 
+    finalLayerRatio 0.3;
+
+    // Number of smoothing iterations of surface normals 
+    nSmoothSurfaceNormals 1;
+
+    // Number of smoothing iterations of interior mesh movement direction  
+    nSmoothNormals 3;
+
+    // Smooth layer thickness over surface patches
+    nSmoothThickness 10;
+
+    // Stop layer growth on highly warped cells 
+    maxFaceThicknessRatio 0.5;
+
+    // Reduce layer growth where ratio thickness to medial 
+    // distance is large 
+    maxThicknessToMedialRatio 0.3;
+
+    // Angle used to pick up medial axis points
+    minMedianAxisAngle 130;
+
+    // Create buffer region for new layer terminations
+    nBufferCellsNoExtrude 0;
+
+    thickness 0.5;
+    nSmoothDispl 4;
+}
+
+
+// For mesh motion
+motionDict
+{
+    //
+    // Mesh Quality Parameters. Decide when mesh is good enough to stop
+    // smoothing.
+    //
+
+    //- Maximum non-orthogonality allowed. Set to 180 to disable.
+    maxNonOrtho 65;
+
+    //- Max skewness allowed. Set to <0 to disable.
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+
+    //- Max concaveness allowed. Is angle (in degrees) below which concavity
+    //  is allowed. 0 is straight face, <0 would be convex face.
+    //  Set to 180 to disable.
+    maxConcave 80;
+
+    //- Minimum projected area v.s. actual area. Set to -1 to disable.
+    minFlatness 0.5;
+
+    //- Minimum pyramid volume. Is absolute volume of cell pyramid.
+    //  Set to very negative number (e.g. -1E30) to disable.
+    minVol 1e-13;
+
+    //- Minimum face area. Set to <0 to disable.
+    minArea -1;
+
+    //- Minimum face twist. Set to <-1 to disable. dot product of face normal
+    //- and face centre triangles normal
+    minTwist 0.05;
+
+    //- minimum normalised cell determinant
+    //- 1 = hex, <= 0 = folded or flattened illegal cell
+    minDeterminant 0.001;
+
+    //- minFaceWeight (0 -> 0.5) 
+    minFaceWeight 0.05;
+
+    //- minVolRatio (0 -> 1)
+    minVolRatio 0.01;
+
+
+    //must be >0 for Fluent compatibility
+    minTriangleTwist -1;
+
+    // Advanced
+
+    //- Number of error distribution iterations
+    nSmoothScale 4;
+    //- amount to scale back displacement at error points
+    errorReduction 0.75;
+}
+
+
+// ************************************************************************* //

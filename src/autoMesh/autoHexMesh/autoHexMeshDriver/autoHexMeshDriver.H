@@ -135,7 +135,7 @@ class autoHexMeshDriver
         //- Reference to mesh
         fvMesh& mesh_;
 
-        //- Input dictionarys
+        //- Input dictionary
         const dictionary dict_;
 
         //- Debug level
@@ -164,7 +164,6 @@ class autoHexMeshDriver
 
 
 
-
         //- Explicit features
         PtrList<featureEdgeMesh> featureMeshes_;
         //- Per feature the refinement level
@@ -183,10 +182,6 @@ class autoHexMeshDriver
         //- Per refinement surface region the patch
         labelList globalToPatch_;
 
-        ////- Per refinement surface with a valid faceZone the cyclicpatch
-        ////  (or -1)
-        //labelList surfaceToCyclicPatch_;
-
         //- Mesh refinement engine
         autoPtr<meshRefinement> meshRefinerPtr_;
 
@@ -197,12 +192,13 @@ class autoHexMeshDriver
         autoPtr<fvMeshDistribute> distributorPtr_;
 
 
+
     // Private Member Functions
 
         // Refinement
 
-            //- Get merge tolerance. Check against writing tolerance.
-            scalar getMergeDistance() const;
+            //- Calculate merge distance. Check against writing tolerance.
+            scalar getMergeDistance(const scalar mergeTol) const;
 
             // Return per keeppoint -1 or the local cell label the point is in.
             // Guaranteed to be only on one processor.
@@ -211,7 +207,7 @@ class autoHexMeshDriver
             static void orientOutside(PtrList<searchableSurface>&);
 
             //- Read feature edges
-            label readFeatureEdges();
+            label readFeatureEdges(const PtrList<dictionary>&);
 
         // Snapping
 
@@ -375,7 +371,6 @@ class autoHexMeshDriver
                 //  layers per surface.
                 void setNumLayers
                 (
-                    const labelList& nLayers,
                     const labelList& patchIDs,
                     const indirectPrimitivePatch& pp,
                     pointField& patchDisp,
@@ -651,6 +646,16 @@ public:
             const dictionary& decomposeDict
         );
 
+        //- Alternative constructor from top-level controldictionary and
+        //  refinement specific dictionary
+        autoHexMeshDriver
+        (
+            fvMesh& mesh,
+            const dictionary& controlDict,
+            const dictionary& refineDict,
+            const dictionary& decomposeDict
+        );
+
 
     // Member Functions
 
@@ -684,6 +689,7 @@ public:
             //- Refine around explicit feature edges
             label featureEdgeRefine
             (
+                const PtrList<dictionary>& featDicts,
                 const label maxIter,
                 const label minRefine
             );
@@ -734,7 +740,11 @@ public:
             autoPtr<mapPolyMesh> mergeZoneBaffles(const List<labelPair>&);
 
             //- Calculate edge length per patch point.
-            scalarField calcSnapDistance(const indirectPrimitivePatch&) const;
+            scalarField calcSnapDistance
+            (
+                const dictionary& snapDict,
+                const indirectPrimitivePatch&
+            ) const;
 
             //- Get patches generated for surfaces.
             labelList getSurfacePatches() const;
@@ -743,6 +753,7 @@ public:
             //  of surface points (on castellated mesh) w.r.t. surface.
             void preSmoothPatch
             (
+                const dictionary& snapDict,
                 const label nInitErrors,
                 const List<labelPair>& baffles,
                 motionSmoother&
@@ -758,12 +769,17 @@ public:
             ) const;
 
             //- Smooth the displacement field to the internal.
-            void smoothDisplacement(motionSmoother&) const;
+            void smoothDisplacement
+            (
+                const dictionary& snapDict,
+                motionSmoother&
+            ) const;
 
             //- Do the hard work: move the mesh according to displacement,
             //  locally relax the displacement.
             void scaleMesh
             (
+                const dictionary& snapDict,
                 const label nInitErrors,
                 const List<labelPair>& baffles,
                 motionSmoother&
@@ -773,23 +789,50 @@ public:
         // Layers
 
             //- Merge patch faces on same cell.
-            void mergePatchFacesUndo();
-
-            //- Read layer per region
-            labelList readNumLayers() const;
+            void mergePatchFacesUndo
+            (
+                const dictionary& shrinkDict,
+                const dictionary& motionDict
+            );
 
             //- Check that mesh outside is not multiply connected.
             void checkMeshManifold() const;
 
             //- Add cell layers
-            void addLayers(const scalar nAllowableErrors, motionSmoother&);
+            void addLayers
+            (
+                const dictionary& shrinkDict,
+                const dictionary& motionDict,
+                const scalar nAllowableErrors,
+                motionSmoother&
+            );
 
 
         // Other
 
+            //- Do all refinement.
+            void doRefine
+            (
+                const dictionary& refineDict,
+                const bool prepareForSnapping
+            );
+
+            //- Do all snapping.
+            void doSnap
+            (
+                const dictionary& snapDict,
+                const dictionary& motionDict
+            );
+
+            //- Do alllayer addition.
+            void doLayers
+            (
+                const dictionary& shrinkDict,
+                const dictionary& motionDict
+            );
+
             //- Do all : refine, snap, layers
             void doMesh();
-
 };
 
 
