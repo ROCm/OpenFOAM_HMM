@@ -87,7 +87,7 @@ fi
 # set paraview environment
 PARAVIEW_SRC_DIR=$PWD/$PARAVIEW_SRC
 #PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
-PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS
+PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_ARCH$WM_COMPILER
 
 # remove existing build folder if present
 if [ -e "$PARAVIEW_OBJ_DIR" ]; then
