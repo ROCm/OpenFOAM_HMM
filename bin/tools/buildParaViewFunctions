@@ -43,7 +43,7 @@ addCMakeVariable ()
 
 initialiseVariables ()
 {
-    unset CMAKE_VARIABLES OBJ_ADD
+    unset CMAKE_VARIABLES OBJ_ADD MPI_ARCH_PATH
 
     if [ "$VERBOSE" = ON ]; then
         addCMakeVariable "CMAKE_VERBOSE_MAKEFILE=TRUE"
@@ -58,25 +58,25 @@ addMpiSupport ()
     # using OpenFOAM variables to identify location of MPI libraries
     case "$WM_MPLIB" in
     OPENMPI)
-        MPI_INCLUDE_PATH=$OPENMPI_ARCH_PATH/include
+        MPI_ARCH_PATH=$OPENMPI_ARCH_PATH
         MPI_LIBRARY=$OPENMPI_ARCH_PATH/lib/libmpi.so
-        MPI_RUN=$OPENMPI_ARCH_PATH/bin/mpirun
         ;;
     LAM)
-        MPI_INCLUDE_PATH=$LAM_ARCH_PATH/include
+        MPI_ARCH_PATH=$LAM_ARCH_PATH
         MPI_LIBRARY=$LAM_ARCH_PATH/lib/libmpi.so
-        MPI_RUN=$LAM_ARCH_PATH/bin/mpirun
         ;;
     MPICH)
-        MPI_INCLUDE_PATH=$MPICH_ARCH_PATH/include
+        MPI_ARCH_PATH=$MPICH_ARCH_PATH
         MPI_LIBRARY=$MPICH_ARCH_PATH/lib/libmpich.so
-        MPI_RUN=$MPICH_ARCH_PATH/bin/mpirun
         ;;
     *)
         echo "*** Error: unknown/unsupported mpi: $WM_MPLIB"
         exit 1
         ;;
     esac
+
+    MPI_INCLUDE_PATH=$MPI_ARCH_PATH/include
+    MPI_RUN=$MPI_ARCH_PATH/bin/mpirun
 
     OBJ_ADD="$OBJ_ADD-mpi"
     addCMakeVariable "VTK_USE_MPI=ON"
@@ -242,11 +242,11 @@ installParaView ()
             "s,$PARAVIEW_SRC_DIR,\$ENV{ParaView_INST_DIR},g" {} ';' \
             -print
 
-        # Replace local OPENMPI_ARCH_PATH path with OPENMPI_ARCH_PATH
+        # Replace local MPI_ARCH_PATH path with MPI_ARCH_PATH
         # environment variables
         if [ "$INCLUDE_MPI" = ON ]; then
             find . -iname \*.cmake -execdir sed -i \
-                "s,$OPENMPI_ARCH_PATH,\$ENV{OPENMPI_ARCH_PATH},g" {} ';' \
+                "s,$MPI_ARCH_PATH,\$ENV{MPI_ARCH_PATH},g" {} ';' \
                 -print
         fi
 
@@ -274,6 +274,7 @@ installParaView ()
 # for good measure - clear a few variables before using any of the functions
 
 unset VERBOSE INCLUDE_MPI INCLUDE_PYTHON INCLUDE_MESA PYTHON_LIBRARY
+unset MPI_ARCH_PATH
 unset CMAKE_VARIABLES OBJ_ADD
 unset CMAKE_SKIP
 
