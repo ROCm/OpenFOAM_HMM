@@ -251,7 +251,7 @@ Field<Type>::Field
                     dict
                 )   << "expected keyword 'uniform' or 'nonuniform', "
                        "assuming deprecated Field format from "
-                       "FoamX version 2.0." << endl;
+                       "Foam version 2.0." << endl;
 
                 this->setSize(s);
 
@@ -313,7 +313,7 @@ void Field<Type>::map
             label mapI = mapAddressing[i];
 
             if (mapI >= 0)
-            { 
+            {
                 f[i] = mapF[mapI];
             }
         }

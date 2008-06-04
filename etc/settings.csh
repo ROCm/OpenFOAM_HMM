@@ -94,10 +94,10 @@ switch ("$WM_COMPILER_INST")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc43:
-        setenv WM_COMPILER_DIR $thirdParty/gcc-4.3.0/platforms/$WM_ARCH
+        setenv WM_COMPILER_DIR $thirdParty/gcc-4.3.0/platforms/$WM_ARCH$WM_COMPILER_ARCH
     breaksw
     case Gcc:
-        setenv WM_COMPILER_DIR $thirdParty/gcc-4.2.2/platforms/$WM_ARCH
+        setenv WM_COMPILER_DIR $thirdParty/gcc-4.2.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
     breaksw
     endsw
 
@@ -124,37 +124,6 @@ if ($?WM_COMPILER_BIN) then
     else
         setenv LD_LIBRARY_PATH ${WM_COMPILER_LIB}
     endif
-endif
-
-
-# MICO
-# ~~~~
-setenv MICO_VERSION 2.3.12
-setenv MICO_PATH $thirdParty/mico-$MICO_VERSION
-setenv MICO_ARCH_PATH $MICO_PATH/platforms/$WM_OPTIONS
-set path=($MICO_ARCH_PATH/bin $path)
-
-
-# FoamX
-# ~~~~~
-setenv FOAMX_PATH $FOAM_UTILITIES/preProcessing/FoamX
-#
-# need csh equivalent for this?
-# for FOAMX_CONFIG in \
-#     $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION/apps/FoamX \
-#     $HOME/.$WM_PROJECT/apps/FoamX \
-#     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/apps/FoamX \
-#     $WM_PROJECT_INST_DIR/site/apps/FoamX \
-#     $WM_PROJECT_DIR/etc/apps/FoamX \
-#     ;
-# do
-#     [ -d $FOAMX_CONFIG ] && break
-# done
-# export FOAMX_CONFIG
-#
-setenv FOAMX_CONFIG $HOME/.$WM_PROJECT-$WM_PROJECT_VERSION/apps/FoamX
-if ( ! -d $FOAMX_CONFIG ) then
-    setenv FOAMX_CONFIG $WM_PROJECT_DIR/etc/apps/FoamX
 endif
 
 

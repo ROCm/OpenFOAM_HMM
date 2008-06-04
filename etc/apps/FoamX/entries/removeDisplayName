@@ -1,4 +1,0 @@
-#!/bin/sh
-
-sed '/displayName/ d' $1 > temp.$$
-mv temp.$$ $1

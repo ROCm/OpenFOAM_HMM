@@ -59,6 +59,5 @@ find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB
 find . \( -name exe -o -name log -o -name so_locations \) -exec rm {} \;
 
 # rm -rf src/mpich-${MPICH_VERSION}/platforms
-# rm -rf src/mico-${MICO_VERSION}/platforms
 
 #------------------------------------------------------------------------------

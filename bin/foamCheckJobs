@@ -156,8 +156,7 @@ information on the machine the process ran on and release the lock
 if the program is no longer running.
 
 Requirements: the environment variable FOAM_JOB_DIR needs to point to the
-license directory and all machines have to be reachable using rsh/ssh.
-(as set in \$FOAMX_CONFIG/FoamX.cfg)
+license directory and all machines have to be reachable using ssh.
 
 The output from checking all running jobs is collected in an optional
 file.
@@ -205,12 +204,7 @@ else
 fi
 
 #- obtain rsh method
-RSH='rsh'
-if [ -f $FOAMX_CONFIG/FoamX.cfg ]; then
-    if grep 'remoteShell' $FOAMX_CONFIG/FoamX.cfg >/dev/null; then
-        RSH=`getEntry $FOAMX_CONFIG/FoamX.cfg remoteShell`
-    fi
-fi
+RSH='ssh'
 echo "Using remote shell type : $RSH"
 
 echo ""
