@@ -53,6 +53,7 @@ AddLib()
     fi
 }
 
+
 #- Add the system-specifc executables path to the path
 export PATH=$WM_PROJECT_DIR/bin:$FOAM_INST_DIR/$WM_ARCH/bin:$PATH
 
@@ -85,6 +86,12 @@ AddPath $FOAM_USER_APPBIN
 
 export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 
+
+# Location of third-party software
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
+
+
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 WM_COMPILER_BIN=
@@ -99,10 +106,10 @@ case "$WM_COMPILER_INST" in
 OpenFOAM)
     case "$WM_COMPILER" in
     Gcc43)
-        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.3.0$WM_COMPILER_ARCH
+        export WM_COMPILER_DIR=$thirdParty/gcc-4.3.0/platforms/$WM_ARCH
         ;;
     Gcc)
-        export WM_COMPILER_DIR=$FOAM_INST_DIR/$WM_ARCH/gcc-4.2.2$WM_COMPILER_ARCH
+        export WM_COMPILER_DIR=$thirdParty/gcc-4.2.2/platforms/$WM_ARCH
         ;;
     esac
 
