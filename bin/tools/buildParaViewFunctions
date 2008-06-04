@@ -43,7 +43,7 @@ addCMakeVariable ()
 
 initialiseVariables ()
 {
-    unset CMAKE_VARIABLES OBJ_ADD MPI_ARCH_PATH
+    unset CMAKE_VARIABLES OBJ_ADD
 
     if [ "$VERBOSE" = ON ]; then
         addCMakeVariable "CMAKE_VERBOSE_MAKEFILE=TRUE"
@@ -255,7 +255,6 @@ installParaView ()
 # for good measure - clear a few variables before using any of the functions
 
 unset VERBOSE INCLUDE_MPI INCLUDE_PYTHON INCLUDE_MESA PYTHON_LIBRARY
-unset MPI_ARCH_PATH
 unset CMAKE_VARIABLES OBJ_ADD
 unset CMAKE_SKIP
 
