@@ -37,7 +37,7 @@ if [ "$PS1" -a "$foamDotFile" ]; then
     fi
 fi
 
-export CMAKE_HOME=$WM_PROJECT_INST_DIR/$WM_ARCH/cmake-2.4.6
+export CMAKE_HOME=$WM_PROJECT_INST_DIR/ThirdParty/cmake-2.4.6/platforms/$WM_ARCH
 
 if [ -r $CMAKE_HOME ]; then
     export PATH=$CMAKE_HOME/bin:$PATH
