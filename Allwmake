@@ -1,9 +1,10 @@
 #!/bin/sh
 set -x
 
-(cd $WM_PROJECT_INST_DIR/ThirdParty && ./Allwmake)
+# wmake is required for subsequent targets
+(cd wmake/src && make)
 
-(cd wmake && ./makeWmake)
+(cd $WM_PROJECT_INST_DIR/ThirdParty && ./Allwmake)
 
 (cd src && ./Allwmake)
 
