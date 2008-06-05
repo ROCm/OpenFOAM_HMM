@@ -147,6 +147,7 @@ case "$WM_MPLIB" in
 OPENMPI)
     ompi_version=openmpi-1.2.6
     export OPENMPI_ARCH_PATH=$thirdParty/$ompi_version/platforms/$WM_OPTIONS
+    export MPI_ARCH_PATH=$OPENMPI_ARCH_PATH
 
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$OPENMPI_ARCH_PATH
@@ -162,6 +163,7 @@ LAM)
     lam_version=lam-7.1.4
     export LAMHOME=$thirdParty/$lam_version
     export LAM_ARCH_PATH=$LAMHOME/platforms/$WM_OPTIONS
+    export MPI_ARCH_PATH=$LAM_ARCH_PATH
 
     AddLib  $LAM_ARCH_PATH/lib
     AddPath $LAM_ARCH_PATH/bin
@@ -174,6 +176,7 @@ MPICH)
     mpich_version=mpich-1.2.4
     export MPICH_ARCH_PATH=$thirdParty/$mpich_version/platforms/$WM_OPTIONS
     export MPICH_ROOT=$MPICH_ARCH_PATH
+    export MPI_ARCH_PATH=$MPICH_ARCH_PATH
 
     AddLib  $MPICH_ARCH_PATH/lib
     AddPath $MPICH_ARCH_PATH/bin
@@ -187,6 +190,7 @@ MPICH-GM)
     export MPICH_ARCH_PATH=$MPICH_PATH
     export MPICH_ROOT=$MPICH_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
+    export MPI_ARCH_PATH=$MPICH_ARCH_PATH
 
     AddLib $MPICH_ARCH_PATH/lib
     AddLib $GM_LIB_PATH
@@ -198,13 +202,11 @@ MPICH-GM)
 GAMMA)
     export GAMMA_ARCH_PATH=/usr
 
-    # AddLib $GAMMA_ARCH_PATH/lib
-    # AddPath $GAMMA_ARCH_PATH/bin
-
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/gamma
     ;;
 
 MPI)
+    export MPI_ARCH_PATH=/opt/mpi
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
     ;;
 

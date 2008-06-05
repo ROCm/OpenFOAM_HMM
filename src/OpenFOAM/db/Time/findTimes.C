@@ -56,6 +56,7 @@ instantList Time::findTimes(const fileName& directory)
     label nTimes = 0;
 
     // Check for "constant"
+    bool haveConstant = false;
     forAll(dirEntries, i)
     {
         if (dirEntries[i] == "constant")
@@ -63,6 +64,7 @@ instantList Time::findTimes(const fileName& directory)
             Times[nTimes].value() = 0;
             Times[nTimes].name() = dirEntries[i];
             nTimes++;
+            haveConstant = true;
             break;
         }
     }
@@ -84,9 +86,16 @@ instantList Time::findTimes(const fileName& directory)
     // Reset the length of the times list
     Times.setSize(nTimes);
 
-    if (nTimes > 1)
+    if (haveConstant)
     {
-        std::sort(&Times[1], Times.end(), instant::less());
+        if (nTimes > 2)
+        {
+            std::sort(&Times[1], Times.end(), instant::less());
+        }
+    }
+    else if (nTimes > 1)
+    {
+        std::sort(&Times[0], Times.end(), instant::less());
     }
 
     return Times;
