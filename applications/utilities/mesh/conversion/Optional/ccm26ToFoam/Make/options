@@ -1,11 +1,12 @@
+thirdParty=$(WM_PROJECT_INST_DIR)/ThirdParty
+
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/other/libccmio \
-    -I$(LIB_SRC)/other/libccmio/libccmio/lnInclude
+    -I$(thirdParty)/libccmio \
+    -I$(thirdParty)/libccmio/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
-    -lccmio \
-    -ladf
+    -lccmio
