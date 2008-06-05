@@ -42,17 +42,16 @@ bool triSurface::stitchTriangles
 )
 {
     // Merge points
-    labelList pointMap(rawPoints.size());
-
-    pointField newPoints(rawPoints.size());
-
+    labelList pointMap;
+    pointField newPoints;
     bool hasMerged = mergePoints(rawPoints, tol, verbose, pointMap, newPoints);
 
     if (hasMerged)
     {
         if (verbose)
         {
-            Pout<< "stitchTriangles : Renumbering all triangles" << endl;
+            Pout<< "stitchTriangles : Merged from " << rawPoints.size()
+                << " points down to " << newPoints.size() << endl;
         }
 
         pointField& ps = const_cast<pointField&>(points());
@@ -73,6 +72,7 @@ bool triSurface::stitchTriangles
                 operator[](newTriangleI)[0] = newA;
                 operator[](newTriangleI)[1] = newB;
                 operator[](newTriangleI)[2] = newC;
+                operator[](newTriangleI).region() = operator[](i).region();
                 newTriangleI++;
             }
             else if (verbose)
