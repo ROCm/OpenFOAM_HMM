@@ -39,18 +39,22 @@ fi
 
 AddPath()
 {
-    if [ $# -ge 1 ]; then
+    while [ $# -ge 1 ]
+    do
         [ -d $1 ] || mkdir -p $1
         export PATH=$1:$PATH
-    fi
+        shift
+    done
 }
 
 AddLib()
 {
-    if [ $# -ge 1 ]; then
+    while [ $# -ge 1 ]
+    do
         [ -d $1 ] || mkdir -p $1
         export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
-    fi
+        shift
+    done
 }
 
 
@@ -117,7 +121,7 @@ OpenFOAM)
     if [ ! -d "$WM_COMPILER_DIR" ]
     then
         echo
-        echo "Warning in $1:"
+        echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
         echo "    Cannot find $WM_COMPILER_DIR installation."
         echo "    Please install this compiler version or if you wish to use the system compiler,"
         echo "    change the WM_COMPILER_INST setting to 'System' in this file"
@@ -135,75 +139,66 @@ if [ "$WM_COMPILER_BIN" != "" ]; then
 fi
 
 
-# Third-party software
-# ~~~~~~~~~~~~~~~~~~~~
-thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
-
-
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
+unset MPI_ARCH_PATH
+
 case "$WM_MPLIB" in
 OPENMPI)
-    ompi_version=1.2.6
-    export OPENMPI_HOME=$thirdParty/openmpi-$ompi_version
-    export OPENMPI_ARCH_PATH=$OPENMPI_HOME/platforms/$WM_OPTIONS
-    export MPI_ARCH_PATH=$OPENMPI_ARCH_PATH
+    mpi_version=openmpi-1.2.6
+    export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
 
-    # Tell OpenMPI where to find it's install directory
-    export OPAL_PREFIX=$OPENMPI_ARCH_PATH
+    # Tell OpenMPI where to find its install directory
+    export OPAL_PREFIX=$MPI_ARCH_PATH
 
-    AddLib $OPENMPI_ARCH_PATH/lib
-    AddPath $OPENMPI_ARCH_PATH/bin
+    AddLib $MPI_ARCH_PATH/lib
+    AddPath $MPI_ARCH_PATH/bin
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/openmpi-$ompi_version
-    unset ompi_version
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    unset mpi_version
     ;;
 
 LAM)
-    lam_version=7.1.4
-    export LAMHOME=$thirdParty/lam-$lam_version
-    export LAM_ARCH_PATH=$LAMHOME/platforms/$WM_OPTIONS
-    export MPI_ARCH_PATH=$LAM_ARCH_PATH
+    mpi_version=lam-7.1.4
+    export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    export LAMHOME=$thirdParty/$mpi_version
+    # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
-    AddLib  $LAM_ARCH_PATH/lib
-    AddPath $LAM_ARCH_PATH/bin
+    AddLib  $MPI_ARCH_PATH/lib
+    AddPath $MPI_ARCH_PATH/bin
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/lam-$lam_version
-    unset lam_version
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    unset mpi_version
     ;;
 
 MPICH)
-    mpich_version=1.2.4
-    export MPICH_PATH=$thirdParty/mpich-$mpich_version
-    export MPICH_ARCH_PATH=$MPICH_PATH/platforms/$WM_OPTIONS
+    mpi_version=mpich-1.2.4
+    export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
     export MPICH_ROOT=$MPICH_ARCH_PATH
-    export MPI_ARCH_PATH=$MPICH_ARCH_PATH
 
-    AddLib  $MPICH_ARCH_PATH/lib
-    AddPath $MPICH_ARCH_PATH/bin
+    AddLib  $MPI_ARCH_PATH/lib
+    AddPath $MPI_ARCH_PATH/bin
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-$mpich_version
-    unset mpich_version
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    unset mpi_version
     ;;
 
 MPICH-GM)
     export MPICH_PATH=/opt/mpi
-    export MPICH_ARCH_PATH=$MPICH_PATH
-    export MPICH_ROOT=$MPICH_ARCH_PATH
+    export MPICH_ROOT=$MPICH_PATH
+    export MPI_ARCH_PATH=$MPICH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
-    export MPI_ARCH_PATH=$MPICH_ARCH_PATH
 
-    AddLib $MPICH_ARCH_PATH/lib
+    AddLib $MPI_ARCH_PATH/lib
     AddLib $GM_LIB_PATH
-    AddPath $MPICH_ARCH_PATH/bin
+    AddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
     ;;
 
 GAMMA)
     export GAMMA_ARCH_PATH=/usr
-
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/gamma
     ;;
 

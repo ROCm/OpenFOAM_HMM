@@ -127,7 +127,7 @@ public:
             {}
 
             //- Return the block holding these datasets
-            const int block() const
+            int block() const
             {
                 return block_;
             }
@@ -137,17 +137,17 @@ public:
                 return name_;
             }
 
-            const int start() const
+            int start() const
             {
                 return start_;
             }
 
-            const int end() const
+            int end() const
             {
                 return start_ + size_;
             }
 
-            const int size() const
+            int size() const
             {
                 return size_;
             }
