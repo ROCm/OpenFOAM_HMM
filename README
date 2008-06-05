@@ -23,20 +23,19 @@
   7.  Documentation
   8.  Help
   9.  Reporting Bugs
-  A.  Network settings
-  B.  Running OpenFOAM in 32-bit mode
+  A.  Running OpenFOAM in 32-bit mode
 
 
 2. System requirements
 ~~~~~~~~~~~~~~~~~~~~~~
-  OpenFOAM generally requires that the host machine operates a basic level
-  of networking.  To check your system setup, execute the foamSystemCheck
+  OpenFOAM is developed and tested on Linux, but should work with other
+  Unix style system.  To check your system setup, execute the foamSystemCheck
   script in the bin directory of the OpenFOAM installation. If no problems
-  are reported, proceed to "3. Installation"; otherwise see the
-  appendix "A. Network settings" and/or contact your system administrator.
+  are reported, proceed to "3. Installation"; otherwise contact your
+  system administrator.
 
   If the user wishes to run OpenFOAM in 32/64-bit mode they should consult
-  the appendix "B. Running OpenFOAM in 32-bit mode".
+  the appendix "A. Running OpenFOAM in 32-bit mode".
 
 
 3. Installation
@@ -48,14 +47,16 @@
   The environment variable settings are contained in files in an etc/
   directory in the OpenFOAM release. e.g. in
 
-      $HOME/OpenFOAM/OpenFOAM-dev/etc/
+      $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/
+
+      where <VERSION> corresponds to the version 1.4, 1.5, ...
 
   a)
     EITHER, if running bash or ksh (if in doubt type 'echo $SHELL'),
     source the etc/bashrc file by adding the following line to the end
     of your $HOME/.bashrc file:
 
-        . $HOME/OpenFOAM/OpenFOAM-dev/etc/bashrc
+        . $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/bashrc
 
     Then update the environment variables by sourcing the $HOME/.bashrc file
     by typing in the terminal:
@@ -66,7 +67,7 @@
     OR, if running tcsh or csh, source the etc/cshrc file by adding the
     following line to the end of your $HOME/.cshrc file:
 
-        source $HOME/OpenFOAM/OpenFOAM-dev/etc/cshrc
+        source $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/cshrc
 
     Then update the environment variables by sourcing the $HOME/.cshrc file
     by typing in the terminal:
@@ -85,39 +86,42 @@
     the appropriate resource file. Here is a bash/ksh/sh example:
 
         export FOAM_INST_DIR=/data/app/OpenFOAM
-        foamDotFile=$FOAM_INST_DIR/OpenFOAM-dev/etc/bashrc
+        foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
         [ -f $foamDotFile ] && . $foamDotFile
 
     and a csh example:
 
         setenv FOAM_INST_DIR /data/app/OpenFOAM
-        foamDotFile=$FOAM_INST_DIR/OpenFOAM-dev/etc/bashrc
+        foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
         if ( -f $foamDotFile ) source $foamDotFile
 
 
-    The value set in '$FOAM_INST_DIR' will be used to locate the rest
-    of the OpenFOAM installation.
-
+    The value set in '$FOAM_INST_DIR' will be used to locate the remaining
+    parts of the OpenFOAM installation.
 
 
 4. Building from Sources (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  If you cannot find an appropriate binary pack for your platform you can
+
+  If you cannot find an appropriate binary pack for your platform, you can
   build the complete OpenFOAM from the source-pack.  First you will need to
-  compile or obtain a recent version of gcc (we recommend gcc-4.1.?) for
-  your platform which may be obtained from http://gcc.gnu.org/.  Install the
-  compiler in $WM_PROJECT_INST_DIR/$WM_ARCH/gcc-4.1.? and change the gcc
-  version number in $WM_PROJECT_DIR/.bashrc and $WM_PROJECT_DIR/.cshrc as
-  appropriate and update the environment variables as in section 3.
+  compile or obtain a recent version of gcc (we recomend gcc-4.2.?) for
+  your platform, which may be obtained from http://gcc.gnu.org/.
+
+  Install the compiler in
+  $WM_PROJECT_INST_DIR/ThirdParty/gcc-<GCC_VERSION>/platforms/$WM_ARCH$WM_COMPILER_ARCH/
+  and change the gcc version number in $WM_PROJECT_DIR/etc/settings.sh and
+  $WM_PROJECT_DIR/etc/settings.csh appropriately and finally update the
+  environment variables as in section 3.
 
   Now go to the top-level source directory $WM_PROJECT_DIR and type
   ./Allwmake, which is the name of the top-level build script for building
-  the whole of OpenFOAM.  In principle this will build everything but
+  the whole of OpenFOAM.  In principle this will build everything, but
   sometimes problems occur with the build order and it is necessary to
   update the environment variables and re-execute Allwmake.  If you
   experience difficulties with building the source-pack or your platform is
-  not currently supported please contact enquiries@OpenCFD.co.uk to
-  negotiate a support contract and we will do the port and maintiain it in
+  not currently supported please contact <enquiries@OpenCFD.co.uk> to
+  negotiate a support contract and we will do the port and maintain it in
   future releases.
 
 
@@ -132,21 +136,22 @@
 
 6. Getting Started
 ~~~~~~~~~~~~~~~~~~
-  Create a project directory within the $HOME/OpenFOAM directory named
-  <userName>-dev (e.g. 'chris-dev' for user chris) and create a
-  directory named 'run' within it, e.g. by typing:
 
-      mkdir -p $HOME/OpenFOAM/${LOGNAME}-dev/run
+  Create a project directory within the $HOME/OpenFOAM directory named
+  <USER>-<VERSION> (e.g. 'chris-1.5' for user chris and OpenFOAM version 1.5)
+  and create a directory named 'run' within it, e.g. by typing:
+
+      mkdir -p $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
 
   Copy the 'tutorial' examples directory in the OpenFOAM distribution to the
   'run' directory.  If OpenFOAM environment variables are set correctly,
   then the following command will be correct:
 
-      cp -r $WM_PROJECT_DIR/tutorials $HOME/OpenFOAM/${LOGNAME}-dev/run
+      cp -r $WM_PROJECT_DIR/tutorials $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
 
   Run the first example case of incompressible laminar flow in a cavity:
 
-      cd $HOME/OpenFOAM/${LOGNAME}-dev/run/tutorials/icoFoam/cavity
+      cd $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run/tutorials/icoFoam/cavity
       blockMesh
       icoFoam
 
@@ -167,87 +172,7 @@
     http://www.OpenFOAM.org/bugs.html
 
 
-A. Network settings
-~~~~~~~~~~~~~~~~~~~
-  OpenFOAM requires a basic level of networking to be set up.  Firstly, the
-  host name must be set - to test, type 'uname -a'.  The running shell must
-  be tcsh, csh, bash or ksh - to test type 'echo $SHELL'
-
-  The user must be able to 'ping' the host machine itself (<host>) - to
-  test, type 'ping -c 1 <host>'
-
-  If the ping fails then it is possible that that the entry for the host
-  machine is missing, incorrect or duplicated in the /etc/hosts file.  The
-  user can check this by typing 'grep <host> /etc/hosts' which should return
-  a single line, typically of the form:
-
-      <IPaddress> <host>.<domain> <host>
-
-  The <IPaddress> must correspond to that in the networking settings of the
-  machine which can also be checked by typing on Linux '/sbin/ifconfig'
-  which should produce lines of output that include something similar to the
-  following:
-
-      eth0  Link encap:Ethernet HWaddr ...
-            inet addr:<IPaddress> ...
-
-  If the user is connected to a network that uses dynamic IP addresses, they
-  must be particularly careful to ensure that an entry for their hostname/IP
-  exists in the /etc/hosts file. If the server frequently reallocates IP
-  addresses across the network, it is advisable that the /etc/hosts file is
-  updated automatically when any changes occur.
-
-  The user should also be able to contact any other machine that it needs
-  to, either a remote licence host or other machines that are being used
-  within some parallel computation. Essentially the user needs to be able to
-  ping these machines as described in preceeding sections.
-
-  The machine must have one of (or both) remote (rsh) and secure shell (ssh)
-  running on his/her account. To check whether rsh is running correctly, the
-  user should type 'rsh <host> ls'. Alternatively the user can check if ssh
-  is running correctly by typing 'ssh <host> ls'. In either case, the output
-  to the command should produce a file/directory listing for the current
-  directory and no other text. If neither command works, we recommend the
-  user set up rsh for their use as follows:
-
-  Check the rsh executable actually exists, e.g. the path to the executable
-  should be returned when typing 'which rsh'. Check with the system
-  administrator that rsh is enabled on the user's account; if not, request
-  that it is enabled. Create a '.rhosts' file in the $HOME directory
-  containing entries to access any machines they need to access, i.e. their
-  own machine and, if different, the licence host machine. The entries are
-  of the form: '<host> <user>'.
-
-  Remote shell accesses the .bashrc (or .cshrc) file and will not run
-  correctly if there is a problem with this file. In particular the user
-  should be careful with the following:
-
-  The ~/.cshrc (or ~/.bashrc) file should not contain errors that prevent it
-  from executing fully at startup; all error messages during execution of
-  the ~/.bashrc (or ~/.cshrc) file should be investigated and acted upon to
-  eliminate them. echo (print to screen) statements within ~/.bashrc (or
-  ~/.cshrc) must not be executed during the running of rsh. This does not
-  mean that echo statements are forbidden from the ~/.cshrc (or ~/.bashrc)
-  file, but they must be enclosed in a control structure, e.g. an if
-  statement, that ensures they are not executed when rsh is executed.
-  For ~.bashrc:
-
-      if [ "$PS1" ]; then
-         echo "..."
-      fi
-
-    # or, alternatively
-
-      if /usr/bin/tty -s 2>/dev/null; then
-         echo "..."
-      fi
-
-  and, for ~.cshrc:
-
-      if ($?prompt) then ; echo "..." ; endif
-
-
-B. Running OpenFOAM in 32-bit mode on 64-bit machines
+A. Running OpenFOAM in 32-bit mode on 64-bit machines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Those users with an installation of Linux on a 64-bit machine may install
   either or both of the 32-bit version of OpenFOAM (linux) or the 64-bit
@@ -256,3 +181,4 @@ B. Running OpenFOAM in 32-bit mode on 64-bit machines
   variable $WM_32 (to anything, e.g. "on") before sourcing the etc/bashrc
   (or etc/cshrc) file.  Unsetting $WM_32 and sourcing the bashrc file will
   set up the user to run in 64-bit mode.
+
