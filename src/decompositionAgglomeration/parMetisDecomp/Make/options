@@ -2,8 +2,8 @@ include $(RULES)/mplib$(WM_MPLIB)
 
 EXE_INC = \
     $(PFLAGS) $(PINC) \
-    -I${WM_PROJECT_INST_DIR}/ThirdParty/ParMetis-3.1/ParMETISLib \
-    -I${WM_PROJECT_INST_DIR}/ThirdParty/ParMetis-3.1 \
+    -I$(THIRD_PARTY)/ParMetis-3.1/ParMETISLib \
+    -I$(THIRD_PARTY)/ParMetis-3.1 \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
