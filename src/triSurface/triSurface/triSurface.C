@@ -651,7 +651,7 @@ surfacePatchList triSurface::calcPatches(labelList& faceMap) const
     {
         sortedRegion[faceI] = operator[](faceI).region();
     }
-    sortedRegion.sort();
+    sortedRegion.stableSort();
 
     faceMap = sortedRegion.indices();
 
@@ -1214,7 +1214,11 @@ void triSurface::writeStats(Ostream& os) const
 {
     // Calculate bounding box without any additional addressing
     // Copy of treeBoundBox code. Cannot use meshTools from triSurface...
-    boundBox bb;
+    boundBox bb
+    (
+        point(VGREAT, VGREAT, VGREAT),
+        point(-VGREAT, -VGREAT, -VGREAT)
+    );
     forAll(*this, triI)
     {
         const labelledTri& f = operator[](triI);

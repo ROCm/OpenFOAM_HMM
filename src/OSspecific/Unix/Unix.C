@@ -103,11 +103,7 @@ bool Foam::setEnv
     const bool overwrite
 )
 {
-#   ifdef linux
     return setenv(envName.c_str(), value.c_str(), overwrite) == 0;
-#   else
-    return putenv((char*)(envName + '=' + value.c_str()).c_str()) == 0;
-#   endif
 }
 
 
