@@ -130,70 +130,67 @@ endif
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
+unset MPI_ARCH_PATH
+
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set ompi_version=1.2.6
-    setenv OPENMPI_HOME $thirdParty/openmpi-$ompi_version
-    setenv OPENMPI_ARCH_PATH $OPENMPI_HOME/platforms/$WM_OPTIONS
+    set mpi_version=openmpi-1.2.6
+    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find it's install directory
-    setenv OPAL_PREFIX $OPENMPI_ARCH_PATH
+    setenv OPAL_PREFIX $MPI_ARCH_PATH
 
-    AddLib $OPENMPI_ARCH_PATH/lib
-    AddPath $OPENMPI_ARCH_PATH/bin
+    AddLib $MPI_ARCH_PATH/lib
+    AddPath $MPI_ARCH_PATH/bin
 
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/openmpi-$ompi_version
-    unset ompi_version
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
+    unset mpi_version
     breaksw
 
 case LAM:
-    set lam_version=7.1.4
-    setenv LAMHOME $thirdParty/lam-$lam_version
-    setenv LAM_ARCH_PATH $LAMHOME/platforms/$WM_OPTIONS
+    set mpi_version=lam-7.1.4
+    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv LAMHOME $thirdParty/$mpi_version
 
-    AddLib $LAM_ARCH_PATH/lib
-    AddPath $LAM_ARCH_PATH/bin
+    AddLib $MPI_ARCH_PATH/lib
+    AddPath $MPI_ARCH_PATH/bin
 
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/lam-$lam_version
-    unset lam_version
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
+    unset mpi_version
     breaksw
 
 case MPICH:
-    set mpich_version=1.2.4
-    setenv MPICH_PATH $thirdParty/mpich-$mpich_version
-    setenv MPICH_ARCH_PATH $MPICH_PATH/platforms/$WM_OPTIONS
-    setenv MPICH_ROOT $MPICH_ARCH_PATH
+    set mpi_version=mpich-1.2.4
+    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv MPICH_ROOT $MPI_ARCH_PATH
 
-    AddLib $MPICH_ARCH_PATH/lib
-    AddPath $MPICH_ARCH_PATH/bin
+    AddLib $MPI_ARCH_PATH/lib
+    AddPath $MPI_ARCH_PATH/bin
 
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-$mpich_version
-    unset mpich_version
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
+    unset mpi_version
     breaksw
 
 case MPICH-GM:
     setenv MPICH_PATH /opt/mpi
-    setenv MPICH_ARCH_PATH $MPICH_PATH
     setenv MPICH_ROOT $MPICH_ARCH_PATH
+    setenv MPI_ARCH_PATH $MPICH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
 
-    AddLib $MPICH_ARCH_PATH/lib
+    AddLib $MPI_ARCH_PATH/lib
     AddLib $GM_LIB_PATH
-    AddPath $MPICH_ARCH_PATH/bin
+    AddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
 
 case GAMMA:
     setenv GAMMA_ARCH_PATH /usr
-
-    # AddLib $GAMMA_ARCH_PATH/lib
-    # AddPath $GAMMA_ARCH_PATH/bin
-
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/gamma
     breaksw
 
 case MPI:
+    setenv MPI_ARCH_PATH /opt/mpi
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpi
     breaksw
 

@@ -535,16 +535,6 @@ Foam::argList::argList
     // Set the case as an environment variable
     setEnv("FOAM_CASE", rootPath_/globalCase_, true);
 
-    // Set the relative parent directory as an environment variable
-    if (parRunControl_.parRun())
-    {
-        setEnv("FOAM_ROOT", "..", true);
-    }
-    else
-    {
-        setEnv("FOAM_ROOT", ".", true);
-    }
-
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.
     sigFpe_.set();

@@ -43,7 +43,7 @@ addCMakeVariable ()
 
 initialiseVariables ()
 {
-    unset CMAKE_VARIABLES OBJ_ADD MPI_ARCH_PATH
+    unset CMAKE_VARIABLES OBJ_ADD
 
     if [ "$VERBOSE" = ON ]; then
         addCMakeVariable "CMAKE_VERBOSE_MAKEFILE=TRUE"
@@ -55,26 +55,7 @@ addMpiSupport ()
 {
     [ "$INCLUDE_MPI" = ON ] || return
 
-    # using OpenFOAM variables to identify location of MPI libraries
-    case "$WM_MPLIB" in
-    OPENMPI)
-        MPI_ARCH_PATH=$OPENMPI_ARCH_PATH
-        MPI_LIBRARY=$OPENMPI_ARCH_PATH/lib/libmpi.so
-        ;;
-    LAM)
-        MPI_ARCH_PATH=$LAM_ARCH_PATH
-        MPI_LIBRARY=$LAM_ARCH_PATH/lib/libmpi.so
-        ;;
-    MPICH)
-        MPI_ARCH_PATH=$MPICH_ARCH_PATH
-        MPI_LIBRARY=$MPICH_ARCH_PATH/lib/libmpich.so
-        ;;
-    *)
-        echo "*** Error: unknown/unsupported mpi: $WM_MPLIB"
-        exit 1
-        ;;
-    esac
-
+    MPI_LIBRARY=$MPI_ARCH_PATH/lib/libmpi.so
     MPI_INCLUDE_PATH=$MPI_ARCH_PATH/include
     MPI_RUN=$MPI_ARCH_PATH/bin/mpirun
 
@@ -274,7 +255,6 @@ installParaView ()
 # for good measure - clear a few variables before using any of the functions
 
 unset VERBOSE INCLUDE_MPI INCLUDE_PYTHON INCLUDE_MESA PYTHON_LIBRARY
-unset MPI_ARCH_PATH
 unset CMAKE_VARIABLES OBJ_ADD
 unset CMAKE_SKIP
 

@@ -104,9 +104,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   If you cannot find an appropriate binary pack for your platform you can
   build the complete OpenFOAM from the source-pack.  First you will need to
-  compile or obtain a recent version of gcc (we recommend gcc-4.1.?) for
+  compile or obtain a recent version of gcc (we recommend gcc-4.2.?) for
   your platform which may be obtained from http://gcc.gnu.org/.  Install the
-  compiler in $WM_PROJECT_INST_DIR/$WM_ARCH/gcc-4.1.? and change the gcc
+  compiler in $WM_PROJECT_INST_DIR/$WM_ARCH/gcc-4.2.? and change the gcc
   version number in $WM_PROJECT_DIR/.bashrc and $WM_PROJECT_DIR/.cshrc as
   appropriate and update the environment variables as in section 3.
 
@@ -167,87 +167,7 @@
     http://www.OpenFOAM.org/bugs.html
 
 
-A. Network settings
-~~~~~~~~~~~~~~~~~~~
-  OpenFOAM requires a basic level of networking to be set up.  Firstly, the
-  host name must be set - to test, type 'uname -a'.  The running shell must
-  be tcsh, csh, bash or ksh - to test type 'echo $SHELL'
-
-  The user must be able to 'ping' the host machine itself (<host>) - to
-  test, type 'ping -c 1 <host>'
-
-  If the ping fails then it is possible that that the entry for the host
-  machine is missing, incorrect or duplicated in the /etc/hosts file.  The
-  user can check this by typing 'grep <host> /etc/hosts' which should return
-  a single line, typically of the form:
-
-      <IPaddress> <host>.<domain> <host>
-
-  The <IPaddress> must correspond to that in the networking settings of the
-  machine which can also be checked by typing on Linux '/sbin/ifconfig'
-  which should produce lines of output that include something similar to the
-  following:
-
-      eth0  Link encap:Ethernet HWaddr ...
-            inet addr:<IPaddress> ...
-
-  If the user is connected to a network that uses dynamic IP addresses, they
-  must be particularly careful to ensure that an entry for their hostname/IP
-  exists in the /etc/hosts file. If the server frequently reallocates IP
-  addresses across the network, it is advisable that the /etc/hosts file is
-  updated automatically when any changes occur.
-
-  The user should also be able to contact any other machine that it needs
-  to, either a remote licence host or other machines that are being used
-  within some parallel computation. Essentially the user needs to be able to
-  ping these machines as described in preceeding sections.
-
-  The machine must have one of (or both) remote (rsh) and secure shell (ssh)
-  running on his/her account. To check whether rsh is running correctly, the
-  user should type 'rsh <host> ls'. Alternatively the user can check if ssh
-  is running correctly by typing 'ssh <host> ls'. In either case, the output
-  to the command should produce a file/directory listing for the current
-  directory and no other text. If neither command works, we recommend the
-  user set up rsh for their use as follows:
-
-  Check the rsh executable actually exists, e.g. the path to the executable
-  should be returned when typing 'which rsh'. Check with the system
-  administrator that rsh is enabled on the user's account; if not, request
-  that it is enabled. Create a '.rhosts' file in the $HOME directory
-  containing entries to access any machines they need to access, i.e. their
-  own machine and, if different, the licence host machine. The entries are
-  of the form: '<host> <user>'.
-
-  Remote shell accesses the .bashrc (or .cshrc) file and will not run
-  correctly if there is a problem with this file. In particular the user
-  should be careful with the following:
-
-  The ~/.cshrc (or ~/.bashrc) file should not contain errors that prevent it
-  from executing fully at startup; all error messages during execution of
-  the ~/.bashrc (or ~/.cshrc) file should be investigated and acted upon to
-  eliminate them. echo (print to screen) statements within ~/.bashrc (or
-  ~/.cshrc) must not be executed during the running of rsh. This does not
-  mean that echo statements are forbidden from the ~/.cshrc (or ~/.bashrc)
-  file, but they must be enclosed in a control structure, e.g. an if
-  statement, that ensures they are not executed when rsh is executed.
-  For ~.bashrc:
-
-      if [ "$PS1" ]; then
-         echo "..."
-      fi
-
-    # or, alternatively
-
-      if /usr/bin/tty -s 2>/dev/null; then
-         echo "..."
-      fi
-
-  and, for ~.cshrc:
-
-      if ($?prompt) then ; echo "..." ; endif
-
-
-B. Running OpenFOAM in 32-bit mode on 64-bit machines
+A. Running OpenFOAM in 32-bit mode on 64-bit machines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Those users with an installation of Linux on a 64-bit machine may install
   either or both of the 32-bit version of OpenFOAM (linux) or the 64-bit

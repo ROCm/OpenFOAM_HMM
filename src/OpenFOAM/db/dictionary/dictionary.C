@@ -68,7 +68,8 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
             else
             {
                 IOWarningIn("dictionary::add(entry* ePtr)", (*this))
-                    << "problem replacing entry in dictionary " << name()
+                    << "problem replacing entry "<< ePtr->keyword()
+                    << " in dictionary " << name()
                     << endl;
 
                 IDLList<entry>::remove(ePtr);
@@ -91,7 +92,8 @@ bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
     else
     {
         IOWarningIn("dictionary::add(entry* ePtr)", (*this))
-            << "attempt to add an entry already in dictionary " << name()
+            << "attempt to add entry "<< ePtr->keyword()
+            << " which already exists in dictionary " << name()
             << endl;
 
         delete ePtr;
