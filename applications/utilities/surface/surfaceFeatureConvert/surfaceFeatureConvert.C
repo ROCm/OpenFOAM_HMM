@@ -230,8 +230,8 @@ void write
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surface");
-    argList::validArgs.append("output name");
+    argList::validArgs.append("input file");
+    argList::validArgs.append("output file");
 #   include "setRootCase.H"
 #   include "createTime.H"
 

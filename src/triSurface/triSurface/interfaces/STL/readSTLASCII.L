@@ -438,6 +438,7 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
 
     STLlabels.clear();
 
+    // Stitch all points within SMALL meters.
     stitchTriangles(rawPoints);
 
     // Convert solidNames into regionNames

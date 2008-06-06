@@ -130,6 +130,8 @@ endif
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
+unset MPI_ARCH_PATH
+
 switch ("$WM_MPLIB")
 case OPENMPI:
     set mpi_version=openmpi-1.2.6

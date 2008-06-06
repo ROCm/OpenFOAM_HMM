@@ -231,14 +231,22 @@ bool Foam::probes::checkFieldTypes()
 
                 probeFilePtrs_.insert(fldName, sPtr);
 
-                *sPtr<< '#' << setw(IOstream::defaultPrecision() + 6)
-                     << "Time";
+                unsigned int w = IOstream::defaultPrecision() + 7;
 
-                forAll(probeLocations_, probeI)
+                for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
                 {
-                    *sPtr << token::SPACE << probeLocations_[probeI];
+                    *sPtr<< '#' << setw(IOstream::defaultPrecision() + 6)
+                        << vector::componentNames[cmpt];
+
+                    forAll(probeLocations_, probeI)
+                    {
+                        *sPtr<< setw(w) << probeLocations_[probeI][cmpt];
+                    }
+                    *sPtr << endl;
                 }
-                *sPtr << endl;
+
+                *sPtr<< '#' << setw(IOstream::defaultPrecision() + 6)
+                    << "Time" << endl;
             }
         }
 
