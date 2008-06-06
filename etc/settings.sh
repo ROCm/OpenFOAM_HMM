@@ -146,7 +146,8 @@ unset MPI_ARCH_PATH
 case "$WM_MPLIB" in
 OPENMPI)
     mpi_version=openmpi-1.2.6
-    export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    export MPI_HOME=$thirdParty/$mpi_version
+    export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
@@ -160,7 +161,8 @@ OPENMPI)
 
 LAM)
     mpi_version=lam-7.1.4
-    export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    export MPI_HOME=$thirdParty/$mpi_version
+    export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
     export LAMHOME=$thirdParty/$mpi_version
     # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
@@ -173,7 +175,8 @@ LAM)
 
 MPICH)
     mpi_version=mpich-1.2.4
-    export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    export MPI_HOME=$thirdParty/$mpi_version
+    export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
     export MPICH_ROOT=$MPI_ARCH_PATH
 
     AddLib  $MPI_ARCH_PATH/lib
