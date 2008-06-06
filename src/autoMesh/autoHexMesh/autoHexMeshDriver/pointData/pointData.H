@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pointData
+    Foam::pointData
 
 Description
     Holds information regarding nearest wall point. Used in pointEdgeWave.
     (so not standard meshWave)
+
     To be used in wall distance calculation.
 
 SourceFiles

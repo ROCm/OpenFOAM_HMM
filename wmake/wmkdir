@@ -27,17 +27,21 @@
 #     wmkdir
 #
 # Description
-#     Script which makes a directory is not already constucted.
+#     Script that makes a directory is not already constructed.
 #     Usage : wmkdir <directoryName>
 #
 #------------------------------------------------------------------------------
 
-if [ $# = 1 ]
+if [ $# -eq 1 ]
 then
-    if [ ! -d $1 ]
-    then
-        mkdir -p $1
-    fi
+   # provide help
+   if [ "$1" = "-h" -o "$1" = "-help" ]
+   then
+      echo "usage: ${0##*/} <dir>"
+      echo "       mkdir if directory does not already exist"
+   else
+      [ -d "$1" ] || mkdir -p "$1"
+   fi
 fi
 
 

@@ -1,3 +1,3 @@
 PFLAGS     =
-PINC       = -I$(MPICH_ARCH_PATH)/include
-PLIBS      = -L$(MPICH_ARCH_PATH)/lib -lmpich -L$(GM_LIB_PATH) -lgm
+PINC       = -I$(MPI_ARCH_PATH)/include
+PLIBS      = -L$(MPI_ARCH_PATH)/lib -lmpich -L$(GM_LIB_PATH) -lgm

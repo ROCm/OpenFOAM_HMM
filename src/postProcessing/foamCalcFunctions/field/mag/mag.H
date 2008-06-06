@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::mag
+    Foam::calcTypes::mag
 
 Description
     Calculates and writes the magnitude of a field for each time

@@ -137,10 +137,10 @@ case OPENMPI:
     set mpi_version=openmpi-1.2.6
     setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
 
-    # Tell OpenMPI where to find it's install directory
+    # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
 
-    AddLib $MPI_ARCH_PATH/lib
+    AddLib  $MPI_ARCH_PATH/lib
     AddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
@@ -151,8 +151,9 @@ case LAM:
     set mpi_version=lam-7.1.4
     setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
     setenv LAMHOME $thirdParty/$mpi_version
+    # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
-    AddLib $MPI_ARCH_PATH/lib
+    AddLib  $MPI_ARCH_PATH/lib
     AddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
@@ -164,7 +165,7 @@ case MPICH:
     setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPI_ARCH_PATH
 
-    AddLib $MPI_ARCH_PATH/lib
+    AddLib  $MPI_ARCH_PATH/lib
     AddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
@@ -172,20 +173,20 @@ case MPICH:
     breaksw
 
 case MPICH-GM:
-    setenv MPICH_PATH /opt/mpi
-    setenv MPICH_ROOT $MPICH_ARCH_PATH
-    setenv MPI_ARCH_PATH $MPICH_PATH
+    setenv MPI_ARCH_PATH /opt/mpi
+    setenv MPICH_PATH $MPI_ARCH_PATH
+    setenv MPICH_ROOT $MPI_ARCH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
 
-    AddLib $MPI_ARCH_PATH/lib
-    AddLib $GM_LIB_PATH
+    AddLib  $MPI_ARCH_PATH/lib
+    AddLib  $GM_LIB_PATH
     AddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
 
 case GAMMA:
-    setenv GAMMA_ARCH_PATH /usr
+    setenv MPI_ARCH_PATH /usr
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/gamma
     breaksw
 
@@ -219,6 +220,5 @@ endif
 #if ( -f $FOAM_LIBBIN/libhoard.so ) then
 #    setenv LD_PRELOAD $FOAM_LIBBIN/libhoard.so:${LD_PRELOAD}
 #endif
-
 
 # -----------------------------------------------------------------------------

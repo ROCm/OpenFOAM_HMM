@@ -76,10 +76,6 @@ find -H $packDir               \
 | sed                          \
  -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
- -e "\@$packDir/src/other/mpich-*/platforms@d" \
- -e "\@$packDir/src/other/mpich-*/lib@d"       \
- -e "\@$packDir/src/other/lam-*/platforms@d"   \
- -e "\@$packDir/src/other/openmpi-*/platforms@d"   \
  -e '\@applications/bin/@d'       \
  -e '\@/t/@d'                     \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'   \

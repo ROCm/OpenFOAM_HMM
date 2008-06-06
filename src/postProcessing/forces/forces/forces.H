@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    forces
+    Foam::forces
 
 Description
     Calculates the forces and moments by integrating the pressure and
@@ -77,8 +77,7 @@ public:
     // pressure/viscous forces Tuples.
     typedef Tuple2<pressureViscous, pressureViscous> forcesMoments;
 
-    // Sum operation class used to accumulate the pressure and viscous
-    // forces and moments
+    //- Sum operation class to accumulate the pressure, viscous forces and moments
     class sumOp
     {
     public:

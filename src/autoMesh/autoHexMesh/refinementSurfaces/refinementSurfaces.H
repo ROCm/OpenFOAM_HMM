@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    refinementSurfaces
+    Foam::refinementSurfaces
 
 Description
     Container for triSurfaces used for surface-driven refinement.

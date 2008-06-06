@@ -3,12 +3,11 @@ set -x
 
 wmake libso decompositionMethods
 
-if [ -d $FOAM_MPI_LIBBIN ]
+if [ -d "$FOAM_MPI_LIBBIN" ]
 then
     wmake libso parMetisDecomp
 fi
 
-( cd MGridGenGamgAgglomeration && ./Allwmake )
-
+wmake libso MGridGenGamgAgglomeration
 
 # ----------------------------------------------------------------- end-of-file

@@ -27,7 +27,9 @@ Namespace
 
 Description
     Namespace of functions to calculate implicit derivatives returning a
-    matrix. Time derivatives are calculated using Euler-implicit, backward
+    matrix.
+
+    Temporal derivatives are calculated using Euler-implicit, backward
     differencing or Crank-Nicholson. Spatial derivatives are calculated
     using Gauss' Theorem.
 

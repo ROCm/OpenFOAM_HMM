@@ -95,7 +95,6 @@ export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
 
-
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 WM_COMPILER_BIN=
@@ -152,7 +151,7 @@ OPENMPI)
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
 
-    AddLib $MPI_ARCH_PATH/lib
+    AddLib  $MPI_ARCH_PATH/lib
     AddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
@@ -175,7 +174,7 @@ LAM)
 MPICH)
     mpi_version=mpich-1.2.4
     export MPI_ARCH_PATH=$thirdParty/$mpi_version/platforms/$WM_OPTIONS
-    export MPICH_ROOT=$MPICH_ARCH_PATH
+    export MPICH_ROOT=$MPI_ARCH_PATH
 
     AddLib  $MPI_ARCH_PATH/lib
     AddPath $MPI_ARCH_PATH/bin
@@ -185,20 +184,20 @@ MPICH)
     ;;
 
 MPICH-GM)
-    export MPICH_PATH=/opt/mpi
-    export MPICH_ROOT=$MPICH_PATH
-    export MPI_ARCH_PATH=$MPICH_PATH
+    export MPI_ARCH_PATH=/opt/mpi
+    export MPICH_PATH=$MPI_ARCH_PATH
+    export MPICH_ROOT=$MPI_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
 
-    AddLib $MPI_ARCH_PATH/lib
-    AddLib $GM_LIB_PATH
+    AddLib  $MPI_ARCH_PATH/lib
+    AddLib  $GM_LIB_PATH
     AddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
     ;;
 
 GAMMA)
-    export GAMMA_ARCH_PATH=/usr
+    export MPI_ARCH_PATH=/usr
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/gamma
     ;;
 
@@ -230,6 +229,5 @@ export MPI_BUFFER_SIZE=20000000
 #if [ -f $FOAM_LIBBIN/libhoard.so ]; then
 #    export LD_PRELOAD=$FOAM_LIBBIN/libhoard.so:$LD_PRELOAD
 #fi
-
 
 # -----------------------------------------------------------------------------

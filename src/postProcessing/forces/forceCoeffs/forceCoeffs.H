@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    forceCoeffs
+    Foam::forceCoeffs
 
 Description
     Derived from the forces function object, creates a specialisation to

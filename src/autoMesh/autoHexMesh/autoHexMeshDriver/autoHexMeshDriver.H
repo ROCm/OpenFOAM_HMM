@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    autoHexMeshDriver
+    Foam::autoHexMeshDriver
 
 Description
     main meshing driver.
@@ -85,9 +85,9 @@ class autoHexMeshDriver
         //- Extrusion controls
         enum extrudeMode
         {
-            NOEXTRUDE,      // Do not extrude. No layers added.
-            EXTRUDE,        // Extrude
-            EXTRUDEREMOVE   // Extrude but afterwards remove added faces locally
+            NOEXTRUDE,      /*!< Do not extrude. No layers added. */
+            EXTRUDE,        /*!< Extrude */
+            EXTRUDEREMOVE   /*!< Extrude but afterwards remove added faces locally */
         };
 
 
@@ -107,7 +107,7 @@ class autoHexMeshDriver
             }
         };
 
-        // Combine operator class to combine normal with other normal.
+        //- Combine operator class to combine normal with other normal.
         class nomalsCombine
         {
         public:

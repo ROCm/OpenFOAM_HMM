@@ -532,8 +532,7 @@ reportEnv '$WM_DIR'           '$PATH' "yes"
 reportEnv '$CEI_HOME'         '$PATH' "no"
 echo ""
 reportEnv '$JAVA_PATH'        '$PATH' "no"
-reportEnv '$LAM_ARCH_PATH'    '$PATH' "yes"
-reportEnv '$MPICH_ARCH_PATH'  '$PATH' "no"
+reportEnv '$MPI_ARCH_PATH'    '$PATH' "yes"
 hline #--------------------
 #
 heading "Checking the FOAM env variables set on the LD_LIBRARY_PATH..."
@@ -543,7 +542,7 @@ echo "$COL1 $COL2 $COL3 $COL4 $COL5"
 hline #--------------------
 reportEnv '$FOAM_LIBBIN'      '$LD_LIBRARY_PATH' "yes"
 reportEnv '$FOAM_USER_LIBBIN' '$LD_LIBRARY_PATH' "no"
-reportEnv '$LAM_ARCH_PATH'    '$LD_LIBRARY_PATH' "yes"
+reportEnv '$MPI_ARCH_PATH'    '$LD_LIBRARY_PATH' "yes"
 hline #--------------------
 #
 heading "Software versions"

@@ -59,6 +59,7 @@ LIB_DIR            = $(WM_PROJECT_DIR)/lib
 LIB_WM_OPTIONS_DIR = $(LIB_DIR)/$(WM_OPTIONS)
 OBJECTS_DIR        = $(MAKE_DIR)/$(WM_OPTIONS)
 CLASSES_DIR        = $(MAKE_DIR)/classes
+THIRD_PARTY        = $(WM_PROJECT_INST_DIR)/ThirdParty
 
 SYS_INC            =
 SYS_LIBS           =

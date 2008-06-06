@@ -30,7 +30,7 @@ Description
 
 
 Global
-    foamVersion
+    Foam::FOAMversion
 
 Description
     OpenFOAM version number static string.

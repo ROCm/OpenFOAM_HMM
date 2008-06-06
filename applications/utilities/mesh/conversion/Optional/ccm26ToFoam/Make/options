@@ -1,11 +1,10 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/other/libccmio \
-    -I$(LIB_SRC)/other/libccmio/libccmio/lnInclude
+    -I$(THIRD_PARTY)/libccmio \
+    -I$(THIRD_PARTY)/libccmio/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
-    -lccmio \
-    -ladf
+    -lccmio
