@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
         polyMesh::meshSubDir/"sets"
     );
 
-    Pout<< "Seached : " << mesh.pointsInstance()/polyMesh::meshSubDir/"sets"
+    Pout<< "Searched : " << mesh.pointsInstance()/polyMesh::meshSubDir/"sets"
         << nl
-        << "Found   : " << objects.names() << nl
+        << "Found    : " << objects.names() << nl
         << endl;
 
 
@@ -108,8 +108,10 @@ int main(int argc, char *argv[])
         // Not in memory. Load it.
         pointSet set(*iter());
 
-        if (mesh.pointZones().findZoneID(set.name()) == -1)
+        label zoneID = mesh.pointZones().findZoneID(set.name());
+        if (zoneID == -1)
         {
+            Info<< "Adding set " << set.name() << " as a pointZone." << endl;
             label sz = mesh.pointZones().size();
             mesh.pointZones().setSize(sz+1);
             mesh.pointZones().set
@@ -123,6 +125,13 @@ int main(int argc, char *argv[])
                     mesh.pointZones()       //pointZoneMesh
                 )
             );
+            mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
+        }
+        else
+        {
+            Info<< "Overwriting contents of existing pointZone " << zoneID
+                << " with that of set " << set.name() << "." << endl;
+            mesh.pointZones()[zoneID] = set.toc();
             mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
         }
     }
@@ -142,8 +151,10 @@ int main(int argc, char *argv[])
         // Not in memory. Load it.
         cellSet set(*iter());
 
-        if (mesh.cellZones().findZoneID(set.name()) == -1)
+        label zoneID = mesh.cellZones().findZoneID(set.name());
+        if (zoneID == -1)
         {
+            Info<< "Adding set " << set.name() << " as a cellZone." << endl;
             label sz = mesh.cellZones().size();
             mesh.cellZones().setSize(sz+1);
             mesh.cellZones().set
@@ -157,6 +168,13 @@ int main(int argc, char *argv[])
                     mesh.cellZones()        //pointZoneMesh
                 )
             );
+            mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+        }
+        else
+        {
+            Info<< "Overwriting contents of existing cellZone " << zoneID
+                << " with that of set " << set.name() << "." << endl;
+            mesh.cellZones()[zoneID] = set.toc();
             mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
         }
     }
@@ -262,8 +280,10 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (mesh.faceZones().findZoneID(set.name()) == -1)
+        label zoneID = mesh.faceZones().findZoneID(set.name());
+        if (zoneID == -1)
         {
+            Info<< "Adding set " << set.name() << " as a faceZone." << endl;
             label sz = mesh.faceZones().size();
             mesh.faceZones().setSize(sz+1);
             mesh.faceZones().set
@@ -277,6 +297,17 @@ int main(int argc, char *argv[])
                     sz,                     //index
                     mesh.faceZones()        //pointZoneMesh
                 )
+            );
+            mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+        }
+        else
+        {
+            Info<< "Overwriting contents of existing faceZone " << zoneID
+                << " with that of set " << set.name() << "." << endl;
+            mesh.faceZones()[zoneID].resetAddressing
+            (
+                addressing.shrink(),
+                flipMap.shrink()
             );
             mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
         }

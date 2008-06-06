@@ -125,4 +125,50 @@ Foam::labelList Foam::decompositionMethod::decompose
 }
 
 
+void Foam::decompositionMethod::calcCellCells
+(
+    const polyMesh& mesh,
+    const labelList& fineToCoarse,
+    const label nCoarse,
+    labelListList& cellCells
+)
+{
+    if (fineToCoarse.size() != mesh.nCells())
+    {
+        FatalErrorIn
+        (
+            "decompositionMethod::calcCellCells"
+            "(const labelList&, labelListList&) const"
+        )   << "Only valid for mesh agglomeration." << exit(FatalError);
+    }
+
+    List<DynamicList<label> > dynCellCells(nCoarse);
+
+    forAll(mesh.faceNeighbour(), faceI)
+    {
+        label own = fineToCoarse[mesh.faceOwner()[faceI]];
+        label nei = fineToCoarse[mesh.faceNeighbour()[faceI]];
+
+        if (own != nei)
+        {
+            if (findIndex(dynCellCells[own], nei) == -1)
+            {
+                dynCellCells[own].append(nei);
+            }
+            if (findIndex(dynCellCells[nei], own) == -1)
+            {
+                dynCellCells[nei].append(own);
+            }
+        }
+    }
+
+    cellCells.setSize(dynCellCells.size());
+    forAll(dynCellCells, coarseI)
+    {
+        cellCells[coarseI].transfer(dynCellCells[coarseI].shrink());
+        dynCellCells[coarseI].clear();
+    }
+}
+
+
 // ************************************************************************* //
