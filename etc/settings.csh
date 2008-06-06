@@ -135,7 +135,8 @@ unset MPI_ARCH_PATH
 switch ("$WM_MPLIB")
 case OPENMPI:
     set mpi_version=openmpi-1.2.6
-    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv MPI_HOME $thirdParty/$mpi_version
+    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
@@ -149,7 +150,8 @@ case OPENMPI:
 
 case LAM:
     set mpi_version=lam-7.1.4
-    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv MPI_HOME $thirdParty/$mpi_version
+    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
     setenv LAMHOME $thirdParty/$mpi_version
     # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
@@ -162,7 +164,8 @@ case LAM:
 
 case MPICH:
     set mpi_version=mpich-1.2.4
-    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv MPI_HOME $thirdParty/$mpi_version
+    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPI_ARCH_PATH
 
     AddLib  $MPI_ARCH_PATH/lib
