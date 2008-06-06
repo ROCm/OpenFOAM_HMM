@@ -28,6 +28,11 @@ Class
 Description
     A HashTable with word keys but without contents.
 
+Class
+    Foam::wordHashSet
+
+Description
+    A HashSet with (the default) word keys.
 \*---------------------------------------------------------------------------*/
 
 #ifndef HashSet_H

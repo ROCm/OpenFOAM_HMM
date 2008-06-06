@@ -22,10 +22,18 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Namespace
+    Foam::compressibilityModels
+
+Description
+    Namespace for compressibility models.
+
+
 Class
     Foam::barotropicCompressibilityModel
 
 Description
+    Abstract class for barotropic compressibility models
 
 SourceFiles
     barotropicCompressibilityModel.C

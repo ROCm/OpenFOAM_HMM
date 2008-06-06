@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::div
+    Foam::calcTypes::div
 
 Description
     Writes scalar fields corresponding to the divergence of the supplied

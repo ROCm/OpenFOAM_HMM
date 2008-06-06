@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    meshRefinement
+    Foam::meshRefinement
 
 Description
     Helper class which maintains intersections of (changing) mesh with
     (static) surfaces.
+
     Maintains
     - per face any intersections of this edge with any of the surfaces
 
@@ -90,9 +91,9 @@ public:
         //- Enumeration for how the userdata is to be mapped upon refinement.
         enum mapType
         {
-            MASTERONLY = 1, // maintain master only
-            KEEPALL = 2,    // have slaves (upon refinement) from master
-            REMOVE = 4      // set value to -1 any face that has been refined
+            MASTERONLY = 1, /*!< maintain master only */
+            KEEPALL = 2,    /*!< have slaves (upon refinement) from master */
+            REMOVE = 4      /*!< set value to -1 any face that has been refined */
         };
 
 

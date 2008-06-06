@@ -477,40 +477,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM \
-                         $(WM_PROJECT_DIR)/src/Pstream \
-                         $(WM_PROJECT_DIR)/src/finiteVolume \
-                         $(WM_PROJECT_DIR)/src/transportModels/incompressible \
-                         $(WM_PROJECT_DIR)/src/transportModels/interfaceProperties \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/thermophysicalFunctions \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/specie \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/liquids \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/liquidMixture \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/basic \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/combustion \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/pdfs \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/chemistryModel \
-                         $(WM_PROJECT_DIR)/src/thermophysicalModels/laminarFlameSpeed \
-                         $(WM_PROJECT_DIR)/src/turbulenceModels/incompressible \
-                         $(WM_PROJECT_DIR)/src/turbulenceModels/compressible \
-                         $(WM_PROJECT_DIR)/src/LESmodels/LESfilters \
-                         $(WM_PROJECT_DIR)/src/LESmodels/incompressible \
-                         $(WM_PROJECT_DIR)/src/LESmodels/compressible \
-                         $(WM_PROJECT_DIR)/src/errorEstimation \
-                         $(WM_PROJECT_DIR)/src/dynamicMesh \
-                         $(WM_PROJECT_DIR)/src/triSurface \
-                         $(WM_PROJECT_DIR)/src/edgeMesh \
-                         $(WM_PROJECT_DIR)/src/lagrangian/basic \
-                         $(WM_PROJECT_DIR)/src/lagrangian/solidParticle \
-                         $(WM_PROJECT_DIR)/src/lagrangian/dieselSpray \
-                         $(WM_PROJECT_DIR)/src/engine \
-                         $(WM_PROJECT_DIR)/src/ODE \
-                         $(WM_PROJECT_DIR)/src/randomProcesses \
-                         $(WM_PROJECT_DIR)/src/sampling \
-                         $(WM_PROJECT_DIR)/src/meshTools \
-                         $(WM_PROJECT_DIR)/src/dynamicFvMesh \
-                         $(WM_PROJECT_DIR)/src/topoChangerFvMesh \
-                         $(WM_PROJECT_DIR)/src/fvMotionSolver \
+INPUT                  = $(WM_PROJECT_DIR)/src \
                          $(WM_PROJECT_DIR)/applications/utilities \
                          $(WM_PROJECT_DIR)/applications/solvers
 

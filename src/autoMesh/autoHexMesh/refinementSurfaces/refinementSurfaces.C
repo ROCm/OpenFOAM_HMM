@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    refinementSurfaces
-
 \*----------------------------------------------------------------------------*/
 
 #include "refinementSurfaces.H"
@@ -261,7 +258,7 @@ Foam::refinementSurfaces::refinementSurfaces
                     << " which has regions " << regionNames
                     << abort(FatalError);
             }
-            
+
             label globalRegionI = regionOffset_[surfI] + regionI;
 
             minLevel_[globalRegionI] = iter();

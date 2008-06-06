@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    coupledPolyPatch
+    Foam::coupledPolyPatch
 
 Description
-    coupledPolyPatch is an abstract base class for patches that couple regions
-    of the computational domain e.g. cyclic and processor-processor links.
+    The coupledPolyPatch is an abstract base class for patches that couple
+    regions of the computational domain e.g. cyclic and processor-processor
+    links.
 
 SourceFiles
     coupledPolyPatch.C

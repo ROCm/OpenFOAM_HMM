@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    trackedParticle
+    Foam::trackedParticle
 
 Description
     Particle class that marks cells it passes through. Used to mark cells

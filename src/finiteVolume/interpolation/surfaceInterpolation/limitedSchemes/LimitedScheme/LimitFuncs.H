@@ -22,12 +22,19 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Namespace
+    Foam::limitFuncs
+
+Description
+    Namespace for limiting functions
+
+
 Class
     Foam::limitFuncs::LimitFuncs
 
 Description
     Class to create NVD/TVD limited weighting-factors.
- 
+
     The particular differencing scheme class is supplied as a template
     argument, the weight function of which is called by the weight function
     of this class for the internal faces as well as faces of coupled

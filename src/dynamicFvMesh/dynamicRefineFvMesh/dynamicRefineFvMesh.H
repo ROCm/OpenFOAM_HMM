@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    dynamicRefineFvMesh
+    Foam::dynamicRefineFvMesh
 
 Description
-    fvMesh with built-in refinement. Determines which cells to refine/unrefine
-    and does all in update().
+    A fvMesh with built-in refinement.
+
+    Determines which cells to refine/unrefine and does all in update().
 
 SourceFiles
     dynamicRefineFvMesh.C
