@@ -38,13 +38,9 @@ doc/[Dd]oxygen/latex
 doc/[Dd]oxygen/man
 
 # source packages - anywhere
+*.tar.bz2
 *.tar.gz
 *.tgz
 
-# specific locations
-applications/utilities/preProcessing/FoamX/Java/Make/classes
-
-# other 3rd party sources
-src/other
 
 # end-of-file

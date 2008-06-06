@@ -73,7 +73,6 @@ dirList=$(
       $packDir/lib/$arch \
       $packDir/applications/bin/$arch \
       $packDir/wmake/rules \
-      $packDir/src/other/{mpich,lam,openmpi}-*/platforms/$arch \
       ;
    do
       [ -d $dir ] && echo $dir
