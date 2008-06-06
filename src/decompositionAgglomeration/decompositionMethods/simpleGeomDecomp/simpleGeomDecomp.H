@@ -92,6 +92,16 @@ public:
         }
 
         virtual labelList decompose(const pointField&);
+
+        //- Explicitly provided connectivity
+        virtual labelList decompose
+        (
+            const labelListList& globalCellCells,
+            const pointField& cc
+        )
+        {
+            return decompose(cc);
+        }
 };
 
 

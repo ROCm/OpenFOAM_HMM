@@ -28,6 +28,8 @@ License
 #include "decompositionMethod.H"
 #include "cpuTime.H"
 #include "cyclicPolyPatch.H"
+#include "cellSet.H"
+#include "regionSplit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,116 +129,33 @@ void domainDecomposition::distributeCells()
     }
     else
     {
-        
-
-        // Work the faces whose neighbours need to be kept together into an
-        // agglomeration.
-
-        // Per cell the region/agglomeration it is in
-        labelList cellToRegion(nCells(), -1);
-
-        // Current region
-        label regionI = 0;
-
-        labelHashSet freeRegions;
+        // Faces where owner and neighbour are not 'connected' (= all except
+        // sameProcFaces)
+        boolList blockedFace(nFaces(), true);
 
         forAllConstIter(labelHashSet, sameProcFaces, iter)
         {
-            label patchI = boundaryMesh().whichPatch(iter.key());
-
-            label own = faceOwner()[iter.key()];
-            label nei = -1;
-
-            if (patchI == -1)
-            {
-                nei = faceNeighbour()[iter.key()];
-            }
-            else if (isA<cyclicPolyPatch>(boundaryMesh()[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(boundaryMesh()[patchI]);
-
-                nei = faceOwner()[pp.transformGlobalFace(iter.key())];
-            }
-
-            if (nei != -1)
-            {
-                label ownRegion = cellToRegion[own];
-                label neiRegion = cellToRegion[nei];
-
-                if (ownRegion == -1 && neiRegion == -1)
-                {
-                    // Allocate new agglomeration
-                    cellToRegion[own] = regionI;
-                    cellToRegion[nei] = regionI;
-                    regionI++;
-                }
-                else if (ownRegion != -1)
-                {
-                    // Owner already part of agglomeration. Add nei to it.
-                    cellToRegion[nei] = ownRegion;
-                }
-                else if (neiRegion != -1)
-                {
-                    // nei already part of agglomeration. Add own to it.
-                    cellToRegion[own] = neiRegion;
-                }
-                else if (ownRegion < neiRegion)
-                {
-                    // Renumber neiRegion
-                    forAll(cellToRegion, cellI)
-                    {
-                        if (cellToRegion[cellI] == neiRegion)
-                        {
-                            cellToRegion[cellI] = ownRegion;
-                        }
-                    }
-                    freeRegions.insert(neiRegion);
-                }
-                else if (ownRegion > neiRegion)
-                {
-                    // Renumber ownRegion
-                    forAll(cellToRegion, cellI)
-                    {
-                        if (cellToRegion[cellI] == ownRegion)
-                        {
-                            cellToRegion[cellI] = neiRegion;
-                        }
-                    }
-                    freeRegions.insert(ownRegion);
-                }
-            }
+            blockedFace[iter.key()] = false;
         }
 
+        // Connect coupled boundary faces
+        const polyBoundaryMesh& patches =  boundaryMesh();
 
-        // Do all other cells
-        forAll(cellToRegion, cellI)
+        forAll(patches, patchI)
         {
-            if (cellToRegion[cellI] == -1)
+            const polyPatch& pp = patches[patchI];
+
+            if (pp.coupled())
             {
-                cellToRegion[cellI] = regionI++;
-            }
-        }
-
-
-        // Compact out freeRegions
-        // ~~~~~~~~~~~~~~~~~~~~~~~
-
-        {
-            labelList compactRegion(regionI, -1);
-
-            regionI = 0;
-
-            forAll(compactRegion, i)
-            {
-                if (!freeRegions.found(compactRegion[i]))
+                forAll(pp, i)
                 {
-                    compactRegion[i] = regionI++;
+                    blockedFace[pp.start()+i] = false;
                 }
             }
-
-            inplaceRenumber(compactRegion, cellToRegion);
         }
+
+        // Determine global regions, separated by blockedFaces
+        regionSplit globalRegion(*this, blockedFace);
 
 
         // Determine region cell centres
@@ -249,11 +168,11 @@ void domainDecomposition::distributeCells()
 
         const point greatPoint(GREAT, GREAT, GREAT);
 
-        pointField regionCentres(regionI, greatPoint);
+        pointField regionCentres(globalRegion.nRegions(), greatPoint);
 
-        forAll(cellToRegion, cellI)
+        forAll(globalRegion, cellI)
         {
-            label regionI = cellToRegion[cellI];
+            label regionI = globalRegion[cellI];
 
             if (regionCentres[regionI] == greatPoint)
             {
@@ -261,10 +180,9 @@ void domainDecomposition::distributeCells()
             }
         }
 
-
         // Do decomposition on agglomeration
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        cellToProc_ = decomposePtr().decompose(cellToRegion, regionCentres);
+        cellToProc_ = decomposePtr().decompose(globalRegion, regionCentres);
     }
 
     Info<< "\nFinished decomposition in "

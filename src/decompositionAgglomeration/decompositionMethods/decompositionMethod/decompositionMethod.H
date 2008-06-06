@@ -36,9 +36,6 @@ SourceFiles
 #ifndef decompositionMethod_H
 #define decompositionMethod_H
 
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "dictionary.H"
 #include "polyMesh.H"
 #include "pointField.H"
 
@@ -59,6 +56,15 @@ protected:
         const dictionary& decompositionDict_;
         label nProcessors_;
 
+
+        //- Helper: determine (non-parallel) cellCells from mesh agglomeration.
+        static void calcCellCells
+        (
+            const polyMesh& mesh,
+            const labelList& agglom,
+            const label nCoarse,
+            labelListList& cellCells
+        );
 
 private:
 
@@ -103,13 +109,13 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected turbulence model
+        //- Return a reference to the selected decomposition method
         static autoPtr<decompositionMethod> New
         (
             const dictionary& decompositionDict
         );
 
-        //- Return a reference to the selected turbulence model
+        //- Return a reference to the selected decomposition method
         static autoPtr<decompositionMethod> New
         (
             const dictionary& decompositionDict,
@@ -142,18 +148,35 @@ public:
         //  proc boundaries)
         virtual bool parallelAware() const = 0;
 
-        //- Return for every coordinate the wanted processor number
+        //- Return for every coordinate the wanted processor number. Use the
+        //  mesh connectivity (if needed)
         virtual labelList decompose(const pointField&) = 0;
 
         //- Return for every coordinate the wanted processor number. Gets
         //  passed agglomeration map (from fine to coarse cells) and coarse cell
         //  location. Can be overridden by decomposers that provide this
-        //  functionality natively.
+        //  functionality natively. Coarse cells are local to the processor
+        //  (if in parallel). If you want to have coarse cells spanning
+        //  processors use the next function below instead.
         virtual labelList decompose
         (
-            const labelList& agglom,
-            const pointField&
+            const labelList& cellToRegion,
+            const pointField& regionPoints
         );
+
+        //- Return for every coordinate the wanted processor number. Explicitly
+        //  provided connectivity - does not use mesh_.
+        //  The connectivity is equal to mesh.cellCells() except for
+        //  - in parallel the cell numbers are global cell numbers (starting
+        //    from 0 at processor0 and then incrementing all through the
+        //    processors)
+        //  - the connections are across coupled patches
+        virtual labelList decompose
+        (
+            const labelListList& globalCellCells,
+            const pointField& cc
+        ) = 0;
+
 };
 
 

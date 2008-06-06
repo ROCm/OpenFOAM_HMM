@@ -55,6 +55,13 @@ class metisDecomp
 
     // Private Member Functions
 
+        label decompose
+        (
+            const List<int>& adjncy,
+            const List<int>& xadj,
+            List<int>& finalDecomp
+        );
+
         //- Disallow default bitwise copy construct and assignment
         void operator=(const metisDecomp&);
         metisDecomp(const metisDecomp&);
@@ -90,9 +97,40 @@ public:
             return false;
         }
 
+        //- Return for every coordinate the wanted processor number. Use the
+        //  mesh connectivity (if needed)
         virtual labelList decompose(const pointField&);
 
-        virtual labelList decompose(const labelList& agglom, const pointField&);
+        //- Return for every coordinate the wanted processor number. Gets
+        //  passed agglomeration map (from fine to coarse cells) and coarse cell
+        //  location. Can be overridden by decomposers that provide this
+        //  functionality natively.
+        virtual labelList decompose
+        (
+            const labelList& agglom,
+            const pointField&
+        );
+
+        //- Return for every coordinate the wanted processor number. Explicitly
+        //  provided mesh connectivity.
+        //  The connectivity is equal to mesh.cellCells() except for
+        //  - in parallel the cell numbers are global cell numbers (starting
+        //    from 0 at processor0 and then incrementing all through the
+        //    processors)
+        //  - the connections are across coupled patches
+        virtual labelList decompose
+        (
+            const labelListList& globalCellCells,
+            const pointField& cc
+        );
+
+        //- Helper to convert cellcells into Metis storage
+        static void calcMetisCSR
+        (
+            const labelListList& globalCellCells,
+            List<int>& adjncy,
+            List<int>& xadj
+        );
 
 };
 
