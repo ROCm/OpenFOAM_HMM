@@ -5,6 +5,7 @@ set -x
 # if the library exists, assume there are headers too
 if [ -e $FOAM_LIBBIN/libccmio.so ]
 then
+   $WM_PROJECT_DIR/../ThirdParty/AllwmakeCcmIO
    wmake ccm26ToFoam
 fi
 
