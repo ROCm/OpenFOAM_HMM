@@ -256,11 +256,6 @@ $(pairGAMGAgglomeration)/pairGAMGAgglomerationCombineLevels.C
 algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomeration
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
 
-matrices/LduMatrix/LduMatrix/lduMatrices.C
-matrices/LduMatrix/Preconditioners/lduPreconditioners.C
-matrices/LduMatrix/Smoothers/lduSmoothers.C
-matrices/LduMatrix/Solvers/lduSolvers.C
-
 meshes/lduMesh/lduMesh.C
 
 primitiveShapes = meshes/primitiveShapes
