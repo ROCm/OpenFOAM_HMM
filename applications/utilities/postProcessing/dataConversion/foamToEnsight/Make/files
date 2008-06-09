@@ -1,0 +1,8 @@
+itoa.C
+ensightMesh.C
+ensightParticlePositions.C
+foamToEnsight.C
+ensightWriteBinary.C
+
+EXE = $(FOAM_APPBIN)/foamToEnsight
+//EXE = $(FOAM_USER_APPBIN)/foamToEnsight
