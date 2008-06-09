@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Newtonian.H"
+#include "powerLaw.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 
@@ -34,15 +34,32 @@ namespace Foam
 {
 namespace viscosityModels
 {
-    defineTypeNameAndDebug(Newtonian, 0);
-    addToRunTimeSelectionTable(viscosityModel, Newtonian, dictionary);
+    defineTypeNameAndDebug(powerLaw, 0);
+
+    addToRunTimeSelectionTable
+    (
+        viscosityModel,
+        powerLaw,
+        dictionary
+    );
 }
+}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::powerLaw::calcNu() const
+{
+    dimensionedScalar tone("tone", dimTime, 1.0);
+    return (max(numin_, min(numax_, k_
+        * pow(tone * strainRate(), n_.value()- scalar(1.0)))));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModels::Newtonian::Newtonian
+Foam::viscosityModels::powerLaw::powerLaw
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -51,7 +68,11 @@ Foam::viscosityModels::Newtonian::Newtonian
 )
 :
     viscosityModel(name, viscosityProperties, U, phi),
-    nu0_(viscosityProperties_.lookup("nu")),
+    powerLawCoeffs_(viscosityProperties.subDict(typeName + "Coeffs")),
+    k_(powerLawCoeffs_.lookup("k")),
+    n_(powerLawCoeffs_.lookup("n")),
+    numin_(powerLawCoeffs_.lookup("numin")),
+    numax_(powerLawCoeffs_.lookup("numax")),
     nu_
     (
         IOobject
@@ -60,25 +81,28 @@ Foam::viscosityModels::Newtonian::Newtonian
             U_.time().timeName(),
             U_.db(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        U_.mesh(),
-        nu0_
+        calcNu()
     )
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::viscosityModels::Newtonian::read
+bool Foam::viscosityModels::powerLaw::read
 (
     const dictionary& viscosityProperties
 )
 {
     viscosityModel::read(viscosityProperties);
 
-    viscosityProperties_.lookup("nu") >> nu0_;
-    nu_ = nu0_;
+    powerLawCoeffs_ = viscosityProperties.subDict(typeName + "Coeffs");
+
+    powerLawCoeffs_.lookup("k") >> k_;
+    powerLawCoeffs_.lookup("n") >> n_;
+    powerLawCoeffs_.lookup("numin") >> numin_;
+    powerLawCoeffs_.lookup("numax") >> numax_;
 
     return true;
 }

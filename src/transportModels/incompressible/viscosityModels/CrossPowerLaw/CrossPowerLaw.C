@@ -28,29 +28,28 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace viscosityModels
 {
+    defineTypeNameAndDebug(CrossPowerLaw, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(CrossPowerLaw, 0);
-
-addToRunTimeSelectionTable
-(
-    viscosityModel,
-    CrossPowerLaw,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        viscosityModel,
+        CrossPowerLaw,
+        dictionary
+    );
+}
+}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-//- Calculate and return the laminar viscosity
-tmp<volScalarField> CrossPowerLaw::calcNu() const
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::CrossPowerLaw::calcNu() const
 {
     return (nu0_ - nuInf_)/(scalar(1) + pow(m_*strainRate(), n_)) + nuInf_;
 }
@@ -58,7 +57,7 @@ tmp<volScalarField> CrossPowerLaw::calcNu() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-CrossPowerLaw::CrossPowerLaw
+Foam::viscosityModels::CrossPowerLaw::CrossPowerLaw
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -89,7 +88,10 @@ CrossPowerLaw::CrossPowerLaw
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool CrossPowerLaw::read(const dictionary& viscosityProperties)
+bool Foam::viscosityModels::CrossPowerLaw::read
+(
+    const dictionary& viscosityProperties
+)
 {
     viscosityModel::read(viscosityProperties);
 
@@ -99,14 +101,9 @@ bool CrossPowerLaw::read(const dictionary& viscosityProperties)
     CrossPowerLawCoeffs_.lookup("nuInf") >> nuInf_;
     CrossPowerLawCoeffs_.lookup("m") >> m_;
     CrossPowerLawCoeffs_.lookup("n") >> n_;
-    
+
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace viscosityModels
-} // End namespace Foam
 
 // ************************************************************************* //

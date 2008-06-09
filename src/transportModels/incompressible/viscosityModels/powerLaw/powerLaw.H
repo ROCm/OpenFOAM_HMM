@@ -22,107 +22,67 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    Foam::viscosityModels
-
-Description
-    A namespace for various incompressible viscosityModel implementations.
-
 Class
-    Foam::viscosityModel
+    Foam::viscosityModels::powerLaw
 
 Description
-    An abstract base class for incompressible viscosityModels
+     Standard power-law non-Newtonian viscosity model.
 
 SourceFiles
-    viscosityModel.C
-    newViscosityModel.C
+    powerLaw.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef viscosityModel_H
-#define viscosityModel_H
+#ifndef powerLaw_H
+#define powerLaw_H
 
-#include "IOdictionary.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "volFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
+#include "viscosityModel.H"
 #include "dimensionedScalar.H"
-#include "tmp.H"
-#include "autoPtr.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                Class viscosityModel Declaration
-\*---------------------------------------------------------------------------*/
-
-class viscosityModel
+namespace viscosityModels
 {
 
-protected:
+/*---------------------------------------------------------------------------*\
+                           Class powerLaw Declaration
+\*---------------------------------------------------------------------------*/
 
-    // Protected data
+class powerLaw
+:
+    public viscosityModel
+{
+    // Private data
 
-        word name_;
-        dictionary viscosityProperties_;
+        dictionary powerLawCoeffs_;
 
-        const volVectorField& U_;
-        const surfaceScalarField& phi_;
+        dimensionedScalar k_;
+        dimensionedScalar n_;
+        dimensionedScalar numin_;
+        dimensionedScalar numax_;
+
+        volScalarField nu_;
 
 
     // Private Member Functions
 
-        //- Disallow copy construct
-        viscosityModel(const viscosityModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const viscosityModel&);
+        //- Calculate and return the laminar viscosity
+        tmp<volScalarField> calcNu() const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("viscosityModel");
-
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            viscosityModel,
-            dictionary,
-            (
-                const word& name,
-                const dictionary& viscosityProperties,
-                const volVectorField& U,
-                const surfaceScalarField& phi
-            ),
-            (name, viscosityProperties, U, phi)
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected viscosity model
-        static autoPtr<viscosityModel> New
-        (
-            const word& name,
-            const dictionary& viscosityProperties,
-            const volVectorField& U,
-            const surfaceScalarField& phi
-        );
+    TypeName("powerLaw");
 
 
     // Constructors
 
         //- Construct from components
-        viscosityModel
+        powerLaw
         (
             const word& name,
             const dictionary& viscosityProperties,
@@ -133,34 +93,32 @@ public:
 
     // Destructor
 
-        virtual ~viscosityModel()
+        ~powerLaw()
         {}
 
 
     // Member Functions
 
-        //- Return the phase transport properties dictionary
-        const dictionary& viscosityProperties() const
+        //- Return the laminar viscosity
+        tmp<volScalarField> nu() const
         {
-            return viscosityProperties_;
+            return nu_;
         }
 
-        //- Return the strain rate mag(grad(U))
-        tmp<volScalarField> strainRate() const;
-
-        //- Return the laminar viscosity
-        virtual tmp<volScalarField> nu() const = 0;
-
         //- Correct the laminar viscosity
-        virtual void correct() = 0;
+        void correct()
+        {
+            nu_ = calcNu();
+        }
 
         //- Read transportProperties dictionary
-        virtual bool read(const dictionary& viscosityProperties) = 0;
+        bool read(const dictionary& viscosityProperties);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace viscosityModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
