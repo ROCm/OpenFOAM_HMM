@@ -6,7 +6,7 @@ set -x
 if [ ! -e $FOAM_LIBBIN/libccmio.so ]
 then
 (
-   cd $WM_THIRD_PARTY && ./AllwmakeLibccmio
+   cd $WM_THIRD_PARTY_DIR && ./AllwmakeLibccmio
 )
 fi
 

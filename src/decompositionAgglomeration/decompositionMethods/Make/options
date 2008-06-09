@@ -1,5 +1,5 @@
 EXE_INC = \
-    -I$(THIRD_PARTY)/metis-5.0pre2/include
+    -I$(WM_THIRD_PARTY_DIR)/metis-5.0pre2/include
 
 LIB_LIBS = \
     -lmetis \

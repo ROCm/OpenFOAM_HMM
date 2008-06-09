@@ -59,7 +59,7 @@ export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Location of third-party software
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-export WM_THIRD_PARTY=$WM_PROJECT_INST_DIR/ThirdParty
+export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty
 
 
 # Operating System/Platform from Unix or MSWindows
