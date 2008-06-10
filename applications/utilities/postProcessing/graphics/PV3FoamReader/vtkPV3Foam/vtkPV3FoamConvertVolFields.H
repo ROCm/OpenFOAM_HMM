@@ -194,7 +194,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
             convertPatchPointField
             (
-                tptf().name(),
+                tf.name(),
                 tptf().boundaryField()[patchId]
                     .patchInternalField()(),
                 output,
