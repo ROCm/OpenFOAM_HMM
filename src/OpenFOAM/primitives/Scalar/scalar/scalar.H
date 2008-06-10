@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    scalar
+Typedef
+    Foam::scalar
 
 Description
     Single floating point number identical to float or double depending on

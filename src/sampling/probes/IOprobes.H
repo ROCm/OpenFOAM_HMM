@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    IOprobes
+    Foam::IOprobes
 
 Description
     Instance of the generic IOOutputFilter for probes.

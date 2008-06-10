@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    fieldAverageFunctionObject
+    Foam::fieldAverageFunctionObject
 
 Description
     FunctionObject wrapper around fieldAverage to allow them to be created

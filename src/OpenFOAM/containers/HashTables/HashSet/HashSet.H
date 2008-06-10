@@ -33,6 +33,7 @@ Class
 
 Description
     A HashSet with (the default) word keys.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef HashSet_H

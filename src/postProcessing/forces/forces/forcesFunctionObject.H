@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    forcesFunctionObject
+    Foam::forcesFunctionObject
 
 Description
     FunctionObject wrapper around forces to allow them to be created via the

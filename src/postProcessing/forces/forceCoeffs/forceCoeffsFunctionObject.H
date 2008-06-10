@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    forceCoeffsFunctionObject
+    Foam::forceCoeffsFunctionObject
 
 Description
     FunctionObject wrapper around forceCoeffs to allow them to be created via
