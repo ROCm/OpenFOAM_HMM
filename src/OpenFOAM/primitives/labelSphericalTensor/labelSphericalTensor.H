@@ -23,23 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Type
-    Foam::tensor
+    Foam::labelSphericalTensor
 
 Description
-    Tensor or scalars.
+    SphericalTensor of labels.
 
 SourceFiles
-    tensor.C
+    labelSphericalTensor.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensor_H
-#define tensor_H
+#ifndef labelSphericalTensor_H
+#define labelSphericalTensor_H
 
-#include "Tensor.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
+#include "SphericalTensor.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,19 +46,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Tensor<scalar> tensor;
+typedef SphericalTensor<label> labelSphericalTensor;
 
-vector eigenValues(const tensor& t);
-vector eigenVector(const tensor& t, const scalar lambda);
-tensor eigenVectors(const tensor& t);
+// Identity labelTensor
+static const labelSphericalTensor I(1);
 
-vector eigenValues(const symmTensor& t);
-vector eigenVector(const symmTensor& t, const scalar lambda);
-tensor eigenVectors(const symmTensor& t);
-
-//- Specify data associated with tensor type is contiguous
+//- Specify data associated with labelSphericalTensor type is contiguous
 template<>
-inline bool contiguous<tensor>() {return true;}
+inline bool contiguous<labelSphericalTensor>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

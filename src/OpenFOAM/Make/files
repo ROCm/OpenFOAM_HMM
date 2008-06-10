@@ -18,14 +18,15 @@ primitives/Scalar/scalar/scalar.C
 primitives/labelVector/labelVector.C
 primitives/vector/vector.C
 primitives/vector2D/vector2D.C
-primitives/labelTensor/labelTensor.C
 primitives/sphericalTensor/sphericalTensor.C
 primitives/sphericalTensor2D/sphericalTensor2D.C
 primitives/diagTensor/diagTensor.C
 primitives/symmTensor/symmTensor.C
-primitives/labelSymmTensor/labelSymmTensor.C
 primitives/tensor/tensor.C
 primitives/tensor2D/tensor2D.C
+primitives/labelSphericalTensor/labelSphericalTensor.C
+primitives/labelSymmTensor/labelSymmTensor.C
+primitives/labelTensor/labelTensor.C
 primitives/complex/complex.C
 primitives/complexVector/complexVector.C
 primitives/quaternion/quaternion.C

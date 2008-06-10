@@ -22,54 +22,35 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    Foam::tensor
-
-Description
-    Tensor or scalars.
-
-SourceFiles
-    tensor.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensor_H
-#define tensor_H
-
-#include "Tensor.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
-#include "contiguous.H"
+#include "labelSphericalTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-typedef Tensor<scalar> tensor;
-
-vector eigenValues(const tensor& t);
-vector eigenVector(const tensor& t, const scalar lambda);
-tensor eigenVectors(const tensor& t);
-
-vector eigenValues(const symmTensor& t);
-vector eigenVector(const symmTensor& t, const scalar lambda);
-tensor eigenVectors(const symmTensor& t);
-
-//- Specify data associated with tensor type is contiguous
 template<>
-inline bool contiguous<tensor>() {return true;}
+const char* const labelSphericalTensor::typeName = "labelSphericalTensor";
+
+template<>
+const char* labelSphericalTensor::componentNames[] = {"ii"};
+
+template<>
+const labelSphericalTensor labelSphericalTensor::zero(0);
+
+template<>
+const labelSphericalTensor labelSphericalTensor::one(1);
+
+template<>
+const labelSphericalTensor labelSphericalTensor::I(1);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
