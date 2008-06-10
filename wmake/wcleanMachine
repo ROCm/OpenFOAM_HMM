@@ -47,11 +47,10 @@ then
    exit 1
 fi
 
+find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` \
+    -depth \( -type d -name "*$1" -o -name "*$1$WM_MPLIB" \) -exec rm -r {} \;
 
-find `find .  -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d -name "*$1" \) -exec rm -r {} \;
-
-
-find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
+#find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 
 
 if [ -d lib/$1 ]
@@ -66,11 +65,6 @@ then
        rm -r applications/bin/$1
     fi
 fi
-
-#if [ src/mpich-${MPICH_VERSION}/platforms/$1 ]
-#then
-#   rm -rf src/mpich-${MPICH_VERSION}/platforms/$1
-#fi
 
 
 #------------------------------------------------------------------------------
