@@ -24,22 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "viscosityModel.H"
-#include "volFields.H"
-#include "fvcGrad.H"
+#include "powerLaw.H"
+#include "addToRunTimeSelectionTable.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(viscosityModel, 0);
-    defineRunTimeSelectionTable(viscosityModel, dictionary);
+namespace viscosityModels
+{
+    defineTypeNameAndDebug(powerLaw, 0);
+
+    addToRunTimeSelectionTable
+    (
+        viscosityModel,
+        powerLaw,
+        dictionary
+    );
+}
+}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::powerLaw::calcNu() const
+{
+    dimensionedScalar tone("tone", dimTime, 1.0);
+    return (max(numin_, min(numax_, k_
+        * pow(tone * strainRate(), n_.value()- scalar(1.0)))));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModel::viscosityModel
+Foam::viscosityModels::powerLaw::powerLaw
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -47,24 +67,42 @@ Foam::viscosityModel::viscosityModel
     const surfaceScalarField& phi
 )
 :
-    name_(name),
-    viscosityProperties_(viscosityProperties),
-    U_(U),
-    phi_(phi)
+    viscosityModel(name, viscosityProperties, U, phi),
+    powerLawCoeffs_(viscosityProperties.subDict(typeName + "Coeffs")),
+    k_(powerLawCoeffs_.lookup("k")),
+    n_(powerLawCoeffs_.lookup("n")),
+    numin_(powerLawCoeffs_.lookup("numin")),
+    numax_(powerLawCoeffs_.lookup("numax")),
+    nu_
+    (
+        IOobject
+        (
+            name,
+            U_.time().timeName(),
+            U_.db(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        calcNu()
+    )
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::viscosityModel::strainRate() const
+bool Foam::viscosityModels::powerLaw::read
+(
+    const dictionary& viscosityProperties
+)
 {
-    return mag(symm(fvc::grad(U_)));
-}
+    viscosityModel::read(viscosityProperties);
 
+    powerLawCoeffs_ = viscosityProperties.subDict(typeName + "Coeffs");
 
-bool Foam::viscosityModel::read(const dictionary& viscosityProperties)
-{
-    viscosityProperties_ = viscosityProperties;
+    powerLawCoeffs_.lookup("k") >> k_;
+    powerLawCoeffs_.lookup("n") >> n_;
+    powerLawCoeffs_.lookup("numin") >> numin_;
+    powerLawCoeffs_.lookup("numax") >> numax_;
 
     return true;
 }

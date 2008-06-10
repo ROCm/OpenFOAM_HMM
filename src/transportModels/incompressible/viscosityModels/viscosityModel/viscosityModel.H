@@ -28,7 +28,6 @@ Namespace
 Description
     A namespace for various incompressible viscosityModel implementations.
 
-
 Class
     Foam::viscosityModel
 

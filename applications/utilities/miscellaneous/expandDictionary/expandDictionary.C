@@ -22,58 +22,35 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    expandDictionary
+
+Description
+    Read the dictionary provided as an argument, expand the macros etc. and
+    write the resulting dictionary to standard output.
+
 \*---------------------------------------------------------------------------*/
 
-#include "DiagonalSolver.H"
+#include "argList.H"
+#include "IFstream.H"
+#include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type, class DType, class LUType>
-Foam::DiagonalSolver<Type, DType, LUType>::DiagonalSolver
-(
-    const word& fieldName,
-    const LduMatrix<Type, DType, LUType>& matrix,
-    const dictionary& solverDict
-)
-:
-    LduMatrix<Type, DType, LUType>::solver
-    (
-        fieldName,
-        matrix,
-        solverDict
-    )
-{}
-
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
 
-template<class Type, class DType, class LUType>
-void Foam::DiagonalSolver<Type, DType, LUType>::read
-(
-    const dictionary&
-)
-{}
-
-
-template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
-Foam::DiagonalSolver<Type, DType, LUType>::solve
-(
-    Field<Type>& psi
-) const
+int main(int argc, char *argv[])
 {
-    psi = this->matrix_.source()/this->matrix_.diag();
+    argList::validArgs.clear();
+    argList::validArgs.append("inputDict");
+    argList args(argc, argv);
 
-    return typename LduMatrix<Type, DType, LUType>::solverPerformance
-    (
-        typeName,
-        this->fieldName_,
-        pTraits<Type>::zero,
-        pTraits<Type>::zero,
-        0,
-        true,
-        false
-    );
+    IFstream dictStream(args.additionalArgs()[0]);
+    dictionary inputDict(dictStream);
+    Info<< inputDict << endl;
+
+    return 0;
 }
 
 

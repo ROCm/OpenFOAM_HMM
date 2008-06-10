@@ -22,6 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    changeDictionary
+
 Description
     Simple dictionary changing tool. Can be used to e.g. change the patch
     type. Reads dictionaries (fields) and entries to change from a dictionary.
@@ -62,7 +65,7 @@ namespace Foam
 }
 
 
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
@@ -219,5 +222,6 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
 
 // ************************************************************************* //

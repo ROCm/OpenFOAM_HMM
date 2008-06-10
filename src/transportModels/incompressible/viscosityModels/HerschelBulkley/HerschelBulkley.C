@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Newtonian.H"
+#include "HerschelBulkley.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 
@@ -34,15 +34,35 @@ namespace Foam
 {
 namespace viscosityModels
 {
-    defineTypeNameAndDebug(Newtonian, 0);
-    addToRunTimeSelectionTable(viscosityModel, Newtonian, dictionary);
+    defineTypeNameAndDebug(HerschelBulkley, 0);
+
+    addToRunTimeSelectionTable
+    (
+        viscosityModel,
+        HerschelBulkley,
+        dictionary
+    );
 }
+}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::HerschelBulkley::calcNu() const
+{
+    dimensionedScalar tone("tone", dimTime, 1.0);
+    dimensionedScalar rtone("rtone", dimless/dimTime, 1.0);
+    tmp<volScalarField> sr(strainRate());
+    return (min(nu0_,(tau0_ + k_* rtone *( pow(tone * sr(), n_)
+        + pow(tone*tau0_/nu0_,n_))) / (max(sr(), dimensionedScalar
+        ("VSMALL", dimless/dimTime, VSMALL)))));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModels::Newtonian::Newtonian
+Foam::viscosityModels::HerschelBulkley::HerschelBulkley
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -51,7 +71,11 @@ Foam::viscosityModels::Newtonian::Newtonian
 )
 :
     viscosityModel(name, viscosityProperties, U, phi),
-    nu0_(viscosityProperties_.lookup("nu")),
+    HerschelBulkleyCoeffs_(viscosityProperties.subDict(typeName + "Coeffs")),
+    k_(HerschelBulkleyCoeffs_.lookup("k")),
+    n_(HerschelBulkleyCoeffs_.lookup("n")),
+    tau0_(HerschelBulkleyCoeffs_.lookup("tau0")),
+    nu0_(HerschelBulkleyCoeffs_.lookup("nu0")),
     nu_
     (
         IOobject
@@ -60,25 +84,28 @@ Foam::viscosityModels::Newtonian::Newtonian
             U_.time().timeName(),
             U_.db(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        U_.mesh(),
-        nu0_
+        calcNu()
     )
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::viscosityModels::Newtonian::read
+bool Foam::viscosityModels::HerschelBulkley::read
 (
     const dictionary& viscosityProperties
 )
 {
     viscosityModel::read(viscosityProperties);
 
-    viscosityProperties_.lookup("nu") >> nu0_;
-    nu_ = nu0_;
+    HerschelBulkleyCoeffs_ = viscosityProperties.subDict(typeName + "Coeffs");
+
+    HerschelBulkleyCoeffs_.lookup("k") >> k_;
+    HerschelBulkleyCoeffs_.lookup("n") >> n_;
+    HerschelBulkleyCoeffs_.lookup("tau0") >> tau0_;
+    HerschelBulkleyCoeffs_.lookup("nu0") >> nu0_;
 
     return true;
 }
