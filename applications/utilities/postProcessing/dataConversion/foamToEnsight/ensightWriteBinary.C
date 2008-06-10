@@ -22,50 +22,58 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Type
-    lduInterfaceFieldPtrsList
-
-Description
-    List of coupled interface fields to be used in coupling.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef LduInterfaceFieldPtrsList_H
-#define LduInterfaceFieldPtrsList_H
-
-#include "LduInterfaceField.H"
-#include "UPtrList.H"
+#include "ensightWriteBinary.H"
+#include <fstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+void writeEnsDataBinary
+(
+    const char* val,
+    std::ofstream& ensFile
+)
 {
+    char buffer[80] = {0};
+    strcpy(buffer, val);
+    ensFile.write(buffer, 80*sizeof(char));
+}
 
-/*---------------------------------------------------------------------------*\
-                   Class LduInterfaceFieldPtrsList Declaration
-\*---------------------------------------------------------------------------*/
 
-template<class Type>
-class LduInterfaceFieldPtrsList
-:
-    public UPtrList<const LduInterfaceField<Type> >
+void writeEnsDataBinary
+(
+    const int val,
+    std::ofstream& ensFile
+)
 {
-public:
-
-    LduInterfaceFieldPtrsList(label size)
-    :
-        UPtrList<const LduInterfaceField<Type> >(size)
-    {}
-};
+    ensFile.write(reinterpret_cast<const char*>(&val), sizeof(int));
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void writeEnsDataBinary
+(
+    const scalarField& sf,
+    std::ofstream& ensightFile
+)
+{
+    if (sf.size() > 0)
+    {
+        List<float> temp(sf.size());
 
-} // End namespace Foam
+        forAll(sf, i)
+        {
+            temp[i] = float(sf[i]);
+        }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+        ensightFile.write
+        (
+            reinterpret_cast<char*>(temp.begin()),
+            sf.size()*sizeof(float)
+        );
+    }
+}
 
-#endif
 
 // ************************************************************************* //
 

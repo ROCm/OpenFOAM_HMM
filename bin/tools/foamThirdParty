@@ -13,6 +13,11 @@ my %config = (
 );
 
 my %packages = (
+    cmake => {
+        -opt => 1,
+        url  => "http://www.cmake.org/files/v2.6/cmake-2.6.0.tar.gz",
+    },
+
     lam => {
         -opt => 1,
         url  => "http://www.lam-mpi.org/download/files/lam-7.1.4.tar.bz2",

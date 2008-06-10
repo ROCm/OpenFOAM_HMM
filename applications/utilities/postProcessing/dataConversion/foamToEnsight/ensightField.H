@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::ensightField
+InApplication
+    foamToEnsight
 
 Description
 
@@ -48,6 +48,7 @@ void ensightField
     const Foam::fileName& postProcPath,
     const Foam::word& prepend,
     const Foam::label timeIndex,
+    const bool binary,
     Foam::Ostream& ensightCaseFile
 );
 

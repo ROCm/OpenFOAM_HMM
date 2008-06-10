@@ -258,4 +258,5 @@ unset VERBOSE INCLUDE_MPI INCLUDE_PYTHON INCLUDE_MESA PYTHON_LIBRARY
 unset CMAKE_VARIABLES OBJ_ADD
 unset CMAKE_SKIP
 
-#------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------- end-of-file

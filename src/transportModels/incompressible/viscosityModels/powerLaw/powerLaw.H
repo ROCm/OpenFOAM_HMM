@@ -23,87 +23,103 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::TPBiCG
+    Foam::viscosityModels::powerLaw
 
 Description
-    Preconditioned bi-conjugate gradient solver for asymmetric lduMatrices
-    using a run-time selectable preconditiioner.
+     Standard power-law non-Newtonian viscosity model.
 
 SourceFiles
-    TPBiCG.C
+    powerLaw.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TPBiCG_H
-#define TPBiCG_H
+#ifndef powerLaw_H
+#define powerLaw_H
 
-#include "LduMatrix.H"
+#include "viscosityModel.H"
+#include "dimensionedScalar.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace viscosityModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class TPBiCG Declaration
+                           Class powerLaw Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type, class DType, class LUType>
-class TPBiCG
+class powerLaw
 :
-    public LduMatrix<Type, DType, LUType>::solver
+    public viscosityModel
 {
+    // Private data
+
+        dictionary powerLawCoeffs_;
+
+        dimensionedScalar k_;
+        dimensionedScalar n_;
+        dimensionedScalar numin_;
+        dimensionedScalar numax_;
+
+        volScalarField nu_;
+
+
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        TPBiCG(const TPBiCG&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const TPBiCG&);
+        //- Calculate and return the laminar viscosity
+        tmp<volScalarField> calcNu() const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("PBiCG");
+    TypeName("powerLaw");
 
 
     // Constructors
 
-        //- Construct from matrix components and solver data dictionary
-        TPBiCG
+        //- Construct from components
+        powerLaw
         (
-            const word& fieldName,
-            const LduMatrix<Type, DType, LUType>& matrix,
-            const dictionary& solverDict
+            const word& name,
+            const dictionary& viscosityProperties,
+            const volVectorField& U,
+            const surfaceScalarField& phi
         );
 
 
     // Destructor
 
-        virtual ~TPBiCG()
+        ~powerLaw()
         {}
 
 
     // Member Functions
 
-        //- Solve the matrix with this solver
-        virtual typename LduMatrix<Type, DType, LUType>::solverPerformance solve
-        (
-            Field<Type>& psi
-        ) const;
+        //- Return the laminar viscosity
+        tmp<volScalarField> nu() const
+        {
+            return nu_;
+        }
+
+        //- Correct the laminar viscosity
+        void correct()
+        {
+            nu_ = calcNu();
+        }
+
+        //- Read transportProperties dictionary
+        bool read(const dictionary& viscosityProperties);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace viscosityModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "PBiCGScalarAlpha.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

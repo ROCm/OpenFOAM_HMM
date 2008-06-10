@@ -74,11 +74,6 @@ AddPath $FOAM_USER_APPBIN
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
 
-# Location of third-party software
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-set thirdParty=$WM_PROJECT_INST_DIR/ThirdParty
-
-
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 set WM_COMPILER_BIN=
@@ -94,10 +89,10 @@ switch ("$WM_COMPILER_INST")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc43:
-        setenv WM_COMPILER_DIR $thirdParty/gcc-4.3.0/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.0/platforms/$WM_ARCH$WM_COMPILER_ARCH
     breaksw
     case Gcc:
-        setenv WM_COMPILER_DIR $thirdParty/gcc-4.2.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.2.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
     breaksw
     endsw
 
@@ -135,7 +130,8 @@ unset MPI_ARCH_PATH
 switch ("$WM_MPLIB")
 case OPENMPI:
     set mpi_version=openmpi-1.2.6
-    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
+    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
@@ -149,8 +145,9 @@ case OPENMPI:
 
 case LAM:
     set mpi_version=lam-7.1.4
-    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
-    setenv LAMHOME $thirdParty/$mpi_version
+    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
+    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
+    setenv LAMHOME $WM_THIRD_PARTY_DIR/$mpi_version
     # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
     AddLib  $MPI_ARCH_PATH/lib
@@ -162,7 +159,8 @@ case LAM:
 
 case MPICH:
     set mpi_version=mpich-1.2.4
-    setenv MPI_ARCH_PATH $thirdParty/$mpi_version/platforms/$WM_OPTIONS
+    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
+    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPI_ARCH_PATH
 
     AddLib  $MPI_ARCH_PATH/lib

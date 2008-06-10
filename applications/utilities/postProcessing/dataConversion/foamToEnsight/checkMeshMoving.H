@@ -1,4 +1,5 @@
 bool meshMoving = true;
+
 if (Times.size() > 2)
 {
    for(label n2=2; n2<Times.size(); n2++)
@@ -16,5 +17,5 @@ if (Times.size() > 2)
 }
 else
 {
-meshMoving = false;
+    meshMoving = false;
 }

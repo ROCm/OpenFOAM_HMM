@@ -1,0 +1,19 @@
+#!/bin/sh
+# Build optional components (eg, may depend on third-party libraries)
+set -x
+
+# build libccmio if required
+if [ ! -e $FOAM_LIBBIN/libccmio.so ]
+then
+(
+   cd $WM_THIRD_PARTY_DIR && ./AllwmakeLibccmio
+)
+fi
+
+# if the library built okay, the headers must exist too
+if [ -e $FOAM_LIBBIN/libccmio.so ]
+then
+   wmake ccm26ToFoam
+fi
+
+# end

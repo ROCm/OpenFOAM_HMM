@@ -63,7 +63,7 @@
 
 <!-- Include sets check box -->
         <IntVectorProperty
-            name="IncludeSets / Zones"
+            name="IncludeSets"
             command="SetIncludeSets"
             number_of_elements="1"
             default_values="0">

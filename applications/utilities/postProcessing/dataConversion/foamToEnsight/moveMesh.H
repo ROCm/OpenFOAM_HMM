@@ -1,12 +1,12 @@
 {
     IOobject ioPoints
     (
-        "points", 
+        "points",
         runTime.timeName(),
         polyMesh::meshSubDir,
         mesh
     );
- 
+
     if (ioPoints.headerOk())
     {
         // Reading new points
@@ -22,7 +22,7 @@
                 IOobject::NO_WRITE
             )
         );
-        
+
         mesh.movePoints(newPoints);
     }
 }

@@ -52,25 +52,8 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("patches", "patch list");
+    argList::validOptions.insert("binary", "" );
 #   include "addTimeOptions.H"
-
-    /*
-    const label nTypes = 3;
-    const word fieldTypes[] =
-    {
-        volScalarField::typeName,
-        volVectorField::typeName,
-        volTensorField::typeName
-    };
-
-    const label nSprayFieldTypes = 3;
-    const word sprayFieldTypes[] =
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName,
-        tensorIOField::typeName
-    };
-    */
 
     const label nTypes = 2;
     const word fieldTypes[] =
@@ -116,18 +99,38 @@ int main(int argc, char *argv[])
 
     OFstream *ensightCaseFilePtr = NULL;
 
+    // Check options
+    bool binary = false;
+    if (args.options().found("binary"))
+    {
+        binary = true;
+    }
+
     if (Pstream::master())
     {
         // Open the Case file
         fileName ensightCaseFileName = prepend + "case";
 
-        ensightCaseFilePtr = new OFstream
-        (
-            postProcPath/ensightCaseFileName,
-            runTime.writeFormat(),
-            runTime.writeVersion(),
-            runTime.writeCompression()
-        );
+        if (!binary)
+        {
+            ensightCaseFilePtr = new OFstream
+            (
+                postProcPath/ensightCaseFileName,
+                runTime.writeFormat(),
+                runTime.writeVersion(),
+                runTime.writeCompression()
+            );
+        }
+        else
+        {
+            ensightCaseFilePtr = new OFstream
+            (
+                postProcPath/ensightCaseFileName,
+                runTime.writeFormat(),
+                runTime.writeVersion(),
+                IOstream::UNCOMPRESSED
+            );
+        }
 
         Info<< nl << "Case file is " << ensightCaseFileName << endl;
     }
@@ -135,7 +138,7 @@ int main(int argc, char *argv[])
     OFstream& ensightCaseFile = *ensightCaseFilePtr;
 
     // Construct the EnSight mesh
-    ensightMesh eMesh(mesh, args);
+    ensightMesh eMesh(mesh, args, binary);
 
     // Set Time to the last time before looking for the spray objects
     runTime.setTime(Times[Times.size()-1], Times.size()-1);
@@ -250,6 +253,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -262,6 +266,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -274,6 +279,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -286,6 +292,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }
@@ -298,6 +305,7 @@ int main(int argc, char *argv[])
                             postProcPath,
                             prepend,
                             timeIndex,
+                            binary,
                             ensightCaseFile
                         );
                     }

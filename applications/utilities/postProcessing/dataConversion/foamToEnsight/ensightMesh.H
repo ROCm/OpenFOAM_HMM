@@ -41,6 +41,7 @@ SourceFiles
 #include "HashSet.H"
 #include "fvMesh.H"
 #include "OFstream.H"
+#include <fstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +58,9 @@ class argList;
 class ensightMesh
 {
     // Private data
+
+        //- Set binary file output
+        bool binary_;
 
 
     // Private Member Functions
@@ -136,6 +140,66 @@ class ensightMesh
             OFstream& ensightGeometryFile
         ) const;
 
+        void writeAscii
+        (
+            const fileName& postProcPath,
+            const word& prepend,
+            const label timeIndex,
+            Ostream& ensightCaseFile
+        ) const;
+
+        void writeBinary
+        (
+            const fileName& postProcPath,
+            const word& prepend,
+            const label timeIndex,
+            Ostream& ensightCaseFile
+        ) const;
+
+        void writePrimsBinary
+        (
+            const cellShapeList& cellShapes,
+            const label pointOffset,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeAllPrimsBinary
+        (
+            const char* key,
+            const label nPrims,
+            const cellShapeList& cellShapes,
+            const labelList& pointOffsets,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writePolysBinary
+        (
+            const labelList& polys,
+            const cellList& cellFaces,
+            const faceList& faces,
+            const label pointOffset,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeAllFacePrimsBinary
+        (
+            const char* key,
+            const labelList& prims,
+            const label nPrims,
+            const faceList& patchFaces,
+            const labelList& pointOffsets,
+            const labelList& patchProcessors,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeFacePrimsBinary
+        (
+            const char* key,
+            const faceList& patchFaces,
+            const label pointOffset,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
 
 public:
 
@@ -151,7 +215,6 @@ public:
 
         class nFacePrims
         {
-
         public:
 
             label nPoints;
@@ -174,7 +237,7 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        ensightMesh(const fvMesh&, const argList& args);
+        ensightMesh(const fvMesh&, const argList& args, const bool binary);
 
 
     // Destructor
@@ -184,21 +247,13 @@ public:
 
     // Member Functions
 
-        // Access
-
-        // Check
-
-        // Edit
-
-        // Write
-
-            void write
-            (
-                const fileName& postProcPath,
-                const word& prepend,
-                const label timeIndex,
-                Ostream& ensightCaseFile
-            ) const;
+        void write
+        (
+            const fileName& postProcPath,
+            const word& prepend,
+            const label timeIndex,
+            Ostream& ensightCaseFile
+        ) const;
 };
 
 

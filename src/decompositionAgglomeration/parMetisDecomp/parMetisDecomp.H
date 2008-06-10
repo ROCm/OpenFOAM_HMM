@@ -62,6 +62,18 @@ class parMetisDecomp
         template<class Type>
         static void append(const UList<Type>&, List<Type>&);
 
+        label decompose
+        (
+            Field<int>& xadj,
+            Field<int>& adjncy,
+            const pointField& cellCentres,
+            Field<int>& cellWeights,
+            Field<int>& faceWeights,
+            const List<int>& options,
+
+            List<int>& finalDecomp
+        );
+
 
         //- Disallow default bitwise copy construct and assignment
         void operator=(const parMetisDecomp&);
@@ -93,12 +105,37 @@ public:
     // Member Functions
 
         //- parMetis handles Foam processor boundaries
-        bool parallelAware() const
+        virtual bool parallelAware() const
         {
             return true;
         }
 
-        labelList decompose(const pointField&);
+        //- Return for every coordinate the wanted processor number. Use the
+        //  mesh connectivity (if needed)
+        virtual labelList decompose(const pointField&);
+
+        //- Return for every coordinate the wanted processor number. Gets
+        //  passed agglomeration map (from fine to coarse cells) and coarse cell
+        //  location. Can be overridden by decomposers that provide this
+        //  functionality natively.
+        virtual labelList decompose
+        (
+            const labelList& agglom,
+            const pointField&
+        );
+
+        //- Return for every coordinate the wanted processor number. Explicitly
+        //  provided mesh connectivity.
+        //  The connectivity is equal to mesh.cellCells() except for
+        //  - in parallel the cell numbers are global cell numbers (starting
+        //    from 0 at processor0 and then incrementing all through the
+        //    processors)
+        //  - the connections are across coupled patches
+        virtual labelList decompose
+        (
+            const labelListList& globalCellCells,
+            const pointField& cc
+        );
 };
 
 

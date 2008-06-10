@@ -23,102 +23,103 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::TDILUPreconditioner
+    Foam::viscosityModels::HerschelBulkley
 
 Description
-    Simplified diagonal-based incomplete LU preconditioner for asymmetric
-    matrices.
-
-    The inverse (reciprocal for scalar) of the preconditioned diagonal is
-    calculated and stored.
+     Herschel-Bulkley non-Newtonian viscosity model.
 
 SourceFiles
-    TDILUPreconditioner.C
+    HerschelBulkley.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TDILUPreconditioner_H
-#define TDILUPreconditioner_H
+#ifndef HerschelBulkley_H
+#define HerschelBulkley_H
 
-#include "LduMatrix.H"
+#include "viscosityModel.H"
+#include "dimensionedScalar.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace viscosityModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class TDILUPreconditioner Declaration
+                           Class HerschelBulkley Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type, class DType, class LUType>
-class TDILUPreconditioner
+class HerschelBulkley
 :
-    public LduMatrix<Type, DType, LUType>::preconditioner
+    public viscosityModel
 {
     // Private data
 
-        //- The inverse (reciprocal for scalar) preconditioned diagonal
-        Field<DType> rD_;
+        dictionary HerschelBulkleyCoeffs_;
+
+        dimensionedScalar k_;
+        dimensionedScalar n_;
+        dimensionedScalar tau0_;
+        dimensionedScalar nu0_;
+
+        volScalarField nu_;
+
+
+    // Private Member Functions
+
+        //- Calculate and return the laminar viscosity
+        tmp<volScalarField> calcNu() const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("DILU");
+    TypeName("HerschelBulkley");
 
 
     // Constructors
 
-        //- Construct from matrix components and preconditioner data dictionary
-        TDILUPreconditioner
+        //- Construct from components
+        HerschelBulkley
         (
-            const typename LduMatrix<Type, DType, LUType>::solver& sol,
-            const dictionary& preconditionerDict
+            const word& name,
+            const dictionary& viscosityProperties,
+            const volVectorField& U,
+            const surfaceScalarField& phi
         );
 
 
     // Destructor
 
-        virtual ~TDILUPreconditioner()
+        ~HerschelBulkley()
         {}
 
 
     // Member Functions
 
-        //- Calculate the reciprocal of the preconditioned diagonal
-        static void calcInvD
-        (
-            Field<DType>& rD,
-            const LduMatrix<Type, DType, LUType>& matrix
-        );
+        //- Return the laminar viscosity
+        tmp<volScalarField> nu() const
+        {
+            return nu_;
+        }
 
-        //- Return wA the preconditioned form of residual rA
-        virtual void precondition
-        (
-            Field<Type>& wA,
-            const Field<Type>& rA
-        ) const;
+        //- Correct the laminar viscosity
+        void correct()
+        {
+            nu_ = calcNu();
+        }
 
-        //- Return wT the transpose-matrix preconditioned form of
-        //  residual rT.
-        virtual void preconditionT
-        (
-            Field<Type>& wT,
-            const Field<Type>& rT
-        ) const;
+        //- Read transportProperties dictionary
+        bool read(const dictionary& viscosityProperties);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace viscosityModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "TDILUPreconditioner.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

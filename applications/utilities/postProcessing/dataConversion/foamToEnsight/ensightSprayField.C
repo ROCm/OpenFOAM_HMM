@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "ensightSprayField.H"
@@ -83,7 +81,7 @@ void ensightSprayField
     ensightFile << pTraits<Type>::typeName << " values" << nl;
 
     IOField<Type> vf(fieldObject);
-    
+
     ensightFile.setf(ios_base::scientific, ios_base::floatfield);
     ensightFile.precision(5);
 
@@ -104,7 +102,7 @@ void ensightSprayField
             {
                 ensightFile << nl;
             }
-        }            
+        }
     }
 
     if ( (count % 6 != 0) || (count==0) )
