@@ -42,5 +42,7 @@ doc/[Dd]oxygen/man
 *.tar.gz
 *.tgz
 
+# ignore .timeStamp in the main directory
+/.timeStamp
 
 # end-of-file

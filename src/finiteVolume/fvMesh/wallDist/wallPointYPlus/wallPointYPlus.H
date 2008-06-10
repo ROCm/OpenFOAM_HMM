@@ -27,10 +27,11 @@ Class
 
 Description
     Holds information (coordinate and yStar) regarding nearest wall point.
+
     Used in VanDriest wall damping where the interest is in y+ but only
-    needs to be calculated upto e.g. y+ < 200. In all other cells/faces
-    (since y gets initialized to GREAT and yStar to 1) the damping function
-    becomes 1
+    needs to be calculated up to e.g. y+ < 200. In all other cells/faces
+    the damping function becomes 1, since y gets initialized to GREAT and
+    yStar to 1.
 
 SourceFiles
     wallPointYPlusI.H
