@@ -118,7 +118,8 @@ void Foam::vtkPV3Foam::convertVolFields
                 );
                 convertPointField
                 (
-                    tptf(), tf,
+                    tptf(),
+                    tf,
                     output,
                     selectInfoVolume_,
                     selectedRegionDatasetIds_[regionId]
@@ -193,7 +194,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
             convertPatchPointField
             (
-                tptf().name(),
+                tf.name(),
                 tptf().boundaryField()[patchId]
                     .patchInternalField()(),
                 output,
