@@ -54,7 +54,10 @@ void Foam::vtkPV3Foam::convertPatchPointField
     pointData->SetNumberOfTuples(pptf.size());
     pointData->SetNumberOfComponents(Type::nComponents);
     pointData->Allocate(Type::nComponents*pptf.size());
-    pointData->SetName(name.c_str());
+//    pointData->SetName(name.c_str());
+    string dataSetName = name;
+    string newDataSetName = dataSetName.replace("volPointInterpolate", "vpi");
+    pointData->SetName(newDataSetName.c_str());
 
     float vec[Type::nComponents];
 
@@ -92,7 +95,10 @@ void Foam::vtkPV3Foam::convertPatchPointField
     pointData->SetNumberOfTuples(ppsf.size());
     pointData->SetNumberOfComponents(1);
     pointData->Allocate(ppsf.size());
-    pointData->SetName(name.c_str());
+//    pointData->SetName(name.c_str());
+    string dataSetName = name;
+    string newDataSetName = dataSetName.replace("volPointInterpolate", "vpi");
+    pointData->SetName(newDataSetName.c_str());
 
     for (int i=0; i<ppsf.size(); i++)
     {
