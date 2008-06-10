@@ -118,7 +118,8 @@ void Foam::vtkPV3Foam::convertVolFields
                 );
                 convertPointField
                 (
-                    tptf(), tf,
+                    tptf(),
+                    tf,
                     output,
                     selectInfoVolume_,
                     selectedRegionDatasetIds_[regionId]
