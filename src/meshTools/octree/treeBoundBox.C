@@ -43,12 +43,12 @@ const treeBoundBox treeBoundBox::greatBox
 
 const label facesArray[6][4] =
 {
-        {0, 4, 6, 2}, // left
-        {1, 3, 7, 5}, // right
-        {0, 1, 5, 4}, // bottom
-        {2, 6, 7, 3}, // top
-        {0, 2, 3, 1}, // back
-        {4, 5, 7, 6}  // front
+    {0, 4, 6, 2}, // left
+    {1, 3, 7, 5}, // right
+    {0, 1, 5, 4}, // bottom
+    {2, 6, 7, 3}, // top
+    {0, 2, 3, 1}, // back
+    {4, 5, 7, 6}  // front
 };
 const faceList treeBoundBox::faces(initListList<face, label, 6, 4>(facesArray));
 
@@ -558,11 +558,11 @@ label treeBoundBox::distanceCmp
     // get nearest and furthest away vertex
     calcExtremities(sample, nearThis, farThis);
 
-    const scalar minDistThis = 
+    const scalar minDistThis =
         sqr(nearThis.x() - sample.x())
      +  sqr(nearThis.y() - sample.y())
      +  sqr(nearThis.z() - sample.z());
-    const scalar maxDistThis = 
+    const scalar maxDistThis =
         sqr(farThis.x() - sample.x())
      +  sqr(farThis.y() - sample.y())
      +  sqr(farThis.z() - sample.z());
@@ -576,11 +576,11 @@ label treeBoundBox::distanceCmp
     // get nearest and furthest away vertex
     other.calcExtremities(sample, nearOther, farOther);
 
-    const scalar minDistOther = 
+    const scalar minDistOther =
         sqr(nearOther.x() - sample.x())
      +  sqr(nearOther.y() - sample.y())
      +  sqr(nearOther.z() - sample.z());
-    const scalar maxDistOther = 
+    const scalar maxDistOther =
         sqr(farOther.x() - sample.x())
      +  sqr(farOther.y() - sample.y())
      +  sqr(farOther.z() - sample.z());
