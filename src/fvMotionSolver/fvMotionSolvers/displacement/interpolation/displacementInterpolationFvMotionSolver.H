@@ -26,17 +26,19 @@ Class
     Foam::displacementInterpolationFvMotionSolver
 
 Description
-    Mesh motion solver for an fvMesh. Scales inbetween motion prescribed on
-    faceZones. Works out per point the distance between the bounding
-    face zones (in all three directions) at the start and then every time
-    step
+    Mesh motion solver for an fvMesh.
+
+    Scales inbetween motion prescribed on faceZones. Works out per point
+    the distance between the bounding face zones (in all three directions)
+    at the start and then every time step
     - moves the faceZones based on tables
     - interpolates the displacement of all points based on the
-    faceZone motion.
+      faceZone motion.
 
-    Tables are in the constant/tables directory.
+    Tables are in the <verbatim>constant/tables</verbatim> directory.
 
-    Note: could be a motionSolver - does not use any fvMesh structure.
+Note
+    could be a motionSolver - does not use any fvMesh structure.
 
 SourceFiles
     displacementInterpolationFvMotionSolver.C
