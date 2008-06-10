@@ -26,7 +26,7 @@ Class
     Foam::ZoneID
 
 Description
-    A class holds the data needed to identify a zone in a dynamic mesh.
+    A class that holds the data needed to identify a zone in a dynamic mesh.
 
     The zone is identified by name.
     Its index in the zoneMesh is updated if the mesh has changed.

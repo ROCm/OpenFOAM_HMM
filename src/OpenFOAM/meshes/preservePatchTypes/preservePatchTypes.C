@@ -96,7 +96,7 @@ void Foam::preservePatchTypes
         if (patchDictionary.found(defaultFacesName))
         {
             const dictionary& patchDict = 
-                patchDictionary.subDict("defaultFaces");
+                patchDictionary.subDict(defaultFacesName);
 
             if (patchDict.found("geometricType"))
             {

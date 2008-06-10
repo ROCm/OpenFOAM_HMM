@@ -32,16 +32,18 @@ Description
 
     On the back plane (z=0):
 
-    Y
-    ^
-    |
-    +--------+
-    |2      3|
-    |        |
-    |        |
-    |        |
-    |0      1|
-    +--------+->X
+    @verbatim
+        Y
+        ^
+        |
+        +--------+
+        |2      3|
+        |        |
+        |        |
+        |        |
+        |0      1|
+        +--------+->X
+    @endverbatim
 
     For the front plane add 4 to the point labels.
 
@@ -234,7 +236,7 @@ public:
             //- Returns octant number given intersection. Midpoint provided.
             //  onEdge set if sample on edge of subOctant. If onEdge
             // the direction vector determines which octant to use
-            // (acc. to which octant the sample would be if it were moved 
+            // (acc. to which octant the sample would be if it were moved
             //  along dir)
             static inline direction subOctant
             (
@@ -250,7 +252,7 @@ public:
             inline void searchOrder
             (
 	         const point& sample,
-                 FixedList<direction, 8>& octantOrder 
+                 FixedList<direction, 8>& octantOrder
             ) const;
 
             //- Intersects other boundingbox?

@@ -26,15 +26,15 @@ Class
     Foam::writer
 
 Description
-    base class for graphics format writing. Entry points are
-    - write(..). Write to an Ostream a table of points with corresponding
-    values.
-
-    - write(scalar/vector/tensor). Write single scalar/vector/tensor.
-    Default is to write space separated components.
+    Base class for graphics format writing. Entry points are
+    - write(..). \n
+      Write to an Ostream a table of points with corresponding values.
+    - write(scalar/vector/tensor). \n
+      Write single scalar/vector/tensor.
+      Default is to write space separated components.
 
     Example:
-
+    @verbatim
         // Construct writer of xmgr type
         autoPtr<writer<scalar> > scalarFormatter(writer<scalar>::New("xmgr"));
 
@@ -51,8 +51,8 @@ Description
             "U.component(0)",   // name of values
             vals                // values
         );
+    @endverbatim
 
-        
 SourceFiles
     writer.C
 
@@ -90,7 +90,7 @@ protected:
 
     //- Generates filename from coordSet and sampled fields
     fileName getBaseName(const coordSet&, const wordList&) const;
-    
+
     void writeCoord
     (
         const coordSet& samples,

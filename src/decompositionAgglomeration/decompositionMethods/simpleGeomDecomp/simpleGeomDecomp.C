@@ -55,7 +55,7 @@ namespace Foam
 
 // assignToProcessorGroup : given nCells cells and nProcGroup processor
 // groups to share them, how do we share them out? Answer : each group
-// gets nCells/nProocGroup cells, and the first few get one
+// gets nCells/nProcGroup cells, and the first few get one
 // extra to make up the numbers. This should produce almost
 // perfect load balancing
 
