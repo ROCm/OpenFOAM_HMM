@@ -27,12 +27,13 @@
 #     wmakeLnInclude
 #
 # Description
-#     Link all the source files in the $1 directory into $1/lnInclude
+#     Link all the source files in the <dir> directory into <dir>/lnInclude
 #
 #     Usage: wmakeLnInclude [-f] <dir> [-lnOption]
 #
 #     The desired source files:
-#         *.C *.H *.h *.cxx
+#         *.C *.H *.h *.cpp *.cxx *.hpp *.hxx
+#
 #     Avoid
 #         *.c (C source)
 #         .#* (cvs recovered files)
@@ -100,6 +101,7 @@ fi
 
 if [ -d $incDir ]
 then
+   # could change force to remove lnInclude first
    if [ ! "$forceUpdate" ]
    then
       # echo $Script: include directory $incDir already exists, exiting.
@@ -128,5 +130,11 @@ find .. $findOpt \
  -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
  -a ! -name ".#*"     \
  -exec ln $lnOpt {} . \;
+
+
+#
+# remove any broken links
+#
+find -L . -type l -exec rm \{\} \;
 
 #------------------------------------------------------------------------------
