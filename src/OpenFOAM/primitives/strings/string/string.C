@@ -209,32 +209,16 @@ Foam::string& Foam::string::expand()
                 *this = home(user)/file;
             }
         }
-        else
+        else if (operator[](0) == '.')
         {
-            // expand a lone initial '.' and './' into CWD
-            // otherwise strip leading './' sequences
-            while
-            (
-                operator[](0) == '.'
-             && (size() == 1 || operator[](1) == '/')
-            )
+            // Expand initial '.' and './' into cwd
+            if (size() == 1)
             {
-                // handle leading ".////" as well
-                size_type slashPos = 1;
-                while (size() > slashPos && operator[](slashPos) == '/')
-                {
-                    ++slashPos;
-                }
-
-                if (size() <= slashPos)
-                {
-                    *this = cwd();
-                    break;
-                }
-                else
-                {
-                    std::string::erase(0, slashPos);
-                }
+                *this = cwd();
+            }
+            else if (operator[](1) == '/')
+            {
+                std::string::replace(0, 1, cwd());
             }
         }
     }
