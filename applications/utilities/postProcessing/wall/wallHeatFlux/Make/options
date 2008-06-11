@@ -10,5 +10,4 @@ EXE_LIBS = \
     -lcombustionThermophysicalModels \
     -lfiniteVolume \
     -lspecie \
-    -lbasicThermophysicalModels \
-   
+    -lbasicThermophysicalModels

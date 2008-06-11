@@ -665,7 +665,8 @@ int main(int argc, char *argv[])
     }
 
     yyFlexLexer lexer(&gambitStream);
-    while(lexer.yylex() != 0);
+    while(lexer.yylex() != 0)
+    {}
 
     Info << "Finished lexing" << endl;
 

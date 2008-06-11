@@ -17,4 +17,3 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleTurbulenceModels \
     -lcompressibleLESmodels
-

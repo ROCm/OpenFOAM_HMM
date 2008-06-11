@@ -265,7 +265,8 @@ int main(int argc, char *argv[])
     }
 
     yyFlexLexer lexer(&ansysStream);
-    while(lexer.yylex() != 0);
+    while(lexer.yylex() != 0)
+    {}
 
     Info << "Creating points" << endl;
 

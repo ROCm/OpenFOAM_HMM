@@ -7,7 +7,7 @@
  *  See the header file progmesh.h for a description of this module
  */
 
-#include <stdio.h>  
+#include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -151,11 +151,11 @@ void Vertex::RemoveIfNonNeighbor(Vertex *n) {
 
 
 float ComputeEdgeCollapseCost(Vertex *u,Vertex *v) {
-	// if we collapse edge uv by moving u to v then how 
+	// if we collapse edge uv by moving u to v then how
 	// much different will the model change, i.e. how much "error".
 	// Texture, vertex normal, and border vertex code was removed
 	// to keep this demo as simple as possible.
-	// The method of determining cost was designed in order 
+	// The method of determining cost was designed in order
 	// to exploit small and coplanar regions for
 	// effective polygon reduction.
 	// Is is possible to add some checks here to see if "folds"
@@ -173,7 +173,7 @@ float ComputeEdgeCollapseCost(Vertex *u,Vertex *v) {
 			sides.Add(u->face[i]);
 		}
 	}
-	// use the triangle facing most away from the sides 
+	// use the triangle facing most away from the sides
 	// to determine our curvature term
 	for(i=0;i<u->face.num;i++) {
 		float mincurv=1; // curve for face i and closer side to it
@@ -184,7 +184,7 @@ float ComputeEdgeCollapseCost(Vertex *u,Vertex *v) {
 		}
 		curvature = max(curvature,mincurv);
 	}
-	// the more coplanar the lower the curvature term   
+	// the more coplanar the lower the curvature term
 	return edgelength * curvature;
 }
 
@@ -193,7 +193,7 @@ void ComputeEdgeCostAtVertex(Vertex *v) {
 	// from vertex v.  Since we are only interested in reducing
 	// the object by selecting the min cost edge at each step, we
 	// only cache the cost of the least cost edge at this vertex
-	// (in member variable collapse) as well as the value of the 
+	// (in member variable collapse) as well as the value of the
 	// cost (in member variable objdist).
 	if(v->neighbor.num==0) {
 		// v doesn't have neighbors so it costs nothing to collapse
@@ -247,7 +247,7 @@ void Collapse(Vertex *u,Vertex *v){
 	for(i=u->face.num-1;i>=0;i--) {
 		u->face[i]->ReplaceVertex(u,v);
 	}
-	delete u; 
+	delete u;
 	// recompute the edge collapse costs for neighboring vertices
 	for(i=0;i<tmp.num;i++) {
 		ComputeEdgeCostAtVertex(tmp[i]);
@@ -256,15 +256,15 @@ void Collapse(Vertex *u,Vertex *v){
 
 void AddVertex(List<Vector> &vert){
 	for(int i=0;i<vert.num;i++) {
-		Vertex *v = new Vertex(vert[i],i);
+		new Vertex(vert[i],i);
 	}
 }
 void AddFaces(List<tridata> &tri){
 	for(int i=0;i<tri.num;i++) {
-		Triangle *t=new Triangle(
-					      vertices[tri[i].v[0]],
-					      vertices[tri[i].v[1]],
-					      vertices[tri[i].v[2]] );
+		new Triangle(
+            vertices[tri[i].v[0]],
+            vertices[tri[i].v[1]],
+            vertices[tri[i].v[2]] );
 	}
 }
 
@@ -284,7 +284,7 @@ Vertex *MinimumCostEdge(){
 	return mn;
 }
 
-void ProgressiveMesh(List<Vector> &vert, List<tridata> &tri, 
+void ProgressiveMesh(List<Vector> &vert, List<tridata> &tri,
                      List<int> &map, List<int> &permutation)
 {
 	AddVertex(vert);  // put input data into our data structures

@@ -451,7 +451,7 @@ void doRefinement
     const labelHashSet& refCells,
     labelList& refLevel
 )
-{ 
+{
     label oldCells = mesh.nCells();
 
     // Multi-iteration, multi-direction topology modifier.
@@ -565,7 +565,7 @@ void subsetMesh
     // Update cutCells for removed cells.
     cutCells.updateMesh(morphMap());
 }
-    
+
 
 // Divide the cells according to status compared to surface. Constructs sets:
 // - cutCells : all cells cut by surface
@@ -877,7 +877,7 @@ int main(int argc, char *argv[])
 
 
         // Added cells from 2:1 refinement level restriction.
-        while 
+        while
         (
             limitRefinementLevel
             (
@@ -887,7 +887,8 @@ int main(int argc, char *argv[])
                 refLevel,
                 cutCells
             )
-        );
+        )
+        {}
 
 
         Info<< "    Current cells           : " << mesh.nCells() << nl
@@ -988,7 +989,8 @@ int main(int argc, char *argv[])
                 refLevel,
                 hanging
             )
-        );
+        )
+        {}
 
         doRefinement(mesh, refineDict, hanging, refLevel);
 

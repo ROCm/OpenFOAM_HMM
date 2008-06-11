@@ -26,12 +26,12 @@ Description
     Tries to figure out what the refinement level is on refined cartesian
     meshes. Run BEFORE snapping.
 
-    Writes 
+    Writes
     - volScalarField 'refinementLevel' with current refinement level.
     - cellSet 'refCells' which are the cells that need to be refined to satisfy
       2:1 refinement.
 
-    Works by dividing cells into volume bins. 
+    Works by dividing cells into volume bins.
 
 \*---------------------------------------------------------------------------*/
 
@@ -77,7 +77,7 @@ bool limitRefinementLevel
             }
         }
     }
-            
+
     if (refCells.size() > oldNCells)
     {
         Info<< "Added an additional " << refCells.size() - oldNCells
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
                 << lowerLimits[lowerLimits.size()-1] << " .. "
                 << upperLimits[upperLimits.size()-1] << endl;
 
-            // Create new bin.            
+            // Create new bin.
             bins.append(DynamicList<label>());
             lowerLimits.append(sortedVols[i]);
             upperLimits.append(1.1*lowerLimits[lowerLimits.size()-1]);
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    
+
     labelIOList refLevel
     (
         IOobject
@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
             bField[faceI] = postRefLevel[own];
         }
     }
-        
+
     Info<< "Determined current refinement level and writing to "
         << postRefLevel.name() << " (as volScalarField; for post processing)"
         << nl
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
     // Cells to refine
     cellSet refCells(mesh, "refCells", 100);
 
-    while 
+    while
     (
         limitRefinementLevel
         (
@@ -333,7 +333,8 @@ int main(int argc, char *argv[])
             refLevel,       // current refinement level
             refCells        // cells to refine
         )
-    );
+    )
+    {}
 
     if (refCells.size() > 0)
     {
