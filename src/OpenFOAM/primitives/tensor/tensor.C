@@ -97,17 +97,17 @@ vector eigenValues(const tensor& t)
             + t.xy()*t.yx()*t.zz() + t.xx()*t.yz()*t.zy();
 
         // If there is a zero root
-        if (mag(c) < SMALL)
+        if (mag(c) < 1.0e-100)
         {
             scalar disc = sqr(a) - 4*b;
 
-            if (disc > 0)
+            if (disc >= -SMALL)
             {
-                scalar q = -0.5*(a + sign(a)*sqrt(disc));
+                scalar q = -0.5*sqrt(max(0.0, disc));
 
                 i = 0;
-                ii = q;
-                iii = b/q;
+                ii = -0.5*a + q;
+                iii = -0.5*a - q;
             }
             else
             {
@@ -185,7 +185,7 @@ vector eigenValues(const tensor& t)
 
 vector eigenVector(const tensor& t, const scalar lambda)
 {
-    if (mag(lambda) < SMALL)
+    if (lambda < SMALL)
     {
         return vector::zero;
     }
@@ -380,7 +380,7 @@ vector eigenValues(const symmTensor& t)
 
 vector eigenVector(const symmTensor& t, const scalar lambda)
 {
-    if (mag(lambda) < SMALL)
+    if (lambda < SMALL)
     {
         return vector::zero;
     }
