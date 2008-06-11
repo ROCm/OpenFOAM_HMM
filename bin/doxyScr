@@ -68,11 +68,11 @@ s/^    /@namespace /
 # Typedef
 #     Foam::def
 # =>
-# @typedef Foam::def
-#
+# @class Foam::def
+# This is not strictly correct, but makes it easier to find the typedefs
 /^Typedef *$/,/^[^ ]/{
 /^Typedef/d
-s/^    /@typedef /
+s/^    /@class /
 }
 
 
