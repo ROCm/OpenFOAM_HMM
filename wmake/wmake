@@ -157,7 +157,8 @@ then
         exit $?
     elif [ ! -d $MakeDir ]
     then
-        $make -k -f $WM_DIR/MakefileApps FOAM_APPS="`find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name ".svn" -a ! -name "Make" \)  -printf "%f "`"
+        $make -k -f $WM_DIR/MakefileApps \
+            FOAM_APPS="`find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name "Optional" -a ! -name "Make" \)  -printf "%f "`"
         exit $?
     fi
 
