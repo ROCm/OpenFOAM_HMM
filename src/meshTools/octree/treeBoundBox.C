@@ -617,13 +617,13 @@ Foam::label Foam::treeBoundBox::distanceCmp
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-bool operator==(const treeBoundBox& a, const treeBoundBox& b)
+bool Foam::operator==(const treeBoundBox& a, const treeBoundBox& b)
 {
     return (a.min() == b.min()) && (a.max() == b.max());
 }
 
 
-bool operator!=(const treeBoundBox& a, const treeBoundBox& b)
+bool Foam::operator!=(const treeBoundBox& a, const treeBoundBox& b)
 {
     return !(a == b);
 }
