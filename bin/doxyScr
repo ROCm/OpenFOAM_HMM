@@ -131,7 +131,8 @@ s/^    //
 
 /SourceFiles/,/^[ ]*$/{
 s?SourceFiles?@par Source files\
-<ul>?
+<ul>\
+  <li><a href="%filePath%">%fileName%</a></li>?
 s?^[ ]*$?</ul>\
 ?
 s? *\([a-zA-Z0-9]*\.[a-zA-Z]*\)?  <li><a href="%dirName%/\1">\1</a></li>?
