@@ -28,7 +28,7 @@ Class
 Description
     A HashTable with word keys but without contents.
 
-Class
+Typedef
     Foam::wordHashSet
 
 Description

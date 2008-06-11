@@ -8,39 +8,51 @@ s?^License.*?\*\/\
 }
 
 # remove entry
-/^Primitive/{
+/^Primitive *$/{
 N
 N
 d
 }
 
 # remove entry
-/^Implementation/{
+/^Implementation *$/{
 N
 N
 d
 }
 
 # remove entry
-/^Application/{
+/^Application *$/{
 N
 N
 d
 }
 
 # remove entry
-/^Type/{
+/^Type *$/{
 N
 N
 d
 }
 
 # remove entry
-/^Global/{
+/^Global *$/{
 N
 N
 d
 }
+
+
+# Class
+#     Foam::className
+# =>
+# @class Foam::className
+#
+/^Class *$/,/^[^ ]/{
+/^Class/d
+s/^    /@class /
+}
+
 
 # Namespace
 #     namespaceName
@@ -53,14 +65,14 @@ s/^    /@namespace /
 }
 
 
-# Class
-#     Foam::className
+# Typedef
+#     Foam::def
 # =>
-# @class Foam::className
+# @typedef Foam::def
 #
-/^Class *$/,/^[^ ]/{
-/^Class/d
-s/^    /@class /
+/^Typedef *$/,/^[^ ]/{
+/^Typedef/d
+s/^    /@typedef /
 }
 
 

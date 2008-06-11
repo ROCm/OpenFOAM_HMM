@@ -8,7 +8,7 @@ use File::Find ();
 #     find-placeholderDescription
 #
 # Description
-#     Search for *.[H] files with a Description that looks like it is 
+#     Search for *.[H] files with a Description that looks like it is
 #     a placeholder
 #     eg, Foam::className
 #
@@ -30,21 +30,21 @@ sub wanted {
         return;
     }
 
-    my ( $currentClass, $description );
+    my ( $tag, $description );
 
     local @ARGV = $_;
     while (<>) {
         my $name;
 
-        ## examine the class name
-        if (/^Class\s*$/) {
+        ## examine the class/typedef name
+        if (/^(Class|Typedef)\s*$/) {
             $_ = <>;
-            ($currentClass) = split;
+            ($tag) = split;
         }
         if (/^Description\s*$/) {
             $_ = <>;
             ( $description = $_ ) =~ s{^\s+|\s+$}{}g;
-            
+
             # remove trailing punctuation as being noise
             $description =~ s{\s*[.,:]+$}{};
             last;
@@ -53,13 +53,13 @@ sub wanted {
 
     $description ||= '';
 
-    ## we have 'Class' tag
-    if ( defined $currentClass ) {
+    ## we have 'Class/Typedef' tag
+    if ( defined $tag ) {
         # description looks like a class name
         if (
             $description =~ m{^\w+(::\w+)+$}
-        ) {            
-            print "$File::Find::name # $description\n";
+        ) {
+            print "$File::Find::name   # $description\n";
         }
     }
 }

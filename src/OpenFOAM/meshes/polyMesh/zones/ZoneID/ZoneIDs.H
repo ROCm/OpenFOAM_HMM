@@ -22,11 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::ZoneID
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef ZoneIDs_H
@@ -41,8 +36,11 @@ Description
 
 namespace Foam
 {
+    //- Foam::pointZoneID
     typedef ZoneID<pointZone> pointZoneID;
+    //- Foam::faceZoneID
     typedef ZoneID<faceZone> faceZoneID;
+    //- Foam::cellZoneID
     typedef ZoneID<cellZone> cellZoneID;
 }
 

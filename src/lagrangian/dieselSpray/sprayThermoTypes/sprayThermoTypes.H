@@ -22,10 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::sprayThermoTypes
+Typedef
+    Foam::specieProperties
 
 Description
+    Foam::specieProperties
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +45,7 @@ namespace Foam
     typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
         specieProperties;
 
-  //typedef sutherlandTransport<specieThermo<hConstThermo<perfectGas> > >
+  // typedef sutherlandTransport<specieThermo<hConstThermo<perfectGas> > >
   //    specieProperties;
 }
 

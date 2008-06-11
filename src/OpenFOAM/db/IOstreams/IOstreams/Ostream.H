@@ -154,7 +154,7 @@ public:
             //- Flush stream
             virtual void flush() = 0;
 
-            //- Add '\n' and flush stream
+            //- Add newline and flush stream
             virtual void endl() = 0;
 
             //- Get width of output field
@@ -233,7 +233,7 @@ inline Ostream& flush(Ostream& os)
 }
 
 
-//- Add '\n' and flush stream
+//- Add newline and flush stream
 inline Ostream& endl(Ostream& os)
 {
     os.endl();

@@ -22,10 +22,17 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::IntegrationScheme
+Typedef
+    Foam::scalarIntegrationScheme
 
 Description
+    Foam::scalarIntegrationScheme
+
+Typedef
+    Foam::vectorIntegrationScheme;
+
+Description
+    Foam::vectorIntegrationScheme;
 
 SourceFiles
     IntegrationScheme.C

@@ -5,18 +5,18 @@ use File::Find ();
 # -----------------------------------------------------------------------------
 #
 # Script
-#     find-its
+#     find-retagged
 #
 # Description
-#     Search for *.[CH] files with "it's"
-#     This contraction (== "it is") looks too much like "its" (possesive)
-#     and confuses non-native (and some native) English speakers.
-#
-#     - print filename and lineNumber
+#     Search for *.[H] files with 'InClass', 'InNamespace' or 'Type'
+#     starting in the first column.
+#     In some places these could removed. In other places they should be
+#     replaced with a 'Typedef'
+#     - print filename and the tag (InClass|InNamespace|Type)
 #
 # -----------------------------------------------------------------------------
 
-my $re_filespec = qr{^.+\.[CH]$};
+my $re_filespec = qr{^.+\.[H]$};
 
 # for the convenience of &wanted calls, including -eval statements:
 ## use vars qw( *name *dir *prune );
@@ -31,8 +31,8 @@ sub wanted {
 
     local @ARGV = $_;
     while (<>) {
-        if (m{it\'s}) {
-            print "$File::Find::name  line=$.\n";
+        if (/^(InClass|InNamespace|Type)\s*$/) {
+            print "$File::Find::name  $1  line=$.\n";
         }
     }
 

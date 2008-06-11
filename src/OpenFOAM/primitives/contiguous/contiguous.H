@@ -26,9 +26,12 @@ InClass
     Foam::contiguous
 
 Description
-    Template fuction which specifies if the data of the type is contiguous
-    or not.  The default function specifies not and this is specialised for
-    the types (e.g. primitives) for which their data is contiguous.
+    Template function which specifies if the data of the type is contiguous
+    or not.
+
+    The default function specifies that data are not contiguous.
+    This is specialised for the types (e.g. primitives) for which their
+    data are contiguous.
 
 \*---------------------------------------------------------------------------*/
 
