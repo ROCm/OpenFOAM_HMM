@@ -34,10 +34,10 @@ T Foam::dictionary::lookupOrDefault
 (
     const word& keyword,
     const T& deft,
-    bool recusive
+    bool recursive
 ) const
 {
-    const entry* ePtr = lookupEntryPtr(keyword, recusive);
+    const entry* ePtr = lookupEntryPtr(keyword, recursive);
 
     if (ePtr == NULL)
     {

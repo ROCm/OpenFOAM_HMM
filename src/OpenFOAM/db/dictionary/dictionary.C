@@ -195,15 +195,15 @@ Foam::label Foam::dictionary::endLineNumber() const
 }
 
 
-bool Foam::dictionary::found(const word& keyword, bool recusive) const
+bool Foam::dictionary::found(const word& keyword, bool recursive) const
 {
     if (hashedEntries_.found(keyword))
     {
         return true;
     }
-    else if (recusive && &parent_ != &dictionary::null)
+    else if (recursive && &parent_ != &dictionary::null)
     {
-        return parent_.found(keyword, recusive);
+        return parent_.found(keyword, recursive);
     }
     else
     {
@@ -215,16 +215,16 @@ bool Foam::dictionary::found(const word& keyword, bool recusive) const
 const Foam::entry* Foam::dictionary::lookupEntryPtr
 (
     const word& keyword,
-    bool recusive
+    bool recursive
 ) const
 {
     HashTable<entry*>::const_iterator iter = hashedEntries_.find(keyword);
 
     if (iter == hashedEntries_.end())
     {
-        if (recusive && &parent_ != &dictionary::null)
+        if (recursive && &parent_ != &dictionary::null)
         {
-            return parent_.lookupEntryPtr(keyword, recusive);
+            return parent_.lookupEntryPtr(keyword, recursive);
         }
         else
         {
@@ -239,19 +239,19 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
 Foam::entry* Foam::dictionary::lookupEntryPtr
 (
     const word& keyword,
-    bool recusive
+    bool recursive
 )
 {
     HashTable<entry*>::iterator iter = hashedEntries_.find(keyword);
 
     if (iter == hashedEntries_.end())
     {
-        if (recusive && &parent_ != &dictionary::null)
+        if (recursive && &parent_ != &dictionary::null)
         {
             return const_cast<dictionary&>(parent_).lookupEntryPtr
             (
                 keyword,
-                recusive
+                recursive
             );
         }
         else
@@ -267,10 +267,10 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
 const Foam::entry& Foam::dictionary::lookupEntry
 (
     const word& keyword,
-    bool recusive
+    bool recursive
 ) const
 {
-    const entry* ePtr = lookupEntryPtr(keyword, recusive);
+    const entry* ePtr = lookupEntryPtr(keyword, recursive);
 
     if (ePtr == NULL)
     {
@@ -291,10 +291,10 @@ const Foam::entry& Foam::dictionary::lookupEntry
 Foam::ITstream& Foam::dictionary::lookup
 (
     const word& keyword,
-    bool recusive
+    bool recursive
 ) const
 {
-    return lookupEntry(keyword, recusive).stream();
+    return lookupEntry(keyword, recursive).stream();
 }
 
 

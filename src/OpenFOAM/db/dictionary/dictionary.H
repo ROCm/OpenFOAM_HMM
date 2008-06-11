@@ -31,8 +31,8 @@ Description
 
     The dictionary class is the base class for IOdictionary.
     It serves the purpose of a bootstrap dictionary for the objectRegistry
-    data dictionaries, since unlike the IOdictionary class, it does not use a
-    objectRegistry itself to work.
+    data dictionaries, since unlike the IOdictionary class, it does not use
+    a objectRegistry itself to work.
 
 SourceFiles
     dictionary.C
@@ -171,31 +171,31 @@ public:
         // Search and lookup
 
             //- Search dictionary for given keyword
-            //  If recusive search parent dictionaries
-            bool found(const word& keyword, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            bool found(const word& keyword, bool recursive=false) const;
 
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
-            //  If recusive search parent dictionaries
-            const entry* lookupEntryPtr(const word&, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            const entry* lookupEntryPtr(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream pointer for manipulation
             //  if present otherwise return NULL.
-            //  If recusive search parent dictionaries
-            entry* lookupEntryPtr(const word&, bool recusive=false);
+            //  If recursive search parent dictionaries
+            entry* lookupEntryPtr(const word&, bool recursive=false);
 
             //- Find and return an entry data stream if present otherwise error.
-            //  If recusive search parent dictionaries
-            const entry& lookupEntry(const word&, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            const entry& lookupEntry(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream
-            //  If recusive search parent dictionaries
-            ITstream& lookup(const word&, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            ITstream& lookup(const word&, bool recursive=false) const;
 
             //- Find and return a T, if not found return the given default value
-            //  If recusive search parent dictionaries
+            //  If recursive search parent dictionaries
             template<class T>
-            T lookupOrDefault(const word&, const T&, bool recusive=false) const;
+            T lookupOrDefault(const word&, const T&, bool recursive=false) const;
 
             //- Check if entry is a sub-dictionary
             bool isDict(const word&) const;
