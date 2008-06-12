@@ -1,16 +1,22 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="damBreak damBreakFine"
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/RunFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/RunFunctions
+
+
 
 setDamBreakFine ()
 {
-    blockMeshDict="$case/constant/polyMesh/blockMeshDict"
-    controlDict="$case/system/controlDict"        
+    blockMeshDict="constant/polyMesh/blockMeshDict"
+    controlDict="system/controlDict"        
     sed \
     -e s/"23 8"/"46 10"/g \
     -e s/"19 8"/"40 10"/g \
@@ -26,24 +32,22 @@ setDamBreakFine ()
     mv temp.$$ $controlDict    
 }
 
-for case in $cases
-do
-    if [ "$case" = "damBreakFine" ] 
-    then
-        cloneCase damBreak $case
-        setDamBreakFine
-        cp damBreak/0/gamma.org $case/0/gamma
-    fi
 
-    runApplication blockMesh $case
-    runApplication setFields $case
-    if [ "$case" = "damBreakFine" ]
-    then
-        runApplication decomposePar $case
-        hostname > $case/system/machines
-        runParallel $application $case 4 $case/system/machines
-        runApplication reconstructPar $case
-    else
-        runApplication $application $case
-    fi
-done
+# Do damBreak
+(cd damBreak && $tutorialPath/runAll)
+
+# Clone case
+cloneCase damBreak damBreakFine
+
+cd damBreakFine
+    # Modify case
+    setDamBreakFine
+    cp ../damBreak/0/gamma.org 0/gamma
+    # And execute
+    runApplication blockMesh
+    runApplication setFields
+    runApplication decomposePar
+    hostname > system/machines
+    runParallel $application 4 system/machines
+    runApplication reconstructPar
+cd ..

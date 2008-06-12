@@ -2,15 +2,24 @@
 
 currDir=`pwd`
 application=`basename $currDir`
+
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/CleanFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
+. $tutorialPath/CleanFunctions
+
+
 keepCases="cavity cavityGrade cavityClipped elbow"
 loseCases="cavityFine cavityHighRe"
 
-tutorialPath=`dirname $0`/..
-. $tutorialPath/CleanFunctions
 
 for case in $keepCases
 do
-    cleanCase $case
+    (cd $case && $tutorialPath/cleanAll)
+
     if [ "$case" = "elbow" ]
     then
         rm -rf $case/fluentInterface

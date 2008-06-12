@@ -65,7 +65,22 @@ EOF
 #
 # VARIABLE
 #
-MAIN_CONTROL_DICT=${WM_PROJECT_DIR}/${FOAM_DOT_DIR}/controlDict
+MAIN_CONTROL_DICT=
+: ${FOAM_DOT_DIR:=.$WM_PROJECT-$WM_PROJECT_VERSION}
+
+for i in \
+  $HOME/$FOAM_DOT_DIR \
+  $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
+  $HOME/.$WM_PROJECT \
+  $WM_PROJECT_DIR/etc \
+  $WM_PROJECT_DIR/$FOAM_DOT_DIR \
+  ;
+do
+  if [ -f "$i/controlDict" ]; then
+     MAIN_CONTROL_DICT="$i/controlDict"
+     break
+  fi
+done
 TUTORIALS_DIR=.
 TEST_RUN_DIR=../tutorialsTest
 FV_SCHEMES=\

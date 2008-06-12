@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Get application name from directory
-application=`basename $PWD`
+parentDir=`dirname $PWD`
+application=`basename $parentDir`
 
 # Find and source additional functions
 tutorialPath=$PWD
@@ -13,12 +14,6 @@ done
 
 
 
-removeCase decompressionTankFine
-
-for case in *
-do
-    if [ -d $case ]
-    then
-        (cd $case && $tutorialsDir/cleanAll)
-    fi
-done
+cleanCase
+cp 0/T.org 0/T
+wclean setHotRoom    

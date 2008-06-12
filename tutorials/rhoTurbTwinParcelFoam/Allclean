@@ -1,16 +1,26 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="simplifiedSiwek"
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/CleanFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/CleanFunctions
 
-wclean $application
 
-for case in $cases
+
+
+wclean rhoTurbTwinParcelFoam
+
+for case in *
 do
-    cleanCase $case
+    if [ -d $case ]
+    then
+        (cd $case && $tutorialPath/cleanAll)
+    fi
 done
 

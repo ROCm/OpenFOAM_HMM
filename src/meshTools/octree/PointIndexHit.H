@@ -141,6 +141,11 @@ public:
             return hitPoint_;
         }
 
+        Point& rawPoint()
+        {
+            return hitPoint_;
+        }
+
         void setHit()
         {
             hit_ = true;

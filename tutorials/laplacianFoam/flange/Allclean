@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Get application name from directory
-application=`basename $PWD`
+parentDir=`dirname $PWD`
+application=`basename $parentDir`
 
 # Find and source additional functions
 tutorialPath=$PWD
@@ -12,13 +13,7 @@ done
 . $tutorialPath/CleanFunctions
 
 
+cleanCase
+rm -rf Fieldview > /dev/null 2>&1
+rm -rf EnSight > /dev/null 2>&1
 
-removeCase decompressionTankFine
-
-for case in *
-do
-    if [ -d $case ]
-    then
-        (cd $case && $tutorialsDir/cleanAll)
-    fi
-done

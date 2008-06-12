@@ -1,23 +1,29 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="cylinder pitzDaily"
-utility=analyticalCylinder
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/CleanFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/CleanFunctions
 
-for case in $cases
-do
-    cleanCase $case
-    rm -rf $case/0 > /dev/null 2>&1
-    cp -r $case/0.org $case/0
 
-    if [ "$case" = "cylinder" ] 
-    then
-        wclean $case/$utility
-    fi
-done 
 
+
+cd cylinder
+    cleanCase
+    rm -rf 0 > /dev/null 2>&1
+    cp -r 0.org 0
+    wclean analyticalCylinder
+cd ..
+
+cd pitzDaily
+    cleanCase
+    rm -rf 0 > /dev/null 2>&1
+    cp -r 0.org 0
+cd ..
 

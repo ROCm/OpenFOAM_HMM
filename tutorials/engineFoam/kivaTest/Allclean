@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Get application name from directory
-application=`basename $PWD`
+parentDir=`dirname $PWD`
+application=`basename $parentDir`
 
 # Find and source additional functions
 tutorialPath=$PWD
@@ -13,12 +14,8 @@ done
 
 
 
-removeCase decompressionTankFine
-
-for case in *
-do
-    if [ -d $case ]
-    then
-        (cd $case && $tutorialsDir/cleanAll)
-    fi
-done
+mv ./-180 temp180
+rm -rf 0
+cp system/controlDict.1st system/controlDict
+cleanCase
+mv temp180 ./-180
