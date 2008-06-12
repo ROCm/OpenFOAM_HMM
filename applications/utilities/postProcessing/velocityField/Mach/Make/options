@@ -8,4 +8,3 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lbasicThermophysicalModels \
     -lspecie
-

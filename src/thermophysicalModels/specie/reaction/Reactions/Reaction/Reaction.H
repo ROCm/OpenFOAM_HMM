@@ -81,6 +81,10 @@ public:
             scalar exponent;
 
             specieCoeffs()
+            :
+                index(-1),
+                stoichCoeff(0),
+                exponent(1)
             {}
 
             specieCoeffs(const speciesTable& species, Istream& is);
@@ -157,7 +161,7 @@ public:
         {
             const speciesTable& species_;
             const HashPtrTable<ReactionThermo>& thermoDatabase_;
-        
+
         public:
 
             iNew
@@ -257,7 +261,7 @@ public:
                 const scalar T,
                 const scalar p,
                 const scalarField& c
-            ) const;            
+            ) const;
 
             //- Reverse rate constant from the given forward rate constant
             virtual scalar kr

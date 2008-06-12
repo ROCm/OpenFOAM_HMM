@@ -24,7 +24,7 @@
         -lgen -lnsl -lsocket -lw -lintl -ldl
 
 #elif defined(sgiN32) || defined(sgiN32Gcc)
- 
+
     FV_LIBS = \
         $(FV_HOME)/user/obj/iris/fv.o \
         $(FV_HOME)/user/obj/iris/fv2.o \
@@ -94,12 +94,9 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/browser/lnInclude \
-    -I$(FOAM_SRC)/lagrangian/basic/lnInclude \
-
+    -I$(FOAM_SRC)/lagrangian/basic/lnInclude
 
 EXE_LIBS = \
     $(FV_LIBS) \
     -lfiniteVolume \
-    -lmeshTools \
-   
-
+    -lmeshTools
