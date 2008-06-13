@@ -4,7 +4,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
 #    \\/     M anipulation  |
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,41 +23,23 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     doxyAwkTop
+#     doxyFilt-ignore.awk
 #
 # Description
-#     Output only the first /* ... */ comment section found in the file
-#       - This is useful for application files in which only the first
-#         block documents the application itself and all other files simply
-#         pollute our documentation
+#     - Prefix file contents with doxygen @file tag and %filePath% tag
+#       that will be changed in a subsequent sed script
+#     - Surround the contents of an entire file with @cond / @endcond
+#       to skip documenting all classes/variables
 #
 # -----------------------------------------------------------------------------
 BEGIN {
-    state = 0
+   print "//! @file %filePath%"
+   print "//! @cond OpenFOAMIgnoreAppDoxygen"
 }
 
-# a '/*' at the beginning of a line starts a block
-/^ *\/\*/ {
-    state++
+{ print }
+        
+END {
+   print "//! @endcond OpenFOAMIgnoreAppDoxygen"
 }
-
-# a '*/' ends the block
-/\*\// {
-    if (state == 1)
-    {
-        print
-    }
-    state = 2
-    next
-}
-
-# end block
-{
-    if (state == 1)
-    {
-        print
-    }
-    next
-}
-
 # -----------------------------------------------------------------------------

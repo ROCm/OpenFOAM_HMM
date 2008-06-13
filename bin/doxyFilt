@@ -29,9 +29,12 @@
 # Description
 #     pass-through filter for doxygen
 #
-#     Filter has special treatment for applications/{solvers,utilities}/*.C
-#       - only keep the first comment block of the C source file
-#       - the corresponding H files are ignored in Doxyfile EXCLUDE_PATTERNS
+#     Special treatment for applications/{solvers,utilities}/*.C
+#     - only keep the first comment block of the C source file
+#       use @cond / @endcond to suppress documenting all classes/variables
+#
+#     Special treatment for applications/{solvers,utilities}/*.H
+#     - use @cond / @endcond to suppress documenting all classes/variables
 #------------------------------------------------------------------------------
 
 if [ "$#" -gt 0 ]
@@ -41,16 +44,19 @@ then
    dirName=${filePath%/[^/]*}
    fileName=${filePath##*/}
 
-   awkScript=$WM_PROJECT_DIR/bin/doxyAwk
+   awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt.awk
 
    case "$1" in
    */applications/solvers/*.C | */applications/utilities/*.C )
-      awkScript=$WM_PROJECT_DIR/bin/doxyAwkTop
+      awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-top.awk
+      ;;
+   */applications/solvers/*.H | */applications/utilities/*.H )
+      awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-ignore.awk
       ;;
    esac
 
    awk -f $awkScript $1 | \
-   sed -f $WM_PROJECT_DIR/bin/doxyScr \
+   sed -f $WM_PROJECT_DIR/bin/tools/doxyFilt.sed \
        -e s@%filePath%@$filePath@g \
        -e s@%fileName%@$fileName@g \
        -e s@%dirName%@$dirName@g
