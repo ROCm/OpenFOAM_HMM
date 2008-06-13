@@ -143,7 +143,7 @@ buildParaView ()
 
     # set paraview environment
     unset PARAVIEW_SRC_DIR
-    for i in $PWD $WM_PROJECT_INST_DIR
+    for i in $PWD $WM_THIRD_PARTY_DIR
     do
        if [ -d $i/$PARAVIEW_SRC ]
        then
@@ -155,7 +155,7 @@ buildParaView ()
     [ -d "$PARAVIEW_SRC_DIR" ] || {
        echo "did not find $PARAVIEW_SRC in these directories:"
        echo "  PWD=$PWD"
-       echo "  WM_PROJECT_INST_DIR=$WM_PROJECT_INST_DIR"
+       echo "  WM_THIRD_PARTY_DIR=$WM_THIRD_PARTY_DIR"
        echo "abort build"
        exit 1
     }
