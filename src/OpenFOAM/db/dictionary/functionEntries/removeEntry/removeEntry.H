@@ -23,30 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::functionEntries::includeEntry
+    Foam::functionEntries::removeEntry
 
 Description
-    Specify an include file when reading dictionaries, expects a
-    single string to follow.
+    Remove a dictionary entry.
 
-    An example of the @c \#include directive:
+    The @c \#remove directive takes a word or a list of words. For example,
     @verbatim
-        #include "includeFile"
+        #remove entry0
+        #remove ( entry1 entry2 entry3 )
     @endverbatim
 
-    The usual expansion of environment variables and other constructs (eg,
-    the @c ~OpenFOAM/ expansion) is retained.
-
-See Also
-    fileName, string::expand()
+    The removable only occurs in the current context.
+    Removing sub-entries or parent entries is not supported.
 
 SourceFiles
-    includeEntry.C
+    removeEntry.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef includeEntry_H
-#define includeEntry_H
+#ifndef removeEntry_H
+#define removeEntry_H
 
 #include "functionEntry.H"
 
@@ -58,29 +55,26 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class includeEntry Declaration
+                           Class removeEntry Declaration
 \*---------------------------------------------------------------------------*/
 
-class includeEntry
+class removeEntry
 :
     public functionEntry
 {
     // Private Member Functions
 
-        //- Read the include fileName from Istream, expand and return
-        static fileName includeFileName(Istream& is);
-
         //- Disallow default bitwise copy construct
-        includeEntry(const includeEntry&);
+        removeEntry(const removeEntry&);
 
         //- Disallow default bitwise assignment
-        void operator=(const includeEntry&);
+        void operator=(const removeEntry&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("include");
+    TypeName("remove");
 
 
     // Member Functions
@@ -91,15 +85,6 @@ public:
             dictionary& parentDict,
             Istream& is
         );
-
-        //- Execute the functionEntry in a primitiveEntry context
-        static bool execute
-        (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
-        );
-
 };
 
 

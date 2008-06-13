@@ -33,13 +33,10 @@ Class
     Foam::functionEntry
 
 Description
-    A function entry causes entries to be added/manipulated on the specified
+    A functionEntry causes entries to be added/manipulated on the specified
     dictionary given an input stream.
 
-    In dictionaries, a @c \# sigil is typically used for a functionEntry.
-
-See Also
-    functionEntries::includeEntry and functionEntries::inputModeEntry
+    In dictionaries, a @c '\#' sigil is typically used for a functionEntry.
 
 SourceFiles
     functionEntry.C
@@ -84,7 +81,28 @@ public:
         (
             bool,
             functionEntry,
-            insert,
+            execute,
+            dictionaryIstream,
+            (
+                dictionary& parentDict,
+                Istream& is
+            ),
+            (parentDict, is)
+        );
+
+        //- Execute the functionEntry in a sub-dict context
+        static bool execute
+        (
+            const word& functionName,
+            dictionary& parentDict,
+            Istream& is
+        );
+
+        declareMemberFunctionSelectionTable
+        (
+            bool,
+            functionEntry,
+            execute,
             primitiveEntryIstream,
             (
                 const dictionary& parentDict,
@@ -94,7 +112,8 @@ public:
             (parentDict, entry, is)
         );
 
-        static bool insert
+        //- Execute the functionEntry in a primitiveEntry context
+        static bool execute
         (
             const word& functionName,
             const dictionary& parentDict,
@@ -103,25 +122,6 @@ public:
         );
 
 
-        declareMemberFunctionSelectionTable
-        (
-            bool,
-            functionEntry,
-            insert,
-            dictionaryIstream,
-            (
-                dictionary& parentDict,
-                Istream& is
-            ),
-            (parentDict, is)
-        );
-
-        static bool insert
-        (
-            const word& functionName,
-            dictionary& parentDict,
-            Istream& is
-        );
 };
 
 

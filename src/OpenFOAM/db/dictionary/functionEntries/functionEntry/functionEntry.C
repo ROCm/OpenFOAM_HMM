@@ -33,22 +33,66 @@ namespace Foam
     defineMemberFunctionSelectionTable
     (
         functionEntry,
-        insert,
-        primitiveEntryIstream
+        execute,
+        dictionaryIstream
     );
 
     defineMemberFunctionSelectionTable
     (
         functionEntry,
-        insert,
-        dictionaryIstream
+        execute,
+        primitiveEntryIstream
     );
 }
 
 
 // * * * * * * * * * * * * Member Function Selectors * * * * * * * * * * * * //
 
-bool Foam::functionEntry::insert
+bool Foam::functionEntry::execute
+(
+    const word& functionName,
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    is.fatalCheck
+    (
+        "functionEntry::execute"
+        "(const word& functionName, dictionary& parentDict, Istream& is)"
+    );
+
+    if (!executedictionaryIstreamMemberFunctionTablePtr_)
+    {
+        cerr<<"functionEntry::execute"
+            << "(const word&, dictionary&, Istream&)"
+            << " not yet initialized, function = "
+            << functionName.c_str() << std::endl;
+
+        // Return true to keep reading
+        return true;
+    }
+
+    executedictionaryIstreamMemberFunctionTable::iterator mfIter =
+        executedictionaryIstreamMemberFunctionTablePtr_->find(functionName);
+
+    if (mfIter == executedictionaryIstreamMemberFunctionTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "functionEntry::execute"
+            "(const word& functionName, dictionary& parentDict, Istream&)"
+        )   << "Unknown functionEntry " << functionName
+            << endl << endl
+            << "Valid functionEntries are :" << endl
+            << executedictionaryIstreamMemberFunctionTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return mfIter()(parentDict, is);
+}
+
+
+bool Foam::functionEntry::execute
 (
     const word& functionName,
     const dictionary& parentDict,
@@ -58,14 +102,14 @@ bool Foam::functionEntry::insert
 {
     is.fatalCheck
     (
-        "functionEntry::insert"
+        "functionEntry::execute"
         "(const word& functionName, const dictionary& parentDict, "
-        "primitiveEntry& entry, Istream& is)"
+        "primitiveEntry&, Istream&)"
     );
 
-    if (!insertprimitiveEntryIstreamMemberFunctionTablePtr_)
+    if (!executeprimitiveEntryIstreamMemberFunctionTablePtr_)
     {
-        cerr<<"functionEntry::insert"
+        cerr<<"functionEntry::execute"
             << "(const word&, dictionary&, primitiveEntry&, Istream&)"
             << " not yet initialized, function = "
             << functionName.c_str() << std::endl;
@@ -74,69 +118,24 @@ bool Foam::functionEntry::insert
         return true;
     }
 
-    insertprimitiveEntryIstreamMemberFunctionTable::iterator mfIter =
-        insertprimitiveEntryIstreamMemberFunctionTablePtr_->find(functionName);
+    executeprimitiveEntryIstreamMemberFunctionTable::iterator mfIter =
+        executeprimitiveEntryIstreamMemberFunctionTablePtr_->find(functionName);
 
-    if (mfIter == insertprimitiveEntryIstreamMemberFunctionTablePtr_->end())
+    if (mfIter == executeprimitiveEntryIstreamMemberFunctionTablePtr_->end())
     {
         FatalErrorIn
         (
-            "functionEntry::insert"
+            "functionEntry::execute"
             "(const word& functionName, const dictionary& parentDict, "
-            "primitiveEntry& entry, Istream& is)"
+            "primitiveEntry&, Istream&)"
         )   << "Unknown functionEntry " << functionName
             << endl << endl
             << "Valid functionEntries are :" << endl
-            << insertprimitiveEntryIstreamMemberFunctionTablePtr_->toc()
+            << executeprimitiveEntryIstreamMemberFunctionTablePtr_->toc()
             << exit(FatalError);
     }
 
     return mfIter()(parentDict, entry, is);
 }
-
-
-bool Foam::functionEntry::insert
-(
-    const word& functionName,
-    dictionary& parentDict,
-    Istream& is
-)
-{
-    is.fatalCheck
-    (
-        "functionEntry::insert"
-        "(const word& functionName, dictionary& parentDict, Istream& is)"
-    );
-
-    if (!insertdictionaryIstreamMemberFunctionTablePtr_)
-    {
-        cerr<<"functionEntry::insert"
-            << "(const word&, dictionary&, Istream&)"
-            << " not yet initialized, function = "
-            << functionName.c_str() << std::endl;
-
-        // Return true to keep reading
-        return true;
-    }
-
-    insertdictionaryIstreamMemberFunctionTable::iterator mfIter =
-        insertdictionaryIstreamMemberFunctionTablePtr_->find(functionName);
-
-    if (mfIter == insertdictionaryIstreamMemberFunctionTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "functionEntry::insert"
-            "(const word& functionName, dictionary& parentDict, Istream& is)"
-        )   << "Unknown functionEntry " << functionName
-            << endl << endl
-            << "Valid functionEntries are :" << endl
-            << insertdictionaryIstreamMemberFunctionTablePtr_->toc()
-            << exit(FatalError);
-    }
-
-    return mfIter()(parentDict, is);
-}
-
 
 // ************************************************************************* //

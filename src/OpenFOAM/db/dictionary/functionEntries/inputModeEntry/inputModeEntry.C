@@ -47,15 +47,7 @@ namespace functionEntries
     (
         functionEntry,
         inputModeEntry,
-        insert,
-        primitiveEntryIstream
-    );
-
-    addToMemberFunctionSelectionTable
-    (
-        functionEntry,
-        inputModeEntry,
-        insert,
+        execute,
         dictionaryIstream
     );
 }
@@ -63,7 +55,7 @@ namespace functionEntries
 
 // * * * * * * * * * * * * * * * * Private Data  * * * * * * * * * * * * * * //
 
-Foam::label Foam::functionEntries::inputModeEntry::inputMode_ = imError;
+Foam::label Foam::functionEntries::inputModeEntry::mode_ = imError;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -74,15 +66,15 @@ void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
     word mode(is);
     if (mode == "merge")
     {
-        inputMode_ = imMerge;
+        mode_ = imMerge;
     }
     else if (mode == "overwrite")
     {
-        inputMode_ = imOverwrite;
+        mode_ = imOverwrite;
     }
     else if (mode == "error" || mode == "default")
     {
-        inputMode_ = imError;
+        mode_ = imError;
     }
     else
     {
@@ -95,19 +87,7 @@ void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionEntries::inputModeEntry::insert
-(
-    const dictionary& parentDict,
-    primitiveEntry& entry,
-    Istream& is
-)
-{
-    setMode(is);
-    return true;
-}
-
-
-bool Foam::functionEntries::inputModeEntry::insert
+bool Foam::functionEntries::inputModeEntry::execute
 (
     dictionary& parentDict,
     Istream& is
@@ -120,13 +100,13 @@ bool Foam::functionEntries::inputModeEntry::insert
 
 void Foam::functionEntries::inputModeEntry::clear()
 {
-    inputMode_ = imError;
+    mode_ = imError;
 }
 
 
 bool Foam::functionEntries::inputModeEntry::merge()
 {
-    if (inputMode_ & imMerge)
+    if (mode_ & imMerge)
     {
         return true;
     }
@@ -139,7 +119,7 @@ bool Foam::functionEntries::inputModeEntry::merge()
 
 bool Foam::functionEntries::inputModeEntry::overwrite()
 {
-    if (inputMode_ & imOverwrite)
+    if (mode_ & imOverwrite)
     {
         return true;
     }

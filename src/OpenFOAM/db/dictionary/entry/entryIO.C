@@ -96,7 +96,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
         if (keyword[0] == '#')        // ... Function entry
         {
             word functionName = keyword(1, keyword.size()-1);
-            return functionEntry::insert(functionName, parentDict, is);
+            return functionEntry::execute(functionName, parentDict, is);
         }
         else if (keyword[0] == '$')    // ... Substitution entry
         {
@@ -105,7 +105,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
         }
         else if (keyword == "include") // ... For backward compatibility
         {
-            return functionEntries::includeEntry::insert(parentDict, is);
+            return functionEntries::includeEntry::execute(parentDict, is);
         }
         else                           // ... Data entries
         {
@@ -114,12 +114,18 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
             // Deal with duplicate entries
             bool mergeEntry = false;
-            if (parentDict.found(keyword))
+
+            entry* existingPtr = parentDict.lookupEntryPtr(keyword);
+            if (existingPtr)
             {
                 if (functionEntries::inputModeEntry::overwrite())
                 {
-                    // silently drop previous entries
-                    parentDict.remove(keyword);
+                    // clear dictionary so merge acts like overwrite
+                    if (existingPtr->isDict())
+                    {
+                        existingPtr->dict().clear();
+                    }
+                    mergeEntry = true;
                 }
                 else if (functionEntries::inputModeEntry::merge())
                 {

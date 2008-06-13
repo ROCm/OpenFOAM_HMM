@@ -1,1 +1,2 @@
-uniform 2
+// the trailing ';' shouldn't actually be there, but shouldn't cause problems
+uniform 2;

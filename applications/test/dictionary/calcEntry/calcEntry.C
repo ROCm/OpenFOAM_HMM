@@ -42,24 +42,17 @@ namespace functionEntries
     (
         functionEntry,
         calcEntry,
-        insert,
+        execute,
         primitiveEntryIstream
     );
 
-    addToMemberFunctionSelectionTable
-    (
-        functionEntry,
-        calcEntry,
-        insert,
-        dictionaryIstream
-    );
 }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionEntries::calcEntry::insert
+bool Foam::functionEntries::calcEntry::execute
 (
     const dictionary& parentDict,
     primitiveEntry& entry,
@@ -71,16 +64,6 @@ bool Foam::functionEntries::calcEntry::insert
     resultStream
         << (args.lookup("x")[0].number() + args.lookup("y")[0].number());
     entry.read(parentDict, IStringStream(resultStream.str())());
-    return true;
-}
-
-
-bool Foam::functionEntries::calcEntry::insert
-(
-    dictionary& parentDict,
-    Istream& is
-)
-{
     return true;
 }
 
