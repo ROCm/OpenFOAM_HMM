@@ -34,6 +34,10 @@ Description
     data dictionaries, since unlike the IOdictionary class, it does not use
     a objectRegistry itself to work.
 
+ToDo
+    A merge() member function with a non-const dictionary parameter.
+    This would avoid unnecessary cloning in the add(entry*,bool) method
+
 SourceFiles
     dictionary.C
     dictionaryIO.C
@@ -217,38 +221,57 @@ public:
         // Editing
 
             //- Add a new entry
-            bool add(entry*, bool mergeEntry = false);
+            //  With the merge option, dictionaries are interwoven and
+            //  primitive entries are overwritten
+            bool add(entry*, bool mergeEntry=false);
 
             //- Add an entry
-            void add(const entry&);
-
-            //- Add a token entry
-            void add(const word& keyword, const token&);
+            //  With the merge option, dictionaries are interwoven and
+            //  primitive entries are overwritten
+            void add(const entry&, bool mergeEntry=false);
 
             //- Add a word entry
-            void add(const word& keyword, const word&);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const word&, bool overwrite=false);
 
             //- Add a string entry
-            void add(const word& keyword, const string&);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const string&, bool overwrite=false);
 
             //- Add a label entry
-            void add(const word& keyword, const label);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const label, bool overwrite=false);
 
             //- Add a scalar entry
-            void add(const word& keyword, const scalar);
-
-            //- Add an entry constructed from a ITstream
-            void add(const word& keyword, const ITstream&);
-
-            //- Add an entry constructed from a tokenList
-            void add(const word& keyword, const tokenList& tokens);
-
-            //- Add a T entry
-            template<class T>
-            void add(const word& keyword, const T&);
+            //  optionally overwrite an existing entry
+            void add (const word& keyword, const scalar, bool overwrite=false);
 
             //- Add a dictionary entry
-            void add(const word& keyword, const dictionary&);
+            //  optionally merge with an existing sub-dictionary
+            void add
+            (
+                const word& keyword,
+                const dictionary&,
+                bool mergeEntry=false
+            );
+
+            //- Add a T entry
+            //  optionally overwrite an existing entry
+            template<class T>
+            void add(const word& keyword, const T&, bool overwrite=false);
+
+            //- Assign a new entry, overwrite any existing entry
+            void set(entry*);
+
+            //- Assign a new entry, overwrite any existing entry
+            void set(const entry&);
+
+            //- Assign a dictionary entry, overwrite any existing entry
+            void set(const word& keyword, const dictionary&);
+
+            //- Assign a T entry, overwrite any existing entry
+            template<class T>
+            void set(const word& keyword, const T&);
 
             //- Remove an entry specified by keyword
             bool remove(const word& keyword);
@@ -307,14 +330,12 @@ public:
 
 // Global Operators
 
-// Combine dictionaries starting from the entries in dict one and then including
-// those from dict2.
-// Warn, but do not overwrite the entries from dict1.
+//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//  Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
 
-// Combine dictionaries starting from the entries in dict one and then including
-// those from dict2.
-// Do not overwrite the entries from dict1.
+//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//  Do not overwrite the entries from dict1.
 dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 
 

@@ -34,74 +34,6 @@ defineTypeNameAndDebug(Foam::dictionary, 0);
 
 const Foam::dictionary Foam::dictionary::null;
 
-#define DICTIONARY_INPLACE_MERGE
-
-// * * * * * * * * * * * * * Private member functions  * * * * * * * * * * * //
-
-bool Foam::dictionary::add(entry* ePtr, bool mergeEntry)
-{
-    HashTable<entry*>::iterator iter = hashedEntries_.find(ePtr->keyword());
-
-    if (mergeEntry && iter != hashedEntries_.end())
-    {
-        // merge dictionary with dictionary
-        if (iter()->isDict() && ePtr->isDict())
-        {
-            iter()->dict().merge(ePtr->dict());
-            delete ePtr;
-
-            return true;
-        }
-        else
-        {
-            // replace existing dictionary with entry or vice versa
-#ifdef DICTIONARY_INPLACE_MERGE
-            IDLList<entry>::replace(iter(), ePtr);
-            delete iter();
-            hashedEntries_.erase(iter);
-
-            if (hashedEntries_.insert(ePtr->keyword(), ePtr))
-            {
-                ePtr->name() = name_ + "::" + ePtr->keyword();
-                return true;
-            }
-            else
-            {
-                IOWarningIn("dictionary::add(entry* ePtr)", (*this))
-                    << "problem replacing entry "<< ePtr->keyword()
-                    << " in dictionary " << name()
-                    << endl;
-
-                IDLList<entry>::remove(ePtr);
-                delete ePtr;
-                return false;
-            }
-#else
-            remove(ePtr->keyword());
-#endif
-        }
-    }
-
-    if (hashedEntries_.insert(ePtr->keyword(), ePtr))
-    {
-        ePtr->name() = name_ + "::" + ePtr->keyword();
-        IDLList<entry>::append(ePtr);
-
-        return true;
-    }
-    else
-    {
-        IOWarningIn("dictionary::add(entry* ePtr)", (*this))
-            << "attempt to add entry "<< ePtr->keyword()
-            << " which already exists in dictionary " << name()
-            << endl;
-
-        delete ePtr;
-        return false;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dictionary::dictionary()
@@ -270,11 +202,10 @@ const Foam::entry& Foam::dictionary::lookupEntry
     bool recursive
 ) const
 {
-    const entry* ePtr = lookupEntryPtr(keyword, recursive);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
 
-    if (ePtr == NULL)
+    if (entryPtr == NULL)
     {
-        // If keyword not found print error message ...
         FatalIOErrorIn
         (
             "dictionary::lookupEntry(const word& keyword) const",
@@ -284,7 +215,7 @@ const Foam::entry& Foam::dictionary::lookupEntry
             << exit(FatalIOError);
     }
 
-    return *ePtr;
+    return *entryPtr;
 }
 
 
@@ -300,7 +231,9 @@ Foam::ITstream& Foam::dictionary::lookup
 
 bool Foam::dictionary::isDict(const word& keyword) const
 {
-    if (const entry* entryPtr = lookupEntryPtr(keyword))
+    const entry* entryPtr = lookupEntryPtr(keyword);
+
+    if (entryPtr)
     {
         return entryPtr->isDict();
     }
@@ -313,7 +246,9 @@ bool Foam::dictionary::isDict(const word& keyword) const
 
 const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
 {
-    if (const entry* entryPtr = lookupEntryPtr(keyword))
+    const entry* entryPtr = lookupEntryPtr(keyword);
+
+    if (entryPtr)
     {
         return &entryPtr->dict();
     }
@@ -326,13 +261,9 @@ const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
 
 const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 {
-    if (const entry* entryPtr = lookupEntryPtr(keyword))
+    const entry* entryPtr = lookupEntryPtr(keyword);
+    if (entryPtr == NULL)
     {
-        return entryPtr->dict();
-    }
-    else
-    {
-        // If keyword not found print error message ...
         FatalIOErrorIn
         (
             "dictionary::subDict(const word& keyword) const",
@@ -340,37 +271,31 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
         )   << " keyword " << keyword << " is undefined in dictionary "
             << name()
             << exit(FatalIOError);
-
-        return entryPtr->dict();
     }
+    return entryPtr->dict();
 }
 
 
 Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 {
-    if (entry* entryPtr = lookupEntryPtr(keyword))
+    entry* entryPtr = lookupEntryPtr(keyword);
+    if (entryPtr == NULL)
     {
-        return entryPtr->dict();
-    }
-    else
-    {
-        // If keyword not found print error message ...
         FatalIOErrorIn
         (
-            "dictionary::subDict(const word& keyword) const",
+            "dictionary::subDict(const word& keyword)",
             *this
         )   << " keyword " << keyword << " is undefined in dictionary "
             << name()
             << exit(FatalIOError);
-
-        return entryPtr->dict();
     }
+    return entryPtr->dict();
 }
 
 
 Foam::wordList Foam::dictionary::toc() const
 {
-    wordList keywords(size());
+    wordList keys(size());
 
     label i = 0;
     for
@@ -380,56 +305,124 @@ Foam::wordList Foam::dictionary::toc() const
         ++iter
     )
     {
-        keywords[i++] = iter().keyword();
+        keys[i++] = iter().keyword();
     }
 
-    return keywords;
+    return keys;
 }
 
 
-void Foam::dictionary::add(const entry& e)
+bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 {
-    add(e.clone(*this).ptr());
+    HashTable<entry*>::iterator iter = hashedEntries_.find(entryPtr->keyword());
+
+    if (mergeEntry && iter != hashedEntries_.end())
+    {
+        // merge dictionary with dictionary
+        if (iter()->isDict() && entryPtr->isDict())
+        {
+            iter()->dict().merge(entryPtr->dict());
+            delete entryPtr;
+
+            return true;
+        }
+        else
+        {
+            // replace existing dictionary with entry or vice versa
+            IDLList<entry>::replace(iter(), entryPtr);
+            delete iter();
+            hashedEntries_.erase(iter);
+
+            if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
+            {
+                entryPtr->name() = name_ + "::" + entryPtr->keyword();
+                return true;
+            }
+            else
+            {
+                IOWarningIn("dictionary::add(entry*)", (*this))
+                    << "problem replacing entry "<< entryPtr->keyword()
+                    << " in dictionary " << name() << endl;
+
+                IDLList<entry>::remove(entryPtr);
+                delete entryPtr;
+                return false;
+            }
+        }
+    }
+
+    if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
+    {
+        entryPtr->name() = name_ + "::" + entryPtr->keyword();
+        IDLList<entry>::append(entryPtr);
+
+        return true;
+    }
+    else
+    {
+        IOWarningIn("dictionary::add(entry* entryPtr)", (*this))
+            << "attempt to add entry "<< entryPtr->keyword()
+            << " which already exists in dictionary " << name()
+            << endl;
+
+        delete entryPtr;
+        return false;
+    }
 }
 
-void Foam::dictionary::add(const word& keyword, const token& t)
+
+void Foam::dictionary::add(const entry& e, bool mergeEntry)
 {
-    add(new primitiveEntry(keyword, t));
+    add(e.clone(*this).ptr(), mergeEntry);
 }
 
-void Foam::dictionary::add(const word& keyword, const word& w)
+void Foam::dictionary::add(const word& k, const word& w, bool overwrite)
 {
-    add(new primitiveEntry(keyword, token(w)));
+    add(new primitiveEntry(k, token(w)), overwrite);
 }
 
-void Foam::dictionary::add(const word& keyword, const Foam::string& s)
+void Foam::dictionary::add(const word& k, const Foam::string& s, bool overwrite)
 {
-    add(new primitiveEntry(keyword, token(s)));
+    add(new primitiveEntry(k, token(s)), overwrite);
 }
 
-void Foam::dictionary::add(const word& keyword, const label l)
+void Foam::dictionary::add(const word& k, const label l, bool overwrite)
 {
-    add(new primitiveEntry(keyword, token(l)));
+    add(new primitiveEntry(k, token(l)), overwrite);
 }
 
-void Foam::dictionary::add(const word& keyword, const scalar s)
+void Foam::dictionary::add(const word& k, const scalar s, bool overwrite)
 {
-    add(new primitiveEntry(keyword, token(s)));
+    add(new primitiveEntry(k, token(s)), overwrite);
 }
 
-void Foam::dictionary::add(const word& keyword, const ITstream& tokens)
+void Foam::dictionary::add(const word& k, const dictionary& d, bool mergeEntry)
 {
-    add(new primitiveEntry(keyword, tokens));
+    add(new dictionaryEntry(k, *this, d), mergeEntry);
 }
 
-void Foam::dictionary::add(const word& keyword, const tokenList& tokens)
+
+void Foam::dictionary::set(entry* entryPtr)
 {
-    add(new primitiveEntry(keyword, tokens));
+    entry* existingPtr = lookupEntryPtr(entryPtr->keyword());
+
+    // clear dictionary so merge acts like overwrite
+    if (existingPtr && existingPtr->isDict())
+    {
+        existingPtr->dict().clear();
+    }
+    add(entryPtr, true);
 }
 
-void Foam::dictionary::add(const word& keyword, const dictionary& dict)
+
+void Foam::dictionary::set(const entry& e)
 {
-    add(new dictionaryEntry(keyword, *this, dict));
+    set(e.clone(*this).ptr());
+}
+
+void Foam::dictionary::set(const word& k, const dictionary& d)
+{
+    set(new dictionaryEntry(k, *this, d));
 }
 
 
@@ -486,7 +479,10 @@ bool Foam::dictionary::changeKeyword
         }
         else
         {
-            // could issue warning if desired
+            WarningIn("dictionary::changeKeyword(const word& old, const word& new)")
+                << "cannot rename keyword "<< oldKeyword
+                << " to existing keyword " << newKeyword
+                << " in dictionary " << name() << endl;
             return false;
         }
     }
@@ -527,34 +523,24 @@ bool Foam::dictionary::merge(const dictionary& dict)
         if (iter2 != hashedEntries_.end())
         {
             // Recursively merge sub-dictionaries
+            // TODO: merge without copying
             if (iter2()->isDict() && iter().isDict())
             {
-                // without copying and without remove/add?
-                // this certainly looks ugly and doesn't necessarily
-                // retain the original sort order (perhaps nice to have)
-                if
-                (
-                    iter2()->dict().merge(iter().dict())
-                )
+                if (iter2()->dict().merge(iter().dict()))
                 {
                     changed = true;
                 }
             }
             else
             {
-#ifdef DICTIONARY_INPLACE_MERGE
                 add(iter().clone(*this).ptr(), true);
-#else
-                remove(keyword);
-                add(iter().clone(*this)());
-#endif
                 changed = true;
             }
         }
         else
         {
             // not found - just add
-            add(iter().clone(*this)());
+            add(iter().clone(*this).ptr());
             changed = true;
         }
     }
@@ -588,8 +574,8 @@ void Foam::dictionary::operator=(const dictionary& dict)
             << abort(FatalError);
     }
 
-    // Clear the current entries
-    IDLList<entry>::clear();
+    name_ = dict.name();
+    clear();
 
     // Create clones of the entries in the given dictionary
     // resetting the parentDict to this dictionary
@@ -602,10 +588,6 @@ void Foam::dictionary::operator=(const dictionary& dict)
     {
         IDLList<entry>::append(iter().clone(*this).ptr());
     }
-
-    name_ = dict.name();
-
-    hashedEntries_.clear();
 
     for
     (
@@ -636,7 +618,7 @@ void Foam::dictionary::operator+=(const dictionary& dict)
         ++iter
     )
     {
-        add(iter().clone(*this)());
+        add(iter().clone(*this).ptr());
     }
 }
 
@@ -660,7 +642,7 @@ void Foam::dictionary::operator|=(const dictionary& dict)
     {
         if (!found(iter().keyword()))
         {
-            add(iter().clone(*this)());
+            add(iter().clone(*this).ptr());
         }
     }
 }
@@ -683,8 +665,7 @@ void Foam::dictionary::operator<<=(const dictionary& dict)
         ++iter
     )
     {
-        remove(iter().keyword());
-        add(iter().clone(*this)());
+        set(iter().clone(*this).ptr());
     }
 }
 

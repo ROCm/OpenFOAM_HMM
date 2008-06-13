@@ -59,6 +59,7 @@ Foam::label Foam::functionEntries::inputModeEntry::mode_ = imError;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+// we could combine this into execute() directly, but leave it here for now
 void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
 {
     clear();
