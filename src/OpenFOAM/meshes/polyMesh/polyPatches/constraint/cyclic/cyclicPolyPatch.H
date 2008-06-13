@@ -70,6 +70,19 @@ class cyclicPolyPatch
 :
     public coupledPolyPatch
 {
+public:
+
+    enum transformType
+    {
+        UNKNOWN,
+        ROTATIONAL,
+        TRANSLATIONAL
+    };
+    static const NamedEnum<transformType, 3> transformTypeNames;
+
+
+private:
+
     // Private data
 
         //- List of edges formed from connected points. e[0] is the point on
@@ -84,6 +97,18 @@ class cyclicPolyPatch
         //- Morph:angle between normals of neighbouring faces.
         //  Used to split cyclic into halves.
         scalar featureCos_;
+
+        //- Index of largest cell face
+        label maxI_;
+
+        //- Type of transformation - rotational or translational
+        transformType transform_;
+
+        //- Axis of rotation for rotational cyclics
+        vector rotationAxis_;
+
+        //- point on axis of rotation for rotational cyclics
+        point rotationCentre_;
 
 
     // Private member functions
@@ -130,6 +155,14 @@ class cyclicPolyPatch
                 labelList& faceMap,
                 labelList& rotation
             ) const;
+
+            //- For rotational cases, try to find a unique face on each side
+            //  of the cyclic.
+            label getConsistentRotationFace
+            (
+                const pointField& faceCentres
+            ) const;
+
 
 protected:
 
