@@ -32,12 +32,9 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-OPstream::~OPstream()
+Foam::OPstream::~OPstream()
 {
     notImplemented("OPstream::~OPstream()");
 }
@@ -45,7 +42,7 @@ OPstream::~OPstream()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool OPstream::write
+bool Foam::OPstream::write
 (
     const commsTypes commsType,
     const int toProcNo,
@@ -68,11 +65,11 @@ bool OPstream::write
 }
 
 
-void OPstream::waitRequests()
+void Foam::OPstream::waitRequests()
 {}
 
 
-bool OPstream::finishedRequest(const label)
+bool Foam::OPstream::finishedRequest(const label)
 {
     notImplemented("OPstream::finishedRequest()");
     return false;
@@ -80,7 +77,5 @@ bool OPstream::finishedRequest(const label)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

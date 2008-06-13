@@ -32,12 +32,9 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-IPstream::IPstream
+Foam::IPstream::IPstream
 (
     const commsTypes commsType,
     const int fromProcNo,
@@ -53,13 +50,12 @@ IPstream::IPstream
 {
      notImplemented
      (
-         "IPstream::IPstream"
+         "IPsream::IPstream"
          "("
-             "const commsTypes commsType,"
-             "const int fromProcNo,"
+             "const commsTypes,"
+             "const int fromProcNo," 
              "const label bufSize,"
-             "streamFormat format,"
-             "versionNumber version"
+             "streamFormat, versionNumber"
          ")"
      );
 }
@@ -67,7 +63,7 @@ IPstream::IPstream
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-int IPstream::read
+int Foam::IPstream::read
 (
     const commsTypes commsType,
     const int fromProcNo,
@@ -75,33 +71,32 @@ int IPstream::read
     const std::streamsize bufSize
 )
 {
-     notImplemented
-     (
-         "IPstream::read"
-         "("
-             "const commsTypes commsType,"
-             "const int fromProcNo,"
-             "char* buf,"
-             "const label bufSize"
-         ")"
+    notImplemented
+    (
+        "IPstream::read"
+        "("
+            "const commsTypes,"
+            "const int fromProcNo,"
+            "char* buf,"
+            "const label bufSize"
+        ")"
      );
 
      return 0;
 }
 
 
-void IPstream::waitRequests()
+void Foam::IPstream::waitRequests()
 {}
 
 
-bool IPstream::finishedRequest(const label)
+bool Foam::IPstream::finishedRequest(const label)
 {
-     notImplemented("IPstream::finishedRequest()");
+    notImplemented("IPstream::finishedRequest()");
+    return false;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

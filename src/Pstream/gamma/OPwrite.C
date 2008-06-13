@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Write primitive and binary block from OPstream
+    Write primitive and binary block from OPstream gamma-mpi
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,8 +46,10 @@ namespace Foam
 
 // Largest message sent so far. This tracks the size of the receive
 // buffer on the receiving end. Done so we only send out resize messages
-// if nessecary
+// if necessary
+//! @cond fileScope
 labelList maxSendSize;
+//! @endcond fileScope
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
