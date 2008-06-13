@@ -4,7 +4,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
 #    \\/     M anipulation  |
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,23 +23,23 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     doxyAwk
+#     doxyFilt.awk
 #
 # Description
 #     Converts cocoon style sentinel strings into doxygen style strings
 #
-#     - assume the comment strings are formatted as follows
-#           //- general description
-#           //  more information
-#           //  and even more information
-#       This should be re-formatted as the following
-#           //! general description
-#           /*!
-#           more information
-#           and even more information
-#           */
-#       The intermediate "/*! ... */" block is left-justified to handle
-#       possible verbatim text
+#     Assumes comment strings are formatted as follows
+#         //- general description
+#         //  more information
+#         //  and even more information
+#     This should be re-formatted as the following
+#         //! general description
+#         /*!
+#         more information
+#         and even more information
+#         */
+#     The intermediate "/*! ... */" block is left-justified to handle
+#     possible verbatim text
 # -----------------------------------------------------------------------------
 
 BEGIN {
@@ -55,14 +55,14 @@ BEGIN {
 
 
 /^ *\/\// {
-    # start block
+    # start comment block
     if (state == 1)
     {
         printf "/*!\n"
         state = 2
     }
 
-    # inside block
+    # inside comment block
     if (state == 2)
     {
         if (!sub(/^ *\/\/  /, ""))
@@ -77,7 +77,7 @@ BEGIN {
 
 
 {
-    # end block
+    # end comment block
     if (state == 2)
     {
         printf "*/\n"
