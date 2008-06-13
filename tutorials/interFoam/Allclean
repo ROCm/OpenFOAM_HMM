@@ -1,16 +1,26 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
+# Get application name from directory
+application=`basename $PWD`
+
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/CleanFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
+. $tutorialPath/CleanFunctions
+
+
+
 keepCases="damBreak"
 loseCases="damBreakFine"
 
-tutorialPath=`dirname $0`/..
-. $tutorialPath/CleanFunctions
 
 for case in $keepCases
 do
-    cleanCase $case
+    (cd $case && $tutorialPath/cleanAll)
+
     if [ "$case" = "damBreak" ] 
     then 
         cp $case/0/gamma.org $case/0/gamma

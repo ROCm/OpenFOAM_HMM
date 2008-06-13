@@ -901,7 +901,8 @@ int main(int argc, char *argv[])
     }
 
     yyFlexLexer lexer(&fluentStream);
-    while(lexer.yylex() != 0);
+    while(lexer.yylex() != 0)
+    {}
 
     Info<< "\n\nFINISHED LEXING\n\n\n";
     // Lookup table giving number of vertices given a fluent cell type ID

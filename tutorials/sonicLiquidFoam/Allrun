@@ -1,11 +1,17 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="decompressionTank decompressionTankFine"
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/RunFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/RunFunctions
+
+
 
 setDecompressionTankFine ()
 {
@@ -25,14 +31,16 @@ setDecompressionTankFine ()
     mv temp.$$ $controlDict    
 }
 
-for case in $cases
-do
-    if [ "$case" = "decompressionTankFine" ] 
-    then
-        cloneCase decompressionTank $case
-        setDecompressionTankFine
-    fi
-#
-    runApplication blockMesh $case
-    runApplication $application $case
-done 
+# Do decompressionTank
+(cd decompressionTank && $tutorialPath/runAll)
+
+# Clone case
+cloneCase decompressionTank decompressionTankFine
+
+cd decompressionTankFine
+    # Modify case
+    setDecompressionTankFine
+    # And execute
+    runApplication blockMesh
+    runApplication $application
+cd ..

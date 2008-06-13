@@ -33,31 +33,29 @@
 runApplication ()
 {
     APP_RUN=$1; shift
-    dir=$1; shift
 
-    if [ -f $dir/log.$APP_RUN ] ; then
-        echo "$APP_RUN already run on $dir: remove log file to run"
+    if [ -f log.$APP_RUN ] ; then
+        echo "$APP_RUN already run on $PWD: remove log file to run"
     else
-        echo "Running $APP_RUN on $dir"
-        ( cd $dir && $APP_RUN $* > log.$APP_RUN 2>&1 )
+        echo "Running $APP_RUN on $PWD"
+        $APP_RUN $* > log.$APP_RUN 2>&1
     fi
 }
 
 runParallel ()
 {
     APP_RUN=$1; shift
-    dir=$2; shift
 
-    if [ -f $dir/log.$APP_RUN ] ; then
-        echo "$APP_RUN already run on $dir: remove log file to run"
+    if [ -f $log.$APP_RUN ] ; then
+        echo "$APP_RUN already run on $PWD: remove log file to run"
     else
         if [ "$WM_MPLIB" = LAM ]
         then
             echo "Starting LAM using $2 machines file"
             lamboot -v $2
         fi
-        echo "Running $APP_RUN in parallel on $dir using $1 processes"
-        ( cd $dir && mpirun -np $1 $APP_RUN -parallel < /dev/null > log.$APP_RUN 2>&1 )
+        echo "Running $APP_RUN in parallel on $PWD using $1 processes"
+        ( mpirun -np $1 $APP_RUN -parallel < /dev/null > log.$APP_RUN 2>&1 )
         if [ "$WM_MPLIB" = LAM ]
         then
             echo "Stopping LAM"
@@ -68,8 +66,8 @@ runParallel ()
 
 compileApplication ()
 {
-    echo "Compiling $1/$2 application"
-    wmake $1/$2
+    echo "Compiling $1 application"
+    wmake $1
 }
 
 cloneCase ()

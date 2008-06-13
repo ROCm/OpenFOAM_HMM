@@ -73,6 +73,7 @@ find -H $packDir               \
  -a ! -name "core"             \
  -a ! -name "core.[1-9]*"      \
  -a ! -name "log[0-9]*"        \
+ -a ! -name "\.ebrowse"        \
 | sed                          \
  -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \

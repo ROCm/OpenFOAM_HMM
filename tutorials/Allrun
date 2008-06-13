@@ -32,94 +32,64 @@
 
 . RunFunctions
 
-applications=\
-" \
-    icoFoam \
-    turbFoam \
-    simpleFoam \
-    icoDyMFoam \
-    nonNewtonianIcoFoam \
-    boundaryFoam \
-    interFoam \
-    lesInterFoam \
-    rasInterFoam \
-    multiphaseInterFoam \
-    buoyantSimpleFoam \
-    buoyantFoam \
-    potentialFoam \
-    laplacianFoam \
-    scalarTransportFoam \
-    oodles \
-    coodles \
-    channelOodles \
-    dnsFoam \
-    mhdFoam \
-    electrostaticFoam \
-    financialFoam \
-    sonicFoam \
-    rhoSonicFoam \
-    rhopSonicFoam \
-    sonicLiquidFoam \
-    sonicTurbFoam \
-    solidDisplacementFoam \
-    solidEquilibriumDisplacementFoam \
-    XiFoam \
-    Xoodles \
-    dieselFoam \
-    engineFoam \
-    bubbleFoam \
-    twoPhaseEulerFoam \
-    settlingFoam \
-    rhoExplicitPorousSimpleFoam \
-    rhoImplicitPorousSimpleFoam \
-    rhoTurbFoam \
-    cavitatingFoam \
-    MRFSimpleFoam \
-    interDyMFoam \
-"
 
+# logReport <logfile>
+# Extracts useful info from log file.
 logReport () {
-case=`dirname $1 | sed s/"\(.*\)\.\/"/""/g`
-app=`echo $1 | sed s/"\(.*\)\."/""/g`
-appAndCase="Application $app - case $case"
+    case=`dirname $1 | sed s/"\(.*\)\.\/"/""/g`
+    app=`echo $1 | sed s/"\(.*\)\."/""/g`
+    appAndCase="Application $app - case $case"
 
-fatalError=`grep "FOAM FATAL" $1`
-UxSS=`grep -E "Ux[:| ]*solution singularity" $1`
-UySS=`grep -E "Uy[:| ]*solution singularity" $1`
-UzSS=`grep -E "Uz[:| ]*solution singularity" $1`
-completed=`grep -E "^[\t ]*[eE]nd" $1`
+    fatalError=`grep "FOAM FATAL" $1`
+    UxSS=`grep -E "Ux[:| ]*solution singularity" $1`
+    UySS=`grep -E "Uy[:| ]*solution singularity" $1`
+    UzSS=`grep -E "Uz[:| ]*solution singularity" $1`
+    completed=`grep -E "^[\t ]*[eE]nd" $1`
 
-if [ "$fatalError" ] ; then
-    echo "$appAndCase: ** FOAM FATAL ERROR **"
-    return
-elif [ "$UxSS" -a "$UySS" -a "$UzSS" ] ; then
-    echo "$appAndCase: ** Solution singularity **"
-    return
-elif [ "$completed" ] ; then
-    completionTime=`tail -10 $log | grep Execution | cut -d= -f2 | sed 's/^[ \t]*//'` 
-    if [ "$completionTime" ] ; then
-        completionTime="in $completionTime"
+    if [ "$fatalError" ] ; then
+        echo "$appAndCase: ** FOAM FATAL ERROR **"
+        return
+    elif [ "$UxSS" -a "$UySS" -a "$UzSS" ] ; then
+        echo "$appAndCase: ** Solution singularity **"
+        return
+    elif [ "$completed" ] ; then
+        completionTime=`tail -10 $log | grep Execution | cut -d= -f2 | sed 's/^[ \t]*//'` 
+        if [ "$completionTime" ] ; then
+            completionTime="in $completionTime"
+        fi
+        echo "$appAndCase: completed $completionTime"
+        return
+    else
+        echo "$appAndCase: unconfirmed completion"
     fi
-    echo "$appAndCase: completed $completionTime"
-    return
-else
-    echo "$appAndCase: unconfirmed completion"
-fi
 }
 
+
+# Recursively run all tutorials
+for application in *
+do
+    if [ -d $application ]
+    then
+        #(cd $application && ../runAll)
+        $WM_SCHEDULER "cd $PWD/$application && ../runAll"
+    fi
+done
+
+# Analyse all log files
 rm testLoopReport > /dev/null 2>&1 &
 touch testLoopReport
-for application in $applications
+for application in *
 do
-    cd $application
-    ./Allrun
-#    echo "$application application completed" >> ../testLoopReport
-    for log in `find . -name "log.*" | xargs ls -rt`
-    do
-        logReport $log >> ../testLoopReport
-    done
-    echo "" >> ../testLoopReport
-    cd ..
+    if [ -d $application ]
+    then
+        cd $application
+        for log in `find . -name "log.*" | xargs ls -rt`
+        do
+            logReport $log >> ../testLoopReport
+        done
+        echo "" >> ../testLoopReport
+        cd ..
+    fi
 done
 
 find . -name "log.*" -exec cat {} \; >> logs

@@ -1,19 +1,24 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-keepCases="decompressionTank"
-loseCases="decompressionTankFine"
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/CleanFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/CleanFunctions
 
-for case in $keepCases
-do
-    cleanCase $case
-done
 
-for case in $loseCases
+
+removeCase decompressionTankFine
+
+for case in *
 do
-    removeCase $case
+    if [ -d $case ]
+    then
+        (cd $case && $tutorialsDir/cleanAll)
+    fi
 done

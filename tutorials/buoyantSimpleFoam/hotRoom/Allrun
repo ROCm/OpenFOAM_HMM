@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Get application directory
+parentDir=`dirname $PWD`
+application=`basename $parentDir`
+
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/RunFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
+. $tutorialPath/RunFunctions
+
+
+
+compileApplication ../../buoyantFoam/hotRoom/setHotRoom
+runApplication blockMesh
+runApplication setHotRoom
+runApplication $application

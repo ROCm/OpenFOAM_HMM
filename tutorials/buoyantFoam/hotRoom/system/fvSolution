@@ -34,6 +34,12 @@ solvers
     {
         preconditioner   DIC;
         tolerance        1e-06;
+        relTol           0.1;
+    };
+    pdFinal PCG
+    {
+        preconditioner   DIC;
+        tolerance        1e-06;
         relTol           0;
     };
     U PBiCG

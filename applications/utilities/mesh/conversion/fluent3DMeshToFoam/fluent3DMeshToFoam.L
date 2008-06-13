@@ -583,7 +583,8 @@ endOfSection               {space}")"{space}
 <readCellData>{spaceNl}{lbrac} {
         // Quickly scan to the end of the cell data block and discard
         register int c;
-        while ((c = yyinput()) != 0 && c != ')');
+        while ((c = yyinput()) != 0 && c != ')')
+        {}
     }
 
 {faceTree} {
@@ -763,7 +764,8 @@ int main(int argc, char *argv[])
 
     yyFlexLexer lexer(&fluentStream.stdStream());
 
-    while(lexer.yylex() != 0);
+    while(lexer.yylex() != 0)
+    {}
 
     Info<< "\nFINISHED LEXING\n\n";
 

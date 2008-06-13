@@ -189,7 +189,7 @@ void writeVTK
         faceList setFaces(cellFaces.size());
         labelList faceValues(cellFaces.size());
         label setFaceI = 0;
-        
+
         forAllConstIter(Map<label>, cellFaces, iter)
         {
             setFaces[setFaceI] = mesh.faces()[iter.key()];
@@ -217,7 +217,7 @@ void writeVTK
             mesh,
             currentSet,
             mesh.time().path()/vtkName
-        );        
+        );
     }
     else
     {
@@ -331,7 +331,7 @@ bool doCommand
     // Get some size estimate for set.
     const globalMeshData& parData = mesh.globalData();
 
-    label typSize = 
+    label typSize =
         max
         (
             parData.nTotalCells(),
@@ -449,7 +449,7 @@ bool doCommand
                 }
             }
             else
-            {        
+            {
                 if (is >> sourceType)
                 {
                     autoPtr<topoSetSource> setSource
@@ -743,7 +743,7 @@ int main(int argc, char *argv[])
     else if (!read_history(historyFile))
     {
         Info<< "Successfully read history from " << historyFile << endl;
-    }        
+    }
 #endif
 
 
@@ -754,7 +754,7 @@ int main(int argc, char *argv[])
     FatalError.throwExceptions();
     FatalIOError.throwExceptions();
 
-    while (1)
+    do
     {
         string rawLine;
 

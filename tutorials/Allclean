@@ -43,23 +43,10 @@ echo ""
 
 for application in *
 do
-    if [ -d "$application" ]
+    if [ -d $application ]
     then
-        cd $application
-        if [ -f "Allclean" ] 
-        then
-            ./Allclean
-        else
-            for case in *
-            do
-                if [ -d "$case" ]
-                then
-                    cleanCase $case
-                fi
-            done
-        fi
-        cd ..
-     fi
+        (cd $application && ../cleanAll)
+    fi
 done
 
 #------------------------------------------------------------------------------

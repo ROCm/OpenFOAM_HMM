@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Get application name from directory
+parentDir=`dirname $PWD`
+application=`basename $parentDir`
+
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/CleanFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
+. $tutorialPath/CleanFunctions
+
+
+cleanTimeDirectories

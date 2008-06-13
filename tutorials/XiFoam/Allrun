@@ -1,14 +1,20 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="moriyoshiHomogeneous moriyoshiHomogeneousPart2"
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/RunFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/RunFunctions
 
+
+
 setControlDict () {
-    controlDict="$case/system/controlDict"
+    controlDict="system/controlDict"
     sed \
     -e s/"\(deltaT[ \t]*\) 5e-06;"/"\1 1e-05;"/g \
     -e s/"\(endTime[ \t]*\) 0.005;"/"\1 0.015;"/g \
@@ -17,14 +23,17 @@ setControlDict () {
     mv temp.$$ $controlDict    
 }
 
-for case in $cases
-do
-    if [ "$case" = "moriyoshiHomogeneousPart2" ] ; then
-        cloneCase moriyoshiHomogeneous $case
-        cp -r moriyoshiHomogeneous/0.005 $case
-        setControlDict
-    else
-        runApplication blockMesh $case
-    fi
-    runApplication $application $case
-done
+
+
+# Do moriyoshiHomogeneous
+(cd moriyoshiHomogeneous && $tutorialPath/runAll)
+
+# Clone case
+cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2
+# Modify and execute
+cd moriyoshiHomogeneousPart2
+    cp -r ../moriyoshiHomogeneous/0.005 .
+    setControlDict
+    runApplication $application
+cd ..
+

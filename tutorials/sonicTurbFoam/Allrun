@@ -1,33 +1,38 @@
 #!/bin/sh
 
-currDir=`pwd`
-application=`basename $currDir`
-cases="prism nacaAirfoil"
+# Get application name from directory
+application=`basename $PWD`
 
-tutorialPath=`dirname $0`/..
+# Find and source additional functions
+tutorialPath=$PWD
+while [ ! -f $tutorialPath/RunFunctions ]
+do
+    tutorialPath="$tutorialPath/.."
+done
 . $tutorialPath/RunFunctions
+
 
 runStarToFoam ()
 {
-    if [ -f $1/log.starToFoam ] ; then
-        echo "starToFoam already run on $1: remove log file to run"
+    if [ -f log.starToFoam ] ; then
+        echo "starToFoam already run on $PWD: remove log file to run"
     else
-        echo "starToFoam: converting mesh $2"
-        starToFoam . $1 $2 > $1/log.starToFoam 2>&1
+        echo "starToFoam: converting mesh $1"
+        starToFoam $1 > log.starToFoam 2>&1
     fi
 }
 
-for case in $cases
-do
-    if [ "$case" = "nacaAirfoil" ] ; then
-        runStarToFoam $case ${case}/prostar/${case}
-        mv ${case}/constant/polyMesh/boundary temp
-        sed -e s/"\([\t ]*type[\t ]*\)symmetryPlane"/"\1empty"/g \
-            temp > ${case}/constant/polyMesh/boundary
-        rm temp
-    else
-        runApplication blockMesh $case
-    fi
-    runApplication $application $case
-#    runApplication Mach $case
-done 
+
+
+# Do prism
+(cd prism && $tutorialPath/runAll)
+
+# Special handling for nacaAirFoil
+cd nacaAirFoil
+    runStarToFoam prostar/nacaAirFoil
+    mv constant/polyMesh/boundary temp
+    sed -e s/"\([\t ]*type[\t ]*\)symmetryPlane"/"\1empty"/g \
+        temp > constant/polyMesh/boundary
+    rm temp
+    runApplication $application
+cd ..
