@@ -90,8 +90,8 @@ addPythonSupport ()
         else
             # Try to obtain $PYTHON_LIBRARY if not set
             # - assumes dynamically linked
-            PYTHON_LIBRARY=`ldd $WHICH_PYTHON | grep libpython | \
-                sed 's/.* => \(.*\) (.*/\1/'`
+            PYTHON_LIBRARY=`ldd $WHICH_PYTHON | \
+                sed -ne '/libpython/s/.* => \(.*\) (.*/\1/p'`
         fi
 
         if [ ! -n "$PYTHON_LIBRARY" ]; then
@@ -102,7 +102,7 @@ addPythonSupport ()
             exit 1
         fi
         PYTHON_MAJOR_VERSION=`echo $PYTHON_LIBRARY | \
-            sed 's/.*libpython\(.*\).so.*/\1/'`
+            sed 's/.*libpython\(.*\)\.so.*/\1/'`
         PYTHON_INCLUDE_DIR=/usr/include/python$PYTHON_MAJOR_VERSION
 
         addCMakeVariable "PARAVIEW_ENABLE_PYTHON=ON"
