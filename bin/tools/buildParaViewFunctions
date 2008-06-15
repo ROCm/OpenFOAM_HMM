@@ -48,6 +48,7 @@ initialiseVariables ()
     if [ "$VERBOSE" = ON ]; then
         addCMakeVariable "CMAKE_VERBOSE_MAKEFILE=TRUE"
     fi
+    addCMakeVariable "VTK_USE_TK=FALSE"
 }
 
 
@@ -90,8 +91,8 @@ addPythonSupport ()
         else
             # Try to obtain $PYTHON_LIBRARY if not set
             # - assumes dynamically linked
-            PYTHON_LIBRARY=`ldd $WHICH_PYTHON | grep libpython | \
-                sed 's/.* => \(.*\) (.*/\1/'`
+            PYTHON_LIBRARY=`ldd $WHICH_PYTHON | \
+                sed -ne '/libpython/s/.* => \(.*\) (.*/\1/p'`
         fi
 
         if [ ! -n "$PYTHON_LIBRARY" ]; then
@@ -102,7 +103,7 @@ addPythonSupport ()
             exit 1
         fi
         PYTHON_MAJOR_VERSION=`echo $PYTHON_LIBRARY | \
-            sed 's/.*libpython\(.*\).so.*/\1/'`
+            sed 's/.*libpython\(.*\)\.so.*/\1/'`
         PYTHON_INCLUDE_DIR=/usr/include/python$PYTHON_MAJOR_VERSION
 
         addCMakeVariable "PARAVIEW_ENABLE_PYTHON=ON"
@@ -143,7 +144,7 @@ buildParaView ()
 
     # set paraview environment
     unset PARAVIEW_SRC_DIR
-    for i in $PWD $WM_PROJECT_INST_DIR
+    for i in $PWD $WM_THIRD_PARTY_DIR
     do
        if [ -d $i/$PARAVIEW_SRC ]
        then
@@ -155,7 +156,7 @@ buildParaView ()
     [ -d "$PARAVIEW_SRC_DIR" ] || {
        echo "did not find $PARAVIEW_SRC in these directories:"
        echo "  PWD=$PWD"
-       echo "  WM_PROJECT_INST_DIR=$WM_PROJECT_INST_DIR"
+       echo "  WM_THIRD_PARTY_DIR=$WM_THIRD_PARTY_DIR"
        echo "abort build"
        exit 1
     }
