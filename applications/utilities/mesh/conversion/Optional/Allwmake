@@ -2,6 +2,9 @@
 # Build optional components (eg, may depend on third-party libraries)
 set -x
 
+# run from this directory only
+cd ${0%/*} || exit 1
+
 # build libccmio if required
 if [ ! -e $FOAM_LIBBIN/libccmio.so ]
 then
