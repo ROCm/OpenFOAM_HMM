@@ -197,6 +197,25 @@ public:
             template<class T>
             T lookupOrDefault(const word&, const T&, bool recusive=false) const;
 
+            //- Find and return a T, if not found return the given default value,
+            //  and add to dictionary. If recusive search parent dictionaries
+            template<class T>
+            T lookupOrAddDefault
+            (
+                const word&,
+                const T&,
+                bool recusive=false
+            );
+
+            //- Find an entry if present, and assign to T
+            template<class T>
+            void readIfPresent
+            (
+                const word&,
+                T&,
+                bool recusive=false
+            ) const;
+
             //- Check if entry is a sub-dictionary
             bool isDict(const word&) const;
 

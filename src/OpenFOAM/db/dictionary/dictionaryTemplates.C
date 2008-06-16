@@ -51,6 +51,48 @@ T Foam::dictionary::lookupOrDefault
 
 
 template<class T>
+T Foam::dictionary::lookupOrAddDefault
+(
+    const word& keyword,
+    const T& deft,
+    bool recusive
+)
+{
+    const entry* ePtr = lookupEntryPtr(keyword, recusive);
+
+    if (ePtr == NULL)
+    {
+        entry* defPtr = new primitiveEntry(keyword, deft);
+        append(defPtr);
+        hashedEntries_.insert(defPtr->keyword(), defPtr);
+
+        return deft;
+    }
+    else
+    {
+        return pTraits<T>(ePtr->stream());
+    }
+}
+
+
+template<class T>
+void Foam::dictionary::readIfPresent
+(
+    const word& keyword,
+    T& deft,
+    bool recusive
+) const
+{
+    const entry* ePtr = lookupEntryPtr(keyword, recusive);
+
+    if (ePtr != NULL)
+    {
+        ePtr->stream() >> deft;
+    }
+}
+
+
+template<class T>
 void Foam::dictionary::add(const word& keyword, const T& t)
 {
     entry* ePtr = new primitiveEntry(keyword, t);
