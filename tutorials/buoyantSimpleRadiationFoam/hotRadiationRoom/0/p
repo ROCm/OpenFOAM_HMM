@@ -1,0 +1,58 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           volScalarField;
+    object          p;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform 100000;
+
+boundaryField
+{
+    floor           
+    {
+        type            fixedFluxBuoyantPressure;
+        value           uniform 100000;
+    }
+
+    ceiling         
+    {
+        type            fixedFluxBuoyantPressure;
+        value           uniform 100000;
+    }
+
+    fixedWalls      
+    {
+        type            fixedFluxBuoyantPressure;
+        value           uniform 100000;
+    }
+
+    box
+    {
+        type            fixedFluxBuoyantPressure;
+        value           uniform 100000;
+    }
+}
+
+
+// ************************************************************************* //

@@ -233,7 +233,7 @@
         </StringVectorProperty>
 
 <!-- Available times array -->
-        <StringVectorProperty
+<!--        <StringVectorProperty
             name="TimeArrayInfo"
             information_only="1">
             <ArraySelectionInformationHelper
@@ -255,6 +255,7 @@
                 </RequiredProperties>
             </ArraySelectionDomain>
         </StringVectorProperty>
+-->
 
     </SourceProxy>
     </ProxyGroup>

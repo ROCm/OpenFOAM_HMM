@@ -41,14 +41,22 @@ void ensightParticlePositions
     const Foam::fvMesh& mesh,
     const Foam::fileName& postProcPath,
     const Foam::word& timeFile,
-    const Foam::word& sprayName
+    const Foam::word& cloudName,
+    const bool dataExists
 )
 {
+    if (dataExists)
+    {
+        Info<< "Converting cloud " << cloudName << " positions" <<  endl;
+    }
+    else
+    {
+        Info<< "Creating empty cloud " << cloudName << " positions" << endl;
+    }
+
     const Time& runTime = mesh.time();
 
-    Cloud<passiveParticle> parcels(mesh);
-
-    fileName ensightFileName(timeFile + "."+ sprayName);
+    fileName ensightFileName(timeFile + "." + cloudName);
     OFstream ensightFile
     (
         postProcPath/ensightFileName,
@@ -59,31 +67,36 @@ void ensightParticlePositions
 
     // Output header
     ensightFile
-        << "lagrangian                                         " << nl
+        << cloudName.c_str() << nl
         << "particle coordinates" << nl;
 
-    // Set Format
-    ensightFile.setf(ios_base::scientific, ios_base::floatfield);
-    ensightFile.precision(5);
-
-    ensightFile << setw(8) << parcels.size() << nl;
-
-    label nParcels = 0;
-
-    // Output position
-    for
-    (
-        Cloud<passiveParticle>::iterator elmnt = parcels.begin();
-        elmnt != parcels.end();
-        ++elmnt
-    )
+    if (dataExists)
     {
-        const vector& p = elmnt().position();
+        Cloud<passiveParticle> parcels(mesh, cloudName, false);
 
-        ensightFile
-            << setw(8) << ++nParcels
-            << setw(12) << p.x() << setw(12) << p.y() << setw(12) << p.z()
-            << nl;
+        // Set Format
+        ensightFile.setf(ios_base::scientific, ios_base::floatfield);
+        ensightFile.precision(5);
+
+        ensightFile<< setw(8) << parcels.size() << nl;
+
+        label nParcels = 0;
+
+        // Output positions
+        forAllConstIter(Cloud<passiveParticle>, parcels, elmnt)
+        {
+            const vector& p = elmnt().position();
+
+            ensightFile
+                << setw(8) << ++nParcels
+                << setw(12) << p.x() << setw(12) << p.y() << setw(12) << p.z()
+                << nl;
+        }
+    }
+    else
+    {
+        label nParcels = 0;
+        ensightFile<< setw(8) << nParcels << nl;
     }
 }
 

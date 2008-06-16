@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4.1                                 |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/dm2/henry/OpenFOAM/OpenFOAM-1.4.1/tutorials/multiphaseInterFoam";
+    case "damBreak4phaseFine";
+    instance "constant";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+5
+(
+leftWall
+{
+    type wall;
+    physicalType wallNoSurfaceTension;
+    nFaces 195;
+    startFace 68014;
+}
+
+rightWall
+{
+    type wall;
+    physicalType wallNoSurfaceTension;
+    nFaces 195;
+    startFace 68209;
+}
+
+lowerWall
+{
+    type wall;
+    physicalType wallNoSurfaceTension;
+    nFaces 206;
+    startFace 68404;
+}
+
+atmosphere
+{
+    type patch;
+    physicalType atmosphere;
+    nFaces 176;
+    startFace 68610;
+}
+
+defaultFaces
+{
+    type empty;
+    nFaces 68400;
+    startFace 68786;
+}
+)
+
+// ************************************************************************* //
