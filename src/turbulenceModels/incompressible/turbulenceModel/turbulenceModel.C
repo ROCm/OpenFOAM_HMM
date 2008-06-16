@@ -41,7 +41,10 @@ defineRunTimeSelectionTable(turbulenceModel, dictionary);
 
 void turbulenceModel::printCoeffs()
 {
-    Info<< turbulenceModelCoeffs_;
+    if (printCoeffs_)
+    {
+        Info<< turbulenceModelCoeffs_;
+    }
 }
 
 
@@ -75,16 +78,11 @@ turbulenceModel::turbulenceModel
     transportModel_(lamTransportModel),
 
     turbulence_(lookup("turbulence")),
+    printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     turbulenceModelCoeffs_(subDict(type + "Coeffs")),
 
-    kappa_
-    (
-        dimensionedScalar(subDict("wallFunctionCoeffs").lookup("kappa")).value()
-    ),
-    E_
-    (
-        dimensionedScalar(subDict("wallFunctionCoeffs").lookup("E")).value()
-    ),
+    kappa_(readScalar(subDict("wallFunctionCoeffs").lookup("kappa"))),
+    E_(readScalar(subDict("wallFunctionCoeffs").lookup("E"))),
     yPlusLam_(yPlusLam(kappa_, E_)),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),

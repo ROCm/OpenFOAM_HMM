@@ -84,6 +84,7 @@ protected:
         transportModel& transportModel_;
 
         Switch turbulence_;
+        Switch printCoeffs_;
         dictionary turbulenceModelCoeffs_;
 
         scalar kappa_;
