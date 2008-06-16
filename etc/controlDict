@@ -16,44 +16,6 @@ FoamFile
 // NB: the #functions do not work here
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-hosts
-(
-);
-
-caseRoots
-(
-    "."
-    "$FOAM_RUN/tutorials/bubbleFoam"
-    "$FOAM_RUN/tutorials/buoyantFoam"
-    "$FOAM_RUN/tutorials/buoyantSimpleFoam"
-    "$FOAM_RUN/tutorials/channelOodles"
-    "$FOAM_RUN/tutorials/coodles"
-    "$FOAM_RUN/tutorials/dnsFoam"
-    "$FOAM_RUN/tutorials/electrostaticFoam"
-    "$FOAM_RUN/tutorials/engineFoam"
-    "$FOAM_RUN/tutorials/icoFoam"
-    "$FOAM_RUN/tutorials/interFoam"
-    "$FOAM_RUN/tutorials/laplacianFoam"
-    "$FOAM_RUN/tutorials/lesInterFoam"
-    "$FOAM_RUN/tutorials/mhdFoam"
-    "$FOAM_RUN/tutorials/oodles"
-    "$FOAM_RUN/tutorials/potentialFoam"
-    "$FOAM_RUN/tutorials/rasInterFoam"
-    "$FOAM_RUN/tutorials/rhoSonicFoam"
-    "$FOAM_RUN/tutorials/rhoTurbFoam"
-    "$FOAM_RUN/tutorials/scalarTransportFoam"
-    "$FOAM_RUN/tutorials/settlingFoam"
-    "$FOAM_RUN/tutorials/simpleFoam"
-    "$FOAM_RUN/tutorials/solidDisplacementFoam"
-    "$FOAM_RUN/tutorials/sonicFoam"
-    "$FOAM_RUN/tutorials/sonicLiquidFoam"
-    "$FOAM_RUN/tutorials/sonicTurbFoam"
-    "$FOAM_RUN/tutorials/turbFoam"
-    "$FOAM_RUN/tutorials/twoPhaseEulerFoam"
-    "$FOAM_RUN/tutorials/XiFoam"
-    "$FOAM_RUN/tutorials/Xoodles"
-);
-
 Documentation
 {
     docBrowser      "kde-open %f";

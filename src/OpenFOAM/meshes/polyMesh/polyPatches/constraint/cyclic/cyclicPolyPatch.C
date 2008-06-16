@@ -43,6 +43,18 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, dictionary);
+
+
+template<>
+const char* NamedEnum<cyclicPolyPatch::transformType, 3>::names[] =
+{
+    "unknown",
+    "rotational",
+    "translational"
+};
+
+const NamedEnum<cyclicPolyPatch::transformType, 3>
+    cyclicPolyPatch::transformTypeNames;
 }
 
 
@@ -52,6 +64,23 @@ void Foam::cyclicPolyPatch::calcTransforms()
 {
     if (size() > 0)
     {
+        const pointField& points = this->points();
+
+        maxI_ = -1;
+        scalar maxAreaSqr = -GREAT;
+
+        for (label faceI = 0; faceI < size()/2; faceI++)
+        {
+            const face& f = operator[](faceI);
+            scalar areaSqr = magSqr(f.normal(points));
+
+            if (areaSqr > maxAreaSqr)
+            {
+                maxAreaSqr = areaSqr;
+                maxI_ = faceI;
+            }
+        }
+
         primitivePatch half0
         (
             SubList<face>
@@ -59,7 +88,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 *this,
                 size()/2
             ),
-            points()
+            points
         );
         pointField half0Ctrs(calcFaceCentres(half0, half0.points()));
         scalarField half0Tols(calcFaceTol(half0, half0.points(), half0Ctrs));
@@ -72,7 +101,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 size()/2,
                 size()/2
             ),
-            points()
+            points
         );
         pointField half1Ctrs(calcFaceCentres(half1, half1.points()));
 
@@ -97,9 +126,9 @@ void Foam::cyclicPolyPatch::calcTransforms()
 
         for (label facei = 0; facei < size()/2; facei++)
         {
-            half0Normals[facei] = operator[](facei).normal(points());
+            half0Normals[facei] = operator[](facei).normal(points);
             label nbrFacei = facei+size()/2;
-            half1Normals[facei] = operator[](nbrFacei).normal(points());
+            half1Normals[facei] = operator[](nbrFacei).normal(points);
 
             scalar magSf = mag(half0Normals[facei]);
             scalar nbrMagSf = mag(half1Normals[facei]);
@@ -129,11 +158,11 @@ void Foam::cyclicPolyPatch::calcTransforms()
                      << endl
                     << "Mesh face:" << start()+facei
                     << " vertices:"
-                    << IndirectList<point>(points(), operator[](facei))()
+                    << IndirectList<point>(points, operator[](facei))()
                     << endl
                     << "Neighbour face:" << start()+nbrFacei
                     << " vertices:"
-                    << IndirectList<point>(points(), operator[](nbrFacei))()
+                    << IndirectList<point>(points, operator[](nbrFacei))()
                     << endl
                     << "Rerun with cyclic debug flag set"
                     << " for more information." << exit(FatalError);
@@ -185,7 +214,7 @@ bool Foam::cyclicPolyPatch::getGeometricHalves
     {
         const labelList& eFaces = edgeFaces[edgeI];
 
-        // Check manifold edges for sharp angle. 
+        // Check manifold edges for sharp angle.
         // (Non-manifold already handled by patchZones)
         if (eFaces.size() == 2)
         {
@@ -353,15 +382,35 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 ) const
 {
     // Get geometric data on both halves.
-
-    vector n0 = half0Faces[0].normal(pp.points());
-    n0 /= mag(n0)+VSMALL;
-    vector n1 = half1Faces[0].normal(pp.points());
-    n1 /= mag(n1)+VSMALL;
-
     half0Ctrs = calcFaceCentres(half0Faces, pp.points());
     anchors0 = getAnchorPoints(half0Faces, pp.points());
     half1Ctrs = calcFaceCentres(half1Faces, pp.points());
+
+    vector n0 = vector::zero;
+    vector n1 = vector::zero;
+    switch (transform_)
+    {
+        case ROTATIONAL:
+        {
+            label face0 = getConsistentRotationFace(half0Ctrs);
+            label face1 = getConsistentRotationFace(half1Ctrs);
+
+            n0 = ((half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_);
+            n1 = ((half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_);
+            n0 /= mag(n0) + VSMALL;
+            n1 /= mag(n1) + VSMALL;
+            break;
+        }
+        default:
+        {
+            // Assumes that cyclic is correctly ordered, so that face[maxI_]
+            // on each side is equivalent.
+            n0 = half0Faces[maxI_].normal(pp.points());
+            n0 /= mag(n0) + VSMALL;
+            n1 = half1Faces[maxI_].normal(pp.points());
+            n1 /= mag(n1) + VSMALL;
+        }
+    }
 
     if (mag(n0 & n1) < 1-coupledPolyPatch::matchTol)
     {
@@ -373,7 +422,6 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
         // Rotation (around origin)
         const tensor reverseT(rotationTensor(n0, -n1));
-        const tensor forwardT(rotationTensor(-n1, n0));
 
         // Rotation
         forAll(half0Ctrs, faceI)
@@ -495,6 +543,44 @@ bool Foam::cyclicPolyPatch::matchAnchors
 }
 
 
+Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
+(
+    const pointField& faceCentres
+) const
+{
+    const scalarField magRadSqr =
+        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
+    scalarField axisLen = (faceCentres - rotationCentre_) & rotationAxis_;
+    axisLen = axisLen - min(axisLen);
+    const scalarField magLenSqr = magRadSqr + axisLen*axisLen;
+
+    label rotFace = -1;
+    scalar maxMagLenSqr = -GREAT;
+    scalar maxMagRadSqr = -GREAT;
+    forAll(faceCentres, i)
+    {
+        if (magLenSqr[i] >= maxMagLenSqr)
+        {
+            if (magRadSqr[i] > maxMagRadSqr)
+            {
+                rotFace = i;
+                maxMagLenSqr = magLenSqr[i];
+                maxMagRadSqr = magRadSqr[i];
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Info<< "getConsistentRotationFace(const pointField&)" << nl
+            << "    rotFace = " << rotFace << nl
+            << "    point =  " << faceCentres[rotFace] << endl;
+    }
+
+    return rotFace;
+}
+
+
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -509,7 +595,11 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPolyPatch(name, size, start, index, bm),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
-    featureCos_(0.9)
+    featureCos_(0.9),
+    maxI_(-1),
+    transform_(UNKNOWN),
+    rotationAxis_(vector::zero),
+    rotationCentre_(point::zero)
 {
     calcTransforms();
 }
@@ -526,11 +616,32 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPolyPatch(name, dict, index, bm),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
-    featureCos_(0.9)
+    featureCos_(0.9),
+    maxI_(-1),
+    transform_(UNKNOWN),
+    rotationAxis_(vector::zero),
+    rotationCentre_(point::zero)
 {
     if (dict.found("featureCos"))
     {
         dict.lookup("featureCos") >> featureCos_;
+    }
+    if (dict.found("transform"))
+    {
+        transform_ = transformTypeNames.read(dict.lookup("transform"));
+        switch (transform_)
+        {
+            case ROTATIONAL:
+            {
+                dict.lookup("rotationAxis") >> rotationAxis_;
+                dict.lookup("rotationCentre") >> rotationCentre_;
+                break;
+            }
+            default:
+            {
+                // no additioanl info required
+            }
+        }
     }
 
     calcTransforms();
@@ -546,7 +657,11 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPolyPatch(pp, bm),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
-    featureCos_(0.9)
+    featureCos_(pp.featureCos_),
+    maxI_(pp.maxI_),
+    transform_(pp.transform_),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_)
 {
     calcTransforms();
 }
@@ -564,7 +679,11 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
-    featureCos_(0.9)
+    featureCos_(pp.featureCos_),
+    maxI_(pp.maxI_),
+    transform_(pp.transform_),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_)
 {
     calcTransforms();
 }
@@ -1031,7 +1150,7 @@ bool Foam::cyclicPolyPatch::order
                 Pout<< "cyclicPolyPatch::order : test if baffles:"
                     << matchedAll << endl;
             }
-            
+
         }
     }
 
@@ -1176,6 +1295,29 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
     os.writeKeyword("featureCos") << featureCos_ << token::END_STATEMENT << nl;
+    switch (transform_)
+    {
+        case ROTATIONAL:
+        {
+            os.writeKeyword("transform") << transformTypeNames[ROTATIONAL]
+                << token::END_STATEMENT << nl;
+            os.writeKeyword("rotationAxis") << rotationAxis_
+                << token::END_STATEMENT << nl;
+            os.writeKeyword("rotationCentre") << rotationCentre_
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        case TRANSLATIONAL:
+        {
+            os.writeKeyword("transform") << transformTypeNames[TRANSLATIONAL]
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        default:
+        {
+            // no additional info to write
+        }
+    }
 }
 
 

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    turbFoam
+    stressComponents
 
 Description
-    Calculates and writes the scalar fields of the six components of the stress 
+    Calculates and writes the scalar fields of the six components of the stress
     tensor sigma for each time.
 
 \*---------------------------------------------------------------------------*/
