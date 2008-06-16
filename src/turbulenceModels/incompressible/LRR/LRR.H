@@ -56,16 +56,16 @@ class LRR
 {
     // Private data
 
-        dimensionedScalar Cmu;
+        scalar Cmu;
 
-        dimensionedScalar Clrr1;
-        dimensionedScalar Clrr2;
+        scalar Clrr1;
+        scalar Clrr2;
 
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar Cs;
-        dimensionedScalar Ceps;
-        dimensionedScalar alphaEps;
+        scalar C1;
+        scalar C2;
+        scalar Cs;
+        scalar Ceps;
+        scalar alphaEps;
 
         scalar couplingFactor_;
 

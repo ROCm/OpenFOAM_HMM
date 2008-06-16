@@ -66,12 +66,12 @@ LaunderSharmaKE::LaunderSharmaKE
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
 
     k_
@@ -101,7 +101,9 @@ LaunderSharmaKE::LaunderSharmaKE
     ),
 
     nut_(Cmu*fMu()*sqr(k_)/(epsilonTilda_ + epsilonSmall_))
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -161,14 +163,10 @@ bool LaunderSharmaKE::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                0.76923
-            );
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
 
         return true;
     }

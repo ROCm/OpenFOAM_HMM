@@ -56,10 +56,10 @@ class LaunderSharmaKE
 {
     // Private data
 
-        dimensionedScalar Cmu;
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar alphaEps;
+        scalar Cmu;
+        scalar C1;
+        scalar C2;
+        scalar alphaEps;
 
         volScalarField k_;
         volScalarField epsilonTilda_;
@@ -106,7 +106,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", nut_ + nu())
             );
@@ -115,7 +115,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DepsilonEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
             );

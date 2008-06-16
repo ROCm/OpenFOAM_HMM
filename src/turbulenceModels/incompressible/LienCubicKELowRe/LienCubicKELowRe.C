@@ -52,23 +52,26 @@ LienCubicKELowRe::LienCubicKELowRe
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
-    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    A1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A1", 1.25)),
-    A2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A2", 1000.0)),
-    Ctau1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau1", -4.0)),
-    Ctau2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau2", 13.0)),
-    Ctau3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau3", -2.0)),
-    alphaKsi(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaKsi", 0.9)),
-    CmuWall(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    Am(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Am", 0.016)),
-    Aepsilon(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Aepsilon", 0.263)),
-    Amu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Amu", 0.00222)),
+    A1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("A1", 1.25)),
+    A2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("A2", 1000.0)),
+    Ctau1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ctau1", -4.0)),
+    Ctau2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ctau2", 13.0)),
+    Ctau3(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ctau3", -2.0)),
+    alphaKsi(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaKsi", 0.9)),
+    CmuWall(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Am(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Am", 0.016)),
+    Aepsilon
+    (
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
+    ),
+    Amu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
 
     k_
     (
@@ -162,7 +165,9 @@ LienCubicKELowRe::LienCubicKELowRe
         )*gradU
         )
     )
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -223,32 +228,20 @@ bool LienCubicKELowRe::read()
 {
     if (turbulenceModel::read())
     {
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
-        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                0.76923
-            );
-        A1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A1", 1.25);
-        A2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A2", 1000.0);
-        Ctau1= turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau1", -4.0);
-        Ctau2= turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau2", 13.0);
-        Ctau3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau3", -2.0);
-        alphaKsi = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaKsi",
-                0.9
-            );
-        CmuWall= turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        Am = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Am", 0.016);
-        Aepsilon = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "Aepsilon",
-                0.263
-            );
-        Amu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Amu", 0.00222);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("A1", A1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("A2", A2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Ctau1", Ctau1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Ctau2", Ctau2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Ctau3", Ctau3);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaKsi", alphaKsi);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", CmuWall);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Am", Am);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Aepsilon", Aepsilon);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Amu", Amu);
 
         return true;
     }

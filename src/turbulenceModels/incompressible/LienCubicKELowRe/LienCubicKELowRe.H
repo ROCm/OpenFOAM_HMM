@@ -71,22 +71,22 @@ class LienCubicKELowRe
 {
     // Private data
 
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar alphak;
-        dimensionedScalar alphaEps;
-        dimensionedScalar A1;
-        dimensionedScalar A2;
-        dimensionedScalar Ctau1;
-        dimensionedScalar Ctau2;
-        dimensionedScalar Ctau3;
-        dimensionedScalar alphaKsi;
+        scalar C1;
+        scalar C2;
+        scalar alphak;
+        scalar alphaEps;
+        scalar A1;
+        scalar A2;
+        scalar Ctau1;
+        scalar Ctau2;
+        scalar Ctau3;
+        scalar alphaKsi;
 
-        dimensionedScalar CmuWall;
+        scalar CmuWall;
 
-        dimensionedScalar Am;
-        dimensionedScalar Aepsilon;
-        dimensionedScalar Amu;
+        scalar Am;
+        scalar Aepsilon;
+        scalar Amu;
 
         volScalarField k_;
         volScalarField epsilon_;

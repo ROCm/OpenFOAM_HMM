@@ -41,6 +41,14 @@ namespace compressible
 defineTypeNameAndDebug(turbulenceModel, 0);
 defineRunTimeSelectionTable(turbulenceModel, dictionary);
 
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void turbulenceModel::printCoeffs()
+{
+    Info<< turbulenceModelCoeffs_;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 turbulenceModel::turbulenceModel

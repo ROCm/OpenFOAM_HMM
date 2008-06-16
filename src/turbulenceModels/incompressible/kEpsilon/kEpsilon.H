@@ -55,14 +55,19 @@ class kEpsilon
 {
     // Private data
 
-        dimensionedScalar Cmu;
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar alphaEps;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField nut_;
+            scalar Cmu;
+            scalar C1;
+            scalar C2;
+            scalar alphaEps;
+
+
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField nut_;
 
 
 public:
@@ -98,7 +103,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", nut_ + nu())
             );
@@ -107,7 +112,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DepsilonEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
             );

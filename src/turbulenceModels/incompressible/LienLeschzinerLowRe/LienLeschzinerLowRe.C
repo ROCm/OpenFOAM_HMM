@@ -52,17 +52,20 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
-    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    Am(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Am", 0.016)),
-    Aepsilon(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Aepsilon", 0.263)),
-    Amu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Amu", 0.00222)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Am(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Am", 0.016)),
+    Aepsilon
+    (
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
+    ),
+    Amu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
 
     k_
     (
@@ -100,7 +103,9 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
        /(scalar(1) - exp(-Aepsilon*yStar_) + SMALL)*sqr(k_)
        /(epsilon_ + epsilonSmall_)
     )
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -163,22 +168,14 @@ bool LienLeschzinerLowRe::read()
 {
     if (turbulenceModel::read())
     {
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
-        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                0.76923
-            );
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        Am = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Am", 0.016);
-        Aepsilon = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "Aepsilon",
-                0.263
-            );
-        Amu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Amu", 0.00222);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Am", Am);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Aepsilon", Aepsilon);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Amu", Amu);
 
         return true;
     }
@@ -205,7 +202,7 @@ void LienLeschzinerLowRe::correct()
         y_.correct();
     }
 
-    scalar Cmu75 = pow(Cmu.value(), 0.75);
+    scalar Cmu75 = pow(Cmu, 0.75);
 
     volTensorField gradU = fvc::grad(U_);
 

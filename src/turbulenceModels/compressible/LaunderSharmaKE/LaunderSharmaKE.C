@@ -71,16 +71,16 @@ LaunderSharmaKE::LaunderSharmaKE
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
-    C3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33)),
-    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    C3(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C3", -0.33)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
+    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -120,7 +120,9 @@ LaunderSharmaKE::LaunderSharmaKE
         ),
         Cmu*fMu()*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
     )
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -179,16 +181,12 @@ bool LaunderSharmaKE::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
-        C3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                0.76923
-            );
-        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C3", C3);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
         return true;
     }

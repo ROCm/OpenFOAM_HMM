@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    scalar Cmu25 = pow(Cmu.value(), 0.25);
+    scalar Cmu25 = pow(Cmu, 0.25);
 
     const fvPatchList& patches = mesh_.boundary();
 
@@ -56,7 +56,7 @@ Description
 
                 if (yPlus > yPlusLam_)
                 {
-                    mutw[facei] = 
+                    mutw[facei] =
                         muw[facei]
                        *(yPlus*kappa_/log(E_*yPlus) - 1);
                 }

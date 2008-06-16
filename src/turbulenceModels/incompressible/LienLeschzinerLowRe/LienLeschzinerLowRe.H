@@ -57,15 +57,15 @@ class LienLeschzinerLowRe
 {
     // Private data
 
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar alphak;
-        dimensionedScalar alphaEps;
-        dimensionedScalar Cmu;
+        scalar C1;
+        scalar C2;
+        scalar alphak;
+        scalar alphaEps;
+        scalar Cmu;
 
-        dimensionedScalar Am;
-        dimensionedScalar Aepsilon;
-        dimensionedScalar Amu;
+        scalar Am;
+        scalar Aepsilon;
+        scalar Amu;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -109,7 +109,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", alphak*nut_ + nu())
             );
@@ -118,7 +118,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DepsilonEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
             );

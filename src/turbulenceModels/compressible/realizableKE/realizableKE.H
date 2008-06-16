@@ -68,12 +68,12 @@ class realizableKE
 {
     // Private data
 
-        dimensionedScalar Cmu;
-        dimensionedScalar A0;
-        dimensionedScalar C2;
-        dimensionedScalar alphak;
-        dimensionedScalar alphaEps;
-        dimensionedScalar alphah;
+        scalar Cmu;
+        scalar A0;
+        scalar C2;
+        scalar alphak;
+        scalar alphaEps;
+        scalar alphah;
 
         volScalarField k_;
         volScalarField epsilon_;

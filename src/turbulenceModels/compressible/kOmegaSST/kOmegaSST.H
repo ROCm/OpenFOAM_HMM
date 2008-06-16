@@ -85,29 +85,29 @@ class kOmegaSST
 {
     // Private data
 
-        dimensionedScalar alphaK1;
-        dimensionedScalar alphaK2;
+        scalar alphaK1;
+        scalar alphaK2;
 
-        dimensionedScalar alphaOmega1;
-        dimensionedScalar alphaOmega2;
+        scalar alphaOmega1;
+        scalar alphaOmega2;
 
-        dimensionedScalar alphah;
+        scalar alphah;
 
-        dimensionedScalar gamma1;
-        dimensionedScalar gamma2;
+        scalar gamma1;
+        scalar gamma2;
 
-        dimensionedScalar beta1;
-        dimensionedScalar beta2;
+        scalar beta1;
+        scalar beta2;
 
-        dimensionedScalar betaStar;
+        scalar betaStar;
 
-        dimensionedScalar a1;
-        dimensionedScalar c1;
+        scalar a1;
+        scalar c1;
 
         dimensionedScalar omega0_;
         dimensionedScalar omegaSmall_;
 
-        dimensionedScalar Cmu;
+        scalar Cmu;
 
         wallDist y_;
 

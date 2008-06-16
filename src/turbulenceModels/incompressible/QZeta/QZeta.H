@@ -56,11 +56,11 @@ class QZeta
 {
     // Private data
 
-        dimensionedScalar Cmu;
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar alphaZeta;
-        Switch            Anisotropic;
+        scalar Cmu;
+        scalar C1;
+        scalar C2;
+        scalar alphaZeta;
+        Switch Anisotropic;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -110,7 +110,7 @@ public:
         //- Return the effective diffusivity for q
         tmp<volScalarField> DqEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DqEff", nut_ + nu())
             );
@@ -119,7 +119,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DzetaEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DzetaEff", alphaZeta*nut_ + nu())
             );

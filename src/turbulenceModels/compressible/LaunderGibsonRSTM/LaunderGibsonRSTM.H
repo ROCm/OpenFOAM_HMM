@@ -59,24 +59,24 @@ class LaunderGibsonRSTM
 {
     // Private data
 
-        dimensionedScalar Cmu;
+        scalar Cmu;
 
-        dimensionedScalar Clg1;
-        dimensionedScalar Clg2;
+        scalar Clg1;
+        scalar Clg2;
 
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar Cs;
-        dimensionedScalar Ceps;
+        scalar C1;
+        scalar C2;
+        scalar Cs;
+        scalar Ceps;
 
-        dimensionedScalar C1Ref;
-        dimensionedScalar C2Ref;
+        scalar C1Ref;
+        scalar C2Ref;
 
         scalar couplingFactor_;
 
-        dimensionedScalar alphaR;
-        dimensionedScalar alphaEps;
-        dimensionedScalar alphah;
+        scalar alphaR;
+        scalar alphaEps;
+        scalar alphah;
 
         wallDistReflection y_;
 
@@ -121,7 +121,7 @@ public:
         //- Return the effective diffusivity for R
         tmp<volScalarField> DREff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DREff", alphaR*mut_ + mu())
             );
@@ -130,7 +130,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DepsilonEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DepsilonEff", alphaEps*mut_ + mu())
             );
@@ -139,7 +139,7 @@ public:
         //- Return the effective turbulent thermal diffusivity
         tmp<volScalarField> alphaEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("alphaEff", alphah*mut_ + alpha())
             );

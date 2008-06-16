@@ -55,15 +55,18 @@ RNGkEpsilon::RNGkEpsilon
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.0845)),
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.42)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.68)),
-    C3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33)),
-    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.39)),
-    alphaEps(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 1.39)),
-    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
-    eta0(turbulenceModelCoeffs_.lookupOrDefault<scalar>("eta0", 4.38)),
-    beta(turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta", 0.012)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
+    C3(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C3", -0.33)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
+    ),
+    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    eta0(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
+    beta(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
 
     k_
     (
@@ -105,6 +108,8 @@ RNGkEpsilon::RNGkEpsilon
     )
 {
 #   include "wallViscosityI.H"
+
+    printCoeffs();
 }
 
 
@@ -164,19 +169,15 @@ bool RNGkEpsilon::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.0845);
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.42);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.68);
-        C3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33);
-        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.39);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                1.39
-            );
-        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
-        eta0 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("eta0", 4.38);
-        beta = turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta", 0.012);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C3", C3);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("eta0", eta0);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("beta", beta);
 
         return true;
     }

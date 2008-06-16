@@ -5,7 +5,7 @@
     labelList cellBoundaryFaceCount(epsilon_.size(), 0);
 
     //- use constant Cmu for epsilon in the near-wall cell
-    scalar Cmu75 = pow(CmuWall.value(), 0.75);
+    scalar Cmu75 = pow(CmuWall, 0.75);
 
     const fvPatchList& patches = mesh_.boundary();
 
@@ -44,9 +44,9 @@
                      Cmu75*pow(k_[faceCelli], 1.5)
                     /(
                          kappa_*y_[faceCelli]
-                         *(1.0 - exp(-Aepsilon.value()*yStar[faceCelli]))
+                         *(1.0 - exp(-Aepsilon*yStar[faceCelli]))
                      )
-                    *exp(-Amu.value()*sqr(yStar[faceCelli]));
+                    *exp(-Amu*sqr(yStar[faceCelli]));
 
             }
         }

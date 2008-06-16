@@ -57,25 +57,25 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    Clg1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clg1", 1.8)),
-    Clg2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clg2", 0.6)),
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
-    Cs(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cs", 0.25)),
-    Ceps(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ceps", 0.15)),
-    C1Ref(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1Ref", 0.5)),
-    C2Ref(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2Ref", 0.3)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Clg1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Clg1", 1.8)),
+    Clg2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Clg2", 0.6)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    Cs(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
+    Ceps(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
+    C1Ref(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1Ref", 0.5)),
+    C2Ref(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2Ref", 0.3)),
     couplingFactor_
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("couplingFactor", 0.0)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
     ),
-    alphaR(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaR", 1.22)),
+    alphaR(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaR", 1.22)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
+    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
     y_(mesh_),
 
@@ -144,6 +144,8 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
     }
+
+    printCoeffs();
 }
 
 
@@ -198,27 +200,23 @@ bool LaunderGibsonRSTM::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        Clg1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clg1", 1.8);
-        Clg2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clg2", 0.6);
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
-        Cs = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cs", 0.25);
-        Ceps = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ceps", 0.15);
-        C1Ref = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1Ref", 0.5);
-        C2Ref = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2Ref", 0.3);
-        alphaR = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaR", 1.22);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                0.76923
-            );
-        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Clg1", Clg1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Clg2", Clg2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cs", Cs);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1Ref", C1Ref);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2Ref", C2Ref);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaR", alphaR);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
-        couplingFactor_ = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+        turbulenceModelCoeffs_.readIfPresent<scalar>
             (
                 "couplingFactor",
-                0.0
+                couplingFactor_
             );
 
         if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)

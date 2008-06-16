@@ -58,15 +58,15 @@ class RNGkEpsilon
 {
     // Private data
 
-        dimensionedScalar Cmu;
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar C3;
-        dimensionedScalar alphak;
-        dimensionedScalar alphaEps;
-        dimensionedScalar alphah;
-        dimensionedScalar eta0;
-        dimensionedScalar beta;
+        scalar Cmu;
+        scalar C1;
+        scalar C2;
+        scalar C3;
+        scalar alphak;
+        scalar alphaEps;
+        scalar alphah;
+        scalar eta0;
+        scalar beta;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -106,7 +106,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", alphak*mut_ + mu())
             );
@@ -115,7 +115,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DepsilonEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DepsilonEff", alphaEps*mut_ + mu())
             );
@@ -124,7 +124,7 @@ public:
         //- Return the effective turbulent thermal diffusivity
         tmp<volScalarField> alphaEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("alphaEff", alphah*mut_ + alpha())
             );

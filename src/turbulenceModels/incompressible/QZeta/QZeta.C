@@ -77,16 +77,16 @@ QZeta::QZeta
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
     alphaZeta
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaZeta", 0.76923)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaZeta", 0.76923)
     ),
     Anisotropic
     (
-         turbulenceModelCoeffs_.lookupOrDefault<Switch>("anisotropic", false)
+         turbulenceModelCoeffs_.lookupOrAddDefault<Switch>("anisotropic", false)
     ),
 
     k_
@@ -144,7 +144,9 @@ QZeta::QZeta
     ),
 
     nut_(Cmu*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_))
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -204,19 +206,15 @@ bool QZeta::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.92);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.44);
-        alphaZeta = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaZeta",
-                0.76923
-            );
-        Anisotropic = turbulenceModelCoeffs_.lookupOrDefault<Switch>
-            (
-                "anisotropic",
-                false
-            );
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaZeta", alphaZeta);
+        turbulenceModelCoeffs_.readIfPresent<Switch>
+        (
+            "anisotropic",
+            Anisotropic
+        );
 
         return true;
     }

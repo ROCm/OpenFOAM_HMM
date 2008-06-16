@@ -99,30 +99,30 @@ kOmegaSST::kOmegaSST
 
     alphaK1
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaK1", 0.85034)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaK1", 0.85034)
     ),
-    alphaK2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaK2", 1.0)),
+    alphaK2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaK2", 1.0)),
     alphaOmega1
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaOmega1", 0.5)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega1", 0.5)
     ),
     alphaOmega2
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaOmega2", 0.85616)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega2", 0.85616)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
-    gamma1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("gamma1", 0.5532)),
-    gamma2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("gamma2", 0.4403)),
-    beta1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta1", 0.075)),
-    beta2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta2", 0.0828)),
-    betaStar(turbulenceModelCoeffs_.lookupOrDefault<scalar>("betaStar", 0.09)),
-    a1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("a1", 0.31)),
-    c1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("c1", 10.0)),
+    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    gamma1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("gamma1", 0.5532)),
+    gamma2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("gamma2", 0.4403)),
+    beta1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta1", 0.075)),
+    beta2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta2", 0.0828)),
+    betaStar(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("betaStar", 0.09)),
+    a1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("a1", 0.31)),
+    c1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("c1", 10.0)),
 
     omega0_("omega0", dimless/dimTime, SMALL),
     omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
 
     y_(mesh_),
 
@@ -166,6 +166,8 @@ kOmegaSST::kOmegaSST
     )
 {
 #   include "kOmegaWallViscosityI.H"
+
+    printCoeffs();
 }
 
 
@@ -225,43 +227,27 @@ bool kOmegaSST::read()
 {
     if (turbulenceModel::read())
     {
-        alphaK1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaK1",
-                0.85034
-            );
-        alphaK2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaK2", 1.0);
-        alphaOmega1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaOmega1",
-                0.5
-            );
-        alphaOmega2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaOmega2",
-                0.85616
-            );
-        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
-        gamma1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "gamma1",
-                0.5532
-            );
-        gamma2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "gamma2",
-                0.4403
-            );
-        beta1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta1", 0.075);
-        beta2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta2", 0.0828);
-        betaStar = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "betaStar",
-                0.09
-            );
-        a1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("a1", 0.31);
-        c1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("c1", 10.0);
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaK1", alphaK1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaK2", alphaK2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>
+        (
+             "alphaOmega1",
+             alphaOmega1
+        );
+        turbulenceModelCoeffs_.readIfPresent<scalar>
+        (
+            "alphaOmega2",
+            alphaOmega2
+        );
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("gamma1", gamma1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("gamma2", gamma2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("beta1", beta1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("beta2", beta2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("betaStar", betaStar);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("a1", a1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("c1", c1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
 
         return true;
     }

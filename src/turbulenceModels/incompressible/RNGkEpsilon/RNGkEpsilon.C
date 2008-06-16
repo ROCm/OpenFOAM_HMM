@@ -51,13 +51,16 @@ RNGkEpsilon::RNGkEpsilon
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.0845)),
-    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.42)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.68)),
-    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.39)),
-    alphaEps(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 1.39)),
-    eta0(turbulenceModelCoeffs_.lookupOrDefault<scalar>("eta0", 4.38)),
-    beta(turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta", 0.012)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
+    ),
+    eta0(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
+    beta(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
 
     k_
     (
@@ -88,6 +91,8 @@ RNGkEpsilon::RNGkEpsilon
     nut_(Cmu*sqr(k_)/(epsilon_ + epsilonSmall_))
 {
 #   include "wallViscosityI.H"
+
+    printCoeffs();
 }
 
 
@@ -149,17 +154,13 @@ bool RNGkEpsilon::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.0845);
-        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.42);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.68);
-        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.39);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                1.39
-            );
-        eta0 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("eta0", 4.38);
-        beta = turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta", 0.012);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("eta0", eta0);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("beta", beta);
 
         return true;
     }

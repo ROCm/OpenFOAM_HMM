@@ -95,15 +95,15 @@ realizableKE::realizableKE
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
-    A0(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A0", 4.0)),
-    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.9)),
-    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    A0(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("A0", 4.0)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.9)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.833333)
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.833333)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
+    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -147,6 +147,8 @@ realizableKE::realizableKE
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
 #   include "wallViscosityI.H"
+
+    printCoeffs();
 }
 
 
@@ -206,16 +208,12 @@ bool realizableKE::read()
 {
     if (turbulenceModel::read())
     {
-        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
-        A0 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A0", 4.0);
-        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.9);
-        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
-        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
-            (
-                "alphaEps",
-                0.833333
-            );
-        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("A0", A0);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
         return true;
     }

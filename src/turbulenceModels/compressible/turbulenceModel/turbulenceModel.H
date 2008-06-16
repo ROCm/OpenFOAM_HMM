@@ -103,6 +103,11 @@ protected:
         nearWallDist y_;
 
 
+    // Protected member functions
+
+        //- Print model coefficients
+        virtual void printCoeffs();
+
         //- Return the laminar thermal conductivity
         const volScalarField& alpha() const
         {

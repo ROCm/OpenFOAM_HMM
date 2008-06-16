@@ -33,8 +33,8 @@ Description
 {
     labelList cellBoundaryFaceCount(epsilon_.size(), 0);
 
-    scalar Cmu25 = pow(Cmu.value(), 0.25);
-    scalar Cmu75 = pow(Cmu.value(), 0.75);
+    scalar Cmu25 = pow(Cmu, 0.25);
+    scalar Cmu75 = pow(Cmu, 0.75);
 
     const fvPatchList& patches = mesh_.boundary();
 

@@ -99,6 +99,12 @@ protected:
         nearWallDist y_;
 
 
+    // Protected member functions
+
+        //- Print model coefficients
+        virtual void printCoeffs();
+
+
 private:
 
     // Private Member Functions
@@ -236,7 +242,7 @@ public:
         //- Return the effective viscosity
         virtual tmp<volScalarField> nuEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("nuEff", nut() + nu())
             );

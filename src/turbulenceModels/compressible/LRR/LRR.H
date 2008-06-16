@@ -59,21 +59,21 @@ class LRR
 {
     // Private data
 
-        dimensionedScalar Cmu;
+        scalar Cmu;
 
-        dimensionedScalar Clrr1;
-        dimensionedScalar Clrr2;
+        scalar Clrr1;
+        scalar Clrr2;
 
-        dimensionedScalar C1;
-        dimensionedScalar C2;
-        dimensionedScalar Cs;
-        dimensionedScalar Ceps;
+        scalar C1;
+        scalar C2;
+        scalar Cs;
+        scalar Ceps;
 
         scalar couplingFactor_;
 
-        dimensionedScalar alphaR;
-        dimensionedScalar alphaEps;
-        dimensionedScalar alphah;
+        scalar alphaR;
+        scalar alphaEps;
+        scalar alphah;
 
         volSymmTensorField R_;
         volScalarField k_;
@@ -114,7 +114,7 @@ public:
         //- Return the effective diffusivity for R
         tmp<volScalarField> DREff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DREff", alphaR*mut_ + mu())
             );
@@ -123,7 +123,7 @@ public:
         //- Return the effective diffusivity for epsilon
         tmp<volScalarField> DepsilonEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DepsilonEff", alphaEps*mut_ + mu())
             );
@@ -132,7 +132,7 @@ public:
         //- Return the effective turbulent thermal diffusivity
         tmp<volScalarField> alphaEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("alphaEff", alphah*mut_ + alpha())
             );
