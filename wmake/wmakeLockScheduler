@@ -37,7 +37,8 @@
 #     Sources the relevant cshrc/bashrc if not set.
 #
 #     WM_PROJECT_DIR, WM_PROJECT and WM_PROJECT_VERSION will have been set
-#     before calling this routine
+#     before calling this routine.
+#     FOAM_INST_DIR may possibly have been set (to find installation)
 #
 # Usage
 #     wmakeScheduler COMMAND
@@ -45,7 +46,7 @@
 #
 #     wmakeScheduler -count
 #         count the total number of slots available in WM_HOSTS
-#         eg,  WM_NCOMPPROCS=$(wmakeScheduler -count)
+#         eg,  export WM_NCOMPPROCS=$(wmakeScheduler -count)
 #
 #-------------------------------------------------------------------------------
 lockDir=$HOME/.wmakeScheduler
@@ -81,35 +82,40 @@ case $SHELL in
     ;;
 esac
 
-# check ~/.$WM_PROJECT-$WM_PROJECT_VERSION/
 # check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
 # check ~/.$WM_PROJECT/
 # check <installedProject>/etc/
-# check <installedProject/.$WM_PROJECT-$WM_PROJECT_VERSION/
 if [ "$WM_PROJECT" ]; then
 
-    : ${FOAM_DOT_DIR:=.$WM_PROJECT-$WM_PROJECT_VERSION}
-
-    for i in \
-        $HOME/$FOAM_DOT_DIR \
-        $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
-        $HOME/.$WM_PROJECT \
-        $WM_PROJECT_DIR/etc \
-        $WM_PROJECT_DIR/$FOAM_DOT_DIR \
-        ;
-    do
-        if [ -f "$i/$shellRc" ]; then
-            sourceFoam="$i/$shellRc"
-            break
-        fi
-    done
+   for i in \
+      $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
+      $HOME/.$WM_PROJECT \
+      $WM_PROJECT_DIR/etc \
+      ;
+   do
+      if [ -f "$i/$shellRc" ]; then
+         sourceFoam="$i/$shellRc"
+         break
+      fi
+   done
 fi
 
 # Construct test string for remote execution.
 # Source WM_PROJECT settings if WM_PROJECT environment not set.
+# attempt to preserve the installation directory 'FOAM_INST_DIR'
 case $sourceFoam in
-    */cshrc)  sourceFoam='if ( ! $?WM_PROJECT ) source '"$sourceFoam";;
-    */bashrc) sourceFoam='[ "$WM_PROJECT" ] || . '"$sourceFoam";;
+*/bashrc)
+   if [ "$FOAM_INST_DIR" ]; then
+      sourceFoam='[ "$WM_PROJECT" ] || '"FOAM_INST_DIR=$FOAM_INST_DIR . $sourceFoam"
+   else
+      sourceFoam='[ "$WM_PROJECT" ] || '". $sourceFoam"
+   fi
+   ;;
+
+*/cshrc)
+   # TODO: csh equivalent to bash code (preserving FOAM_INST_DIR)
+   sourceFoam='if ( ! $?WM_PROJECT ) source '"$sourceFoam"
+   ;;
 esac
 
 # quote double-quotes for remote command line
@@ -160,7 +166,7 @@ do
             if lockfile -r0 "$lockFile" 2>/dev/null; then
                 # Set colour
                 colour=${colours[$colourIndex]}
-                #echo "** host=$host  colourIndex=$colourIndex  colour=$colour"
+                ## echo "** host=$host  colourIndex=$colourIndex  colour=$colour"
 
                 if [ "$host" = "$HOST" ]; then
                     if [ "$colour" ]; then
