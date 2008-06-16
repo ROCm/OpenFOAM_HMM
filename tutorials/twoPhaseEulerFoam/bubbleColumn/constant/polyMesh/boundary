@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4.1                                 |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version 2.0;
+    format ascii;
+
+    root "/home/dm2/henry/OpenFOAM/OpenFOAM-1.4.1/tutorials/twoPhaseEulerFoam";
+    case "bubbleColumn";
+    instance "constant";
+    local "polyMesh";
+
+    class polyBoundaryMesh;
+    object boundary;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+4
+(
+inlet
+{
+    type patch;
+    physicalType inlet;
+    nFaces 25;
+    startFace 3650;
+}
+
+outlet
+{
+    type patch;
+    physicalType inletOutlet;
+    nFaces 25;
+    startFace 3675;
+}
+
+walls
+{
+    type wall;
+    physicalType wallFunctions;
+    nFaces 150;
+    startFace 3700;
+}
+
+defaultFaces
+{
+    type empty;
+    nFaces 3750;
+    startFace 3850;
+}
+)
+
+// ************************************************************************* //
