@@ -719,7 +719,7 @@ operator+(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
     return Tensor<Cmpt>
     (
         t1.xx() + st2.xx(), t1.xy() + st2.xy(), t1.xz() + st2.xz(),
-        t1.yx() + st2.xy(), t1.yy() + st2.yy(), t1.yz() + st2.yy(),
+        t1.yx() + st2.xy(), t1.yy() + st2.yy(), t1.yz() + st2.yz(),
         t1.zx() + st2.xz(), t1.zy() + st2.yz(), t1.zz() + st2.zz()
     );
 }
@@ -745,7 +745,7 @@ operator-(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
     return Tensor<Cmpt>
     (
         t1.xx() - st2.xx(), t1.xy() - st2.xy(), t1.xz() - st2.xz(),
-        t1.yx() - st2.xy(), t1.yy() - st2.yy(), t1.yz() - st2.yy(),
+        t1.yx() - st2.xy(), t1.yy() - st2.yy(), t1.yz() - st2.yz(),
         t1.zx() - st2.xz(), t1.zy() - st2.yz(), t1.zz() - st2.zz()
     );
 }
