@@ -44,7 +44,8 @@ void ensightParticlePositions
     const Foam::fvMesh& mesh,
     const Foam::fileName& postProcPath,
     const Foam::word& timeFile,
-    const Foam::word& sprayName
+    const Foam::word& CloudName,
+    const bool dataExists
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

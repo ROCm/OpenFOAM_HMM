@@ -28,33 +28,34 @@ InApplication
 Description
 
 SourceFiles
-    ensightSprayField.C
+    ensightCloudField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightSprayField_H
-#define ensightSprayField_H
+#ifndef ensightCloudField_H
+#define ensightCloudField_H
 
 #include "IOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void ensightSprayField
+void ensightCloudField
 (
     const Foam::IOobject& fieldObject,
     const Foam::fileName& postProcPath,
     const Foam::word& prepend,
     const Foam::label timeIndex,
     const Foam::word& timeFile,
-    const Foam::word& sprayName,
-    Foam::Ostream& ensightCaseFile
+    const Foam::word& cloudName,
+    Foam::Ostream& ensightCaseFile,
+    const bool dataExists
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ensightSprayField.C"
+#   include "ensightCloudField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

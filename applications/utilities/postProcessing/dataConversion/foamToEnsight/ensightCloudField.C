@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightSprayField.H"
+#include "ensightCloudField.H"
 #include "Time.H"
 #include "IOField.H"
 #include "OFstream.H"
@@ -35,39 +35,48 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void ensightSprayField
+void ensightCloudField
 (
     const Foam::IOobject& fieldObject,
     const Foam::fileName& postProcPath,
     const Foam::word& prepend,
     const Foam::label timeIndex,
-    const Foam::word& sprayName,
-    Foam::Ostream& ensightCaseFile
+    const Foam::word& cloudName,
+    Foam::Ostream& ensightCaseFile,
+    const bool dataExists
 )
 {
-    Info<< "Converting spray field " << fieldObject.name() << endl;
+    if (dataExists)
+    {
+        Info<< "Converting cloud " << cloudName
+            << " field " << fieldObject.name() << endl;
+    }
+    else
+    {
+        Info<< "Creating empty cloud " << cloudName
+            << " field "  << fieldObject.name() << endl;
+    }
 
     word timeFile = prepend + itoa(timeIndex);
 
     const Time& runTime = fieldObject.time();
 
-    if (timeIndex == 0)
+    if (timeIndex == 0 && Pstream::master())
     {
         ensightCaseFile
             << pTraits<Type>::typeName << " per measured node:      1       ";
         ensightCaseFile.width(15);
         ensightCaseFile.setf(ios_base::left);
         ensightCaseFile
-            << ("s" + fieldObject.name()).c_str()
-            << (' ' + prepend + "***." + sprayName
+            << ("c" + fieldObject.name()).c_str()
+            << (' ' + prepend + "***." + cloudName
               + "." + fieldObject.name()).c_str()
             << nl;
     }
 
-    // set the filename of the ensight file
     fileName ensightFileName
     (
-        timeFile + "." + sprayName +"." + fieldObject.name()
+        timeFile + "." + cloudName +"." + fieldObject.name()
     );
 
     OFstream ensightFile
@@ -78,36 +87,39 @@ void ensightSprayField
         runTime.writeCompression()
     );
 
-    ensightFile << pTraits<Type>::typeName << " values" << nl;
+    ensightFile<< pTraits<Type>::typeName << " values" << nl;
 
-    IOField<Type> vf(fieldObject);
-
-    ensightFile.setf(ios_base::scientific, ios_base::floatfield);
-    ensightFile.precision(5);
-
-    label count = 0;
-    forAll(vf, i)
+    if (dataExists)
     {
-        Type v = vf[i];
+        IOField<Type> vf(fieldObject);
 
-        if (mag(v) < 1.0e-90)
-        {
-            v = pTraits<Type>::zero;
-        }
+        ensightFile.setf(ios_base::scientific, ios_base::floatfield);
+        ensightFile.precision(5);
 
-        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+        label count = 0;
+        forAll(vf, i)
         {
-            ensightFile << setw(12) << component(v, cmpt);
-            if (++count % 6 == 0)
+            Type v = vf[i];
+
+            if (mag(v) < 1.0e-90)
             {
-                ensightFile << nl;
+                v = pTraits<Type>::zero;
+            }
+
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                ensightFile << setw(12) << component(v, cmpt);
+                if (++count % 6 == 0)
+                {
+                    ensightFile << nl;
+                }
             }
         }
-    }
 
-    if ( (count % 6 != 0) || (count==0) )
-    {
-        ensightFile << nl;
+        if ((count % 6 != 0) || (count==0))
+        {
+            ensightFile << nl;
+        }
     }
 }
 

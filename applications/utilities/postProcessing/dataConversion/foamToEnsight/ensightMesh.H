@@ -57,10 +57,47 @@ class argList;
 
 class ensightMesh
 {
+        class nFacePrimitives
+        {
+        public:
+
+            label nPoints;
+            label nTris;
+            label nQuads;
+            label nPolys;
+
+            nFacePrimitives()
+            :
+                nPoints(0),
+                nTris(0),
+                nQuads(0),
+                nPolys(0)
+            {}
+        };
+
+
     // Private data
 
         //- Set binary file output
         bool binary_;
+
+        //- Reference to the OpenFOAM mesh
+        const fvMesh& mesh_;
+
+        cellSets meshCellSets_;
+
+        List<faceSets> boundaryFaceSets_;
+
+
+
+
+        HashTable<labelList> allPatchNames_;
+
+        HashTable<label> patchIndices_;
+
+        wordHashSet patchNames_;
+
+        HashTable<nFacePrimitives> nPatchPrims_;
 
 
     // Private Member Functions
@@ -203,37 +240,6 @@ class ensightMesh
 
 public:
 
-    // Public data
-
-        const fvMesh& mesh;
-        cellSets meshCellSets;
-        List<faceSets> boundaryFaceSets;
-
-        HashTable<labelList> allPatchNames;
-        HashTable<label> patchIndices;
-        wordHashSet patchNames;
-
-        class nFacePrims
-        {
-        public:
-
-            label nPoints;
-            label nTris;
-            label nQuads;
-            label nPolys;
-
-            nFacePrims()
-            :
-                nPoints(0),
-                nTris(0),
-                nQuads(0),
-                nPolys(0)
-            {}
-        };
-
-        HashTable<nFacePrims> nPatchPrims;
-
-
     // Constructors
 
         //- Construct from fvMesh
@@ -246,6 +252,46 @@ public:
 
 
     // Member Functions
+
+        // Access
+
+            const fvMesh& mesh() const
+            {
+                return mesh_;
+            }
+
+            const cellSets& meshCellSets() const
+            {
+                return meshCellSets_;
+            }
+
+            const List<faceSets>& boundaryFaceSets() const
+            {
+                return boundaryFaceSets_;
+            }
+
+            const HashTable<labelList>& allPatchNames() const
+            {
+                return allPatchNames_;
+            }
+
+            const HashTable<label>& patchIndices() const
+            {
+                return patchIndices_;
+            }
+
+            const wordHashSet& patchNames() const
+            {
+                return patchNames_;
+            }
+
+            const HashTable<nFacePrimitives>& nPatchPrims() const
+            {
+                return nPatchPrims_;
+            }
+
+
+    // I-O
 
         void write
         (

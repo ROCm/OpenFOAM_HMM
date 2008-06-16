@@ -278,7 +278,7 @@ bool writePatchField
     const Foam::label patchi,
     const Foam::label ensightPatchi,
     const Foam::faceSets& boundaryFaceSet,
-    const Foam::ensightMesh::nFacePrims& nfp,
+    const Foam::ensightMesh::nFacePrimitives& nfp,
     const Foam::labelList& patchProcessors,
     Foam::OFstream& ensightFile
 )
@@ -338,7 +338,7 @@ bool writePatchFieldBinary
     const Foam::label patchi,
     const Foam::label ensightPatchi,
     const Foam::faceSets& boundaryFaceSet,
-    const Foam::ensightMesh::nFacePrims& nfp,
+    const Foam::ensightMesh::nFacePrimitives& nfp,
     const Foam::labelList& patchProcessors,
     std::ofstream& ensightFile
 )
@@ -403,12 +403,13 @@ void writePatchField
     Foam::Ostream& ensightCaseFile
 )
 {
-    const Time& runTime = eMesh.mesh.time();
+    const Time& runTime = eMesh.mesh().time();
 
     const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets;
     const HashTable<labelList>& allPatchNames = eMesh.allPatchNames;
     const HashTable<label>& patchIndices = eMesh.patchIndices;
-    const HashTable<ensightMesh::nFacePrims>& nPatchPrims = eMesh.nPatchPrims;
+    const HashTable<ensightMesh::nFacePrimitives>&
+        nPatchPrims = eMesh.nPatchPrims();
 
     label patchi = -1;
 
@@ -521,15 +522,16 @@ void ensightFieldAscii
 
     word timeFile = prepend + itoa(timeIndex);
 
-    const fvMesh& mesh = eMesh.mesh;
+    const fvMesh& mesh = eMesh.mesh();
     const Time& runTime = mesh.time();
 
-    const cellSets& meshCellSets = eMesh.meshCellSets;
-    const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets;
-    const HashTable<labelList>& allPatchNames = eMesh.allPatchNames;
-    const HashTable<label>& patchIndices = eMesh.patchIndices;
-    const wordHashSet& patchNames = eMesh.patchNames;
-    const HashTable<ensightMesh::nFacePrims>& nPatchPrims = eMesh.nPatchPrims;
+    const cellSets& meshCellSets = eMesh.meshCellSets();
+    const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets();
+    const HashTable<labelList>& allPatchNames = eMesh.allPatchNames();
+    const HashTable<label>& patchIndices = eMesh.patchIndices();
+    const wordHashSet& patchNames = eMesh.patchNames();
+    const HashTable<ensightMesh::nFacePrimitives>&
+        nPatchPrims = eMesh.nPatchPrims();
 
     const labelList& tets = meshCellSets.tets;
     const labelList& pyrs = meshCellSets.pyrs;
@@ -701,15 +703,16 @@ void ensightFieldBinary
 
     word timeFile = prepend + itoa(timeIndex);
 
-    const fvMesh& mesh = eMesh.mesh;
+    const fvMesh& mesh = eMesh.mesh();
     //const Time& runTime = mesh.time();
 
-    const cellSets& meshCellSets = eMesh.meshCellSets;
-    const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets;
-    const HashTable<labelList>& allPatchNames = eMesh.allPatchNames;
-    const HashTable<label>& patchIndices = eMesh.patchIndices;
-    const wordHashSet& patchNames = eMesh.patchNames;
-    const HashTable<ensightMesh::nFacePrims>& nPatchPrims = eMesh.nPatchPrims;
+    const cellSets& meshCellSets = eMesh.meshCellSets();
+    const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets();
+    const HashTable<labelList>& allPatchNames = eMesh.allPatchNames();
+    const HashTable<label>& patchIndices = eMesh.patchIndices();
+    const wordHashSet& patchNames = eMesh.patchNames();
+    const HashTable<ensightMesh::nFacePrimitives>&
+        nPatchPrims = eMesh.nPatchPrims();
 
     const labelList& tets = meshCellSets.tets;
     const labelList& pyrs = meshCellSets.pyrs;
