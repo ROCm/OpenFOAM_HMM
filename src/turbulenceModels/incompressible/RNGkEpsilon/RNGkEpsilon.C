@@ -51,13 +51,13 @@ RNGkEpsilon::RNGkEpsilon
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    eta0(turbulenceModelCoeffs_.lookup("eta0")),
-    beta(turbulenceModelCoeffs_.lookup("beta")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.0845)),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.42)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.68)),
+    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.39)),
+    alphaEps(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 1.39)),
+    eta0(turbulenceModelCoeffs_.lookupOrDefault<scalar>("eta0", 4.38)),
+    beta(turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta", 0.012)),
 
     k_
     (
@@ -149,13 +149,17 @@ bool RNGkEpsilon::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphak") >> alphak;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("eta0") >> eta0;
-        turbulenceModelCoeffs_.lookup("beta") >> beta;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.0845);
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.42);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.68);
+        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.39);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                1.39
+            );
+        eta0 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("eta0", 4.38);
+        beta = turbulenceModelCoeffs_.lookupOrDefault<scalar>("beta", 0.012);
 
         return true;
     }
@@ -182,7 +186,7 @@ void RNGkEpsilon::correct()
     volScalarField G = nut_*S2;
 
     volScalarField eta = sqrt(S2)*k_/epsilon_;
-    volScalarField R = 
+    volScalarField R =
         ((eta*(scalar(1) - eta/eta0))/(scalar(1) + beta*eta*sqr(eta)));
 
 #   include "wallFunctionsI.H"

@@ -54,7 +54,7 @@ tmp<volScalarField> realizableKE::rCmu
     tmp<volSymmTensorField> tS = dev(symm(gradU));
     const volSymmTensorField& S = tS();
 
-    volScalarField W = 
+    volScalarField W =
         (2*sqrt(2.0))*((S&S)&&S)
        /(
             magS*S2
@@ -63,7 +63,7 @@ tmp<volScalarField> realizableKE::rCmu
 
     tS.clear();
 
-    volScalarField phis = 
+    volScalarField phis =
         (1.0/3.0)*acos(min(max(sqrt(6.0)*W, -scalar(1)), scalar(1)));
     volScalarField As = sqrt(6.0)*cos(phis);
     volScalarField Us = sqrt(S2/2.0 + magSqr(skew(gradU)));
@@ -94,13 +94,16 @@ realizableKE::realizableKE
 )
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
-    
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    A0(turbulenceModelCoeffs_.lookup("A0")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    alphah(turbulenceModelCoeffs_.lookup("alphah")),
+
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    A0(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A0", 4.0)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.9)),
+    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.833333)
+    ),
+    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -203,12 +206,16 @@ bool realizableKE::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("A0") >> A0;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphak") >> alphak;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("alphah") >> alphah;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        A0 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A0", 4.0);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.9);
+        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                0.833333
+            );
+        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
 
         return true;
     }
@@ -240,10 +247,10 @@ void realizableKE::correct()
     volTensorField gradU = fvc::grad(U_);
     volScalarField S2 = 2*magSqr(dev(symm(gradU)));
     volScalarField magS = sqrt(S2);
-    
+
     volScalarField eta = magS*k_/epsilon_;
     volScalarField C1 = max(eta/(scalar(5) + eta), scalar(0.43));
-    
+
     volScalarField G = mut_*(gradU && dev(twoSymm(gradU)));
 
 #   include "wallFunctionsI.H"
@@ -286,7 +293,7 @@ void realizableKE::correct()
     kEqn().relax();
     solve(kEqn);
     bound(k_, k0_);
-    
+
     // Re-calculate viscosity
     mut_ = rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;
 

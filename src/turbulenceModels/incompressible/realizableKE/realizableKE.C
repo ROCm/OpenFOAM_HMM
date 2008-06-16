@@ -93,11 +93,14 @@ realizableKE::realizableKE
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    A0(turbulenceModelCoeffs_.lookup("A0")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    A0(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A0", 4.0)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.9)),
+    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.833333)
+    ),
 
     k_
     (
@@ -190,11 +193,15 @@ bool realizableKE::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("A0") >> A0;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphak") >> alphak;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        A0 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A0", 4.0);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.9);
+        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                0.833333
+            );
 
         return true;
     }

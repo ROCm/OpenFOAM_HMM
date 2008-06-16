@@ -51,7 +51,7 @@ tmp<volScalarField> QZeta::fMu() const
     }
     else
     {
-        return 
+        return
             exp(-6.0/sqr(scalar(1) + Rt/50.0))
            *(scalar(1) + 3.0*exp(-Rt/10.0));
     }
@@ -77,11 +77,17 @@ QZeta::QZeta
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphaZeta(turbulenceModelCoeffs_.lookup("alphaZeta")),
-    Anisotropic(turbulenceModelCoeffs_.lookup("anisotropic")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    alphaZeta
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaZeta", 0.76923)
+    ),
+    Anisotropic
+    (
+         turbulenceModelCoeffs_.lookupOrDefault<Switch>("anisotropic", false)
+    ),
 
     k_
     (
@@ -198,11 +204,19 @@ bool QZeta::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphaZeta") >> alphaZeta;
-        turbulenceModelCoeffs_.lookup("anisotropic") >> Anisotropic;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.92);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.44);
+        alphaZeta = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaZeta",
+                0.76923
+            );
+        Anisotropic = turbulenceModelCoeffs_.lookupOrDefault<Switch>
+            (
+                "anisotropic",
+                false
+            );
 
         return true;
     }

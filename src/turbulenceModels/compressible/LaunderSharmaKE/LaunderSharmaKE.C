@@ -52,7 +52,7 @@ tmp<volScalarField> LaunderSharmaKE::fMu() const
 
 tmp<volScalarField> LaunderSharmaKE::f2() const
 {
-    return 
+    return
         scalar(1)
       - 0.3*exp(-min(sqr(rho_*sqr(k_)/(mu()*epsilon_)), scalar(50.0)));
 }
@@ -71,13 +71,16 @@ LaunderSharmaKE::LaunderSharmaKE
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    C3(turbulenceModelCoeffs_.lookup("C3")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    alphah(turbulenceModelCoeffs_.lookup("alphah")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    C3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33)),
+    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+    ),
+    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -176,12 +179,16 @@ bool LaunderSharmaKE::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("C3") >> C3;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("alphah") >> alphah;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
+        C3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                0.76923
+            );
+        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
 
         return true;
     }

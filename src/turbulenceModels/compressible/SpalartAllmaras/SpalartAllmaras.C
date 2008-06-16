@@ -115,16 +115,16 @@ SpalartAllmaras::SpalartAllmaras
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    alphaNut(turbulenceModelCoeffs_.lookup("alphaNut")),
-    alphah(turbulenceModelCoeffs_.lookup("alphah")),
+    alphaNut(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaNut", 1.5)),
+    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
 
-    Cb1(turbulenceModelCoeffs_.lookup("Cb1")),
-    Cb2(turbulenceModelCoeffs_.lookup("Cb2")),
+    Cb1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cb1", 0.1355)),
+    Cb2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cb2", 0.622)),
     Cw1(Cb1/sqr(kappa_) + alphaNut*(1.0 + Cb2)),
-    Cw2(turbulenceModelCoeffs_.lookup("Cw2")),
-    Cw3(turbulenceModelCoeffs_.lookup("Cw3")),
-    Cv1(turbulenceModelCoeffs_.lookup("Cv1")),
-    Cv2(turbulenceModelCoeffs_.lookup("Cv2")),
+    Cw2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cw2", 0.3)),
+    Cw3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cw3", 2.0)),
+    Cv1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cv1", 7.1)),
+    Cv2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cv2", 5.0)),
 
     nuTilda_
     (
@@ -214,16 +214,20 @@ bool SpalartAllmaras::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("alphaNut") >> alphaNut;
-        turbulenceModelCoeffs_.lookup("alphah") >> alphah;
+        alphaNut = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaNut",
+                1.5
+            );
+        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
 
-        turbulenceModelCoeffs_.lookup("Cb1") >> Cb1;
-        turbulenceModelCoeffs_.lookup("Cb2") >> Cb2;
+        Cb1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cb1", 0.1355);
+        Cb2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cb2", 0.622);
         Cw1 = Cb1/sqr(kappa_) + alphaNut*(1.0 + Cb2);
-        turbulenceModelCoeffs_.lookup("Cw2") >> Cw2;
-        turbulenceModelCoeffs_.lookup("Cw3") >> Cw3;
-        turbulenceModelCoeffs_.lookup("Cv1") >> Cv1;
-        turbulenceModelCoeffs_.lookup("Cv2") >> Cv2;
+        Cw2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cw2", 0.3);
+        Cw3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cw3", 2.0);
+        Cv1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cv1", 7.1);
+        Cv2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cv2", 5.0);
 
         return true;
     }

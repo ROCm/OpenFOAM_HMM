@@ -52,10 +52,13 @@ kEpsilon::kEpsilon
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    alphaEps
+    (
+         turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+    ),
 
     k_
     (
@@ -146,10 +149,11 @@ bool kEpsilon::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
+        alphaEps =
+            turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923);
 
         return true;
     }

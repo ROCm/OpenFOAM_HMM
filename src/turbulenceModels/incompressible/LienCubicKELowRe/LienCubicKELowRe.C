@@ -52,20 +52,23 @@ LienCubicKELowRe::LienCubicKELowRe
 :
     turbulenceModel(typeName, U, phi, lamTransportModel),
 
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    A1(turbulenceModelCoeffs_.lookup("A1")),
-    A2(turbulenceModelCoeffs_.lookup("A2")),
-    Ctau1(turbulenceModelCoeffs_.lookup("Ctau1")),
-    Ctau2(turbulenceModelCoeffs_.lookup("Ctau2")),
-    Ctau3(turbulenceModelCoeffs_.lookup("Ctau3")),
-    alphaKsi(turbulenceModelCoeffs_.lookup("alphaKsi")),
-    CmuWall(turbulenceModelCoeffs_.lookup("Cmu")),
-    Am(turbulenceModelCoeffs_.lookup("Am")),
-    Aepsilon(turbulenceModelCoeffs_.lookup("Aepsilon")),
-    Amu(turbulenceModelCoeffs_.lookup("Amu")),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+    ),
+    A1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A1", 1.25)),
+    A2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("A2", 1000.0)),
+    Ctau1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau1", -4.0)),
+    Ctau2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau2", 13.0)),
+    Ctau3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau3", -2.0)),
+    alphaKsi(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaKsi", 0.9)),
+    CmuWall(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    Am(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Am", 0.016)),
+    Aepsilon(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Aepsilon", 0.263)),
+    Amu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Amu", 0.00222)),
 
     k_
     (
@@ -220,20 +223,32 @@ bool LienCubicKELowRe::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphak") >> alphak;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("A1") >> A1;
-        turbulenceModelCoeffs_.lookup("A2") >> A2;
-        turbulenceModelCoeffs_.lookup("Ctau1") >> Ctau1;
-        turbulenceModelCoeffs_.lookup("Ctau2") >> Ctau2;
-        turbulenceModelCoeffs_.lookup("Ctau3") >> Ctau3;
-        turbulenceModelCoeffs_.lookup("alphaKsi") >> alphaKsi;
-        turbulenceModelCoeffs_.lookup("Cmu") >> CmuWall;
-        turbulenceModelCoeffs_.lookup("Am") >> Am;
-        turbulenceModelCoeffs_.lookup("Aepsilon") >> Aepsilon;
-        turbulenceModelCoeffs_.lookup("Amu") >> Amu;
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
+        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                0.76923
+            );
+        A1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A1", 1.25);
+        A2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("A2", 1000.0);
+        Ctau1= turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau1", -4.0);
+        Ctau2= turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau2", 13.0);
+        Ctau3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ctau3", -2.0);
+        alphaKsi = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaKsi",
+                0.9
+            );
+        CmuWall= turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        Am = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Am", 0.016);
+        Aepsilon = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "Aepsilon",
+                0.263
+            );
+        Amu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Amu", 0.00222);
 
         return true;
     }

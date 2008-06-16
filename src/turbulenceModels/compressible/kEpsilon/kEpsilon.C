@@ -54,13 +54,16 @@ kEpsilon::kEpsilon
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    C3(turbulenceModelCoeffs_.lookup("C3")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    alphah(turbulenceModelCoeffs_.lookup("alphah")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    C3(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33)),
+    alphak(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+    ),
+    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -162,13 +165,17 @@ bool kEpsilon::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("C3") >> C3;
-        turbulenceModelCoeffs_.lookup("alphak") >> alphak;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("alphah") >> alphah;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
+        C3 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C3", -0.33);
+        alphak = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphak", 1.0);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                0.76923
+            );
+        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
 
         return true;
     }
@@ -232,7 +239,7 @@ void kEpsilon::correct()
       + fvm::div(phi_, k_)
       - fvm::laplacian(DkEff(), k_)
      ==
-        G 
+        G
       - fvm::SuSp((2.0/3.0)*rho_*divU, k_)
       - fvm::Sp(rho_*epsilon_/k_, k_)
     );

@@ -55,17 +55,23 @@ LRR::LRR
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    Clrr1(turbulenceModelCoeffs_.lookup("Clrr1")),
-    Clrr2(turbulenceModelCoeffs_.lookup("Clrr2")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    Cs(turbulenceModelCoeffs_.lookup("Cs")),
-    Ceps(turbulenceModelCoeffs_.lookup("Ceps")),
-    couplingFactor_(0.0),
-    alphaR(turbulenceModelCoeffs_.lookup("alphaR")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    alphah(turbulenceModelCoeffs_.lookup("alphah")),
+    Cmu(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09)),
+    Clrr1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clrr1", 1.8)),
+    Clrr2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clrr2", 0.6)),
+    C1(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92)),
+    Cs(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cs", 0.25)),
+    Ceps(turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ceps", 0.15)),
+    couplingFactor_
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("couplingFactor", 0.0)
+    ),
+    alphaR(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaR", 1.22)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaEps", 0.76923)
+    ),
+    alphah(turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0)),
 
     R_
     (
@@ -121,21 +127,16 @@ LRR::LRR
 {
 #   include "wallViscosityI.H"
 
-    if (turbulenceModelCoeffs_.found("couplingFactor"))
+    if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
     {
-        turbulenceModelCoeffs_.lookup("couplingFactor") >> couplingFactor_;
-
-        if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
-        {
-            FatalErrorIn
-            (
-                "LRR::LRR"
-                "(const volVectorField& U, const surfaceScalarField& phi,"
-                "incompressibleTransportModel& lamTransportModel)"
-            )   << "couplingFactor = " << couplingFactor_
-                << " is not in range 0 - 1"
-                << exit(FatalError);
-        }
+        FatalErrorIn
+        (
+            "LRR::LRR"
+            "(const volVectorField& U, const surfaceScalarField& phi,"
+            "incompressibleTransportModel& lamTransportModel)"
+        )   << "couplingFactor = " << couplingFactor_
+            << " is not in range 0 - 1" << nl
+            << exit(FatalError);
     }
 }
 
@@ -191,24 +192,31 @@ bool LRR::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("Clrr1") >> Clrr1;
-        turbulenceModelCoeffs_.lookup("Clrr2") >> Clrr2;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("Cs") >> Cs;
-        turbulenceModelCoeffs_.lookup("Ceps") >> Ceps;
-        turbulenceModelCoeffs_.lookup("alphaR") >> alphaR;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("alphah") >> alphah;
-
-        turbulenceModelCoeffs_.lookup("couplingFactor") >> couplingFactor_;
+        Cmu = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cmu", 0.09);
+        Clrr1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clrr1", 1.8);
+        Clrr2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Clrr2", 0.6);
+        C1 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C1", 1.44);
+        C2 = turbulenceModelCoeffs_.lookupOrDefault<scalar>("C2", 1.92);
+        Cs = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Cs", 0.25);
+        Ceps = turbulenceModelCoeffs_.lookupOrDefault<scalar>("Ceps", 0.15);
+        alphaR = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphaR", 1.22);
+        alphaEps = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "alphaEps",
+                0.76923
+            );
+        alphah = turbulenceModelCoeffs_.lookupOrDefault<scalar>("alphah", 1.0);
+        couplingFactor_ = turbulenceModelCoeffs_.lookupOrDefault<scalar>
+            (
+                "couplingFactor",
+                0.0
+            );
 
         if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
         {
             FatalErrorIn("LRR::read()")
                 << "couplingFactor = " << couplingFactor_
-                << " is not in range 0 - 1"
+                << " is not in range 0 - 1" << nl
                 << exit(FatalError);
         }
 
