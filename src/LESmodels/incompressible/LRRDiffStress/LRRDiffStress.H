@@ -71,9 +71,9 @@ class LRRDiffStress
 {
     // Private data
 
-        dimensionedScalar ck_;
-        dimensionedScalar c1_;
-        dimensionedScalar c2_;
+        scalar ck_;
+        scalar c1_;
+        scalar c2_;
 
 
     // Private Member Functions

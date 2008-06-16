@@ -44,8 +44,11 @@ GenSGSStress::GenSGSStress
 :
     LESmodel(word("GenSGSStress"), U, phi, transport),
 
-    ce_(LESmodelProperties().lookup("ce")),
-    couplingFactor_(0.0),
+    ce_(LESmodelProperties().lookupOrAddDefault<scalar>("ce", 1.048)),
+    couplingFactor_
+    (
+        LESmodelProperties().lookupOrAddDefault<scalar>("couplingFactor", 0.0)
+    ),
 
     B_
     (
@@ -74,21 +77,16 @@ GenSGSStress::GenSGSStress
         B_.boundaryField().types()
     )
 {
-    if (LESmodelProperties().found("couplingFactor"))
+    if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
     {
-        LESmodelProperties().lookup("couplingFactor") >> couplingFactor_;
-
-        if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
-        {
-            FatalErrorIn
-            (
-                "GenSGSStress::GenSGSStress"
-                "(const volVectorField& U, const surfaceScalarField& phi,"
-                "transportModel& lamTransportModel)"
-            )   << "couplingFactor = " << couplingFactor_
-                << " is not in range 0 - 1"
-                << exit(FatalError);
-        }
+        FatalErrorIn
+        (
+            "GenSGSStress::GenSGSStress"
+            "(const volVectorField& U, const surfaceScalarField& phi,"
+            "transportModel& lamTransportModel)"
+        )   << "couplingFactor = " << couplingFactor_
+            << " is not in range 0 - 1" << nl
+            << exit(FatalError);
     }
 }
 
@@ -148,9 +146,13 @@ bool GenSGSStress::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().lookup("ce") >> ce_;
+        LESmodelProperties().readIfPresent<scalar>("ce", ce_);
 
-        LESmodelProperties().lookup("couplingFactor") >> couplingFactor_;
+        LESmodelProperties().readIfPresent<scalar>
+        (
+            "couplingFactor",
+            couplingFactor_
+        );
 
         if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
         {

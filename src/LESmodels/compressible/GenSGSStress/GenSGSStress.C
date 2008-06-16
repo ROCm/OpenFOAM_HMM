@@ -55,7 +55,7 @@ GenSGSStress::GenSGSStress
         thermoPhysicalModel
     ),
 
-    ce_(LESmodelProperties().lookup("ce")),
+    ce_(LESmodelProperties().lookupOrAddDefault<scalar>("ce" ,1.048)),
 
     B_
     (
@@ -82,7 +82,9 @@ GenSGSStress::GenSGSStress
         ),
         mesh_
     )
-{}
+{
+//    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -129,7 +131,7 @@ bool GenSGSStress::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().lookup("ce") >> ce_;
+        LESmodelProperties().readIfPresent<scalar>("ce", ce_);
 
         return true;
     }

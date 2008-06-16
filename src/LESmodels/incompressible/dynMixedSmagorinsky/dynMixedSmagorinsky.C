@@ -51,7 +51,9 @@ dynMixedSmagorinsky::dynMixedSmagorinsky
     LESmodel(typeName, U, phi, transport),
     scaleSimilarity(U, phi, transport),
     dynSmagorinsky(U, phi, transport)
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

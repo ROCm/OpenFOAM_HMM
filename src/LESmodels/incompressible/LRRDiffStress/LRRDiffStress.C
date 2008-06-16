@@ -52,10 +52,12 @@ LRRDiffStress::LRRDiffStress
     LESmodel(typeName, U, phi, transport),
     GenSGSStress(U, phi, transport),
 
-    ck_(LESmodelProperties().lookup("ck")),
-    c1_(LESmodelProperties().lookup("c1")),
-    c2_(LESmodelProperties().lookup("c2"))
-{}
+    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.09)),
+    c1_(LESmodelProperties().lookupOrAddDefault<scalar>("c1", 1.8)),
+    c2_(LESmodelProperties().lookupOrAddDefault<scalar>("c2", 0.6))
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -111,9 +113,9 @@ bool LRRDiffStress::read()
 {
     if (GenSGSStress::read())
     {
-        LESmodelProperties().lookup("ck") >> ck_;
-        LESmodelProperties().lookup("c1") >> c1_;
-        LESmodelProperties().lookup("c2") >> c2_;
+        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
+        LESmodelProperties().readIfPresent<scalar>("c1", c1_);
+        LESmodelProperties().readIfPresent<scalar>("c2", c2_);
 
         return true;
     }

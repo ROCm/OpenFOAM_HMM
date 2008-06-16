@@ -64,8 +64,10 @@ oneEqEddy::oneEqEddy
         mesh_
     ),
 
-    ck_(LESmodelProperties().lookup("ck"))
-{}
+    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.094))
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -97,7 +99,7 @@ bool oneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().lookup("ck") >> ck_;
+        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
 
         return true;
     }

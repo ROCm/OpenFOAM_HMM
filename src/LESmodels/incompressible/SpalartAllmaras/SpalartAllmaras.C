@@ -101,17 +101,17 @@ SpalartAllmaras::SpalartAllmaras
 :
     LESmodel(typeName, U, phi, transport),
 
-    alphaNut_(LESmodelProperties().lookup("alphaNut")),
-    Cb1_(LESmodelProperties().lookup("Cb1")),
-    Cb2_(LESmodelProperties().lookup("Cb2")),
-    Cv1_(LESmodelProperties().lookup("Cv1")),
-    Cv2_(LESmodelProperties().lookup("Cv2")),
-    CDES_(LESmodelProperties().lookup("CDES")),
-    ck_(LESmodelProperties().lookup("ck")),
-    kappa_(lookup("kappa")),
+    alphaNut_(LESmodelProperties().lookupOrAddDefault<scalar>("alphaNut", 1.5)),
+    Cb1_(LESmodelProperties().lookupOrAddDefault<scalar>("Cb1", 0.1355)),
+    Cb2_(LESmodelProperties().lookupOrAddDefault<scalar>("Cb2", 0.622)),
+    Cv1_(LESmodelProperties().lookupOrAddDefault<scalar>("Cv1", 7.1)),
+    Cv2_(LESmodelProperties().lookupOrAddDefault<scalar>("Cv2", 5.0)),
+    CDES_(LESmodelProperties().lookupOrAddDefault<scalar>("CDES", 0.65)),
+    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.07)),
+    kappa_(lookupOrAddDefault<scalar>("kappa", 0.4187)),
     Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
-    Cw2_(LESmodelProperties().lookup("Cw2")),
-    Cw3_(LESmodelProperties().lookup("Cw3")),
+    Cw2_(LESmodelProperties().lookupOrAddDefault<scalar>("Cw2", 0.3)),
+    Cw3_(LESmodelProperties().lookupOrAddDefault<scalar>("Cw3", 2.0)),
 
     nuTilda_
     (
@@ -140,7 +140,9 @@ SpalartAllmaras::SpalartAllmaras
         ),
         mesh_
     )
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -212,18 +214,18 @@ bool SpalartAllmaras::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().lookup("alphaNut") >> alphaNut_;
-        LESmodelProperties().lookup("Cb1") >> Cb1_;
-        LESmodelProperties().lookup("Cb2") >> Cb2_;
+        LESmodelProperties().readIfPresent<scalar>("alphaNut", alphaNut_);
+        LESmodelProperties().readIfPresent<scalar>("Cb1", Cb1_);
+        LESmodelProperties().readIfPresent<scalar>("Cb2", Cb2_);
         Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
-        LESmodelProperties().lookup("Cw2") >> Cw2_;
-        LESmodelProperties().lookup("Cw3") >> Cw3_;
-        LESmodelProperties().lookup("Cv1") >> Cv1_;
-        LESmodelProperties().lookup("Cv2") >> Cv2_;
-        LESmodelProperties().lookup("CDES") >> CDES_;
-        LESmodelProperties().lookup("ck") >> ck_;
-        lookup("kappa") >> kappa_;
-    
+        LESmodelProperties().readIfPresent<scalar>("Cw2", Cw2_);
+        LESmodelProperties().readIfPresent<scalar>("Cw3", Cw3_);
+        LESmodelProperties().readIfPresent<scalar>("Cv1", Cv1_);
+        LESmodelProperties().readIfPresent<scalar>("Cv2", Cv2_);
+        LESmodelProperties().readIfPresent<scalar>("CDES", CDES_);
+        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
+        readIfPresent<scalar>("kappa", kappa_);
+
         return true;
     }
     else

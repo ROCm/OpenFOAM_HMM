@@ -52,9 +52,11 @@ DeardorffDiffStress::DeardorffDiffStress
     LESmodel(typeName, U, phi, transport),
     GenSGSStress(U, phi, transport),
 
-    ck_(LESmodelProperties().lookup("ck")),
-    cm_(LESmodelProperties().lookup("cm"))
-{}
+    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.094)),
+    cm_(LESmodelProperties().lookupOrAddDefault<scalar>("cm", 4.13))
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -109,8 +111,8 @@ bool DeardorffDiffStress::read()
 {
     if (GenSGSStress::read())
     {
-        LESmodelProperties().lookup("ck") >> ck_;
-        LESmodelProperties().lookup("cm") >> cm_;
+        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
+        LESmodelProperties().readIfPresent<scalar>("cm", cm_);
 
         return true;
     }

@@ -56,18 +56,18 @@ class SpalartAllmaras
 {
     // Private data
 
-        dimensionedScalar alphaNut_;
+        scalar alphaNut_;
 
-        dimensionedScalar Cb1_;
-        dimensionedScalar Cb2_;
-        dimensionedScalar Cv1_;
-        dimensionedScalar Cv2_;
-        dimensionedScalar CDES_;
-        dimensionedScalar ck_;
-        dimensionedScalar kappa_;
-        dimensionedScalar Cw1_;
-        dimensionedScalar Cw2_;
-        dimensionedScalar Cw3_;
+        scalar Cb1_;
+        scalar Cb2_;
+        scalar Cv1_;
+        scalar Cv2_;
+        scalar CDES_;
+        scalar ck_;
+        scalar kappa_;
+        scalar Cw1_;
+        scalar Cw2_;
+        scalar Cw3_;
 
 
     // Private member functions
@@ -79,7 +79,7 @@ class SpalartAllmaras
 
         // Disallow default bitwise copy construct and assignment
         SpalartAllmaras(const SpalartAllmaras&);
-        SpalartAllmaras& operator=(const SpalartAllmaras&);       
+        SpalartAllmaras& operator=(const SpalartAllmaras&);
 
         volScalarField nuTilda_;
         volScalarField dTilda_;
@@ -129,7 +129,7 @@ public:
         tmp<volScalarField> nuSgs() const
         {
             return nuSgs_;
-        }       
+        }
 
         //- Return the sub-grid stress tensor.
         tmp<volSymmTensorField> B() const;

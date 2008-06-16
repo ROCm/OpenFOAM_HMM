@@ -91,6 +91,7 @@ private:
 
         transportModel& transport_;
 
+        Switch printCoeffs_;
         dictionary LESmodelProperties_;
 
         dimensionedScalar k0_;
@@ -103,6 +104,14 @@ private:
         // Disallow default bitwise copy construct and assignment
         LESmodel(const LESmodel&);
         LESmodel& operator=(const LESmodel&);
+
+
+protected:
+
+    // Protected member functions
+
+        //- Print model coefficients
+        virtual void printCoeffs();
 
 
 public:
@@ -180,7 +189,7 @@ public:
 
             //- Access the dictionary which provides info. about choice of
             //  models, and all related data (particularly model coefficients).
-            inline const dictionary& LESmodelProperties()
+            inline dictionary& LESmodelProperties()
             {
                 return LESmodelProperties_;
             }

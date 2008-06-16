@@ -75,7 +75,7 @@ class oneEqEddy
 {
     // Private data
 
-        dimensionedScalar ck_;
+        scalar ck_;
 
 
     // Private Member Functions

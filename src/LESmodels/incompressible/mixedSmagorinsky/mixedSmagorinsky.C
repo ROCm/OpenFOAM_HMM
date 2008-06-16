@@ -51,7 +51,9 @@ mixedSmagorinsky::mixedSmagorinsky
     LESmodel(typeName, U, phi, transport),
     scaleSimilarity(U, phi, transport),
     Smagorinsky(U, phi, transport)
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

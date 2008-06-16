@@ -66,7 +66,7 @@ class GenEddyVisc
 
 protected:
 
-        dimensionedScalar ce_;
+        scalar ce_;
 
         volScalarField nuSgs_;
 

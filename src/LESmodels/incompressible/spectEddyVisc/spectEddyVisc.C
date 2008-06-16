@@ -52,12 +52,14 @@ spectEddyVisc::spectEddyVisc
     LESmodel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
-    cB_(LESmodelProperties().lookup("cB")),
-    cK1_(LESmodelProperties().lookup("cK1")),
-    cK2_(LESmodelProperties().lookup("cK2")),
-    cK3_(LESmodelProperties().lookup("cK3")),
-    cK4_(LESmodelProperties().lookup("cK4"))
-{}
+    cB_(LESmodelProperties().lookupOrAddDefault<scalar>("cB", 8.22)),
+    cK1_(LESmodelProperties().lookupOrAddDefault<scalar>("cK1", 0.83)),
+    cK2_(LESmodelProperties().lookupOrAddDefault<scalar>("cK2", 1.03)),
+    cK3_(LESmodelProperties().lookupOrAddDefault<scalar>("cK3", 4.75)),
+    cK4_(LESmodelProperties().lookupOrAddDefault<scalar>("cK4", 2.55))
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -82,7 +84,7 @@ void spectEddyVisc::correct(const tmp<volTensorField>& gradU)
 
     for (label i=0; i<5; i++)
     {
-        nuSgs_ = 
+        nuSgs_ =
             nu()
            /(
                scalar(1)
@@ -98,11 +100,11 @@ bool spectEddyVisc::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().lookup("cB") >> cB_;
-        LESmodelProperties().lookup("cK1") >> cK1_;
-        LESmodelProperties().lookup("cK2") >> cK2_;
-        LESmodelProperties().lookup("cK3") >> cK3_;
-        LESmodelProperties().lookup("cK4") >> cK4_;
+        LESmodelProperties().readIfPresent<scalar>("cB", cB_);
+        LESmodelProperties().readIfPresent<scalar>("cK1", cK1_);
+        LESmodelProperties().readIfPresent<scalar>("cK2", cK2_);
+        LESmodelProperties().readIfPresent<scalar>("cK3", cK3_);
+        LESmodelProperties().readIfPresent<scalar>("cK4", cK4_);
 
         return true;
     }

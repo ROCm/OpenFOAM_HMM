@@ -39,7 +39,18 @@ namespace compressible
 defineTypeNameAndDebug(LESmodel, 0);
 defineRunTimeSelectionTable(LESmodel, dictionary);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void LESmodel::printCoeffs()
+{
+    if (printCoeffs_)
+    {
+        Info<< LESmodelProperties_;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
 
 LESmodel::LESmodel
 (
@@ -70,6 +81,7 @@ LESmodel::LESmodel
     phi_(phi),
     thermoPhysicalModel_(thermoPhysicalModel),
 
+    printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     LESmodelProperties_(subDict(type + "Coeffs")),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),

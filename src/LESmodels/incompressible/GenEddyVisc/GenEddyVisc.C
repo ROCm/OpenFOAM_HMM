@@ -44,7 +44,7 @@ GenEddyVisc::GenEddyVisc
 :
     LESmodel(word("GenEddyVisc"), U, phi, transport),
 
-    ce_(LESmodelProperties().lookup("ce")),
+    ce_(LESmodelProperties().lookupOrAddDefault<scalar>("ce", 1.048)),
 
     nuSgs_
     (
@@ -58,7 +58,9 @@ GenEddyVisc::GenEddyVisc
         ),
         mesh_
     )
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -94,7 +96,7 @@ bool GenEddyVisc::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().lookup("ce") >> ce_;
+        LESmodelProperties().readIfPresent<scalar>("ce", ce_);
 
         return true;
     }

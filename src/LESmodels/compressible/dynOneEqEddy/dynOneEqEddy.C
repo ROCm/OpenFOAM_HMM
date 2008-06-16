@@ -90,7 +90,9 @@ dynOneEqEddy::dynOneEqEddy
 
     filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
     filter_(filterPtr_())
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -69,7 +69,7 @@ class GenSGSStress
 
 protected:
 
-        dimensionedScalar ce_;
+        scalar ce_;
 
         volSymmTensorField B_;
         volScalarField muSgs_;

@@ -69,7 +69,7 @@ class Smagorinsky2
 {
     // Private data
 
-        dimensionedScalar cD2_;
+        scalar cD2_;
 
 
     // Private Member Functions

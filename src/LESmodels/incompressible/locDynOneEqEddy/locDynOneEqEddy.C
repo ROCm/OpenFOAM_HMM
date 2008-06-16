@@ -52,7 +52,7 @@ volScalarField locDynOneEqEddy::ck
 
     volSymmTensorField MM = simpleFilter_(-2.0*delta()*pow(KK, 0.5)*filter_(D));
 
-    volScalarField ck = 
+    volScalarField ck =
         simpleFilter_(0.5*(LL && MM))
        /(
             simpleFilter_(magSqr(MM))
@@ -105,7 +105,9 @@ locDynOneEqEddy::locDynOneEqEddy
     simpleFilter_(U.mesh()),
     filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
     filter_(filterPtr_())
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

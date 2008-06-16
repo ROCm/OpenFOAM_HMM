@@ -71,7 +71,7 @@ class Smagorinsky
 {
     // Private data
 
-        dimensionedScalar ck_;
+        scalar ck_;
 
 
     // Private Member Functions

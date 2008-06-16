@@ -75,8 +75,8 @@ class DeardorffDiffStress
 {
     // Private data
 
-        dimensionedScalar ck_;
-        dimensionedScalar cm_;
+        scalar ck_;
+        scalar cm_;
 
 
     // Private Member Functions
@@ -114,7 +114,7 @@ public:
         //- Return the effective diffusivity for B
         tmp<volScalarField> DBEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DBEff", muSgs_ + mu())
             );

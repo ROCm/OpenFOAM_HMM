@@ -37,7 +37,18 @@ namespace Foam
 defineTypeNameAndDebug(LESmodel, 0);
 defineRunTimeSelectionTable(LESmodel, dictionary);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void LESmodel::printCoeffs()
+{
+    if (printCoeffs_)
+    {
+        Info<< LESmodelProperties_;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
 
 LESmodel::LESmodel
 (
@@ -65,6 +76,8 @@ LESmodel::LESmodel
     U_(U),
     phi_(phi),
     transport_(transport),
+
+    printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
 
     LESmodelProperties_(subDict(type + "Coeffs")),
 

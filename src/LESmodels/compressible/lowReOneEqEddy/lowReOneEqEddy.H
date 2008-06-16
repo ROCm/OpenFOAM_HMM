@@ -72,8 +72,8 @@ class lowReOneEqEddy
 {
     // Private data
 
-        dimensionedScalar ck_;
-        dimensionedScalar beta_;
+        scalar ck_;
+        scalar beta_;
 
     // Private Member Functions
 
@@ -111,7 +111,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", muSgs_ + mu())
             );

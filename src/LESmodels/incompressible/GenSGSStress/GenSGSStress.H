@@ -67,7 +67,7 @@ class GenSGSStress
 
 protected:
 
-        dimensionedScalar ce_;
+        scalar ce_;
 
         scalar couplingFactor_;
 

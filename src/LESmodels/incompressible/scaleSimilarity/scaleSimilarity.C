@@ -49,7 +49,9 @@ scaleSimilarity::scaleSimilarity
     LESmodel(typeName, U, phi, transport),
     filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
     filter_(filterPtr_())
-{}
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

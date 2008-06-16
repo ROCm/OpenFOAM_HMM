@@ -51,7 +51,7 @@ Smagorinsky::Smagorinsky
     LESmodel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
-    ck_(LESmodelProperties().lookup("ck"))
+    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.094))
 {}
 
 
@@ -70,7 +70,7 @@ bool Smagorinsky::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().lookup("ck") >> ck_;
+        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
 
         return true;
     }

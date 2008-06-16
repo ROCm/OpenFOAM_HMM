@@ -54,8 +54,10 @@ oneEqEddy::oneEqEddy
     LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
-    ck_(LESmodelProperties().lookup("ck"))
-{}
+    ck_(LESmodelProperties().lookupOrAddDefault("ck", 0.094))
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -94,7 +96,7 @@ bool oneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().lookup("ck") >> ck_;
+        LESmodelProperties().readIfPresent("ck", ck_);
 
         return true;
     }
