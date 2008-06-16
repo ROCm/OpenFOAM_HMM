@@ -194,14 +194,6 @@ void Foam::vtkPV3Foam::initializeTime()
         return;
     }
 
-    // preserve the currently selected values
-    const stringList selectedEntries = getSelectedArrayEntries
-    (
-        arraySelection
-    );
-    // Clear current time lists
-    arraySelection->RemoveAllArrays();
-
     // "constant" is implicit - skip it
     // All the time selections are enabled by default
     for (label timeI = 1; timeI < times.size(); ++timeI)
@@ -211,29 +203,6 @@ void Foam::vtkPV3Foam::initializeTime()
             times[timeI].name().c_str()
         );
     }
-
-    // TODO: select latestTime from the current selections
-    // restore selections
-    if (selectedEntries.size())
-    {
-        // Update time selection according to the data just read in
-        setSelectedArrayEntries
-        (
-            arraySelection,
-            selectedEntries
-        );
-
-        Info << "last selected: " << selectedEntries[selectedEntries.size()-1] << endl;
-    }
-
-/*
-    if (debug)
-    {
-        Info<< "Selecting time " << times[timeIndex].name() << endl;
-    }
-
-    runTime.setTime(times[timeIndex], timeIndex);
- */
 }
 
 
@@ -616,7 +585,7 @@ void Foam::vtkPV3Foam::Update
 
         cout<<"Internally:\n";
         output_->Print(cout);
-        
+
         cout<< " has " << output_->GetNumberOfBlocks() << " blocks\n";
     }
 
@@ -687,7 +656,7 @@ void Foam::vtkPV3Foam::Update
         output_->Print(cout);
         cout<< " has " << output_->GetNumberOfBlocks() << " blocks\n";
         output_->GetInformation()->Print(cout);
-        
+
         cout <<"ShouldIReleaseData :" << output_->ShouldIReleaseData() << "\n";
     }
 }
