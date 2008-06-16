@@ -38,6 +38,12 @@ alias wm32='export WM_ARCH_OPTION=32; . $WM_PROJECT_DIR/etc/bashrc'
 alias wmSP='export WM_PRECISION_OPTION=SP; . $WM_PROJECT_DIR/etc/bashrc'
 alias wmDP='export WM_PRECISION_OPTION=DP; . $WM_PROJECT_DIR/etc/bashrc'
 
+# Toggle wmakeScheduler on/off
+#  - also need to set WM_HOSTS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+alias wmSchedON='export WM_SCHEDULER=$WM_PROJECT_DIR/wmake/wmakeScheduler'
+alias wmSchedOFF='unset WM_SCHEDULER'
+
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias src='cd $FOAM_SRC'
