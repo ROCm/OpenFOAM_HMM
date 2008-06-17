@@ -24,7 +24,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Turbulence model selection
-turbulenceModel kEpsilon;
+RASmodel            kEpsilon;
 
 // Do you wish to calculate turbulence?
 turbulence      on;

@@ -22,8 +22,8 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// turbulenceModel kEpsilon;
-turbulenceModel laminar;
+// RASmodel            kEpsilon;
+RASmodel            laminar;
 
 turbulence      off;
 

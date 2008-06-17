@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-turbulenceModel LaunderSharmaKE;
+RASmodel            LaunderSharmaKE;
 
 turbulence      on;
 
