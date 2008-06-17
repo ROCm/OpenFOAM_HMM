@@ -102,7 +102,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   If you cannot find an appropriate binary pack for your platform, you can
   build the complete OpenFOAM from the source-pack.  You will first need to
-  compile or obtain a recent version of gcc (we recomend gcc-4.2.?) for
+  compile or obtain a recent version of gcc (we recomend gcc-4.3.?) for
   your platform, which may be obtained from http://gcc.gnu.org/.
 
   Install the compiler in
