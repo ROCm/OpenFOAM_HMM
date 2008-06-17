@@ -37,10 +37,10 @@ Description
 #include "fvc.H"
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASmodel/RASmodel.H"
 #include "incompressible/LESmodel/LESmodel.H"
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASmodel/RASmodel.H"
 #include "compressible/LESmodel/LESmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,11 +98,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
                 singlePhaseTransportModel laminarTransport(U, phi);
 
-                if (turbulenceProperties.found("turbulenceModel"))
+                if (turbulenceProperties.found("RASmodel"))
                 {
-                    autoPtr<incompressible::turbulenceModel> turbulenceModel
+                    autoPtr<incompressible::RASmodel> RASmodel
                     (
-                        incompressible::turbulenceModel::New
+                        incompressible::RASmodel::New
                         (
                             U,
                             phi,
@@ -125,7 +125,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                             (
                                 mesh.magSf()
                               * mesh.surfaceInterpolation::deltaCoeffs()
-                              * fvc::interpolate(turbulenceModel->nuEff())
+                              * fvc::interpolate(RASmodel->nuEff())
                             )
                         )
                     );
@@ -161,7 +161,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 {
                     FatalErrorIn(args.executable())
                         << "Cannot find turbulence model type in "
-                        "turbulenceModel dictionary"
+                        "RASmodel dictionary"
                         << exit(FatalError);
                 }
             }
@@ -235,11 +235,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                     thermo->rho()
                 );
 
-                if (turbulenceProperties.found("turbulenceModel"))
+                if (turbulenceProperties.found("RASmodel"))
                 {
-                    autoPtr<compressible::turbulenceModel> turbulenceModel
+                    autoPtr<compressible::RASmodel> RASmodel
                     (
-                        compressible::turbulenceModel::New
+                        compressible::RASmodel::New
                         (
                             rho,
                             U,
@@ -263,7 +263,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                             (
                                 mesh.magSf()
                               * mesh.surfaceInterpolation::deltaCoeffs()
-                              * fvc::interpolate(turbulenceModel->muEff())
+                              * fvc::interpolate(RASmodel->muEff())
                             )
                         )
                     );
@@ -299,7 +299,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 {
                     FatalErrorIn(args.executable())
                         << "Cannot find turbulence model type in"
-                        "turbulenceModel dictionary"
+                        "RASmodel dictionary"
                         << exit(FatalError);
                 }
             }

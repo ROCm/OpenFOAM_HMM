@@ -31,7 +31,7 @@ License
 Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 (
     const dictionary& PDRProperties,
-    const compressible::turbulenceModel& turbulence,
+    const compressible::RASmodel& turbulence,
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi

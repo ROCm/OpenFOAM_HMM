@@ -87,9 +87,9 @@
     interfaceProperties interface(gamma, U, twoPhaseProperties);
 
     // Construct incompressible RAS model
-    autoPtr<incompressible::turbulenceModel> turbulence
+    autoPtr<incompressible::RASmodel> turbulence
     (
-        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
+        incompressible::RASmodel::New(U, phi, twoPhaseProperties)
     );
 
     wordList pcorrTypes(pd.boundaryField().types());

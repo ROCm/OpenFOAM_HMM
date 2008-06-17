@@ -45,7 +45,7 @@ Foam::XiGModels::instabilityG::instabilityG
 (
     const dictionary& XiGProperties,
     const hhuCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
+    const compressible::RASmodel& turbulence,
     const volScalarField& Su
 )
 :

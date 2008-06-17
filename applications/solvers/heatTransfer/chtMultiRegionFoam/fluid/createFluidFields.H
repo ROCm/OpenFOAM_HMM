@@ -4,7 +4,7 @@
     PtrList<volScalarField> Kf(fluidRegions.size());
     PtrList<volVectorField> Uf(fluidRegions.size());
     PtrList<surfaceScalarField> phif(fluidRegions.size());
-    PtrList<compressible::turbulenceModel> turb(fluidRegions.size());
+    PtrList<compressible::RASmodel> turb(fluidRegions.size());
     PtrList<volScalarField> DpDtf(fluidRegions.size());
     PtrList<volScalarField> ghf(fluidRegions.size());
     PtrList<volScalarField> pdf(fluidRegions.size());
@@ -125,9 +125,9 @@
         turb.set
         (
             i,
-            autoPtr<compressible::turbulenceModel>
+            autoPtr<compressible::RASmodel>
             (
-                compressible::turbulenceModel::New
+                compressible::RASmodel::New
                 (
                     rhof[i],
                     Uf[i],

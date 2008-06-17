@@ -38,7 +38,7 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "hhuCombustionThermo.H"
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "multivariateSurfaceInterpolationScheme.H"
 #include "runTimeSelectionTables.H"
 
@@ -61,7 +61,7 @@ protected:
         dictionary XiModelCoeffs_;
 
         const hhuCombustionThermo& thermo_;
-        const compressible::turbulenceModel& turbulence_;
+        const compressible::RASmodel& turbulence_;
         const volScalarField& Su_;
         const volScalarField& rho_;
         const volScalarField& b_;
@@ -98,7 +98,7 @@ public:
             (
                 const dictionary& XiProperties,
                 const hhuCombustionThermo& thermo,
-                const compressible::turbulenceModel& turbulence,
+                const compressible::RASmodel& turbulence,
                 const volScalarField& Su,
                 const volScalarField& rho,
                 const volScalarField& b,
@@ -123,7 +123,7 @@ public:
         (
             const dictionary& XiProperties,
             const hhuCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& Su,
             const volScalarField& rho,
             const volScalarField& b,
@@ -138,7 +138,7 @@ public:
         (
             const dictionary& XiProperties,
             const hhuCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& Su,
             const volScalarField& rho,
             const volScalarField& b,

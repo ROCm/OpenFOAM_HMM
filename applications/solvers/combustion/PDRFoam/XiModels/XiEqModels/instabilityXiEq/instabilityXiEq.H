@@ -83,7 +83,7 @@ public:
         (
             const dictionary& XiEqProperties,
             const hhuCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& Su
         );
 

@@ -39,7 +39,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASmodel/RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

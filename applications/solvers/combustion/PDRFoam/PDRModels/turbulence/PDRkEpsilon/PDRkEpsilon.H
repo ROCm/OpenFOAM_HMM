@@ -37,7 +37,7 @@ SourceFiles
 #ifndef compressiblePDRkEpsilon_H
 #define compressiblePDRkEpsilon_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace RAS
 
 class PDRkEpsilon
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

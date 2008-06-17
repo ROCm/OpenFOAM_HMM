@@ -38,7 +38,7 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "hhuCombustionThermo.H"
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ protected:
         dictionary XiGModelCoeffs_;
 
         const hhuCombustionThermo& thermo_;
-        const compressible::turbulenceModel& turbulence_;
+        const compressible::RASmodel& turbulence_;
         const volScalarField& Su_;
 
 
@@ -91,7 +91,7 @@ public:
             (
                 const dictionary& XiGProperties,
                 const hhuCombustionThermo& thermo,
-                const compressible::turbulenceModel& turbulence,
+                const compressible::RASmodel& turbulence,
                 const volScalarField& Su
             ),
             (
@@ -110,7 +110,7 @@ public:
         (
             const dictionary& XiGProperties,
             const hhuCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& Su
         );
 
@@ -122,7 +122,7 @@ public:
         (
             const dictionary& XiGProperties,
             const hhuCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& Su
         );
 

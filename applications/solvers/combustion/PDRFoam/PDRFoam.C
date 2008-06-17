@@ -58,7 +58,7 @@ Description
 
 #include "fvCFD.H"
 #include "hhuCombustionThermo.H"
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "laminarFlameSpeed.H"
 #include "XiModel.H"
 #include "PDRDragModel.H"

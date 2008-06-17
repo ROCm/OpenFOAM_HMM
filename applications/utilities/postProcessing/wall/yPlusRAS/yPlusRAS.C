@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASmodel/RASmodel.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
-        autoPtr<incompressible::turbulenceModel> turbulence
+        autoPtr<incompressible::RASmodel> turbulence
         (
-            incompressible::turbulenceModel::New(U, phi, laminarTransport)
+            incompressible::RASmodel::New(U, phi, laminarTransport)
         );
 
         const fvPatchList& patches = mesh.boundary();

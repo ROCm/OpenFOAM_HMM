@@ -47,7 +47,7 @@ dispersionRASModel::dispersionRASModel
     dispersionModel(dict, sm),
     turbulence_
     (
-        sm.mesh().lookupObject<compressible::turbulenceModel>
+        sm.mesh().lookupObject<compressible::RASmodel>
         (
             "turbulenceProperties"
         )

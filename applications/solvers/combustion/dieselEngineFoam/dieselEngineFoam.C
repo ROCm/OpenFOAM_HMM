@@ -34,7 +34,7 @@ Description
 #include "engineTime.H"
 #include "engineMesh.H"
 #include "hCombustionThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASmodel/RASmodel.H"
 #include "spray.H"
 #include "chemistryModel.H"
 #include "chemistrySolver.H"

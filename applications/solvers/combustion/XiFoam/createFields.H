@@ -48,9 +48,9 @@
 
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::turbulenceModel> turbulence
+    autoPtr<compressible::RASmodel> turbulence
     (
-        compressible::turbulenceModel::New
+        compressible::RASmodel::New
         (
             rho,
             U,

@@ -38,7 +38,7 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "hhuCombustionThermo.H"
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "multivariateSurfaceInterpolationScheme.H"
 #include "runTimeSelectionTables.H"
 
@@ -62,7 +62,7 @@ protected:
 
         dictionary PDRDragModelCoeffs_;
 
-        const compressible::turbulenceModel& turbulence_;
+        const compressible::RASmodel& turbulence_;
         const volScalarField& rho_;
         const volVectorField& U_;
         const surfaceScalarField& phi_;
@@ -96,7 +96,7 @@ public:
             dictionary,
             (
                 const dictionary& PDRProperties,
-                const compressible::turbulenceModel& turbulence,
+                const compressible::RASmodel& turbulence,
                 const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi
@@ -117,7 +117,7 @@ public:
         static autoPtr<PDRDragModel> New
         (
             const dictionary& PDRProperties,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi
@@ -130,7 +130,7 @@ public:
         PDRDragModel
         (
             const dictionary& PDRProperties,
-            const compressible::turbulenceModel& turbulence,
+            const compressible::RASmodel& turbulence,
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi

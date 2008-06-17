@@ -32,7 +32,7 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 (
     const dictionary& XiEqProperties,
     const hhuCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
+    const compressible::RASmodel& turbulence,
     const volScalarField& Su
 )
 {
@@ -50,7 +50,7 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
             "XiEqModel::New"
             "("
             "    const hhuCombustionThermo& thermo,"
-            "    const compressible::turbulenceModel& turbulence,"
+            "    const compressible::RASmodel& turbulence,"
             "    const volScalarField& Su"
             ")"
         )   << "Unknown XiEqModel type "

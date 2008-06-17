@@ -34,7 +34,7 @@ Description
 
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASmodel/RASmodel.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

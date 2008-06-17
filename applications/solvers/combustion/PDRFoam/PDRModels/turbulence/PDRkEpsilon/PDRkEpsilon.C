@@ -41,7 +41,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(PDRkEpsilon, 0);
-addToRunTimeSelectionTable(turbulenceModel, PDRkEpsilon, dictionary);
+addToRunTimeSelectionTable(RASmodel, PDRkEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -53,17 +53,17 @@ PDRkEpsilon::PDRkEpsilon
     basicThermo& thermophysicalModel
 )
 :
-    turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
+    RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -164,14 +164,14 @@ tmp<fvVectorMatrix> PDRkEpsilon::divDevRhoReff(volVectorField& U) const
 
 bool PDRkEpsilon::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
         return true;
     }
@@ -192,7 +192,7 @@ void PDRkEpsilon::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
 

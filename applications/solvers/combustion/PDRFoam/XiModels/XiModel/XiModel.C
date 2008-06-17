@@ -41,7 +41,7 @@ Foam::XiModel::XiModel
 (
     const dictionary& XiProperties,
     const hhuCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
+    const compressible::RASmodel& turbulence,
     const volScalarField& Su,
     const volScalarField& rho,
     const volScalarField& b,

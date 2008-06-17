@@ -110,7 +110,7 @@
     interfaceProperties interface(gamma, U, twoPhaseProperties);
 
     // Construct LES model
-    autoPtr<incompressible::turbulenceModel> turbulence
+    autoPtr<incompressible::RASmodel> turbulence
     (
-        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
+        incompressible::RASmodel::New(U, phi, twoPhaseProperties)
     );
