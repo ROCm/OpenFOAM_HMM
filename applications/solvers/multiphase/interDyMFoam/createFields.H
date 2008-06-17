@@ -86,10 +86,10 @@
     // Construct interface from gamma distribution
     interfaceProperties interface(gamma, U, twoPhaseProperties);
 
-    // Construct LES model
-    autoPtr<turbulenceModel> turbulence
+    // Construct incompressible RAS model
+    autoPtr<incompressible::turbulenceModel> turbulence
     (
-        turbulenceModel::New(U, phi, twoPhaseProperties)
+        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
     );
 
     wordList pcorrTypes(pd.boundaryField().types());

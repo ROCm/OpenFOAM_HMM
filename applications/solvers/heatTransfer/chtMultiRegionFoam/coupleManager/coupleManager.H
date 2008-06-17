@@ -120,7 +120,7 @@ public:
             inline const fvMesh& neighbourRegion() const;
 
             //- Return the neighbour patch ID
-            inline const label neighbourPatchID() const;
+            inline label neighbourPatchID() const;
 
             //- Return a reference to the neighbour patch
             inline const fvPatch& neighbourPatch() const;

@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
-        autoPtr<turbulenceModel> turbulence
+        autoPtr<incompressible::turbulenceModel> turbulence
         (
-            turbulenceModel::New(U, phi, laminarTransport)
+            incompressible::turbulenceModel::New(U, phi, laminarTransport)
         );
 
         const fvPatchList& patches = mesh.boundary();

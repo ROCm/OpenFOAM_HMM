@@ -1,7 +1,7 @@
 EXE_INC = \
     -I../engineFoam \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/turbulenceModels \
+    -I$(LIB_SRC)/turbulenceModels/RAS \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/lagrangian/dieselSpray/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \

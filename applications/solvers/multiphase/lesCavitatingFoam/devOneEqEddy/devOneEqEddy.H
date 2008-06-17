@@ -61,7 +61,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace LESmodels
+namespace LES
 {
 
 /*---------------------------------------------------------------------------*\
@@ -76,7 +76,7 @@ class devOneEqEddy
 
         volScalarField k_;
 
-        dimensionedScalar ck_;
+        scalar ck_;
 
 
     // Private Member Functions
@@ -119,7 +119,7 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", nuSgs_ + nu())
             );

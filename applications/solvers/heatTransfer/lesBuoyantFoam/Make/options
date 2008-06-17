@@ -2,8 +2,8 @@ EXE_INC = \
     -I../buoyantFoam \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/LESmodels \
-    -I$(LIB_SRC)/LESmodels/LESdeltas/lnInclude
+    -I$(LIB_SRC)/turbulenceModels/LES \
+    -I$(LIB_SRC)/turbulenceModels/LES/LESdeltas/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \

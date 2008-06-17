@@ -2,8 +2,8 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
-    -I$(LIB_SRC)/turbulenceModels \
-    -I$(LIB_SRC)/turbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/turbulenceModels/RAS \
+    -I$(LIB_SRC)/turbulenceModels/RAS/incompressible/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
