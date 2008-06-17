@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nutWallFunctionFvPatchScalarField.H"
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -97,8 +97,8 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 
 void nutWallFunctionFvPatchScalarField::evaluate(const Pstream::commsTypes)
 {
-    const turbulenceModel& rasModel
-        = db().lookupObject<turbulenceModel>("turbulenceProperties");
+    const RASmodel& rasModel
+        = db().lookupObject<RASmodel>("turbulenceProperties");
 
     scalar kappa = rasModel.kappa();
     scalar E = rasModel.E();

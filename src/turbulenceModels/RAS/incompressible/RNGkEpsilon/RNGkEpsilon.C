@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(RNGkEpsilon, 0);
-addToRunTimeSelectionTable(turbulenceModel, RNGkEpsilon, dictionary);
+addToRunTimeSelectionTable(RASmodel, RNGkEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,18 +51,18 @@ RNGkEpsilon::RNGkEpsilon
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
-    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
+    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
     ),
-    eta0(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
-    beta(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
+    eta0(RASmodelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
+    beta(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
 
     k_
     (
@@ -154,15 +154,15 @@ tmp<fvVectorMatrix> RNGkEpsilon::divDevReff(volVectorField& U) const
 
 bool RNGkEpsilon::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("eta0", eta0);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("beta", beta);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("eta0", eta0);
+        RASmodelCoeffs_.readIfPresent<scalar>("beta", beta);
 
         return true;
     }
@@ -182,7 +182,7 @@ void RNGkEpsilon::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 

@@ -37,7 +37,7 @@ SourceFiles
 #ifndef LaunderSharmaKE_H
 #define LaunderSharmaKE_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace RAS
 
 class LaunderSharmaKE
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

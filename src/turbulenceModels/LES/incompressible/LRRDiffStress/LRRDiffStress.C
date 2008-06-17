@@ -93,12 +93,12 @@ void LRRDiffStress::correct(const tmp<volTensorField>& tgradU)
 
     forAll(B_, celli)
     {
-        B_[celli].component(tensor::XX) =
-            max(B_[celli].component(tensor::XX), k0().value());
-        B_[celli].component(tensor::YY) =
-            max(B_[celli].component(tensor::YY), k0().value());
-        B_[celli].component(tensor::ZZ) =
-            max(B_[celli].component(tensor::ZZ), k0().value());
+        B_[celli].component(symmTensor::XX) =
+            max(B_[celli].component(symmTensor::XX), k0().value());
+        B_[celli].component(symmTensor::YY) =
+            max(B_[celli].component(symmTensor::YY), k0().value());
+        B_[celli].component(symmTensor::ZZ) =
+            max(B_[celli].component(symmTensor::ZZ), k0().value());
     }
 
     K = 0.5*tr(B_);

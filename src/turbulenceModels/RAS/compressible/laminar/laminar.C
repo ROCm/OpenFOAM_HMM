@@ -39,7 +39,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(turbulenceModel, laminar, dictionary);
+addToRunTimeSelectionTable(RASmodel, laminar, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ laminar::laminar
     basicThermo& thermophysicalModel
 )
 :
-    turbulenceModel(typeName, rho, U, phi, thermophysicalModel)
+    RASmodel(typeName, rho, U, phi, thermophysicalModel)
 {}
 
 
@@ -178,7 +178,7 @@ tmp<fvVectorMatrix> laminar::divDevRhoReff(volVectorField& U) const
 
 bool laminar::read()
 {
-    return turbulenceModel::read();
+    return RASmodel::read();
 }
 
 

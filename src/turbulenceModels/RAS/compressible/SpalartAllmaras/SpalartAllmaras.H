@@ -53,7 +53,7 @@ SourceFiles
 #ifndef compressibleSpalartAllmaras_H
 #define combressibleSpalartAllmaras_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -71,7 +71,7 @@ namespace RAS
 
 class SpalartAllmaras
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

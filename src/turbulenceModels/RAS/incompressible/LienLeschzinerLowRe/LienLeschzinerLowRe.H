@@ -37,7 +37,7 @@ SourceFiles
 #ifndef LienLeschzinerLowRe_H
 #define LienLeschzinerLowRe_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,7 +55,7 @@ namespace RAS
 
 class LienLeschzinerLowRe
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

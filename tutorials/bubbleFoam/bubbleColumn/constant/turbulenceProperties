@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-turbulenceModel laminar;
+RASmodel            laminar;
 
 turbulence      off;
 

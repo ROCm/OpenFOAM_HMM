@@ -37,7 +37,7 @@ SourceFiles
 #ifndef compressibleRNGkEpsilon_H
 #define compressibleRNGkEpsilon_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace RAS
 
 class RNGkEpsilon
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

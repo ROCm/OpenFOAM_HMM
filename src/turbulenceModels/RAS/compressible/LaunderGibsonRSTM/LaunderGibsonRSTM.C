@@ -42,7 +42,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LaunderGibsonRSTM, 0);
-addToRunTimeSelectionTable(turbulenceModel, LaunderGibsonRSTM, dictionary);
+addToRunTimeSelectionTable(RASmodel, LaunderGibsonRSTM, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -55,27 +55,27 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
     basicThermo& thermophysicalModel
 )
 :
-    turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
+    RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Clg1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Clg1", 1.8)),
-    Clg2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Clg2", 0.6)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    Cs(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
-    Ceps(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
-    C1Ref(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1Ref", 0.5)),
-    C2Ref(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2Ref", 0.3)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Clg1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clg1", 1.8)),
+    Clg2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clg2", 0.6)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    Cs(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
+    Ceps(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
+    C1Ref(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1Ref", 0.5)),
+    C2Ref(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2Ref", 0.3)),
     couplingFactor_
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
     ),
-    alphaR(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaR", 1.22)),
+    alphaR(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaR", 1.22)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
     y_(mesh_),
 
@@ -198,22 +198,22 @@ tmp<fvVectorMatrix> LaunderGibsonRSTM::divDevRhoReff(volVectorField& U) const
 
 bool LaunderGibsonRSTM::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Clg1", Clg1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Clg2", Clg2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cs", Cs);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1Ref", C1Ref);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2Ref", C2Ref);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaR", alphaR);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("Clg1", Clg1);
+        RASmodelCoeffs_.readIfPresent<scalar>("Clg2", Clg2);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cs", Cs);
+        RASmodelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1Ref", C1Ref);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2Ref", C2Ref);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaR", alphaR);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
-        turbulenceModelCoeffs_.readIfPresent<scalar>
+        RASmodelCoeffs_.readIfPresent<scalar>
             (
                 "couplingFactor",
                 couplingFactor_
@@ -245,7 +245,7 @@ void LaunderGibsonRSTM::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     if (mesh_.changing())
     {

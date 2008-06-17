@@ -39,7 +39,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LamBremhorstKE, 0);
-addToRunTimeSelectionTable(turbulenceModel, LamBremhorstKE, dictionary);
+addToRunTimeSelectionTable(RASmodel, LamBremhorstKE, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,14 +51,14 @@ LamBremhorstKE::LamBremhorstKE
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
 
     k_
@@ -158,12 +158,12 @@ tmp<fvVectorMatrix> LamBremhorstKE::divDevReff(volVectorField& U) const
 
 bool LamBremhorstKE::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
 
         return true;
     }
@@ -183,7 +183,7 @@ void LamBremhorstKE::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     if (mesh_.changing())
     {

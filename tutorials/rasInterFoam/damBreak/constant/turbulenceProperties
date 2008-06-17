@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-turbulenceModel kEpsilon;
+RASmodel            kEpsilon;
 
 turbulence      on;
 

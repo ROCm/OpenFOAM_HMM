@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -35,7 +35,7 @@ namespace compressible
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-autoPtr<turbulenceModel> turbulenceModel::New
+autoPtr<RASmodel> RASmodel::New
 (
     const volScalarField& rho,
     const volVectorField& U,
@@ -43,10 +43,10 @@ autoPtr<turbulenceModel> turbulenceModel::New
     basicThermo& thermophysicalModel
 )
 {
-    word turbulenceModelTypeName;
+    word RASmodelTypeName;
 
     // Enclose the creation of the turbulencePropertiesDict to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
+    // deleted before the RASmodel is created otherwise the dictionary
     // is entered in the database twice
     {
         IOdictionary turbulencePropertiesDict
@@ -61,30 +61,30 @@ autoPtr<turbulenceModel> turbulenceModel::New
             )
         );
 
-        turbulencePropertiesDict.lookup("turbulenceModel")
-            >> turbulenceModelTypeName;
+        turbulencePropertiesDict.lookup("RASmodel")
+            >> RASmodelTypeName;
     }
 
-    Info<< "Selecting turbulence model " << turbulenceModelTypeName << endl;
+    Info<< "Selecting turbulence model " << RASmodelTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(turbulenceModelTypeName);
+        dictionaryConstructorTablePtr_->find(RASmodelTypeName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "turbulenceModel::New(const volScalarField& rho, "
+            "RASmodel::New(const volScalarField& rho, "
             "const volVectorField& U, const surfaceScalarField& phi, "
             "basicThermo&)"
-        )   << "Unknown turbulenceModel type " << turbulenceModelTypeName
+        )   << "Unknown RASmodel type " << RASmodelTypeName
             << endl << endl
-            << "Valid turbulenceModel types are :" << endl
+            << "Valid RASmodel types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
-    return autoPtr<turbulenceModel>
+    return autoPtr<RASmodel>
     (
         cstrIter()(rho, U, phi, thermophysicalModel)
     );

@@ -24,40 +24,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
+#include "wallDist.H"
 #include "wallFvPatch.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(turbulenceModel, 0);
-defineRunTimeSelectionTable(turbulenceModel, dictionary);
+defineTypeNameAndDebug(RASmodel, 0);
+defineRunTimeSelectionTable(RASmodel, dictionary);
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void turbulenceModel::printCoeffs()
+void RASmodel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< turbulenceModelCoeffs_;
+        Info<< type() << "Coeffs" << nl
+            << RASmodelCoeffs_;
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-turbulenceModel::turbulenceModel
+RASmodel::RASmodel
 (
     const word& type,
+    const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    basicThermo& thermophysicalModel
 )
 :
     IOdictionary
@@ -75,16 +79,24 @@ turbulenceModel::turbulenceModel
     runTime_(U.time()),
     mesh_(U.mesh()),
 
+    rho_(rho),
     U_(U),
     phi_(phi),
-    transportModel_(lamTransportModel),
+    thermophysicalModel_(thermophysicalModel),
 
     turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
-    turbulenceModelCoeffs_(subDict(type + "Coeffs")),
+    RASmodelCoeffs_(subDict(type + "Coeffs")),
 
-    kappa_(readScalar(subDict("wallFunctionCoeffs").lookup("kappa"))),
-    E_(readScalar(subDict("wallFunctionCoeffs").lookup("E"))),
+    kappa_
+    (
+        subDict("wallFunctionCoeffs").lookupOrAddDefault<scalar>
+        (
+            "kappa",
+            0.4187
+        )
+    ),
+    E_(subDict("wallFunctionCoeffs").lookupOrAddDefault<scalar>("E", 9.0)),
     yPlusLam_(yPlusLam(kappa_, E_)),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
@@ -95,13 +107,9 @@ turbulenceModel::turbulenceModel
 {}
 
 
-turbulenceModel::~turbulenceModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar turbulenceModel::yPlusLam(const scalar kappa, const scalar E)
+scalar RASmodel::yPlusLam(const scalar kappa, const scalar E)
 {
     scalar ypl = 11.0;
 
@@ -114,7 +122,7 @@ scalar turbulenceModel::yPlusLam(const scalar kappa, const scalar E)
 }
 
 
-tmp<scalarField> turbulenceModel::yPlus(const label patchNo) const
+tmp<scalarField> RASmodel::yPlus(const label patchNo) const
 {
     const fvPatch& curPatch = mesh_.boundary()[patchNo];
 
@@ -123,19 +131,22 @@ tmp<scalarField> turbulenceModel::yPlus(const label patchNo) const
 
     if (typeid(curPatch) == typeid(wallFvPatch))
     {
-        scalar Cmu(turbulenceModelCoeffs_.lookup("Cmu"));
+        scalar Cmu(readScalar(RASmodelCoeffs_.lookup("Cmu")));
 
-        Yp = pow(Cmu, 0.25)*y_[patchNo]
+        Yp = pow(Cmu, 0.25)
+            *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
-            /nu().boundaryField()[patchNo];
+           /(
+                mu().boundaryField()[patchNo].patchInternalField()
+               /rho_.boundaryField()[patchNo]
+            );
     }
     else
     {
         WarningIn
         (
-            "tmp<scalarField> turbulenceModel::yPlus(const label patchNo)"
-        )   << "const : " << endl
-            << "Patch " << patchNo << " is not a wall.  Returning blank field"
+            "tmp<scalarField> RASmodel::yPlus(const label patchNo) const"
+        )   << "Patch " << patchNo << " is not a wall.  Returning blank field"
             << endl;
 
         Yp.setSize(0);
@@ -145,7 +156,7 @@ tmp<scalarField> turbulenceModel::yPlus(const label patchNo) const
 }
 
 
-void turbulenceModel::correct()
+void RASmodel::correct()
 {
     if (mesh_.changing())
     {
@@ -154,12 +165,12 @@ void turbulenceModel::correct()
 }
 
 
-bool turbulenceModel::read()
+bool RASmodel::read()
 {
     if (regIOobject::read())
     {
         lookup("turbulence") >> turbulence_;
-        turbulenceModelCoeffs_ = subDict(type() + "Coeffs");
+        RASmodelCoeffs_ = subDict(type() + "Coeffs");
 
         subDict("wallFunctionCoeffs").lookup("kappa") >> kappa_;
         subDict("wallFunctionCoeffs").lookup("E") >> E_;
@@ -181,7 +192,7 @@ bool turbulenceModel::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //

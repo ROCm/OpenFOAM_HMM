@@ -1,5 +1,5 @@
-turbulenceModel/turbulenceModel.C
-turbulenceModel/newTurbulenceModel.C
+RASmodel/RASmodel.C
+RASmodel/newRASmodel.C
 laminar/laminar.C
 kEpsilon/kEpsilon.C
 RNGkEpsilon/RNGkEpsilon.C

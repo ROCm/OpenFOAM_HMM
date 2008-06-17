@@ -37,7 +37,7 @@ SourceFiles
 #ifndef compressibleLaunderGibsonRSTM_H
 #define compressibleLaunderGibsonRSTM_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "wallDistReflection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,7 +55,7 @@ namespace RAS
 
 class LaunderGibsonRSTM
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

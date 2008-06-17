@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LienLeschzinerLowRe, 0);
-addToRunTimeSelectionTable(turbulenceModel, LienLeschzinerLowRe, dictionary);
+addToRunTimeSelectionTable(RASmodel, LienLeschzinerLowRe, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,22 +52,22 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Am(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Am", 0.016)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Am(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Am", 0.016)),
     Aepsilon
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
     ),
-    Amu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
+    Amu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
 
     k_
     (
@@ -168,16 +168,16 @@ tmp<fvVectorMatrix> LienLeschzinerLowRe::divDevReff(volVectorField& U) const
 
 bool LienLeschzinerLowRe::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Am", Am);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Aepsilon", Aepsilon);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Amu", Amu);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("Am", Am);
+        RASmodelCoeffs_.readIfPresent<scalar>("Aepsilon", Aepsilon);
+        RASmodelCoeffs_.readIfPresent<scalar>("Amu", Amu);
 
         return true;
     }
@@ -197,7 +197,7 @@ void LienLeschzinerLowRe::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     if (mesh_.changing())
     {

@@ -51,7 +51,7 @@ SourceFiles
 #ifndef LienCubicKELowRe_H
 #define LienCubicKELowRe_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,7 +69,7 @@ namespace RAS
 
 class LienCubicKELowRe
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

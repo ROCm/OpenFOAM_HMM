@@ -36,7 +36,7 @@ SourceFiles
 #ifndef laminar_H
 #define laminar_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +53,7 @@ namespace RAS
 
 class laminar
 :
-    public turbulenceModel
+    public RASmodel
 {
 
 public:
