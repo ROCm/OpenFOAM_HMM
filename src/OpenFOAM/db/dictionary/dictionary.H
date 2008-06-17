@@ -30,9 +30,9 @@ Description
     of values (e.g. words and numbers).
 
     The dictionary class is the base class for IOdictionary.
-    It serves the purpose of a bootstrap dictionary for the objectRegistry
-    data dictionaries, since unlike the IOdictionary class, it does not use
-    a objectRegistry itself to work.
+    It also serves as a bootstrap dictionary for the objectRegistry data
+    dictionaries since, unlike the IOdictionary class, it does not use an
+    objectRegistry itself to work.
 
 ToDo
     A merge() member function with a non-const dictionary parameter.
@@ -199,25 +199,31 @@ public:
             //- Find and return a T, if not found return the given default value
             //  If recursive search parent dictionaries
             template<class T>
-            T lookupOrDefault(const word&, const T&, bool recursive=false) const;
+            T lookupOrDefault
+            (
+                const word&,
+                const T&,
+                bool recursive=false
+            ) const;
 
             //- Find and return a T, if not found return the given default value,
-            //  and add to dictionary. If recusive search parent dictionaries
+            //  and add to dictionary. If recursive search parent dictionaries
             template<class T>
             T lookupOrAddDefault
             (
                 const word&,
                 const T&,
-                bool recusive=false
+                bool recursive=false
             );
 
             //- Find an entry if present, and assign to T
+            //  Returns true if the entry was found
             template<class T>
-            void readIfPresent
+            bool readIfPresent
             (
                 const word&,
                 T&,
-                bool recusive=false
+                bool recursive=false
             ) const;
 
             //- Check if entry is a sub-dictionary
