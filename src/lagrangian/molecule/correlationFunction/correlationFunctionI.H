@@ -33,28 +33,28 @@ tZeroBuffers() const
 
 
 template<class Type>
-inline const scalar Foam::correlationFunction<Type>::duration() const
+inline scalar Foam::correlationFunction<Type>::duration() const
 {
     return duration_;
 }
 
 
 template<class Type>
-inline const scalar Foam::correlationFunction<Type>::sampleInterval() const
+inline scalar Foam::correlationFunction<Type>::sampleInterval() const
 {
     return sampleInterval_;
 }
 
 
 template<class Type>
-inline const scalar Foam::correlationFunction<Type>::averagingInterval() const
+inline scalar Foam::correlationFunction<Type>::averagingInterval() const
 {
     return averagingInterval_;
 }
 
 
 template<class Type>
-inline const label Foam::correlationFunction<Type>::sampleSteps() const
+inline label Foam::correlationFunction<Type>::sampleSteps() const
 {
     return sampleSteps_;
 }

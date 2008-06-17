@@ -141,13 +141,13 @@ public:
 
         inline const Field< Field<Type> >& tZeroBuffers() const;
 
-        inline const scalar duration() const;
+        inline scalar duration() const;
 
-        inline const scalar sampleInterval() const;
+        inline scalar sampleInterval() const;
 
-        inline const scalar averagingInterval() const;
+        inline scalar averagingInterval() const;
 
-        inline const label sampleSteps() const;
+        inline label sampleSteps() const;
 
         inline label measurandFieldSize() const;
 

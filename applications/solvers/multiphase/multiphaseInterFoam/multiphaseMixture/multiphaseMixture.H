@@ -123,8 +123,8 @@ public:
             {
                 return
                 (
-                    (a.first() == b.first()) && (a.second() == b.second())
-                 || (a.first() == b.second()) && (a.second() == b.first())
+                    ((a.first() == b.first()) && (a.second() == b.second()))
+                 || ((a.first() == b.second()) && (a.second() == b.first()))
                 );
             }
 
@@ -143,7 +143,7 @@ private:
 
     // Private data
 
-        //- Dictionary of phases 
+        //- Dictionary of phases
         PtrDictionary<phase> phases_;
 
         //- The phase chosen as reference, the one which is derived from

@@ -124,21 +124,21 @@ public:
 
         // Access
 
-            inline const scalar m() const;
+            inline scalar m() const;
 
-            inline const scalar gamma() const ;
+            inline scalar gamma() const ;
 
-            inline const scalar rm() const;
+            inline scalar rm() const;
 
-            inline const scalar epsilon() const;
+            inline scalar epsilon() const;
 
-            inline const scalar rCut() const;
+            inline scalar rCut() const;
 
-            inline const scalar rCutSqr() const;
+            inline scalar rCutSqr() const;
 
-            inline const scalar rMin() const;
+            inline scalar rMin() const;
 
-            inline const scalar dr() const;
+            inline scalar dr() const;
 
 
         // Write

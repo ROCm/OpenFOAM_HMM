@@ -46,7 +46,7 @@ inline const Field<Type>& bufferedAccumulator<Type>::accumulationBuffer() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-inline const label bufferedAccumulator<Type>::averagesTaken() const
+inline label bufferedAccumulator<Type>::averagesTaken() const
 {
     return averagesTaken_;
 }
