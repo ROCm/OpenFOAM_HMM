@@ -213,25 +213,13 @@ bool Foam::chDir(const fileName& dir)
 
 Foam::fileName Foam::dotFoam(const fileName& name)
 {
-    // Search for file 'name' in:
-    // 1) ~/.OpenFOAM-VERSION/, ~/.OpenFOAM/VERSION/ or ~/.OpenFOAM/
-    // 2) $WM_PROJECT_INST_DIR/site/VERSION or $WM_PROJECT_INST_DIR/site/
-    // 3) $WM_PROJECT_DIR/etc/
-
     // Search user files:
     // ~~~~~~~~~~~~~~~~~~
-    // Check for user file in ~/.OpenFOAM-VERSION/
-    fileName fullName  = home()/(word(".OpenFOAM-") + FOAMversion)/name;
-    if (exists(fullName))
-    {
-        return fullName;
-    }
-
     fileName searchDir = home()/".OpenFOAM";
     if (dir(searchDir))
     {
         // Check for user file in ~/.OpenFOAM/VERSION
-        fullName = searchDir/FOAMversion/name;
+        fileName fullName = searchDir/FOAMversion/name;
         if (exists(fullName))
         {
             return fullName;
@@ -252,7 +240,7 @@ Foam::fileName Foam::dotFoam(const fileName& name)
     if (dir(searchDir))
     {
         // Check for site file in $WM_PROJECT_INST_DIR/site/VERSION
-        fullName = searchDir/"site"/FOAMversion/name;
+        fileName fullName = searchDir/"site"/FOAMversion/name;
         if (exists(fullName))
         {
             return fullName;
@@ -272,14 +260,14 @@ Foam::fileName Foam::dotFoam(const fileName& name)
     if (dir(searchDir))
     {
         // Check for shipped OpenFOAM file in $WM_PROJECT_DIR/etc
-        fullName = searchDir/"etc"/name;
+        fileName fullName = searchDir/"etc"/name;
         if (exists(fullName))
         {
             return fullName;
         }
     }
 
-    // Nothing found
+    // Not found
     return fileName::null;
 }
 

@@ -73,8 +73,7 @@ void Foam::processorLduInterface::send
     else
     {
         FatalErrorIn("processorLduInterface::send")
-            << "Unsuported communications type "
-            << Pstream::commsTypeNames[commsType]
+            << "Unsupported communications type " << commsType
             << exit(FatalError);
     }
 }
@@ -104,8 +103,7 @@ void Foam::processorLduInterface::receive
     else
     {
         FatalErrorIn("processorLduInterface::receive")
-            << "Unsuported communications type "
-            << Pstream::commsTypeNames[commsType]
+            << "Unsupported communications type " << commsType
             << exit(FatalError);
     }
 }
@@ -184,8 +182,7 @@ void Foam::processorLduInterface::compressedSend
         else
         {
             FatalErrorIn("processorLduInterface::compressedSend")
-                << "Unsuported communications type "
-                << Pstream::commsTypeNames[commsType]
+                << "Unsupported communications type " << commsType
                 << exit(FatalError);
         }
     }
@@ -225,8 +222,7 @@ void Foam::processorLduInterface::compressedReceive
         else if (commsType != Pstream::nonBlocking)
         {
             FatalErrorIn("processorLduInterface::compressedReceive")
-                << "Unsuported communications type "
-                << Pstream::commsTypeNames[commsType]
+                << "Unsupported communications type " << commsType
                 << exit(FatalError);
         }
 

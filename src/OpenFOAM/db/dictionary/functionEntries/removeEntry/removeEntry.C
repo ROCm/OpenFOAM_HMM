@@ -22,70 +22,67 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::functionEntries::calcEntry
-
-Description
-
-SourceFiles
-    calcEntry.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
+#include "removeEntry.H"
+#include "dictionary.H"
+#include "IStringStream.H"
+#include "OStringStream.H"
+#include "addToMemberFunctionSelectionTable.H"
 
-#include "functionEntry.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const Foam::word Foam::functionEntries::removeEntry::typeName
+(
+    Foam::functionEntries::removeEntry::typeName_()
+);
+
+// Don't lookup the debug switch here as the debug switch dictionary
+// might include removeEntry
+int Foam::functionEntries::removeEntry::debug(0);
 
 namespace Foam
 {
 namespace functionEntries
 {
+    addToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        removeEntry,
+        execute,
+        dictionaryIstream
+    );
+}
+}
 
-/*---------------------------------------------------------------------------*\
-                           Class calcEntry Declaration
-\*---------------------------------------------------------------------------*/
 
-class calcEntry
-:
-    public functionEntry
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionEntries::removeEntry::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
 {
-    // Private Member Functions
+    token currToken(is);
+    is.putBack(currToken);
 
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
+    if (currToken == token::BEGIN_LIST)
+    {
+        wordList keys(is);
 
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
+        forAll(keys, keyI)
+        {
+            parentDict.remove(keys[keyI]);
+        }
+    }
+    else
+    {
+        word key(is);
+        parentDict.remove(key);
+    }
 
-
-public:
-
-    //- Runtime type information
-    TypeName("calc");
-
-
-    // Member Functions
-
-        static bool execute
-        (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
-        );
-
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace functionEntries
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+    return true;
+}
 
 // ************************************************************************* //

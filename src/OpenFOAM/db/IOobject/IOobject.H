@@ -329,12 +329,9 @@ public:
         // Writing
 
             //- Write the standard OpenFOAM file/dictionary banner
+            //  Optionally without -*- C++ -*- editor hint (eg, for logs)
             template<class Stream>
-            static inline void writeBanner(Stream& os);
-
-            //- Write the standard OpenFOAM log banner
-            template<class Stream>
-            static inline void writeLogBanner(Stream& os);
+            static inline void writeBanner(Stream& os, bool noHint=false);
 
             //- Write the standard file section divider
             template<class Stream>

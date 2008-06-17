@@ -48,16 +48,16 @@ namespace functionEntries
     (
         functionEntry,
         includeEntry,
-        insert,
-        primitiveEntryIstream
+        execute,
+        dictionaryIstream
     );
 
     addToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEntry,
-        insert,
-        dictionaryIstream
+        execute,
+        primitiveEntryIstream
     );
 }
 }
@@ -82,37 +82,7 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 }
 
 
-bool Foam::functionEntries::includeEntry::insert
-(
-    const dictionary& parentDict,
-    primitiveEntry& entry,
-    Istream& is
-)
-{
-    IFstream fileStream(includeFileName(is));
-
-    if (fileStream)
-    {
-        entry.read(parentDict, fileStream);
-        return true;
-    }
-    else
-    {
-        FatalIOErrorIn
-        (
-            "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict, primitiveEntry& entry, Istream& is)",
-            is
-        )   << "Cannot open include file " << fileStream.name()
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
-
-        return false;
-    }
-}
-
-
-bool Foam::functionEntries::includeEntry::insert
+bool Foam::functionEntries::includeEntry::execute
 (
     dictionary& parentDict,
     Istream& is
@@ -140,5 +110,33 @@ bool Foam::functionEntries::includeEntry::insert
     }
 }
 
+bool Foam::functionEntries::includeEntry::execute
+(
+    const dictionary& parentDict,
+    primitiveEntry& entry,
+    Istream& is
+)
+{
+    IFstream fileStream(includeFileName(is));
+
+    if (fileStream)
+    {
+        entry.read(parentDict, fileStream);
+        return true;
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "functionEntries::includeEntry::includeEntry"
+            "(dictionary& parentDict, primitiveEntry& entry, Istream& is)",
+            is
+        )   << "Cannot open include file " << fileStream.name()
+            << " while reading dictionary " << parentDict.name()
+            << exit(FatalIOError);
+
+        return false;
+    }
+}
 
 // ************************************************************************* //

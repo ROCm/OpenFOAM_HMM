@@ -33,18 +33,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // Outstanding non-blocking operations.
-DynamicList<MPI_Request> IPstream_outstandingRequests_;
-
+//! @cond fileScope
+Foam::DynamicList<MPI_Request> IPstream_outstandingRequests_;
+//! @endcond fileScope
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-IPstream::IPstream
+Foam::IPstream::IPstream
 (
     const commsTypes commsType,
     const int fromProcNo,
@@ -89,7 +87,7 @@ IPstream::IPstream
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-label IPstream::read
+Foam::label Foam::IPstream::read
 (
     const commsTypes commsType,
     const int fromProcNo,
@@ -192,7 +190,7 @@ label IPstream::read
 }
 
 
-void IPstream::waitRequests()
+void Foam::IPstream::waitRequests()
 {
     if (IPstream_outstandingRequests_.size() > 0)
     {
@@ -219,7 +217,7 @@ void IPstream::waitRequests()
 }
 
 
-bool IPstream::finishedRequest(const label i)
+bool Foam::IPstream::finishedRequest(const label i)
 {
     if (i >= IPstream_outstandingRequests_.size())
     {
@@ -243,7 +241,5 @@ bool IPstream::finishedRequest(const label i)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

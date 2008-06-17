@@ -37,8 +37,8 @@ bool Foam::IOobject::writeHeader(Ostream& os) const
     if (!os.good())
     {
         Info<< "IOobject::writeHeader(Ostream&) : "
-            << "no stream open for write"
-            << endl << os.info() << endl;
+            << "no stream open for write" << nl
+            << os.info() << endl;
 
         return false;
     }
@@ -49,16 +49,14 @@ bool Foam::IOobject::writeHeader(Ostream& os) const
         << "    format      " << os.format() << ";\n"
         << "    class       " << type() << ";\n";
 
+    // outdent for visibility and more space
     if (note().size())
     {
-        os << "    note        " << note() << ";\n";
+        os  << "    note    " << note() << ";\n";
     }
 
-    // writing without quotes would look nicer
-    os  << "    object      " << name() << ";\n"
-        //<< "    instance    " << instance()/local() << ";\n"
-        //<< "    local       " << local() << ";\n"
-        << "    location    " << instance()/local() << ";\n"
+    os  << "    location    " << instance()/local() << ";\n"
+        << "    object      " << name() << ";\n"
         << "}" << nl;
 
     writeDivider(os);

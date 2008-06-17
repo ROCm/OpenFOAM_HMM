@@ -128,11 +128,6 @@ class sampledSurface
 
 protected:
 
-    // Protected static functions
-
-        //- Read bool from dictionary. Return provided value if not found
-        static bool getBool(const dictionary&, const word&, const bool);
-
     // Protected Member functions
 
         virtual void clearGeom() const;

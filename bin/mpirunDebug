@@ -80,27 +80,25 @@ $ECHO "Choose running method: 1)gdb+xterm  2)gdb  3)log  4)xterm+valgrind: \c"
 read method
 if [ "$method" -ne 1 -a "$method" -ne 2 -a "$method" -ne 3 -a "$method" -ne 4 ]; then
     printUsage
-    exit 1    
+    exit 1
 fi
 
 $ECHO "Run all processes local or distributed? 1)local  2)remote: \c"
 read spawn
 if [ "$spawn" -ne 1 -a "$spawn" -ne 2 ]; then
     printUsage
-    exit 1    
+    exit 1
 fi
 
-# check ~/.OpenFOAM-VERSION
-# check <site>/etc
-# check <site>/.OpenFOAM-VERSION
+# check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
+# check ~/.$WM_PROJECT/
+# check <installedProject>/etc/
 if [ "$WM_PROJECT" ]; then
 
-   : ${FOAM_DOT_DIR:=.$WM_PROJECT-$WM_PROJECT_VERSION}
-
    for i in \
-      $HOME/$FOAM_DOT_DIR \
+      $HOME/.WM_PROJECT/$WM_PROJECT_VERSION \
+      $HOME/.WM_PROJECT \
       $WM_PROJECT_DIR/etc \
-      $WM_PROJECT_DIR/$FOAM_DOT_DIR \
       ;
    do
       if [ -f "$i/bashrc" ]; then
@@ -112,7 +110,12 @@ fi
 
 # Construct test string for remote execution.
 # Source OpenFOAM settings if OpenFOAM environment not set.
-sourceFoam='[ "$WM_PROJECT" ] || . '"$sourceFoam"
+# attempt to preserve the installation directory 'FOAM_INST_DIR'
+if [ "$FOAM_INST_DIR" ]; then
+   sourceFoam='[ "$WM_PROJECT" ] || '"FOAM_INST_DIR=$FOAM_INST_DIR . $sourceFoam"
+else
+   sourceFoam='[ "$WM_PROJECT" ] || '". $sourceFoam"
+fi
 
 echo "**sourceFoam:$sourceFoam"
 

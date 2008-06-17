@@ -122,6 +122,7 @@ functionEntries = $(dictionary)/functionEntries
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
+$(functionEntries)/removeEntry/removeEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
