@@ -1,0 +1,19 @@
+#!/bin/sh
+
+currDir=`pwd`
+application=`basename $currDir`
+cases="periodicCube"
+
+tutorialPath=`dirname $0`/..
+. $tutorialPath/RunFunctions
+. $tutorialPath/CleanFunctions
+
+
+for case in $cases
+do
+    runApplication blockMesh $case
+
+    runApplication molConfig $case
+
+    runApplication $application $case
+done

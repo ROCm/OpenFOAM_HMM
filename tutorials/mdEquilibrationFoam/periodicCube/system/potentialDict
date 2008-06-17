@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Subdictionaries specifying types of intermoleular potential.
+// Subdictionaries specifying types of intermolecular potential.
 // Sub-sub dictionaries specify the potentials themselves.
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,14 +52,24 @@ pair
 {
     Ar-Ar
     {
-        potentialType   maitlandSmithTabulated;
-        m               13.0;
-        gamma           7.5;
-        rm              0.3756e-9;
-        epsilon         1.990108438e-21;
-        rCut            1.0e-9;
+        pairPotential   azizChen;
+        rCut            1.2e-9;
         rMin            0.15e-9;
         dr              2e-14;
+        azizChenCoeffs
+        {
+            epsilon     1.97742255e-21;
+            rm          3.759e-10;
+            A           0.9502720e7;
+            alpha       16.345655;
+            C6          1.0914254;
+            C8          0.6002595;
+            C10         0.3700113;
+            D           1.4;
+            gamma       2.0;
+        }
+        energyScalingFunction   noScaling;
+        writeTables     yes;
     }
 }
 
@@ -70,8 +80,12 @@ tether
 {
     Ar
     {
-        potentialType   harmonicSpring;
-        springConstant  0.0277;
+        tetherPotential restrainedHarmonicSpring;
+        restrainedHarmonicSpringCoeffs
+        {
+            springConstant  0.0277;
+            rR              1.2e-9;
+        }
     }
 }
 
