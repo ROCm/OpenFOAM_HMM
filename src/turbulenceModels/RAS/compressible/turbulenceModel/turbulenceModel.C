@@ -47,7 +47,8 @@ void turbulenceModel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< turbulenceModelCoeffs_;
+        Info<< type() << "Coeffs" << nl
+            << turbulenceModelCoeffs_;
     }
 }
 
@@ -87,8 +88,15 @@ turbulenceModel::turbulenceModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     turbulenceModelCoeffs_(subDict(type + "Coeffs")),
 
-    kappa_(readScalar(subDict("wallFunctionCoeffs").lookup("kappa"))),
-    E_(readScalar(subDict("wallFunctionCoeffs").lookup("E"))),
+    kappa_
+    (
+        subDict("wallFunctionCoeffs").lookupOrAddDefault<scalar>
+        (
+            "kappa",
+            0.4187
+        )
+    ),
+    E_(subDict("wallFunctionCoeffs").lookupOrAddDefault<scalar>("E", 9.0)),
     yPlusLam_(yPlusLam(kappa_, E_)),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
@@ -123,7 +131,7 @@ tmp<scalarField> turbulenceModel::yPlus(const label patchNo) const
 
     if (typeid(curPatch) == typeid(wallFvPatch))
     {
-        scalar Cmu(turbulenceModelCoeffs_.lookup("Cmu"));
+        scalar Cmu(readScalar(turbulenceModelCoeffs_.lookup("Cmu")));
 
         Yp = pow(Cmu, 0.25)
             *y_[patchNo]

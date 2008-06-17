@@ -45,7 +45,8 @@ void LESmodel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< LESmodelProperties_;
+        Info<< type() << "Coeffs" << nl
+            << LESmodelProperties_;
     }
 }
 
