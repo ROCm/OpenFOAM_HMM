@@ -61,7 +61,7 @@ Foam::IPstream::IPstream
 
     MPI_Status status;
 
-    // If the buffer size is not specified probe the incomming message
+    // If the buffer size is not specified, probe the incomming message
     // and set it
     if (!bufSize)
     {
@@ -181,8 +181,7 @@ Foam::label Foam::IPstream::read
         (
             "IPstream::read"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
-        )   << "Unsupported communications type "
-            << Pstream::commsTypeNames[commsType]
+        )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
 
         return 0;

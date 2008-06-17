@@ -119,8 +119,7 @@ bool Foam::OPstream::write
         (
             "OPstream::write"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
-        )   << "Unsupported communications type "
-            << Pstream::commsTypeNames[commsType]
+        )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
     }
 
