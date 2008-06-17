@@ -29,8 +29,8 @@
 2. System requirements
 ~~~~~~~~~~~~~~~~~~~~~~
   OpenFOAM is developed and tested on Linux, but should work with other
-  Unix style system.  To check your system setup, execute the foamSystemCheck
-  script in the bin directory of the OpenFOAM installation. If no problems
+  Unix style systems.  To check your system setup, execute the foamSystemCheck
+  script in the bin/ directory of the OpenFOAM installation. If no problems
   are reported, proceed to "3. Installation"; otherwise contact your
   system administrator.
 
@@ -40,7 +40,6 @@
 
 3. Installation
 ~~~~~~~~~~~~~~~
-
   Download and unpack the files in the $HOME/OpenFOAM directory as described
   in:  http://www.OpenFOAM.org/download.html
 
@@ -77,10 +76,9 @@
 
   3.1. Installation in alternative locations
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    OpenFOAM may also be installed in an alternative location.
-    However, the installation directory must be network available
-    (eg, NFS) if parallel calculations are planned.
+    OpenFOAM may also be installed in alternative locations. However, the
+    installation directory should be network available (e.g., NFS) if
+    parallel calculations are planned.
 
     The environment variable 'FOAM_INST_DIR' can be used to find and source
     the appropriate resource file. Here is a bash/ksh/sh example:
@@ -89,7 +87,7 @@
         foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
         [ -f $foamDotFile ] && . $foamDotFile
 
-    and a csh example:
+    and a csh/tcsh example:
 
         setenv FOAM_INST_DIR /data/app/OpenFOAM
         foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
@@ -102,9 +100,8 @@
 
 4. Building from Sources (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
   If you cannot find an appropriate binary pack for your platform, you can
-  build the complete OpenFOAM from the source-pack.  First you will need to
+  build the complete OpenFOAM from the source-pack.  You will first need to
   compile or obtain a recent version of gcc (we recomend gcc-4.2.?) for
   your platform, which may be obtained from http://gcc.gnu.org/.
 
@@ -114,29 +111,27 @@
   $WM_PROJECT_DIR/etc/settings.csh appropriately and finally update the
   environment variables as in section 3.
 
-  Now go to the top-level source directory $WM_PROJECT_DIR and type
-  ./Allwmake, which is the name of the top-level build script for building
-  the whole of OpenFOAM.  In principle this will build everything, but
-  sometimes problems occur with the build order and it is necessary to
-  update the environment variables and re-execute Allwmake.  If you
-  experience difficulties with building the source-pack or your platform is
-  not currently supported please contact <enquiries@OpenCFD.co.uk> to
-  negotiate a support contract and we will do the port and maintain it in
+  Now go to the top-level source directory $WM_PROJECT_DIR and execute the
+  top-level build script './Allwmake'.  In principle this will build
+  everything, but if problems occur with the build order it may be necessary
+  to update the environment variables and re-execute 'Allwmake'. If you
+  experience difficulties with building the source-pack, or your platform is
+  not currently supported, please contact <enquiries@OpenCFD.co.uk> to
+  negotiate a support contract and we will do the port and maintain it for
   future releases.
 
 
 5. Testing the installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   To check your installation setup, execute the 'foamInstallationTest'
-  script (in the bin directory of the OpenFOAM installation). If no problems
-  are reported, proceed to getting started with OpenFOAM; otherwise, go back
-  and check you have installed the software correctly and/or contact your
-  system administrator.
+  script (in the bin/ directory of the OpenFOAM installation). If no
+  problems are reported, proceed to getting started with OpenFOAM;
+  otherwise, go back and check you have installed the software correctly
+  and/or contact your system administrator.
 
 
 6. Getting Started
 ~~~~~~~~~~~~~~~~~~
-
   Create a project directory within the $HOME/OpenFOAM directory named
   <USER>-<VERSION> (e.g. 'chris-1.5' for user chris and OpenFOAM version 1.5)
   and create a directory named 'run' within it, e.g. by typing:
@@ -144,7 +139,7 @@
       mkdir -p $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
 
   Copy the 'tutorial' examples directory in the OpenFOAM distribution to the
-  'run' directory.  If OpenFOAM environment variables are set correctly,
+  'run' directory.  If the OpenFOAM environment variables are set correctly,
   then the following command will be correct:
 
       cp -r $WM_PROJECT_DIR/tutorials $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
@@ -158,27 +153,27 @@
 
 7. Documentation
 ~~~~~~~~~~~~~~~~
-    http://www.OpenFOAM.org/doc
+  http://www.OpenFOAM.org/doc
 
 
 8. Help
 ~~~~~~~
-    http://www.OpenFOAM.org
-    http://www.OpenFOAM.org/discussion.html
+  http://www.OpenFOAM.org
+  http://www.OpenFOAM.org/discussion.html
 
 
 9. Reporting Bugs in OpenFOAM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    http://www.OpenFOAM.org/bugs.html
+  http://www.OpenFOAM.org/bugs.html
 
 
 A. Running OpenFOAM in 32-bit mode on 64-bit machines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Those users with an installation of Linux on a 64-bit machine may install
-  either or both of the 32-bit version of OpenFOAM (linux) or the 64-bit
-  version of FOAM (linux64) with 64-bit being the default mode. In order to
-  set up the user to run in 32-bit mode, the user must set the environment
-  variable $WM_32 (to anything, e.g. "on") before sourcing the etc/bashrc
-  (or etc/cshrc) file.  Unsetting $WM_32 and sourcing the bashrc file will
+  Linux users with a 64-bit machine may install either the OpenFOAM 32-bit
+  version (linux) or the OpenFOAM 64-bit version (linux64), or both.
+  The 64-bit is the default mode on a 64-bit machine.  To use an installed
+  32-bit version, the user must set the environment variable $WM_32 (to
+  anything, e.g. "on") before sourcing the etc/bashrc (or etc/cshrc) file.
+  Unsetting WM_32 and re-sourcing the etc/bashrc (or etc/cshrc) file will
   set up the user to run in 64-bit mode.
 

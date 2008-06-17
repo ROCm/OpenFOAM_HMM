@@ -1,5 +1,4 @@
-#!/bin/sh
-#------------------------------------------------------------------------------
+#---------------------------------*- sh -*-------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
@@ -48,6 +47,7 @@ initialiseVariables ()
     if [ "$VERBOSE" = ON ]; then
         addCMakeVariable "CMAKE_VERBOSE_MAKEFILE=TRUE"
     fi
+    addCMakeVariable "VTK_USE_TK=FALSE"
 }
 
 
