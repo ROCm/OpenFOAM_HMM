@@ -29,48 +29,34 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Stream>
-inline void Foam::IOobject::writeBanner(Stream& os)
+inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
 {
     static bool spacesSet = false;
-    static char spaces[80];
+    static char spaces[40];
 
     if (!spacesSet)
     {
-        memset(spaces, ' ', 80);
+        memset(spaces, ' ', 40);
         spaces[38 - strlen(Foam::FOAMversion)] = '\0';
         spacesSet = true;
     }
 
-    os  <<
-        "/*--------------------------------*- C++ -*----------------------------------*\\\n"
-        "| =========                 |                                                 |\n"
-        "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
-        "|  \\\\    /   O peration     | Version:  " << FOAMversion << spaces << "|\n"
-        "|   \\\\  /    A nd           | Web:      http://www.openfoam.org               |\n"
-        "|    \\\\/     M anipulation  |                                                 |\n"
-        "\\*---------------------------------------------------------------------------*/\n";
-}
-
-
-template<class Stream>
-inline void Foam::IOobject::writeLogBanner(Stream& os)
-{
-    static bool spacesSet = false;
-    static char spaces[80];
-
-    if (!spacesSet)
+    if (noHint)
     {
-        memset(spaces, ' ', 80);
-        spaces[38 - strlen(Foam::FOAMversion)] = '\0';
-        spacesSet = true;
+        os  <<
+            "/*---------------------------------------------------------------------------*\\\n";
+    }
+    else
+    {
+        os  <<
+            "/*--------------------------------*- C++ -*----------------------------------*\\\n";
     }
 
     os  <<
-        "/*---------------------------------------------------------------------------*\\\n"
         "| =========                 |                                                 |\n"
         "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
         "|  \\\\    /   O peration     | Version:  " << FOAMversion << spaces << "|\n"
-        "|   \\\\  /    A nd           | Web:      http://www.openfoam.org               |\n"
+        "|   \\\\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n"
         "|    \\\\/     M anipulation  |                                                 |\n"
         "\\*---------------------------------------------------------------------------*/\n";
 }

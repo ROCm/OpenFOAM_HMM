@@ -37,7 +37,8 @@
 #     Sources the relevant cshrc/bashrc if not set.
 #
 #     WM_PROJECT_DIR, WM_PROJECT and WM_PROJECT_VERSION will have been set
-#     before calling this routine
+#     before calling this routine.
+#     FOAM_INST_DIR may possibly have been set (to find installation)
 #
 # Usage
 #     wmakeScheduler COMMAND
@@ -45,7 +46,7 @@
 #
 #     wmakeScheduler -count
 #         count the total number of slots available in WM_HOSTS
-#         eg,  WM_NCOMPPROCS=$(wmakeScheduler -count)
+#         eg,  export WM_NCOMPPROCS=$(wmakeScheduler -count)
 #
 #-------------------------------------------------------------------------------
 lockDir=$HOME/.wmakeScheduler
@@ -81,21 +82,15 @@ case $SHELL in
     ;;
 esac
 
-# check ~/.$WM_PROJECT-$WM_PROJECT_VERSION/
 # check ~/.$WM_PROJECT/$WM_PROJECT_VERSION/
 # check ~/.$WM_PROJECT/
 # check <installedProject>/etc/
-# check <installedProject/.$WM_PROJECT-$WM_PROJECT_VERSION/
 if [ "$WM_PROJECT" ]; then
 
-   : ${FOAM_DOT_DIR:=.$WM_PROJECT-$WM_PROJECT_VERSION}
-
    for i in \
-      $HOME/$FOAM_DOT_DIR \
       $HOME/.$WM_PROJECT/$WM_PROJECT_VERSION \
       $HOME/.$WM_PROJECT \
       $WM_PROJECT_DIR/etc \
-      $WM_PROJECT_DIR/$FOAM_DOT_DIR \
       ;
    do
       if [ -f "$i/$shellRc" ]; then
@@ -203,7 +198,7 @@ do
             fi
         done
     done
-    # Not found any free slots. Rest a bit.
+    # Did not find any free slots. Rest a bit.
     sleep 1
 done
 

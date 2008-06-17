@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-namespace LESmodels
+namespace LES
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -64,8 +64,10 @@ devOneEqEddy::devOneEqEddy
         mesh_
     ),
 
-    ck_(LESmodelProperties().lookup("ck"))
-{}
+    ck_(LESmodelProperties().lookupOrAddDefault("ck", 0.07))
+{
+    printCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -99,7 +101,7 @@ bool devOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().lookup("ck") >> ck_;
+        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
 
         return true;
     }
@@ -112,7 +114,7 @@ bool devOneEqEddy::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LESmodels
+} // End namespace LES
 } // End namespace Foam
 
 // ************************************************************************* //

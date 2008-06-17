@@ -29,7 +29,6 @@ wmake libso randomProcesses
 ( cd thermophysicalModels && ./Allwmake )
 ( cd transportModels && ./Allwmake )
 ( cd turbulenceModels && ./Allwmake )
-( cd LESmodels && ./Allwmake )
 ( cd lagrangian && ./Allwmake )
 ( cd postProcessing && ./Allwmake )
 

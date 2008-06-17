@@ -33,14 +33,39 @@ template<class T>
 T Foam::dictionary::lookupOrDefault
 (
     const word& keyword,
+    const T& deflt,
+    bool recursive
+) const
+{
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
+
+    if (entryPtr == NULL)
+    {
+        return deflt;
+    }
+    else
+    {
+        return pTraits<T>(entryPtr->stream());
+    }
+}
+
+
+template<class T>
+T Foam::dictionary::lookupOrAddDefault
+(
+    const word& keyword,
     const T& deft,
     bool recusive
-) const
+)
 {
     const entry* ePtr = lookupEntryPtr(keyword, recusive);
 
     if (ePtr == NULL)
     {
+        entry* defPtr = new primitiveEntry(keyword, deft);
+        append(defPtr);
+        hashedEntries_.insert(defPtr->keyword(), defPtr);
+
         return deft;
     }
     else
@@ -51,12 +76,33 @@ T Foam::dictionary::lookupOrDefault
 
 
 template<class T>
-void Foam::dictionary::add(const word& keyword, const T& t)
+void Foam::dictionary::readIfPresent
+(
+    const word& keyword,
+    T& deft,
+    bool recusive
+) const
 {
-    entry* ePtr = new primitiveEntry(keyword, t);
-    append(ePtr);
-    hashedEntries_.insert(ePtr->keyword(), ePtr);
+    const entry* ePtr = lookupEntryPtr(keyword, recusive);
+
+    if (ePtr != NULL)
+    {
+        ePtr->stream() >> deft;
+    }
 }
 
+
+template<class T>
+void Foam::dictionary::add(const word& k, const T& t, bool overwrite)
+{
+    add(new primitiveEntry(k, t), overwrite);
+}
+
+
+template<class T>
+void Foam::dictionary::set(const word& k, const T& t)
+{
+    set(new primitiveEntry(k, t));
+}
 
 // ************************************************************************* //

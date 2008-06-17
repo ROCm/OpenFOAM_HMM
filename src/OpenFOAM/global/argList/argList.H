@@ -27,18 +27,18 @@ Class
 
 Description
     Extract command arguments and options from the supplied
-    @a argc and @a argv.
+    @a argc and @a argv parameters.
 
     Sequences with "(" ... ")" are transformed into a stringList.
     For example,
     @verbatim
         program -listFiles \( *.txt \)
     @endverbatim
-    in which the backslash-escaping has been used to avoid shell expansions,
     would create a stringList:
     @verbatim
         ( "file1.txt" "file2.txt" ... "fileN.txt" )
     @endverbatim
+    The backslash-escaping has been used to avoid shell expansions.
 
     @par Default command-line options
     @param -case \<dir\> \n
@@ -47,6 +47,8 @@ Description
         specify case as a parallel job
     @param -doc \n
         display the documentation in browser
+    @param -srcDoc \n
+        display the source documentation in browser
     @param -help \n
        print the usage
 
@@ -130,14 +132,14 @@ public:
         //- A list of valid parallel options
         static HashTable<string> validParOptions;
 
-        //! @cond ignore documentation for this class
+        //! @cond ignoreDocumentation
         class initValidTables
         {
         public:
 
             initValidTables();
         };
-        //! @endcond
+        //! @endcond ignoreDocumentation
 
 
     // Constructors
@@ -148,8 +150,8 @@ public:
         (
             int& argc,
             char**& argv,
-            bool checkArgs = true,
-            bool checkOpts = true
+            bool checkArgs=true,
+            bool checkOpts=true
         );
 
 
@@ -196,8 +198,7 @@ public:
                 return globalCase_;
             }
 
-            //- Return case name for parallel run
-            //  or the global case for a serial run
+            //- Return case name for parallel run or the global case for a serial run
             const fileName& caseName() const
             {
                 return case_;
@@ -222,13 +223,14 @@ public:
             void printUsage() const;
 
             //- Display documentation in browser
-            void displayDoc() const;
+            //  Optionally display the application source code
+            void displayDoc(bool source=false) const;
 
 
         // Check
 
             //- Check argument list
-            bool check(bool checkArgs = true, bool checkOpts = true) const;
+            bool check(bool checkArgs=true, bool checkOpts=true) const;
 
             //- Check root path and case path
             bool checkRootCase() const;

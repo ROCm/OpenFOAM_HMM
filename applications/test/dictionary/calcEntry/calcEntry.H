@@ -69,18 +69,13 @@ public:
 
     // Member Functions
 
-        static bool insert
+        static bool execute
         (
             const dictionary& parentDict,
             primitiveEntry& entry,
             Istream& is
         );
 
-        static bool insert
-        (
-            dictionary& parentDict,
-            Istream& is
-        );
 };
 
 

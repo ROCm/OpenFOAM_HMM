@@ -35,7 +35,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace turbulenceModels
+namespace RAS
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -55,12 +55,15 @@ PDRkEpsilon::PDRkEpsilon
 :
     turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookup("Cmu")),
-    C1(turbulenceModelCoeffs_.lookup("C1")),
-    C2(turbulenceModelCoeffs_.lookup("C2")),
-    alphak(turbulenceModelCoeffs_.lookup("alphak")),
-    alphaEps(turbulenceModelCoeffs_.lookup("alphaEps")),
-    alphah(turbulenceModelCoeffs_.lookup("alphah")),
+    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
+    alphaEps
+    (
+        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+    ),
+    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
     k_
     (
@@ -102,6 +105,8 @@ PDRkEpsilon::PDRkEpsilon
     )
 {
 #   include "wallViscosityI.H"
+
+    printCoeffs();
 }
 
 
@@ -161,12 +166,12 @@ bool PDRkEpsilon::read()
 {
     if (turbulenceModel::read())
     {
-        turbulenceModelCoeffs_.lookup("Cmu") >> Cmu;
-        turbulenceModelCoeffs_.lookup("C1") >> C1;
-        turbulenceModelCoeffs_.lookup("C2") >> C2;
-        turbulenceModelCoeffs_.lookup("alphak") >> alphak;
-        turbulenceModelCoeffs_.lookup("alphaEps") >> alphaEps;
-        turbulenceModelCoeffs_.lookup("alphah") >> alphah;
+        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
         return true;
     }
@@ -204,7 +209,7 @@ void PDRkEpsilon::correct()
     // in both the k and epsilon equations
     const volScalarField& betav = U_.db().lookupObject<volScalarField>("betav");
 
-    const PDRDragModel& drag = 
+    const PDRDragModel& drag =
         U_.db().lookupObject<PDRDragModel>("PDRDragModel");
 
     volScalarField GR = drag.Gk();
@@ -259,7 +264,7 @@ void PDRkEpsilon::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace turbulenceModels
+} // End namespace RAS
 } // End namespace compressible
 } // End namespace Foam
 

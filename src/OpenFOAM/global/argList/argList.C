@@ -186,7 +186,7 @@ Foam::argList::argList
     // Print the banner once only for parallel runs
     if (Pstream::master())
     {
-        IOobject::writeLogBanner(Info);
+        IOobject::writeBanner(Info, true);
     }
 
     // convert argv -> args_ and capture ( ... ) lists
@@ -252,19 +252,30 @@ Foam::argList::argList
 
     args_.setSize(nArgs);
 
-    // Help options:
-    //   -doc   display the documentation in browser
-    //   -help  print the usage
-    if (options_.found("doc") || options_.found("help"))
+    // Help/documentation options:
+    //   -help    print the usage
+    //   -doc     display application documentation in browser
+    //   -srcDoc  display source code in browser
+    if
+    (
+        options_.found("help")
+     || options_.found("doc")
+     || options_.found("srcDoc")
+    )
     {
         if (options_.found("help"))
         {
             printUsage();
         }
 
-        if (options_.found("doc"))
+        // only display one or the other
+        if (options_.found("srcDoc"))
         {
-            displayDoc();
+            displayDoc(true);
+        }
+        else if (options_.found("doc"))
+        {
+            displayDoc(false);
         }
 
         ::exit(0);
@@ -578,11 +589,8 @@ void Foam::argList::printUsage() const
         ++iter
     )
     {
-        Info<< ' ' << '<' << iter().c_str() << '>';
+        Info<< " <" << iter().c_str() << '>';
     }
-
-    // place -doc and -help up front
-    Info<< " [-doc] [-help]";
 
     for
     (
@@ -601,15 +609,26 @@ void Foam::argList::printUsage() const
         Info<< ']';
     }
 
-    Info<< endl;
+    // place help/doc options of the way at the end,
+    // but with an extra space to separate it a little
+    Info<< "  [-help] [-doc] [-srcDoc]" << endl;
 }
 
 
-void Foam::argList::displayDoc() const
+void Foam::argList::displayDoc(bool source) const
 {
     const dictionary& docDict = debug::controlDict().subDict("Documentation");
     List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
     List<fileName> docExts(docDict.lookup("doxySourceFileExts"));
+
+    // for source code: change foo_8C.html to foo_8C-source.html
+    if (source)
+    {
+        forAll(docExts, extI)
+        {
+            docExts[extI].replace(".", "-source.");
+        }
+    }
 
     fileName docFile;
     bool found = false;
@@ -618,7 +637,7 @@ void Foam::argList::displayDoc() const
     {
         forAll(docExts, extI)
         {
-            docFile = docDirs[dirI]/executable() + docExts[extI];
+            docFile = docDirs[dirI]/executable_ + docExts[extI];
             docFile.expand();
 
             if (exists(docFile))
