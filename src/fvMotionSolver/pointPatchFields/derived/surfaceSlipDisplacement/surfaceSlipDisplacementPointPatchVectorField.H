@@ -196,7 +196,7 @@ public:
         const triSurfaceMeshes& surfaces() const;
 
         //- Mode of projection/following
-        const followMode projectMode() const
+        followMode projectMode() const
         {
             return projectMode_;
         }

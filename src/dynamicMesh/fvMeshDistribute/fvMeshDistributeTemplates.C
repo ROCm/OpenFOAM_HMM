@@ -85,7 +85,7 @@ void Foam::fvMeshDistribute::addPatchFields(const word& patchFieldType)
             );
 
         label sz = bfld.size();
-        bfld.setSize(sz+1);
+        bfld.setSize(sz + 1);
         bfld.set
         (
             sz,
@@ -124,10 +124,8 @@ void Foam::fvMeshDistribute::deleteTrailingPatchFields()
                 fld.boundaryField()
             );
 
-        label sz = bfld.size();
-
         // Shrink patchFields
-        bfld.setSize(sz-1);
+        bfld.setSize(bfld.size() - 1);
     }
 }
 
