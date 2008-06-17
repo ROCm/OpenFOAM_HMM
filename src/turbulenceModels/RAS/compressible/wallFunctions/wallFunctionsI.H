@@ -78,7 +78,7 @@ Description
                 label faceCelli = curPatch.faceCells()[facei];
 
                 scalar yPlus =
-                    Cmu25*turbulenceModel::y_[patchi][facei]
+                    Cmu25*RASmodel::y_[patchi][facei]
                    *sqrt(k_[faceCelli])
                    /(muw[facei]/rhow[facei]);
 
@@ -90,7 +90,7 @@ Description
 
                 epsilon_[faceCelli] +=
                     Cmu75*pow(k_[faceCelli], 1.5)
-                   /(kappa_*turbulenceModel::y_[patchi][facei]);
+                   /(kappa_*RASmodel::y_[patchi][facei]);
 
                 if (yPlus > yPlusLam_)
                 {
@@ -98,7 +98,7 @@ Description
                         (mutw[facei] + muw[facei])
                        *magFaceGradU[facei]
                        *Cmu25*sqrt(k_[faceCelli])
-                       /(kappa_*turbulenceModel::y_[patchi][facei]);
+                       /(kappa_*RASmodel::y_[patchi][facei]);
                 }
             }
         }

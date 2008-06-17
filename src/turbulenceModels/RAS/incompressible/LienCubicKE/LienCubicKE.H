@@ -36,7 +36,7 @@ SourceFiles
 #ifndef LienCubicKE_H
 #define LienCubicKE_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +53,7 @@ namespace RAS
 
 class LienCubicKE
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

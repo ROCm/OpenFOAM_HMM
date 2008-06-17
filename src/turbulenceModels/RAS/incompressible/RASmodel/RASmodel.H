@@ -23,27 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::compressible::RAS
+    Foam::incompressible
 
 Description
-    Namespace for compressible RAS turbulence models.
-
+    Namespace for incompressible RAS turbulence models.
 
 Class
-    Foam::compressible::turbulenceModel
+    Foam::incompressible::RASmodel
 
 Description
-    Abstract base class for turbulence models for compressible and combusting
-    flows.
+    Abstract base class for incompressible turbulence models.
 
 SourceFiles
-    turbulenceModel.C
+    RASmodel.C
     newTurbulenceModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleTurbulenceModel_H
-#define compressibleTurbulenceModel_H
+#ifndef RASmodel_H
+#define RASmodel_H
 
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -51,7 +49,7 @@ SourceFiles
 #include "fvm.H"
 #include "fvc.H"
 #include "fvMatrices.H"
-#include "basicThermo.H"
+#include "incompressible/transportModel/transportModel.H"
 #include "IOdictionary.H"
 #include "Switch.H"
 #include "bound.H"
@@ -62,14 +60,14 @@ SourceFiles
 
 namespace Foam
 {
-namespace compressible
+namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class turbulenceModel Declaration
+                           Class RASmodel Declaration
 \*---------------------------------------------------------------------------*/
 
-class turbulenceModel
+class RASmodel
 :
     public IOdictionary
 {
@@ -81,15 +79,14 @@ protected:
         const Time& runTime_;
         const fvMesh& mesh_;
 
-        const volScalarField& rho_;
         const volVectorField& U_;
         const surfaceScalarField& phi_;
 
-        basicThermo& thermophysicalModel_;
+        transportModel& transportModel_;
 
         Switch turbulence_;
         Switch printCoeffs_;
-        dictionary turbulenceModelCoeffs_;
+        dictionary RASmodelCoeffs_;
 
         scalar kappa_;
         scalar E_;
@@ -109,28 +106,22 @@ protected:
         //- Print model coefficients
         virtual void printCoeffs();
 
-        //- Return the laminar thermal conductivity
-        const volScalarField& alpha() const
-        {
-            return thermophysicalModel_.alpha();
-        }
-
 
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        turbulenceModel(const turbulenceModel&);
+        RASmodel(const RASmodel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const turbulenceModel&);
+        void operator=(const RASmodel&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("turbulenceModel");
+    TypeName("RASmodel");
 
 
     // Declare run-time constructor selection table
@@ -138,47 +129,43 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            turbulenceModel,
+            RASmodel,
             dictionary,
             (
-                const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                basicThermo& thermoPhysicalModel
+                transportModel& transport
             ),
-            (rho, U, phi, thermoPhysicalModel)
+            (U, phi, transport)
         );
 
 
     // Constructors
 
         //- Construct from components
-        turbulenceModel
+        RASmodel
         (
             const word& type,
-            const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermoPhysicalModel
+            transportModel& transport
         );
 
 
     // Selectors
 
         //- Return a reference to the selected turbulence model
-        static autoPtr<turbulenceModel> New
+        static autoPtr<RASmodel> New
         (
-            const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermoPhysicalModel
+            transportModel& transport
         );
 
 
     // Destructor
 
-        virtual ~turbulenceModel()
-        {}
+        virtual ~RASmodel();
 
 
     // Member Functions
@@ -246,25 +233,22 @@ public:
 
 
         //- Return the laminar viscosity
-        const volScalarField& mu() const
+        const volScalarField& nu() const
         {
-            return thermophysicalModel_.mu();
+            return transportModel_.nu();
         }
 
         //- Return the turbulence viscosity
-        virtual tmp<volScalarField> mut() const = 0;
+        virtual tmp<volScalarField> nut() const = 0;
 
         //- Return the effective viscosity
-        virtual tmp<volScalarField> muEff() const
+        virtual tmp<volScalarField> nuEff() const
         {
             return tmp<volScalarField>
             (
-                new volScalarField("muEff", mut() + mu())
+                new volScalarField("nuEff", nut() + nu())
             );
         }
-
-        //- Return the effective turbulent thermal diffusivity
-        virtual tmp<volScalarField> alphaEff() const = 0;
 
         //- Return the turbulence kinetic energy
         virtual tmp<volScalarField> k() const = 0;
@@ -276,10 +260,10 @@ public:
         virtual tmp<volSymmTensorField> R() const = 0;
 
         //- Return the effective stress tensor including the laminar stress
-        virtual tmp<volSymmTensorField> devRhoReff() const = 0;
+        virtual tmp<volSymmTensorField> devReff() const = 0;
 
         //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const = 0;
+        virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const = 0;
 
         //- Return yPlus for the given patch
         virtual tmp<scalarField> yPlus(const label patchI) const;
@@ -294,7 +278,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

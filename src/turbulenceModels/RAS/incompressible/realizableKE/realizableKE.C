@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(realizableKE, 0);
-addToRunTimeSelectionTable(turbulenceModel, realizableKE, dictionary);
+addToRunTimeSelectionTable(RASmodel, realizableKE, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -92,16 +92,16 @@ realizableKE::realizableKE
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    A0(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("A0", 4.0)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.9)),
-    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    A0(RASmodelCoeffs_.lookupOrAddDefault<scalar>("A0", 4.0)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.9)),
+    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.833333)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.833333)
     ),
 
     k_
@@ -195,13 +195,13 @@ tmp<fvVectorMatrix> realizableKE::divDevReff(volVectorField& U) const
 
 bool realizableKE::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("A0", A0);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("A0", A0);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
 
         return true;
     }
@@ -221,7 +221,7 @@ void realizableKE::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     volTensorField gradU = fvc::grad(U_);
     volScalarField S2 = 2*magSqr(dev(symm(gradU)));

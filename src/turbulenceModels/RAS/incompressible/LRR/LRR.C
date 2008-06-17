@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LRR, 0);
-addToRunTimeSelectionTable(turbulenceModel, LRR, dictionary);
+addToRunTimeSelectionTable(RASmodel, LRR, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,22 +52,22 @@ LRR::LRR
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Clrr1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Clrr1", 1.8)),
-    Clrr2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Clrr2", 0.6)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    Cs(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
-    Ceps(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Clrr1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clrr1", 1.8)),
+    Clrr2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clrr2", 0.6)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    Cs(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
+    Ceps(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
     couplingFactor_
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
     ),
 
     R_
@@ -176,18 +176,18 @@ tmp<fvVectorMatrix> LRR::divDevReff(volVectorField& U) const
 
 bool LRR::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Clrr1", Clrr1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Clrr2", Clrr2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cs", Cs);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("Clrr1", Clrr1);
+        RASmodelCoeffs_.readIfPresent<scalar>("Clrr2", Clrr2);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cs", Cs);
+        RASmodelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
 
-        turbulenceModelCoeffs_.readIfPresent<scalar>
+        RASmodelCoeffs_.readIfPresent<scalar>
         (
             "couplingFactor",
             couplingFactor_
@@ -219,7 +219,7 @@ void LRR::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
     volScalarField G = 0.5*tr(P);

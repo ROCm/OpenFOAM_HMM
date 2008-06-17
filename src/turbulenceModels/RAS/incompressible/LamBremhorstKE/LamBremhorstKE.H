@@ -37,7 +37,7 @@ SourceFiles
 #ifndef LamBremhorstKE_H
 #define LamBremhorstKE_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,7 +55,7 @@ namespace RAS
 
 class LamBremhorstKE
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

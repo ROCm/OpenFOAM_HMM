@@ -47,7 +47,7 @@ SourceFiles
 #ifndef realizableKE_H
 #define realizableKE_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ namespace RAS
 
 class realizableKE
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(kOmegaSST, 0);
-addToRunTimeSelectionTable(turbulenceModel, kOmegaSST, dictionary);
+addToRunTimeSelectionTable(RASmodel, kOmegaSST, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -94,36 +94,36 @@ kOmegaSST::kOmegaSST
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
     alphaK1
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaK1", 0.85034)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaK1", 0.85034)
     ),
-    alphaK2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaK2", 1.0)),
+    alphaK2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaK2", 1.0)),
     alphaOmega1
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega1", 0.5)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega1", 0.5)
     ),
     alphaOmega2
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega2", 0.85616)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega2", 0.85616)
     ),
-    gamma1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("gamma1", 0.5532)),
-    gamma2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("gamma2", 0.4403)),
-    beta1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta1", 0.075)),
-    beta2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta2", 0.0828)),
+    gamma1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("gamma1", 0.5532)),
+    gamma2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("gamma2", 0.4403)),
+    beta1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta1", 0.075)),
+    beta2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta2", 0.0828)),
     betaStar
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("betaStar", 0.09)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("betaStar", 0.09)
     ),
-    a1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("a1", 0.31)),
-    c1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("c1", 10.0)),
+    a1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("a1", 0.31)),
+    c1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("c1", 10.0)),
 
     omega0_("omega0", dimless/dimTime, SMALL),
     omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
 
     y_(mesh_),
 
@@ -216,28 +216,28 @@ tmp<fvVectorMatrix> kOmegaSST::divDevReff(volVectorField& U) const
 
 bool kOmegaSST::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaK1", alphaK1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaK2", alphaK2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaK1", alphaK1);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaK2", alphaK2);
+        RASmodelCoeffs_.readIfPresent<scalar>
         (
             "alphaOmega1",
             alphaOmega1
         );
-        turbulenceModelCoeffs_.readIfPresent<scalar>
+        RASmodelCoeffs_.readIfPresent<scalar>
         (
             "alphaOmega2",
             alphaOmega2
         );
-        turbulenceModelCoeffs_.readIfPresent<scalar>("gamma1", gamma1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("gamma2", gamma2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("beta1", beta1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("beta2", beta2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("betaStar", betaStar);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("a1", a1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("c1", c1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("gamma1", gamma1);
+        RASmodelCoeffs_.readIfPresent<scalar>("gamma2", gamma2);
+        RASmodelCoeffs_.readIfPresent<scalar>("beta1", beta1);
+        RASmodelCoeffs_.readIfPresent<scalar>("beta2", beta2);
+        RASmodelCoeffs_.readIfPresent<scalar>("betaStar", betaStar);
+        RASmodelCoeffs_.readIfPresent<scalar>("a1", a1);
+        RASmodelCoeffs_.readIfPresent<scalar>("c1", c1);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
 
         return true;
     }
@@ -257,7 +257,7 @@ void kOmegaSST::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     if (mesh_.changing())
     {

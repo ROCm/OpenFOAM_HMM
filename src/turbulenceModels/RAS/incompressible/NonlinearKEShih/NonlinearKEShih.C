@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(NonlinearKEShih, 0);
-addToRunTimeSelectionTable(turbulenceModel, NonlinearKEShih, dictionary);
+addToRunTimeSelectionTable(RASmodel, NonlinearKEShih, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,23 +52,23 @@ NonlinearKEShih::NonlinearKEShih
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    A1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("A1", 1.25)),
-    A2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("A2", 1000.0)),
-    Ctau1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ctau1", -4.0)),
-    Ctau2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ctau2", 13.0)),
-    Ctau3(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Ctau3", -2.0)),
+    A1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("A1", 1.25)),
+    A2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("A2", 1000.0)),
+    Ctau1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ctau1", -4.0)),
+    Ctau2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ctau2", 13.0)),
+    Ctau3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ctau3", -2.0)),
     alphaKsi
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaKsi", 0.9)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaKsi", 0.9)
     ),
 
     k_
@@ -187,18 +187,18 @@ tmp<fvVectorMatrix> NonlinearKEShih::divDevReff(volVectorField& U) const
 
 bool NonlinearKEShih::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("A1", A1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("A2", A2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Ctau1", Ctau1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Ctau2", Ctau2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Ctau3", Ctau3);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaKsi", alphaKsi);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("A1", A1);
+        RASmodelCoeffs_.readIfPresent<scalar>("A2", A2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Ctau1", Ctau1);
+        RASmodelCoeffs_.readIfPresent<scalar>("Ctau2", Ctau2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Ctau3", Ctau3);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaKsi", alphaKsi);
 
         return true;
     }
@@ -218,7 +218,7 @@ void NonlinearKEShih::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     gradU = fvc::grad(U_);
 

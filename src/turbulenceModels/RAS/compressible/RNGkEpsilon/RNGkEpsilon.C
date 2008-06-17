@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(RNGkEpsilon, 0);
-addToRunTimeSelectionTable(turbulenceModel, RNGkEpsilon, dictionary);
+addToRunTimeSelectionTable(RASmodel, RNGkEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -53,20 +53,20 @@ RNGkEpsilon::RNGkEpsilon
     basicThermo& thermophysicalModel
 )
 :
-    turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
+    RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
-    C3(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C3", -0.33)),
-    alphak(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
+    C3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C3", -0.33)),
+    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
     alphaEps
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
-    eta0(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
-    beta(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
+    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    eta0(RASmodelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
+    beta(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
 
     k_
     (
@@ -167,17 +167,17 @@ tmp<fvVectorMatrix> RNGkEpsilon::divDevRhoReff(volVectorField& U) const
 
 bool RNGkEpsilon::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C3", C3);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("eta0", eta0);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("beta", beta);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("C3", C3);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        RASmodelCoeffs_.readIfPresent<scalar>("eta0", eta0);
+        RASmodelCoeffs_.readIfPresent<scalar>("beta", beta);
 
         return true;
     }
@@ -197,7 +197,7 @@ void RNGkEpsilon::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
 

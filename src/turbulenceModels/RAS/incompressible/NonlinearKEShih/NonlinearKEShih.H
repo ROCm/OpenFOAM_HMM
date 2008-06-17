@@ -37,7 +37,7 @@ SourceFiles
 #ifndef NonlinearKEShih_H
 #define NonlinearKEShih_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace RAS
 
 class NonlinearKEShih
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

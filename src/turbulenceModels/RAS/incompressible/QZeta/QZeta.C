@@ -39,7 +39,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(QZeta, 0);
-addToRunTimeSelectionTable(turbulenceModel, QZeta, dictionary);
+addToRunTimeSelectionTable(RASmodel, QZeta, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -77,18 +77,18 @@ QZeta::QZeta
     transportModel& lamTransportModel
 )
 :
-    turbulenceModel(typeName, U, phi, lamTransportModel),
+    RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
     alphaZeta
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaZeta", 0.76923)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaZeta", 0.76923)
     ),
     Anisotropic
     (
-         turbulenceModelCoeffs_.lookupOrAddDefault<Switch>("anisotropic", false)
+         RASmodelCoeffs_.lookupOrAddDefault<Switch>("anisotropic", false)
     ),
 
     k_
@@ -206,13 +206,13 @@ tmp<fvVectorMatrix> QZeta::divDevReff(volVectorField& U) const
 
 bool QZeta::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C1", C1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("C2", C2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaZeta", alphaZeta);
-        turbulenceModelCoeffs_.readIfPresent<Switch>
+        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
+        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaZeta", alphaZeta);
+        RASmodelCoeffs_.readIfPresent<Switch>
         (
             "anisotropic",
             Anisotropic
@@ -236,7 +236,7 @@ void QZeta::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 

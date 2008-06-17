@@ -36,7 +36,7 @@ SourceFiles
 #ifndef kEpsilon_H
 #define kEpsilon_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +53,7 @@ namespace RAS
 
 class kEpsilon
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

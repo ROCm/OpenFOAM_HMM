@@ -37,7 +37,7 @@ SourceFiles
 #ifndef QZeta_H
 #define QZeta_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace RAS
 
 class QZeta
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

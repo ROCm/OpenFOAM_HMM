@@ -40,7 +40,7 @@ namespace RAS
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(SpalartAllmaras, 0);
-addToRunTimeSelectionTable(turbulenceModel, SpalartAllmaras, dictionary);
+addToRunTimeSelectionTable(RASmodel, SpalartAllmaras, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -113,21 +113,21 @@ SpalartAllmaras::SpalartAllmaras
     basicThermo& thermophysicalModel
 )
 :
-    turbulenceModel(typeName, rho, U, phi, thermophysicalModel),
+    RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
     alphaNut
     (
-        turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphaNut", 1.5)
+        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaNut", 1.5)
     ),
-    alphah(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
 
-    Cb1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cb1", 0.1355)),
-    Cb2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cb2", 0.622)),
+    Cb1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cb1", 0.1355)),
+    Cb2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cb2", 0.622)),
     Cw1(Cb1/sqr(kappa_) + alphaNut*(1.0 + Cb2)),
-    Cw2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cw2", 0.3)),
-    Cw3(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cw3", 2.0)),
-    Cv1(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cv1", 7.1)),
-    Cv2(turbulenceModelCoeffs_.lookupOrAddDefault<scalar>("Cv2", 5.0)),
+    Cw2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cw2", 0.3)),
+    Cw3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cw3", 2.0)),
+    Cv1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cv1", 7.1)),
+    Cv2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cv2", 5.0)),
 
     nuTilda_
     (
@@ -217,18 +217,18 @@ tmp<fvVectorMatrix> SpalartAllmaras::divDevRhoReff(volVectorField& U) const
 
 bool SpalartAllmaras::read()
 {
-    if (turbulenceModel::read())
+    if (RASmodel::read())
     {
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphaNut", alphaNut);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphaNut", alphaNut);
+        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
 
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cb1", Cb1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cb2", Cb2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cb1", Cb1);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cb2", Cb2);
         Cw1 = Cb1/sqr(kappa_) + alphaNut*(1.0 + Cb2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cw2", Cw2);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cw3", Cw3);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cv1", Cv1);
-        turbulenceModelCoeffs_.readIfPresent<scalar>("Cv2", Cv2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cw2", Cw2);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cw3", Cw3);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cv1", Cv1);
+        RASmodelCoeffs_.readIfPresent<scalar>("Cv2", Cv2);
 
         return true;
     }
@@ -248,7 +248,7 @@ void SpalartAllmaras::correct()
         return;
     }
 
-    turbulenceModel::correct();
+    RASmodel::correct();
 
     if (mesh_.changing())
     {

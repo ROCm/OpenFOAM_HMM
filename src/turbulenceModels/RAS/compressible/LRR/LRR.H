@@ -38,7 +38,7 @@ SourceFiles
 #ifndef compressibleLRR_H
 #define compressibleLRR_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ namespace RAS
 
 class LRR
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 

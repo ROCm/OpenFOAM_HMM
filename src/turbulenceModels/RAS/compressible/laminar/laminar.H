@@ -37,7 +37,7 @@ SourceFiles
 #ifndef compressibleLaminar_H
 #define compressibleLaminar_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ namespace RAS
 
 class laminar
 :
-    public turbulenceModel
+    public RASmodel
 {
 
 public:

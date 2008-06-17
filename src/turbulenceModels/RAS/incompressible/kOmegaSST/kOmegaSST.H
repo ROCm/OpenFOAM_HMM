@@ -64,7 +64,7 @@ SourceFiles
 #ifndef kOmegaSST_H
 #define kOmegaSST_H
 
-#include "turbulenceModel.H"
+#include "RASmodel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,7 +82,7 @@ namespace RAS
 
 class kOmegaSST
 :
-    public turbulenceModel
+    public RASmodel
 {
     // Private data
 
