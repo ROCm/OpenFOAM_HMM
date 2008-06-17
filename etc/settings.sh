@@ -105,7 +105,7 @@ case "$WM_COMPILER_INST" in
 OpenFOAM)
     case "$WM_COMPILER" in
     Gcc43)
-        export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.0/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
         ;;
     Gcc)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.2.2/platforms/$WM_ARCH$WM_COMPILER_ARCH

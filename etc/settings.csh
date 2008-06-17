@@ -89,7 +89,7 @@ switch ("$WM_COMPILER_INST")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc43:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.0/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
     breaksw
     case Gcc:
         setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.2.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
