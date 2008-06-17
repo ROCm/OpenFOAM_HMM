@@ -151,25 +151,6 @@ Foam::sampledSurface::New
     );
 }
 
-
-bool Foam::sampledSurface::getBool
-(
-    const dictionary& dict,
-    const word& key,
-    const bool defaultVal
-)
-{
-    if (dict.found(key))
-    {
-        return readBool(dict.lookup(key));
-    }
-    else
-    {
-        return defaultVal;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::sampledSurface::sampledSurface
@@ -200,8 +181,8 @@ Foam::sampledSurface::sampledSurface
 :
     name_(name),
     mesh_(mesh),
-    triangulate_(getBool(dict, "triangulate", true)),
-    interpolate_(getBool(dict, "interpolate", false)),
+    triangulate_(dict.lookupOrDefault("triangulate", true)),
+    interpolate_(dict.lookupOrDefault("interpolate", false)),
     SfPtr_(NULL),
     magSfPtr_(NULL),
     CfPtr_(NULL),

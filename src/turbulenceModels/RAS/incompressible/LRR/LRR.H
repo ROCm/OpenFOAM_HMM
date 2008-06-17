@@ -1,0 +1,170 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::incompressible::RAS::LRR
+
+Description
+    Launder, Reece and Rodi Reynolds-stress turbulence model for
+    incompressible flows.
+
+SourceFiles
+    LRR.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef LRR_H
+#define LRR_H
+
+#include "RASmodel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace incompressible
+{
+namespace RAS
+{
+
+/*---------------------------------------------------------------------------*\
+                           Class LRR Declaration
+\*---------------------------------------------------------------------------*/
+
+class LRR
+:
+    public RASmodel
+{
+    // Private data
+
+        scalar Cmu;
+
+        scalar Clrr1;
+        scalar Clrr2;
+
+        scalar C1;
+        scalar C2;
+        scalar Cs;
+        scalar Ceps;
+        scalar alphaEps;
+
+        scalar couplingFactor_;
+
+        volSymmTensorField R_;
+        volScalarField k_;
+        volScalarField epsilon_;
+        volScalarField nut_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("LRR");
+
+    // Constructors
+
+        //- from components
+        LRR
+        (
+            const volVectorField& U,
+            const surfaceScalarField& phi,
+            transportModel& transport
+        );
+
+
+    // Destructor
+
+        ~LRR()
+        {}
+
+
+    // Member Functions
+
+        //- Return the turbulence viscosity
+        tmp<volScalarField> nut() const
+        {
+            return nut_;
+        }
+
+        //- Return the effective diffusivity for R
+        tmp<volScalarField> DREff() const
+        {
+            return tmp<volScalarField>
+            (
+                new volScalarField("DREff", nut_ + nu())
+            );
+        }
+
+        //- Return the effective diffusivity for epsilon
+        tmp<volScalarField> DepsilonEff() const
+        {
+            return tmp<volScalarField>
+            (
+                new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
+            );
+        }
+
+        //- Return the turbulence kinetic energy
+        tmp<volScalarField> k() const
+        {
+            return k_;
+        }
+
+        //- Return the turbulence kinetic energy dissipation rate
+        tmp<volScalarField> epsilon() const
+        {
+            return epsilon_;
+        }
+
+        //- Return the Reynolds stress tensor
+        tmp<volSymmTensorField> R() const
+        {
+            return R_;
+        }
+
+        //- Return the effective stress tensor including the laminar stress
+        tmp<volSymmTensorField> devReff() const;
+
+        //- Return the source term for the momentum equation
+        tmp<fvVectorMatrix> divDevReff(volVectorField& U) const;
+
+        //- Solve the turbulence equations and correct the turbulence viscosity
+        void correct();
+
+        //- Read turbulenceProperties dictionary
+        bool read();
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace RAS
+} // End namespace incompressible
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

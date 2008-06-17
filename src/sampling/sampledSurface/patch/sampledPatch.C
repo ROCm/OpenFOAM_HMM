@@ -140,7 +140,7 @@ Foam::sampledPatch::sampledPatch
     patchFaceLabels_(0)
 {
     // default: non-triangulated
-    triangulate() = getBool(dict, "triangulate", false);
+    triangulate() = dict.lookupOrDefault("triangulate", false);
     createGeometry();
 }
 

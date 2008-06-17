@@ -1,17 +1,19 @@
+/*-------------------------------*- C++ -*---------------------------------*\
+|    =========                                                              |
+|    \\      /     OpenFOAM                                                 |
+|     \\    /                                                               |
+|      \\  /       The Open Source CFD Toolbox                              |
+|       \\/                                        http://www.OpenFOAM.org  |
+\*-------------------------------------------------------------------------*/
 FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
     class           dictionary;
     object          testDict;
 }
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#inputMode  merge
 
 dimensions      [ 0 2 -2 0 0 0 0 ];
 internalField   uniform 1;
@@ -29,7 +31,6 @@ inactive
     type            zeroGradient;
 }
 
-
 boundaryField
 {
     Default_Boundary_Region
@@ -40,6 +41,12 @@ boundaryField
     inlet_1  { $active }
     inlet_2  { $inactive }
     inlet_3  { $inactive }
+    inlet_4  { $inactive }
+    inlet_5  "a primitiveEntry is squashed by a directory entry";
+    inlet_5  { $inactive }
+    inlet_6  { $inactive }
+    inlet_7  { $inactive }
+    inlet_8  { $inactive }
 
     #include "testDictInc"
 
@@ -48,8 +55,44 @@ boundaryField
         type            inletOutlet;
         inletValue      $internalField;
         value           #include "value";
+        // error           #remove self;
         x               5;
         y               6;
         another         #calc{x $x; y $y;};
     }
+
+    // this should have no effect
+    #remove inactive
+
+    inlet_7  { $active }
+    #inputMode overwrite
+    inlet_8  { $active }
 }
+
+// NB: the inputMode has a global scope
+#inputMode merge
+#include "testDict2"
+
+foo
+{
+    $active
+}
+
+bar
+{
+    $active
+}
+
+baz
+{
+    $active
+}
+
+
+// this should work
+#remove active
+
+// this should work too
+#remove ( bar baz )
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

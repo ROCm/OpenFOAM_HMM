@@ -29,9 +29,9 @@ Description
     Specify an include file when reading dictionaries, expects a
     single string to follow.
 
-    An example of @c \#include directive:
+    An example of the @c \#include directive:
     @verbatim
-        \#include "includefile"
+        #include "includeFile"
     @endverbatim
 
     The usual expansion of environment variables and other constructs (eg,
@@ -85,18 +85,21 @@ public:
 
     // Member Functions
 
-        static bool insert
+        //- Execute the functionEntry in a sub-dict context
+        static bool execute
+        (
+            dictionary& parentDict,
+            Istream& is
+        );
+
+        //- Execute the functionEntry in a primitiveEntry context
+        static bool execute
         (
             const dictionary& parentDict,
             primitiveEntry& entry,
             Istream& is
         );
 
-        static bool insert
-        (
-            dictionary& parentDict,
-            Istream& is
-        );
 };
 
 

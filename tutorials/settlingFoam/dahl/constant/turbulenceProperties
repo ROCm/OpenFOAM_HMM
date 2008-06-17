@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-turbulenceModel kEpsilon;
+RASmodel            kEpsilon;
 
 turbulence      on;
 
@@ -32,18 +32,18 @@ laminarCoeffs
 
 kEpsilonCoeffs
 {
-    Cmu             Cmu [0 0 0 0 0 0 0] 0.09;
-    C1              C1 [0 0 0 0 0 0 0] 1.44;
-    C2              C2 [0 0 0 0 0 0 0] 1.92;
-    C3              C3 [0 0 0 0 0 0 0] 0.85;
-    alphak          alphak [0 0 0 0 0 0 0] 1;
-    alphaEps        alphaEps [0 0 0 0 0 0 0] 0.76923;
+    Cmu              0.09;
+    C1               1.44;
+    C2               1.92;
+    C3               0.85;
+    alphak           1;
+    alphaEps         0.76923;
 }
 
 wallFunctionCoeffs
 {
-    kappa           kappa [0 0 0 0 0 0 0] 0.4187;
-    E               E [0 0 0 0 0 0 0] 9;
+    kappa            0.4187;
+    E                9;
 }
 
 

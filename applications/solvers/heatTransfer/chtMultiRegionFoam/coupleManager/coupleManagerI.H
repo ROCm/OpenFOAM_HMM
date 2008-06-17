@@ -55,7 +55,7 @@ inline const Foam::fvMesh& Foam::coupleManager::neighbourRegion() const
 }
 
 
-inline const Foam::label Foam::coupleManager::neighbourPatchID() const
+inline Foam::label Foam::coupleManager::neighbourPatchID() const
 {
     return neighbourRegion().boundaryMesh().findPatchID(neighbourPatchName_);
 }

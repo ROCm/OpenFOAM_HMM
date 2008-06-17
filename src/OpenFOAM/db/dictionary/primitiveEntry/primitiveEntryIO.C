@@ -115,7 +115,7 @@ bool Foam::primitiveEntry::expandFunction
 )
 {
     word functionName = keyword(1, keyword.size()-1);
-    return functionEntry::insert(functionName, parentDict, *this, is);
+    return functionEntry::execute(functionName, parentDict, *this, is);
 }
 
 

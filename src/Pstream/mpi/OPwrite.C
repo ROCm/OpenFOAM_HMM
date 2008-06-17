@@ -31,20 +31,16 @@ Description
 
 #include "OPstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // Outstanding non-blocking operations.
-DynamicList<MPI_Request> OPstream_outstandingRequests_;
-
+//! @cond fileScope
+Foam::DynamicList<MPI_Request> OPstream_outstandingRequests_;
+//! @endcond fileScope
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-OPstream::~OPstream()
+Foam::OPstream::~OPstream()
 {
     if
     (
@@ -66,7 +62,7 @@ OPstream::~OPstream()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool OPstream::write
+bool Foam::OPstream::write
 (
     const commsTypes commsType,
     const int toProcNo,
@@ -80,7 +76,7 @@ bool OPstream::write
     {
         transferFailed = MPI_Bsend
         (
-            (char*)buf,
+            const_cast<char*>(buf),
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
@@ -92,7 +88,7 @@ bool OPstream::write
     {
         transferFailed = MPI_Send
         (
-            (char*)buf,
+            const_cast<char*>(buf),
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
@@ -106,7 +102,7 @@ bool OPstream::write
 
         transferFailed = MPI_Isend
         (
-            (char*)buf,
+            const_cast<char*>(buf),
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
@@ -123,8 +119,7 @@ bool OPstream::write
         (
             "OPstream::write"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
-        )   << "Unsupported communications type "
-            << Pstream::commsTypeNames[commsType]
+        )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
     }
 
@@ -132,7 +127,7 @@ bool OPstream::write
 }
 
 
-void OPstream::waitRequests()
+void Foam::OPstream::waitRequests()
 {
     if (OPstream_outstandingRequests_.size() > 0)
     {
@@ -159,7 +154,7 @@ void OPstream::waitRequests()
 }
 
 
-bool OPstream::finishedRequest(const label i)
+bool Foam::OPstream::finishedRequest(const label i)
 {
     if (i >= OPstream_outstandingRequests_.size())
     {
@@ -183,7 +178,5 @@ bool OPstream::finishedRequest(const label i)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

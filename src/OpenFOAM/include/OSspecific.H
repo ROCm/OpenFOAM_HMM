@@ -89,8 +89,6 @@ bool chDir(const fileName& dir);
 
 //- Search for @em name in the following hierarchy:
 //  -# personal settings:
-//    - ~/.OpenFOAM-\<VERSION\>
-//      <em>(old style)</em>
 //    - ~/.OpenFOAM/\<VERSION\>/
 //      <em>for version-specific files</em>
 //    - ~/.OpenFOAM/

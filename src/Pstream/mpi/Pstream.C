@@ -42,12 +42,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Pstream::addValidParOptions(HashTable<string>& validParOptions)
+// NOTE:
+// valid parallel options vary between implementations, but flag common ones.
+// if they are not removed by MPI_Init(), the subsequent argument processing
+// will notice that they are wrong
+void Foam::Pstream::addValidParOptions(HashTable<string>& validParOptions)
 {
     validParOptions.insert("np", "");
     validParOptions.insert("p4pg", "PI file");
@@ -59,7 +61,7 @@ void Pstream::addValidParOptions(HashTable<string>& validParOptions)
 }
 
 
-bool Pstream::init(int& argc, char**& argv)
+bool Foam::Pstream::init(int& argc, char**& argv)
 {
     MPI_Init(&argc, &argv);
 
@@ -119,7 +121,7 @@ bool Pstream::init(int& argc, char**& argv)
 }
 
 
-void Pstream::exit(int errnum)
+void Foam::Pstream::exit(int errnum)
 {
 #   ifndef SGIMPI
     int size;
@@ -140,13 +142,13 @@ void Pstream::exit(int errnum)
 }
 
 
-void Pstream::abort()
+void Foam::Pstream::abort()
 {
     MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
 
-void reduce(scalar& Value, const sumOp<scalar>& bop)
+void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
 {
     if (!Pstream::parRun())
     {
@@ -425,7 +427,5 @@ void reduce(scalar& Value, const sumOp<scalar>& bop)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

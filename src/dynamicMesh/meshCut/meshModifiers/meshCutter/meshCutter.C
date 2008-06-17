@@ -601,7 +601,7 @@ void Foam::meshCutter::setRefinement
             const edge& e = mesh().edges()[edgeI];
 
             // Check if there is any cell using this edge.
-            if (debug & findCutCell(cuts, mesh().edgeCells()[edgeI]) == -1)
+            if (debug && findCutCell(cuts, mesh().edgeCells()[edgeI]) == -1)
             {
                 FatalErrorIn
                 (

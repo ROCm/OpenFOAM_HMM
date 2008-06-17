@@ -1,8 +1,8 @@
 {
     labelList cellBoundaryFaceCount(epsilon.size(), 0);
 
-    scalar Cmu25 = ::pow(Cmu.value(), 0.25);
-    scalar Cmu75 = ::pow(Cmu.value(), 0.75);
+    scalar Cmu25 = ::pow(Cmu, 0.25);
+    scalar Cmu75 = ::pow(Cmu, 0.75);
 
     const fvPatchList& patches = mesh.boundary();
 
@@ -55,14 +55,14 @@
 
                 epsilon[faceCelli] +=
                     Cmu75*rho[faceCelli]*::pow(k[faceCelli], 1.5)
-                   /(kappa.value()*y[patchi][facei]);
+                   /(kappa*y[patchi][facei]);
 
                 if (yPlus > 11.6)
                 {
                     G[faceCelli] +=
                         mutw[facei]*magFaceGradU[facei]
                        *Cmu25*::sqrt(k[faceCelli])
-                       /(kappa.value()*y[patchi][facei]);
+                       /(kappa*y[patchi][facei]);
                 }
             }
         }

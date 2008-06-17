@@ -26,7 +26,8 @@ Namespace
     Foam::PstreamGlobals
 
 Description
-    Global functions and variables for working with parallel streams.
+    Global functions and variables for working with parallel streams,
+    but principally for gamma/mpi
 
 SourceFiles
     PstreamGlobals.C

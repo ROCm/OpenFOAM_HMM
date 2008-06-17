@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASmodel/RASmodel.H"
 
 #include "basicThermoCloud.H"
 #include "basicKinematicCloud.H"

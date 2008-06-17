@@ -74,11 +74,12 @@ class inputModeEntry
         };
 
         //- current input mode
-        static label inputMode_;
+        static label mode_;
 
 
     // Private Member Functions
 
+        //- Read the mode as a word and set enum appropriately
         static void setMode(Istream&);
 
         //- Disallow default bitwise copy construct
@@ -96,23 +97,20 @@ public:
 
     // Member Functions
 
-        static bool insert
-        (
-            const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
-        );
-
-        static bool insert
+        //- Execute the functionEntry in a sub-dict context
+        static bool execute
         (
             dictionary& parentDict,
             Istream&
         );
 
+        //- Reset the inputMode to 'default'
         static void clear();
 
+        //- Return true if the inputMode is 'merge'
         static bool merge();
 
+        //- Return true if the inputMode is 'overwrite'
         static bool overwrite();
 
 };

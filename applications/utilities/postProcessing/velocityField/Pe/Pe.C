@@ -100,9 +100,14 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
                 if (turbulenceProperties.found("turbulenceModel"))
                 {
-                    autoPtr<turbulenceModel> turbulenceModel
+                    autoPtr<incompressible::turbulenceModel> turbulenceModel
                     (
-                        turbulenceModel::New(U, phi, laminarTransport)
+                        incompressible::turbulenceModel::New
+                        (
+                            U,
+                            phi,
+                            laminarTransport
+                        )
                     );
 
                     PePtr.set

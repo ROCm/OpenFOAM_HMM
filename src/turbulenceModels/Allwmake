@@ -1,5 +1,5 @@
 #!/bin/sh
 set -x
 
-wmake libso incompressible
-wmake libso compressible
+( cd RAS && ./Allwmake )
+( cd LES && ./Allwmake )

@@ -29,16 +29,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Pstream::addValidParOptions(HashTable<string>& validParOptions)
+void Foam::Pstream::addValidParOptions(HashTable<string>& validParOptions)
 {}
 
 
-bool Pstream::init(int& argc, char**& argv)
+bool Foam::Pstream::init(int& argc, char**& argv)
 {
     FatalErrorIn("Pstream::init(int& argc, char**& argv)")
         << "Trying to use the dummy Pstream library." << nl
@@ -49,24 +46,21 @@ bool Pstream::init(int& argc, char**& argv)
 }
 
 
-void Pstream::exit(int errnum)
+void Foam::Pstream::exit(int errnum)
 {
     notImplemented("Pstream::exit(int errnum)");
 }
 
 
-void Pstream::abort()
+void Foam::Pstream::abort()
 {
     notImplemented("Pstream::abort()");
 }
 
 
-void reduce(scalar&, const sumOp<scalar>&)
+void Foam::reduce(scalar&, const sumOp<scalar>&)
 {}
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

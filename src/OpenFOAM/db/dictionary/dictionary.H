@@ -30,9 +30,13 @@ Description
     of values (e.g. words and numbers).
 
     The dictionary class is the base class for IOdictionary.
-    It serves the purpose of a bootstrap dictionary for the objectRegistry
-    data dictionaries, since unlike the IOdictionary class, it does not use a
+    It also serves as a bootstrap dictionary for the objectRegistry data
+    dictionaries since, unlike the IOdictionary class, it does not use an
     objectRegistry itself to work.
+
+ToDo
+    A merge() member function with a non-const dictionary parameter.
+    This would avoid unnecessary cloning in the add(entry*,bool) method
 
 SourceFiles
     dictionary.C
@@ -171,31 +175,56 @@ public:
         // Search and lookup
 
             //- Search dictionary for given keyword
-            //  If recusive search parent dictionaries
-            bool found(const word& keyword, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            bool found(const word& keyword, bool recursive=false) const;
 
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
-            //  If recusive search parent dictionaries
-            const entry* lookupEntryPtr(const word&, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            const entry* lookupEntryPtr(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream pointer for manipulation
             //  if present otherwise return NULL.
-            //  If recusive search parent dictionaries
-            entry* lookupEntryPtr(const word&, bool recusive=false);
+            //  If recursive search parent dictionaries
+            entry* lookupEntryPtr(const word&, bool recursive=false);
 
             //- Find and return an entry data stream if present otherwise error.
-            //  If recusive search parent dictionaries
-            const entry& lookupEntry(const word&, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            const entry& lookupEntry(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream
-            //  If recusive search parent dictionaries
-            ITstream& lookup(const word&, bool recusive=false) const;
+            //  If recursive search parent dictionaries
+            ITstream& lookup(const word&, bool recursive=false) const;
 
             //- Find and return a T, if not found return the given default value
-            //  If recusive search parent dictionaries
+            //  If recursive search parent dictionaries
             template<class T>
-            T lookupOrDefault(const word&, const T&, bool recusive=false) const;
+            T lookupOrDefault
+            (
+                const word&,
+                const T&,
+                bool recursive=false
+            ) const;
+
+            //- Find and return a T, if not found return the given default value,
+            //  and add to dictionary. If recursive search parent dictionaries
+            template<class T>
+            T lookupOrAddDefault
+            (
+                const word&,
+                const T&,
+                bool recursive=false
+            );
+
+            //- Find an entry if present, and assign to T
+            //  Returns true if the entry was found
+            template<class T>
+            bool readIfPresent
+            (
+                const word&,
+                T&,
+                bool recursive=false
+            ) const;
 
             //- Check if entry is a sub-dictionary
             bool isDict(const word&) const;
@@ -217,38 +246,57 @@ public:
         // Editing
 
             //- Add a new entry
-            bool add(entry*, bool mergeEntry = false);
+            //  With the merge option, dictionaries are interwoven and
+            //  primitive entries are overwritten
+            bool add(entry*, bool mergeEntry=false);
 
             //- Add an entry
-            void add(const entry&);
-
-            //- Add a token entry
-            void add(const word& keyword, const token&);
+            //  With the merge option, dictionaries are interwoven and
+            //  primitive entries are overwritten
+            void add(const entry&, bool mergeEntry=false);
 
             //- Add a word entry
-            void add(const word& keyword, const word&);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const word&, bool overwrite=false);
 
             //- Add a string entry
-            void add(const word& keyword, const string&);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const string&, bool overwrite=false);
 
             //- Add a label entry
-            void add(const word& keyword, const label);
+            //  optionally overwrite an existing entry
+            void add(const word& keyword, const label, bool overwrite=false);
 
             //- Add a scalar entry
-            void add(const word& keyword, const scalar);
-
-            //- Add an entry constructed from a ITstream
-            void add(const word& keyword, const ITstream&);
-
-            //- Add an entry constructed from a tokenList
-            void add(const word& keyword, const tokenList& tokens);
-
-            //- Add a T entry
-            template<class T>
-            void add(const word& keyword, const T&);
+            //  optionally overwrite an existing entry
+            void add (const word& keyword, const scalar, bool overwrite=false);
 
             //- Add a dictionary entry
-            void add(const word& keyword, const dictionary&);
+            //  optionally merge with an existing sub-dictionary
+            void add
+            (
+                const word& keyword,
+                const dictionary&,
+                bool mergeEntry=false
+            );
+
+            //- Add a T entry
+            //  optionally overwrite an existing entry
+            template<class T>
+            void add(const word& keyword, const T&, bool overwrite=false);
+
+            //- Assign a new entry, overwrite any existing entry
+            void set(entry*);
+
+            //- Assign a new entry, overwrite any existing entry
+            void set(const entry&);
+
+            //- Assign a dictionary entry, overwrite any existing entry
+            void set(const word& keyword, const dictionary&);
+
+            //- Assign a T entry, overwrite any existing entry
+            template<class T>
+            void set(const word& keyword, const T&);
 
             //- Remove an entry specified by keyword
             bool remove(const word& keyword);
@@ -307,14 +355,12 @@ public:
 
 // Global Operators
 
-// Combine dictionaries starting from the entries in dict one and then including
-// those from dict2.
-// Warn, but do not overwrite the entries from dict1.
+//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//  Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
 
-// Combine dictionaries starting from the entries in dict one and then including
-// those from dict2.
-// Do not overwrite the entries from dict1.
+//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//  Do not overwrite the entries from dict1.
 dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 
 
