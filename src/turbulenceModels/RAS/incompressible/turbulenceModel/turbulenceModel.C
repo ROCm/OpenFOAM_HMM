@@ -123,9 +123,9 @@ tmp<scalarField> turbulenceModel::yPlus(const label patchNo) const
 
     if (typeid(curPatch) == typeid(wallFvPatch))
     {
-        dimensionedScalar Cmu(turbulenceModelCoeffs_.lookup("Cmu"));
+        scalar Cmu(turbulenceModelCoeffs_.lookup("Cmu"));
 
-        Yp = pow(Cmu.value(), 0.25)*y_[patchNo]
+        Yp = pow(Cmu, 0.25)*y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
             /nu().boundaryField()[patchNo];
     }
@@ -161,32 +161,14 @@ bool turbulenceModel::read()
         lookup("turbulence") >> turbulence_;
         turbulenceModelCoeffs_ = subDict(type() + "Coeffs");
 
-        kappa_ = dimensionedScalar
-        (
-            subDict("wallFunctionCoeffs").lookup("kappa")
-        ).value();
-
-        E_ = dimensionedScalar
-        (
-            subDict("wallFunctionCoeffs").lookup("E")
-        ).value();
+        subDict("wallFunctionCoeffs").lookup("kappa") >> kappa_;
+        subDict("wallFunctionCoeffs").lookup("E") >> E_;
 
         yPlusLam_ = yPlusLam(kappa_, E_);
 
-        if (found("k0"))
-        {
-            lookup("k0") >> k0_;
-        }
-
-        if (found("epsilon0"))
-        {
-            lookup("epsilon0") >> epsilon0_;
-        }
-
-        if (found("epsilonSmall"))
-        {
-            lookup("epsilonSmall") >> epsilonSmall_;
-        }
+        readIfPresent("k0", k0_);
+        readIfPresent("epsilon0", epsilon0_);
+        readIfPresent("epsilonSmall", epsilonSmall_);
 
         return true;
     }
