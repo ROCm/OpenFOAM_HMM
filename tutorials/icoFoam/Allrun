@@ -10,13 +10,13 @@ cavityCases="cavity cavityFine cavityGrade cavityHighRe cavityClipped"
 runMapFields ()
 {
     echo "Running mapFields from $1 to $2"
-    mapFields -source $1 -case $2 -sourceTime latestTime > $2/log.mapFields 2>&1
+    mapFields $1 -case $2 -sourceTime latestTime > $2/log.mapFields 2>&1
 }
 
 runMapFieldsConsistent ()
 {
     echo "Running mapFields from $1 to $2"
-    mapFields -source $1 -case $2 -sourceTime latestTime -consistent > $2/log.mapFields 2>&1
+    mapFields $1 -case $2 -sourceTime latestTime -consistent > $2/log.mapFields 2>&1
 }
 
 runFluentMeshToFoam ()

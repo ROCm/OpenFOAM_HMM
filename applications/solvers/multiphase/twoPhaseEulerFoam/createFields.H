@@ -170,29 +170,29 @@
     );
 
 
-    dimensionedScalar Cmu
+    scalar Cmu
     (
-        kEpsilonCoeffs.lookup("Cmu")
+        readScalar(kEpsilonCoeffs.lookup("Cmu"))
     );
 
-    dimensionedScalar C1
+    scalar C1
     (
-        kEpsilonCoeffs.lookup("C1")
+        readScalar(kEpsilonCoeffs.lookup("C1"))
     );
 
-    dimensionedScalar C2
+    scalar C2
     (
-        kEpsilonCoeffs.lookup("C2")
+        readScalar(kEpsilonCoeffs.lookup("C2"))
     );
 
-    dimensionedScalar alphak
+    scalar alphak
     (
-        kEpsilonCoeffs.lookup("alphak")
+        readScalar(kEpsilonCoeffs.lookup("alphak"))
     );
 
-    dimensionedScalar alphaEps
+    scalar alphaEps
     (
-        kEpsilonCoeffs.lookup("alphaEps")
+        readScalar(kEpsilonCoeffs.lookup("alphaEps"))
     );
 
     dictionary wallFunctionCoeffs
@@ -200,14 +200,14 @@
         turbulenceProperties.subDict("wallFunctionCoeffs")
     );
 
-    dimensionedScalar kappa
+    scalar kappa
     (
-        wallFunctionCoeffs.lookup("kappa")
+        readScalar(wallFunctionCoeffs.lookup("kappa"))
     );
 
-    dimensionedScalar E
+    scalar E
     (
-        wallFunctionCoeffs.lookup("E")
+        readScalar(wallFunctionCoeffs.lookup("E"))
     );
 
     nearWallDist y(mesh);

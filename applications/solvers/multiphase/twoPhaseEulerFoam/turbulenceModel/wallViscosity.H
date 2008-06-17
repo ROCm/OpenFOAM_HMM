@@ -1,5 +1,5 @@
 {
-    scalar Cmu25 = ::pow(Cmu.value(), 0.25);
+    scalar Cmu25 = ::pow(Cmu, 0.25);
 
     const fvPatchList& patches = mesh.boundary();
 
@@ -24,8 +24,8 @@
                 if (yPlus > 11.6)
                 {
                     nutw[facei] =
-                        yPlus*nub.value()*kappa.value()
-                       /::log(E.value()*yPlus)
+                        yPlus*nub.value()*kappa
+                       /::log(E*yPlus)
                       - nub.value();
                 }
                 else

@@ -5,6 +5,6 @@
 # Get application name from directory
 application=`basename $PWD`
 
-runApplication blockMesh
-runApplication $application
-runApplication sample
+(cd hartmann && runApplication blockMesh)
+(cd hartmann && runApplication $application)
+(cd hartmann && runApplication sample)

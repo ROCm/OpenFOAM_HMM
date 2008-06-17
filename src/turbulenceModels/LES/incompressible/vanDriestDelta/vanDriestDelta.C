@@ -105,15 +105,14 @@ vanDriestDelta::vanDriestDelta
     (
         LESdelta::New("geometricDelta", mesh, dd.subDict(type() + "Coeffs"))
     ),
-    kappa_(dimensionedScalar(dd.lookup("kappa")).value()),
+    kappa_(dd.lookupOrDefault<scalar>("kappa", 0.4187)),
     Aplus_
     (
-        dimensionedScalar(dd.subDict(type() + "Coeffs").lookup("Aplus")).value()
+        dd.subDict(type() + "Coeffs").lookupOrDefault<scalar>("Aplus", 26.0)
     ),
     Cdelta_
     (
-        dimensionedScalar(dd.subDict(type() + "Coeffs").lookup("Cdelta"))
-       .value()
+        dd.subDict(type() + "Coeffs").lookupOrDefault<scalar>("Cdelta", 0.158)
     )
 {
     delta_ = geometricDelta_();
@@ -127,9 +126,9 @@ void vanDriestDelta::read(const dictionary& d)
     const dictionary& dd(d.subDict(type() + "Coeffs"));
 
     geometricDelta_().read(dd);
-    kappa_ = dimensionedScalar(d.lookup("kappa")).value();
-    Aplus_ = dimensionedScalar(dd.lookup("Aplus")).value();
-    Cdelta_ = dimensionedScalar(dd.lookup("Cdelta")).value();
+    d.readIfPresent<scalar>("kappa", kappa_);
+    dd.readIfPresent<scalar>("Aplus", Aplus_);
+    dd.readIfPresent<scalar>("Cdelta", Cdelta_);
     calcDelta();
 }
 
