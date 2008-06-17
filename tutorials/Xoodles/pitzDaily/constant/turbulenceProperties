@@ -32,34 +32,34 @@ laminarCoeffs
 
 oneEqEddyCoeffs
 {
-    ce              ce [0 0 0 0 0 0 0] 1.048;
-    ck              ck [0 0 0 0 0 0 0] 0.094;
+    ce               1.048;
+    ck               0.094;
 }
 
 dynOneEqEddyCoeffs
 {
-    ce              ce [0 0 0 0 0 0 0] 1.05;
+    ce               1.05;
     filter          simple;
 }
 
 lowReOneEqEddyCoeffs
 {
-    ck              ck [0 0 0 0 0 0 0] 0.07;
-    ce              ce [0 0 0 0 0 0 0] 1.05;
-    beta            beta [0 0 0 0 0 0 0] 0.01;
+    ck               0.07;
+    ce               1.05;
+    beta             0.01;
 }
 
 SmagorinskyCoeffs
 {
-    ck              ck [0 0 0 0 0 0 0] 0.02;
-    ce              ce [0 0 0 0 0 0 0] 0.202;
+    ck               0.02;
+    ce               0.202;
 }
 
 DeardorffDiffStressCoeffs
 {
-    ce              ce [0 0 0 0 0 0 0] 1.048;
-    ck              ck [0 0 0 0 0 0 0] 0.094;
-    cm              cm [0 0 0 0 0 0 0] 4.13;
+    ce               1.048;
+    ck               0.094;
+    cm               4.13;
 }
 
 cubeRootVolCoeffs
@@ -83,7 +83,7 @@ PrandtlCoeffs
         }
         maxDeltaRatio   1.1;
     }
-    Cdelta          Cdelta [0 0 0 0 0 0 0] 0.158;
+    Cdelta           0.158;
 }
 
 vanDriestCoeffs
@@ -102,8 +102,8 @@ vanDriestCoeffs
         }
         maxDeltaRatio   1.1;
     }
-    Aplus           Aplus [0 0 0 0 0 0 0] 26;
-    Cdelta          Cdelta [0 0 0 0 0 0 0] 0.158;
+    Aplus            26;
+    Cdelta           0.158;
 }
 
 smoothCoeffs
@@ -116,11 +116,11 @@ smoothCoeffs
     maxDeltaRatio   1.1;
 }
 
-kappa           kappa [0 0 0 0 0 0 0] 0.4187;
+kappa            0.4187;
 
 wallFunctionCoeffs
 {
-    E               E [0 0 0 0 0 0 0] 9;
+    E                9;
 }
 
 

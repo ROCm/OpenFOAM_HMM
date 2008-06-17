@@ -38,124 +38,124 @@ laminarCoeffs
 kEpsilonCoeffs
 {
     // Cmu
-    Cmu             Cmu [0 0 0 0 0 0 0] 0.09;
+    Cmu              0.09;
     // C1
-    C1              C1 [0 0 0 0 0 0 0] 1.44;
+    C1               1.44;
     // C2
-    C2              C2 [0 0 0 0 0 0 0] 1.92;
+    C2               1.92;
     // C3
-    C3              C3 [0 0 0 0 0 0 0] -0.33;
+    C3               -0.33;
     // alphah
-    alphah          alphah [0 0 0 0 0 0 0] 1;
+    alphah           1;
     // alphak
-    alphak          alphak [0 0 0 0 0 0 0] 1;
+    alphak           1;
     // alphaEps
-    alphaEps        alphaEps [0 0 0 0 0 0 0] 0.76923;
+    alphaEps         0.76923;
 }
 
 // RNG k-epsilon model coefficients
 RNGkEpsilonCoeffs
 {
     // Cmu
-    Cmu             Cmu [0 0 0 0 0 0 0] 0.0845;
+    Cmu              0.0845;
     // C1
-    C1              C1 [0 0 0 0 0 0 0] 1.42;
+    C1               1.42;
     // C2
-    C2              C2 [0 0 0 0 0 0 0] 1.68;
+    C2               1.68;
     // C3
-    C3              C3 [0 0 0 0 0 0 0] -0.33;
+    C3               -0.33;
     // alphah
-    alphah          alphah [0 0 0 0 0 0 0] 1;
+    alphah           1;
     // alphak
-    alphak          alphaK [0 0 0 0 0 0 0] 1.39;
+    alphak           1.39;
     // alphaEps
-    alphaEps        alphaEps [0 0 0 0 0 0 0] 1.39;
+    alphaEps         1.39;
     // eta0
-    eta0            eta0 [0 0 0 0 0 0 0] 4.38;
+    eta0             4.38;
     // beta
-    beta            beta [0 0 0 0 0 0 0] 0.012;
+    beta             0.012;
 }
 
 // Launder-Sharma low Reynolds number k-epsilon model coefficients
 LaunderSharmaKECoeffs
 {
     // Cmu
-    Cmu             Cmu [0 0 0 0 0 0 0] 0.09;
+    Cmu              0.09;
     // C1
-    C1              C1 [0 0 0 0 0 0 0] 1.44;
+    C1               1.44;
     // C2
-    C2              C2 [0 0 0 0 0 0 0] 1.92;
+    C2               1.92;
     // C3
-    C3              C3 [0 0 0 0 0 0 0] -0.33;
+    C3               -0.33;
     // alphah
-    alphah          alphah [0 0 0 0 0 0 0] 1;
+    alphah           1;
     // alphak
-    alphak          alphak [0 0 0 0 0 0 0] 1;
+    alphak           1;
     // alphaEps
-    alphaEps        alphaEps [0 0 0 0 0 0 0] 0.76923;
+    alphaEps         0.76923;
 }
 
 // Launder-Reece-Rodi RSTM with wall functions model coefficients
 LRRCoeffs
 {
     // Cmu
-    Cmu             Cmu [0 0 0 0 0 0 0] 0.09;
+    Cmu              0.09;
     // Clrr1
-    Clrr1           Clrr1 [0 0 0 0 0 0 0] 1.8;
+    Clrr1            1.8;
     // Clrr2
-    Clrr2           Clrr2 [0 0 0 0 0 0 0] 0.6;
+    Clrr2            0.6;
     // C1
-    C1              C1 [0 0 0 0 0 0 0] 1.44;
+    C1               1.44;
     // C2
-    C2              C2 [0 0 0 0 0 0 0] 1.92;
+    C2               1.92;
     // Cs
-    Cs              Cs [0 0 0 0 0 0 0] 0.25;
+    Cs               0.25;
     // Ceps
-    Ceps            Ceps [0 0 0 0 0 0 0] 0.15;
+    Ceps             0.15;
     // alphah
-    alphah          alphah [0 0 0 0 0 0 0] 1;
+    alphah           1;
     // alphaEps
-    alphaEps        alphaEps [0 0 0 0 0 0 0] 0.76923;
+    alphaEps         0.76923;
     // alphaR
-    alphaR          alphaR [0 0 0 0 0 0 0] 1.22;
+    alphaR           1.22;
 }
 
 // Launder-Gibson RSTM with wall reflection and wall functions model coefficients
 LaunderGibsonRSTMCoeffs
 {
     // Cmu
-    Cmu             Cmu [0 0 0 0 0 0 0] 0.09;
+    Cmu              0.09;
     // Clg1
-    Clg1            Clg1 [0 0 0 0 0 0 0] 1.8;
+    Clg1             1.8;
     // Clg2
-    Clg2            Clg2 [0 0 0 0 0 0 0] 0.6;
+    Clg2             0.6;
     // C1
-    C1              C1 [0 0 0 0 0 0 0] 1.44;
+    C1               1.44;
     // C2
-    C2              C2 [0 0 0 0 0 0 0] 1.92;
+    C2               1.92;
     // C1Ref
-    C1Ref           C1Ref [0 0 0 0 0 0 0] 0.5;
+    C1Ref            0.5;
     // C2Ref
-    C2Ref           C2Ref [0 0 0 0 0 0 0] 0.3;
+    C2Ref            0.3;
     // Cs
-    Cs              Cs [0 0 0 0 0 0 0] 0.25;
+    Cs               0.25;
     // Ceps
-    Ceps            Ceps [0 0 0 0 0 0 0] 0.15;
+    Ceps             0.15;
     // alphah
-    alphah          alphah [0 0 0 0 0 0 0] 1;
+    alphah           1;
     // alphaEps
-    alphaEps        alphaEps [0 0 0 0 0 0 0] 0.76923;
+    alphaEps         0.76923;
     // alphaR
-    alphaR          alphaR [0 0 0 0 0 0 0] 1.22;
+    alphaR           1.22;
 }
 
 // Wall function coefficients
 wallFunctionCoeffs
 {
     // kappa
-    kappa           kappa [0 0 0 0 0 0 0] 0.4187;
+    kappa            0.4187;
     // E
-    E               E [0 0 0 0 0 0 0] 9;
+    E                9;
 }
 
 
