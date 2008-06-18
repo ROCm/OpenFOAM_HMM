@@ -18,7 +18,9 @@ FoamFile
 
 RASmodel            kEpsilon;
 
-turbulence      on;
+turbulence          on;
+
+printCoeffs         on;
 
 laminarCoeffs
 {
@@ -35,7 +37,7 @@ kEpsilonCoeffs
     alphaEps         0.76923;
     muLimiter       on;
     Lsgs             0.0002;
-    
+
 }
 
 RNGkEpsilonCoeffs
