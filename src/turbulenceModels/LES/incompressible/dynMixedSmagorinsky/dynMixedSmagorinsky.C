@@ -31,6 +31,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -134,6 +136,7 @@ bool dynMixedSmagorinsky::read()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

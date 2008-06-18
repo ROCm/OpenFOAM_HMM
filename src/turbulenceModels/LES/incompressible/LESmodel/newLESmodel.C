@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +72,7 @@ autoPtr<LESmodel> LESmodel::New
         (
             "LESmodel::select(const volVectorField&, const "
             "surfaceScalarField&, transportModel&)"
-        )   << "Unknown LESmodel type " << LESmodelTypeName 
+        )   << "Unknown LESmodel type " << LESmodelTypeName
             << endl << endl
             << "Valid LESmodel types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
@@ -83,6 +85,7 @@ autoPtr<LESmodel> LESmodel::New
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

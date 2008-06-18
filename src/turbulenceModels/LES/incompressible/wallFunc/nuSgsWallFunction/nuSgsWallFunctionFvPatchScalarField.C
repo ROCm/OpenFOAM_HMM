@@ -34,6 +34,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -110,7 +112,7 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
 
     const scalarField& ry = patch().deltaCoeffs();
 
-    const fvPatchVectorField& U = 
+    const fvPatchVectorField& U =
         patch().lookupPatchField<volVectorField, vector>("U");
 
     scalarField magUp = mag(U.patchInternalField() - U);
@@ -127,7 +129,7 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
         scalar magUpara = magUp[facei];
 
         scalar utau = sqrt((nuSgsw[facei] + nuw[facei])*magFaceGradU[facei]);
-                
+
         if(utau > VSMALL)
         {
             int iter = 0;
@@ -140,21 +142,21 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
 
                 scalar f =
                     - utau/(ry[facei]*nuw[facei])
-                    + magUpara/utau 
+                    + magUpara/utau
                     + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
-                        
+
                 scalar df =
                     - 1.0/(ry[facei]*nuw[facei])
                     - magUpara/sqr(utau)
                     - 1/E*kUu*fkUu/utau;
-                    
+
                 scalar utauNew = utau - f/df;
                 err = mag((utau - utauNew)/utau);
                 utau = utauNew;
 
             } while (utau > VSMALL && err > 0.01 && ++iter < 10);
 
-            nuSgsw[facei] = 
+            nuSgsw[facei] =
                 max(sqr(max(utau, 0))/magFaceGradU[facei] - nuw[facei], 0.0);
         }
         else
@@ -172,6 +174,7 @@ makePatchTypeField(fvPatchScalarField, nuSgsWallFunctionFvPatchScalarField);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //
