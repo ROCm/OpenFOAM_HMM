@@ -31,10 +31,10 @@ Description
     Int. J. Multiphase Flow, Vol. 22, Suppl, pp. 21-66 (1996)
     Eq. 86-87, p. 40
 
-    This is identical to the Wen and Yu, Rowe model Table 3.6 p.56  in 
+    This is identical to the Wen and Yu, Rowe model Table 3.6 p.56  in
     the Ph.D. thesis of Berend van Wachem
-    'Derivation, Implementation and Validation 
-                    of 
+    'Derivation, Implementation and Validation
+                    of
           Computer Simulation Models
          for Gas-Solid Fluidized Beds'
 
@@ -80,9 +80,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~GidaspowSchillerNaumann();
+    //- Destructor
+    virtual ~GidaspowSchillerNaumann();
 
 
     // Member Functions

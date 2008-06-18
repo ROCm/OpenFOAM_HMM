@@ -95,9 +95,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~dragModel();
+    //- Destructor
+    virtual ~dragModel();
 
 
     // Selectors
@@ -118,7 +117,7 @@ public:
         //    ddt(beta*rhob*Ub) + ...  = ... alpha*beta*K*(Ub-Ua)
         // ********************************** NB ! *****************************
         // for numerical reasons alpha and beta has been
-        // extracted from the dragFunction K, 
+        // extracted from the dragFunction K,
         // so you MUST divide K by alpha*beta when implemnting the drag function
         // ********************************** NB ! *****************************
         virtual tmp<volScalarField> K(const volScalarField& Ur) const = 0;

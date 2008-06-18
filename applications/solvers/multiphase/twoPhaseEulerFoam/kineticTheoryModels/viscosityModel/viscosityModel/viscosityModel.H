@@ -23,128 +23,105 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::phaseModel
+    Foam::viscosityModel
+
+Description
 
 SourceFiles
-    phaseModel.C
+    viscosityModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseModel_H
-#define phaseModel_H
+#ifndef viscosityModel_H
+#define viscosityModel_H
 
 #include "dictionary.H"
-#include "dimensionedScalar.H"
 #include "volFields.H"
-#include "surfaceFields.H"
+#include "dimensionedTypes.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace kineticTheoryModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class phaseModel Declaration
+                           Class viscosityModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseModel
+class viscosityModel
 {
-    // Private data
+    // Private member functions
 
-        dictionary dict_;
+        //- Disallow default bitwise copy construct
+        viscosityModel(const viscosityModel&);
 
-        //- Name of phase
-        word name_;
+        //- Disallow default bitwise assignment
+        void operator=(const viscosityModel&);
 
-        //- Characteristic diameter of phase
-        dimensionedScalar d_;
 
-        //- kinematic viscosity
-        dimensionedScalar nu_;
+protected:
 
-        //- density
-        dimensionedScalar rho_;
+    // Protected data
 
-        //- Velocity
-        volVectorField U_;
-
-        //- Fluxes
-        surfaceScalarField* phiPtr_;
+        const dictionary& dict_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("viscosityModel");
+
+    // Declare runtime constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        viscosityModel,
+        dictionary,
+        (
+            const dictionary& dict
+        ),
+        (dict)
+    );
+
+
     // Constructors
 
-        phaseModel
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
+        //- Construct from components
+        viscosityModel(const dictionary& dict);
 
 
     // Selectors
 
-        //- Return a reference to the selected turbulence model
-        static autoPtr<phaseModel> New
+        static autoPtr<viscosityModel> New
         (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
+            const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~phaseModel();
+    virtual ~viscosityModel();
 
 
     // Member Functions
 
-        const word& name() const
-        {
-            return name_;
-        }
-
-        const dimensionedScalar& d() const
-        {
-            return d_;
-        }
-
-        const dimensionedScalar& nu() const
-        {
-            return nu_;
-        }
-
-        const dimensionedScalar& rho() const
-        {
-            return rho_;
-        }
-
-        const volVectorField& U() const
-        {
-            return U_;
-        }
-
-        volVectorField& U()
-        {
-            return U_;
-        }
-
-        const surfaceScalarField& phi() const
-        {
-            return *phiPtr_;
-        }
-
-        surfaceScalarField& phi()
-        {
-            return *phiPtr_;
-        }
+        virtual tmp<volScalarField> mua
+        (
+            const volScalarField& alpha,
+            const volScalarField& Theta,
+            const volScalarField& g0,
+            const dimensionedScalar& rhoa,
+            const dimensionedScalar& da,
+            const dimensionedScalar& e
+        ) const = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

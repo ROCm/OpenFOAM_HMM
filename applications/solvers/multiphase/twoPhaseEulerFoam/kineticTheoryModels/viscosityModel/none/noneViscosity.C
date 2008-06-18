@@ -22,69 +22,55 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::SchillerNaumann
-
-Description
-
-SourceFiles
-    SchillerNaumann.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef SchillerNaumann_H
-#define SchillerNaumann_H
+#include "noneViscosity.H"
+#include "addToRunTimeSelectionTable.H"
 
-#include "dragModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class SchillerNaumann Declaration
-\*---------------------------------------------------------------------------*/
-
-class SchillerNaumann
-:
-    public dragModel
+namespace kineticTheoryModels
 {
+    defineTypeNameAndDebug(noneViscosity, 0);
+    addToRunTimeSelectionTable(viscosityModel, noneViscosity, dictionary);
+}
+}
 
-public:
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-    //- Runtime type information
-    TypeName("SchillerNaumann");
-
-
-    // Constructors
-
-        //- Construct from components
-        SchillerNaumann
-        (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha,
-            const phaseModel& phasea,
-            const phaseModel& phaseb
-        );
+Foam::kineticTheoryModels::noneViscosity::noneViscosity(const dictionary& dict)
+:
+    viscosityModel(dict)
+{}
 
 
-    //- Destructor
-    virtual ~SchillerNaumann();
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::kineticTheoryModels::noneViscosity::~noneViscosity()
+{}
 
 
-    // Member Functions
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-        tmp<volScalarField> K(const volScalarField& Ur) const;
-};
+Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::noneViscosity::mua
+(
+    const volScalarField& alpha,
+    const volScalarField& Theta,
+    const volScalarField& g0,
+    const dimensionedScalar& rhoa,
+    const dimensionedScalar& da,
+    const dimensionedScalar& e
+) const
+{
+    return dimensionedScalar
+    (
+        "0",
+        dimensionSet(1, -1, -1, 0, 0, 0, 0),
+        0.0
+    )*alpha;
+}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

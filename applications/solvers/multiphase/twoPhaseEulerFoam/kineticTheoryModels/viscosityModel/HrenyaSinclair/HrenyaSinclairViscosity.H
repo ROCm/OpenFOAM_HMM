@@ -23,128 +23,76 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::phaseModel
+    Foam::HrenyaSinclairViscosity
+
+Description
 
 SourceFiles
-    phaseModel.C
+    HrenyaSinclairViscosity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseModel_H
-#define phaseModel_H
+#ifndef HrenyaSinclairViscosity_H
+#define HrenyaSinclairViscosity_H
 
-#include "dictionary.H"
-#include "dimensionedScalar.H"
-#include "volFields.H"
-#include "surfaceFields.H"
+#include "viscosityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace kineticTheoryModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class phaseModel Declaration
+                           Class HrenyaSinclairViscosity Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseModel
+class HrenyaSinclairViscosity
+:
+    public viscosityModel
 {
     // Private data
 
-        dictionary dict_;
+        dictionary coeffsDict_;
 
-        //- Name of phase
-        word name_;
-
-        //- Characteristic diameter of phase
-        dimensionedScalar d_;
-
-        //- kinematic viscosity
-        dimensionedScalar nu_;
-
-        //- density
-        dimensionedScalar rho_;
-
-        //- Velocity
-        volVectorField U_;
-
-        //- Fluxes
-        surfaceScalarField* phiPtr_;
+        //- characteristic length of geometry
+        dimensionedScalar L_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("HrenyaSinclair");
+
+
     // Constructors
 
-        phaseModel
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected turbulence model
-        static autoPtr<phaseModel> New
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
+        //- Construct from components
+        HrenyaSinclairViscosity(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~phaseModel();
+    virtual ~HrenyaSinclairViscosity();
 
 
-    // Member Functions
+    // Member functions
 
-        const word& name() const
-        {
-            return name_;
-        }
-
-        const dimensionedScalar& d() const
-        {
-            return d_;
-        }
-
-        const dimensionedScalar& nu() const
-        {
-            return nu_;
-        }
-
-        const dimensionedScalar& rho() const
-        {
-            return rho_;
-        }
-
-        const volVectorField& U() const
-        {
-            return U_;
-        }
-
-        volVectorField& U()
-        {
-            return U_;
-        }
-
-        const surfaceScalarField& phi() const
-        {
-            return *phiPtr_;
-        }
-
-        surfaceScalarField& phi()
-        {
-            return *phiPtr_;
-        }
+        tmp<volScalarField> mua
+        (
+            const volScalarField& alpha,
+            const volScalarField& Theta,
+            const volScalarField& g0,
+            const dimensionedScalar& rhoa,
+            const dimensionedScalar& da,
+            const dimensionedScalar& e
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

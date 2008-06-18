@@ -56,13 +56,12 @@ class Ergun
 {
 
 public:
-    
+
     //- Runtime type information
     TypeName("Ergun");
 
 
     // Constructors
-
 
         //- Construct from components
         Ergun
@@ -74,9 +73,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~Ergun();
+    //- Destructor
+    virtual ~Ergun();
 
 
     // Member Functions

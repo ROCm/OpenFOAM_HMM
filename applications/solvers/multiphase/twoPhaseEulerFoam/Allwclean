@@ -1,4 +1,4 @@
 wclean libso phaseModel
 wclean libso interfacialModels
-wclean libso kineticTheoryModel
+wclean libso kineticTheoryModels
 wclean
