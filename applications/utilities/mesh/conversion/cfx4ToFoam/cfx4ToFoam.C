@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    cfxToFoam
+    cfx4ToFoam
 
 Description
-    Converts a CFX mesh to FOAM format
+    Converts a CFX 4 mesh to FOAM format
 
 \*---------------------------------------------------------------------------*/
 

@@ -1,4 +1,0 @@
-hexBlock.C
-cfxToFoam.C
-
-EXE = $(FOAM_APPBIN)/cfxToFoam
