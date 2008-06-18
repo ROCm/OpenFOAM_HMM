@@ -20,4 +20,4 @@ wallFunctions/nutWallFunctions/nutWallFunction/nutWallFunctionFvPatchScalarField
 wallFunctions/nutWallFunctions/nutStandardWallFunction/nutStandardWallFunctionFvPatchScalarField.C
 wallFunctions/nutWallFunctions/nutStandardRoughWallFunction/nutStandardRoughWallFunctionFvPatchScalarField.C
 
-LIB = $(FOAM_LIBBIN)/libincompressibleTurbulenceModels
+LIB = $(FOAM_LIBBIN)/libincompressibleRASmodels

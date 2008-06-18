@@ -9,4 +9,4 @@ EXE_LIBS = \
     -lmeshTools \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleTurbulenceModels
+    -lcompressibleRASmodels
