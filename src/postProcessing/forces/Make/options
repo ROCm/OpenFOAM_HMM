@@ -12,7 +12,11 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lincompressibleTransportModels \
+<<<<<<< HEAD:src/postProcessing/forces/Make/options
     -lincompressibleRASModels \
+=======
+    -lincompressibleRASmodels \
+>>>>>>> update to reflect RASmodel changes:src/postProcessing/forces/Make/options
     -lincompressibleLESmodels \
     -lbasicThermophysicalModels \
     -lspecie \
