@@ -27,7 +27,9 @@ FoamFile
 RASmodel            kOmegaSST; //kEpsilon;
 
 // Do you wish to calculate turbulence?
-turbulence      on;
+turbulence          on;
+
+printCoeffs         on;
 
 // Laminar model coefficients
 laminarCoeffs
