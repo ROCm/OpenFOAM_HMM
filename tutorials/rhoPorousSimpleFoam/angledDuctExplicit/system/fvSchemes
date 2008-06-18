@@ -58,6 +58,8 @@ laplacianSchemes
     // pCorrect
     laplacian((rho|A(U)),p) Gauss linear corrected;
 
+    laplacian((rho*rAU),p)  Gauss linear corrected;
+
     // epsilonEqn
     laplacian(DepsilonEff,epsilon)  Gauss linear corrected;
 
