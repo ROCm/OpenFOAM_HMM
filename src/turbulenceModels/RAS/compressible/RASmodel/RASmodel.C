@@ -172,8 +172,8 @@ bool RASmodel::read()
         lookup("turbulence") >> turbulence_;
         RASmodelCoeffs_ = subDict(type() + "Coeffs");
 
-        subDict("wallFunctionCoeffs").lookup("kappa") >> kappa_;
-        subDict("wallFunctionCoeffs").lookup("E") >> E_;
+        subDict("wallFunctionCoeffs").readIfPresent<scalar>("kappa", kappa_);
+        subDict("wallFunctionCoeffs").readIfPresent<scalar>("E", E_);
 
         yPlusLam_ = yPlusLam(kappa_, E_);
 

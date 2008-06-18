@@ -15,7 +15,7 @@ EXE_INC = \
 LIB_LIBS = \
     -llagrangian \
     -lfiniteVolume \
-    -lcompressibleTurbulenceModels \
+    -lcompressibleRASmodels \
     -lcompressibleLESmodels \
     -lLESdeltas \
     -lliquids \
