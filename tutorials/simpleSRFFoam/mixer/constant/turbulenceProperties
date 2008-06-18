@@ -24,7 +24,9 @@ FoamFile
 
 RASmodel            kOmegaSST;
 
-turbulence      on;
+turbulence          on;
+
+printCoeffs         on;
 
 laminarCoeffs
 {

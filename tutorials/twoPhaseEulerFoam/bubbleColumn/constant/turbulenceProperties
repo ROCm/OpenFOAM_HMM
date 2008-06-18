@@ -24,7 +24,9 @@ FoamFile
 
 RASmodel            kEpsilon;
 
-turbulence      off;
+turbulence          off;
+
+printCoeffs         off;
 
 kEpsilonCoeffs
 {

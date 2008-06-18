@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -116,6 +118,7 @@ bool scaleSimilarity::read()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

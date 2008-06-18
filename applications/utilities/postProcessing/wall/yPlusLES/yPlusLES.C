@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
-        autoPtr<LESmodel> sgsModel
+        autoPtr<incompressible::LESmodel> sgsModel
         (
-            LESmodel::New(U, phi, laminarTransport)
+            incompressible::LESmodel::New(U, phi, laminarTransport)
         );
 
         volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();

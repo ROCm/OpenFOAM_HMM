@@ -75,10 +75,10 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 
         return les.devRhoBeff();
     }
-    else if (obr_.foundObject<LESmodel>("turbulenceProperties"))
+    else if (obr_.foundObject<incompressible::LESmodel>("turbulenceProperties"))
     {
-        const LESmodel& les
-            = obr_.lookupObject<LESmodel>("turbulenceProperties");
+        const incompressible::LESmodel& les
+            = obr_.lookupObject<incompressible::LESmodel>("turbulenceProperties");
 
         return rhoRef_*les.devBeff();
     }

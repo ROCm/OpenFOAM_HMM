@@ -31,6 +31,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,8 +45,7 @@ void LESmodel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< type() << "Coeffs" << nl
-            << LESmodelProperties_;
+        Info<< type() << "Coeffs" << LESmodelProperties_ << endl;
     }
 }
 
@@ -132,6 +133,7 @@ bool LESmodel::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

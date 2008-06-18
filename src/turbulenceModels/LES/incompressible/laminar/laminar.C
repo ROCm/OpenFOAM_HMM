@@ -32,6 +32,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -99,7 +101,7 @@ tmp<volScalarField> laminar::nuSgs() const
             dimensionedScalar("nuSgs", nu().dimensions(), 0.0)
         )
     );
-}       
+}
 
 tmp<volScalarField> laminar::nuEff() const
 {
@@ -158,6 +160,7 @@ bool laminar::read()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

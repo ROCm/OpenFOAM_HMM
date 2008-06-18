@@ -31,6 +31,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -173,6 +175,7 @@ bool dynOneEqEddy::read()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

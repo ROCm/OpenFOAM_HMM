@@ -23,14 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::LESmodels
+    Foam::incompressible
 
 Description
     Namespace for incompressible LES models.
 
 
 Class
-    Foam::LESmodel
+    Foam::incompressible::LESmodel
 
 Description
     Base class for all incompressible flow LES SGS models.
@@ -63,6 +63,8 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
@@ -263,6 +265,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
