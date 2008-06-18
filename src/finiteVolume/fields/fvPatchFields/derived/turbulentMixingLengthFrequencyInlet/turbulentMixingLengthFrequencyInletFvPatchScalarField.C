@@ -116,8 +116,8 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     );
 
     const dictionary& turbulenceCoeffs = turbulenceProperties.subDict
-	(
-        word(turbulenceProperties.lookup("turbulenceModel")) + "Coeffs"
+    (
+        word(turbulenceProperties.lookup("RASmodel")) + "Coeffs"
     );
 
     scalar Cmu = dimensionedScalar(turbulenceCoeffs.lookup("Cmu")).value();
