@@ -24,12 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline molecule::molecule
+inline Foam::molecule::molecule
 (
     const Cloud<molecule>& c,
     const vector& position,
@@ -54,7 +51,7 @@ inline molecule::molecule
 {}
 
 
-inline molecule::trackData::trackData
+inline Foam::molecule::trackData::trackData
 (
     moleculeCloud& molCloud,
     label part
@@ -68,92 +65,88 @@ inline molecule::trackData::trackData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const label molecule::id() const
+inline Foam::label Foam::molecule::id() const
 {
     return id_;
 }
 
 
-inline const scalar molecule::mass() const
+inline Foam::scalar Foam::molecule::mass() const
 {
     return mass_;
 }
 
 
-inline const vector& molecule::U() const
+inline const Foam::vector& Foam::molecule::U() const
 {
     return U_;
 }
 
 
-inline vector& molecule::U()
+inline Foam::vector& Foam::molecule::U()
 {
     return U_;
 }
 
 
-inline const vector& molecule::A() const
+inline const Foam::vector& Foam::molecule::A() const
 {
     return A_;
 }
 
 
-inline vector& molecule::A()
+inline Foam::vector& Foam::molecule::A()
 {
     return A_;
 }
 
 
-inline const scalar molecule::potentialEnergy() const
+inline Foam::scalar Foam::molecule::potentialEnergy() const
 {
     return potentialEnergy_;
 }
 
 
-inline scalar& molecule::potentialEnergy()
+inline Foam::scalar& Foam::molecule::potentialEnergy()
 {
     return potentialEnergy_;
 }
 
 
-inline const tensor& molecule::rf() const
+inline const Foam::tensor& Foam::molecule::rf() const
 {
     return rf_;
 }
 
 
-inline tensor& molecule::rf()
+inline Foam::tensor& Foam::molecule::rf()
 {
     return rf_;
 }
 
 
-inline const label molecule::tethered() const
+inline Foam::label Foam::molecule::tethered() const
 {
     return tethered_;
 }
 
 
-inline const vector& molecule::tetherPosition() const
+inline const Foam::vector& Foam::molecule::tetherPosition() const
 {
     return tetherPosition_;
 }
 
 
-inline moleculeCloud& molecule::trackData::molCloud()
+inline Foam::moleculeCloud& Foam::molecule::trackData::molCloud()
 {
     return molCloud_;
 }
 
 
-inline label molecule::trackData::part() const
+inline Foam::label Foam::molecule::trackData::part() const
 {
     return part_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

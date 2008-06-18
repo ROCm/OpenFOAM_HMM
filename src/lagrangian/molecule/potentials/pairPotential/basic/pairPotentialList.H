@@ -126,13 +126,13 @@ public:
                 const scalar rIJMagSqr
             ) const;
 
-            const scalar rCutSqr
+            scalar rCutSqr
             (
                 const label a,
                 const label b
             ) const;
 
-            const scalar rCut
+            scalar rCut
             (
                 const label a,
                 const label b

@@ -123,7 +123,7 @@ public:
 
         // Access
 
-            inline const label averagesTaken() const;
+            inline label averagesTaken() const;
 
             inline label nBuffers() const;
 

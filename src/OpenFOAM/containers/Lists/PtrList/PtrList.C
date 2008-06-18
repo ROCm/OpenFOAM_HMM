@@ -30,29 +30,24 @@ License
 #include "PtrListLoopM.H"
 #include "SLPtrList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-PtrList<T>::PtrList()
+Foam::PtrList<T>::PtrList()
 :
     ptrs_()
 {}
 
 
 template<class T>
-PtrList<T>::PtrList(const label s)
+Foam::PtrList<T>::PtrList(const label s)
 :
     ptrs_(s, reinterpret_cast<T*>(NULL))
 {}
 
 
 template<class T>
-PtrList<T>::PtrList(const PtrList<T>& a)
+Foam::PtrList<T>::PtrList(const PtrList<T>& a)
 :
     ptrs_(a.size())
 {
@@ -65,7 +60,7 @@ PtrList<T>::PtrList(const PtrList<T>& a)
 
 template<class T>
 template<class CloneArg>
-PtrList<T>::PtrList(const PtrList<T>& a, const CloneArg& cloneArg)
+Foam::PtrList<T>::PtrList(const PtrList<T>& a, const CloneArg& cloneArg)
 :
     ptrs_(a.size())
 {
@@ -77,7 +72,7 @@ PtrList<T>::PtrList(const PtrList<T>& a, const CloneArg& cloneArg)
 
 
 template<class T>
-PtrList<T>::PtrList(PtrList<T>& a, bool reUse)
+Foam::PtrList<T>::PtrList(PtrList<T>& a, bool reUse)
 :
     ptrs_(a.size())
 {
@@ -101,7 +96,7 @@ PtrList<T>::PtrList(PtrList<T>& a, bool reUse)
 
 
 template<class T>
-PtrList<T>::PtrList(const SLPtrList<T>& sll)
+Foam::PtrList<T>::PtrList(const SLPtrList<T>& sll)
 :
     ptrs_(sll.size())
 {
@@ -124,7 +119,7 @@ PtrList<T>::PtrList(const SLPtrList<T>& sll)
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T>
-PtrList<T>::~PtrList()
+Foam::PtrList<T>::~PtrList()
 {
     forAll(*this, i)
     {
@@ -139,8 +134,15 @@ PtrList<T>::~PtrList()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-void PtrList<T>::setSize(const label newSize)
+void Foam::PtrList<T>::setSize(const label newSize)
 {
+    if (newSize < 0)
+    {
+        FatalErrorIn("PtrList<T>::setSize(const label)")
+            << "bad set size " << newSize
+            << abort(FatalError);
+    }
+
     label oldSize = size();
 
     if (newSize == 0)
@@ -160,7 +162,7 @@ void PtrList<T>::setSize(const label newSize)
 
         ptrs_.setSize(newSize);
     }
-    else if (newSize > oldSize)
+    else // newSize > oldSize
     {
         ptrs_.setSize(newSize);
 
@@ -174,7 +176,7 @@ void PtrList<T>::setSize(const label newSize)
 
 
 template<class T>
-void PtrList<T>::clear()
+void Foam::PtrList<T>::clear()
 {
     forAll(*this, i)
     {
@@ -189,7 +191,7 @@ void PtrList<T>::clear()
 
 
 template<class T>
-void PtrList<T>::transfer(PtrList<T>& a)
+void Foam::PtrList<T>::transfer(PtrList<T>& a)
 {
     clear();
     ptrs_.transfer(a.ptrs_);
@@ -197,7 +199,7 @@ void PtrList<T>::transfer(PtrList<T>& a)
 
 
 template<class T>
-void PtrList<T>::reorder(const UList<label>& oldToNew)
+void Foam::PtrList<T>::reorder(const UList<label>& oldToNew)
 {
     if (oldToNew.size() != size())
     {
@@ -247,7 +249,7 @@ void PtrList<T>::reorder(const UList<label>& oldToNew)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-PtrList<T>& PtrList<T>::operator=(const PtrList<T>& a)
+Foam::PtrList<T>& Foam::PtrList<T>::operator=(const PtrList<T>& a)
 {
     if (this == &a)
     {
@@ -283,10 +285,6 @@ PtrList<T>& PtrList<T>::operator=(const PtrList<T>& a)
     return *this;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

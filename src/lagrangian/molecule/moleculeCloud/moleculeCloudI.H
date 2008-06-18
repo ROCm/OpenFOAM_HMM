@@ -56,13 +56,13 @@ inline scalar moleculeCloud::guardRadius() const
 }
 
 
-inline const scalar moleculeCloud::rCutMax() const
+inline scalar moleculeCloud::rCutMax() const
 {
     return rCutMax_;
 }
 
 
-inline const scalar moleculeCloud::rCutMaxSqr() const
+inline scalar moleculeCloud::rCutMaxSqr() const
 {
     return rCutMaxSqr_;
 }

@@ -24,49 +24,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-inline const Foam::scalar Foam::pairPotential::m() const
+inline Foam::scalar Foam::pairPotential::m() const
 {
     return m_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::gamma() const
+inline Foam::scalar Foam::pairPotential::gamma() const
 {
     return gamma_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::rm() const
+inline Foam::scalar Foam::pairPotential::rm() const
 {
     return rm_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::epsilon() const
+inline Foam::scalar Foam::pairPotential::epsilon() const
 {
     return epsilon_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::rCut() const
+inline Foam::scalar Foam::pairPotential::rCut() const
 {
     return rCut_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::rCutSqr() const
+inline Foam::scalar Foam::pairPotential::rCutSqr() const
 {
     return rCutSqr_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::rMin() const
+inline Foam::scalar Foam::pairPotential::rMin() const
 {
     return rMin_;
 }
 
 
-inline const Foam::scalar Foam::pairPotential::dr() const
+inline Foam::scalar Foam::pairPotential::dr() const
 {
     return dr_;
 }

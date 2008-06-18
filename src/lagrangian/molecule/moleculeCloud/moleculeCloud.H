@@ -191,9 +191,9 @@ public:
 
             inline scalar guardRadius() const;
 
-            inline const scalar rCutMax() const;
+            inline scalar rCutMax() const;
 
-            inline const scalar rCutMaxSqr() const;
+            inline scalar rCutMaxSqr() const;
 
             inline const List<word>& idList() const;
 

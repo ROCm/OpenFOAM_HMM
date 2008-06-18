@@ -166,10 +166,10 @@ public:
         // Access
 
             //- Return id
-            inline const label id() const;
+            inline label id() const;
 
             //- Return mass
-            inline const scalar mass() const;
+            inline scalar mass() const;
 
             //- Return velocity
             inline const vector& U() const;
@@ -180,7 +180,7 @@ public:
             inline vector& A();
 
             //- Return potential energy
-            inline const scalar potentialEnergy() const;
+            inline scalar potentialEnergy() const;
             inline scalar& potentialEnergy();
 
             //- Return stress contribution
@@ -188,7 +188,7 @@ public:
             inline tensor& rf();
 
             //- Return tethered
-            inline const label tethered() const;
+            inline label tethered() const;
 
             //- Return tetherPosition
             inline const vector& tetherPosition() const;

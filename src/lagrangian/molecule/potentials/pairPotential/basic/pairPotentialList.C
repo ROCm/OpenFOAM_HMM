@@ -127,7 +127,7 @@ bool pairPotentialList::rCutSqr
 }
 
 
-const scalar pairPotentialList::rCutSqr
+scalar pairPotentialList::rCutSqr
 (
     const label a,
     const label b
@@ -137,7 +137,7 @@ const scalar pairPotentialList::rCutSqr
 }
 
 
-const scalar pairPotentialList::rCut
+scalar pairPotentialList::rCut
 (
     const label a,
     const label b

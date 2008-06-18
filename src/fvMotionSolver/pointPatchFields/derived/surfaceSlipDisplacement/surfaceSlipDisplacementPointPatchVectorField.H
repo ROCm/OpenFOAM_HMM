@@ -196,7 +196,7 @@ public:
         const triSurfaceMeshes& surfaces() const;
 
         //- Mode of projection/following
-        const followMode projectMode() const
+        followMode projectMode() const
         {
             return projectMode_;
         }
@@ -223,7 +223,7 @@ public:
         //- Update the patch field
         virtual void evaluate
         (
-            const Pstream::commsTypes commsType=Pstream::Pstream::blocking
+            const Pstream::commsTypes commsType=Pstream::blocking
         );
 
         //- Write

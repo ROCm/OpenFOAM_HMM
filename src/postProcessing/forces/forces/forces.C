@@ -30,12 +30,10 @@ License
 #include "Time.H"
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-
-#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/RASmodel/RASmodel.H"
 #include "incompressible/LESmodel/LESmodel.H"
-
 #include "basicThermo.H"
-#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/RASmodel/RASmodel.H"
 #include "compressible/LESmodel/LESmodel.H"
 
 
@@ -52,19 +50,20 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 {
     if
     (
-        obr_.foundObject<compressible::turbulenceModel>("turbulenceProperties")
+        obr_.foundObject<compressible::RASmodel>("turbulenceProperties")
     )
     {
-        const compressible::turbulenceModel& ras
-            = obr_.lookupObject<compressible::turbulenceModel>
+        const compressible::RASmodel& ras
+            = obr_.lookupObject<compressible::RASmodel>
             ("turbulenceProperties");
 
         return ras.devRhoReff();
     }
-    else if (obr_.foundObject<turbulenceModel>("turbulenceProperties"))
+    else if (obr_.foundObject<incompressible::RASmodel>("turbulenceProperties"))
     {
-        const turbulenceModel& ras
-            = obr_.lookupObject<turbulenceModel>("turbulenceProperties");
+        const incompressible::RASmodel& ras
+            = obr_.lookupObject<incompressible::RASmodel>
+            ("turbulenceProperties");
 
         return rhoRef_*ras.devReff();
     }
