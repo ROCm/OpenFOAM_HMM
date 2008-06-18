@@ -61,6 +61,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -136,6 +138,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESmodels
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

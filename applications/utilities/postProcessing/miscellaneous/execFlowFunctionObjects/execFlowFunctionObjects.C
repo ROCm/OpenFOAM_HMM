@@ -162,9 +162,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             }
             else if (turbulenceProperties.found("LESmodel"))
             {
-                autoPtr<LESmodel> sgsModel
+                autoPtr<incompressible::LESmodel> sgsModel
                 (
-                    LESmodel::New(U, phi, laminarTransport)
+                    incompressible::LESmodel::New(U, phi, laminarTransport)
                 );
 
                 execFlowFunctionObjects(args, runTime);
