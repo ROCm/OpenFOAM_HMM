@@ -26,6 +26,4 @@ integrationMethod               verletLeapfrog;
 
 potentialEnergyLimit            5.256e-20;
 
-guardRadius                     0;
-
 // ************************************************************************* //
