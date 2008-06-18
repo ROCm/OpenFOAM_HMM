@@ -154,7 +154,7 @@ public:
             //- Evaluate the patch field
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType=Pstream::Pstream::blocking
+                const Pstream::commsTypes commsType=Pstream::blocking
             )
             {}
 
