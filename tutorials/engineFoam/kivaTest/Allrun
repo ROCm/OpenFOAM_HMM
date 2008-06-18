@@ -25,7 +25,7 @@ restartApplication ()
     fi
 }
 
-runKivaToFoam . $case/otape17
+runKivaToFoam . otape17
 cp system/controlDict.1st system/controlDict
 runApplication $application
 cp system/controlDict.2nd system/controlDict
