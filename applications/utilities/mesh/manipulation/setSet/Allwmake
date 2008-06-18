@@ -8,4 +8,4 @@ if [ -f /usr/include/readline/readline.h ]; then
     break
 fi
 export READLINE
-wmake setSet
+wmake
