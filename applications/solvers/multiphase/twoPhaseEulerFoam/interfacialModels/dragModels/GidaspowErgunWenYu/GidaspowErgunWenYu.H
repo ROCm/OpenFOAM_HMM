@@ -26,7 +26,7 @@ Class
     Foam::GidaspowErgunWenYu
 
 Description
-    D. Gidaspow, Multiphase flow and fluidization, 
+    D. Gidaspow, Multiphase flow and fluidization,
         Academic Press, New York, 1994.
 
 SourceFiles
@@ -54,7 +54,7 @@ class GidaspowErgunWenYu
 {
 
 public:
-    
+
     //- Runtime type information
     TypeName("GidaspowErgunWenYu");
 
@@ -71,9 +71,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~GidaspowErgunWenYu();
+    //- Destructor
+    virtual ~GidaspowErgunWenYu();
 
 
     // Member Functions

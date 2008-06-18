@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::phaseModel
+    Foam::HrenyaSinclairConductivity
+
+Description
 
 SourceFiles
-    phaseModel.C
+    HrenyaSinclairConductivity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseModel_H
-#define phaseModel_H
+#ifndef HrenyaSinclairConductivity_H
+#define HrenyaSinclairConductivity_H
 
-#include "dictionary.H"
-#include "dimensionedScalar.H"
-#include "volFields.H"
-#include "surfaceFields.H"
+#include "conductivityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,102 +43,46 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class phaseModel Declaration
+                           Class HrenyaSinclairConductivity Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseModel
+class HrenyaSinclairConductivity
+:
+    public conductivityModel
 {
-    // Private data
 
-        dictionary dict_;
+        dictionary coeffsDict_;
 
-        //- Name of phase
-        word name_;
-
-        //- Characteristic diameter of phase
-        dimensionedScalar d_;
-
-        //- kinematic viscosity
-        dimensionedScalar nu_;
-
-        //- density
-        dimensionedScalar rho_;
-
-        //- Velocity
-        volVectorField U_;
-
-        //- Fluxes
-        surfaceScalarField* phiPtr_;
-
+        //- characteristic length of geometry
+        dimensionedScalar L_;
 
 public:
 
+        //- Runtime type information
+        TypeName("HrenyaSinclair");
+
+
     // Constructors
 
-        phaseModel
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected turbulence model
-        static autoPtr<phaseModel> New
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
+        //- Construct from components
+        HrenyaSinclairConductivity(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~phaseModel();
+    virtual ~HrenyaSinclairConductivity();
 
 
     // Member Functions
 
-        const word& name() const
-        {
-            return name_;
-        }
-
-        const dimensionedScalar& d() const
-        {
-            return d_;
-        }
-
-        const dimensionedScalar& nu() const
-        {
-            return nu_;
-        }
-
-        const dimensionedScalar& rho() const
-        {
-            return rho_;
-        }
-
-        const volVectorField& U() const
-        {
-            return U_;
-        }
-
-        volVectorField& U()
-        {
-            return U_;
-        }
-
-        const surfaceScalarField& phi() const
-        {
-            return *phiPtr_;
-        }
-
-        surfaceScalarField& phi()
-        {
-            return *phiPtr_;
-        }
+        tmp<volScalarField> kappa
+        (
+            const volScalarField& alpha,
+            const volScalarField& Theta,
+            const volScalarField& g0,
+            const dimensionedScalar& rhoa,
+            const dimensionedScalar& da,
+            const dimensionedScalar& e
+        ) const;
 };
 
 

@@ -56,7 +56,7 @@ class Gibilaro
 {
 
 public:
-    
+
     //- Runtime type information
     TypeName("Gibilaro");
 
@@ -73,9 +73,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~Gibilaro();
+    //- Destructor
+    virtual ~Gibilaro();
 
 
     // Member Functions

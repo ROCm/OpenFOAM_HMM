@@ -22,69 +22,39 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::SchillerNaumann
-
-Description
-
-SourceFiles
-    SchillerNaumann.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef SchillerNaumann_H
-#define SchillerNaumann_H
+#include "viscosityModel.H"
 
-#include "dragModel.H"
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+Foam::autoPtr<Foam::kineticTheoryModels::viscosityModel>
+Foam::kineticTheoryModels::viscosityModel::New
+(
+    const dictionary& dict
+)
 {
+    word viscosityModelType(dict.lookup("viscosityModel"));
 
-/*---------------------------------------------------------------------------*\
-                           Class SchillerNaumann Declaration
-\*---------------------------------------------------------------------------*/
+    Info<< "Selecting viscosityModel "
+        << viscosityModelType << endl;
 
-class SchillerNaumann
-:
-    public dragModel
-{
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(viscosityModelType);
 
-public:
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalError
+            << "viscosityModel::New(const dictionary&) : " << endl
+            << "    unknown viscosityModelType type "
+            << viscosityModelType
+            << ", constructor not in hash table" << endl << endl
+            << "    Valid viscosityModelType types are :" << endl;
+        Info<< dictionaryConstructorTablePtr_->toc() << abort(FatalError);
+    }
 
-    //- Runtime type information
-    TypeName("SchillerNaumann");
+    return autoPtr<viscosityModel>(cstrIter()(dict));
+}
 
-
-    // Constructors
-
-        //- Construct from components
-        SchillerNaumann
-        (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha,
-            const phaseModel& phasea,
-            const phaseModel& phaseb
-        );
-
-
-    //- Destructor
-    virtual ~SchillerNaumann();
-
-
-    // Member Functions
-
-        tmp<volScalarField> K(const volScalarField& Ur) const;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -23,64 +23,68 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SchillerNaumann
+    Foam::GidaspowViscosity
 
 Description
 
 SourceFiles
-    SchillerNaumann.C
+    GidaspowViscosity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SchillerNaumann_H
-#define SchillerNaumann_H
+#ifndef GidaspowViscosity_H
+#define GidaspowViscosity_H
 
-#include "dragModel.H"
+#include "viscosityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace kineticTheoryModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class SchillerNaumann Declaration
+                           Class GidaspowViscosity Declaration
 \*---------------------------------------------------------------------------*/
 
-class SchillerNaumann
+class GidaspowViscosity
 :
-    public dragModel
+    public viscosityModel
 {
 
 public:
 
     //- Runtime type information
-    TypeName("SchillerNaumann");
-
+    TypeName("Gidaspow");
 
     // Constructors
 
         //- Construct from components
-        SchillerNaumann
-        (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha,
-            const phaseModel& phasea,
-            const phaseModel& phaseb
-        );
+        GidaspowViscosity(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~SchillerNaumann();
+    virtual ~GidaspowViscosity();
 
 
-    // Member Functions
+    // Member functions
 
-        tmp<volScalarField> K(const volScalarField& Ur) const;
+        tmp<volScalarField> mua
+        (
+            const volScalarField& alpha,
+            const volScalarField& Theta,
+            const volScalarField& g0,
+            const dimensionedScalar& rhoa,
+            const dimensionedScalar& da,
+            const dimensionedScalar& e
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

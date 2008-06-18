@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::phaseModel
+    Foam::LunSavageRadial
+
+Description
 
 SourceFiles
-    phaseModel.C
+    LunSavageRadial.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseModel_H
-#define phaseModel_H
+#ifndef LunSavageRadial_H
+#define LunSavageRadial_H
 
-#include "dictionary.H"
-#include "dimensionedScalar.H"
-#include "volFields.H"
-#include "surfaceFields.H"
+#include "radialModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,102 +43,43 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class phaseModel Declaration
+                           Class LunSavageradial Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseModel
+class LunSavageRadial
+:
+    public radialModel
 {
-    // Private data
-
-        dictionary dict_;
-
-        //- Name of phase
-        word name_;
-
-        //- Characteristic diameter of phase
-        dimensionedScalar d_;
-
-        //- kinematic viscosity
-        dimensionedScalar nu_;
-
-        //- density
-        dimensionedScalar rho_;
-
-        //- Velocity
-        volVectorField U_;
-
-        //- Fluxes
-        surfaceScalarField* phiPtr_;
-
 
 public:
 
+    //- Runtime type information
+    TypeName("LunSavage");
+
+
     // Constructors
 
-        phaseModel
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected turbulence model
-        static autoPtr<phaseModel> New
-        (
-            const fvMesh& mesh,
-            const dictionary& transportProperties,
-            const word& phaseName
-        );
+        //- Construct from components
+        LunSavageRadial(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~phaseModel();
+    virtual ~LunSavageRadial();
 
 
     // Member Functions
 
-        const word& name() const
-        {
-            return name_;
-        }
+        tmp<volScalarField> g0
+        (
+            const volScalarField& alpha,
+            const dimensionedScalar& alphaMax
+        ) const;
 
-        const dimensionedScalar& d() const
-        {
-            return d_;
-        }
-
-        const dimensionedScalar& nu() const
-        {
-            return nu_;
-        }
-
-        const dimensionedScalar& rho() const
-        {
-            return rho_;
-        }
-
-        const volVectorField& U() const
-        {
-            return U_;
-        }
-
-        volVectorField& U()
-        {
-            return U_;
-        }
-
-        const surfaceScalarField& phi() const
-        {
-            return *phiPtr_;
-        }
-
-        surfaceScalarField& phi()
-        {
-            return *phiPtr_;
-        }
+        tmp<volScalarField> g0prime
+        (
+            const volScalarField& alpha,
+            const dimensionedScalar& alphaMax
+        ) const;
 };
 
 

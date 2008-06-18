@@ -22,69 +22,37 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::SchillerNaumann
-
-Description
-
-SourceFiles
-    SchillerNaumann.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef SchillerNaumann_H
-#define SchillerNaumann_H
+#include "viscosityModel.H"
 
-#include "dragModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class SchillerNaumann Declaration
-\*---------------------------------------------------------------------------*/
-
-class SchillerNaumann
-:
-    public dragModel
+namespace kineticTheoryModels
 {
-
-public:
-
-    //- Runtime type information
-    TypeName("SchillerNaumann");
-
-
-    // Constructors
-
-        //- Construct from components
-        SchillerNaumann
-        (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha,
-            const phaseModel& phasea,
-            const phaseModel& phaseb
-        );
+    defineTypeNameAndDebug(viscosityModel, 0);
+    defineRunTimeSelectionTable(viscosityModel, dictionary);
+}
+}
 
 
-    //- Destructor
-    virtual ~SchillerNaumann();
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::kineticTheoryModels::viscosityModel::viscosityModel
+(
+    const dictionary& dict
+)
+:
+    dict_(dict)
+{}
 
 
-    // Member Functions
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-        tmp<volScalarField> K(const volScalarField& Ur) const;
-};
+Foam::kineticTheoryModels::viscosityModel::~viscosityModel()
+{}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

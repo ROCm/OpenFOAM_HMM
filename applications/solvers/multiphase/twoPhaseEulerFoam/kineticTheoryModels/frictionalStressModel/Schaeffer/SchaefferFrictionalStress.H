@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SchillerNaumann
+    Foam::SchaefferFrictionalStress
 
 Description
 
 SourceFiles
-    SchillerNaumann.C
+    SchaefferFrictionalStress.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SchillerNaumann_H
-#define SchillerNaumann_H
+#ifndef SchaefferFrictionalStress_H
+#define SchaefferFrictionalStress_H
 
-#include "dragModel.H"
+#include "frictionalStressModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,39 +43,60 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SchillerNaumann Declaration
+                           Class SchaefferFrictionalStress Declaration
 \*---------------------------------------------------------------------------*/
 
-class SchillerNaumann
+class SchaefferFrictionalStress
 :
-    public dragModel
+    public frictionalStressModel
 {
 
 public:
 
-    //- Runtime type information
-    TypeName("SchillerNaumann");
+        //- Runtime type information
+        TypeName("Schaeffer");
 
 
     // Constructors
 
         //- Construct from components
-        SchillerNaumann
-        (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha,
-            const phaseModel& phasea,
-            const phaseModel& phaseb
-        );
+        SchaefferFrictionalStress(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~SchillerNaumann();
+    virtual ~SchaefferFrictionalStress();
 
 
-    // Member Functions
+    // Member functions
 
-        tmp<volScalarField> K(const volScalarField& Ur) const;
+        virtual tmp<volScalarField> frictionalPressure
+        (
+            const volScalarField& alpha,
+            const dimensionedScalar& alphaMinFriction,
+            const dimensionedScalar& alphaMax,
+            const dimensionedScalar& Fr,
+            const dimensionedScalar& eta,
+            const dimensionedScalar& p
+        ) const;
+
+        virtual tmp<volScalarField> frictionalPressurePrime
+        (
+            const volScalarField& alpha,
+            const dimensionedScalar& alphaMinFriction,
+            const dimensionedScalar& alphaMax,
+            const dimensionedScalar& Fr,
+            const dimensionedScalar& n,
+            const dimensionedScalar& p
+        ) const;
+
+        virtual tmp<volScalarField> muf
+        (
+            const volScalarField& alpha,
+            const dimensionedScalar& alphaMax,
+            const volScalarField& pf,
+            const volTensorField& D,
+            const dimensionedScalar& phi
+        ) const;
 };
 
 
