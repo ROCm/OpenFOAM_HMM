@@ -63,6 +63,8 @@ autoPtr<LESmodel> LESmodel::New
         turbulencePropertiesDict.lookup("LESmodel") >> LESmodelTypeName;
     }
 
+    Info<< "Selecting turbulence model " << LESmodelTypeName << endl;
+
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(LESmodelTypeName);
 
