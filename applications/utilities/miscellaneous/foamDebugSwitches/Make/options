@@ -4,7 +4,7 @@ EXE_LIBS = \
     -lchemistryModel \
     -lcombustionThermophysicalModels \
     -lcompressibleLESmodels \
-    -lcompressibleTurbulenceModels \
+    -lcompressibleRASmodels \
     -ldecompositionMethods \
     -ldieselSpray \
     -ldynamicFvMesh \
@@ -17,7 +17,7 @@ EXE_LIBS = \
     -lfvMotionSolvers \
     -lincompressibleLESmodels \
     -lincompressibleTransportModels \
-    -lincompressibleTurbulenceModels \
+    -lincompressibleRASmodels \
     -linterfaceProperties \
     -llagrangianIntermediate \
     -llagrangian \
