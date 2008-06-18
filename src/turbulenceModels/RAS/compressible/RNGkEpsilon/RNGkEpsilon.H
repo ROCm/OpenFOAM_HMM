@@ -28,6 +28,22 @@ Class
 Description
     Renormalisation group k-epsilon turbulence model for compressible flows.
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        RNGkEpsilonCoeffs
+        {
+            Cmu         0.0845;
+            C1          1.42;
+            C2          1.68;
+            C3          -0.33;  // only for compressible
+            alphah      1.0;    // only for compressible
+            alphak      1.39;
+            alphaEps    1.39;
+            eta0        4.38;
+            beta        0.012;
+        }
+    @endverbatim
+
 SourceFiles
     RNGkEpsilon.C
     RNGkEpsilonCorrect.C

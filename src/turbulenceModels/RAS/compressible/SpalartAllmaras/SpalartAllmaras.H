@@ -44,6 +44,21 @@ Description
         Ph.D. thesis, University of Michigan, 1996.
     @endverbatim
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        SpalartAllmarasCoeffs
+        {
+            Cb1         0.1355;
+            Cb2         0.622;
+            Cw2         0.3;
+            Cw3         2.0;
+            Cv1         7.1;
+            Cv2         5.0;
+            alphaNut    1.5;
+            alphah      1.0;    // only for compressible
+        }
+    @endverbatim
+
 SourceFiles
     SpalartAllmaras.C
     SpalartAllmarasCorrect.C
