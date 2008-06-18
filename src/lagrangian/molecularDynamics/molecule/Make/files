@@ -11,9 +11,6 @@ referredMolecule = referredMolecule
 referredCellList = referredCellList
 referredCell = referredCell
 referralLists = referralLists
-
-tetherPotential = tetherPotential
-
 $(distribution)/distribution.C
 
 $(reducedUnits)/reducedUnits.C
