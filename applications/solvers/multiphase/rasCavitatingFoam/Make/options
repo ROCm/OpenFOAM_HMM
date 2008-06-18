@@ -8,7 +8,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lincompressibleTransportModels \
-    -lincompressibleTurbulenceModels \
+    -lincompressibleRASmodels \
     -lfiniteVolume \
     -lbarotropicCompressibilityModel
 

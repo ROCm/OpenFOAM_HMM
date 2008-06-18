@@ -11,9 +11,9 @@ EXE_LIBS = \
     $(FOAM_LIBBIN)/postCalc.o \
     -lfiniteVolume \
     -lincompressibleTransportModels \
-    -lincompressibleTurbulenceModels \
+    -lincompressibleRASmodels \
     -lincompressibleLESmodels \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleTurbulenceModels \
+    -lcompressibleRASmodels \
     -lcompressibleLESmodels

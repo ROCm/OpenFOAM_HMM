@@ -13,7 +13,7 @@ EXE_INC = \
 EXE_LIBS = \
     -linterfaceProperties \
     -lincompressibleTransportModels \
-    -lincompressibleTurbulenceModels \
+    -lincompressibleRASmodels \
     -lfiniteVolume \
     -ldynamicMesh \
     -lmeshTools \

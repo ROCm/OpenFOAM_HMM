@@ -16,7 +16,7 @@ EXE_INC = \
     -I$(LIB_SRC)/ODE/lnInclude
 
 EXE_LIBS = \
-    -lcompressibleTurbulenceModels \
+    -lcompressibleRASmodels \
     -lcombustionThermophysicalModels \
     -lfiniteVolume \
     -llagrangian \
