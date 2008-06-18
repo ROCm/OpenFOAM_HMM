@@ -29,6 +29,24 @@ Description
     Launder, Reece and Rodi Reynolds-stress turbulence model for
     incompressible flows.
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        LRRCoeffs
+        {
+            Cmu         0.09;
+            Clrr1       1.8;
+            Clrr2       0.6;
+            C1          1.44;
+            C2          1.92;
+            Cs          0.25;
+            Ceps        0.15;
+            alphah      1.0;    // only for compressible
+            alphaEps    0.76923;
+            alphaR      1.22;   // only for compressible
+            couplingFactor  0.0;    // only for incompressible
+        }
+    @endverbatim
+
 SourceFiles
     LRR.C
 

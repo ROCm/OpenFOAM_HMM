@@ -28,6 +28,26 @@ Class
 Description
     Launder-Gibson Reynolds stress turbulence model for compressible flows.
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        LaunderGibsonRSTMCoeffs
+        {
+            Cmu         0.09;
+            Clg1        1.8;
+            Clg2        0.6;
+            C1          1.44;
+            C2          1.92;
+            C1Ref       0.5;
+            C2Ref       0.3;
+            Cs          0.25;
+            Ceps        0.15;
+            alphah      1.0;    // only for compressible
+            alphaEps    0.76923;
+            alphaR      1.22;
+            couplingFactor  0.0;
+        }
+    @endverbatim
+
 SourceFiles
     LaunderGibsonRSTM.C
     LaunderGibsonRSTMcorrect.C

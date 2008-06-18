@@ -53,6 +53,26 @@ Description
     uncertainty in their origin, range of applicability and that is y+ becomes
     sufficiently small blending u_tau in this manner clearly becomes nonsense.
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        kOmegaSST
+        {
+            Cmu         0.09;
+            alphaK1     0.85034;
+            alphaK2     1.0;
+            alphaOmega1 0.5;
+            alphaOmega2 0.85616;
+            alphah      1.0;    // only for compressible
+            beta1       0.075;
+            beta2       0.0828;
+            betaStar    0.09;
+            gamma1      0.5532;
+            gamma2      0.4403;
+            a1          0.31;
+            c1          10.0;
+        }
+    @endverbatim
+
 SourceFiles
     kOmegaSST.C
     kOmegaWallFunctionsI.H
