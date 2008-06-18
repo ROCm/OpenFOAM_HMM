@@ -12,9 +12,9 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lincompressibleTransportModels \
-    -lincompressibleTurbulenceModels \
+    -lincompressibleRASmodels \
     -lincompressibleLESmodels \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleTurbulenceModels \
+    -lcompressibleRASModels \
     -lcompressibleLESmodels
