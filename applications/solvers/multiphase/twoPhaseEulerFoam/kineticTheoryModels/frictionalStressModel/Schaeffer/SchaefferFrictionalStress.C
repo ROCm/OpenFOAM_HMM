@@ -123,13 +123,13 @@ Foam::tmp<Foam::volScalarField> Foam::SchaefferFrictionalStress::muf
         )
     );
 
-    volScalarField& muf_ = tmuf();
+    volScalarField& muff = tmuf();
 
     forAll (D, celli)
     {
         if (alpha[celli] > alphaMax.value()-5e-2)
         {
-            muf_[celli] =
+            muff[celli] =
                 0.5*pf[celli]*sin(phi.value())
                /(
                     sqrt(1.0/6.0*(sqr(D[celli].xx() - D[celli].yy())
@@ -141,7 +141,7 @@ Foam::tmp<Foam::volScalarField> Foam::SchaefferFrictionalStress::muf
         }
     }
 
-    return muf_;
+    return tmuf;
 }
 
 
