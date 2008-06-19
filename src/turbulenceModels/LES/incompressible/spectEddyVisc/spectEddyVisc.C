@@ -31,6 +31,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -118,6 +120,7 @@ bool spectEddyVisc::read()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

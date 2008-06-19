@@ -45,8 +45,7 @@ void RASmodel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< type() << "Coeffs" << nl
-            << RASmodelCoeffs_;
+        Info<< type() << "Coeffs" << RASmodelCoeffs_ << endl;;
     }
 }
 

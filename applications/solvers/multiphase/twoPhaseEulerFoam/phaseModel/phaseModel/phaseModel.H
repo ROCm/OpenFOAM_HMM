@@ -95,9 +95,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~phaseModel();
+    //- Destructor
+    virtual ~phaseModel();
 
 
     // Member Functions
@@ -131,7 +130,7 @@ public:
         {
             return U_;
         }
-    
+
         const surfaceScalarField& phi() const
         {
             return *phiPtr_;

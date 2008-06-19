@@ -22,9 +22,11 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-LESmodel        oneEqEddy;
+LESmodel            oneEqEddy;
 
-delta           vanDriest;
+printCoeffs         on;
+
+delta               vanDriest;
 
 laminarCoeffs
 {

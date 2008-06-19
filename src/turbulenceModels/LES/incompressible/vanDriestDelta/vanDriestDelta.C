@@ -35,6 +35,8 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -143,6 +145,7 @@ void vanDriestDelta::correct()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

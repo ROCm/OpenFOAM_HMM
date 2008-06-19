@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::LESmodels::nuSgsWallFunctionFvPatchScalarField
+    Foam::incompressible::LES::nuSgsWallFunctionFvPatchScalarField
 
 Description
     wall function boundary condition for incompressible flows
@@ -41,6 +41,8 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace incompressible
 {
 namespace LES
 {
@@ -139,6 +141,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -22,9 +22,12 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-LESmodel        oneEqEddy;
+LESmodel            oneEqEddy;
 
-delta           cubeRootVol;
+delta               cubeRootVol;
+
+
+printCoeffs         on;
 
 laminarCoeffs
 {

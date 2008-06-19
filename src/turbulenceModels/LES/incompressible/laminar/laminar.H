@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::LESmodels::laminar
+    Foam::incompressible::LES::laminar
 
 Description
     LES model for laminar incompressible flow.
@@ -44,6 +44,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace incompressible
+{
 namespace LES
 {
 
@@ -59,7 +61,7 @@ class laminar
 
         // Disallow default bitwise copy construct and assignment
         laminar(const laminar&);
-        laminar& operator=(const laminar&);       
+        laminar& operator=(const laminar&);
 
 
 public:
@@ -86,7 +88,7 @@ public:
 
 
     // Member Functions
-        
+
         //- Return SGS kinetic energy
         tmp<volScalarField> k() const;
 
@@ -118,6 +120,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LES
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

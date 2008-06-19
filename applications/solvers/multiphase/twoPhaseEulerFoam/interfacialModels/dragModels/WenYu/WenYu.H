@@ -83,9 +83,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~WenYu();
+    //- Destructor
+    virtual ~WenYu();
 
 
     // Member Functions

@@ -107,9 +107,8 @@ public:
         static autoPtr<className> New();
 
 
-    // Destructor
-
-        ~className();
+    //- Destructor
+    ~className();
 
 
     // Member Functions

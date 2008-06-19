@@ -27,7 +27,7 @@ Class
 
 Description
     Syamlal, M., Rogers, W. and O'Brien, T. J. (1993) MFIX documentation,
-    Theory Guide. Technical Note DOE/METC-94/1004. Morgantown, West Virginia, 
+    Theory Guide. Technical Note DOE/METC-94/1004. Morgantown, West Virginia,
     USA.
 
 SourceFiles
@@ -55,7 +55,7 @@ class SyamlalOBrien
 {
 
 public:
-    
+
     //- Runtime type information
     TypeName("SyamlalOBrien");
 
@@ -72,9 +72,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~SyamlalOBrien();
+    //- Destructor
+    virtual ~SyamlalOBrien();
 
 
     // Member Functions

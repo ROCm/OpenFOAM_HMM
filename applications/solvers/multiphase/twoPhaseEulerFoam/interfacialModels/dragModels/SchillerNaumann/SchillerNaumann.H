@@ -52,7 +52,7 @@ class SchillerNaumann
 {
 
 public:
-    
+
     //- Runtime type information
     TypeName("SchillerNaumann");
 
@@ -69,9 +69,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~SchillerNaumann();
+    //- Destructor
+    virtual ~SchillerNaumann();
 
 
     // Member Functions

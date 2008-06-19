@@ -22,9 +22,12 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-LESmodel        oneEqEddy;
+LESmodel            oneEqEddy;
 
-delta           cubeRootVol;
+delta               cubeRootVol;
+
+
+printCoeffs         on;
 
 laminarCoeffs
 {
@@ -39,7 +42,7 @@ oneEqEddyCoeffs
 dynOneEqEddyCoeffs
 {
     ce               1.05;
-    filter          simple;
+    filter           simple;
 }
 
 lowReOneEqEddyCoeffs

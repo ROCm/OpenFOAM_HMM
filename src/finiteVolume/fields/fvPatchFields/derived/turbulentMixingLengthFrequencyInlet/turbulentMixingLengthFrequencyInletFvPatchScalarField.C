@@ -120,7 +120,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
         word(turbulenceProperties.lookup("RASmodel")) + "Coeffs"
     );
 
-    scalar Cmu = dimensionedScalar(turbulenceCoeffs.lookup("Cmu")).value();
+    scalar Cmu = readScalar(turbulenceCoeffs.lookup("Cmu"));
     scalar Cmu25 = pow(Cmu, 0.25);
 
     const fvPatchField<scalar>& kp =
