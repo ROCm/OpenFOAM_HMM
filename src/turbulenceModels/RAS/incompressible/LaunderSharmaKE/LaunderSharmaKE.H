@@ -58,10 +58,10 @@ class LaunderSharmaKE
 {
     // Private data
 
-        scalar Cmu;
-        scalar C1;
-        scalar C2;
-        scalar alphaEps;
+        dimensionedScalar Cmu_;
+        dimensionedScalar C1_;
+        dimensionedScalar C2_;
+        dimensionedScalar alphaEps_;
 
         volScalarField k_;
         volScalarField epsilonTilda_;
@@ -119,7 +119,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
+                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
             );
         }
 

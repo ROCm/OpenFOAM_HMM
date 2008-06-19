@@ -58,18 +58,18 @@ class LRR
 {
     // Private data
 
-        scalar Cmu;
+        dimensionedScalar Cmu_;
 
-        scalar Clrr1;
-        scalar Clrr2;
+        dimensionedScalar Clrr1_;
+        dimensionedScalar Clrr2_;
 
-        scalar C1;
-        scalar C2;
-        scalar Cs;
-        scalar Ceps;
-        scalar alphaEps;
+        dimensionedScalar C1_;
+        dimensionedScalar C2_;
+        dimensionedScalar Cs_;
+        dimensionedScalar Ceps_;
+        dimensionedScalar alphaEps_;
 
-        scalar couplingFactor_;
+        dimensionedScalar couplingFactor_;
 
         volSymmTensorField R_;
         volScalarField k_;
@@ -121,7 +121,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
+                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
             );
         }
 

@@ -75,16 +75,16 @@ class SpalartAllmaras
 {
     // Private data
 
-        scalar alphaNut;
-        scalar alphah;
+        dimensionedScalar alphaNut_;
+        dimensionedScalar alphah_;
 
-        scalar Cb1;
-        scalar Cb2;
-        scalar Cw1;
-        scalar Cw2;
-        scalar Cw3;
-        scalar Cv1;
-        scalar Cv2;
+        dimensionedScalar Cb1_;
+        dimensionedScalar Cb2_;
+        dimensionedScalar Cw1_;
+        dimensionedScalar Cw2_;
+        dimensionedScalar Cw3_;
+        dimensionedScalar Cv1_;
+        dimensionedScalar Cv2_;
 
         volScalarField nuTilda_;
         volScalarField mut_;
@@ -146,7 +146,11 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DnuTildaEff", alphaNut*rho_*nuTilda_ + mu())
+                new volScalarField
+                (
+                    "DnuTildaEff",
+                    alphaNut_*rho_*nuTilda_ + mu()
+                )
             );
         }
 	      //- Return the effective turbulent thermal diffusivity
@@ -154,7 +158,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*mut_ + alpha())
             );
         }
 

@@ -55,23 +55,105 @@ LRR::LRR
 :
     RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Clrr1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clrr1", 1.8)),
-    Clrr2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clrr2", 0.6)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    Cs(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
-    Ceps(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
+    Cmu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
+    ),
+    Clrr1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Clrr1",
+            RASmodelCoeffs_,
+            1.8
+        )
+    ),
+    Clrr2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Clrr2",
+            RASmodelCoeffs_,
+            0.6
+        )
+    ),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    Cs_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cs",
+            RASmodelCoeffs_,
+            0.25
+        )
+    ),
+    Ceps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ceps",
+            RASmodelCoeffs_,
+            0.15
+        )
+    ),
     couplingFactor_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "couplingFactor",
+            RASmodelCoeffs_,
+            0.0
+        )
     ),
-    alphaR(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaR", 1.22)),
-    alphaEps
+    alphaR_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaR",
+            RASmodelCoeffs_,
+            1.22
+        )
     ),
-    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.76923
+        )
+    ),
+    alphah_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphah",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
 
     R_
     (
@@ -122,12 +204,12 @@ LRR::LRR
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        Cmu*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
     )
 {
 #   include "wallViscosityI.H"
 
-    if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
+    if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
         FatalErrorIn
         (
@@ -167,7 +249,7 @@ tmp<volSymmTensorField> LRR::devRhoReff() const
 
 tmp<fvVectorMatrix> LRR::divDevRhoReff(volVectorField& U) const
 {
-    if (couplingFactor_ > 0.0)
+    if (couplingFactor_.value() > 0.0)
     {
         return
         (
@@ -194,23 +276,19 @@ bool LRR::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("Clrr1", Clrr1);
-        RASmodelCoeffs_.readIfPresent<scalar>("Clrr2", Clrr2);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cs", Cs);
-        RASmodelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaR", alphaR);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
-        RASmodelCoeffs_.readIfPresent<scalar>
-        (
-            "couplingFactor",
-            couplingFactor_
-        );
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        Clrr1_.readIfPresent(RASmodelCoeffs_);
+        Clrr2_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        Cs_.readIfPresent(RASmodelCoeffs_);
+        Ceps_.readIfPresent(RASmodelCoeffs_);
+        alphaR_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        alphah_.readIfPresent(RASmodelCoeffs_);
+        couplingFactor_.readIfPresent(RASmodelCoeffs_);
 
-        if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
+        if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
             FatalErrorIn("LRR::read()")
                 << "couplingFactor = " << couplingFactor_
@@ -232,7 +310,7 @@ void LRR::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         return;
     }
 
@@ -251,8 +329,8 @@ void LRR::correct()
     //- fvm::laplacian(Ceps*rho_*(k_/epsilon_)*R_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        C1*rho_*G*epsilon_/k_
-      - fvm::Sp(C2*rho_*epsilon_/k_, epsilon_)
+        C1_*rho_*G*epsilon_/k_
+      - fvm::Sp(C2_*rho_*epsilon_/k_, epsilon_)
     );
 
     epsEqn().relax();
@@ -289,11 +367,11 @@ void LRR::correct()
       + fvm::div(phi_, R_)
     //- fvm::laplacian(Cs*rho_*(k_/epsilon_)*R_, R_)
       - fvm::laplacian(DREff(), R_)
-      + fvm::Sp(Clrr1*rho_*epsilon_/k_, R_)
+      + fvm::Sp(Clrr1_*rho_*epsilon_/k_, R_)
      ==
         rho_*P
-      - (2.0/3.0*(1 - Clrr1)*I)*rho_*epsilon_
-      - Clrr2*rho_*dev(P)
+      - (2.0/3.0*(1 - Clrr1_)*I)*rho_*epsilon_
+      - Clrr2_*rho_*dev(P)
     );
 
     REqn().relax();
@@ -319,7 +397,7 @@ void LRR::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
 
 #   include "wallViscosityI.H"
 

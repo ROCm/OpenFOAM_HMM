@@ -66,7 +66,15 @@ oneEqEddy::oneEqEddy
         mesh_
     ),
 
-    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.094))
+    ck_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ck",
+            LESmodelProperties(),
+            0.094
+        )
+    )
 {
     printCoeffs();
 }
@@ -101,7 +109,7 @@ bool oneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
+        ck_.readIfPresent(LESmodelProperties());
 
         return true;
     }

@@ -55,8 +55,24 @@ lowReOneEqEddy::lowReOneEqEddy
     LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
-    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", ck_)),
-    beta_(LESmodelProperties().lookupOrAddDefault("beta", beta_))
+    ck_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ck",
+            LESmodelProperties(),
+            0.07
+        )
+    ),
+    beta_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "beta",
+            LESmodelProperties(),
+            0.01
+        )
+    )
 {
     printCoeffs();
 }
@@ -100,8 +116,8 @@ bool lowReOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
-        LESmodelProperties().readIfPresent<scalar>("beta", beta_);
+        ck_.readIfPresent(LESmodelProperties());
+        beta_.readIfPresent(LESmodelProperties());
 
         return true;
     }

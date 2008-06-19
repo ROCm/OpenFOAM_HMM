@@ -86,27 +86,27 @@ class kOmegaSST
 {
     // Private data
 
-        scalar alphaK1;
-        scalar alphaK2;
+        dimensionedScalar alphaK1_;
+        dimensionedScalar alphaK2_;
 
-        scalar alphaOmega1;
-        scalar alphaOmega2;
+        dimensionedScalar alphaOmega1_;
+        dimensionedScalar alphaOmega2_;
 
-        scalar gamma1;
-        scalar gamma2;
+        dimensionedScalar gamma1_;
+        dimensionedScalar gamma2_;
 
-        scalar beta1;
-        scalar beta2;
+        dimensionedScalar beta1_;
+        dimensionedScalar beta2_;
 
-        scalar betaStar;
+        dimensionedScalar betaStar_;
 
-        scalar a1;
-        scalar c1;
+        dimensionedScalar a1_;
+        dimensionedScalar c1_;
 
         dimensionedScalar omega0_;
         dimensionedScalar omegaSmall_;
 
-        scalar Cmu;
+        dimensionedScalar Cmu_;
 
         wallDist y_;
 
@@ -135,7 +135,7 @@ class kOmegaSST
             const volScalarField& F1
         ) const
         {
-            return blend(F1, alphaK1, alphaK2);
+            return blend(F1, alphaK1_, alphaK2_);
         }
 
         tmp<volScalarField> alphaOmega
@@ -143,7 +143,7 @@ class kOmegaSST
             const volScalarField& F1
         ) const
         {
-            return blend(F1, alphaOmega1, alphaOmega2);
+            return blend(F1, alphaOmega1_, alphaOmega2_);
         }
 
         tmp<volScalarField> beta
@@ -151,7 +151,7 @@ class kOmegaSST
             const volScalarField& F1
         ) const
         {
-            return blend(F1, beta1, beta2);
+            return blend(F1, beta1_, beta2_);
         }
 
         tmp<volScalarField> gamma
@@ -159,7 +159,7 @@ class kOmegaSST
             const volScalarField& F1
         ) const
         {
-            return blend(F1, gamma1, gamma2);
+            return blend(F1, gamma1_, gamma2_);
         }
 
 
@@ -236,7 +236,7 @@ public:
                         mesh_.time().timeName(),
                         mesh_
                     ),
-                    betaStar*k_*omega_,
+                    betaStar_*k_*omega_,
                     omega_.boundaryField().types()
                 )
             );

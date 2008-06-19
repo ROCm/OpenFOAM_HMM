@@ -69,9 +69,9 @@ class GenSGSStress
 
 protected:
 
-        scalar ce_;
+        dimensionedScalar ce_;
 
-        scalar couplingFactor_;
+        dimensionedScalar couplingFactor_;
 
         volSymmTensorField B_;
         volScalarField nuSgs_;

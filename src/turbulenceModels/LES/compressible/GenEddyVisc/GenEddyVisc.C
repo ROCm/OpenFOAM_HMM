@@ -51,7 +51,15 @@ GenEddyVisc::GenEddyVisc
         word("GenEddyVisc"), rho, U, phi, thermoPhysicalModel
     ),
 
-    ce_(LESmodelProperties().lookupOrAddDefault<scalar>("ce", 1.048)),
+    ce_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ce",
+            LESmodelProperties(),
+            1.048
+        )
+    ),
 
     k_
     (
@@ -116,7 +124,7 @@ bool GenEddyVisc::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ce", ce_);
+        ce_.readIfPresent(LESmodelProperties());
 
         return true;
     }

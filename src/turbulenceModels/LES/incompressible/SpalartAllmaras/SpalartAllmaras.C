@@ -103,17 +103,98 @@ SpalartAllmaras::SpalartAllmaras
 :
     LESmodel(typeName, U, phi, transport),
 
-    alphaNut_(LESmodelProperties().lookupOrAddDefault<scalar>("alphaNut", 1.5)),
-    Cb1_(LESmodelProperties().lookupOrAddDefault<scalar>("Cb1", 0.1355)),
-    Cb2_(LESmodelProperties().lookupOrAddDefault<scalar>("Cb2", 0.622)),
-    Cv1_(LESmodelProperties().lookupOrAddDefault<scalar>("Cv1", 7.1)),
-    Cv2_(LESmodelProperties().lookupOrAddDefault<scalar>("Cv2", 5.0)),
-    CDES_(LESmodelProperties().lookupOrAddDefault<scalar>("CDES", 0.65)),
-    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.07)),
-    kappa_(lookupOrAddDefault<scalar>("kappa", 0.4187)),
+
+    alphaNut_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaNut",
+            LESmodelProperties(),
+            1.5
+        )
+    ),
+    Cb1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cb1",
+            LESmodelProperties(),
+            0.1355
+        )
+    ),
+    Cb2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cb2",
+            LESmodelProperties(),
+            0.622
+        )
+    ),
+    Cv1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cv1",
+            LESmodelProperties(),
+            7.1
+        )
+    ),
+    Cv2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cv2",
+            LESmodelProperties(),
+            5.0
+        )
+    ),
+    CDES_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "CDES",
+            LESmodelProperties(),
+            0.65
+        )
+    ),
+    ck_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ck",
+            LESmodelProperties(),
+            0.07
+        )
+    ),
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa",
+            *this,
+            0.4187
+        )
+    ),
     Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
-    Cw2_(LESmodelProperties().lookupOrAddDefault<scalar>("Cw2", 0.3)),
-    Cw3_(LESmodelProperties().lookupOrAddDefault<scalar>("Cw3", 2.0)),
+    Cw2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cw2",
+            LESmodelProperties(),
+            0.3
+        )
+    ),
+    Cw3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cw3",
+            LESmodelProperties(),
+            2.0
+        )
+    ),
 
     nuTilda_
     (
@@ -216,17 +297,17 @@ bool SpalartAllmaras::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("alphaNut", alphaNut_);
-        LESmodelProperties().readIfPresent<scalar>("Cb1", Cb1_);
-        LESmodelProperties().readIfPresent<scalar>("Cb2", Cb2_);
+        alphaNut_.readIfPresent(LESmodelProperties());
+        Cb1_.readIfPresent(LESmodelProperties());
+        Cb2_.readIfPresent(LESmodelProperties());
         Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
-        LESmodelProperties().readIfPresent<scalar>("Cw2", Cw2_);
-        LESmodelProperties().readIfPresent<scalar>("Cw3", Cw3_);
-        LESmodelProperties().readIfPresent<scalar>("Cv1", Cv1_);
-        LESmodelProperties().readIfPresent<scalar>("Cv2", Cv2_);
-        LESmodelProperties().readIfPresent<scalar>("CDES", CDES_);
-        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
-        readIfPresent<scalar>("kappa", kappa_);
+        Cw2_.readIfPresent(LESmodelProperties());
+        Cw3_.readIfPresent(LESmodelProperties());
+        Cv1_.readIfPresent(LESmodelProperties());
+        Cv2_.readIfPresent(LESmodelProperties());
+        CDES_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(LESmodelProperties());
+        kappa_.readIfPresent(*this);
 
         return true;
     }

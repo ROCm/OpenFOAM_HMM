@@ -58,15 +58,15 @@ class RNGkEpsilon
 {
     // Private data
 
-        scalar Cmu;
-        scalar C1;
-        scalar C2;
-        scalar C3;
-        scalar alphak;
-        scalar alphaEps;
-        scalar alphah;
-        scalar eta0;
-        scalar beta;
+        dimensionedScalar Cmu_;
+        dimensionedScalar C1_;
+        dimensionedScalar C2_;
+        dimensionedScalar C3_;
+        dimensionedScalar alphak_;
+        dimensionedScalar alphaEps_;
+        dimensionedScalar alphah_;
+        dimensionedScalar eta0_;
+        dimensionedScalar beta_;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -108,7 +108,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak*mut_ + mu())
+                new volScalarField("DkEff", alphak_*mut_ + mu())
             );
         }
 
@@ -117,7 +117,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*mut_ + mu())
+                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
             );
         }
 
@@ -126,7 +126,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*mut_ + alpha())
             );
         }
 

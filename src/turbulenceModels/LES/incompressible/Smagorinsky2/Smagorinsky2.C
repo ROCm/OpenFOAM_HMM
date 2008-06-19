@@ -53,7 +53,15 @@ Smagorinsky2::Smagorinsky2
     LESmodel(typeName, U, phi, transport),
     Smagorinsky(U, phi, transport),
 
-    cD2_(LESmodelProperties().lookupOrAddDefault<scalar>("cD2", 0.02))
+    cD2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cD2",
+            LESmodelProperties(),
+            0.02
+        )
+    )
 {
     printCoeffs();
 }
@@ -96,7 +104,7 @@ bool Smagorinsky2::read()
 {
     if (Smagorinsky::read())
     {
-        LESmodelProperties().lookupOrDefault<scalar>("cD2", cD2_);
+        cD2.readIfPresent(LESmodelProperties());
 
         return true;
     }

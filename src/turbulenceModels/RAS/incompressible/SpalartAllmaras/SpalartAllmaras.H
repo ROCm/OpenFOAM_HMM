@@ -74,15 +74,15 @@ class SpalartAllmaras
 {
     // Private data
 
-        scalar alphaNut;
+        dimensionedScalar alphaNut_;
 
-        scalar Cb1;
-        scalar Cb2;
-        scalar Cw1;
-        scalar Cw2;
-        scalar Cw3;
-        scalar Cv1;
-        scalar Cv2;
+        dimensionedScalar Cb1_;
+        dimensionedScalar Cb2_;
+        dimensionedScalar Cw1_;
+        dimensionedScalar Cw2_;
+        dimensionedScalar Cw3_;
+        dimensionedScalar Cv1_;
+        dimensionedScalar Cv2_;
 
         volScalarField nuTilda_;
         volScalarField nut_;

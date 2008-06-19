@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    scalar Cmu25 = pow(Cmu, 0.25);
+    scalar Cmu25 = pow(Cmu_.value(), 0.25);
 
     const fvPatchList& patches = mesh_.boundary();
 

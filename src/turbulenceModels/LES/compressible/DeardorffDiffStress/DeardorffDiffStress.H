@@ -75,8 +75,8 @@ class DeardorffDiffStress
 {
     // Private data
 
-        scalar ck_;
-        scalar cm_;
+        dimensionedScalar ck_;
+        dimensionedScalar cm_;
 
 
     // Private Member Functions

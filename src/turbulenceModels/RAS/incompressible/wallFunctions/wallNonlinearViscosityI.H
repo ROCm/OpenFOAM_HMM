@@ -47,7 +47,7 @@ Description
                 label faceCelli = curPatch.faceCells()[facei];
 
                 //- Using local Cmu
-                scalar Cmu25 = pow(Cmu[faceCelli], 0.25);
+                scalar Cmu25 = pow(Cmu_[faceCelli], 0.25);
 
                 scalar yPlus =
                     Cmu25*y_[patchi][facei]*sqrt(k_[faceCelli])/nuw[facei];

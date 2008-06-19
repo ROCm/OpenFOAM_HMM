@@ -57,30 +57,30 @@ class LienCubicKE
 {
     // Private data
 
-        scalar C1;
-        scalar C2;
-        scalar alphak;
-        scalar alphaEps;
-        scalar A1;
-        scalar A2;
-        scalar Ctau1;
-        scalar Ctau2;
-        scalar Ctau3;
-        scalar alphaKsi;
+        dimensionedScalar C1_;
+        dimensionedScalar C2_;
+        dimensionedScalar alphak_;
+        dimensionedScalar alphaEps_;
+        dimensionedScalar A1_;
+        dimensionedScalar A2_;
+        dimensionedScalar Ctau1_;
+        dimensionedScalar Ctau2_;
+        dimensionedScalar Ctau3_;
+        dimensionedScalar alphaKsi_;
 
         volScalarField k_;
         volScalarField epsilon_;
 
-        volTensorField gradU;
-        volScalarField eta;
-        volScalarField ksi;
-        volScalarField Cmu;
-        volScalarField fEta;
-        volScalarField C5viscosity;
+        volTensorField gradU_;
+        volScalarField eta_;
+        volScalarField ksi_;
+        volScalarField Cmu_;
+        volScalarField fEta_;
+        volScalarField C5viscosity_;
 
         volScalarField nut_;
 
-        volSymmTensorField nonlinearStress;
+        volSymmTensorField nonlinearStress_;
 
 
 public:
@@ -118,7 +118,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak*nut_ + nu())
+                new volScalarField("DkEff", alphak_*nut_ + nu())
             );
         }
 
@@ -127,7 +127,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
+                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
             );
         }
 

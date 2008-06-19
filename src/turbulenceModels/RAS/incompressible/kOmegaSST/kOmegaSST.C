@@ -58,10 +58,10 @@ tmp<volScalarField> kOmegaSST::F1(const volScalarField& CDkOmega) const
         (
             max
             (
-                (scalar(1)/betaStar)*sqrt(k_)/(omega_*y_),
+                (scalar(1)/betaStar_)*sqrt(k_)/(omega_*y_),
                 scalar(500)*nu()/(sqr(y_)*omega_)
             ),
-            (4*alphaOmega2)*k_/(CDkOmegaPlus*sqr(y_))
+            (4*alphaOmega2_)*k_/(CDkOmegaPlus*sqr(y_))
         ),
         scalar(10)
     );
@@ -75,7 +75,7 @@ tmp<volScalarField> kOmegaSST::F2() const
     (
         max
         (
-            (scalar(2)/betaStar)*sqrt(k_)/(omega_*y_),
+            (scalar(2)/betaStar_)*sqrt(k_)/(omega_*y_),
             scalar(500)*nu()/(sqr(y_)*omega_)
         ),
         scalar(100)
@@ -96,34 +96,118 @@ kOmegaSST::kOmegaSST
 :
     RASmodel(typeName, U, phi, lamTransportModel),
 
-    alphaK1
+    alphaK1_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaK1", 0.85034)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaK1",
+            RASmodelCoeffs_,
+            0.85034
+        )
     ),
-    alphaK2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaK2", 1.0)),
-    alphaOmega1
+    alphaK2_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega1", 0.5)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaK2",
+            RASmodelCoeffs_,
+            1.0
+        )
     ),
-    alphaOmega2
+    alphaOmega1_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaOmega2", 0.85616)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaOmega1",
+            RASmodelCoeffs_,
+            0.5
+        )
     ),
-    gamma1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("gamma1", 0.5532)),
-    gamma2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("gamma2", 0.4403)),
-    beta1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta1", 0.075)),
-    beta2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta2", 0.0828)),
-    betaStar
+    alphaOmega2_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("betaStar", 0.09)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaOmega2",
+            RASmodelCoeffs_,
+            0.85616
+        )
     ),
-    a1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("a1", 0.31)),
-    c1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("c1", 10.0)),
+    gamma1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "gamma1",
+            RASmodelCoeffs_,
+            0.5532
+        )
+    ),
+    gamma2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "gamma2",
+            RASmodelCoeffs_,
+            0.4403
+        )
+    ),
+    beta1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "beta1",
+            RASmodelCoeffs_,
+            0.075
+        )
+    ),
+    beta2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "beta2",
+            RASmodelCoeffs_,
+            0.0828
+        )
+    ),
+    betaStar_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "betaStar",
+            RASmodelCoeffs_,
+            0.09
+        )
+    ),
+    a1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "a1",
+            RASmodelCoeffs_,
+            0.31
+        )
+    ),
+    c1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "c1",
+            RASmodelCoeffs_,
+            10.0
+        )
+    ),
 
     omega0_("omega0", dimless/dimTime, SMALL),
     omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Cmu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
+    ),
 
     y_(mesh_),
 
@@ -153,7 +237,7 @@ kOmegaSST::kOmegaSST
         mesh_
     ),
 
-    nut_(a1*k_/max(a1*(omega_ + omegaSmall_), F2()*mag(symm(fvc::grad(U_)))))
+    nut_(a1_*k_/max(a1_*(omega_ + omegaSmall_), F2()*mag(symm(fvc::grad(U_)))))
 {
 #   include "kOmegaWallViscosityI.H"
 
@@ -218,26 +302,18 @@ bool kOmegaSST::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaK1", alphaK1);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaK2", alphaK2);
-        RASmodelCoeffs_.readIfPresent<scalar>
-        (
-            "alphaOmega1",
-            alphaOmega1
-        );
-        RASmodelCoeffs_.readIfPresent<scalar>
-        (
-            "alphaOmega2",
-            alphaOmega2
-        );
-        RASmodelCoeffs_.readIfPresent<scalar>("gamma1", gamma1);
-        RASmodelCoeffs_.readIfPresent<scalar>("gamma2", gamma2);
-        RASmodelCoeffs_.readIfPresent<scalar>("beta1", beta1);
-        RASmodelCoeffs_.readIfPresent<scalar>("beta2", beta2);
-        RASmodelCoeffs_.readIfPresent<scalar>("betaStar", betaStar);
-        RASmodelCoeffs_.readIfPresent<scalar>("a1", a1);
-        RASmodelCoeffs_.readIfPresent<scalar>("c1", c1);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
+        alphaK1_.readIfPresent(RASmodelCoeffs_);
+        alphaK2_.readIfPresent(RASmodelCoeffs_);
+        alphaOmega1_.readIfPresent(RASmodelCoeffs_);
+        alphaOmega2_.readIfPresent(RASmodelCoeffs_);
+        gamma1_.readIfPresent(RASmodelCoeffs_);
+        gamma2_.readIfPresent(RASmodelCoeffs_);
+        beta1_.readIfPresent(RASmodelCoeffs_);
+        beta2_.readIfPresent(RASmodelCoeffs_);
+        betaStar_.readIfPresent(RASmodelCoeffs_);
+        a1_.readIfPresent(RASmodelCoeffs_);
+        c1_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -270,7 +346,7 @@ void kOmegaSST::correct()
 #   include "kOmegaWallFunctionsI.H"
 
     volScalarField CDkOmega =
-        (2*alphaOmega2)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
+        (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
 
     volScalarField F1 = this->F1(CDkOmega);
 
@@ -306,8 +382,8 @@ void kOmegaSST::correct()
       - fvm::Sp(fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(F1), k_)
      ==
-        min(G, c1*betaStar*k_*omega_)
-      - fvm::Sp(betaStar*omega_, k_)
+        min(G, c1_*betaStar_*k_*omega_)
+      - fvm::Sp(betaStar_*omega_, k_)
     );
 
     kEqn().relax();
@@ -316,7 +392,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    nut_ = a1*k_/max(a1*omega_, F2()*sqrt(S2));
+    nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
 
 #   include "kOmegaWallViscosityI.H"
 

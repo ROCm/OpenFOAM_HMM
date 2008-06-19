@@ -68,12 +68,12 @@ class realizableKE
 {
     // Private data
 
-        scalar Cmu;
-        scalar A0;
-        scalar C2;
-        scalar alphak;
-        scalar alphaEps;
-        scalar alphah;
+        dimensionedScalar Cmu_;
+        dimensionedScalar A0_;
+        dimensionedScalar C2_;
+        dimensionedScalar alphak_;
+        dimensionedScalar alphaEps_;
+        dimensionedScalar alphah_;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -126,7 +126,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak*mut_ + mu())
+                new volScalarField("DkEff", alphak_*mut_ + mu())
             );
         }
 
@@ -135,7 +135,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*mut_ + mu())
+                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
             );
         }
 
@@ -144,7 +144,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*mut_ + alpha())
             );
         }
 

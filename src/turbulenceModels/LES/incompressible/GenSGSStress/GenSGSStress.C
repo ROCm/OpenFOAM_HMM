@@ -46,10 +46,24 @@ GenSGSStress::GenSGSStress
 :
     LESmodel(word("GenSGSStress"), U, phi, transport),
 
-    ce_(LESmodelProperties().lookupOrAddDefault<scalar>("ce", 1.048)),
+    ce_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ce",
+            LESmodelProperties(),
+            1.048
+        )
+    ),
+
     couplingFactor_
     (
-        LESmodelProperties().lookupOrAddDefault<scalar>("couplingFactor", 0.0)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "couplingFactor",
+            LESmodelProperties(),
+            0.0
+        )
     ),
 
     B_
@@ -79,7 +93,7 @@ GenSGSStress::GenSGSStress
         B_.boundaryField().types()
     )
 {
-    if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
+    if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
         FatalErrorIn
         (
@@ -120,7 +134,7 @@ tmp<fvVectorMatrix> GenSGSStress::divDevBeff
     volVectorField& U
 ) const
 {
-    if (couplingFactor_ > 0.0)
+    if (couplingFactor_.value() > 0.0)
     {
         return
         (
@@ -148,15 +162,11 @@ bool GenSGSStress::read()
 {
     if (LESmodel::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ce", ce_);
+        ce_.readIfPresent(LESmodelProperties());
 
-        LESmodelProperties().readIfPresent<scalar>
-        (
-            "couplingFactor",
-            couplingFactor_
-        );
+        couplingFactor_.readIfPresent(LESmodelProperties());
 
-        if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
+        if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
             FatalErrorIn("GenSGSStress::read()")
                 << "couplingFactor = " << couplingFactor_
