@@ -55,18 +55,87 @@ RNGkEpsilon::RNGkEpsilon
 :
     RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.0845)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.42)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.68)),
-    C3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C3", -0.33)),
-    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.39)),
-    alphaEps
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 1.39)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.0845
+        )
     ),
-    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
-    eta0(RASmodelCoeffs_.lookupOrAddDefault<scalar>("eta0", 4.38)),
-    beta(RASmodelCoeffs_.lookupOrAddDefault<scalar>("beta", 0.012)),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.42
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.68
+        )
+    ),
+    C3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C3",
+            RASmodelCoeffs_,
+            -0.33
+        )
+    ),
+    alphak_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphak",
+            RASmodelCoeffs_,
+            1.39
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            1.39
+        )
+    ),
+    alphah_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphah",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
+    eta0_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "eta0",
+            RASmodelCoeffs_,
+            4.38
+        )
+    ),
+    beta_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "beta",
+            RASmodelCoeffs_,
+            0.012
+        )
+    ),
 
     k_
     (
@@ -104,7 +173,7 @@ RNGkEpsilon::RNGkEpsilon
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        Cmu*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
     )
 {
 #   include "wallViscosityI.H"
@@ -169,15 +238,15 @@ bool RNGkEpsilon::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("C3", C3);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
-        RASmodelCoeffs_.readIfPresent<scalar>("eta0", eta0);
-        RASmodelCoeffs_.readIfPresent<scalar>("beta", beta);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        C3_.readIfPresent(RASmodelCoeffs_);
+        alphak_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        alphah_.readIfPresent(RASmodelCoeffs_);
+        eta0_.readIfPresent(RASmodelCoeffs_);
+        beta_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -193,7 +262,7 @@ void RNGkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         return;
     }
 
@@ -216,7 +285,7 @@ void RNGkEpsilon::correct()
     volScalarField eta3 = eta*sqr(eta);
 
     volScalarField R =
-        ((eta*(-eta/eta0 + scalar(1)))/(beta*eta3 + scalar(1)));
+        ((eta*(-eta/eta0_ + scalar(1)))/(beta_*eta3 + scalar(1)));
 
 #   include "wallFunctionsI.H"
 
@@ -227,9 +296,9 @@ void RNGkEpsilon::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
       ==
-        (C1 - R)*G*epsilon_/k_
-      - fvm::SuSp(((2.0/3.0)*C1 + C3)*rho_*divU, epsilon_)
-      - fvm::Sp(C2*rho_*epsilon_/k_, epsilon_)
+        (C1_ - R)*G*epsilon_/k_
+      - fvm::SuSp(((2.0/3.0)*C1_ + C3_)*rho_*divU, epsilon_)
+      - fvm::Sp(C2_*rho_*epsilon_/k_, epsilon_)
     );
 
     epsEqn().relax();
@@ -258,7 +327,7 @@ void RNGkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
 
 #   include "wallViscosityI.H"
 

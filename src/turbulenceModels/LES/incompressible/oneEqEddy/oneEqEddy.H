@@ -78,7 +78,7 @@ class oneEqEddy
 
         volScalarField k_;
 
-        scalar ck_;
+        dimensionedScalar ck_;
 
 
     // Private Member Functions

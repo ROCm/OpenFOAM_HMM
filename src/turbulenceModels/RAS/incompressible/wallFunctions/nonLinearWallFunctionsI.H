@@ -26,7 +26,7 @@ Global
     nonLinearwallFunctions
 
 Description
-    Calculate wall generation and dissipation from wall-functions 
+    Calculate wall generation and dissipation from wall-functions
     for non-linear models.
 
 \*---------------------------------------------------------------------------*/
@@ -73,8 +73,8 @@ Description
                 label faceCelli = curPatch.faceCells()[facei];
 
                 //- using local Cmu !
-                scalar Cmu25 = pow(Cmu[faceCelli], 0.25);
-                scalar Cmu75 = pow(Cmu[faceCelli], 0.75);
+                scalar Cmu25 = pow(Cmu_[faceCelli], 0.25);
+                scalar Cmu75 = pow(Cmu_[faceCelli], 0.75);
 
                 scalar yPlus =
                     Cmu25*y_[patchi][facei]
@@ -98,7 +98,7 @@ Description
                         *magFaceGradU[facei]
                         *Cmu25*sqrt(k_[faceCelli])
                         /(kappa_*y_[patchi][facei])
-                      - (nonlinearStress[faceCelli] && gradU[faceCelli]);
+                      - (nonlinearStress_[faceCelli] && gradU_[faceCelli]);
                 }
             }
         }

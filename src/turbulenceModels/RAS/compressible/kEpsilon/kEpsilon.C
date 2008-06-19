@@ -54,16 +54,69 @@ kEpsilon::kEpsilon
 :
     RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    C3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C3", -0.33)),
-    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
-    alphaEps
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
     ),
-    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    C3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C3",
+            RASmodelCoeffs_,
+            -0.33
+        )
+    ),
+    alphak_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphak",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.76923
+        )
+    ),
+    alphah_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphah",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
 
     k_
     (
@@ -101,7 +154,7 @@ kEpsilon::kEpsilon
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        Cmu*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
     )
 {
 #   include "wallViscosityI.H"
@@ -167,13 +220,13 @@ bool kEpsilon::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("C3", C3);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        C3_.readIfPresent(RASmodelCoeffs_);
+        alphak_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        alphah_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -189,7 +242,7 @@ void kEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
 #       include "wallViscosityI.H"
         return;
     }
@@ -216,9 +269,9 @@ void kEpsilon::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        C1*G*epsilon_/k_
-      - fvm::SuSp(((2.0/3.0)*C1 + C3)*rho_*divU, epsilon_)
-      - fvm::Sp(C2*rho_*epsilon_/k_, epsilon_)
+        C1_*G*epsilon_/k_
+      - fvm::SuSp(((2.0/3.0)*C1_ + C3_)*rho_*divU, epsilon_)
+      - fvm::Sp(C2_*rho_*epsilon_/k_, epsilon_)
     );
 
 #   include "wallDissipationI.H"
@@ -248,7 +301,7 @@ void kEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
 
 #   include "wallViscosityI.H"
 

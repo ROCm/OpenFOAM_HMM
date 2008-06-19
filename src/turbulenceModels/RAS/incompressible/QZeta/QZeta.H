@@ -58,11 +58,11 @@ class QZeta
 {
     // Private data
 
-        scalar Cmu;
-        scalar C1;
-        scalar C2;
-        scalar alphaZeta;
-        Switch Anisotropic;
+        dimensionedScalar Cmu_;
+        dimensionedScalar C1_;
+        dimensionedScalar C2_;
+        dimensionedScalar alphaZeta_;
+        Switch anisotropic_;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -123,7 +123,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DzetaEff", alphaZeta*nut_ + nu())
+                new volScalarField("DzetaEff", alphaZeta_*nut_ + nu())
             );
         }
 

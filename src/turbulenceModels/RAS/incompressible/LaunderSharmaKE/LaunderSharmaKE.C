@@ -68,12 +68,41 @@ LaunderSharmaKE::LaunderSharmaKE
 :
     RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphaEps
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
+    ),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.76923
+        )
     ),
 
     k_
@@ -102,7 +131,7 @@ LaunderSharmaKE::LaunderSharmaKE
         mesh_
     ),
 
-    nut_(Cmu*fMu()*sqr(k_)/(epsilonTilda_ + epsilonSmall_))
+    nut_(Cmu_*fMu()*sqr(k_)/(epsilonTilda_ + epsilonSmall_))
 {
     printCoeffs();
 }
@@ -165,10 +194,10 @@ bool LaunderSharmaKE::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -206,8 +235,8 @@ void LaunderSharmaKE::correct()
       + fvm::div(phi_, epsilonTilda_)
       - fvm::laplacian(DepsilonEff(), epsilonTilda_)
      ==
-        C1*G*epsilonTilda_/k_
-      - fvm::Sp(C2*f2()*epsilonTilda_/k_, epsilonTilda_)
+        C1_*G*epsilonTilda_/k_
+      - fvm::Sp(C2_*f2()*epsilonTilda_/k_, epsilonTilda_)
       + E
     );
 
@@ -233,7 +262,7 @@ void LaunderSharmaKE::correct()
 
 
     // Re-calculate viscosity
-    nut_ = Cmu*fMu()*sqr(k_)/epsilonTilda_;
+    nut_ = Cmu_*fMu()*sqr(k_)/epsilonTilda_;
 }
 
 

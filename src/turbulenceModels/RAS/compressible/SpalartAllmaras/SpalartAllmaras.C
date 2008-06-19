@@ -53,7 +53,7 @@ tmp<volScalarField> SpalartAllmaras::chi() const
 tmp<volScalarField> SpalartAllmaras::fv1(const volScalarField& chi) const
 {
     volScalarField chi3 = pow3(chi);
-    return chi3/(chi3 + pow3(Cv1));
+    return chi3/(chi3 + pow3(Cv1_));
 }
 
 
@@ -74,11 +74,11 @@ tmp<volScalarField> SpalartAllmaras::fv3
     const volScalarField& fv1
 ) const
 {
-    volScalarField chiByCv2 = (1/Cv2)*chi;
+    volScalarField chiByCv2 = (1/Cv2_)*chi;
 
     return
         (scalar(1) + chi*fv1)
-       *(1/Cv2)
+       *(1/Cv2_)
        *(3*(scalar(1) + chiByCv2) + sqr(chiByCv2))
        /pow3(scalar(1) + chiByCv2);
 }
@@ -97,9 +97,9 @@ tmp<volScalarField> SpalartAllmaras::fw(const volScalarField& Stilda) const
     );
     r.boundaryField() == 0.0;
 
-    volScalarField g = r + Cw2*(pow6(r) - r);
+    volScalarField g = r + Cw2_*(pow6(r) - r);
 
-    return g*pow((1.0 + pow6(Cw3))/(pow6(g) + pow6(Cw3)), 1.0/6.0);
+    return g*pow((1.0 + pow6(Cw3_))/(pow6(g) + pow6(Cw3_)), 1.0/6.0);
 }
 
 
@@ -107,7 +107,7 @@ tmp<volScalarField> SpalartAllmaras::fw(const volScalarField& Stilda) const
 
 SpalartAllmaras::SpalartAllmaras
 (
- const volScalarField& rho,
+    const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
     basicThermo& thermophysicalModel
@@ -115,19 +115,80 @@ SpalartAllmaras::SpalartAllmaras
 :
     RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    alphaNut
+    alphaNut_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaNut", 1.5)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaNut",
+            RASmodelCoeffs_,
+            1.5
+        )
     ),
-    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    alphah_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphah",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
 
-    Cb1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cb1", 0.1355)),
-    Cb2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cb2", 0.622)),
-    Cw1(Cb1/sqr(kappa_) + alphaNut*(1.0 + Cb2)),
-    Cw2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cw2", 0.3)),
-    Cw3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cw3", 2.0)),
-    Cv1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cv1", 7.1)),
-    Cv2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cv2", 5.0)),
+    Cb1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cb1",
+            RASmodelCoeffs_,
+            0.1355
+        )
+    ),
+    Cb2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cb2",
+            RASmodelCoeffs_,
+            0.622
+        )
+    ),
+    Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
+    Cw2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cw2",
+            RASmodelCoeffs_,
+            0.3
+        )
+    ),
+    Cw3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cw3",
+            RASmodelCoeffs_,
+            2.0
+        )
+    ),
+    Cv1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cv1",
+            RASmodelCoeffs_,
+            7.1
+        )
+    ),
+    Cv2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cv2",
+            RASmodelCoeffs_,
+            5.0
+        )
+    ),
 
     nuTilda_
     (
@@ -219,16 +280,16 @@ bool SpalartAllmaras::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaNut", alphaNut);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        alphaNut_.readIfPresent(RASmodelCoeffs_);
+        alphah_.readIfPresent(RASmodelCoeffs_);
 
-        RASmodelCoeffs_.readIfPresent<scalar>("Cb1", Cb1);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cb2", Cb2);
-        Cw1 = Cb1/sqr(kappa_) + alphaNut*(1.0 + Cb2);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cw2", Cw2);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cw3", Cw3);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cv1", Cv1);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cv2", Cv2);
+        Cb1_.readIfPresent(RASmodelCoeffs_);
+        Cb2_.readIfPresent(RASmodelCoeffs_);
+        Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
+        Cw2_.readIfPresent(RASmodelCoeffs_);
+        Cw3_.readIfPresent(RASmodelCoeffs_);
+        Cv1_.readIfPresent(RASmodelCoeffs_);
+        Cv2_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -244,7 +305,7 @@ void SpalartAllmaras::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*nuTilda_*fv1( chi() );
+        mut_ = rho_*nuTilda_*fv1(chi());
         return;
     }
 
@@ -267,10 +328,10 @@ void SpalartAllmaras::correct()
         fvm::ddt(rho_, nuTilda_)
       + fvm::div(phi_, nuTilda_)
       - fvm::laplacian(DnuTildaEff(), nuTilda_)
-      - alphaNut*Cb2*rho_*magSqr(fvc::grad(nuTilda_))
+      - alphaNut_*Cb2_*rho_*magSqr(fvc::grad(nuTilda_))
      ==
-        Cb1*rho_*Stilda*nuTilda_
-      - fvm::Sp(Cw1*fw(Stilda)*nuTilda_*rho_/sqr(d_), nuTilda_)
+        Cb1_*rho_*Stilda*nuTilda_
+      - fvm::Sp(Cw1_*fw(Stilda)*nuTilda_*rho_/sqr(d_), nuTilda_)
     );
 
     nuTildaEqn().relax();

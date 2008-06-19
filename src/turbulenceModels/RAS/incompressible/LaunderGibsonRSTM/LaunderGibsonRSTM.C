@@ -54,23 +54,113 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
 :
     RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Clg1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clg1", 1.8)),
-    Clg2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Clg2", 0.6)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    Cs(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cs", 0.25)),
-    Ceps(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ceps", 0.15)),
-    alphaR(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaR", 1.22)),
-    alphaEps
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
     ),
-    C1Ref(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1Ref", 0.5)),
-    C2Ref(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2Ref", 0.3)),
+    Clg1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Clg1",
+            RASmodelCoeffs_,
+            1.8
+        )
+    ),
+    Clg2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Clg2",
+            RASmodelCoeffs_,
+            0.6
+        )
+    ),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    Cs_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cs",
+            RASmodelCoeffs_,
+            0.25
+        )
+    ),
+    Ceps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ceps",
+            RASmodelCoeffs_,
+            0.15
+        )
+    ),
+    alphaR_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaR",
+            RASmodelCoeffs_,
+            1.22
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.76923
+        )
+    ),
+    C1Ref_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1Ref",
+            RASmodelCoeffs_,
+            0.5
+        )
+    ),
+    C2Ref_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2Ref",
+            RASmodelCoeffs_,
+            0.3
+        )
+    ),
     couplingFactor_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("couplingFactor", 0.0)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "couplingFactor",
+            RASmodelCoeffs_,
+            0.0
+        )
     ),
 
     yr_(mesh_),
@@ -114,11 +204,11 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         mesh_
     ),
 
-    nut_(Cmu*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_))
 {
 #   include "wallViscosityI.H"
 
-    if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
+    if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
         FatalErrorIn
         (
@@ -158,7 +248,7 @@ tmp<volSymmTensorField> LaunderGibsonRSTM::devReff() const
 
 tmp<fvVectorMatrix> LaunderGibsonRSTM::divDevReff(volVectorField& U) const
 {
-    if (couplingFactor_ > 0.0)
+    if (couplingFactor_.value() > 0.0)
     {
         return
         (
@@ -183,25 +273,21 @@ bool LaunderGibsonRSTM::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("Clg1", Clg1);
-        RASmodelCoeffs_.readIfPresent<scalar>("Clg2", Clg2);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cs", Cs);
-        RASmodelCoeffs_.readIfPresent<scalar>("Ceps", Ceps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaR", alphaR);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1Ref", C1Ref);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2Ref", C2Ref);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        Clg1_.readIfPresent(RASmodelCoeffs_);
+        Clg2_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        Cs_.readIfPresent(RASmodelCoeffs_);
+        Ceps_.readIfPresent(RASmodelCoeffs_);
+        alphaR_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        C1Ref_.readIfPresent(RASmodelCoeffs_);
+        C2Ref_.readIfPresent(RASmodelCoeffs_);
 
-        RASmodelCoeffs_.readIfPresent<scalar>
-        (
-            "couplingFactor",
-            couplingFactor_
-        );
+        couplingFactor_.readIfPresent(RASmodelCoeffs_);
 
-        if (couplingFactor_ < 0.0 || couplingFactor_ > 1.0)
+        if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
             FatalErrorIn("LaunderGibsonRSTM::read()")
                 << "couplingFactor = " << couplingFactor_
@@ -247,8 +333,8 @@ void LaunderGibsonRSTM::correct()
     //- fvm::laplacian(Ceps*(k_/epsilon_)*R_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        C1*G*epsilon_/k_
-      - fvm::Sp(C2*epsilon_/k_, epsilon_)
+        C1_*G*epsilon_/k_
+      - fvm::Sp(C2_*epsilon_/k_, epsilon_)
     );
 
     epsEqn().relax();
@@ -278,7 +364,7 @@ void LaunderGibsonRSTM::correct()
         }
     }
 
-    volSymmTensorField reflect = C1Ref*epsilon_/k_*R_ - C2Ref*Clg2*dev(P);
+    volSymmTensorField reflect = C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P);
 
     tmp<fvSymmTensorMatrix> REqn
     (
@@ -286,11 +372,11 @@ void LaunderGibsonRSTM::correct()
       + fvm::div(phi_, R_)
     //- fvm::laplacian(Cs*(k_/epsilon_)*R_, R_)
       - fvm::laplacian(DREff(), R_)
-      + fvm::Sp(Clg1*epsilon_/k_, R_)
+      + fvm::Sp(Clg1_*epsilon_/k_, R_)
       ==
         P
-      + (2.0/3.0*(Clg1 - 1)*I)*epsilon_
-      - Clg2*dev(P)
+      + (2.0/3.0*(Clg1_ - 1)*I)*epsilon_
+      - Clg2_*dev(P)
 
         // wall reflection terms
       + symm
@@ -298,7 +384,7 @@ void LaunderGibsonRSTM::correct()
             I*((yr_.n() & reflect) & yr_.n())
           - 1.5*(yr_.n()*(reflect & yr_.n())
           + (yr_.n() & reflect)*yr_.n())
-        )*pow(Cmu, 0.75)*pow(k_, 1.5)/(kappa_*yr_*epsilon_)
+        )*pow(Cmu_, 0.75)*pow(k_, 1.5)/(kappa_*yr_*epsilon_)
     );
 
     REqn().relax();
@@ -324,7 +410,7 @@ void LaunderGibsonRSTM::correct()
 
 
     // Re-calculate turbulent viscosity
-    nut_ = Cmu*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
 
 
 #   include "wallViscosityI.H"

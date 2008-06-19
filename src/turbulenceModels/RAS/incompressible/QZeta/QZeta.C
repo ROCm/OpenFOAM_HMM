@@ -47,7 +47,7 @@ tmp<volScalarField> QZeta::fMu() const
 {
     volScalarField Rt = q_*k_/(2.0*nu()*zeta_);
 
-    if (Anisotropic)
+    if (anisotropic_)
     {
         return exp((-scalar(2.5) + Rt/20.0)/pow(scalar(1) + Rt/130.0, 3.0));
     }
@@ -79,16 +79,50 @@ QZeta::QZeta
 :
     RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphaZeta
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaZeta", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
     ),
-    Anisotropic
+    C1_
     (
-         RASmodelCoeffs_.lookupOrAddDefault<Switch>("anisotropic", false)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    alphaZeta_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaZeta",
+            RASmodelCoeffs_,
+            0.76923
+        )
+    ),
+    anisotropic_
+    (
+        Switch::lookupOrAddToDict
+        (
+            "anisotropic",
+            RASmodelCoeffs_,
+            false
+        )
     ),
 
     k_
@@ -145,7 +179,7 @@ QZeta::QZeta
         epsilon_.boundaryField().types()
     ),
 
-    nut_(Cmu*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_(Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_))
 {
     printCoeffs();
 }
@@ -208,15 +242,11 @@ bool QZeta::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaZeta", alphaZeta);
-        RASmodelCoeffs_.readIfPresent<Switch>
-        (
-            "anisotropic",
-            Anisotropic
-        );
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        alphaZeta_.readIfPresent(RASmodelCoeffs_);
+        anisotropic_.readIfPresent("anisotropic", RASmodelCoeffs_);
 
         return true;
     }
@@ -252,8 +282,8 @@ void QZeta::correct()
       + fvm::div(phi_, zeta_)
       - fvm::laplacian(DzetaEff(), zeta_)
      ==
-        (2.0*C1 - 1)*G*zeta_/q_
-      - fvm::Sp((2.0*C2 - dimensionedScalar(1.0))*f2()*zeta_/q_, zeta_)
+        (2.0*C1_ - 1)*G*zeta_/q_
+      - fvm::Sp((2.0*C2_ - dimensionedScalar(1.0))*f2()*zeta_/q_, zeta_)
       + E
     );
 
@@ -287,7 +317,7 @@ void QZeta::correct()
 
 
     // Re-calculate viscosity
-    nut_ = Cmu*fMu()*sqr(k_)/epsilon_;
+    nut_ = Cmu_*fMu()*sqr(k_)/epsilon_;
 }
 
 

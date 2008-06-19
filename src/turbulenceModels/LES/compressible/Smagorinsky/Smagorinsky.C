@@ -55,7 +55,15 @@ Smagorinsky::Smagorinsky
     LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
-    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.02))
+    ck_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ck",
+            LESmodelProperties(),
+            0.02
+        )
+    )
 {
     printCoeffs();
 }
@@ -84,7 +92,7 @@ bool Smagorinsky::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
+        ck_.readIfPresent(LESmodelProperties());
 
         return true;
     }

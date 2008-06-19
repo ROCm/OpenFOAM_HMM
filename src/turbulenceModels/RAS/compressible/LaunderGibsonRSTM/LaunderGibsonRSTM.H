@@ -79,24 +79,24 @@ class LaunderGibsonRSTM
 {
     // Private data
 
-        scalar Cmu;
+        dimensionedScalar Cmu_;
 
-        scalar Clg1;
-        scalar Clg2;
+        dimensionedScalar Clg1_;
+        dimensionedScalar Clg2_;
 
-        scalar C1;
-        scalar C2;
-        scalar Cs;
-        scalar Ceps;
+        dimensionedScalar C1_;
+        dimensionedScalar C2_;
+        dimensionedScalar Cs_;
+        dimensionedScalar Ceps_;
 
-        scalar C1Ref;
-        scalar C2Ref;
+        dimensionedScalar C1Ref_;
+        dimensionedScalar C2Ref_;
 
-        scalar couplingFactor_;
+        dimensionedScalar couplingFactor_;
 
-        scalar alphaR;
-        scalar alphaEps;
-        scalar alphah;
+        dimensionedScalar alphaR_;
+        dimensionedScalar alphaEps_;
+        dimensionedScalar alphah_;
 
         wallDistReflection y_;
 
@@ -143,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DREff", alphaR*mut_ + mu())
+                new volScalarField("DREff", alphaR_*mut_ + mu())
             );
         }
 
@@ -152,7 +152,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*mut_ + mu())
+                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
             );
         }
 
@@ -161,7 +161,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*mut_ + alpha())
             );
         }
 

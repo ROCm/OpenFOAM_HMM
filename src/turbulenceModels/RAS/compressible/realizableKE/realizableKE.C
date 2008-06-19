@@ -68,7 +68,7 @@ tmp<volScalarField> realizableKE::rCmu
     volScalarField As = sqrt(6.0)*cos(phis);
     volScalarField Us = sqrt(S2/2.0 + magSqr(skew(gradU)));
 
-    return 1.0/(A0 + As*Us*k_/(epsilon_ + epsilonSmall_));
+    return 1.0/(A0_ + As*Us*k_/(epsilon_ + epsilonSmall_));
 }
 
 
@@ -95,15 +95,60 @@ realizableKE::realizableKE
 :
     RASmodel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    A0(RASmodelCoeffs_.lookupOrAddDefault<scalar>("A0", 4.0)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.9)),
-    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
-    alphaEps
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.833333)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
     ),
-    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    A0_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "A0",
+            RASmodelCoeffs_,
+            4.0
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.9
+        )
+    ),
+    alphak_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphak",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.833333
+        )
+    ),
+    alphah_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphah",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
 
     k_
     (
@@ -208,12 +253,12 @@ bool realizableKE::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("A0", A0);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        A0_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        alphak_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        alphah_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -263,7 +308,7 @@ void realizableKE::correct()
         C1*rho_*magS*epsilon_
       - fvm::Sp
         (
-            C2*rho_*epsilon_/(k_ + sqrt((mu()/rho_)*epsilon_)),
+            C2_*rho_*epsilon_/(k_ + sqrt((mu()/rho_)*epsilon_)),
             epsilon_
         )
     );
