@@ -51,9 +51,23 @@ namespace viscosityModels
 Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::powerLaw::calcNu() const
 {
-    dimensionedScalar tone("tone", dimTime, 1.0);
-    return (max(numin_, min(numax_, k_
-        * pow(tone * strainRate(), n_.value()- scalar(1.0)))));
+    return max
+    (
+        nuMin_,
+        min
+        (
+            nuMax_,
+            k_*pow
+            (
+                max
+                (
+                    dimensionedScalar("one", dimTime, 1.0)*strainRate(),
+                    dimensionedScalar("VSMALL", dimless, VSMALL)
+                ),
+                n_.value() - scalar(1.0)
+            )
+        )
+    );
 }
 
 
@@ -71,8 +85,8 @@ Foam::viscosityModels::powerLaw::powerLaw
     powerLawCoeffs_(viscosityProperties.subDict(typeName + "Coeffs")),
     k_(powerLawCoeffs_.lookup("k")),
     n_(powerLawCoeffs_.lookup("n")),
-    numin_(powerLawCoeffs_.lookup("numin")),
-    numax_(powerLawCoeffs_.lookup("numax")),
+    nuMin_(powerLawCoeffs_.lookup("nuMin")),
+    nuMax_(powerLawCoeffs_.lookup("nuMax")),
     nu_
     (
         IOobject
@@ -101,8 +115,8 @@ bool Foam::viscosityModels::powerLaw::read
 
     powerLawCoeffs_.lookup("k") >> k_;
     powerLawCoeffs_.lookup("n") >> n_;
-    powerLawCoeffs_.lookup("numin") >> numin_;
-    powerLawCoeffs_.lookup("numax") >> numax_;
+    powerLawCoeffs_.lookup("nuMin") >> nuMin_;
+    powerLawCoeffs_.lookup("nuMax") >> nuMax_;
 
     return true;
 }
