@@ -34,7 +34,7 @@ Description
 
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
-#include "compressible/RASmodel/RASmodel.H"
+#include "compressible/RASModel/RASModel.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 #       include "createFields.H"
 
         surfaceScalarField heatFlux =
-            fvc::interpolate(turbulence->alphaEff())*fvc::snGrad(h);
+            fvc::interpolate(RASModel->alphaEff())*fvc::snGrad(h);
 
         const surfaceScalarField::GeometricBoundaryField& patchHeatFlux =
             heatFlux.boundaryField();
