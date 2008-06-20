@@ -32,7 +32,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -48,8 +48,8 @@ scaleSimilarity::scaleSimilarity
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
-    filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
+    LESModel(typeName, U, phi, transport),
+    filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
     printCoeffs();
@@ -102,9 +102,9 @@ void scaleSimilarity::correct(const tmp<volTensorField>&)
 
 bool scaleSimilarity::read()
 {
-    if (LESmodel::read())
+    if (LESModel::read())
     {
-        filter_.read(LESmodelProperties());
+        filter_.read(coeffDict());
 
         return true;
     }
@@ -117,7 +117,7 @@ bool scaleSimilarity::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

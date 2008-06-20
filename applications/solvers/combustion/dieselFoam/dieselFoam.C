@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
-#include "compressible/RASmodel/RASmodel.H"
+#include "compressible/RASModel/RASModel.H"
 #include "spray.H"
 #include "chemistryModel.H"
 #include "chemistrySolver.H"

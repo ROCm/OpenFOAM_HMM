@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(RASmodel, laminar, dictionary);
+addToRunTimeSelectionTable(RASModel, laminar, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ laminar::laminar
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel)
+    RASModel(typeName, U, phi, lamTransportModel)
 {}
 
 
@@ -184,7 +184,7 @@ tmp<fvVectorMatrix> laminar::divDevReff(volVectorField& U) const
 
 bool laminar::read()
 {
-    return RASmodel::read();
+    return RASModel::read();
 }
 
 
@@ -196,7 +196,7 @@ void laminar::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

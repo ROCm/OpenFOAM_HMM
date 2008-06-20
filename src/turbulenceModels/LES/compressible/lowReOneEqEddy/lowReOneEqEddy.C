@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(lowReOneEqEddy, 0);
-addToRunTimeSelectionTable(LESmodel, lowReOneEqEddy, dictionary);
+addToRunTimeSelectionTable(LESModel, lowReOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ lowReOneEqEddy::lowReOneEqEddy
     const basicThermo& thermoPhysicalModel
 )
 :
-    LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
+    LESModel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
     ck_
@@ -60,7 +60,7 @@ lowReOneEqEddy::lowReOneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.07
         )
     ),
@@ -69,7 +69,7 @@ lowReOneEqEddy::lowReOneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta",
-            LESmodelProperties(),
+            coeffDict(),
             0.01
         )
     )
@@ -116,8 +116,8 @@ bool lowReOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        ck_.readIfPresent(LESmodelProperties());
-        beta_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(coeffDict());
+        beta_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -130,7 +130,7 @@ bool lowReOneEqEddy::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

@@ -34,7 +34,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "compressible/LESModel/LESModel.H"
 
 #define divDevRhoReff divDevRhoBeff
 

@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nuSgsWallFunctionFvPatchScalarField.H"
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -36,7 +36,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -100,8 +100,8 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const LESmodel& sgsModel
-        = db().lookupObject<LESmodel>("turbulenceProperties");
+    const LESModel& sgsModel
+        = db().lookupObject<LESModel>("LESProperties");
 
     scalar kappa = dimensionedScalar(sgsModel.lookup("kappa")).value();
 
@@ -173,7 +173,7 @@ makePatchTypeField(fvPatchScalarField, nuSgsWallFunctionFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

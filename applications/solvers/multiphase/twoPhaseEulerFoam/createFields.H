@@ -146,11 +146,11 @@
     );
 
 
-    IOdictionary turbulenceProperties
+    IOdictionary RASProperties
     (
         IOobject
         (
-            "turbulenceProperties",
+            "RASProperties",
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,
@@ -161,12 +161,12 @@
 
     Switch turbulence
     (
-        turbulenceProperties.lookup("turbulence")
+        RASProperties.lookup("turbulence")
     );
 
     dictionary kEpsilonCoeffs
     (
-        turbulenceProperties.subDict("kEpsilonCoeffs")
+        RASProperties.subDict("kEpsilonCoeffs")
     );
 
 
@@ -197,7 +197,7 @@
 
     dictionary wallFunctionCoeffs
     (
-        turbulenceProperties.subDict("wallFunctionCoeffs")
+        RASProperties.subDict("wallFunctionCoeffs")
     );
 
     scalar kappa
@@ -304,7 +304,7 @@
     {
         dragPhase = word(interfacialProperties.lookup("dragPhase"));
 
-        bool validDrag = 
+        bool validDrag =
             dragPhase == "a" || dragPhase == "b" || dragPhase == "blended";
 
         if (!validDrag)

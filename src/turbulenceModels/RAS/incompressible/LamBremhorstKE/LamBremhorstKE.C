@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LamBremhorstKE, 0);
-addToRunTimeSelectionTable(RASmodel, LamBremhorstKE, dictionary);
+addToRunTimeSelectionTable(RASModel, LamBremhorstKE, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,14 +51,14 @@ LamBremhorstKE::LamBremhorstKE
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -67,7 +67,7 @@ LamBremhorstKE::LamBremhorstKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -76,7 +76,7 @@ LamBremhorstKE::LamBremhorstKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -85,7 +85,7 @@ LamBremhorstKE::LamBremhorstKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -187,12 +187,12 @@ tmp<fvVectorMatrix> LamBremhorstKE::divDevReff(volVectorField& U) const
 
 bool LamBremhorstKE::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -212,7 +212,7 @@ void LamBremhorstKE::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     if (mesh_.changing())
     {
@@ -273,7 +273,7 @@ void LamBremhorstKE::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

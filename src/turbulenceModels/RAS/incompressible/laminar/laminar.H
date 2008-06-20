@@ -36,7 +36,7 @@ SourceFiles
 #ifndef laminar_H
 #define laminar_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +44,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -53,7 +53,7 @@ namespace RAS
 
 class laminar
 :
-    public RASmodel
+    public RASModel
 {
 
 public:
@@ -112,7 +112,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

@@ -40,7 +40,7 @@ SourceFiles
 #ifndef scaleSimilarity_H
 #define scaleSimilarity_H
 
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "LESfilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +49,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +58,7 @@ namespace LES
 
 class scaleSimilarity
 :
-    virtual public LESmodel
+    virtual public LESModel
 {
     // Private data
 
@@ -123,7 +123,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

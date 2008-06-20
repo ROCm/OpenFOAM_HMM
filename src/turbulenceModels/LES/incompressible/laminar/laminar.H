@@ -37,7 +37,7 @@ SourceFiles
 #ifndef laminar_H
 #define laminar_H
 
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +46,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -55,7 +55,7 @@ namespace LES
 
 class laminar
 :
-    public LESmodel
+    public LESModel
 {
     // Private member functions
 
@@ -119,7 +119,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

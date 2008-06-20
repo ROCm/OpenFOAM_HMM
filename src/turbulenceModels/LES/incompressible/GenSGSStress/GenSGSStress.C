@@ -32,7 +32,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -44,14 +44,14 @@ GenSGSStress::GenSGSStress
     transportModel& transport
 )
 :
-    LESmodel(word("GenSGSStress"), U, phi, transport),
+    LESModel(word("GenSGSStress"), U, phi, transport),
 
     ce_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ce",
-            LESmodelProperties(),
+            coeffDict(),
             1.048
         )
     ),
@@ -61,7 +61,7 @@ GenSGSStress::GenSGSStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "couplingFactor",
-            LESmodelProperties(),
+            coeffDict(),
             0.0
         )
     ),
@@ -160,11 +160,11 @@ tmp<fvVectorMatrix> GenSGSStress::divDevBeff
 
 bool GenSGSStress::read()
 {
-    if (LESmodel::read())
+    if (LESModel::read())
     {
-        ce_.readIfPresent(LESmodelProperties());
+        ce_.readIfPresent(coeffDict());
 
-        couplingFactor_.readIfPresent(LESmodelProperties());
+        couplingFactor_.readIfPresent(coeffDict());
 
         if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
@@ -185,7 +185,7 @@ bool GenSGSStress::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

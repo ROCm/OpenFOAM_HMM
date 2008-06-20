@@ -47,9 +47,9 @@
 #   include "compressibleCreatePhi.H"
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::RASmodel> turbulence
+    autoPtr<compressible::RASModel> turbulence
     (
-        compressible::RASmodel::New
+        compressible::RASModel::New
         (
             rho,
             U,

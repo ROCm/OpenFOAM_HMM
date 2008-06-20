@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(realizableKE, 0);
-addToRunTimeSelectionTable(RASmodel, realizableKE, dictionary);
+addToRunTimeSelectionTable(RASModel, realizableKE, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -93,14 +93,14 @@ realizableKE::realizableKE
     basicThermo& thermophysicalModel
 )
 :
-    RASmodel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(typeName, rho, U, phi, thermophysicalModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -109,7 +109,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "A0",
-            RASmodelCoeffs_,
+            coeffDict_,
             4.0
         )
     ),
@@ -118,7 +118,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.9
         )
     ),
@@ -127,7 +127,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -136,7 +136,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.833333
         )
     ),
@@ -145,7 +145,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphah",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -251,14 +251,14 @@ tmp<fvVectorMatrix> realizableKE::divDevRhoReff(volVectorField& U) const
 
 bool realizableKE::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        A0_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        alphah_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        A0_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        alphah_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -278,7 +278,7 @@ void realizableKE::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
 
@@ -347,7 +347,7 @@ void realizableKE::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

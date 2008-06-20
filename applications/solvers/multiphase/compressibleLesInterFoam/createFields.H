@@ -146,7 +146,7 @@
     interfaceProperties interface(alpha1, U, twoPhaseProperties);
 
     // Construct LES model
-    autoPtr<incompressible::LESmodel> turbulence
+    autoPtr<incompressible::LESModel> turbulence
     (
-        incompressible::LESmodel::New(U, phi, twoPhaseProperties)
+        incompressible::LESModel::New(U, phi, twoPhaseProperties)
     );

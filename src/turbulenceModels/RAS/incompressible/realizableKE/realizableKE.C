@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(realizableKE, 0);
-addToRunTimeSelectionTable(RASmodel, realizableKE, dictionary);
+addToRunTimeSelectionTable(RASModel, realizableKE, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -92,14 +92,14 @@ realizableKE::realizableKE
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -108,7 +108,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "A0",
-            RASmodelCoeffs_,
+            coeffDict_,
             4.0
         )
     ),
@@ -117,7 +117,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.9
         )
     ),
@@ -126,7 +126,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -135,7 +135,7 @@ realizableKE::realizableKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.833333
         )
     ),
@@ -231,13 +231,13 @@ tmp<fvVectorMatrix> realizableKE::divDevReff(volVectorField& U) const
 
 bool realizableKE::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        A0_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        A0_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -257,7 +257,7 @@ void realizableKE::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volTensorField gradU = fvc::grad(U_);
     volScalarField S2 = 2*magSqr(dev(symm(gradU)));
@@ -321,7 +321,7 @@ void realizableKE::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

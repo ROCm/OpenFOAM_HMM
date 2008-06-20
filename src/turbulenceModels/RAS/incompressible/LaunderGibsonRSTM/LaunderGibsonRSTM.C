@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LaunderGibsonRSTM, 0);
-addToRunTimeSelectionTable(RASmodel, LaunderGibsonRSTM, dictionary);
+addToRunTimeSelectionTable(RASModel, LaunderGibsonRSTM, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,14 +52,14 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -68,7 +68,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Clg1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.8
         )
     ),
@@ -77,7 +77,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Clg2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.6
         )
     ),
@@ -86,7 +86,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -95,7 +95,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -104,7 +104,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cs",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.25
         )
     ),
@@ -113,7 +113,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Ceps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.15
         )
     ),
@@ -122,7 +122,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaR",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.22
         )
     ),
@@ -131,7 +131,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -140,7 +140,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1Ref",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.5
         )
     ),
@@ -149,7 +149,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2Ref",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.3
         )
     ),
@@ -158,7 +158,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         dimensioned<scalar>::lookupOrAddToDict
         (
             "couplingFactor",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.0
         )
     ),
@@ -271,21 +271,21 @@ tmp<fvVectorMatrix> LaunderGibsonRSTM::divDevReff(volVectorField& U) const
 
 bool LaunderGibsonRSTM::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        Clg1_.readIfPresent(RASmodelCoeffs_);
-        Clg2_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        Cs_.readIfPresent(RASmodelCoeffs_);
-        Ceps_.readIfPresent(RASmodelCoeffs_);
-        alphaR_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        C1Ref_.readIfPresent(RASmodelCoeffs_);
-        C2Ref_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        Clg1_.readIfPresent(coeffDict_);
+        Clg2_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        Cs_.readIfPresent(coeffDict_);
+        Ceps_.readIfPresent(coeffDict_);
+        alphaR_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        C1Ref_.readIfPresent(coeffDict_);
+        C2Ref_.readIfPresent(coeffDict_);
 
-        couplingFactor_.readIfPresent(RASmodelCoeffs_);
+        couplingFactor_.readIfPresent(coeffDict_);
 
         if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
@@ -313,7 +313,7 @@ void LaunderGibsonRSTM::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     if (mesh_.changing())
     {
@@ -457,7 +457,7 @@ void LaunderGibsonRSTM::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

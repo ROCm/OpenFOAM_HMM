@@ -38,7 +38,7 @@ SourceFiles
 #ifndef compressibleLaunderSharmaKE_H
 #define compressibleLaunderSharmaKE_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +46,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -55,7 +55,7 @@ namespace RAS
 
 class LaunderSharmaKE
 :
-    public RASmodel
+    public RASModel
 {
     // Private data
 
@@ -166,7 +166,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

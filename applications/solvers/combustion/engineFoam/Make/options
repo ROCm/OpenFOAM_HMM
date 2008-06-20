@@ -11,7 +11,7 @@ EXE_INC = \
 EXE_LIBS = \
     -lengine \
     -lfiniteVolume \
-    -lcompressibleRASmodels \
+    -lcompressibleRASModels \
     -lbasicThermophysicalModels \
     -lcombustionThermophysicalModels \
     -lspecie \

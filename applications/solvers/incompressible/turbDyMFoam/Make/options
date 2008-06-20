@@ -10,6 +10,6 @@ EXE_LIBS = \
     -ldynamicFvMesh \
     -ldynamicMesh \
     -lmeshTools \
-    -lincompressibleRASmodels \
+    -lincompressibleRASModels \
     -lincompressibleTransportModels \
     -lfiniteVolume

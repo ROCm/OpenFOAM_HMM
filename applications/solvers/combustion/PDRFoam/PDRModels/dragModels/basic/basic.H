@@ -86,7 +86,7 @@ public:
         basic
         (
             const dictionary& PDRProperties,
-            const compressible::RASmodel& turbulence,
+            const compressible::RASModel& turbulence,
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi

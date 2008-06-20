@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LRR, 0);
-addToRunTimeSelectionTable(RASmodel, LRR, dictionary);
+addToRunTimeSelectionTable(RASModel, LRR, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,14 +52,14 @@ LRR::LRR
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -68,7 +68,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Clrr1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.8
         )
     ),
@@ -77,7 +77,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Clrr2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.6
         )
     ),
@@ -86,7 +86,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -95,7 +95,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -104,7 +104,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cs",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.25
         )
     ),
@@ -113,7 +113,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Ceps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.15
         )
     ),
@@ -122,7 +122,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -131,7 +131,7 @@ LRR::LRR
         dimensioned<scalar>::lookupOrAddToDict
         (
             "couplingFactor",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.0
         )
     ),
@@ -247,18 +247,18 @@ tmp<fvVectorMatrix> LRR::divDevReff(volVectorField& U) const
 
 bool LRR::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        Clrr1_.readIfPresent(RASmodelCoeffs_);
-        Clrr2_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        Cs_.readIfPresent(RASmodelCoeffs_);
-        Ceps_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        Clrr1_.readIfPresent(coeffDict_);
+        Clrr2_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        Cs_.readIfPresent(coeffDict_);
+        Ceps_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
 
-        couplingFactor_.readIfPresent(RASmodelCoeffs_);
+        couplingFactor_.readIfPresent(coeffDict_);
 
         if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
@@ -286,7 +286,7 @@ void LRR::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
     volScalarField G = 0.5*tr(P);
@@ -415,7 +415,7 @@ void LRR::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

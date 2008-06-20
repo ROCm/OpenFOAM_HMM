@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(RNGkEpsilon, 0);
-addToRunTimeSelectionTable(RASmodel, RNGkEpsilon, dictionary);
+addToRunTimeSelectionTable(RASModel, RNGkEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,14 +51,14 @@ RNGkEpsilon::RNGkEpsilon
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.0845
         )
     ),
@@ -67,7 +67,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.42
         )
     ),
@@ -76,7 +76,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.68
         )
     ),
@@ -85,7 +85,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.39
         )
     ),
@@ -94,7 +94,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.39
         )
     ),
@@ -103,7 +103,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "eta0",
-            RASmodelCoeffs_,
+            coeffDict_,
             4.38
         )
     ),
@@ -112,7 +112,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.012
         )
     ),
@@ -207,15 +207,15 @@ tmp<fvVectorMatrix> RNGkEpsilon::divDevReff(volVectorField& U) const
 
 bool RNGkEpsilon::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        eta0_.readIfPresent(RASmodelCoeffs_);
-        beta_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        eta0_.readIfPresent(coeffDict_);
+        beta_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -235,7 +235,7 @@ void RNGkEpsilon::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 
@@ -293,7 +293,7 @@ void RNGkEpsilon::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

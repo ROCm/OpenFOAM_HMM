@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(RNGkEpsilon, 0);
-addToRunTimeSelectionTable(RASmodel, RNGkEpsilon, dictionary);
+addToRunTimeSelectionTable(RASModel, RNGkEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -53,14 +53,14 @@ RNGkEpsilon::RNGkEpsilon
     basicThermo& thermophysicalModel
 )
 :
-    RASmodel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(typeName, rho, U, phi, thermophysicalModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.0845
         )
     ),
@@ -69,7 +69,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.42
         )
     ),
@@ -78,7 +78,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.68
         )
     ),
@@ -87,7 +87,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C3",
-            RASmodelCoeffs_,
+            coeffDict_,
             -0.33
         )
     ),
@@ -96,7 +96,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.39
         )
     ),
@@ -105,7 +105,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.39
         )
     ),
@@ -114,7 +114,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphah",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -123,7 +123,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "eta0",
-            RASmodelCoeffs_,
+            coeffDict_,
             4.38
         )
     ),
@@ -132,7 +132,7 @@ RNGkEpsilon::RNGkEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.012
         )
     ),
@@ -236,17 +236,17 @@ tmp<fvVectorMatrix> RNGkEpsilon::divDevRhoReff(volVectorField& U) const
 
 bool RNGkEpsilon::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        C3_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        alphah_.readIfPresent(RASmodelCoeffs_);
-        eta0_.readIfPresent(RASmodelCoeffs_);
-        beta_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        C3_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        alphah_.readIfPresent(coeffDict_);
+        eta0_.readIfPresent(coeffDict_);
+        beta_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -266,7 +266,7 @@ void RNGkEpsilon::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
 
@@ -336,7 +336,7 @@ void RNGkEpsilon::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

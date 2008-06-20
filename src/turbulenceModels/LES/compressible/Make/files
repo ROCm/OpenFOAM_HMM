@@ -1,7 +1,7 @@
 wallFunc/muSgsWallFunction/muSgsWallFunctionFvPatchScalarField.C
 
-LESmodel/LESmodel.C
-LESmodel/newLESmodel.C
+LESModel/LESModel.C
+LESModel/newLESModel.C
 GenEddyVisc/GenEddyVisc.C
 GenSGSStress/GenSGSStress.C
 
@@ -12,4 +12,4 @@ dynOneEqEddy/dynOneEqEddy.C
 DeardorffDiffStress/DeardorffDiffStress.C
 SpalartAllmaras/SpalartAllmaras.C
 
-LIB = $(FOAM_LIBBIN)/libcompressibleLESmodels
+LIB = $(FOAM_LIBBIN)/libcompressibleLESModels

@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(RASmodel, laminar, dictionary);
+addToRunTimeSelectionTable(RASModel, laminar, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ laminar::laminar
     basicThermo& thermophysicalModel
 )
 :
-    RASmodel(typeName, rho, U, phi, thermophysicalModel)
+    RASModel(typeName, rho, U, phi, thermophysicalModel)
 {}
 
 
@@ -178,7 +178,7 @@ tmp<fvVectorMatrix> laminar::divDevRhoReff(volVectorField& U) const
 
 bool laminar::read()
 {
-    return RASmodel::read();
+    return RASModel::read();
 }
 
 
@@ -188,7 +188,7 @@ void laminar::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(LESmodel, laminar, dictionary);
+addToRunTimeSelectionTable(LESModel, laminar, dictionary);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -52,7 +52,7 @@ laminar::laminar
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport)
+    LESModel(typeName, U, phi, transport)
 {}
 
 
@@ -153,13 +153,13 @@ tmp<fvVectorMatrix> laminar::divDevBeff(volVectorField& U) const
 
 bool laminar::read()
 {
-    return LESmodel::read();
+    return LESModel::read();
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

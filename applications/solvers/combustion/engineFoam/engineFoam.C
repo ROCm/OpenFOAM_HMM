@@ -53,7 +53,7 @@ Description
 #include "engineTime.H"
 #include "engineMesh.H"
 #include "hhuCombustionThermo.H"
-#include "RASmodel.H"
+#include "RASModel.H"
 #include "laminarFlameSpeed.H"
 #include "ignition.H"
 #include "Switch.H"

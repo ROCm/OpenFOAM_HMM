@@ -12,7 +12,7 @@ EXE_LIBS = \
     -lengine \
     -lfiniteVolume \
     -lmeshTools \
-    -lcompressibleRASmodels \
+    -lcompressibleRASModels \
     -lbasicThermophysicalModels \
     -lcombustionThermophysicalModels \
     -lspecie \

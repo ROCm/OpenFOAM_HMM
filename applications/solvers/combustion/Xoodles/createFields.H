@@ -48,9 +48,9 @@
 
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::LESmodel> turbulence
+    autoPtr<compressible::LESModel> turbulence
     (
-        compressible::LESmodel::New(rho, U, phi, thermo())
+        compressible::LESModel::New(rho, U, phi, thermo())
     );
 
 

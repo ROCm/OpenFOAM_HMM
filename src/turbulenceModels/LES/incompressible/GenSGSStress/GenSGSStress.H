@@ -41,7 +41,7 @@ SourceFiles
 #ifndef GenSGSStress_H
 #define GenSGSStress_H
 
-#include "LESmodel.H"
+#include "LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +58,7 @@ namespace LES
 
 class GenSGSStress
 :
-    virtual public LESmodel
+    virtual public LESModel
 {
     // Private Member Functions
 
@@ -138,7 +138,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

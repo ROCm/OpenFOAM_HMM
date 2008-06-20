@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(QZeta, 0);
-addToRunTimeSelectionTable(RASmodel, QZeta, dictionary);
+addToRunTimeSelectionTable(RASModel, QZeta, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -77,14 +77,14 @@ QZeta::QZeta
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -93,7 +93,7 @@ QZeta::QZeta
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -102,7 +102,7 @@ QZeta::QZeta
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -111,7 +111,7 @@ QZeta::QZeta
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaZeta",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -120,7 +120,7 @@ QZeta::QZeta
         Switch::lookupOrAddToDict
         (
             "anisotropic",
-            RASmodelCoeffs_,
+            coeffDict_,
             false
         )
     ),
@@ -240,13 +240,13 @@ tmp<fvVectorMatrix> QZeta::divDevReff(volVectorField& U) const
 
 bool QZeta::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphaZeta_.readIfPresent(RASmodelCoeffs_);
-        anisotropic_.readIfPresent("anisotropic", RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphaZeta_.readIfPresent(coeffDict_);
+        anisotropic_.readIfPresent("anisotropic", coeffDict_);
 
         return true;
     }
@@ -266,7 +266,7 @@ void QZeta::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 
@@ -323,7 +323,7 @@ void QZeta::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 
