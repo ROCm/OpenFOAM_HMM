@@ -46,6 +46,7 @@ const Foam::dimensionSet Foam::dimDensity(1, -3, 0, 0, 0, 0, 0);
 const Foam::dimensionSet Foam::dimForce(1, 1, -2, 0, 0, 0, 0);
 
 const Foam::dimensionSet Foam::dimVelocity(0, 1, -1, 0, 0, 0, 0);
+const Foam::dimensionSet Foam::dimAcceleration(0, 1, -2, 0, 0, 0, 0);
 const Foam::dimensionSet Foam::dimPressure(1, -1, -2, 0, 0, 0, 0);
 const Foam::dimensionSet Foam::dimGasConstant(0, 2, -2, -1, 0, 0, 0);
 const Foam::dimensionSet Foam::dimSpecificHeatCapacity(0, 2, -2, -1, 0, 0, 0);
