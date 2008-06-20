@@ -54,11 +54,52 @@ spectEddyVisc::spectEddyVisc
     LESmodel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
-    cB_(LESmodelProperties().lookupOrAddDefault<scalar>("cB", 8.22)),
-    cK1_(LESmodelProperties().lookupOrAddDefault<scalar>("cK1", 0.83)),
-    cK2_(LESmodelProperties().lookupOrAddDefault<scalar>("cK2", 1.03)),
-    cK3_(LESmodelProperties().lookupOrAddDefault<scalar>("cK3", 4.75)),
-    cK4_(LESmodelProperties().lookupOrAddDefault<scalar>("cK4", 2.55))
+
+    cB_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cB",
+            LESmodelProperties(),
+            8.22
+        )
+    ),
+    cK1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cK1",
+            LESmodelProperties(),
+            0.83
+        )
+    ),
+    cK2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cK2",
+            LESmodelProperties(),
+            1.03
+        )
+    ),
+    cK3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cK3",
+            LESmodelProperties(),
+            4.75
+        )
+    ),
+    cK4_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cK4",
+            LESmodelProperties(),
+            2.55
+        )
+    )
 {
     printCoeffs();
 }
@@ -102,11 +143,11 @@ bool spectEddyVisc::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("cB", cB_);
-        LESmodelProperties().readIfPresent<scalar>("cK1", cK1_);
-        LESmodelProperties().readIfPresent<scalar>("cK2", cK2_);
-        LESmodelProperties().readIfPresent<scalar>("cK3", cK3_);
-        LESmodelProperties().readIfPresent<scalar>("cK4", cK4_);
+        cB_.readIfPresent(LESmodelProperties());
+        cK1_.readIfPresent(LESmodelProperties());
+        cK2_.readIfPresent(LESmodelProperties());
+        cK3_.readIfPresent(LESmodelProperties());
+        cK4_.readIfPresent(LESmodelProperties());
 
         return true;
     }

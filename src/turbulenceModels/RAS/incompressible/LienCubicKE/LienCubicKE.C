@@ -54,19 +54,96 @@ LienCubicKE::LienCubicKE
 :
     RASmodel(typeName, U, phi, lamTransportModel),
 
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
-    alphaEps
+    C1_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
     ),
-    A1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("A1", 1.25)),
-    A2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("A2", 1000.0)),
-    Ctau1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ctau1", -4.0)),
-    Ctau2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ctau2", 13.0)),
-    Ctau3(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Ctau3", -2.0)),
-    alphaKsi(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaKsi", 0.9)),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    alphak_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphak",
+            RASmodelCoeffs_,
+            1.0
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.76923
+        )
+    ),
+    A1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "A1",
+            RASmodelCoeffs_,
+            1.25
+        )
+    ),
+    A2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "A2",
+            RASmodelCoeffs_,
+            1000.0
+        )
+    ),
+    Ctau1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ctau1",
+            RASmodelCoeffs_,
+            -4.0
+        )
+    ),
+    Ctau2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ctau2",
+            RASmodelCoeffs_,
+            13.0
+        )
+    ),
+    Ctau3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ctau3",
+            RASmodelCoeffs_,
+            -2.0
+        )
+    ),
+    alphaKsi_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaKsi",
+            RASmodelCoeffs_,
+            0.9
+        )
+    ),
 
     k_
     (
@@ -94,46 +171,46 @@ LienCubicKE::LienCubicKE
         mesh_
     ),
 
-    gradU(fvc::grad(U)),
-    eta(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU + gradU.T())))),
-    ksi(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU - gradU.T())))),
-    Cmu(2.0/(3.0*(A1 + eta + alphaKsi*ksi))),
-    fEta(A2 + pow(eta, 3.0)),
+    gradU_(fvc::grad(U)),
+    eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
+    ksi_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))),
+    Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
+    fEta_(A2_ + pow(eta_, 3.0)),
 
-    C5viscosity
+    C5viscosity_
     (
-        -2.0*pow(Cmu, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)*
-        (magSqr(gradU + gradU.T()) - magSqr(gradU - gradU.T()))
+        -2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)*
+        (magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()))
     ),
 
     // C5 term, implicit
-    nut_(Cmu*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity),
+    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_),
     // turbulent viscosity, with implicit part of C5
 
-    nonlinearStress
+    nonlinearStress_
     (
         "nonlinearStress",
         // quadratic terms
         symm
         (
-            pow(k_, 3.0)/sqr(epsilon_)*
-            (
-                Ctau1/fEta*
-                (
-                    (gradU & gradU)
-                  + (gradU & gradU)().T()
+            pow(k_, 3.0)/sqr(epsilon_)
+           *(
+                Ctau1_/fEta_
+               *(
+                    (gradU_ & gradU_)
+                  + (gradU_ & gradU_)().T()
                 )
-              + Ctau2/fEta*(gradU & gradU.T())
-              + Ctau3/fEta*(gradU.T() & gradU)
+              + Ctau2_/fEta_*(gradU_ & gradU_.T())
+              + Ctau3_/fEta_*(gradU_.T() & gradU_)
             )
             // cubic term C4
-          - 20.0*pow(k_, 4.0)/pow(epsilon_, 3.0)*
-            pow(Cmu, 3.0)*
-            (
-                ((gradU & gradU) & gradU.T())
-              + ((gradU & gradU.T()) & gradU.T())
-              - ((gradU.T() & gradU) & gradU)
-              - ((gradU.T() & gradU.T()) & gradU)
+          - 20.0*pow(k_, 4.0)/pow(epsilon_, 3.0)
+           *pow(Cmu_, 3.0)
+           *(
+                ((gradU_ & gradU_) & gradU_.T())
+              + ((gradU_ & gradU_.T()) & gradU_.T())
+              - ((gradU_.T() & gradU_) & gradU_)
+              - ((gradU_.T() & gradU_.T()) & gradU_)
             )
         )
     )
@@ -160,7 +237,7 @@ tmp<volSymmTensorField> LienCubicKE::R() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            ((2.0/3.0)*I)*k_ - nut_*twoSymm(gradU) + nonlinearStress,
+            ((2.0/3.0)*I)*k_ - nut_*twoSymm(gradU_) + nonlinearStress_,
             k_.boundaryField().types()
         )
     );
@@ -181,7 +258,7 @@ tmp<volSymmTensorField> LienCubicKE::devReff() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-           -nuEff()*dev(twoSymm(fvc::grad(U_))) + nonlinearStress
+           -nuEff()*dev(twoSymm(fvc::grad(U_))) + nonlinearStress_
         )
     );
 }
@@ -191,7 +268,7 @@ tmp<fvVectorMatrix> LienCubicKE::divDevReff(volVectorField& U) const
 {
     return
     (
-        fvc::div(nonlinearStress)
+        fvc::div(nonlinearStress_)
       - fvm::laplacian(nuEff(), U)
       - fvc::div(nuEff()*dev(fvc::grad(U)().T()))
     );
@@ -202,16 +279,16 @@ bool LienCubicKE::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("A1", A1);
-        RASmodelCoeffs_.readIfPresent<scalar>("A2", A2);
-        RASmodelCoeffs_.readIfPresent<scalar>("Ctau1", Ctau1);
-        RASmodelCoeffs_.readIfPresent<scalar>("Ctau2", Ctau2);
-        RASmodelCoeffs_.readIfPresent<scalar>("Ctau3", Ctau3);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaKsi", alphaKsi);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        alphak_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        A1_.readIfPresent(RASmodelCoeffs_);
+        A2_.readIfPresent(RASmodelCoeffs_);
+        Ctau1_.readIfPresent(RASmodelCoeffs_);
+        Ctau2_.readIfPresent(RASmodelCoeffs_);
+        Ctau3_.readIfPresent(RASmodelCoeffs_);
+        alphaKsi_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -233,12 +310,12 @@ void LienCubicKE::correct()
 
     RASmodel::correct();
 
-    gradU = fvc::grad(U_);
+    gradU_ = fvc::grad(U_);
 
     // generation term
-    volScalarField S2 = symm(gradU) && gradU;
+    volScalarField S2 = symm(gradU_) && gradU_;
 
-    volScalarField G = Cmu*sqr(k_)/epsilon_*S2 - (nonlinearStress && gradU);
+    volScalarField G = Cmu_*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_);
 
 #   include "nonLinearWallFunctionsI.H"
 
@@ -249,8 +326,8 @@ void LienCubicKE::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
       ==
-        C1*G*epsilon_/k_
-      - fvm::Sp(C2*epsilon_/k_, epsilon_)
+        C1_*G*epsilon_/k_
+      - fvm::Sp(C2_*epsilon_/k_, epsilon_)
     );
 
     epsEqn().relax();
@@ -280,40 +357,40 @@ void LienCubicKE::correct()
 
     // Re-calculate viscosity
 
-    eta = k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU + gradU.T())));
-    ksi = k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU - gradU.T())));
-    Cmu = 2.0/(3.0*(A1 + eta + alphaKsi*ksi));
-    fEta = A2 + pow(eta, 3.0);
+    eta_ = k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())));
+    ksi_ = k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())));
+    Cmu_ = 2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_));
+    fEta_ = A2_ + pow(eta_, 3.0);
 
-    C5viscosity =
-        - 2.0*pow(Cmu, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)*
-        (magSqr(gradU + gradU.T()) - magSqr(gradU - gradU.T()));
+    C5viscosity_ =
+        - 2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)
+       *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()));
 
-    nut_ = Cmu*sqr(k_)/epsilon_ + C5viscosity;
+    nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
 
 #   include "wallNonlinearViscosityI.H"
 
-    nonlinearStress = symm
+    nonlinearStress_ = symm
     (
         // quadratic terms
         pow(k_, 3.0)/sqr(epsilon_)*
         (
-            Ctau1/fEta*
+            Ctau1_/fEta_*
             (
-                (gradU & gradU)
-              + (gradU & gradU)().T()
+                (gradU_ & gradU_)
+              + (gradU_ & gradU_)().T()
             )
-          + Ctau2/fEta*(gradU & gradU.T())
-          + Ctau3/fEta*(gradU.T() & gradU)
+          + Ctau2_/fEta_*(gradU_ & gradU_.T())
+          + Ctau3_/fEta_*(gradU_.T() & gradU_)
         )
         // cubic term C4
-      - 20.0*pow(k_, 4.0)/pow(epsilon_, 3.0)*
-        pow(Cmu, 3.0)*
-        (
-            ((gradU & gradU) & gradU.T())
-          + ((gradU & gradU.T()) & gradU.T())
-          - ((gradU.T() & gradU) & gradU)
-          - ((gradU.T() & gradU.T()) & gradU)
+      - 20.0*pow(k_, 4.0)/pow(epsilon_, 3.0)
+       *pow(Cmu_, 3.0)
+       *(
+            ((gradU_ & gradU_) & gradU_.T())
+          + ((gradU_ & gradU_.T()) & gradU_.T())
+          - ((gradU_.T() & gradU_) & gradU_)
+          - ((gradU_.T() & gradU_.T()) & gradU_)
         )
     );
 }

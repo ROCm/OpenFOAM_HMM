@@ -55,8 +55,24 @@ DeardorffDiffStress::DeardorffDiffStress
     LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
     GenSGSStress(rho, U, phi, thermoPhysicalModel),
 
-    ck_(LESmodelProperties().lookupOrAddDefault<scalar>("ck", 0.094)),
-    cm_(LESmodelProperties().lookupOrAddDefault<scalar>("cm", 4.13))
+    ck_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ck",
+            LESmodelProperties(),
+            0.094
+        )
+    ),
+    cm_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cm",
+            LESmodelProperties(),
+            4.13
+        )
+    )
 {
     printCoeffs();
 }
@@ -113,8 +129,8 @@ bool DeardorffDiffStress::read()
 {
     if (GenSGSStress::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
-        LESmodelProperties().readIfPresent<scalar>("cm", cm_);
+        ck_.readIfPresent(LESmodelProperties());
+        cm_.readIfPresent(LESmodelProperties());
 
         return true;
     }

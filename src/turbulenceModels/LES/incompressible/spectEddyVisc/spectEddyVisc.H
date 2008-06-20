@@ -76,11 +76,11 @@ class spectEddyVisc
 {
     // Private data
 
-        scalar cB_;
-        scalar cK1_;
-        scalar cK2_;
-        scalar cK3_;
-        scalar cK4_;
+        dimensionedScalar cB_;
+        dimensionedScalar cK1_;
+        dimensionedScalar cK2_;
+        dimensionedScalar cK3_;
+        dimensionedScalar cK4_;
 
 
     // Private Member Functions

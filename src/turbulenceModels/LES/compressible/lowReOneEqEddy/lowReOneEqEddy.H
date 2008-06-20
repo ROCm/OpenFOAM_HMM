@@ -72,8 +72,8 @@ class lowReOneEqEddy
 {
     // Private data
 
-        scalar ck_;
-        scalar beta_;
+        dimensionedScalar ck_;
+        dimensionedScalar beta_;
 
     // Private Member Functions
 

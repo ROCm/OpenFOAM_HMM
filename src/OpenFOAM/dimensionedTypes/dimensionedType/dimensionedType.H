@@ -56,6 +56,7 @@ Istream& operator>>(Istream&, dimensioned<Type>&);
 template<class Type>
 Ostream& operator<<(Ostream&, const dimensioned<Type>&);
 
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
                            Class dimensioned Declaration
@@ -107,6 +108,16 @@ public:
         //- Construct from an Istream with a given name and dimensions
         dimensioned(const word&, const dimensionSet&, Istream&);
 
+        //- Construct from dictionary, supplying default value so that if the
+        //  value is not found, it is added into the dictionary.
+        static dimensioned<Type> lookupOrAddToDict
+        (
+            const word&,
+            dictionary&,
+            const Type& defaultValue = pTraits<Type>::zero,
+            const dimensionSet& dims = dimless
+        );
+
 
     // Member functions
 
@@ -136,6 +147,10 @@ public:
 
         //- Return transpose.
         dimensioned<Type> T() const;
+
+        //- Update the value of the dimensioned<Type> if it is found in the
+        //  dictionary
+        bool readIfPresent(const dictionary&);
 
 
     // Member operators

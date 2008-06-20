@@ -26,13 +26,30 @@ License
 
 #include "dimensionedType.H"
 #include "pTraits.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class Type>
+dimensioned<Type> dimensioned<Type>::lookupOrAddToDict
+(
+    const word& name,
+    dictionary& dict,
+    const Type& defaultValue,
+    const dimensionSet& dims
+)
+{
+    Type value = dict.lookupOrAddDefault<Type>(name, defaultValue);
+    return dimensioned<Type>(name, dims, value);
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class Type>
 dimensioned<Type>::dimensioned
@@ -165,6 +182,13 @@ void dimensioned<Type>::replace
 {
     dimensions_ = dc.dimensions();
     value_.replace(d, dc.value());
+}
+
+
+template <class Type>
+bool dimensioned<Type>::readIfPresent(const dictionary& dict)
+{
+    return dict.readIfPresent(name_, value_);
 }
 
 

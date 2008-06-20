@@ -54,12 +54,41 @@ kEpsilon::kEpsilon
 :
     RASmodel(typeName, U, phi, lamTransportModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphaEps
+    Cmu_
     (
-         RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            RASmodelCoeffs_,
+            0.09
+        )
+    ),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            RASmodelCoeffs_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            RASmodelCoeffs_,
+            1.92
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            RASmodelCoeffs_,
+            0.76923
+        )
     ),
 
     k_
@@ -88,7 +117,7 @@ kEpsilon::kEpsilon
         mesh_
     ),
 
-    nut_(Cmu*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_))
 {
 #   include "wallViscosityI.H"
 
@@ -153,10 +182,10 @@ bool kEpsilon::read()
 {
     if (RASmodel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
+        Cmu_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(RASmodelCoeffs_);
+        C2_.readIfPresent(RASmodelCoeffs_);
+        alphaEps_.readIfPresent(RASmodelCoeffs_);
 
         return true;
     }
@@ -190,8 +219,8 @@ void kEpsilon::correct()
       - fvm::Sp(fvc::div(phi_), epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        C1*G*epsilon_/k_
-      - fvm::Sp(C2*epsilon_/k_, epsilon_)
+        C1_*G*epsilon_/k_
+      - fvm::Sp(C2_*epsilon_/k_, epsilon_)
     );
 
     epsEqn().relax();
@@ -220,7 +249,7 @@ void kEpsilon::correct()
 
 
     // Re-calculate viscosity
-    nut_ = Cmu*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
 
 #   include "wallViscosityI.H"
 

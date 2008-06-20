@@ -53,6 +53,7 @@ class Switch;
 Istream& operator>>(Istream&, Switch&);
 Ostream& operator<<(Ostream&, const Switch&);
 
+class dictionary;
 
 /*---------------------------------------------------------------------------*\
                            Class Switch Declaration
@@ -92,6 +93,15 @@ public:
         //- Construct from Istream
         Switch(Istream& is);
 
+        //- Construct from dictionary, supplying default value so that if the
+        //  value is not found, it is added into the dictionary.
+        static Switch lookupOrAddToDict
+        (
+            const word&,
+            dictionary&,
+            const Switch& defaultValue = false
+        );
+
 
     // Member Operators
 
@@ -112,6 +122,12 @@ public:
         {
             return wordSwitch_;
         }
+
+
+    // Member fuctions
+
+        //- Update the value of the Switch if it is found in the dictionary
+        bool readIfPresent(const word&, const dictionary&);
 
 
     // IOstream Operators

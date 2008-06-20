@@ -61,8 +61,8 @@ class powerLaw
 
         dimensionedScalar k_;
         dimensionedScalar n_;
-        dimensionedScalar numin_;
-        dimensionedScalar numax_;
+        dimensionedScalar nuMin_;
+        dimensionedScalar nuMax_;
 
         volScalarField nu_;
 
