@@ -86,6 +86,7 @@ class dictionary
         //- Parent dictionary
         const dictionary& parent_;
 
+
 public:
 
         //- Read dictionary from Istream
@@ -181,7 +182,10 @@ public:
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
             //  If recursive search parent dictionaries
-            const entry* lookupEntryPtr(const word&, bool recursive=false) const;
+            const entry* lookupEntryPtr
+            (
+                const word&, bool recursive=false
+            ) const;
 
             //- Find and return an entry data stream pointer for manipulation
             //  if present otherwise return NULL.
@@ -196,7 +200,8 @@ public:
             //  If recursive search parent dictionaries
             ITstream& lookup(const word&, bool recursive=false) const;
 
-            //- Find and return a T, if not found return the given default value
+            //- Find and return a T,
+            //  if not found return the given default value
             //  If recursive search parent dictionaries
             template<class T>
             T lookupOrDefault
@@ -206,8 +211,9 @@ public:
                 bool recursive=false
             ) const;
 
-            //- Find and return a T, if not found return the given default value,
-            //  and add to dictionary. If recursive search parent dictionaries
+            //- Find and return a T, if not found return the given
+            //  default value, and add to dictionary.
+            //  If recursive search parent dictionaries
             template<class T>
             T lookupOrAddDefault
             (
