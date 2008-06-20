@@ -34,7 +34,7 @@ Description
 #define dispersionLESModel_H
 
 #include "dispersionModel.H"
-#include "LESmodel.H"
+#include "LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ class dispersionLESModel
 {
     // Private data
 
-        const compressible::LESmodel& turbulence_;
+        const compressible::LESModel& turbulence_;
 
 
 public:
@@ -77,7 +77,7 @@ public:
 
     // Member Functions
 
-        const compressible::LESmodel& turbulence() const
+        const compressible::LESModel& turbulence() const
         {
             return turbulence_;
         }
