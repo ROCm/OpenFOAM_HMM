@@ -145,7 +145,7 @@ void SRFVelocityFvPatchVectorField::updateCoeffs()
         // Determine patch velocity due to SRF
         const vectorField SRFVelocity = srf.velocity(patch().Cf());
 
-        operator==(SRFVelocity + inletValue_);
+        operator==(-SRFVelocity + inletValue_);
     }
     // If absolute, simply supply the inlet value as a fixed value
     else
