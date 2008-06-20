@@ -14,9 +14,9 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lincompressibleTransportModels \
-    -lincompressibleRASmodels \
-    -lincompressibleLESmodels \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASmodels \
-    -lcompressibleLESmodels
+    -lcompressibleRASModels \
+    -lcompressibleLESModels

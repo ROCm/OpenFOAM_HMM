@@ -39,12 +39,12 @@ Description
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 
-#include "incompressible/RASmodel/RASmodel.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/RASModel/RASModel.H"
+#include "incompressible/LESModel/LESModel.H"
 
 #include "basicThermo.H"
-#include "compressible/RASmodel/RASmodel.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "compressible/RASModel/RASModel.H"
+#include "compressible/LESModel/LESModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -127,9 +127,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
     if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
     {
-        IOobject turbulencePropertiesHeader
+        IOobject RASPropertiesHeader
         (
-            "turbulenceProperties",
+            "RASProperties",
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,
@@ -137,45 +137,43 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             false
         );
 
-        if (turbulencePropertiesHeader.headerOk())
+        IOobject LESPropertiesHeader
+        (
+            "RASProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        singlePhaseTransportModel laminarTransport(U, phi);
+
+        if (RASPropertiesHeader.headerOk())
         {
-            IOdictionary turbulenceProperties
+            IOdictionary RASProperties(RASPropertiesHeader);
+
+            autoPtr<incompressible::RASModel> RASModel
             (
-                turbulencePropertiesHeader
+                incompressible::RASModel::New
+                (
+                    U,
+                    phi,
+                    laminarTransport
+                )
+            );
+            execFlowFunctionObjects(args, runTime);
+        }
+        else if (LESPropertiesHeader.headerOk())
+        {
+            IOdictionary LESProperties(LESPropertiesHeader);
+
+            autoPtr<incompressible::LESModel> sgsModel
+            (
+                incompressible::LESModel::New(U, phi, laminarTransport)
             );
 
-            singlePhaseTransportModel laminarTransport(U, phi);
-
-            if (turbulenceProperties.found("RASmodel"))
-            {
-                autoPtr<incompressible::RASmodel> RASmodel
-                (
-                    incompressible::RASmodel::New
-                    (
-                        U,
-                        phi,
-                        laminarTransport
-                    )
-                );
-
-                execFlowFunctionObjects(args, runTime);
-            }
-            else if (turbulenceProperties.found("LESmodel"))
-            {
-                autoPtr<incompressible::LESmodel> sgsModel
-                (
-                    incompressible::LESmodel::New(U, phi, laminarTransport)
-                );
-
-                execFlowFunctionObjects(args, runTime);
-            }
-            else
-            {
-                FatalErrorIn(args.executable())
-                    << "Cannot find turbulence model type in "
-                    << "RASmodel dictionary"
-                    << nl << exit(FatalError);
-            }
+            execFlowFunctionObjects(args, runTime);
         }
         else
         {
@@ -191,20 +189,14 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 )
             );
 
-            dimensionedScalar nu
-            (
-                transportProperties.lookup("nu")
-            );
+            dimensionedScalar nu(transportProperties.lookup("nu"));
 
             execFlowFunctionObjects(args, runTime);
         }
     }
     else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
     {
-        autoPtr<basicThermo> thermo
-        (
-            basicThermo::New(mesh)
-        );
+        autoPtr<basicThermo> thermo(basicThermo::New(mesh));
 
         volScalarField rho
         (
@@ -217,9 +209,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             thermo->rho()
         );
 
-        IOobject turbulencePropertiesHeader
+        IOobject RASPropertiesHeader
         (
-            "turbulenceProperties",
+            "RASProperties",
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,
@@ -227,44 +219,43 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             false
         );
 
-        if (turbulencePropertiesHeader.headerOk())
+        IOobject LESPropertiesHeader
+        (
+            "LESProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        if (RASPropertiesHeader.headerOk())
         {
-            IOdictionary turbulenceProperties
+            IOdictionary RASProperties(RASPropertiesHeader);
+
+            autoPtr<compressible::RASModel> RASModel
             (
-                turbulencePropertiesHeader
+                compressible::RASModel::New
+                (
+                    rho,
+                    U,
+                    phi,
+                    thermo()
+                )
             );
 
-            if (turbulenceProperties.found("RASmodel"))
-            {
-                autoPtr<compressible::RASmodel> RASmodel
-                (
-                    compressible::RASmodel::New
-                    (
-                        rho,
-                        U,
-                        phi,
-                        thermo()
-                    )
-                );
+            execFlowFunctionObjects(args, runTime);
+        }
+        else if (LESPropertiesHeader.headerOk())
+        {
+            IOdictionary LESProperties(LESPropertiesHeader);
 
-                execFlowFunctionObjects(args, runTime);
-            }
-            else if (turbulenceProperties.found("LESmodel"))
-            {
-                autoPtr<compressible::LESmodel> sgsModel
-                (
-                    compressible::LESmodel::New(rho, U, phi, thermo())
-                );
+            autoPtr<compressible::LESModel> sgsModel
+            (
+                compressible::LESModel::New(rho, U, phi, thermo())
+            );
 
-                execFlowFunctionObjects(args, runTime);
-            }
-            else
-            {
-                FatalErrorIn(args.executable())
-                    << "Cannot find turbulence model type in "
-                    << "RASmodel dictionary"
-                    << nl << exit(FatalError);
-            }
+            execFlowFunctionObjects(args, runTime);
         }
         else
         {
@@ -280,10 +271,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 )
             );
 
-            dimensionedScalar mu
-            (
-                transportProperties.lookup("mu")
-            );
+            dimensionedScalar mu(transportProperties.lookup("mu"));
 
             execFlowFunctionObjects(args, runTime);
         }
