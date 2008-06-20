@@ -27,7 +27,6 @@ FoamFile
 axis
 {
     type empty;
-    physicalType empty;
     nFaces 0;
     startFace 41031;
 }
@@ -35,7 +34,6 @@ axis
 inlet
 {
     type patch;
-    physicalType inlet;
     nFaces 30;
     startFace 41031;
 }
@@ -43,7 +41,6 @@ inlet
 wall
 {
     type wall;
-    physicalType wall;
     nFaces 70;
     startFace 41061;
 }
@@ -51,7 +48,6 @@ wall
 atmosphere
 {
     type patch;
-    physicalType atmosphere;
     nFaces 175;
     startFace 41131;
 }
@@ -59,7 +55,6 @@ atmosphere
 front
 {
     type wedge;
-    physicalType wedge;
     nFaces 20603;
     startFace 41306;
 }
@@ -67,7 +62,6 @@ front
 back
 {
     type wedge;
-    physicalType wedge;
     nFaces 20603;
     startFace 61909;
 }

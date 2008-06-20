@@ -26,7 +26,6 @@ FoamFile
 (    inlet
     {
         type            patch;
-        physicalType    turbulentInlet;
         startFace       715675;
         nFaces          600;
     }
@@ -34,7 +33,6 @@ FoamFile
     outlet
     {
         type            patch;
-        physicalType    inletOutlet;
         startFace       716275;
         nFaces          1140;
     }
@@ -42,7 +40,6 @@ FoamFile
     upperWall
     {
         type            wall;
-        physicalType    fixedTemperatureWall;
         startFace       717415;
         nFaces          4460;
     }
@@ -50,7 +47,6 @@ FoamFile
     lowerWall
     {
         type            wall;
-        physicalType    fixedTemperatureWall;
         startFace       721875;
         nFaces          5000;
     }
@@ -58,7 +54,6 @@ FoamFile
     frontAndBack
     {
         type            cyclic;
-        physicalType    cyclic;
         startFace       726875;
         nFaces          24450;
     }

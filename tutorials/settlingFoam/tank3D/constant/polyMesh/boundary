@@ -26,7 +26,6 @@ FoamFile
     SYMP3
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         startFace       53708;
         nFaces          3191;
     }
@@ -34,7 +33,6 @@ FoamFile
     INLE1
     {
         type            patch;
-        physicalType    inlet;
         startFace       56899;
         nFaces          45;
     }
@@ -42,7 +40,6 @@ FoamFile
     OUTL9
     {
         type            patch;
-        physicalType    fixedVelocityOutlet;
         startFace       56944;
         nFaces          11;
     }
@@ -50,7 +47,6 @@ FoamFile
     OUTL10
     {
         type            patch;
-        physicalType    fixedVelocityOutlet;
         startFace       56955;
         nFaces          11;
     }
@@ -58,7 +54,6 @@ FoamFile
     OUTL11
     {
         type            patch;
-        physicalType    fixedVelocityOutlet;
         startFace       56966;
         nFaces          11;
     }
@@ -66,7 +61,6 @@ FoamFile
     OUTL12
     {
         type            patch;
-        physicalType    fixedVelocityOutlet;
         startFace       56977;
         nFaces          11;
     }
@@ -74,7 +68,6 @@ FoamFile
     WALL6
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       56988;
         nFaces          1474;
     }
@@ -82,7 +75,6 @@ FoamFile
     WALL8
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       58462;
         nFaces          1640;
     }
@@ -90,7 +82,6 @@ FoamFile
     WALL61
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60102;
         nFaces          44;
     }
@@ -98,7 +89,6 @@ FoamFile
     WALL62
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60146;
         nFaces          78;
     }
@@ -106,7 +96,6 @@ FoamFile
     WALL63
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60224;
         nFaces          255;
     }
@@ -114,7 +103,6 @@ FoamFile
     WALL64
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60479;
         nFaces          157;
     }
@@ -122,7 +110,6 @@ FoamFile
     WALL65
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60636;
         nFaces          35;
     }
@@ -130,7 +117,6 @@ FoamFile
     WALL66
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60671;
         nFaces          60;
     }
@@ -138,7 +124,6 @@ FoamFile
     WALL67
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60731;
         nFaces          55;
     }
@@ -146,7 +131,6 @@ FoamFile
     WALL68
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60786;
         nFaces          116;
     }
@@ -154,7 +138,6 @@ FoamFile
     WALL69
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60902;
         nFaces          24;
     }
@@ -162,7 +145,6 @@ FoamFile
     WALL7
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       60926;
         nFaces          121;
     }
@@ -170,7 +152,6 @@ FoamFile
     WALL70
     {
         type            wall;
-        physicalType    wallFunctions;
         startFace       61047;
         nFaces          182;
     }
@@ -178,7 +159,6 @@ FoamFile
     OUTL15
     {
         type            patch;
-        physicalType    outlet;
         startFace       61229;
         nFaces          14;
     }

@@ -20,14 +20,12 @@ FoamFile
     lowerWall
     {
         type            wall;
-        physicalType    wallFunctions;
         nFaces          1;
         startFace       79;
     }
     upperWall
     {
         type            wall;
-        physicalType    wallFunctions;
         nFaces          1;
         startFace       80;
     }

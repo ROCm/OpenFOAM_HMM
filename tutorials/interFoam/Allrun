@@ -25,7 +25,11 @@ setDamBreakFine ()
 }
 
 # Do damBreak
-(cd damBreak && foamRunTutorials)
+cd damBreak
+    runApplication blockMesh
+    runApplication setFields
+    runApplication $application
+cd ..
 
 # Clone case
 cloneCase damBreak damBreakFine

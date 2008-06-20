@@ -27,7 +27,6 @@ FoamFile
 inlet
 {
     type patch;
-    physicalType inlet;
     nFaces 30;
     startFace 24170;
 }
@@ -35,7 +34,6 @@ inlet
 outlet
 {
     type patch;
-    physicalType outlet;
     nFaces 57;
     startFace 24200;
 }
@@ -43,7 +41,6 @@ outlet
 upperWall
 {
     type wall;
-    physicalType wall;
     nFaces 223;
     startFace 24257;
 }
@@ -51,7 +48,6 @@ upperWall
 lowerWall
 {
     type wall;
-    physicalType wall;
     nFaces 250;
     startFace 24480;
 }
@@ -59,7 +55,6 @@ lowerWall
 frontAndBack
 {
     type empty;
-    physicalType empty;
     nFaces 24450;
     startFace 24730;
 }
