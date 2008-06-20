@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASmodel/RASmodel.H"
+#include "incompressible/RASModel/RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 #       include "createFields.H"
 
-        volSymmTensorField Reff(turbulence->devReff());
+        volSymmTensorField Reff(RASModel->devReff());
 
         volVectorField wallShearStress
         (
