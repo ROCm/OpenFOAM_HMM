@@ -33,7 +33,7 @@ Description
 #define DispersionRASModel_H
 
 #include "DispersionModel.H"
-#include "RASmodel.H"
+#include "RASModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,7 +54,7 @@ class DispersionRASModel
     // Private data
 
         //- Reference to the compressible turbulence model
-        const compressible::RASmodel& turbulence_;
+        const compressible::RASModel& turbulence_;
 
 
 public:
@@ -81,7 +81,7 @@ public:
     // Member Functions
 
         //- Return const access to the turbulence model
-        const compressible::RASmodel& turbulence() const
+        const compressible::RASModel& turbulence() const
         {
             return turbulence_;
         }
