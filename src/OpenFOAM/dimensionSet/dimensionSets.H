@@ -62,6 +62,7 @@ extern const dimensionSet dimDensity;
 extern const dimensionSet dimForce;
 
 extern const dimensionSet dimVelocity;
+extern const dimensionSet dimAcceleration;
 extern const dimensionSet dimPressure;
 extern const dimensionSet dimGasConstant;
 extern const dimensionSet dimSpecificHeatCapacity;
