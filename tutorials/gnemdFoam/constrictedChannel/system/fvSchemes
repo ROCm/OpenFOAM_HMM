@@ -17,54 +17,51 @@ FoamFile
     local           "";
 
     class           dictionary;
-    object          decomposeParDict;
+    object          fvSchemes;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-numberOfSubdomains 2;
-
-method              simple;
-
-simpleCoeffs
+ddtSchemes
 {
-    n               (2 1 1);
-    delta           0.001;
+    default         Euler;
 }
 
-hierarchicalCoeffs
+gradSchemes
 {
-    n               (1 1 1);
-    delta           0.001;
-    order           xyz;
+    default         Gauss linear;
+    grad(p)         Gauss linear;
 }
 
-metisCoeffs
+divSchemes
 {
-    processorWeights 
-    (
-        1
-        1
-        1
-        4
-        1
-        5
-        1
-        2
-    );
+    default         none;
+    div(phi,U)      Gauss linear;
 }
 
-manualCoeffs
+laplacianSchemes
 {
-    dataFile        "";
+    default         none;
+    laplacian(nu,U) Gauss linear corrected;
+    laplacian(1|A(U),p) Gauss linear corrected;
 }
 
-distributed     no;
+interpolationSchemes
+{
+    default         linear;
+    interpolate(HbyA) linear;
+}
 
-roots           
-(
-);
+snGradSchemes
+{
+    default         corrected;
+}
+
+fluxRequired
+{
+    default         no;
+    p;
+}
 
 
 // ************************************************************************* //
