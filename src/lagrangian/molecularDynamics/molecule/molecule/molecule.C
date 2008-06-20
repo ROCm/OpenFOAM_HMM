@@ -54,7 +54,7 @@ bool molecule::move(molecule::trackData& td)
                 U_ += 0.5*deltaT*A_;
             }
 
-            while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
+            while (td.keepParticle && !td.switchProcessor && tEnd > (SMALL*SMALL))
             {
                 // set the lagrangian time-step
                 scalar dt = min(dtMax, tEnd);
@@ -178,6 +178,7 @@ void molecule::hitWallPatch
         {
             U_ -= 2*Un*nw;
         }
+
 //     }
 
 }
