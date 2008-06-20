@@ -37,7 +37,7 @@ SourceFiles
 #ifndef LamBremhorstKE_H
 #define LamBremhorstKE_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +46,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -55,7 +55,7 @@ namespace RAS
 
 class LamBremhorstKE
 :
-    public RASmodel
+    public RASModel
 {
     // Private data
 
@@ -154,7 +154,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

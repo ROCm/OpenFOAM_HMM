@@ -20,7 +20,7 @@ EXE_INC = \
 EXE_LIBS = \
     -lengine \
     -lmeshTools \
-    -lcompressibleRASmodels \
+    -lcompressibleRASModels \
     -lbasicThermophysicalModels \
     -lcombustionThermophysicalModels \
     -lspecie \

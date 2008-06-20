@@ -40,7 +40,7 @@ namespace Foam
 Foam::PDRDragModel::PDRDragModel
 (
     const dictionary& PDRProperties,
-    const compressible::RASmodel& turbulence,
+    const compressible::RASModel& turbulence,
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi

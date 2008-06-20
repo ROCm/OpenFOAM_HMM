@@ -7,7 +7,7 @@ EXE_INC = \
     -I../oodles
 
 EXE_LIBS = \
-    -lincompressibleLESmodels \
+    -lincompressibleLESModels \
     -lincompressibleTransportModels \
     -lfiniteVolume \
     -lmeshTools

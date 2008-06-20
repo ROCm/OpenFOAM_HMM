@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LienCubicKELowRe, 0);
-addToRunTimeSelectionTable(RASmodel, LienCubicKELowRe, dictionary);
+addToRunTimeSelectionTable(RASModel, LienCubicKELowRe, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,14 +52,14 @@ LienCubicKELowRe::LienCubicKELowRe
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     C1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -68,7 +68,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -77,7 +77,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -86,7 +86,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -95,7 +95,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "A1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.25
         )
     ),
@@ -104,7 +104,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "A2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1000.0
         )
     ),
@@ -113,7 +113,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Ctau1",
-            RASmodelCoeffs_,
+            coeffDict_,
             -4.0
         )
     ),
@@ -122,7 +122,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Ctau2",
-            RASmodelCoeffs_,
+            coeffDict_,
             13.0
         )
     ),
@@ -131,7 +131,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Ctau3",
-            RASmodelCoeffs_,
+            coeffDict_,
             -2.0
         )
     ),
@@ -140,7 +140,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaKsi",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.9
         )
     ),
@@ -149,7 +149,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -158,7 +158,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Am",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.016
         )
     ),
@@ -167,7 +167,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Aepsilon",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.263
         )
     ),
@@ -176,7 +176,7 @@ LienCubicKELowRe::LienCubicKELowRe
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Amu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.00222
         )
     ),
@@ -334,22 +334,22 @@ tmp<fvVectorMatrix> LienCubicKELowRe::divDevReff(volVectorField& U) const
 
 bool LienCubicKELowRe::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        A1_.readIfPresent(RASmodelCoeffs_);
-        A2_.readIfPresent(RASmodelCoeffs_);
-        Ctau1_.readIfPresent(RASmodelCoeffs_);
-        Ctau2_.readIfPresent(RASmodelCoeffs_);
-        Ctau3_.readIfPresent(RASmodelCoeffs_);
-        alphaKsi_.readIfPresent(RASmodelCoeffs_);
-        CmuWall_.readIfPresent(RASmodelCoeffs_);
-        Am_.readIfPresent(RASmodelCoeffs_);
-        Aepsilon_.readIfPresent(RASmodelCoeffs_);
-        Amu_.readIfPresent(RASmodelCoeffs_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        A1_.readIfPresent(coeffDict_);
+        A2_.readIfPresent(coeffDict_);
+        Ctau1_.readIfPresent(coeffDict_);
+        Ctau2_.readIfPresent(coeffDict_);
+        Ctau3_.readIfPresent(coeffDict_);
+        alphaKsi_.readIfPresent(coeffDict_);
+        CmuWall_.readIfPresent(coeffDict_);
+        Am_.readIfPresent(coeffDict_);
+        Aepsilon_.readIfPresent(coeffDict_);
+        Amu_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -369,7 +369,7 @@ void LienCubicKELowRe::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     if (mesh_.changing())
     {
@@ -488,7 +488,7 @@ void LienCubicKELowRe::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

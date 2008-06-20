@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "muSgsWallFunctionFvPatchScalarField.H"
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -36,7 +36,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -111,8 +111,8 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const LESmodel& sgsModel
-        = db().lookupObject<LESmodel>("turbulenceProperties");
+    const LESModel& sgsModel
+        = db().lookupObject<LESModel>("LESProperties");
 
     scalar kappa = dimensionedScalar(sgsModel.lookup("kappa")).value();
 
@@ -123,15 +123,15 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
 
     const scalarField& ry = patch().deltaCoeffs();
 
-    const fvPatchVectorField& U = 
+    const fvPatchVectorField& U =
         patch().lookupPatchField<volVectorField, vector>("U");
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
-    const scalarField& muw = 
+    const scalarField& muw =
         patch().lookupPatchField<volScalarField, scalar>("mu");
 
-    const scalarField& rhow = 
+    const scalarField& rhow =
         patch().lookupPatchField<volScalarField, scalar>("rho");
 
     scalarField& muSgsw = *this;
@@ -147,7 +147,7 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
             (muSgsw[facei] + muw[facei])
             *magFaceGradU[facei]/rhow[facei]
         );
-                
+
         if(utau > 0)
         {
             int iter = 0;
@@ -160,21 +160,21 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
 
                 scalar f =
                     - utau/(ry[facei]*muw[facei]/rhow[facei])
-                    + magUpara/utau 
+                    + magUpara/utau
                     + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
-                        
+
                 scalar df =
                     - 1.0/(ry[facei]*muw[facei]/rhow[facei])
                     - magUpara/sqr(utau)
                     - 1/E*kUu*fkUu/utau;
-                    
+
                 scalar utauNew = utau - f/df;
                 err = mag((utau - utauNew)/utau);
                 utau = utauNew;
 
             } while (utau > VSMALL && err > 0.01 && ++iter < 10);
 
-            muSgsw[facei] = 
+            muSgsw[facei] =
                 max(rhow[facei]*sqr(utau)/magFaceGradU[facei] - muw[facei],0.0);
         }
         else
@@ -191,7 +191,7 @@ makePatchTypeField(fvPatchScalarField, muSgsWallFunctionFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

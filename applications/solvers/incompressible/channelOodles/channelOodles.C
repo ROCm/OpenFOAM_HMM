@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/LESModel/LESModel.H"
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Random.H"

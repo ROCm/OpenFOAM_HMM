@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(dynMixedSmagorinsky, 0);
-addToRunTimeSelectionTable(LESmodel, dynMixedSmagorinsky, dictionary);
+addToRunTimeSelectionTable(LESModel, dynMixedSmagorinsky, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ dynMixedSmagorinsky::dynMixedSmagorinsky
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     scaleSimilarity(U, phi, transport),
     dynSmagorinsky(U, phi, transport)
 {
@@ -119,7 +119,7 @@ void dynMixedSmagorinsky::correct(const tmp<volTensorField>& gradU)
 
 bool dynMixedSmagorinsky::read()
 {
-    if (LESmodel::read())
+    if (LESModel::read())
     {
         scaleSimilarity::read();
         dynSmagorinsky::read();
@@ -135,7 +135,7 @@ bool dynMixedSmagorinsky::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // namespace incompressible
 } // End namespace Foam
 

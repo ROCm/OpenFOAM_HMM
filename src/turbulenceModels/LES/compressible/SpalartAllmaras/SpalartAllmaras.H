@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::LESmodels::SpalartAllmaras
+    Foam::compressible::LESModels::SpalartAllmaras
 
 Description
     SpalartAllmaras for compressible flows
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef compressibleSpalartAllmaras_H
 #define compressibleSpalartAllmaras_H
 
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,7 +45,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -54,7 +54,7 @@ namespace LES
 
 class SpalartAllmaras
 :
-    public LESmodel
+    public LESModel
 {
     // Private data
 
@@ -164,7 +164,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

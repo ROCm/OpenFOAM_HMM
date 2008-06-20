@@ -52,7 +52,7 @@ SourceFiles
 #ifndef RNGkEpsilon_H
 #define RNGkEpsilon_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +60,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -69,7 +69,7 @@ namespace RAS
 
 class RNGkEpsilon
 :
-    public RASmodel
+    public RASModel
 {
     // Private data
 
@@ -165,7 +165,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

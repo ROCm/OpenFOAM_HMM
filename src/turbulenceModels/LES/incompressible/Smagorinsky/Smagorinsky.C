@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Smagorinsky, 0);
-addToRunTimeSelectionTable(LESmodel, Smagorinsky, dictionary);
+addToRunTimeSelectionTable(LESModel, Smagorinsky, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ Smagorinsky::Smagorinsky
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
     ck_
@@ -58,7 +58,7 @@ Smagorinsky::Smagorinsky
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.094
         )
     )
@@ -80,7 +80,7 @@ bool Smagorinsky::read()
 {
     if (GenEddyVisc::read())
     {
-        ck_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -93,7 +93,7 @@ bool Smagorinsky::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

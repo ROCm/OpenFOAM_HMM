@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LRRDiffStress, 0);
-addToRunTimeSelectionTable(LESmodel, LRRDiffStress, dictionary);
+addToRunTimeSelectionTable(LESModel, LRRDiffStress, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ LRRDiffStress::LRRDiffStress
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     GenSGSStress(U, phi, transport),
 
     ck_
@@ -59,7 +59,7 @@ LRRDiffStress::LRRDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.09
         )
     ),
@@ -68,7 +68,7 @@ LRRDiffStress::LRRDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "c1",
-            LESmodelProperties(),
+            coeffDict(),
             1.8
         )
     ),
@@ -77,7 +77,7 @@ LRRDiffStress::LRRDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "c2",
-            LESmodelProperties(),
+            coeffDict(),
             0.6
         )
     )
@@ -139,9 +139,9 @@ bool LRRDiffStress::read()
 {
     if (GenSGSStress::read())
     {
-        ck_.readIfPresent(LESmodelProperties());
-        c1_.readIfPresent(LESmodelProperties());
-        c2_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(coeffDict());
+        c1_.readIfPresent(coeffDict());
+        c2_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -154,7 +154,7 @@ bool LRRDiffStress::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

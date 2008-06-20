@@ -210,11 +210,11 @@
 
 
 
-    IOdictionary turbulenceProperties
+    IOdictionary RASProperties
     (
         IOobject
         (
-            "turbulenceProperties",
+            "RASProperties",
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,
@@ -225,12 +225,12 @@
 
     Switch turbulence
     (
-        turbulenceProperties.lookup("turbulence")
+        RASProperties.lookup("turbulence")
     );
 
     const dictionary& kEpsilonCoeffs
     (
-        turbulenceProperties.subDict("kEpsilonCoeffs")
+        RASProperties.subDict("kEpsilonCoeffs")
     );
 
 
@@ -266,7 +266,7 @@
 
     const dictionary& wallFunctionCoeffs
     (
-        turbulenceProperties.subDict("wallFunctionCoeffs")
+        RASProperties.subDict("wallFunctionCoeffs")
     );
 
     scalar kappa

@@ -45,7 +45,7 @@ Foam::XiEqModels::instability::instability
 (
     const dictionary& XiEqProperties,
     const hhuCombustionThermo& thermo,
-    const compressible::RASmodel& turbulence,
+    const compressible::RASModel& turbulence,
     const volScalarField& Su
 )
 :

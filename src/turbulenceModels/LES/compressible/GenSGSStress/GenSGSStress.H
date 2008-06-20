@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::LESmodels::GenSGSStress
+    Foam::compressible::LESModels::GenSGSStress
 
 Description
     General base class for all compressible models that directly
@@ -41,7 +41,7 @@ SourceFiles
 #ifndef compressibleGenSGSStress_H
 #define compressibleGenSGSStress_H
 
-#include "LESmodel.H"
+#include "LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +58,7 @@ namespace LES
 
 class GenSGSStress
 :
-    virtual public LESmodel
+    virtual public LESModel
 {
     // Private Member Functions
 
@@ -149,7 +149,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

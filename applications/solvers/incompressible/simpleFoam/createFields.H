@@ -36,7 +36,7 @@
 
     singlePhaseTransportModel laminarTransport(U, phi);
 
-    autoPtr<incompressible::RASmodel> turbulence
+    autoPtr<incompressible::RASModel> turbulence
     (
-        incompressible::RASmodel::New(U, phi, laminarTransport)
+        incompressible::RASModel::New(U, phi, laminarTransport)
     );

@@ -36,7 +36,7 @@ SourceFiles
 #ifndef SpalartAllmaras_H
 #define SpalartAllmaras_H
 
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,7 +45,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -54,7 +54,7 @@ namespace LES
 
 class SpalartAllmaras
 :
-    public LESmodel
+    public LESModel
 {
     // Private data
 
@@ -154,7 +154,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

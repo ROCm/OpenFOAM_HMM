@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(dynSmagorinsky, 0);
-addToRunTimeSelectionTable(LESmodel, dynSmagorinsky, dictionary);
+addToRunTimeSelectionTable(LESModel, dynSmagorinsky, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -92,7 +92,7 @@ dynSmagorinsky::dynSmagorinsky
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
     k_
@@ -108,7 +108,7 @@ dynSmagorinsky::dynSmagorinsky
         mesh_
     ),
 
-    filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
+    filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
     printCoeffs();
@@ -125,7 +125,7 @@ dynSmagorinsky::~dynSmagorinsky()
 
 void dynSmagorinsky::correct(const tmp<volTensorField>& gradU)
 {
-    LESmodel::correct(gradU);
+    LESModel::correct(gradU);
 
     volSymmTensorField D = dev(symm(gradU));
     volScalarField magSqrD = magSqr(D);
@@ -141,7 +141,7 @@ bool dynSmagorinsky::read()
 {
     if (GenEddyVisc::read())
     {
-        filter_.read(LESmodelProperties());
+        filter_.read(coeffDict());
 
         return true;
     }
@@ -154,7 +154,7 @@ bool dynSmagorinsky::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

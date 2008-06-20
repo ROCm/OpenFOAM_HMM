@@ -32,7 +32,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -46,7 +46,7 @@ GenSGSStress::GenSGSStress
     const basicThermo& thermoPhysicalModel
 )
 :
-    LESmodel
+    LESModel
     (
         word("GenSGSStress"),
         rho,
@@ -60,7 +60,7 @@ GenSGSStress::GenSGSStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ce",
-            LESmodelProperties(),
+            coeffDict(),
             1.048
         )
     ),
@@ -131,15 +131,15 @@ tmp<fvVectorMatrix> GenSGSStress::divDevRhoBeff(volVectorField& U) const
 
 void GenSGSStress::correct(const tmp<volTensorField>& gradU)
 {
-    LESmodel::correct(gradU);
+    LESModel::correct(gradU);
 }
 
 
 bool GenSGSStress::read()
 {
-    if (LESmodel::read())
+    if (LESModel::read())
     {
-        ce_.readIfPresent(LESmodelProperties());
+        ce_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -152,7 +152,7 @@ bool GenSGSStress::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

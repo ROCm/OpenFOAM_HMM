@@ -84,7 +84,7 @@ SourceFiles
 #ifndef kOmegaSST_H
 #define kOmegaSST_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -93,7 +93,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -102,7 +102,7 @@ namespace RAS
 
 class kOmegaSST
 :
-    public RASmodel
+    public RASModel
 {
     // Private data
 
@@ -281,7 +281,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // namespace incompressible
 } // End namespace Foam
 

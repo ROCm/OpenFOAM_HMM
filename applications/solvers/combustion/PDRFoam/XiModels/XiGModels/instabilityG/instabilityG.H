@@ -87,7 +87,7 @@ public:
         (
             const dictionary& XiGProperties,
             const hhuCombustionThermo& thermo,
-            const compressible::RASmodel& turbulence,
+            const compressible::RASModel& turbulence,
             const volScalarField& Su
         );
 

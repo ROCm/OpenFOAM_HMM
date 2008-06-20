@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(dynOneEqEddy, 0);
-addToRunTimeSelectionTable(LESmodel, dynOneEqEddy, dictionary);
+addToRunTimeSelectionTable(LESModel, dynOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -85,10 +85,10 @@ dynOneEqEddy::dynOneEqEddy
     const basicThermo& thermoPhysicalModel
 )
 :
-    LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
+    LESModel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
-    filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
+    filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
     printCoeffs();
@@ -135,7 +135,7 @@ bool dynOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        filter_.read(LESmodelProperties());
+        filter_.read(coeffDict());
 
         return true;
     }
@@ -148,7 +148,7 @@ bool dynOneEqEddy::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

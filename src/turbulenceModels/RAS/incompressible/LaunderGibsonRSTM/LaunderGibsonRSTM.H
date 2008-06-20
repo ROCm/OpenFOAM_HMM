@@ -56,7 +56,7 @@ SourceFiles
 #ifndef LaunderGibsonRSTM_H
 #define LaunderGibsonRSTM_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 #include "wallDistReflection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,7 +65,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -74,7 +74,7 @@ namespace RAS
 
 class LaunderGibsonRSTM
 :
-    public RASmodel
+    public RASModel
 {
     // Private data
 
@@ -185,7 +185,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

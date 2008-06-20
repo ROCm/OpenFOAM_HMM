@@ -45,7 +45,7 @@ Foam::XiModels::fixed::fixed
 (
     const dictionary& XiProperties,
     const hhuCombustionThermo& thermo,
-    const compressible::RASmodel& turbulence,
+    const compressible::RASModel& turbulence,
     const volScalarField& Su,
     const volScalarField& rho,
     const volScalarField& b,

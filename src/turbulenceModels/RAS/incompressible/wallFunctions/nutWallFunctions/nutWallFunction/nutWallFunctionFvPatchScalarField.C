@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nutWallFunctionFvPatchScalarField.H"
-#include "RASmodel.H"
+#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -36,7 +36,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -97,8 +97,8 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 
 void nutWallFunctionFvPatchScalarField::evaluate(const Pstream::commsTypes)
 {
-    const RASmodel& rasModel
-        = db().lookupObject<RASmodel>("turbulenceProperties");
+    const RASModel& rasModel
+        = db().lookupObject<RASModel>("RASProperties");
 
     scalar kappa = rasModel.kappa();
     scalar E = rasModel.E();
@@ -166,7 +166,7 @@ makePatchTypeField(fvPatchScalarField, nutWallFunctionFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

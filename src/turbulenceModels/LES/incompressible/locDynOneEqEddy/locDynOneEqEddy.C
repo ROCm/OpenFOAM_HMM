@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(locDynOneEqEddy, 0);
-addToRunTimeSelectionTable(LESmodel, locDynOneEqEddy, dictionary);
+addToRunTimeSelectionTable(LESModel, locDynOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -88,7 +88,7 @@ locDynOneEqEddy::locDynOneEqEddy
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
     k_
@@ -105,7 +105,7 @@ locDynOneEqEddy::locDynOneEqEddy
     ),
 
     simpleFilter_(U.mesh()),
-    filterPtr_(LESfilter::New(U.mesh(), LESmodelProperties())),
+    filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
     printCoeffs();
@@ -122,7 +122,7 @@ locDynOneEqEddy::~locDynOneEqEddy()
 
 void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
 {
-    LESmodel::correct(gradU);
+    LESModel::correct(gradU);
 
     volSymmTensorField D = symm(gradU);
 
@@ -152,7 +152,7 @@ bool locDynOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        filter_.read(LESmodelProperties());
+        filter_.read(coeffDict());
 
         return true;
     }
@@ -165,7 +165,7 @@ bool locDynOneEqEddy::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

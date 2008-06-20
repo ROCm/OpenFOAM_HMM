@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(DeardorffDiffStress, 0);
-addToRunTimeSelectionTable(LESmodel, DeardorffDiffStress, dictionary);
+addToRunTimeSelectionTable(LESModel, DeardorffDiffStress, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ DeardorffDiffStress::DeardorffDiffStress
     const basicThermo& thermoPhysicalModel
 )
 :
-    LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
+    LESModel(typeName, rho, U, phi, thermoPhysicalModel),
     GenSGSStress(rho, U, phi, thermoPhysicalModel),
 
     ck_
@@ -60,7 +60,7 @@ DeardorffDiffStress::DeardorffDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.094
         )
     ),
@@ -69,7 +69,7 @@ DeardorffDiffStress::DeardorffDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cm",
-            LESmodelProperties(),
+            coeffDict(),
             4.13
         )
     )
@@ -129,8 +129,8 @@ bool DeardorffDiffStress::read()
 {
     if (GenSGSStress::read())
     {
-        ck_.readIfPresent(LESmodelProperties());
-        cm_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(coeffDict());
+        cm_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -143,7 +143,7 @@ bool DeardorffDiffStress::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

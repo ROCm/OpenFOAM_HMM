@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(SpalartAllmaras, 0);
-addToRunTimeSelectionTable(RASmodel, SpalartAllmaras, dictionary);
+addToRunTimeSelectionTable(RASModel, SpalartAllmaras, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -112,14 +112,14 @@ SpalartAllmaras::SpalartAllmaras
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     alphaNut_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaNut",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.5
         )
     ),
@@ -129,7 +129,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb1",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.1355
         )
     ),
@@ -138,7 +138,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.622
         )
     ),
@@ -148,7 +148,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.3
         )
     ),
@@ -157,7 +157,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw3",
-            RASmodelCoeffs_,
+            coeffDict_,
             2.0
         )
     ),
@@ -166,7 +166,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv1",
-            RASmodelCoeffs_,
+            coeffDict_,
             7.1
         )
     ),
@@ -175,7 +175,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv2",
-            RASmodelCoeffs_,
+            coeffDict_,
             5.0
         )
     ),
@@ -315,17 +315,17 @@ tmp<fvVectorMatrix> SpalartAllmaras::divDevReff(volVectorField& U) const
 
 bool SpalartAllmaras::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        alphaNut_.readIfPresent(RASmodelCoeffs_);
+        alphaNut_.readIfPresent(coeffDict_);
 
-        Cb1_.readIfPresent(RASmodelCoeffs_);
-        Cb2_.readIfPresent(RASmodelCoeffs_);
+        Cb1_.readIfPresent(coeffDict_);
+        Cb2_.readIfPresent(coeffDict_);
         Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
-        Cw2_.readIfPresent(RASmodelCoeffs_);
-        Cw3_.readIfPresent(RASmodelCoeffs_);
-        Cv1_.readIfPresent(RASmodelCoeffs_);
-        Cv2_.readIfPresent(RASmodelCoeffs_);
+        Cw2_.readIfPresent(coeffDict_);
+        Cw3_.readIfPresent(coeffDict_);
+        Cv1_.readIfPresent(coeffDict_);
+        Cv2_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -345,7 +345,7 @@ void SpalartAllmaras::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     if (mesh_.changing())
     {
@@ -383,7 +383,7 @@ void SpalartAllmaras::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

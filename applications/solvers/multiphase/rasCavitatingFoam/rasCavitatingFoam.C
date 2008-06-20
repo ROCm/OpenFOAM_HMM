@@ -33,7 +33,7 @@ Description
 #include "fvCFD.H"
 #include "barotropicCompressibilityModel.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/RASmodel/RASmodel.H"
+#include "incompressible/RASModel/RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

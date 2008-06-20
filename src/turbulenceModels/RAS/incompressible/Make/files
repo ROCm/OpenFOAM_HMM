@@ -1,5 +1,5 @@
-RASmodel/RASmodel.C
-RASmodel/newRASmodel.C
+RASModel/RASModel.C
+RASModel/newRASModel.C
 laminar/laminar.C
 kEpsilon/kEpsilon.C
 RNGkEpsilon/RNGkEpsilon.C
@@ -20,4 +20,4 @@ wallFunctions/nutWallFunctions/nutWallFunction/nutWallFunctionFvPatchScalarField
 wallFunctions/nutWallFunctions/nutStandardWallFunction/nutStandardWallFunctionFvPatchScalarField.C
 wallFunctions/nutWallFunctions/nutStandardRoughWallFunction/nutStandardRoughWallFunctionFvPatchScalarField.C
 
-LIB = $(FOAM_LIBBIN)/libincompressibleRASmodels
+LIB = $(FOAM_LIBBIN)/libincompressibleRASModels
