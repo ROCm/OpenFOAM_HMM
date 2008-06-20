@@ -94,13 +94,14 @@ public:
 
         void insertMissingKeys();
 
-        List< Pair<scalar> > normalised();
+        List<Pair<scalar> > normalised();
 
-        List< Pair<scalar> > normalisedMinusMean();
+        List<Pair<scalar> > normalisedMinusMean();
 
-        List< Pair<scalar> > normalisedShifted(const scalar shiftValue);
+        List<Pair<scalar> > normalisedShifted(const scalar shiftValue);
 
-        List< Pair<scalar> > raw();
+        List<Pair<scalar> > raw();
+
 
         // Access
 

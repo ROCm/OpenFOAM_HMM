@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    harmonicSpring
+    Foam::tetherPotentials::harmonicSpring
 
 Description
-     
+
 
 SourceFiles
     harmonicSpring.C
@@ -58,6 +58,7 @@ class harmonicSpring
         dictionary harmonicSpringCoeffs_;
 
         scalar springConstant_;
+
 
 public:
 

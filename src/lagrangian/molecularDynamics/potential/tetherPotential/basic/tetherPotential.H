@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    tetherPotential
+    Foam::tetherPotential
 
 Description
 
@@ -62,12 +62,13 @@ protected:
 
 
     // Private Member Functions
-        
+
         //- Disallow copy construct
         tetherPotential(const tetherPotential&);
 
         //- Disallow default bitwise assignment
         void operator=(const tetherPotential&);
+
 
 public:
 

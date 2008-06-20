@@ -76,6 +76,7 @@ class tetherPotentialList
         //- Disallow default bitwise copy construct
         tetherPotentialList(const tetherPotentialList&);
 
+
 public:
 
     // Constructors
@@ -95,7 +96,7 @@ public:
         ~tetherPotentialList();
 
     // Member Functions
-        
+
         void buildPotentials
         (
             const dictionary& idListDict,

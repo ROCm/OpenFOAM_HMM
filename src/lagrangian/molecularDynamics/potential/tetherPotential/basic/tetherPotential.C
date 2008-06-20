@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    tetherPotential
-
 \*---------------------------------------------------------------------------*/
 
 #include "tetherPotential.H"
@@ -39,9 +36,6 @@ namespace Foam
 defineTypeNameAndDebug(tetherPotential, 0);
 defineRunTimeSelectionTable(tetherPotential, dictionary);
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::tetherPotential::tetherPotential
@@ -54,6 +48,7 @@ Foam::tetherPotential::tetherPotential
     tetherPotentialProperties_(tetherPotentialProperties)
 {}
 
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 
@@ -63,6 +58,7 @@ bool Foam::tetherPotential::read(const dictionary& tetherPotentialProperties)
 
     return true;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

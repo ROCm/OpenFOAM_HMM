@@ -74,7 +74,7 @@ scalar lennardJones::unscaledEnergy(const scalar r) const
     // (rIJ/sigma)^-6
     scalar ir6 = ir2*ir2*ir2;
 
-    return 4.0 * epsilon_ * (ir6 * (ir6 - 1.0));
+    return 4.0 * epsilon_*(ir6*(ir6 - 1.0));
 }
 
 
@@ -86,7 +86,7 @@ bool lennardJones::read(const dictionary& pairPotentialProperties)
 
     lennardJonesCoeffs_.lookup("sigma") >> sigma_;
     lennardJonesCoeffs_.lookup("epsilon") >> epsilon_;
-    
+
     return true;
 }
 

@@ -135,7 +135,7 @@ scalar distribution::median()
 
     scalar runningSum = 0.0;
 
-    List< Pair<scalar> > normDist(normalised());
+    List<Pair<scalar> > normDist(normalised());
 
     if (normDist.size())
     {
@@ -259,7 +259,7 @@ List< Pair<scalar> > distribution::normalised()
 
     sort(keys);
 
-    List< Pair<scalar> > normDist(size());
+    List<Pair<scalar> > normDist(size());
 
     forAll(keys,k)
     {
@@ -282,9 +282,9 @@ List< Pair<scalar> > distribution::normalisedMinusMean()
 
 List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
 {
-    List< Pair<scalar> > oldDist(normalised());
+    List<Pair<scalar> > oldDist(normalised());
 
-    List< Pair<scalar> > newDist(oldDist.size());
+    List<Pair<scalar> > newDist(oldDist.size());
 
     forAll(oldDist,u)
     {
@@ -383,7 +383,7 @@ List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
 }
 
 
-List< Pair<scalar> > distribution::raw()
+List<Pair<scalar> > distribution::raw()
 {
     insertMissingKeys();
 
@@ -391,7 +391,7 @@ List< Pair<scalar> > distribution::raw()
 
     sort(keys);
 
-    List< Pair<scalar> > rawDist(size());
+    List<Pair<scalar> > rawDist(size());
 
     forAll(keys,k)
     {

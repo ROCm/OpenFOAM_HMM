@@ -52,7 +52,7 @@ void Foam::pairPotential::scaleEnergy(scalar& e, const scalar r) const
             name_, pairPotentialProperties_, *this
         ).ptr();
     }
-    
+
     esfPtr_->scaleEnergy(e, r);
 }
 
@@ -77,6 +77,7 @@ Foam::pairPotential::pairPotential
     writeTables_(Switch(pairPotentialProperties_.lookup("writeTables")))
 {}
 
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::pairPotential::setLookupTables()
@@ -91,7 +92,7 @@ void Foam::pairPotential::setLookupTables()
     {
         energyLookup_[k] = scaledEnergy(k*dr_ + rMin_);
 
-        forceLookup_[k] = -energyDerivative( (k * dr_ + rMin_), true);
+        forceLookup_[k] = -energyDerivative((k*dr_ + rMin_), true);
     }
 }
 
@@ -105,8 +106,8 @@ Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
     if (k < 0)
     {
         FatalErrorIn("pairPotential.C") << nl
-        << "r less than rMin" << nl
-        << abort(FatalError);
+            << "r less than rMin" << nl
+            << abort(FatalError);
     }
 
     scalar f =
@@ -120,7 +121,7 @@ Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
 Foam::List< Foam::Pair< Foam::scalar > >
 Foam::pairPotential::forceTable() const
 {
-    List< Pair<scalar> > forceTab(forceLookup_.size());
+    List<Pair<scalar> > forceTab(forceLookup_.size());
 
     forAll(forceLookup_,k)
     {
@@ -142,8 +143,8 @@ Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
     if (k < 0)
     {
         FatalErrorIn("pairPotential.C") << nl
-        << "r less than rMin" << nl
-        << abort(FatalError);
+            << "r less than rMin" << nl
+            << abort(FatalError);
     }
 
     scalar e =
@@ -157,7 +158,7 @@ Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
 Foam::List< Foam::Pair< Foam::scalar > >
     Foam::pairPotential::energyTable() const
 {
-    List< Pair<scalar> > energyTab(energyLookup_.size());
+    List<Pair<scalar> > energyTab(energyLookup_.size());
 
     forAll(energyLookup_,k)
     {
@@ -173,7 +174,7 @@ Foam::List< Foam::Pair< Foam::scalar > >
 Foam::scalar Foam::pairPotential::scaledEnergy(const scalar r) const
 {
     scalar e = unscaledEnergy(r);
-    
+
     scaleEnergy(e, r);
 
     return e;
@@ -192,7 +193,7 @@ Foam::scalar Foam::pairPotential::energyDerivative
     scalar ra = r - dr_;
     scalar rf = r;
     scalar rb = r + dr_;
-    
+
     scalar Ea, Ef, Eb;
 
     if (scaledEnergyDerivative)
@@ -207,20 +208,20 @@ Foam::scalar Foam::pairPotential::energyDerivative
         Ef = unscaledEnergy(rf);
         Eb = unscaledEnergy(rb);
     }
-    
+
     scalar denominator = (ra - rf)*(ra - rb)*(rf - rb);
-    
+
     scalar a1 =
     (
         rb*rb*(Ea - Ef) + ra*ra*(Ef - Eb) + rf*rf*(Eb - Ea)
     ) / denominator;
 
-    scalar a2 = 
+    scalar a2 =
     (
         rb*(Ef - Ea) + rf*(Ea - Eb) + ra*(Eb - Ef)
     ) / denominator;
 
-    return a1 + 2.0 * a2 * r;
+    return a1 + 2.0*a2*r;
 }
 
 
@@ -230,6 +231,7 @@ bool Foam::pairPotential::read(const dictionary& pairPotentialProperties)
 
     return true;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

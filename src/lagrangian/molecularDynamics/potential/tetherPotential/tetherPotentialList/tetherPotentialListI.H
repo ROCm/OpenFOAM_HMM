@@ -50,4 +50,5 @@ inline Foam::label Foam::tetherPotentialList::tetherPotentialIndex
     }
 }
 
+
 // ************************************************************************* //

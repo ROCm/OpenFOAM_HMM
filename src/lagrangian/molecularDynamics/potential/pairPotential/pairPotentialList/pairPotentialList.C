@@ -36,54 +36,55 @@ void Foam::pairPotentialList::readPairPotentialDict
     const polyMesh& mesh
 )
 {
-    Info<< nl << "Building pair potentials." << endl;   
+    Info<< nl << "Building pair potentials." << endl;
 
     rCutMax_ = 0.0;
 
     for (label a = 0; a < nIds(); ++a)
     {
         word idA = idList_[a];
-    
+
         for (label b = a; b < nIds(); ++b)
         {
             word idB = idList_[b];
 
             word pairPotentialName;
 
-            if (a==b)
+            if (a == b)
             {
-                if(pairPotentialDict.found(idA+"-"+idB))
+                if (pairPotentialDict.found(idA + "-" + idB))
                 {
-                    pairPotentialName = idA+"-"+idB;
+                    pairPotentialName = idA + "-" + idB;
                 }
                 else
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
                             << "Pair pairPotential specification subDict "
-                            << idA+"-"+idB << " not found"
-                            << abort(FatalError);
+                            << idA << "-" << idB << " not found"
+                            << nl << abort(FatalError);
                 }
             }
             else
             {
-                if(pairPotentialDict.found(idA+"-"+idB))
+                if (pairPotentialDict.found(idA + "-" + idB))
                 {
-                    pairPotentialName = idA+"-"+idB;
+                    pairPotentialName = idA + "-" + idB;
                 }
-    
-                else if(pairPotentialDict.found(idB+"-"+idA))
+
+                else if (pairPotentialDict.found(idB + "-" + idA))
                 {
-                    pairPotentialName = idB+"-"+idA;
+                    pairPotentialName = idB + "-" + idA;
                 }
-    
+
                 else
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
                             << "Pair pairPotential specification subDict "
-                            << idA+"-"+idB << " or " << idB+"-"+idA << " not found"
-                            << abort(FatalError);
+                            << idA << "-" << idB << " or "
+                            << idB << "-" << idA << " not found"
+                            << nl << abort(FatalError);
                 }
-    
+
                 if
                 (
                     pairPotentialDict.found(idA+"-"+idB)
@@ -92,15 +93,15 @@ void Foam::pairPotentialList::readPairPotentialDict
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
                             << "Pair pairPotential specification subDict "
-                            << idA+"-"+idB << " and "
-                            << idB+"-"+idA << " found - multiple definition"
-                            << abort(FatalError);
+                            << idA << "-" << idB << " and "
+                            << idB << "-" << idA << " found multiple definition"
+                            << nl << abort(FatalError);
                 }
             }
 
             (*this).set
             (
-                pairPotentialIndex(a,b),
+                pairPotentialIndex(a, b),
                 pairPotential::New
                 (
                     pairPotentialName,
@@ -108,22 +109,18 @@ void Foam::pairPotentialList::readPairPotentialDict
                 )
             );
 
-            if ((*this)[pairPotentialIndex(a,b)].rCut() > rCutMax_)
+            if ((*this)[pairPotentialIndex(a, b)].rCut() > rCutMax_)
             {
-                rCutMax_ = (*this)[pairPotentialIndex(a,b)].rCut();
+                rCutMax_ = (*this)[pairPotentialIndex(a, b)].rCut();
             }
 
-//             Info<< pairPotentialName << ": "
-//                 << (*this)[pairPotentialIndex(a,b)].pairPotentialProperties()
-//                 << endl;
-
-            if ((*this)[pairPotentialIndex(a,b)].writeTables())
+            if ((*this)[pairPotentialIndex(a, b)].writeTables())
             {
                 OFstream ppTabFile(mesh.time().path()/pairPotentialName);
-            
-                if 
+
+                if
                 (
-                    !(*this)[pairPotentialIndex(a,b)].writeEnergyAndForceTables
+                    !(*this)[pairPotentialIndex(a, b)].writeEnergyAndForceTables
                     (
                         ppTabFile
                     )
@@ -131,16 +128,14 @@ void Foam::pairPotentialList::readPairPotentialDict
                 {
                     FatalErrorIn("pairPotentialList::readPairPotentialDict")
                         << "Failed writing to "
-                        << ppTabFile.name()
+                        << ppTabFile.name() << nl
                         << abort(FatalError);
                 }
             }
         }
     }
 
-    rCutMaxSqr_ = rCutMax_ * rCutMax_;
-
-    Info << nl << "rCutMax = " << rCutMax_ << endl;
+    rCutMaxSqr_ = rCutMax_*rCutMax_;
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -164,10 +159,12 @@ Foam::pairPotentialList::pairPotentialList
     buildPotentials(idListDict, pairPotentialDict, mesh);
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::pairPotentialList::~pairPotentialList()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -180,7 +177,7 @@ void Foam::pairPotentialList::buildPotentials
 {
     idList_ = List<word>(idListDict.lookup("idList"));
 
-    setSize(((idList_.size() * (idList_.size() + 1))/2));
+    setSize(((idList_.size()*(idList_.size() + 1))/2));
 
     readPairPotentialDict(pairPotentialDict, mesh);
 }
@@ -192,7 +189,7 @@ const Foam::pairPotential& Foam::pairPotentialList::pairPotentialFunction
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a,b)];
+    return (*this)[pairPotentialIndex (a, b)];
 }
 
 
@@ -203,7 +200,7 @@ bool Foam::pairPotentialList::rCutSqr
     const scalar rIJMagSqr
 ) const
 {
-    if(rIJMagSqr <= rCutSqr (a,b))
+    if (rIJMagSqr <= rCutSqr (a, b))
     {
         return true;
     }
@@ -220,7 +217,7 @@ Foam::scalar Foam::pairPotentialList::rMin
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a,b)].rMin();
+    return (*this)[pairPotentialIndex (a, b)].rMin();
 }
 
 
@@ -230,7 +227,7 @@ Foam::scalar Foam::pairPotentialList::dr
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a,b)].dr();
+    return (*this)[pairPotentialIndex (a, b)].dr();
 }
 
 
@@ -240,7 +237,7 @@ Foam::scalar Foam::pairPotentialList::rCutSqr
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a,b)].rCutSqr();
+    return (*this)[pairPotentialIndex (a, b)].rCutSqr();
 }
 
 
@@ -250,7 +247,7 @@ Foam::scalar Foam::pairPotentialList::rCut
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a,b)].rCut();
+    return (*this)[pairPotentialIndex (a, b)].rCut();
 }
 
 
@@ -261,7 +258,7 @@ Foam::scalar Foam::pairPotentialList::force
     const scalar rIJMag
 ) const
 {
-    scalar f = (*this)[pairPotentialIndex (a,b)].forceLookup(rIJMag);
+    scalar f = (*this)[pairPotentialIndex (a, b)].forceLookup(rIJMag);
 
     return f;
 }
@@ -274,7 +271,7 @@ Foam::scalar Foam::pairPotentialList::energy
     const scalar rIJMag
 ) const
 {
-    scalar e = (*this)[pairPotentialIndex (a,b)].energyLookup(rIJMag);
+    scalar e = (*this)[pairPotentialIndex (a, b)].energyLookup(rIJMag);
 
     return e;
 }

@@ -45,8 +45,6 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,30 +55,37 @@ harmonicSpring::harmonicSpring
 )
 :
     tetherPotential(name, tetherPotentialProperties),
-    harmonicSpringCoeffs_(tetherPotentialProperties.subDict(typeName + "Coeffs")),
+    harmonicSpringCoeffs_
+    (
+        tetherPotentialProperties.subDict(typeName + "Coeffs")
+    ),
     springConstant_(readScalar(harmonicSpringCoeffs_.lookup("springConstant")))
 {}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 scalar harmonicSpring::energy(const scalar r) const
 {
-    return 0.5 * springConstant_ * r * r;
+    return 0.5*springConstant_*r*r;
 }
+
 
 scalar harmonicSpring::force(const scalar r) const
 {
-    return -springConstant_ * r;
+    return -springConstant_*r;
 }
+
 
 bool harmonicSpring::read(const dictionary& tetherPotentialProperties)
 {
     tetherPotential::read(tetherPotentialProperties);
 
-    harmonicSpringCoeffs_ = tetherPotentialProperties.subDict(typeName + "Coeffs");
+    harmonicSpringCoeffs_ =
+        tetherPotentialProperties.subDict(typeName + "Coeffs");
 
     harmonicSpringCoeffs_.lookup("springConstant") >> springConstant_;
-    
+
     return true;
 }
 

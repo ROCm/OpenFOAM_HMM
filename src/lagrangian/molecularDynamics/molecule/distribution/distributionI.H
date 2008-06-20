@@ -24,19 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar distribution::binWidth() const
+inline Foam::scalar Foam::distribution::binWidth() const
 {
     return binWidth_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

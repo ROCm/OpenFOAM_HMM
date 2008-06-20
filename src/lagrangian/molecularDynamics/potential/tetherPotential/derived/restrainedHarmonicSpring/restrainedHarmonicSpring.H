@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    restrainedHarmonicSpring
+    Foam::tetherPotentials::restrainedHarmonicSpring
 
 Description
-     
+
 
 SourceFiles
     restrainedHarmonicSpring.C
@@ -60,6 +60,7 @@ class restrainedHarmonicSpring
         scalar springConstant_;
 
         scalar rR_;
+
 
 public:
 

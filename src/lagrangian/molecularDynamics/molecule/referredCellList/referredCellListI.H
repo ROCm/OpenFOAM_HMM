@@ -24,9 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline const Foam::moleculeCloud& Foam::referredCellList::molCloud()
@@ -34,9 +31,5 @@ inline const Foam::moleculeCloud& Foam::referredCellList::molCloud()
     return molCloud_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

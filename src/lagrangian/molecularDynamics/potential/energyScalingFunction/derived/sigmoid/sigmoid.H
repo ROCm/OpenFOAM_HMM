@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    sigmoid
+    Foam::energyScalingFunctions::sigmoid
 
 Description
-     
+
 
 SourceFiles
     sigmoid.C
@@ -54,12 +54,13 @@ class sigmoid
     public energyScalingFunction
 {
     // Private data
-        
+
         dictionary sigmoidCoeffs_;
 
         scalar shift_;
         scalar scale_;
-        
+
+
     // Private Member Functions
 
         scalar sigmoidScale
@@ -68,6 +69,7 @@ class sigmoid
             const scalar shift,
             const scalar scale
         ) const;
+
 
 public:
 
@@ -90,6 +92,7 @@ public:
 
         ~sigmoid()
         {}
+
 
     // Member Functions
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    pairPotential
+    Foam::pairPotential
 
 Description
 
@@ -82,12 +82,13 @@ protected:
     // Private Member Functions
 
         void scaleEnergy(scalar& e, const scalar r) const;
-        
+
         //- Disallow copy construct
         pairPotential(const pairPotential&);
 
         //- Disallow default bitwise assignment
         void operator=(const pairPotential&);
+
 
 public:
 
@@ -152,9 +153,9 @@ public:
 
         scalar forceLookup (const scalar r) const;
 
-        List< Pair <scalar> > energyTable() const;
+        List<Pair<scalar> > energyTable() const;
 
-        List< Pair <scalar> > forceTable() const;
+        List<Pair<scalar> > forceTable() const;
 
         inline bool writeTables() const;
 

@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    shiftedForce
+    Foam::energyScalingFunctions::shiftedForce
 
 Description
-     
+
 
 SourceFiles
     shiftedForce.C
@@ -54,14 +54,13 @@ class shiftedForce
     public energyScalingFunction
 {
     // Private data
-        
+
         scalar rCut_;
 
         scalar e_at_rCut_;
 
         scalar de_dr_at_rCut_;
 
-    // Private Member Functions
 
 public:
 
@@ -85,8 +84,9 @@ public:
         ~shiftedForce()
         {}
 
+
     // Member Functions
-        
+
         void scaleEnergy(scalar& e, const scalar r) const;
 
         //- Read transportProperties dictionary

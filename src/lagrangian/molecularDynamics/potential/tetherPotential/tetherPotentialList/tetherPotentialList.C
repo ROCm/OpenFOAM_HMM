@@ -30,7 +30,7 @@ License
 
 void Foam::tetherPotentialList::readTetherPotentialDict
 (
-    const dictionary& tetherPotentialDict,  
+    const dictionary& tetherPotentialDict,
     const List<word>& idList,
     const List<label>& tetherIds
 )
@@ -63,7 +63,7 @@ void Foam::tetherPotentialList::readTetherPotentialDict
                         << abort(FatalError);
             }
 
-            (*this).set
+            this->set
             (
                 tetherMapIndex,
                 tetherPotential::New
@@ -76,14 +76,10 @@ void Foam::tetherPotentialList::readTetherPotentialDict
             idMap_[tetherId] = tetherMapIndex;
 
             tetherMapIndex++;
-
-//             Info<< tetherPotentialName << ": "
-//                 << (*this)[tetherPotentialIndex(tetherId)].tetherPotentialProperties()
-//                 << endl;
-
         }
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -107,10 +103,12 @@ Foam::tetherPotentialList::tetherPotentialList
     buildPotentials(idListDict, tetherPotentialDict, tetherIds);
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::tetherPotentialList::~tetherPotentialList()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

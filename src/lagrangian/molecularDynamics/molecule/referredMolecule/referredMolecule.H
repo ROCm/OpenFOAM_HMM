@@ -98,6 +98,7 @@ public:
             const referredMolecule& b
         );
 
+
     // IOstream Operators
 
         friend Istream& operator>>
