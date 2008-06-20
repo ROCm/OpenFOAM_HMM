@@ -20,35 +20,30 @@ FoamFile
     left
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          35;
         startFace       4795;
     }
     right
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          35;
         startFace       4830;
     }
     top
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          70;
         startFace       4865;
     }
     bottom
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          70;
         startFace       4935;
     }
     frontAndBack
     {
         type            empty;
-        physicalType    empty;
         nFaces          4900;
         startFace       5005;
     }

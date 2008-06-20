@@ -20,14 +20,12 @@ FoamFile
     lowValue
     {
         type            patch;
-        physicalType    limitValue;
         nFaces          1;
         startFace       499;
     }
     highValue
     {
         type            patch;
-        physicalType    limitGradient;
         nFaces          1;
         startFace       500;
     }

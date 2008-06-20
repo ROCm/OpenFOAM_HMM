@@ -20,35 +20,30 @@ FoamFile
     down
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          60;
         startFace       3890;
     }
     right
     {
         type            patch;
-        physicalType    outlet;
         nFaces          30;
         startFace       3950;
     }
     up
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          60;
         startFace       3980;
     }
     left
     {
         type            patch;
-        physicalType    inlet;
         nFaces          30;
         startFace       4040;
     }
     cylinder
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          40;
         startFace       4070;
     }

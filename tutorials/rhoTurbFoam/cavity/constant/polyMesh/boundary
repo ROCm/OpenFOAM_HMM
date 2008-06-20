@@ -27,7 +27,6 @@ FoamFile
 movingWall
 {
     type wall;
-    physicalType adiabaticWallFunctions;
     nFaces 20;
     startFace 760;
 }
@@ -35,7 +34,6 @@ movingWall
 fixedWalls
 {
     type wall;
-    physicalType adiabaticWallFunctions;
     nFaces 60;
     startFace 780;
 }
@@ -43,7 +41,6 @@ fixedWalls
 frontAndBack
 {
     type empty;
-    physicalType empty;
     nFaces 800;
     startFace 840;
 }

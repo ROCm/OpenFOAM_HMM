@@ -20,7 +20,6 @@ FoamFile
     patch0
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          512;
         startFace       11520;
         featureCos      0.9;
@@ -28,7 +27,6 @@ FoamFile
     patch1
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          512;
         startFace       12032;
         featureCos      0.9;
@@ -36,7 +34,6 @@ FoamFile
     patch2
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          512;
         startFace       12544;
         featureCos      0.9;

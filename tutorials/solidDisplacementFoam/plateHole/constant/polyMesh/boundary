@@ -20,7 +20,6 @@ FoamFile
 left
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 30;
     startFace 1930;
 }
@@ -28,7 +27,6 @@ left
 right
 {
     type patch;
-    physicalType tractionAdiabatic;
     nFaces 30;
     startFace 1960;
 }
@@ -36,7 +34,6 @@ right
 down
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 30;
     startFace 1990;
 }
@@ -44,7 +41,6 @@ down
 up
 {
     type patch;
-    physicalType tractionAdiabatic;
     nFaces 30;
     startFace 2020;
 }
@@ -52,7 +48,6 @@ up
 hole
 {
     type patch;
-    physicalType tractionAdiabatic;
     nFaces 20;
     startFace 2050;
 }
@@ -60,7 +55,6 @@ hole
 frontAndBack
 {
     type empty;
-    physicalType empty;
     nFaces 2000;
     startFace 2070;
 }
