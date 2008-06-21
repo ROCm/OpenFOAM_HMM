@@ -112,6 +112,13 @@ void Foam::calcTypes::components::calc
                 processed
             );
 
+            writeComponentFields<symmTensor>
+            (
+                fieldHeader,
+                mesh,
+                processed
+            );
+
             if (!processed)
             {
                 FatalError
