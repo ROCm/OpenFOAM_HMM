@@ -37,8 +37,20 @@ Description
         Jiang Zhu
 
         Computers and Fluids Vol. 24, No. 3, pp. 227-238, 1995
-    @verbatim
+    @endverbatim
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        realizableKE
+        {
+            Cmu         0.09;
+            A0          4.0;
+            C2          1.9;
+            alphak      1.0;
+            alphaEps    0.833333;
+            alphah      1.0;    // only for compressible
+        }
+    @endverbatim
 
 SourceFiles
     realizableKE.C
