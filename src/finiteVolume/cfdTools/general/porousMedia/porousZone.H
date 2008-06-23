@@ -128,7 +128,7 @@ class porousZone
     // Private Member Functions
 
         //- adjust negative resistance values to be multiplier of max value
-        static void adjustNegativeResistance(vector& resist);
+        static void adjustNegativeResistance(dimensionedVector& resist);
 
         //- Power-law resistance
         template<class RhoFieldType>
