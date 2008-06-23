@@ -36,12 +36,12 @@ inline Foam::label Foam::pairPotentialList::pairPotentialIndex
 
     if (a < b)
     {
-        index = a*(2*nIds() - a - 1) / 2 + b;
+        index = a*(2*nIds() - a - 1)/2 + b;
     }
 
     else
     {
-        index = b*(2*nIds() - b - 1) / 2 + a;
+        index = b*(2*nIds() - b - 1)/2 + a;
     }
 
     if (index > size() - 1)
