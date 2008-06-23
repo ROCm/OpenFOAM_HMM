@@ -31,7 +31,7 @@ sub wanted {
         if ( $maxlen < length ) {
             $count++;
             substr( $_, $maxlen, 0 ) = "||->>";    # show truncation point
-            print "$ARGV $. $_\n";
+            print "$File::Find::name  $. $_\n";
         }
     }
     close ARGV;

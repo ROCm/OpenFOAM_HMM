@@ -90,7 +90,7 @@ inline const labelList& objectMap::masterObjects() const
 }
 
 
-// * * * * * * * * * * * * * * * * Frimaster Operators  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * //
 
 inline bool operator==(const objectMap& a, const objectMap& b)
 {

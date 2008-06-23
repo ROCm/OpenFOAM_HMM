@@ -170,19 +170,28 @@ inline Smanip<ios_base::fmtflags> setf
 }
 
 
-inline Omanip<IOstream::streamFormat> setformat(const IOstream::streamFormat fmt)
+inline Omanip<IOstream::streamFormat> setformat
+(
+    const IOstream::streamFormat fmt
+)
 {
     return Omanip<IOstream::streamFormat>(&IOstream::format, fmt);
 }
 
 
-inline Omanip<IOstream::versionNumber> setversion(const IOstream::versionNumber ver)
+inline Omanip<IOstream::versionNumber> setversion
+(
+    const IOstream::versionNumber ver
+)
 {
     return Omanip<IOstream::versionNumber>(&IOstream::version, ver);
 }
 
 
-inline Omanip<IOstream::compressionType> setcompression(const IOstream::compressionType cmp)
+inline Omanip<IOstream::compressionType> setcompression
+(
+    const IOstream::compressionType cmp
+)
 {
     return Omanip<IOstream::compressionType>(&IOstream::compression, cmp);
 }
