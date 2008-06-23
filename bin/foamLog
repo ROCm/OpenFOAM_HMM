@@ -47,7 +47,7 @@ printUsage() {
 cat <<LABUSAGE
 $PROGNAME - extracts xy files from Foam logs.
 
-Usage: $PROGNAME [-n][-s] <root> <case> <log>
+Usage: $PROGNAME [-n][-s] <log>
            extracts xy files from log
        $PROGNAME -l <log>
            lists but does not extract
@@ -82,11 +82,11 @@ files with the extracted data only.
 
 The query database is a simple text format with three entries per line, 
 separated with '/'. Column 1 is the name of the variable (cannot contain
-spaces), column 2 is the regular expression to select the line and
-column 3 is the string to select the column inside the line. The value
-taken will be the first (non-space)word after this column.
-The database will either be \$HOME/.${PROGNAME}.db or if not found 
-$PROGDIR/${PROGNAME}.db.
+spaces), column 2 is the extended regular expression (egrep) to select
+the line and column 3 is the string (fgrep) to select the column inside the
+line. The value taken will be the first (non-space)word after this
+column. The database will either be \$HOME/.${PROGNAME}.db or if not
+found  $PROGDIR/${PROGNAME}.db.
 
 Option -s suppresses the default information and only prints the extracted
 variables.
@@ -105,7 +105,7 @@ myEcho() {
 # getSolvedVars logFile
 # Prints names of all 'solved for' variables in the log file.
 getSolvedVars() {
-    grep ' Solving for ' $1 | fgrep ',' | sed -e 's/.* Solving for \([^,]*\)[,:].*/\1/' | sort -u
+    fgrep ' Solving for ' $1 | fgrep ',' | sed -e 's/.* Solving for \([^,]*\)[,:].*/\1/' | sort -u
 }
 
 
@@ -163,7 +163,7 @@ getAllQueries() {
     for var in $dbQueries
     do
         getQueries $1 "$var"
-        line=`grep "$LINEQ" $2`
+        line=`egrep "$LINEQ" $2`
         if [ "$line" ]; then
             column=`echo "$line" | fgrep "$NUMQ"`
             if [ "$column" ]; then
@@ -228,14 +228,13 @@ if [ "$LISTONLY" ]; then
     exit 0
 fi
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 1 ]; then
     printUsage
     exit 1
 fi
 
-ROOT=$1
-CASE=$2
-LOG=$3
+CASEDIR=.
+LOG=$1
 if [ ! -r $LOG ]; then
     echo "$PROGNAME: Cannot read log $LOG"
     exit 1
@@ -244,13 +243,13 @@ fi
 QUERYNAMES=`getAllQueries $DBFILE $LOG`
 
 
-if [ ! "$ROOT" -o ! "$CASE" ]; then
+if [ ! "$CASEDIR" ]; then
     printUsage
     exit 1
 fi
 
-if [ ! -d "$ROOT/$CASE" ]; then
-    echo "$PROGNAME: Cannot read $ROOT/$CASE"
+if [ ! -d "$CASEDIR" ]; then
+    echo "$PROGNAME: Cannot read $CASEDIR"
     exit 1
 fi
 
@@ -262,16 +261,14 @@ fi
 
 #-- Make logs dir in case directory and put awk file there.
 
-mkdir -p $ROOT/$CASE/logs
-AWKFILE=$ROOT/$CASE/logs/$PROGNAME.awk
+mkdir -p $CASEDIR/logs
+AWKFILE=$CASEDIR/logs/$PROGNAME.awk
 
 myEcho "Using:"
-myEcho "  root     : $ROOT"
-myEcho "  case     : $CASE"
 myEcho "  log      : $LOG"
 myEcho "  database : $DBFILE"
 myEcho "  awk file : $AWKFILE"
-myEcho "  files to : $ROOT/$CASE/logs"
+myEcho "  files to : $CASEDIR/logs"
 myEcho ""
 
 
@@ -364,19 +361,19 @@ cat <<LABSOLVE >> $AWKFILE
 
     varName=varNameVal[1]
     file=varName "_" subIter[varName]++
-    file="$ROOT/$CASE/logs/" file 
+    file="$CASEDIR/logs/" file 
     extract(\$0, "Initial residual = ", val)
     print $TIMENAME "\t" val[1] > file
 
     varName=varNameVal[1] "FinalRes"
     file=varName "_" subIter[varName]++
-    file="$ROOT/$CASE/logs/" file 
+    file="$CASEDIR/logs/" file 
     extract(\$0, "Final residual = ", val)
     print $TIMENAME "\t" val[1] > file
 
     varName=varNameVal[1] "Iters"
     file=varName "_" subIter[varName]++
-    file="$ROOT/$CASE/logs/" file 
+    file="$CASEDIR/logs/" file 
     extract(\$0, "No Iterations ", val)
     print $TIMENAME "\t" val[1] > file
 }
@@ -393,7 +390,7 @@ do
         echo "#-- Extraction of $queryName" >> $AWKFILE
         echo "/$LINEQ/ {" >> $AWKFILE
         echo "    extract(\$0, \"$NUMQ\", val)" >> $AWKFILE
-        echo "    file=\"$ROOT/$CASE/logs/${queryName}_\" ${counter}" >> $AWKFILE
+        echo "    file=\"$CASEDIR/logs/${queryName}_\" ${counter}" >> $AWKFILE
         echo "    print $TIMENAME \"\\t\" val[1] > file" >> $AWKFILE
         echo "    ${counter}++" >> $AWKFILE
         echo "}" >> $AWKFILE
