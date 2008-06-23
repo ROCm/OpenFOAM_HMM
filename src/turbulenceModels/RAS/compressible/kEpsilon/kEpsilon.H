@@ -28,6 +28,20 @@ Class
 Description
     Standard k-epsilon turbulence model for compressible flows
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        kEpsilonCoeffs
+        {
+            Cmu         0.09;
+            C1          1.44;
+            C2          1.92;
+            C3          -0.33;  // only for compressible
+            alphak      1.0;    // only for compressible
+            alphaEps    0.76923;
+            alphah      1.0;    // only for compressible
+        }
+    @endverbatim
+
 SourceFiles
     kEpsilon.C
     kEpsilonCorrect.C

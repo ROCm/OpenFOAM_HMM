@@ -48,6 +48,6 @@ epsMax/bounding epsilon,/max:
 epsAvg/bounding epsilon,/average: 
 
 #- gamma bounding
-gammaMin/Min\(gamma\) =/Min(gamma) =
-gammaMax/Max\(gamma\) =/Max(gamma) =
+gammaMin/Min\(gamma\) =/Min(gamma) = 
+gammaMax/Max\(gamma\) =/Max(gamma) = 
 
