@@ -405,64 +405,71 @@ bool doCommand
                 backup(mesh, setName, currentSet, setName + "_old");
             }
 
-            if (action == topoSetSource::CLEAR)
+            switch (action)
             {
-                // Already handled above by not reading
-            }
-            else if (action == topoSetSource::INVERT)
-            {
-                currentSet.invert(currentSet.maxSize(mesh));
-            }
-            else if (action == topoSetSource::LIST)
-            {
-                currentSet.writeDebug(Pout, mesh, 100);
-                Pout<< endl;
-            }
-            else if (action == topoSetSource::SUBSET)
-            {
-                if (is >> sourceType)
+                case topoSetSource::CLEAR:
                 {
-                    autoPtr<topoSetSource> setSource
-                    (
-                        topoSetSource::New
-                        (
-                            sourceType,
-                            mesh,
-                            is
-                        )
-                    );
-
-                    // Backup current set.
-                    topoSet oldSet
-                    (
-                        mesh,
-                        currentSet.name() + "_old2",
-                        currentSet
-                    );
-
-                    currentSet.clear();
-                    currentSet.resize(oldSet.size());
-                    setSource().applyToSet(topoSetSource::NEW, currentSet);
-
-                    // Combine new value of currentSet with old one.
-                    currentSet.subset(oldSet);
+                    // Already handled above by not reading
+                    break;
                 }
-            }
-            else
-            {
-                if (is >> sourceType)
+                case topoSetSource::INVERT:
                 {
-                    autoPtr<topoSetSource> setSource
-                    (
-                        topoSetSource::New
+                    currentSet.invert(currentSet.maxSize(mesh));
+                    break;
+                }
+                case topoSetSource::LIST:
+                {
+                    currentSet.writeDebug(Pout, mesh, 100);
+                    Pout<< endl;
+                    break;
+                }
+                case topoSetSource::SUBSET:
+                {
+                    if (is >> sourceType)
+                    {
+                        autoPtr<topoSetSource> setSource
                         (
-                            sourceType,
-                            mesh,
-                            is
-                        )
-                    );
+                            topoSetSource::New
+                            (
+                                sourceType,
+                                mesh,
+                                is
+                            )
+                        );
 
-                    setSource().applyToSet(action, currentSet);
+                        // Backup current set.
+                        topoSet oldSet
+                        (
+                            mesh,
+                            currentSet.name() + "_old2",
+                            currentSet
+                        );
+
+                        currentSet.clear();
+                        currentSet.resize(oldSet.size());
+                        setSource().applyToSet(topoSetSource::NEW, currentSet);
+
+                        // Combine new value of currentSet with old one.
+                        currentSet.subset(oldSet);
+                    }
+                    break;
+                }
+                default:
+                {
+                    if (is >> sourceType)
+                    {
+                        autoPtr<topoSetSource> setSource
+                        (
+                            topoSetSource::New
+                            (
+                                sourceType,
+                                mesh,
+                                is
+                            )
+                        );
+
+                        setSource().applyToSet(action, currentSet);
+                    }
                 }
             }
 
@@ -532,7 +539,7 @@ bool doCommand
         }
     }
 
-    return error;
+    return !error;
 }
 
 
@@ -612,31 +619,36 @@ commandStatus parseType
         switch(stat)
         {
             case polyMesh::UNCHANGED:
+            {
                 Pout<< "    mesh not changed." << endl;
-            break;
-
+                break;
+            }
             case polyMesh::POINTS_MOVED:
+            {
                 Pout<< "    points moved; topology unchanged." << endl;
-            break;
-
+                break;
+            }
             case polyMesh::TOPO_CHANGE:
+            {
                 Pout<< "    topology changed; patches unchanged." << nl
                     << "    ";
                 printMesh(runTime, mesh);
-
-            break;
-
+                break;
+            }
             case polyMesh::TOPO_PATCH_CHANGE:
+            {
                 Pout<< "    topology changed and patches changed." << nl
                     << "    ";
                 printMesh(runTime, mesh);
 
-            break;
-
+                break;
+            }
             default:
+            {
                 FatalErrorIn("parseType") << "Illegal mesh update state "
                     << stat  << abort(FatalError);
-            break;
+                break;
+            }
         }
 
         return INVALID;
