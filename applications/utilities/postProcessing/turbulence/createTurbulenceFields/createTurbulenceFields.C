@@ -36,7 +36,7 @@ Source files:
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASmodel/RASmodel.H"
+#include "incompressible/RASModel/RASModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,13 +68,13 @@ int main(int argc, char *argv[])
         // Cache the turbulence fields
 
         Info<< "\nRetrieving field k from turbulence model" << endl;
-        const volScalarField k = turbulence->k();
+        const volScalarField k = RASModel->k();
 
         Info<< "\nRetrieving field epsilon from turbulence model" << endl;
-        const volScalarField epsilon = turbulence->epsilon();
+        const volScalarField epsilon = RASModel->epsilon();
 
         Info<< "\nRetrieving field R from turbulence model" << endl;
-        const volSymmTensorField R = turbulence->R();
+        const volSymmTensorField R = RASModel->R();
 
         // Check availability of tubulence fields
 

@@ -44,7 +44,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -140,7 +140,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

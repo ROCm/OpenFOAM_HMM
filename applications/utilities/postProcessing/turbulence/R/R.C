@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    R 
+    R
 
 Description
     Calculates and writes the Reynolds stress R for the current time step.
@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASmodel/RASmodel.H"
+#include "incompressible/RASModel/RASModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        turbulence->R()
+        RASModel->R()
     );
 
     R.write();

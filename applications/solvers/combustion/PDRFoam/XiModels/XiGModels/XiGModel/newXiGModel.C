@@ -32,7 +32,7 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
 (
     const dictionary& XiGProperties,
     const hhuCombustionThermo& thermo,
-    const compressible::RASmodel& turbulence,
+    const compressible::RASModel& turbulence,
     const volScalarField& Su
 )
 {
@@ -50,7 +50,7 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
             "XiGModel::New"
             "("
             "    const hhuCombustionThermo& thermo,"
-            "    const compressible::RASmodel& turbulence,"
+            "    const compressible::RASModel& turbulence,"
             "    const volScalarField& Su"
             ")"
         )   << "Unknown XiGModel type "

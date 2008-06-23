@@ -216,7 +216,7 @@ bool Foam::KinematicParcel<ParcelType>::move
     scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 
-    while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
+    while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
     {
         // Set the Lagrangian time-step
         scalar dt = min(dtMax, tEnd);

@@ -105,17 +105,17 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
     }
 
     // Lookup Cmu corresponding to the turbulence model selected
-    const dictionary& turbulenceProperties = db().lookupObject<IOdictionary>
+    const dictionary& RASProperties = db().lookupObject<IOdictionary>
     (
-        "turbulenceProperties"
+        "RASProperties"
     );
 
-    const dictionary& turbulenceCoeffs = turbulenceProperties.subDict
+    const dictionary& RASCoeffs = RASProperties.subDict
     (
-        word(turbulenceProperties.lookup("RASmodel")) + "Coeffs"
+        word(RASProperties.lookup("RASModel")) + "Coeffs"
     );
 
-    scalar Cmu = readScalar(turbulenceCoeffs.lookup("Cmu"));
+    scalar Cmu = readScalar(RASCoeffs.lookup("Cmu"));
     scalar Cmu75 = pow(Cmu, 0.75);
 
     const fvPatchField<scalar>& k =

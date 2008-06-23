@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(SpalartAllmaras, 0);
-addToRunTimeSelectionTable(LESmodel, SpalartAllmaras, dictionary);
+addToRunTimeSelectionTable(LESModel, SpalartAllmaras, dictionary);
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -101,7 +101,7 @@ SpalartAllmaras::SpalartAllmaras
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
 
 
     alphaNut_
@@ -109,7 +109,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaNut",
-            LESmodelProperties(),
+            coeffDict(),
             1.5
         )
     ),
@@ -118,7 +118,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb1",
-            LESmodelProperties(),
+            coeffDict(),
             0.1355
         )
     ),
@@ -127,7 +127,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb2",
-            LESmodelProperties(),
+            coeffDict(),
             0.622
         )
     ),
@@ -136,7 +136,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv1",
-            LESmodelProperties(),
+            coeffDict(),
             7.1
         )
     ),
@@ -145,7 +145,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv2",
-            LESmodelProperties(),
+            coeffDict(),
             5.0
         )
     ),
@@ -154,7 +154,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "CDES",
-            LESmodelProperties(),
+            coeffDict(),
             0.65
         )
     ),
@@ -163,7 +163,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.07
         )
     ),
@@ -182,7 +182,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw2",
-            LESmodelProperties(),
+            coeffDict(),
             0.3
         )
     ),
@@ -191,7 +191,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw3",
-            LESmodelProperties(),
+            coeffDict(),
             2.0
         )
     ),
@@ -232,7 +232,7 @@ SpalartAllmaras::SpalartAllmaras
 
 void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
 {
-    LESmodel::correct(gradU);
+    LESModel::correct(gradU);
 
     if (mesh_.changing())
     {
@@ -295,18 +295,18 @@ tmp<fvVectorMatrix> SpalartAllmaras::divDevBeff(volVectorField& U) const
 
 bool SpalartAllmaras::read()
 {
-    if (LESmodel::read())
+    if (LESModel::read())
     {
-        alphaNut_.readIfPresent(LESmodelProperties());
-        Cb1_.readIfPresent(LESmodelProperties());
-        Cb2_.readIfPresent(LESmodelProperties());
+        alphaNut_.readIfPresent(coeffDict());
+        Cb1_.readIfPresent(coeffDict());
+        Cb2_.readIfPresent(coeffDict());
         Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
-        Cw2_.readIfPresent(LESmodelProperties());
-        Cw3_.readIfPresent(LESmodelProperties());
-        Cv1_.readIfPresent(LESmodelProperties());
-        Cv2_.readIfPresent(LESmodelProperties());
-        CDES_.readIfPresent(LESmodelProperties());
-        ck_.readIfPresent(LESmodelProperties());
+        Cw2_.readIfPresent(coeffDict());
+        Cw3_.readIfPresent(coeffDict());
+        Cv1_.readIfPresent(coeffDict());
+        Cv2_.readIfPresent(coeffDict());
+        CDES_.readIfPresent(coeffDict());
+        ck_.readIfPresent(coeffDict());
         kappa_.readIfPresent(*this);
 
         return true;
@@ -320,7 +320,7 @@ bool SpalartAllmaras::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

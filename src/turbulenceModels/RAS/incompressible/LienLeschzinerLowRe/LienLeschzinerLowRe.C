@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LienLeschzinerLowRe, 0);
-addToRunTimeSelectionTable(RASmodel, LienLeschzinerLowRe, dictionary);
+addToRunTimeSelectionTable(RASModel, LienLeschzinerLowRe, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,22 +52,22 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
+    C1(coeffDict_.lookupOrAddDefault<scalar>("C1", 1.44)),
+    C2(coeffDict_.lookupOrAddDefault<scalar>("C2", 1.92)),
+    alphak(coeffDict_.lookupOrAddDefault<scalar>("alphak", 1.0)),
     alphaEps
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        coeffDict_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
     ),
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Am(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Am", 0.016)),
+    Cmu(coeffDict_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
+    Am(coeffDict_.lookupOrAddDefault<scalar>("Am", 0.016)),
     Aepsilon
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
+        coeffDict_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
     ),
-    Amu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
+    Amu(coeffDict_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
 
     k_
     (
@@ -168,16 +168,16 @@ tmp<fvVectorMatrix> LienLeschzinerLowRe::divDevReff(volVectorField& U) const
 
 bool LienLeschzinerLowRe::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("Am", Am);
-        RASmodelCoeffs_.readIfPresent<scalar>("Aepsilon", Aepsilon);
-        RASmodelCoeffs_.readIfPresent<scalar>("Amu", Amu);
+        coeffDict_.readIfPresent<scalar>("C1", C1);
+        coeffDict_.readIfPresent<scalar>("C2", C2);
+        coeffDict_.readIfPresent<scalar>("alphak", alphak);
+        coeffDict_.readIfPresent<scalar>("alphaEps", alphaEps);
+        coeffDict_.readIfPresent<scalar>("Cmu", Cmu);
+        coeffDict_.readIfPresent<scalar>("Am", Am);
+        coeffDict_.readIfPresent<scalar>("Aepsilon", Aepsilon);
+        coeffDict_.readIfPresent<scalar>("Amu", Amu);
 
         return true;
     }
@@ -197,7 +197,7 @@ void LienLeschzinerLowRe::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     if (mesh_.changing())
     {
@@ -271,7 +271,7 @@ void LienLeschzinerLowRe::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

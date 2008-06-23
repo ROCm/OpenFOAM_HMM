@@ -1,8 +1,8 @@
 vanDriestDelta/vanDriestDelta.C
 wallFunc/nuSgsWallFunction/nuSgsWallFunctionFvPatchScalarField.C
 
-LESmodel/LESmodel.C
-LESmodel/newLESmodel.C
+LESModel/LESModel.C
+LESModel/newLESModel.C
 
 GenEddyVisc/GenEddyVisc.C
 GenSGSStress/GenSGSStress.C
@@ -25,4 +25,4 @@ dynMixedSmagorinsky/dynMixedSmagorinsky.C
 
 /*Smagorinsky2/Smagorinsky2.C*/
 
-LIB = $(FOAM_LIBBIN)/libincompressibleLESmodels
+LIB = $(FOAM_LIBBIN)/libincompressibleLESModels

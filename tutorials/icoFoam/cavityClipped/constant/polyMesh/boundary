@@ -20,21 +20,18 @@ FoamFile
     lid
     {
         type            wall;
-        physicalType    wall;
         nFaces          20;
         startFace       632;
     }
     fixedWalls
     {
         type            wall;
-        physicalType    wall;
         nFaces          60;
         startFace       652;
     }
     frontAndBack
     {
         type            empty;
-        physicalType    empty;
         nFaces          672;
         startFace       712;
     }

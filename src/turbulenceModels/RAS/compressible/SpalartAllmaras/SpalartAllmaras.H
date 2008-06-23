@@ -68,7 +68,7 @@ SourceFiles
 #ifndef compressibleSpalartAllmaras_H
 #define combressibleSpalartAllmaras_H
 
-#include "RASmodel.H"
+#include "RASModel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,7 +77,7 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -86,7 +86,7 @@ namespace RAS
 
 class SpalartAllmaras
 :
-    public RASmodel
+    public RASModel
 {
     // Private data
 
@@ -234,7 +234,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

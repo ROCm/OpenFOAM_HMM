@@ -33,7 +33,7 @@ Description
 #include "fvCFD.H"
 #include "barotropicCompressibilityModel.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/LESModel/LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

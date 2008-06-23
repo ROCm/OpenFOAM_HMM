@@ -32,7 +32,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -44,14 +44,14 @@ GenEddyVisc::GenEddyVisc
     transportModel& transport
 )
 :
-    LESmodel(word("GenEddyVisc"), U, phi, transport),
+    LESModel(word("GenEddyVisc"), U, phi, transport),
 
     ce_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ce",
-            LESmodelProperties(),
+            coeffDict(),
             1.048
         )
     ),
@@ -69,7 +69,7 @@ GenEddyVisc::GenEddyVisc
         mesh_
     )
 {
-    printCoeffs();
+//    printCoeffs();
 }
 
 
@@ -98,15 +98,15 @@ tmp<fvVectorMatrix> GenEddyVisc::divDevBeff(volVectorField& U) const
 
 void GenEddyVisc::correct(const tmp<volTensorField>& gradU)
 {
-    LESmodel::correct(gradU);
+    LESModel::correct(gradU);
 }
 
 
 bool GenEddyVisc::read()
 {
-    if (LESmodel::read())
+    if (LESModel::read())
     {
-        ce_.readIfPresent(LESmodelProperties());
+        ce_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -119,7 +119,7 @@ bool GenEddyVisc::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

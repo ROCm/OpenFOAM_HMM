@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Smagorinsky, 0);
-addToRunTimeSelectionTable(LESmodel, Smagorinsky, dictionary);
+addToRunTimeSelectionTable(LESModel, Smagorinsky, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ Smagorinsky::Smagorinsky
     const basicThermo& thermoPhysicalModel
 )
 :
-    LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
+    LESModel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
     ck_
@@ -60,7 +60,7 @@ Smagorinsky::Smagorinsky
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.02
         )
     )
@@ -92,7 +92,7 @@ bool Smagorinsky::read()
 {
     if (GenEddyVisc::read())
     {
-        ck_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -105,7 +105,7 @@ bool Smagorinsky::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(kOmegaSST, 0);
-addToRunTimeSelectionTable(RASmodel, kOmegaSST, dictionary);
+addToRunTimeSelectionTable(RASModel, kOmegaSST, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -94,14 +94,14 @@ kOmegaSST::kOmegaSST
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     alphaK1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK1",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.85034
         )
     ),
@@ -110,7 +110,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -119,7 +119,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaOmega1",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.5
         )
     ),
@@ -128,7 +128,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaOmega2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.85616
         )
     ),
@@ -137,7 +137,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma1",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.5532
         )
     ),
@@ -146,7 +146,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.4403
         )
     ),
@@ -155,7 +155,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta1",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.075
         )
     ),
@@ -164,7 +164,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta2",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.0828
         )
     ),
@@ -173,7 +173,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "betaStar",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -182,7 +182,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "a1",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.31
         )
     ),
@@ -191,7 +191,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "c1",
-            RASmodelCoeffs_,
+            coeffDict_,
             10.0
         )
     ),
@@ -204,7 +204,7 @@ kOmegaSST::kOmegaSST
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -300,20 +300,20 @@ tmp<fvVectorMatrix> kOmegaSST::divDevReff(volVectorField& U) const
 
 bool kOmegaSST::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        alphaK1_.readIfPresent(RASmodelCoeffs_);
-        alphaK2_.readIfPresent(RASmodelCoeffs_);
-        alphaOmega1_.readIfPresent(RASmodelCoeffs_);
-        alphaOmega2_.readIfPresent(RASmodelCoeffs_);
-        gamma1_.readIfPresent(RASmodelCoeffs_);
-        gamma2_.readIfPresent(RASmodelCoeffs_);
-        beta1_.readIfPresent(RASmodelCoeffs_);
-        beta2_.readIfPresent(RASmodelCoeffs_);
-        betaStar_.readIfPresent(RASmodelCoeffs_);
-        a1_.readIfPresent(RASmodelCoeffs_);
-        c1_.readIfPresent(RASmodelCoeffs_);
-        Cmu_.readIfPresent(RASmodelCoeffs_);
+        alphaK1_.readIfPresent(coeffDict_);
+        alphaK2_.readIfPresent(coeffDict_);
+        alphaOmega1_.readIfPresent(coeffDict_);
+        alphaOmega2_.readIfPresent(coeffDict_);
+        gamma1_.readIfPresent(coeffDict_);
+        gamma2_.readIfPresent(coeffDict_);
+        beta1_.readIfPresent(coeffDict_);
+        beta2_.readIfPresent(coeffDict_);
+        betaStar_.readIfPresent(coeffDict_);
+        a1_.readIfPresent(coeffDict_);
+        c1_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -333,7 +333,7 @@ void kOmegaSST::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     if (mesh_.changing())
     {
@@ -401,7 +401,7 @@ void kOmegaSST::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

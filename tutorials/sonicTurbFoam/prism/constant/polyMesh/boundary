@@ -20,35 +20,30 @@ FoamFile
     inlet
     {
         type            patch;
-        physicalType    supersonicInlet;
         nFaces          48;
         startFace       13081;
     }
     outlet
     {
         type            patch;
-        physicalType    pressureTransmissiveOutlet;
         nFaces          68;
         startFace       13129;
     }
     bottomWall
     {
         type            patch;
-        physicalType    supersonicFreestream;
         nFaces          107;
         startFace       13197;
     }
     topWall
     {
         type            patch;
-        physicalType    supersonicFreestream;
         nFaces          107;
         startFace       13304;
     }
     prismWall
     {
         type            wall;
-        physicalType    adiabaticWallFunctions;
         nFaces          52;
         startFace       13411;
     }

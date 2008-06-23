@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(oneEqEddy, 0);
-addToRunTimeSelectionTable(LESmodel, oneEqEddy, dictionary);
+addToRunTimeSelectionTable(LESModel, oneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ oneEqEddy::oneEqEddy
     const basicThermo& thermoPhysicalModel
 )
 :
-    LESmodel(typeName, rho, U, phi, thermoPhysicalModel),
+    LESModel(typeName, rho, U, phi, thermoPhysicalModel),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
 
     ck_
@@ -59,7 +59,7 @@ oneEqEddy::oneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            LESmodelProperties(),
+            coeffDict(),
             0.094
         )
     )
@@ -104,7 +104,7 @@ bool oneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        ck_.readIfPresent(LESmodelProperties());
+        ck_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -117,7 +117,7 @@ bool oneEqEddy::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace compressible
 } // End namespace Foam
 

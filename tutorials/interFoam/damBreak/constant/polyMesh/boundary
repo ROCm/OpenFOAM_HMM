@@ -20,28 +20,24 @@ FoamFile
     leftWall
     {
         type            wall;
-        physicalType    wall;
         nFaces          50;
         startFace       4432;
     }
     rightWall
     {
         type            wall;
-        physicalType    wall;
         nFaces          50;
         startFace       4482;
     }
     lowerWall
     {
         type            wall;
-        physicalType    wall;
         nFaces          62;
         startFace       4532;
     }
     atmosphere
     {
         type            patch;
-        physicalType    atmosphere;
         nFaces          46;
         startFace       4594;
     }

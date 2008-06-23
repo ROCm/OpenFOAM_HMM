@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vanDriestDelta.H"
-#include "LESmodel.H"
+#include "LESModel.H"
 #include "wallFvPatch.H"
 #include "wallDistData.H"
 #include "wallPointYPlus.H"
@@ -37,7 +37,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -49,8 +49,8 @@ addToRunTimeSelectionTable(LESdelta, vanDriestDelta, dictionary);
 
 void vanDriestDelta::calcDelta()
 {
-    const LESmodel& sgsModel
-        = mesh_.lookupObject<LESmodel>("turbulenceProperties");
+    const LESModel& sgsModel
+        = mesh_.lookupObject<LESModel>("LESProperties");
 
     const volVectorField& U = sgsModel.U();
     const volScalarField& nu = sgsModel.nu();
@@ -144,7 +144,7 @@ void vanDriestDelta::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

@@ -1,8 +1,10 @@
+#!/bin/sh
+
 m4 < constant/polyMesh/blockMeshDict.m4 > constant/polyMesh/blockMeshDict
-blockMesh .. mixerVessel2D
-cellSet .. mixerVessel2D
+blockMesh
+cellSet
 cp system/faceSetDict_rotorFaces system/faceSetDict
-faceSet .. mixerVessel2D
+faceSet
 cp system/faceSetDict_noBoundaryFaces system/faceSetDict
-faceSet .. mixerVessel2D
-setsToZones .. mixerVessel2D -noFlipMap
+faceSet
+setsToZones -noFlipMap

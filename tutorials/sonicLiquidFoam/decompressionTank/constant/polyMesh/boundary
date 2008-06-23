@@ -20,35 +20,30 @@ FoamFile
     outerWall
     {
         type            wall;
-        physicalType    wall;
         nFaces          225;
         startFace       7275;
     }
     axis
     {
         type            symmetryPlane;
-        physicalType    symmetryPlane;
         nFaces          120;
         startFace       7500;
     }
     nozzle
     {
         type            patch;
-        physicalType    pressureOutlet;
         nFaces          5;
         startFace       7620;
     }
     back
     {
         type            empty;
-        physicalType    empty;
         nFaces          3725;
         startFace       7625;
     }
     front
     {
         type            empty;
-        physicalType    empty;
         nFaces          3725;
         startFace       11350;
     }

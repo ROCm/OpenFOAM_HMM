@@ -52,7 +52,7 @@ Description
 
 #include "fvCFD.H"
 #include "hhuCombustionThermo.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "compressible/LESModel/LESModel.H"
 #include "laminarFlameSpeed.H"
 #include "ignition.H"
 #include "IFstream.H"

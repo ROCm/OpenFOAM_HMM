@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(kEpsilon, 0);
-addToRunTimeSelectionTable(RASmodel, kEpsilon, dictionary);
+addToRunTimeSelectionTable(RASModel, kEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,14 +52,14 @@ kEpsilon::kEpsilon
     basicThermo& thermophysicalModel
 )
 :
-    RASmodel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(typeName, rho, U, phi, thermophysicalModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -68,7 +68,7 @@ kEpsilon::kEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -77,7 +77,7 @@ kEpsilon::kEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -86,7 +86,7 @@ kEpsilon::kEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C3",
-            RASmodelCoeffs_,
+            coeffDict_,
             -0.33
         )
     ),
@@ -95,7 +95,7 @@ kEpsilon::kEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -104,7 +104,7 @@ kEpsilon::kEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -113,7 +113,7 @@ kEpsilon::kEpsilon
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphah",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -218,15 +218,15 @@ tmp<fvVectorMatrix> kEpsilon::divDevRhoReff(volVectorField& U) const
 
 bool kEpsilon::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        C3_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        alphah_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        C3_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        alphah_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -247,7 +247,7 @@ void kEpsilon::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
 
@@ -310,7 +310,7 @@ void kEpsilon::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

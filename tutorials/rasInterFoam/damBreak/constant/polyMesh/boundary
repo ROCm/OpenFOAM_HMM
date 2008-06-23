@@ -27,7 +27,6 @@ FoamFile
 leftWall
 {
     type wall;
-    physicalType wallFunctions;
     nFaces 50;
     startFace 4432;
 }
@@ -35,7 +34,6 @@ leftWall
 rightWall
 {
     type wall;
-    physicalType wallFunctions;
     nFaces 50;
     startFace 4482;
 }
@@ -43,7 +41,6 @@ rightWall
 lowerWall
 {
     type wall;
-    physicalType wallFunctions;
     nFaces 62;
     startFace 4532;
 }
@@ -51,7 +48,6 @@ lowerWall
 atmosphere
 {
     type patch;
-    physicalType atmosphere;
     nFaces 46;
     startFace 4594;
 }

@@ -167,7 +167,7 @@ Foam::vectorField Foam::SRF::SRFModel::velocity
     const vectorField& positions
 ) const
 {
-    return -omega_.value() ^ (positions - axis_*(axis_ & positions));
+    return omega_.value() ^ (positions - axis_*(axis_ & positions));
 }
 
 
@@ -185,7 +185,7 @@ Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::U() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            -omega_ ^ (mesh_.C() - axis_*(axis_ & mesh_.C()))
+            omega_ ^ (mesh_.C() - axis_*(axis_ & mesh_.C()))
         )
     );
 }

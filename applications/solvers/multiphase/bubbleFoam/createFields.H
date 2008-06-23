@@ -157,7 +157,7 @@
     );
 
 
-#   include "createTurbulence.H"
+#   include "createRASTurbulence.H"
 
     Info<< "Calculating field DDtUa and DDtUb\n" << endl;
 

@@ -34,13 +34,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LaunderSharmaKE, 0);
-addToRunTimeSelectionTable(RASmodel, LaunderSharmaKE, dictionary);
+addToRunTimeSelectionTable(RASModel, LaunderSharmaKE, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -69,14 +69,14 @@ LaunderSharmaKE::LaunderSharmaKE
     basicThermo& thermophysicalModel
 )
 :
-    RASmodel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(typeName, rho, U, phi, thermophysicalModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -85,7 +85,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -94,7 +94,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -103,7 +103,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C3",
-            RASmodelCoeffs_,
+            coeffDict_,
             -0.33
         )
     ),
@@ -112,7 +112,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphak",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -121,7 +121,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -130,7 +130,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphah",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.0
         )
     ),
@@ -232,15 +232,15 @@ tmp<fvVectorMatrix> LaunderSharmaKE::divDevRhoReff(volVectorField& U) const
 
 bool LaunderSharmaKE::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        C3_.readIfPresent(RASmodelCoeffs_);
-        alphak_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
-        alphah_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        C3_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        alphah_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -260,7 +260,7 @@ void LaunderSharmaKE::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     // Calculate parameters and coefficients for Launder-Sharma low-Reynolds
     // number model
@@ -324,7 +324,7 @@ void LaunderSharmaKE::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

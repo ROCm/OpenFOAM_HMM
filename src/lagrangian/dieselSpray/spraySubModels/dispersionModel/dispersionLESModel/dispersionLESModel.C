@@ -47,9 +47,9 @@ dispersionLESModel::dispersionLESModel
     dispersionModel(dict, sm),
     turbulence_
     (
-        sm.mesh().lookupObject<compressible::LESmodel>
+        sm.mesh().lookupObject<compressible::LESModel>
         (
-            "turbulenceProperties"
+            "LESProperties"
         )
     )
 {}

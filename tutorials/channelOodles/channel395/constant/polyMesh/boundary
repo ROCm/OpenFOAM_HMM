@@ -20,21 +20,18 @@ FoamFile
     bottomWall
     {
         type            wall;
-        physicalType    wall;
         nFaces          1200;
         startFace       175300;
     }
     topWall
     {
         type            wall;
-        physicalType    wall;
         nFaces          1200;
         startFace       176500;
     }
     sides1
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          2000;
         startFace       177700;
         featureCos      0.9;
@@ -42,7 +39,6 @@ FoamFile
     sides2
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          2000;
         startFace       179700;
         featureCos      0.9;
@@ -50,7 +46,6 @@ FoamFile
     inout1
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          1500;
         startFace       181700;
         featureCos      0.9;
@@ -58,7 +53,6 @@ FoamFile
     inout2
     {
         type            cyclic;
-        physicalType    cyclic;
         nFaces          1500;
         startFace       183200;
         featureCos      0.9;

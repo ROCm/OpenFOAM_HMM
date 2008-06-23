@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(devOneEqEddy, 0);
-addToRunTimeSelectionTable(LESmodel, devOneEqEddy, dictionary);
+addToRunTimeSelectionTable(LESModel, devOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ devOneEqEddy::devOneEqEddy
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
     k_
@@ -65,8 +65,15 @@ devOneEqEddy::devOneEqEddy
         ),
         mesh_
     ),
-
-    ck_(LESmodelProperties().lookupOrAddDefault("ck", 0.07))
+    ck_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "ck",
+            coeffDict(),
+            0.07
+        )
+    )
 {
     printCoeffs();
 }
@@ -103,7 +110,7 @@ bool devOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
-        LESmodelProperties().readIfPresent<scalar>("ck", ck_);
+        ck_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -116,7 +123,7 @@ bool devOneEqEddy::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

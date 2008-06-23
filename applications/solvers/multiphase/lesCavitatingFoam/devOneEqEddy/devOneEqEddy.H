@@ -63,7 +63,7 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -78,7 +78,7 @@ class devOneEqEddy
 
         volScalarField k_;
 
-        scalar ck_;
+        dimensionedScalar ck_;
 
 
     // Private Member Functions
@@ -137,7 +137,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LESmodels
+} // End namespace LESModelsModels
 } // End namespace incompressible
 } // End namespace Foam
 

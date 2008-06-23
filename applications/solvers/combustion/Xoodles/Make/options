@@ -19,5 +19,5 @@ EXE_LIBS = \
     -lbasicThermophysicalModels \
     -lcombustionThermophysicalModels \
     -lspecie \
-    -lcompressibleLESmodels \
+    -lcompressibleLESModels \
     -llaminarFlameSpeedModels

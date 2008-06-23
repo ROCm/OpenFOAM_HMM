@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace LES
+namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(spectEddyVisc, 0);
-addToRunTimeSelectionTable(LESmodel, spectEddyVisc, dictionary);
+addToRunTimeSelectionTable(LESModel, spectEddyVisc, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -51,7 +51,7 @@ spectEddyVisc::spectEddyVisc
     transportModel& transport
 )
 :
-    LESmodel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
 
@@ -60,7 +60,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cB",
-            LESmodelProperties(),
+            coeffDict(),
             8.22
         )
     ),
@@ -69,7 +69,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK1",
-            LESmodelProperties(),
+            coeffDict(),
             0.83
         )
     ),
@@ -78,7 +78,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK2",
-            LESmodelProperties(),
+            coeffDict(),
             1.03
         )
     ),
@@ -87,7 +87,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK3",
-            LESmodelProperties(),
+            coeffDict(),
             4.75
         )
     ),
@@ -96,7 +96,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK4",
-            LESmodelProperties(),
+            coeffDict(),
             2.55
         )
     )
@@ -143,11 +143,11 @@ bool spectEddyVisc::read()
 {
     if (GenEddyVisc::read())
     {
-        cB_.readIfPresent(LESmodelProperties());
-        cK1_.readIfPresent(LESmodelProperties());
-        cK2_.readIfPresent(LESmodelProperties());
-        cK3_.readIfPresent(LESmodelProperties());
-        cK4_.readIfPresent(LESmodelProperties());
+        cB_.readIfPresent(coeffDict());
+        cK1_.readIfPresent(coeffDict());
+        cK2_.readIfPresent(coeffDict());
+        cK3_.readIfPresent(coeffDict());
+        cK4_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -160,7 +160,7 @@ bool spectEddyVisc::read()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LES
+} // End namespace LESModels
 } // End namespace incompressible
 } // End namespace Foam
 

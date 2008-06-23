@@ -51,7 +51,7 @@ Description
                 label faceCelli = curPatch.faceCells()[facei];
 
                 scalar yPlus =
-                    Cmu25*RASmodel::y_[patchi][facei]
+                    Cmu25*RASModel::y_[patchi][facei]
                    *sqrt(k_[faceCelli])/(muw[facei]/rhow[facei]);
 
                 if (yPlus > yPlusLam_)

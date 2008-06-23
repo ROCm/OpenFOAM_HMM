@@ -79,7 +79,7 @@
     twoPhaseMixture twoPhaseProperties(U, phiv, "gamma");
 
     // Create LES model
-    autoPtr<incompressible::LESmodel> turbulence
+    autoPtr<incompressible::LESModel> turbulence
     (
-        incompressible::LESmodel::New(U, phiv, twoPhaseProperties)
+        incompressible::LESModel::New(U, phiv, twoPhaseProperties)
     );

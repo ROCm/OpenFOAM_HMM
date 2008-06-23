@@ -27,7 +27,6 @@ FoamFile
 inlet
 {
     type patch;
-    physicalType supersonicInlet;
     nFaces 50;
     startFace 10325;
 }
@@ -35,7 +34,6 @@ inlet
 outlet
 {
     type patch;
-    physicalType pressureTransmissiveOutlet;
     nFaces 40;
     startFace 10375;
 }
@@ -43,7 +41,6 @@ outlet
 bottom
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 25;
     startFace 10415;
 }
@@ -51,7 +48,6 @@ bottom
 top
 {
     type symmetryPlane;
-    physicalType symmetryPlane;
     nFaces 125;
     startFace 10440;
 }
@@ -59,7 +55,6 @@ top
 obstacle
 {
     type patch;
-    physicalType adiabaticWall;
     nFaces 110;
     startFace 10565;
 }

@@ -35,13 +35,13 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(PDRkEpsilon, 0);
-addToRunTimeSelectionTable(RASmodel, PDRkEpsilon, dictionary);
+addToRunTimeSelectionTable(RASModel, PDRkEpsilon, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -53,17 +53,62 @@ PDRkEpsilon::PDRkEpsilon
     basicThermo& thermophysicalModel
 )
 :
-    RASmodel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(typeName, rho, U, phi, thermophysicalModel),
 
-    Cmu(RASmodelCoeffs_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    C1(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(RASmodelCoeffs_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphak", 1.0)),
-    alphaEps
+    Cmu_
     (
-        RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            coeffDict_,
+            0.09
+        )
     ),
-    alphah(RASmodelCoeffs_.lookupOrAddDefault<scalar>("alphah", 1.0)),
+    C1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            coeffDict_,
+            1.44
+        )
+    ),
+    C2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            coeffDict_,
+            1.92
+        )
+    ),
+    alphak_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphak",
+            coeffDict_,
+            1.0
+        )
+    ),
+    alphaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphaEps",
+            coeffDict_,
+            0.76923
+        )
+    ),
+    alphah_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alphah",
+            coeffDict_,
+            1.0
+        )
+    ),
 
     k_
     (
@@ -101,7 +146,7 @@ PDRkEpsilon::PDRkEpsilon
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        Cmu*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
     )
 {
 #   include "wallViscosityI.H"
@@ -164,14 +209,14 @@ tmp<fvVectorMatrix> PDRkEpsilon::divDevRhoReff(volVectorField& U) const
 
 bool PDRkEpsilon::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        RASmodelCoeffs_.readIfPresent<scalar>("Cmu", Cmu);
-        RASmodelCoeffs_.readIfPresent<scalar>("C1", C1);
-        RASmodelCoeffs_.readIfPresent<scalar>("C2", C2);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphak", alphak);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphaEps", alphaEps);
-        RASmodelCoeffs_.readIfPresent<scalar>("alphah", alphah);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphak_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
+        alphah_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -187,12 +232,12 @@ void PDRkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
 #       include "wallViscosityI.H"
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
 
@@ -223,9 +268,9 @@ void PDRkEpsilon::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        C1*(betav*G + GR)*epsilon_/k_
-      - fvm::SuSp(((2.0/3.0)*C1)*betav*rho_*divU, epsilon_)
-      - fvm::Sp(C2*betav*rho_*epsilon_/k_, epsilon_)
+        C1_*(betav*G + GR)*epsilon_/k_
+      - fvm::SuSp(((2.0/3.0)*C1_)*betav*rho_*divU, epsilon_)
+      - fvm::Sp(C2_*betav*rho_*epsilon_/k_, epsilon_)
     );
 
 #   include "wallDissipationI.H"
@@ -255,7 +300,7 @@ void PDRkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
 
 #   include "wallViscosityI.H"
 
@@ -264,7 +309,7 @@ void PDRkEpsilon::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

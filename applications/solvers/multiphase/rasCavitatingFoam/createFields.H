@@ -79,7 +79,7 @@
     twoPhaseMixture twoPhaseProperties(U, phiv, "gamma");
 
     // Create RAS turbulence model
-    autoPtr<incompressible::RASmodel> turbulence
+    autoPtr<incompressible::RASModel> turbulence
     (
-        incompressible::RASmodel::New(U, phiv, twoPhaseProperties)
+        incompressible::RASModel::New(U, phiv, twoPhaseProperties)
     );

@@ -27,7 +27,6 @@ FoamFile
 sides
 {
     type patch;
-    physicalType extrapolatedOutlet;
     nFaces 2;
     startFace 999;
 }
@@ -35,7 +34,6 @@ sides
 empty
 {
     type empty;
-    physicalType empty;
     nFaces 4000;
     startFace 1001;
 }

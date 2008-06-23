@@ -15,8 +15,8 @@ EXE_INC = \
 LIB_LIBS = \
     -llagrangian \
     -lfiniteVolume \
-    -lcompressibleRASmodels \
-    -lcompressibleLESmodels \
+    -lcompressibleRASModels \
+    -lcompressibleLESModels \
     -lLESdeltas \
     -lliquids \
     -lliquidMixture \

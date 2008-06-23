@@ -33,13 +33,13 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RAS
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(LaunderSharmaKE, 0);
-addToRunTimeSelectionTable(RASmodel, LaunderSharmaKE, dictionary);
+addToRunTimeSelectionTable(RASModel, LaunderSharmaKE, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -66,14 +66,14 @@ LaunderSharmaKE::LaunderSharmaKE
     transportModel& lamTransportModel
 )
 :
-    RASmodel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, lamTransportModel),
 
     Cmu_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.09
         )
     ),
@@ -82,7 +82,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C1",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.44
         )
     ),
@@ -91,7 +91,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "C2",
-            RASmodelCoeffs_,
+            coeffDict_,
             1.92
         )
     ),
@@ -100,7 +100,7 @@ LaunderSharmaKE::LaunderSharmaKE
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
-            RASmodelCoeffs_,
+            coeffDict_,
             0.76923
         )
     ),
@@ -192,12 +192,12 @@ tmp<fvVectorMatrix> LaunderSharmaKE::divDevReff(volVectorField& U) const
 
 bool LaunderSharmaKE::read()
 {
-    if (RASmodel::read())
+    if (RASModel::read())
     {
-        Cmu_.readIfPresent(RASmodelCoeffs_);
-        C1_.readIfPresent(RASmodelCoeffs_);
-        C2_.readIfPresent(RASmodelCoeffs_);
-        alphaEps_.readIfPresent(RASmodelCoeffs_);
+        Cmu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict_);
+        C2_.readIfPresent(coeffDict_);
+        alphaEps_.readIfPresent(coeffDict_);
 
         return true;
     }
@@ -217,7 +217,7 @@ void LaunderSharmaKE::correct()
         return;
     }
 
-    RASmodel::correct();
+    RASModel::correct();
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 
@@ -268,7 +268,7 @@ void LaunderSharmaKE::correct()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RAS
+} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

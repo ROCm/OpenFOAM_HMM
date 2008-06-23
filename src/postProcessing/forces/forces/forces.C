@@ -30,11 +30,11 @@ License
 #include "Time.H"
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASmodel/RASmodel.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/RASModel/RASModel.H"
+#include "incompressible/LESModel/LESModel.H"
 #include "basicThermo.H"
-#include "compressible/RASmodel/RASmodel.H"
-#include "compressible/LESmodel/LESmodel.H"
+#include "compressible/RASModel/RASModel.H"
+#include "compressible/LESModel/LESModel.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -48,37 +48,31 @@ namespace Foam
 
 Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 {
-    if
-    (
-        obr_.foundObject<compressible::RASmodel>("turbulenceProperties")
-    )
+    if (obr_.foundObject<compressible::RASModel>("RASProperties"))
     {
-        const compressible::RASmodel& ras
-            = obr_.lookupObject<compressible::RASmodel>
-            ("turbulenceProperties");
+        const compressible::RASModel& ras
+            = obr_.lookupObject<compressible::RASModel>("RASProperties");
 
         return ras.devRhoReff();
     }
-    else if (obr_.foundObject<incompressible::RASmodel>("turbulenceProperties"))
+    else if (obr_.foundObject<incompressible::RASModel>("RASProperties"))
     {
-        const incompressible::RASmodel& ras
-            = obr_.lookupObject<incompressible::RASmodel>
-            ("turbulenceProperties");
+        const incompressible::RASModel& ras
+            = obr_.lookupObject<incompressible::RASModel>("RASProperties");
 
         return rhoRef_*ras.devReff();
     }
-    else if (obr_.foundObject<compressible::LESmodel>("turbulenceProperties"))
+    else if (obr_.foundObject<compressible::LESModel>("LESProperties"))
     {
-        const compressible::LESmodel& les =
-        obr_.lookupObject<compressible::LESmodel>
-        ("turbulenceProperties");
+        const compressible::LESModel& les =
+        obr_.lookupObject<compressible::LESModel>("LESProperties");
 
         return les.devRhoBeff();
     }
-    else if (obr_.foundObject<incompressible::LESmodel>("turbulenceProperties"))
+    else if (obr_.foundObject<incompressible::LESModel>("LESProperties"))
     {
-        const incompressible::LESmodel& les
-            = obr_.lookupObject<incompressible::LESmodel>("turbulenceProperties");
+        const incompressible::LESModel& les
+            = obr_.lookupObject<incompressible::LESModel>("LESProperties");
 
         return rhoRef_*les.devBeff();
     }

@@ -3,8 +3,7 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application directory
-parentDir=`dirname $PWD`
-application=`basename $parentDir`
+application="laplacianFoam"
 
 runIdeasToFoam ()
 {
@@ -18,5 +17,5 @@ runIdeasToFoam ()
 
 runIdeasToFoam flange.ans 0.001
 runApplication $application
-runApplication foamToFieldview
+runApplication foamToFieldview9
 runApplication foamToEnsight

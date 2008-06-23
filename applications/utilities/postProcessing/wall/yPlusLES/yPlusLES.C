@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/LESModel/LESModel.H"
 #include "nearWallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
-        autoPtr<incompressible::LESmodel> sgsModel
+        autoPtr<incompressible::LESModel> sgsModel
         (
-            incompressible::LESmodel::New(U, phi, laminarTransport)
+            incompressible::LESModel::New(U, phi, laminarTransport)
         );
 
         volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();

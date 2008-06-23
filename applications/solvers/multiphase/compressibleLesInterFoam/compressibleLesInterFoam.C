@@ -39,7 +39,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/LESmodel/LESmodel.H"
+#include "incompressible/LESModel/LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

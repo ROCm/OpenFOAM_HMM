@@ -27,7 +27,6 @@ FoamFile
 left
 {
     type patch;
-    physicalType inlet;
     nFaces 35;
     startFace 3485;
 }
@@ -35,7 +34,6 @@ left
 right
 {
     type patch;
-    physicalType outlet;
     nFaces 35;
     startFace 3520;
 }
@@ -43,7 +41,6 @@ right
 down
 {
     type wall;
-    physicalType wall;
     nFaces 40;
     startFace 3555;
 }
@@ -51,7 +48,6 @@ down
 up
 {
     type wall;
-    physicalType wall;
     nFaces 40;
     startFace 3595;
 }
@@ -59,7 +55,6 @@ up
 cylinder
 {
     type wall;
-    physicalType wall;
     nFaces 80;
     startFace 3635;
 }
