@@ -110,7 +110,7 @@ void nutStandardWallFunctionFvPatchScalarField::evaluate
 
     scalar kappa = rasModel.kappa().value();
     scalar E = rasModel.E().value();
-    scalar yPlusLam = rasModel.E().value();
+    scalar yPlusLam = rasModel.yPlusLam();
 
     const scalarField& ry = patch().deltaCoeffs();
 
