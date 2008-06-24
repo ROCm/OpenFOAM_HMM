@@ -28,11 +28,11 @@ Class
 Description
     Specialization of GeometricField which holds slices of given complete
     fields in a form that they act as a GeometricField.
- 
+
     The destructor is wrapped to avoid deallocation of the storage of the
     complete fields when this is destroyed.
 
-    SlicedGeometricField can only be instantiated with a valid form of 
+    SlicedGeometricField can only be instantiated with a valid form of
     SlicedPatchField to handle the slicing and storage deallocation of the
     boundary field.
 
@@ -83,7 +83,8 @@ private:
         tmp<FieldField<PatchField, Type> >  slicedBoundaryField
         (
             const Mesh& mesh,
-            const Field<Type>& completeField
+            const Field<Type>& completeField,
+            const bool preserveCouples
         );
 
         //- Disallow default bitwise copy construct
@@ -111,7 +112,8 @@ public:
             const IOobject&,
             const Mesh&,
             const dimensionSet&,
-            const Field<Type>& completeField
+            const Field<Type>& completeField,
+            const bool preserveCouples=true
         );
 
         //- Construct from components and separate fields to slice for the
@@ -122,7 +124,8 @@ public:
             const Mesh&,
             const dimensionSet&,
             const Field<Type>& completeIField,
-            const Field<Type>& completeBField
+            const Field<Type>& completeBField,
+            const bool preserveCouples=true
         );
 
 
