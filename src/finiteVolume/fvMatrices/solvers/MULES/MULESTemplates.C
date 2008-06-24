@@ -411,9 +411,6 @@ void Foam::MULES::limiter
             {
                 label pfCelli = pFaceCells[pFacei];
 
-                psiMaxn[pfCelli] = max(psiMaxn[pfCelli], psiPf[pFacei]);
-                psiMinn[pfCelli] = min(psiMinn[pfCelli], psiPf[pFacei]);
-
                 psiMaxn[pfCelli] = max(psiMaxn[pfCelli], psiPNf[pFacei]);
                 psiMinn[pfCelli] = min(psiMinn[pfCelli], psiPNf[pFacei]);
             }
