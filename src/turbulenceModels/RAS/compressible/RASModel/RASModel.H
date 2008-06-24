@@ -91,8 +91,8 @@ protected:
         Switch printCoeffs_;
         dictionary coeffDict_;
 
-        scalar kappa_;
-        scalar E_;
+        dimensionedScalar kappa_;
+        dimensionedScalar E_;
 
         scalar yPlusLam(const scalar kappa, const scalar E);
         scalar yPlusLam_;
@@ -226,13 +226,13 @@ public:
 
 
             //- Return kappa for use in wall-functions
-            scalar kappa() const
+            dimensionedScalar kappa() const
             {
                 return kappa_;
             }
 
             //- Return E for use in wall-functions
-            scalar E() const
+            dimensionedScalar E() const
             {
                 return E_;
             }

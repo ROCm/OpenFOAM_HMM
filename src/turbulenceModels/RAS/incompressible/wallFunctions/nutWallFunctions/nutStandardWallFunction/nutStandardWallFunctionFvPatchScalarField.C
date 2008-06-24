@@ -108,9 +108,9 @@ void nutStandardWallFunctionFvPatchScalarField::evaluate
     const RASModel& rasModel
         = db().lookupObject<RASModel>("RASProperties");
 
-    scalar kappa = rasModel.kappa();
-    scalar E = rasModel.E();
-    scalar yPlusLam = rasModel.E();
+    scalar kappa = rasModel.kappa().value();
+    scalar E = rasModel.E().value();
+    scalar yPlusLam = rasModel.yPlusLam();
 
     const scalarField& ry = patch().deltaCoeffs();
 

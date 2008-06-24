@@ -89,7 +89,7 @@ Description
 
                 epsilon_[faceCelli] +=
                      Cmu75*pow(k_[faceCelli], 1.5)
-                    /(kappa_*y_[patchi][facei]);
+                    /(kappa_.value()*y_[patchi][facei]);
 
                 if (yPlus > yPlusLam_)
                 {
@@ -97,7 +97,7 @@ Description
                         (nutw[facei] + nuw[facei])
                         *magFaceGradU[facei]
                         *Cmu25*sqrt(k_[faceCelli])
-                        /(kappa_*y_[patchi][facei])
+                        /(kappa_.value()*y_[patchi][facei])
                       - (nonlinearStress_[faceCelli] && gradU_[faceCelli]);
                 }
             }

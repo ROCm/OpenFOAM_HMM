@@ -43,7 +43,7 @@
                 epsilon_[faceCelli] +=
                      Cmu75*pow(k_[faceCelli], 1.5)
                     /(
-                         kappa_*y_[faceCelli]
+                         kappa_.value()*y_[faceCelli]
                          *(1.0 - exp(-Aepsilon*yStar_[faceCelli]))
                      )
                     *exp(-Amu*sqr(yStar_[faceCelli]));

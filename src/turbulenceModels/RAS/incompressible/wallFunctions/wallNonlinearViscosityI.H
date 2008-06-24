@@ -55,7 +55,7 @@ Description
                 if (yPlus > yPlusLam_)
                 {
                     nutw[facei] = nuw[facei]
-                        *(yPlus*kappa_/log(E_*yPlus) - 1);
+                        *(yPlus*kappa_.value()/log(E_.value()*yPlus) - 1);
                 }
                 else
                 {
