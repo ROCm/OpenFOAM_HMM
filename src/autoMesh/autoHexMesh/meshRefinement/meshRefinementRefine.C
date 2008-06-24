@@ -641,7 +641,7 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
                     }
                 }
             }
-            else if (refineCell[own] != -1)
+            else if (refineCell[own] == -1)
             {
                 // boundary face with unmarked owner
 
@@ -658,18 +658,25 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
 
                 if (surfI != -1)
                 {
-                    if
-                    (
-                       !markForRefine
-                        (
-                            surfI,
-                            nAllowRefine,
-                            refineCell[own],
-                            nRefine
-                        )
-                    )
+                    // Make sure it is my side that wants refinement.
+                    label surfaceMinLevel =
+                        surfaces_.minLevelField(surfI)[hit.index()];
+                   
+                    if (surfaceMinLevel > cellLevel[own])
                     {
-                        break;
+                        if
+                        (
+                           !markForRefine
+                            (
+                                surfI,
+                                nAllowRefine,
+                                refineCell[own],
+                                nRefine
+                            )
+                        )
+                        {
+                            break;
+                        }
                     }
                 }
             }
