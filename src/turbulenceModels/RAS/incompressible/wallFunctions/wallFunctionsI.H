@@ -88,7 +88,7 @@ Description
 
                 epsilon_[faceCelli] +=
                      Cmu75*pow(k_[faceCelli], 1.5)
-                    /(kappa_*RASModel::y_[patchi][facei]);
+                    /(kappa_.value()*RASModel::y_[patchi][facei]);
 
                 if (yPlus > yPlusLam_)
                 {
@@ -96,7 +96,7 @@ Description
                         (nutw[facei] + nuw[facei])
                        *magFaceGradU[facei]
                        *Cmu25*sqrt(k_[faceCelli])
-                       /(kappa_*RASModel::y_[patchi][facei]);
+                       /(kappa_.value()*RASModel::y_[patchi][facei]);
                 }
             }
         }

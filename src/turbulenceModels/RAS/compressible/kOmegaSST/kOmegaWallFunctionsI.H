@@ -89,7 +89,7 @@ Description
 
                 omega_[faceCelli] +=
                     sqrt(k_[faceCelli])
-                   /(Cmu25*kappa_*y_[faceCelli]);
+                   /(Cmu25*kappa_.value()*y_[faceCelli]);
 
                 if (yPlus > yPlusLam_)
                 {
@@ -97,7 +97,7 @@ Description
                         (mutw[facei] + muw[facei])
                        *magFaceGradU[facei]
                        *Cmu25*sqrt(k_[faceCelli])
-                       /(kappa_*y_[faceCelli]);
+                       /(kappa_.value()*y_[faceCelli]);
                 }
             }
         }
