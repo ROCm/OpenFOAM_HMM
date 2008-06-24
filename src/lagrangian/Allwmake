@@ -5,4 +5,6 @@ wmake libso basic
 wmake libso solidParticle
 wmake libso intermediate
 wmake libso dieselSpray
-wmake libso molecule
+(cd molecularDynamics && wmake libso potential)
+(cd molecularDynamics && wmake libso molecule)
+

@@ -32,15 +32,28 @@ License
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 // adjust negative resistance values to be multiplier of max value
-void Foam::porousZone::adjustNegativeResistance(vector& resist)
+void Foam::porousZone::adjustNegativeResistance(dimensionedVector& resist)
 {
-    scalar maxCmpt = max(0, cmptMax(resist));
+    scalar maxCmpt = max(0, cmptMax(resist.value()));
 
-    for (label cmpt=0; cmpt < vector::nComponents; ++cmpt)
+    if (maxCmpt < 0)
     {
-        if (resist[cmpt] < 0)
+        FatalErrorIn
+        (
+            "Foam::porousZone::porousZone::adjustNegativeResistance"
+            "(dimensionedVector&)"
+        )   << "negative resistances! " << resist
+            << exit(FatalError);
+    }
+    else
+    {
+        vector& val = resist.value();
+        for (label cmpt=0; cmpt < vector::nComponents; ++cmpt)
         {
-            resist[cmpt] *= -maxCmpt;
+            if (val[cmpt] < 0)
+            {
+                val[cmpt] *= -maxCmpt;
+            }
         }
     }
 }
@@ -71,24 +84,20 @@ Foam::porousZone::porousZone
         FatalErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const Istream&)"
+            "(const fvMesh&, const word&, const dictionary&)"
         )   << "cannot find porous cellZone " << name_
             << exit(FatalError);
     }
 
-    // local-to-global transformation tensor
-    const tensor& E = coordSys_.R();
-
     // porosity
-    if (dict_.found("porosity"))
+    if (dict_.readIfPresent("porosity", porosity_))
     {
-        dict_.lookup("porosity") >> porosity_;
-
         if (porosity_ <= 0.0 || porosity_ > 1.0)
         {
             FatalIOErrorIn
             (
-                "Foam::porousZone::porousZone(const fvMesh&, const Istream&)",
+                "Foam::porousZone::porousZone"
+                "(const fvMesh&, const word&, const dictionary&)",
                 dict_
             )
                 << "out-of-range porosity value " << porosity_
@@ -97,73 +106,64 @@ Foam::porousZone::porousZone
     }
 
     // powerLaw coefficients
-    if (dict_.found("powerLaw"))
+    if (const dictionary* dictPtr = dict_.subDictPtr("powerLaw"))
     {
-        const dictionary& subDict = dict_.subDict("powerLaw");
-        if (subDict.found("C0"))
-        {
-            subDict.lookup("C0") >> C0_;
-        }
-        if (subDict.found("C1"))
-        {
-            subDict.lookup("C1") >> C1_;
-        }
+        dictPtr->readIfPresent("C0", C0_);
+        dictPtr->readIfPresent("C1", C1_);
     }
 
     // Darcy-Forchheimer coefficients
-    if (dict_.found("Darcy"))
+    if (const dictionary* dictPtr = dict_.subDictPtr("Darcy"))
     {
-        const dictionary& subDict = dict_.subDict("Darcy");
+        // local-to-global transformation tensor
+        const tensor& E = coordSys_.R();
 
-        dimensionedVector d("d", D_.dimensions(), vector::zero);
-        dimensionedVector f("f", F_.dimensions(), vector::zero);
-
-        if (subDict.found("d"))
+        dimensionedVector d(vector::zero);
+        if (dictPtr->readIfPresent("d", d))
         {
-            // d = dimensionedVector("d", subDict.lookup("d"));
-            subDict.lookup("d") >> d;
-            adjustNegativeResistance(d.value());
+            if (D_.dimensions() != d.dimensions())
+            {
+                FatalIOErrorIn
+                (
+                    "Foam::porousZone::porousZone"
+                    "(const fvMesh&, const word&, const dictionary&)",
+                    dict_
+                )   << "incorrect dimensions for d: " << d.dimensions()
+                    << " should be " << D_.dimensions()
+                    << exit(FatalIOError);
+            }
 
-        }
-        if (subDict.found("f"))
-        {
-            // f = dimensionedVector("f", subDict.lookup("f"));
-            subDict.lookup("f") >> f;
-            adjustNegativeResistance(f.value());
-        }
+            adjustNegativeResistance(d);
 
-        if (D_.dimensions() != d.dimensions())
-        {
-            FatalIOErrorIn
-            (
-                "Foam::porousZone::porousZone(const fvMesh&, const Istream&)",
-                dict_
-            )   << "incorrect dimensions for d: " << d.dimensions()
-                << " should be " << D_.dimensions()
-                << exit(FatalIOError);
+            D_.value().xx() = d.value().x();
+            D_.value().yy() = d.value().y();
+            D_.value().zz() = d.value().z();
+            D_.value() = (E & D_ & E.T()).value();
         }
 
-        if (F_.dimensions() != f.dimensions())
+        dimensionedVector f(vector::zero);
+        if (dictPtr->readIfPresent("f", f))
         {
-            FatalIOErrorIn
-            (
-                "Foam::porousZone::porousZone(const fvMesh&, const Istream&)",
-                dict_
-            )   << "incorrect dimensions for f: " << f.dimensions()
-                << " should be " << F_.dimensions()
-                << exit(FatalIOError);
+            if (F_.dimensions() != f.dimensions())
+            {
+                FatalIOErrorIn
+                (
+                    "Foam::porousZone::porousZone"
+                    "(const fvMesh&, const word&, const dictionary&)",
+                    dict_
+                )   << "incorrect dimensions for f: " << f.dimensions()
+                    << " should be " << F_.dimensions()
+                    << exit(FatalIOError);
+            }
+
+            adjustNegativeResistance(f);
+
+            // leading 0.5 is from 1/2 * rho
+            F_.value().xx() = 0.5*f.value().x();
+            F_.value().yy() = 0.5*f.value().y();
+            F_.value().zz() = 0.5*f.value().z();
+            F_.value() = (E & F_ & E.T()).value();
         }
-
-        D_.value().xx() = d.value().x();
-        D_.value().yy() = d.value().y();
-        D_.value().zz() = d.value().z();
-        D_.value() = (E & D_ & E.T()).value();
-
-        // leading 0.5 is from 1/2 * rho
-        F_.value().xx() = 0.5*f.value().x();
-        F_.value().yy() = 0.5*f.value().y();
-        F_.value().zz() = 0.5*f.value().z();
-        F_.value() = (E & F_ & E.T()).value();
     }
 
     // provide some feedback for the user
@@ -179,7 +179,8 @@ Foam::porousZone::porousZone
     {
         FatalIOErrorIn
         (
-            "Foam::porousZone::porousZone(const fvMesh&, const Istream&)",
+            "Foam::porousZone::porousZone"
+            "(const fvMesh&, const word&, const dictionary&)",
             dict_
         )   << "neither powerLaw (C0/C1) "
                "nor Darcy-Forchheimer law (d/f) specified"

@@ -1,3 +1,4 @@
+/* RAS turbulence models */
 RASModel/RASModel.C
 RASModel/newRASModel.C
 laminar/laminar.C
@@ -16,8 +17,13 @@ NonlinearKEShih/NonlinearKEShih.C
 LienLeschzinerLowRe/LienLeschzinerLowRe.C
 LamBremhorstKE/LamBremhorstKE.C
 
+/* Wall functions */
 wallFunctions/nutWallFunctions/nutWallFunction/nutWallFunctionFvPatchScalarField.C
 wallFunctions/nutWallFunctions/nutStandardWallFunction/nutStandardWallFunctionFvPatchScalarField.C
 wallFunctions/nutWallFunctions/nutStandardRoughWallFunction/nutStandardRoughWallFunctionFvPatchScalarField.C
+
+/* Patch fields */
+derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
+derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libincompressibleRASModels

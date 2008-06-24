@@ -39,7 +39,7 @@ Description
     Note that this implementation is written in terms of alpha diffusion
     coefficients rather than the more traditional sigma (alpha = 1/sigma) so
     that the blending can be applied to all coefficuients in a consistent
-    manner.  The paper suggests that sigma is blended but this woulf not be
+    manner.  The paper suggests that sigma is blended but this would not be
     consistent with the blending of the k-epsilon and k-omega models.
 
     Also note that the error in the last term of equation (2) relating to
@@ -51,6 +51,26 @@ Description
     The blending functions (15) and (16) are not currently used because of the
     uncertainty in their origin, range of applicability and that is y+ becomes
     sufficiently small blending u_tau in this manner clearly becomes nonsense.
+
+    The default model coefficients correspond to the following:
+    @verbatim
+        kOmegaSST
+        {
+            Cmu         0.09;
+            alphaK1     0.85034;
+            alphaK2     1.0;
+            alphaOmega1 0.5;
+            alphaOmega2 0.85616;
+            alphah      1.0;    // only for compressible
+            beta1       0.075;
+            beta2       0.0828;
+            betaStar    0.09;
+            gamma1      0.5532;
+            gamma2      0.4403;
+            a1          0.31;
+            c1          10.0;
+        }
+    @endverbatim
 
 SourceFiles
     kOmegaSST.C

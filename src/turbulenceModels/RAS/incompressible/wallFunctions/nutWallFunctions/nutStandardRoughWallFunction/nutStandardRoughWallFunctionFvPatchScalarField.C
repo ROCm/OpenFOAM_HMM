@@ -123,8 +123,8 @@ void nutStandardRoughWallFunctionFvPatchScalarField::evaluate
     const RASModel& rasModel
         = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar kappa = rasModel.kappa();
-    const scalar E = rasModel.E();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar E = rasModel.E().value();
     const scalar yPlusLam = 11.225;
 
     // The reciprical of the distance to the adjacent cell centre.

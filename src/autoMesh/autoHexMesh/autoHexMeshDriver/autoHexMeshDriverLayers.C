@@ -2346,7 +2346,7 @@ void Foam::autoHexMeshDriver::addLayers
 (
     const dictionary& shrinkDict,
     const dictionary& motionDict,
-    const scalar nAllowableErrors,
+    const label nAllowableErrors,
     motionSmoother& meshMover
 )
 {

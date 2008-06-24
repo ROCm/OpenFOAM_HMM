@@ -111,6 +111,8 @@ void Foam::calcTypes::components::calc
                 mesh,
                 processed
             );
+            writeComponentFields<symmTensor>(fieldHeader, mesh, processed);
+            writeComponentFields<tensor>(fieldHeader, mesh, processed);
 
             if (!processed)
             {

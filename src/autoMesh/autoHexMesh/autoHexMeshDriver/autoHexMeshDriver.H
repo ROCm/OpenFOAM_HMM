@@ -803,7 +803,7 @@ public:
             (
                 const dictionary& shrinkDict,
                 const dictionary& motionDict,
-                const scalar nAllowableErrors,
+                const label nAllowableErrors,
                 motionSmoother&
             );
 

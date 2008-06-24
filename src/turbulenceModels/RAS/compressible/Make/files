@@ -1,3 +1,4 @@
+/* RAS turbulence models */
 RASModel/RASModel.C
 RASModel/newRASModel.C
 laminar/laminar.C
@@ -10,6 +11,11 @@ realizableKE/realizableKE.C
 SpalartAllmaras/SpalartAllmaras.C
 kOmegaSST/kOmegaSST.C
 
+/* Wall functions */
 wallFunctions/mutWallFunctions/mutStandardRoughWallFunction/mutStandardRoughWallFunctionFvPatchScalarField.C
+
+/* Patch fields */
+derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
+derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleRASModels

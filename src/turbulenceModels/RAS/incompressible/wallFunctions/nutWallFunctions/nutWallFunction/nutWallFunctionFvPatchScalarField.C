@@ -100,8 +100,8 @@ void nutWallFunctionFvPatchScalarField::evaluate(const Pstream::commsTypes)
     const RASModel& rasModel
         = db().lookupObject<RASModel>("RASProperties");
 
-    scalar kappa = rasModel.kappa();
-    scalar E = rasModel.E();
+    scalar kappa = rasModel.kappa().value();
+    scalar E = rasModel.E().value();
 
     const scalarField& ry = patch().deltaCoeffs();
 
