@@ -186,9 +186,9 @@ bool RASModel::read()
 
         yPlusLam_ = yPlusLam(kappa_.value(), E_.value());
 
-        readIfPresent("k0", k0_);
-        readIfPresent("epsilon0", epsilon0_);
-        readIfPresent("epsilonSmall", epsilonSmall_);
+        k0_.readIfPresent(*this);
+        epsilon0_.readIfPresent(*this);
+        epsilonSmall_.readIfPresent(*this);
 
         return true;
     }
