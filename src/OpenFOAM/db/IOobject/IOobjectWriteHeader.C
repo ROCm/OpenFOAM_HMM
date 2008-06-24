@@ -52,7 +52,7 @@ bool Foam::IOobject::writeHeader(Ostream& os) const
     // outdent for visibility and more space
     if (note().size())
     {
-        os  << "    note    " << note() << ";\n";
+        os  << "    note        " << note() << ";\n";
     }
 
     os  << "    location    " << instance()/local() << ";\n"
