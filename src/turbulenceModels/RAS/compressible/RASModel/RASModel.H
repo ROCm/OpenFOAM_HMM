@@ -245,7 +245,7 @@ public:
             }
 
             //- Const access to the coefficients dictionary
-            const dictionary& coeffDict()
+            const dictionary& coeffDict() const
             {
                 return coeffDict_;
             }
