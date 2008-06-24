@@ -123,14 +123,14 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
     const RASModel& rasModel
         = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar kappa = rasModel.kappa();
-    const scalar E = rasModel.E();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar E = rasModel.E().value();
     const scalar yPlusLam = 11.225;
 
     // The reciprical of the distance to the adjacent cell centre.
     const scalarField& ry = patch().deltaCoeffs();
 
-    const fvPatchVectorField& U = 
+    const fvPatchVectorField& U =
         patch().lookupPatchField<volVectorField, vector>("U");
 
     const fvPatchScalarField& rho =
@@ -139,7 +139,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
     // The flow velocity at the adjacent cell centre.
     scalarField magUp = mag(U.patchInternalField() - U);
 
-    const scalarField& muw = 
+    const scalarField& muw =
         patch().lookupPatchField<volScalarField, scalar>("mu");
     scalarField& mutw = *this;
 
@@ -155,7 +155,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
 
         //if (KsPlusBasedOnYPlus_)
         {
-            // If KsPlus is based on YPlus the extra term added to the law 
+            // If KsPlus is based on YPlus the extra term added to the law
             // of the wall will depend on yPlus.
             forAll(mutw, facei)
             {
@@ -206,7 +206,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
                         const scalar sint_2 = sin(t_2);
                         const scalar logt_1 = log(t_1);
                         G = logt_1*sint_2;
-                        yPlusGPrime = 
+                        yPlusGPrime =
                             (c_1*sint_2*KsPlus/t_1) + (c_3*logt_1*cos(t_2));
                     }
 
@@ -268,7 +268,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
                 mag(ryPlusLam*(yPlus - yPlusLast)) > 0.0001
              && ++iter < 10
             );
- 
+
             if (yPlus > yPlusLam)
             {
                 mutw[facei] = muw[facei]*(yPlus*yPlus/Re - 1);
@@ -291,7 +291,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
         << roughnessConstant_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessFudgeFactor")
         << roughnessFudgeFactor_ << token::END_STATEMENT << nl;
-} 
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

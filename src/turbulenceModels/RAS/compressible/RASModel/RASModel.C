@@ -89,14 +89,24 @@ RASModel::RASModel
 
     kappa_
     (
-        subDict("wallFunctionCoeffs").lookupOrAddDefault<scalar>
+        dimensioned<scalar>::lookupOrAddToDict
         (
             "kappa",
+            subDict("wallFunctionCoeffs"),
             0.4187
         )
     ),
-    E_(subDict("wallFunctionCoeffs").lookupOrAddDefault<scalar>("E", 9.0)),
-    yPlusLam_(yPlusLam(kappa_, E_)),
+    E_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "E",
+            subDict("wallFunctionCoeffs"),
+            9.0
+        )
+    ),
+
+    yPlusLam_(yPlusLam(kappa_.value(), E_.value())),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
     epsilon0_("epsilon", k0_.dimensions()/dimTime, SMALL),
@@ -171,10 +181,10 @@ bool RASModel::read()
         lookup("turbulence") >> turbulence_;
         coeffDict_ = subDict(type() + "Coeffs");
 
-        subDict("wallFunctionCoeffs").readIfPresent<scalar>("kappa", kappa_);
-        subDict("wallFunctionCoeffs").readIfPresent<scalar>("E", E_);
+        kappa_.readIfPresent(subDict("wallFunctionCoeffs"));
+        E_.readIfPresent(subDict("wallFunctionCoeffs"));
 
-        yPlusLam_ = yPlusLam(kappa_, E_);
+        yPlusLam_ = yPlusLam(kappa_.value(), E_.value());
 
         readIfPresent("k0", k0_);
         readIfPresent("epsilon0", epsilon0_);
