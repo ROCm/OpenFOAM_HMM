@@ -35,12 +35,13 @@ template
     template<class> class SlicedPatchField,
     class GeoMesh
 >
-Foam::tmp<Foam::FieldField<PatchField, Type> > 
+Foam::tmp<Foam::FieldField<PatchField, Type> >
 Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
 slicedBoundaryField
 (
     const Mesh& mesh,
-    const Field<Type>& completeField
+    const Field<Type>& completeField,
+    const bool preserveCouples
 )
 {
     tmp<FieldField<PatchField, Type> > tbf
@@ -52,7 +53,7 @@ slicedBoundaryField
 
     forAll (mesh.boundary(), patchi)
     {
-        if (mesh.boundary()[patchi].coupled())
+        if (preserveCouples && mesh.boundary()[patchi].coupled())
         {
             // For coupled patched construct the correct patch field type
             bf.set
@@ -143,7 +144,8 @@ SlicedGeometricField
     const IOobject& io,
     const Mesh& mesh,
     const dimensionSet& ds,
-    const Field<Type>& completeField
+    const Field<Type>& completeField,
+    const bool preserveCouples
 )
 :
     GeometricField<Type, PatchField, GeoMesh>
@@ -152,7 +154,7 @@ SlicedGeometricField
         mesh,
         ds,
         Field<Type>(),
-        slicedBoundaryField(mesh, completeField)
+        slicedBoundaryField(mesh, completeField, preserveCouples)
     )
 {
     // Set the internalField to the slice of the complete field
@@ -179,7 +181,8 @@ SlicedGeometricField
     const Mesh& mesh,
     const dimensionSet& ds,
     const Field<Type>& completeIField,
-    const Field<Type>& completeBField
+    const Field<Type>& completeBField,
+    const bool preserveCouples
 )
 :
     GeometricField<Type, PatchField, GeoMesh>
@@ -188,7 +191,7 @@ SlicedGeometricField
         mesh,
         ds,
         Field<Type>(),
-        slicedBoundaryField(mesh, completeBField)
+        slicedBoundaryField(mesh, completeBField, preserveCouples)
     )
 {
     // Set the internalField to the slice of the complete field
