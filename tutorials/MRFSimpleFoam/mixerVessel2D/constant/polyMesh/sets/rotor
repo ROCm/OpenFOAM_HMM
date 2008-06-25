@@ -1,27 +1,18 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4.1                                 |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "..";
-    case "mixerVessel2D";
-    instance "constant";
-    local "polyMesh/sets";
-
-    class faceSet;
-    object rotor;
+    version     2.0;
+    format      ascii;
+    class       faceSet;
+    object      rotor;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 3024
 (

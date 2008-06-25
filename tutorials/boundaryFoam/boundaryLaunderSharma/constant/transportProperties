@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          transportProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Ubar            Ubar [0 1 -1 0 0 0 0] (10 0 0);
@@ -43,6 +35,5 @@ BirdCarreauCoeffs
     k               k [0 0 1 0 0 0 0] 0;
     n               n [0 0 0 0 0 0 0] 1;
 }
-
 
 // ************************************************************************* //
