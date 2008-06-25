@@ -23,19 +23,13 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     bashrc
+#     ensightFoam/bashrc
 #
 # Description
 #     Setup file for Ensight 8.?
 #     Sourced from OpenFOAM-?.?/etc/bashrc
 #
 #------------------------------------------------------------------------------
-
-if [ "$PS1" -a "$foamDotFile" ]; then
-    if [ "$FOAM_VERBOSE" ]; then
-        echo "Executing: $foamDotFile"
-    fi
-fi
 
 # fallback value
 if [ ! -d "$CEI_HOME" ]; then

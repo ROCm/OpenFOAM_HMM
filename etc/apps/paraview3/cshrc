@@ -23,7 +23,7 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     cshrc
+#     paraview3/cshrc
 #
 # Description
 #     Startup File for Paraview3
@@ -31,18 +31,12 @@
 #
 #------------------------------------------------------------------------------
 
-if ($?prompt && $?foamDotFile) then
-    if ($?FOAM_VERBOSE) then
-        echo "Executing: $foamDotFile"
-    endif
-endif
-
 setenv CMAKE_HOME $WM_THIRD_PARTY_DIR/cmake-2.4.6/platforms/$WM_ARCH
 
 if ( -r $CMAKE_HOME ) then
     set path=($CMAKE_HOME/bin $path)
 else
-    unset CMAKE_HOME
+    unsetenv CMAKE_HOME
 endif
 
 setenv ParaView_VERSION 3.3-cvs

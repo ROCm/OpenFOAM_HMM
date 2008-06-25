@@ -178,23 +178,29 @@ export PATH LD_LIBRARY_PATH MANPATH
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-SOURCE(){
-   foamDotFile=$1
-   . $1
-   foamDotFile=
+_foamSource()
+{
+   while [ $# -ge 1 ]
+   do
+      if [ "$FOAM_VERBOSE" -a "$PS1" ]; then
+         echo "Sourcing: $1"
+      fi
+      . $1
+      shift
+   done
 }
 
 
-SOURCE $WM_PROJECT_DIR/etc/settings.sh
-SOURCE $WM_PROJECT_DIR/etc/aliases.sh
+_foamSource $WM_PROJECT_DIR/etc/settings.sh
+_foamSource $WM_PROJECT_DIR/etc/aliases.sh
 
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#SOURCE $WM_PROJECT_DIR/etc/apps/paraview/bashrc
-SOURCE $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
-#SOURCE $WM_PROJECT_DIR/etc/apps/ensightFoam/bashrc
-SOURCE $WM_PROJECT_DIR/etc/apps/cint/bashrc
+# _foamSource $WM_PROJECT_DIR/etc/apps/paraview/bashrc
+_foamSource $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
+# _foamSource $WM_PROJECT_DIR/etc/apps/ensightFoam/bashrc
+_foamSource $WM_PROJECT_DIR/etc/apps/cint/bashrc
 
 
 # Again clean environment (path, PATH, MANPATH, LD_LIBRARY_PATH)
@@ -217,8 +223,9 @@ if [ "$LD_PRELOAD" != "" ]; then
 fi
 
 
-# cleanup environment
-unset cleanPath cleanProg foamDotFile foamInstall
-
+# cleanup environment:
+# ~~~~~~~~~~~~~~~~~~~~
+unset cleanPath cleanProg foamInstall
+unset _foamSource
 
 # -----------------------------------------------------------------------------
