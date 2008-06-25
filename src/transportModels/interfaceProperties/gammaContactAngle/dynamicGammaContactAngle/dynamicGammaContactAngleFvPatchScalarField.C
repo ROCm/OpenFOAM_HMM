@@ -29,14 +29,9 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-dynamicGammaContactAngleFvPatchScalarField::
+Foam::dynamicGammaContactAngleFvPatchScalarField::
 dynamicGammaContactAngleFvPatchScalarField
 (
     const fvPatch& p,
@@ -51,7 +46,7 @@ dynamicGammaContactAngleFvPatchScalarField
 {}
 
 
-dynamicGammaContactAngleFvPatchScalarField::
+Foam::dynamicGammaContactAngleFvPatchScalarField::
 dynamicGammaContactAngleFvPatchScalarField
 (
     const dynamicGammaContactAngleFvPatchScalarField& gcpsf,
@@ -64,11 +59,11 @@ dynamicGammaContactAngleFvPatchScalarField
     theta0_(gcpsf.theta0_),
     uTheta_(gcpsf.uTheta_),
     thetaA_(gcpsf.thetaA_),
-    thetaR_(gcpsf.thetaA_)
+    thetaR_(gcpsf.thetaR_)
 {}
 
 
-dynamicGammaContactAngleFvPatchScalarField::
+Foam::dynamicGammaContactAngleFvPatchScalarField::
 dynamicGammaContactAngleFvPatchScalarField
 (
     const fvPatch& p,
@@ -86,7 +81,7 @@ dynamicGammaContactAngleFvPatchScalarField
 }
 
 
-dynamicGammaContactAngleFvPatchScalarField::
+Foam::dynamicGammaContactAngleFvPatchScalarField::
 dynamicGammaContactAngleFvPatchScalarField
 (
     const dynamicGammaContactAngleFvPatchScalarField& gcpsf
@@ -100,7 +95,7 @@ dynamicGammaContactAngleFvPatchScalarField
 {}
 
 
-dynamicGammaContactAngleFvPatchScalarField::
+Foam::dynamicGammaContactAngleFvPatchScalarField::
 dynamicGammaContactAngleFvPatchScalarField
 (
     const dynamicGammaContactAngleFvPatchScalarField& gcpsf,
@@ -117,7 +112,8 @@ dynamicGammaContactAngleFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField> dynamicGammaContactAngleFvPatchScalarField::theta
+Foam::tmp<Foam::scalarField>
+Foam::dynamicGammaContactAngleFvPatchScalarField::theta
 (
     const fvPatchVectorField& Up,
     const fvsPatchVectorField& nHat
@@ -133,22 +129,22 @@ tmp<scalarField> dynamicGammaContactAngleFvPatchScalarField::theta
     // Calculated the component of the velocity parallel to the wall
     vectorField Uwall = Up.patchInternalField() - Up;
     Uwall -= (nf & Uwall)*nf;
-    
+
     // Find the direction of the interface parallel to the wall
     vectorField nWall = nHat - (nf & nHat)*nf;
-    
+
     // Normalise nWall
     nWall /= (mag(nWall) + SMALL);
-    
+
     // Calculate Uwall resolved normal to the interface parallel to
     // the interface
     scalarField uwall = nWall & Uwall;
-    
+
     return theta0_ + (thetaA_ - thetaR_)*tanh(uwall/uTheta_);
 }
 
 
-void dynamicGammaContactAngleFvPatchScalarField::write(Ostream& os) const
+void Foam::dynamicGammaContactAngleFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     os.writeKeyword("theta0") << theta0_ << token::END_STATEMENT << nl;
@@ -161,10 +157,14 @@ void dynamicGammaContactAngleFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, dynamicGammaContactAngleFvPatchScalarField);
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        dynamicGammaContactAngleFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
