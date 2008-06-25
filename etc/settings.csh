@@ -4,7 +4,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -30,14 +30,9 @@
 #     Sourced from OpenFOAM-??/etc/cshrc
 #
 #------------------------------------------------------------------------------
-if ($?prompt && $?foamDotFile) then
-    if ($?FOAM_VERBOSE) then
-        echo "Executing: $foamDotFile"
-    endif
-endif
 
-alias AddPath 'set path=(\!* $path) ; if ( ! -d \!* ) mkdir -p \!*'
-alias AddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; if ( ! -d \!* ) mkdir -p \!*'
+alias _foamAddPath 'set path=(\!* $path) ; if ( ! -d \!* ) mkdir -p \!*'
+alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; if ( ! -d \!* ) mkdir -p \!*'
 
 
 #- Add the system-specific executables path to the path
@@ -49,27 +44,26 @@ setenv FOAM_JOB_DIR $FOAM_INST_DIR/jobControl
 setenv WM_DIR $WM_PROJECT_DIR/wmake
 setenv WM_LINK_LANGUAGE c++
 setenv WM_OPTIONS $WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
-
 set path=($WM_DIR $path)
 
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_LIB $WM_PROJECT_DIR/lib
 setenv FOAM_LIBBIN $FOAM_LIB/$WM_OPTIONS
-AddLib $FOAM_LIBBIN
+_foamAddLib $FOAM_LIBBIN
 
 setenv FOAM_APP $WM_PROJECT_DIR/applications
 setenv FOAM_APPBIN $WM_PROJECT_DIR/applications/bin/$WM_OPTIONS
-AddPath $FOAM_APPBIN
+_foamAddPath $FOAM_APPBIN
 
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
 setenv FOAM_SOLVERS $FOAM_APP/solvers
 
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
-AddLib $FOAM_USER_LIBBIN
+_foamAddLib $FOAM_USER_LIBBIN
 
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/applications/bin/$WM_OPTIONS
-AddPath $FOAM_USER_APPBIN
+_foamAddPath $FOAM_USER_APPBIN
 
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
@@ -83,7 +77,6 @@ set WM_COMPILER_LIB=
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WM_COMPILER_INST = OpenFOAM | System
 set WM_COMPILER_INST=OpenFOAM
-
 
 switch ("$WM_COMPILER_INST")
 case OpenFOAM:
@@ -121,6 +114,9 @@ if ($?WM_COMPILER_BIN) then
     endif
 endif
 
+unset WM_COMPILER_BIN
+unset WM_COMPILER_LIB
+
 
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
@@ -136,8 +132,8 @@ case OPENMPI:
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -150,8 +146,8 @@ case LAM:
     setenv LAMHOME $WM_THIRD_PARTY_DIR/$mpi_version
     # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -163,8 +159,8 @@ case MPICH:
     setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
     setenv MPICH_ROOT $MPI_ARCH_PATH
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -176,9 +172,9 @@ case MPICH-GM:
     setenv MPICH_ROOT $MPI_ARCH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddLib  $GM_LIB_PATH
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddLib  $GM_LIB_PATH
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
@@ -198,7 +194,7 @@ default:
     breaksw
 endsw
 
-AddLib $FOAM_MPI_LIBBIN
+_foamAddLib $FOAM_MPI_LIBBIN
 
 
 # Set the MPI buffer size (used by all platforms except SGI MPI)
@@ -209,7 +205,7 @@ setenv MPI_BUFFER_SIZE 20000000
 # CGAL library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( $?CGAL_LIB_DIR ) then
-    AddLib $CGAL_LIB_DIR
+    _foamAddLib $CGAL_LIB_DIR
 endif
 
 
@@ -218,5 +214,12 @@ endif
 #if ( -f $FOAM_LIBBIN/libhoard.so ) then
 #    setenv LD_PRELOAD $FOAM_LIBBIN/libhoard.so:${LD_PRELOAD}
 #endif
+
+
+# cleanup environment:
+# ~~~~~~~~~~~~~~~~~~~~
+unalias _foamAddLib
+unalias _foamAddPath
+
 
 # -----------------------------------------------------------------------------
