@@ -1,27 +1,18 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4.1                                 |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version 2.0;
-    format ascii;
-
-    root "/home/dm2/henry/OpenFOAM/OpenFOAM-1.4.1/tutorials/lesInterFoam";
-    case "nozzleFlow2D";
-    instance "1e-08";
-    local "polyMesh/sets";
-
-    class cellSet;
-    object refinedCells;
+    version     2.0;
+    format      ascii;
+    class       cellSet;
+    object      refinedCells;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 14138
 (
