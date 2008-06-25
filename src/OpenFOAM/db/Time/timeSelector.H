@@ -117,7 +117,7 @@ public:
         //- Select a list of Time values that are within the ranges
         void inplaceSelect(List<instant>&) const;
 
-        //- Add the set of options handled by timeSelector to argList::validOptions
+        //- Add the options handled by timeSelector to argList::validOptions
         //
         // @param constant
         //   Add the @b -constant option to include the @c constant/ directory

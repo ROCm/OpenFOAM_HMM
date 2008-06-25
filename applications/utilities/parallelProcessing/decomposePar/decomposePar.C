@@ -29,6 +29,27 @@ Description
     Automatically decomposes a mesh and fields of a case for parallel
     execution of OpenFOAM.
 
+Usage
+
+    - decomposePar [OPTION]
+
+    @param -cellDist \n
+    Write the cell distribution as a labelList for use with 'manual'
+    decomposition method and as a volScalarField for post-processing.
+
+    @param -copyUniform \n
+    Copy any @a uniform directories too.
+
+    @param -fields \n
+    Use existing geometry decomposition and convert fields only.
+
+    @param -filterPatches \n
+    Remove empty patches when decomposing the geometry.
+
+    @param -force \n
+    Remove any existing @a processor subdirectories before decomposing the
+    geometry.
+
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
@@ -54,23 +75,76 @@ Description
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("fields", "");
     argList::validOptions.insert("cellDist", "");
-    argList::validOptions.insert("filterPatches", "");
     argList::validOptions.insert("copyUniform", "");
+    argList::validOptions.insert("fields", "");
+    argList::validOptions.insert("filterPatches", "");
+    argList::validOptions.insert("force", "");
 
 #   include "setRootCase.H"
 
-    bool decomposeFieldsOnly(args.options().found("fields"));
     bool writeCellDist(args.options().found("cellDist"));
-    bool filterPatches(args.options().found("filterPatches"));
     bool copyUniform(args.options().found("copyUniform"));
+    bool decomposeFieldsOnly(args.options().found("fields"));
+    bool filterPatches(args.options().found("filterPatches"));
+    bool forceOverwrite(args.options().found("force"));
 
 #   include "createTime.H"
 
     Info<< "Time = " << runTime.timeName() << endl;
 
-    Info<< "Create mesh\n" << endl;
+    // determine the existing processor count directly
+    label nProcs = 0;
+    while (dir(runTime.path()/(word("processor") + name(nProcs))))
+    {
+        ++nProcs;
+    }
+
+    // Check for previously decomposed case first
+    if (decomposeFieldsOnly)
+    {
+        if (!nProcs)
+        {
+            FatalErrorIn(args.executable())
+                << "Specifying -fields requires a decomposed geometry!"
+                << nl
+                << exit(FatalError);
+        }
+    }
+    else
+    {
+        if (nProcs)
+        {
+            if (forceOverwrite)
+            {
+                Info<< "Removing " << nProcs
+                    << " existing processor directories" << endl;
+
+                // remove existing processor dirs
+                for (label procI = nProcs-1; procI >= 0; --procI)
+                {
+                    fileName procDir
+                    (
+                        runTime.path()/(word("processor") + name(procI))
+                    );
+
+                    rmDir(procDir);
+                }
+            }
+            else
+            {
+                FatalErrorIn(args.executable())
+                    << "Case is already decomposed, "
+                        "use the -force option or manually remove" << nl
+                    << "processor directories before decomposing. e.g.," << nl
+                    << "    rm -rf " << runTime.path().c_str() << "/processor*"
+                    << nl
+                    << exit(FatalError);
+            }
+        }
+    }
+
+    Info<< "Create mesh" << endl;
     domainDecomposition mesh
     (
         IOobject
@@ -84,16 +158,6 @@ int main(int argc, char *argv[])
     // Decompose the mesh
     if (!decomposeFieldsOnly)
     {
-        if (dir(runTime.path()/"processor1"))
-        {
-            FatalErrorIn(args.executable())
-                << "Case is already decomposed." << endl
-                << "    Please remove processor directories before "
-                   "decomposing e.g. using:" << nl
-                << "    rm -rf " << runTime.path().c_str() << "/processor*"
-                << exit(FatalError);
-        }
-
         mesh.decomposeMesh(filterPatches);
 
         mesh.writeDecomposition();
@@ -102,7 +166,9 @@ int main(int argc, char *argv[])
         {
             // Write the decomposition as labelList for use with 'manual'
             // decomposition method.
-            OFstream str
+
+            // FIXME: may attempt to write to a non-existent "region0/"
+            OFstream os
             (
                 runTime.path()
               / mesh.facesInstance()
@@ -110,11 +176,11 @@ int main(int argc, char *argv[])
               / "cellDecomposition"
             );
 
-            str << mesh.cellToProc();
+            os << mesh.cellToProc();
 
-            Info<< nl << "Written decomposition to "
-                << str.name() << " for use in manual decomposition."
-                << nl << endl;
+            Info<< nl << "Wrote decomposition to "
+                << os.name() << " for use in manual decomposition."
+                << endl;
 
             // Write as volScalarField for postprocessing.
             volScalarField cellDist
@@ -140,9 +206,9 @@ int main(int argc, char *argv[])
 
             cellDist.write();
 
-            Info<< nl << "Written decomposition as volScalarField to "
+            Info<< nl << "Wrote decomposition as volScalarField to "
                 << cellDist.name() << " for use in postprocessing."
-                << nl << endl;
+                << endl;
         }
     }
 
