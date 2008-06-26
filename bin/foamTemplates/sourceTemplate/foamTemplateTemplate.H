@@ -54,14 +54,14 @@ template<TemplateClassArgument>
 class ClassName;
 
 template<TemplateClassArgument>
-Istream& operator>>(Istream&, ClassName<TemplateClassArgument>&);
+Istream& operator>>(Istream&, ClassName<TemplateArgument>&);
 
 template<TemplateClassArgument>
-Ostream& operator<<(Ostream&, const ClassName<TemplateClassArgument>&);
+Ostream& operator<<(Ostream&, const ClassName<TemplateArgument>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class ClassName Declaration
+                         Class ClassName Declaration
 \*---------------------------------------------------------------------------*/
 
 template<TemplateClassArgument>

@@ -66,10 +66,10 @@ IO)
    template=foamTemplateIO
    fileType=C
    ;;
-App)
+app|App)
    template=foamAppTemplate
    fileType=C
-   if [ ! -d "Make" ]; then
+   if [ ! -d Make ]; then
        echo "foamNew: Creating Make/files and Make/options"
        wmakeFilesAndOptions
    fi
