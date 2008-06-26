@@ -228,7 +228,7 @@ labelList regionFaceOrder
 
             oldToNewFace[sortKey.indices()[i]] = newFaceI++;
         }
-    } 
+    }
 
     // Leave patch faces intact.
     for (label faceI = newFaceI; faceI < mesh.nFaces(); faceI++)
@@ -368,7 +368,8 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("blockOrder", "");
     argList::validOptions.insert("orderPoints", "");
     argList::validOptions.insert("writeMaps", "");
-    
+    argList::validOptions.insert("overwrite", "");
+
 #   include "addTimeOptions.H"
 
 #   include "setRootCase.H"
@@ -411,6 +412,7 @@ int main(int argc, char *argv[])
             << endl;
     }
 
+    bool overwrite = args.options().found("overwrite");
 
     label band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
 
@@ -503,7 +505,7 @@ int main(int argc, char *argv[])
 
             forAll(cellToRegion, cellI)
             {
-               cellDist[cellI] = cellToRegion[cellI]; 
+               cellDist[cellI] = cellToRegion[cellI];
             }
 
             cellDist.write();
@@ -528,7 +530,10 @@ int main(int argc, char *argv[])
             )
         );
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Change the mesh.
         map = reorderMesh(mesh, cellOrder, faceOrder);
@@ -539,7 +544,10 @@ int main(int argc, char *argv[])
 
         polyTopoChange meshMod(mesh);
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Change the mesh.
         map = meshMod.changeMesh

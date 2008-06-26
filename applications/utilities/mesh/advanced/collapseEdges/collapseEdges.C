@@ -312,7 +312,7 @@ label collapseHighAspectFaces
                 if (lengths[1] > edgeRatio*lengths[0])
                 {
                     edgeI = fEdges[lengths.indices()[0]];
-                }    
+                }
             }
 
 
@@ -456,6 +456,7 @@ label simplifyFaces
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::validOptions.insert("overwrite", "");
     argList::validArgs.append("edge length [m]");
     argList::validArgs.append("merge angle (degrees)");
 
@@ -465,6 +466,7 @@ int main(int argc, char *argv[])
 
     scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
     scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
+    bool overwrite = args.options().found("overwrite");
 
     scalar maxCos = Foam::cos(angle*180/mathematicalConstant::pi);
 
@@ -580,7 +582,10 @@ int main(int argc, char *argv[])
     if (meshChanged)
     {
         // Write resulting mesh
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         Info << "Writing collapsed mesh to time " << runTime.value() << endl;
 

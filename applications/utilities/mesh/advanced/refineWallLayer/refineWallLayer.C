@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     Foam::argList::validArgs.append("patchName");
     Foam::argList::validArgs.append("edgeWeight");
     Foam::argList::validOptions.insert("useSet", "cellSet");
+    Foam::argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -57,7 +58,8 @@ int main(int argc, char *argv[])
 
     word patchName(args.additionalArgs()[0]);
 
-    scalar weight(readScalar(IStringStream(args.additionalArgs()[1])()));    
+    scalar weight(readScalar(IStringStream(args.additionalArgs()[1])()));
+    bool overwrite = args.options().found("overwrite");
 
 
     label patchID = mesh.boundaryMesh().findPatchID(patchName);
@@ -212,7 +214,10 @@ int main(int argc, char *argv[])
     // Do all changes
     Info<< "Morphing ..." << endl;
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 

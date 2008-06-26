@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
     Foam::argList::validArgs.append("faceSet");
     Foam::argList::validArgs.append("masterPatch");
     Foam::argList::validArgs.append("slavePatch");
+    Foam::argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -126,6 +127,7 @@ int main(int argc, char *argv[])
     word setName(args.additionalArgs()[0]);
     word masterPatch(args.additionalArgs()[1]);
     word slavePatch(args.additionalArgs()[2]);
+    bool overwrite = args.options().found("overwrite");
 
     // List of faces to split
     faceSet facesSet(mesh, setName);
@@ -252,7 +254,10 @@ int main(int argc, char *argv[])
     Info<< nl << "Constructed topologyModifier:" << endl;
     splitter[0].writeDict(Info);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     splitter.attach();
 
