@@ -42,12 +42,18 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-#   include "setRootCase.H"
+    argList::validOptions.insert("overwrite", "");
 
+#   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    runTime++;
+    bool overwrite = args.options().found("overwrite");
+
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     Info<< "Time = " << runTime.timeName() << nl
         << "Attaching sliding interface" << endl;

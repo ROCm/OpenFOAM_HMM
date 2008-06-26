@@ -52,6 +52,7 @@ using namespace Foam;
 // Main program:
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("overwrite", "");
     argList::validArgs.append("cellSet");
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
     pointMesh pMesh(mesh);
 
     word cellSetName(args.args()[1]);
+    bool overwrite = args.options().found("overwrite");
 
     Info<< "Reading cells to refine from cellSet " << cellSetName
         << nl << endl;
@@ -110,7 +112,7 @@ int main(int argc, char *argv[])
     // Read point fields
     PtrList<pointScalarField> psFlds;
     ReadFields(pMesh, objects, psFlds);
-    
+
     PtrList<pointVectorField> pvFlds;
     ReadFields(pMesh, objects, pvFlds);
 
@@ -149,7 +151,10 @@ int main(int argc, char *argv[])
     // Play refinement commands into mesh changer.
     meshCutter.setRefinement(newCellsToRefine, meshMod);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Create mesh, return map from old to new mesh.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
