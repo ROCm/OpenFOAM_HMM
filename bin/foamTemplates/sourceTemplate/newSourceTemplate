@@ -46,7 +46,7 @@ USAGE
     exit 1
 }
 
-if [ "$#" -lt 2 ]; then
+if [ "$#" -le 2 ]; then
    usage "wrong number of arguments, expected 3 (or more)"
 fi
 
