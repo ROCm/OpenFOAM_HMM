@@ -1,25 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    `format'        ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          blockMeshDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // General macros to create 2D/extruded-2D meshes
 
@@ -34,7 +26,6 @@ define(hex2D, hex ($1b $2b $3b $4b $1t $2t $3t $4t))
 define(quad2D, ($1b $2b $2t $1t))
 define(frontQuad, ($1t $2t $3t $4t))
 define(backQuad, ($1b $4b $3b $2b))
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,7 +70,6 @@ define(Na, 12)
 
 // Number of cells in the thickness of the slab
 define(Nz, 1)
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -140,7 +130,6 @@ define(sea5, calc(sin((pi/180)*ea5)))
 define(sea6, calc(sin((pi/180)*ea6)))
 define(sea7, calc(sin((pi/180)*ea7)))
 
-
 define(x00, calc(r*ca0))
 define(x01, calc(r*ca1))
 define(x02, calc(r*ca2))
@@ -185,7 +174,6 @@ define(x44, calc(R*ca4))
 define(x45, calc(R*ca5))
 define(x46, calc(R*ca6))
 define(x47, calc(R*ca7))
-
 
 define(y00, calc(r*sa0))
 define(y01, calc(r*sa1))
@@ -232,8 +220,6 @@ define(y45, calc(R*sa5))
 define(y46, calc(R*sa6))
 define(y47, calc(R*sa7))
 
-
-
 define(ex00, calc(r*cea0))
 define(ex01, calc(r*cea1))
 define(ex02, calc(r*cea2))
@@ -279,7 +265,6 @@ define(ex45, calc(R*cea5))
 define(ex46, calc(R*cea6))
 define(ex47, calc(R*cea7))
 
-
 define(ey00, calc(r*sea0))
 define(ey01, calc(r*sea1))
 define(ey02, calc(r*sea2))
@@ -324,8 +309,6 @@ define(ey44, calc(R*sea4))
 define(ey45, calc(R*sea5))
 define(ey46, calc(R*sea6))
 define(ey47, calc(R*sea7))
-
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -488,8 +471,6 @@ blocks
     (Na Nr Nz)
     simpleGrading (1 1 1)
 
-
-
     // block0
     hex2D(rb0, rb1, ri1, ri0)
     rotor
@@ -538,7 +519,6 @@ blocks
     (Na Ni Nz)
     simpleGrading (1 1 1)
 
-
     // block0
     hex2D(ri0, ri1, Rb1, Rb0)
     (Na Ni Nz)
@@ -578,7 +558,6 @@ blocks
     hex2D(ri7, ri0, Rb0, Rb7)
     (Na Ni Nz)
     simpleGrading (1 1 1)
-
 
     // block0
     hex2D(Rb0, Rb1, R1s, R0)
@@ -667,7 +646,6 @@ edges
     arc R5b R6b evert(4, 5, Zb)
     arc R6b R7sb evert(4, 6, Zb)
     arc R7b R0b evert(4, 7, Zb)
-
 
     arc r0t r1t evert(0, 0, Zt)
     arc r1t r2st evert(0, 1, Zt)
@@ -837,6 +815,5 @@ patches
         backQuad(Rb7, Rb0, R0, R7)
     )
 );
-
 
 // ************************************************************************* //
