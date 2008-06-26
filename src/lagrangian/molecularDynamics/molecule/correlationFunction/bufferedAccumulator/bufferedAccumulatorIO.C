@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source bAD Toolbox
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenbAD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 
 template<class Type>
 Foam::Ostream&
-    Foam::operator<<(Ostream& os, const bufferedAccumulator<Type>& bA)
+Foam::operator<<(Ostream& os, const bufferedAccumulator<Type>& bA)
 {
 
     os<< bA.averagesTaken_
