@@ -1,26 +1,17 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          sampleDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      sampleDict;
 }
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // interpolationScheme : choice of
@@ -32,14 +23,12 @@ FoamFile
 //    for the field (linear, gamma, etc.)
 interpolationScheme cellPointFace;
 
-
 // setFormat : choice of
 //      xmgr
 //      jplot
 //      gnuplot
 //      raw
 setFormat raw;
-
 
 // Surface output format. Choice of
 //      null        : suppress output
@@ -49,7 +38,6 @@ setFormat raw;
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.
 //      stl         : ascii stl. Does not contain values!
 surfaceFormat vtk;
-
 
 // sampling definition:
 //
@@ -159,6 +147,5 @@ fields
 //    magUMean
     UMeanx
 );
-
 
 // ************************************************************************* //
