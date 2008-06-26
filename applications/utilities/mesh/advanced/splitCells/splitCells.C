@@ -527,6 +527,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("set", "cellSet name");
     argList::validOptions.insert("geometry", "");
     argList::validOptions.insert("tol", "edge snap tolerance");
+    argList::validOptions.insert("overwrite", "");
     argList::validArgs.append("edge angle [0..360]");
 
 #   include "setRootCase.H"
@@ -541,6 +542,7 @@ int main(int argc, char *argv[])
 
     bool readSet = args.options().found("set");
     bool geometry = args.options().found("geometry");
+    bool overwrite = args.options().found("overwrite");
 
     scalar edgeTol = 0.2;
 
@@ -574,7 +576,7 @@ int main(int argc, char *argv[])
     // Cell circumference cutter
     geomCellLooper cellCutter(mesh);
     // Snap all edge cuts close to endpoints to vertices.
-    geomCellLooper::setSnapTol(edgeTol);    
+    geomCellLooper::setSnapTol(edgeTol);
 
     // Candidate cells to cut
     cellSet cellsToCut(mesh, "cellsToCut", mesh.nCells()/100);
@@ -612,7 +614,7 @@ int main(int argc, char *argv[])
             minCos,
             minSin,
             cellsToCut,
-            
+
             cutCells,
             cellLoops,
             cellEdgeWeights
@@ -669,7 +671,10 @@ int main(int argc, char *argv[])
         // Do all changes
         Info<< "Morphing ..." << endl;
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 

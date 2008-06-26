@@ -60,7 +60,7 @@ void subsetVolFields
 
         Info<< "Subsetting field " << fieldName << endl;
 
-        GeometricField<Type, fvPatchField, volMesh> fld    
+        GeometricField<Type, fvPatchField, volMesh> fld
         (
             IOobject
             (
@@ -94,7 +94,7 @@ void subsetSurfaceFields
 
         Info<< "Subsetting field " << fieldName << endl;
 
-        GeometricField<Type, fvsPatchField, surfaceMesh> fld    
+        GeometricField<Type, fvsPatchField, surfaceMesh> fld
         (
             IOobject
             (
@@ -129,7 +129,7 @@ void subsetPointFields
 
         Info<< "Subsetting field " << fieldName << endl;
 
-        GeometricField<Type, pointPatchField, pointMesh> fld    
+        GeometricField<Type, pointPatchField, pointMesh> fld
         (
             IOobject
             (
@@ -153,12 +153,14 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("set");
     argList::validOptions.insert("patch", "patch name");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
 
     word setName(args.additionalArgs()[0]);
+    bool overwrite = args.options().found("overwrite");
 
 
     Info<< "Reading cell set from " << setName << endl << endl;
@@ -324,14 +326,17 @@ int main(int argc, char *argv[])
     // Write mesh and fields to new time
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     Info<< "Writing subsetted mesh and fields to time " << runTime.value()
         << endl;
     subsetter.subMesh().write();
 
 
-    // Subsetting adds 'subset' prefix. Rename field to be like original.    
+    // Subsetting adds 'subset' prefix. Rename field to be like original.
     forAll(scalarFlds, i)
     {
         scalarFlds[i].rename(scalarNames[i]);

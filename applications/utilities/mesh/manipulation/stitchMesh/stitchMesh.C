@@ -131,6 +131,8 @@ int main(int argc, char *argv[])
     Foam::argList::validOptions.insert("partial", "");
     Foam::argList::validOptions.insert("perfect", "");
 
+    Foam::argList::validOptions.insert("overwrite", "");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
@@ -141,6 +143,7 @@ int main(int argc, char *argv[])
 
     bool partialCover = args.options().found("partial");
     bool perfectCover = args.options().found("perfect");
+    bool overwrite = args.options().found("overwrite");
 
     if (partialCover && perfectCover)
     {
@@ -349,7 +352,7 @@ int main(int argc, char *argv[])
     IOobjectList objects(mesh, runTime.timeName());
 
     // Read all current fvFields so they will get mapped
-    Info<< "Reading all current volfields" << endl;    
+    Info<< "Reading all current volfields" << endl;
     PtrList<volScalarField> volScalarFields;
     readFields(mesh, objects, volScalarFields);
 
@@ -366,7 +369,7 @@ int main(int argc, char *argv[])
     readFields(mesh, objects, volTensorFields);
 
     //- uncomment if you want to interpolate surface fields (usually bad idea)
-    //Info<< "Reading all current surfaceFields" << endl;    
+    //Info<< "Reading all current surfaceFields" << endl;
     //PtrList<surfaceScalarField> surfaceScalarFields;
     //readFields(mesh, objects, surfaceScalarFields);
     //
@@ -376,7 +379,10 @@ int main(int argc, char *argv[])
     //PtrList<surfaceTensorField> surfaceTensorFields;
     //readFields(mesh, objects, surfaceTensorFields);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Execute all polyMeshModifiers
     autoPtr<mapPolyMesh> morphMap = stitcher.changeMesh(true);
