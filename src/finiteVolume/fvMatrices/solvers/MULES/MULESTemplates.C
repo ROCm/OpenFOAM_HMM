@@ -55,6 +55,7 @@ void Foam::MULES::explicitSolve
     Info<< "MULES: Solving for " << psi.name() << endl;
 
     const fvMesh& mesh = psi.mesh();
+    psi.correctBoundaryConditions();
 
     surfaceScalarField phiBD = upwind<scalar>(psi.mesh(), phi).flux(psi);
 
@@ -76,7 +77,8 @@ void Foam::MULES::explicitSolve
         ),
         mesh,
         dimless,
-        allLambda
+        allLambda,
+        false   // Use slices for the couples
     );
 
     limiter
@@ -183,7 +185,8 @@ void Foam::MULES::implicitSolve
             ),
             mesh,
             dimless,
-            allCoLambda
+            allCoLambda,
+            false   // Use slices for the couples
         );
 
         CoLambda == 1.0/max(CoCoeff*Cof, scalar(1));
@@ -205,7 +208,8 @@ void Foam::MULES::implicitSolve
         ),
         mesh,
         dimless,
-        allLambda
+        allLambda,
+        false   // Use slices for the couples
     );
 
     linear<scalar> CDs(mesh);
@@ -347,7 +351,8 @@ void Foam::MULES::limiter
         ),
         mesh,
         dimless,
-        allLambda
+        allLambda,
+        false   // Use slices for the couples
     );
 
     scalarField& lambdaIf = lambda;
