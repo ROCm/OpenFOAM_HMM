@@ -54,8 +54,7 @@
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
 
-
-    dimensionedScalar pRef("pRef", p.dimensions(), 1.0e5);
+    dimensionedScalar pRef("pRef", p.dimensions(), thermo->lookup("pRef"));
 
     Info<< "Creating field pd\n" << endl;
     volScalarField pd
@@ -77,7 +76,13 @@
 
     label pdRefCell = 0;
     scalar pdRefValue = 0.0;
-    setRefCell(pd, mesh.solutionDict().subDict("SIMPLE"), pdRefCell, pdRefValue);
+    setRefCell
+    (
+        pd,
+        mesh.solutionDict().subDict("SIMPLE"),
+        pdRefCell,
+        pdRefValue
+    );
 
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);

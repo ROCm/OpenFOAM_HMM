@@ -11,7 +11,12 @@
 
     List<scalar> initialMassf(fluidRegions.size());
 
-    dimensionedScalar pRef("pRef", dimensionSet(1, -1, -2, 0, 0), 1.0E5);
+    dimensionedScalar pRef
+    (
+        "pRef",
+        dimensionSet(1, -1, -2, 0, 0),
+        rp.lookup("pRef")
+    );
 
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)

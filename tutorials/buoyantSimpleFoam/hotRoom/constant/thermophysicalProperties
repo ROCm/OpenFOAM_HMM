@@ -18,4 +18,6 @@ thermoType      hThermo<pureMixture<constTransport<specieThermo<hConstThermo<per
 
 mixture         air 1 28.9 1000 0 1.8e-05 0.7;
 
+pRef            1e5;
+
 // ************************************************************************* //
