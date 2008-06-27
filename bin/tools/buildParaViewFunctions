@@ -140,6 +140,7 @@ buildParaView ()
 {
     # set general options
     addCMakeVariable "BUILD_SHARED_LIBS:BOOL=ON"
+    addCMakeVariable "CMAKE_BUILD_TYPE:STRING=Release"
 
     # set paraview environment
     unset PARAVIEW_SRC_DIR
