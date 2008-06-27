@@ -78,6 +78,11 @@ class treeBoundBox
     public boundBox
 {
 
+private:
+
+        //- To initialise faceNormals.
+        static FixedList<vector, 6> calcFaceNormals();
+
 public:
 
     // Static data members
@@ -141,6 +146,9 @@ public:
 
         //- Edge to point addressing
         static const edgeList edges;
+
+        //- Per face the unit normal
+        static const FixedList<vector, 6> faceNormals;
 
 
         //- Face on which neighbour is
