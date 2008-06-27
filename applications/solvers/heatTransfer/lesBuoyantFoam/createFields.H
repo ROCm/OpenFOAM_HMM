@@ -37,7 +37,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
 
     Info<< "Creating turbulence model\n" << endl;
@@ -69,7 +69,7 @@
         mesh
     );
 
-    //pd = p - rho*gh - pRef;
     p = pd + rho*gh + pRef;
+    thermo->correct();
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);

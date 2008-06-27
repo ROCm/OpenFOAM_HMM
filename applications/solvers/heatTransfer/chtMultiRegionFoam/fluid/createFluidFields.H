@@ -173,7 +173,7 @@
 
         Info<< "    Updating p from pd\n" << endl;
         thermof[i].p() == pdf[i] + rhof[i]*ghf[i] + pRef;
-
+        thermof[i].correct();
 
         initialMassf[i] = fvc::domainIntegrate(rhof[i]).value();
     }
