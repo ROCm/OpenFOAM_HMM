@@ -56,7 +56,7 @@ void importDirectory(const char* dirName);
 
 %}
 
-%s CMNT CFNAME SCFNAME JFNAME FFNAME
+%x CMNT CFNAME SCFNAME JFNAME FFNAME
 %%
 
 "//".*\n                  ;            /* remove c++ style one line comments */

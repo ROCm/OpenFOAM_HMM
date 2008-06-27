@@ -31,23 +31,22 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::fieldAverage::addMeanFields
+void Foam::fieldAverage::addMeanField
 (
     const label fieldi,
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList
+    PtrList<GeometricField<Type, fvPatchField, volMesh> >& meanFieldList
 )
 {
     if (faItems_[fieldi].mean())
     {
         typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
         const word& fieldName = faItems_[fieldi].fieldName();
-        const fieldType& baseField = mesh.lookupObject<fieldType>(fieldName);
-        const word meanFieldName = fieldName + EXT_MEAN;
+        const fieldType& baseField = obr_.lookupObject<fieldType>(fieldName);
 
+        const word meanFieldName = fieldName + EXT_MEAN;
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
-        fieldList.set
+        meanFieldList.set
         (
             fieldi,
             new fieldType
@@ -55,8 +54,8 @@ void Foam::fieldAverage::addMeanFields
                 IOobject
                 (
                     meanFieldName,
-                    mesh.time().timeName(),
-                    mesh,
+                    obr_.time().timeName(),
+                    obr_,
                     IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 ),
@@ -68,26 +67,25 @@ void Foam::fieldAverage::addMeanFields
 
 
 template<class Type1, class Type2>
-void Foam::fieldAverage::addPrime2MeanFields
+void Foam::fieldAverage::addPrime2MeanField
 (
     const label fieldi,
-    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& fieldList
+    PtrList<GeometricField<Type1, fvPatchField, volMesh> >& meanFieldList,
+    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
 )
 {
-    if (faItems_[fieldi].mean())
+    if (faItems_[fieldi].mean() && meanFieldList.set(fieldi))
     {
         typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
         typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
 
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
         const word& fieldName = faItems_[fieldi].fieldName();
-        const fieldType1& baseField = mesh.lookupObject<fieldType1>(fieldName);
-        const fieldType1& meanField =
-            mesh.lookupObject<fieldType1>(fieldName + EXT_MEAN);
-        const word meanFieldName = fieldName + EXT_PRIME2MEAN;
+        const fieldType1& baseField = obr_.lookupObject<fieldType1>(fieldName);
+        const fieldType1& meanField = meanFieldList[fieldi];
 
+        const word meanFieldName = fieldName + EXT_PRIME2MEAN;
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
-        fieldList.set
+        prime2MeanFieldList.set
         (
             fieldi,
             new fieldType2
@@ -95,8 +93,8 @@ void Foam::fieldAverage::addPrime2MeanFields
                 IOobject
                 (
                     meanFieldName,
-                    mesh.time().timeName(),
-                    mesh,
+                    obr_.time().timeName(),
+                    obr_,
                     IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 ),
@@ -110,7 +108,7 @@ void Foam::fieldAverage::addPrime2MeanFields
 template<class Type>
 void Foam::fieldAverage::calculateMeanFields
 (
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList
+    PtrList<GeometricField<Type, fvPatchField, volMesh> >& meanFieldList
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
@@ -119,31 +117,27 @@ void Foam::fieldAverage::calculateMeanFields
 
     forAll(faItems_, i)
     {
-        if (fieldList.set(i))
+        if (faItems_[i].mean() && meanFieldList.set(i))
         {
-            if (faItems_[i].mean())
+            const word& fieldName = faItems_[i].fieldName();
+            const fieldType& baseField =
+                obr_.lookupObject<fieldType>(fieldName);
+            fieldType& meanField = meanFieldList[i];
+
+            scalar alpha = 0.0;
+            scalar beta = 0.0;
+            if (faItems_[i].timeBase())
             {
-                const fvMesh& mesh = refCast<const fvMesh>(obr_);
-                const word& fieldName = faItems_[i].fieldName();
-                const fieldType& baseField =
-                    mesh.lookupObject<fieldType>(fieldName);
-                fieldType& meanField = fieldList[i];
-
-                scalar alpha = 0.0;
-                scalar beta = 0.0;
-                if (faItems_[i].timeBase())
-                {
-                    alpha = (totalTime_[i] - dt)/totalTime_[i];
-                    beta = dt/totalTime_[i];
-                }
-                else
-                {
-                    alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
-                    beta = 1.0/scalar(totalIter_[i]);
-                }
-
-                meanField = alpha*meanField + beta*baseField;
+                 alpha = (totalTime_[i] - dt)/totalTime_[i];
+                 beta = dt/totalTime_[i];
             }
+            else
+            {
+                alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
+                beta = 1.0/scalar(totalIter_[i]);
+            }
+
+            meanField = alpha*meanField + beta*baseField;
         }
     }
 }
@@ -152,7 +146,8 @@ void Foam::fieldAverage::calculateMeanFields
 template<class Type1, class Type2>
 void Foam::fieldAverage::calculatePrime2MeanFields
 (
-    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& fieldList
+    PtrList<GeometricField<Type1, fvPatchField, volMesh> >& meanFieldList,
+    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
 )
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
@@ -162,36 +157,36 @@ void Foam::fieldAverage::calculatePrime2MeanFields
 
     forAll(faItems_, i)
     {
-        if (fieldList.set(i))
+        if
+        (
+            faItems_[i].prime2Mean()
+         && meanFieldList.set(i)
+         && prime2MeanFieldList.set(i)
+        )
         {
-            if (faItems_[i].prime2Mean())
+            const word& fieldName = faItems_[i].fieldName();
+            const fieldType1& baseField =
+                obr_.lookupObject<fieldType1>(fieldName);
+            const fieldType1& meanField = meanFieldList[i];
+            fieldType2& prime2MeanField = prime2MeanFieldList[i];
+
+            scalar alpha = 0.0;
+            scalar beta = 0.0;
+            if (faItems_[i].timeBase())
             {
-                const fvMesh& mesh = refCast<const fvMesh>(obr_);
-                const word& fieldName = faItems_[i].fieldName();
-                const fieldType1& baseField =
-                    mesh.lookupObject<fieldType1>(fieldName);
-                const fieldType1& meanField =
-                    mesh.lookupObject<fieldType1>(fieldName + EXT_MEAN);
-                fieldType2& prime2MeanField = fieldList[i];
-
-                scalar alpha = 0.0;
-                scalar beta = 0.0;
-                if (faItems_[i].timeBase())
-                {
-                    alpha = (totalTime_[i] - dt)/totalTime_[i];
-                    beta = dt/totalTime_[i];
-                }
-                else
-                {
-                    alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
-                    beta = 1.0/scalar(totalIter_[i]);
-                }
-
-                prime2MeanField =
-                    alpha*prime2MeanField
-                  + beta*sqr(baseField)
-                  - sqr(meanField);
+                alpha = (totalTime_[i] - dt)/totalTime_[i];
+                beta = dt/totalTime_[i];
             }
+            else
+            {
+                alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
+                beta = 1.0/scalar(totalIter_[i]);
+            }
+
+            prime2MeanField =
+                alpha*prime2MeanField
+              + beta*sqr(baseField)
+              - sqr(meanField);
         }
     }
 }
@@ -200,7 +195,8 @@ void Foam::fieldAverage::calculatePrime2MeanFields
 template<class Type1, class Type2>
 void Foam::fieldAverage::addMeanSqrToPrime2Mean
 (
-    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& fieldList
+    PtrList<GeometricField<Type1, fvPatchField, volMesh> >& meanFieldList,
+    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
 )
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
@@ -208,18 +204,17 @@ void Foam::fieldAverage::addMeanSqrToPrime2Mean
 
     forAll(faItems_, i)
     {
-        if (fieldList.set(i))
+        if
+        (
+            faItems_[i].prime2Mean()
+         && meanFieldList.set(i)
+         && prime2MeanFieldList.set(i)
+        )
         {
-            if (faItems_[i].prime2Mean())
-            {
-                const fvMesh& mesh = refCast<const fvMesh>(obr_);
-                const word& fieldName = faItems_[i].fieldName();
-                const fieldType1& meanField =
-                    mesh.lookupObject<fieldType1>(fieldName + EXT_MEAN);
-                fieldType2& prime2MeanField = fieldList[i];
+            const fieldType1& meanField = meanFieldList[i];
+            fieldType2& prime2MeanField = prime2MeanFieldList[i];
 
-                prime2MeanField += sqr(meanField);
-            }
+            prime2MeanField += sqr(meanField);
         }
     }
 }
