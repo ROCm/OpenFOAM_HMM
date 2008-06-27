@@ -63,7 +63,7 @@ pair
             shift2      0.97e-9;
             scale2      1.2e11;
         }
-        writeTables     yes;
+        writeTables     no;
     }
 
     Ar-Ne
@@ -80,7 +80,7 @@ pair
             epsilon         8.765026657e-22;
         }
         energyScalingFunction   shiftedForce;
-        writeTables     yes;
+        writeTables     no;
     }
 
     Ne-Ne
@@ -97,7 +97,7 @@ pair
             epsilon         5.813260729e-22;
         }
         energyScalingFunction   shiftedForce;
-        writeTables     yes;
+        writeTables     no;
     }
 }
 
