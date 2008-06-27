@@ -57,14 +57,11 @@ class shifted
 
         scalar e_at_rCut_;
 
-<<<<<<< HEAD:src/lagrangian/molecularDynamics/potential/energyScalingFunction/derived/shifted/shifted.H
-
-=======
->>>>>>> fixed missing public: in src/lagrangian/molecularDynamics/potential/energyScalingFunction/derived/shifted/shifted.H:src/lagrangian/molecularDynamics/potential/energyScalingFunction/derived/shifted/shifted.H
 public:
 
     //- Runtime type information
     TypeName("shifted");
+
 
     // Constructors
 
