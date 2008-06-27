@@ -74,6 +74,12 @@ const Foam::label edgesArray[12][2] =
 //! @endcond
 
 
+const Foam::edgeList Foam::treeBoundBox::edges
+(
+    initListList<edge, label, 12, 2>(edgesArray)
+);
+
+
 const Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::faceNormals
 (
     calcFaceNormals()
