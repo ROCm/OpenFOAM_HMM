@@ -16,6 +16,7 @@
 *.la
 *.so
 *.jar
+lex.yy.c
 
 # Corefiles
 core
@@ -27,10 +28,13 @@ core
 lnInclude
 
 # linux build folder(s) - anywhere
-linux*Gcc*[SD]POpt*
+linux*Gcc*
 
 # reinstate wmake/rules that look like build folders
 !wmake/rules/linux*
+# but do ignore the derived files in there
+wmake/rules/linux*/dirToString
+wmake/rules/linux*/wmkdep
 
 # doxygen generated documentation
 doc/[Dd]oxygen/html
