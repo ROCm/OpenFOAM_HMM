@@ -85,23 +85,23 @@ void Foam::fieldAverage::initialise()
         const word fieldName = faItems_[i].fieldName();
         if (obr_.foundObject<volScalarField>(fieldName))
         {
-            addMeanFields<scalar>(i, meanScalarFields_);
+            addMeanField<scalar>(i, meanScalarFields_);
         }
         else if (obr_.foundObject<volVectorField>(fieldName))
         {
-            addMeanFields<vector>(i, meanVectorFields_);
+            addMeanField<vector>(i, meanVectorFields_);
         }
         else if (obr_.foundObject<volSphericalTensorField>(fieldName))
         {
-            addMeanFields<sphericalTensor>(i, meanSphericalTensorFields_);
+            addMeanField<sphericalTensor>(i, meanSphericalTensorFields_);
         }
         else if (obr_.foundObject<volSymmTensorField>(fieldName))
         {
-            addMeanFields<symmTensor>(i, meanSymmTensorFields_);
+            addMeanField<symmTensor>(i, meanSymmTensorFields_);
         }
         else if (obr_.foundObject<volTensorField>(fieldName))
         {
-            addMeanFields<tensor>(i, meanTensorFields_);
+            addMeanField<tensor>(i, meanTensorFields_);
         }
         else
         {
@@ -118,29 +118,29 @@ void Foam::fieldAverage::initialise()
         if (faItems_[i].prime2Mean())
         {
             const word fieldName = faItems_[i].fieldName();
+            if (!faItems_[i].mean())
+            {
+                FatalErrorIn("Foam::fieldAverage::initialise()")
+                    << "To calculate the prime-squared average, the "
+                    << "mean average must also be selected for field "
+                    << fieldName << nl << exit(FatalError);
+            }
+
             if (obr_.foundObject<volScalarField>(fieldName))
             {
-                if (!faItems_[i].mean())
-                {
-                    FatalErrorIn("Foam::fieldAverage::initialise()")
-                        << "To calculate the prime-squared average, the "
-                        << "mean average must also be selected for field "
-                        << fieldName << nl << exit(FatalError);
-                }
-                addPrime2MeanFields<scalar>(i, prime2MeanScalarFields_);
+                addPrime2MeanField<scalar>
+                (
+                    i,
+                    meanScalarFields_,
+                    prime2MeanScalarFields_
+                );
             }
             else if (obr_.foundObject<volVectorField>(fieldName))
             {
-                if (!faItems_[i].mean())
-                {
-                    FatalErrorIn("Foam::fieldAverage::initialise()")
-                        << "To calculate the prime-squared average, the "
-                        << "mean average must also be selected for field "
-                        << fieldName << nl << exit(FatalError);
-                }
-                addPrime2MeanFields<vector>
+                addPrime2MeanField<vector>
                 (
                     i,
+                    meanVectorFields_,
                     prime2MeanSymmTensorFields_
                 );
             }
@@ -251,8 +251,16 @@ void Foam::fieldAverage::calcAverages()
         totalTime_[i] += obr_.time().deltaT().value();
     }
 
-    addMeanSqrToPrime2Mean<scalar>(prime2MeanScalarFields_);
-    addMeanSqrToPrime2Mean<vector>(prime2MeanSymmTensorFields_);
+    addMeanSqrToPrime2Mean<scalar>
+    (
+        meanScalarFields_,
+        prime2MeanScalarFields_
+    );
+    addMeanSqrToPrime2Mean<vector>
+    (
+        meanVectorFields_,
+        prime2MeanSymmTensorFields_
+    );
 
     calculateMeanFields<scalar>(meanScalarFields_);
     calculateMeanFields<vector>(meanVectorFields_);
@@ -260,8 +268,16 @@ void Foam::fieldAverage::calcAverages()
     calculateMeanFields<symmTensor>(meanSymmTensorFields_);
     calculateMeanFields<tensor>(meanTensorFields_);
 
-    calculatePrime2MeanFields<scalar>(prime2MeanScalarFields_);
-    calculatePrime2MeanFields<vector>(prime2MeanSymmTensorFields_);
+    calculatePrime2MeanFields<scalar>
+    (
+        meanScalarFields_,
+        prime2MeanScalarFields_
+    );
+    calculatePrime2MeanFields<vector>
+    (
+        meanVectorFields_,
+        prime2MeanSymmTensorFields_
+    );
 }
 
 
