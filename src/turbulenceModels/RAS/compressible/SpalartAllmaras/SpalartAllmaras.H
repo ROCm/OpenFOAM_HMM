@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RAS::SpalartAllmaras
+    Foam::compressible::RASModels::SpalartAllmaras
 
 Description
     Spalart-Allmaras one-eqn mixing-length model for compressible

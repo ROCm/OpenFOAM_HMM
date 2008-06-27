@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RAS::LaunderSharmaKE
+    Foam::incompressible::RASModels::LaunderSharmaKE
 
 Description
     Launder and Sharma low-Reynolds k-epsilon turbulence model for

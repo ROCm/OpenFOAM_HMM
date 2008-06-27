@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LES::dynSmagorinsky
+    Foam::incompressible::LESModels::dynSmagorinsky
 
 Description
     The Isochoric dynamic Smagorinsky Model for incompressible flows.
@@ -56,7 +56,7 @@ Description
         m = delta^2*(4*||F(D)||^2 - F(||D||^2))
         L = dev(F(U*U) - F(U)*F(U))
         M = delta^2*(F(||D||*dev(D)) - 4*||F(D)||*F(dev(D)))
-    @verbatim
+    @endverbatim
 
 SourceFiles
     dynSmagorinsky.C

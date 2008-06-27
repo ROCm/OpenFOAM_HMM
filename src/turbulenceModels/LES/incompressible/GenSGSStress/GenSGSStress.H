@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LES::GenSGSStress
+    Foam::incompressible::LESModels::GenSGSStress
 
 Description
     General base class for all incompressible models that directly

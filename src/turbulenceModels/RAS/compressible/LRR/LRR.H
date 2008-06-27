@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RAS::LRR
+    Foam::compressible::RASModels::LRR
 
 Description
     Launder, Reece and Rodi Reynolds-stress turbulence model for

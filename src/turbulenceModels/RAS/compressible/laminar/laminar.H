@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RAS::laminar
+    Foam::compressible::RASModels::laminar
 
 Description
     Dummy turbulence model for laminar compressible flow.

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RAS::kOmegaSST
+    Foam::compressible::RASModels::kOmegaSST
 
 Description
     Implementation of the k-omega-SST turbulence model for compressible flows.
