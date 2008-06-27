@@ -12,10 +12,7 @@ refineMeshByCellSet()
     cellSet >& log.cellSet.$1
 
     echo "refining primary zone - $1"
-    refineMesh -dict >& log.refineMesh.$1
-    rm -rf 0/polyMesh
-    mv 1e-08/polyMesh 0/
-    rm -rf 1e-08
+    refineMesh -dict -overwrite >& log.refineMesh.$1
 }
 
 runApplication blockMesh
