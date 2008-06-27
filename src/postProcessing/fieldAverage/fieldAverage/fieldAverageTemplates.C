@@ -74,7 +74,7 @@ void Foam::fieldAverage::addPrime2MeanField
     PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
 )
 {
-    if (faItems_[fieldi].mean())
+    if (faItems_[fieldi].mean() && meanFieldList.set(fieldi))
     {
         typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
         typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
@@ -117,30 +117,27 @@ void Foam::fieldAverage::calculateMeanFields
 
     forAll(faItems_, i)
     {
-        if (meanFieldList.set(i))
+        if (faItems_[i].mean() && meanFieldList.set(i))
         {
-            if (faItems_[i].mean())
+            const word& fieldName = faItems_[i].fieldName();
+            const fieldType& baseField =
+                obr_.lookupObject<fieldType>(fieldName);
+            fieldType& meanField = meanFieldList[i];
+
+            scalar alpha = 0.0;
+            scalar beta = 0.0;
+            if (faItems_[i].timeBase())
             {
-                const word& fieldName = faItems_[i].fieldName();
-                const fieldType& baseField =
-                    obr_.lookupObject<fieldType>(fieldName);
-                fieldType& meanField = meanFieldList[i];
-
-                scalar alpha = 0.0;
-                scalar beta = 0.0;
-                if (faItems_[i].timeBase())
-                {
-                    alpha = (totalTime_[i] - dt)/totalTime_[i];
-                    beta = dt/totalTime_[i];
-                }
-                else
-                {
-                    alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
-                    beta = 1.0/scalar(totalIter_[i]);
-                }
-
-                meanField = alpha*meanField + beta*baseField;
+                 alpha = (totalTime_[i] - dt)/totalTime_[i];
+                 beta = dt/totalTime_[i];
             }
+            else
+            {
+                alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
+                beta = 1.0/scalar(totalIter_[i]);
+            }
+
+            meanField = alpha*meanField + beta*baseField;
         }
     }
 }
@@ -160,34 +157,36 @@ void Foam::fieldAverage::calculatePrime2MeanFields
 
     forAll(faItems_, i)
     {
-        if (prime2MeanFieldList.set(i))
+        if
+        (
+            faItems_[i].prime2Mean()
+         && meanFieldList.set(i)
+         && prime2MeanFieldList.set(i)
+        )
         {
-            if (faItems_[i].prime2Mean())
+            const word& fieldName = faItems_[i].fieldName();
+            const fieldType1& baseField =
+                obr_.lookupObject<fieldType1>(fieldName);
+            const fieldType1& meanField = meanFieldList[i];
+            fieldType2& prime2MeanField = prime2MeanFieldList[i];
+
+            scalar alpha = 0.0;
+            scalar beta = 0.0;
+            if (faItems_[i].timeBase())
             {
-                const word& fieldName = faItems_[i].fieldName();
-                const fieldType1& baseField =
-                    obr_.lookupObject<fieldType1>(fieldName);
-                const fieldType1& meanField = meanFieldList[i];
-                fieldType2& prime2MeanField = prime2MeanFieldList[i];
-
-                scalar alpha = 0.0;
-                scalar beta = 0.0;
-                if (faItems_[i].timeBase())
-                {
-                    alpha = (totalTime_[i] - dt)/totalTime_[i];
-                    beta = dt/totalTime_[i];
-                }
-                else
-                {
-                    alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
-                    beta = 1.0/scalar(totalIter_[i]);
-                }
-
-                prime2MeanField =
-                    alpha*prime2MeanField
-                  + beta*sqr(baseField)
-                  - sqr(meanField);
+                alpha = (totalTime_[i] - dt)/totalTime_[i];
+                beta = dt/totalTime_[i];
             }
+            else
+            {
+                alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
+                beta = 1.0/scalar(totalIter_[i]);
+            }
+
+            prime2MeanField =
+                alpha*prime2MeanField
+              + beta*sqr(baseField)
+              - sqr(meanField);
         }
     }
 }
@@ -205,15 +204,17 @@ void Foam::fieldAverage::addMeanSqrToPrime2Mean
 
     forAll(faItems_, i)
     {
-        if (prime2MeanFieldList.set(i))
+        if
+        (
+            faItems_[i].prime2Mean()
+         && meanFieldList.set(i)
+         && prime2MeanFieldList.set(i)
+        )
         {
-            if (faItems_[i].prime2Mean())
-            {
-                const fieldType1& meanField = meanFieldList[i];
-                fieldType2& prime2MeanField = prime2MeanFieldList[i];
+            const fieldType1& meanField = meanFieldList[i];
+            fieldType2& prime2MeanField = prime2MeanFieldList[i];
 
-                prime2MeanField += sqr(meanField);
-            }
+            prime2MeanField += sqr(meanField);
         }
     }
 }
