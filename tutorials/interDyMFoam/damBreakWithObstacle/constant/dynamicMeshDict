@@ -1,29 +1,20 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          motionProperties;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      motionProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dynamicFvMesh      dynamicRefineFvMesh;
-
 
 // Refinement
 dynamicRefineFvMeshCoeffs
@@ -43,7 +34,6 @@ dynamicRefineFvMeshCoeffs
     // 3. if too many cells determine cost function:
     //    - lowest level wins
     //    - cell closest to (0.5*minLevel + 0.5*maxLevel) wins
-
 
     // Which cells to un/refine: based on point values (simple averaging).
     // - refine pointCells of point value > refineLevel
@@ -69,6 +59,5 @@ dynamicRefineFvMeshCoeffs
     // Write cellLevel?
     dumpLevel true;
 }
-
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,11 +48,14 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    Foam::argList::validOptions.insert("overwrite", "");
     Foam::argList::validArgs.append("faceSet");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
+
+    bool overwrite = args.options().found("overwrite");
 
     word setName(args.additionalArgs()[0]);
 
@@ -159,7 +162,10 @@ int main(int argc, char *argv[])
     // Update numbering of cells/vertices.
     faceRemover.updateMesh(morphMap);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Take over refinement levels and write to new time directory.
     Pout<< "Writing mesh to time " << runTime.timeName() << endl;

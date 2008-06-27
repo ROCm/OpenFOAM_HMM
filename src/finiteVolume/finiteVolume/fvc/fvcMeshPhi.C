@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,17 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fvc
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-tmp<surfaceScalarField> meshPhi
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::meshPhi
 (
     const volVectorField& vf
 )
@@ -53,13 +43,13 @@ tmp<surfaceScalarField> meshPhi
 }
 
 
-tmp<surfaceScalarField> meshPhi
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::meshPhi
 (
     const dimensionedScalar& rho,
     const volVectorField& vf
 )
 {
-    return rho*fv::ddtScheme<vector>::New
+    return fv::ddtScheme<vector>::New
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + rho.name() + ',' + vf.name() + ')')
@@ -67,13 +57,13 @@ tmp<surfaceScalarField> meshPhi
 }
 
 
-tmp<surfaceScalarField> meshPhi
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::meshPhi
 (
     const volScalarField& rho,
     const volVectorField& vf
 )
 {
-    return fvc::interpolate(rho)*fv::ddtScheme<vector>::New
+    return fv::ddtScheme<vector>::New
     (
         vf.mesh(),
         vf.mesh().ddtScheme("ddt(" + rho.name() + ',' + vf.name() + ')')
@@ -81,7 +71,7 @@ tmp<surfaceScalarField> meshPhi
 }
 
 
-void makeRelative
+void Foam::fvc::makeRelative
 (
     surfaceScalarField& phi,
     const volVectorField& U
@@ -93,7 +83,7 @@ void makeRelative
     }
 }
 
-void makeRelative
+void Foam::fvc::makeRelative
 (
     surfaceScalarField& phi,
     const dimensionedScalar& rho,
@@ -102,11 +92,11 @@ void makeRelative
 {
     if (phi.mesh().moving())
     {
-        phi -= fvc::meshPhi(rho, U);
+        phi -= rho*fvc::meshPhi(rho, U);
     }
 }
 
-void makeRelative
+void Foam::fvc::makeRelative
 (
     surfaceScalarField& phi,
     const volScalarField& rho,
@@ -115,12 +105,12 @@ void makeRelative
 {
     if (phi.mesh().moving())
     {
-        phi -= fvc::meshPhi(rho, U);
+        phi -= fvc::interpolate(rho)*fvc::meshPhi(rho, U);
     }
 }
 
 
-void makeAbsolute
+void Foam::fvc::makeAbsolute
 (
     surfaceScalarField& phi,
     const volVectorField& U
@@ -132,7 +122,7 @@ void makeAbsolute
     }
 }
 
-void makeAbsolute
+void Foam::fvc::makeAbsolute
 (
     surfaceScalarField& phi,
     const dimensionedScalar& rho,
@@ -141,11 +131,11 @@ void makeAbsolute
 {
     if (phi.mesh().moving())
     {
-        phi += fvc::meshPhi(rho, U);
+        phi += rho*fvc::meshPhi(rho, U);
     }
 }
 
-void makeAbsolute
+void Foam::fvc::makeAbsolute
 (
     surfaceScalarField& phi,
     const volScalarField& rho,
@@ -154,17 +144,9 @@ void makeAbsolute
 {
     if (phi.mesh().moving())
     {
-        phi += fvc::meshPhi(rho, U);
+        phi += fvc::interpolate(rho)*fvc::meshPhi(rho, U);
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fvc
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

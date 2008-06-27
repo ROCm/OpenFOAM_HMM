@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ Description
     Does a very simple scheduling which assumes same time for all operations.
 
     After construction:
-      - schedule() gives the order in which the input communication should happen
+      - schedule() gives the order in which the input communication should occur
       - procSchedule()[procI] gives per procI
 
     Does not care whether 'talking' is first send, second receive or maybe

@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -31,13 +31,7 @@
 #
 #------------------------------------------------------------------------------
 
-if [ "$PS1" -a "$foamDotFile" ]; then
-    if [ "$FOAM_VERBOSE" ]; then
-        echo "Executing: $foamDotFile"
-    fi
-fi
-
-AddPath()
+_foamAddPath()
 {
     while [ $# -ge 1 ]
     do
@@ -47,7 +41,7 @@ AddPath()
     done
 }
 
-AddLib()
+_foamAddLib()
 {
     while [ $# -ge 1 ]
     do
@@ -58,7 +52,7 @@ AddLib()
 }
 
 
-#- Add the system-specifc executables path to the path
+#- Add the system-specific executables path to the path
 export PATH=$WM_PROJECT_DIR/bin:$FOAM_INST_DIR/$WM_ARCH/bin:$PATH
 
 #- Location of the jobControl directory
@@ -72,21 +66,21 @@ export PATH=$WM_DIR:$PATH
 export FOAM_SRC=$WM_PROJECT_DIR/src
 export FOAM_LIB=$WM_PROJECT_DIR/lib
 export FOAM_LIBBIN=$FOAM_LIB/$WM_OPTIONS
-AddLib $FOAM_LIBBIN
+_foamAddLib $FOAM_LIBBIN
 
 export FOAM_APP=$WM_PROJECT_DIR/applications
 export FOAM_APPBIN=$WM_PROJECT_DIR/applications/bin/$WM_OPTIONS
-AddPath $FOAM_APPBIN
+_foamAddPath $FOAM_APPBIN
 
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
 export FOAM_UTILITIES=$FOAM_APP/utilities
 export FOAM_SOLVERS=$FOAM_APP/solvers
 
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
-AddLib $FOAM_USER_LIBBIN
+_foamAddLib $FOAM_USER_LIBBIN
 
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/applications/bin/$WM_OPTIONS
-AddPath $FOAM_USER_APPBIN
+_foamAddPath $FOAM_USER_APPBIN
 
 export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 
@@ -128,11 +122,12 @@ OpenFOAM)
     ;;
 esac
 
-if [ "$WM_COMPILER_BIN" != "" ]; then
+if [ -d "$WM_COMPILER_BIN" ]; then
     export PATH=$WM_COMPILER_BIN:$PATH
     export LD_LIBRARY_PATH=$WM_COMPILER_LIB:$LD_LIBRARY_PATH
 fi
 
+unset WM_COMPILER_BIN WM_COMPILER_LIB
 
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
@@ -148,8 +143,8 @@ OPENMPI)
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -162,8 +157,8 @@ LAM)
     export LAMHOME=$WM_THIRD_PARTY_DIR/$mpi_version
     # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -175,8 +170,8 @@ MPICH)
     export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
     export MPICH_ROOT=$MPI_ARCH_PATH
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -188,9 +183,9 @@ MPICH-GM)
     export MPICH_ROOT=$MPI_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
 
-    AddLib  $MPI_ARCH_PATH/lib
-    AddLib  $GM_LIB_PATH
-    AddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddLib  $GM_LIB_PATH
+    _foamAddPath $MPI_ARCH_PATH/bin
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
     ;;
@@ -210,7 +205,7 @@ MPI)
     ;;
 esac
 
-AddLib $FOAM_MPI_LIBBIN
+_foamAddLib $FOAM_MPI_LIBBIN
 
 
 # Set the MPI buffer size (used by all platforms except SGI MPI)
@@ -220,7 +215,7 @@ export MPI_BUFFER_SIZE=20000000
 
 # CGAL library if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
-[ -d "$CGAL_LIB_DIR" ] && AddLib $CGAL_LIB_DIR
+[ -d "$CGAL_LIB_DIR" ] && _foamAddLib $CGAL_LIB_DIR
 
 
 # Switch on the hoard memory allocator if available
@@ -228,5 +223,10 @@ export MPI_BUFFER_SIZE=20000000
 #if [ -f $FOAM_LIBBIN/libhoard.so ]; then
 #    export LD_PRELOAD=$FOAM_LIBBIN/libhoard.so:$LD_PRELOAD
 #fi
+
+
+# cleanup environment:
+# ~~~~~~~~~~~~~~~~~~~~
+unset _foamAddLib _foamAddPath
 
 # -----------------------------------------------------------------------------

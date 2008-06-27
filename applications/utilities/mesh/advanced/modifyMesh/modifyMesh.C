@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -328,9 +328,13 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("overwrite", "");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
+
+    bool overwrite = args.options().found("overwrite");
 
     Info<< "Reading modifyMeshDict\n" << endl;
 
@@ -366,7 +370,7 @@ int main(int argc, char *argv[])
 
     bool cellsToSplit = cellsToPyramidise.size() > 0;
 
-    //List<Tuple<pointField,point> > 
+    //List<Tuple<pointField,point> >
     //  cellsToCreate(dict.lookup("cellsToCreate"));
 
     Info<< "Read from " << dict.name() << nl
@@ -541,7 +545,10 @@ int main(int argc, char *argv[])
 
         cutter.updateMesh(morphMap());
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;
@@ -572,7 +579,7 @@ int main(int argc, char *argv[])
         // Topo change container
         polyTopoChange meshMod(mesh);
 
-        // Insert 
+        // Insert
         cutter.setRefinement(meshMod);
 
         // Do changes
@@ -587,7 +594,10 @@ int main(int argc, char *argv[])
         //cutter.updateMesh(morphMap());
 
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;
@@ -623,7 +633,10 @@ int main(int argc, char *argv[])
 
         cutter.updateMesh(morphMap());
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;

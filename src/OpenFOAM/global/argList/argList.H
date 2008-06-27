@@ -198,7 +198,7 @@ public:
                 return globalCase_;
             }
 
-            //- Return case name for parallel run or the global case for a serial run
+            //- Return case name (parallel run) or global case (serial run)
             const fileName& caseName() const
             {
                 return case_;

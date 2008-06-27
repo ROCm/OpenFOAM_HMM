@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -720,7 +720,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             {
                 exposedPatchIDs[i] = interfaceToPatch[interface]+1;
             }
-        }                    
+        }
     }
 
     // Remove faces
@@ -1118,6 +1118,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("makeCellZones", "");
     argList::validOptions.insert("largestOnly", "");
     argList::validOptions.insert("insidePoint", "point");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -1134,6 +1135,7 @@ int main(int argc, char *argv[])
     bool largestOnly = args.options().found("largestOnly");
     bool insidePoint = args.options().found("insidePoint");
     bool useCellZones = args.options().found("cellZones");
+    bool overwrite = args.options().found("overwrite");
 
     if (insidePoint && largestOnly)
     {
@@ -1469,7 +1471,11 @@ int main(int argc, char *argv[])
             }
         }
         mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
-        runTime++;
+
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
         Info<< "Writing cellZones as new mesh to time " << runTime.timeName()
             << nl << endl;
@@ -1510,7 +1516,10 @@ int main(int argc, char *argv[])
         );
 
 
-        runTime++;
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
 
         // Create regions

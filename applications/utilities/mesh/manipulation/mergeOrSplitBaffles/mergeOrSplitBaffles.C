@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -251,11 +251,13 @@ labelList getAllNonManifoldPoints
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("split", "");
+    argList::validOptions.insert("overwrite", "");
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
 
     bool split = args.options().found("split");
+    bool overwrite = args.options().found("overwrite");
 
     // Collect all boundary faces
     labelList boundaryFaces(mesh.nFaces() - mesh.nInternalFaces());
@@ -402,7 +404,10 @@ int main(int argc, char *argv[])
         insertDuplicateMerge(mesh, duplicates, meshMod);
     }
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Change the mesh. No inflation.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);

@@ -64,11 +64,15 @@
         (
             "pd",
             runTime.timeName(),
-            mesh
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
         ),
-        p - rho*gh - pRef,
-        p.boundaryField().types()
+        mesh
     );
+
+    p = pd + rho*gh + pRef;
+    thermo->correct();
 
 
     label pdRefCell = 0;

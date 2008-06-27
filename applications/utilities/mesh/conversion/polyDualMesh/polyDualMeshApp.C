@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,12 +43,14 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("feature angle[0-180]");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
+    bool overwrite = args.options().found("overwrite");
 
     scalar minCos = Foam::cos(featureAngle * mathematicalConstant::pi/180.0);
 
@@ -58,7 +60,10 @@ int main(int argc, char *argv[])
 
     polyDualMesh dualMesh(mesh, minCos);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     Pout<< "Writing dualMesh to " << runTime.timeName() << endl;
 

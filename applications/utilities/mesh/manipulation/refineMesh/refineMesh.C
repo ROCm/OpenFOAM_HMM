@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -294,6 +294,7 @@ label twoDNess(const polyMesh& mesh)
 int main(int argc, char *argv[])
 {
     Foam::argList::validOptions.insert("dict", "");
+    Foam::argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -307,6 +308,7 @@ int main(int argc, char *argv[])
     //
 
     bool readDict = args.options().found("dict");
+    bool overwrite = args.options().found("overwrite");
 
     // List of cells to refine
     labelList refCells;
@@ -413,7 +415,10 @@ int main(int argc, char *argv[])
 
     string oldTimeName(runTime.timeName());
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
 
     // Multi-directional refinement (does multiple iterations)
@@ -431,7 +436,7 @@ int main(int argc, char *argv[])
 
     // Create cellSet with added cells for easy inspection
     cellSet newCells(mesh, "refinedCells", refCells.size());
-    
+
     forAll(oldToNew, oldCellI)
     {
         const labelList& added = oldToNew[oldCellI];
@@ -445,7 +450,7 @@ int main(int argc, char *argv[])
     Pout<< "Writing refined cells (" << newCells.size() << ") to cellSet "
         << newCells.instance()/newCells.local()/newCells.name()
         << endl << endl;
-    
+
     newCells.write();
 
 
@@ -473,7 +478,7 @@ int main(int argc, char *argv[])
       + runTime.timeName()
       + " to cells in mesh at "
       + oldTimeName;
-        
+
 
     forAll(oldToNew, oldCellI)
     {
@@ -500,7 +505,7 @@ int main(int argc, char *argv[])
 
 
     // Some statistics.
-    
+
     printEdgeStats(mesh);
 
     Info<< "End\n" << endl;

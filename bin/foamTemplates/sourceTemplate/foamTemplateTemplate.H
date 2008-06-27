@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,14 +54,14 @@ template<TemplateClassArgument>
 class ClassName;
 
 template<TemplateClassArgument>
-Istream& operator>>(Istream&, ClassName<TemplateClassArgument>&);
+Istream& operator>>(Istream&, ClassName<TemplateArgument>&);
 
 template<TemplateClassArgument>
-Ostream& operator<<(Ostream&, const ClassName<TemplateClassArgument>&);
+Ostream& operator<<(Ostream&, const ClassName<TemplateArgument>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class ClassName Declaration
+                         Class ClassName Declaration
 \*---------------------------------------------------------------------------*/
 
 template<TemplateClassArgument>

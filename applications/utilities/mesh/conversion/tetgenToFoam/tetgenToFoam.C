@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,12 +75,14 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("file prefix");
     argList::validOptions.insert("noFaceFile", "");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
 
     bool readFaceFile = !args.options().found("noFaceFile");
+    bool overwrite = args.options().found("overwrite");
 
     fileName prefix(args.additionalArgs()[0]);
 
@@ -244,7 +246,7 @@ int main(int argc, char *argv[])
             << "Element attributes (third elemenent in .ele header)"
             << " not used" << endl;
     }
- 
+
 
 
     const cellModel& tet = *(cellModeller::lookup("tet"));
@@ -438,7 +440,7 @@ int main(int argc, char *argv[])
     word defaultFacesType = polyPatch::typeName;
     wordList patchPhysicalTypes(nPatches, polyPatch::typeName);
 
-    
+
     if (readFaceFile)
     {
         // Sort boundaryFaces by patch using boundaryPatch.
@@ -464,7 +466,10 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     polyMesh mesh
     (
@@ -487,7 +492,7 @@ int main(int argc, char *argv[])
     Info<< "Writing mesh to " << runTime.constant() << endl << endl;
 
     mesh.write();
-    
+
 
     Info<< "End\n" << endl;
 
