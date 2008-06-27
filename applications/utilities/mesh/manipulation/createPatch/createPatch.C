@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,11 +154,13 @@ void filterPatches(polyMesh& mesh)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
+    bool overwrite = args.options().found("overwrite");
 
     Info<< "Reading createPatchDict\n" << endl;
 
@@ -355,7 +357,10 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Write resulting mesh
     Info<< "Writing repatched mesh to " << runTime.timeName() << endl;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("set");
     argList::validArgs.append("patch");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -80,6 +81,8 @@ int main(int argc, char *argv[])
         FatalErrorIn(args.executable())
             << "Cannot find patch " << patchName << exit(FatalError);
     }
+
+    bool overwrite = args.options().found("overwrite");
 
     // Read objects in time directory
     IOobjectList objects(mesh, runTime.timeName());
@@ -226,7 +229,10 @@ int main(int argc, char *argv[])
     Pout<< "Converted locally " << nBaffled
         << " faces into boundary faces on patch " << patchName << nl << endl;
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Change the mesh. Change points directly (no inflation).
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);

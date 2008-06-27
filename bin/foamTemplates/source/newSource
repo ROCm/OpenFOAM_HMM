@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -66,10 +66,10 @@ IO)
    template=foamTemplateIO
    fileType=C
    ;;
-App)
+app|App)
    template=foamAppTemplate
    fileType=C
-   if [ ! -d "Make" ]; then
+   if [ ! -d Make ]; then
        echo "foamNew: Creating Make/files and Make/options"
        wmakeFilesAndOptions
    fi

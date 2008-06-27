@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,7 @@ void checkSnapMesh
     scalar relMinVol(readScalar(snapDict.lookup("minVol")));
     const scalar minCellVol = min(mesh.cellVolumes());
     const scalar minPyrVol = relMinVol*minCellVol;
-    // Min area 
+    // Min area
     scalar minArea(readScalar(snapDict.lookup("minArea")));
 
     if (maxNonOrtho < 180.0-SMALL)
@@ -435,6 +435,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("feature angle [0..180]");
     argList::validOptions.insert("concaveAngle", "[0..180]");
     argList::validOptions.insert("snapMesh", "");
+    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -457,6 +458,7 @@ int main(int argc, char *argv[])
     scalar concaveSin = Foam::sin(concaveAngle*mathematicalConstant::pi/180.0);
 
     bool snapMeshDict = args.options().found("snapMesh");
+    bool overwrite = args.options().found("overwrite");
 
     Info<< "Merging all faces of a cell" << nl
         << "    - which are on the same patch" << nl
@@ -468,7 +470,10 @@ int main(int argc, char *argv[])
         << "      (sin:" << concaveSin << ')' << nl
         << endl;
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Merge faces on same patch
     label nChanged = mergePatchFaces

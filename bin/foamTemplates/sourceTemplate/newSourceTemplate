@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -46,7 +46,7 @@ USAGE
     exit 1
 }
 
-if [ "$#" -lt 2 ]; then
+if [ "$#" -le 2 ]; then
    usage "wrong number of arguments, expected 3 (or more)"
 fi
 

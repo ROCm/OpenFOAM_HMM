@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,11 +58,13 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("thickness");
+    argList::validOptions.insert("overwrite", "");
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
     scalar thickness(readScalar(IStringStream(args.additionalArgs()[0])()));
+    bool overwrite = args.options().found("overwrite");
 
 
     // Check that mesh is 2D
@@ -164,7 +166,7 @@ int main(int argc, char *argv[])
     // Insert changes into meshMod
     extruder.setRefinement
     (
-        extrudeDir, 
+        extrudeDir,
         thickness,
         frontPatchI,
         meshMod
@@ -175,7 +177,10 @@ int main(int argc, char *argv[])
 
     mesh.updateMesh(morphMap);
 
-    runTime++;
+    if (!overwrite)
+    {
+        runTime++;
+    }
 
     // Take over refinement levels and write to new time directory.
     Pout<< "Writing extruded mesh to time " << runTime.timeName() << nl
