@@ -46,7 +46,7 @@ solvers
 
     p GAMG
     {
-        preconditioner   1e-5;
+        tolerance        1e-8;
         relTol           0;
 
         smoother         GaussSeidel;
