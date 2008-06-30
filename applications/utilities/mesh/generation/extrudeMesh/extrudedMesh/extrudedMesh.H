@@ -36,6 +36,7 @@ SourceFiles
 #define extrudedMesh_H
 
 #include "polyMesh.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,24 +51,22 @@ class extrudedMesh
 :
     public polyMesh
 {
+    // Private data
+
+        const extrudeModel& model_;
+
+
     // Private Member Functions
 
         //- Do edge and face use points in same order?
         static bool sameOrder(const face&, const edge&);
 
         //- Construct and return the extruded mesh points
-        template
-        <
-            class Face,
-            template<class> class FaceList,
-            class PointField,
-            class PointExtruder
-        >
+        template<class Face, template<class> class FaceList, class PointField>
         pointField extrudedPoints
         (
             const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-            const label nLayers,
-            const PointExtruder& extruder
+            const extrudeModel& model
         );
 
         //- Construct and return the extruded mesh faces
@@ -75,7 +74,7 @@ class extrudedMesh
         faceList extrudedFaces
         (
             const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-            const label nLayers
+            const extrudeModel& model
         );
 
         //- Construct and return the extruded mesh cells
@@ -83,7 +82,7 @@ class extrudedMesh
         cellList extrudedCells
         (
             const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-            const label nLayers
+            const extrudeModel& model
         );
 
 
@@ -99,19 +98,12 @@ public:
     // Constructors
 
         //- Construct from the primitivePatch to extrude
-        template
-        <
-            class Face,
-            template<class> class FaceList,
-            class PointField,
-            class PointExtruder
-        >
+        template<class Face, template<class> class FaceList, class PointField>
         extrudedMesh
         (
             const IOobject& io,
             const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-            const label nLayers,
-            const PointExtruder& extruder
+            const extrudeModel& model
         );
 };
 
@@ -133,3 +125,4 @@ public:
 #endif
 
 // ************************************************************************* //
+

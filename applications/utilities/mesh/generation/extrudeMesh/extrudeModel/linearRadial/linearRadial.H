@@ -23,75 +23,66 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::faceMesh
+    Foam::extrudeModels::linearRadial
 
 Description
-    Storage for surface mesh i.e. points and faces.
-
-SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceMesh_H
-#define faceMesh_H
+#ifndef linearRadial_H
+#define linearRadial_H
 
-#include "PrimitivePatch.H"
-#include "faceList.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace extrudeModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class faceMesh Declaration
+                           Class linearRadial Declaration
 \*---------------------------------------------------------------------------*/
 
-class faceMesh
+class linearRadial
 :
-    public PrimitivePatch<face, List, pointField>
+    public extrudeModel
 {
-    // Private member functions
+    // Private data
 
-        PrimitivePatch<face, List, pointField> read(Istream& is)
-        {
-            pointField points(is);
-            faceList faces(is);
-            return PrimitivePatch<face, Foam::List, pointField>(faces, points);
-        }
+        scalar R_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("linearRadial");
+
     // Constructors
 
         //- Construct from components
-        faceMesh(const faceList& faces, const pointField& points)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(faces, points)
-        {}
-
-        //- Construct from Istream
-        faceMesh(Istream& is)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(read(is))
-        {}
+        linearRadial(const dictionary& dict);
 
 
-    // IOstream Operators
+    //- Destructor
+    ~linearRadial();
 
-        friend Ostream& operator<<(Ostream& os, const faceMesh& fm)
-        {
-            return os
-                << fm.points()
-                << token::NL
-                << static_cast<PrimitivePatch<face, Foam::List, pointField> >(fm);
-        }
+
+    // Member Operators
+
+        point operator()
+        (
+            const point& surfacePoint,
+            const vector& surfaceNormal,
+            const label layer
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,3 +90,4 @@ public:
 #endif
 
 // ************************************************************************* //
+

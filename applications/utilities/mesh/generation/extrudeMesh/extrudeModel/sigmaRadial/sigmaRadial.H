@@ -23,27 +23,31 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sigmaRadialExtruder
+    Foam::extrudeModels::sigmaRadial
 
 Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sigmaRadialExtruder_H
-#define sigmaRadialExtruder_H
+#ifndef sigmaRadial_H
+#define sigmaRadial_H
 
-#include "point.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace extrudeModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class sigmaRadialExtruder Declaration
+                           Class sigmaRadial Declaration
 \*---------------------------------------------------------------------------*/
 
-class sigmaRadialExtruder
+class sigmaRadial
+:
+    public extrudeModel
 {
     // Private data
 
@@ -54,20 +58,17 @@ class sigmaRadialExtruder
 
 public:
 
+    //- Runtime type information
+    TypeName("sigmaRadial");
+
     // Constructors
 
         //- Construct from components
-        sigmaRadialExtruder
-        (
-            const scalar RTbyg,
-            const scalar pRef,
-            const scalar pStrat
-        )
-        :
-            RTbyg_(RTbyg),
-            pRef_(pRef),
-            pStrat_(pStrat)
-        {}
+        sigmaRadial(const dictionary& dict);
+
+
+    //-Destructor
+    ~sigmaRadial();
 
 
     // Member Operators
@@ -76,24 +77,14 @@ public:
         (
             const point& surfacePoint,
             const vector& surfaceNormal,
-            const label nLayers,
             const label layer
-        ) const
-        {
-            // radius of the surface
-            scalar rs = mag(surfacePoint);
-            vector rsHat = surfacePoint/rs;
-
-            scalar p = pRef_ - layer*(pRef_ - pStrat_)/nLayers;
-            scalar r = rs - RTbyg_*Foam::log(p/pRef_);
-
-            return r*rsHat;
-        }
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -101,3 +92,4 @@ public:
 #endif
 
 // ************************************************************************* //
+

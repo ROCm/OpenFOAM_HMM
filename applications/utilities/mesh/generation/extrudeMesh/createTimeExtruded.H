@@ -3,6 +3,6 @@
     Time runTimeExtruded
     (
         Time::controlDictName,
-        rootDirTarget,
-        caseDirTarget
+        args.rootPath(),
+        args.caseName()
     );
