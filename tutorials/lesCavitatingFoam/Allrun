@@ -26,7 +26,7 @@ cd throttle
 cd ..
 
 cd throttle3D
-    cp -r 0.orig 0
+    cp -r 0.org 0
 
     runApplication blockMesh
 
@@ -42,3 +42,4 @@ cd throttle3D
     runParallel $application 4 system/machines
     runApplication reconstructPar
 cd ..
+
