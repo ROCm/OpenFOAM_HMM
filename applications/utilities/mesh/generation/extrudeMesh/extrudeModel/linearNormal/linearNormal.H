@@ -23,42 +23,53 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::linearRadialExtruder
+    Foam::extrudeModels::linearNormal
 
 Description
+    Extrudes by transforming points normal to the surface by a given distance
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearRadialExtruder_H
-#define linearRadialExtruder_H
+#ifndef linearNormal_H
+#define linearNormal_H
 
 #include "point.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace extrudeModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class linearRadialExtruder Declaration
+                    Class linearNormal Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearRadialExtruder
+class linearNormal
+:
+    public extrudeModel
 {
     // Private data
 
-        scalar R_;
+        //- layer thickness
+        scalar thickness_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("linearNormal");
+
     // Constructors
 
         //- Construct from components
-        linearRadialExtruder(const scalar R)
-        :
-            R_(R)
-        {}
+        linearNormal(const dictionary& dict);
+
+
+    //- Destructor
+    ~linearNormal();
 
 
     // Member Operators
@@ -67,23 +78,14 @@ public:
         (
             const point& surfacePoint,
             const vector& surfaceNormal,
-            const label nLayers,
             const label layer
-        ) const
-        {
-            // radius of the surface
-            scalar rs = mag(surfacePoint);
-            vector rsHat = surfacePoint/rs;
-
-            scalar delta = (R_ - rs)/nLayers;
-            scalar r = rs + layer*delta;
-            return r*rsHat;
-        }
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,3 +93,4 @@ public:
 #endif
 
 // ************************************************************************* //
+

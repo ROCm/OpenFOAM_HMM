@@ -23,20 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::faceMesh
+    Foam::extrudeModel
 
 Description
-    Storage for surface mesh i.e. points and faces.
+    Top level extrusion model class
 
 SourceFiles
+    extrudeModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceMesh_H
-#define faceMesh_H
+#ifndef extrudeModel_H
+#define extrudeModel_H
 
-#include "PrimitivePatch.H"
-#include "faceList.H"
+#include "dictionary.H"
+#include "point.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,49 +47,81 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class faceMesh Declaration
+                        Class extrudeModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class faceMesh
-:
-    public PrimitivePatch<face, List, pointField>
+class extrudeModel
 {
-    // Private member functions
+protected:
 
-        PrimitivePatch<face, List, pointField> read(Istream& is)
-        {
-            pointField points(is);
-            faceList faces(is);
-            return PrimitivePatch<face, Foam::List, pointField>(faces, points);
-        }
+    // Protected data
+
+        const label nLayers_;
+
+        const dictionary& dict_;
+
+        const dictionary& coeffDict_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        extrudeModel(const extrudeModel&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const extrudeModel&);
 
 
 public:
 
+    //- Runtime type information
+    TypeName("extrudeModel");
+
+    //- Declare runtime constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            extrudeModel,
+            dictionary,
+            (
+                const dictionary& dict
+            ),
+            (dict)
+        );
+
+
     // Constructors
 
-        //- Construct from components
-        faceMesh(const faceList& faces, const pointField& points)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(faces, points)
-        {}
-
-        //- Construct from Istream
-        faceMesh(Istream& is)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(read(is))
-        {}
+        //- Construct from dictionary
+        extrudeModel(const word& modelType, const dictionary&);
 
 
-    // IOstream Operators
+    // Selectors
 
-        friend Ostream& operator<<(Ostream& os, const faceMesh& fm)
-        {
-            return os
-                << fm.points()
-                << token::NL
-                << static_cast<PrimitivePatch<face, Foam::List, pointField> >(fm);
-        }
+        //- Select null constructed
+        static autoPtr<extrudeModel> New(const dictionary&);
+
+
+    //- Destructor
+    virtual ~extrudeModel();
+
+
+    // Member Functions
+
+        // Access
+
+            label nLayers() const;
+
+
+    // Member Operators
+
+        virtual point operator()
+        (
+            const point& surfacePoint,
+            const vector& surfaceNormal,
+            const label layer
+        ) const = 0;
 };
 
 

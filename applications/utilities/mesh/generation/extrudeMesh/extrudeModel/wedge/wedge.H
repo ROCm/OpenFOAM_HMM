@@ -23,29 +23,40 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::wedgeExtruder
+    Foam::extrudeModels::wedge
 
 Description
     Extrudes by rotating a surface around an axis
-
+    - extrusion is opposite the surface/patch normal so inwards the source
+      mesh
+    - axis direction has to be consistent with this.
+    - use -mergeFaces option if doing full 360 and want to merge front and back
+    - note direction of axis. This should be consistent with rotating against
+      the patch normal direction. If you get it wrong you'll see all cells
+      with extreme aspect ratio and internal faces wrong way around in
+      checkMesh
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wedgeExtruder_H
-#define wedgeExtruder_H
+#ifndef wedge_H
+#define wedge_H
 
-#include "point.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace extrudeModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class wedgeExtruder Declaration
+                         Class wedge Declaration
 \*---------------------------------------------------------------------------*/
 
-class wedgeExtruder
+class wedge
+:
+    public extrudeModel
 {
     // Private data
 
@@ -58,22 +69,19 @@ class wedgeExtruder
         //- overall angle (radians)
         const scalar angle_;
 
+
 public:
+
+    //- Runtime type information
+    TypeName("wedge");
 
     // Constructors
 
         //- Construct from components
-        wedgeExtruder
-        (
-            const point& axisPt,
-            const point& axisNormal,
-            const scalar angle
-        )
-        :
-            axisPt_(axisPt),
-            axisNormal_(axisNormal),
-            angle_(angle)
-        {}
+        wedge(const dictionary& dict);
+
+    //- Destrcuctor
+    ~wedge();
 
 
     // Member Operators
@@ -82,60 +90,14 @@ public:
         (
             const point& surfacePoint,
             const vector& surfaceNormal,
-            const label nLayers,
             const label layer
-        ) const
-        {
-            scalar sliceAngle;
-
-            // For the case of a single layer extrusion assume a
-            // symmetric wedge about the reference plane is required
-            if (nLayers == 1)
-            {
-                if (layer == 0)
-                {
-                    sliceAngle = -angle_/2.0;
-                }
-                else
-                {
-                    sliceAngle = angle_/2.0;
-                }
-            }
-            else
-            {
-                sliceAngle = angle_ * (layer+1)/nLayers;
-            }
-
-            // Find projection onto axis (or rather decompose surfacePoint
-            // into vector along edge (proj), vector normal to edge in plane
-            // of surface point and surface normal.
-            point d = surfacePoint - axisPt_;
-
-            d -= (axisNormal_&d)*axisNormal_;
-
-            scalar dMag = mag(d);
-
-            point edgePt = surfacePoint - d;
-
-            // Rotate point around sliceAngle.
-            point rotatedPoint = edgePt;
-
-            if (dMag > VSMALL)
-            {
-                vector n = (d/dMag) ^ axisNormal_;
-
-                rotatedPoint +=
-                  + cos(sliceAngle)*d
-                  - sin(sliceAngle)*mag(d)*n; // Use either n or surfaceNormal
-            }
-
-            return rotatedPoint;
-        }
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

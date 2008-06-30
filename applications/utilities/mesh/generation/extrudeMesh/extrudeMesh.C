@@ -23,39 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Extrude mesh from existing patch or from patch read from file. Merges close
-    points so be careful.
+    Extrude mesh from existing patch or from patch read from file.
+    Note: Merges close points so be careful.
 
-    Can do wedges:
-    - use wedgeExtruder instead of e.g. linearNormalExtruder
-    - extrusion is opposite the surface/patch normal so inwards the source
-      mesh
-    - axis direction has to be consistent with this.
-    - use -mergeFaces option if doing full 360 and want to merge front and back
-
-    E.g. starting from 'movingWall' patch of cavity tutorial:
-    - we want to rotate around the left side of this patch (is at x=0,y=0.1)
-      for a full 360 degrees:
-
-        wedgeExtruder
-        (
-            point(0,0.1,0),     // point on axis
-            vector(0,0,-1),     // (normalized!) direction of axis
-            360.0/180.0*mathematicalConstant::pi // angle
-        )
-
-    - note direction of axis. This should be consistent with rotating against
-      the patch normal direction. If you get it wrong you'll see all cells
-      with extreme aspect ratio and internal faces wrong way around in
-      checkMesh
-
-    - call with e.g. 10 layers. Thickness argument (0.1) is not used! 
-
-        extrudeMesh <root> <case> 10 0.1 \
-            -sourceRoot $FOAM_TUTORIALS/icoFoam \
-            -sourceCase cavity \
-            -sourcePatch movingWall
-            -mergeFaces
+    Type of extrusion prescribed by run-time selectable model.
 
 \*---------------------------------------------------------------------------*/
 
@@ -72,10 +43,7 @@ Description
 #include "perfectInterface.H"
 
 #include "extrudedMesh.H"
-#include "linearNormalExtruder.H"
-#include "linearRadialExtruder.H"
-#include "sigmaRadialExtruder.H"
-#include "wedgeExtruder.H"
+#include "extrudeModel.H"
 
 using namespace Foam;
 
@@ -99,6 +67,23 @@ int main(int argc, char *argv[])
 
     autoPtr<extrudedMesh> meshPtr(NULL);
 
+    autoPtr<extrudeModel> model
+    (
+        extrudeModel::New
+        (
+            IOdictionary
+            (
+                IOobject
+                (
+                    "extrudeProperties",
+                    runTimeExtruded.constant(),
+                    runTimeExtruded,
+                    IOobject::MUST_READ
+                )
+            )
+        )
+    );
+
     if (args.options().found("sourceRoot"))
     {
         fileName rootDirSource(args.options()["sourceRoot"]);
@@ -115,7 +100,6 @@ int main(int argc, char *argv[])
             rootDirSource,
             caseDirSource
         );
-
 #       include "createPolyMesh.H"
 
         label patchID = mesh.boundaryMesh().findPatchID(patchName);
@@ -153,20 +137,7 @@ int main(int argc, char *argv[])
                     runTimeExtruded
                 ),
                 pp,
-                nLayers,                        // number of layers
-                linearNormalExtruder(-thickness) // overall thickness(signed!)
-                //wedgeExtruder
-                //(
-                //    point(0,0.1,0),     // point on axis
-                //    vector(0,0,-1),     // (normalized!) direction of axis
-                //    360.0/180.0*mathematicalConstant::pi // angle
-                //)
-                //wedgeExtruder
-                //(
-                //    point(0,0,0),     // point on axis
-                //    vector(0,1,0),    // (normalized!) direction of axis
-                //    30.0/180.0*mathematicalConstant::pi // angle
-                //)
+                model()
             )
         );
     }
@@ -198,12 +169,10 @@ int main(int argc, char *argv[])
                     runTimeExtruded
                 ),
                 fMesh,
-                nLayers,                         // number of layers
-                linearNormalExtruder(-thickness) // overall thickness (signed!)
+                model()
             )
         );        
     }
-
     extrudedMesh& mesh = meshPtr();
 
 
