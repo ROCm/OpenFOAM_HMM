@@ -210,7 +210,7 @@ const Foam::entry& Foam::dictionary::lookupEntry
         (
             "dictionary::lookupEntry(const word& keyword) const",
             *this
-        )   << " keyword " << keyword << " is undefined in dictionary "
+        )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -268,7 +268,7 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
         (
             "dictionary::subDict(const word& keyword) const",
             *this
-        )   << " keyword " << keyword << " is undefined in dictionary "
+        )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -285,7 +285,7 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
         (
             "dictionary::subDict(const word& keyword)",
             *this
-        )   << " keyword " << keyword << " is undefined in dictionary "
+        )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
             << exit(FatalIOError);
     }
@@ -479,7 +479,7 @@ bool Foam::dictionary::changeKeyword
         }
         else
         {
-            WarningIn("dictionary::changeKeyword(const word& old, const word& new)")
+            WarningIn("dictionary::changeKeyword(const word&, const word&)")
                 << "cannot rename keyword "<< oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
