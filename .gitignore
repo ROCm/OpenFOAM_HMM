@@ -16,6 +16,8 @@
 *.la
 *.so
 *.jar
+
+# ignore derived files
 lex.yy.c
 
 # Corefiles
@@ -32,9 +34,10 @@ linux*Gcc*
 
 # reinstate wmake/rules that look like build folders
 !wmake/rules/linux*
-# but do ignore the derived files in there
-wmake/rules/linux*/dirToString
-wmake/rules/linux*/wmkdep
+
+# but do continue to ignore the derived wmake files
+wmake/rules/*/dirToString
+wmake/rules/*/wmkdep
 
 # doxygen generated documentation
 doc/[Dd]oxygen/html
