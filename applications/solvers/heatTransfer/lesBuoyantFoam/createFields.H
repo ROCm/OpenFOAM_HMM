@@ -37,7 +37,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
 
     Info<< "Creating turbulence model\n" << endl;
@@ -53,7 +53,7 @@
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
 
-    dimensionedScalar pRef("pRef", p.dimensions(), 0.0);
+    dimensionedScalar pRef("pRef", p.dimensions(), thermo->lookup("pRef"));
 
     Info<< "Creating field pd\n" << endl;
     volScalarField pd
@@ -69,7 +69,7 @@
         mesh
     );
 
-    //pd = p - rho*gh - pRef;
     p = pd + rho*gh + pRef;
+    thermo->correct();
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);

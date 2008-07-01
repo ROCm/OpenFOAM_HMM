@@ -17,7 +17,7 @@ FoamFile
 numberOfSubdomains 4;
 
 method          hierarchical;
-method          metis;
+//method          metis;
 //method          parMetis;
 
 simpleCoeffs
@@ -34,15 +34,7 @@ hierarchicalCoeffs
 }
 
 metisCoeffs
-{
-    //processorWeights 
-    //(
-    //    1
-    //    1
-    //    1
-    //    1
-    //);
-}
+{}
 
 manualCoeffs
 {
@@ -51,7 +43,7 @@ manualCoeffs
 
 distributed     no;
 
-roots           
+roots
 (
 );
 

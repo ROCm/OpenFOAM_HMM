@@ -51,12 +51,14 @@ class faceMesh
 :
     public PrimitivePatch<face, List, pointField>
 {
-    PrimitivePatch<face, List, pointField> read(Istream& is)
-    {
-        pointField points(is);
-        faceList faces(is);
-        return PrimitivePatch<face, Foam::List, pointField>(faces, points);
-    }
+    // Private member functions
+
+        PrimitivePatch<face, List, pointField> read(Istream& is)
+        {
+            pointField points(is);
+            faceList faces(is);
+            return PrimitivePatch<face, Foam::List, pointField>(faces, points);
+        }
 
 
 public:

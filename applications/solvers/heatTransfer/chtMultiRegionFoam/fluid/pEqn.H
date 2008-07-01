@@ -1,11 +1,6 @@
 {
     bool closedVolume = false;
 
-    //pdf[i].boundaryField() ==
-    //    thermof[i].p().boundaryField()
-    //  - rhof[i].boundaryField()*ghf[i].boundaryField()
-    //  - pRef.value();
-
     rhof[i] = thermof[i].rho();
 
     volScalarField rUA = 1.0/UEqn().A();
@@ -15,11 +10,11 @@
         fvc::interpolate(rhof[i])
        *(
             (fvc::interpolate(Uf[i]) & fluidRegions[i].Sf())
-//          + fvc::ddtPhiCorr(rUA, rhof[i], Uf[i], phif[i])
+          + fvc::ddtPhiCorr(rUA, rhof[i], Uf[i], phif[i])
         )
       - fvc::interpolate(rhof[i]*rUA*ghf[i])
-            *fvc::snGrad(rhof[i])
-            *fluidRegions[i].magSf();
+       *fvc::snGrad(rhof[i])
+       *fluidRegions[i].magSf();
 
     // Solve pressure difference
 #   include "pdEqn.H"
@@ -55,8 +50,7 @@
                     initialMassf[i]
                 )
               - fvc::domainIntegrate(thermof[i].psi()*thermof[i].p())
-            )
-            /fvc::domainIntegrate(thermof[i].psi());
+            )/fvc::domainIntegrate(thermof[i].psi());
 
         rhof[i] = thermof[i].rho();
     }

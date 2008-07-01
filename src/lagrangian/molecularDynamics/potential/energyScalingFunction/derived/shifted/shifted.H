@@ -57,7 +57,6 @@ class shifted
 
         scalar e_at_rCut_;
 
-
 public:
 
     //- Runtime type information

@@ -46,18 +46,18 @@ template
 <
     class Face,
     template<class> class FaceList,
-    class PointField,
-    class PointExtruder
+    class PointField
 >
 Foam::pointField Foam::extrudedMesh::extrudedPoints
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-    const label nLayers,
-    const PointExtruder& extruder
+    const extrudeModel& model
 )
 {
     const pointField& surfacePoints = extrudePatch.localPoints();
     const vectorField& surfaceNormals = extrudePatch.pointNormals();
+
+    const label nLayers = model.nLayers();
 
     pointField ePoints((nLayers + 1)*surfacePoints.size());
 
@@ -67,11 +67,10 @@ Foam::pointField Foam::extrudedMesh::extrudedPoints
 
         forAll(surfacePoints, i)
         {
-            ePoints[offset + i] = extruder
+            ePoints[offset + i] = model
             (
                 surfacePoints[i],
                 surfaceNormals[i],
-                nLayers,
                 layer
             );
         }
@@ -85,13 +84,15 @@ template<class Face, template<class> class FaceList, class PointField>
 Foam::faceList Foam::extrudedMesh::extrudedFaces
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-    const label nLayers
+    const extrudeModel& model
 )
 {
     const pointField& surfacePoints = extrudePatch.localPoints();
     const List<face>& surfaceFaces = extrudePatch.localFaces();
     const edgeList& surfaceEdges = extrudePatch.edges();
     const label nInternalEdges = extrudePatch.nInternalEdges();
+
+    const label nLayers = model.nLayers();
 
     label nFaces = 
         (nLayers + 1)*surfaceFaces.size() + nLayers*surfaceEdges.size();
@@ -108,7 +109,7 @@ Foam::faceList Foam::extrudedMesh::extrudedFaces
         label nextLayerOffset = currentLayerOffset + surfacePoints.size();
 
         // Side faces from layer to layer+1
-        for (label i = 0; i < nInternalEdges; i++)
+        for (label i=0; i<nInternalEdges; i++)
         {
             quad[0] = surfaceEdges[i][1] + currentLayerOffset;
             quad[1] = surfaceEdges[i][0] + currentLayerOffset;
@@ -140,7 +141,7 @@ Foam::faceList Foam::extrudedMesh::extrudedFaces
         label nextLayerOffset = currentLayerOffset + surfacePoints.size();
 
         // Side faces across layer
-        for (label i = nInternalEdges; i < surfaceEdges.size(); i++)
+        for (label i=nInternalEdges; i<surfaceEdges.size(); i++)
         {
             const edge& e = surfaceEdges[i];
             quad[0] = e[1] + currentLayerOffset;
@@ -162,7 +163,7 @@ Foam::faceList Foam::extrudedMesh::extrudedFaces
     // Top faces
     forAll(surfaceFaces, i)
     {
-        eFaces[facei++] =  face(surfaceFaces[i]);
+        eFaces[facei++] = face(surfaceFaces[i]);
     }
 
     // Bottom faces
@@ -172,7 +173,7 @@ Foam::faceList Foam::extrudedMesh::extrudedFaces
             face
             (
                 surfaceFaces[i].reverseFace()
-             +  nLayers*surfacePoints.size()
+              + nLayers*surfacePoints.size()
             );
     }
 
@@ -184,12 +185,14 @@ template<class Face, template<class> class FaceList, class PointField>
 Foam::cellList Foam::extrudedMesh::extrudedCells
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-    const label nLayers
+    const extrudeModel& model
 )
 {
     const List<face>& surfaceFaces = extrudePatch.localFaces();
     const edgeList& surfaceEdges = extrudePatch.edges();
     const label nInternalEdges = extrudePatch.nInternalEdges();
+
+    const label nLayers = model.nLayers();
 
     cellList eCells(nLayers*surfaceFaces.size());
 
@@ -200,7 +203,7 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
 
         for (label layer=0; layer<nLayers; layer++)
         {
-            eCells[i+layer*surfaceFaces.size()].setSize(f.size() + 2);
+            eCells[i + layer*surfaceFaces.size()].setSize(f.size() + 2);
         }
     }
 
@@ -213,7 +216,7 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
     for (label layer=0; layer<nLayers; layer++)
     {
         // Side faces from layer to layer+1
-        for (label i = 0; i < nInternalEdges; i++)
+        for (label i=0; i<nInternalEdges; i++)
         {
             // Get patch faces using edge
             const labelList& edgeFaces = extrudePatch.edgeFaces()[i];
@@ -248,7 +251,7 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
     for (label layer=0; layer<nLayers; layer++)
     {
         // Side faces across layer
-        for (label i = nInternalEdges; i < surfaceEdges.size(); i++)
+        for (label i=nInternalEdges; i<surfaceEdges.size(); i++)
         {
             // Get patch faces using edge
             const labelList& edgeFaces = extrudePatch.edgeFaces()[i];
@@ -290,30 +293,31 @@ template
 <
     class Face,
     template<class> class FaceList,
-    class PointField,
-    class PointExtruder
+    class PointField
 >
 Foam::extrudedMesh::extrudedMesh
 (
     const IOobject& io,
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
-    const label nLayers,
-    const PointExtruder& extruder
+    const extrudeModel& model
 )
 :
     polyMesh
     (
         io,
-        extrudedPoints(extrudePatch, nLayers, extruder),
-        extrudedFaces(extrudePatch, nLayers),
-        extrudedCells(extrudePatch, nLayers)
-    )
+        extrudedPoints(extrudePatch, model),
+        extrudedFaces(extrudePatch, model),
+        extrudedCells(extrudePatch, model)
+    ),
+    model_(model)
 {
     List<polyPatch*> patches(3);
 
     label facei = nInternalFaces();
 
-    label sz = nLayers*(extrudePatch.nEdges() - extrudePatch.nInternalEdges());
+    label sz =
+        model_.nLayers()
+       *(extrudePatch.nEdges() - extrudePatch.nInternalEdges());
 
     patches[0] = new wallPolyPatch
     (
@@ -351,3 +355,4 @@ Foam::extrudedMesh::extrudedMesh
 
 
 // ************************************************************************* //
+

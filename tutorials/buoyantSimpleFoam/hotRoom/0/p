@@ -16,25 +16,25 @@ FoamFile
 
 dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 100000;
+internalField   uniform 0;
 
 boundaryField
 {
-    floor           
+    floor
     {
-        type            fixedFluxBuoyantPressure;
+        type            calculated;
         value           uniform 100000;
     }
 
-    ceiling         
+    ceiling
     {
-        type            fixedFluxBuoyantPressure;
+        type            calculated;
         value           uniform 100000;
     }
 
-    fixedWalls      
+    fixedWalls
     {
-        type            fixedFluxBuoyantPressure;
+        type            calculated;
         value           uniform 100000;
     }
 }

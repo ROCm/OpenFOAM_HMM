@@ -1,6 +1,3 @@
-pd.boundaryField() ==
-    p.boundaryField() - rho.boundaryField()*gh.boundaryField() - pRef.value();
-
 volScalarField rUA = 1.0/UEqn().A();
 U = rUA*UEqn().H();
 UEqn.clear();

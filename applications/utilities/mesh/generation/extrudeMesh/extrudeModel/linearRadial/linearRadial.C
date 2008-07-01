@@ -22,69 +22,61 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::linearNormalExtruder
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearNormalExtruder_H
-#define linearNormalExtruder_H
-
-#include "point.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "linearRadial.H"
+#include "addToRunTimeSelectionTable.H"
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class linearNormalExtruder Declaration
-\*---------------------------------------------------------------------------*/
-
-class linearNormalExtruder
+namespace extrudeModels
 {
-    // Private data
 
-        //- layer thickness
-        scalar thickness_;
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+defineTypeNameAndDebug(linearRadial, 0);
 
-public:
-
-    // Constructors
-
-        //- Construct from components
-        linearNormalExtruder(const scalar thickness)
-        :
-            thickness_(thickness)
-        {}
+addToRunTimeSelectionTable(extrudeModel, linearRadial, dictionary);
 
 
-    // Member Operators
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-        point operator()
-        (
-            const point& surfacePoint,
-            const vector& surfaceNormal,
-            const label nLayers,
-            const label layer
-        ) const
-        {
-            scalar d = thickness_*layer/nLayers;
+linearRadial::linearRadial(const dictionary& dict)
+:
+    extrudeModel(typeName, dict),
+    R_(readScalar(coeffDict_.lookup("R")))
+{}
 
-            return surfacePoint + d*surfaceNormal;
-        }
-};
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+linearRadial::~linearRadial()
+{}
+
+
+// * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
+
+point linearRadial::operator()
+(
+    const point& surfacePoint,
+    const vector& surfaceNormal,
+    const label layer
+) const
+{
+    // radius of the surface
+    scalar rs = mag(surfacePoint);
+    vector rsHat = surfacePoint/rs;
+
+    scalar delta = (R_ - rs)/nLayers_;
+    scalar r = rs + layer*delta;
+    return r*rsHat;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
 // ************************************************************************* //
+

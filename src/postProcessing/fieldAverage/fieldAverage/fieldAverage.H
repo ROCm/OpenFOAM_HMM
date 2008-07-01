@@ -161,22 +161,21 @@ protected:
             //  valid, and populate field lists
             void initialise();
 
-            //- Add mean average fields to PtrLists
+            //- Add mean average field to PtrList
             template<class Type>
-            void addMeanFields
+            void addMeanField
             (
-                const label fieldi,
+                const label,
                 PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-                    fieldList
             );
 
-            //- Add prime-squared average fields to PtrLists
+            //- Add prime-squared average field to PtrList
             template<class Type1, class Type2>
-            void addPrime2MeanFields
+            void addPrime2MeanField
             (
-                const label fieldi,
+                const label,
+                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
                 PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-                    fieldList
             );
 
 
@@ -190,23 +189,22 @@ protected:
             void calculateMeanFields
             (
                 PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-                    fieldList
             );
 
             //- Add mean-squared field value to prime-squared mean field
             template<class Type1, class Type2>
             void addMeanSqrToPrime2Mean
             (
+                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
                 PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-                    fieldList
             );
 
             //- Calculate prime-squared average fields
             template<class Type1, class Type2>
             void calculatePrime2MeanFields
             (
+                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
                 PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-                    fieldList
             );
 
 

@@ -1,8 +1,5 @@
 bool closedVolume = pd.needReference();
 
-//pd.boundaryField() ==
-//    p.boundaryField() - rho.boundaryField()*gh.boundaryField() - pRef.value();
-
 rho = thermo->rho();
 
 volScalarField rUA = 1.0/UEqn.A();

@@ -27,8 +27,6 @@ License
 #include "treeBoundBox.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::treeBoundBox Foam::treeBoundBox::greatBox
@@ -49,6 +47,7 @@ const Foam::label facesArray[6][4] =
     {4, 5, 7, 6}  // front
 };
 //! @endcond
+
 
 const Foam::faceList Foam::treeBoundBox::faces
 (
@@ -74,10 +73,32 @@ const Foam::label edgesArray[12][2] =
 };
 //! @endcond
 
+
 const Foam::edgeList Foam::treeBoundBox::edges
 (
     initListList<edge, label, 12, 2>(edgesArray)
 );
+
+
+const Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::faceNormals
+(
+    calcFaceNormals()
+);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::calcFaceNormals()
+{
+    FixedList<vector, 6> normals;
+    normals[LEFT]   = vector(-1,  0,  0);
+    normals[RIGHT]  = vector( 1,  0,  0);
+    normals[BOTTOM] = vector( 0, -1,  0);
+    normals[TOP]    = vector( 0,  1,  0);
+    normals[BACK]   = vector( 0,  0, -1);
+    normals[FRONT]  = vector( 0,  0,  1);
+    return normals;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

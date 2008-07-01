@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -9,31 +9,45 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volSymmTensorField;
-    object      R;
+    class       dictionary;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+application lesInterFoam;
 
-internalField   uniform (0 0 0 0 0 0);
+startFrom       latestTime;
 
-boundaryField
-{
-    floor           
-    {
-        type            zeroGradient;
-    }
+startTime       0;
 
-    ceiling         
-    {
-        type            zeroGradient;
-    }
+stopAt          endTime;
 
-    fixedWalls      
-    {
-        type            zeroGradient;
-    }
-}
+endTime         0.5;
+
+deltaT          1e-04;
+
+writeControl    adjustableRunTime;
+
+writeInterval   5e-03;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression compressed;
+
+timeFormat      general;
+
+timePrecision   10;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           0.25;
+
+maxDeltaT       1;
 
 // ************************************************************************* //
