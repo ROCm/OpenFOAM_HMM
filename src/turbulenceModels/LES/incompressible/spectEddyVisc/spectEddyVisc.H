@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LES::spectEddyVisc
+    Foam::incompressible::LESModels::spectEddyVisc
 
 Description
     The Isochoric spectral Eddy Viscosity Model for incompressible flows.

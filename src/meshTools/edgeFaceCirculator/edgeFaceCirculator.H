@@ -26,15 +26,15 @@ Class
     Foam::edgeFaceCirculator
 
 Description
-    Walks from starting face around edge. Implicit
-    description of edge:
+    Walks from starting face around edge.
+
+    Implicit description of edge:
     - face
     - index in face. edge is always between f[index] and f[index+1]
     - direction (cell to walk into)
 
-    Use as:
-
-        1) in-place:
+    -# Use in-place: \n
+        @code
             edgeFaceCirculator circ(..);
             // Optionally rotate to beginning: circ.setCanonical();
 
@@ -45,9 +45,10 @@ Description
                 ++circ;
             }
             while (circ != circ.end());
+        @endcode
 
-        2) like STL iterator:
-
+    -# Use like STL iterator: \n
+        @code
             edgeFaceCirculator circ(..);
             for
             (
@@ -58,6 +59,7 @@ Description
             {
                 Info<< "face:" << iter.face() << endl;
             }
+        @endcode
 
 
 SourceFiles

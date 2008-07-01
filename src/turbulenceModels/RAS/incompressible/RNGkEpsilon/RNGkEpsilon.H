@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RAS::RNGkEpsilon
+    Foam::incompressible::RASModels::RNGkEpsilon
 
 Description
     Renormalisation group k-epsilon turbulence model for incompressible flows.

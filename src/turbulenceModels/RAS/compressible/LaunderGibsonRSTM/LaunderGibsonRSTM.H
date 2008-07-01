@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RAS::LaunderGibsonRSTM
+    Foam::compressible::RASModels::LaunderGibsonRSTM
 
 Description
     Launder-Gibson Reynolds stress turbulence model for compressible flows.
