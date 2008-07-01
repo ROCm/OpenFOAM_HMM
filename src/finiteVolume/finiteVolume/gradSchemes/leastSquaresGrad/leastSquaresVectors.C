@@ -134,7 +134,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const unallocLabelList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd = 
+        vectorField pd =
             mesh.Sf().boundaryField()[patchi]
            /(
                mesh.magSf().boundaryField()[patchi]
@@ -198,7 +198,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const unallocLabelList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd = 
+        vectorField pd =
             mesh.Sf().boundaryField()[patchi]
            /(
                mesh.magSf().boundaryField()[patchi]
@@ -239,6 +239,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
     // For 3D meshes check the determinant of the dd tensor and switch to
     // Gauss if it is less than 3
+    /* Currently the det(dd[celli]) criterion is incorrect: dd is weighted by Sf
     if (mesh.nGeometricD() == 3)
     {
         label nBadCells = 0;
@@ -279,7 +280,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
                         if (mesh.boundary()[patchi].size())
                         {
-                            label patchFacei = 
+                            label patchFacei =
                                 facei - mesh.boundaryMesh()[patchi].start();
 
                             if (mesh.boundary()[patchi].coupled())
@@ -294,14 +295,14 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
                                     0.2
                                 );
 
-                                lsP.boundaryField()[patchi][patchFacei] = 
+                                lsP.boundaryField()[patchi][patchFacei] =
                                     (1 - wf)
                                    *Sf.boundaryField()[patchi][patchFacei]
                                    /V[celli];
                             }
                             else
                             {
-                                lsP.boundaryField()[patchi][patchFacei] = 
+                                lsP.boundaryField()[patchi][patchFacei] =
                                     Sf.boundaryField()[patchi][patchFacei]
                                    /V[celli];
                             }
@@ -318,7 +319,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
                 << endl;
         }
     }
-
+    */
 
     if (debug)
     {
