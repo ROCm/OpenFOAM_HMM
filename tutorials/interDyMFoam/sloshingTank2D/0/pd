@@ -32,10 +32,6 @@ boundaryField
     {
         type            zeroGradient;
     }
-    pipe
-    {
-        type            zeroGradient;
-    }
 }
 
 // ************************************************************************* //
