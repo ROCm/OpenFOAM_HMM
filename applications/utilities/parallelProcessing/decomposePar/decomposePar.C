@@ -48,7 +48,15 @@ Usage
 
     @param -force \n
     Remove any existing @a processor subdirectories before decomposing the
-    geometry.
+    geometry. Has precedence over the @a -lazy option.
+
+    @param -lazy \n
+    Only decompose the geometry if the number of domains has changed
+    from a previous decomposition.  Any existing @a processor subdirectories
+    are removed as necessary. This option can be used to avoid redundant
+    geometry decomposition (eg, in scripts), but should be used with caution
+    when the underlying (serial) geometry or the decomposition method etc
+    have been changed between decompositions.
 
 \*---------------------------------------------------------------------------*/
 
@@ -80,6 +88,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("fields", "");
     argList::validOptions.insert("filterPatches", "");
     argList::validOptions.insert("force", "");
+    argList::validOptions.insert("lazy", "");
 
 #   include "setRootCase.H"
 
@@ -88,6 +97,7 @@ int main(int argc, char *argv[])
     bool decomposeFieldsOnly(args.options().found("fields"));
     bool filterPatches(args.options().found("filterPatches"));
     bool forceOverwrite(args.options().found("force"));
+    bool lazyDecomposition(args.options().found("lazy"));
 
 #   include "createTime.H"
 
@@ -115,6 +125,8 @@ int main(int argc, char *argv[])
     {
         if (nProcs)
         {
+            bool hasProcDirs = true;
+
             if (forceOverwrite)
             {
                 Info<< "Removing " << nProcs
@@ -130,13 +142,47 @@ int main(int argc, char *argv[])
 
                     rmDir(procDir);
                 }
+
+                hasProcDirs = false;
             }
-            else
+            else if (lazyDecomposition)
+            {
+                // lazy decomposition
+                IOdictionary decompDict
+                (
+                    IOobject
+                    (
+                        "decomposeParDict",
+                        runTime.time().system(),
+                        runTime,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    )
+                );
+
+                label nDomains
+                (
+                    readInt(decompDict.lookup("numberOfSubdomains"))
+                );
+
+                // avoid repeated decomposition
+                if (nDomains == nProcs)
+                {
+                    decomposeFieldsOnly = true;
+                    hasProcDirs = false;
+
+                    Info<< "Using existing processor directories" << nl;
+                }
+            }
+
+            if (hasProcDirs)
             {
                 FatalErrorIn(args.executable())
-                    << "Case is already decomposed, "
-                        "use the -force option or manually remove" << nl
-                    << "processor directories before decomposing. e.g.," << nl
+                    << "Case is already decomposed with " << nProcs
+                    << " domains, use the -force option or manually" << nl
+                    << "remove processor directories before decomposing. e.g.,"
+                    << nl
                     << "    rm -rf " << runTime.path().c_str() << "/processor*"
                     << nl
                     << exit(FatalError);
