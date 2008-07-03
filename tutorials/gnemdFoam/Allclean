@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Source tutorial clean functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd constrictedChannel
+    rm -rf 0 > /dev/null 2>&1
+    rm Ar-Ar Ar-Ne Ne-Ne > /dev/null 2>&1
+    rm constant/idList
+
+    cleanCase
+cd ..
+
+cd nanoNozzle
+    rm -rf processor[0-9] > /dev/null 2>&1
+
+    cleanCase
+cd ..
+
