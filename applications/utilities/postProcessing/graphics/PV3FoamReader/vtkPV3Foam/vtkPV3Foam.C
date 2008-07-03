@@ -770,7 +770,10 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         true
     );
 
-    Info<<"patches: " << selectedPatches <<endl;
+    if (debug)
+    {
+        Info<<"patches: " << selectedPatches <<endl;
+    }
 
     // Find the total number of zones
     // Each zone will take the patch name

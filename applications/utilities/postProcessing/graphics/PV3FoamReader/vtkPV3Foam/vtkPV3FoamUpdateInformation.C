@@ -142,8 +142,11 @@ void Foam::vtkPV3Foam::updateInformationLagrangian()
     }
     else
     {
-        Info<<"no clouds identified in "
-            << dbPtr_->timePath()/"lagrangian" << endl;
+        if (debug)
+        {
+            Info<<"no clouds identified in "
+                << dbPtr_->timePath()/"lagrangian" << endl;
+        }
     }
 
 }
