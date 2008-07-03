@@ -48,6 +48,8 @@ void Foam::vtkPV3Foam::convertPatchFaceField
     const label datasetNo
 )
 {
+    const label nComp = pTraits<Type>::nComponents;
+
     vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
@@ -55,61 +57,24 @@ void Foam::vtkPV3Foam::convertPatchFaceField
 
     vtkFloatArray *cellData = vtkFloatArray::New();
     cellData->SetNumberOfTuples(ptf.size());
-    cellData->SetNumberOfComponents(Type::nComponents);
-    cellData->Allocate(Type::nComponents*ptf.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*ptf.size());
     cellData->SetName(name.c_str());
 
-    float vec[Type::nComponents];
+    float vec[nComp];
 
     forAll(ptf, i)
     {
         const Type& t = ptf[i];
-        for (direction d=0; d<Type::nComponents; d++)
+        for (direction d=0; d<nComp; d++)
         {
-            vec[d] = t[d];
+            vec[d] = component(t, d);
         }
 
         cellData->InsertTuple(i, vec);
     }
 
     vtkmesh->GetCellData()->AddArray(cellData);
-    cellData->Delete();
-}
-
-
-template<>
-void Foam::vtkPV3Foam::convertPatchFaceField
-(
-    const word& name,
-    const Field<scalar>& psf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo
-)
-{
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(psf.size());
-    cellData->SetNumberOfComponents(1);
-    cellData->Allocate(psf.size());
-    cellData->SetName(name.c_str());
-
-    forAll(psf, i)
-    {
-        cellData->InsertComponent(i, 0, psf[i]);
-    }
-
-    vtkmesh->GetCellData()->AddArray(cellData);
-
-    if (!vtkmesh->GetCellData()->GetScalars())
-    {
-        vtkmesh->GetCellData()->SetScalars(cellData);
-    }
-
     cellData->Delete();
 }
 

@@ -108,15 +108,13 @@ void Foam::vtkPV3Foam::updateInformationLagrangian()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationLagrangian at timePath "
-            << dbPtr_->timePath()/"lagrangian" << endl;
+        Info<< "entered Foam::vtkPV3Foam::updateInformationLagrangian "
+            << "at timePath " << dbPtr_->timePath()/"lagrangian" << endl;
     }
 
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
 
     // Search for list of lagrangian objects for this time
-    // IOobjectList lagrangianObjects(dbPtr(), dbPtr_().timeName(), "lagrangian");
-
     fileNameList cloudDirs
     (
         readDir(dbPtr_->timePath()/"lagrangian", fileName::DIRECTORY)
@@ -144,7 +142,8 @@ void Foam::vtkPV3Foam::updateInformationLagrangian()
     }
     else
     {
-        Info<<"no cloudDirs @ " << dbPtr_->timePath()/"lagrangian" << endl;
+        Info<<"no clouds identified in "
+            << dbPtr_->timePath()/"lagrangian" << endl;
     }
 
 }
@@ -159,7 +158,7 @@ void Foam::vtkPV3Foam::updateInformationPatches()
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
 
-    //- Read patches
+    // Read patches
     polyBoundaryMeshEntries patchEntries
     (
         IOobject
@@ -182,7 +181,7 @@ void Foam::vtkPV3Foam::updateInformationPatches()
     {
         label nFaces(readLabel(patchEntries[entryI].dict().lookup("nFaces")));
 
-        //- Valid patch if nFace > 0
+        // Valid patch if nFace > 0
         if (nFaces)
         {
             // Add patch to GUI region list
@@ -208,7 +207,7 @@ void Foam::vtkPV3Foam::updateInformationZones()
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
 
-    //- Read cell zone information
+    // Read cell zone information
     {
         zonesEntries zones
         (
@@ -240,7 +239,7 @@ void Foam::vtkPV3Foam::updateInformationZones()
         superCellZonesCells_.setSize(selectInfoCellZones_.size());
     }
 
-    //- Read face zone information
+    // Read face zone information
     {
         zonesEntries zones
         (
@@ -270,7 +269,7 @@ void Foam::vtkPV3Foam::updateInformationZones()
         }
     }
 
-    //- Read point zone information
+    // Read point zone information
     {
         zonesEntries zones
         (
@@ -373,6 +372,11 @@ void Foam::vtkPV3Foam::updateInformationLagrangianFields()
         "lagrangian"/cloudName_
     );
 
+    addFields<IOField<label> >
+    (
+        arraySelection,
+        objects
+    );
     addFields<IOField<scalar> >
     (
         arraySelection,
