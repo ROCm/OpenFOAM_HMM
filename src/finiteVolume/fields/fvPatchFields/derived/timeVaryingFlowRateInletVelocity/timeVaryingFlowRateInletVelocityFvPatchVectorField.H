@@ -36,7 +36,7 @@ Description
         flowRate        0.2;         // Volumetric/mass flow rate [m3/s or kg/s]
         value           uniform (0 0 0);  // placeholder
         fileName        "time-series";
-        timeBounding    repeat;           // (error|warn|clamp|repeat)
+        boundAction     repeat;           // (error|warn|clamp|repeat)
     }
     @endverbatim
 

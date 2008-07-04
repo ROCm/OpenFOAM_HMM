@@ -33,8 +33,8 @@ Description
     inlet
     {
         type            timeVaryingUniformFixedValue;
-        timeDataFile   "time-series";
-        timeBounding    clamp;           // (error|warn|clamp|repeat)
+        fileName        "time-series";
+        boundAction      clamp;           // (error|warn|clamp|repeat)
     }
     @endverbatim
 
