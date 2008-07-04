@@ -50,7 +50,7 @@ Usage
     Remove any existing @a processor subdirectories before decomposing the
     geometry.
 
-    @param -lazy \n
+    @param -ifRequired \n
     Only decompose the geometry if the number of domains has changed from a
     previous decomposition. No @a processor subdirectories will be removed
     unless the @a -force option is also specified. This option can be used
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("fields", "");
     argList::validOptions.insert("filterPatches", "");
     argList::validOptions.insert("force", "");
-    argList::validOptions.insert("lazy", "");
+    argList::validOptions.insert("ifRequired", "");
 
 #   include "setRootCase.H"
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     bool decomposeFieldsOnly(args.options().found("fields"));
     bool filterPatches(args.options().found("filterPatches"));
     bool forceOverwrite(args.options().found("force"));
-    bool lazyDecomposition(args.options().found("lazy"));
+    bool ifRequiredDecomposition(args.options().found("ifRequired"));
 
 #   include "createTime.H"
 
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     {
         bool procDirsProblem = true;
 
-        if (lazyDecomposition && nProcs == nDomains)
+        if (ifRequiredDecomposition && nProcs == nDomains)
         {
             // we can reuse the decomposition
             decomposeFieldsOnly = true;
