@@ -55,6 +55,13 @@ void Foam::vtkPV3Foam::updateInformationFields
     // Populate the GUI volume/point field arrays
 
     //- Add volume fields to GUI
+/*
+    addFields<GeometricField<label, patchType, meshType> >
+    (
+        arraySelection,
+        objects
+    );
+*/
     addFields<GeometricField<scalar, patchType, meshType> >
     (
         arraySelection,

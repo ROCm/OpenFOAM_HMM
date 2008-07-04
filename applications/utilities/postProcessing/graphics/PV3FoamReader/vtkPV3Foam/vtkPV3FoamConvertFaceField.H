@@ -48,6 +48,8 @@ void Foam::vtkPV3Foam::convertFaceField
     const labelList& faceLabels
 )
 {
+    const label nComp = pTraits<Type>::nComponents;
+
     vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
@@ -59,33 +61,30 @@ void Foam::vtkPV3Foam::convertFaceField
 
     vtkFloatArray *cellData = vtkFloatArray::New();
     cellData->SetNumberOfTuples(faceLabels.size());
-    cellData->SetNumberOfComponents(Type::nComponents);
-    cellData->Allocate(Type::nComponents*faceLabels.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*faceLabels.size());
     cellData->SetName(tf.name().c_str());
 
-    float vec[Type::nComponents];
+    float vec[nComp];
 
     forAll(faceLabels, faceI)
     {
         const label faceNo = faceLabels[faceI];
         if (faceNo < nInternalFaces)
         {
-            Type t = 0.5 *
-            (
-                tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]
-            );
+            Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<Type::nComponents; d++)
+            for (direction d=0; d<nComp; d++)
             {
-                vec[d] = t[d];
+                vec[d] = component(t, d);
             }
         }
         else
         {
             const Type& t = tf[faceOwner[faceNo]];
-            for (direction d=0; d<Type::nComponents; d++)
+            for (direction d=0; d<nComp; d++)
             {
-                vec[d] = t[d];
+                vec[d] = component(t, d);
             }
         }
 
@@ -108,6 +107,8 @@ void Foam::vtkPV3Foam::convertFaceField
     const faceSet& fSet
 )
 {
+    const label nComp = pTraits<Type>::nComponents;
+
     vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
@@ -119,11 +120,11 @@ void Foam::vtkPV3Foam::convertFaceField
 
     vtkFloatArray *cellData = vtkFloatArray::New();
     cellData->SetNumberOfTuples(fSet.size());
-    cellData->SetNumberOfComponents(Type::nComponents);
-    cellData->Allocate(Type::nComponents*fSet.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*fSet.size());
     cellData->SetName(tf.name().c_str());
 
-    float vec[Type::nComponents];
+    float vec[nComp];
 
     label faceI = 0;
     forAllConstIter(faceSet, fSet, iter)
@@ -132,22 +133,19 @@ void Foam::vtkPV3Foam::convertFaceField
 
         if (faceNo < nInternalFaces)
         {
-            Type t = 0.5 *
-            (
-                tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]
-            );
+            Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<Type::nComponents; d++)
+            for (direction d=0; d<nComp; d++)
             {
-                vec[d] = t[d];
+                vec[d] = component(t, d);
             }
         }
         else
         {
             const Type& t = tf[faceOwner[faceNo]];
-            for (direction d=0; d<Type::nComponents; d++)
+            for (direction d=0; d<nComp; d++)
             {
-                vec[d] = t[d];
+                vec[d] = component(t, d);
             }
         }
 
@@ -156,125 +154,6 @@ void Foam::vtkPV3Foam::convertFaceField
     }
 
     vtkmesh->GetCellData()->AddArray(cellData);
-    cellData->Delete();
-}
-
-
-template<>
-void Foam::vtkPV3Foam::convertFaceField
-(
-    const GeometricField<scalar, fvPatchField, volMesh>& tf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo,
-    const fvMesh& mesh,
-    const labelList& faceLabels
-)
-{
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
-    const label nInternalFaces = mesh.nInternalFaces();
-    const labelList& faceOwner = mesh.faceOwner();
-    const labelList& faceNeigh = mesh.faceNeighbour();
-
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(faceLabels.size());
-    cellData->SetNumberOfComponents(1);
-    cellData->Allocate(faceLabels.size());
-    cellData->SetName(tf.name().c_str());
-
-    forAll(faceLabels, faceI)
-    {
-        const label faceNo = faceLabels[faceI];
-        if (faceNo < nInternalFaces)
-        {
-            cellData->InsertComponent
-            (
-                faceI,
-                0,
-                0.5 * (tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]])
-            );
-        }
-        else
-        {
-            cellData->InsertComponent
-            (
-                faceI, 0, tf[faceOwner[faceNo]]
-            );
-        }
-
-    }
-
-    vtkmesh->GetCellData()->AddArray(cellData);
-
-    if (!vtkmesh->GetCellData()->GetScalars())
-    {
-        vtkmesh->GetCellData()->SetScalars(cellData);
-    }
-
-    cellData->Delete();
-}
-
-
-template<>
-void Foam::vtkPV3Foam::convertFaceField
-(
-    const GeometricField<scalar, fvPatchField, volMesh>& tf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo,
-    const fvMesh& mesh,
-    const faceSet& fSet
-)
-{
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
-    const label nInternalFaces = mesh.nInternalFaces();
-    const labelList& faceOwner = mesh.faceOwner();
-    const labelList& faceNeigh = mesh.faceNeighbour();
-
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(fSet.size());
-    cellData->SetNumberOfComponents(1);
-    cellData->Allocate(fSet.size());
-    cellData->SetName(tf.name().c_str());
-
-    label faceI = 0;
-    forAllConstIter(faceSet, fSet, iter)
-    {
-        const label faceNo = iter.key();
-        if (faceNo < nInternalFaces)
-        {
-            cellData->InsertComponent
-            (
-                faceI,
-                0,
-                0.5 * (tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]])
-            );
-        }
-        else
-        {
-            cellData->InsertComponent
-            (
-                faceI, 0, tf[faceOwner[faceNo]]
-            );
-        }
-        ++faceI;
-    }
-
-    vtkmesh->GetCellData()->AddArray(cellData);
-
-    if (!vtkmesh->GetCellData()->GetScalars())
-    {
-        vtkmesh->GetCellData()->SetScalars(cellData);
-    }
-
     cellData->Delete();
 }
 

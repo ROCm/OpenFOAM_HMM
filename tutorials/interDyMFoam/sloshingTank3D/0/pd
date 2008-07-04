@@ -10,29 +10,17 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      gamma.0;
+    object      pd;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    front
-    {
-        type            empty;
-    }
-    back
-    {
-        type            empty;
-    }
     walls
-    {
-        type            zeroGradient;
-    }
-    pipe
     {
         type            zeroGradient;
     }

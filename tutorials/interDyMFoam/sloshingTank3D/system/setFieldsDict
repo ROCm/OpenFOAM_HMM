@@ -9,33 +9,27 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      pd;
+    class       dictionary;
+    object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+defaultFieldValues
+(
+    volScalarFieldValue gamma 0
+);
 
-internalField   uniform 0;
+regions
+(
+    boxToCell
+    {
+        box (-100 -100 -100) (100 100 0);
 
-boundaryField
-{
-    front
-    {
-        type            empty;
+        fieldValues
+        (
+            volScalarFieldValue gamma 1
+        );
     }
-    back
-    {
-        type            empty;
-    }
-    walls
-    {
-        type            zeroGradient;
-    }
-    pipe
-    {
-        type            zeroGradient;
-    }
-}
+);
 
 // ************************************************************************* //
