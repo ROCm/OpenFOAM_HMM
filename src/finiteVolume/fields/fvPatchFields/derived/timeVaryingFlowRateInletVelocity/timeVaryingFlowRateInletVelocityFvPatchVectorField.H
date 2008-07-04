@@ -23,100 +23,96 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::massFlowRateInletVelocityFvPatchVectorField
+    Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField
 
 Description
-    Describes an massflow normal vector boundary condition by its magnitude
-    as an integral over its area.
-    The current density is used to correct the velocity.
+    A time-varying form of a flow normal vector boundary condition.
 
     Example of the boundary condition specification:
     @verbatim
     inlet
     {
-        type            massFlowRateInletVelocity;
-        massFlowRate    0.2;             // Mass flow rate [kg/s]
-        value           uniform (0 0 0); // placeholder
+        type            timeVaryingFlowRateInletVelocity;
+        flowRate        0.2;         // Volumetric/mass flow rate [m3/s or kg/s]
+        value           uniform (0 0 0);  // placeholder
+        fileName        "time-series";
+        timeBounding    repeat;           // (error|warn|clamp|repeat)
     }
     @endverbatim
 
 Note
     - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Strange behaviour with potentialFoam since the U equation is not solved
+    - may not work correctly for transonic inlets!
+    - strange behaviour with potentialFoam since the U equation is not solved
+
+See Also
+    Foam::timeSeries and Foam::flowRateInletVelocityFvPatchVectorField
 
 SourceFiles
-    massFlowRateInletVelocityFvPatchVectorField.C
+    timeVaryingFlowRateInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef massFlowRateInletVelocityFvPatchVectorField_H
-#define massFlowRateInletVelocityFvPatchVectorField_H
+#ifndef timeVaryingFlowRateInletVelocityFvPatchVectorField_H
+#define timeVaryingFlowRateInletVelocityFvPatchVectorField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "flowRateInletVelocityFvPatchVectorField.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-               Class massFlowRateInletVelocityFvPatch Declaration
+        Class timeVaryingFlowRateInletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class massFlowRateInletVelocityFvPatchVectorField
+class timeVaryingFlowRateInletVelocityFvPatchVectorField
 :
-    public fixedValueFvPatchVectorField
+    public flowRateInletVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Inlet integral mass flow rate
-        scalar massFlowRate_;
-
-        //- Name of the flux transporting the field
-        word phiName_;
-
-        //- Name of the density field used to normalize the mass flux
-        word rhoName_;
+        //- the time series being used, including the bounding treatment
+        interpolationTable<scalar> timeSeries_;
 
 
 public:
 
-   //- Runtime type information
-   TypeName("massFlowRateInletVelocity");
+    //- Runtime type information
+    TypeName("timeVaryingFlowRateInletVelocity");
 
 
-   // Constructors
+    // Constructors
 
         //- Construct from patch and internal field
-        massFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        massFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        //  massFlowRateInletVelocityFvPatchVectorField
-        //  onto a new patch
-        massFlowRateInletVelocityFvPatchVectorField
+        //- Construct by mapping given patch field onto a new patch
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
-            const massFlowRateInletVelocityFvPatchVectorField&,
+            const timeVaryingFlowRateInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        massFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
-            const massFlowRateInletVelocityFvPatchVectorField&
+            const timeVaryingFlowRateInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -124,14 +120,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new massFlowRateInletVelocityFvPatchVectorField(*this)
+                new timeVaryingFlowRateInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        massFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
-            const massFlowRateInletVelocityFvPatchVectorField&,
+            const timeVaryingFlowRateInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -143,7 +139,11 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new massFlowRateInletVelocityFvPatchVectorField(*this, iF)
+                new timeVaryingFlowRateInletVelocityFvPatchVectorField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
@@ -152,25 +152,21 @@ public:
 
         // Access
 
-            //- Return the mass flux
-            scalar massFlowRate() const
+            //- Return the time series used
+            const interpolationTable<scalar>& timeSeries() const
             {
-                return massFlowRate_;
-            }
-
-            //- Return reference to the mass flux to allow adjustment
-            scalar& massFlowRate()
-            {
-                return massFlowRate_;
+                return timeSeries_;
             }
 
 
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
+        // Evaluation functions
+
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 

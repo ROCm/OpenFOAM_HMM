@@ -38,7 +38,7 @@ SourceFiles
 #define timeVaryingUniformTotalPressureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "timeSeries.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,11 +74,8 @@ class timeVaryingUniformTotalPressureFvPatchScalarField
         //- Total pressure
         scalar p0_;
 
-        fileName totalPressureDataFileName_;
-        timeSeries<scalar> totalPressureTimeSeries_;
-
-        //- Interpolate the value at the current time
-        scalar currentValue();
+        //- Table of time vs total pressure
+        interpolationTable<scalar> totalPressureTimeSeries_;
 
 
 public:
@@ -189,14 +186,8 @@ public:
                 return p0_;
             }
 
-            //- Return the out-of-bounds treatment as a word
-            word timeBounding() const
-            {
-                return totalPressureTimeSeries_.bounding();
-            }
-
             //- Return the time series used
-            const timeSeries<scalar>& totalPressureTimeSeries() const
+            const interpolationTable<scalar>& totalPressureTimeSeries() const
             {
                 return totalPressureTimeSeries_;
             }

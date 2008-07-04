@@ -28,8 +28,6 @@ License
 #include "Time.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -57,8 +55,7 @@ timeVaryingUniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
-    timeDataFile_(ptf.timeDataFile_),
-    timeSeries_(ptf.timeBounding())
+    timeSeries_(ptf.timeSeries_)
 {}
 
 
@@ -73,8 +70,7 @@ timeVaryingUniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF),
-    timeDataFile_(dict.lookup("timeDataFile")),
-    timeSeries_(word(dict.lookup("timeBounding")))
+    timeSeries_(this->db(), dict)
 {
     updateCoeffs();
 }
@@ -89,8 +85,7 @@ timeVaryingUniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf),
-    timeDataFile_(ptf.timeDataFile_),
-    timeSeries_(ptf.timeBounding())
+    timeSeries_(ptf.timeSeries_)
 {}
 
 
@@ -104,66 +99,11 @@ timeVaryingUniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, iF),
-    timeDataFile_(ptf.timeDataFile_),
-    timeSeries_(ptf.timeBounding())
+    timeSeries_(ptf.timeSeries_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Type
-Foam::timeVaryingUniformFixedValuePointPatchField<Type>::
-currentValue()
-{
-    if (timeSeries_.size() == 0)
-    {
-        fileName fName(timeDataFile_);
-        fName.expand();
-
-        if (fName.size() == 0)
-        {
-            FatalErrorIn
-            (
-                "timeVaryingUniformFixedValuePointPatchField"
-                "::currentValue()"
-            )   << "timeDataFile not specified for Patch "
-                << this->patch().name()
-                << exit(FatalError);
-        }
-        else
-        {
-            // relative path
-            if (fName[0] != '/')
-            {
-                fName = this->db().path()/fName;
-            }
-
-            // just in case we change the interface to timeSeries
-            word boundType = timeBounding();
-
-            IFstream(fName)() >> timeSeries_;
-            timeSeries_.bounding(boundType);
-
-            // be a bit paranoid and check that the list is okay
-            timeSeries_.check();
-        }
-
-        if (timeSeries_.size() == 0)
-        {
-            FatalErrorIn
-            (
-                "timeVaryingUniformFixedValuePointPatchField"
-                "::currentValue()"
-            )   << "empty time series for Patch "
-                << this->patch().name()
-                << exit(FatalError);
-        }
-    }
-
-    return timeSeries_(this->db().time().timeOutputValue());
-}
-
 
 template<class Type>
 void Foam::timeVaryingUniformFixedValuePointPatchField<Type>::updateCoeffs()
@@ -173,7 +113,7 @@ void Foam::timeVaryingUniformFixedValuePointPatchField<Type>::updateCoeffs()
         return;
     }
 
-    this->operator==(currentValue());
+    this->operator==(timeSeries_(this->db().time().timeOutputValue()));
     fixedValuePointPatchField<Type>::updateCoeffs();
 }
 
@@ -182,13 +122,8 @@ template<class Type>
 void Foam::timeVaryingUniformFixedValuePointPatchField<Type>::write(Ostream& os) const
 {
     fixedValuePointPatchField<Type>::write(os);
-    os.writeKeyword("timeDataFile")
-        << timeDataFile_ << token::END_STATEMENT << nl;
-    os.writeKeyword("timeBounding")
-        << timeBounding() << token::END_STATEMENT << nl;
+    timeSeries_.write(os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

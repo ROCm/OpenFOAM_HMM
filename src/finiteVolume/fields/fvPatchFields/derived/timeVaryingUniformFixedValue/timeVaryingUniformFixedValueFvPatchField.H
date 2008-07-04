@@ -54,7 +54,7 @@ SourceFiles
 #define timeVaryingUniformFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchField.H"
-#include "timeSeries.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,14 +72,8 @@ class timeVaryingUniformFixedValueFvPatchField
 {
     // Private data
 
-        //- File containing time/uniformFixedValue
-        fileName timeDataFile_;
-
         //- The time series being used, including the bounding treatment
-        timeSeries<Type> timeSeries_;
-
-        //- Interpolate the value at the current time
-        Type currentValue();
+        interpolationTable<Type> timeSeries_;
 
 
 public:
@@ -153,14 +147,8 @@ public:
 
         // Access
 
-            //- Return the out-of-bounds treatment as a word
-            word timeBounding() const
-            {
-                return timeSeries_.bounding();
-            }
-
             //- Return the time series used
-            const timeSeries<Type>& timeData() const
+            const interpolationTable<Type>& timeSeries() const
             {
                 return timeSeries_;
             }
