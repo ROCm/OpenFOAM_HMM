@@ -29,28 +29,28 @@ solidBodyMotionFvMeshCoeffs
         lamda       50;
 
         // Max roll amplitude [rad]
-        rollAmax    0.22654;
+        rollAmax    0.2;
 
         // Min roll amplitude [rad]
-        rollAmin    0.10472;
+        rollAmin    0.1;
 
         // Heave amplitude [m]
-        heaveA      3.79;
+        heaveA      4;
 
         // Sway amplitude [m]
-        swayA       2.34;
+        swayA       2.4;
 
         // Damping Coefficient [-]
-        Q           2.00;
-    
+        Q           2;
+
         // Time Period for liquid [sec]
-        Tp          13.93;
+        Tp          14;
 
         // Natural Period of Ship [sec]
-        Tpn         11.93;
+        Tpn         12;
 
         // Reference time step [sec]
-        dTi         0.059;
+        dTi         0.06;
 
         // Incr. in Tp/unit 'dTi'[-]
         dTp         -0.001;
