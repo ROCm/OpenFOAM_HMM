@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LES::mixedSmagorinsky
+    Foam::incompressible::LESModels::mixedSmagorinsky
 
 Description
     The mixed Isochoric Smagorinsky Model for incompressible flows.

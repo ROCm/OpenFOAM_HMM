@@ -54,7 +54,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 {
     Debug = 0;
     vtkDebugMacro(<<"Constructor");
-    
+
     SetNumberOfInputPorts(0);
 
     FileName  = NULL;
@@ -115,7 +115,6 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 vtkPV3FoamReader::~vtkPV3FoamReader()
 {
     vtkDebugMacro(<<"Deconstructor");
-    cout << "Destroy ~vtkPV3FoamReader\n";
 
     if (foamData_)
     {
@@ -152,23 +151,30 @@ int vtkPV3FoamReader::RequestInformation
 )
 {
     vtkDebugMacro(<<"RequestInformation");
-    cout<<"REQUEST_INFORMATION\n";
+
+
+    if (Foam::vtkPV3Foam::debug)
+    {
+        cout<<"REQUEST_INFORMATION\n";
+    }
 
     if (!FileName)
     {
         vtkErrorMacro("FileName has to be specified!");
         return 0;
     }
-    
+
+    if (Foam::vtkPV3Foam::debug)
     {
         vtkInformation* outputInfo = this->GetOutputPortInformation(0);
-        outputInfo->Print(cout);
-    
+
         vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
         (
             outputInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
         );
-        if (output) 
+
+        outputInfo->Print(cout);
+        if (output)
         {
             output->Print(cout);
         }
@@ -177,21 +183,19 @@ int vtkPV3FoamReader::RequestInformation
             cout << "no output\n";
         }
 
-        cout << "GetExecutive:\n";
-
         this->GetExecutive()->GetOutputInformation(0)->Print(cout);
-    }
-    
-    {
+
         int nInfo = outputVector->GetNumberOfInformationObjects();
-        cout<<"requestInfo with " << nInfo << " items\n";
+
+        cout<< "requestInfo with " << nInfo << " items:\n";
+
         for (int i=0; i<nInfo; i++)
         {
             vtkInformation *info = outputVector->GetInformationObject(i);
             info->Print(cout);
         }
     }
-    
+
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
     if (!foamData_)
@@ -207,14 +211,11 @@ int vtkPV3FoamReader::RequestInformation
     else
     {
         vtkDebugMacro("RequestInformation: updating information");
-
         foamData_->UpdateInformation();
     }
 
     int nTimeSteps = 0;
     double* timeSteps = foamData_->timeSteps(nTimeSteps);
-
-    cout<<"Have nTimeSteps: " << nTimeSteps << "\n";
 
     outInfo->Set
     (
@@ -229,13 +230,16 @@ int vtkPV3FoamReader::RequestInformation
         timeRange[0] = timeSteps[0];
         timeRange[1] = timeSteps[nTimeSteps-1];
 
-        cout<<"nTimeSteps " << nTimeSteps << "\n";
-        cout<<"timeRange " << timeRange[0] << " -> " << timeRange[1] << "\n";
+        if (Foam::vtkPV3Foam::debug)
+        {
+            cout<<"nTimeSteps " << nTimeSteps << "\n";
+            cout<<"timeRange " << timeRange[0] << " to " << timeRange[1] << "\n";
 
-//        for (int i = 0; i < nTimeSteps; ++i)
-//        {
-//            cout<<"step[" << i << "] = " << timeSteps[i] << "\n";
-//        }
+            for (int i = 0; i < nTimeSteps; ++i)
+            {
+                cout<< "step[" << i << "] = " << timeSteps[i] << "\n";
+            }
+        }
 
         outInfo->Set
         (
@@ -247,7 +251,6 @@ int vtkPV3FoamReader::RequestInformation
 
     delete timeSteps;
 
-    cout<<"done RequestInformation\n";
     return 1;
 }
 
@@ -261,21 +264,27 @@ int vtkPV3FoamReader::RequestData
 )
 {
     vtkDebugMacro(<<"RequestData");
-    cout<<"REQUEST_DATA\n";
 
     if (!FileName)
     {
         vtkErrorMacro("FileName has to be specified!");
         return 0;
     }
-    
+
     {
         int nInfo = outputVector->GetNumberOfInformationObjects();
-        cout<<"requestData with " << nInfo << " items\n";
+        if (Foam::vtkPV3Foam::debug)
+        {
+            cout<<"requestData with " << nInfo << " items\n";
+        }
         for (int i=0; i<nInfo; i++)
         {
             vtkInformation *info = outputVector->GetInformationObject(i);
-            info->Print(cout);
+
+            if (Foam::vtkPV3Foam::debug)
+            {
+                info->Print(cout);
+            }
         }
     }
 
@@ -284,38 +293,38 @@ int vtkPV3FoamReader::RequestData
     (
         outInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
     );
-    
-#if 1
+
+    if (Foam::vtkPV3Foam::debug)
     {
         vtkInformation* outputInfo = this->GetOutputPortInformation(0);
         outputInfo->Print(cout);
-    
+
         vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
         (
             outputInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
         );
-        if (output) 
+        if (output)
         {
             output->Print(cout);
         }
         else
         {
-            cout << "no output\n";
+            cout<< "no output\n";
         }
-        
+
         vtkInformation* execInfo = this->GetExecutive()->GetOutputInformation(0);
         execInfo->Print(cout);
-        
+
         outInfo->Print(cout);
-        
+
         vtkMultiBlockDataSet* dobj = vtkMultiBlockDataSet::SafeDownCast
         (
             outInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
         );
-        if (dobj) 
+        if (dobj)
         {
             dobj->Print(cout);
-            
+
             vtkInformation* dobjInfo = dobj->GetInformation();
             dobjInfo->Print(cout);
         }
@@ -323,16 +332,16 @@ int vtkPV3FoamReader::RequestData
         {
             cout << "no data_object\n";
         }
-        
-
     }
-#endif
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
     {
-        cout<<"Has UPDATE_TIME_STEPS\n";
-        cout<<"output->GetNumberOfBlocks() " << output->GetNumberOfBlocks() <<
-            "\n";
+        if (Foam::vtkPV3Foam::debug)
+        {
+            cout<<"Has UPDATE_TIME_STEPS\n";
+            cout<<"output->GetNumberOfBlocks() = "
+                << output->GetNumberOfBlocks() << "\n";
+        }
 
         // Get the requested time step.
         // We only supprt requests of a single time step
@@ -369,10 +378,6 @@ int vtkPV3FoamReader::RequestData
         }
     }
     UpdateGUIOld = GetUpdateGUI();
-
-    cout<<"done RequestData\n";
-    cout<<"done output->GetNumberOfBlocks() "
-        << output->GetNumberOfBlocks() << "\n";
 
     return 1;
 }

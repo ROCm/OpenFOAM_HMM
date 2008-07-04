@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RAS::LienCubicKE
+    Foam::incompressible::RASModels::LienCubicKE
 
 Description
     Lien cubic non-linear k-epsilon turbulence model for incompressible flows.

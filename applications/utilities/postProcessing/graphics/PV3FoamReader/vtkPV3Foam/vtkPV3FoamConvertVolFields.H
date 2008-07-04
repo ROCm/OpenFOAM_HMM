@@ -372,6 +372,8 @@ void Foam::vtkPV3Foam::convertVolField
     labelList& superCells
 )
 {
+    const label nComp = pTraits<Type>::nComponents;
+
     vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
@@ -379,8 +381,8 @@ void Foam::vtkPV3Foam::convertVolField
 
     vtkFloatArray* celldata = vtkFloatArray::New();
     celldata->SetNumberOfTuples(superCells.size());
-    celldata->SetNumberOfComponents(Type::nComponents);
-    celldata->Allocate(Type::nComponents*superCells.size());
+    celldata->SetNumberOfComponents(nComp);
+    celldata->Allocate(nComp*superCells.size());
     celldata->SetName(tf.name().c_str());
 
     if (debug)
@@ -388,17 +390,17 @@ void Foam::vtkPV3Foam::convertVolField
         Info<< "converting vol<Type>Field: " << tf.name() << nl
             << "field size = " << tf.size() << nl
             << "nTuples = " << superCells.size() << nl
-            << "nComps  = " << Type::nComponents << endl;
+            << "nComp  = " << nComp << endl;
     }
 
-    float vec[Type::nComponents];
+    float vec[nComp];
 
     forAll(superCells, scI)
     {
         const Type& t = tf[superCells[scI]];
-        for (direction d=0; d<Type::nComponents; d++)
+        for (direction d=0; d<nComp; d++)
         {
-            vec[d] = t[d];
+            vec[d] = component(t, d);
         }
 
         celldata->InsertTuple(scI, vec);
@@ -406,50 +408,6 @@ void Foam::vtkPV3Foam::convertVolField
 
     vtkmesh->GetCellData()->AddArray(celldata);
     celldata->Delete();
-}
-
-
-template<>
-void Foam::vtkPV3Foam::convertVolField
-(
-    const GeometricField<scalar, fvPatchField, volMesh>& sf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo,
-    labelList& superCells
-)
-{
-    vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(superCells.size());
-    cellData->SetNumberOfComponents(1);
-    cellData->Allocate(superCells.size());
-    cellData->SetName(sf.name().c_str());
-
-    if (debug)
-    {
-        Info<< "converting volScalarField: " << sf.name() << nl
-            << "field size = " << sf.size() << nl
-            << "nTuples = " << superCells.size() << nl
-            << "nComps  = 1" << endl;
-    }
-
-    forAll(superCells, scI)
-    {
-        cellData->InsertComponent(scI, 0, sf[superCells[scI]]);
-    }
-
-    vtkmesh->GetCellData()->AddArray(cellData);
-    if (!vtkmesh->GetCellData()->GetScalars())
-    {
-        vtkmesh->GetCellData()->SetScalars(cellData);
-    }
-
-    cellData->Delete();
 }
 
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LES::scaleSimilarity
+    Foam::incompressible::LESModels::scaleSimilarity
 
 Description
     General base class for all scale similarity models

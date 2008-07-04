@@ -95,6 +95,8 @@ void Foam::vtkPV3Foam::convertLagrangianField
     const label datasetNo
 )
 {
+    const label nComp = pTraits<Type>::nComponents;
+
     vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
@@ -102,72 +104,30 @@ void Foam::vtkPV3Foam::convertLagrangianField
 
     vtkFloatArray *pointData = vtkFloatArray::New();
     pointData->SetNumberOfTuples(tf.size());
-    pointData->SetNumberOfComponents(Type::nComponents);
-    pointData->Allocate(Type::nComponents*tf.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*tf.size());
     pointData->SetName(tf.name().c_str());
 
     if (debug)
     {
         Info<< "converting Lagrangian <Type>Field: " << tf.name() << nl
             << "tf.size() = " << tf.size() << nl
-            << "nComps  = " << Type::nComponents << endl;
+            << "nComp  = " << nComp << endl;
     }
 
-    float vec[Type::nComponents];
+    float vec[nComp];
 
     forAll(tf, i)
     {
-        for (direction d=0; d<Type::nComponents; d++)
+        for (direction d=0; d<nComp; d++)
         {
-            vec[d] = tf[i][d];
+            vec[d] = component(tf[i], d);
         }
 
         pointData->InsertTuple(i, vec);
     }
 
     vtkmesh->GetPointData()->AddArray(pointData);
-    pointData->Delete();
-}
-
-
-template<>
-void Foam::vtkPV3Foam::convertLagrangianField
-(
-    const IOField<scalar>& sf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo
-)
-{
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
-    vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples(sf.size());
-    pointData->SetNumberOfComponents(1);
-    pointData->Allocate(sf.size());
-    pointData->SetName(sf.name().c_str());
-
-    if (debug)
-    {
-        Info<< "converting Lagrangian scalarField: " << sf.name() << nl
-            << "sf.size() = " << sf.size() << nl
-            << "nComps  = 1" << endl;
-    }
-
-    for (int i=0; i<sf.size(); i++)
-    {
-        pointData->InsertComponent(i, 0, sf[i]);
-    }
-
-    vtkmesh->GetPointData()->AddArray(pointData);
-    if (!vtkmesh->GetPointData()->GetScalars())
-    {
-        vtkmesh->GetPointData()->SetScalars(pointData);
-    }
-
     pointData->Delete();
 }
 

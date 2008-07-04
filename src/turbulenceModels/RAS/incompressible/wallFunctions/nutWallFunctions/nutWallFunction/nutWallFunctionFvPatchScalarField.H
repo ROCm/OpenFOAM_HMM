@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RAS::nutWallFunctionFvPatchScalarField
+    Foam::incompressible::RASModels::nutWallFunctionFvPatchScalarField
 
 Description
     Wall function boundary condition for walls

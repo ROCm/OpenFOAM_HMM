@@ -27,7 +27,7 @@ FoamFile
 // automatically less valuable than any on the list.  For molecules of the
 // same type there is no control over which is removed.
 
-removalOrder        1 (Ar);
+removalOrder        2 (Ne Ar);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Pair potentials
@@ -111,17 +111,8 @@ tether
         tetherPotential restrainedHarmonicSpring;
         restrainedHarmonicSpringCoeffs
         {
-            springConstant  0.0277;
+            springConstant  0.1;
             rR              1.2e-9;
-        }
-    }
-
-    Ne
-    {
-        tetherPotential harmonicSpring;
-        harmonicSpringCoeffs
-        {
-            springConstant  0.0277;
         }
     }
 }

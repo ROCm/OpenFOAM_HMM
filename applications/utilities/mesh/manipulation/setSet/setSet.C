@@ -344,7 +344,7 @@ bool doCommand
       / (10*Pstream::nProcs());
 
 
-    bool error = false;
+    bool ok = true;
 
     // Set to work on
     autoPtr<topoSet> currentSetPtr(NULL);
@@ -388,7 +388,7 @@ bool doCommand
             Pout<< "    Cannot construct/load set "
                 << topoSet::localPath(mesh, setName) << endl;
 
-            error = true;
+            ok = false;
         }
         else
         {
@@ -518,7 +518,7 @@ bool doCommand
     }
     catch (Foam::IOerror& fIOErr)
     {
-        error = true;
+        ok = false;
 
         Pout<< fIOErr.message().c_str() << endl;
 
@@ -529,7 +529,7 @@ bool doCommand
     }
     catch (Foam::error& fErr)
     {
-        error = true;
+        ok = false;
 
         Pout<< fErr.message().c_str() << endl;
 
@@ -539,15 +539,16 @@ bool doCommand
         }
     }
 
-    return !error;
+    return ok;
 }
 
 
+// Status returned from parsing the first token of the line
 enum commandStatus
 {
-    QUIT,
-    INVALID,
-    VALID
+    QUIT,           // quit program
+    INVALID,        // token is not a valid set manipulation command
+    VALID           // ,,    is a valid     ,,
 };
 
 
@@ -841,7 +842,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        ok = false;
+        ok = true;
 
         if (stat == QUIT)
         {

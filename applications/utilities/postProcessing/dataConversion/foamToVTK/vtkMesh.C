@@ -70,6 +70,7 @@ Foam::polyMesh::readUpdateState Foam::vtkMesh::readUpdate()
         // the subset even if only movement.
 
         topoPtr_.clear();
+        pointMeshPtr_.clear();
 
         if (setName_.size() > 0)
         {

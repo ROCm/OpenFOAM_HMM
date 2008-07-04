@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RAS::realizableKE
+    Foam::compressible::RASModels::realizableKE
 
 Description
     Realizable k-epsilon turbulence model for compressible flows.

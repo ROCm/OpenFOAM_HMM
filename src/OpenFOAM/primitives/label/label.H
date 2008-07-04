@@ -119,6 +119,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "pTraits.H"
+#include "direction.H"
 
 namespace Foam
 {
@@ -201,6 +202,16 @@ MAXMIN(unsigned long long, unsigned long long, unsigned long long)
 MAXMIN(long, int, long)
 MAXMIN(long long, int, long long)
 MAXMIN(long long, long long, int)
+
+inline label& setComponent(label& l, const direction)
+{
+    return l;
+}
+
+inline label component(const label l, const direction)
+{
+    return l;
+}
 
 inline label mag(const label l)
 {

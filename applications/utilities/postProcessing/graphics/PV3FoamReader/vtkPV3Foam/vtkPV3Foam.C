@@ -87,10 +87,13 @@ void Foam::vtkPV3Foam::AddToBlock
 
     if (block)
     {
-        Info<< "block[" << blockNo << "] has "
-            << block->GetNumberOfBlocks()
-            <<  " datasets prior to adding set " << datasetNo
-            <<  " with name: " << blockName << endl;
+        if (debug)
+        {
+            Info<< "block[" << blockNo << "] has "
+                << block->GetNumberOfBlocks()
+                <<  " datasets prior to adding set " << datasetNo
+                <<  " with name: " << blockName << endl;
+        }
 
         // when assigning dataset 0, also name the parent block
         if (!datasetNo && selector.name())
@@ -481,8 +484,11 @@ Foam::vtkPV3Foam::vtkPV3Foam
 
     dbPtr_().functionObjects().off();
 
-    cout<<"constructed with output: ";
-    output_->Print(cout),
+    if (debug)
+    {
+        cout<< "constructed with output: ";
+        output_->Print(cout);
+    }
 
     resetCounters();
 
@@ -579,8 +585,8 @@ void Foam::vtkPV3Foam::Update
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::Update" << endl;
-        cout<<"Update\n";
+        cout<< "entered Foam::vtkPV3Foam::Update" << nl
+             <<"Update\n";
         output->Print(cout);
 
         cout<<"Internally:\n";
@@ -765,7 +771,10 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         true
     );
 
-    Info<<"patches: " << selectedPatches <<endl;
+    if (debug)
+    {
+        Info<<"patches: " << selectedPatches <<endl;
+    }
 
     // Find the total number of zones
     // Each zone will take the patch name

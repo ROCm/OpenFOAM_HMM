@@ -33,8 +33,6 @@ InClass
 // Foam includes
 #include "interpolatePointToCell.H"
 
-// VTK includes
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -145,6 +143,8 @@ void Foam::vtkPV3Foam::convertPointField
     const label datasetNo
 )
 {
+    const label nComp = pTraits<Type>::nComponents;
+
     vtkUnstructuredGrid* internalMesh = vtkUnstructuredGrid::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
@@ -152,17 +152,17 @@ void Foam::vtkPV3Foam::convertPointField
 
     vtkFloatArray *pointData = vtkFloatArray::New();
     pointData->SetNumberOfTuples(ptf.size() + addPointCellLabels_.size());
-    pointData->SetNumberOfComponents(Type::nComponents);
-    pointData->Allocate(Type::nComponents*ptf.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*ptf.size());
     pointData->SetName(tf.name().c_str());
 
-    float vec[Type::nComponents];
+    float vec[nComp];
 
     forAll(ptf, i)
     {
-        for (direction d=0; d<Type::nComponents; d++)
+        for (direction d=0; d<nComp; d++)
         {
-            vec[d] = ptf[i][d];
+            vec[d] = component(ptf[i], d);
         }
 
         pointData->InsertTuple(i, vec);
@@ -176,9 +176,9 @@ void Foam::vtkPV3Foam::convertPointField
         {
             Type t = tf[addPointCellLabels_[api]];
 
-            for (direction d=0; d<Type::nComponents; d++)
+            for (direction d=0; d<nComp; d++)
             {
-                vec[d] = t[d];
+                vec[d] = component(t, d);
             }
 
             pointData->InsertTuple(i++, vec);
@@ -190,9 +190,9 @@ void Foam::vtkPV3Foam::convertPointField
         {
             Type t = interpolatePointToCell(ptf, addPointCellLabels_[api]);
 
-            for (direction d=0; d<Type::nComponents; d++)
+            for (direction d=0; d<nComp; d++)
             {
-                vec[d] = t[d];
+                vec[d] = component(t, d);
             }
 
             pointData->InsertTuple(i++, vec);
@@ -200,69 +200,6 @@ void Foam::vtkPV3Foam::convertPointField
     }
 
     internalMesh->GetPointData()->AddArray(pointData);
-    pointData->Delete();
-}
-
-
-template<>
-void Foam::vtkPV3Foam::convertPointField
-(
-    const GeometricField<scalar, pointPatchField, pointMesh>& psf,
-    const GeometricField<scalar, fvPatchField, volMesh>& sf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo
-)
-{
-    vtkUnstructuredGrid* internalMesh = vtkUnstructuredGrid::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
-    vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples(psf.size() + addPointCellLabels_.size());
-    pointData->SetNumberOfComponents(1);
-    pointData->Allocate(psf.size());
-    pointData->SetName(sf.name().c_str());
-
-    for (int i=0; i<psf.size(); i++)
-    {
-        pointData->InsertComponent(i, 0, psf[i]);
-    }
-
-    label i = psf.size();
-
-    if (&sf != &GeometricField<scalar, fvPatchField, volMesh>::null())
-    {
-        forAll(addPointCellLabels_, api)
-        {
-            pointData->InsertComponent
-            (
-                i++,
-                0,
-                sf[addPointCellLabels_[api]]
-            );
-        }
-    }
-    else
-    {
-        forAll(addPointCellLabels_, api)
-        {
-            pointData->InsertComponent
-            (
-                i++,
-                0,
-                interpolatePointToCell(psf, addPointCellLabels_[api])
-            );
-        }
-    }
-
-    internalMesh->GetPointData()->AddArray(pointData);
-    if (!internalMesh->GetPointData()->GetScalars())
-    {
-        internalMesh->GetPointData()->SetScalars(pointData);
-    }
-
     pointData->Delete();
 }
 

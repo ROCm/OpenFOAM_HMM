@@ -1,0 +1,3 @@
+polyDualMesh/polyDualMesh.C
+
+LIB = $(FOAM_LIBBIN)/libconversion

@@ -172,6 +172,7 @@ public:
             }
         };
 
+
 private:
 
     // Private data
@@ -643,85 +644,6 @@ public:
         int numberOfMeshes() const;
 
 };
-
-
-// * * * * * * * * * * * * * Template Specialisations  * * * * * * * * * * * //
-
-template<>
-void vtkPV3Foam::convertVolField
-(
-    const GeometricField<scalar, fvPatchField, volMesh>& sf,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo,
-    labelList& superCells
-);
-
-
-template<>
-void vtkPV3Foam::convertPatchFaceField
-(
-    const word& name,
-    const Field<scalar>&,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo
-);
-
-template<>
-void vtkPV3Foam::convertFaceField
-(
-    const GeometricField<scalar, fvPatchField, volMesh>&,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo,
-    const fvMesh&,
-    const labelList& faceLabels
-);
-
-
-template<>
-void vtkPV3Foam::convertFaceField
-(
-    const GeometricField<scalar, fvPatchField, volMesh>&,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo,
-    const fvMesh&,
-    const faceSet&
-);
-
-
-template<>
-void vtkPV3Foam::convertPointField
-(
-    const GeometricField<scalar, pointPatchField, pointMesh>&,
-    const GeometricField<scalar, fvPatchField, volMesh>&,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo
-);
-
-
-template<>
-void vtkPV3Foam::convertPatchPointField
-(
-    const word& name,
-    const Field<scalar>&,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo
-);
-
-
-template<>
-void vtkPV3Foam::convertLagrangianField
-(
-    const IOField<scalar>&,
-    vtkMultiBlockDataSet* output,
-    const selectionInfo&,
-    const label datasetNo
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

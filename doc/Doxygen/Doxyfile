@@ -1244,7 +1244,7 @@ DOTFILE_DIRS           =
 # The MAX_DOT_GRAPH_MAX_NODES tag can be used to set the maximum number of
 # nodes that will be shown in the graph. If the number of nodes in a graph
 # becomes larger than this value, doxygen will truncate the graph, which is
-# visualized by representing a node as a red box. Note that doxygen if the number
+# visualized by representing a node as a red box. Note that if the number
 # of direct children of the root node in a graph is already larger than
 # MAX_DOT_GRAPH_NOTES then the graph will not be shown at all. Also note
 # that the size of a graph can be further restricted by MAX_DOT_GRAPH_DEPTH.

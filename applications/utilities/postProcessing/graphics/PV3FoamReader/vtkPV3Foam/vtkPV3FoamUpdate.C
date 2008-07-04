@@ -114,6 +114,12 @@ void Foam::vtkPV3Foam::updateVolFields
     }
 
     volPointInterpolation pInterp(mesh, pMesh);
+/*
+    convertVolFields<Foam::label>
+    (
+        mesh, pInterp, objects, arraySelection, output
+    );
+*/
     convertVolFields<Foam::scalar>
     (
         mesh, pInterp, objects, arraySelection, output
@@ -159,7 +165,12 @@ void Foam::vtkPV3Foam::updatePointFields
     {
         Info<< "converting Foam point fields" << endl;
     }
-
+/*
+    convertPointFields<Foam::label>
+    (
+        mesh, objects, arraySelection, output
+    );
+*/
     convertPointFields<Foam::scalar>
     (
         mesh, objects, arraySelection, output
@@ -212,6 +223,11 @@ void Foam::vtkPV3Foam::updateLagrangianFields
     {
         Info<< "converting Foam Lagrangian fields" << endl;
     }
+
+    convertLagrangianFields<Foam::label>
+    (
+        mesh, objects, arraySelection, output
+    );
 
     convertLagrangianFields<Foam::scalar>
     (

@@ -50,6 +50,14 @@ Usage
     Remove any existing @a processor subdirectories before decomposing the
     geometry.
 
+    @param -ifRequired \n
+    Only decompose the geometry if the number of domains has changed from a
+    previous decomposition. No @a processor subdirectories will be removed
+    unless the @a -force option is also specified. This option can be used
+    to avoid redundant geometry decomposition (eg, in scripts), but should
+    be used with caution when the underlying (serial) geometry or the
+    decomposition method etc. have been changed between decompositions.
+
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
@@ -80,6 +88,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("fields", "");
     argList::validOptions.insert("filterPatches", "");
     argList::validOptions.insert("force", "");
+    argList::validOptions.insert("ifRequired", "");
 
 #   include "setRootCase.H"
 
@@ -88,6 +97,7 @@ int main(int argc, char *argv[])
     bool decomposeFieldsOnly(args.options().found("fields"));
     bool filterPatches(args.options().found("filterPatches"));
     bool forceOverwrite(args.options().found("force"));
+    bool ifRequiredDecomposition(args.options().found("ifRequired"));
 
 #   include "createTime.H"
 
@@ -100,47 +110,84 @@ int main(int argc, char *argv[])
         ++nProcs;
     }
 
-    // Check for previously decomposed case first
+    // get requested numberOfSubdomains
+    label nDomains = 0;
+    {
+        IOdictionary decompDict
+        (
+            IOobject
+            (
+                "decomposeParDict",
+                runTime.time().system(),
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        decompDict.lookup("numberOfSubdomains") >> nDomains;
+    }
+
     if (decomposeFieldsOnly)
     {
-        if (!nProcs)
+        // Sanity check on previously decomposed case
+        if (nProcs != nDomains)
         {
             FatalErrorIn(args.executable())
-                << "Specifying -fields requires a decomposed geometry!"
+                << "Specified -fields, but the case was decomposed with "
+                << nProcs << " domains"
+                << nl
+                << "instead of " << nDomains
+                << " domains as specified in decomposeParDict"
                 << nl
                 << exit(FatalError);
         }
     }
-    else
+    else if (nProcs)
     {
-        if (nProcs)
+        bool procDirsProblem = true;
+
+        if (ifRequiredDecomposition && nProcs == nDomains)
         {
-            if (forceOverwrite)
-            {
-                Info<< "Removing " << nProcs
-                    << " existing processor directories" << endl;
+            // we can reuse the decomposition
+            decomposeFieldsOnly = true;
+            procDirsProblem = false;
+            forceOverwrite = false;
 
-                // remove existing processor dirs
-                for (label procI = nProcs-1; procI >= 0; --procI)
-                {
-                    fileName procDir
-                    (
-                        runTime.path()/(word("processor") + name(procI))
-                    );
+            Info<< "Using existing processor directories" << nl;
+        }
 
-                    rmDir(procDir);
-                }
-            }
-            else
+        if (forceOverwrite)
+        {
+            Info<< "Removing " << nProcs
+                << " existing processor directories" << endl;
+
+            // remove existing processor dirs
+            // reverse order to avoid gaps if someone interrupts the process
+            for (label procI = nProcs-1; procI >= 0; --procI)
             {
-                FatalErrorIn(args.executable())
-                    << "Case is already decomposed, "
-                        "use the -force option or manually remove" << nl
-                    << "processor directories before decomposing. e.g.," << nl
-                    << "    rm -rf " << runTime.path().c_str() << "/processor*"
-                    << nl
-                    << exit(FatalError);
+                fileName procDir
+                (
+                    runTime.path()/(word("processor") + name(procI))
+                );
+
+                rmDir(procDir);
             }
+
+            procDirsProblem = false;
+        }
+
+        if (procDirsProblem)
+        {
+            FatalErrorIn(args.executable())
+                << "Case is already decomposed with " << nProcs
+                << " domains, use the -force option or manually" << nl
+                << "remove processor directories before decomposing. e.g.,"
+                << nl
+                << "    rm -rf " << runTime.path().c_str() << "/processor*"
+                << nl
+                << exit(FatalError);
         }
     }
 

@@ -27,7 +27,9 @@ Class
 
 Description
     Kinematic parcel class with one/two-way coupling with the continuous
-    phase. Sub-models include:
+    phase.
+
+    Sub-models include:
     - drag
     - break-up
     - wall interactions
