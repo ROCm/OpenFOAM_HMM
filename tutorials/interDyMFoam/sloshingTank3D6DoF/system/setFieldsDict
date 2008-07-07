@@ -9,40 +9,27 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       dictionary;
+    object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
+defaultFieldValues
 (
-    periodicX
+    volScalarFieldValue gamma 0
+);
+
+regions
+(
+    boxToCell
     {
-        type            cyclic;
-        nFaces          288;
-        startFace       10710;
-        featureCos      0.9;
+        box (-100 -100 -100) (100 100 0);
+
+        fieldValues
+        (
+            volScalarFieldValue gamma 1
+        );
     }
-    periodicZ
-    {
-        type            cyclic;
-        nFaces          1296;
-        startFace       10998;
-        featureCos      0.9;
-    }
-    outerBoundaryBottom
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12294;
-    }
-    outerBoundaryTop
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12456;
-    }
-)
+);
 
 // ************************************************************************* //

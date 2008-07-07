@@ -9,40 +9,25 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       dictionary;
+    object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
-(
-    periodicX
-    {
-        type            cyclic;
-        nFaces          288;
-        startFace       10710;
-        featureCos      0.9;
-    }
-    periodicZ
-    {
-        type            cyclic;
-        nFaces          1296;
-        startFace       10998;
-        featureCos      0.9;
-    }
-    outerBoundaryBottom
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12294;
-    }
-    outerBoundaryTop
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12456;
-    }
-)
+phase1
+{
+    transportModel  Newtonian;
+    nu              nu  [0 2 -1 0 0 0 0] 1e-6;
+    rho             rho [1 -3 0 0 0 0 0] 998.2;
+}
+
+phase2
+{
+    transportModel  Newtonian;
+    nu              nu [0 2 -1 0 0 0 0] 1.48e-05;
+    rho             rho [1 -3 0 0 0 0 0] 1;
+}
+
+sigma           sigma [1 0 -2 0 0 0 0] 0.0;
 
 // ************************************************************************* //

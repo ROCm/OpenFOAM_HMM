@@ -46,8 +46,8 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     rhoName_("undefined"),
     psiName_("undefined"),
     gamma_(0.0),
-    p0_(0.0)
-
+    p0_(0.0),
+    totalPressureTimeSeries_()
 {}
 
 
@@ -66,8 +66,7 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(dict.lookup("psi")),
     gamma_(readScalar(dict.lookup("gamma"))),
     p0_(readScalar(dict.lookup("p0"))),
-    totalPressureDataFileName_(dict.lookup("totalPressureDataFileName")),
-    totalPressureTimeSeries_(word(dict.lookup("timeBounding")))
+    totalPressureTimeSeries_(this->db(), dict)
 {
     if (dict.found("value"))
     {
@@ -99,8 +98,7 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
     p0_(ptf.p0_),
-    totalPressureDataFileName_(ptf.totalPressureDataFileName_),
-    totalPressureTimeSeries_(ptf.timeBounding())
+    totalPressureTimeSeries_(ptf.totalPressureTimeSeries_)
 {}
 
 
@@ -117,8 +115,7 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
     p0_(tppsf.p0_),
-    totalPressureDataFileName_(tppsf.totalPressureDataFileName_),
-    totalPressureTimeSeries_(tppsf.timeBounding())
+    totalPressureTimeSeries_(tppsf.totalPressureTimeSeries_)
 {}
 
 
@@ -136,63 +133,11 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
     p0_(tppsf.p0_),
-    totalPressureDataFileName_(tppsf.totalPressureDataFileName_),
-    totalPressureTimeSeries_(tppsf.timeBounding())
+    totalPressureTimeSeries_(tppsf.totalPressureTimeSeries_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::scalar Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-currentValue()
-{
-    if (totalPressureTimeSeries_.size() == 0)
-    {
-        fileName fName(totalPressureDataFileName_);
-        fName.expand();
-
-        if (fName.size() == 0)
-        {
-            FatalErrorIn
-            (
-                "timeVaryingUniformFixedValueFvPatchField::currentValue()"
-            )   << "timeDataFile not specified for Patch "
-                << patch().name()
-                << exit(FatalError);
-        }
-        else
-        {
-            // relative path
-            if (fName[0] != '/')
-            {
-                fName = db().path()/fName;
-            }
-
-            // just in case we change the interface to timeSeries
-            word boundType = timeBounding();
-
-            IFstream(fName)() >> totalPressureTimeSeries_;
-            totalPressureTimeSeries_.bounding(boundType);
-
-            // be a bit paranoid and check that the list is okay
-            totalPressureTimeSeries_.check();
-        }
-
-        if (totalPressureTimeSeries_.size() == 0)
-        {
-            FatalErrorIn
-            (
-                "timeVaryingUniformFixedValueFvPatchField"
-                "::currentValue()"
-            )   << "empty time series for Patch "
-                << this->patch().name()
-                << exit(FatalError);
-        }
-    }
-
-    return totalPressureTimeSeries_(this->db().time().timeOutputValue());
-}
-
 
 void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs
 (
@@ -204,7 +149,7 @@ void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs
         return;
     }
 
-    p0_ = currentValue();
+    p0_ = totalPressureTimeSeries_(this->db().time().timeOutputValue());
 
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
@@ -279,10 +224,7 @@ void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::write(Ostream& os)
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
     os.writeKeyword("p0") << p0_ << token::END_STATEMENT << endl;
-    os.writeKeyword("totalPressureDataFileName")
-        << totalPressureDataFileName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("timeBounding")
-        << timeBounding() << token::END_STATEMENT << nl;
+    totalPressureTimeSeries_.write(os);
     writeEntry("value", os);
 }
 

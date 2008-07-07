@@ -23,19 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::massFlowRateInletVelocityFvPatchVectorField
+    Foam::flowRateInletVelocityFvPatchVectorField
 
 Description
-    Describes an massflow normal vector boundary condition by its magnitude
-    as an integral over its area.
-    The current density is used to correct the velocity.
+    Describes an volumetric/mass flow normal vector boundary condition by its
+    magnitude as an integral over its area.
+    The basis of the patch (volumetric or mass) is determined by the
+    dimensions of the flux, phi.
+    The current density is used to correct the velocity when applying the mass
+    basis.
 
     Example of the boundary condition specification:
     @verbatim
     inlet
     {
-        type            massFlowRateInletVelocity;
-        massFlowRate    0.2;             // Mass flow rate [kg/s]
+        type            flowRateInletVelocity;
+        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
         value           uniform (0 0 0); // placeholder
     }
     @endverbatim
@@ -46,12 +49,12 @@ Note
     - Strange behaviour with potentialFoam since the U equation is not solved
 
 SourceFiles
-    massFlowRateInletVelocityFvPatchVectorField.C
+    flowRateInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef massFlowRateInletVelocityFvPatchVectorField_H
-#define massFlowRateInletVelocityFvPatchVectorField_H
+#ifndef flowRateInletVelocityFvPatchVectorField_H
+#define flowRateInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -60,17 +63,17 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-               Class massFlowRateInletVelocityFvPatch Declaration
+               Class flowRateInletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class massFlowRateInletVelocityFvPatchVectorField
+class flowRateInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
     // Private data
 
-        //- Inlet integral mass flow rate
-        scalar massFlowRate_;
+        //- Inlet integral flow rate
+        scalar flowRate_;
 
         //- Name of the flux transporting the field
         word phiName_;
@@ -82,20 +85,20 @@ class massFlowRateInletVelocityFvPatchVectorField
 public:
 
    //- Runtime type information
-   TypeName("massFlowRateInletVelocity");
+   TypeName("flowRateInletVelocity");
 
 
    // Constructors
 
         //- Construct from patch and internal field
-        massFlowRateInletVelocityFvPatchVectorField
+        flowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        massFlowRateInletVelocityFvPatchVectorField
+        flowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -103,20 +106,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  massFlowRateInletVelocityFvPatchVectorField
+        //  flowRateInletVelocityFvPatchVectorField
         //  onto a new patch
-        massFlowRateInletVelocityFvPatchVectorField
+        flowRateInletVelocityFvPatchVectorField
         (
-            const massFlowRateInletVelocityFvPatchVectorField&,
+            const flowRateInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        massFlowRateInletVelocityFvPatchVectorField
+        flowRateInletVelocityFvPatchVectorField
         (
-            const massFlowRateInletVelocityFvPatchVectorField&
+            const flowRateInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -124,14 +127,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new massFlowRateInletVelocityFvPatchVectorField(*this)
+                new flowRateInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        massFlowRateInletVelocityFvPatchVectorField
+        flowRateInletVelocityFvPatchVectorField
         (
-            const massFlowRateInletVelocityFvPatchVectorField&,
+            const flowRateInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -143,7 +146,7 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new massFlowRateInletVelocityFvPatchVectorField(*this, iF)
+                new flowRateInletVelocityFvPatchVectorField(*this, iF)
             );
         }
 
@@ -152,16 +155,16 @@ public:
 
         // Access
 
-            //- Return the mass flux
-            scalar massFlowRate() const
+            //- Return the flux
+            scalar flowRate() const
             {
-                return massFlowRate_;
+                return flowRate_;
             }
 
-            //- Return reference to the mass flux to allow adjustment
-            scalar& massFlowRate()
+            //- Return reference to the flux to allow adjustment
+            scalar& flowRate()
             {
-                return massFlowRate_;
+                return flowRate_;
             }
 
 

@@ -15,33 +15,28 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
+3
 (
     periodicX
     {
         type            cyclic;
         nFaces          288;
-        startFace       10710;
+        startFace       4752;
+        featureCos      0.9;
+    }
+    periodicY
+    {
+        type            cyclic;
+        nFaces          288;
+        startFace       5040;
         featureCos      0.9;
     }
     periodicZ
     {
         type            cyclic;
-        nFaces          1296;
-        startFace       10998;
+        nFaces          288;
+        startFace       5328;
         featureCos      0.9;
-    }
-    outerBoundaryBottom
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12294;
-    }
-    outerBoundaryTop
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12456;
     }
 )
 

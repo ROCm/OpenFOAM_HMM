@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+    Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField
 
 Description
-    A time-varying form of a massflow normal vector boundary condition.
+    A time-varying form of a flow normal vector boundary condition.
 
     Example of the boundary condition specification:
     @verbatim
     inlet
     {
-        type            timeVaryingMassFlowRateInletVelocity;
-        massFlowRate    0.2;              // Massflow rate [kg/s]
+        type            timeVaryingFlowRateInletVelocity;
+        flowRate        0.2;         // Volumetric/mass flow rate [m3/s or kg/s]
         value           uniform (0 0 0);  // placeholder
-        timeDataFile   "time-series";
-        timeBounding    repeat;           // (error|warn|clamp|repeat)
+        fileName        "time-series";
+        boundAction     repeat;           // (error|warn|clamp|repeat)
     }
     @endverbatim
 
@@ -46,58 +46,54 @@ Note
     - strange behaviour with potentialFoam since the U equation is not solved
 
 See Also
-    Foam::timeSeries and Foam::massFlowRateInletVelocityFvPatchVectorField
+    Foam::timeSeries and Foam::flowRateInletVelocityFvPatchVectorField
 
 SourceFiles
-    timeVaryingMassFlowRateInletVelocityFvPatchVectorField.C
+    timeVaryingFlowRateInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingMassFlowRateInletVelocityFvPatchVectorField_H
-#define timeVaryingMassFlowRateInletVelocityFvPatchVectorField_H
+#ifndef timeVaryingFlowRateInletVelocityFvPatchVectorField_H
+#define timeVaryingFlowRateInletVelocityFvPatchVectorField_H
 
-#include "massFlowRateInletVelocityFvPatchVectorField.H"
-#include "timeSeries.H"
+#include "flowRateInletVelocityFvPatchVectorField.H"
+#include "interpolationTable.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-        Class timeVaryingMassFlowRateInletVelocityFvPatch Declaration
+        Class timeVaryingFlowRateInletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+class timeVaryingFlowRateInletVelocityFvPatchVectorField
 :
-    public massFlowRateInletVelocityFvPatchVectorField
+    public flowRateInletVelocityFvPatchVectorField
 {
     // Private data
 
-        //- file containing time/massFlowRate
-        fileName timeDataFile_;
-
         //- the time series being used, including the bounding treatment
-        timeSeries<scalar> timeSeries_;
+        interpolationTable<scalar> timeSeries_;
 
-        //- interpolate the value at the current time
-        scalar currentValue();
 
 public:
 
     //- Runtime type information
-    TypeName("timeVaryingMassFlowRateInletVelocity");
+    TypeName("timeVaryingFlowRateInletVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -105,18 +101,18 @@ public:
         );
 
         //- Construct by mapping given patch field onto a new patch
-        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
-            const timeVaryingMassFlowRateInletVelocityFvPatchVectorField&,
+            const timeVaryingFlowRateInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
-            const timeVaryingMassFlowRateInletVelocityFvPatchVectorField&
+            const timeVaryingFlowRateInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -124,14 +120,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new timeVaryingMassFlowRateInletVelocityFvPatchVectorField(*this)
+                new timeVaryingFlowRateInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        timeVaryingMassFlowRateInletVelocityFvPatchVectorField
+        timeVaryingFlowRateInletVelocityFvPatchVectorField
         (
-            const timeVaryingMassFlowRateInletVelocityFvPatchVectorField&,
+            const timeVaryingFlowRateInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -143,34 +139,34 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new timeVaryingMassFlowRateInletVelocityFvPatchVectorField(*this, iF)
+                new timeVaryingFlowRateInletVelocityFvPatchVectorField
+                (
+                    *this,
+                    iF
+                )
             );
         }
+
 
     // Member functions
 
         // Access
 
-            //- Return the out-of-bounds treatment as a word
-            word timeBounding() const
-            {
-                return timeSeries_.bounding();
-            }
-
             //- Return the time series used
-            const timeSeries<scalar>& timeData() const
+            const interpolationTable<scalar>& timeSeries() const
             {
                 return timeSeries_;
             }
+
 
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
+
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 

@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "massFlowRateInletVelocityFvPatchVectorField.H"
+#include "flowRateInletVelocityFvPatchVectorField.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
@@ -33,38 +33,40 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::
-massFlowRateInletVelocityFvPatchVectorField::
-massFlowRateInletVelocityFvPatchVectorField
+flowRateInletVelocityFvPatchVectorField::
+flowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    massFlowRate_(0),
+    flowRate_(0),
     phiName_("phi"),
     rhoName_("rho")
 {}
 
+
 Foam::
-massFlowRateInletVelocityFvPatchVectorField::
-massFlowRateInletVelocityFvPatchVectorField
+flowRateInletVelocityFvPatchVectorField::
+flowRateInletVelocityFvPatchVectorField
 (
-    const massFlowRateInletVelocityFvPatchVectorField& ptf,
+    const flowRateInletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    massFlowRate_(ptf.massFlowRate_),
+    flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
 
+
 Foam::
-massFlowRateInletVelocityFvPatchVectorField::
-massFlowRateInletVelocityFvPatchVectorField
+flowRateInletVelocityFvPatchVectorField::
+flowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -72,7 +74,7 @@ massFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    massFlowRate_(readScalar(dict.lookup("massFlowRate"))),
+    flowRate_(readScalar(dict.lookup("flowRate"))),
     phiName_("phi"),
     rhoName_("rho")
 {
@@ -87,29 +89,31 @@ massFlowRateInletVelocityFvPatchVectorField
     }
 }
 
+
 Foam::
-massFlowRateInletVelocityFvPatchVectorField::
-massFlowRateInletVelocityFvPatchVectorField
+flowRateInletVelocityFvPatchVectorField::
+flowRateInletVelocityFvPatchVectorField
 (
-    const massFlowRateInletVelocityFvPatchVectorField& ptf
+    const flowRateInletVelocityFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    massFlowRate_(ptf.massFlowRate_),
+    flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
 
+
 Foam::
-massFlowRateInletVelocityFvPatchVectorField::
-massFlowRateInletVelocityFvPatchVectorField
+flowRateInletVelocityFvPatchVectorField::
+flowRateInletVelocityFvPatchVectorField
 (
-    const massFlowRateInletVelocityFvPatchVectorField& ptf,
+    const flowRateInletVelocityFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    massFlowRate_(ptf.massFlowRate_),
+    flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
@@ -117,7 +121,7 @@ massFlowRateInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -125,7 +129,7 @@ void Foam::massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // a simpler way of doing this would be nice
-    scalar avgU = -massFlowRate_/gSum(patch().magSf());
+    scalar avgU = -flowRate_/gSum(patch().magSf());
 
     vectorField n = patch().nf();
 
@@ -151,23 +155,23 @@ void Foam::massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     {
         FatalErrorIn
         (
-            "massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()"
+            "flowRateInletVelocityFvPatchVectorField::updateCoeffs()"
         )   << "dimensions of phi are incorrect"
             << "\n    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalError);
+            << nl << exit(FatalError);
     }
 
     fixedValueFvPatchField<vector>::updateCoeffs();
 }
 
 
-void Foam::massFlowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
 
-    os.writeKeyword("massFlowRate") << massFlowRate_
+    os.writeKeyword("flowRate") << flowRate_
         << token::END_STATEMENT << nl;
 
     if (phiName_ != "phi")
@@ -191,7 +195,7 @@ namespace Foam
    makePatchTypeField
    (
        fvPatchVectorField,
-       massFlowRateInletVelocityFvPatchVectorField
+       flowRateInletVelocityFvPatchVectorField
    );
 }
 

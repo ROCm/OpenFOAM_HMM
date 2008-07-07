@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::timeSeries
+    Foam::interpolationTable
 
 Description
     A list of times and values.
@@ -40,12 +40,12 @@ Note
     - Accessing a list with a single element will always return the same value.
 
 SourceFiles
-    timeSeries.C
+    interpolationTable.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeSeries_H
-#define timeSeries_H
+#ifndef interpolationTable_H
+#define interpolationTable_H
 
 #include "List.H"
 #include "Tuple2.H"
@@ -55,21 +55,23 @@ SourceFiles
 namespace Foam
 {
 
+class objectRegistry;
+
 /*---------------------------------------------------------------------------*\
-                        Class timeSeries Declaration
+                      Class interpolationTable Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class timeSeries
+template<class Type>
+class interpolationTable
 :
-    public List<Tuple2<scalar, T> >
+    public List<Tuple2<scalar, Type> >
 {
 public:
 
     // Public data types
 
-        //- Enumeration for handling out-of-bound times
-        enum bounds
+        //- Enumeration for handling out-of-bound values
+        enum boundActions
         {
             ERROR,          /*!< Exit with a FatalError */
             WARN,           /*!< Issue warning and clamp value (default) */
@@ -77,74 +79,85 @@ public:
             REPEAT          /*!< Treat as a repeating list */
         };
 
+
 private:
 
     // Private data
 
-        //- Enumeration for handling out-of-bound times
-        bounds bounding_;
+        //- Parent dictionary
+        const dictionary& dict_;
+
+        //- Enumeration for handling out-of-bound values
+        boundActions boundAction_;
+
+        //- File name
+        fileName fileName_;
+
 
 public:
 
     // Constructors
 
-        //- Construct null, optionally with a given bounding
-        timeSeries(const bounds = timeSeries::WARN);
+        //- Construct null
+        interpolationTable();
 
-        //- Construct null with a given bounding
-        timeSeries(const word&);
+        //- Construct from objectRegistry and dictionary
+        interpolationTable(const objectRegistry& obr, const dictionary& dict);
 
-        //- Construct from Istream, optionally with a given bounding
-        timeSeries(Istream&, const bounds = timeSeries::WARN);
+        //- Construct copy
+        interpolationTable(const interpolationTable& interpTable);
 
-        //- Construct from Istream with a given bounding
-        timeSeries(Istream&, const word&);
 
-    // Destructor
+    //- Destructor
+    ~interpolationTable();
 
-        ~timeSeries();
 
     // Member Functions
 
-    // Access
+        // Access
 
-        //- Return the size
-        label size() const
-        {
-            return List<Tuple2<scalar, T> >::size();
-        }
+            //- Return the size
+            label size() const
+            {
+                return List<Tuple2<scalar, Type> >::size();
+            }
 
-        //- Return the out-of-bounds treatment as a word
-        word bounding() const;
+            //- Return the out-of-bounds treatment as a word
+            word boundActionToWord(const boundActions& bound) const;
 
-    // Check
+            //- Return the out-of-bounds treatment as an enumeration
+            boundActions wordToBoundAction(const word& bound) const;
 
-        //- Check that list is monotonically increasing
-        //  Exit with a FatalError if there is a problem
-        void check() const;
 
-    // Edit
+        // Check
 
-        //- Set the out-of-bounds treatment from enum, return previous setting
-        bounds bounding(const bounds& bound)
-        {
-            bounds prev = bounding_;
-            bounding_ = bound;
-            return prev;
-        }
+            //- Check that list is monotonically increasing
+            //  Exit with a FatalError if there is a problem
+            void check() const;
 
-        //- Set the out-of-bounds treatment from word
-        void bounding(const word& bound);
 
-    // Member Operators
+        // Edit
 
-        //- Return an element of constant Tuple2<scalar, T>
-        const Tuple2<scalar, T>& operator[](const label) const;
+            //- Set the out-of-bounds treatment from enum, return previous
+            //  setting
+            boundActions boundAction(const boundActions& bound);
 
-        //- Return an interpolated value
-        T operator()(const scalar) const;
 
+        // Member Operators
+
+            //- Return an element of constant Tuple2<scalar, Type>
+            const Tuple2<scalar, Type>& operator[](const label) const;
+
+            //- Return an interpolated value
+            Type operator()(const scalar) const;
+
+
+        // I-O
+
+            //- Write
+            void write(Ostream& os) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -152,11 +165,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
-#   include "timeSeries.C"
+#   include "interpolationTable.C"
 #endif
 
 #endif
+
 // ************************************************************************* //

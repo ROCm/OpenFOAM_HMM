@@ -84,7 +84,8 @@ void Foam::vtkPV3Foam::AddToBlock
         output->SetBlock(blockNo, block);
         block->Delete();
     }
-    else
+
+    if (block)
     {
         if (debug)
         {

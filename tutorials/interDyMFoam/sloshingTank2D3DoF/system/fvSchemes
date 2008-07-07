@@ -9,40 +9,51 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       dictionary;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
-(
-    periodicX
-    {
-        type            cyclic;
-        nFaces          288;
-        startFace       10710;
-        featureCos      0.9;
-    }
-    periodicZ
-    {
-        type            cyclic;
-        nFaces          1296;
-        startFace       10998;
-        featureCos      0.9;
-    }
-    outerBoundaryBottom
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12294;
-    }
-    outerBoundaryTop
-    {
-        type            wall;
-        nFaces          162;
-        startFace       12456;
-    }
-)
+ddtSchemes
+{
+    default Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    grad(U)         Gauss linear;
+    grad(gamma)     Gauss linear;
+}
+
+divSchemes
+{
+    div(rho*phi,U)  Gauss vanLeerV;
+    div(phi,gamma)  Gauss vanLeer;
+    div(phirb,gamma) Gauss vanLeer;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+fluxRequired
+{
+    default         no;
+    pd;
+    pcorr;
+    gamma;
+}
 
 // ************************************************************************* //
