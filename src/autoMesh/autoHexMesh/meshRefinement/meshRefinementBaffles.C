@@ -1838,7 +1838,11 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
     // Patch for exposed faces for lack of anything sensible.
-    const label defaultPatch = globalToPatch[0];
+    label defaultPatch = 0;
+    if (globalToPatch.size() > 0)
+    {
+        defaultPatch = globalToPatch[0];
+    }
 
     for (label i = 0; i < nBufferLayers; i++)
     {
