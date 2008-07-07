@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ namespace Foam
 class triSurfaceMesh
 :
     public searchableSurface,
-    public objectRegistry,
+    public objectRegistry,      // so we can store fields
     public triSurface
 {
 private:
@@ -67,6 +67,12 @@ private:
         //- Search tree for boundary edges.
         mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
 
+        //- Names of regions
+        mutable wordList regions_;
+
+        //- Is surface closed
+        mutable label surfaceClosed_;
+
     // Private Member Functions
 
         //- Check file existence
@@ -75,6 +81,10 @@ private:
             const fileName& fName,
             const fileName& objectName
         );
+
+        //- Check whether surface is closed without calculating any permanent
+        //  addressing.
+        bool isSurfaceClosed() const;
 
         //- Disallow default bitwise copy construct
         triSurfaceMesh(const triSurfaceMesh&);
@@ -97,11 +107,10 @@ public:
         //- Construct read
         triSurfaceMesh(const IOobject& io);
 
-        //- Construct as searchableSurface
+        //- Construct from dictionary (used by searchableSurface)
         triSurfaceMesh
         (
-            const word& name,
-            const objectRegistry& obj,
+            const IOobject& io,
             const dictionary& dict
         );
 
@@ -128,57 +137,73 @@ public:
 
         // searchableSurface implementation
 
-            //- Calculate nearest point on surface. Returns
-            //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface
-            //  - point: actual nearest point found
-            virtual pointIndexHit findNearest
+            virtual const wordList& regions() const;
+
+            //- Whether supports volume type below. I.e. whether is closed.
+            virtual bool hasVolumeType() const;
+
+
+        // Multiple point queries.
+
+            virtual void findNearest
             (
-                const point& sample,
-                const scalar nearestDistSqr
+                const pointField& sample,
+                const scalarField& nearestDistSqr,
+                List<pointIndexHit>&
             ) const;
 
-            //- Calculate nearest point on edge. Returns
-            //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface
-            //  - point: actual nearest point found
-            virtual pointIndexHit findNearestOnEdge
+            virtual void findLine
             (
-                const point& sample,
-                const scalar nearestDistSqr
+                const pointField& start,
+                const pointField& end,
+                List<pointIndexHit>&
             ) const;
 
-            //- Find nearest to line. Returns
-            //  - bool : any point found?
-            //  - label: relevant index in shapes
-            //  - point: actual nearest point found
-            //  sets:
-            //  - tightest  : bounding box
-            //  - linePoint : corresponding nearest point on line
-            virtual pointIndexHit findNearest
+            virtual void findLineAny
             (
-                const linePointRef& ln,
-                treeBoundBox& tightest,
-                point& linePoint
+                const pointField& start,
+                const pointField& end,
+                List<pointIndexHit>&
             ) const;
 
-            //- Find nearest intersection of line between start and end.
-            virtual pointIndexHit findLine
+            //- Get all intersections in order from start to end.
+            virtual void findLineAll
             (
-                const point& start,
-                const point& end
+                const pointField& start,
+                const pointField& end,
+                List<List<pointIndexHit> >&
             ) const;
 
-            //- Find any intersection of line between start and end.
-            virtual pointIndexHit findLineAny
+            //- From a set of points and indices get the region
+            virtual void getRegion
             (
-                const point& start,
-                const point& end
+                const List<pointIndexHit>&,
+                labelList& region
+            ) const;
+
+            //- From a set of points and indices get the normal
+            virtual void getNormal
+            (
+                const List<pointIndexHit>&,
+                vectorField& normal
             ) const;
 
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)
-            virtual volumeType getVolumeType(const point&) const;
+            virtual void getVolumeType
+            (
+                const pointField&,
+                List<volumeType>&
+            ) const;
+
+
+        // regIOobject implementation
+
+            bool writeData(Ostream&) const
+            {
+                notImplemented("triSurfaceMesh::writeData(Ostream&) const");
+                return false;
+            }
 
 };
 

@@ -53,6 +53,14 @@ indexedOctree/treeDataFace.C
 indexedOctree/treeDataPoint.C
 indexedOctree/treeDataTriSurface.C
 
+searchableSurface = searchableSurface
+$(searchableSurface)/searchableBox.C
+$(searchableSurface)/searchableSphere.C
+$(searchableSurface)/searchableSurface.C
+$(searchableSurface)/searchableSurfaces.C
+$(searchableSurface)/searchableSurfacesQueries.C
+$(searchableSurface)/triSurfaceMesh.C
+
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C
 $(topoSets)/topoSet.C
@@ -117,20 +125,10 @@ $(intersectedSurface)/intersectedSurface.C
 $(intersectedSurface)/edgeSurface.C
 
 triSurface/triSurfaceSearch/triSurfaceSearch.C
-
 triSurface/octreeData/octreeDataTriSurface.C
 triSurface/octreeData/octreeDataTriSurfaceTreeLeaf.C
-
 triSurface/triangleFuncs/triangleFuncs.C
-
-triSurface/searchableSurface/searchableSurface.C
-triSurface/searchableSurface/triSurfaceMesh.C
-triSurface/searchableSurface/searchableBox.C
-
 triSurface/surfaceFeatures/surfaceFeatures.C
-
-triSurface/triSurfaceMeshes/triSurfaceMeshes.C
-
 triSurface/triSurfaceTools/triSurfaceTools.C
 triSurface/triSurfaceTools/geompack/geompack.C
 

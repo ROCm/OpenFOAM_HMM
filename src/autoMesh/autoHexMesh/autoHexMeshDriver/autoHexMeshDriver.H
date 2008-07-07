@@ -49,8 +49,9 @@ SourceFiles
 #include "wallPoint.H"
 #include "indirectPrimitivePatch.H"
 #include "featureEdgeMesh.H"
-#include "searchableSurface.H"
+#include "searchableSurfaces.H"
 #include "refinementSurfaces.H"
+#include "shellSurfaces.H"
 #include "meshRefinement.H"
 #include "decompositionMethod.H"
 #include "fvMeshDistribute.H"
@@ -70,6 +71,9 @@ class pointData;
 class faceSet;
 class addPatchCellLayer;
 class mapDistributePolyMesh;
+class snapParameters;
+class layerParameters;
+class refinementParameters;
 
 /*---------------------------------------------------------------------------*\
                            Class autoHexMeshDriver Declaration
@@ -79,15 +83,13 @@ class autoHexMeshDriver
 {
     // Static data members
 
-        //- Default angle for faces to be convcave
-        static const scalar defaultConcaveAngle;
-
         //- Extrusion controls
         enum extrudeMode
         {
             NOEXTRUDE,      /*!< Do not extrude. No layers added. */
             EXTRUDE,        /*!< Extrude */
-            EXTRUDEREMOVE   /*!< Extrude but afterwards remove added faces locally */
+            EXTRUDEREMOVE   /*!< Extrude but afterwards remove added */
+                            /*!< faces locally */
         };
 
 
@@ -141,42 +143,24 @@ class autoHexMeshDriver
         //- Debug level
         const label debug_;
 
-        //- Total number of cells
-        const label maxGlobalCells_;
-
-        //- Per processor max number of cells
-        const label maxLocalCells_;
-
-        //- When to stop refining
-        const label minRefineCells_;
-
-        //- Curvature
-        const scalar curvature_;
-
-        //- Number of layers between different refinement levels
-        const label nBufferLayers_;
-
-        //- Areas to keep
-        const pointField keepPoints_;
-
         //- Merge distance
         const scalar mergeDist_;
 
 
+        // Refinement only
 
-        //- Explicit features
-        PtrList<featureEdgeMesh> featureMeshes_;
-        //- Per feature the refinement level
-        labelList featureLevels_;
+            //- Explicit features
+            PtrList<featureEdgeMesh> featureMeshes_;
+            //- Per feature the refinement level
+            labelList featureLevels_;
 
-        //- Shells
-        PtrList<searchableSurface> shells_;
-        //- Per shell the refinement level
-        labelList shellLevels_;
-        //- Per shell whether to refine inside or outside
-        boolList shellRefineInside_;
+        //- All surface based geometry
+        autoPtr<searchableSurfaces> allGeometryPtr_;
 
-        //- Surfaces with refinement levels built-in
+        //- Shells (geometry for inside/outside refinement)
+        autoPtr<shellSurfaces> shellsPtr_;
+
+        //- Surfaces (geometry for intersection based refinement)
         autoPtr<refinementSurfaces> surfacesPtr_;
 
         //- Per refinement surface region the patch
@@ -199,10 +183,6 @@ class autoHexMeshDriver
 
             //- Calculate merge distance. Check against writing tolerance.
             scalar getMergeDistance(const scalar mergeTol) const;
-
-            // Return per keeppoint -1 or the local cell label the point is in.
-            // Guaranteed to be only on one processor.
-            labelList findCells(const pointField&) const;
 
             static void orientOutside(PtrList<searchableSurface>&);
 
@@ -371,6 +351,7 @@ class autoHexMeshDriver
                 //  layers per surface.
                 void setNumLayers
                 (
+                    const labelList& patchToNLayers,
                     const labelList& patchIDs,
                     const indirectPrimitivePatch& pp,
                     pointField& patchDisp,
@@ -390,17 +371,22 @@ class autoHexMeshDriver
                 //- Calculate pointwise wanted and minimum thickness.
                 //  thickness: wanted thickness
                 //  minthickness: when to give up and not extrude
+                //  Gets per patch parameters and determine pp pointwise
+                //  parameters.
                 void calculateLayerThickness
                 (
-                    const scalar expansionRatio,
-                    const scalar finalLayerRatio,
-                    const scalar relMinThickness,
                     const indirectPrimitivePatch& pp,
+                    const labelList& patchIDs,
+                    const scalarField& patchExpansionRatio,
+                    const scalarField& patchFinalLayerRatio,
+                    const scalarField& patchRelMinThickness,
                     const labelList& cellLevel,
                     const labelList& patchNLayers,
                     const scalar edge0Len,
+
                     scalarField& thickness,
-                    scalarField& minThickness
+                    scalarField& minThickness,
+                    scalarField& expansionRatio
                 ) const;
 
 
@@ -638,13 +624,13 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and mesh to modify
-        autoHexMeshDriver
-        (
-            fvMesh& mesh,
-            const dictionary& meshDict,
-            const dictionary& decomposeDict
-        );
+//        //- Construct from dictionary and mesh to modify
+//        autoHexMeshDriver
+//        (
+//            fvMesh& mesh,
+//            const dictionary& meshDict,
+//            const dictionary& decomposeDict
+//        );
 
         //- Alternative constructor from top-level controldictionary and
         //  refinement specific dictionary
@@ -652,6 +638,7 @@ public:
         (
             fvMesh& mesh,
             const dictionary& controlDict,
+            const dictionary& geometryDict,
             const dictionary& refineDict,
             const dictionary& decomposeDict
         );
@@ -677,6 +664,12 @@ public:
                 return surfacesPtr_();
             }
 
+            //- Surfaces to volume refinement on
+            const shellSurfaces& shells() const
+            {
+                return shellsPtr_();
+            }
+
             //- Per refinementsurface, per region the patch
             const labelList& globalToPatch() const
             {
@@ -689,32 +682,53 @@ public:
             //- Refine around explicit feature edges
             label featureEdgeRefine
             (
+                const refinementParameters& refineParams,
                 const PtrList<dictionary>& featDicts,
                 const label maxIter,
                 const label minRefine
             );
 
             //- Refine at surface intersections
-            label surfaceOnlyRefine(const label maxIter);
+            label surfaceOnlyRefine
+            (
+                const refinementParameters& refineParams,
+                const label maxIter
+            );
 
             //- Remove cells not reachable from keep points
-            void removeInsideCells(const label nBufferLayers);
+            void removeInsideCells
+            (    
+                const refinementParameters& refineParams,
+                const label nBufferLayers
+            );
 
             //- Refine volume regions (interior of shells)
-            label shellRefine(const label maxIter);
+            label shellRefine
+            (
+                const refinementParameters& refineParams,
+                const label maxIter
+            );
 
             //- Introduce baffles; remove unreachable mesh parts
             //  handleSnapProblems : whether to remove free floating cells
-            void baffleAndSplitMesh(const bool handleSnapProblems);
+            void baffleAndSplitMesh
+            (
+                const refinementParameters& refineParams,
+                const bool handleSnapProblems
+            );
 
             //- Move cells to zones
-            void zonify();
+            void zonify(const refinementParameters&);
 
             //- Split and recombine baffles to get rid of single face baffles.
-            void splitAndMergeBaffles(const bool handleSnapProblems);
+            void splitAndMergeBaffles
+            (
+                const refinementParameters& refineParams,
+                const bool handleSnapProblems
+            );
 
             //- Merge multiple boundary faces on single cell
-            void mergePatchFaces();
+            void mergePatchFaces(const refinementParameters&);
 
             //- Redecompose according to cell count
             //  keepZoneFaces : find all faceZones from zoned surfaces and keep
@@ -742,7 +756,7 @@ public:
             //- Calculate edge length per patch point.
             scalarField calcSnapDistance
             (
-                const dictionary& snapDict,
+                const snapParameters& snapParams,
                 const indirectPrimitivePatch&
             ) const;
 
@@ -753,10 +767,17 @@ public:
             //  of surface points (on castellated mesh) w.r.t. surface.
             void preSmoothPatch
             (
-                const dictionary& snapDict,
+                const snapParameters& snapParams,
                 const label nInitErrors,
                 const List<labelPair>& baffles,
                 motionSmoother&
+            ) const;
+
+            //- Get points both on patch and facezone.
+            labelList getZoneSurfacePoints
+            (
+                const indirectPrimitivePatch&,
+                const word& zoneName
             ) const;
 
             //- Per patch point calculate point on nearest surface. Set as
@@ -771,7 +792,7 @@ public:
             //- Smooth the displacement field to the internal.
             void smoothDisplacement
             (
-                const dictionary& snapDict,
+                const snapParameters& snapParams,
                 motionSmoother&
             ) const;
 
@@ -779,7 +800,7 @@ public:
             //  locally relax the displacement.
             void scaleMesh
             (
-                const dictionary& snapDict,
+                const snapParameters& snapParams,
                 const label nInitErrors,
                 const List<labelPair>& baffles,
                 motionSmoother&
@@ -791,7 +812,7 @@ public:
             //- Merge patch faces on same cell.
             void mergePatchFacesUndo
             (
-                const dictionary& shrinkDict,
+                const layerParameters& layerParams,
                 const dictionary& motionDict
             );
 
@@ -801,7 +822,7 @@ public:
             //- Add cell layers
             void addLayers
             (
-                const dictionary& shrinkDict,
+                const layerParameters& layerParams,
                 const dictionary& motionDict,
                 const label nAllowableErrors,
                 motionSmoother&

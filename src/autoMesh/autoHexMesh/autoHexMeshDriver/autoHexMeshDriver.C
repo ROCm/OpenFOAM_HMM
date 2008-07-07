@@ -35,6 +35,9 @@ License
 #include "syncTools.H"
 #include "motionSmoother.H"
 #include "pointMesh.H"
+#include "refinementParameters.H"
+#include "snapParameters.H"
+#include "layerParameters.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -60,7 +63,8 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
        -scalar(IOstream::defaultPrecision())
     );
 
-    Info<< "Overall mesh bounding box  : " << meshBb << nl
+    Info<< nl
+        << "Overall mesh bounding box  : " << meshBb << nl
         << "Relative tolerance         : " << mergeTol << nl
         << "Absolute matching distance : " << mergeDist << nl
         << endl;
@@ -82,110 +86,59 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 }
 
 
-// Return per keeppoint -1 or the local cell label the point is in. Guaranteed
-// to be only on one processor.
-Foam::labelList Foam::autoHexMeshDriver::findCells(const pointField& keepPoints)
- const
-{
-    // Global calculation engine
-    globalIndex globalCells(mesh_.nCells());
-
-    // Cell label per point
-    labelList cellLabels(keepPoints.size());
-
-    forAll(keepPoints, i)
-    {
-        const point& keepPoint = keepPoints[i];
-
-        label localCellI = mesh_.findCell(keepPoint);
-
-        label globalCellI = -1;
-
-        if (localCellI != -1)
-        {
-            Pout<< "Found point " << keepPoint << " in cell " << localCellI
-                << " on processor " << Pstream::myProcNo() << endl;
-            globalCellI = globalCells.toGlobal(localCellI);
-        }
-
-        reduce(globalCellI, maxOp<label>());
-
-        if (globalCellI == -1)
-        {
-            FatalErrorIn
-            (
-                "autoHexMeshDriver::findCells(const pointField&) const"
-            )   << "Point " << keepPoint << " is not inside the mesh." << nl
-                << "Bounding box of the mesh:" << mesh_.bounds()
-                << exit(FatalError);
-        }
-
-        if (globalCells.isLocal(globalCellI))
-        {
-            cellLabels[i] = localCellI;
-        }
-        else
-        {
-            cellLabels[i] = -1;
-        }
-    }
-    return cellLabels;
-}
-
-
-// Specifically orient using a calculated point outside
-void Foam::autoHexMeshDriver::orientOutside(PtrList<searchableSurface>& shells)
-{
-    // Determine outside point.
-    boundBox overallBb
-    (
-        point(GREAT, GREAT, GREAT),
-        point(-GREAT, -GREAT, -GREAT)
-    );
-
-    bool hasSurface = false;
-
-    forAll(shells, shellI)
-    {
-        if (isA<triSurfaceMesh>(shells[shellI]))
-        {
-            const triSurfaceMesh& shell =
-                refCast<const triSurfaceMesh>(shells[shellI]);
-
-            hasSurface = true;
-
-            boundBox shellBb(shell.localPoints(), false);
-
-            overallBb.min() = min(overallBb.min(), shellBb.min());
-            overallBb.max() = max(overallBb.max(), shellBb.max());
-        }
-    }
-
-    if (hasSurface)
-    {
-        const point outsidePt(2*overallBb.max() - overallBb.min());
-
-        //Info<< "Using point " << outsidePt << " to orient shells" << endl;
-
-        forAll(shells, shellI)
-        {
-            if (isA<triSurfaceMesh>(shells[shellI]))
-            {
-                triSurfaceMesh& shell = refCast<triSurfaceMesh>(shells[shellI]);
-
-                if (!refinementSurfaces::isSurfaceClosed(shell))
-                {
-                    FatalErrorIn("orientOutside(PtrList<searchableSurface>&)")
-                        << "Refinement shell "
-                        << shell.searchableSurface::name()
-                        << " is not closed." << exit(FatalError);
-                }
-
-                refinementSurfaces::orientSurface(outsidePt, shell);
-            }
-        }
-    }
-}
+//// Specifically orient using a calculated point outside
+//void Foam::autoHexMeshDriver::orientOutside(PtrList<searchableSurface>& shells)
+//{
+//    // Determine outside point.
+//    boundBox overallBb
+//    (
+//        point(GREAT, GREAT, GREAT),
+//        point(-GREAT, -GREAT, -GREAT)
+//    );
+//
+//    bool hasSurface = false;
+//
+//    forAll(shells, shellI)
+//    {
+//        if (isA<triSurfaceMesh>(shells[shellI]))
+//        {
+//            const triSurfaceMesh& shell =
+//                refCast<const triSurfaceMesh>(shells[shellI]);
+//
+//            hasSurface = true;
+//
+//            boundBox shellBb(shell.localPoints(), false);
+//
+//            overallBb.min() = min(overallBb.min(), shellBb.min());
+//            overallBb.max() = max(overallBb.max(), shellBb.max());
+//        }
+//    }
+//
+//    if (hasSurface)
+//    {
+//        const point outsidePt(2*overallBb.max() - overallBb.min());
+//
+//        //Info<< "Using point " << outsidePt << " to orient shells" << endl;
+//
+//        forAll(shells, shellI)
+//        {
+//            if (isA<triSurfaceMesh>(shells[shellI]))
+//            {
+//                triSurfaceMesh& shell = refCast<triSurfaceMesh>(shells[shellI]);
+//
+//                if (!refinementSurfaces::isSurfaceClosed(shell))
+//                {
+//                    FatalErrorIn("orientOutside(PtrList<searchableSurface>&)")
+//                        << "Refinement shell "
+//                        << shell.searchableSurface::name()
+//                        << " is not closed." << exit(FatalError);
+//                }
+//
+//                refinementSurfaces::orientSurface(outsidePt, shell);
+//            }
+//        }
+//    }
+//}
 
 
 // Check that face zones are synced
@@ -286,324 +239,394 @@ void Foam::autoHexMeshDriver::checkCoupledFaceZones() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-Foam::autoHexMeshDriver::autoHexMeshDriver
-(
-    fvMesh& mesh,
-    const dictionary& dict,
-    const dictionary& decomposeDict
-)
-:
-    mesh_(mesh),
-    dict_(dict),
-    debug_(readLabel(dict_.lookup("debug"))),
-    maxGlobalCells_(readLabel(dict_.lookup("cellLimit"))),
-    maxLocalCells_(readLabel(dict_.lookup("procCellLimit"))),
-    minRefineCells_(readLabel(dict_.lookup("minimumRefine"))),
-    curvature_(readScalar(dict_.lookup("curvature"))),
-    nBufferLayers_(readLabel(dict_.lookup("nBufferLayers"))),
-    keepPoints_(dict_.lookup("keepPoints")),
-    mergeDist_(getMergeDistance(readScalar(dict_.lookup("mergeTolerance"))))
-{
-    if (debug_ > 0)
-    {
-        meshRefinement::debug = debug_;
-        autoHexMeshDriver::debug = debug_;
-    }
-
-    Info<< "Overall cell limit                         : " << maxGlobalCells_
-        << endl;
-    Info<< "Per processor cell limit                   : " << maxLocalCells_
-        << endl;
-    Info<< "Minimum number of cells to refine          : " << minRefineCells_
-        << endl;
-    Info<< "Curvature                                  : " << curvature_
-        << nl << endl;
-    Info<< "Layers between different refinement levels : " << nBufferLayers_
-        << endl;
-
-    // Check keepPoints are sensible
-    findCells(keepPoints_);
-
-
-    // Read refinement shells
-    // ~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< "Reading refinement shells." << endl;
-
-        PtrList<dictionary> shellDicts(dict_.lookup("refinementShells"));
-
-        shells_.setSize(shellDicts.size());
-        shellLevels_.setSize(shellDicts.size());
-        shellRefineInside_.setSize(shellDicts.size());
-
-        forAll(shellDicts, i)
-        {
-            const dictionary& dict = shellDicts[i];
-
-            shells_.set
-            (
-                i,
-                searchableSurface::New
-                (
-                    dict.lookup("type"),
-                    dict.lookup("name"),
-                    mesh_.time(),
-                    dict
-                )
-            );
-            shellLevels_[i] = readLabel(dict.lookup("level"));
-            shellRefineInside_[i] = Switch(dict.lookup("refineInside"));
-
-            if (shellRefineInside_[i])
-            {
-                Info<< "Refinement level " << shellLevels_[i]
-                    << " for all cells inside " << shells_[i].name() << endl;
-            }
-            else
-            {
-                Info<< "Refinement level " << shellLevels_[i]
-                    << " for all cells outside " << shells_[i].name() << endl;
-            }
-        }
-
-        Info<< "Read refinement shells in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Orient shell surfaces before any searching is done.
-        Info<< "Orienting triSurface shells so point far away is outside."
-            << endl;
-        orientOutside(shells_);
-        Info<< "Oriented shells in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    }
-
-
-    // Read refinement surfaces
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< "Reading surfaces and constructing search trees." << endl;
-
-        surfacesPtr_.reset
-        (
-            new refinementSurfaces
-            (
-                IOobject
-                (
-                    "",                                 // dummy name
-                    mesh_.time().constant(),            // directory
-                    "triSurface",                       // instance
-                    mesh_.time(),                       // registry
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                dict_.lookup("surfaces")
-            )
-        );
-        Info<< "Read surfaces in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Orient surfaces (if they're closed) before any searching is done.
-        Info<< "Orienting (closed) surfaces so keepPoint is outside." << endl;
-        forAll(surfaces(), i)
-        {
-            if (refinementSurfaces::isSurfaceClosed(surfaces()[i]))
-            {
-                refinementSurfaces::orientSurface
-                (
-                    keepPoints_[0],
-                    surfacesPtr_()[i]
-                );
-            }
-        }
-        Info<< "Oriented closed surfaces in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        Info<< "Setting refinement level of surface to be consistent"
-            << " with shells." << endl;
-        surfacesPtr_().setMinLevelFields
-        (
-            shells_,
-            shellLevels_,
-            shellRefineInside_
-        );
-        Info<< "Checked shell refinement in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    }
-
-    // Check faceZones are synchronised
-    checkCoupledFaceZones();
-
-
-    // Add all the surface regions as patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< nl
-            << "Adding patches for surface regions" << nl
-            << "----------------------------------" << nl
-            << endl;
-
-        // From global region number to mesh patch.
-        globalToPatch_.setSize(surfaces().nRegions(), -1);
-
-        Info<< "Patch\tRegion" << nl
-            << "-----\t------"
-            << endl;
-
-        forAll(surfaces(), surfI)
-        {
-            const triSurfaceMesh& s = surfaces()[surfI];
-
-            Info<< surfaces().names()[surfI] << ':' << nl << nl;
-
-            const geometricSurfacePatchList& regions = s.patches();
-
-            labelList nTrisPerRegion(surfaces().countRegions(s));
-
-            forAll(regions, i)
-            {
-                if (nTrisPerRegion[i] > 0)
-                {
-                    label globalRegionI = surfaces().globalRegion(surfI, i);
-
-                    // Use optionally specified patch type and name
-                    word patchType = surfaces().patchType()[globalRegionI];
-                    if (patchType == "")
-                    {
-                        patchType = wallPolyPatch::typeName;
-                    }
-
-                    word patchName = surfaces().patchName()[globalRegionI];
-                    if (patchName == "")
-                    {
-                        patchName =
-                            surfaces().names()[surfI]
-                          + '_'
-                          + regions[i].name();
-                    }
-
-                    label patchI = meshRefinement::addPatch
-                    (
-                        mesh,
-                        patchName,
-                        patchType
-                    );
-
-                    Info<< patchI << '\t' << regions[i].name() << nl;
-
-                    globalToPatch_[globalRegionI] = patchI;
-                }
-            }
-
-            Info<< nl;
-        }
-        Info<< "Added patches in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    }
-
-
-    //// Add cyclics for any named faceZones
-    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //// (these cyclics are used later on to temporarily put the faceZones
-    ////  in when snapping)
-    //
-    //labelList namedSurfaces(surfaces().getNamedSurfaces());
-    //if (namedSurfaces.size() > 0)
-    //{
-    //    Info<< nl
-    //        << "Introducing cyclics for faceZones" << nl
-    //        << "---------------------------------" << nl
-    //        << endl;
-    //
-    //    // From surface to cyclic patch
-    //    surfaceToCyclicPatch_.setSize(surfaces().size(), -1);
-    //
-    //    Info<< "Patch\tZone" << nl
-    //        << "----\t-----"
-    //        << endl;
-    //
-    //    forAll(namedSurfaces, i)
-    //    {
-    //        label surfI = namedSurfaces[i];
-    //
-    //        surfaceToCyclicPatch_[surfI] = meshRefinement::addPatch
-    //        (
-    //            mesh,
-    //            surfaces().faceZoneNames()[surfI],
-    //            cyclicPolyPatch::typeName
-    //        );
-    //
-    //        Info<< surfaceToCyclicPatch_[surfI] << '\t'
-    //            << surfaces().faceZoneNames()[surfI] << nl << endl;
-    //    }
-    //    Info<< "Added cyclic patches in = "
-    //        << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    //}
-
-
-    // Parallel
-    // ~~~~~~~~
-
-    {
-        // Decomposition
-        decomposerPtr_ = decompositionMethod::New
-        (
-            decomposeDict,
-            mesh_
-        );
-        decompositionMethod& decomposer = decomposerPtr_();
-
-
-        if (Pstream::parRun() && !decomposer.parallelAware())
-        {
-            FatalErrorIn("autoHexMeshDriver::autoHexMeshDriver(const IOobject&, fvMesh&)")
-                << "You have selected decomposition method "
-                << decomposer.typeName
-                << " which is not parallel aware." << endl
-                << "Please select one that is (parMetis, hierarchical)"
-                << exit(FatalError);
-        }
-
-        // Mesh distribution engine (uses tolerance to reconstruct meshes)
-        distributorPtr_.reset(new fvMeshDistribute(mesh_, mergeDist_));
-    }
-
-
-    // Refinement engine
-    // ~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< nl
-            << "Determining initial surface intersections" << nl
-            << "-----------------------------------------" << nl
-            << endl;
-
-        // Main refinement engine
-        meshRefinerPtr_.reset
-        (
-            new meshRefinement
-            (
-                mesh,
-                mergeDist_,         // tolerance used in sorting coordinates
-                surfaces()
-            )
-        );
-        Info<< "Calculated surface intersections in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Some stats
-        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
-
-        meshRefinerPtr_().write
-        (
-            debug_&meshRefinement::OBJINTERSECTIONS,
-            mesh_.time().path()/mesh_.time().timeName()
-        );
-    }
-}
+//// Construct from components
+//Foam::autoHexMeshDriver::autoHexMeshDriver
+//(
+//    fvMesh& mesh,
+//    const dictionary& dict,
+//    const dictionary& decomposeDict
+//)
+//:
+//    mesh_(mesh),
+//    dict_(dict),
+//    debug_(readLabel(dict_.lookup("debug"))),
+//    mergeDist_(getMergeDistance(readScalar(dict_.lookup("mergeTolerance"))))
+//{
+//    if (debug_ > 0)
+//    {
+//        meshRefinement::debug = debug_;
+//        autoHexMeshDriver::debug = debug_;
+//    }
+//
+//    refinementParameters refineParams(dict);
+//
+//    Info<< "Overall cell limit                         : "
+//        << refineParams.maxGlobalCells() << endl;
+//    Info<< "Per processor cell limit                   : "
+//        << refineParams.maxLocalCells() << endl;
+//    Info<< "Minimum number of cells to refine          : "
+//        << refineParams.minRefineCells() << endl;
+//    Info<< "Curvature                                  : "
+//        << refineParams.curvature() << nl << endl;
+//    Info<< "Layers between different refinement levels : "
+//        << refineParams.nBufferLayers() << endl;
+//
+////XXXXX
+//    PtrList<dictionary> shellsDict(dict_.lookup("refinementShells"));
+//
+//    PtrList<dictionary> surfacesDict(dict_.lookup("surfaces"));
+//
+//
+//    // Read geometry
+//    // ~~~~~~~~~~~~~
+//
+//    {
+//        Info<< "Reading all geometry." << endl;
+//
+//        // Construct dictionary with all shells and all refinement surfaces
+//        dictionary geometryDict;
+//
+//        forAll(shellsDict, shellI)
+//        {
+//            dictionary shellDict = shellsDict[shellI];
+//            const word name(shellDict.lookup("name"));
+//            shellDict.remove("name");
+//            shellDict.remove("level");
+//            shellDict.remove("refineInside");
+//            geometryDict.add(name, shellDict);
+//        }
+//
+//        forAll(surfacesDict, surfI)
+//        {
+//            dictionary surfDict = surfacesDict[shellI];
+//            const word name(string::validate<word>(surfDict.lookup("file")));
+//            surfDict.remove("file");
+//            if (!surfDict.found("name"))
+//            {
+//                surfDict.add("name", name);
+//            }
+//            geometryDict.add(name, iter());
+//        }
+//
+//        allGeometryPtr_.reset
+//        (
+//            new searchableSurfaces
+//            (
+//                IOobject
+//                (
+//                    "abc",                      // dummy name
+//                    mesh_.time().constant(),    // directory
+//                    "triSurface",               // instance
+//                    mesh_.time(),               // registry
+//                    IOobject::MUST_READ,
+//                    IOobject::NO_WRITE
+//                ),
+//                geometryDict
+//            )
+//        );
+//
+//        Info<< "Read geometry in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
+//    }
+//
+//
+//    // Read refinement surfaces
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    {
+//        Info<< "Reading surfaces and constructing search trees." << endl;
+//
+//        surfacesPtr_.reset
+//        (
+//            new refinementSurfaces
+//            (
+//                allGeometryPtr_(),
+//                surfacesDict
+//            )
+//        );
+//        Info<< "Read surfaces in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//    }
+//
+//    // Read refinement shells
+//    // ~~~~~~~~~~~~~~~~~~~~~~
+//
+//    {
+//        Info<< "Reading refinement shells." << endl;
+//
+//        PtrList<dictionary> shellDicts(dict_.lookup("refinementShells"));
+//
+//        shells_.setSize(shellDicts.size());
+//        shellLevels_.setSize(shellDicts.size());
+//        shellRefineInside_.setSize(shellDicts.size());
+//
+//        forAll(shellDicts, i)
+//        {
+//            const dictionary& dict = shellDicts[i];
+//
+//            shells_.set
+//            (
+//                i,
+//                searchableSurface::New
+//                (
+//                    dict.lookup("type"),
+//                    dict.lookup("name"),
+//                    mesh_.time(),
+//                    dict
+//                )
+//            );
+//            shellLevels_[i] = readLabel(dict.lookup("level"));
+//            shellRefineInside_[i] = Switch(dict.lookup("refineInside"));
+//
+//            if (shellRefineInside_[i])
+//            {
+//                Info<< "Refinement level " << shellLevels_[i]
+//                    << " for all cells inside " << shells_[i].name() << endl;
+//            }
+//            else
+//            {
+//                Info<< "Refinement level " << shellLevels_[i]
+//                    << " for all cells outside " << shells_[i].name() << endl;
+//            }
+//        }
+//
+//        Info<< "Read refinement shells in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//
+//        // Orient shell surfaces before any searching is done.
+//        Info<< "Orienting triSurface shells so point far away is outside."
+//            << endl;
+//        orientOutside(shells_);
+//        Info<< "Oriented shells in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//    }
+//
+//
+//    // Read refinement surfaces
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    {
+//        Info<< "Reading surfaces and constructing search trees." << endl;
+//
+//        surfacesPtr_.reset
+//        (
+//            new refinementSurfaces
+//            (
+//                IOobject
+//                (
+//                    "",                                 // dummy name
+//                    mesh_.time().constant(),            // directory
+//                    "triSurface",                       // instance
+//                    mesh_.time(),                       // registry
+//                    IOobject::MUST_READ,
+//                    IOobject::NO_WRITE
+//                ),
+//                dict_.lookup("surfaces")
+//            )
+//        );
+//        Info<< "Read surfaces in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//
+//        // Orient surfaces (if they're closed) before any searching is done.
+//        Info<< "Orienting (closed) surfaces so keepPoint is outside." << endl;
+//        forAll(surfaces(), i)
+//        {
+//            if (refinementSurfaces::isSurfaceClosed(surfaces()[i]))
+//            {
+//                refinementSurfaces::orientSurface
+//                (
+//                    keepPoints_[0],
+//                    surfacesPtr_()[i]
+//                );
+//            }
+//        }
+//        Info<< "Oriented closed surfaces in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//
+//        Info<< "Setting refinement level of surface to be consistent"
+//            << " with shells." << endl;
+//        surfacesPtr_().setMinLevelFields
+//        (
+//            shells_,
+//            shellLevels_,
+//            shellRefineInside_
+//        );
+//        Info<< "Checked shell refinement in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//    }
+//
+//    // Check faceZones are synchronised
+//    checkCoupledFaceZones();
+//
+//
+//    // Add all the surface regions as patches
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    {
+//        Info<< nl
+//            << "Adding patches for surface regions" << nl
+//            << "----------------------------------" << nl
+//            << endl;
+//
+//        // From global region number to mesh patch.
+//        globalToPatch_.setSize(surfaces().nRegions(), -1);
+//
+//        Info<< "Patch\tRegion" << nl
+//            << "-----\t------"
+//            << endl;
+//
+//        forAll(surfaces(), surfI)
+//        {
+//            const triSurfaceMesh& s = surfaces()[surfI];
+//
+//            Info<< surfaces().names()[surfI] << ':' << nl << nl;
+//
+//            const geometricSurfacePatchList& regions = s.patches();
+//
+//            labelList nTrisPerRegion(surfaces().countRegions(s));
+//
+//            forAll(regions, i)
+//            {
+//                if (nTrisPerRegion[i] > 0)
+//                {
+//                    label globalRegionI = surfaces().globalRegion(surfI, i);
+//
+//                    // Use optionally specified patch type and name
+//                    word patchType = surfaces().patchType()[globalRegionI];
+//                    if (patchType == "")
+//                    {
+//                        patchType = wallPolyPatch::typeName;
+//                    }
+//
+//                    word patchName = surfaces().patchName()[globalRegionI];
+//                    if (patchName == "")
+//                    {
+//                        patchName =
+//                            surfaces().names()[surfI]
+//                          + '_'
+//                          + regions[i].name();
+//                    }
+//
+//                    label patchI = meshRefinement::addPatch
+//                    (
+//                        mesh,
+//                        patchName,
+//                        patchType
+//                    );
+//
+//                    Info<< patchI << '\t' << regions[i].name() << nl;
+//
+//                    globalToPatch_[globalRegionI] = patchI;
+//                }
+//            }
+//
+//            Info<< nl;
+//        }
+//        Info<< "Added patches in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//    }
+//
+//
+//    //// Add cyclics for any named faceZones
+//    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//    //// (these cyclics are used later on to temporarily put the faceZones
+//    ////  in when snapping)
+//    //
+//    //labelList namedSurfaces(surfaces().getNamedSurfaces());
+//    //if (namedSurfaces.size() > 0)
+//    //{
+//    //    Info<< nl
+//    //        << "Introducing cyclics for faceZones" << nl
+//    //        << "---------------------------------" << nl
+//    //        << endl;
+//    //
+//    //    // From surface to cyclic patch
+//    //    surfaceToCyclicPatch_.setSize(surfaces().size(), -1);
+//    //
+//    //    Info<< "Patch\tZone" << nl
+//    //        << "----\t-----"
+//    //        << endl;
+//    //
+//    //    forAll(namedSurfaces, i)
+//    //    {
+//    //        label surfI = namedSurfaces[i];
+//    //
+//    //        surfaceToCyclicPatch_[surfI] = meshRefinement::addPatch
+//    //        (
+//    //            mesh,
+//    //            surfaces().faceZoneNames()[surfI],
+//    //            cyclicPolyPatch::typeName
+//    //        );
+//    //
+//    //        Info<< surfaceToCyclicPatch_[surfI] << '\t'
+//    //            << surfaces().faceZoneNames()[surfI] << nl << endl;
+//    //    }
+//    //    Info<< "Added cyclic patches in = "
+//    //        << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//    //}
+//
+//
+//    // Parallel
+//    // ~~~~~~~~
+//
+//    {
+//        // Decomposition
+//        decomposerPtr_ = decompositionMethod::New
+//        (
+//            decomposeDict,
+//            mesh_
+//        );
+//        decompositionMethod& decomposer = decomposerPtr_();
+//
+//
+//        if (Pstream::parRun() && !decomposer.parallelAware())
+//        {
+//            FatalErrorIn("autoHexMeshDriver::autoHexMeshDriver"
+//                "(const IOobject&, fvMesh&)")
+//                << "You have selected decomposition method "
+//                << decomposer.typeName
+//                << " which is not parallel aware." << endl
+//                << "Please select one that is (parMetis, hierarchical)"
+//                << exit(FatalError);
+//        }
+//
+//        // Mesh distribution engine (uses tolerance to reconstruct meshes)
+//        distributorPtr_.reset(new fvMeshDistribute(mesh_, mergeDist_));
+//    }
+//
+//
+//    // Refinement engine
+//    // ~~~~~~~~~~~~~~~~~
+//
+//    {
+//        Info<< nl
+//            << "Determining initial surface intersections" << nl
+//            << "-----------------------------------------" << nl
+//            << endl;
+//
+//        // Main refinement engine
+//        meshRefinerPtr_.reset
+//        (
+//            new meshRefinement
+//            (
+//                mesh,
+//                mergeDist_,         // tolerance used in sorting coordinates
+//                surfaces()
+//            )
+//        );
+//        Info<< "Calculated surface intersections in = "
+//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+//
+//        // Some stats
+//        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
+//
+//        meshRefinerPtr_().write
+//        (
+//            debug_&meshRefinement::OBJINTERSECTIONS,
+//            mesh_.time().path()/mesh_.time().timeName()
+//        );
+//    }
+//}
 
 
 // Construct from separate dictionaries.
@@ -611,6 +634,7 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 (
     fvMesh& mesh,
     const dictionary& controlDict,
+    const dictionary& geometryDict,
     const dictionary& refineDict,
     const dictionary& decomposeDict
 )
@@ -618,15 +642,9 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     mesh_(mesh),
     dict_(controlDict),
     debug_(readLabel(controlDict.lookup("debug"))),
-    maxGlobalCells_(readLabel(refineDict.lookup("cellLimit"))),
-    maxLocalCells_(readLabel(refineDict.lookup("procCellLimit"))),
-    minRefineCells_(readLabel(refineDict.lookup("minimumRefine"))),
-    curvature_(readScalar(refineDict.lookup("curvature"))),
-    nBufferLayers_(readLabel(refineDict.lookup("nBufferLayers"))),
-    keepPoints_(refineDict.lookup("keepPoints")),
     mergeDist_
     (
-        getMergeDistance(readScalar(refineDict.lookup("mergeTolerance")))
+        getMergeDistance(readScalar(controlDict.lookup("mergeTolerance")))
     )
 {
     if (debug_ > 0)
@@ -635,127 +653,69 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
         autoHexMeshDriver::debug = debug_;
     }
 
-    Info<< "Overall cell limit                         : " << maxGlobalCells_
-        << endl;
-    Info<< "Per processor cell limit                   : " << maxLocalCells_
-        << endl;
-    Info<< "Minimum number of cells to refine          : " << minRefineCells_
-        << endl;
-    Info<< "Curvature                                  : " << curvature_
-        << nl << endl;
-    Info<< "Layers between different refinement levels : " << nBufferLayers_
-        << endl;
+    // Read geometry
+    // ~~~~~~~~~~~~~
 
-    // Check keepPoints are sensible
-    findCells(keepPoints_);
-
-
-    // Read refinement shells
-    // ~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< "Reading refinement shells." << endl;
-
-        PtrList<dictionary> shellDicts(refineDict.lookup("refinementShells"));
-
-        shells_.setSize(shellDicts.size());
-        shellLevels_.setSize(shellDicts.size());
-        shellRefineInside_.setSize(shellDicts.size());
-
-        forAll(shellDicts, i)
-        {
-            const dictionary& dict = shellDicts[i];
-
-            shells_.set
+    Info<< "Reading all geometry." << endl;
+    allGeometryPtr_.reset
+    (
+        new searchableSurfaces
+        (
+            IOobject
             (
-                i,
-                searchableSurface::New
-                (
-                    dict.lookup("type"),
-                    dict.lookup("name"),
-                    mesh_.time(),
-                    dict
-                )
-            );
-            shellLevels_[i] = readLabel(dict.lookup("level"));
-            shellRefineInside_[i] = Switch(dict.lookup("refineInside"));
-
-            if (shellRefineInside_[i])
-            {
-                Info<< "Refinement level " << shellLevels_[i]
-                    << " for all cells inside " << shells_[i].name() << endl;
-            }
-            else
-            {
-                Info<< "Refinement level " << shellLevels_[i]
-                    << " for all cells outside " << shells_[i].name() << endl;
-            }
-        }
-
-        Info<< "Read refinement shells in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Orient shell surfaces before any searching is done.
-        Info<< "Orienting triSurface shells so point far away is outside."
-            << endl;
-        orientOutside(shells_);
-        Info<< "Oriented shells in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    }
+                "abc",                      // dummy name
+                mesh_.time().constant(),    // directory
+                "triSurface",               // instance
+                mesh_.time(),               // registry
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            geometryDict
+        )
+    );
+    Info<< "Read geometry in = "
+        << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
 
 
     // Read refinement surfaces
     // ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    {
-        Info<< "Reading surfaces and constructing search trees." << endl;
-
-        surfacesPtr_.reset
+    Info<< "Reading refinement surfaces." << endl;
+    surfacesPtr_.reset
+    (
+        new refinementSurfaces
         (
-            new refinementSurfaces
-            (
-                IOobject
-                (
-                    "",                                 // dummy name
-                    mesh_.time().constant(),            // directory
-                    "triSurface",                       // instance
-                    mesh_.time(),                       // registry
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                refineDict.lookup("surfaces")
-            )
-        );
-        Info<< "Read surfaces in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+            allGeometryPtr_(),
+            refineDict.subDict("refinementSurfaces")
+        )
+    );
+    Info<< "Read refinement surfaces in = "
+        << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
 
-        // Orient surfaces (if they're closed) before any searching is done.
-        Info<< "Orienting (closed) surfaces so keepPoint is outside." << endl;
-        forAll(surfaces(), i)
-        {
-            if (refinementSurfaces::isSurfaceClosed(surfaces()[i]))
-            {
-                refinementSurfaces::orientSurface
-                (
-                    keepPoints_[0],
-                    surfacesPtr_()[i]
-                );
-            }
-        }
-        Info<< "Oriented closed surfaces in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
 
-        Info<< "Setting refinement level of surface to be consistent"
-            << " with shells." << endl;
-        surfacesPtr_().setMinLevelFields
+    // Read refinement shells
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    Info<< "Reading refinement shells." << endl;
+    shellsPtr_.reset
+    (
+        new shellSurfaces
         (
-            shells_,
-            shellLevels_,
-            shellRefineInside_
-        );
-        Info<< "Checked shell refinement in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    }
+            allGeometryPtr_(),
+            refineDict.subDict("refinementRegions")
+        )
+    );
+    Info<< "Read refinement shells in = "
+        << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
+
+
+    Info<< "Setting refinement level of surface to be consistent"
+        << " with shells." << endl;
+    surfacesPtr_().setMinLevelFields(shells());
+    Info<< "Checked shell refinement in = "
+        << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
+
+
 
     // Check faceZones are synchronised
     checkCoupledFaceZones();
@@ -777,38 +737,41 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
             << "-----\t------"
             << endl;
 
-        forAll(surfaces(), surfI)
+        const labelList& surfaceGeometry = surfaces().surfaces();
+        forAll(surfaceGeometry, surfI)
         {
-            const triSurfaceMesh& s = surfaces()[surfI];
+            label geomI = surfaceGeometry[surfI];
+
+            const wordList& regNames = allGeometryPtr_().regionNames()[geomI];
 
             Info<< surfaces().names()[surfI] << ':' << nl << nl;
 
-            const geometricSurfacePatchList& regions = s.patches();
+            //const triSurfaceMesh& s = surfaces()[surfI];
+            //const geometricSurfacePatchList& regions = s.patches();
+            //labelList nTrisPerRegion(surfaces().countRegions(s));
 
-            labelList nTrisPerRegion(surfaces().countRegions(s));
-
-            forAll(regions, i)
+            forAll(regNames, i)
             {
-                if (nTrisPerRegion[i] > 0)
-                {
+                //if (nTrisPerRegion[i] > 0)
+                //{
                     label patchI = meshRefinement::addPatch
                     (
                         mesh,
                         //s.searchableSurface::name() + '_' + regions[i].name(),
-                        surfaces().names()[surfI] + '_' + regions[i].name(),
+                        regNames[i],
                         wallPolyPatch::typeName
                     );
 
-                    Info<< patchI << '\t' << regions[i].name() << nl;
+                    Info<< patchI << '\t' << regNames[i] << nl;
 
                     globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
-                }
+                //}
             }
 
             Info<< nl;
         }
         Info<< "Added patches in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+            << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
     }
 
     // Parallel
@@ -855,11 +818,12 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
             (
                 mesh,
                 mergeDist_,         // tolerance used in sorting coordinates
-                surfaces()
+                surfaces(),         // for surface intersection refinement
+                shells()            // for volume (inside/outside) refinement
             )
         );
         Info<< "Calculated surface intersections in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+            << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
 
         // Some stats
         meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
@@ -920,7 +884,7 @@ Foam::label Foam::autoHexMeshDriver::readFeatureEdges
     }
 
     Info<< "Read feature lines in = "
-        << mesh_.time().cpuTimeIncrement() << " s" << endl;
+        << mesh_.time().cpuTimeIncrement() << " s" << nl << endl;
 
     return featureMeshes_.size();
 }
@@ -928,6 +892,7 @@ Foam::label Foam::autoHexMeshDriver::readFeatureEdges
 
 Foam::label Foam::autoHexMeshDriver::featureEdgeRefine
 (
+    const refinementParameters& refineParams,
     const PtrList<dictionary>& featDicts,
     const label maxIter,
     const label minRefine
@@ -953,23 +918,18 @@ Foam::label Foam::autoHexMeshDriver::featureEdgeRefine
             (
                 meshRefiner.refineCandidates
                 (
-                    keepPoints_[0],     // For now only use one.
-                    globalToPatch_,
-                    curvature_,
+                    refineParams.keepPoints()[0],    // For now only use one.
+                    refineParams.curvature(),
 
                     featureMeshes_,
                     featureLevels_,
-
-                    shells_,
-                    shellLevels_,
-                    shellRefineInside_,
 
                     true,               // featureRefinement
                     false,              // internalRefinement
                     false,              // surfaceRefinement
                     false,              // curvatureRefinement
-                    maxGlobalCells_,
-                    maxLocalCells_
+                    refineParams.maxGlobalCells(),
+                    refineParams.maxLocalCells()
                 )
             );
             labelList cellsToRefine
@@ -1018,7 +978,11 @@ Foam::label Foam::autoHexMeshDriver::featureEdgeRefine
 }
 
 
-Foam::label Foam::autoHexMeshDriver::surfaceOnlyRefine(const label maxIter)
+Foam::label Foam::autoHexMeshDriver::surfaceOnlyRefine
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
 {
     meshRefinement& meshRefiner = meshRefinerPtr_();
 
@@ -1044,23 +1008,18 @@ Foam::label Foam::autoHexMeshDriver::surfaceOnlyRefine(const label maxIter)
         (
             meshRefiner.refineCandidates
             (
-                keepPoints_[0],
-                globalToPatch_,
-                curvature_,
+                refineParams.keepPoints()[0],
+                refineParams.curvature(),
 
                 featureMeshes_,
                 featureLevels_,
-
-                shells_,
-                shellLevels_,
-                shellRefineInside_,
 
                 false,              // featureRefinement
                 false,              // internalRefinement
                 true,               // surfaceRefinement
                 true,               // curvatureRefinement
-                maxGlobalCells_,
-                maxLocalCells_
+                refineParams.maxGlobalCells(),
+                refineParams.maxLocalCells()
             )
         );
         labelList cellsToRefine
@@ -1089,7 +1048,7 @@ Foam::label Foam::autoHexMeshDriver::surfaceOnlyRefine(const label maxIter)
             nCellsToRefine == 0
          || (
                 iter >= overallMaxLevel
-             && nCellsToRefine <= minRefineCells_
+             && nCellsToRefine <= refineParams.minRefineCells()
             )
         )
         {
@@ -1116,7 +1075,11 @@ Foam::label Foam::autoHexMeshDriver::surfaceOnlyRefine(const label maxIter)
 }
 
 
-void Foam::autoHexMeshDriver::removeInsideCells(const label nBufferLayers)
+void Foam::autoHexMeshDriver::removeInsideCells
+(
+    const refinementParameters& refineParams,
+    const label nBufferLayers
+)
 {
 
     meshRefinement& meshRefiner = meshRefinerPtr_();
@@ -1135,7 +1098,7 @@ void Foam::autoHexMeshDriver::removeInsideCells(const label nBufferLayers)
     (
         nBufferLayers,                  // nBufferLayers
         globalToPatch_,
-        keepPoints_[0]
+        refineParams.keepPoints()[0]
     );
 
     if (debug_)
@@ -1149,7 +1112,11 @@ void Foam::autoHexMeshDriver::removeInsideCells(const label nBufferLayers)
 }
 
 
-Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
+Foam::label Foam::autoHexMeshDriver::shellRefine
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
 {
     meshRefinement& meshRefiner = meshRefinerPtr_();
 
@@ -1170,15 +1137,7 @@ Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
     // Determine the maximum refinement level over all volume refinement
     // regions. This determines the minumum number of shell refinement
     // iterations.
-    label overallMaxShellLevel;
-    if (shellLevels_.size() == 0)
-    {
-        overallMaxShellLevel = 0;
-    }
-    else
-    {
-        overallMaxShellLevel = max(shellLevels_);
-    }
+    label overallMaxShellLevel = shells().maxLevel();
 
     label iter;
     for (iter = 0; iter < maxIter; iter++)
@@ -1192,23 +1151,18 @@ Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
         (
             meshRefiner.refineCandidates
             (
-                keepPoints_[0],
-                globalToPatch_,
-                curvature_,
+                refineParams.keepPoints()[0],
+                refineParams.curvature(),
 
                 featureMeshes_,
                 featureLevels_,
-
-                shells_,
-                shellLevels_,
-                shellRefineInside_,
 
                 false,              // featureRefinement
                 true,               // internalRefinement
                 false,              // surfaceRefinement
                 false,              // curvatureRefinement
-                maxGlobalCells_,
-                maxLocalCells_
+                refineParams.maxGlobalCells(),
+                refineParams.maxLocalCells()
             )
         );
 
@@ -1232,16 +1186,16 @@ Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
             findIndices(meshRefiner.userFaceData()[0].second(), 0)
         );
 
-        Info<< "Collected boundary faces : "
-            << returnReduce(bFaces.size(), sumOp<label>()) << endl;
+        //Info<< "Collected boundary faces : "
+        //    << returnReduce(bFaces.size(), sumOp<label>()) << endl;
 
         labelList cellsToRefine;
 
-        if (nBufferLayers_ <= 2)
+        if (refineParams.nBufferLayers() <= 2)
         {
             cellsToRefine = meshRefiner.meshCutter().consistentSlowRefinement
             (
-                nBufferLayers_,
+                refineParams.nBufferLayers(),
                 candidateCells,                 // cells to refine
                 bFaces,                         // faces for nBufferLayers
                 1,                              // point difference
@@ -1252,7 +1206,7 @@ Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
         {
             cellsToRefine = meshRefiner.meshCutter().consistentSlowRefinement2
             (
-                nBufferLayers_,
+                refineParams.nBufferLayers(),
                 candidateCells,                 // cells to refine
                 bFaces                          // faces for nBufferLayers
             );
@@ -1276,7 +1230,7 @@ Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
             nCellsToRefine == 0
          || (
                 iter >= overallMaxShellLevel
-             && nCellsToRefine <= minRefineCells_
+             && nCellsToRefine <= refineParams.minRefineCells()
             )
         )
         {
@@ -1305,7 +1259,11 @@ Foam::label Foam::autoHexMeshDriver::shellRefine(const label maxIter)
 }
 
 
-void Foam::autoHexMeshDriver::baffleAndSplitMesh(const bool handleSnapProblems)
+void Foam::autoHexMeshDriver::baffleAndSplitMesh
+(
+    const refinementParameters& refineParams,
+    const bool handleSnapProblems
+)
 {
     meshRefinement& meshRefiner = meshRefinerPtr_();
 
@@ -1323,12 +1281,15 @@ void Foam::autoHexMeshDriver::baffleAndSplitMesh(const bool handleSnapProblems)
         !handleSnapProblems,            // merge free standing baffles?
         const_cast<Time&>(mesh_.time()),
         globalToPatch_,
-        keepPoints_[0]
+        refineParams.keepPoints()[0]
     );
 }
 
 
-void Foam::autoHexMeshDriver::zonify()
+void Foam::autoHexMeshDriver::zonify
+(
+    const refinementParameters& refineParams
+)
 {
     // Mesh is at its finest. Do zoning
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1351,7 +1312,7 @@ void Foam::autoHexMeshDriver::zonify()
             const_cast<Time&>(mesh_.time())++;
         }
 
-        meshRefiner.zonify(keepPoints_[0]);
+        meshRefiner.zonify(refineParams.keepPoints()[0]);
 
         if (debug_)
         {
@@ -1372,6 +1333,7 @@ void Foam::autoHexMeshDriver::zonify()
 
 void Foam::autoHexMeshDriver::splitAndMergeBaffles
 (
+    const refinementParameters& refineParams,
     const bool handleSnapProblems
 )
 {
@@ -1394,7 +1356,7 @@ void Foam::autoHexMeshDriver::splitAndMergeBaffles
         false,                  // merge free standing baffles?
         const_cast<Time&>(mesh_.time()),
         globalToPatch_,
-        keepPoints_[0]
+        refineParams.keepPoints()[0]
     );
 
     if (debug_)
@@ -1447,7 +1409,10 @@ void Foam::autoHexMeshDriver::splitAndMergeBaffles
 }
 
 
-void Foam::autoHexMeshDriver::mergePatchFaces()
+void Foam::autoHexMeshDriver::mergePatchFaces
+(
+    const refinementParameters& refineParams
+)
 {
     Info<< nl
         << "Merge refined boundary faces" << nl
@@ -1536,8 +1501,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::autoHexMeshDriver::balance
                 const wordList& fzNames = surfaces().faceZoneNames();
                 const faceZoneMesh& fZones = mesh_.faceZones();
 
-                // Get faces whose owner and neighbour should stay together, i.e.
-                // they are not 'blocked'.
+                // Get faces whose owner and neighbour should stay together,
+                // i.e. they are not 'blocked'.
 
                 label nZoned = 0;
 
@@ -1655,11 +1620,18 @@ void Foam::autoHexMeshDriver::doRefine
 
     const_cast<Time&>(mesh_.time())++;
 
+    // Get all the refinement specific params
+    refinementParameters refineParams(refineDict);
+
+    // Check that all the keep points are inside the mesh.
+    refineParams.findCells(mesh_);
+
     PtrList<dictionary> featDicts(refineDict.lookup("features"));
 
     // Refine around feature edges
     featureEdgeRefine
     (
+        refineParams,
         featDicts,
         100,    // maxIter
         0       // min cells to refine
@@ -1668,34 +1640,37 @@ void Foam::autoHexMeshDriver::doRefine
     // Refine based on surface
     surfaceOnlyRefine
     (
+        refineParams,
         100     // maxIter
     );
 
     // Remove cells (a certain distance) beyond surface intersections
     removeInsideCells
     (
+        refineParams,
         1       // nBufferLayers
     );
 
     // Internal mesh refinement
     shellRefine
     (
+        refineParams,
         100    // maxIter
     );
 
     // Introduce baffles at surface intersections
-    baffleAndSplitMesh(prepareForSnapping);
+    baffleAndSplitMesh(refineParams, prepareForSnapping);
 
     // Mesh is at its finest. Do optional zoning.
-    zonify();
+    zonify(refineParams);
 
     // Pull baffles apart
-    splitAndMergeBaffles(prepareForSnapping);
+    splitAndMergeBaffles(refineParams, prepareForSnapping);
 
     // Do something about cells with refined faces on the boundary
     if (prepareForSnapping)
     {
-        mergePatchFaces();
+        mergePatchFaces(refineParams);
     }
 
     // Do final balancing. Keep zoned faces on one processor.
@@ -1719,6 +1694,9 @@ void Foam::autoHexMeshDriver::doSnap
 
     const_cast<Time&>(mesh_.time())++;
 
+    // Get all the snapping specific params
+    snapParameters snapParams(snapDict);
+
     // Get the labels of added patches.
     labelList adaptPatchIDs(getSurfacePatches());
 
@@ -1739,7 +1717,7 @@ void Foam::autoHexMeshDriver::doSnap
         indirectPrimitivePatch& pp = ppPtr();
 
         // Distance to attact to nearest feature on surface
-        const scalarField snapDist(calcSnapDistance(snapDict, pp));
+        const scalarField snapDist(calcSnapDistance(snapParams, pp));
 
 
         // Construct iterative mesh mover.
@@ -1777,17 +1755,17 @@ void Foam::autoHexMeshDriver::doSnap
             << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
 
         // Pre-smooth patch vertices (so before determining nearest)
-        preSmoothPatch(snapDict, nInitErrors, baffles, meshMover);
+        preSmoothPatch(snapParams, nInitErrors, baffles, meshMover);
 
         // Calculate displacement at every patch point. Insert into
         // meshMover.
         calcNearestSurface(snapDist, meshMover);
 
         // Get smoothly varying internal displacement field.
-        smoothDisplacement(snapDict, meshMover);
+        smoothDisplacement(snapParams, meshMover);
 
         // Apply internal displacement to mesh.
-        scaleMesh(snapDict, nInitErrors, baffles, meshMover);
+        scaleMesh(snapParams, nInitErrors, baffles, meshMover);
     }
 
     // Merge any introduced baffles.
@@ -1811,22 +1789,24 @@ void Foam::autoHexMeshDriver::doLayers
 
     const_cast<Time&>(mesh_.time())++;
 
+    // Get all the layer specific params
+    layerParameters layerParams(shrinkDict, mesh_.boundaryMesh());
+
     Info<< "Using mesh parameters " << motionDict << nl << endl;
 
     // Merge coplanar boundary faces
-    mergePatchFacesUndo(shrinkDict, motionDict);
+    mergePatchFacesUndo(layerParams, motionDict);
 
-    // Per global region the number of layers (0 if no layer)
-    const labelList& numLayers = surfaces().numLayers();
+    // Per patch the number of layers (0 if no layer)
+    const labelList& numLayers = layerParams.numLayers();
 
     // Patches that need to get a layer
     DynamicList<label> patchIDs(numLayers.size());
     label nFacesWithLayers = 0;
-    forAll(numLayers, region)
+    forAll(numLayers, patchI)
     {
-        if (numLayers[region] > 0 && globalToPatch()[region] != -1)
+        if (numLayers[patchI] > 0)
         {
-            label patchI = globalToPatch()[region];
             patchIDs.append(patchI);
             nFacesWithLayers += mesh_.boundaryMesh()[patchI].size();
         }
@@ -1882,7 +1862,7 @@ void Foam::autoHexMeshDriver::doLayers
                 << endl;
 
             // Do all topo changes
-            addLayers(shrinkDict, motionDict, nInitErrors, meshMover);
+            addLayers(layerParams, motionDict, nInitErrors, meshMover);
         }
 
         // Write mesh.

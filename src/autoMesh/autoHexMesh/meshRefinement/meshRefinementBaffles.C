@@ -249,7 +249,7 @@ void Foam::meshRefinement::getBafflePatches
             if (debug)
             {
                 Pout<< "getBafflePatches : Not baffling surface "
-                    << surfaces_[surfI].searchableSurface::name() << endl;
+                    << surfaces_.names()[surfI] << endl;
             }
         }
         else
@@ -264,69 +264,95 @@ void Foam::meshRefinement::getBafflePatches
     neiPatch.setSize(mesh_.nFaces());
     neiPatch = -1;
 
-    forAll(surfaceIndex_, faceI)
+
+    // Collect candidate faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList testFaces(intersectedFaces());
+
+    // Collect segments
+    // ~~~~~~~~~~~~~~~~
+
+    pointField start(testFaces.size());
+    pointField end(testFaces.size());
+
+    forAll(testFaces, i)
     {
-        if (surfaceIndex_[faceI] != -1)
+        label faceI = testFaces[i];
+
+        label own = mesh_.faceOwner()[faceI];
+
+        if (mesh_.isInternalFace(faceI))
         {
-            // Edge between owner and neighbour of face pierces a surface.
-            // Do closer inspection to find nearest intersection on both sides.
+            start[i] = cellCentres[own];
+            end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
+        }
+        else
+        {
+            start[i] = cellCentres[own];
+            end[i] = neiCc[faceI-mesh_.nInternalFaces()];
+        }
+    }
 
-            label own = mesh_.faceOwner()[faceI];
 
-            // Cc of neighbouring cell
-            point end
-            (
-                mesh_.isInternalFace(faceI)
-              ? cellCentres[mesh_.faceNeighbour()[faceI]]
-              : neiCc[faceI-mesh_.nInternalFaces()]
-            );
+    // Do test for intersections
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    labelList surface1;
+    List<pointIndexHit> hit1;
+    labelList region1;
+    labelList surface2;
+    List<pointIndexHit> hit2;
+    labelList region2;
+    surfaces_.findNearestIntersection
+    (
+        surfacesToBaffle,
+        start,
+        end,
 
-            label surface1, surface2;
-            pointIndexHit hit1, hit2;
-            surfaces_.findNearestIntersection
-            (
-                surfacesToBaffle,
-                cellCentres[own],
-                end,
+        surface1,
+        hit1,
+        region1,
 
-                surface1,
-                hit1,
-                surface2,
-                hit2
-            );
+        surface2,
+        hit2,
+        region2
+    );
 
-            if (hit1.hit() && hit2.hit())
+    forAll(testFaces, i)
+    {
+        label faceI = testFaces[i];
+
+        if (hit1[i].hit() && hit2[i].hit())
+        {
+            if (str.valid())
             {
-                if (str.valid())
-                {
-                    meshTools::writeOBJ(str(), cellCentres[own]);
-                    vertI++;
-                    meshTools::writeOBJ(str(), hit1.rawPoint());
-                    vertI++;
-                    meshTools::writeOBJ(str(), hit2.rawPoint());
-                    vertI++;
-                    meshTools::writeOBJ(str(), end);
-                    vertI++;
-                    str()<< "l " << vertI-3 << ' ' << vertI-2 << nl;
-                    str()<< "l " << vertI-2 << ' ' << vertI-1 << nl;
-                    str()<< "l " << vertI-1 << ' ' << vertI << nl;
-                }
+                meshTools::writeOBJ(str(), start[i]);
+                vertI++;
+                meshTools::writeOBJ(str(), hit1[i].rawPoint());
+                vertI++;
+                meshTools::writeOBJ(str(), hit2[i].rawPoint());
+                vertI++;
+                meshTools::writeOBJ(str(), end[i]);
+                vertI++;
+                str()<< "l " << vertI-3 << ' ' << vertI-2 << nl;
+                str()<< "l " << vertI-2 << ' ' << vertI-1 << nl;
+                str()<< "l " << vertI-1 << ' ' << vertI << nl;
+            }
 
+            // Pick up the patches
+            ownPatch[faceI] = globalToPatch
+            [
+                surfaces_.globalRegion(surface1[i], region1[i])
+            ];
+            neiPatch[faceI] = globalToPatch
+            [
+                surfaces_.globalRegion(surface2[i], region2[i])
+            ];
 
-                // Pick up the patches
-                ownPatch[faceI] = globalToPatch
-                [
-                    surfaces_.triangleRegion(surface1, hit1.index())
-                ];
-                neiPatch[faceI] = globalToPatch
-                [
-                    surfaces_.triangleRegion(surface2, hit2.index())
-                ];
-
-                if (ownPatch[faceI] == -1 || neiPatch[faceI] == -1)
-                {
-                    FatalErrorIn("getBafflePatches()") << abort(FatalError);
-                }
+            if (ownPatch[faceI] == -1 || neiPatch[faceI] == -1)
+            {
+                FatalErrorIn("getBafflePatches(..)")
+                    << "problem." << abort(FatalError);
             }
         }
     }
@@ -1203,15 +1229,20 @@ void Foam::meshRefinement::findCellZoneGeometric
     const labelList& faceOwner = mesh_.faceOwner();
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
-    forAll(cellToZone, cellI)
+    // Check if cell centre is inside
+    labelList insideSurfaces;
+    surfaces_.findInside
+    (
+        closedNamedSurfaces,
+        cellCentres,
+        insideSurfaces
+    );
+
+    forAll(insideSurfaces, cellI)
     {
         if (cellToZone[cellI] == -2)
         {
-            label surfI = surfaces_.insideZone
-            (
-                closedNamedSurfaces,
-                cellCentres[cellI]
-            );
+            label surfI = insideSurfaces[cellI];
 
             if (surfI != -1)
             {
@@ -1223,6 +1254,32 @@ void Foam::meshRefinement::findCellZoneGeometric
 
     // Some cells with cell centres close to surface might have
     // had been put into wrong surface. Recheck with perturbed cell centre.
+
+
+    // 1. Collect points
+
+    // Count points to test.
+    label nCandidates = 0;
+    forAll(namedSurfaceIndex, faceI)
+    {
+        label surfI = namedSurfaceIndex[faceI];
+
+        if (surfI != -1)
+        {
+            if (mesh_.isInternalFace(faceI))
+            {
+                nCandidates += 2;
+            }
+            else
+            {
+                nCandidates += 1;
+            }
+        }
+    }
+
+    // Collect points.
+    pointField candidatePoints(nCandidates);
+    nCandidates = 0;
     forAll(namedSurfaceIndex, faceI)
     {
         label surfI = namedSurfaceIndex[faceI];
@@ -1236,55 +1293,65 @@ void Foam::meshRefinement::findCellZoneGeometric
             {
                 label nei = faceNeighbour[faceI];
                 const point& neiCc = cellCentres[nei];
-
+                // Perturbed cc
                 const vector d = 1E-4*(neiCc - ownCc);
+                candidatePoints[nCandidates++] = ownCc-d;
+                candidatePoints[nCandidates++] = neiCc+d;
+            }
+            else
+            {
+                const point& neiFc = mesh_.faceCentres()[faceI];
+                // Perturbed cc
+                const vector d = 1E-4*(neiFc - ownCc);
+                candidatePoints[nCandidates++] = ownCc-d;
+            }
+        }
+    }
 
-                // Test perturbed owner
+
+    // 2. Test points for inside
+
+    surfaces_.findInside
+    (
+        closedNamedSurfaces,
+        candidatePoints,
+        insideSurfaces
+    );
+
+
+    // 3. Update zone information
+
+    nCandidates = 0;
+    forAll(namedSurfaceIndex, faceI)
+    {
+        label surfI = namedSurfaceIndex[faceI];
+
+        if (surfI != -1)
+        {
+            label own = faceOwner[faceI];
+
+            if (mesh_.isInternalFace(faceI))
+            {
+                label ownSurfI = insideSurfaces[nCandidates++];
+                if (ownSurfI != -1)
                 {
-                    label ownSurfI = surfaces_.insideZone
-                    (
-                        closedNamedSurfaces,
-                        ownCc-d
-                    );
-
-                    if (ownSurfI != -1)
-                    {
-                        cellToZone[own] = surfaceToCellZone[ownSurfI];
-                    }
+                    cellToZone[own] = surfaceToCellZone[ownSurfI];
                 }
 
-                // Test perturbed neighbour
+                label neiSurfI = insideSurfaces[nCandidates++];
+                if (neiSurfI != -1)
                 {
-                    label neiSurfI = surfaces_.insideZone
-                    (
-                        closedNamedSurfaces,
-                        neiCc+d
-                    );
+                    label nei = faceNeighbour[faceI];
 
-                    if (neiSurfI != -1)
-                    {
-                        cellToZone[nei] = surfaceToCellZone[neiSurfI];
-                    }
+                    cellToZone[nei] = surfaceToCellZone[neiSurfI];
                 }
             }
             else
             {
-                const point& neiCc = mesh_.faceCentres()[faceI];
-
-                const vector d = 1E-4*(neiCc - ownCc);
-
-                // Test perturbed owner
+                label ownSurfI = insideSurfaces[nCandidates++];
+                if (ownSurfI != -1)
                 {
-                    label ownSurfI = surfaces_.insideZone
-                    (
-                        closedNamedSurfaces,
-                        ownCc-d
-                    );
-
-                    if (ownSurfI != -1)
-                    {
-                        cellToZone[own] = surfaceToCellZone[ownSurfI];
-                    }
+                    cellToZone[own] = surfaceToCellZone[ownSurfI];
                 }
             }
         }
@@ -2291,7 +2358,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         isNamedSurface[surfI] = true;
 
-        Info<< "Surface : " << surfaces_[surfI].searchableSurface::name() << nl
+        Info<< "Surface : " << surfaces_.names()[surfI] << nl
             << "    faceZone : " << faceZoneNames[surfI] << nl
             << "    cellZone : " << cellZoneNames[surfI] << endl;
     }
@@ -2329,7 +2396,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
             if (debug)
             {
-                Pout<< "Faces on " << surfaces_[surfI].searchableSurface::name()
+                Pout<< "Faces on " << surfaces_.names()[surfI]
                     << " will go into faceZone " << zoneI << endl;
             }
             surfaceToFaceZone[surfI] = zoneI;
@@ -2387,8 +2454,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
             if (debug)
             {
-                Pout<< "Cells inside "
-                    << surfaces_[surfI].searchableSurface::name()
+                Pout<< "Cells inside " << surfaces_.names()[surfI]
                     << " will go into cellZone " << zoneI << endl;
             }
             surfaceToCellZone[surfI] = zoneI;
@@ -2444,77 +2510,82 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         // Note: for all internal faces? internal + coupled?
         // Since zonify is run after baffling the surfaceIndex_ on baffles is
         // not synchronised across both baffle faces. Fortunately we don't
-        // do zonify baffle faces anyway.
-        forAll(surfaceIndex_, faceI)
+        // do zonify baffle faces anyway (they are normal boundary faces).
+
+        // Collect candidate faces
+        // ~~~~~~~~~~~~~~~~~~~~~~~
+
+        labelList testFaces(intersectedFaces());
+
+        // Collect segments
+        // ~~~~~~~~~~~~~~~~
+
+        pointField start(testFaces.size());
+        pointField end(testFaces.size());
+
+        forAll(testFaces, i)
         {
-            label surfI = surfaceIndex_[faceI];
+            label faceI = testFaces[i];
 
-            if
-            (
-                surfI != -1
-             && (
-                    mesh_.isInternalFace(faceI)
-                 || patches[patches.whichPatch(faceI)].coupled()
-                )
-            )
+            label own = mesh_.faceOwner()[faceI];
+
+            if (mesh_.isInternalFace(faceI))
             {
-                if (isNamedSurface[surfI])
-                {
-                    namedSurfaceIndex[faceI] = surfI;
-                    nSurfFaces[surfI]++;
-                }
-                else
-                {
-                    // Test more accurately for whether intersection is at
-                    // zoneable surface
-
-                    label surface1, surface2;
-                    pointIndexHit hit1, hit2;
-
-                    if (mesh_.isInternalFace(faceI))
-                    {
-                        surfaces_.findNearestIntersection
-                        (
-                            namedSurfaces,
-                            cellCentres[faceOwner[faceI]],
-                            cellCentres[faceNeighbour[faceI]],
-
-                            surface1,
-                            hit1,
-                            surface2,
-                            hit2
-                        );
-                    }
-                    else
-                    {
-                        surfaces_.findNearestIntersection
-                        (
-                            namedSurfaces,
-                            cellCentres[faceOwner[faceI]],
-                            neiCc[faceI-mesh_.nInternalFaces()],
-
-                            surface1,
-                            hit1,
-                            surface2,
-                            hit2
-                        );
-                    }
-
-                    if (hit1.hit())
-                    {
-                        // If both hit should probably choose nearest. For
-                        // later.
-                        namedSurfaceIndex[faceI] = surface1;
-                        nSurfFaces[surface1]++;
-                    }
-                    else if (hit2.hit())
-                    {
-                        namedSurfaceIndex[faceI] = surface2;
-                        nSurfFaces[surface2]++;
-                    }
-                }
+                start[i] = cellCentres[own];
+                end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
+            }
+            else
+            {
+                start[i] = cellCentres[own];
+                end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
         }
+
+
+        // Do test for intersections
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Note that we intersect all intersected faces again. Could reuse
+        // the information already in surfaceIndex_.
+
+        labelList surface1;
+        labelList surface2;
+        {
+            List<pointIndexHit> hit1;
+            labelList region1;
+            List<pointIndexHit> hit2;
+            labelList region2;
+            surfaces_.findNearestIntersection
+            (
+                namedSurfaces,
+                start,
+                end,
+
+                surface1,
+                hit1,
+                region1,
+                surface2,
+                hit2,
+                region2
+            );
+        }
+
+        forAll(testFaces, i)
+        {
+            label faceI = testFaces[i];
+
+            if (surface1[i] != -1)
+            {
+                // If both hit should probably choose nearest. For later.
+                namedSurfaceIndex[faceI] = surface1[i];
+                nSurfFaces[surface1[i]]++;
+            }
+            else if (surface2[i] != -1)
+            {
+                namedSurfaceIndex[faceI] = surface2[i];
+                nSurfFaces[surface2[i]]++;
+            }
+        }
+
 
         // surfaceIndex migh have different surfaces on both sides if
         // there happen to be a (obviously thin) surface with different
@@ -2534,7 +2605,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             forAll(nSurfFaces, surfI)
             {
                 Pout<< "Surface:"
-                    << surfaces_[surfI].searchableSurface::name()
+                    << surfaces_.names()[surfI]
                     << "  nZoneFaces:" << nSurfFaces[surfI] << nl;
             }
             Pout<< endl;
@@ -2591,7 +2662,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     (
                         mesh_.faces()[faceI],           // modified face
                         faceI,                          // label of face
-                        faceOwner[faceI],              // owner
+                        faceOwner[faceI],               // owner
                         -1,                             // neighbour
                         false,                          // face flip
                         patchI,                         // patch for face
@@ -2609,20 +2680,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Put the cells into the correct zone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList closedNamedSurfaces(namedSurfaces.size());
-    label nClosed = 0;
-
-    forAll(namedSurfaces, i)
-    {
-        label surfI = namedSurfaces[i];
-
-        if (surfaces_.closed()[surfI])
-        {
-            closedNamedSurfaces[nClosed++] = surfI;
-        }
-    }
-    closedNamedSurfaces.setSize(nClosed);
-
+    // Closed surfaces with cellZone specified.
+    labelList closedNamedSurfaces(surfaces_.getClosedNamedSurfaces());
 
     // Zone per cell:
     // -2 : unset
@@ -2702,15 +2761,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
     return map;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //
