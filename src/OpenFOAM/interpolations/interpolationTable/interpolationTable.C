@@ -34,9 +34,8 @@ template<class Type>
 Foam::interpolationTable<Type>::interpolationTable()
 :
     List<Tuple2<scalar, Type> >(),
-    dict_(dictionary::null),
-    boundAction_(interpolationTable::WARN),
-    fileName_("undefined_fileName")
+    boundsHandling_(interpolationTable::WARN),
+    fileName_("fileNameIsUndefined")
 {}
 
 
@@ -48,20 +47,23 @@ Foam::interpolationTable<Type>::interpolationTable
 )
 :
     List<Tuple2<scalar, Type> >(),
-    dict_(dict),
-    boundAction_(wordToBoundAction(dict.lookup("boundAction"))),
+    boundsHandling_(wordToBoundsHandling(dict.lookup("outOfBounds"))),
     fileName_(dict.lookup("fileName"))
 {
-    fileName_.expand();
+    // preserve the original (unexpanded) fileName to avoid absolute paths
+    // appearing in the write() method
+    fileName fName(fileName_);
+
+    fName.expand();
 
     // Correct for relative path
-    if (fileName_[0] != '/')
+    if (fName[0] != '/')
     {
-        fileName_ = obr.db().path()/fileName_;
+        fName = obr.db().path()/fName;
     }
 
     // Read data from file
-    IFstream(fileName_)() >> *this;
+    IFstream(fName)() >> *this;
 
     // Check that the data is okay
     check();
@@ -71,7 +73,7 @@ Foam::interpolationTable<Type>::interpolationTable
         FatalErrorIn
         (
             "Foam::interpolationTable<Type>::interpolationTable"
-            "(const dictionary& dict)"
+            "(const dictionary&)"
         )   << "table is empty" << nl
             << exit(FatalError);
     }
@@ -85,8 +87,7 @@ Foam::interpolationTable<Type>::interpolationTable
 )
 :
     List<Tuple2<scalar, Type> >(interpTable),
-    dict_(interpTable.dict_),
-    boundAction_(interpTable.boundAction_),
+    boundsHandling_(interpTable.boundsHandling_),
     fileName_(interpTable.fileName_)
 {}
 
@@ -101,9 +102,9 @@ Foam::interpolationTable<Type>::~interpolationTable()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::word Foam::interpolationTable<Type>::boundActionToWord
+Foam::word Foam::interpolationTable<Type>::boundsHandlingToWord
 (
-     const boundActions& bound
+     const boundsHandling& bound
 ) const
 {
     word enumName("warn");
@@ -137,8 +138,8 @@ Foam::word Foam::interpolationTable<Type>::boundActionToWord
 
 
 template<class Type>
-typename Foam::interpolationTable<Type>::boundActions
-Foam::interpolationTable<Type>::wordToBoundAction
+typename Foam::interpolationTable<Type>::boundsHandling
+Foam::interpolationTable<Type>::wordToBoundsHandling
 (
     const word& bound
 ) const
@@ -163,8 +164,8 @@ Foam::interpolationTable<Type>::wordToBoundAction
     {
         WarningIn
         (
-            "Foam::interpolationTable<Type>::wordToBoundAction(const word&)"
-        )   << "bad bounding specifier " << bound << " using 'warn'" << endl;
+            "Foam::interpolationTable<Type>::wordToBoundsHandling(const word&)"
+        )   << "bad outOfBounds specifier " << bound << " using 'warn'" << endl;
 
         return interpolationTable::WARN;
     }
@@ -198,14 +199,14 @@ void Foam::interpolationTable<Type>::check() const
 
 
 template<class Type>
-typename Foam::interpolationTable<Type>::boundActions
-Foam::interpolationTable<Type>::boundAction
+typename Foam::interpolationTable<Type>::boundsHandling
+Foam::interpolationTable<Type>::outOfBounds
 (
-    const boundActions& bound
+    const boundsHandling& bound
 )
 {
-    boundActions prev = boundAction_;
-    boundAction_ = bound;
+    boundsHandling prev = boundsHandling_;
+    boundsHandling_ = bound;
     return prev;
 }
 
@@ -215,8 +216,8 @@ void Foam::interpolationTable<Type>::write(Ostream& os) const
 {
     os.writeKeyword("fileName")
         << fileName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("boundAction")
-        << boundActionToWord(boundAction_) << token::END_STATEMENT << nl;
+    os.writeKeyword("outOfBounds")
+        << boundsHandlingToWord(boundsHandling_) << token::END_STATEMENT << nl;
 }
 
 
@@ -235,7 +236,7 @@ Foam::interpolationTable<Type>::operator[](const label i) const
     }
     else if (ii < 0)
     {
-        switch (boundAction_)
+        switch (boundsHandling_)
         {
             case interpolationTable::ERROR:
             {
@@ -275,7 +276,7 @@ Foam::interpolationTable<Type>::operator[](const label i) const
     }
     else if (ii >= n)
     {
-        switch (boundAction_)
+        switch (boundsHandling_)
         {
             case interpolationTable::ERROR:
             {
@@ -334,7 +335,7 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
 
     if (lookupValue < minLimit)
     {
-        switch (boundAction_)
+        switch (boundsHandling_)
         {
             case interpolationTable::ERROR:
             {
@@ -375,7 +376,7 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
     }
     else if (lookupValue >= maxLimit)
     {
-        switch (boundAction_)
+        switch (boundsHandling_)
         {
             case interpolationTable::ERROR:
             {
@@ -477,6 +478,5 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
         );
     }
 }
-
 
 // ************************************************************************* //
