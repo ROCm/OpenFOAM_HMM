@@ -46,7 +46,7 @@ Note
     - strange behaviour with potentialFoam since the U equation is not solved
 
 See Also
-    Foam::timeSeries and Foam::flowRateInletVelocityFvPatchVectorField
+    Foam::interpolationTable and Foam::flowRateInletVelocityFvPatchVectorField
 
 SourceFiles
     timeVaryingFlowRateInletVelocityFvPatchVectorField.C

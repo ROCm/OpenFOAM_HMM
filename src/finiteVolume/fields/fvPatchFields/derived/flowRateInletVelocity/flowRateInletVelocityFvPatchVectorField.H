@@ -26,12 +26,13 @@ Class
     Foam::flowRateInletVelocityFvPatchVectorField
 
 Description
-    Describes an volumetric/mass flow normal vector boundary condition by its
+    Describes a volumetric/mass flow normal vector boundary condition by its
     magnitude as an integral over its area.
+
     The basis of the patch (volumetric or mass) is determined by the
     dimensions of the flux, phi.
-    The current density is used to correct the velocity when applying the mass
-    basis.
+    The current density is used to correct the velocity when applying the
+    mass basis.
 
     Example of the boundary condition specification:
     @verbatim
