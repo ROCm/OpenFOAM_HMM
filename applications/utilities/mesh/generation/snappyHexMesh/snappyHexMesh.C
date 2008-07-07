@@ -76,16 +76,19 @@ int main(int argc, char *argv[])
     );
 
     // refinement parameters
-    const dictionary& refineDict = meshDict.subDict("refineDict");
+    const dictionary& refineDict = meshDict.subDict("castellatedMeshControls");
+
+    // all surface geometry
+    const dictionary& geometryDict = meshDict.subDict("geometry");
 
     // snap-to-surface parameters
-    const dictionary& snapDict = meshDict.subDict("snapDict");
+    const dictionary& snapDict = meshDict.subDict("snapControls");
 
     // mesh motion and mesh quality parameters
-    const dictionary& motionDict = meshDict.subDict("motionDict");
+    const dictionary& motionDict = meshDict.subDict("meshQualityControls");
 
     // layer addition parameters
-    const dictionary& layerDict = meshDict.subDict("layerDict");
+    const dictionary& layerDict = meshDict.subDict("addLayersControls");
 
 
     // Main meshing driver. Read surfaces. Determine initial intersections.
@@ -93,13 +96,14 @@ int main(int argc, char *argv[])
     (
         mesh,
         meshDict,       // global control parameters
+        geometryDict,
         refineDict,     // refinement parameters
         decomposeDict
     );
 
-    Switch wantRefine(meshDict.lookup("doRefine"));
-    Switch wantSnap(meshDict.lookup("doSnap"));
-    Switch wantLayers(meshDict.lookup("doLayers"));
+    Switch wantRefine(meshDict.lookup("castellatedMesh"));
+    Switch wantSnap(meshDict.lookup("snap"));
+    Switch wantLayers(meshDict.lookup("addLayers"));
 
     if (wantRefine)
     {
