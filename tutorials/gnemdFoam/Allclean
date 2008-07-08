@@ -4,16 +4,13 @@
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cd constrictedChannel
-    rm -rf 0 > /dev/null 2>&1
-    rm Ar-Ar Ar-Ne Ne-Ne > /dev/null 2>&1
-    rm constant/idList
-
+    rm -rf 0
+    rm -rf Ar-Ar Ar-Ne Ne-Ne
+    rm -rf constant/idList
     cleanCase
 cd ..
 
 cd nanoNozzle
-    rm -rf processor[0-9] > /dev/null 2>&1
-
+    rm -rf processor[0-9]
     cleanCase
 cd ..
-
