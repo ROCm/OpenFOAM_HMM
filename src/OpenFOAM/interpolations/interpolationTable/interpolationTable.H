@@ -84,14 +84,17 @@ private:
 
     // Private data
 
-        //- Parent dictionary
-        const dictionary& dict_;
-
         //- Enumeration for handling out-of-bound values
         boundActions boundAction_;
 
         //- File name
         fileName fileName_;
+
+
+    // Private Member Functions
+
+        //- Read the table of data from file
+        void readTable();
 
 
 public:
@@ -101,61 +104,45 @@ public:
         //- Construct null
         interpolationTable();
 
-        //- Construct from objectRegistry and dictionary
-        interpolationTable(const objectRegistry& obr, const dictionary& dict);
+        //- Construct given the name of the file containing the table of data
+        interpolationTable(const fileName& fn);
+
+        //- Construct by reading the fileName and boundAction from dictionary
+        //  and read the table from that file.
+        //  This is a specialised constructor used by patchFields
+        interpolationTable(const dictionary& dict);
 
         //- Construct copy
         interpolationTable(const interpolationTable& interpTable);
 
 
-    //- Destructor
-    ~interpolationTable();
-
-
     // Member Functions
 
-        // Access
+        //- Return the out-of-bounds treatment as a word
+        word boundActionToWord(const boundActions& bound) const;
 
-            //- Return the size
-            label size() const
-            {
-                return List<Tuple2<scalar, Type> >::size();
-            }
+        //- Return the out-of-bounds treatment as an enumeration
+        boundActions wordToBoundAction(const word& bound) const;
 
-            //- Return the out-of-bounds treatment as a word
-            word boundActionToWord(const boundActions& bound) const;
+        //- Check that list is monotonically increasing
+        //  Exit with a FatalError if there is a problem
+        void check() const;
 
-            //- Return the out-of-bounds treatment as an enumeration
-            boundActions wordToBoundAction(const word& bound) const;
+        //- Set the out-of-bounds treatment from enum, return previous
+        //  setting
+        boundActions boundAction(const boundActions& bound);
 
-
-        // Check
-
-            //- Check that list is monotonically increasing
-            //  Exit with a FatalError if there is a problem
-            void check() const;
+        //- Write
+        void write(Ostream& os) const;
 
 
-        // Edit
+    // Member Operators
 
-            //- Set the out-of-bounds treatment from enum, return previous
-            //  setting
-            boundActions boundAction(const boundActions& bound);
+        //- Return an element of constant Tuple2<scalar, Type>
+        const Tuple2<scalar, Type>& operator[](const label) const;
 
-
-        // Member Operators
-
-            //- Return an element of constant Tuple2<scalar, Type>
-            const Tuple2<scalar, Type>& operator[](const label) const;
-
-            //- Return an interpolated value
-            Type operator()(const scalar) const;
-
-
-        // I-O
-
-            //- Write
-            void write(Ostream& os) const;
+        //- Return an interpolated value
+        Type operator()(const scalar) const;
 };
 
 
@@ -168,6 +155,8 @@ public:
 #ifdef NoRepository
 #   include "interpolationTable.C"
 #endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

@@ -30,12 +30,10 @@ License
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
 #include "Time.H"
-#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 timeVaryingFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -47,8 +45,7 @@ timeVaryingFlowRateInletVelocityFvPatchVectorField
 {}
 
 
-Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 timeVaryingFlowRateInletVelocityFvPatchVectorField
 (
     const timeVaryingFlowRateInletVelocityFvPatchVectorField& ptf,
@@ -62,8 +59,7 @@ timeVaryingFlowRateInletVelocityFvPatchVectorField
 {}
 
 
-Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 timeVaryingFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -72,12 +68,11 @@ timeVaryingFlowRateInletVelocityFvPatchVectorField
 )
 :
     flowRateInletVelocityFvPatchVectorField(p, iF, dict),
-    timeSeries_(this->db(), dict)
+    timeSeries_(dict)
 {}
 
 
-Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 timeVaryingFlowRateInletVelocityFvPatchVectorField
 (
     const timeVaryingFlowRateInletVelocityFvPatchVectorField& ptf
@@ -88,8 +83,7 @@ timeVaryingFlowRateInletVelocityFvPatchVectorField
 {}
 
 
-Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 timeVaryingFlowRateInletVelocityFvPatchVectorField
 (
     const timeVaryingFlowRateInletVelocityFvPatchVectorField& ptf,
@@ -103,8 +97,7 @@ timeVaryingFlowRateInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+void Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 updateCoeffs()
 {
     if (updated())
@@ -117,8 +110,7 @@ updateCoeffs()
 }
 
 
-void Foam::
-timeVaryingFlowRateInletVelocityFvPatchVectorField::
+void Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField::
 write(Ostream& os) const
 {
     flowRateInletVelocityFvPatchVectorField::write(os);
