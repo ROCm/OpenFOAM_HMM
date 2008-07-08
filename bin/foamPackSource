@@ -73,13 +73,15 @@ find -H $packDir               \
  -a ! -name "core"             \
  -a ! -name "core.[1-9]*"      \
  -a ! -name "log[0-9]*"        \
+ -a ! -name "libccmio*"        \
  -a ! -name "\.ebrowse"        \
 | sed                          \
  -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
- -e '\@applications/bin/@d'       \
- -e '\@/t/@d'                     \
- -e '\@Make[.A-Za-z]*/[^/]*/@d'   \
+ -e "\@libccmio.*/@d"          \
+ -e '\@applications/bin/@d'    \
+ -e '\@/t/@d'                  \
+ -e '\@Make[.A-Za-z]*/[^/]*/@d'\
  > $tmpFile
 
 tar czpf $packFile --files-from $tmpFile
