@@ -82,6 +82,7 @@ find -H $packDir               \
  -e '\@applications/bin/@d'    \
  -e '\@/t/@d'                  \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'\
+ -e '\@/platforms/@d'          \
  > $tmpFile
 
 tar czpf $packFile --files-from $tmpFile

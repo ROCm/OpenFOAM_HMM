@@ -41,6 +41,7 @@ then
 fi
 archOptions=$1
 arch=${archOptions%%G*}
+arch3264=$(echo "$arch" | sed 's@64@-64@')
 
 timeStamp=$(date +%Y-%m-%d)
 packDir=ThirdParty
@@ -59,7 +60,7 @@ then
 fi
 
 # get list of directories
-dirList=`find $packDir -type d -name $arch -o -type d -name $archOptions`
+dirList=`find $packDir -type d -name $arch -o -type d -name $archOptions -o -type l -name $arch3264`
 echo
 echo "Packing $archOptions port of $packDir into $packFile"
 echo
