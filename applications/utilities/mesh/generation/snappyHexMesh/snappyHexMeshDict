@@ -36,26 +36,26 @@ addLayers       false;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-//    box1x1x1
-//    {
-//        type searchableBox;
-//        min (1.5 1 -0.5);
-//        max (3.5 2 0.5);
-//    }
-//
-//    sphere.stl
-//    {
-//        type triSurfaceMesh;
-//
-//        // Per region the patchname. If not provided will be <name>_<region>.
-//        regions
-//        {
-//            secondSolid
-//            {
-//                name mySecondPatch;
-//            }
-//        }
-//    }
+    box1x1x1
+    {
+        type searchableBox;
+        min (1.5 1 -0.5);
+        max (3.5 2 0.5);
+    }
+
+    sphere.stl
+    {
+        type triSurfaceMesh;
+
+        // Per region the patchname. If not provided will be <name>_<region>.
+        regions
+        {
+            secondSolid
+            {
+                name mySecondPatch;
+            }
+        }
+    }
 
     sphere2
     {
@@ -159,11 +159,11 @@ castellatedMeshControls
 
     refinementRegions
     {
-        //box1x1x1
-        //{
-        //    mode inside;
-        //    levels ((1.0 4));
-        //}
+        box1x1x1
+        {
+            mode inside;
+            levels ((1.0 4));
+        }
         //sphere.stl
         //{
         //    mode distance;

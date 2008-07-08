@@ -27,10 +27,112 @@ License
 #include "layerParameters.H"
 #include "polyBoundaryMesh.H"
 #include "mathematicalConstants.H"
+#include "refinementSurfaces.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::scalar Foam::layerParameters::defaultConcaveAngle = 90;
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Read the number of layers from dictionary. Per patch 0 or the number
+// of layers.
+Foam::labelList Foam::layerParameters::readNumLayers
+(
+    const PtrList<dictionary>& surfaceDicts,
+    const refinementSurfaces& refineSurfaces,
+    const labelList& globalToPatch,
+    const polyBoundaryMesh& boundaryMesh
+)
+{
+    // Per surface the number of layers
+    labelList globalSurfLayers(surfaceDicts.size());
+    // Per surface, per region the number of layers
+    List<Map<label> > regionSurfLayers(surfaceDicts.size());
+
+    const labelList& surfaceIndices = refineSurfaces.surfaces();
+
+    forAll(surfaceDicts, surfI)
+    {
+        const dictionary& dict = surfaceDicts[surfI];
+
+        globalSurfLayers[surfI] = readLabel(dict.lookup("surfaceLayers"));
+
+        if (dict.found("regions"))
+        {
+            // Per-region layer information
+
+            PtrList<dictionary> regionDicts(dict.lookup("regions"));
+
+            const wordList& regionNames =
+                refineSurfaces.geometry()[surfaceIndices[surfI]].regions();
+
+            forAll(regionDicts, dictI)
+            {
+                const dictionary& regionDict = regionDicts[dictI];
+
+                const word regionName(regionDict.lookup("name"));
+
+                label regionI = findIndex(regionNames, regionName);
+
+                label nLayers = readLabel(regionDict.lookup("surfaceLayers"));
+
+                Info<< "    region " << regionName << ':'<< nl
+                    << "        surface layers:" << nLayers << nl;
+
+                regionSurfLayers[surfI].insert(regionI, nLayers);
+            }
+        }
+    }
+
+
+    // Transfer per surface/region information into patchwise region info
+
+    labelList nLayers(boundaryMesh.size(), 0);
+
+    forAll(surfaceIndices, surfI)
+    {
+        const wordList& regionNames =
+            refineSurfaces.geometry()[surfaceIndices[surfI]].regions();
+
+        forAll(regionNames, regionI)
+        {
+            const word& regionName = regionNames[regionI];
+
+            label global = refineSurfaces.globalRegion(surfI, regionI);
+
+            label patchI = globalToPatch[global];
+
+            // Initialise to surface-wise layers
+            nLayers[patchI] = globalSurfLayers[surfI];
+
+            // Override with region specific data if available
+            Map<label>::const_iterator iter =
+                regionSurfLayers[surfI].find(regionI);
+
+            if (iter != regionSurfLayers[surfI].end())
+            {
+                nLayers[patchI] = iter();
+            }
+
+            // Check
+            if (nLayers[patchI] < 0)
+            {
+                FatalErrorIn
+                (
+                    "layerParameters::readNumLayers(..)"
+                )   << "Illegal number of layers " << nLayers[patchI]
+                    << " for surface "
+                    << refineSurfaces.names()[surfI]
+                    << " region " << regionName << endl
+                    << exit(FatalError);
+            }
+        }
+    }
+    return nLayers;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -38,11 +140,23 @@ const Foam::scalar Foam::layerParameters::defaultConcaveAngle = 90;
 // Construct from dictionary
 Foam::layerParameters::layerParameters
 (
+    const PtrList<dictionary>& surfaceDicts,
+    const refinementSurfaces& refineSurfaces,
+    const labelList& globalToPatch,
     const dictionary& dict,
-    const labelList& numLayers
+    const polyBoundaryMesh& boundaryMesh
 )
 :
-    numLayers_(numLayers),
+    numLayers_
+    (
+        readNumLayers
+        (
+            surfaceDicts,
+            refineSurfaces,
+            globalToPatch,
+            boundaryMesh
+        )
+    ),
     expansionRatio_
     (
         numLayers_.size(),

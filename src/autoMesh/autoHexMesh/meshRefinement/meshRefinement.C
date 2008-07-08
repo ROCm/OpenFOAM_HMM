@@ -224,7 +224,7 @@ void Foam::meshRefinement::checkData()
         // Compare
         testSyncBoundaryFaceList
         (
-            tol_,
+            mergeDistance_,
             "testing faceCentres : ",
             boundaryFc,
             neiBoundaryFc
@@ -489,13 +489,13 @@ void Foam::meshRefinement::getRegionMaster
 Foam::meshRefinement::meshRefinement
 (
     fvMesh& mesh,
-    const scalar tol,
+    const scalar mergeDistance,
     const refinementSurfaces& surfaces,
     const shellSurfaces& shells
 )
 :
     mesh_(mesh),
-    tol_(tol),
+    mergeDistance_(mergeDistance),
     surfaces_(surfaces),
     shells_(shells),
     meshCutter_
@@ -715,6 +715,141 @@ Foam::labelList Foam::meshRefinement::decomposeCombineRegions
         }
     }
     return distribution;
+}
+
+
+Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
+(
+    const bool keepZoneFaces,
+    const bool keepBaffles,
+    decompositionMethod& decomposer,
+    fvMeshDistribute& distributor
+)
+{
+    autoPtr<mapDistributePolyMesh> map;
+
+    if (Pstream::parRun())
+    {
+        //Info<< nl
+        //    << "Doing final balancing" << nl
+        //    << "---------------------" << nl
+        //    << endl;
+        //
+        //if (debug_)
+        //{
+        //    const_cast<Time&>(mesh_.time())++;
+        //}
+
+        // Wanted distribution
+        labelList distribution;
+
+        if (keepZoneFaces || keepBaffles)
+        {
+            // Faces where owner and neighbour are not 'connected' so can
+            // go to different processors.
+            boolList blockedFace(mesh_.nFaces(), true);
+            // Pairs of baffles
+            List<labelPair> couples;
+
+            if (keepZoneFaces)
+            {
+                label nNamed = surfaces().getNamedSurfaces().size();
+
+                Info<< "Found " << nNamed << " surfaces with faceZones."
+                    << " Applying special decomposition to keep those together."
+                    << endl;
+
+                // Determine decomposition to keep/move surface zones
+                // on one processor. The reason is that snapping will make these
+                // into baffles, move and convert them back so if they were
+                // proc boundaries after baffling&moving the points might be no
+                // longer snychronised so recoupling will fail. To prevent this
+                // keep owner&neighbour of such a surface zone on the same
+                // processor.
+
+                const wordList& fzNames = surfaces().faceZoneNames();
+                const faceZoneMesh& fZones = mesh_.faceZones();
+
+                // Get faces whose owner and neighbour should stay together,
+                // i.e. they are not 'blocked'.
+
+                label nZoned = 0;
+
+                forAll(fzNames, surfI)
+                {
+                    if (fzNames[surfI].size() > 0)
+                    {
+                        // Get zone
+                        label zoneI = fZones.findZoneID(fzNames[surfI]);
+
+                        const faceZone& fZone = fZones[zoneI];
+
+                        forAll(fZone, i)
+                        {
+                            if (blockedFace[fZone[i]])
+                            {
+                                blockedFace[fZone[i]] = false;
+                                nZoned++;
+                            }
+                        }
+                    }
+                }
+                Info<< "Found " << returnReduce(nZoned, sumOp<label>())
+                    << " zoned faces to keep together."
+                    << endl;
+            }
+
+            if (keepBaffles)
+            {
+                // Get boundary baffles that need to stay together.
+                couples = getDuplicateFaces   // all baffles
+                (
+                    identity(mesh_.nFaces()-mesh_.nInternalFaces())
+                   +mesh_.nInternalFaces()
+                );
+
+                Info<< "Found " << returnReduce(couples.size(), sumOp<label>())
+                    << " baffles to keep together."
+                    << endl;
+            }
+
+            distribution = decomposeCombineRegions
+            (
+                blockedFace,
+                couples,
+                decomposer
+            );
+
+            labelList nProcCells(distributor.countCells(distribution));
+            Pstream::listCombineGather(nProcCells, plusEqOp<label>());
+            Pstream::listCombineScatter(nProcCells);
+
+            Info<< "Calculated decomposition:" << endl;
+            forAll(nProcCells, procI)
+            {
+                Info<< "    " << procI << '\t' << nProcCells[procI] << endl;
+            }
+            Info<< endl;
+        }
+        else
+        {
+            // Normal decomposition
+            distribution = decomposer.decompose(mesh_.cellCentres());
+        }
+
+        if (debug)
+        {
+            Pout<< "Wanted distribution:"
+                << distributor.countCells(distribution)
+                << endl;
+        }
+        // Do actual sending/receiving of mesh
+        map = distributor.distribute(distribution);
+
+        // Update numbering of meshRefiner
+        distribute(map);
+    }
+    return map;
 }
 
 
@@ -938,6 +1073,101 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
         )
     );
     return tfld;
+}
+
+
+void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
+{
+    const faceZoneMesh& fZones = mesh.faceZones();
+
+    // Check any zones are present anywhere and in same order
+
+    {
+        List<wordList> zoneNames(Pstream::nProcs());
+        zoneNames[Pstream::myProcNo()] = fZones.names();
+        Pstream::gatherList(zoneNames);
+        Pstream::scatterList(zoneNames);
+        // All have same data now. Check.
+        forAll(zoneNames, procI)
+        {
+            if (procI != Pstream::myProcNo())
+            {
+                if (zoneNames[procI] != zoneNames[Pstream::myProcNo()])
+                {
+                    FatalErrorIn
+                    (
+                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+                    )   << "faceZones are not synchronised on processors." << nl
+                        << "Processor " << procI << " has faceZones "
+                        << zoneNames[procI] << nl
+                        << "Processor " << Pstream::myProcNo()
+                        << " has faceZones "
+                        << zoneNames[Pstream::myProcNo()] << nl
+                        << exit(FatalError);
+                }
+            }
+        }
+    }
+
+    // Check that coupled faces are present on both sides.
+
+    labelList faceToZone(mesh.nFaces()-mesh.nInternalFaces(), -1);
+
+    forAll(fZones, zoneI)
+    {
+        const faceZone& fZone = fZones[zoneI];
+
+        forAll(fZone, i)
+        {
+            label bFaceI = fZone[i]-mesh.nInternalFaces();
+
+            if (bFaceI >= 0)
+            {
+                if (faceToZone[bFaceI] == -1)
+                {
+                    faceToZone[bFaceI] = zoneI;
+                }
+                else if (faceToZone[bFaceI] == zoneI)
+                {
+                    FatalErrorIn
+                    (
+                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+                    )   << "Face " << fZone[i] << " in zone "
+                        << fZone.name()
+                        << " is twice in zone!"
+                        << abort(FatalError);
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+                    )   << "Face " << fZone[i] << " in zone "
+                        << fZone.name()
+                        << " is also in zone "
+                        << fZones[faceToZone[bFaceI]].name()
+                        << abort(FatalError);
+                }
+            }
+        }
+    }
+
+    labelList neiFaceToZone(faceToZone);
+    syncTools::swapBoundaryFaceList(mesh, neiFaceToZone, false);
+
+    forAll(faceToZone, i)
+    {
+        if (faceToZone[i] != neiFaceToZone[i])
+        {
+            FatalErrorIn
+            (
+                "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+            )   << "Face " << mesh.nInternalFaces()+i
+                << " is in zone " << faceToZone[i]
+                << ", its coupled face is in zone " << neiFaceToZone[i]
+                << abort(FatalError);
+        }
+    }
 }
 
 
