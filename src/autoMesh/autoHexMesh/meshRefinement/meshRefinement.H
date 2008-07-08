@@ -30,7 +30,7 @@ Description
     (static) surfaces.
 
     Maintains
-    - per face any intersections of this edge with any of the surfaces
+    - per face any intersections of the cc-cc segment with any of the surfaces
 
 SourceFiles
     meshRefinement.C
@@ -62,6 +62,7 @@ class fvMesh;
 class mapDistributePolyMesh;
 class decompositionMethod;
 class refinementSurfaces;
+class shellSurfaces;
 class removeCells;
 class featureEdgeMesh;
 class fvMeshDistribute;
@@ -107,7 +108,11 @@ private:
         //- tolerance used for sorting coordinates (used in 'less' routine)
         const scalar tol_;
 
+        //- All surface-intersection interaction
         const refinementSurfaces& surfaces_;
+
+        //- All shell-refinement interaction
+        const shellSurfaces& shells_;
 
         //- refinement engine
         hexRef8 meshCutter_;
@@ -229,12 +234,16 @@ private:
             //- Mark cells for refinement-shells based refinement.
             label markInternalRefinement
             (
-                const PtrList<searchableSurface>&,
-                const labelList& shellLevels,
-                const boolList& shellRefineInside,
                 const label nAllowRefine,
                 labelList& refineCell,
                 label& nRefine
+            ) const;
+
+            //- Collect faces that are intersected and whose neighbours aren't
+            //  yet marked  for refinement.
+            labelList getRefineCandidateFaces
+            (
+                const labelList& refineCell
             ) const;
 
             //- Mark cells for surface intersection based refinement.
@@ -252,17 +261,13 @@ private:
             //  regions.
             bool checkCurvature
             (
-                const labelList& globalToPatch,
                 const scalar curvature,
-                const bool markDifferingRegions,
                 const label nAllowRefine,
-                const label newSurfI,
-                const label newTriI,
+                const label surfaceLevel,
+                const vector& surfaceNormal,
                 const label cellI,
-
-                label& maxCellSurfI,
-                label& maxCellTriI,
-
+                label& cellMaxLevel,
+                vector& cellMaxNormal,
                 labelList& refineCell,
                 label& nRefine
             ) const;
@@ -273,9 +278,7 @@ private:
             //  (markDifferingRegions)
             label markSurfaceCurvatureRefinement
             (
-                const labelList& globalToPatch,
                 const scalar curvature,
-                const bool markDifferingRegions,
                 const label nAllowRefine,
                 const labelList& neiLevel,
                 const pointField& neiCc,
@@ -381,7 +384,8 @@ public:
         (
             fvMesh& mesh,
             const scalar tol,
-            const refinementSurfaces&
+            const refinementSurfaces&,
+            const shellSurfaces&
         );
 
 
@@ -482,21 +486,17 @@ public:
                 const labelList& adaptPatchIDs
             );
 
+
         // Refinement
 
             //- Calculate list of cells to refine.
             labelList refineCandidates
             (
                 const point& keepPoint,
-                const labelList& globalToPatch,
                 const scalar curvature,
 
                 const PtrList<featureEdgeMesh>& featureMeshes,
                 const labelList& featureLevels,
-
-                const PtrList<searchableSurface>&,
-                const labelList& shellLevels,
-                const boolList& shellRefineInside,
 
                 const bool featureRefinement,
                 const bool internalRefinement,

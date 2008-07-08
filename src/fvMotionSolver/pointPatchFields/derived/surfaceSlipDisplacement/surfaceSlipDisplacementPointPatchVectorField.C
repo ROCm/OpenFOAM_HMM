@@ -62,7 +62,6 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(p, iF),
-    surfaceNames_(),
     projectMode_(NEAREST),
     projectDir_(vector::zero),
     wedgePlane_(-1)
@@ -78,7 +77,7 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(p, iF, dict),
-    surfaceNames_(dict.lookup("projectSurfaces")),
+    surfacesDict_(dict.subDict("geometry")),
     projectMode_(followModeNames_.read(dict.lookup("followMode"))),
     projectDir_(dict.lookup("projectDirection")),
     wedgePlane_(readLabel(dict.lookup("wedgePlane"))),
@@ -96,7 +95,7 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(p, iF),
-    surfaceNames_(ppf.surfaceNames()),
+    surfacesDict_(ppf.surfacesDict()),
     projectMode_(ppf.projectMode()),
     projectDir_(ppf.projectDir()),
     wedgePlane_(ppf.wedgePlane()),
@@ -111,7 +110,7 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(ppf),
-    surfaceNames_(ppf.surfaceNames()),
+    surfacesDict_(ppf.surfacesDict()),
     projectMode_(ppf.projectMode()),
     projectDir_(ppf.projectDir()),
     wedgePlane_(ppf.wedgePlane()),
@@ -127,7 +126,7 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(ppf, iF),
-    surfaceNames_(ppf.surfaceNames()),
+    surfacesDict_(ppf.surfacesDict()),
     projectMode_(ppf.projectMode()),
     projectDir_(ppf.projectDir()),
     wedgePlane_(ppf.wedgePlane()),
@@ -137,14 +136,14 @@ surfaceSlipDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const triSurfaceMeshes& surfaceSlipDisplacementPointPatchVectorField::
+const searchableSurfaces& surfaceSlipDisplacementPointPatchVectorField::
 surfaces() const
 {
     if (!surfacesPtr_.valid())
     {
         surfacesPtr_.reset
         (
-            new triSurfaceMeshes
+            new searchableSurfaces
             (
                 IOobject
                 (
@@ -155,7 +154,7 @@ surfaces() const
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                surfaceNames_
+                surfacesDict_
             )
         );
     }
@@ -215,128 +214,180 @@ void surfaceSlipDisplacementPointPatchVectorField::evaluate
         );
     const pointField& points0 = motionSolver.points0();
 
-    forAll(localPoints, i)
+
+//XXXXXX
+
+
+    pointField start(meshPoints.size());
+    forAll(start, i)
     {
-        if (zonePtr && (zonePtr->whichPoint(meshPoints[i]) >= 0))
+        start[i] = points0[meshPoints[i]] + displacement[i];
+    }
+
+    if (projectMode_ == NEAREST)
+    {
+        List<pointIndexHit> nearest;
+        labelList hitSurfaces;
+        surfaces().findNearest
+        (
+            start,
+            scalarField(start.size(), sqr(projectLen)),
+            hitSurfaces,
+            nearest
+        );
+
+        forAll(nearest, i)
         {
-            // Fixed point. Reset to point0 location.
-
-            //Pout<< "    Fixed point:" << meshPoints[i]
-            //    << " coord:" << localPoints[i]
-            //    << " should be at:" << points0[meshPoints[i]]
-            //    << endl;
-            displacement[i] = points0[meshPoints[i]] - localPoints[i];
-        }
-        else
-        {
-            point start(points0[meshPoints[i]] + displacement[i]);
-
-            scalar offset = 0;
-            pointIndexHit intersection;
-
-            if (projectMode_ == NEAREST)
+            if (zonePtr && (zonePtr->whichPoint(meshPoints[i]) >= 0))
             {
-                surfaces().findNearest(start, sqr(projectLen), intersection);
+                // Fixed point. Reset to point0 location.
+                displacement[i] = points0[meshPoints[i]] - localPoints[i];
             }
-            else
+            else if (nearest[i].hit())
             {
-                // Check if already on surface
-                surfaces().findNearest(start, sqr(SMALL), intersection);
-
-                if (!intersection.hit())
-                {
-                    // No nearest found. Do intersection
-
-                    if (projectMode_ == POINTNORMAL)
-                    {
-                        projectVec = projectLen*patch().pointNormals()[i];
-                    }
-
-                    // Knock out any wedge component
-                    if (wedgePlane_ >= 0 && wedgePlane_ <= vector::nComponents)
-                    {
-                        offset = start[wedgePlane_];
-                        start[wedgePlane_] = 0;
-                        projectVec[wedgePlane_] = 0;
-                    }
-
-                    label rightSurf0, rightSurf1;
-                    pointIndexHit rightHit0, rightHit1;
-                    surfaces().findNearestIntersection
-                    (
-                        start,
-                        start+projectVec,
-                        rightSurf0,
-                        rightHit0,
-                        rightSurf1,
-                        rightHit1
-                    );
-
-                    // Do intersection
-                    label leftSurf0, leftSurf1;
-                    pointIndexHit leftHit0, leftHit1;
-                    surfaces().findNearestIntersection
-                    (
-                        start,
-                        start-projectVec,
-                        leftSurf0,
-                        leftHit0,
-                        leftSurf1,
-                        leftHit1
-                    );
-
-                    if (rightHit0.hit())
-                    {
-                        if (leftHit0.hit())
-                        {
-                            if
-                            (
-                                magSqr(rightHit0.hitPoint()-start)
-                              < magSqr(leftHit0.hitPoint()-start)
-                            )
-                            {
-                                intersection = rightHit0;
-                            }
-                            else
-                            {
-                                intersection = leftHit0;
-                            }
-                        }
-                        else
-                        {
-                            intersection = rightHit0;
-                        }
-                    }
-                    else
-                    {
-                        if (leftHit0.hit())
-                        {
-                            intersection = leftHit0;
-                        }
-                    }
-                }
-            }
-
-            // Update *this from intersection point
-
-            if (intersection.hit())
-            {
-                point interPt = intersection.hitPoint();
-
-                if (wedgePlane_ >= 0 && wedgePlane_ <= vector::nComponents)
-                {
-                    interPt[wedgePlane_] += offset;
-                }
-                displacement[i] = interPt-points0[meshPoints[i]];
+                displacement[i] =
+                    nearest[i].hitPoint()
+                  - points0[meshPoints[i]];
             }
             else
             {
                 Pout<< "    point:" << meshPoints[i]
                     << " coord:" << localPoints[i]
-                    << "  did not find any intersection between ray from "
-                    << start-projectVec << " to " << start+projectVec
+                    << "  did not find any surface within " << projectLen
                     << endl;
-            }  
+            }
+        }
+    }
+    else
+    {
+        // Do tests on all points. Combine later on.
+
+        // 1. Check if already on surface
+        List<pointIndexHit> nearest;
+        {
+            labelList nearestSurface;
+            surfaces().findNearest
+            (
+                start,
+                scalarField(start.size(), sqr(SMALL)),
+                nearestSurface,
+                nearest
+            );
+        }
+
+        // 2. intersection. (combined later on with information from nearest
+        // above)
+        vectorField projectVecs(start.size(), projectVec);
+
+        if (projectMode_ == POINTNORMAL)
+        {
+            projectVecs = projectLen*patch().pointNormals();
+        }
+
+        // Knock out any wedge component
+        scalarField offset(start.size(), 0.0);
+        if (wedgePlane_ >= 0 && wedgePlane_ <= vector::nComponents)
+        {
+            forAll(offset, i)
+            {
+                offset[i] = start[i][wedgePlane_];
+                start[i][wedgePlane_] = 0;
+                projectVecs[i][wedgePlane_] = 0;
+            }
+        }
+
+        List<pointIndexHit> rightHit;
+        {
+            labelList rightSurf;
+            surfaces().findAnyIntersection
+            (
+                start,
+                start+projectVecs,
+                rightSurf,
+                rightHit
+            );
+        }
+        
+        List<pointIndexHit> leftHit;
+        {
+            labelList leftSurf;
+            surfaces().findAnyIntersection
+            (
+                start,
+                start-projectVecs,
+                leftSurf,
+                leftHit
+            );
+        }
+
+        // 3. Choose either -fixed, nearest, right, left.
+        forAll(displacement, i)
+        {
+            if (zonePtr && (zonePtr->whichPoint(meshPoints[i]) >= 0))
+            {
+                // Fixed point. Reset to point0 location.
+                displacement[i] = points0[meshPoints[i]] - localPoints[i];
+            }
+            else if (nearest[i].hit())
+            {
+                // Found nearest.
+                displacement[i] =
+                    nearest[i].hitPoint()
+                  - points0[meshPoints[i]];
+            }
+            else
+            {
+                pointIndexHit interPt;
+
+                if (rightHit[i].hit())
+                {
+                    if (leftHit[i].hit())
+                    {
+                        if
+                        (
+                            magSqr(rightHit[i].hitPoint()-start[i])
+                          < magSqr(leftHit[i].hitPoint()-start[i])
+                        )
+                        {
+                            interPt = rightHit[i];
+                        }
+                        else
+                        {
+                            interPt = leftHit[i];
+                        }
+                    }
+                    else
+                    {
+                        interPt = rightHit[i];
+                    }
+                }
+                else
+                {
+                    if (leftHit[i].hit())
+                    {
+                        interPt = leftHit[i];
+                    }
+                }
+
+
+                if (interPt.hit())
+                {
+                    if (wedgePlane_ >= 0 && wedgePlane_ <= vector::nComponents)
+                    {
+                        interPt.rawPoint()[wedgePlane_] += offset[i];
+                    }
+                    displacement[i] = interPt.rawPoint()-points0[meshPoints[i]];
+                }
+                else
+                {
+                    Pout<< "    point:" << meshPoints[i]
+                        << " coord:" << localPoints[i]
+                        << "  did not find any intersection between ray from "
+                        << start[i]-projectVecs[i]
+                        << " to " << start[i]+projectVecs[i]
+                        << endl;
+                }
+            }
         }
     }
 
@@ -353,7 +404,7 @@ void surfaceSlipDisplacementPointPatchVectorField::evaluate
 void surfaceSlipDisplacementPointPatchVectorField::write(Ostream& os) const
 {
     pointPatchVectorField::write(os);
-    os.writeKeyword("projectSurfaces") << surfaceNames_
+    os.writeKeyword("geometry") << surfacesDict_
         << token::END_STATEMENT << nl;
     os.writeKeyword("followMode") << followModeNames_[projectMode_]
         << token::END_STATEMENT << nl;

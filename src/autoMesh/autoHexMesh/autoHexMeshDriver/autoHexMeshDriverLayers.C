@@ -27,7 +27,6 @@ Description
 
 \*----------------------------------------------------------------------------*/
 
-#include "ListOps.H"
 #include "autoHexMeshDriver.H"
 #include "fvMesh.H"
 #include "Time.H"
@@ -43,11 +42,8 @@ Description
 #include "mapPolyMesh.H"
 #include "addPatchCellLayer.H"
 #include "mapDistributePolyMesh.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::scalar Foam::autoHexMeshDriver::defaultConcaveAngle = 90;
-
+#include "OFstream.H"
+#include "layerParameters.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -1191,6 +1187,7 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 // No extrusion on faces with differing number of layers for points
 void Foam::autoHexMeshDriver::setNumLayers
 (
+    const labelList& patchToNLayers,
     const labelList& patchIDs,
     const indirectPrimitivePatch& pp,
     pointField& patchDisp,
@@ -1200,18 +1197,6 @@ void Foam::autoHexMeshDriver::setNumLayers
 {
     Info<< nl << "Handling points with inconsistent layer specification ..."
         << endl;
-
-    const labelList& nSurfLayers = surfaces().numLayers();
-
-    // Build map from patch to layers
-    Map<label> patchToNLayers(nSurfLayers.size());
-    forAll(nSurfLayers, region)
-    {
-        if (globalToPatch_[region] != -1)
-        {
-            patchToNLayers.insert(globalToPatch_[region], nSurfLayers[region]);
-        }
-    }
 
     // Get for every point (really only nessecary on patch external points)
     // the max and min of any patch faces using it.
@@ -1257,7 +1242,7 @@ void Foam::autoHexMeshDriver::setNumLayers
     // Unmark any point with different min and max
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label nConflicts = 0;
+    //label nConflicts = 0;
 
     forAll(maxLayers, i)
     {
@@ -1294,11 +1279,11 @@ void Foam::autoHexMeshDriver::setNumLayers
         }
     }
 
-    reduce(nConflicts, sumOp<label>());
-
-    Info<< "Set displacement to zero for " << nConflicts
-        << " points due to points being on multiple regions"
-        << " with inconsistent nLayers specification." << endl;
+    //reduce(nConflicts, sumOp<label>());
+    //
+    //Info<< "Set displacement to zero for " << nConflicts
+    //    << " points due to points being on multiple regions"
+    //    << " with inconsistent nLayers specification." << endl;
 }
 
 
@@ -1369,59 +1354,137 @@ void Foam::autoHexMeshDriver::growNoExtrusion
 }
 
 
-
-// Calculate pointwise wanted and minimum thickness.
-// thickness: wanted thickness per point
 void Foam::autoHexMeshDriver::calculateLayerThickness
 (
-    const scalar expansionRatio,
-    const scalar finalLayerRatio,
-    const scalar relMinThickness,
     const indirectPrimitivePatch& pp,
+    const labelList& patchIDs,
+    const scalarField& patchExpansionRatio,
+    const scalarField& patchFinalLayerRatio,
+    const scalarField& patchRelMinThickness,
     const labelList& cellLevel,
     const labelList& patchNLayers,
     const scalar edge0Len,
+
     scalarField& thickness,
-    scalarField& minThickness
+    scalarField& minThickness,
+    scalarField& expansionRatio
 ) const
 {
-    if (relMinThickness < 0 || relMinThickness > 2)
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    if (min(patchRelMinThickness) < 0 || max(patchRelMinThickness) > 2)
     {
         FatalErrorIn("calculateLayerThickness(..)")
             << "Thickness should be factor of local undistorted cell size."
             << " Valid values are [0..2]." << nl
-            << " minThickness:" << relMinThickness
+            << " minThickness:" << patchRelMinThickness
             << exit(FatalError);
     }
 
-    thickness.setSize(pp.nPoints());
-    minThickness.setSize(pp.nPoints());
 
     // Per point the max cell level of connected cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     labelList maxPointLevel(pp.nPoints(), labelMin);
 
-    forAll(pp, i)
     {
-        label ownLevel = cellLevel[mesh_.faceOwner()[pp.addressing()[i]]];
-
-        const face& f = pp.localFaces()[i];
-
-        forAll(f, fp)
+        forAll(pp, i)
         {
-            maxPointLevel[f[fp]] = max(maxPointLevel[f[fp]], ownLevel);
+            label ownLevel = cellLevel[mesh_.faceOwner()[pp.addressing()[i]]];
+
+            const face& f = pp.localFaces()[i];
+
+            forAll(f, fp)
+            {
+                maxPointLevel[f[fp]] = max(maxPointLevel[f[fp]], ownLevel);
+            }
         }
+
+        syncTools::syncPointList
+        (
+            mesh_,
+            pp.meshPoints(),
+            maxPointLevel,
+            maxEqOp<label>(),
+            labelMin,           // null value
+            false               // no separation
+        );
     }
 
-    syncTools::syncPointList
-    (
-        mesh_,
-        pp.meshPoints(),
-        maxPointLevel,
-        maxEqOp<label>(),
-        labelMin,           // null value
-        false               // no separation
-    );
 
+    // Rework patch-wise layer parameters into minimum per point
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    expansionRatio.setSize(pp.nPoints());
+    expansionRatio = GREAT;
+    scalarField finalLayerRatio(pp.nPoints(), GREAT);
+    scalarField relMinThickness(pp.nPoints(), GREAT);
+
+    {
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+
+            const labelList& meshPoints = patches[patchI].meshPoints();
+
+            forAll(meshPoints, patchPointI)
+            {
+                label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
+
+                expansionRatio[ppPointI] = min
+                (
+                    expansionRatio[ppPointI],
+                    patchExpansionRatio[patchI]
+                );
+                finalLayerRatio[ppPointI] = min
+                (
+                    finalLayerRatio[ppPointI],
+                    patchFinalLayerRatio[patchI]
+                );
+                relMinThickness[ppPointI] = min
+                (
+                    relMinThickness[ppPointI],
+                    patchRelMinThickness[patchI]
+                );
+            }
+        }
+
+        syncTools::syncPointList
+        (
+            mesh_,
+            pp.meshPoints(),
+            expansionRatio,
+            minEqOp<scalar>(),
+            GREAT,              // null value
+            false               // no separation
+        );
+        syncTools::syncPointList
+        (
+            mesh_,
+            pp.meshPoints(),
+            finalLayerRatio,
+            minEqOp<scalar>(),
+            GREAT,              // null value
+            false               // no separation
+        );
+        syncTools::syncPointList
+        (
+            mesh_,
+            pp.meshPoints(),
+            relMinThickness,
+            minEqOp<scalar>(),
+            GREAT,              // null value
+            false               // no separation
+        );
+    }
+
+
+
+    // Per mesh point the expansion parameters
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    thickness.setSize(pp.nPoints());
+    minThickness.setSize(pp.nPoints());
 
     forAll(maxPointLevel, pointI)
     {
@@ -1430,19 +1493,24 @@ void Foam::autoHexMeshDriver::calculateLayerThickness
 
         // Calculate layer thickness based on expansion ratio
         // and final layer height
-        if (expansionRatio == 1)
+        if (expansionRatio[pointI] == 1)
         {
-            thickness[pointI] = finalLayerRatio*patchNLayers[pointI]*edgeLen;
-            minThickness[pointI] = relMinThickness*edgeLen;
+            thickness[pointI] =
+                finalLayerRatio[pointI]
+              * patchNLayers[pointI]
+              * edgeLen;
+            minThickness[pointI] = relMinThickness[pointI]*edgeLen;
         }
         else
         {
-            scalar invExpansion = 1.0 / expansionRatio;
+            scalar invExpansion = 1.0 / expansionRatio[pointI];
             label nLay = patchNLayers[pointI];
-            thickness[pointI] = finalLayerRatio*edgeLen
-                * (1.0 - pow(invExpansion, nLay))
-                / (1.0 - invExpansion);
-            minThickness[pointI] = relMinThickness*edgeLen;
+            thickness[pointI] =
+                finalLayerRatio[pointI]
+              * edgeLen
+              * (1.0 - pow(invExpansion, nLay))
+              / (1.0 - invExpansion);
+            minThickness[pointI] = relMinThickness[pointI]*edgeLen;
         }
     }
 
@@ -2309,31 +2377,34 @@ void Foam::autoHexMeshDriver::getLayerCellsFaces
 
 void Foam::autoHexMeshDriver::mergePatchFacesUndo
 (
-    const dictionary& shrinkDict,
+    const layerParameters& layerParams,
     const dictionary& motionDict
 )
 {
-    const scalar featureAngle(readScalar(shrinkDict.lookup("featureAngle")));
-    scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.0);
+    scalar minCos = Foam::cos
+    (
+        layerParams.featureAngle()
+      * mathematicalConstant::pi/180.0
+    );
 
-    scalar concaveAngle = defaultConcaveAngle;
-
-    if (shrinkDict.found("concaveAngle"))
-    {
-        concaveAngle = readScalar(shrinkDict.lookup("concaveAngle"));
-    }
-    scalar concaveCos = Foam::cos(concaveAngle*mathematicalConstant::pi/180.0);
+    scalar concaveCos = Foam::cos
+    (
+        layerParams.concaveAngle()
+      * mathematicalConstant::pi/180.0
+    );
 
     Info<< nl
         << "Merging all faces of a cell" << nl
         << "---------------------------" << nl
         << "    - which are on the same patch" << nl
-        << "    - which make an angle < " << featureAngle << " degrees"
+        << "    - which make an angle < " << layerParams.featureAngle()
+        << " degrees"
         << nl
         << "      (cos:" << minCos << ')' << nl
         << "    - as long as the resulting face doesn't become concave"
         << " by more than "
-        << concaveAngle << " degrees (0=straight, 180=fully concave)" << nl
+        << layerParams.concaveAngle()
+        << " degrees (0=straight, 180=fully concave)" << nl
         << endl;
 
     label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
@@ -2344,79 +2415,17 @@ void Foam::autoHexMeshDriver::mergePatchFacesUndo
 
 void Foam::autoHexMeshDriver::addLayers
 (
-    const dictionary& shrinkDict,
+    const layerParameters& layerParams,
     const dictionary& motionDict,
     const label nAllowableErrors,
     motionSmoother& meshMover
 )
 {
-    // Read some more dictionary settings
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Min thickness per cell
-    const scalar relMinThickness(readScalar(shrinkDict.lookup("minThickness")));
-
-    // Warped faces recoginition
-    const scalar maxFaceThicknessRatio
-    (
-        readScalar(shrinkDict.lookup("maxFaceThicknessRatio"))
-    );
-    const scalar featureAngle(readScalar(shrinkDict.lookup("featureAngle")));
-
-    // Feature angle
-    const scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.);
-
-    // Number of layers for to grow non-extrusion region by
-    const label nGrow(readLabel(shrinkDict.lookup("nGrow")));
-
-    //const label nSmoothDisp(readLabel(shrinkDict.lookup("nSmoothDispl")));
-    // Snapping iterations
-    const label nSnap(readLabel(shrinkDict.lookup("nSnap")));
-
-    // Mesh termination and medial axis smoothing quantities
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const scalar minCosLayerTermination =
-        Foam::cos(0.5*featureAngle*mathematicalConstant::pi/180.);
-    const scalar expansionRatio
-    (
-        readScalar(shrinkDict.lookup("expansionRatio"))
-    );
-    const scalar finalLayerRatio
-    (
-        readScalar(shrinkDict.lookup("finalLayerRatio"))
-    );
-    const label nBufferCellsNoExtrude
-    (
-        readLabel(shrinkDict.lookup("nBufferCellsNoExtrude"))
-    );
-    const label nSmoothSurfaceNormals
-    (
-        readLabel(shrinkDict.lookup("nSmoothSurfaceNormals"))
-    );
-    const label nSmoothNormals(readLabel(shrinkDict.lookup("nSmoothNormals")));
-    const label nSmoothThickness
-    (
-        readLabel(shrinkDict.lookup("nSmoothThickness"))
-    );
-    const scalar maxThicknessToMedialRatio
-    (
-        readScalar(shrinkDict.lookup("maxThicknessToMedialRatio"))
-    );
-
-    // Medial axis setup
-
-    const scalar minMedianAxisAngle
-    (
-        readScalar(shrinkDict.lookup("minMedianAxisAngle"))
-    );
-    const scalar minMedianAxisAngleCos =
-        Foam::cos(minMedianAxisAngle*mathematicalConstant::pi/180.);
-
-
-    // Precalculate mesh edge labels for patch edges
     const indirectPrimitivePatch& pp = meshMover.patch();
     const labelList& meshPoints = pp.meshPoints();
+
+    // Precalculate mesh edge labels for patch edges
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelList meshEdges(pp.nEdges());
     forAll(pp.edges(), edgeI)
@@ -2449,8 +2458,9 @@ void Foam::autoHexMeshDriver::addLayers
 
     setNumLayers
     (
-        meshMover.adaptPatchIDs(),
-        pp,
+        layerParams.numLayers(),    // per patch the num layers
+        meshMover.adaptPatchIDs(),  // patches that are being moved
+        pp,                         // indirectpatch for all faces moving
 
         patchDisp,
         patchNLayers,
@@ -2477,7 +2487,7 @@ void Foam::autoHexMeshDriver::addLayers
     (
         pp,
         meshEdges,
-        minCos,
+        layerParams.featureAngle()*mathematicalConstant::pi/180.0,
 
         patchDisp,
         patchNLayers,
@@ -2494,7 +2504,7 @@ void Foam::autoHexMeshDriver::addLayers
     handleWarpedFaces
     (
         pp,
-        maxFaceThicknessRatio,
+        layerParams.maxFaceThicknessRatio(),
         edge0Len,
         cellLevel,
 
@@ -2517,7 +2527,7 @@ void Foam::autoHexMeshDriver::addLayers
 
 
     // Grow out region of non-extrusion
-    for (label i = 0; i < nGrow; i++)
+    for (label i = 0; i < layerParams.nGrow(); i++)
     {
         growNoExtrusion
         (
@@ -2528,21 +2538,24 @@ void Foam::autoHexMeshDriver::addLayers
         );
     }
 
-    // Determine point-wise layer thickness
+    // Determine (wanted) point-wise layer thickness and expansion ratio
     scalarField thickness(pp.nPoints());
     scalarField minThickness(pp.nPoints());
+    scalarField expansionRatio(pp.nPoints());
     calculateLayerThickness
     (
-        expansionRatio,
-        finalLayerRatio,
-        relMinThickness,
         pp,
+        meshMover.adaptPatchIDs(),
+        layerParams.expansionRatio(),
+        layerParams.finalLayerRatio(),
+        layerParams.minThickness(),
         cellLevel,
         patchNLayers,
         edge0Len,
 
         thickness,
-        minThickness
+        minThickness,
+        expansionRatio
     );
 
     // Calculate wall to medial axis distance for smoothing displacement
@@ -2602,9 +2615,9 @@ void Foam::autoHexMeshDriver::addLayers
     medialAxisSmoothingInfo
     (
         meshMover,
-        nSmoothNormals,
-        nSmoothSurfaceNormals,
-        minMedianAxisAngleCos,
+        layerParams.nSmoothNormals(),
+        layerParams.nSmoothSurfaceNormals(),
+        layerParams.minMedianAxisAngleCos(),
 
         dispVec,
         medialRatio,
@@ -2657,8 +2670,8 @@ void Foam::autoHexMeshDriver::addLayers
             //    debug,
             //    meshMover,
             //    -patchDisp,     // Shrink in opposite direction of addedPoints
-            //    nSmoothDisp,
-            //    nSnap
+            //    layerParams.nSmoothDisp(),
+            //    layerParams.nSnap()
             //);
 
             // Medial axis based shrinking
@@ -2666,11 +2679,11 @@ void Foam::autoHexMeshDriver::addLayers
             (
                 meshMover,
 
-                nSmoothThickness,
-                maxThicknessToMedialRatio,
+                layerParams.nSmoothThickness(),
+                layerParams.maxThicknessToMedialRatio(),
                 nAllowableErrors,
-                nSnap,
-                minCosLayerTermination,
+                layerParams.nSnap(),
+                layerParams.layerTerminationCos(),
 
                 thickness,
                 minThickness,
@@ -2735,7 +2748,7 @@ void Foam::autoHexMeshDriver::addLayers
             meshMover,
             patchNLayers,
             extrudeStatus,
-            nBufferCellsNoExtrude,
+            layerParams.nBufferCellsNoExtrude(),
             nPatchPointLayers,
             nPatchFaceLayers
         );
@@ -2747,7 +2760,7 @@ void Foam::autoHexMeshDriver::addLayers
         {
             if (patchNLayers[i] > 0)
             {
-                if (expansionRatio == 1.0)
+                if (expansionRatio[i] == 1.0)
                 {
                     firstDisp[i] = patchDisp[i]/nPatchPointLayers[i];
                 }
@@ -2755,15 +2768,15 @@ void Foam::autoHexMeshDriver::addLayers
                 {
                     label nLay = nPatchPointLayers[i];
                     scalar h =
-                        pow(expansionRatio,nLay - 1)
-                      * (mag(patchDisp[i])*(1.0 - expansionRatio))
-                      / (1.0 - pow(expansionRatio, nLay));
+                        pow(expansionRatio[i], nLay - 1)
+                      * (mag(patchDisp[i])*(1.0 - expansionRatio[i]))
+                      / (1.0 - pow(expansionRatio[i], nLay));
                     firstDisp[i] = h/mag(patchDisp[i])*patchDisp[i];
                 }
             }
         }
 
-        scalar invExpansionRatio = 1.0 / expansionRatio;
+        scalarField invExpansionRatio = 1.0 / expansionRatio;
 
         // Add topo regardless of whether extrudeStatus is extruderemove.
         // Not add layer if patchDisp is zero.

@@ -52,7 +52,7 @@ SourceFiles
 #define surfaceSlipDisplacementPointPatchVectorField_H
 
 #include "pointPatchFields.H"
-#include "triSurfaceMeshes.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,7 +87,7 @@ private:
         static const NamedEnum<followMode, 3> followModeNames_;
 
         //- names of surfaces
-        const fileNameList surfaceNames_;
+        const dictionary surfacesDict_;
 
         //- How to follow/project onto surface
         const followMode projectMode_;
@@ -102,7 +102,7 @@ private:
         const word frozenPointsZone_;
 
         //- Demand driven: surface to follow
-        mutable autoPtr<triSurfaceMeshes> surfacesPtr_;
+        mutable autoPtr<searchableSurfaces> surfacesPtr_;
 
 
     // Private Member Functions
@@ -187,13 +187,13 @@ public:
     // Member Functions
 
         //- Surfaces to follow
-        const fileNameList& surfaceNames() const
+        const dictionary& surfacesDict() const
         {
-            return surfaceNames_;
+            return surfacesDict_;
         }
 
         //- Surface to follow. Demand loads surfaceNames.
-        const triSurfaceMeshes& surfaces() const;
+        const searchableSurfaces& surfaces() const;
 
         //- Mode of projection/following
         followMode projectMode() const

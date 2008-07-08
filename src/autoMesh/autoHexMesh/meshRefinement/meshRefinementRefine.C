@@ -29,6 +29,7 @@ License
 #include "syncTools.H"
 #include "Time.H"
 #include "refinementSurfaces.H"
+#include "shellSurfaces.H"
 #include "faceSet.H"
 #include "decompositionMethod.H"
 #include "fvMeshDistribute.H"
@@ -36,9 +37,6 @@ License
 #include "mapDistributePolyMesh.H"
 #include "featureEdgeMesh.H"
 #include "Cloud.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -369,7 +367,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
             {
                 label edgeI = pEdges[i];
 
-                if (featureEdgeVisited[featI].get(edgeI) == 0)
+                if (featureEdgeVisited[featI].set(edgeI, 1u))
                 {
                     // Unvisited edge. Make the particle go to the other point
                     // on the edge.
@@ -377,7 +375,6 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                     const edge& e = featureMesh.edges()[edgeI];
                     label otherPointI = e.otherVertex(pointI);
 
-                    featureEdgeVisited[featI].set(edgeI, 1u);
                     tp.end() = featureMesh.points()[otherPointI];
                     tp.j() = otherPointI;
                     keepParticle = true;
@@ -438,6 +435,15 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
         }
     }
 
+    if
+    (
+        returnReduce(nRefine, sumOp<label>())
+      > returnReduce(nAllowRefine, sumOp<label>())
+    )
+    {
+        Info<< "Reached refinement limit." << endl;
+    }
+
     return returnReduce(nRefine-oldNRefine,  sumOp<label>());
 }
 
@@ -445,9 +451,6 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
 // Mark cells for non-surface intersection based refinement.
 Foam::label Foam::meshRefinement::markInternalRefinement
 (
-    const PtrList<searchableSurface>& shells,
-    const labelList& shellLevels,
-    const boolList& shellRefineInside,
     const label nAllowRefine,
 
     labelList& refineCell,
@@ -457,91 +460,110 @@ Foam::label Foam::meshRefinement::markInternalRefinement
     const labelList& cellLevel = meshCutter_.cellLevel();
     const pointField& cellCentres = mesh_.cellCentres();
 
-
     label oldNRefine = nRefine;
 
-    // Number of cells marked for refinement per shell.
-    labelList nCellsPerShell(shells.size(), 0);
+    // Collect cells to test
+    pointField testCc(cellLevel.size()-nRefine);
+    labelList testLevels(cellLevel.size()-nRefine);
+    label testI = 0;
 
     forAll(cellLevel, cellI)
     {
         if (refineCell[cellI] == -1)
         {
-            // Cell not marked for refinement. Check if inside any shell
-            // with higher refinement level than cell currently has.
-
-            bool reachedLimit = false;
-
-            forAll(shells, shellI)
-            {
-                // Cached inside-outside from tree
-                searchableSurface::volumeType t =
-                    shells[shellI].getVolumeType(cellCentres[cellI]);
-
-                //// Uncached inside-outside from treeData
-                //label t = shells[shellI].shapes().getVolumeType
-                //    (
-                //        shells[shellI],
-                //        cellCentres[cellI]
-                //    );
-
-                // Which side of shell is to be refined
-                searchableSurface::volumeType refSide =
-                (
-                    shellRefineInside[shellI]
-                  ? searchableSurface::INSIDE
-                  : searchableSurface::OUTSIDE
-                );
-
-                if (t == refSide && cellLevel[cellI] < shellLevels[shellI])
-                {
-                    // Cell is inside shell with higher refinement level. Mark
-                    // for refinement.
-
-                    reachedLimit = !markForRefine
-                    (
-                        labelMax,
-                        nAllowRefine,
-                        refineCell[cellI],
-                        nRefine
-                    );
-
-                    if (reachedLimit)
-                    {
-                        if (debug)
-                        {
-                            Pout<< "Stopped refining internal cells"
-                                << " since reaching my cell limit of "
-                                << mesh_.nCells()+7*nRefine << endl;
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        // Cell successfully marked for refinement
-                        nCellsPerShell[shellI]++;
-                    }
-                }
-            }
-
-            if (reachedLimit)
-            {
-                break;
-            }
+            testCc[testI] = cellCentres[cellI];
+            testLevels[testI] = cellLevel[cellI];
+            testI++;
         }
     }
 
-    Pstream::listCombineGather(nCellsPerShell, plusEqOp<label>());
-    Pstream::listCombineScatter(nCellsPerShell);
+    // Do test to see whether cells is inside/outside shell with higher level
+    labelList maxLevel;
+    shells_.findHigherLevel(testCc, testLevels, maxLevel);
 
-    Info<< "Marked for refinement per shell :" << endl;
-    forAll(nCellsPerShell, shellI)
+    // Mark for refinement. Note that we didn't store the original cellID so
+    // now just reloop in same order.
+    testI = 0;
+    forAll(cellLevel, cellI)
     {
-        Info<< "    shell:" << shellI << " nCells:" << nCellsPerShell[shellI]
-            << nl;
+        if (refineCell[cellI] == -1)
+        {
+            if (maxLevel[testI] > testLevels[testI])
+            {
+                bool reachedLimit = !markForRefine
+                (
+                    maxLevel[testI],    // mark with any positive value
+                    nAllowRefine,
+                    refineCell[cellI],
+                    nRefine
+                );
+
+                if (reachedLimit)
+                {
+                    if (debug)
+                    {
+                        Pout<< "Stopped refining internal cells"
+                            << " since reaching my cell limit of "
+                            << mesh_.nCells()+7*nRefine << endl;
+                    }
+                    break;
+                }
+            }
+            testI++;
+        }
+    }
+
+    if
+    (
+        returnReduce(nRefine, sumOp<label>())
+      > returnReduce(nAllowRefine, sumOp<label>())
+    )
+    {
+        Info<< "Reached refinement limit." << endl;
     }
 
     return returnReduce(nRefine-oldNRefine, sumOp<label>());
+}
+
+
+// Collect faces that are intersected and whose neighbours aren't yet marked
+// for refinement.
+Foam::labelList Foam::meshRefinement::getRefineCandidateFaces
+(
+    const labelList& refineCell
+) const
+{
+    labelList testFaces(mesh_.nCells());
+
+    label nTest = 0;
+
+    forAll(surfaceIndex_, faceI)
+    {
+        if (surfaceIndex_[faceI] != -1)
+        {
+            label own = mesh_.faceOwner()[faceI];
+
+            if (mesh_.isInternalFace(faceI))
+            {
+                label nei = mesh_.faceNeighbour()[faceI];
+
+                if (refineCell[own] == -1 || refineCell[nei] == -1)
+                {
+                    testFaces[nTest++] = faceI;
+                }
+            }
+            else
+            {
+                if (refineCell[own] == -1)
+                {
+                    testFaces[nTest++] = faceI;
+                }
+            }
+        }
+    }
+    testFaces.setSize(nTest);
+
+    return testFaces;
 }
 
 
@@ -564,156 +586,149 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
     // Use cached surfaceIndex_ to detect if any intersection. If so
     // re-intersect to determine level wanted.
 
-    label faceI;
-    for (faceI = 0; faceI < surfaceIndex_.size(); faceI++)
+    // Collect candidate faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList testFaces(getRefineCandidateFaces(refineCell));
+
+    // Collect segments
+    // ~~~~~~~~~~~~~~~~
+
+    pointField start(testFaces.size());
+    pointField end(testFaces.size());
+    labelList minLevel(testFaces.size());
+
+    forAll(testFaces, i)
     {
-        if (surfaceIndex_[faceI] != -1)
+        label faceI = testFaces[i];
+
+        label own = mesh_.faceOwner()[faceI];
+
+        if (mesh_.isInternalFace(faceI))
         {
+            label nei = mesh_.faceNeighbour()[faceI];
+
+            start[i] = cellCentres[own];
+            end[i] = cellCentres[nei];
+            minLevel[i] = min(cellLevel[own], cellLevel[nei]);
+        }
+        else
+        {
+            label bFaceI = faceI - mesh_.nInternalFaces();
+
+            start[i] = cellCentres[own];
+            end[i] = neiCc[bFaceI];
+            minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
+        }
+    }
+
+
+    // Do test for higher intersections
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList surfaceHit;
+    labelList surfaceMinLevel;
+    surfaces_.findHigherIntersection
+    (
+        start,
+        end,
+        minLevel,
+
+        surfaceHit,
+        surfaceMinLevel
+    );
+
+
+    // Mark cells for refinement
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    forAll(testFaces, i)
+    {
+        label faceI = testFaces[i];
+
+        label surfI = surfaceHit[i];
+
+        if (surfI != -1)
+        {
+            // Found intersection with surface with higher wanted
+            // refinement. Check if the level field on that surface
+            // specifies an even higher level. Note:this is weird. Should
+            // do the check with the surfaceMinLevel whilst intersecting the
+            // surfaces?
+
             label own = mesh_.faceOwner()[faceI];
+
+            if (surfaceMinLevel[i] > cellLevel[own])
+            {
+                // Owner needs refining
+                if
+                (
+                   !markForRefine
+                    (
+                        surfI,
+                        nAllowRefine,
+                        refineCell[own],
+                        nRefine
+                    )
+                )
+                {
+                    break;
+                }
+            }
 
             if (mesh_.isInternalFace(faceI))
             {
                 label nei = mesh_.faceNeighbour()[faceI];
-
-                // Test if not both sides already marked for refinement.
-                if (refineCell[own] == -1 || refineCell[nei] == -1)
+                if (surfaceMinLevel[i] > cellLevel[nei])
                 {
-                    pointIndexHit hit;
-                    label surfI = surfaces_.findHigherIntersection
+                    // Neighbour needs refining
+                    if
                     (
-                        cellCentres[own],
-                        cellCentres[nei],
-                        min(cellLevel[own], cellLevel[nei]),
-                        hit
-                    );
-
-                    if (surfI != -1)
-                    {
-                        // Found intersection with surface with higher wanted
-                        // refinement. Mark cell for refining.
-                        // Note: could do optimization here and only refine the
-                        // side of the face the intersection actually goes
-                        // through.
-                        // This would require us though to find all
-                        // intersections
-                        // first instead of now only the first higher one. Also
-                        // would need the exact intersection of face with cc-cc
-                        // connection?
-
-                        label surfaceMinLevel =
-                            surfaces_.minLevelField(surfI)[hit.index()];
-
-                        if (surfaceMinLevel > cellLevel[own])
-                        {
-                            // Owner needs refining
-                            if
-                            (
-                               !markForRefine
-                                (
-                                    surfI,
-                                    nAllowRefine,
-                                    refineCell[own],
-                                    nRefine
-                                )
-                            )
-                            {
-                                break;
-                            }
-                        }
-
-                        if (surfaceMinLevel > cellLevel[nei])
-                        {
-                            // Neighbour needs refining
-                            if
-                            (
-                               !markForRefine
-                                (
-                                    surfI,
-                                    nAllowRefine,
-                                    refineCell[nei],
-                                    nRefine
-                                )
-                            )
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            else if (refineCell[own] == -1)
-            {
-                // boundary face with unmarked owner
-
-                label bFaceI = faceI - mesh_.nInternalFaces();
-
-                pointIndexHit hit;
-                label surfI = surfaces_.findHigherIntersection
-                (
-                    cellCentres[own],
-                    neiCc[bFaceI],
-                    min(cellLevel[own], neiLevel[bFaceI]),
-                    hit
-                );
-
-                if (surfI != -1)
-                {
-                    // Make sure it is my side that wants refinement.
-                    label surfaceMinLevel =
-                        surfaces_.minLevelField(surfI)[hit.index()];
-                   
-                    if (surfaceMinLevel > cellLevel[own])
-                    {
-                        if
+                       !markForRefine
                         (
-                           !markForRefine
-                            (
-                                surfI,
-                                nAllowRefine,
-                                refineCell[own],
-                                nRefine
-                            )
+                            surfI,
+                            nAllowRefine,
+                            refineCell[nei],
+                            nRefine
                         )
-                        {
-                            break;
-                        }
+                    )
+                    {
+                        break;
                     }
                 }
             }
         }
     }
 
-    if (faceI < surfaceIndex_.size())
+    if
+    (
+        returnReduce(nRefine, sumOp<label>())
+      > returnReduce(nAllowRefine, sumOp<label>())
+    )
     {
-        if (debug)
-        {
-            Pout<< "Stopped refining since reaching my cell limit of "
-                << mesh_.nCells()+7*nRefine << endl;
-        }
+        Info<< "Reached refinement limit." << endl;
     }
 
     return returnReduce(nRefine-oldNRefine, sumOp<label>());
 }
 
 
-// Given intersection of (face of) cell by newSurfI, newTriI, check whether
-// it needs to be refined. Updates maxCellSurf, maxCellTri and
-// refineCell,nRefine if it decides to refine the cell. Returns false
-// if the nRefine limit has been reached, true otherwise.
+// Checks if multiple intersections of a cell (by a surface with a higher
+// max than the cell level) and if so if the normals at these intersections
+// make a large angle.
+// Returns false if the nRefine limit has been reached, true otherwise.
 bool Foam::meshRefinement::checkCurvature
 (
-    const labelList& globalToPatch,
     const scalar curvature,
-    const bool markDifferingRegions,
     const label nAllowRefine,
 
-    const label newSurfI,
-    const label newTriI,
+    const label surfaceLevel,   // current intersection max level
+    const vector& surfaceNormal,// current intersection normal
 
     const label cellI,
 
-    label& maxCellSurfI,
-    label& maxCellTriI,
+    label& cellMaxLevel,        // cached max surface level for this cell
+    vector& cellMaxNormal,      // cached surface normal for this cell
 
     labelList& refineCell,
     label& nRefine
@@ -721,59 +736,35 @@ bool Foam::meshRefinement::checkCurvature
 {
     const labelList& cellLevel = meshCutter_.cellLevel();
 
-    if (maxCellSurfI == -1)
+    // Test if surface applicable
+    if (surfaceLevel > cellLevel[cellI])
     {
-        // First visit of cell. Store
-        maxCellSurfI = newSurfI;
-        maxCellTriI = newTriI;
-    }
-    else
-    {
-        // Second or more visit.
-        label cellRegion = surfaces_.triangleRegion(maxCellSurfI, maxCellTriI);
-        label newRegion = surfaces_.triangleRegion(newSurfI, newTriI);
-
-        // Update max
-        label maxLevel = surfaces_.maxLevel()[cellRegion];
-
-        if (surfaces_.maxLevel()[newRegion] > maxLevel)
+        if (cellMaxLevel == -1)
         {
-            maxCellSurfI = newSurfI;
-            maxCellTriI = newTriI;
-            maxLevel = surfaces_.maxLevel()[newRegion];
+            // First visit of cell. Store
+            cellMaxLevel = surfaceLevel;
+            cellMaxNormal = surfaceNormal;
         }
-
-
-        // Check if cell is candidate for refinement
-        if (cellLevel[cellI] < maxLevel)
+        else
         {
-            // Test 1: different regions
-            if (markDifferingRegions && cellRegion != newRegion)
+            // Second or more visit. Check curvature.
+            if ((cellMaxNormal & surfaceNormal) < curvature)
             {
                 return markForRefine
                 (
-                    globalToPatch[newRegion],   // mark with non-neg number.
+                    surfaceLevel,   // mark with any non-neg number.
                     nAllowRefine,
                     refineCell[cellI],
                     nRefine
                 );
             }
 
-            // Test 2: different normals
-            const vector& cellN =
-                surfaces_[maxCellSurfI].faceNormals()[maxCellTriI];
-            const vector& newN =
-                surfaces_[newSurfI].faceNormals()[newTriI];
-
-            if ((cellN & newN) < curvature)
+            // Set normal to that of highest surface. Not really necessary
+            // over here but we reuse cellMax info when doing coupled faces.
+            if (surfaceLevel > cellMaxLevel)
             {
-                return markForRefine
-                (
-                    globalToPatch[newRegion],   // mark with non-neg number.
-                    nAllowRefine,
-                    refineCell[cellI],
-                    nRefine
-                );
+                cellMaxLevel = surfaceLevel;
+                cellMaxNormal = surfaceNormal;
             }
         }
     }
@@ -786,9 +777,7 @@ bool Foam::meshRefinement::checkCurvature
 // Mark cells for surface curvature based refinement.
 Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 (
-    const labelList& globalToPatch,
     const scalar curvature,
-    const bool markDifferingRegions,
     const label nAllowRefine,
     const labelList& neiLevel,
     const pointField& neiCc,
@@ -802,107 +791,117 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
     label oldNRefine = nRefine;
 
-    // 1. Any cell on more than one surface gets refined (if its current level
-    // is <= max of the surface max level)
+    // 1. local test: any cell on more than one surface gets refined
+    // (if its current level is < max of the surface max level)
 
-    // 2. Any cell on only one surface with a neighbour on a different surface
-    // gets refined (if its current level etc.)
+    // 2. 'global' test: any cell on only one surface with a neighbour
+    // on a different surface gets refined (if its current level etc.)
 
 
+    // Collect candidate faces (i.e. intersecting any surface and
+    // owner/neighbour not yet refined.
+    labelList testFaces(getRefineCandidateFaces(refineCell));
 
-    // Index of surface with the max maxLevel and the actual triangle
-    // on the surface. We store these and not e.g. global region so we can get
-    // at:
-    //  - global region
-    //  - global patch
-    //  - face normal
-    labelList cellMaxSurface(mesh_.nCells(), -1);
-    labelList cellMaxTriangle(mesh_.nCells(), -1);
+    // Collect segments
+    pointField start(testFaces.size());
+    pointField end(testFaces.size());
+    labelList minLevel(testFaces.size());
 
-    // 1.
-
-    forAll(surfaceIndex_, faceI)
+    forAll(testFaces, i)
     {
-        if (surfaceIndex_[faceI] != -1)
+        label faceI = testFaces[i];
+
+        label own = mesh_.faceOwner()[faceI];
+
+        if (mesh_.isInternalFace(faceI))
         {
+            label nei = mesh_.faceNeighbour()[faceI];
+
+            start[i] = cellCentres[own];
+            end[i] = cellCentres[nei];
+            minLevel[i] = min(cellLevel[own], cellLevel[nei]);
+        }
+        else
+        {
+            label bFaceI = faceI - mesh_.nInternalFaces();
+
+            start[i] = cellCentres[own];
+            end[i] = neiCc[bFaceI];
+            minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
+        }
+    }
+
+    // Test for all intersections (with surfaces of higher max level than
+    // minLevel) and cache per cell the max surface level and the local normal
+    // on that surface.
+    labelList cellMaxLevel(mesh_.nCells(), -1);
+    vectorField cellMaxNormal(mesh_.nCells());
+
+    {
+        // Per segment the normals of the surfaces
+        List<vectorList> surfaceNormal;
+        // Per segment the list of levels of the surfaces
+        labelListList surfaceLevel;
+
+        surfaces_.findAllHigherIntersections
+        (
+            start,
+            end,
+            minLevel,           // max level of surface has to be bigger
+                                // than min level of neighbouring cells
+            surfaceNormal,
+            surfaceLevel
+        );
+        // Clear out unnecessary data
+        start.clear();
+        end.clear();
+        minLevel.clear();
+
+        // Extract per cell information on the surface with the highest max
+        forAll(testFaces, i)
+        {
+            label faceI = testFaces[i];
             label own = mesh_.faceOwner()[faceI];
 
-            // There is an intersection. Do more accurate test to get all
-            // intersections
-            labelList surfaceIndices;
-            List<pointIndexHit> hits;
+            const vectorList& fNormals = surfaceNormal[i];
+            const labelList& fLevels = surfaceLevel[i];
+
+            forAll(fLevels, hitI)
+            {
+                checkCurvature
+                (
+                    curvature,
+                    nAllowRefine,
+
+                    fLevels[hitI],
+                    fNormals[hitI],
+
+                    own,
+                    cellMaxLevel[own],
+                    cellMaxNormal[own],
+
+                    refineCell,
+                    nRefine
+                );
+            }
 
             if (mesh_.isInternalFace(faceI))
             {
                 label nei = mesh_.faceNeighbour()[faceI];
 
-                surfaces_.findAllIntersections
-                (
-                    cellCentres[own],
-                    cellCentres[nei],
-                    surfaceIndices,
-                    hits
-                );
-            }
-            else
-            {
-                label bFaceI = faceI - mesh_.nInternalFaces();
-
-                surfaces_.findAllIntersections
-                (
-                    cellCentres[own],
-                    neiCc[bFaceI],
-                    surfaceIndices,
-                    hits
-                );
-            }
-
-
-            // See if intersection adds any new information to the owner or
-            // neighbour cell.
-
-            forAll(surfaceIndices, i)
-            {
-                label surfI = surfaceIndices[i];
-                label triI = hits[i].index();
-
-                checkCurvature
-                (
-                    globalToPatch,
-                    curvature,
-                    markDifferingRegions,
-                    nAllowRefine,
-
-                    surfI,
-                    triI,
-
-                    own,
-
-                    cellMaxSurface[own],
-                    cellMaxTriangle[own],
-
-                    refineCell,
-                    nRefine
-                );
-
-                if (mesh_.isInternalFace(faceI))
+                forAll(fLevels, hitI)
                 {
-                    label nei = mesh_.faceNeighbour()[faceI];
-
                     checkCurvature
                     (
-                        globalToPatch,
                         curvature,
-                        markDifferingRegions,
                         nAllowRefine,
 
-                        surfI,
-                        triI,
+                        fLevels[hitI],
+                        fNormals[hitI],
 
                         nei,
-
-                        cellMaxSurface[nei],
-                        cellMaxTriangle[nei],
+                        cellMaxLevel[nei],
+                        cellMaxNormal[nei],
 
                         refineCell,
                         nRefine
@@ -910,93 +909,46 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
                 }
             }
         }
-
-        if (nRefine > nAllowRefine)
-        {
-            if (debug)
-            {
-                Pout<< "Stopped refining since reaching my cell limit of "
-                    << mesh_.nCells()+7*nRefine << endl;
-            }
-            break;
-        }
     }
 
     // 2. Find out a measure of surface curvature and region edges.
     // Send over surface region and surface normal to neighbour cell.
 
-    // global region
-    labelList ownRegion(mesh_.nFaces(), -1);
-    labelList neiRegion(mesh_.nFaces(), -1);
-    // local normal at hit
-    vectorField ownNormal(mesh_.nFaces(), vector::zero);
-    vectorField neiNormal(mesh_.nFaces(), vector::zero);
+    labelList neiBndMaxLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    vectorField neiBndMaxNormal(mesh_.nFaces()-mesh_.nInternalFaces());
+
+    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
+    {
+        label bFaceI = faceI-mesh_.nInternalFaces();
+        label own = mesh_.faceOwner()[faceI];
+
+        neiBndMaxLevel[bFaceI] = cellMaxLevel[own];
+        neiBndMaxNormal[bFaceI] = cellMaxNormal[own];
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxLevel, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxNormal, false);
+
+    // Loop over all faces. Could only be checkFaces.. except if they're coupled
 
     // Internal faces
     for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
     {
         label own = mesh_.faceOwner()[faceI];
-
-        if (cellMaxSurface[own] != -1)
-        {
-            label surfI = cellMaxSurface[own];
-            label triI = cellMaxTriangle[own];
-
-            ownRegion[faceI] = surfaces_.triangleRegion(surfI, triI);
-            ownNormal[faceI] = surfaces_[surfI].faceNormals()[triI];
-        }
-
         label nei = mesh_.faceNeighbour()[faceI];
 
-        if (cellMaxSurface[nei] != -1)
+        if (cellMaxLevel[own] != -1 && cellMaxLevel[nei] != -1)
         {
-            label surfI = cellMaxSurface[nei];
-            label triI = cellMaxTriangle[nei];
-
-            neiRegion[faceI] = surfaces_.triangleRegion(surfI, triI);
-            neiNormal[faceI] = surfaces_[surfI].faceNormals()[triI];
-        }
-    }
-    // Boundary faces
-    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
-    {
-        label own = mesh_.faceOwner()[faceI];
-
-        if (cellMaxSurface[own] != -1)
-        {
-            label surfI = cellMaxSurface[own];
-            label triI = cellMaxTriangle[own];
-
-            ownRegion[faceI] = surfaces_.triangleRegion(surfI, triI);
-            ownNormal[faceI] = surfaces_[surfI].faceNormals()[triI];
-
-            neiRegion[faceI] = ownRegion[faceI];
-            neiNormal[faceI] = ownNormal[faceI];
-        }
-    }
-
-    syncTools::swapFaceList(mesh_, neiRegion, false);
-    syncTools::swapFaceList(mesh_, neiNormal, false);
-
-    for (label faceI = 0; faceI < mesh_.nFaces(); faceI++)
-    {
-        if (ownRegion[faceI] != -1 && neiRegion[faceI] != -1)
-        {
-            if
-            (
-                (markDifferingRegions && (ownRegion[faceI] != neiRegion[faceI]))
-             || ((ownNormal[faceI] & neiNormal[faceI]) < curvature)
-            )
+            // Have valid data on both sides. Check curvature.
+            if ((cellMaxNormal[own] & cellMaxNormal[nei]) < curvature)
             {
-                label own = mesh_.faceOwner()[faceI];
-
-                if (cellLevel[own] < surfaces_.maxLevel()[ownRegion[faceI]])
+                // See which side to refine
+                if (cellLevel[own] < cellMaxLevel[own])
                 {
                     if
                     (
                         !markForRefine
                         (
-                            globalToPatch[ownRegion[faceI]],
+                            cellMaxLevel[own],
                             nAllowRefine,
                             refineCell[own],
                             nRefine
@@ -1011,46 +963,77 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
                         }
                         break;
                     }
-
                 }
 
-                if (mesh_.isInternalFace(faceI))
+                if (cellLevel[nei] < cellMaxLevel[nei])
                 {
-                    label nei = mesh_.faceNeighbour()[faceI];
-
-                    if (cellLevel[nei] < surfaces_.maxLevel()[neiRegion[faceI]])
-                    {
-                        if
+                    if
+                    (
+                        !markForRefine
                         (
-                            !markForRefine
-                            (
-                                globalToPatch[neiRegion[faceI]],
-                                nAllowRefine,
-
-                                refineCell[nei],
-                                nRefine
-                            )
+                            cellMaxLevel[nei],
+                            nAllowRefine,
+                            refineCell[nei],
+                            nRefine
                         )
+                    )
+                    {
+                        if (debug)
                         {
-                            if (debug)
-                            {
-                                Pout<< "Stopped refining since reaching my cell"
-                                    << " limit of " << mesh_.nCells()+7*nRefine
-                                    << endl;
-                            }
-                            break;
+                            Pout<< "Stopped refining since reaching my cell"
+                                << " limit of " << mesh_.nCells()+7*nRefine
+                                << endl;
                         }
+                        break;
                     }
                 }
             }
         }
     }
+    // Boundary faces
+    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
+    {
+        label own = mesh_.faceOwner()[faceI];
+        label bFaceI = faceI - mesh_.nInternalFaces();
 
+        if (cellLevel[own] < cellMaxLevel[own] && neiBndMaxLevel[bFaceI] != -1)
+        {
+            // Have valid data on both sides. Check curvature.
+            if ((cellMaxNormal[own] & neiBndMaxNormal[bFaceI]) < curvature)
+            {
+                if
+                (
+                    !markForRefine
+                    (
+                        cellMaxLevel[own],
+                        nAllowRefine,
+                        refineCell[own],
+                        nRefine
+                    )
+                )
+                {
+                    if (debug)
+                    {
+                        Pout<< "Stopped refining since reaching my cell"
+                            << " limit of " << mesh_.nCells()+7*nRefine
+                            << endl;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    if
+    (
+        returnReduce(nRefine, sumOp<label>())
+      > returnReduce(nAllowRefine, sumOp<label>())
+    )
+    {
+        Info<< "Reached refinement limit." << endl;
+    }
 
     return returnReduce(nRefine-oldNRefine, sumOp<label>());
-    label totNRefined = returnReduce(totNRefined, sumOp<label>());
-
-    return totNRefined;
 }
 
 
@@ -1064,15 +1047,10 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 Foam::labelList Foam::meshRefinement::refineCandidates
 (
     const point& keepPoint,
-    const labelList& globalToPatch,
     const scalar curvature,
 
     const PtrList<featureEdgeMesh>& featureMeshes,
     const labelList& featureLevels,
-
-    const PtrList<searchableSurface>& shells,
-    const labelList& shellLevels,
-    const boolList& shellRefineInside,
 
     const bool featureRefinement,
     const bool internalRefinement,
@@ -1086,7 +1064,12 @@ Foam::labelList Foam::meshRefinement::refineCandidates
 
     labelList cellsToRefine;
 
-    if (totNCells < maxGlobalCells)
+    if (totNCells >= maxGlobalCells)
+    {
+        Info<< "No cells marked for refinement since reached limit "
+            << maxGlobalCells << '.' << endl;
+    }
+    else
     {
         // Every cell I refine adds 7 cells. Estimate the number of cells
         // I am allowed to refine.
@@ -1151,9 +1134,6 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         {
             label nShell = markInternalRefinement
             (
-                shells,
-                shellLevels,
-                shellRefineInside,
                 nAllowRefine,
 
                 refineCell,
@@ -1184,13 +1164,11 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         // Refinement based on curvature of surface
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if (curvatureRefinement)
+        if (curvatureRefinement && (curvature >= -1 && curvature <= 1))
         {
             label nCurv = markSurfaceCurvatureRefinement
             (
-                globalToPatch,
                 curvature,
-                false,              // do not refine at multiple regions
                 nAllowRefine,
                 neiLevel,
                 neiCc,
@@ -1285,28 +1263,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
     Info<< "Refined mesh in = "
         << mesh_.time().cpuTimeIncrement() << " s" << endl;
     printMeshInfo(debug, "After refinement " + msg);
-
-
-    //// Remove cells which are inside closed surfaces
-    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //
-    //if (findIndex(surfaces.closed(), true) != -1)
-    //{
-    //    Info<< "Removing cells fully inside closed surfaces."
-    //        << endl;
-    //    removeInsideCells
-    //    (
-    //        msg,               // refinement iteration for statistics only
-    //        exposedFacesPatch  // patch to use for exposed internal faces
-    //    );
-    //    Info<< "Removed inside cells in = "
-    //        << mesh_.time().cpuTimeIncrement() << " s" << endl;
-    //    if (debug)
-    //    {
-    //       // test all is still synced across proc patches
-    //       checkData();
-    //    }
-    //}
 
 
     // Load balancing
