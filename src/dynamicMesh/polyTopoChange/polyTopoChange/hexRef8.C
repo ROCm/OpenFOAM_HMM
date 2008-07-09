@@ -474,7 +474,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
 
     forAll(typEdgeLenSqr, levelI)
     {
-        if (typEdgeLenSqr[levelI] == GREAT2)
+        if (typEdgeLenSqr[levelI] == GREAT2 && maxEdgeLenSqr[levelI] >= 0)
         {
             typEdgeLenSqr[levelI] = maxEdgeLenSqr[levelI];
         }
@@ -496,13 +496,14 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
 
         if (lenSqr < GREAT2)
         {
-            level0Size = Foam::sqrt(lenSqr)/(1<<levelI);
+            level0Size = Foam::sqrt(lenSqr)*(1<<levelI);
 
             if (debug)
             {
                 Pout<< "hexRef8::getLevel0EdgeLength() :"
                     << " For level:" << levelI
-                    << " found edgeLen:" << level0Size
+                    << " have edgeLen:" << Foam::sqrt(lenSqr)
+                    << " with equivalent level0 len:" << level0Size
                     << endl;
             }
             break;
