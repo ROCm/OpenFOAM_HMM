@@ -474,7 +474,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
 
     forAll(typEdgeLenSqr, levelI)
     {
-        if (typEdgeLenSqr[levelI] == GREAT2)
+        if (typEdgeLenSqr[levelI] == GREAT2 && maxEdgeLenSqr[levelI] >= 0)
         {
             typEdgeLenSqr[levelI] = maxEdgeLenSqr[levelI];
         }
