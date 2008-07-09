@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
 #       include "readSIMPLEControls.H"
+#       include "initConvergenceCheck.H"
 
         pd.storePrevIter();
         rho.storePrevIter();
@@ -65,9 +66,7 @@ int main(int argc, char *argv[])
         // Pressure-velocity SIMPLE corrector
         {
 #           include "UEqn.H"
-
 #           include "hEqn.H"
-
 #           include "pEqn.H"
         }
 
@@ -78,6 +77,8 @@ int main(int argc, char *argv[])
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
+
+#       include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;

@@ -8,4 +8,10 @@
 
     UEqn().relax();
 
-    solve(UEqn() == -fvc::grad(p));
+    eqnResidual = solve
+    (
+        UEqn() == -fvc::grad(p)
+    ).initialResidual();
+
+    maxResidual = max(eqnResidual, maxResidual);
+

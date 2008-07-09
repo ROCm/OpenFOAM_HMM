@@ -9,4 +9,10 @@
 
     UEqn().relax();
 
-    solve(UEqn() == -fvc::grad(pd) - fvc::grad(rho)*gh);
+    eqnResidual = solve
+    (
+        UEqn() == -fvc::grad(pd) - fvc::grad(rho)*gh
+    ).initialResidual();
+
+    maxResidual = max(eqnResidual, maxResidual);
+
