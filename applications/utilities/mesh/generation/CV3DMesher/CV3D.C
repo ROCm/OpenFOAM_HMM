@@ -162,12 +162,7 @@ void Foam::CV3D::insertGrid()
         {
             for (int k=0; k<nk; k++)
             {
-                point p1
-		(
-		    x0 + i*delta.x(),
-		    y0 + j*delta.y(),
-		    z0 + k*delta.z()
-		);
+                point p1 (x0 + i*delta.x(), y0 + j*delta.y(), z0 + k*delta.z());
 
                 point p2 = p1 + 0.5*delta;
 
@@ -220,18 +215,19 @@ void Foam::CV3D::insertSurfacePointPairs()
         insertSurfaceNearestPointPairs();
     }
 
-//     if (controls_.writeNearestTriangulation)
-//     {
-//         writeFaces("near_allFaces.obj", false);
-//         writeFaces("near_faces.obj", true);
-//         writeTriangles("near_triangles.obj", true);
-//     }
+    if (controls_.writeNearestTriangulation)
+    {   
+        // writeFaces("near_allFaces.obj", false);
+        // writeFaces("near_faces.obj", true);
+        writeTriangles("near_triangles.obj", true);
+    }
 
     if (controls_.insertSurfaceNearPointPairs)
     {
         insertSurfaceNearPointPairs();
     }
 
+    startOfBoundaryConformPointPairs_ = number_of_vertices();
 }
 
 void Foam::CV3D::boundaryConform()
@@ -240,6 +236,18 @@ void Foam::CV3D::boundaryConform()
 
 void Foam::CV3D::removeSurfacePointPairs()
 {
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->index() >= startOfSurfacePointPairs_)
+        {
+            remove(vit);
+        }
+    }
 }
 
 void Foam::CV3D::write() const

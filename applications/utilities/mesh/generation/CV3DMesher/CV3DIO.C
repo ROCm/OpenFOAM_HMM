@@ -193,23 +193,25 @@ void Foam::CV3D::writeMesh(const Time& runTime)
 
     Info << nl << "Temporary hack to produce boundary" << endl;
 
-    for
-    (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if
-        (
-            mag(topoint(vit->point()).x()) > 1.5
-         || mag(topoint(vit->point()).y()) > 1.5
-         || mag(topoint(vit->point()).z()) > 1.5   
-        )
-        {
-	    vit->type() = Vb::FAR_POINT;
-        }
-    }
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     ++vit
+    // )
+    // {
+    //     if
+    //     (
+    //         mag(topoint(vit->point()).x()) > 1.5
+    //      || mag(topoint(vit->point()).y()) > 1.5
+    //      || mag(topoint(vit->point()).z()) > 1.5   
+    //     )
+    //     {
+    // 	    vit->type() = Vb::FAR_POINT;
+    //     }
+    // }
+
+    markNearBoundaryPoints();
 
     pointField points(0);
     faceList faces(0);
