@@ -81,7 +81,7 @@ find -H $packDir               \
  -e "\@libccmio.*/@d"          \
  -e '\@applications/bin/@d'    \
  -e '\@/t/@d'                  \
- -e '\@Make[.A-Za-z]*/[^/]*/@d'\
+ -e '\@/Make[.A-Za-z]*/[^/]*/@d'\
  -e '\@/platforms/@d'          \
  > $tmpFile
 
