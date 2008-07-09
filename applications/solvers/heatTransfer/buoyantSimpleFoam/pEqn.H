@@ -13,7 +13,16 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     );
 
     pdEqn.setReference(pdRefCell, pdRefValue);
-    pdEqn.solve();
+    // retain the residual from the first iteration
+    if (nonOrth == 0)
+    {
+        eqnResidual = pdEqn.solve().initialResidual();
+        maxResidual = max(eqnResidual, maxResidual);
+    }
+    else
+    {
+        pdEqn.solve();
+    }
 
     if (nonOrth == nNonOrthCorr)
     {

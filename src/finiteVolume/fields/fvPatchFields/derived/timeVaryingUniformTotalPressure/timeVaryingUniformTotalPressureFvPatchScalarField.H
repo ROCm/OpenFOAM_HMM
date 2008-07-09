@@ -26,8 +26,11 @@ Class
     Foam::timeVaryingUniformTotalPressureFvPatchScalarField
 
 Description
-    See timeVaryingUniformFixedValueFvPatchField.H
-    and totalPressureFvPatchScalarField.H
+    A time-varying form of a uniform total pressure boundary condition.
+
+See Also
+    Foam::timeVaryingUniformFixedValueFvPatchField
+    and Foam::totalPressureFvPatchScalarField.H
 
 SourceFiles
     timeVaryingUniformTotalPressureFvPatchScalarField.C

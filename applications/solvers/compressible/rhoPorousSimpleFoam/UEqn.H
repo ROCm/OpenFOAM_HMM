@@ -35,7 +35,12 @@
     {
         pZones.addResistance(UEqn());
 
-        solve(UEqn() == -fvc::grad(p));
+        eqnResidual = solve
+        (
+            UEqn() == -fvc::grad(p)
+        ). initialResidual();
+
+        maxResidual = max(eqnResidual, maxResidual);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

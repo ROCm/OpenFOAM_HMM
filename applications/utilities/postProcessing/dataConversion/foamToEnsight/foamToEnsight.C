@@ -24,6 +24,15 @@ License
 
 Description
     Translates FOAM data to EnSight format
+
+Usage
+    - foamToEnsight [OPTION] \n
+    Translates OpenFOAM data to Ensight format
+
+    @param -ascii \n
+    Write Ensight data in ASCII format instead of "C Binary"
+
+Note
     Parallel support for cloud data is not supported
 
 \*---------------------------------------------------------------------------*/
@@ -74,16 +83,16 @@ bool inFileNameList
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("patches", "patch list");
-    argList::validOptions.insert("binary", "" );
+    argList::validOptions.insert("ascii", "" );
 #   include "addTimeOptions.H"
 
 #   include "setRootCase.H"
 
     // Check options
-    bool binary = false;
-    if (args.options().found("binary"))
+    bool binary = true;
+    if (args.options().found("ascii"))
     {
-        binary = true;
+        binary = false;
     }
 
 #   include "createTime.H"

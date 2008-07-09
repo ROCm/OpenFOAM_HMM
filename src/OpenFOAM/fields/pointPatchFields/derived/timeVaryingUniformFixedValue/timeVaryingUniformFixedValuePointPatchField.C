@@ -70,7 +70,7 @@ timeVaryingUniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF),
-    timeSeries_(this->db(), dict)
+    timeSeries_(dict)
 {
     updateCoeffs();
 }

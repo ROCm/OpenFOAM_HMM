@@ -43,7 +43,7 @@ Note
     a uniformFixedValue patch.
 
 See Also
-    Foam::timeSeries and Foam::fixedValueFvPatchField
+    Foam::interpolationTable and Foam::fixedValueFvPatchField
 
 SourceFiles
     timeVaryingUniformFixedValueFvPatchField.C

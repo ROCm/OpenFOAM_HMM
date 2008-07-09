@@ -29,15 +29,15 @@ Description
     A list of times and values.
     The time values must be positive and monotonically increasing.
 
-    The treatment of out-of-bounds values depends on the current setting
-    of bounding.
+    The handling of out-of-bounds values depends on the current setting
+    of @a outOfBounds.
 
-    If @a REPEAT bounding is in effect, the final time value is treated
-    as being equivalent to time=0 for the following periods.
+    If @a REPEAT is chosen for the out-of-bounds handling, the final time
+    value is treated as being equivalent to time=0 for the following periods.
 
 Note
-    - Accessing an empty list will result in an error.
-    - Accessing a list with a single element will always return the same value.
+    - Accessing an empty list results in an error.
+    - Accessing a list with a single element always returns the same value.
 
 SourceFiles
     interpolationTable.C
@@ -55,10 +55,8 @@ SourceFiles
 namespace Foam
 {
 
-class objectRegistry;
-
 /*---------------------------------------------------------------------------*\
-                      Class interpolationTable Declaration
+                    Class interpolationTable Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -71,7 +69,7 @@ public:
     // Public data types
 
         //- Enumeration for handling out-of-bound values
-        enum boundActions
+        enum boundsHandling
         {
             ERROR,          /*!< Exit with a FatalError */
             WARN,           /*!< Issue warning and clamp value (default) */
@@ -85,7 +83,7 @@ private:
     // Private data
 
         //- Enumeration for handling out-of-bound values
-        boundActions boundAction_;
+        boundsHandling boundsHandling_;
 
         //- File name
         fileName fileName_;
@@ -107,7 +105,7 @@ public:
         //- Construct given the name of the file containing the table of data
         interpolationTable(const fileName& fn);
 
-        //- Construct by reading the fileName and boundAction from dictionary
+        //- Construct by reading the fileName and boundsHandling from dictionary
         //  and read the table from that file.
         //  This is a specialised constructor used by patchFields
         interpolationTable(const dictionary& dict);
@@ -118,19 +116,18 @@ public:
 
     // Member Functions
 
-        //- Return the out-of-bounds treatment as a word
-        word boundActionToWord(const boundActions& bound) const;
+        //- Return the out-of-bounds handling as a word
+        word boundsHandlingToWord(const boundsHandling& bound) const;
 
-        //- Return the out-of-bounds treatment as an enumeration
-        boundActions wordToBoundAction(const word& bound) const;
+        //- Return the out-of-bounds handling as an enumeration
+        boundsHandling wordToBoundsHandling(const word& bound) const;
+
+        //- Set the out-of-bounds handling from enum, return previous setting
+        boundsHandling outOfBounds(const boundsHandling& bound);
 
         //- Check that list is monotonically increasing
         //  Exit with a FatalError if there is a problem
         void check() const;
-
-        //- Set the out-of-bounds treatment from enum, return previous
-        //  setting
-        boundActions boundAction(const boundActions& bound);
 
         //- Write
         void write(Ostream& os) const;
