@@ -1,0 +1,299 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    CV3D
+
+Description
+
+SourceFiles
+    CV3DI.H
+    CV3D.C
+    CV3DIO.C
+    controls.C
+    tolerances.C
+    insertFeaturePoints.C
+    insertSurfaceNearestPointPairs.C
+    insertSurfaceNearPointPairs.C
+
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef CV3D_H
+#define CV3D_H
+
+#define CGAL_INEXACT
+#define CGAL_HIERARCHY
+
+#include "CGALTriangulation3Ddefs.H"
+
+#include "querySurface.H"
+#include "dictionary.H"
+#include "DynamicList.H"
+#include "Switch.H"
+#include "Time.H"
+#include "polyMesh.H"
+#include "SortableList.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+
+/*---------------------------------------------------------------------------*\
+                           Class CV3D Declaration
+\*---------------------------------------------------------------------------*/
+
+class CV3D
+:
+    public HTriangulation
+{
+public:
+
+    class controls
+    {
+    public:
+    
+        //- Minimum cell size below which protusions through the surface are
+        //  not split
+        scalar minCellSize;
+
+        //- Square of minCellSize
+        scalar minCellSize2;
+
+        //- The feature angle used to select corners to be
+        //  explicitly represented in the mesh.
+        //  0 = all features, 180 = no features
+        scalar featAngle;
+
+        //- Maximum quadrant angle allowed at a concave corner before
+        //  additional "mitering" lines are added
+        scalar maxQuadAngle;
+
+        //- Insert near-boundary point mirror or point-pairs
+        Switch insertSurfaceNearestPointPairs;
+
+        //- Insert point-pairs for dual-cell vertices very near the surface
+        Switch insertSurfaceNearPointPairs;
+
+        Switch writeInitialTriangulation;
+        Switch writeFeatureTriangulation;
+        Switch writeNearestTriangulation;
+        Switch writeInsertedPointPairs;
+        Switch writeFinalTriangulation;
+
+        Switch randomiseInitialGrid;
+        scalar randomPerturbation;
+
+        controls(const dictionary& controlDict);
+    };
+
+    class tolerances
+    {
+    public:
+
+        //- Maximum cartesian span of the geometry
+        scalar span;
+
+        //- Distance between boundary conforming point-pairs
+        scalar ppDist;
+
+        //- Square of ppDist
+        scalar ppDist2;
+
+        tolerances
+        (
+            const dictionary& controlDict,
+            scalar minCellSize,
+            const boundBox&
+        );
+    };
+
+private:
+
+// Private data
+
+        //- The surface to mesh
+        const querySurface& qSurf_;
+
+        //- Meshing controls
+        controls controls_;
+
+        //- Meshing tolerances
+        tolerances tols_;
+
+        //- Keep track of the start of the internal points
+        label startOfInternalPoints_;
+
+        //- Keep track of the start of the surface point-pairs
+        label startOfSurfacePointPairs_;
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        CV3D(const CV3D&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const CV3D&);
+
+        //- Insert point and return it's index
+        inline label insertPoint
+        (
+            const point& pt,
+            const label type
+        );
+
+        //- Create the initial mesh from the bounding-box
+        void insertBoundingBox();
+
+        //- Insert point-pairs at the nearest points on the surface to the 
+        //  control vertex of dual-cells which intersect the boundary in order
+        //  to provide a boundary-layer mesh.
+        //  NB: This is not guaranteed to close the boundary
+        void insertSurfaceNearestPointPairs();
+
+        //- Insert point-pairs at small dual-cell edges on the surface in order
+        //  to improve the boundary-layer mesh generated by
+        //  insertSurfaceNearestPointPairs.
+        void insertSurfaceNearPointPairs();
+
+        //- Dual calculation
+        void calcDualMesh
+        (
+            pointField& points,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchNames,
+            labelList& patchSizes,
+            labelList& patchStarts
+        );
+
+public:
+
+    // Constructors
+
+        //- Construct for given surface
+        CV3D(const dictionary& controlDict, const querySurface& qSurf);
+
+    // Destructor
+
+        ~CV3D();
+
+
+    // Member Functions
+
+        // Access
+
+            const controls& meshingControls() const
+            {
+                return controls_;
+            }
+
+            // Conversion functions between point and Point
+
+#           ifdef CGAL_INEXACT
+                typedef const point& pointFromPoint;
+                typedef const Point& PointFrompoint;
+#           else
+                typedef point pointFromPoint;
+                typedef Point PointFrompoint;
+#           endif
+
+            inline pointFromPoint topoint(const Point&) const;
+            inline PointFrompoint toPoint(const point&) const;
+
+        // Point insertion
+
+            //- Create the initial mesh from the given internal points.
+            //  Points must be inside the boundary by at least nearness
+            //  otherwise they are ignored.
+            void insertPoints
+            (
+                const pointField& points,
+                const scalar nearness
+            );
+
+            //- Create the initial mesh from the internal points in the given 
+            //  file.  Points outside the geometry are ignored.
+            void insertPoints(const fileName& pointFileName);
+
+            //- Create the initial mesh as a regular grid of points.
+            //  Points outside the geometry are ignored.
+            void insertGrid();
+
+            //- Insert point groups at the feature points.
+            void insertFeaturePoints();
+
+            //- Insert all surface point-pairs from
+            //  insertSurfaceNearestPointPairs and
+            //  findIntersectionForOutsideCentroid
+            void insertSurfacePointPairs();
+
+            //- Insert point-pairs where there are protrusions into
+            //  or out of the surface
+            void boundaryConform();
+
+        // Point removal
+
+            //- Remove the point-pairs introduced by insertSurfacePointPairs
+            //  and boundaryConform
+            void removeSurfacePointPairs();
+
+        // Check
+
+        // Edit
+
+        // Write
+
+            //- Write Delaunay points to .obj file
+            void writePoints(const fileName& fName, bool internalOnly) const;
+
+            //- Write Delaunay triangles as .obj file
+            void writeTriangles(const fileName& fName, bool internalOnly) const;
+
+            //- Write dual points and faces as .obj file
+            void writeDual(const fileName& fName) const;
+
+            //- Write polyMesh
+            void writeMesh(const Time& runTime);
+
+            void write() const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "CV3DI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //
