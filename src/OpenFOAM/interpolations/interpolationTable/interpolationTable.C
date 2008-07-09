@@ -26,7 +26,34 @@ License
 
 #include "interpolationTable.H"
 #include "IFstream.H"
-#include "objectRegistry.H"
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::interpolationTable<Type>::readTable()
+{
+    // preserve the original (unexpanded) fileName to avoid absolute paths
+    // appearing subsequently in the write() method
+    fileName fName(fileName_);
+
+    fName.expand();
+
+    // Read data from file
+    IFstream(fName)() >> *this;
+
+    // Check that the data are okay
+    check();
+
+    if (this->size() == 0)
+    {
+        FatalErrorIn
+        (
+            "Foam::interpolationTable<Type>::readTable()"
+        )   << "table is empty" << nl
+            << exit(FatalError);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -40,43 +67,24 @@ Foam::interpolationTable<Type>::interpolationTable()
 
 
 template<class Type>
-Foam::interpolationTable<Type>::interpolationTable
-(
-    const objectRegistry& obr,
-    const dictionary& dict
-)
+Foam::interpolationTable<Type>::interpolationTable(const fileName& fn)
+:
+    List<Tuple2<scalar, Type> >(),
+    boundsHandling_(interpolationTable::WARN),
+    fileName_(fn)
+{
+    readTable();
+}
+
+
+template<class Type>
+Foam::interpolationTable<Type>::interpolationTable(const dictionary& dict)
 :
     List<Tuple2<scalar, Type> >(),
     boundsHandling_(wordToBoundsHandling(dict.lookup("outOfBounds"))),
     fileName_(dict.lookup("fileName"))
 {
-    // preserve the original (unexpanded) fileName to avoid absolute paths
-    // appearing in the write() method
-    fileName fName(fileName_);
-
-    fName.expand();
-
-    // Correct for relative path
-    if (fName[0] != '/')
-    {
-        fName = obr.db().path()/fName;
-    }
-
-    // Read data from file
-    IFstream(fName)() >> *this;
-
-    // Check that the data is okay
-    check();
-
-    if (this->size() == 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::interpolationTable<Type>::interpolationTable"
-            "(const dictionary&)"
-        )   << "table is empty" << nl
-            << exit(FatalError);
-    }
+    readTable();
 }
 
 
@@ -91,12 +99,6 @@ Foam::interpolationTable<Type>::interpolationTable
     fileName_(interpTable.fileName_)
 {}
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::interpolationTable<Type>::~interpolationTable()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -173,9 +175,22 @@ Foam::interpolationTable<Type>::wordToBoundsHandling
 
 
 template<class Type>
+typename Foam::interpolationTable<Type>::boundsHandling
+Foam::interpolationTable<Type>::outOfBounds
+(
+    const boundsHandling& bound
+)
+{
+    boundsHandling prev = boundsHandling_;
+    boundsHandling_ = bound;
+    return prev;
+}
+
+
+template<class Type>
 void Foam::interpolationTable<Type>::check() const
 {
-    label n = size();
+    label n = this->size();
     scalar prevValue = List<Tuple2<scalar, Type> >::operator[](0).first();
 
     for (label i=1; i<n; ++i)
@@ -199,19 +214,6 @@ void Foam::interpolationTable<Type>::check() const
 
 
 template<class Type>
-typename Foam::interpolationTable<Type>::boundsHandling
-Foam::interpolationTable<Type>::outOfBounds
-(
-    const boundsHandling& bound
-)
-{
-    boundsHandling prev = boundsHandling_;
-    boundsHandling_ = bound;
-    return prev;
-}
-
-
-template<class Type>
 void Foam::interpolationTable<Type>::write(Ostream& os) const
 {
     os.writeKeyword("fileName")
@@ -228,7 +230,7 @@ const Foam::Tuple2<Foam::scalar, Type>&
 Foam::interpolationTable<Type>::operator[](const label i) const
 {
     label ii = i;
-    label n  = size();
+    label n  = this->size();
 
     if (n <= 1)
     {
@@ -322,7 +324,7 @@ Foam::interpolationTable<Type>::operator[](const label i) const
 template<class Type>
 Type Foam::interpolationTable<Type>::operator()(const scalar value) const
 {
-    label n = size();
+    label n = this->size();
 
     if (n <= 1)
     {
@@ -478,5 +480,6 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
         );
     }
 }
+
 
 // ************************************************************************* //

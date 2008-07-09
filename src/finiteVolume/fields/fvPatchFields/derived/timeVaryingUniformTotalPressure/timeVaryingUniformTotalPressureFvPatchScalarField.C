@@ -29,7 +29,6 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -66,7 +65,7 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(dict.lookup("psi")),
     gamma_(readScalar(dict.lookup("gamma"))),
     p0_(readScalar(dict.lookup("p0"))),
-    totalPressureTimeSeries_(this->db(), dict)
+    totalPressureTimeSeries_(dict)
 {
     if (dict.found("value"))
     {
@@ -215,7 +214,8 @@ void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::write(Ostream& os) const
+void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
+write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;

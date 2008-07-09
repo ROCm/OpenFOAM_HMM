@@ -27,7 +27,7 @@ Class
 
 Description
     A list of times and values.
-    The time values must be positive monotonically increasing.
+    The time values must be positive and monotonically increasing.
 
     The handling of out-of-bounds values depends on the current setting
     of @a outOfBounds.
@@ -37,7 +37,7 @@ Description
 
 Note
     - Accessing an empty list results in an error.
-    - Accessing a list with a single element will always return the same value.
+    - Accessing a list with a single element always returns the same value.
 
 SourceFiles
     interpolationTable.C
@@ -54,8 +54,6 @@ SourceFiles
 
 namespace Foam
 {
-
-class objectRegistry;
 
 /*---------------------------------------------------------------------------*\
                     Class interpolationTable Declaration
@@ -91,6 +89,12 @@ private:
         fileName fileName_;
 
 
+    // Private Member Functions
+
+        //- Read the table of data from file
+        void readTable();
+
+
 public:
 
     // Constructors
@@ -98,61 +102,44 @@ public:
         //- Construct null
         interpolationTable();
 
-        //- Construct from objectRegistry and dictionary
-        interpolationTable(const objectRegistry& obr, const dictionary& dict);
+        //- Construct given the name of the file containing the table of data
+        interpolationTable(const fileName& fn);
+
+        //- Construct by reading the fileName and boundsHandling from dictionary
+        //  and read the table from that file.
+        //  This is a specialised constructor used by patchFields
+        interpolationTable(const dictionary& dict);
 
         //- Construct copy
         interpolationTable(const interpolationTable& interpTable);
 
 
-    //- Destructor
-    ~interpolationTable();
-
-
     // Member Functions
 
-        // Access
+        //- Return the out-of-bounds handling as a word
+        word boundsHandlingToWord(const boundsHandling& bound) const;
 
-            //- Return the size
-            label size() const
-            {
-                return List<Tuple2<scalar, Type> >::size();
-            }
+        //- Return the out-of-bounds handling as an enumeration
+        boundsHandling wordToBoundsHandling(const word& bound) const;
 
-            //- Return the out-of-bounds handling as a word
-            word boundsHandlingToWord(const boundsHandling& bound) const;
+        //- Set the out-of-bounds handling from enum, return previous setting
+        boundsHandling outOfBounds(const boundsHandling& bound);
 
-            //- Return the out-of-bounds handling as an enumeration
-            boundsHandling wordToBoundsHandling(const word& bound) const;
+        //- Check that list is monotonically increasing
+        //  Exit with a FatalError if there is a problem
+        void check() const;
 
-
-        // Check
-
-            //- Check that list is monotonically increasing
-            //  Exit with a FatalError if there is a problem
-            void check() const;
+        //- Write
+        void write(Ostream& os) const;
 
 
-        // Edit
+    // Member Operators
 
-            //- Set the out-of-bounds handling from enum,
-            //  return previous setting
-            boundsHandling outOfBounds(const boundsHandling& bound);
+        //- Return an element of constant Tuple2<scalar, Type>
+        const Tuple2<scalar, Type>& operator[](const label) const;
 
-
-        // Member Operators
-
-            //- Return an element of constant Tuple2<scalar, Type>
-            const Tuple2<scalar, Type>& operator[](const label) const;
-
-            //- Return an interpolated value
-            Type operator()(const scalar) const;
-
-
-        // I-O
-
-            //- Write
-            void write(Ostream& os) const;
+        //- Return an interpolated value
+        Type operator()(const scalar) const;
 };
 
 
@@ -165,6 +152,8 @@ public:
 #ifdef NoRepository
 #   include "interpolationTable.C"
 #endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

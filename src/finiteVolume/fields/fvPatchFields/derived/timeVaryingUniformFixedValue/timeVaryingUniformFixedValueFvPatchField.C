@@ -26,7 +26,6 @@ License
 
 #include "timeVaryingUniformFixedValueFvPatchField.H"
 #include "Time.H"
-#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -53,7 +52,7 @@ timeVaryingUniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    timeSeries_(this->db(), dict)
+    timeSeries_(dict)
 {
    if (dict.found("value"))
    {
