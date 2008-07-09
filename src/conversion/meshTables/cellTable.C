@@ -37,7 +37,6 @@ const char* const Foam::cellTable::defaultMaterial_ = "fluid";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-//- map from cellTable Id -> zone number (unmapped = -1)
 Foam::labelList Foam::cellTable::zoneMap() const
 {
     label maxId = 0;
@@ -78,7 +77,6 @@ Foam::wordList Foam::cellTable::namesList() const
 }
 
 
-// add required entries - MaterialType
 void Foam::cellTable::addDefaults()
 {
     forAllIter(Map<dictionary>, *this, iter)
@@ -115,14 +113,12 @@ void Foam::cellTable::setEntry
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 Foam::cellTable::cellTable()
 :
     Map<dictionary>()
 {}
 
 
-// read constant/cellTable (IOMap<dictionary>)
 Foam::cellTable::cellTable
 (
     const objectRegistry& registry,
@@ -136,12 +132,11 @@ Foam::cellTable::cellTable
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cellTable::~cellTable()
 {}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -161,8 +156,7 @@ Foam::label Foam::cellTable::append(const dictionary& dict)
 }
 
 
-Foam::Map<Foam::word>
-Foam::cellTable::names() const
+Foam::Map<Foam::word> Foam::cellTable::names() const
 {
     Map<word> lookup;
 
@@ -211,8 +205,10 @@ Foam::label Foam::cellTable::findIndex(const word& name) const
 }
 
 
-Foam::Map<Foam::word>
-Foam::cellTable::selectType(const word& materialType) const
+Foam::Map<Foam::word> Foam::cellTable::selectType
+(
+    const word& materialType
+) const
 {
     Map<word> lookup;
 
@@ -236,29 +232,25 @@ Foam::cellTable::selectType(const word& materialType) const
 }
 
 
-Foam::Map<Foam::word>
-Foam::cellTable::fluids() const
+Foam::Map<Foam::word> Foam::cellTable::fluids() const
 {
     return selectType("fluid");
 }
 
 
-Foam::Map<Foam::word>
-Foam::cellTable::solids() const
+Foam::Map<Foam::word> Foam::cellTable::solids() const
 {
     return selectType("solid");
 }
 
 
-Foam::Map<Foam::word>
-Foam::cellTable::shells() const
+Foam::Map<Foam::word> Foam::cellTable::shells() const
 {
     return selectType("shell");
 }
 
 
-Foam::Map<Foam::word>
-Foam::cellTable::materialTypes() const
+Foam::Map<Foam::word> Foam::cellTable::materialTypes() const
 {
     Map<word> lookup;
 
@@ -275,7 +267,6 @@ Foam::cellTable::materialTypes() const
 }
 
 
-//- assign material Type
 void Foam::cellTable::setMaterial(const label& id, const word& matlType)
 {
     setEntry(id, "MaterialType", matlType);
@@ -299,7 +290,6 @@ void Foam::cellTable::setName(const label& id)
 }
 
 
-// read constant/cellTable (IOMap<dictionary>)
 void Foam::cellTable::readDict
 (
     const objectRegistry& registry,
@@ -335,7 +325,6 @@ void Foam::cellTable::readDict
 }
 
 
-// write constant/cellTable for later reuse
 void Foam::cellTable::writeDict
 (
     const objectRegistry& registry,
@@ -369,18 +358,19 @@ void Foam::cellTable::writeDict
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-
 void Foam::cellTable::operator=(const cellTable& rhs)
 {
     Map<dictionary>::operator=(rhs);
     addDefaults();
 }
 
+
 void Foam::cellTable::operator=(const Map<dictionary>& rhs)
 {
     Map<dictionary>::operator=(rhs);
     addDefaults();
 }
+
 
 void Foam::cellTable::operator=(const polyMesh& mesh)
 {
@@ -430,9 +420,6 @@ void Foam::cellTable::operator=(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-
-// attach cellZones based on the cellTable Id
-// - any other values can be extracted later from the cellTable dictionary
 void Foam::cellTable::addCellZones
 (
     polyMesh& mesh,
@@ -580,8 +567,5 @@ void Foam::cellTable::combine(const dictionary& dict, labelList& tableIds)
     }
 }
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

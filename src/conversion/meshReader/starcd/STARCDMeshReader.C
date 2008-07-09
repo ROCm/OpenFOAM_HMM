@@ -34,21 +34,16 @@ License
 #include "IFstream.H"
 #include "IOMap.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// special boundary regions
 const char* Foam::meshReaders::STARCD::defaultBoundaryName =
     "Default_Boundary_Region";
 
 const char* Foam::meshReaders::STARCD::defaultSolidBoundaryName =
     "Default_Boundary_Solid";
 
-// keep solids
 bool Foam::meshReaders::STARCD::keepSolids = false;
 
-// face addressing from pro-STAR faces -> foam faces
 const int Foam::meshReaders::STARCD::starToFoamFaceAddr[4][6] =
 {
     { 4, 5, 2, 3, 0, 1 },     // 11 = pro-STAR hex
@@ -57,12 +52,9 @@ const int Foam::meshReaders::STARCD::starToFoamFaceAddr[4][6] =
     { 0, -1, 4, 2, 1, 3 }     // 14 = pro-STAR pyramid
 };
 
-// * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// read and discard to newline
 void Foam::meshReaders::STARCD::readToNewline(IFstream& is)
 {
     char ch = '\n';
@@ -73,14 +65,8 @@ void Foam::meshReaders::STARCD::readToNewline(IFstream& is)
     while ((is) && ch != '\n');
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// read header
-bool Foam::meshReaders::STARCD::readHeader
-(
-    IFstream& is,
-    word fileSignature
-)
+bool Foam::meshReaders::STARCD::readHeader(IFstream& is, word fileSignature)
 {
     if (!is.good())
     {
@@ -108,18 +94,15 @@ bool Foam::meshReaders::STARCD::readHeader
     return true;
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// read boundaryRegion names and the cellTable information from
-// dictionaries that have been extracted from the .inp file
-void Foam::meshReaders::STARCD::readAux
-(
-    const objectRegistry& registry
-)
+void Foam::meshReaders::STARCD::readAux(const objectRegistry& registry)
 {
     boundaryRegion_.readDict(registry);
     cellTable_.readDict(registry);
 }
+
 
 // read in the points from the .vrt file
 //
@@ -219,7 +202,6 @@ void Foam::meshReaders::STARCD::readPoints
 
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // read in the cells from the .cel file
 //
@@ -261,10 +243,7 @@ for each cell face.
 Strictly speaking, we only need the cellModeller for adding boundaries.
 \*---------------------------------------------------------------------------*/
 
-void Foam::meshReaders::STARCD::readCells
-(
-    const fileName& inputName
-)
+void Foam::meshReaders::STARCD::readCells(const fileName& inputName)
 {
     const word fileSignature = "PROSTAR_CELL";
     label nFluids = 0, nSolids = 0, nBaffles = 0, nShells = 0;
@@ -545,7 +524,8 @@ void Foam::meshReaders::STARCD::readCells
                 {
                     Info<< "star cell " << starCellId << " has "
                         << (nFaces - faceI)
-                        << " empty faces - could cause boundary addressing problems"
+                        << " empty faces - could cause boundary "
+                        << "addressing problems"
                         << endl;
 
                     nFaces = faceI;
@@ -633,6 +613,7 @@ void Foam::meshReaders::STARCD::readCells
     mapToFoamPointId_.clear();
 }
 
+
 // read in the boundaries from the .bnd file
 //
 /*---------------------------------------------------------------------------*\
@@ -653,10 +634,7 @@ BAFFLE
 etc,
 \*---------------------------------------------------------------------------*/
 
-void Foam::meshReaders::STARCD::readBoundary
-(
-    const fileName& inputName
-)
+void Foam::meshReaders::STARCD::readBoundary(const fileName& inputName)
 {
     const word fileSignature = "PROSTAR_BOUNDARY";
     label nPatches = 0, nFaces = 0, nBafflePatches = 0, maxId = 0;
@@ -1059,13 +1037,9 @@ void Foam::meshReaders::STARCD::cullPoints()
 }
 
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool Foam::meshReaders::STARCD::readGeometry
-(
-    const scalar scaleFactor
-)
+bool Foam::meshReaders::STARCD::readGeometry(const scalar scaleFactor)
 {
     // Info<< "called meshReaders::STARCD::readGeometry" << endl;
 
@@ -1077,9 +1051,9 @@ bool Foam::meshReaders::STARCD::readGeometry
     return true;
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from reading a file
 Foam::meshReaders::STARCD::STARCD
 (
     const fileName& prefix,
@@ -1095,11 +1069,11 @@ Foam::meshReaders::STARCD::STARCD
     readAux(registry);
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::meshReaders::STARCD::~STARCD()
 {}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

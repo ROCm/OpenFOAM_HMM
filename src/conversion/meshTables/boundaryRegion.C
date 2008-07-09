@@ -36,7 +36,6 @@ Foam::boundaryRegion::boundaryRegion()
 {}
 
 
-// read constant/boundaryRegion (IOMap<dictionary>)
 Foam::boundaryRegion::boundaryRegion
 (
     const objectRegistry& registry,
@@ -54,6 +53,7 @@ Foam::boundaryRegion::boundaryRegion
 
 Foam::boundaryRegion::~boundaryRegion()
 {}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -73,8 +73,7 @@ Foam::label Foam::boundaryRegion::append(const dictionary& dict)
 }
 
 
-Foam::Map<Foam::word>
-Foam::boundaryRegion::names() const
+Foam::Map<Foam::word> Foam::boundaryRegion::names() const
 {
     Map<word> lookup;
 
@@ -90,8 +89,7 @@ Foam::boundaryRegion::names() const
 }
 
 
-Foam::Map<Foam::word>
-Foam::boundaryRegion::boundaryTypes() const
+Foam::Map<Foam::word> Foam::boundaryRegion::boundaryTypes() const
 {
     Map<word> lookup;
 
@@ -139,7 +137,6 @@ Foam::word Foam::boundaryRegion::boundaryType(const word& name) const
 }
 
 
-// read constant/boundaryRegion (IOMap<dictionary>)
 void Foam::boundaryRegion::readDict
 (
     const objectRegistry& registry,
@@ -174,7 +171,6 @@ void Foam::boundaryRegion::readDict
 }
 
 
-// write constant/boundaryRegion for later reuse
 void Foam::boundaryRegion::writeDict
 (
     const objectRegistry& registry,
@@ -208,11 +204,11 @@ void Foam::boundaryRegion::writeDict
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-
 void Foam::boundaryRegion::operator=(const boundaryRegion& rhs)
 {
     Map<dictionary>::operator=(rhs);
 }
+
 
 void Foam::boundaryRegion::operator=(const Map<dictionary>& rhs)
 {
@@ -260,9 +256,5 @@ void Foam::boundaryRegion::rename(const dictionary& dict)
     }
 }
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

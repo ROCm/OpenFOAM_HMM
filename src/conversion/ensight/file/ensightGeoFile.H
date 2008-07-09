@@ -29,10 +29,13 @@ Description
     Specialized Ensight output with extra geometry file header
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ensightGeoFile_H
 #define ensightGeoFile_H
 
 #include "ensightFile.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -40,17 +43,22 @@ namespace Foam
 /*---------------------------------------------------------------------------*\
                       Class ensightGeoFile Declaration
 \*---------------------------------------------------------------------------*/
+
 class ensightGeoFile
 :
     public ensightFile
 {
-    //- Disallow default bitwise assignment
-    void operator=(const ensightGeoFile&);
+    // Private member functions
 
-    //- Disallow default copy constructor
-    ensightGeoFile(const ensightGeoFile&);
+        //- Disallow default bitwise assignment
+        void operator=(const ensightGeoFile&);
+
+        //- Disallow default copy constructor
+        ensightGeoFile(const ensightGeoFile&);
+
 
 public:
+
     // Constructors
 
         //- Construct from pathname
@@ -60,20 +68,22 @@ public:
             IOstream::streamFormat format=IOstream::BINARY
         );
 
-    // Destructor
-        ~ensightGeoFile();
+
+    //- Destructor
+    ~ensightGeoFile();
+
 
     // Output
 
         //- write keyword with trailing newline
         virtual Ostream& writeKeyword(const string& key);
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

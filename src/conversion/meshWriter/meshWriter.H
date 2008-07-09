@@ -90,8 +90,6 @@ namespace Foam
 
 class meshWriter
 {
-    // Private data
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -100,16 +98,18 @@ class meshWriter
         //- Disallow default bitwise assignment
         void operator=(const meshWriter&);
 
+
 protected:
+
     // Protected data
 
-        //- mesh reference
+        //- Mesh reference
         const polyMesh& mesh_;
 
-        //- scaling factor for points (eg, [m] -> [mm])
+        //- Scaling factor for points (eg, [m] -> [mm])
         scalar scaleFactor_;
 
-        //- write bnd file
+        //- Write bnd file
         bool writeBoundary_;
 
         //- boundaryRegion persistent data saved as a dictionary
@@ -118,7 +118,7 @@ protected:
         //- cellTable persistent data saved as a dictionary
         cellTable cellTable_;
 
-        // cellTable IDs for each cell
+        //- cellTable IDs for each cell
         labelList cellTableId_;
 
         //- Pointers to cell shape models
@@ -127,6 +127,7 @@ protected:
         static const cellModel* pyrModel;
         static const cellModel* prismModel;
         static const cellModel* hexModel;
+
 
 public:
 
@@ -138,7 +139,7 @@ public:
 
     // Constructors
 
-        //- create a writer obejct
+        //- Ccreate a writer obejct
         meshWriter
         (
             const polyMesh&,
@@ -146,70 +147,52 @@ public:
         );
 
 
-    // Selectors
-
-    // Destructor
-
-        virtual ~meshWriter();
+    //- Destructor
+    virtual ~meshWriter();
 
 
     // Member Functions
 
-        // Access
-
-        // Check
-
         // Edit
 
-        //- set points scaling
-        void scaleFactor(const scalar scaling)
-        {
-            scaleFactor_ = scaling;
-        }
+            //- Set points scaling
+            void scaleFactor(const scalar scaling)
+            {
+                scaleFactor_ = scaling;
+            }
 
-        //- suppress writing bnd file
-        void noBoundary()
-        {
-            writeBoundary_ = false;
-        }
+            //- Suppress writing bnd file
+            void noBoundary()
+            {
+                writeBoundary_ = false;
+            }
+
 
         // Write
 
-        //- write volume mesh
-        //  subclass must to supply this method
-        virtual bool write
-        (
-            const fileName& timeName = fileName::null
-        ) const = 0;
+            //- Write volume mesh
+            //  subclass must to supply this method
+            virtual bool write
+            (
+                const fileName& timeName = fileName::null
+            ) const = 0;
 
-        //- write surface mesh with optional triangulation
-        //  subclass could supply this information
-        virtual bool writeSurface
-        (
-            const fileName& timeName = fileName::null,
-            const bool& triangulate = false
-        ) const
-        {
-            return false;
-        }
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
+            //- Write surface mesh with optional triangulation
+            //  subclass could supply this information
+            virtual bool writeSurface
+            (
+                const fileName& timeName = fileName::null,
+                const bool& triangulate = false
+            ) const
+            {
+                return false;
+            }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// #include "meshWriterI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

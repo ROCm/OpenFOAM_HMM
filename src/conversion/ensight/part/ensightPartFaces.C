@@ -31,13 +31,14 @@ License
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 namespace Foam
 {
    defineTypeNameAndDebug(ensightPartFaces, 0);
    addToRunTimeSelectionTable(ensightPart, ensightPartFaces, istream);
 }
 
-// names for addressable ensight element types
+
 Foam::List<Foam::word> Foam::ensightPartFaces::elemTypes_
 (
     IStringStream
@@ -46,9 +47,9 @@ Foam::List<Foam::word> Foam::ensightPartFaces::elemTypes_
     )()
 );
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct empty part with number and description
 Foam::ensightPartFaces::ensightPartFaces
 (
     label partNumber,
@@ -61,7 +62,6 @@ Foam::ensightPartFaces::ensightPartFaces
 }
 
 
-// Construct from polyMesh and polyPatch
 Foam::ensightPartFaces::ensightPartFaces
 (
     label partNumber,
@@ -137,28 +137,20 @@ Foam::ensightPartFaces::ensightPartFaces
 }
 
 
-
-// Construct as copy
-Foam::ensightPartFaces::ensightPartFaces
-(
-    const ensightPartFaces &part
-)
+Foam::ensightPartFaces::ensightPartFaces(const ensightPartFaces &part)
 :
     ensightPart(part)
 {}
 
 
-// Construct from Istream
-Foam::ensightPartFaces::ensightPartFaces
-(
-    Istream& is
-)
+Foam::ensightPartFaces::ensightPartFaces(Istream& is)
 :
     ensightPart()
 {
     isCellData_ = false;
     reconstruct(is);
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -168,7 +160,6 @@ Foam::ensightPartFaces::~ensightPartFaces()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// track the points used
 Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
 {
     const polyMesh& mesh = *meshPtr_;
@@ -212,7 +203,6 @@ Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
 }
 
 
-// write face connectivities
 void Foam::ensightPartFaces::writeConnectivity
 (
     ensightGeoFile& os,
@@ -257,7 +247,5 @@ void Foam::ensightPartFaces::writeConnectivity
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

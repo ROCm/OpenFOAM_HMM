@@ -67,7 +67,8 @@ class STARCD
 
 protected:
 
-    // Private Data
+    // Protected Data
+
         static const char* defaultBoundaryName;
         static const char* defaultSolidBoundaryName;
 
@@ -83,10 +84,11 @@ protected:
         //- Cell labels (imported Cell numbering not necessarily contiguous)
         labelList mapToFoamCellId_;
 
-        //- boundary region data
+        //- Boundary region data
         boundaryRegion boundaryRegion_;
 
-    // Private Member Functions
+
+    // Protected Member Functions
 
         //- Disallow default bitwise copy construct
         STARCD(const STARCD&);
@@ -97,26 +99,27 @@ protected:
         //- Read the mesh from the file(s)
         virtual bool readGeometry(const scalar scaleFactor = 1.0);
 
-        //- read points from file
+        //- Read points from file
         void readPoints(const fileName&, const scalar scaleFactor);
 
-        //- read cell connectivities from file
+        //- Read cell connectivities from file
         virtual void readCells(const fileName&);
 
-        //- remove unused points
+        //- Remove unused points
         void cullPoints();
 
-        //- read boundary (cell/face) definitions
+        //- Read boundary (cell/face) definitions
         void readBoundary(const fileName&);
 
-        //- read auxiliary data from constant/{boundaryRegion,cellTable}
+        //- Read auxiliary data from constant/{boundaryRegion,cellTable}
         void readAux(const objectRegistry&);
 
-        //- read and discard to newline
+        //- Read and discard to newline
         static void readToNewline(IFstream&);
 
-        //- read header
+        //- Read header
         static bool readHeader(IFstream&, word fileSignature);
+
 
 protected:
 
@@ -145,8 +148,11 @@ protected:
 
 public:
 
-        //- keep solids (default false)
+    // Static data
+
+        //- Keep solids (default false)
         static bool keepSolids;
+
 
     // Constructors
 
@@ -158,18 +164,18 @@ public:
             const scalar scaleFactor = 1.0
         );
 
-        // Destructor
-        virtual ~STARCD();
 
-    // Member Functions
-
+    //- Destructor
+    virtual ~STARCD();
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace meshReaders
-
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
