@@ -1,0 +1,14 @@
+#include CGAL_FILES
+
+querySurface.C
+CV3D.C
+controls.C
+tolerances.C
+CV3DIO.C
+CV3DMesher.C
+calcDualMesh.C
+insertFeaturePoints.C
+insertSurfaceNearestPointPairs.C
+insertSurfaceNearPointPairs.C
+
+EXE = $(FOAM_USER_APPBIN)/CV3DMesher
