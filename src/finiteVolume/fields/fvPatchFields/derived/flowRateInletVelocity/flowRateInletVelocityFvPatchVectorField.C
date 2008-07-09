@@ -156,8 +156,8 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
         FatalErrorIn
         (
             "flowRateInletVelocityFvPatchVectorField::updateCoeffs()"
-        )   << "dimensions of phi are incorrect"
-            << "\n    on patch " << this->patch().name()
+        )   << "dimensions of " << phiName_ << " are incorrect" << nl
+            << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
             << nl << exit(FatalError);
