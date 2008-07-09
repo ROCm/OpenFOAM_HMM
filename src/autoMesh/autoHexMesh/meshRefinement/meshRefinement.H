@@ -30,7 +30,7 @@ Description
     (static) surfaces.
 
     Maintains
-    - per face any intersections of this edge with any of the surfaces
+    - per face any intersections of the cc-cc segment with any of the surfaces
 
 SourceFiles
     meshRefinement.C
@@ -62,6 +62,7 @@ class fvMesh;
 class mapDistributePolyMesh;
 class decompositionMethod;
 class refinementSurfaces;
+class shellSurfaces;
 class removeCells;
 class featureEdgeMesh;
 class fvMeshDistribute;
@@ -93,7 +94,7 @@ public:
         {
             MASTERONLY = 1, /*!< maintain master only */
             KEEPALL = 2,    /*!< have slaves (upon refinement) from master */
-            REMOVE = 4      /*!< set value to -1 any face that has been refined */
+            REMOVE = 4      /*!< set value to -1 any face that was refined */
         };
 
 
@@ -105,9 +106,13 @@ private:
         fvMesh& mesh_;
 
         //- tolerance used for sorting coordinates (used in 'less' routine)
-        const scalar tol_;
+        const scalar mergeDistance_;
 
+        //- All surface-intersection interaction
         const refinementSurfaces& surfaces_;
+
+        //- All shell-refinement interaction
+        const shellSurfaces& shells_;
 
         //- refinement engine
         hexRef8 meshCutter_;
@@ -229,12 +234,16 @@ private:
             //- Mark cells for refinement-shells based refinement.
             label markInternalRefinement
             (
-                const PtrList<searchableSurface>&,
-                const labelList& shellLevels,
-                const boolList& shellRefineInside,
                 const label nAllowRefine,
                 labelList& refineCell,
                 label& nRefine
+            ) const;
+
+            //- Collect faces that are intersected and whose neighbours aren't
+            //  yet marked  for refinement.
+            labelList getRefineCandidateFaces
+            (
+                const labelList& refineCell
             ) const;
 
             //- Mark cells for surface intersection based refinement.
@@ -252,17 +261,13 @@ private:
             //  regions.
             bool checkCurvature
             (
-                const labelList& globalToPatch,
                 const scalar curvature,
-                const bool markDifferingRegions,
                 const label nAllowRefine,
-                const label newSurfI,
-                const label newTriI,
+                const label surfaceLevel,
+                const vector& surfaceNormal,
                 const label cellI,
-
-                label& maxCellSurfI,
-                label& maxCellTriI,
-
+                label& cellMaxLevel,
+                vector& cellMaxNormal,
                 labelList& refineCell,
                 label& nRefine
             ) const;
@@ -273,9 +278,7 @@ private:
             //  (markDifferingRegions)
             label markSurfaceCurvatureRefinement
             (
-                const labelList& globalToPatch,
                 const scalar curvature,
-                const bool markDifferingRegions,
                 const label nAllowRefine,
                 const labelList& neiLevel,
                 const pointField& neiCc,
@@ -380,8 +383,9 @@ public:
         meshRefinement
         (
             fvMesh& mesh,
-            const scalar tol,
-            const refinementSurfaces&
+            const scalar mergeDistance,
+            const refinementSurfaces&,
+            const shellSurfaces&
         );
 
 
@@ -399,10 +403,21 @@ public:
                 return mesh_;
             }
 
+            scalar mergeDistance() const
+            {
+                return mergeDistance_;
+            }
+
             //- reference to surface search engines
             const refinementSurfaces& surfaces() const
             {
                 return surfaces_;
+            }
+
+            //- reference to refinement shells (regions)
+            const shellSurfaces& shells() const
+            {
+                return shells_;
             }
 
             //- reference to meshcutting engine
@@ -454,6 +469,18 @@ public:
                 decompositionMethod&
             ) const;
 
+            //- Redecompose according to cell count
+            //  keepZoneFaces : find all faceZones from zoned surfaces and keep
+            //                  owner and neighbour together
+            //  keepBaffles   : find all baffles and keep them together
+            autoPtr<mapDistributePolyMesh> balance
+            (
+                const bool keepZoneFaces,
+                const bool keepBaffles,
+                decompositionMethod& decomposer,
+                fvMeshDistribute& distributor
+            );
+
             //- Get faces with intersection.
             labelList intersectedFaces() const;
 
@@ -482,21 +509,20 @@ public:
                 const labelList& adaptPatchIDs
             );
 
+            //- Helper function: check that face zones are synced
+            static void checkCoupledFaceZones(const polyMesh&);
+
+
         // Refinement
 
             //- Calculate list of cells to refine.
             labelList refineCandidates
             (
                 const point& keepPoint,
-                const labelList& globalToPatch,
                 const scalar curvature,
 
                 const PtrList<featureEdgeMesh>& featureMeshes,
                 const labelList& featureLevels,
-
-                const PtrList<searchableSurface>&,
-                const labelList& shellLevels,
-                const boolList& shellRefineInside,
 
                 const bool featureRefinement,
                 const bool internalRefinement,
@@ -626,7 +652,7 @@ public:
             template<class T>
             void testSyncBoundaryFaceList
             (
-                const scalar tol,
+                const scalar mergeDistance,
                 const string&,
                 const UList<T>&,
                 const UList<T>&

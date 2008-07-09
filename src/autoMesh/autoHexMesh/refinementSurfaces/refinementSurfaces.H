@@ -26,8 +26,8 @@ Class
     Foam::refinementSurfaces
 
 Description
-    Container for triSurfaces used for surface-driven refinement.
-    These contain all the data about the level of refinement needed per
+    Container for data on surfaces used for surface-driven refinement.
+    Contains all the data about the level of refinement needed per
     surface.
 
 SourceFiles
@@ -38,33 +38,37 @@ SourceFiles
 #ifndef refinementSurfaces_H
 #define refinementSurfaces_H
 
-#include "triSurfaceMeshes.H"
 #include "PackedList.H"
 #include "triSurfaceGeoMesh.H"
 #include "triSurfaceFields.H"
+#include "vectorList.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class searchableSurface;
+class searchableSurfaces;
+class shellSurfaces;
+class triSurfaceMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class refinementSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class refinementSurfaces
-:
-    public triSurfaceMeshes
 {
     // Private data
 
+        //- Reference to all geometry.
+        const searchableSurfaces& allGeometry_;
+
+        //- Indices of surfaces that are refinement ones
+        labelList surfaces_;
+
         //- Surface name (word)
         wordList names_;
-
-        //- Per surface whether is closed
-        boolList closed_;
 
         //- Per 'interface' surface : name of faceZone to put faces into
         wordList faceZoneNames_;
@@ -86,23 +90,11 @@ class refinementSurfaces
         //- From global region number to refinement level
         labelList maxLevel_;
 
-        //- From global region number to added layers
-        labelList numLayers_;
-
-        //- From global region number to patch name
-        wordList patchName_;
-
-        //- From global region number to patch name
-        wordList patchType_;
-
-
         //- Per surface refinement level adapted for shells.
         PtrList<triSurfaceLabelField> minLevelFields_;
 
 
     // Private Member Functions
-
-        static fileNameList extractFileNames(const PtrList<dictionary>&);
 
         //- Disallow default bitwise copy construct
         refinementSurfaces(const refinementSurfaces&);
@@ -115,11 +107,18 @@ public:
 
     // Constructors
 
-        //- Construct from directory (io.instance()) and dictionaries
+        //- Construct from surfaces and dictionaries
         refinementSurfaces
         (
-            const IOobject& io,
+            const searchableSurfaces& allGeometry,
             const PtrList<dictionary>&
+        );
+
+        //- Construct from surfaces and dictionary
+        refinementSurfaces
+        (
+            const searchableSurfaces& allGeometry,
+            const dictionary&
         );
 
 
@@ -127,16 +126,20 @@ public:
 
         // Access
 
+            const searchableSurfaces& geometry() const
+            {
+                return allGeometry_;
+            }
+
+            const labelList& surfaces() const
+            {
+                return surfaces_;
+            }
+
             //- Names of surfaces
             const wordList& names() const
             {
                 return names_;
-            }
-
-            //- Per surface whether is closed
-            const boolList& closed() const
-            {
-                return closed_;
             }
 
             //- Per 'interface' surface : name of faceZone to put faces into
@@ -151,15 +154,11 @@ public:
                 return cellZoneNames_;
             }
 
-            //- Per 'interface' surface : if closed: zonify cells inside surface
-            const boolList& zoneInside() const
-            {
-                return zoneInside_;
-            }
-
             //- Get indices of named surfaces (surfaces with cellZoneName)
             labelList getNamedSurfaces() const;
 
+            //- Get indices of closed named surfaces
+            labelList getClosedNamedSurfaces() const;
 
             //- From local region number to global region number
             const labelList& regionOffset() const
@@ -179,24 +178,6 @@ public:
                 return maxLevel_;
             }
 
-            //- From global region number to added layers
-            const labelList& numLayers() const
-            {
-                return numLayers_;
-            }
-
-            //- From global region number to patch name. Patchnames can be empty
-            const wordList& patchName() const
-            {
-                return patchName_;
-            }
-
-            //- From global region number to patch name
-            const wordList& patchType() const
-            {
-                return patchType_;
-            }
-
 
         // Helper
 
@@ -204,14 +185,6 @@ public:
             label globalRegion(const label surfI, const label regionI) const
             {
                 return regionOffset_[surfI]+regionI;
-            }
-
-            //- From triangle on surface to global region
-            label triangleRegion(const label surfI, const label triI) const
-            {
-                const triSurface& s = operator[](surfI);
-
-                return globalRegion(surfI, s[triI].region());
             }
 
             //- Min level for surface and region on surface
@@ -231,22 +204,11 @@ public:
                 return minLevel_.size();
             }
 
-            //- Minlevel updated for refinement shells
-            const triSurfaceLabelField& minLevelField(const label surfI) const
-            {
-                return minLevelFields_[surfI];
-            }
-
             //- Calculate minLevelFields
             void setMinLevelFields
             (
-                const PtrList<searchableSurface>& shells,
-                const labelList& shellLevels,
-                const boolList& shellRefineInside
+                const shellSurfaces& shells
             );
-
-            //- Helper: is surface closed?
-            static bool isSurfaceClosed(const triSurface&);
 
             //- Helper: orient (closed only) surfaces so keepPoint is outside.
             static void orientSurface
@@ -263,36 +225,71 @@ public:
 
             //- Find intersection of edge. Return -1 or first surface
             //  with higher (than currentLevel) minlevel.
-            //  Return surface number and hit info.
-            label findHigherIntersection
+            //  Return surface number and level.
+            void findHigherIntersection
             (
-                const point& start,
-                const point& end,
-                const label currentLevel,   // current cell refinement level
-                pointIndexHit&
+                const pointField& start,
+                const pointField& end,
+                const labelList& currentLevel,  // current cell refinement level
+
+                labelList& surfaces,
+                labelList& surfaceLevel
             ) const;
 
-            //- Find intersection with max level. Return -1 or the surface
-            //  with the highest maxLevel above currentLevel
-            label findHighestIntersection
+            //- Find all intersections of edge. Unsorted order.
+            void findAllHigherIntersections
             (
-                const point& start,
-                const point& end,
-                const label currentLevel,   // current cell refinement level
-                pointIndexHit&
+                const pointField& start,
+                const pointField& end,
+                const labelList& currentLevel,  // current cell refinement level
+
+                List<vectorList>& surfaceNormal,
+                labelListList& surfaceLevel
             ) const;
 
-            //- Detect if a point is 'inside' (depending on zoneInside flag) a
-            //  zoneable surface. Returns -1 if not, returns first surface it
-            //  is.
-            label insideZone(const labelList& surfaces, const point& pt) const;
+            //- Find intersection nearest to the endpoints. surface1,2 are
+            //  not indices into surfacesToTest but refinement surface indices.
+            void findNearestIntersection
+            (
+                const labelList& surfacesToTest,
+                const pointField& start,
+                const pointField& end,
 
+                labelList& surface1,
+                List<pointIndexHit>& hit1,
+                labelList& region1,
+                labelList& surface2,
+                List<pointIndexHit>& hit2,
+                labelList& region2
+            ) const;
 
-            //- Mark for all points whether it is inside any closed surface
-            //  Return number of inside points.
-            label markInsidePoints(const pointField&, PackedList<1>& isInside)
-             const;
+            //- Used for debugging only: find intersection of edge.
+            void findAnyIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surfaces,
+                List<pointIndexHit>&
+            ) const;
 
+            //- Find nearest point on surfaces.
+            void findNearest
+            (
+                const labelList& surfacesToTest,
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                labelList& surfaces,
+                List<pointIndexHit>&
+            ) const;
+
+            //- Detect if a point is 'inside' (closed) surfaces.
+            //  Returns -1 if not, returns first surface it is.
+            void findInside
+            (
+                const labelList& surfacesToTest,
+                const pointField& pt,
+                labelList& insideSurfaces
+            ) const;
 };
 
 

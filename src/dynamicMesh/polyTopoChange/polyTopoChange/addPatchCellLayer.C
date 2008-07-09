@@ -553,7 +553,7 @@ Foam::labelListList Foam::addPatchCellLayer::addedCells() const
 
 void Foam::addPatchCellLayer::setRefinement
 (
-    const scalar expansionRatio,
+    const scalarField& expansionRatio,
     const indirectPrimitivePatch& pp,
     const labelList& nFaceLayers,
     const labelList& nPointLayers,
@@ -885,7 +885,7 @@ void Foam::addPatchCellLayer::setRefinement
 
                 addedPoints_[patchPointI][i] = addedVertI;
 
-                disp *= expansionRatio;
+                disp *= expansionRatio[patchPointI];
             }
         }
     }

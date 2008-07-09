@@ -24,52 +24,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "autoHexMeshDriver.H"
-#include "syncTools.H"
+#include "snapParameters.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::autoHexMeshDriver::averageNeighbours
-(
-    const PackedList<1>& isMasterEdge,
-    const labelList& meshEdges,
-    const labelList& meshPoints,
-    const edgeList& edges,
-    const scalarField& invSumWeight,
-    const Field<Type>& data,
-    Field<Type>& average
-) const
-{
-    average = pTraits<Type>::zero;
+// Construct from dictionary
+Foam::snapParameters::snapParameters(const dictionary& dict, const label dummy)
+:
+    nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
+    snapTol_(readScalar(dict.lookup("snapTol"))),
+    nSmoothDispl_(readLabel(dict.lookup("nSmoothDispl"))),
+    nSnap_(readLabel(dict.lookup("nSnap")))
+{}
 
-    forAll(edges, edgeI)
-    {
-        if (isMasterEdge.get(meshEdges[edgeI]) == 1)
-        {
-            const edge& e = edges[edgeI];
-            //scalar eWeight = edgeWeights[edgeI];
-            scalar eWeight =  1.0;
-            label v0 = e[0];
-            label v1 = e[1];
 
-            average[v0] += eWeight*data[v1];
-            average[v1] += eWeight*data[v0];
-        }
-    }
+// Construct from dictionary
+Foam::snapParameters::snapParameters(const dictionary& dict)
+:
+    nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
+    snapTol_(readScalar(dict.lookup("tolerance"))),
+    nSmoothDispl_(readLabel(dict.lookup("nSolveIter"))),
+    nSnap_(readLabel(dict.lookup("nRelaxIter")))
+{}
 
-    syncTools::syncPointList
-    (
-        mesh_,
-        meshPoints,
-        average,
-        plusEqOp<Type>(),
-        pTraits<Type>::zero,    // null value
-        false                   // no separation
-    );
 
-    average *= invSumWeight;
-}
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

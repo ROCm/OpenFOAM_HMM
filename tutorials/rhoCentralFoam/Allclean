@@ -24,7 +24,7 @@ do
 
     if [ "$case" = "biconic25-55Run35" ]
     then
-        rm $case/constant/polyMesh/boundary
+        rm -rf $case/constant/polyMesh/boundary
         wclean $case/datToFoam
     fi
 done

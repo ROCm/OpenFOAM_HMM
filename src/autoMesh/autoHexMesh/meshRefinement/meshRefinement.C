@@ -24,9 +24,7 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "Pstream.H"
 #include "meshRefinement.H"
-
 #include "volMesh.H"
 #include "volFields.H"
 #include "surfaceMesh.H"
@@ -34,7 +32,6 @@ License
 #include "Time.H"
 #include "refinementHistory.H"
 #include "refinementSurfaces.H"
-#include "cellSet.H"
 #include "decompositionMethod.H"
 #include "regionSplit.H"
 #include "fvMeshDistribute.H"
@@ -50,8 +47,9 @@ License
 #include "globalPointPatchFields.H"
 #include "calculatedPointPatchFields.H"
 #include "processorPointPatch.H"
-#include "featureEdgeMesh.H"
 #include "globalIndex.H"
+#include "meshTools.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -117,90 +115,6 @@ void Foam::meshRefinement::calcNeighbourData
 }
 
 
-//void Foam::meshRefinement::calcCanonicalBoundaryData
-//(
-//    labelList& leftLevel,
-//    pointField& leftCc,
-//    labelList& rightLevel,
-//    pointField& rightCc
-//)  const
-//{
-//    const labelList& cellLevel = meshCutter_.cellLevel();
-//    const pointField& cellCentres = mesh_.cellCentres();
-//    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-//
-//    // Get boundary face centre and level. Coupled aware.
-//    calcNeighbourData(rightLevel, rightCc);
-//
-//    // Get owner face centre and level. Canonical sort for coupled faces.
-//    forAll(patches, patchI)
-//    {
-//        const polyPatch& pp = patches[patchI];
-//
-//        const unallocLabelList& faceCells = pp.faceCells();
-//        const vectorField::subField faceCentres = pp.faceCentres();
-//
-//        if (isA<processorPolyPatch>(pp))
-//        {
-//            const processorPolyPatch& procPp =
-//                refCast<const processorPolyPatch>(patches[patchI]);
-//
-//            label bFaceI = pp.start()-mesh_.nInternalFaces();
-//            forAll(faceCells, i)
-//            {
-//                leftLevel[bFaceI] = cellLevel[faceCells[i]];
-//                leftCc[bFaceI] = cellCentres[faceCells[i]];
-//                bFaceI++;
-//            }
-//
-//            // Swap if on neighbour so both sides have same values
-//            if (!procPp.owner())
-//            {
-//                forAll(leftLevel, i)
-//                {
-//                    Swap(leftLevel[i], rightLevel[i]);
-//                    Swap(leftCc[i], rightCc[i]);
-//                }
-//            }
-//        }
-//        else if (isA<cyclicPolyPatch>(pp))
-//        {
-//            const processorPolyPatch& cycPp =
-//                refCast<const processorPolyPatch>(patches[patchI]);
-//
-//            label bFaceI = pp.start()-mesh_.nInternalFaces();
-//            forAll(faceCells, i)
-//            {
-//                leftLevel[bFaceI] = cellLevel[faceCells[i]];
-//                leftCc[bFaceI] = cellCentres[faceCells[i]];
-//                bFaceI++;
-//            }
-//
-//            // First half has data in normal order: owner in leftLevel,leftCc
-//            // and coupled data in rightLevel, rightCc. Second half has it
-//            // swapped:
-//            bFaceI = pp.start()+cycPp.size()/2-mesh_.nInternalFaces();
-//            for (label i = 0; i < cycPp.size()/2; i++)
-//            {
-//                Swap(leftLevel[bFaceI], rightLevel[bFaceI]);
-//                Swap(leftCc[bFaceI], rightCc[bFaceI]);
-//                bFaceI++;
-//            }
-//        }
-//        else
-//        {
-//            label bFaceI = pp.start()-mesh_.nInternalFaces();
-//            forAll(faceCells, i)
-//            {
-//                leftLevel[bFaceI] = cellLevel[faceCells[i]];
-//                leftCc[bFaceI] = cellCentres[faceCells[i]];
-//                bFaceI++;
-//            }
-//        }
-//    }
-//}
-
-
 // Find intersections of edges (given by their two endpoints) with surfaces.
 // Returns first intersection if there are more than one.
 void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
@@ -220,31 +134,44 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
     calcNeighbourData(neiLevel, neiCc);
 
+    // Collect segments we want to test for
+    pointField start(changedFaces.size());
+    pointField end(changedFaces.size());
+
     forAll(changedFaces, i)
     {
         label faceI = changedFaces[i];
         label own = mesh_.faceOwner()[faceI];
 
-        pointIndexHit surfaceHitInfo;
-
+        start[i] = cellCentres[own];
         if (mesh_.isInternalFace(faceI))
         {
-            surfaceIndex_[faceI] = surfaces_.findAnyIntersection
-            (
-                cellCentres[own],
-                cellCentres[mesh_.faceNeighbour()[faceI]],
-                surfaceHitInfo
-            );
+            end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
         }
         else
         {
-            surfaceIndex_[faceI] = surfaces_.findAnyIntersection
-            (
-                cellCentres[own],
-                neiCc[faceI-mesh_.nInternalFaces()],
-                surfaceHitInfo
-            );
+            end[i] = neiCc[faceI-mesh_.nInternalFaces()];
         }
+    }
+
+    // Do tests in one go
+    labelList surfaceHit;
+    {
+        labelList surfaceLevel;
+        surfaces_.findHigherIntersection
+        (
+            start,
+            end,
+            labelList(start.size(), -1),    // accept any intersection
+            surfaceHit,
+            surfaceLevel
+        );
+    }
+
+    // Keep just surface hit
+    forAll(surfaceHit, i)
+    {
+        surfaceIndex_[changedFaces[i]] = surfaceHit[i];
     }
 
     // Make sure both sides have same information. This should be
@@ -297,7 +224,7 @@ void Foam::meshRefinement::checkData()
         // Compare
         testSyncBoundaryFaceList
         (
-            tol_,
+            mergeDistance_,
             "testing faceCentres : ",
             boundaryFc,
             neiBoundaryFc
@@ -305,67 +232,72 @@ void Foam::meshRefinement::checkData()
     }
     // Check meshRefinement
     {
-        for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
-        {
-            label own = mesh_.faceOwner()[faceI];
-            label nei = mesh_.faceNeighbour()[faceI];
-            const point& ownCc = mesh_.cellCentres()[own];
-            const point& neiCc = mesh_.cellCentres()[nei];
-
-            pointIndexHit surfaceHitInfo;
-            label surfI = surfaces_.findAnyIntersection
-            (
-                ownCc,
-                neiCc,
-                surfaceHitInfo
-            );
-
-            if (surfI != surfaceIndex_[faceI])
-            {
-                WarningIn("meshRefinement::checkData()")
-                    << "Internal face:" << faceI
-                    << " fc:" << mesh_.faceCentres()[faceI]
-                    << " cached surfaceIndex_:" << surfaceIndex_[faceI]
-                    << " current:" << surfI
-                    << " ownCc:" << ownCc << " neiCc:" << neiCc
-                    << endl;
-            }
-        }
-
         // Get boundary face centre and level. Coupled aware.
         labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
         pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
         calcNeighbourData(neiLevel, neiCc);
 
-        for
-        (
-            label faceI = mesh_.nInternalFaces();
-            faceI < mesh_.nFaces();
-            faceI++
-        )
+        // Collect segments we want to test for
+        pointField start(mesh_.nFaces());
+        pointField end(mesh_.nFaces());
+
+        forAll(start, faceI)
         {
-            label own = mesh_.faceOwner()[faceI];
-            const point& ownCc = mesh_.cellCentres()[own];
+            start[faceI] = mesh_.cellCentres()[mesh_.faceOwner()[faceI]];
 
-            pointIndexHit surfaceHitInfo;
-            label surfI = surfaces_.findAnyIntersection
-            (
-                ownCc,
-                neiCc[faceI-mesh_.nInternalFaces()],
-                surfaceHitInfo
-            );
-
-            if (surfI != surfaceIndex_[faceI])
+            if (mesh_.isInternalFace(faceI))
             {
-                WarningIn("meshRefinement::checkData()")
-                    << "Boundary face:" << faceI
-                    << " patch:" << mesh_.boundaryMesh().whichPatch(faceI)
-                    << " fc:" << mesh_.faceCentres()[faceI]
-                    << " cached surfaceIndex_:" << surfaceIndex_[faceI]
-                    << " current:" << surfI
-                    << " ownCc:" << ownCc
-                    << " neiCc:" << neiCc[faceI-mesh_.nInternalFaces()]
-                    << endl;
+                end[faceI] = mesh_.cellCentres()[mesh_.faceNeighbour()[faceI]];
+            }
+            else
+            {
+                end[faceI] = neiCc[faceI-mesh_.nInternalFaces()];
+            }
+        }
+
+        // Do tests in one go
+        labelList surfaceHit;
+        {
+            labelList surfaceLevel;
+            surfaces_.findHigherIntersection
+            (
+                start,
+                end,
+                labelList(start.size(), -1),    // accept any intersection
+                surfaceHit,
+                surfaceLevel
+            );
+        }
+
+        // Check
+        forAll(surfaceHit, faceI)
+        {
+            if (surfaceHit[faceI] != surfaceIndex_[faceI])
+            {
+                if (mesh_.isInternalFace(faceI))
+                {
+                    WarningIn("meshRefinement::checkData()")
+                        << "Internal face:" << faceI
+                        << " fc:" << mesh_.faceCentres()[faceI]
+                        << " cached surfaceIndex_:" << surfaceIndex_[faceI]
+                        << " current:" << surfaceHit[faceI]
+                        << " ownCc:"
+                        << mesh_.cellCentres()[mesh_.faceOwner()[faceI]]
+                        << " neiCc:"
+                        << mesh_.cellCentres()[mesh_.faceNeighbour()[faceI]]
+                        << endl;
+                }
+                else
+                {
+                    WarningIn("meshRefinement::checkData()")
+                        << "Boundary face:" << faceI
+                        << " fc:" << mesh_.faceCentres()[faceI]
+                        << " cached surfaceIndex_:" << surfaceIndex_[faceI]
+                        << " current:" << surfaceHit[faceI]
+                        << " ownCc:"
+                        << mesh_.cellCentres()[mesh_.faceOwner()[faceI]]
+                        << endl;
+                }
             }
         }
     }
@@ -492,283 +424,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
 }
 
 
-// Get which are inside any closed surface. Note that all closed surfaces
-// will have already been oriented to have keepPoint outside.
-Foam::labelList Foam::meshRefinement::getInsideCells
-(
-    const word& postfix
-) const
-{
-    const pointField& points = mesh_.points();
-
-    // This test can be done in various ways. The ultimate is the intersection
-    // of any edge of the mesh with any surface and intersection of any edge
-    // of any surface of the mesh with any mesh face.
-    // For now:
-    // - none of the edges of a cell intersects any surface
-    // - any point of the cell is inside.
-
-
-    // Is point inside any closed surface?
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    PackedList<1> pointIsInside;
-    label nPointInside = surfaces_.markInsidePoints
-    (
-       points,
-       pointIsInside
-    );
-
-    if (debug)
-    {
-        Pout<< "getInsideCells : Points internal to closed surfaces :"
-            << " local:" << nPointInside
-            << " global:" << returnReduce(nPointInside, sumOp<label>())
-            << endl;
-    }
-
-
-    // Find cells with all points inside closed surface
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    PackedList<1> cellIsInside(mesh_.nCells(), 1u);
-    label nCellInside = mesh_.nCells();
-
-    // Unmark cells with any point outside
-    forAll(points, pointI)
-    {
-        if (pointIsInside.get(pointI) == 0u)
-        {
-            // Outside point. Unmark cells.
-            const labelList& pCells = mesh_.pointCells()[pointI];
-
-            forAll(pCells, i)
-            {
-                label cellI = pCells[i];
-
-                if (cellIsInside.get(cellI) == 1u)
-                {
-                    cellIsInside.set(cellI, 0u);
-                    nCellInside--;
-                }
-            }
-        }
-    }
-
-    label totNCellInside = nCellInside;
-    reduce(totNCellInside, sumOp<label>());
-    if (debug)
-    {
-        Pout<< "getInsideCells : Cells using inside points only :"
-            << " local:" << nCellInside << " global:" << totNCellInside
-            << endl;
-    }
-
-    // Filter any cells with cc-cc edge intersection
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const cellList& cells = mesh_.cells();
-
-    cellSet insidePoints(mesh_, "insidePoints_"+postfix, mesh_.nCells()/100);
-    cellSet insidePointsButCut
-    (
-        mesh_,
-        "insidePointsButCut_"+postfix,
-        mesh_.nCells()/100
-    );
-
-    forAll(cells, cellI)
-    {
-        if (cellIsInside.get(cellI) == 1u)
-        {
-            insidePoints.insert(cellI);
-
-            const cell& cFaces = cells[cellI];
-
-            forAll(cFaces, i)
-            {
-                if (surfaceIndex_[cFaces[i]] != -1)
-                {
-                    cellIsInside.set(cellI, 0u);
-                    nCellInside--;
-
-                    insidePointsButCut.insert(cellI);
-
-                    break;
-                }
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "getInsideCells : cells with all points inside : "
-            << insidePoints.objectPath() << endl;
-        insidePoints.write();
-        Pout<< "getInsideCells : cells with all points inside"
-            << " but intersecting (cc) surface : "
-            << insidePointsButCut.objectPath() << endl;
-        insidePointsButCut.write();
-    }
-
-    totNCellInside = nCellInside;
-    reduce(totNCellInside, sumOp<label>());
-    if (debug)
-    {
-        Pout<< "getInsideCells : After filtering cc-cc intersections :"
-            << " local:" << nCellInside << " global:" << totNCellInside
-            << endl;
-    }
-
-
-    // Filter cells with any normal edge intersection
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    cellSet insidePointsButEdge
-    (
-        mesh_,
-        "insidePointsButEdge_"+postfix,
-        mesh_.nCells()/100
-    );
-
-    const labelListList& edgeCells = mesh_.edgeCells();
-
-    forAll(edgeCells, edgeI)
-    {
-        const labelList& eCells = edgeCells[edgeI];
-
-        // Does edge use any inside cells? Prefilter since edge intersection
-        // test expensive.
-        bool edgeHasInsideCells = false;
-
-        forAll(eCells, i)
-        {
-            if (cellIsInside.get(eCells[i]) == 1u)
-            {
-                edgeHasInsideCells = true;
-                break;
-            }
-        }
-
-        if (edgeHasInsideCells)
-        {
-            const edge& e = mesh_.edges()[edgeI];
-
-            // Find any pierces of surface by mesh edge.
-            pointIndexHit hit;
-            label surfI = surfaces().findHigherIntersection
-            (
-                points[e[0]],
-                points[e[1]],
-                -1,                     // minimum level.
-                hit
-            );
-
-            if (surfI != -1)
-            {
-                // This edge intersects some surface. Unmark all cells
-                // using this edge.
-
-                forAll(eCells, i)
-                {
-                    if (cellIsInside.get(eCells[i]) == 1u)
-                    {
-                        cellIsInside.set(eCells[i], 0u);
-                        nCellInside--;
-
-                        insidePointsButEdge.insert(eCells[i]);
-                    }
-                }
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "getInsideCells : cells with all points inside"
-            << " but intersecting (edges) surface : "
-            << insidePointsButEdge.objectPath() << endl;
-        insidePointsButEdge.write();
-    }
-
-    totNCellInside = nCellInside;
-    reduce(totNCellInside, sumOp<label>());
-    if (debug)
-    {
-        Pout<< "getInsideCells : After filtering edge interesections :"
-            << " local:" << nCellInside << " global:" << totNCellInside
-            << endl;
-    }
-
-
-    // Collect cells
-    // ~~~~~~~~~~~~~
-
-    DynamicList<label> cellsToRemove(nCellInside);
-
-    forAll(cellIsInside, cellI)
-    {
-        if (cellIsInside.get(cellI) == 1u)
-        {
-            cellsToRemove.append(cellI);
-        }
-    }
-    return cellsToRemove.shrink();
-}
-
-
-// Do all to remove inside cells
-Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeInsideCells
-(
-    const string& msg,
-    const label exposedPatchI
-)
-{
-    labelList insideCells
-    (
-        getInsideCells
-        (
-            string::validate<word>(msg)
-        )
-    );
-
-    Info<< "Removing inside cells : "
-        << returnReduce(insideCells.size(), sumOp<label>())
-        << '.' << endl;
-
-    removeCells cellRemover(mesh_);
-
-    labelList exposedFaces(cellRemover.getExposedFaces(insideCells));
-
-    // Debug check
-    forAll(exposedFaces, i)
-    {
-        label faceI = exposedFaces[i];
-
-        if (surfaceIndex_[faceI] != -1)
-        {
-            FatalErrorIn
-            (
-                "removeInsideCells"
-                "(const label, const string&, const label)"
-            )   << "Face:" << faceI
-                << " fc:" << mesh_.faceCentres()[faceI]
-                << " is actually cutting the surface and should never have been"
-                << " included in the cells to remove."
-                << abort(FatalError);
-        }
-    }
-
-    return doRemoveCells
-    (
-        insideCells,
-        exposedFaces,
-        labelList(exposedFaces.size(), exposedPatchI),
-        cellRemover
-    );
-}
-
-
 // Determine for multi-processor regions the lowest numbered cell on the lowest
 // numbered processor.
 void Foam::meshRefinement::getRegionMaster
@@ -834,13 +489,15 @@ void Foam::meshRefinement::getRegionMaster
 Foam::meshRefinement::meshRefinement
 (
     fvMesh& mesh,
-    const scalar tol,
-    const refinementSurfaces& surfaces
+    const scalar mergeDistance,
+    const refinementSurfaces& surfaces,
+    const shellSurfaces& shells
 )
 :
     mesh_(mesh),
-    tol_(tol),
+    mergeDistance_(mergeDistance),
     surfaces_(surfaces),
+    shells_(shells),
     meshCutter_
     (
         mesh,
@@ -924,109 +581,6 @@ Foam::label Foam::meshRefinement::countHits() const
     }
     return nHits;
 }
-
-
-//// Determine distribution to keep baffles together
-//Foam::labelList Foam::meshRefinement::decomposePreserveBaffles
-//(
-//    decompositionMethod& decomposer
-//) const
-//{
-//    // Find duplicate faces
-//    labelList duplicateFace
-//    (
-//        localPointRegion::findDuplicateFaces
-//        (
-//            mesh_,
-//            identity(mesh_.nFaces()-mesh_.nInternalFaces())
-//          + mesh_.nInternalFaces()
-//        )
-//    );
-//
-//
-//    // Agglomerate cells on both sides of duplicate face pair
-//
-//    const pointField& cellCentres = mesh_.cellCentres();
-//    const labelList& faceOwner = mesh_.faceOwner();
-//
-//    labelList toAgglom(mesh_.nCells(), -1);
-//    pointField agglomCellCentres(mesh_.nCells());
-//    labelList nAgglomCellCentres(mesh_.nCells(), 0);
-//
-//    label agglomI = 0;
-//
-//    // Do all baffle cells
-//    forAll(duplicateFace, i)
-//    {
-//        if (duplicateFace[i] != -1)
-//        {
-//            label own = faceOwner[i+mesh_.nInternalFaces()];
-//            label otherOwn =
-//                faceOwner[duplicateFace[i]+mesh_.nInternalFaces()];
-//
-//            if (toAgglom[own] == -1 && toAgglom[otherOwn] == -1)
-//            {
-//                // Allocate new agglomeration
-//                agglomCellCentres[agglomI] =
-//                    cellCentres[own]
-//                  + cellCentres[otherOwn];
-//                nAgglomCellCentres[agglomI] = 2;
-//                toAgglom[own] = agglomI;
-//                toAgglom[otherOwn] = agglomI;
-//                agglomI++;
-//            }
-//            else if (toAgglom[own] != -1)
-//            {
-//                // Owner already part of agglomeration. Add otherOwn to it.
-//                label destAgglom = toAgglom[own];
-//                agglomCellCentres[destAgglom] += cellCentres[otherOwn];
-//                nAgglomCellCentres[destAgglom]++;
-//                toAgglom[otherOwn] = destAgglom;
-//            }
-//            else if (toAgglom[otherOwn] != -1)
-//            {
-//                // otherOwn already part of agglomeration. Add own to it.
-//                label destAgglom = toAgglom[otherOwn];
-//                agglomCellCentres[destAgglom] += cellCentres[own];
-//                nAgglomCellCentres[destAgglom]++;
-//                toAgglom[own] = destAgglom;
-//            }
-//        }
-//    }
-//
-//    // Do all other cells
-//    forAll(toAgglom, cellI)
-//    {
-//        if (toAgglom[cellI] == -1)
-//        {
-//            agglomCellCentres[agglomI] = cellCentres[cellI];
-//            nAgglomCellCentres[agglomI] = 1;
-//            toAgglom[cellI] = agglomI;
-//            agglomI++;
-//        }
-//    }
-//
-//    // Average
-//    agglomCellCentres.setSize(agglomI);
-//
-//    forAll(agglomCellCentres, i)
-//    {
-//        agglomCellCentres[i] /= nAgglomCellCentres[i];
-//    }
-//
-//    // Decompose based on agglomerated cell centres
-//    labelList agglomDistribution(decomposer.decompose(agglomCellCentres));
-//
-//    // Rework back into decomposition for original mesh_
-//    labelList distribution(mesh_.nCells());
-//
-//    forAll(toAgglom, cellI)
-//    {
-//        distribution[cellI] = agglomDistribution[toAgglom[cellI]];
-//    }
-//
-//    return distribution;
-//}
 
 
 // Determine distribution to move connected regions onto one processor.
@@ -1164,6 +718,141 @@ Foam::labelList Foam::meshRefinement::decomposeCombineRegions
 }
 
 
+Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
+(
+    const bool keepZoneFaces,
+    const bool keepBaffles,
+    decompositionMethod& decomposer,
+    fvMeshDistribute& distributor
+)
+{
+    autoPtr<mapDistributePolyMesh> map;
+
+    if (Pstream::parRun())
+    {
+        //Info<< nl
+        //    << "Doing final balancing" << nl
+        //    << "---------------------" << nl
+        //    << endl;
+        //
+        //if (debug_)
+        //{
+        //    const_cast<Time&>(mesh_.time())++;
+        //}
+
+        // Wanted distribution
+        labelList distribution;
+
+        if (keepZoneFaces || keepBaffles)
+        {
+            // Faces where owner and neighbour are not 'connected' so can
+            // go to different processors.
+            boolList blockedFace(mesh_.nFaces(), true);
+            // Pairs of baffles
+            List<labelPair> couples;
+
+            if (keepZoneFaces)
+            {
+                label nNamed = surfaces().getNamedSurfaces().size();
+
+                Info<< "Found " << nNamed << " surfaces with faceZones."
+                    << " Applying special decomposition to keep those together."
+                    << endl;
+
+                // Determine decomposition to keep/move surface zones
+                // on one processor. The reason is that snapping will make these
+                // into baffles, move and convert them back so if they were
+                // proc boundaries after baffling&moving the points might be no
+                // longer snychronised so recoupling will fail. To prevent this
+                // keep owner&neighbour of such a surface zone on the same
+                // processor.
+
+                const wordList& fzNames = surfaces().faceZoneNames();
+                const faceZoneMesh& fZones = mesh_.faceZones();
+
+                // Get faces whose owner and neighbour should stay together,
+                // i.e. they are not 'blocked'.
+
+                label nZoned = 0;
+
+                forAll(fzNames, surfI)
+                {
+                    if (fzNames[surfI].size() > 0)
+                    {
+                        // Get zone
+                        label zoneI = fZones.findZoneID(fzNames[surfI]);
+
+                        const faceZone& fZone = fZones[zoneI];
+
+                        forAll(fZone, i)
+                        {
+                            if (blockedFace[fZone[i]])
+                            {
+                                blockedFace[fZone[i]] = false;
+                                nZoned++;
+                            }
+                        }
+                    }
+                }
+                Info<< "Found " << returnReduce(nZoned, sumOp<label>())
+                    << " zoned faces to keep together."
+                    << endl;
+            }
+
+            if (keepBaffles)
+            {
+                // Get boundary baffles that need to stay together.
+                couples = getDuplicateFaces   // all baffles
+                (
+                    identity(mesh_.nFaces()-mesh_.nInternalFaces())
+                   +mesh_.nInternalFaces()
+                );
+
+                Info<< "Found " << returnReduce(couples.size(), sumOp<label>())
+                    << " baffles to keep together."
+                    << endl;
+            }
+
+            distribution = decomposeCombineRegions
+            (
+                blockedFace,
+                couples,
+                decomposer
+            );
+
+            labelList nProcCells(distributor.countCells(distribution));
+            Pstream::listCombineGather(nProcCells, plusEqOp<label>());
+            Pstream::listCombineScatter(nProcCells);
+
+            Info<< "Calculated decomposition:" << endl;
+            forAll(nProcCells, procI)
+            {
+                Info<< "    " << procI << '\t' << nProcCells[procI] << endl;
+            }
+            Info<< endl;
+        }
+        else
+        {
+            // Normal decomposition
+            distribution = decomposer.decompose(mesh_.cellCentres());
+        }
+
+        if (debug)
+        {
+            Pout<< "Wanted distribution:"
+                << distributor.countCells(distribution)
+                << endl;
+        }
+        // Do actual sending/receiving of mesh
+        map = distributor.distribute(distribution);
+
+        // Update numbering of meshRefiner
+        distribute(map);
+    }
+    return map;
+}
+
+
 // Helper function to get intersected faces
 Foam::labelList Foam::meshRefinement::intersectedFaces() const
 {
@@ -1213,9 +902,8 @@ Foam::labelList Foam::meshRefinement::intersectedPoints
 
             forAll(f, fp)
             {
-                if (isBoundaryPoint.get(f[fp]) == 0u)
+                if (isBoundaryPoint.set(f[fp], 1u))
                 {
-                    isBoundaryPoint.set(f[fp], 1u);
                     nBoundaryPoints++;
                 }
             }
@@ -1239,9 +927,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints
     //
     //            forAll(f, fp)
     //            {
-    //                if (isBoundaryPoint.get(f[fp]) == 0u)
-    //                {
-    //                    isBoundaryPoint.set(f[fp], 1u);
+    //                if (isBoundaryPoint.set(f[fp], 1u))
     //                    nBoundaryPoints++;
     //                }
     //            }
@@ -1387,6 +1073,101 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
         )
     );
     return tfld;
+}
+
+
+void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
+{
+    const faceZoneMesh& fZones = mesh.faceZones();
+
+    // Check any zones are present anywhere and in same order
+
+    {
+        List<wordList> zoneNames(Pstream::nProcs());
+        zoneNames[Pstream::myProcNo()] = fZones.names();
+        Pstream::gatherList(zoneNames);
+        Pstream::scatterList(zoneNames);
+        // All have same data now. Check.
+        forAll(zoneNames, procI)
+        {
+            if (procI != Pstream::myProcNo())
+            {
+                if (zoneNames[procI] != zoneNames[Pstream::myProcNo()])
+                {
+                    FatalErrorIn
+                    (
+                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+                    )   << "faceZones are not synchronised on processors." << nl
+                        << "Processor " << procI << " has faceZones "
+                        << zoneNames[procI] << nl
+                        << "Processor " << Pstream::myProcNo()
+                        << " has faceZones "
+                        << zoneNames[Pstream::myProcNo()] << nl
+                        << exit(FatalError);
+                }
+            }
+        }
+    }
+
+    // Check that coupled faces are present on both sides.
+
+    labelList faceToZone(mesh.nFaces()-mesh.nInternalFaces(), -1);
+
+    forAll(fZones, zoneI)
+    {
+        const faceZone& fZone = fZones[zoneI];
+
+        forAll(fZone, i)
+        {
+            label bFaceI = fZone[i]-mesh.nInternalFaces();
+
+            if (bFaceI >= 0)
+            {
+                if (faceToZone[bFaceI] == -1)
+                {
+                    faceToZone[bFaceI] = zoneI;
+                }
+                else if (faceToZone[bFaceI] == zoneI)
+                {
+                    FatalErrorIn
+                    (
+                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+                    )   << "Face " << fZone[i] << " in zone "
+                        << fZone.name()
+                        << " is twice in zone!"
+                        << abort(FatalError);
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+                    )   << "Face " << fZone[i] << " in zone "
+                        << fZone.name()
+                        << " is also in zone "
+                        << fZones[faceToZone[bFaceI]].name()
+                        << abort(FatalError);
+                }
+            }
+        }
+    }
+
+    labelList neiFaceToZone(faceToZone);
+    syncTools::swapBoundaryFaceList(mesh, neiFaceToZone, false);
+
+    forAll(faceToZone, i)
+    {
+        if (faceToZone[i] != neiFaceToZone[i])
+        {
+            FatalErrorIn
+            (
+                "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
+            )   << "Face " << mesh.nInternalFaces()+i
+                << " is in zone " << faceToZone[i]
+                << ", its coupled face is in zone " << neiFaceToZone[i]
+                << abort(FatalError);
+        }
+    }
 }
 
 
@@ -1910,53 +1691,56 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
             << " Writing cellcentre-cellcentre intersections to file "
             << str.name() << endl;
 
-        // Internal faces
-        for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
-        {
-            if (surfaceIndex_[faceI] != -1)
-            {
-                const point& ownCc = cellCentres[mesh_.faceOwner()[faceI]];
-                const point& neiCc = cellCentres[mesh_.faceNeighbour()[faceI]];
 
-                // Re-intersect to get position
-                pointIndexHit surfaceHitInfo;
-                surfaces_.findAnyIntersection(ownCc, neiCc, surfaceHitInfo);
-
-                meshTools::writeOBJ(str, ownCc);
-                vertI++;
-                meshTools::writeOBJ(str, surfaceHitInfo.hitPoint());
-                vertI++;
-                meshTools::writeOBJ(str, neiCc);
-                vertI++;
-                str << "l " << vertI-2 << ' ' << vertI-1 << nl
-                    << "l " << vertI-1 << ' ' << vertI << nl;
-            }
-        }
-
-        // Boundary faces
+        // Redo all intersections
+        // ~~~~~~~~~~~~~~~~~~~~~~
 
         // Get boundary face centre and level. Coupled aware.
         labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
         pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
         calcNeighbourData(neiLevel, neiCc);
 
-        forAll(neiCc, i)
+        labelList intersectionFaces(intersectedFaces());
+
+        // Collect segments we want to test for
+        pointField start(intersectionFaces.size());
+        pointField end(intersectionFaces.size());
+
+        forAll(intersectionFaces, i)
         {
-            label faceI = i + mesh_.nInternalFaces();
+            label faceI = intersectionFaces[i];
+            start[i] = cellCentres[mesh_.faceOwner()[faceI]];
 
-            if (surfaceIndex_[faceI] != -1)
+            if (mesh_.isInternalFace(faceI))
             {
-                const point& ownCc = cellCentres[mesh_.faceOwner()[faceI]];
+                end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
+            }
+            else
+            {
+                end[i] = neiCc[faceI-mesh_.nInternalFaces()];
+            }
+        }
 
-                // Re-intersect to get position
-                pointIndexHit surfaceHitInfo;
-                surfaces_.findAnyIntersection(ownCc, neiCc[i], surfaceHitInfo);
+        // Do tests in one go
+        labelList surfaceHit;
+        List<pointIndexHit> surfaceHitInfo;
+        surfaces_.findAnyIntersection
+        (
+            start,
+            end,
+            surfaceHit,
+            surfaceHitInfo
+        );
 
-                meshTools::writeOBJ(str, ownCc);
+        forAll(intersectionFaces, i)
+        {
+            if (surfaceHit[i] != -1)
+            {
+                meshTools::writeOBJ(str, start[i]);
                 vertI++;
-                meshTools::writeOBJ(str, surfaceHitInfo.hitPoint());
+                meshTools::writeOBJ(str, surfaceHitInfo[i].hitPoint());
                 vertI++;
-                meshTools::writeOBJ(str, neiCc[i]);
+                meshTools::writeOBJ(str, end[i]);
                 vertI++;
                 str << "l " << vertI-2 << ' ' << vertI-1 << nl
                     << "l " << vertI-1 << ' ' << vertI << nl;
@@ -1994,15 +1778,6 @@ void Foam::meshRefinement::write
         dumpIntersections(prefix);
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

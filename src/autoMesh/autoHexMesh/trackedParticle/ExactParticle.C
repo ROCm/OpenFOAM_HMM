@@ -256,7 +256,7 @@ Foam::Ostream& Foam::operator<<
     const ExactParticle<ParticleType>& p
 )
 {
-    return operator<<(os, static_cast<Particle<ParticleType> >(p));
+    return operator<<(os, static_cast<const Particle<ParticleType>&>(p));
 }
 
 

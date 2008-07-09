@@ -23,116 +23,112 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::triSurfaceMesh
+    Foam::searchableBox
 
 Description
-    IOoject and searching on triSurface
+    Searching on bounding box
 
 SourceFiles
-    triSurfaceMesh.C
+    searchableBox.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurfaceMesh_H
-#define triSurfaceMesh_H
+#ifndef searchableBox_H
+#define searchableBox_H
 
 #include "searchableSurface.H"
-#include "objectRegistry.H"
-#include "indexedOctree.H"
-#include "treeDataTriSurface.H"
-#include "treeDataEdge.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+
 /*---------------------------------------------------------------------------*\
-                           Class triSurfaceMesh Declaration
+                           Class searchableBox Declaration
 \*---------------------------------------------------------------------------*/
 
-class triSurfaceMesh
+class searchableBox
 :
     public searchableSurface,
-    public objectRegistry,
-    public triSurface
+    public treeBoundBox
 {
 private:
 
-    // Private member data
+    // Private Member Data
 
-        //- Search tree (triangles)
-        mutable autoPtr<indexedOctree<treeDataTriSurface> > tree_;
+        mutable wordList regions_;
 
-        //- Search tree for boundary edges.
-        mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
 
     // Private Member Functions
 
-        //- Check file existence
-        static const fileName& checkFile
+        //- Project onto component dir of planePt and update index() (=face)
+        void projectOntoCoordPlane
         (
-            const fileName& fName,
-            const fileName& objectName
-        );
+            const direction dir,
+            const point& planePt,
+            pointIndexHit& info
+        ) const;
+
+        //- Returns miss or hit with face (0..5)
+        pointIndexHit findNearest
+        (
+            const point& bbMid,
+            const point& sample,
+            const scalar nearestDistSqr
+        ) const;
+
 
         //- Disallow default bitwise copy construct
-        triSurfaceMesh(const triSurfaceMesh&);
+        searchableBox(const searchableBox&);
 
         //- Disallow default bitwise assignment
-        void operator=(const triSurfaceMesh&);
+        void operator=(const searchableBox&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("triSurfaceMesh");
+    TypeName("searchableBox");
 
 
     // Constructors
 
-        //- Construct from triSurface
-        triSurfaceMesh(const IOobject&, const triSurface&);
+        //- Construct from components
+        searchableBox(const IOobject& io, const treeBoundBox& bb);
 
-        //- Construct read
-        triSurfaceMesh(const IOobject& io);
-
-        //- Construct as searchableSurface
-        triSurfaceMesh
+        //- Construct from dictionary (used by searchableSurface)
+        searchableBox
         (
-            const word& name,
-            const objectRegistry& obj,
+            const IOobject& io,
             const dictionary& dict
         );
 
-
     // Destructor
 
-        virtual ~triSurfaceMesh();
-
-        //- Clear storage
-        void clearOut();
+        virtual ~searchableBox();
 
 
     // Member Functions
 
-        //- Move points
-        virtual void movePoints(const pointField&);
+        virtual const wordList& regions() const;
 
-        //- Demand driven contruction of octree
-        const indexedOctree<treeDataTriSurface>& tree() const;
+        //- Whether supports volume type below
+        virtual bool hasVolumeType() const
+        {
+            return true;
+        }
 
-        //- Demand driven contruction of octree for boundary edges
-        const indexedOctree<treeDataEdge>& edgeTree() const;
 
-
-        // searchableSurface implementation
+        // Single point queries.
 
             //- Calculate nearest point on surface. Returns
             //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface
+            //  - label: relevant index in surface (=face 0..5)
             //  - point: actual nearest point found
-            virtual pointIndexHit findNearest
+            pointIndexHit findNearest
             (
                 const point& sample,
                 const scalar nearestDistSqr
@@ -140,22 +136,22 @@ public:
 
             //- Calculate nearest point on edge. Returns
             //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface
+            //  - label: relevant index in surface(=?)
             //  - point: actual nearest point found
-            virtual pointIndexHit findNearestOnEdge
+            pointIndexHit findNearestOnEdge
             (
                 const point& sample,
                 const scalar nearestDistSqr
             ) const;
 
-            //- Find nearest to line. Returns
+            //- Find nearest to segment. Returns
             //  - bool : any point found?
-            //  - label: relevant index in shapes
+            //  - label: relevant index in shapes (=face 0..5)
             //  - point: actual nearest point found
             //  sets:
             //  - tightest  : bounding box
             //  - linePoint : corresponding nearest point on line
-            virtual pointIndexHit findNearest
+            pointIndexHit findNearest
             (
                 const linePointRef& ln,
                 treeBoundBox& tightest,
@@ -163,22 +159,81 @@ public:
             ) const;
 
             //- Find nearest intersection of line between start and end.
-            virtual pointIndexHit findLine
+            pointIndexHit findLine
             (
                 const point& start,
                 const point& end
             ) const;
 
             //- Find any intersection of line between start and end.
-            virtual pointIndexHit findLineAny
+            pointIndexHit findLineAny
             (
                 const point& start,
                 const point& end
             ) const;
 
+
+        // Multiple point queries.
+
+            virtual void findNearest
+            (
+                const pointField& sample,
+                const scalarField& nearestDistSqr,
+                List<pointIndexHit>&
+            ) const;
+
+            virtual void findLine
+            (
+                const pointField& start,
+                const pointField& end,
+                List<pointIndexHit>&
+            ) const;
+
+            virtual void findLineAny
+            (
+                const pointField& start,
+                const pointField& end,
+                List<pointIndexHit>&
+            ) const;
+
+            //- Get all intersections in order from start to end.
+            virtual void findLineAll
+            (
+                const pointField& start,
+                const pointField& end,
+                List<List<pointIndexHit> >&
+            ) const;
+
+            //- From a set of points and indices get the region
+            virtual void getRegion
+            (
+                const List<pointIndexHit>&,
+                labelList& region
+            ) const;
+
+            //- From a set of points and indices get the normal
+            virtual void getNormal
+            (
+                const List<pointIndexHit>&,
+                vectorField& normal
+            ) const;
+
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)
-            virtual volumeType getVolumeType(const point&) const;
+            virtual void getVolumeType
+            (
+                const pointField&,
+                List<volumeType>&
+            ) const;
+
+
+        // regIOobject implementation
+
+            bool writeData(Ostream&) const
+            {
+                notImplemented("searchableBox::writeData(Ostream&) const");
+                return false;
+            }
 
 };
 
