@@ -4,10 +4,8 @@
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cd periodicCube
-    rm -rf 0 > /dev/null 2>&1
-    rm Ar-Ar > /dev/null 2>&1
-    rm constant/idList
-
+    rm -rf 0
+    rm -rf Ar-Ar
+    rm -rf constant/idList
     cleanCase
 cd ..
-

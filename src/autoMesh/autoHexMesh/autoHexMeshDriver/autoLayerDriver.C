@@ -27,11 +27,10 @@ Description
 
 \*----------------------------------------------------------------------------*/
 
-#include "ListOps.H"
-#include "autoHexMeshDriver.H"
+#include "autoLayerDriver.H"
 #include "fvMesh.H"
 #include "Time.H"
-#include "combineFaces.H"
+#include "meshRefinement.H"
 #include "removePoints.H"
 #include "pointFields.H"
 #include "motionSmoother.H"
@@ -43,31 +42,41 @@ Description
 #include "mapPolyMesh.H"
 #include "addPatchCellLayer.H"
 #include "mapDistributePolyMesh.H"
+#include "OFstream.H"
+#include "layerParameters.H"
+#include "combineFaces.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::autoHexMeshDriver::defaultConcaveAngle = 90;
+namespace Foam
+{
+
+defineTypeNameAndDebug(autoLayerDriver, 0);
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
+Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
 (
     const scalar minCos,
     const scalar concaveCos,
     const dictionary& motionDict
 )
 {
+    fvMesh& mesh = meshRefiner_.mesh();
+
     // Patch face merging engine
-    combineFaces faceCombiner(mesh_, true);
+    combineFaces faceCombiner(mesh, true);
 
     // Pick up all candidate cells on boundary
-    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelHashSet boundaryCells(mesh.nFaces()-mesh.nInternalFaces());
 
     {
         labelList patchIDs(meshRefinement::addedPatches(globalToPatch_));
 
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
         forAll(patchIDs, i)
         {
@@ -79,7 +88,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             {
                 forAll(patch, i)
                 {
-                    boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
+                    boundaryCells.insert(mesh.faceOwner()[patch.start()+i]);
                 }
             }
         }
@@ -102,9 +111,9 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
 
     if (nFaceSets > 0)
     {
-        if (debug_)
+        if (debug)
         {
-            faceSet allSets(mesh_, "allFaceSets", allFaceSets.size());
+            faceSet allSets(mesh, "allFaceSets", allFaceSets.size());
             forAll(allFaceSets, setI)
             {
                 forAll(allFaceSets[setI], i)
@@ -119,13 +128,13 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
 
 
         // Topology changes container
-        polyTopoChange meshMod(mesh_);
+        polyTopoChange meshMod(mesh);
 
         // Merge all faces of a set into the first face of the set.
         faceCombiner.setRefinement(allFaceSets, meshMod);
 
         // Experimental: store data for all the points that have been deleted
-        meshRefinerPtr_().storeData
+        meshRefiner_.storeData
         (
             faceCombiner.savedPointLabels(),    // points to store
             labelList(0),                       // faces to store
@@ -133,20 +142,20 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
         );
 
         // Change the mesh (no inflation)
-        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
 
         // Update fields
-        mesh_.updateMesh(map);
+        mesh.updateMesh(map);
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh.movePoints(map().preMotionPoints());
         }
 
         faceCombiner.updateMesh(map);
 
-        meshRefinerPtr_().updateMesh(map, labelList(0));
+        meshRefiner_.updateMesh(map, labelList(0));
 
 
 
@@ -162,14 +171,14 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
 
             faceSet errorFaces
             (
-                mesh_,
+                mesh,
                 "errorFaces",
-                mesh_.nFaces()-mesh_.nInternalFaces()
+                mesh.nFaces()-mesh.nInternalFaces()
             );
             bool hasErrors = motionSmoother::checkMesh
             (
                 false,  // report
-                mesh_,
+                mesh,
                 motionDict,
                 errorFaces
             );
@@ -181,7 +190,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             //    label nOldSize = errorFaces.size();
             //
             //    hasErrors =
-            //        mesh_.checkFaceFaces
+            //        mesh.checkFaceFaces
             //        (
             //            false,
             //            &errorFaces
@@ -200,7 +209,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             }
 
 
-            if (debug_)
+            if (debug)
             {
                 Pout<< "Writing all faces in error to faceSet "
                     << errorFaces.objectPath() << nl << endl;
@@ -219,9 +228,9 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
 
                 if (masterFaceI != -1)
                 {
-                    label masterCellII = mesh_.faceOwner()[masterFaceI];
+                    label masterCellII = mesh.faceOwner()[masterFaceI];
 
-                    const cell& cFaces = mesh_.cells()[masterCellII];
+                    const cell& cFaces = mesh.cells()[masterCellII];
 
                     forAll(cFaces, i)
                     {
@@ -244,9 +253,9 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             Info<< "Masters that need to be restored:"
                 << nRestore << endl;
 
-            if (debug_)
+            if (debug)
             {
-                faceSet restoreSet(mesh_, "mastersToRestore", mastersToRestore);
+                faceSet restoreSet(mesh, "mastersToRestore", mastersToRestore);
                 Pout<< "Writing all " << mastersToRestore.size()
                     << " masterfaces to be restored to set "
                     << restoreSet.objectPath() << endl;
@@ -264,7 +273,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             // ~~~~
 
             // Topology changes container
-            polyTopoChange meshMod(mesh_);
+            polyTopoChange meshMod(mesh);
 
             // Merge all faces of a set into the first face of the set.
             // Experimental:mark all points/faces/cells that have been restored.
@@ -282,15 +291,15 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             );
 
             // Change the mesh (no inflation)
-            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
 
             // Update fields
-            mesh_.updateMesh(map);
+            mesh.updateMesh(map);
 
             // Move mesh (since morphing does not do this)
             if (map().hasMotionPoints())
             {
-                mesh_.movePoints(map().preMotionPoints());
+                mesh.movePoints(map().preMotionPoints());
             }
 
             faceCombiner.updateMesh(map);
@@ -301,7 +310,7 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             inplaceMapKey(map().reverseCellMap(), restoredCells);
 
             // Experimental:restore all points/face/cells in maps
-            meshRefinerPtr_().updateMesh
+            meshRefiner_.updateMesh
             (
                 map,
                 labelList(0),       // changedFaces
@@ -313,11 +322,11 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
             Info<< endl;
         }
 
-        if (debug_)
+        if (debug)
         {
             Pout<< "Writing merged-faces mesh to time "
-                << mesh_.time().timeName() << nl << endl;
-            mesh_.write();
+                << mesh.time().timeName() << nl << endl;
+            mesh.write();
         }
     }
     else
@@ -330,45 +339,49 @@ Foam::label Foam::autoHexMeshDriver::mergePatchFacesUndo
 
 
 // Remove points. pointCanBeDeleted is parallel synchronised.
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::doRemovePoints
+Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRemovePoints
 (
     removePoints& pointRemover,
     const boolList& pointCanBeDeleted
 )
 {
+    fvMesh& mesh = meshRefiner_.mesh();
+
     // Topology changes container
-    polyTopoChange meshMod(mesh_);
+    polyTopoChange meshMod(mesh);
 
     pointRemover.setRefinement(pointCanBeDeleted, meshMod);
 
     // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh.updateMesh(map);
 
     // Move mesh (since morphing does not do this)
     if (map().hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh.movePoints(map().preMotionPoints());
     }
 
     pointRemover.updateMesh(map);
-    meshRefinerPtr_().updateMesh(map, labelList(0));
+    meshRefiner_.updateMesh(map, labelList(0));
 
     return map;
 }
 
 
 // Restore faces (which contain removed points)
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::doRestorePoints
+Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRestorePoints
 (
     removePoints& pointRemover,
     const labelList& facesToRestore
 )
 {
+    fvMesh& mesh = meshRefiner_.mesh();
+
     // Topology changes container
-    polyTopoChange meshMod(mesh_);
+    polyTopoChange meshMod(mesh);
 
     // Determine sets of points and faces to restore
     labelList localFaces, localPoints;
@@ -388,19 +401,19 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::doRestorePoints
     );
 
     // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh.updateMesh(map);
 
     // Move mesh (since morphing does not do this)
     if (map().hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh.movePoints(map().preMotionPoints());
     }
 
     pointRemover.updateMesh(map);
-    meshRefinerPtr_().updateMesh(map, labelList(0));
+    meshRefiner_.updateMesh(map, labelList(0));
 
     return map;
 }
@@ -408,14 +421,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::doRestorePoints
 
 // Collect all faces that are both in candidateFaces and in the set.
 // If coupled face also collects the coupled face.
-Foam::labelList Foam::autoHexMeshDriver::collectFaces
+Foam::labelList Foam::autoLayerDriver::collectFaces
 (
     const labelList& candidateFaces,
     const labelHashSet& set
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     // Has face been selected?
-    boolList selected(mesh_.nFaces(), false);
+    boolList selected(mesh.nFaces(), false);
 
     forAll(candidateFaces, i)
     {
@@ -428,7 +443,7 @@ Foam::labelList Foam::autoHexMeshDriver::collectFaces
     }
     syncTools::syncFaceList
     (
-        mesh_,
+        mesh,
         selected,
         orEqOp<bool>(),     // combine operator
         false               // separation
@@ -441,30 +456,32 @@ Foam::labelList Foam::autoHexMeshDriver::collectFaces
 
 
 // Pick up faces of cells of faces in set.
-Foam::labelList Foam::autoHexMeshDriver::growFaceCellFace
+Foam::labelList Foam::autoLayerDriver::growFaceCellFace
 (
     const labelHashSet& set
 ) const
 {
-    boolList selected(mesh_.nFaces(), false);
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    boolList selected(mesh.nFaces(), false);
 
     forAllConstIter(faceSet, set, iter)
     {
         label faceI = iter.key();
 
-        label own = mesh_.faceOwner()[faceI];
+        label own = mesh.faceOwner()[faceI];
 
-        const cell& ownFaces = mesh_.cells()[own];
+        const cell& ownFaces = mesh.cells()[own];
         forAll(ownFaces, ownFaceI)
         {
             selected[ownFaces[ownFaceI]] = true;
         }
 
-        if (mesh_.isInternalFace(faceI))
+        if (mesh.isInternalFace(faceI))
         {
-            label nbr = mesh_.faceNeighbour()[faceI];
+            label nbr = mesh.faceNeighbour()[faceI];
 
-            const cell& nbrFaces = mesh_.cells()[nbr];
+            const cell& nbrFaces = mesh.cells()[nbr];
             forAll(nbrFaces, nbrFaceI)
             {
                 selected[nbrFaces[nbrFaceI]] = true;
@@ -473,7 +490,7 @@ Foam::labelList Foam::autoHexMeshDriver::growFaceCellFace
     }
     syncTools::syncFaceList
     (
-        mesh_,
+        mesh,
         selected,
         orEqOp<bool>(),     // combine operator
         false               // separation
@@ -484,12 +501,14 @@ Foam::labelList Foam::autoHexMeshDriver::growFaceCellFace
 
 // Remove points not used by any face or points used by only two faces where
 // the edges are in line
-Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
+Foam::label Foam::autoLayerDriver::mergeEdgesUndo
 (
     const scalar minCos,
     const dictionary& motionDict
 )
 {
+    fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< nl
         << "Merging all points on surface that" << nl
         << "- are used by only two boundary faces and" << nl
@@ -497,7 +516,7 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
         << "." << nl << endl;
 
     // Point removal analysis engine with undo
-    removePoints pointRemover(mesh_, true);
+    removePoints pointRemover(mesh, true);
 
     // Count usage of points
     boolList pointCanBeDeleted;
@@ -526,14 +545,14 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
 
             faceSet errorFaces
             (
-                mesh_,
+                mesh,
                 "errorFaces",
-                mesh_.nFaces()-mesh_.nInternalFaces()
+                mesh.nFaces()-mesh.nInternalFaces()
             );
             bool hasErrors = motionSmoother::checkMesh
             (
                 false,  // report
-                mesh_,
+                mesh,
                 motionDict,
                 errorFaces
             );
@@ -545,7 +564,7 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
             //    label nOldSize = errorFaces.size();
             //
             //    hasErrors =
-            //        mesh_.checkFaceFaces
+            //        mesh.checkFaceFaces
             //        (
             //            false,
             //            &errorFaces
@@ -553,7 +572,7 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
             //     || hasErrors;
             //
             //    Info<< "Detected additional "
-            //        << returnReduce(errorFaces.size()-nOldSize, sumOp<label>())
+            //        << returnReduce(errorFaces.size()-nOldSize,sumOp<label>())
             //        << " faces with illegal face-face connectivity"
             //        << endl;
             //}
@@ -563,7 +582,7 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
                 break;
             }
 
-            if (debug_)
+            if (debug)
             {
                 Pout<< "**Writing all faces in error to faceSet "
                     << errorFaces.objectPath() << nl << endl;
@@ -613,11 +632,11 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
             doRestorePoints(pointRemover, masterErrorFaces);
         }
 
-        if (debug_)
+        if (debug)
         {
             Pout<< "Writing merged-edges mesh to time "
-                << mesh_.time().timeName() << nl << endl;
-            mesh_.write();
+                << mesh.time().timeName() << nl << endl;
+            mesh.write();
         }
     }
     else
@@ -630,7 +649,7 @@ Foam::label Foam::autoHexMeshDriver::mergeEdgesUndo
 
 
 // For debugging: Dump displacement to .obj files
-void Foam::autoHexMeshDriver::dumpDisplacement
+void Foam::autoLayerDriver::dumpDisplacement
 (
     const fileName& prefix,
     const indirectPrimitivePatch& pp,
@@ -676,7 +695,7 @@ void Foam::autoHexMeshDriver::dumpDisplacement
 
 // Check that primitivePatch is not multiply connected. Collect non-manifold
 // points in pointSet.
-void Foam::autoHexMeshDriver::checkManifold
+void Foam::autoLayerDriver::checkManifold
 (
     const indirectPrimitivePatch& fp,
     pointSet& nonManifoldPoints
@@ -703,23 +722,25 @@ void Foam::autoHexMeshDriver::checkManifold
 }
 
 
-void Foam::autoHexMeshDriver::checkMeshManifold() const
+void Foam::autoLayerDriver::checkMeshManifold() const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< nl << "Checking mesh manifoldness ..." << endl;
 
     // Get all outside faces
-    labelList outsideFaces(mesh_.nFaces() - mesh_.nInternalFaces());
+    labelList outsideFaces(mesh.nFaces() - mesh.nInternalFaces());
 
-    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
+    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
-         outsideFaces[faceI - mesh_.nInternalFaces()] = faceI;
+         outsideFaces[faceI - mesh.nInternalFaces()] = faceI;
     }
 
     pointSet nonManifoldPoints
     (
-        mesh_,
+        mesh,
         "nonManifoldPoints",
-        mesh_.nPoints() / 100
+        mesh.nPoints() / 100
     );
 
     // Build primitivePatch out of faces and check it for problems.
@@ -727,8 +748,8 @@ void Foam::autoHexMeshDriver::checkMeshManifold() const
     (
         indirectPrimitivePatch
         (
-            IndirectList<face>(mesh_.faces(), outsideFaces),
-            mesh_.points()
+            IndirectList<face>(mesh.faces(), outsideFaces),
+            mesh.points()
         ),
         nonManifoldPoints
     );
@@ -753,7 +774,7 @@ void Foam::autoHexMeshDriver::checkMeshManifold() const
 
 
 // Unset extrusion on point. Returns true if anything unset.
-bool Foam::autoHexMeshDriver::unmarkExtrusion
+bool Foam::autoLayerDriver::unmarkExtrusion
 (
     const label patchPointI,
     pointField& patchDisp,
@@ -783,7 +804,7 @@ bool Foam::autoHexMeshDriver::unmarkExtrusion
 
 
 // Unset extrusion on face. Returns true if anything unset.
-bool Foam::autoHexMeshDriver::unmarkExtrusion
+bool Foam::autoLayerDriver::unmarkExtrusion
 (
     const face& localFace,
     pointField& patchDisp,
@@ -814,7 +835,7 @@ bool Foam::autoHexMeshDriver::unmarkExtrusion
 
 
 // No extrusion at non-manifold points.
-void Foam::autoHexMeshDriver::handleNonManifolds
+void Foam::autoLayerDriver::handleNonManifolds
 (
     const indirectPrimitivePatch& pp,
     const labelList& meshEdges,
@@ -823,12 +844,14 @@ void Foam::autoHexMeshDriver::handleNonManifolds
     List<extrudeMode>& extrudeStatus
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< nl << "Handling non-manifold points ..." << endl;
 
     // Detect non-manifold points
     Info<< nl << "Checking patch manifoldness ..." << endl;
 
-    pointSet nonManifoldPoints(mesh_, "nonManifoldPoints", pp.nPoints());
+    pointSet nonManifoldPoints(mesh, "nonManifoldPoints", pp.nPoints());
 
     // 1. Local check
     checkManifold(pp, nonManifoldPoints);
@@ -844,16 +867,16 @@ void Foam::autoHexMeshDriver::handleNonManifolds
 
     // 2. Parallel check
     // For now disable extrusion at any shared edges.
-    const labelHashSet sharedEdgeSet(mesh_.globalData().sharedEdgeLabels());
+    const labelHashSet sharedEdgeSet(mesh.globalData().sharedEdgeLabels());
 
     forAll(pp.edges(), edgeI)
     {
         if (sharedEdgeSet.found(meshEdges[edgeI]))
         {
-            const edge& e = mesh_.edges()[meshEdges[edgeI]];
+            const edge& e = mesh.edges()[meshEdges[edgeI]];
 
             Pout<< "Disabling extrusion at edge "
-                << mesh_.points()[e[0]] << mesh_.points()[e[1]]
+                << mesh.points()[e[0]] << mesh.points()[e[1]]
                 << " since it is non-manifold across coupled patches."
                 << endl;
 
@@ -905,7 +928,7 @@ void Foam::autoHexMeshDriver::handleNonManifolds
 
 
 // Parallel feature edge detection. Assumes non-manifold edges already handled.
-void Foam::autoHexMeshDriver::handleFeatureAngle
+void Foam::autoLayerDriver::handleFeatureAngle
 (
     const indirectPrimitivePatch& pp,
     const labelList& meshEdges,
@@ -915,12 +938,14 @@ void Foam::autoHexMeshDriver::handleFeatureAngle
     List<extrudeMode>& extrudeStatus
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< nl << "Handling feature edges ..." << endl;
 
     if (minCos < 1-SMALL)
     {
         // Normal component of normals of connected faces.
-        vectorField edgeNormal(mesh_.nEdges(), wallPoint::greatPoint);
+        vectorField edgeNormal(mesh.nEdges(), wallPoint::greatPoint);
 
         const labelListList& edgeFaces = pp.edgeFaces();
 
@@ -942,7 +967,7 @@ void Foam::autoHexMeshDriver::handleFeatureAngle
 
         syncTools::syncEdgeList
         (
-            mesh_,
+            mesh,
             edgeNormal,
             nomalsCombine(),
             wallPoint::greatPoint,  // null value
@@ -951,9 +976,9 @@ void Foam::autoHexMeshDriver::handleFeatureAngle
 
         label vertI = 0;
         autoPtr<OFstream> str;
-        if (debug_)
+        if (debug)
         {
-            str.reset(new OFstream(mesh_.time().path()/"featureEdges.obj"));
+            str.reset(new OFstream(mesh.time().path()/"featureEdges.obj"));
             Info<< "Writing feature edges to " << str().name() << endl;
         }
 
@@ -1017,7 +1042,7 @@ void Foam::autoHexMeshDriver::handleFeatureAngle
 // layer and compares it to the space the warped face takes up. Disables
 // extrusion if layer thickness is more than faceRatio of the thickness of
 // the face.
-void Foam::autoHexMeshDriver::handleWarpedFaces
+void Foam::autoLayerDriver::handleWarpedFaces
 (
     const indirectPrimitivePatch& pp,
     const scalar faceRatio,
@@ -1028,9 +1053,11 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
     List<extrudeMode>& extrudeStatus
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< nl << "Handling cells with warped patch faces ..." << nl;
 
-    const pointField& points = mesh_.points();
+    const pointField& points = mesh.points();
 
     label nWarpedFaces = 0;
 
@@ -1042,11 +1069,11 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
         {
             label faceI = pp.addressing()[i];
 
-            label ownLevel = cellLevel[mesh_.faceOwner()[faceI]];
+            label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
             scalar edgeLen = edge0Len/(1<<ownLevel);
 
             // Normal distance to face centre plane
-            const point& fc = mesh_.faceCentres()[faceI];
+            const point& fc = mesh.faceCentres()[faceI];
             const vector& fn = pp.faceNormals()[i];
 
             scalarField vProj(f.size());
@@ -1090,7 +1117,7 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 
 //// No extrusion on cells with multiple patch faces. There ususally is a reason
 //// why combinePatchFaces hasn't succeeded.
-//void Foam::autoHexMeshDriver::handleMultiplePatchFaces
+//void Foam::autoLayerDriver::handleMultiplePatchFaces
 //(
 //    const indirectPrimitivePatch& pp,
 //    pointField& patchDisp,
@@ -1098,12 +1125,14 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 //    List<extrudeMode>& extrudeStatus
 //) const
 //{
+//    const fvMesh& mesh = meshRefiner_.mesh();
+//
 //    Info<< nl << "Handling cells with multiple patch faces ..." << nl;
 //
 //    const labelListList& pointFaces = pp.pointFaces();
 //
 //    // Cells that should not get an extrusion layer
-//    cellSet multiPatchCells(mesh_, "multiPatchCells", pp.size());
+//    cellSet multiPatchCells(mesh, "multiPatchCells", pp.size());
 //
 //    // Detect points that use multiple faces on same cell.
 //    forAll(pointFaces, patchPointI)
@@ -1114,7 +1143,7 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 //
 //        forAll(pFaces, i)
 //        {
-//            label cellI = mesh_.faceOwner()[pp.addressing()[pFaces[i]]];
+//            label cellI = mesh.faceOwner()[pp.addressing()[pFaces[i]]];
 //
 //            if (!pointCells.insert(cellI))
 //            {
@@ -1158,7 +1187,7 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 //                forAll(pFaces, i)
 //                {
 //                    label cellI =
-//                        mesh_.faceOwner()[pp.addressing()[pFaces[i]]];
+//                        mesh.faceOwner()[pp.addressing()[pFaces[i]]];
 //
 //                    if (multiPatchCells.found(cellI))
 //                    {
@@ -1189,8 +1218,9 @@ void Foam::autoHexMeshDriver::handleWarpedFaces
 
 
 // No extrusion on faces with differing number of layers for points
-void Foam::autoHexMeshDriver::setNumLayers
+void Foam::autoLayerDriver::setNumLayers
 (
+    const labelList& patchToNLayers,
     const labelList& patchIDs,
     const indirectPrimitivePatch& pp,
     pointField& patchDisp,
@@ -1198,20 +1228,10 @@ void Foam::autoHexMeshDriver::setNumLayers
     List<extrudeMode>& extrudeStatus
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< nl << "Handling points with inconsistent layer specification ..."
         << endl;
-
-    const labelList& nSurfLayers = surfaces().numLayers();
-
-    // Build map from patch to layers
-    Map<label> patchToNLayers(nSurfLayers.size());
-    forAll(nSurfLayers, region)
-    {
-        if (globalToPatch_[region] != -1)
-        {
-            patchToNLayers.insert(globalToPatch_[region], nSurfLayers[region]);
-        }
-    }
 
     // Get for every point (really only nessecary on patch external points)
     // the max and min of any patch faces using it.
@@ -1222,7 +1242,7 @@ void Foam::autoHexMeshDriver::setNumLayers
     {
         label patchI = patchIDs[i];
 
-        const labelList& meshPoints = mesh_.boundaryMesh()[patchI].meshPoints();
+        const labelList& meshPoints = mesh.boundaryMesh()[patchI].meshPoints();
 
         label wantedLayers = patchToNLayers[patchI];
 
@@ -1237,7 +1257,7 @@ void Foam::autoHexMeshDriver::setNumLayers
 
     syncTools::syncPointList
     (
-        mesh_,
+        mesh,
         pp.meshPoints(),
         maxLayers,
         maxEqOp<label>(),
@@ -1246,7 +1266,7 @@ void Foam::autoHexMeshDriver::setNumLayers
     );
     syncTools::syncPointList
     (
-        mesh_,
+        mesh,
         pp.meshPoints(),
         minLayers,
         minEqOp<label>(),
@@ -1257,7 +1277,7 @@ void Foam::autoHexMeshDriver::setNumLayers
     // Unmark any point with different min and max
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label nConflicts = 0;
+    //label nConflicts = 0;
 
     forAll(maxLayers, i)
     {
@@ -1294,16 +1314,16 @@ void Foam::autoHexMeshDriver::setNumLayers
         }
     }
 
-    reduce(nConflicts, sumOp<label>());
-
-    Info<< "Set displacement to zero for " << nConflicts
-        << " points due to points being on multiple regions"
-        << " with inconsistent nLayers specification." << endl;
+    //reduce(nConflicts, sumOp<label>());
+    //
+    //Info<< "Set displacement to zero for " << nConflicts
+    //    << " points due to points being on multiple regions"
+    //    << " with inconsistent nLayers specification." << endl;
 }
 
 
 // Grow no-extrusion layer
-void Foam::autoHexMeshDriver::growNoExtrusion
+void Foam::autoLayerDriver::growNoExtrusion
 (
     const indirectPrimitivePatch& pp,
     pointField& patchDisp,
@@ -1369,59 +1389,138 @@ void Foam::autoHexMeshDriver::growNoExtrusion
 }
 
 
-
-// Calculate pointwise wanted and minimum thickness.
-// thickness: wanted thickness per point
-void Foam::autoHexMeshDriver::calculateLayerThickness
+void Foam::autoLayerDriver::calculateLayerThickness
 (
-    const scalar expansionRatio,
-    const scalar finalLayerRatio,
-    const scalar relMinThickness,
     const indirectPrimitivePatch& pp,
+    const labelList& patchIDs,
+    const scalarField& patchExpansionRatio,
+    const scalarField& patchFinalLayerRatio,
+    const scalarField& patchRelMinThickness,
     const labelList& cellLevel,
     const labelList& patchNLayers,
     const scalar edge0Len,
+
     scalarField& thickness,
-    scalarField& minThickness
+    scalarField& minThickness,
+    scalarField& expansionRatio
 ) const
 {
-    if (relMinThickness < 0 || relMinThickness > 2)
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    if (min(patchRelMinThickness) < 0 || max(patchRelMinThickness) > 2)
     {
         FatalErrorIn("calculateLayerThickness(..)")
             << "Thickness should be factor of local undistorted cell size."
             << " Valid values are [0..2]." << nl
-            << " minThickness:" << relMinThickness
+            << " minThickness:" << patchRelMinThickness
             << exit(FatalError);
     }
 
-    thickness.setSize(pp.nPoints());
-    minThickness.setSize(pp.nPoints());
 
     // Per point the max cell level of connected cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     labelList maxPointLevel(pp.nPoints(), labelMin);
 
-    forAll(pp, i)
     {
-        label ownLevel = cellLevel[mesh_.faceOwner()[pp.addressing()[i]]];
-
-        const face& f = pp.localFaces()[i];
-
-        forAll(f, fp)
+        forAll(pp, i)
         {
-            maxPointLevel[f[fp]] = max(maxPointLevel[f[fp]], ownLevel);
+            label ownLevel = cellLevel[mesh.faceOwner()[pp.addressing()[i]]];
+
+            const face& f = pp.localFaces()[i];
+
+            forAll(f, fp)
+            {
+                maxPointLevel[f[fp]] = max(maxPointLevel[f[fp]], ownLevel);
+            }
         }
+
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            maxPointLevel,
+            maxEqOp<label>(),
+            labelMin,           // null value
+            false               // no separation
+        );
     }
 
-    syncTools::syncPointList
-    (
-        mesh_,
-        pp.meshPoints(),
-        maxPointLevel,
-        maxEqOp<label>(),
-        labelMin,           // null value
-        false               // no separation
-    );
 
+    // Rework patch-wise layer parameters into minimum per point
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    expansionRatio.setSize(pp.nPoints());
+    expansionRatio = GREAT;
+    scalarField finalLayerRatio(pp.nPoints(), GREAT);
+    scalarField relMinThickness(pp.nPoints(), GREAT);
+
+    {
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+
+            const labelList& meshPoints = patches[patchI].meshPoints();
+
+            forAll(meshPoints, patchPointI)
+            {
+                label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
+
+                expansionRatio[ppPointI] = min
+                (
+                    expansionRatio[ppPointI],
+                    patchExpansionRatio[patchI]
+                );
+                finalLayerRatio[ppPointI] = min
+                (
+                    finalLayerRatio[ppPointI],
+                    patchFinalLayerRatio[patchI]
+                );
+                relMinThickness[ppPointI] = min
+                (
+                    relMinThickness[ppPointI],
+                    patchRelMinThickness[patchI]
+                );
+            }
+        }
+
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            expansionRatio,
+            minEqOp<scalar>(),
+            GREAT,              // null value
+            false               // no separation
+        );
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            finalLayerRatio,
+            minEqOp<scalar>(),
+            GREAT,              // null value
+            false               // no separation
+        );
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            relMinThickness,
+            minEqOp<scalar>(),
+            GREAT,              // null value
+            false               // no separation
+        );
+    }
+
+
+
+    // Per mesh point the expansion parameters
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    thickness.setSize(pp.nPoints());
+    minThickness.setSize(pp.nPoints());
 
     forAll(maxPointLevel, pointI)
     {
@@ -1430,19 +1529,24 @@ void Foam::autoHexMeshDriver::calculateLayerThickness
 
         // Calculate layer thickness based on expansion ratio
         // and final layer height
-        if (expansionRatio == 1)
+        if (expansionRatio[pointI] == 1)
         {
-            thickness[pointI] = finalLayerRatio*patchNLayers[pointI]*edgeLen;
-            minThickness[pointI] = relMinThickness*edgeLen;
+            thickness[pointI] =
+                finalLayerRatio[pointI]
+              * patchNLayers[pointI]
+              * edgeLen;
+            minThickness[pointI] = relMinThickness[pointI]*edgeLen;
         }
         else
         {
-            scalar invExpansion = 1.0 / expansionRatio;
+            scalar invExpansion = 1.0 / expansionRatio[pointI];
             label nLay = patchNLayers[pointI];
-            thickness[pointI] = finalLayerRatio*edgeLen
-                * (1.0 - pow(invExpansion, nLay))
-                / (1.0 - invExpansion);
-            minThickness[pointI] = relMinThickness*edgeLen;
+            thickness[pointI] =
+                finalLayerRatio[pointI]
+              * edgeLen
+              * (1.0 - pow(invExpansion, nLay))
+              / (1.0 - invExpansion);
+            minThickness[pointI] = relMinThickness[pointI]*edgeLen;
         }
     }
 
@@ -1452,7 +1556,7 @@ void Foam::autoHexMeshDriver::calculateLayerThickness
 
 
 // Synchronize displacement among coupled patches.
-void Foam::autoHexMeshDriver::syncPatchDisplacement
+void Foam::autoLayerDriver::syncPatchDisplacement
 (
     const motionSmoother& meshMover,
     const scalarField& minThickness,
@@ -1461,6 +1565,7 @@ void Foam::autoHexMeshDriver::syncPatchDisplacement
     List<extrudeMode>& extrudeStatus
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
     const labelList& meshPoints = meshMover.patch().meshPoints();
 
     label nChangedTotal = 0;
@@ -1472,7 +1577,7 @@ void Foam::autoHexMeshDriver::syncPatchDisplacement
         // Sync displacement (by taking min)
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             patchDisp,
             minEqOp<vector>(),
@@ -1505,7 +1610,7 @@ void Foam::autoHexMeshDriver::syncPatchDisplacement
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             syncPatchNLayers,
             minEqOp<label>(),
@@ -1536,7 +1641,7 @@ void Foam::autoHexMeshDriver::syncPatchDisplacement
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             syncPatchNLayers,
             maxEqOp<label>(),
@@ -1583,7 +1688,7 @@ void Foam::autoHexMeshDriver::syncPatchDisplacement
 // of the faces using it.
 // extrudeStatus is both input and output and gives the status of each
 // patch point.
-void Foam::autoHexMeshDriver::getPatchDisplacement
+void Foam::autoLayerDriver::getPatchDisplacement
 (
     const motionSmoother& meshMover,
     const scalarField& thickness,
@@ -1596,6 +1701,7 @@ void Foam::autoHexMeshDriver::getPatchDisplacement
     Info<< nl << "Determining displacement for added points"
         << " according to pointNormal ..." << endl;
 
+    const fvMesh& mesh = meshRefiner_.mesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
     const vectorField& faceNormals = pp.faceNormals();
     const labelListList& pointFaces = pp.pointFaces();
@@ -1622,7 +1728,7 @@ void Foam::autoHexMeshDriver::getPatchDisplacement
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             pointNormals,
             plusEqOp<vector>(),
@@ -1632,7 +1738,7 @@ void Foam::autoHexMeshDriver::getPatchDisplacement
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
@@ -1735,7 +1841,7 @@ void Foam::autoHexMeshDriver::getPatchDisplacement
 // Truncates displacement
 // - for all patchFaces in the faceset displacement gets set to zero
 // - all displacement < minThickness gets set to zero
-Foam::label Foam::autoHexMeshDriver::truncateDisplacement
+Foam::label Foam::autoLayerDriver::truncateDisplacement
 (
     const motionSmoother& meshMover,
     const scalarField& minThickness,
@@ -1939,7 +2045,7 @@ Foam::label Foam::autoHexMeshDriver::truncateDisplacement
 
 // Setup layer information (at points and faces) to modify mesh topology in
 // regions where layer mesh terminates.
-void Foam::autoHexMeshDriver::setupLayerInfoTruncation
+void Foam::autoLayerDriver::setupLayerInfoTruncation
 (
     const motionSmoother& meshMover,
     const labelList& patchNLayers,
@@ -2137,7 +2243,7 @@ void Foam::autoHexMeshDriver::setupLayerInfoTruncation
 
 
 // Does any of the cells use a face from faces?
-bool Foam::autoHexMeshDriver::cellsUseFace
+bool Foam::autoLayerDriver::cellsUseFace
 (
     const polyMesh& mesh,
     const labelList& cellLabels,
@@ -2163,7 +2269,7 @@ bool Foam::autoHexMeshDriver::cellsUseFace
 // Checks the newly added cells and locally unmarks points so they
 // will not get extruded next time round. Returns global number of unmarked
 // points (0 if all was fine)
-Foam::label Foam::autoHexMeshDriver::checkAndUnmark
+Foam::label Foam::autoLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
     const dictionary& motionDict,
@@ -2230,7 +2336,7 @@ Foam::label Foam::autoHexMeshDriver::checkAndUnmark
 
 
 //- Count global number of extruded faces
-Foam::label Foam::autoHexMeshDriver::countExtrusion
+Foam::label Foam::autoLayerDriver::countExtrusion
 (
     const indirectPrimitivePatch& pp,
     const List<extrudeMode>& extrudeStatus
@@ -2261,7 +2367,7 @@ Foam::label Foam::autoHexMeshDriver::countExtrusion
 
 
 // Collect layer faces and layer cells into bools for ease of handling
-void Foam::autoHexMeshDriver::getLayerCellsFaces
+void Foam::autoLayerDriver::getLayerCellsFaces
 (
     const polyMesh& mesh,
     const addPatchCellLayer& addLayer,
@@ -2305,35 +2411,51 @@ void Foam::autoHexMeshDriver::getLayerCellsFaces
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::autoLayerDriver::autoLayerDriver
+(
+    meshRefinement& meshRefiner,
+    const labelList& globalToPatch
+)
+:
+    meshRefiner_(meshRefiner),
+    globalToPatch_(globalToPatch)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::autoHexMeshDriver::mergePatchFacesUndo
+void Foam::autoLayerDriver::mergePatchFacesUndo
 (
-    const dictionary& shrinkDict,
+    const layerParameters& layerParams,
     const dictionary& motionDict
 )
 {
-    const scalar featureAngle(readScalar(shrinkDict.lookup("featureAngle")));
-    scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.0);
+    scalar minCos = Foam::cos
+    (
+        layerParams.featureAngle()
+      * mathematicalConstant::pi/180.0
+    );
 
-    scalar concaveAngle = defaultConcaveAngle;
-
-    if (shrinkDict.found("concaveAngle"))
-    {
-        concaveAngle = readScalar(shrinkDict.lookup("concaveAngle"));
-    }
-    scalar concaveCos = Foam::cos(concaveAngle*mathematicalConstant::pi/180.0);
+    scalar concaveCos = Foam::cos
+    (
+        layerParams.concaveAngle()
+      * mathematicalConstant::pi/180.0
+    );
 
     Info<< nl
         << "Merging all faces of a cell" << nl
         << "---------------------------" << nl
         << "    - which are on the same patch" << nl
-        << "    - which make an angle < " << featureAngle << " degrees"
+        << "    - which make an angle < " << layerParams.featureAngle()
+        << " degrees"
         << nl
         << "      (cos:" << minCos << ')' << nl
         << "    - as long as the resulting face doesn't become concave"
         << " by more than "
-        << concaveAngle << " degrees (0=straight, 180=fully concave)" << nl
+        << layerParams.concaveAngle()
+        << " degrees (0=straight, 180=fully concave)" << nl
         << endl;
 
     label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
@@ -2342,81 +2464,22 @@ void Foam::autoHexMeshDriver::mergePatchFacesUndo
 }
 
 
-void Foam::autoHexMeshDriver::addLayers
+void Foam::autoLayerDriver::addLayers
 (
-    const dictionary& shrinkDict,
+    const layerParameters& layerParams,
     const dictionary& motionDict,
     const label nAllowableErrors,
-    motionSmoother& meshMover
+    motionSmoother& meshMover,
+    decompositionMethod& decomposer,
+    fvMeshDistribute& distributor
 )
 {
-    // Read some more dictionary settings
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Min thickness per cell
-    const scalar relMinThickness(readScalar(shrinkDict.lookup("minThickness")));
-
-    // Warped faces recoginition
-    const scalar maxFaceThicknessRatio
-    (
-        readScalar(shrinkDict.lookup("maxFaceThicknessRatio"))
-    );
-    const scalar featureAngle(readScalar(shrinkDict.lookup("featureAngle")));
-
-    // Feature angle
-    const scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.);
-
-    // Number of layers for to grow non-extrusion region by
-    const label nGrow(readLabel(shrinkDict.lookup("nGrow")));
-
-    //const label nSmoothDisp(readLabel(shrinkDict.lookup("nSmoothDispl")));
-    // Snapping iterations
-    const label nSnap(readLabel(shrinkDict.lookup("nSnap")));
-
-    // Mesh termination and medial axis smoothing quantities
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const scalar minCosLayerTermination =
-        Foam::cos(0.5*featureAngle*mathematicalConstant::pi/180.);
-    const scalar expansionRatio
-    (
-        readScalar(shrinkDict.lookup("expansionRatio"))
-    );
-    const scalar finalLayerRatio
-    (
-        readScalar(shrinkDict.lookup("finalLayerRatio"))
-    );
-    const label nBufferCellsNoExtrude
-    (
-        readLabel(shrinkDict.lookup("nBufferCellsNoExtrude"))
-    );
-    const label nSmoothSurfaceNormals
-    (
-        readLabel(shrinkDict.lookup("nSmoothSurfaceNormals"))
-    );
-    const label nSmoothNormals(readLabel(shrinkDict.lookup("nSmoothNormals")));
-    const label nSmoothThickness
-    (
-        readLabel(shrinkDict.lookup("nSmoothThickness"))
-    );
-    const scalar maxThicknessToMedialRatio
-    (
-        readScalar(shrinkDict.lookup("maxThicknessToMedialRatio"))
-    );
-
-    // Medial axis setup
-
-    const scalar minMedianAxisAngle
-    (
-        readScalar(shrinkDict.lookup("minMedianAxisAngle"))
-    );
-    const scalar minMedianAxisAngleCos =
-        Foam::cos(minMedianAxisAngle*mathematicalConstant::pi/180.);
-
-
-    // Precalculate mesh edge labels for patch edges
+    fvMesh& mesh = meshRefiner_.mesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
     const labelList& meshPoints = pp.meshPoints();
+
+    // Precalculate mesh edge labels for patch edges
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelList meshEdges(pp.nEdges());
     forAll(pp.edges(), edgeI)
@@ -2426,8 +2489,8 @@ void Foam::autoHexMeshDriver::addLayers
         label v1 = meshPoints[ppEdge[1]];
         meshEdges[edgeI] = meshTools::findEdge
         (
-            mesh_.edges(),
-            mesh_.pointEdges()[v0],
+            mesh.edges(),
+            mesh.pointEdges()[v0],
             v0,
             v1
         );
@@ -2449,8 +2512,9 @@ void Foam::autoHexMeshDriver::addLayers
 
     setNumLayers
     (
-        meshMover.adaptPatchIDs(),
-        pp,
+        layerParams.numLayers(),    // per patch the num layers
+        meshMover.adaptPatchIDs(),  // patches that are being moved
+        pp,                         // indirectpatch for all faces moving
 
         patchDisp,
         patchNLayers,
@@ -2477,7 +2541,7 @@ void Foam::autoHexMeshDriver::addLayers
     (
         pp,
         meshEdges,
-        minCos,
+        layerParams.featureAngle()*mathematicalConstant::pi/180.0,
 
         patchDisp,
         patchNLayers,
@@ -2488,13 +2552,13 @@ void Foam::autoHexMeshDriver::addLayers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Undistorted edge length
-    const scalar edge0Len = meshRefinerPtr_().meshCutter().level0EdgeLength();
-    const labelList& cellLevel = meshRefinerPtr_().meshCutter().cellLevel();
+    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
 
     handleWarpedFaces
     (
         pp,
-        maxFaceThicknessRatio,
+        layerParams.maxFaceThicknessRatio(),
         edge0Len,
         cellLevel,
 
@@ -2517,7 +2581,7 @@ void Foam::autoHexMeshDriver::addLayers
 
 
     // Grow out region of non-extrusion
-    for (label i = 0; i < nGrow; i++)
+    for (label i = 0; i < layerParams.nGrow(); i++)
     {
         growNoExtrusion
         (
@@ -2528,21 +2592,24 @@ void Foam::autoHexMeshDriver::addLayers
         );
     }
 
-    // Determine point-wise layer thickness
+    // Determine (wanted) point-wise layer thickness and expansion ratio
     scalarField thickness(pp.nPoints());
     scalarField minThickness(pp.nPoints());
+    scalarField expansionRatio(pp.nPoints());
     calculateLayerThickness
     (
-        expansionRatio,
-        finalLayerRatio,
-        relMinThickness,
         pp,
+        meshMover.adaptPatchIDs(),
+        layerParams.expansionRatio(),
+        layerParams.finalLayerRatio(),
+        layerParams.minThickness(),
         cellLevel,
         patchNLayers,
         edge0Len,
 
         thickness,
-        minThickness
+        minThickness,
+        expansionRatio
     );
 
     // Calculate wall to medial axis distance for smoothing displacement
@@ -2553,8 +2620,8 @@ void Foam::autoHexMeshDriver::addLayers
         IOobject
         (
             "pointMedialDist",
-            mesh_.time().timeName(),
-            mesh_,
+            mesh.time().timeName(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -2568,8 +2635,8 @@ void Foam::autoHexMeshDriver::addLayers
         IOobject
         (
             "dispVec",
-            mesh_.time().timeName(),
-            mesh_,
+            mesh.time().timeName(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -2583,8 +2650,8 @@ void Foam::autoHexMeshDriver::addLayers
         IOobject
         (
             "medialRatio",
-            mesh_.time().timeName(),
-            mesh_,
+            mesh.time().timeName(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -2602,9 +2669,9 @@ void Foam::autoHexMeshDriver::addLayers
     medialAxisSmoothingInfo
     (
         meshMover,
-        nSmoothNormals,
-        nSmoothSurfaceNormals,
-        minMedianAxisAngleCos,
+        layerParams.nSmoothNormals(),
+        layerParams.nSmoothSurfaceNormals(),
+        layerParams.minMedianAxisAngleCos(),
 
         dispVec,
         medialRatio,
@@ -2614,10 +2681,10 @@ void Foam::autoHexMeshDriver::addLayers
 
 
     // Saved old points
-    pointField oldPoints(mesh_.points());
+    pointField oldPoints(mesh.points());
 
     // Last set of topology changes. (changing mesh clears out polyTopoChange)
-    polyTopoChange savedMeshMod(mesh_.boundaryMesh().size());
+    polyTopoChange savedMeshMod(mesh.boundaryMesh().size());
 
     boolList flaggedCells;
     boolList flaggedFaces;
@@ -2657,8 +2724,8 @@ void Foam::autoHexMeshDriver::addLayers
             //    debug,
             //    meshMover,
             //    -patchDisp,     // Shrink in opposite direction of addedPoints
-            //    nSmoothDisp,
-            //    nSnap
+            //    layerParams.nSmoothDisp(),
+            //    layerParams.nSnap()
             //);
 
             // Medial axis based shrinking
@@ -2666,11 +2733,11 @@ void Foam::autoHexMeshDriver::addLayers
             (
                 meshMover,
 
-                nSmoothThickness,
-                maxThicknessToMedialRatio,
+                layerParams.nSmoothThickness(),
+                layerParams.maxThicknessToMedialRatio(),
                 nAllowableErrors,
-                nSnap,
-                minCosLayerTermination,
+                layerParams.nSnap(),
+                layerParams.layerTerminationCos(),
 
                 thickness,
                 minThickness,
@@ -2690,7 +2757,7 @@ void Foam::autoHexMeshDriver::addLayers
 
         // Truncate displacements that are too small (this will do internal
         // ones, coupled ones have already been truncated by syncPatch)
-        faceSet dummySet(mesh_, "wrongPatchFaces", 0);
+        faceSet dummySet(mesh, "wrongPatchFaces", 0);
         truncateDisplacement
         (
             meshMover,
@@ -2703,27 +2770,27 @@ void Foam::autoHexMeshDriver::addLayers
 
 
         // Dump to .obj file for debugging.
-        if (debug_)
+        if (debug)
         {
             dumpDisplacement
             (
-                mesh_.time().path()/"layer",
+                mesh.time().path()/"layer",
                 pp,
                 patchDisp,
                 extrudeStatus
             );
 
-            const_cast<Time&>(mesh_.time())++;
-            Info<< "Writing shrunk mesh to " << mesh_.time().timeName() << endl;
-            mesh_.write();
+            const_cast<Time&>(mesh.time())++;
+            Info<< "Writing shrunk mesh to " << mesh.time().timeName() << endl;
+            mesh.write();
         }
 
 
         // Mesh topo change engine
-        polyTopoChange meshMod(mesh_);
+        polyTopoChange meshMod(mesh);
 
         // Grow layer of cells on to patch. Handles zero sized displacement.
-        addPatchCellLayer addLayer(mesh_);
+        addPatchCellLayer addLayer(mesh);
 
         // Determine per point/per face number of layers to extrude. Also
         // handles the slow termination of layers when going switching layers
@@ -2735,7 +2802,7 @@ void Foam::autoHexMeshDriver::addLayers
             meshMover,
             patchNLayers,
             extrudeStatus,
-            nBufferCellsNoExtrude,
+            layerParams.nBufferCellsNoExtrude(),
             nPatchPointLayers,
             nPatchFaceLayers
         );
@@ -2747,7 +2814,7 @@ void Foam::autoHexMeshDriver::addLayers
         {
             if (patchNLayers[i] > 0)
             {
-                if (expansionRatio == 1.0)
+                if (expansionRatio[i] == 1.0)
                 {
                     firstDisp[i] = patchDisp[i]/nPatchPointLayers[i];
                 }
@@ -2755,15 +2822,15 @@ void Foam::autoHexMeshDriver::addLayers
                 {
                     label nLay = nPatchPointLayers[i];
                     scalar h =
-                        pow(expansionRatio,nLay - 1)
-                      * (mag(patchDisp[i])*(1.0 - expansionRatio))
-                      / (1.0 - pow(expansionRatio, nLay));
+                        pow(expansionRatio[i], nLay - 1)
+                      * (mag(patchDisp[i])*(1.0 - expansionRatio[i]))
+                      / (1.0 - pow(expansionRatio[i], nLay));
                     firstDisp[i] = h/mag(patchDisp[i])*patchDisp[i];
                 }
             }
         }
 
-        scalar invExpansionRatio = 1.0 / expansionRatio;
+        scalarField invExpansionRatio = 1.0 / expansionRatio;
 
         // Add topo regardless of whether extrudeStatus is extruderemove.
         // Not add layer if patchDisp is zero.
@@ -2777,9 +2844,9 @@ void Foam::autoHexMeshDriver::addLayers
             meshMod
         );
 
-        if (debug_)
+        if (debug)
         {
-            const_cast<Time&>(mesh_.time())++;
+            const_cast<Time&>(mesh.time())++;
         }
 
         // Store mesh changes for if mesh is correct.
@@ -2796,13 +2863,13 @@ void Foam::autoHexMeshDriver::addLayers
             IOobject
             (
                 //mesh.name()+"_layer",
-                mesh_.name(),
-                static_cast<polyMesh&>(mesh_).instance(),
-                mesh_.db(),
-                static_cast<polyMesh&>(mesh_).readOpt(),
-                static_cast<polyMesh&>(mesh_).writeOpt()
+                mesh.name(),
+                static_cast<polyMesh&>(mesh).instance(),
+                mesh.db(),
+                static_cast<polyMesh&>(mesh).readOpt(),
+                static_cast<polyMesh&>(mesh).writeOpt()
             ),          // io params from original mesh but new name
-            mesh_,      // original mesh
+            mesh,      // original mesh
             true        // parallel sync
         );
         fvMesh& newMesh = newMeshPtr();
@@ -2830,9 +2897,9 @@ void Foam::autoHexMeshDriver::addLayers
         );
 
 
-        if (debug_)
+        if (debug)
         {
-            Info<< "Writing layer mesh to " << mesh_.time().timeName() << endl;
+            Info<< "Writing layer mesh to " << mesh.time().timeName() << endl;
             newMesh.write();
             cellSet addedCellSet
             (
@@ -2843,8 +2910,7 @@ void Foam::autoHexMeshDriver::addLayers
             Info<< "Writing "
                 << returnReduce(addedCellSet.size(), sumOp<label>())
                 << " added cells to cellSet "
-                << addedCellSet.objectPath()
-                << endl;
+                << addedCellSet.name() << endl;
             addedCellSet.write();
 
             faceSet layerFacesSet
@@ -2856,8 +2922,7 @@ void Foam::autoHexMeshDriver::addLayers
             Info<< "Writing "
                 << returnReduce(layerFacesSet.size(), sumOp<label>())
                 << " faces inside added layer to faceSet "
-                << layerFacesSet.objectPath()
-                << endl;
+                << layerFacesSet.name() << endl;
             layerFacesSet.write();
         }
 
@@ -2895,18 +2960,18 @@ void Foam::autoHexMeshDriver::addLayers
     // current mesh.
 
     // Apply the stored topo changes to the current mesh.
-    autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh_, false);
+    autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh, false);
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh.updateMesh(map);
 
     // Move mesh (since morphing does not do this)
     if (map().hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh.movePoints(map().preMotionPoints());
     }
 
-    meshRefinerPtr_().updateMesh(map, labelList(0));
+    meshRefiner_.updateMesh(map, labelList(0));
 
 
     // Do final balancing
@@ -2914,8 +2979,24 @@ void Foam::autoHexMeshDriver::addLayers
 
     if (Pstream::parRun())
     {
+        Info<< nl
+            << "Doing final balancing" << nl
+            << "---------------------" << nl
+            << endl;
+
+        if (debug)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
         // Balance. No restriction on face zones and baffles.
-        autoPtr<mapDistributePolyMesh> map = balance(false, false);
+        autoPtr<mapDistributePolyMesh> map = meshRefiner_.balance
+        (
+            false,
+            false,
+            decomposer,
+            distributor
+        );
 
         // Re-distribute flag of layer faces and cells
         map().distributeCellData(flaggedCells);
@@ -2926,22 +3007,121 @@ void Foam::autoHexMeshDriver::addLayers
     // Write mesh
     // ~~~~~~~~~~
 
-    //writeMesh("Layer mesh");
-    cellSet addedCellSet(mesh_, "addedCells", findIndices(flaggedCells, true));
+    cellSet addedCellSet(mesh, "addedCells", findIndices(flaggedCells, true));
     Info<< "Writing "
         << returnReduce(addedCellSet.size(), sumOp<label>())
         << " added cells to cellSet "
-        << addedCellSet.objectPath()
-        << endl;
+        << addedCellSet.name() << endl;
     addedCellSet.write();
 
-    faceSet layerFacesSet(mesh_, "layerFaces", findIndices(flaggedFaces, true));
+    faceSet layerFacesSet(mesh, "layerFaces", findIndices(flaggedFaces, true));
     Info<< "Writing "
         << returnReduce(layerFacesSet.size(), sumOp<label>())
         << " faces inside added layer to faceSet "
-        << layerFacesSet.objectPath()
-        << endl;
+        << layerFacesSet.name() << endl;
     layerFacesSet.write();
+}
+
+
+void Foam::autoLayerDriver::doLayers
+(
+    const dictionary& shrinkDict,
+    const dictionary& motionDict,
+    const layerParameters& layerParams,
+    decompositionMethod& decomposer,
+    fvMeshDistribute& distributor
+)
+{
+    fvMesh& mesh = meshRefiner_.mesh();
+
+    Info<< nl
+        << "Shrinking and layer addition phase" << nl
+        << "----------------------------------" << nl
+        << endl;
+
+    const_cast<Time&>(mesh.time())++;
+
+    Info<< "Using mesh parameters " << motionDict << nl << endl;
+
+    // Merge coplanar boundary faces
+    mergePatchFacesUndo(layerParams, motionDict);
+
+    // Per patch the number of layers (0 if no layer)
+    const labelList& numLayers = layerParams.numLayers();
+
+    // Patches that need to get a layer
+    DynamicList<label> patchIDs(numLayers.size());
+    label nFacesWithLayers = 0;
+    forAll(numLayers, patchI)
+    {
+        if (numLayers[patchI] > 0)
+        {
+            patchIDs.append(patchI);
+            nFacesWithLayers += mesh.boundaryMesh()[patchI].size();
+        }
+    }
+    patchIDs.shrink();
+
+    if (returnReduce(nFacesWithLayers, sumOp<label>()) == 0)
+    {
+        Info<< nl << "No layers to generate ..." << endl;
+    }
+    else
+    {
+        autoPtr<indirectPrimitivePatch> ppPtr
+        (
+            meshRefinement::makePatch
+            (
+                mesh,
+                patchIDs
+            )
+        );
+        indirectPrimitivePatch& pp = ppPtr();
+
+        // Construct iterative mesh mover.
+        Info<< "Constructing mesh displacer ..." << endl;
+
+        {
+            pointMesh pMesh(mesh);
+
+            motionSmoother meshMover
+            (
+                mesh,
+                pp,
+                patchIDs,
+                meshRefinement::makeDisplacementField(pMesh, patchIDs),
+                motionDict
+            );
+
+            // Check that outside of mesh is not multiply connected.
+            checkMeshManifold();
+
+            // Check initial mesh
+            Info<< "Checking initial mesh ..." << endl;
+            labelHashSet wrongFaces(mesh.nFaces()/100);
+            motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+            const label nInitErrors = returnReduce
+            (
+                wrongFaces.size(),
+                sumOp<label>()
+            );
+
+            Info<< "Detected " << nInitErrors << " illegal faces"
+                << " (concave, zero area or negative cell pyramid volume)"
+                << endl;
+
+            // Do all topo changes
+            addLayers
+            (
+                layerParams,
+                motionDict,
+                nInitErrors,
+                meshMover,
+                decomposer,
+                distributor
+            );
+        }
+    }
 }
 
 

@@ -305,7 +305,7 @@ public:
             //        (instead of e.g. from patch faces)
            void setRefinement
            (
-               const scalar expansionRatio,
+               const scalarField& expansionRatio,
                const indirectPrimitivePatch& pp,
                const labelList& nFaceLayers,
                const labelList& nPointLayers,
@@ -325,7 +325,7 @@ public:
             {
                 setRefinement
                 (
-                    1.0,            // expansion ration
+                    scalarField(pp.nPoints(), 1.0), // expansion ration
                     pp,
                     labelList(pp.size(), nLayers),
                     labelList(pp.nPoints(), nLayers),

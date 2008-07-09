@@ -34,15 +34,13 @@ namespace Foam
 
 defineTypeNameAndDebug(searchableSurface, 0);
 defineRunTimeSelectionTable(searchableSurface, dict);
-//defineRunTimeSelectionTable(searchableSurface, istream);
 
 
 // Construct named object from dictionary
 autoPtr<searchableSurface> searchableSurface::New
 (
     const word& searchableSurfaceType,
-    const word& name,
-    const objectRegistry& obj,
+    const IOobject& io,
     const dictionary& dict
 )
 {
@@ -55,7 +53,7 @@ autoPtr<searchableSurface> searchableSurface::New
         FatalErrorIn
         (
             "searchableSurface::New(const word&, const word&"
-            ", const objectRegistry&, const dictionary&)"
+            ", const IOobject&, const dictionary&)"
         )   << "Unknown searchableSurface type " << searchableSurfaceType
             << endl << endl
             << "Valid searchableSurface types : " << endl
@@ -63,44 +61,15 @@ autoPtr<searchableSurface> searchableSurface::New
             << exit(FatalError);
     }
 
-    return autoPtr<searchableSurface>(cstrIter()(name, obj, dict));
+    return autoPtr<searchableSurface>(cstrIter()(io, dict));
 }
-
-
-//// Construct named object from Istream
-//autoPtr<searchableSurface> searchableSurface::New
-//(
-//    const word& searchableSurfaceType,
-//    const objectRegistry& obj,
-//    Istream& is
-//)
-//{
-//    istreamConstructorTable::iterator cstrIter =
-//        istreamConstructorTablePtr_
-//            ->find(searchableSurfaceType);
-//
-//    if (cstrIter == istreamConstructorTablePtr_->end())
-//    {
-//        FatalErrorIn
-//        (
-//            "searchableSurface::New(const word&, const objectRegistry&"
-//            ", Istream&)"
-//        )   << "Unknown searchableSurface type " << searchableSurfaceType
-//            << endl << endl
-//            << "Valid searchableSurface types : " << endl
-//            << istreamConstructorTablePtr_->toc()
-//            << exit(FatalError);
-//    }
-//
-//    return autoPtr<searchableSurface>(cstrIter()(obj, is));
-//}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::searchableSurface::searchableSurface(const word& name)
+Foam::searchableSurface::searchableSurface(const IOobject& io)
 :
-    name_(name)
+    regIOobject(io)
 {}
 
 

@@ -26,39 +26,13 @@ License
 
 #include "interpolationTable.H"
 #include "IFstream.H"
-#include "objectRegistry.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::interpolationTable<Type>::interpolationTable()
-:
-    List<Tuple2<scalar, Type> >(),
-    dict_(dictionary::null),
-    boundAction_(interpolationTable::WARN),
-    fileName_("undefined_fileName")
-{}
-
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class Type>
-Foam::interpolationTable<Type>::interpolationTable
-(
-    const objectRegistry& obr,
-    const dictionary& dict
-)
-:
-    List<Tuple2<scalar, Type> >(),
-    dict_(dict),
-    boundAction_(wordToBoundAction(dict.lookup("boundAction"))),
-    fileName_(dict.lookup("fileName"))
+void Foam::interpolationTable<Type>::readTable()
 {
     fileName_.expand();
-
-    // Correct for relative path
-    if (fileName_[0] != '/')
-    {
-        fileName_ = obr.db().path()/fileName_;
-    }
 
     // Read data from file
     IFstream(fileName_)() >> *this;
@@ -78,6 +52,39 @@ Foam::interpolationTable<Type>::interpolationTable
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::interpolationTable<Type>::interpolationTable()
+:
+    List<Tuple2<scalar, Type> >(),
+    boundAction_(interpolationTable::WARN),
+    fileName_("undefined_fileName")
+{}
+
+
+template<class Type>
+Foam::interpolationTable<Type>::interpolationTable(const fileName& fn)
+:
+    List<Tuple2<scalar, Type> >(),
+    boundAction_(interpolationTable::WARN),
+    fileName_(fn)
+{
+    readTable();
+}
+
+
+template<class Type>
+Foam::interpolationTable<Type>::interpolationTable(const dictionary& dict)
+:
+    List<Tuple2<scalar, Type> >(),
+    boundAction_(wordToBoundAction(dict.lookup("boundAction"))),
+    fileName_(dict.lookup("fileName"))
+{
+    readTable();
+}
+
+
 template<class Type>
 Foam::interpolationTable<Type>::interpolationTable
 (
@@ -85,17 +92,10 @@ Foam::interpolationTable<Type>::interpolationTable
 )
 :
     List<Tuple2<scalar, Type> >(interpTable),
-    dict_(interpTable.dict_),
     boundAction_(interpTable.boundAction_),
     fileName_(interpTable.fileName_)
 {}
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::interpolationTable<Type>::~interpolationTable()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -174,7 +174,7 @@ Foam::interpolationTable<Type>::wordToBoundAction
 template<class Type>
 void Foam::interpolationTable<Type>::check() const
 {
-    label n = size();
+    label n = this->size();
     scalar prevValue = List<Tuple2<scalar, Type> >::operator[](0).first();
 
     for (label i=1; i<n; ++i)
@@ -227,7 +227,7 @@ const Foam::Tuple2<Foam::scalar, Type>&
 Foam::interpolationTable<Type>::operator[](const label i) const
 {
     label ii = i;
-    label n  = size();
+    label n  = this->size();
 
     if (n <= 1)
     {
@@ -321,7 +321,7 @@ Foam::interpolationTable<Type>::operator[](const label i) const
 template<class Type>
 Type Foam::interpolationTable<Type>::operator()(const scalar value) const
 {
-    label n = size();
+    label n = this->size();
 
     if (n <= 1)
     {
