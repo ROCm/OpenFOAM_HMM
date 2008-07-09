@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Wrapper for stat() system call.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fileStat.H"
@@ -35,33 +32,15 @@ Description
 #include <unistd.h>
 #include <sys/sysmacros.h>
 
-/*
-#undef major
-#undef minor
-#undef makedev
-
-# define major(dev) ((int)(((dev) >> 8) & 0xff))
-# define minor(dev) ((int)((dev) & 0xff))
-# define makedev(major, minor) ((((unsigned int) (major)) << 8) \
-				| ((unsigned int) (minor)))
-*/
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
-fileStat::fileStat()
+Foam::fileStat::fileStat()
 :
     isValid_(false)
 {}
 
 
-// Construct from components
-fileStat::fileStat(const fileName& fName, const unsigned int maxTime)
+Foam::fileStat::fileStat(const fileName& fName, const unsigned int maxTime)
 {
     // Work on volatile
     volatile bool locIsValid = false;
@@ -85,8 +64,7 @@ fileStat::fileStat(const fileName& fName, const unsigned int maxTime)
 }
 
 
-// Construct from Istream.
-fileStat::fileStat(Istream& is)
+Foam::fileStat::fileStat(Istream& is)
 {
     is >> *this;
 }
@@ -94,10 +72,9 @@ fileStat::fileStat(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// compare two fileStates for same device
-bool fileStat::sameDevice(const fileStat& stat2) const
+bool Foam::fileStat::sameDevice(const fileStat& stat2) const
 {
-    return 
+    return
         isValid_
      && (
             major(status_.st_dev) == major(stat2.status().st_dev)
@@ -105,14 +82,14 @@ bool fileStat::sameDevice(const fileStat& stat2) const
         );
 }
 
-// compare two fileStates for same Inode
-bool fileStat::sameINode(const fileStat& stat2) const
+
+bool Foam::fileStat::sameINode(const fileStat& stat2) const
 {
     return isValid_ && (status_.st_ino == stat2.status().st_ino);
 }
 
-// compare state against inode
-bool fileStat::sameINode(const label iNode) const
+
+bool Foam::fileStat::sameINode(const label iNode) const
 {
     return isValid_ && (status_.st_ino == ino_t(iNode));
 }
@@ -120,13 +97,12 @@ bool fileStat::sameINode(const label iNode) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// Input in list syntax
-Istream& operator>>(Istream& is, fileStat& fStat)
+Foam::Istream& Foam::operator>>(Istream& is, fileStat& fStat)
 {
     // Read beginning of machine info list
     is.readBegin("fileStat");
 
-    label 
+    label
         devMaj, devMin,
         ino, mode, uid, gid,
         rdevMaj, rdevMin,
@@ -172,11 +148,10 @@ Istream& operator>>(Istream& is, fileStat& fStat)
 }
 
 
-// Output in list syntax
-Ostream& operator<<(Ostream& os, const fileStat& fStat)
+Foam::Ostream& Foam::operator<<(Ostream& os, const fileStat& fStat)
 {
-    //Set precision so 32bit unsigned int can be printed
-//    int oldPrecision = os.precision();
+    // Set precision so 32bit unsigned int can be printed
+    // int oldPrecision = os.precision();
     int oldPrecision = 0;
     os.precision(10);
 
@@ -199,9 +174,5 @@ Ostream& operator<<(Ostream& os, const fileStat& fStat)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
