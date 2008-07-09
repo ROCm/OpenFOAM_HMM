@@ -27,7 +27,12 @@ Description
 
 \*----------------------------------------------------------------------------*/
 
-#include "autoHexMeshDriver.H"
+#include "autoSnapDriver.H"
+#include "Time.H"
+#include "pointFields.H"
+#include "motionSmoother.H"
+#include "polyTopoChange.H"
+#include "OFstream.H"
 #include "syncTools.H"
 #include "fvMesh.H"
 #include "Time.H"
@@ -38,16 +43,28 @@ Description
 #include "PointEdgeWave.H"
 #include "mergePoints.H"
 #include "snapParameters.H"
+#include "refinementSurfaces.H"
+
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+defineTypeNameAndDebug(autoSnapDriver, 0);
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::autoHexMeshDriver::getZonedSurfaces
+void Foam::autoSnapDriver::getZonedSurfaces
 (
     labelList& zonedSurfaces,
     labelList& unzonedSurfaces
 ) const
 {    // Surfaces with zone information
-    const wordList& faceZoneNames = surfaces().faceZoneNames();
+    const wordList& faceZoneNames = meshRefiner_.surfaces().faceZoneNames();
 
     zonedSurfaces.setSize(faceZoneNames.size());
     label zonedI = 0;
@@ -71,15 +88,18 @@ void Foam::autoHexMeshDriver::getZonedSurfaces
 
 
 // Get faces to repatch. Returns map from face to patch.
-Foam::Map<Foam::label> Foam::autoHexMeshDriver::getZoneBafflePatches
+Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
 (
     const bool allowBoundary
 ) const
 {
-    Map<label> bafflePatch(mesh_.nFaces()/1000);
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
 
-    const wordList& faceZoneNames = surfaces().faceZoneNames();
-    const faceZoneMesh& fZones = mesh_.faceZones();
+    Map<label> bafflePatch(mesh.nFaces()/1000);
+
+    const wordList& faceZoneNames = surfaces.faceZoneNames();
+    const faceZoneMesh& fZones = mesh.faceZones();
 
     forAll(faceZoneNames, surfI)
     {
@@ -93,12 +113,12 @@ Foam::Map<Foam::label> Foam::autoHexMeshDriver::getZoneBafflePatches
             //// Get patch allocated for zone
             //label patchI = surfaceToCyclicPatch_[surfI];
             // Get patch of (first region) of surface
-            label patchI = globalToPatch_[surfaces().globalRegion(surfI, 0)];
+            label patchI = globalToPatch_[surfaces.globalRegion(surfI, 0)];
 
             Info<< "For surface "
-                << surfaces().names()[surfI]
+                << surfaces.names()[surfI]
                 << " found faceZone " << fZone.name()
-                << " and patch " << mesh_.boundaryMesh()[patchI].name()
+                << " and patch " << mesh.boundaryMesh()[patchI].name()
                 << endl;
 
 
@@ -106,7 +126,7 @@ Foam::Map<Foam::label> Foam::autoHexMeshDriver::getZoneBafflePatches
             {
                 label faceI = fZone[i];
 
-                if (allowBoundary || mesh_.isInternalFace(faceI))
+                if (allowBoundary || mesh.isInternalFace(faceI))
                 {
                     if (!bafflePatch.insert(faceI, patchI))
                     {
@@ -116,11 +136,11 @@ Foam::Map<Foam::label> Foam::autoHexMeshDriver::getZoneBafflePatches
                         {
                             FatalErrorIn("getZoneBafflePatches(const bool)")
                                 << "Face " << faceI
-                                << " fc:" << mesh_.faceCentres()[faceI]
+                                << " fc:" << mesh.faceCentres()[faceI]
                                 << " is in faceZone "
-                                << mesh_.boundaryMesh()[oldPatchI].name()
+                                << mesh.boundaryMesh()[oldPatchI].name()
                                 << " and in faceZone "
-                                << mesh_.boundaryMesh()[patchI].name()
+                                << mesh.boundaryMesh()[patchI].name()
                                 << abort(FatalError);
                         }
                     }
@@ -134,7 +154,7 @@ Foam::Map<Foam::label> Foam::autoHexMeshDriver::getZoneBafflePatches
 
 // Calculate geometrically collocated points, Requires PackedList to be
 // sizes and initalised!
-Foam::label Foam::autoHexMeshDriver::getCollocatedPoints
+Foam::label Foam::autoSnapDriver::getCollocatedPoints
 (
     const scalar tol,
     const pointField& points,
@@ -196,7 +216,7 @@ Foam::label Foam::autoHexMeshDriver::getCollocatedPoints
 
 
 // Calculate displacement as average of patch points.
-Foam::pointField Foam::autoHexMeshDriver::smoothPatchDisplacement
+Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 (
     const motionSmoother& meshMover
 ) const
@@ -483,7 +503,7 @@ Foam::pointField Foam::autoHexMeshDriver::smoothPatchDisplacement
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::autoHexMeshDriver::edgePatchDist
+Foam::tmp<Foam::scalarField> Foam::autoSnapDriver::edgePatchDist
 (
     const pointMesh& pMesh,
     const indirectPrimitivePatch& pp
@@ -565,7 +585,7 @@ Foam::tmp<Foam::scalarField> Foam::autoHexMeshDriver::edgePatchDist
 }
 
 
-void Foam::autoHexMeshDriver::dumpMove
+void Foam::autoSnapDriver::dumpMove
 (
     const fileName& fName,
     const pointField& meshPts,
@@ -596,7 +616,7 @@ void Foam::autoHexMeshDriver::dumpMove
 
 // Check whether all displacement vectors point outwards of patch. Return true
 // if so.
-bool Foam::autoHexMeshDriver::outwardsDisplacement
+bool Foam::autoSnapDriver::outwardsDisplacement
 (
     const indirectPrimitivePatch& pp,
     const vectorField& patchDisp
@@ -637,9 +657,22 @@ bool Foam::autoHexMeshDriver::outwardsDisplacement
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::autoSnapDriver::autoSnapDriver
+(
+    meshRefinement& meshRefiner,
+    const labelList& globalToPatch
+)
+:
+    meshRefiner_(meshRefiner),
+    globalToPatch_(globalToPatch)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::createZoneBaffles
+Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::createZoneBaffles
 (
     List<labelPair>& baffles
 )
@@ -653,6 +686,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::createZoneBaffles
     // No need to sync; all processors will have all same zonedSurfaces.
     if (zonedSurfaces.size() > 0)
     {
+        fvMesh& mesh = meshRefiner_.mesh();
+
         // Split internal faces on interface surfaces
         Info<< "Converting zoned faces into baffles ..." << endl;
 
@@ -664,14 +699,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::createZoneBaffles
         if (nZoneFaces > 0)
         {
             // Convert into labelLists
-            labelList ownPatch(mesh_.nFaces(), -1);
+            labelList ownPatch(mesh.nFaces(), -1);
             forAllConstIter(Map<label>, faceToPatch, iter)
             {
                 ownPatch[iter.key()] = iter();
             }
 
             // Create baffles. both sides same patch.
-            map = meshRefinerPtr_().createBaffles(ownPatch, ownPatch);
+            map = meshRefiner_.createBaffles(ownPatch, ownPatch);
 
             // Get pairs of faces created.
             // Just loop over faceMap and store baffle if we encounter a slave
@@ -702,29 +737,29 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::createZoneBaffles
 
             if (baffleI != faceToPatch.size())
             {
-                FatalErrorIn("autoHexMeshDriver::createZoneBaffles(..)")
+                FatalErrorIn("autoSnapDriver::createZoneBaffles(..)")
                     << "Had " << faceToPatch.size() << " patches to create "
                     << " but encountered " << baffleI
                     << " slave faces originating from patcheable faces."
                     << abort(FatalError);
             }
 
-            if (debug_)
+            if (debug)
             {
-                const_cast<Time&>(mesh_.time())++;
+                const_cast<Time&>(mesh.time())++;
                 Pout<< "Writing baffled mesh to time "
-                    << mesh_.time().timeName() << endl;
-                mesh_.write();
+                    << mesh.time().timeName() << endl;
+                mesh.write();
             }
         }
         Info<< "Created " << nZoneFaces << " baffles in = "
-            << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+            << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
     }
     return map;
 }
 
 
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::mergeZoneBaffles
+Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::mergeZoneBaffles
 (
     const List<labelPair>& baffles
 )
@@ -743,17 +778,18 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoHexMeshDriver::mergeZoneBaffles
         Info<< "Converting " << nBaffles << " baffles back into zoned faces ..."
             << endl;
 
-        map = meshRefinerPtr_().mergeBaffles(baffles);
+        map = meshRefiner_.mergeBaffles(baffles);
 
         Info<< "Converted baffles in = "
-            << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+            << meshRefiner_.mesh().time().cpuTimeIncrement()
+            << " s\n" << nl << endl;
     }
 
     return map;
 }
 
 
-Foam::scalarField Foam::autoHexMeshDriver::calcSnapDistance
+Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
 (
     const snapParameters& snapParams,
     const indirectPrimitivePatch& pp
@@ -762,6 +798,7 @@ Foam::scalarField Foam::autoHexMeshDriver::calcSnapDistance
     const edgeList& edges = pp.edges();
     const labelListList& pointEdges = pp.pointEdges();
     const pointField& localPoints = pp.localPoints();
+    const fvMesh& mesh = meshRefiner_.mesh();
 
     scalarField maxEdgeLen(localPoints.size(), -GREAT);
 
@@ -781,7 +818,7 @@ Foam::scalarField Foam::autoHexMeshDriver::calcSnapDistance
 
     syncTools::syncPointList
     (
-        mesh_,
+        mesh,
         pp.meshPoints(),
         maxEdgeLen,
         maxEqOp<scalar>(),  // combine op
@@ -793,34 +830,36 @@ Foam::scalarField Foam::autoHexMeshDriver::calcSnapDistance
 }
 
 
-// Invert globalToPatch_ to get the patches related to surfaces.
-Foam::labelList Foam::autoHexMeshDriver::getSurfacePatches() const
-{
-    // Set of patches originating from surface
-    labelHashSet surfacePatchSet(globalToPatch_.size());
+//// Invert globalToPatch_ to get the patches related to surfaces.
+//Foam::labelList Foam::autoSnapDriver::getSurfacePatches() const
+//{
+//    // Set of patches originating from surface
+//    labelHashSet surfacePatchSet(globalToPatch_.size());
+//
+//    forAll(globalToPatch_, i)
+//    {
+//        if (globalToPatch_[i] != -1)
+//        {
+//            surfacePatchSet.insert(globalToPatch_[i]);
+//        }
+//    }
+//
+//    const fvMesh& mesh = meshRefiner_.mesh();
+//
+//    DynamicList<label> surfacePatches(surfacePatchSet.size());
+//
+//    for (label patchI = 0; patchI < mesh.boundaryMesh().size(); patchI++)
+//    {
+//        if (surfacePatchSet.found(patchI))
+//        {
+//            surfacePatches.append(patchI);
+//        }
+//    }
+//    return surfacePatches.shrink();
+//}
 
-    forAll(globalToPatch_, i)
-    {
-        if (globalToPatch_[i] != -1)
-        {
-            surfacePatchSet.insert(globalToPatch_[i]);
-        }
-    }
 
-    DynamicList<label> surfacePatches(surfacePatchSet.size());
-
-    for (label patchI = 0; patchI < mesh_.boundaryMesh().size(); patchI++)
-    {
-        if (surfacePatchSet.found(patchI))
-        {
-            surfacePatches.append(patchI);
-        }
-    }
-    return surfacePatches.shrink();
-}
-
-
-void Foam::autoHexMeshDriver::preSmoothPatch
+void Foam::autoSnapDriver::preSmoothPatch
 (
     const snapParameters& snapParams,
     const label nInitErrors,
@@ -828,6 +867,8 @@ void Foam::autoHexMeshDriver::preSmoothPatch
     motionSmoother& meshMover
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     labelList checkFaces;
 
     Info<< "Smoothing patch points ..." << endl;
@@ -839,7 +880,7 @@ void Foam::autoHexMeshDriver::preSmoothPatch
     )
     {
         Info<< "Smoothing iteration " << smoothIter << endl;
-        checkFaces.setSize(mesh_.nFaces());
+        checkFaces.setSize(mesh.nFaces());
         forAll(checkFaces, faceI)
         {
             checkFaces[faceI] = faceI;
@@ -884,39 +925,41 @@ void Foam::autoHexMeshDriver::preSmoothPatch
     // The current mesh is the starting mesh to smooth from.
     meshMover.correct();
 
-    if (debug_)
+    if (debug)
     {
-        const_cast<Time&>(mesh_.time())++;
-        Pout<< "Writing patch smoothed mesh to time " << mesh_.time().timeName()
+        const_cast<Time&>(mesh.time())++;
+        Pout<< "Writing patch smoothed mesh to time " << mesh.time().timeName()
             << endl;
-        mesh_.write();
+        mesh.write();
     }
 
     Info<< "Patch points smoothed in = "
-        << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+        << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
 }
 
 
 // Get (pp-local) indices of points that are both on zone and on patched surface
-Foam::labelList Foam::autoHexMeshDriver::getZoneSurfacePoints
+Foam::labelList Foam::autoSnapDriver::getZoneSurfacePoints
 (
     const indirectPrimitivePatch& pp,
     const word& zoneName
 ) const
 {
-    label zoneI = mesh_.faceZones().findZoneID(zoneName);
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    label zoneI = mesh.faceZones().findZoneID(zoneName);
 
     if (zoneI == -1)
     {
         FatalErrorIn
         (
-            "autoHexMeshDriver::getZoneSurfacePoints"
+            "autoSnapDriver::getZoneSurfacePoints"
             "(const indirectPrimitivePatch&, const word&)"
         )   << "Cannot find zone " << zoneName
             << exit(FatalError);
     }
 
-    const faceZone& fZone = mesh_.faceZones()[zoneI];
+    const faceZone& fZone = mesh.faceZones()[zoneI];
 
 
     // Could use PrimitivePatch & localFaces to extract points but might just
@@ -926,7 +969,7 @@ Foam::labelList Foam::autoHexMeshDriver::getZoneSurfacePoints
 
     forAll(fZone, i)
     {
-        const face& f = mesh_.faces()[fZone[i]];
+        const face& f = mesh.faces()[fZone[i]];
 
         forAll(f, fp)
         {
@@ -947,7 +990,7 @@ Foam::labelList Foam::autoHexMeshDriver::getZoneSurfacePoints
 }
 
 
-Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
+Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
 (
     const scalarField& snapDist,
     motionSmoother& meshMover
@@ -958,6 +1001,8 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
 
     const indirectPrimitivePatch& pp = meshMover.patch();
     const pointField& localPoints = pp.localPoints();
+    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
+    const fvMesh& mesh = meshRefiner_.mesh();
 
     // Divide surfaces into zoned and unzoned
     labelList zonedSurfaces;
@@ -974,7 +1019,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
     {
         List<pointIndexHit> hitInfo;
         labelList hitSurface;
-        surfaces().findNearest
+        surfaces.findNearest
         (
             unzonedSurfaces,
             localPoints,
@@ -993,7 +1038,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
             }
             //else
             //{
-            //   WarningIn("autoHexMeshDriver::calcNearestSurface(..)")
+            //   WarningIn("autoSnapDriver::calcNearestSurface(..)")
             //        << "For point:" << pointI
             //        << " coordinate:" << localPoints[pointI]
             //        << " did not find any surface within:"
@@ -1009,7 +1054,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Surfaces with zone information
-    const wordList& faceZoneNames = surfaces().faceZoneNames();
+    const wordList& faceZoneNames = surfaces.faceZoneNames();
 
     forAll(zonedSurfaces, i)
     {
@@ -1036,7 +1081,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
         // Find nearest for points both on faceZone and pp.
         List<pointIndexHit> hitInfo;
         labelList hitSurface;
-        surfaces().findNearest
+        surfaces.findNearest
         (
             labelList(1, zoneSurfI),
             zonePoints,
@@ -1055,7 +1100,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
             }
             else
             {
-                WarningIn("autoHexMeshDriver::calcNearestSurface(..)")
+                WarningIn("autoSnapDriver::calcNearestSurface(..)")
                     << "For point:" << pointI
                     << " coordinate:" << localPoints[pointI]
                     << " did not find any surface within:"
@@ -1076,7 +1121,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
     }
 
     Info<< "Calculated surface displacement in = "
-        << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+        << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
 
 
     // Limit amount of movement.
@@ -1098,7 +1143,7 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
     // will not do condition 2 on all. Sync explicitly.
     syncTools::syncPointList
     (
-        mesh_,
+        mesh,
         pp.meshPoints(),
         patchDisp,
         minMagEqOp(),                   // combine op
@@ -1115,11 +1160,11 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
     // pointVectorField.
     meshMover.setDisplacement(patchDisp);
 
-    if (debug_)
+    if (debug)
     {
         dumpMove
         (
-            mesh_.time().path()/"patchDisplacement.obj",
+            mesh.time().path()/"patchDisplacement.obj",
             pp.localPoints(),
             pp.localPoints() + patchDisp
         );
@@ -1129,12 +1174,13 @@ Foam::vectorField Foam::autoHexMeshDriver::calcNearestSurface
 }
 
 
-void Foam::autoHexMeshDriver::smoothDisplacement
+void Foam::autoSnapDriver::smoothDisplacement
 (
     const snapParameters& snapParams,
     motionSmoother& meshMover
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
     const pointMesh& pMesh = meshMover.pMesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
 
@@ -1142,7 +1188,7 @@ void Foam::autoHexMeshDriver::smoothDisplacement
 
     // Set edge diffusivity as inverse of distance to patch
     scalarField edgeGamma(1.0/(edgePatchDist(pMesh, pp) + SMALL));
-    //scalarField edgeGamma(mesh_.nEdges(), 1.0);
+    //scalarField edgeGamma(mesh.nEdges(), 1.0);
     //scalarField edgeGamma(wallGamma(mesh, pp, 10, 1));
 
     // Get displacement field
@@ -1159,14 +1205,14 @@ void Foam::autoHexMeshDriver::smoothDisplacement
         meshMover.smooth(oldDisp, edgeGamma, false, disp);
     }
     Info<< "Displacement smoothed in = "
-        << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+        << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
 
-    if (debug_)
+    if (debug)
     {
-        const_cast<Time&>(mesh_.time())++;
-        Pout<< "Writing smoothed mesh to time " << mesh_.time().timeName()
+        const_cast<Time&>(mesh.time())++;
+        Pout<< "Writing smoothed mesh to time " << mesh.time().timeName()
             << endl;
-        mesh_.write();
+        mesh.write();
 
         Pout<< "Writing displacement field ..." << endl;
         disp.write();
@@ -1180,7 +1226,7 @@ void Foam::autoHexMeshDriver::smoothDisplacement
         );
         dumpMove
         (
-            mesh_.time().path()/"actualPatchDisplacement.obj",
+            mesh.time().path()/"actualPatchDisplacement.obj",
             pp.localPoints(),
             pp.localPoints() + actualPatchDisp
         );
@@ -1188,7 +1234,7 @@ void Foam::autoHexMeshDriver::smoothDisplacement
 }
 
 
-void Foam::autoHexMeshDriver::scaleMesh
+void Foam::autoSnapDriver::scaleMesh
 (
     const snapParameters& snapParams,
     const label nInitErrors,
@@ -1196,9 +1242,11 @@ void Foam::autoHexMeshDriver::scaleMesh
     motionSmoother& meshMover
 )
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     // Relax displacement until correct mesh
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    labelList checkFaces(identity(mesh_.nFaces()));
+    labelList checkFaces(identity(mesh.nFaces()));
 
     scalar oldErrorReduction = -1;
 
@@ -1219,12 +1267,12 @@ void Foam::autoHexMeshDriver::scaleMesh
 
             break;
         }
-        if (debug_)
+        if (debug)
         {
-            const_cast<Time&>(mesh_.time())++;
-            Pout<< "Writing scaled mesh to time " << mesh_.time().timeName()
+            const_cast<Time&>(mesh.time())++;
+            Pout<< "Writing scaled mesh to time " << mesh.time().timeName()
                 << endl;
-            mesh_.write();
+            mesh.write();
 
             Pout<< "Writing displacement field ..." << endl;
             meshMover.displacement().write();
@@ -1238,7 +1286,99 @@ void Foam::autoHexMeshDriver::scaleMesh
         meshMover.setErrorReduction(oldErrorReduction);
     }
     Info<< "Moved mesh in = "
-        << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+        << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
+}
+
+
+void Foam::autoSnapDriver::doSnap
+(
+    const dictionary& snapDict,
+    const dictionary& motionDict,
+    const snapParameters& snapParams
+)
+{
+    fvMesh& mesh = meshRefiner_.mesh();
+
+    Info<< nl
+        << "Morphing phase" << nl
+        << "--------------" << nl
+        << endl;
+
+    const_cast<Time&>(mesh.time())++;
+
+    // Get the labels of added patches.
+    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch_));
+
+    // Create baffles (pairs of faces that share the same points)
+    // Baffles stored as owner and neighbour face that have been created.
+    List<labelPair> baffles;
+    createZoneBaffles(baffles);
+
+    {
+        autoPtr<indirectPrimitivePatch> ppPtr
+        (
+            meshRefinement::makePatch
+            (
+                mesh,
+                adaptPatchIDs
+            )
+        );
+        indirectPrimitivePatch& pp = ppPtr();
+
+        // Distance to attact to nearest feature on surface
+        const scalarField snapDist(calcSnapDistance(snapParams, pp));
+
+
+        // Construct iterative mesh mover.
+        Info<< "Constructing mesh displacer ..." << endl;
+        Info<< "Using mesh parameters " << motionDict << nl << endl;
+
+        pointMesh pMesh(mesh);
+
+        motionSmoother meshMover
+        (
+            mesh,
+            pp,
+            adaptPatchIDs,
+            meshRefinement::makeDisplacementField(pMesh, adaptPatchIDs),
+            motionDict
+        );
+
+
+        // Check initial mesh
+        Info<< "Checking initial mesh ..." << endl;
+        labelHashSet wrongFaces(mesh.nFaces()/100);
+        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+        const label nInitErrors = returnReduce
+        (
+            wrongFaces.size(),
+            sumOp<label>()
+        );
+
+        Info<< "Detected " << nInitErrors << " illegal faces"
+            << " (concave, zero area or negative cell pyramid volume)"
+            << endl;
+
+
+        Info<< "Checked initial mesh in = "
+            << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
+
+        // Pre-smooth patch vertices (so before determining nearest)
+        preSmoothPatch(snapParams, nInitErrors, baffles, meshMover);
+
+        // Calculate displacement at every patch point. Insert into
+        // meshMover.
+        calcNearestSurface(snapDist, meshMover);
+
+        // Get smoothly varying internal displacement field.
+        smoothDisplacement(snapParams, meshMover);
+
+        // Apply internal displacement to mesh.
+        scaleMesh(snapParams, nInitErrors, baffles, meshMover);
+    }
+
+    // Merge any introduced baffles.
+    mergeZoneBaffles(baffles);
 }
 
 

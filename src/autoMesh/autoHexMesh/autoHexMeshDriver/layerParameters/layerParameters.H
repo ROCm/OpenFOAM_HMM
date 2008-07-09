@@ -47,6 +47,7 @@ namespace Foam
 
 // Class forward declarations
 class polyBoundaryMesh;
+class refinementSurfaces;
 
 /*---------------------------------------------------------------------------*\
                            Class layerParameters Declaration
@@ -107,6 +108,15 @@ class layerParameters
 
     // Private Member Functions
 
+        //- Extract patch-wise number of layers
+        static labelList readNumLayers
+        (
+            const PtrList<dictionary>& surfaceDicts,
+            const refinementSurfaces& refineSurfaces,
+            const labelList& globalToPatch,
+            const polyBoundaryMesh& boundaryMesh
+        );
+
         //- Disallow default bitwise copy construct
         layerParameters(const layerParameters&);
 
@@ -119,7 +129,14 @@ public:
     // Constructors
 
         //- Construct from dictionary - old syntax
-        layerParameters(const dictionary& dict, const labelList& numLayers);
+        layerParameters
+        (
+            const PtrList<dictionary>& surfaceDicts,
+            const refinementSurfaces& refineSurfaces,
+            const labelList& globalToPatch,
+            const dictionary& dict,
+            const polyBoundaryMesh& boundaryMesh
+        );
 
         //- Construct from dictionary - new syntax
         layerParameters(const dictionary& dict, const polyBoundaryMesh&);

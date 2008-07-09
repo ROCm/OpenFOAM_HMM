@@ -26,8 +26,8 @@ Class
     Foam::refinementSurfaces
 
 Description
-    Container for triSurfaces used for surface-driven refinement.
-    These contain all the data about the level of refinement needed per
+    Container for data on surfaces used for surface-driven refinement.
+    Contains all the data about the level of refinement needed per
     surface.
 
 SourceFiles
@@ -125,6 +125,11 @@ public:
     // Member Functions
 
         // Access
+
+            const searchableSurfaces& geometry() const
+            {
+                return allGeometry_;
+            }
 
             const labelList& surfaces() const
             {

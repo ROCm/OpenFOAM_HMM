@@ -27,7 +27,7 @@ Description
 
 \*----------------------------------------------------------------------------*/
 
-#include "autoHexMeshDriver.H"
+#include "autoLayerDriver.H"
 #include "fvMesh.H"
 #include "Time.H"
 #include "pointFields.H"
@@ -41,7 +41,7 @@ Description
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Calculate inverse sum of edge weights (currently always 1.0)
-void Foam::autoHexMeshDriver::sumWeights
+void Foam::autoLayerDriver::sumWeights
 (
     const PackedList<1>& isMasterEdge,
     const labelList& meshEdges,
@@ -67,7 +67,7 @@ void Foam::autoHexMeshDriver::sumWeights
 
     syncTools::syncPointList
     (
-        mesh_,
+        meshRefiner_.mesh(),
         meshPoints,
         invSumWeight,
         plusEqOp<scalar>(),
@@ -88,7 +88,7 @@ void Foam::autoHexMeshDriver::sumWeights
 
 
 // Smooth field on moving patch
-void Foam::autoHexMeshDriver::smoothField
+void Foam::autoLayerDriver::smoothField
 (
     const motionSmoother& meshMover,
     const PackedList<1>& isMasterEdge,
@@ -120,6 +120,7 @@ void Foam::autoHexMeshDriver::smoothField
         scalarField average(pp.nPoints());
         averageNeighbours
         (
+            meshMover.mesh(),
             isMasterEdge,
             meshEdges,
             meshPoints,
@@ -159,7 +160,7 @@ void Foam::autoHexMeshDriver::smoothField
 
 
 // Smooth normals on moving patch.
-void Foam::autoHexMeshDriver::smoothPatchNormals
+void Foam::autoLayerDriver::smoothPatchNormals
 (
     const motionSmoother& meshMover,
     const PackedList<1>& isMasterEdge,
@@ -192,6 +193,7 @@ void Foam::autoHexMeshDriver::smoothPatchNormals
         vectorField average(pp.nPoints());
         averageNeighbours
         (
+            meshMover.mesh(),
             isMasterEdge,
             meshEdges,
             meshPoints,
@@ -223,7 +225,7 @@ void Foam::autoHexMeshDriver::smoothPatchNormals
 
 
 // Smooth normals in interior.
-void Foam::autoHexMeshDriver::smoothNormals
+void Foam::autoLayerDriver::smoothNormals
 (
     const label nSmoothDisp,
     const PackedList<1>& isMasterEdge,
@@ -234,10 +236,11 @@ void Foam::autoHexMeshDriver::smoothNormals
     // Get smoothly varying internal normals field.
     Info<< "shrinkMeshDistance : Smoothing normals ..." << endl;
 
-    const edgeList& edges = mesh_.edges();
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const edgeList& edges = mesh.edges();
 
     // Points that do not change.
-    PackedList<1> isFixedPoint(mesh_.nPoints(), 0);
+    PackedList<1> isFixedPoint(mesh.nPoints(), 0);
 
     // Internal points that are fixed
     forAll(fixedPoints, i)
@@ -247,12 +250,12 @@ void Foam::autoHexMeshDriver::smoothNormals
     }
 
     // Correspondence between local edges/points and mesh edges/points
-    const labelList meshEdges(identity(mesh_.nEdges()));
-    const labelList meshPoints(identity(mesh_.nPoints()));
+    const labelList meshEdges(identity(mesh.nEdges()));
+    const labelList meshPoints(identity(mesh.nPoints()));
 
     // Calculate inverse sum of weights
 
-    scalarField invSumWeight(mesh_.nPoints(), 0);
+    scalarField invSumWeight(mesh.nPoints(), 0);
     sumWeights
     (
         isMasterEdge,
@@ -266,9 +269,10 @@ void Foam::autoHexMeshDriver::smoothNormals
 
     for (label iter = 0; iter < nSmoothDisp; iter++)
     {
-        vectorField average(mesh_.nPoints());
+        vectorField average(mesh.nPoints());
         averageNeighbours
         (
+            mesh,
             isMasterEdge,
             meshEdges,
             meshPoints,
@@ -305,18 +309,19 @@ void Foam::autoHexMeshDriver::smoothNormals
 
 // Tries and find a medial axis point. Done by comparing vectors to nearest
 // wall point for both vertices of edge.
-bool Foam::autoHexMeshDriver::isMaxEdge
+bool Foam::autoLayerDriver::isMaxEdge
 (
     const List<pointData>& pointWallDist,
     const label edgeI,
     const scalar minCos
 ) const
 {
-    const pointField& points = mesh_.points();
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const pointField& points = mesh.points();
 
     // Do not mark edges with one side on moving wall.
 
-    const edge& e = mesh_.edges()[edgeI];
+    const edge& e = mesh.edges()[edgeI];
 
     vector v0(points[e[0]] - pointWallDist[e[0]].origin());
     scalar magV0(mag(v0));
@@ -351,7 +356,7 @@ bool Foam::autoHexMeshDriver::isMaxEdge
 
 // Stop layer growth where mesh wraps around edge with a
 // large feature angle
-void Foam::autoHexMeshDriver::handleFeatureAngleLayerTerminations
+void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
 (
     const indirectPrimitivePatch& pp,
     const scalar minCos,
@@ -444,7 +449,7 @@ void Foam::autoHexMeshDriver::handleFeatureAngleLayerTerminations
 
 // Find isolated islands (points, edges and faces and layer terminations)
 // in the layer mesh and stop any layer growth at these points.
-void Foam::autoHexMeshDriver::findIsolatedRegions
+void Foam::autoLayerDriver::findIsolatedRegions
 (
     const indirectPrimitivePatch& pp,
     const PackedList<1>& isMasterEdge,
@@ -456,6 +461,8 @@ void Foam::autoHexMeshDriver::findIsolatedRegions
     labelList& patchNLayers
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     Info<< "shrinkMeshDistance : Removing isolated regions ..." << endl;
 
     // Keep count of number of points unextruded
@@ -514,7 +521,7 @@ void Foam::autoHexMeshDriver::findIsolatedRegions
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             pp.meshPoints(),
             keptPoints,
             orEqOp<bool>(),
@@ -582,7 +589,7 @@ void Foam::autoHexMeshDriver::findIsolatedRegions
 
     syncTools::syncPointList
     (
-        mesh_,
+        mesh,
         pp.meshPoints(),
         isolatedPoint,
         plusEqOp<label>(),
@@ -650,7 +657,7 @@ void Foam::autoHexMeshDriver::findIsolatedRegions
 // medialDist  : distance to medial axis
 // medialRatio : ratio of medial distance to wall distance.
 //               (1 at wall, 0 at medial axis)
-void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
+void Foam::autoLayerDriver::medialAxisSmoothingInfo
 (
     const motionSmoother& meshMover,
     const label nSmoothNormals,
@@ -666,7 +673,8 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
     Info<< "medialAxisSmoothingInfo :"
         << " Calculate distance to Medial Axis ..." << endl;
 
-    const pointField& points = mesh_.points();
+    const polyMesh& mesh = meshMover.mesh();
+    const pointField& points = mesh.points();
     const pointMesh& pMesh = meshMover.pMesh();
 
     const indirectPrimitivePatch& pp = meshMover.patch();
@@ -677,7 +685,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
     // ~~~~~~~~~~~~~~~~~~~~~~~
 
     // Precalulate master edge (only relevant for shared edges)
-    PackedList<1> isMasterEdge(syncTools::getMasterEdges(mesh_));
+    PackedList<1> isMasterEdge(syncTools::getMasterEdges(mesh));
     // Precalculate meshEdge per pp edge
     labelList meshEdges(pp.nEdges());
 
@@ -689,8 +697,8 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
         label v1 = pp.meshPoints()[e[1]];
         meshEdges[patchEdgeI] = meshTools::findEdge
         (
-            mesh_.edges(),
-            mesh_.pointEdges()[v0],
+            mesh.edges(),
+            mesh.pointEdges()[v0],
             v0,
             v1
         );
@@ -717,7 +725,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             pointNormals,
             plusEqOp<vector>(),
@@ -727,7 +735,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
 
         syncTools::syncPointList
         (
-            mesh_,
+            mesh,
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
@@ -756,7 +764,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Distance to wall
-    List<pointData> pointWallDist(mesh_.nPoints());
+    List<pointData> pointWallDist(mesh.nPoints());
 
 
     // 1. Calculate distance to points where displacement is specified.
@@ -777,7 +785,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
         }
 
         // Do all calculations
-        List<pointData> edgeWallDist(mesh_.nEdges());
+        List<pointData> edgeWallDist(mesh.nEdges());
         PointEdgeWave<pointData> wallDistCalc
         (
             pMesh,
@@ -785,15 +793,15 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
             wallInfo,
             pointWallDist,
             edgeWallDist,
-            mesh_.nPoints()  // max iterations
+            mesh.nPoints()  // max iterations
         );
     }
 
     // 2. Find points with max distance and transport information back to
     //    wall.
     {
-        List<pointData> pointMedialDist(mesh_.nPoints());
-        List<pointData> edgeMedialDist(mesh_.nEdges());
+        List<pointData> pointMedialDist(mesh.nPoints());
+        List<pointData> edgeMedialDist(mesh.nEdges());
 
         // Seed point data.
         DynamicList<pointData> maxInfo(meshPoints.size());
@@ -801,7 +809,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
 
         // 1. Medial axis points
 
-        const edgeList& edges = mesh_.edges();
+        const edgeList& edges = mesh.edges();
 
         forAll(edges, edgeI)
         {
@@ -836,7 +844,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
 
 
         // 2. Seed non-adapt patches
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
         labelHashSet adaptPatches(meshMover.adaptPatchIDs());
 
@@ -890,7 +898,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
 
             pointMedialDist,
             edgeMedialDist,
-            mesh_.nPoints()  // max iterations
+            mesh.nPoints()  // max iterations
         );
 
         // Extract medial axis distance as pointScalarField
@@ -925,7 +933,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
         }
     }
 
-    if (debug_)
+    if (debug)
     {
         Info<< "medialAxisSmoothingInfo :"
             << " Writing:" << nl
@@ -943,7 +951,7 @@ void Foam::autoHexMeshDriver::medialAxisSmoothingInfo
 }
 
 
-void Foam::autoHexMeshDriver::shrinkMeshMedialDistance
+void Foam::autoLayerDriver::shrinkMeshMedialDistance
 (
     motionSmoother& meshMover,
     const label nSmoothThickness,
@@ -973,7 +981,7 @@ void Foam::autoHexMeshDriver::shrinkMeshMedialDistance
     const labelList& meshPoints = pp.meshPoints();
 
     // Precalulate master edge (only relevant for shared edges)
-    PackedList<1> isMasterEdge(syncTools::getMasterEdges(mesh_));
+    PackedList<1> isMasterEdge(syncTools::getMasterEdges(mesh));
     // Precalculate meshEdge per pp edge
     labelList meshEdges(pp.nEdges());
 
@@ -985,8 +993,8 @@ void Foam::autoHexMeshDriver::shrinkMeshMedialDistance
         label v1 = pp.meshPoints()[e[1]];
         meshEdges[patchEdgeI] = meshTools::findEdge
         (
-            mesh_.edges(),
-            mesh_.pointEdges()[v0],
+            mesh.edges(),
+            mesh.pointEdges()[v0],
             v0,
             v1
         );

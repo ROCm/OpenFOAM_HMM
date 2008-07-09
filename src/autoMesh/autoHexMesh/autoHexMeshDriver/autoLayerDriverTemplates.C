@@ -24,14 +24,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "autoHexMeshDriver.H"
+#include "autoLayerDriver.H"
 #include "syncTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::autoHexMeshDriver::averageNeighbours
+void Foam::autoLayerDriver::averageNeighbours
 (
+    const polyMesh& mesh,
     const PackedList<1>& isMasterEdge,
     const labelList& meshEdges,
     const labelList& meshPoints,
@@ -39,7 +40,7 @@ void Foam::autoHexMeshDriver::averageNeighbours
     const scalarField& invSumWeight,
     const Field<Type>& data,
     Field<Type>& average
-) const
+)
 {
     average = pTraits<Type>::zero;
 
@@ -60,7 +61,7 @@ void Foam::autoHexMeshDriver::averageNeighbours
 
     syncTools::syncPointList
     (
-        mesh_,
+        mesh,
         meshPoints,
         average,
         plusEqOp<Type>(),

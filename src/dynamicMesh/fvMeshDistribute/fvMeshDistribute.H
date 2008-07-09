@@ -361,7 +361,7 @@ public:
 
     // Member Functions
 
-        //- Helper funntion: count cells per processor in wanted distribution
+        //- Helper function: count cells per processor in wanted distribution
         static labelList countCells(const labelList&);
 
         //- Send cells to neighbours according to distribution
