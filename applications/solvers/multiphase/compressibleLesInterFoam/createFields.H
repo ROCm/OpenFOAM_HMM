@@ -140,7 +140,7 @@
     );
 
     volScalarField dgdt =
-        pos(alpha2)*fvc::div(phi)/max(alpha2, 0.0001);
+        pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001));
 
     // Construct interface from alpha1 distribution
     interfaceProperties interface(alpha1, U, twoPhaseProperties);
