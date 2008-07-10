@@ -28,11 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from polyMesh
-Foam::ensightParts::ensightParts
-(
-    const polyMesh& pMesh
-)
+Foam::ensightParts::ensightParts(const polyMesh& pMesh)
 :
     partsList_()
 {
@@ -40,11 +36,7 @@ Foam::ensightParts::ensightParts
 }
 
 
-// Construct from IOobject
-Foam::ensightParts::ensightParts
-(
-    const IOobject& ioObj
-)
+Foam::ensightParts::ensightParts(const IOobject& ioObj)
 :
     partsList_()
 {
@@ -61,12 +53,7 @@ Foam::ensightParts::~ensightParts()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-// clear old information and construct anew from polyMesh
-void Foam::ensightParts::recalculate
-(
-    const polyMesh& pMesh
-)
+void Foam::ensightParts::recalculate(const polyMesh& pMesh)
 {
     partsList_.clear();
 
@@ -197,7 +184,6 @@ void Foam::ensightParts::recalculate
 }
 
 
-// renumber elements
 void Foam::ensightParts::renumber
 (
     const labelList& origCellId,
@@ -218,11 +204,7 @@ void Foam::ensightParts::renumber
 }
 
 
-// write the geometry
-void Foam::ensightParts::writeGeometry
-(
-    ensightGeoFile& os
-) const
+void Foam::ensightParts::writeGeometry( ensightGeoFile& os) const
 {
     // with some feedback
     Info<< "write geometry part:" << nl << flush;
@@ -235,11 +217,7 @@ void Foam::ensightParts::writeGeometry
 }
 
 
-// write summary information about the objects
-bool Foam::ensightParts::writeSummary
-(
-    Ostream& os
-) const
+bool Foam::ensightParts::writeSummary(Ostream& os) const
 {
     forAll(partsList_, partI)
     {
@@ -250,10 +228,7 @@ bool Foam::ensightParts::writeSummary
 }
 
 
-void Foam::ensightParts::writeData
-(
-    Ostream& os
-) const
+void Foam::ensightParts::writeData(Ostream& os) const
 {
     // Write size of list
     os << nl << partsList_.size();
@@ -275,7 +250,6 @@ void Foam::ensightParts::writeData
 }
 
 
-// write scalar field
 void Foam::ensightParts::writeScalarField
 (
     ensightFile& os,
@@ -298,7 +272,6 @@ void Foam::ensightParts::writeScalarField
 }
 
 
-// write vector field components
 void Foam::ensightParts::writeVectorField
 (
     ensightFile& os,
@@ -322,8 +295,6 @@ void Foam::ensightParts::writeVectorField
     }
 }
 
-// * * * * * * * * * * * * * * * Member operators  * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 
@@ -337,6 +308,5 @@ Foam::ensightGeoFile& Foam::operator<<
     return os;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

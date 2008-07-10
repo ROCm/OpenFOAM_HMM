@@ -63,9 +63,9 @@ class ensightPart
         // Static data members
         static List<word> elemTypes_;
 
-    // Private Member Functions
 
 protected:
+
     // Protected data
 
         //- part number
@@ -91,6 +91,7 @@ protected:
 
         //- mesh reference used
         const polyMesh* meshPtr_;
+
 
     // Protected Classes
 
@@ -155,12 +156,12 @@ protected:
         ) const
         {}
 
+
 public:
 
     //- Runtime type information
     TypeName("ensightPart");
 
-    // Public data
 
     // Constructors
 
@@ -206,9 +207,9 @@ public:
         static autoPtr<ensightPart> New(Istream& is);
 
 
-    // Destructor
+    //- Destructor
+    virtual ~ensightPart();
 
-        virtual ~ensightPart();
 
     // Static members
 
@@ -216,6 +217,7 @@ public:
         {
             return elemTypes_;
         }
+
 
     // Access
 
@@ -271,6 +273,7 @@ public:
         {
             return offset_;
         }
+
 
     // Edit
 
@@ -332,7 +335,6 @@ public:
             ensightGeoFile&,
             const ensightPart&
         );
-
 };
 
 

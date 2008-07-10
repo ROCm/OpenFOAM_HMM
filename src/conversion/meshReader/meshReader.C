@@ -34,7 +34,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// Pointers to cell shape models
 const Foam::cellModel* Foam::meshReader::unknownModel = Foam::cellModeller::
 lookup
 (
@@ -65,27 +64,17 @@ lookup
     "hex"
 );
 
-// * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// attach cellZones based on the cellTable Id
-// - any other values can be extracted later from the cellTable dictionary
-void Foam::meshReader::addCellZones
-(
-    polyMesh& mesh
-) const
+void Foam::meshReader::addCellZones(polyMesh& mesh) const
 {
     cellTable_.addCellZones(mesh, cellTableId_);
     warnDuplicates("cellZones", mesh.cellZones().names());
 }
 
 
-// attach faceZones based on the monitoring boundary conditions
-void Foam::meshReader::addFaceZones
-(
-    polyMesh& mesh
-) const
+void Foam::meshReader::addFaceZones(polyMesh& mesh) const
 {
     label nZone = monitoringSets_.size();
     mesh.faceZones().setSize(nZone);
@@ -128,7 +117,6 @@ void Foam::meshReader::addFaceZones
 }
 
 
-// create and access the polyMesh
 Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
 (
     const objectRegistry& registry
@@ -172,7 +160,6 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
 }
 
 
-//- write the polyMesh
 void Foam::meshReader::writeMesh
 (
     const polyMesh& mesh,
@@ -199,7 +186,6 @@ void Foam::meshReader::writeMesh
 }
 
 
-// Clear extra storage before creation of the mesh to reduce the memory usage
 void Foam::meshReader::clearExtraStorage()
 {
     cellFaces_.clear();
@@ -241,14 +227,13 @@ Foam::meshReader::meshReader
     cellTable_()
 {}
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::meshReader::~meshReader()
 {
     deleteDemandDrivenData(pointCellsPtr_);
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

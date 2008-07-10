@@ -66,6 +66,7 @@ class ensightParts
         //- Disallow default bitwise assignment
         void operator=(const ensightParts&);
 
+
 public:
 
     // Constructors
@@ -76,9 +77,12 @@ public:
         //- Construct from IOobject
         ensightParts(const IOobject&);
 
-    // Destructor
 
-        ~ensightParts();
+    //- Destructor
+    ~ensightParts();
+
+
+    // Member functions
 
         //- clear old information and construct anew from polyMesh
         void recalculate(const polyMesh&);
@@ -132,6 +136,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
 
+
     // Friend Operators
 
         friend ensightGeoFile& operator<<
@@ -139,7 +144,6 @@ public:
             ensightGeoFile&,
             const ensightParts&
         );
-
 };
 
 

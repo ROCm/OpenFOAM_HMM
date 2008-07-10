@@ -52,8 +52,6 @@ class ensightPartCells
 :
     public ensightPart
 {
-    // Private data
-
     // Private Member Functions
 
         //- Disallow default bitwise assignment
@@ -76,6 +74,7 @@ class ensightPartCells
             const labelList& idList,
             const labelList& pointMap
         ) const;
+
 
 protected:
 
@@ -135,9 +134,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~ensightPartCells();
+    //- Destructor
+    virtual ~ensightPartCells();
 
 
     // Member Functions
@@ -147,7 +145,6 @@ public:
         {
             return elemTypes_;
         }
-
 };
 
 

@@ -51,6 +51,7 @@ SourceFiles
     createPolyCells.C
     meshReader.C
     meshReaderAux.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef meshReader_H
@@ -74,54 +75,69 @@ namespace Foam
 class meshReader
 {
 protected:
-    //- identify cell faces in terms of cell Id and face Id
+
+    //- Identify cell faces in terms of cell Id and face Id
     class cellFaceIdentifier
     {
     public:
-        //- cell Id
-        label cell;
+        // Public data
 
-        //- face Id
-        label face;
+            //- Cell Id
+            label cell;
 
-        //- Construct null
-        cellFaceIdentifier() : cell(-1), face(-1) {}
+            //- Face Id
+            label face;
 
-        //- Construct from cell/face components
-        cellFaceIdentifier(label c, label f) : cell(c), face(f) {}
+
+        // Constructors
+
+            //- Construct null
+            cellFaceIdentifier() : cell(-1), face(-1) {}
+
+            //- Construct from cell/face components
+            cellFaceIdentifier(label c, label f) : cell(c), face(f) {}
+
 
         // Check
 
-        //- used if cell or face are non-negative
-        bool used() const
-        {
-            return (cell >= 0 && face >= 0);
-        }
+            //- Used if cell or face are non-negative
+            bool used() const
+            {
+                return (cell >= 0 && face >= 0);
+            }
 
-        //- unsed if cell or face are negative
-        bool unused() const
-        {
-            return (cell < 0 || face < 0);
-        }
+            //- Unused if cell or face are negative
+            bool unused() const
+            {
+                return (cell < 0 || face < 0);
+            }
+
 
         // Member Operators
-        bool operator!=(const cellFaceIdentifier& cf) const
-        {
-            return (cell != cf.cell || face != cf.face);
-        }
 
-        bool operator==(const cellFaceIdentifier& cf) const
-        {
-            return (cell == cf.cell && face == cf.face);
-        }
+            bool operator!=(const cellFaceIdentifier& cf) const
+            {
+                return (cell != cf.cell || face != cf.face);
+            }
+
+            bool operator==(const cellFaceIdentifier& cf) const
+            {
+                return (cell == cf.cell && face == cf.face);
+            }
 
         // IOstream Operators
-        friend Ostream& operator<<(Ostream& os, const cellFaceIdentifier& cf)
-        {
-            os << "(" << cf.cell << "/" << cf.face << ")";
-            return os;
-        }
-    };
+
+            friend Ostream& operator<<
+            (
+                Ostream& os,
+                const cellFaceIdentifier& cf
+            )
+            {
+                os << "(" << cf.cell << "/" << cf.face << ")";
+                return os;
+            }
+        };
+
 
 private:
 
@@ -154,6 +170,7 @@ private:
         //- Face sets for monitoring
         HashTable<List<label>, word, string::hash> monitoringSets_;
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -170,7 +187,7 @@ private:
         //- Make polyhedral cells and global faces if the mesh is polyhedral
         void createPolyCells();
 
-        //- add in boundary face
+        //- Add in boundary face
         void addPolyBoundaryFace
         (
             const label cellId,
@@ -178,17 +195,17 @@ private:
             const label nCreatedFaces
         );
 
-        //- add in boundary face
+        //- Add in boundary face
         void addPolyBoundaryFace
         (
             const cellFaceIdentifier& identifier,
             const label nCreatedFaces
         );
 
-        //- add cellZones based on cellTable Id
+        //- Add cellZones based on cellTable Id
         void addCellZones(polyMesh&) const;
 
-        //- add faceZones based on monitoring boundary conditions
+        //- Add faceZones based on monitoring boundary conditions
         void addFaceZones(polyMesh&) const;
 
         //- Make polyhedral boundary from shape boundary
@@ -204,7 +221,7 @@ private:
 
         void writeInterfaces(const objectRegistry&) const;
 
-        // write List<label> in constant/polyMesh
+        //- Write List<label> in constant/polyMesh
         void writeMeshLabelList
         (
             const objectRegistry& registry,
@@ -219,7 +236,9 @@ private:
             return const_cast<faceListList&>(cellFaces_);
         }
 
+
 protected:
+
     // Protected data
 
         //- Pointers to cell shape models
@@ -229,19 +248,19 @@ protected:
         static const cellModel* prismModel;
         static const cellModel* hexModel;
 
-        //- referenced filename
+        //- Referenced filename
         fileName geometryFile_;
 
-        //- geometry scaling
+        //- Geometry scaling
         scalar scaleFactor_;
 
         //- Points supporting the mesh
         pointField points_;
 
-        //- lookup original Cell number for a given cell
+        //- Lookup original Cell number for a given cell
         labelList origCellId_;
 
-        //- identify boundary faces by cells and their faces
+        //- Identify boundary faces by cells and their faces
         //  for each patch
         List<List<cellFaceIdentifier> > boundaryIds_;
 
@@ -260,19 +279,17 @@ protected:
         //- List of each baffle face
         faceList baffleFaces_;
 
-        // cell table id for each cell
+        //- Cell table id for each cell
         labelList cellTableId_;
 
-        // cell table persistent data saved as a dictionary
+        //- Cell table persistent data saved as a dictionary
         cellTable cellTable_;
+
 
     // Member Functions
 
-        //- subclasses are required to supply this information
-        virtual bool readGeometry
-        (
-            const scalar scaleFactor = 1.0
-        ) = 0;
+        //- Subclasses are required to supply this information
+        virtual bool readGeometry(const scalar scaleFactor = 1.0) = 0;
 
         //- Return mesh points
         pointField& points() const
@@ -280,23 +297,28 @@ protected:
             return const_cast<pointField&>(points_);
         }
 
+
 public:
+
     // Static Members
 
-        //- warn about repeated names
+        //- Warn about repeated names
         static void warnDuplicates(const word& context, const wordList&);
+
 
     // Constructors
 
         //- Construct from fileName
         meshReader(const fileName&, const scalar scaleFactor = 1.0);
 
-    // Destructor
-        virtual ~meshReader();
+
+    //- Destructor
+    virtual ~meshReader();
+
 
     // Member Functions
 
-        //- create and return polyMesh
+        //- Create and return polyMesh
         virtual autoPtr<polyMesh> mesh(const objectRegistry&);
 
         //- Write auxiliary information
@@ -309,6 +331,7 @@ public:
             IOstream::streamFormat fmt = IOstream::BINARY
         ) const;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

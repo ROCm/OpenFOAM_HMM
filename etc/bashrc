@@ -32,8 +32,8 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-#export WM_PROJECT_VERSION=dev
-: ${WM_PROJECT_VERSION:=dev}; export WM_PROJECT_VERSION
+export WM_PROJECT_VERSION=1.5
+#: ${WM_PROJECT_VERSION:=dev}; export WM_PROJECT_VERSION
 
 
 #!!User:

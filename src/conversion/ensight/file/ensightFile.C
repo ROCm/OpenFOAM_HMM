@@ -28,16 +28,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// allow undef in results
 bool Foam::ensightFile::allowUndef_ = false;
 
-// value to represent undef in results
 Foam::scalar Foam::ensightFile::undefValue_ = Foam::floatScalarVGREAT;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from pathname
 Foam::ensightFile::ensightFile
 (
     const fileName& pathname,
@@ -54,6 +50,7 @@ Foam::ensightFile::ensightFile
     );
     precision(5);
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -88,7 +85,6 @@ Foam::scalar Foam::ensightFile::undefValue(const scalar& value)
 }
 
 
-// binary write
 Foam::Ostream& Foam::ensightFile::write
 (
     const char* buf,
@@ -100,11 +96,7 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-// write string as "%80s" or as binary
-Foam::Ostream& Foam::ensightFile::write
-(
-    const string& value
-)
+Foam::Ostream& Foam::ensightFile::write(const string& value)
 {
     char buf[80];
 
@@ -141,11 +133,7 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-// write integer as "%10d" or as binary
-Foam::Ostream& Foam::ensightFile::write
-(
-    const label& value
-)
+Foam::Ostream& Foam::ensightFile::write(const label& value)
 {
     if (format() == IOstream::BINARY)
     {
@@ -167,7 +155,6 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-// write integer with specified width or as binary
 Foam::Ostream& Foam::ensightFile::write
 (
     const label& value,
@@ -194,11 +181,7 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-// write float as "%12.5e" or as binary
-Foam::Ostream& Foam::ensightFile::write
-(
-    const scalar& value
-)
+Foam::Ostream& Foam::ensightFile::write(const scalar& value)
 {
     if (format() == IOstream::BINARY)
     {
@@ -220,7 +203,6 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-// Add carriage return to ascii stream
 void Foam::ensightFile::newline()
 {
     if (format() == IOstream::ASCII)
@@ -230,7 +212,6 @@ void Foam::ensightFile::newline()
 }
 
 
-// write undef value
 Foam::Ostream& Foam::ensightFile::writeUndef()
 {
     write(undefValue_);
@@ -238,11 +219,7 @@ Foam::Ostream& Foam::ensightFile::writeUndef()
 }
 
 
-// write element keyword with trailing newline, optionally with undef
-Foam::Ostream& Foam::ensightFile::writeKeyword
-(
-    const string& key
-)
+Foam::Ostream& Foam::ensightFile::writeKeyword(const string& key)
 {
     if (allowUndef_)
     {
@@ -260,7 +237,6 @@ Foam::Ostream& Foam::ensightFile::writeKeyword
 }
 
 
-// write "C Binary" for binary files
 Foam::Ostream& Foam::ensightFile::writeBinaryHeader()
 {
     if (format() == IOstream::BINARY)
@@ -274,8 +250,6 @@ Foam::Ostream& Foam::ensightFile::writeBinaryHeader()
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-
-// '*' mask appropriate for subDir
 Foam::string Foam::ensightFile::mask()
 {
     char buf[16] = "********";
@@ -283,7 +257,6 @@ Foam::string Foam::ensightFile::mask()
 }
 
 
-// consistent zero-padded numbers for subdirectories
 Foam::string Foam::ensightFile::subDir(const label n)
 {
     char buf[16];
@@ -292,7 +265,5 @@ Foam::string Foam::ensightFile::subDir(const label n)
     return buf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

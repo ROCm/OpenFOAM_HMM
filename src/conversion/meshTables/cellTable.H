@@ -80,7 +80,9 @@ class cellTable
     public Map<dictionary>
 {
     // Private data
-        static const char* const defaultMaterial_;
+
+       static const char* const defaultMaterial_;
+
 
     // Private Member Functions
 
@@ -98,8 +100,8 @@ class cellTable
         //- Disallow default bitwise copy construct
         cellTable(const cellTable&);
 
+
 public:
-    // Static Members
 
     // Constructors
 
@@ -115,8 +117,8 @@ public:
         );
 
 
-    // Destructor
-        ~cellTable();
+    //- Destructor
+    ~cellTable();
 
 
     // Member Functions
@@ -175,6 +177,7 @@ public:
             const fileName& instance = "constant"
         ) const;
 
+
     // Member Operators
 
         //- Assignment
@@ -195,12 +198,13 @@ public:
         //- Combine tableIds together
         //  each dictionary entry is a wordList
         void combine(const dictionary&, labelList& tableIds);
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

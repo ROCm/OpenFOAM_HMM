@@ -33,7 +33,6 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// write the part header
 void Foam::ensightPart::writeHeader
 (
     ensightFile& os,
@@ -54,7 +53,6 @@ void Foam::ensightPart::writeHeader
 }
 
 
-// write scalar field for idList
 void Foam::ensightPart::writeFieldList
 (
     ensightFile& os,
@@ -80,12 +78,7 @@ void Foam::ensightPart::writeFieldList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-// write summary information about the object
-bool Foam::ensightPart::writeSummary
-(
-    Ostream& os
-) const
+bool Foam::ensightPart::writeSummary(Ostream& os) const
 {
     os  << indent << type() << nl
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
@@ -102,11 +95,7 @@ bool Foam::ensightPart::writeSummary
 }
 
 
-// write reconstruction information for the object
-bool Foam::ensightPart::writeData
-(
-    Ostream& os
-) const
+bool Foam::ensightPart::writeData(Ostream& os) const
 {
     os  << indent << type() << nl
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
@@ -130,12 +119,7 @@ bool Foam::ensightPart::writeData
 }
 
 
-
-// write geometry by components
-void Foam::ensightPart::writeGeometry
-(
-    ensightGeoFile& os
-) const
+void Foam::ensightPart::writeGeometry(ensightGeoFile& os) const
 {
     if (size() && meshPtr_)
     {
@@ -182,7 +166,6 @@ void Foam::ensightPart::writeGeometry
 }
 
 
-// write scalar field
 void Foam::ensightPart::writeScalarField
 (
     ensightFile& os,
@@ -207,7 +190,6 @@ void Foam::ensightPart::writeScalarField
 }
 
 
-// write vector field components
 void Foam::ensightPart::writeVectorField
 (
     ensightFile& os,
@@ -259,6 +241,5 @@ Foam::ensightGeoFile& Foam::operator<<
     return os;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

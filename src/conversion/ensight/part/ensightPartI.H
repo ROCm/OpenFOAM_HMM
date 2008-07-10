@@ -31,7 +31,6 @@ Description
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-// write generalized field components
 template <class Type>
 void Foam::ensightPart::writeField
 (
@@ -65,7 +64,5 @@ void Foam::ensightPart::writeField
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

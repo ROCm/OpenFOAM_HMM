@@ -30,11 +30,14 @@ Description
     Correctly handles binary write as well.
 
 \*---------------------------------------------------------------------------*/
+
 #ifndef ensightFile_H
 #define ensightFile_H
 
 #include "OFstream.H"
 #include "IOstream.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -47,19 +50,26 @@ class ensightFile
 :
     public OFstream
 {
-    //- allow undef in results
-    static bool allowUndef_;
+    // Private data
 
-    //- value to represent undef in results
-    static scalar undefValue_;
+        //- allow undef in results
+        static bool allowUndef_;
 
-    //- Disallow default bitwise assignment
-    void operator=(const ensightFile&);
+        //- value to represent undef in results
+        static scalar undefValue_;
 
-    //- Disallow default copy constructor
-    ensightFile(const ensightFile&);
+
+    // Private member functions
+
+        //- Disallow default bitwise assignment
+        void operator=(const ensightFile&);
+
+        //- Disallow default copy constructor
+        ensightFile(const ensightFile&);
+
 
 public:
+
     // Constructors
 
         //- Construct from pathname
@@ -69,10 +79,13 @@ public:
             IOstream::streamFormat format=IOstream::BINARY
         );
 
+
     // Destructor
-        ~ensightFile();
+    ~ensightFile();
+
 
     // Access
+
         //- Return setting for whether 'undef' values are allowed in results
         static bool allowUndef();
 
@@ -82,13 +95,16 @@ public:
         //- consistent zero-padded numbers for subdirectories
         static string subDir(const label);
 
+
     // Edit
+
         static bool allowUndef(bool);
 
         //- Assign the value to represent undef in the results
         //  Returns the previous value
         //  NB: do not use values larger than floatScalarVGREAT
         static scalar undefValue(const scalar&);
+
 
     // Output
 
@@ -124,6 +140,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

@@ -42,7 +42,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// add in boundary face
 void Foam::meshReader::addPolyBoundaryFace
 (
     const label cellId,
@@ -86,7 +85,6 @@ void Foam::meshReader::addPolyBoundaryFace
 }
 
 
-// add in boundary face
 void Foam::meshReader::addPolyBoundaryFace
 (
     const cellFaceIdentifier& identifier,
@@ -95,6 +93,7 @@ void Foam::meshReader::addPolyBoundaryFace
 {
     addPolyBoundaryFace(identifier.cell, identifier.face, nCreatedFaces);
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -370,6 +369,7 @@ void Foam::meshReader::createPolyBoundary()
         << "Number of interfaces: " << nInterfaces << endl;
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::List<Foam::polyPatch*>
@@ -445,6 +445,5 @@ Foam::meshReader::polyBoundaryPatches(const polyMesh& mesh)
     return p;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

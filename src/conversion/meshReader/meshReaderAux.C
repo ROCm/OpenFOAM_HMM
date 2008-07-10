@@ -23,17 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \*----------------------------------------------------------------------------*/
+
 #include "meshReader.H"
 #include "IOMap.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * //
 
-// warn about duplicate names
 void Foam::meshReader::warnDuplicates
 (
     const word& context,
@@ -76,8 +73,6 @@ void Foam::meshReader::warnDuplicates
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
-// write interface (baffle) mapping
 void Foam::meshReader::writeInterfaces(const objectRegistry& registry) const
 {
     // write constant/polyMesh/interface
@@ -103,14 +98,12 @@ void Foam::meshReader::writeInterfaces(const objectRegistry& registry) const
     ioObj.writeHeader(os);
 
     os  << interfaces_
-        << "// ************************************************************************* //"
+        << "// *************************************"
+        << "************************************ //"
         << endl;
-
 }
 
 
-// write List<label> in constant/polyMesh
-// this is crucial for later conversion back to ccm/starcd
 void Foam::meshReader::writeMeshLabelList
 (
     const objectRegistry& registry,
@@ -151,6 +144,7 @@ void Foam::meshReader::writeMeshLabelList
     );
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::meshReader::writeAux(const objectRegistry& registry) const
@@ -178,11 +172,5 @@ void Foam::meshReader::writeAux(const objectRegistry& registry) const
     );
 }
 
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //
