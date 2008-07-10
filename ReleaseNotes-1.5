@@ -85,15 +85,17 @@
   + Demonstration SRFSimpleFoam solver based on simpleFoam that incorporates the
     SRF extensions (see below) for rotating flows.
 
+* Automatic mesher
+  New snappyHexMesh utility that generates split-hex meshes automatically from
+  triangulated (STL) surface geometries.  The mesh approximately conforms to
+  the surface by iteratively refining a starting mesh and morphing the
+  resulting split-hex mesh to the surface.  An optional phase will shrink back
+  the resulting mesh and insert cell layers.  It has a flexible specification
+  of mesh refinement level and robust surface handling with a pre-specified
+  final mesh quality.  It runs in parallel with a load balancing step every
+  iteration.
+
 * Developments to utilities
-  + New snappyHexMesh utility that generates split-hex meshes automatically from
-    triangulated (STL) surface geometries.  The mesh approximately conforms to
-    the surface by iteratively refining a starting mesh and morphing the
-    resulting split-hex mesh to the surface.  An optional phase will shrink back
-    the resulting mesh and insert cell layers.  It has a flexible specification
-    of mesh refinement level and robust surface handling with a pre-specified
-    final mesh quality.  It runs in parallel with a load balancing step every
-    iteration.
   + New extrude2DMesh utility that extrudes 2D meshes into a 3D mesh.  2D meshes
     are described by faces with 2 points, so can be used in combination with 2D
     meshes converted with ccm26ToFoam.
