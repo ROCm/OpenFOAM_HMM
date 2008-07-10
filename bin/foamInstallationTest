@@ -34,11 +34,10 @@
 
 # SETTINGS
 #~~~~~~~~~
-FOAM_VERSION=1.4.2
-GCC_VERSION=4.2.2
+FOAM_VERSION=1.5
+GCC_VERSION=4.3.1
 GZIP_VERSION=1.3.5
 GTAR_VERSION=1.13.25
-JAVA_VERSION=1.4.2+
 
 #GLOBAL VARIABLES
 FATALERROR=0
@@ -475,7 +474,7 @@ case ${USER_CONFIG_TYPE} in
     bashrc) SRC_STR=".";;
 esac
 #
-SOURCE_FOAM_CONFIG=`grep "^${SRC_STR}.*OpenFOAM-${FOAM_VERSION}/${USER_CONFIG_TYPE}" ${USER_CONFIG_FILE}`
+SOURCE_FOAM_CONFIG=`grep "^${SRC_STR}.*OpenFOAM-${FOAM_VERSION}/etc/${USER_CONFIG_TYPE}" ${USER_CONFIG_FILE}`
 #
 if [ ! "$SOURCE_FOAM_CONFIG" = "" ] ; then
     echo "`fixlen "Foam_config:" $WIDTH` "$FOAM_CONFIG_FILE sourced correctly.""
@@ -531,7 +530,6 @@ reportEnv '$FOAM_APPBIN'      '$PATH' "yes"
 reportEnv '$WM_DIR'           '$PATH' "yes"
 reportEnv '$CEI_HOME'         '$PATH' "no"
 echo ""
-reportEnv '$JAVA_PATH'        '$PATH' "no"
 reportEnv '$MPI_ARCH_PATH'    '$PATH' "yes"
 hline #--------------------
 #
@@ -554,7 +552,6 @@ hline #--------------------
 echo "$COL1 $COL2 $COL3"
 hline #--------------------
 reportExecutable gcc "${WM_COMPILER_DIR}/bin/gcc"
-reportExecutable java "${JAVA_HOME}/bin/java"
 reportExecutable gzip
 if [ "$OS" = "Linux" ]  ; then
     reportExecutable tar
