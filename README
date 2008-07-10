@@ -1,9 +1,10 @@
-                             -*- mode: org; -*-
-
+#                            -*- mode: org; -*-
+#
 #+TITLE:             *OpenFOAM README for version 1.5*
 #+AUTHOR:                      OpenCFD Ltd.
 #+DATE:                        10 July 2008
 #+LINK:                  http://www.opencfd.co.uk
+#+OPTIONS: author:nil
 
 * Copyright
   OpenFOAM is free software; you can redistribute it and/or modify it under the
