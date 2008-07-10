@@ -103,12 +103,9 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
     const LESModel& sgsModel
         = db().lookupObject<LESModel>("LESProperties");
 
-    scalar kappa = dimensionedScalar(sgsModel.lookup("kappa")).value();
+    scalar kappa = readScalar(sgsModel.lookup("kappa"));
 
-    scalar E = dimensionedScalar
-    (
-        sgsModel.subDict("wallFunctionCoeffs").lookup("E")
-    ).value();
+    scalar E = readScalar(sgsModel.subDict("wallFunctionCoeffs").lookup("E"));
 
     const scalarField& ry = patch().deltaCoeffs();
 
