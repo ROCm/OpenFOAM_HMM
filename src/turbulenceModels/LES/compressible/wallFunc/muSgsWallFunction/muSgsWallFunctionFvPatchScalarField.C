@@ -116,7 +116,7 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
 
     scalar kappa = readScalar(sgsModel.lookup("kappa"));
 
-    scalar E = readScalar(sgsModel.subDict("wallFunctionCoeffs"));
+    scalar E = readScalar(sgsModel.subDict("wallFunctionCoeffs").lookup("E"));
 
     const scalarField& ry = patch().deltaCoeffs();
 
