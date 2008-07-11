@@ -24,7 +24,7 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     buildParaView
+#     buildParaView3.3-cvs
 #
 # Description
 #     Build and install ParaView
@@ -38,31 +38,56 @@
 
 PARAVIEW_SRC="ParaView3.3-cvs"
 PARAVIEW_MAJOR_VERSION="3.3"
-
 VERBOSE=OFF
-INCLUDE_MPI=ON
+
+
+# User options
+# ~~~~~~~~~~~~
+
+# MPI suport
+INCLUDE_MPI=OFF
 MPI_MAX_PROCS=32
+
+# Python
+# note: script will try to determine python library. If it fails, specify the
+#       path using the PYTHON_LIBRARY variable
 INCLUDE_PYTHON=OFF
 #PYTHON_LIBRARY="/usr/lib64/libpython2.5.so.1.0"
 PYTHON_LIBRARY=""
+
+# MESA graphics
 INCLUDE_MESA=OFF
+
+
+# No further editing should be required below this line
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 set +x
 
-# provide a shortcut for repeated builds - use with caution
+# Provide a shortcut for repeated builds - use with caution
 if [ "$#" -gt 0 ]
 then
    CMAKE_SKIP=YES
 fi
 
+
+# Initialisation
+#~~~~~~~~~~~~~~~
 initialiseVariables
 
+
+# Set configure options
+#~~~~~~~~~~~~~~~~~~~~~~
 addMpiSupport       # set MPI specific options
 addPythonSupport    # set python specific options
 addMesaSupport      # set MESA specific options
 
+
+# Build and install
+# ~~~~~~~~~~~~~~~~~
 buildParaView
 installParaView
+
 
 echo "done"
 
