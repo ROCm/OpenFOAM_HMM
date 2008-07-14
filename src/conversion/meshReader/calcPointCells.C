@@ -177,7 +177,5 @@ const Foam::labelListList& Foam::meshReader::pointCells() const
     return *pointCellsPtr_;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // ************************************************************************* //

@@ -1004,120 +1004,124 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
     const refinementSurfaces& surfaces = meshRefiner_.surfaces();
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    // Divide surfaces into zoned and unzoned
-    labelList zonedSurfaces;
-    labelList unzonedSurfaces;
-    getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
-
     // Displacement per patch point
     vectorField patchDisp(localPoints.size(), vector::zero);
 
 
-    // 1. All points to non-interface surfaces
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    if (returnReduce(localPoints.size(), sumOp<label>()) > 0)
     {
-        List<pointIndexHit> hitInfo;
-        labelList hitSurface;
-        surfaces.findNearest
-        (
-            unzonedSurfaces,
-            localPoints,
-            sqr(4*snapDist),        // sqr of attract distance
-            hitSurface,
-            hitInfo
-        );
+        // Divide surfaces into zoned and unzoned
+        labelList zonedSurfaces;
+        labelList unzonedSurfaces;
+        getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
 
-        forAll(hitInfo, pointI)
+
+        // 1. All points to non-interface surfaces
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         {
-            if (hitInfo[pointI].hit())
-            {
-                patchDisp[pointI] =
-                    hitInfo[pointI].hitPoint()
-                  - localPoints[pointI];
-            }
-            //else
-            //{
-            //   WarningIn("autoSnapDriver::calcNearestSurface(..)")
-            //        << "For point:" << pointI
-            //        << " coordinate:" << localPoints[pointI]
-            //        << " did not find any surface within:"
-            //        << 4*snapDist[pointI]
-            //        << " meter." << endl;
-            //}
-        }
-    }
-
-
-
-    // 2. All points on zones to their respective surface
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Surfaces with zone information
-    const wordList& faceZoneNames = surfaces.faceZoneNames();
-
-    forAll(zonedSurfaces, i)
-    {
-        label zoneSurfI = zonedSurfaces[i];
-
-        const labelList surfacesToTest(1, zoneSurfI);
-
-        // Get indices of points both on faceZone and on pp.
-        labelList zonePointIndices
-        (
-            getZoneSurfacePoints
+            List<pointIndexHit> hitInfo;
+            labelList hitSurface;
+            surfaces.findNearest
             (
-                pp,
-                faceZoneNames[zoneSurfI]
-            )
-        );
+                unzonedSurfaces,
+                localPoints,
+                sqr(4*snapDist),        // sqr of attract distance
+                hitSurface,
+                hitInfo
+            );
 
-        pointField zonePoints(zonePointIndices.size());
-        forAll(zonePointIndices, i)
-        {
-            zonePoints[i] = localPoints[zonePointIndices[i]];
-        }
-
-        // Find nearest for points both on faceZone and pp.
-        List<pointIndexHit> hitInfo;
-        labelList hitSurface;
-        surfaces.findNearest
-        (
-            labelList(1, zoneSurfI),
-            zonePoints,
-            sqr(4*snapDist),
-            hitSurface,
-            hitInfo
-        );
-
-        forAll(hitInfo, pointI)
-        {
-            if (hitInfo[pointI].hit())
+            forAll(hitInfo, pointI)
             {
-                patchDisp[pointI] =
-                    hitInfo[pointI].hitPoint()
-                  - localPoints[pointI];
-            }
-            else
-            {
-                WarningIn("autoSnapDriver::calcNearestSurface(..)")
-                    << "For point:" << pointI
-                    << " coordinate:" << localPoints[pointI]
-                    << " did not find any surface within:"
-                    << 4*snapDist[pointI]
-                    << " meter." << endl;
+                if (hitInfo[pointI].hit())
+                {
+                    patchDisp[pointI] =
+                        hitInfo[pointI].hitPoint()
+                      - localPoints[pointI];
+                }
+                //else
+                //{
+                //   WarningIn("autoSnapDriver::calcNearestSurface(..)")
+                //        << "For point:" << pointI
+                //        << " coordinate:" << localPoints[pointI]
+                //        << " did not find any surface within:"
+                //        << 4*snapDist[pointI]
+                //        << " meter." << endl;
+                //}
             }
         }
-    }
 
 
-    {
-        scalarField magDisp(mag(patchDisp));
 
-        Info<< "Wanted displacement : average:"
-            << gSum(magDisp)/returnReduce(patchDisp.size(), sumOp<label>())
-            << " min:" << gMin(magDisp)
-            << " max:" << gMax(magDisp) << endl;
+        // 2. All points on zones to their respective surface
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // Surfaces with zone information
+        const wordList& faceZoneNames = surfaces.faceZoneNames();
+
+        forAll(zonedSurfaces, i)
+        {
+            label zoneSurfI = zonedSurfaces[i];
+
+            const labelList surfacesToTest(1, zoneSurfI);
+
+            // Get indices of points both on faceZone and on pp.
+            labelList zonePointIndices
+            (
+                getZoneSurfacePoints
+                (
+                    pp,
+                    faceZoneNames[zoneSurfI]
+                )
+            );
+
+            pointField zonePoints(zonePointIndices.size());
+            forAll(zonePointIndices, i)
+            {
+                zonePoints[i] = localPoints[zonePointIndices[i]];
+            }
+
+            // Find nearest for points both on faceZone and pp.
+            List<pointIndexHit> hitInfo;
+            labelList hitSurface;
+            surfaces.findNearest
+            (
+                labelList(1, zoneSurfI),
+                zonePoints,
+                sqr(4*snapDist),
+                hitSurface,
+                hitInfo
+            );
+
+            forAll(hitInfo, pointI)
+            {
+                if (hitInfo[pointI].hit())
+                {
+                    patchDisp[pointI] =
+                        hitInfo[pointI].hitPoint()
+                      - localPoints[pointI];
+                }
+                else
+                {
+                    WarningIn("autoSnapDriver::calcNearestSurface(..)")
+                        << "For point:" << pointI
+                        << " coordinate:" << localPoints[pointI]
+                        << " did not find any surface within:"
+                        << 4*snapDist[pointI]
+                        << " meter." << endl;
+                }
+            }
+        }
+
+
+        {
+            scalarField magDisp(mag(patchDisp));
+
+            Info<< "Wanted displacement : average:"
+                << gSum(magDisp)/returnReduce(patchDisp.size(), sumOp<label>())
+                << " min:" << gMin(magDisp)
+                << " max:" << gMax(magDisp) << endl;
+        }
     }
 
     Info<< "Calculated surface displacement in = "

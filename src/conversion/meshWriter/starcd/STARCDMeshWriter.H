@@ -64,7 +64,9 @@ class STARCD
     public meshWriter
 {
     // Private Data
+
         static const char* defaultBoundaryName;
+
 
     // Private Member Functions
 
@@ -74,21 +76,22 @@ class STARCD
         //- Disallow default bitwise assignment
         void operator=(const STARCD&);
 
-        //- pro-STAR 4+ header format
+        //- Pro-STAR 4+ header format
         static void writeHeader(Ostream&, const char* filetype);
 
-        //- write points
+        //- Write points
         void writePoints(const fileName& baseName) const;
 
-        //- write cells
+        //- Write cells
         void writeCells(const fileName& baseName) const;
 
-        //- write boundary
+        //- Write boundary
         void writeBoundary(const fileName& baseName) const;
 
         void getCellTable();
 
         label findDefaultBoundary() const;
+
 
 public:
 
@@ -100,65 +103,47 @@ public:
 
     // Constructors
 
-        //- open a file for writing
+        //- Open a file for writing
         STARCD
         (
             const polyMesh&,
             const scalar scaleFactor = 1.0
         );
 
-    // Selectors
 
-    // Destructor
-
-        virtual ~STARCD();
+    //- Destructor
+    virtual ~STARCD();
 
 
     // Member Functions
 
-        // Access
-
-        // Check
-
         // Edit
+
+            //- Remove STAR-CD files for the baseName
+            void rmFiles(const fileName& baseName) const;
+
 
         // Write
 
+            //- Write volume mesh
+            virtual bool write
+            (
+                const fileName& meshName = fileName::null
+            ) const;
 
-        //- Remove STAR-CD files for the baseName
-        void rmFiles(const fileName& baseName) const;
-
-        //- write volume mesh
-        virtual bool write
-        (
-            const fileName& meshName = fileName::null
-        ) const;
-
-        //- write surface mesh with optional triangulation
-        virtual bool writeSurface
-        (
-            const fileName& meshName = fileName::null,
-            const bool& triangulate = false
-        ) const;
-
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
+            //- Write surface mesh with optional triangulation
+            virtual bool writeSurface
+            (
+                const fileName& meshName = fileName::null,
+                const bool& triangulate = false
+            ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace meshWriters
-
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

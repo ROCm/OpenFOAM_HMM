@@ -72,15 +72,13 @@ class boundaryRegion
 :
     public Map<dictionary>
 {
-    // Private data
-
     // Private Member Functions
 
-    //- Disallow default bitwise copy construct
-    boundaryRegion(const boundaryRegion&);
+        //- Disallow default bitwise copy construct
+        boundaryRegion(const boundaryRegion&);
+
 
 public:
-    // Static Members
 
     // Constructors
 
@@ -96,8 +94,8 @@ public:
         );
 
 
-    // Destructor
-        ~boundaryRegion();
+    //- Destructor
+    ~boundaryRegion();
 
 
     // Member Functions
@@ -126,7 +124,6 @@ public:
             const fileName& instance = "constant"
         );
 
-
         //- Write constant/boundaryRegion for later reuse
         void writeDict
         (
@@ -153,12 +150,13 @@ public:
         //      newPatchName    originalName;
         //  @endverbatim
         void rename(const dictionary&);
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

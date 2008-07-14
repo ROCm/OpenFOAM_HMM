@@ -31,6 +31,7 @@ Description
     - standard connectivity checks
 
     - added baffle support
+
 \*---------------------------------------------------------------------------*/
 
 #include "meshReader.H"
@@ -325,6 +326,5 @@ void Foam::meshReader::createPolyCells()
     // added in createPolyBoundary()
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

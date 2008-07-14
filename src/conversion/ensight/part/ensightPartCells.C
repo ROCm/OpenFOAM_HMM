@@ -40,7 +40,6 @@ namespace Foam
    addToRunTimeSelectionTable(ensightPart, ensightPartCells, istream);
 }
 
-// names for addressable ensight element types
 Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
 (
     IStringStream
@@ -52,11 +51,7 @@ Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// classify the cell types, track the points used
-void Foam::ensightPartCells::classify
-(
-    const labelList& idList
-)
+void Foam::ensightPartCells::classify(const labelList& idList)
 {
     // References to cell shape models
     const cellModel& tet   = *(cellModeller::lookup("tet"));
@@ -229,7 +224,6 @@ void Foam::ensightPartCells::classify
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct empty part with number and description
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
@@ -240,7 +234,6 @@ Foam::ensightPartCells::ensightPartCells
 {}
 
 
-// Construct from polyMesh without zones
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
@@ -253,7 +246,6 @@ Foam::ensightPartCells::ensightPartCells
 }
 
 
-// Construct from polyMesh and list of (non-zoned) cells
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
@@ -267,7 +259,6 @@ Foam::ensightPartCells::ensightPartCells
 }
 
 
-// Construct from polyMesh and cellZone
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
@@ -281,21 +272,13 @@ Foam::ensightPartCells::ensightPartCells
 }
 
 
-// Construct as copy
-Foam::ensightPartCells::ensightPartCells
-(
-    const ensightPartCells& part
-)
+Foam::ensightPartCells::ensightPartCells(const ensightPartCells& part)
 :
     ensightPart(part)
 {}
 
 
-// Construct from Istream
-Foam::ensightPartCells::ensightPartCells
-(
-    Istream& is
-)
+Foam::ensightPartCells::ensightPartCells(Istream& is)
 :
     ensightPart()
 {
@@ -305,15 +288,12 @@ Foam::ensightPartCells::ensightPartCells
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-
 Foam::ensightPartCells::~ensightPartCells()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-// track the points used
 Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 {
     const polyMesh& mesh = *meshPtr_;
@@ -362,7 +342,6 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 }
 
 
-// write cell connectivities
 void Foam::ensightPartCells::writeConnectivity
 (
     ensightGeoFile& os,
@@ -448,7 +427,5 @@ void Foam::ensightPartCells::writeConnectivity
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

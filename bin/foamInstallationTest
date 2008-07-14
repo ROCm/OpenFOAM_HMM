@@ -27,40 +27,47 @@
 #     foamInstallationTest
 #
 # Description
-#     Checks the machine system, the installation of FOAM, and the user's
-#     personal configuration for running FOAM.
+#     Checks the machine system, the installation of OpenFOAM, and the user's
+#     personal configuration for running OpenFOAM.
 #
 #------------------------------------------------------------------------------
 
-# SETTINGS
-#~~~~~~~~~
-FOAM_VERSION=1.4.2
-GCC_VERSION=4.2.2
-GZIP_VERSION=1.3.5
-GTAR_VERSION=1.13.25
-JAVA_VERSION=1.4.2+
+# Base settings
+FOAM_VERSION=1.5
+SUPPLIED_VERSION_GCC=4.3.1
+MIN_VERSION_GCC=4.2.0
 
-#GLOBAL VARIABLES
+# General
+WIDTH=20
+
+# Global variables
 FATALERROR=0
 CRITICALERROR=0
 SSHRSHOK=0
 
-#SYSTEM VARIABLES
+# System variables
 USER_SHELL=`basename $SHELL`
 HOST_NAME=`uname -n`
 OS=`uname -s`
 OS_VERSION=`uname -r`
 USER_NAME=$LOGNAME
+if [ ! -n $USER_NAME ]; then
+    USER_NAME=$USER
+fi
 
-# FUNCTIONS
-#~~~~~~~~~~
+#==============================================================================
+#                             HELPER FUNCTIONS
+#==============================================================================
+
 hline () {
     echo "-------------------------------------------------------------------------------"
 }
 
+
 expenv () {
     eval "echo $1"
 }
+
 
 heading () {
     echo ""
@@ -68,9 +75,11 @@ heading () {
     echo "$1"
 }
 
+
 lenBase () {
-echo $1 | tr -d " " | wc -m | tr -d " "
+    echo $1 | tr -d " " | wc -m | tr -d " "
 }
+
 
 length () {
     NOCHAR=`lenBase $1`
@@ -81,9 +90,11 @@ length () {
     echo $NOCHAR
 }
 
+
 stringLength () {
 echo $1 | wc -m | tr -d " "
 }
+
 
 fixlen () {
     WORD=$1
@@ -102,6 +113,7 @@ fixlen () {
     fi
 }
 
+
 reportEnv () {
     EXP_ENV=`eval "echo $1"`
     EXP_PATH=`eval "echo $2"`
@@ -119,7 +131,12 @@ reportEnv () {
                     IFS=':'
                     for e in $EXP_PATH
                     do
-                        if [  "$e" = "$EXP_ENV" -o "$e" = "${EXP_ENV}/bin" -o "${EXP_ENV}/lib" = "$e"  ] ; then
+                        if                                \
+                        [                                 \
+                            "$e" = "$EXP_ENV"             \
+                         -o "$e" = "${EXP_ENV}/bin"       \
+                         -o "${EXP_ENV}/lib" = "$e"       \
+                        ] ; then
                             ON_PATH="yes "
                         fi
                     done
@@ -141,7 +158,12 @@ reportEnv () {
                     IFS=':'
                     for e in $EXP_PATH
                     do
-                        if [  "$e" = "$EXP_ENV" -o "$e" = "${EXP_ENV}/bin" -o "${EXP_ENV}/lib" = "$e"  ] ; then
+                        if                                \
+                        [                                 \
+                            "$e" = "$EXP_ENV"             \
+                         -o "$e" = "${EXP_ENV}/bin"       \
+                         -o "${EXP_ENV}/lib" = "$e"       \
+                        ] ; then
                             ON_PATH="yes "
                         fi
                     done
@@ -171,6 +193,7 @@ reportEnv () {
 
 }
 
+
 findExec() {
     OLD_IFS=$IFS
     IFS=':'
@@ -197,140 +220,117 @@ findExec() {
     return 1
 }
 
+
 reportExecutable () {
     APP_PATH=""
     APP_PATH=`findExec $PATH $1`
     APP_SPEC="$2"
-    if [ `length $APP_PATH` -eq 0 ];then
+    if [ ! -n $APP_PATH ];then
         echo "`fixlen "$1" 9`" "*** not installed ***"
         VERSION=""
         case $1 in
-            icoFoam) echo "          CRITICAL ERROR"
-            CRITICALERROR=`expr $CRITICALERROR + 1` ;;
-            gcc) echo "          CRITICAL ERROR"
-            CRITICALERROR=`expr $CRITICALERROR + 1`;;
+            icoFoam)
+                echo "          CRITICAL ERROR"
+                CRITICALERROR=`expr $CRITICALERROR + 1`
+                ;;
+            gcc)
+                echo "          CRITICAL ERROR"
+                CRITICALERROR=`expr $CRITICALERROR + 1`
+                ;;
+            tar) ;;
             gtar) ;;
             gzip) ;;
             dx) ;;
-            java) ;;
         esac
         echo
         return 1
     fi
     case $1 in
-        icoFoam) VERSION=`$1 2>&1 | grep ' Version:' | sed -e 's/.*Version:/Version:/' | cut -d" " -f2`;;
-        gcc) VERSION=`$1 -v 2>&1 | grep 'version' | cut -d" " -f3`;;
-        gtar) VERSION=`$APP_PATH --version | head -1`;;
+        icoFoam)
+            VERSION=`$1 2>&1                      \
+                | \grep ' Version:'               \
+                | sed -e 's/.*Version:/Version:/' \
+                | cut -d" " -f3`
+            ;;
+        gcc)
+            VERSION=`$1 -v 2>&1                  \
+                | grep 'version'                 \
+                | cut -d" " -f3`
+            if [ ! "$VERSION" = "$SUPPLIED_VERSION_GCC" ]; then
+                echo "WARNING: gcc version does not match gcc supplied" \
+                     "with this release of OpenFOAM"
+                echo "         Supplied version: $SUPPLIED_VERSION_GCC"
+                echo "         User version    : $VERSION"
+                echo "         Minimum required: $MIN_VERSION_GCC"
+                echo ""
+            fi
+            ;;
+        gtar)
+            VERSION=`$APP_PATH --version | head -1`
+            ;;
+        tar)
+            VERSION=`$APP_PATH --version | head -1 | cut -d" " -f4`
+            ;;
         gzip)
             case $OS in
-            SunOS) VERSION=`$1 --version 2>&1 | grep gzip | cut -d" " -f2`;;
-            *) VERSION=`$1 --version | head -1 | cut -d" " -f2`;;
+                SunOS)
+                    VERSION=`$1 --version 2>&1 | grep gzip | cut -d" " -f2`
+                    ;;
+                *)
+                    VERSION=`$1 --version | head -1 | cut -d" " -f2`
+                    ;;
             esac
             ;;
-        dx) unset DXEXEC; VERSION=`$1 -version 2>&1 | grep 'Open ' | grep 'Script' | cut -d" " -f6`;;
-        java) VERSION=`$1 -version 2>&1 | grep 'version' | cut -d" " -f3 | tr -d "\""`;;
     esac
     if [ "$APP_PATH" = "$APP_SPEC" ] || [ ! "$2" ]; then
         echo "`fixlen "$1" 9` `fixlen "$VERSION" 10` `fixlen "$APP_PATH" 58`"
     else
         echo "`fixlen "$1" 9` `fixlen "$VERSION" 10`"
         echo "WARNING:  Conflicting installations:"
-        echo "          foam settings: $APP_SPEC"
-        echo "          current path : $APP_PATH"
+        echo "          OpenFOAM settings        : $APP_SPEC"
+        echo "          current path             : $APP_PATH"
         case $1 in
-            icoFoam) echo "          CRITICAL ERROR"
-            CRITICALERROR=`expr $CRITICALERROR + 1` ;;
-            gcc) echo "          CRITICAL ERROR"
-            CRITICALERROR=`expr $CRITICALERROR + 1`;;
+            icoFoam)
+                echo "          CRITICAL ERROR"
+                CRITICALERROR=`expr $CRITICALERROR + 1`
+                ;;
+            gcc)
+                echo "          CRITICAL ERROR"
+                CRITICALERROR=`expr $CRITICALERROR + 1`
+                ;;
             gtar) ;;
             gzip) ;;
             dx) ;;
-            java) ;;
         esac
-        echo
+        echo ""
     fi
 }
 
-checkPermissions () {
-    PERMISSIONS=""
-    case $OS in
-    SunOS)
-        if /usr/bin/test -e "$1"  ; then
-            if /usr/bin/test -r $1  ; then
-                PERMISSIONS="${PERMISSIONS}r"
-            else
-                PERMISSIONS="${PERMISSIONS} "
-            fi
-            if /usr/bin/test -w $1  ; then
-                PERMISSIONS="${PERMISSIONS}w"
-            else
-                PERMISSIONS="${PERMISSIONS} "
-            fi
-            if /usr/bin/test -w $1  ; then
-                PERMISSIONS="${PERMISSIONS}x"
-            else
-                PERMISSIONS="${PERMISSIONS} "
-            fi
-            echo "`fixlen "$1" 50` `fixlen "$PERMISSIONS" 5` `fixlen "$2" 5` `fixlen "$3" 6`"
-        else
-            echo "`fixlen "$1" 50` does not exist `fixlen "" 10` `fixlen "$3" 6`"
-        fi
-        ;;
-    *)
-        if [ -e "$1" ] ; then
-            if [ -r $1 ] ; then
-                PERMISSIONS="${PERMISSIONS}r"
-            else
-                PERMISSIONS="${PERMISSIONS} "
-            fi
-            if [ -w $1 ] ; then
-                PERMISSIONS="${PERMISSIONS}w"
-            else
-                PERMISSIONS="${PERMISSIONS} "
-            fi
-            if [ -w $1 ] ; then
-                PERMISSIONS="${PERMISSIONS}x"
-            else
-                PERMISSIONS="${PERMISSIONS} "
-            fi
-            echo "`fixlen "$1" 50` `fixlen "$PERMISSIONS" 5` `fixlen "$2" 5` `fixlen "$3" 6`"
-        else
-            echo "`fixlen "$1" 50` does not exist `fixlen "" 10` `fixlen "$3" 6`"
-        fi
-    ;;
-    esac
-    if [ "$3" = "yes" ] && [ ! "$PERMISSIONS" = "$2" ]; then
-        CRITICALERROR=`expr $CRITICALERROR + 1`
-        echo "WARNING: CRITICAL ERROR"
-        echo
-    fi
-}
 
 pingTest () {
-RESULT=""
-case $OS in
-    SunOS)
-        PINGTEST=`/usr/sbin/ping $1 2>&1`
-        if  [ "`echo $PINGTEST | grep "alive"`" != "" ] ; then
-            RESULT="Successful"
-        elif  [ "`echo $PINGTEST | grep "unknown host"`" != "" ] ; then
-            RESULT="No_entry_for_\"$1\"_in_/etc/hosts"
-        else
-            RESULT="Networking_cannot_reach_$1"
-        fi
-        ;;
-    *)
-        PINGTEST=`/bin/ping -w 3 -c 1 $1 2>&1`
+    RESULT=""
+    case $OS in
+        SunOS)
+            PINGTEST=`/usr/sbin/ping $1 2>&1`
+            if  [ "`echo $PINGTEST | grep "alive"`" != "" ] ; then
+                RESULT="Successful"
+            elif  [ "`echo $PINGTEST | grep "unknown host"`" != "" ] ; then
+                RESULT="No_entry_for_\"$1\"_in_/etc/hosts"
+            else
+                RESULT="Networking_cannot_reach_$1"
+            fi
+            ;;
+        *)
+            PINGTEST=`/bin/ping -w 3 -c 1 $1 2>&1`
             if  [ "`echo $PINGTEST | grep "1 received"`" != "" ] ; then
-            RESULT="Successful"
-        elif  [ "`echo $PINGTEST | grep "unknown host"`" != "" ] ; then
-            RESULT="No_entry_for_\"$1\"_in_/etc/hosts"
-        else
-            RESULT="Networking_cannot_reach_$1"
-        fi
-        ;;
-esac
-#   echo "inna pingtest2 $1  $RESULT" 1>&2
+                RESULT="Successful"
+            elif  [ "`echo $PINGTEST | grep "unknown host"`" != "" ] ; then
+                RESULT="No_entry_for_\"$1\"_in_/etc/hosts"
+            else
+                RESULT="Networking_cannot_reach_$1"
+            fi
+            ;;
+    esac
 
     echo "`fixlen "Pinging_$1" 25` `fixlen "$RESULT" 45` `fixlen "$2" 5`"
 
@@ -341,6 +341,7 @@ esac
     fi
 }
 
+
 telnetPortTest () {
 telnet -e A $1 $2 <<EOF
 A
@@ -348,213 +349,165 @@ quit
 EOF
 }
 
+
 checkTelnetPort () {
-if  [ -x "/usr/bin/telnet" ] || [ -x "/bin/telnet" ] ; then
-    RESULT=`telnetPortTest $1 $2 2>&1 | egrep "onnect.* [t|r]"`
-    if [ "`echo $RESULT | grep 'Connected to'`" ] ; then
-        RESULT='Successful'
-    elif [ "`echo $RESULT | grep 'Connection refused'`" ] ; then
-        RESULT='Unsuccessful_connection_refused*'
+    if  [ -x "/usr/bin/telnet" ] || [ -x "/bin/telnet" ] ; then
+        RESULT=`telnetPortTest $1 $2 2>&1 | egrep "onnect.* [t|r]"`
+        if [ "`echo $RESULT | grep 'Connected to'`" ] ; then
+            RESULT='Successful'
+        elif [ "`echo $RESULT | grep 'Connection refused'`" ] ; then
+            RESULT='Unsuccessful_connection_refused*'
+        else
+            RESULT="Not_active*"
+        fi
     else
-        RESULT="Not_active*"
+        RESULT='No_telnet_running:_cannot_check*'
     fi
-else
-    RESULT='No_telnet_running:_cannot_check*'
-fi
 }
+
 
 checkRsh () {
-checkTelnetPort $HOST_NAME 222
-echo "`fixlen "Test_rsh:" 25` `fixlen "$RESULT" 45` "yes""
-if [ "$RESULT" != 'Successful' ]; then
-    SSHRSHOK=`expr $SSHRSHOK + 1`
-fi
+    checkTelnetPort $HOST_NAME 222
+    echo "`fixlen "Test_rsh:" 25` `fixlen "$RESULT" 45` "yes""
+    if [ "$RESULT" != 'Successful' ]; then
+        SSHRSHOK=`expr $SSHRSHOK + 1`
+    fi
 }
+
 
 checkSsh () {
-checkTelnetPort $HOST_NAME 22
-echo "`fixlen "Test_ssh:" 25` `fixlen "$RESULT" 45` "yes""
-if [ "$RESULT" != 'Successful' ]; then
-    SSHRSHOK=`expr $SSHRSHOK + 1`
-fi
+    checkTelnetPort $HOST_NAME 22
+    echo "`fixlen "Test_ssh:" 25` `fixlen "$RESULT" 45` "yes""
+    if [ "$RESULT" != 'Successful' ]; then
+        SSHRSHOK=`expr $SSHRSHOK + 1`
+    fi
 }
 
 
+checkOpenFOAMEnvironment() {
+    if [ ! -d "$WM_PROJECT_INST_DIR" -o ! -d "$WM_THIRD_PARTY_DIR" ]; then
+        echo ""
+        echo "FATAL ERROR: OpenFOAM environment not configured."
+        echo ""
+        echo "    Please refer to the installation section of the README file:"
+        echo "    <OpenFOAM installation dir>/OpenFOAM-${FOAM_VERSION}/README"
+        echo "    to source the OpenFOAM environment."
+        echo ""
+        exit 1
+    fi
+}
 
-# REMAINING ARGUMENTS
-#~~~~~~~~~~~~~~~~~~~~
-#
-#------------
-# MAIN SCRIPT
-#------------
+
+checkUserShell() {
+    case $USER_SHELL in
+        csh | tcsh)
+            USER_CONFIG_TYPE="cshrc"
+            echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
+            ;;
+        bash | ksh)
+            USER_CONFIG_TYPE="bashrc"
+            echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
+            ;;
+        *) USER_CONFIG_TYPE=""
+            echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
+            echo "FATAL ERROR: Cannot identify the shell you are running."
+            echo "             OpenFOAM ${FOAM_VERSION} is compatible with "
+            echo "             csh, tcsh, ksh and bash."
+            echo
+            FATALERROR=`expr $FATALERROR + 1`;;
+    esac
+}
+
+
+checkHostName() {
+    if [ ! "$HOST_NAME" ]; then
+        echo "`fixlen "Host:" $WIDTH` ${HOST_NAME}"
+        echo "FATAL ERROR: Cannot stat hostname."
+        echo "             Contact your system administrator, "
+        echo "             OpenFOAM ${FOAM_VERSION} needs a valid "
+        echo "             hostname to function."
+        echo
+        FATALERROR=`expr $FATALERROR + 1`
+    else
+        echo "`fixlen "Host:" $WIDTH` ${HOST_NAME}"
+    fi
+}
+
+
+checkOS () {
+    if [ "$OS" = "Linux" ] || [ "$OS" = "LinuxAMD64" ] || [ "$OS" = "SunOS" ]; then
+        echo "`fixlen "OS:" $WIDTH` ${OS} version ${OS_VERSION}"
+    else
+        echo "FATAL ERROR: Incompatible operating system \"$OS\"."
+        echo "             OpenFOAM ${FOAM_VERSION} is currently "
+        echo "             available for Linux and SunOS only."
+        echo
+        FATALERROR=`expr $FATALERROR + 1`
+    fi
+}
+
+
+#==============================================================================
+#                                MAIN SCRIPT
+#==============================================================================
 #
 echo "Executing $0:"
-#
+
+#------------------------------------------------------------------------------
 heading "Checking basic setup..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-hline #----------
-USER_SHELL=`basename $SHELL`
-HOST_NAME=`uname -n`
-OS=`uname -s`
-OS_VERSION=`uname -r`
-USER_NAME=$LOGNAME
-WIDTH=20
-if [ `length $USER_NAME` -eq 0 ] ; then
-    USER_NAME=$USER
-fi
-#
-case $USER_SHELL in
-    csh | tcsh)
-        USER_CONFIG_TYPE="cshrc"
-        echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
-        ;;
-    bash | ksh)
-        USER_CONFIG_TYPE="bashrc"
-        echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
-        ;;
-    *) USER_CONFIG_TYPE=""
-       echo "`fixlen "Shell:" $WIDTH` ${USER_SHELL}"
-       echo "FATAL ERROR: Cannot identify the shell you are running."
-       echo "             Fam ${FOAM_VERSION} is compatible with "
-       echo "             csh, tcsh, ksh and bash."
-       echo
-       FATALERROR=`expr $FATALERROR + 1`;;
-esac
-#
-if [ ! "$HOST_NAME" ]; then
-    echo "`fixlen "Host:" $WIDTH` ${HOST_NAME}"
-    echo "FATAL ERROR: Cannot stat hostname."
-    echo "             Contact your system administrator, "
-    echo "             Foam ${FOAM_VERSION} needs a valid "
-    echo "             hostname to function."
-    echo
-    FATALERROR=`expr $FATALERROR + 1`
-else
-    echo "`fixlen "Host:" $WIDTH` ${HOST_NAME}"
-fi
-#
-if [ "$OS" = "Linux" ] || [ "$OS" = "LinuxAMD64" ] || [ "$OS" = "SunOS" ]; then
-    echo "`fixlen "OS:" $WIDTH` ${OS} version ${OS_VERSION}"
-else
-    echo "FATAL ERROR: Incompatible operating system \"$OS\"."
-    echo "             Foam${FOAM_VERSION} is currently "
-    echo "             available for Linux and SunOS only."
-    echo
-    FATALERROR=`expr $FATALERROR + 1`
-fi
-#
-if [ `length $USER_NAME` -eq 0 ]; then
-    echo "`fixlen "User:" $WIDTH` ${USER_NAME}"
-    echo "FATAL ERROR: Cannot stat user name ${USER_NAME}."
-    echo ""
-    echo "             Contact your system administrator, "
-    echo "             Foam${FOAM_VERSION} needs a valid "
-    echo "             user name to function."
-    echo
-    FATALERROR=`expr $FATALERROR + 1`
-else
-    echo "`fixlen "User:" $WIDTH` ${USER_NAME}"
-fi
-#
-USER_CONFIG_FILE="${HOME}/.${USER_CONFIG_TYPE}"
-if [ -f ${USER_CONFIG_FILE} ] ; then
-    echo "`fixlen "User_config:" $WIDTH` ${USER_CONFIG_FILE}"
-else
-    echo "`fixlen "User_config:" $WIDTH` ${USER_CONFIG_FILE}"
-    echo "FATAL ERROR: User config file: *** not located ***"
-    echo "             Create a user config file $USER_CONFIG_FILE"
-    echo
-    FATALERROR=`expr $FATALERROR + 1`
-fi
-#
-# heading "Checking if user config file sources the foam config file..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-FOAM_CONFIG_FILE=`echo $HOME/.OpenFOAM-${FOAM_VERSION}/${USER_CONFIG_TYPE}`
-case ${USER_CONFIG_TYPE} in
-    cshrc) SRC_STR="source";;
-    bashrc) SRC_STR=".";;
-esac
-#
-SOURCE_FOAM_CONFIG=`grep "^${SRC_STR}.*OpenFOAM-${FOAM_VERSION}/${USER_CONFIG_TYPE}" ${USER_CONFIG_FILE}`
-#
-if [ ! "$SOURCE_FOAM_CONFIG" = "" ] ; then
-    echo "`fixlen "Foam_config:" $WIDTH` "$FOAM_CONFIG_FILE sourced correctly.""
-else
-    echo "FATAL ERROR: $FOAM_CONFIG_FILE does not appear to be sourced from:"
-    echo "    $USER_CONFIG_FILE"
-    echo ""
-    echo "You need the following at the end of your $USER_CONFIG_FILE file:"
-    echo "${SRC_STR} $HOME/OpenFOAM/OpenFOAM-${FOAM_VERSION}/etc/${USER_CONFIG_TYPE}"
-    echo "or equivalent depending on the location of the OpenFOAM installation."
-    echo
-    FATALERROR=`expr $FATALERROR + 1`
-fi
-#
-if [ ! "$WM_PROJECT_INST_DIR" ]; then
-    echo
-    echo "FATAL ERROR Foam install directory not set."
-    echo
-    echo "Set correct path to installation 'WM_PROJECT_INST_DIR' in $HOME/.foam2.3/bashrc"
-elif [ ! -d $WM_PROJECT_INST_DIR ]; then
-    echo
-    echo "FATAL ERROR Cannot find FOAM installation at: $WM_PROJECT_INST_DIR"
-    echo
-    echo "Set correct path to installation 'WM_PROJECT_INST_DIR' in $HOME/.foam2.3/bashrc"
-    FATALERROR=`expr $FATALERROR + 1`
-fi
-hline #--------------------
-#
-heading "Checking main FOAM env variables..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+hline
+checkOpenFOAMEnvironment
+checkUserShell
+checkHostName
+checkOS
+hline
+
+#------------------------------------------------------------------------------
+heading "Checking main OpenFOAM env variables..."
 COL1=`fixlen "Environment_variable" 21`
 COL2=`fixlen "Set_to_file_or_directory" 40`
 COL3="Valid"
 COL4="Path"
 COL5="Crit"
-hline #--------------------
+hline
 echo "$COL1 $COL2 $COL3      $COL5"
-hline #--------------------
+hline
 reportEnv '$WM_PROJECT_INST_DIR' 'noPath' "yes"
 reportEnv '$WM_PROJECT_USER_DIR' 'noPath' "no"
-reportEnv '$FOAM_JOB_DIR'        'noPath' "yes"
-hline #--------------------
-#
-heading "Checking the FOAM env variables set on the PATH..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-hline #--------------------
+reportEnv '$WM_THIRD_PARTY_DIR'  'noPath' "yes"
+hline
+
+#------------------------------------------------------------------------------
+heading "Checking the OpenFOAM env variables set on the PATH..."
+hline
 echo "$COL1 $COL2 $COL3 $COL4 $COL5"
-hline #--------------------
+hline
 reportEnv '$WM_PROJECT_DIR'   '$PATH' "yes"
 echo ""
-reportEnv '$FOAM_USER_APPBIN' '$PATH' "no"
 reportEnv '$FOAM_APPBIN'      '$PATH' "yes"
+reportEnv '$FOAM_USER_APPBIN' '$PATH' "no"
 reportEnv '$WM_DIR'           '$PATH' "yes"
-reportEnv '$CEI_HOME'         '$PATH' "no"
-echo ""
-reportEnv '$JAVA_PATH'        '$PATH' "no"
-reportEnv '$MPI_ARCH_PATH'    '$PATH' "yes"
-hline #--------------------
-#
-heading "Checking the FOAM env variables set on the LD_LIBRARY_PATH..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-hline #--------------------
+hline
+
+#------------------------------------------------------------------------------
+heading "Checking the OpenFOAM env variables set on the LD_LIBRARY_PATH..."
+hline
 echo "$COL1 $COL2 $COL3 $COL4 $COL5"
-hline #--------------------
+hline
 reportEnv '$FOAM_LIBBIN'      '$LD_LIBRARY_PATH' "yes"
 reportEnv '$FOAM_USER_LIBBIN' '$LD_LIBRARY_PATH' "no"
 reportEnv '$MPI_ARCH_PATH'    '$LD_LIBRARY_PATH' "yes"
-hline #--------------------
-#
-heading "Software versions"
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
+hline
+
+#------------------------------------------------------------------------------
+heading "Third party software"
 COL1=`fixlen "Software" 9`
 COL2=`fixlen "Version" 10`
 COL3=`fixlen "Location" 10`
-hline #--------------------
+hline
 echo "$COL1 $COL2 $COL3"
-hline #--------------------
+hline
 reportExecutable gcc "${WM_COMPILER_DIR}/bin/gcc"
-reportExecutable java "${JAVA_HOME}/bin/java"
 reportExecutable gzip
 if [ "$OS" = "Linux" ]  ; then
     reportExecutable tar
@@ -562,44 +515,35 @@ else
     reportExecutable gtar
 fi
 reportExecutable icoFoam "${FOAM_APPBIN}/icoFoam"
-hline #--------------------
-#
-heading "Checking file/directory permissions..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-COL1=`fixlen "File/directory" 50`
-COL2=`fixlen "Set" 5`
-COL3=`fixlen "Reqd" 5`
-COL4=`fixlen "Crit" 5`
-hline #--------------------
-echo "$COL1 $COL2 $COL3 $COL4"
-hline #--------------------
 
-#
+hline
+
+#------------------------------------------------------------------------------
 heading "Checking networking..."
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COL1=`fixlen "Action" 25`
 COL2=`fixlen "Result" 45`
 COL3=`fixlen "Crit" 5`
 
-hline #--------------------
+hline
 echo "$COL1 $COL2 $COL3"
-hline #--------------------
+hline
+
 pingTest "$HOST_NAME" "yes"
 pingTest "localHost" "yes"
 checkRsh
 checkSsh
 
 if [ $SSHRSHOK -eq 1 ]; then
-    echo "(*) Only one of rsh or ssh is required by the Foam enviroment."
+    echo "(*) Only one of rsh or ssh is required by the OpenFOAM enviroment."
 elif [ $SSHRSHOK -gt 1  ]; then
     echo "FATAL ERROR: No remote shell available."
-    echo "             Foam${FOAM_VERSION} enviroment requires either ssh and/or rsh."
+    echo "             OpenFOAM ${FOAM_VERSION} enviroment requires either ssh and/or rsh."
     echo "             Contact your system administrator."
     echo ""
     FATALERROR=`expr $FATALERROR + 1`
 fi
 echo ""
-hline #--------------------
+hline
 echo ""
 if [ $FATALERROR -gt 0 ] ; then
     echo "The system test has evoked $FATALERROR fatal error(s)."
@@ -618,5 +562,11 @@ if [ $CRITICALERROR -gt 0 ] || [ $FATALERROR -gt 0 ]; then
     echo "the installation guide for trouble shooting."
 fi
 echo ""
+
+echo "done."
+
+echo ""
+
+exit 0
 
 #------------------------------------------------------------------------------

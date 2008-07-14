@@ -29,27 +29,34 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// Pointers to cell shape models
 const Foam::cellModel* Foam::meshWriter::unknownModel = Foam::cellModeller::
 lookup
 (
     "unknown"
 );
+
+
 const Foam::cellModel* Foam::meshWriter::tetModel = Foam::cellModeller::
 lookup
 (
     "tet"
 );
+
+
 const Foam::cellModel* Foam::meshWriter::pyrModel = Foam::cellModeller::
 lookup
 (
     "pyr"
 );
+
+
 const Foam::cellModel* Foam::meshWriter::prismModel = Foam::cellModeller::
 lookup
 (
     "prism"
 );
+
+
 const Foam::cellModel* Foam::meshWriter::hexModel = Foam::cellModeller::
 lookup
 (
@@ -61,15 +68,9 @@ Foam::string Foam::meshWriter::defaultMeshName = "meshExport";
 Foam::string Foam::meshWriter::defaultSurfaceName = "surfExport";
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshWriter::meshWriter
-(
-    const polyMesh& mesh,
-    const scalar scaleFactor
-)
+Foam::meshWriter::meshWriter(const polyMesh& mesh, const scalar scaleFactor)
 :
     mesh_(mesh),
     scaleFactor_(scaleFactor),
@@ -80,27 +81,10 @@ Foam::meshWriter::meshWriter
 {}
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::meshWriter::~meshWriter()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

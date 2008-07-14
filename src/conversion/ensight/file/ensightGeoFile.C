@@ -28,8 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-// Construct from pathname
 Foam::ensightGeoFile::ensightGeoFile
 (
     const fileName& pathname,
@@ -53,11 +51,7 @@ Foam::ensightGeoFile::~ensightGeoFile()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// write keyword with trailing newline
-Foam::Ostream& Foam::ensightGeoFile::writeKeyword
-(
-    const string& key
-)
+Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const string& key)
 {
     write(key);
     newline();
@@ -65,6 +59,5 @@ Foam::Ostream& Foam::ensightGeoFile::writeKeyword
     return *this;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -51,8 +51,6 @@ class ensightPartFaces
 :
     public ensightPart
 {
-    // Private data
-
     // Private Member Functions
 
         //- Disallow default bitwise assignment
@@ -69,6 +67,7 @@ class ensightPartFaces
             const labelList& idList,
             const labelList& pointMap
         ) const;
+
 
 protected:
 
@@ -115,9 +114,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~ensightPartFaces();
+    //- Destructor
+    virtual ~ensightPartFaces();
 
 
     // Member Functions
@@ -127,7 +125,6 @@ public:
         {
             return elemTypes_;
         }
-
 };
 
 

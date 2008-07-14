@@ -26,11 +26,11 @@ Description
     Template to write generalized field components
 
 \*---------------------------------------------------------------------------*/
+
 #include "ensightParts.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// write generalized field components
 template <class Type>
 void Foam::ensightParts::writeField
 (
@@ -72,6 +72,5 @@ void Foam::ensightParts::writeField
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

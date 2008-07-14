@@ -41,11 +41,7 @@ Foam::List<Foam::word> Foam::ensightPart::elemTypes_(0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-//- check for fully defined fields
-bool Foam::ensightPart::isFieldDefined
-(
-    const List<scalar>& field
-) const
+bool Foam::ensightPart::isFieldDefined(const List<scalar>& field) const
 {
     forAll(elemLists_, elemI)
     {
@@ -67,7 +63,6 @@ bool Foam::ensightPart::isFieldDefined
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 Foam::ensightPart::ensightPart
 ()
 :
@@ -82,7 +77,6 @@ Foam::ensightPart::ensightPart
 {}
 
 
-// Construct empty part with number and description
 Foam::ensightPart::ensightPart
 (
     label partNumber,
@@ -100,7 +94,6 @@ Foam::ensightPart::ensightPart
 {}
 
 
-// Construct empty part with number and description
 Foam::ensightPart::ensightPart
 (
     label partNumber,
@@ -119,11 +112,7 @@ Foam::ensightPart::ensightPart
 {}
 
 
-// Construct as copy
-Foam::ensightPart::ensightPart
-(
-    const ensightPart& part
-)
+Foam::ensightPart::ensightPart(const ensightPart& part)
 :
     number_(part.number_),
     name_(part.name_),
@@ -138,7 +127,6 @@ Foam::ensightPart::ensightPart
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-// runtime selection
 Foam::autoPtr<Foam::ensightPart> Foam::ensightPart::New(Istream& is)
 {
     word partType(is);
@@ -161,6 +149,7 @@ Foam::autoPtr<Foam::ensightPart> Foam::ensightPart::New(Istream& is)
     return autoPtr<ensightPart>(cstrIter()(is));
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::ensightPart::~ensightPart()
@@ -169,7 +158,6 @@ Foam::ensightPart::~ensightPart()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// reconstruct from Istream
 void Foam::ensightPart::reconstruct(Istream& is)
 {
     dictionary dict(is);
@@ -198,7 +186,6 @@ void Foam::ensightPart::reconstruct(Istream& is)
 }
 
 
-// renumber elements
 void Foam::ensightPart::renumber(labelList const& origId)
 {
     // transform to global values first
@@ -225,7 +212,5 @@ void Foam::ensightPart::renumber(labelList const& origId)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

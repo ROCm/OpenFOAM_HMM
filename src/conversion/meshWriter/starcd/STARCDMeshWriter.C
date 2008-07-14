@@ -32,11 +32,9 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// special boundary regions
 const char* Foam::meshWriters::STARCD::defaultBoundaryName =
     "Default_Boundary_Region";
 
-// face addressing from foam faces -> pro-STAR faces for primitive shapes
 const Foam::label Foam::meshWriters::STARCD::foamToStarFaceAddr[4][6] =
 {
     { 4, 5, 2, 3, 0, 1 },     // 11 = pro-STAR hex
@@ -174,12 +172,7 @@ void Foam::meshWriters::STARCD::getCellTable()
 }
 
 
-// Prostar 4+ header format
-void Foam::meshWriters::STARCD::writeHeader
-(
-    Ostream& os,
-    const char* filetype
-)
+void Foam::meshWriters::STARCD::writeHeader(Ostream& os, const char* filetype)
 {
     os  << "PROSTAR_" << filetype << nl
         << 4000
@@ -194,10 +187,7 @@ void Foam::meshWriters::STARCD::writeHeader
 }
 
 
-void Foam::meshWriters::STARCD::writePoints
-(
-    const fileName& prefix
-) const
+void Foam::meshWriters::STARCD::writePoints(const fileName& prefix) const
 {
     OFstream os(prefix + ".vrt");
     writeHeader(os, "VERTEX");
@@ -227,10 +217,7 @@ void Foam::meshWriters::STARCD::writePoints
 }
 
 
-void Foam::meshWriters::STARCD::writeCells
-(
-    const fileName& prefix
-) const
+void Foam::meshWriters::STARCD::writeCells(const fileName& prefix) const
 {
     OFstream os(prefix + ".cel");
     writeHeader(os, "CELL");
@@ -372,10 +359,7 @@ void Foam::meshWriters::STARCD::writeCells
 }
 
 
-void Foam::meshWriters::STARCD::writeBoundary
-(
-    const fileName& prefix
-) const
+void Foam::meshWriters::STARCD::writeBoundary(const fileName& prefix) const
 {
     OFstream os(prefix + ".bnd");
     writeHeader(os, "BOUNDARY");
@@ -495,9 +479,6 @@ Foam::meshWriters::STARCD::STARCD
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::meshWriters::STARCD::~STARCD()
@@ -506,10 +487,7 @@ Foam::meshWriters::STARCD::~STARCD()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::meshWriters::STARCD::rmFiles
-(
-    const fileName& baseName
-) const
+void Foam::meshWriters::STARCD::rmFiles(const fileName& baseName) const
 {
     rm(baseName + ".vrt");
     rm(baseName + ".cel");
@@ -518,10 +496,7 @@ void Foam::meshWriters::STARCD::rmFiles
 }
 
 
-bool Foam::meshWriters::STARCD::write
-(
-    const fileName& meshName
-) const
+bool Foam::meshWriters::STARCD::write(const fileName& meshName) const
 {
     fileName baseName(meshName);
 
@@ -747,11 +722,5 @@ bool Foam::meshWriters::STARCD::writeSurface
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

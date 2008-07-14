@@ -137,7 +137,6 @@ void Foam::polyMeshInfo::queryWedge()
 
 void Foam::polyMeshInfo::queryDirections()
 {
-
     vector dirVec = vector::zero;
 
     forAll(mesh_.boundaryMesh(), patchi)
@@ -147,7 +146,8 @@ void Foam::polyMeshInfo::queryDirections()
             if (mesh_.boundaryMesh()[patchi].size())
             {
                 nEmpty_++;
-                dirVec += sum(cmptMag(mesh_.boundaryMesh()[patchi].faceAreas()));
+                dirVec +=
+                    sum(cmptMag(mesh_.boundaryMesh()[patchi].faceAreas()));
             }
         }
     }
@@ -225,12 +225,6 @@ Foam::polyMeshInfo::~polyMeshInfo()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::Vector<Foam::label>& Foam::polyMesh::directions() const
-{
-    return directions_;
-}
-
 
 Foam::label Foam::polyMeshInfo::nGeometricD() const
 {
