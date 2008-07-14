@@ -26,6 +26,12 @@ FoamFile
 // face times this factor.
 matchTolerance 1E-3;
 
+// Do a synchronisation of coupled points.
+pointSync true;
+
+
+// Patches to create.
+// If no patches does a coupled point and face synchronisation anyway.
 patches
 (
     {
