@@ -3,4 +3,4 @@ U/maxwellSlipUFvPatchVectorField.C
 T/smoluchowskiJumpTFvPatchScalarField.C
 rho/fixedRhoFvPatchScalarField.C
 
-LIB = $(FOAM_USER_LIBBIN)/librhoCentralFoam
+LIB = $(FOAM_LIBBIN)/librhoCentralFoam
