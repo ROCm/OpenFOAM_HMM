@@ -1,39 +1,21 @@
 /*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
+Exec   : adiabaticFlameT -case . controlDict
+Date   : Jul 14 2008
+Time   : 14:36:39
+Host   : auglx106
+PID    : 21203
+Case   : ./.
+nProcs : 1
 
-Exec   : adiabaticFlameT controlDict 
-Date   : Dec 01 2004
-Time   : 14:24:02
-Host   : dm
-PID    : 8154
-Root   : 
-Case   : 
-Nprocs : 1
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Reading Burcat data dictionary
---> FOAM Warning : dictionary::read(Istream&, const word&) :  could not add entry
-    CH3             ) 2 N-NO2 CH3 ) 2 N-NO2 1 90.0819 200 6000 1000 12.4704 0.0186035 -6.89302e-06 1.13155e-09 -6.84339e-14 -6246.84 -39.5039 4.2251 0.0224382 3.20606e-05 -5.84889e-08 2.50091e-11 -3013.8 7.7452;
-    on line 1067 of dictionary "/home/dm2/henry/OpenFOAM/OpenFOAM-1.0/.OpenFOAM-1.0/thermoData/BurcatCpData"
-    entry already in dictionary : 
-ITstream : /home/dm2/henry/OpenFOAM/OpenFOAM-1.0/.OpenFOAM-1.0/thermoData/BurcatCpData::CH3, lines 553-555, IOstream: Version 2.0, format ASCII, line 553, OPENED, GOOD
-
---> FOAM Warning : dictionary::read(Istream&, const word&) :  could not add entry
-    CH3             ) 2 CHOH CH3 ) 2 CHOH 1 60.0959 200 6000 1000 9.64268 0.0200225 -7.11954e-06 1.14138e-09 -6.79937e-14 -37484 -25.6345 4.30799 0.0102502 6.19844e-05 -9.03296e-08 3.7406e-11 -34924.9 7.5584;
-    on line 1387 of dictionary "/home/dm2/henry/OpenFOAM/OpenFOAM-1.0/.OpenFOAM-1.0/thermoData/BurcatCpData"
-    entry already in dictionary : 
-ITstream : /home/dm2/henry/OpenFOAM/OpenFOAM-1.0/.OpenFOAM-1.0/thermoData/BurcatCpData::CH3, lines 553-555, IOstream: Version 2.0, format ASCII, line 553, OPENED, GOOD
-
---> FOAM Warning : dictionary::read(Istream&, const word&) :  could not add entry
-    NH2             NH2 1 16.0226 200 6000 1000 2.84766 0.00314285 -8.98666e-07 1.30324e-10 -7.48854e-15 21823.9 6.47181 4.20556 -0.00213553 7.2682e-06 -5.93028e-09 1.80672e-12 21535.2 -0.146632;
-    on line 3411 of dictionary "/home/dm2/henry/OpenFOAM/OpenFOAM-1.0/.OpenFOAM-1.0/thermoData/BurcatCpData"
-    entry already in dictionary : 
-ITstream : /home/dm2/henry/OpenFOAM/OpenFOAM-1.0/.OpenFOAM-1.0/thermoData/BurcatCpData::NH2, lines 637-639, IOstream: Version 2.0, format ASCII, line 637, OPENED, GOOD
-
 stoichiometricAirFuelMassRatio stoichiometricAirFuelMassRatio [0 0 0 0 0 0 0] 15.5776;
 phi = 0.01
 ft = 0.000641534

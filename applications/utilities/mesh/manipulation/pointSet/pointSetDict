@@ -1,23 +1,16 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "/home/penfold/mattijs/foam/mattijs2.2/run/icoFoam";
-    case            "cavityTut";
-    instance        "system";
-    local           "";
-
-    class           dictionary;
-    object          pointSetDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      pointSetDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,9 +26,9 @@ action new;
 topoSetSources
 (
     // Copy elements from pointSet
-    pointToPoint     
+    pointToPoint
     {
-        set p1;     
+        set p1;
     }
 
     // Select based on cellSet
@@ -75,6 +68,5 @@ topoSetSources
         includeOutside      false;  //   ,,    outside  ,,
     }
 );
-
 
 // ************************************************************************* //
