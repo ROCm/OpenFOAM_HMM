@@ -1,19 +1,19 @@
 /*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.2.1                                 |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
+Exec   : adiabaticFlameT -case . controlDict
+Date   : Jul 14 2008
+Time   : 14:36:14
+Host   : auglx106
+PID    : 21199
+Case   : ./.
+nProcs : 1
 
-Exec   : adiabaticFlameT controlDict 
-Date   : Dec 06 2005
-Time   : 15:25:54
-Host   : dm
-PID    : 19011
-Root   : 
-Case   : 
-Nprocs : 1
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Reading Burcat data dictionary
 stoichiometricAirFuelMassRatio stoichiometricAirFuelMassRatio [0 0 0 0 0 0 0] 17.1271;

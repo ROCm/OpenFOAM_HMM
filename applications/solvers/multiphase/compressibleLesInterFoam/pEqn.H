@@ -40,7 +40,10 @@
 
         solve
         (
-            (max(alpha1, 0.0)*(psi1/rho1) + max(alpha2, 0.0)*(psi2/rho2))
+            (
+                max(alpha1, scalar(0))*(psi1/rho1)
+              + max(alpha2, scalar(0))*(psi2/rho2)
+            )
            *pdEqnComp()
           + pdEqnIncomp
         );

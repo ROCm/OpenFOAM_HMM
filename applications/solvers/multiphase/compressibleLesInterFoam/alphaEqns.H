@@ -28,7 +28,7 @@
             ),
             // Divergence term is handled explicitly to be
             // consistent with the explicit transport solution
-            divU*min(alpha1, 1.0)
+            divU*min(alpha1, scalar(1))
         );
 
         forAll(dgdt, celli)

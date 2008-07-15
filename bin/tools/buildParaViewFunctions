@@ -232,6 +232,18 @@ installParaView ()
                 -print
         fi
 
+        # Replace local CMAKE_HOME path with CMAKE_HOME
+        # environment variables
+        find . -iname '*cmake*' -execdir sed -i \
+            "s,$CMAKE_HOME,\$ENV{CMAKE_HOME},g" {} ';' \
+            -print
+
+        # Replace local WM_COMPILER_DIR path with WM_COMPILER_DIR
+        # environment variables
+        find . -iname '*cmake*' -execdir sed -i \
+            "s,$WM_COMPILER_DIR,\$ENV{WM_COMPILER_DIR},g" {} ';' \
+            -print
+
         # create a softlink to the $PARAVIEW_OBJ_DIR/bin folder
         # - workaround for chosen install location
         echo "    Creating paraview $PARAVIEW_MAJOR_VERSION soft link to /bin"
