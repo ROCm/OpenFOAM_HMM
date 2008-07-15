@@ -86,8 +86,6 @@ if (runTime.outputTime())
                 << " m/s" << nl
             << "Average temperature = "
                 << averageTemperature << " K" << nl
-            << "accumulatedTotalrDotfSum = "
-                << accumulatedTotalrDotfSum << nl
             << "Average pressure = "
                 << averagePressure << " N/m^2" << nl
             << "----------------------------------------" << endl;
