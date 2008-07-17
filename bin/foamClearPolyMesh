@@ -45,9 +45,8 @@ USAGE
 }
 
 unset caseDir
-unset meshDir
 
-# parse options
+# parse a single option
 if [ "$#" -gt 0 ]; then
    case "$1" in
    -h | -help)
@@ -58,7 +57,6 @@ if [ "$#" -gt 0 ]; then
       caseDir=$1
       [ "$#" -ge 1 ] || usage "'-case' option requires an argument"
       cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
-      meshDir="constant/polyMesh"
       ;;
    *)
       usage "unknown option/argument: '$*'"
@@ -67,8 +65,11 @@ if [ "$#" -gt 0 ]; then
 fi
 
 # meshDir is only set if -case was specified: insist upon 'constant/polyMesh'
-if [ -n "$meshDir" ]
+if [ -n "$caseDir" ]
 then
+   # require constant/polyMesh
+   meshDir=constant/polyMesh
+
    if [ ! -d "$meshDir" ]
    then
       echo "Error: no '$meshDir' in $caseDir" 1>&2
