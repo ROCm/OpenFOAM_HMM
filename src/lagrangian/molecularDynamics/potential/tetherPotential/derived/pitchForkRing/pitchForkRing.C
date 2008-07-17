@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "restrainedHarmonicSpring.H"
+#include "pitchForkRing.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -36,81 +36,74 @@ namespace tetherPotentials
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(restrainedHarmonicSpring, 0);
+defineTypeNameAndDebug(pitchForkRing, 0);
 
 addToRunTimeSelectionTable
 (
     tetherPotential,
-    restrainedHarmonicSpring,
+    pitchForkRing,
     dictionary
 );
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-restrainedHarmonicSpring::restrainedHarmonicSpring
+pitchForkRing::pitchForkRing
 (
     const word& name,
     const dictionary& tetherPotentialProperties
 )
 :
     tetherPotential(name, tetherPotentialProperties),
-    restrainedHarmonicSpringCoeffs_
+    pitchForkRingCoeffs_
     (
         tetherPotentialProperties.subDict(typeName + "Coeffs")
     ),
-    springConstant_
-    (
-        readScalar(restrainedHarmonicSpringCoeffs_.lookup("springConstant"))
-    ),
-    rR_
-    (
-        readScalar(restrainedHarmonicSpringCoeffs_.lookup("rR"))
-    )
+    mu_(readScalar(pitchForkRingCoeffs_.lookup("mu"))),
+    alpha_(readScalar(pitchForkRingCoeffs_.lookup("alpha"))),
+    rOrbit_(readScalar(pitchForkRingCoeffs_.lookup("rOrbit")))
 {}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-scalar restrainedHarmonicSpring::energy(const vector r) const
+scalar pitchForkRing::energy(const vector r) const
 {
-    scalar magR = mag(r);
+    scalar p = sqrt(r.x()*r.x() + r.y()*r.y());
 
-    if (magR < rR_)
-    {
-        return 0.5 * springConstant_ * magSqr(r);
-    }
-    else
-    {
-        return 0.5 * springConstant_ * rR_ * rR_
-          + springConstant_ * rR_ * (magR - rR_);
-    }
+    scalar pMinusRSqr = (p - rOrbit_)*(p - rOrbit_);
+
+    return -0.5 * mu_ * pMinusRSqr
+      + 0.25 * pMinusRSqr * pMinusRSqr
+      + 0.5 * alpha_ * r.z() * r.z();
 }
 
-vector restrainedHarmonicSpring::force(const vector r) const
-{
-    scalar magR = mag(r);
 
-    if (magR < rR_)
-    {
-        return -springConstant_ * r;
-    }
-    else
-    {
-        return -springConstant_ * rR_ * r / magR;
-    }
+vector pitchForkRing::force(const vector r) const
+{
+    scalar p = sqrt(r.x()*r.x() + r.y()*r.y());
+
+    scalar pMinusR = (p - rOrbit_);
+
+    return vector
+    (
+        (mu_ - pMinusR * pMinusR) * pMinusR * r.x()/p,
+        (mu_ - pMinusR * pMinusR) * pMinusR * r.y()/p,
+        -alpha_ * r.z()
+    );
 }
 
-bool restrainedHarmonicSpring::read(const dictionary& tetherPotentialProperties)
+
+bool pitchForkRing::read(const dictionary& tetherPotentialProperties)
 {
     tetherPotential::read(tetherPotentialProperties);
 
-    restrainedHarmonicSpringCoeffs_ =
+    pitchForkRingCoeffs_ =
         tetherPotentialProperties.subDict(typeName + "Coeffs");
 
-    restrainedHarmonicSpringCoeffs_.lookup("springConstant") >> springConstant_;
-    restrainedHarmonicSpringCoeffs_.lookup("rR") >> rR_;
+    pitchForkRingCoeffs_.lookup("mu") >> mu_;
+    pitchForkRingCoeffs_.lookup("alpha") >> alpha_;
+    pitchForkRingCoeffs_.lookup("rOrbit") >> rOrbit_;
 
     return true;
 }

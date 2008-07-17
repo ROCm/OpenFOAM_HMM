@@ -34,8 +34,6 @@ void Foam::moleculeCloud::calculateTetherForce()
 
     vector rIT;
 
-    scalar rITMag;
-
     vector fIT;
 
     for (mol = this->begin(); mol != this->end(); ++mol)
@@ -44,12 +42,10 @@ void Foam::moleculeCloud::calculateTetherForce()
         {
             rIT = mol().position() - mol().tetherPosition();
 
-            rITMag = mag(rIT);
-
-            fIT = (rIT/rITMag) * tetherPotentials_.force
+            fIT = tetherPotentials_.force
             (
                 mol().id(),
-                rITMag
+                rIT
             );
 
             mol().A() += fIT/(mol().mass());
@@ -57,7 +53,7 @@ void Foam::moleculeCloud::calculateTetherForce()
             mol().potentialEnergy() += tetherPotentials_.energy
             (
                 mol().id(),
-                rITMag
+                rIT
             );
 
             mol().rf() += rIT*fIT;
