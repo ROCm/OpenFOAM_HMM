@@ -23,119 +23,77 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::tetherPotential
+    Foam::pairPotentials::exponentialRepulsion
 
 Description
 
 SourceFiles
-    tetherPotential.C
-    newTetherPotential.C
+    exponentialRepulsion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetherPotential_H
-#define tetherPotential_H
+#ifndef exponentialRepulsion_H
+#define exponentialRepulsion_H
 
-#include "IOdictionary.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "autoPtr.H"
-#include "vector.H"
+#include "pairPotential.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                Class tetherPotential Declaration
-\*---------------------------------------------------------------------------*/
-
-class tetherPotential
+namespace pairPotentials
 {
 
-protected:
+/*---------------------------------------------------------------------------*\
+                           Class exponentialRepulsion Declaration
+\*---------------------------------------------------------------------------*/
 
-    // Protected data
+class exponentialRepulsion
+:
+    public pairPotential
+{
+    // Private data
 
-        word name_;
-        dictionary tetherPotentialProperties_;
+        dictionary exponentialRepulsionCoeffs_;
 
-
-    // Private Member Functions
-
-        //- Disallow copy construct
-        tetherPotential(const tetherPotential&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const tetherPotential&);
-
+        scalar rm_;
+        scalar epsilon_;
 
 public:
 
     //- Runtime type information
-    TypeName("tetherPotential");
-
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            tetherPotential,
-            dictionary,
-            (
-                const word& name,
-                const dictionary& tetherPotentialProperties
-            ),
-            (name, tetherPotentialProperties)
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected viscosity model
-        static autoPtr<tetherPotential> New
-        (
-            const word& name,
-            const dictionary& tetherPotentialProperties
-        );
+    TypeName("exponentialRepulsion");
 
 
     // Constructors
 
         //- Construct from components
-        tetherPotential
+        exponentialRepulsion
         (
             const word& name,
-            const dictionary& tetherPotentialProperties
+            const dictionary& pairPotentialProperties
         );
 
 
     // Destructor
 
-        virtual ~tetherPotential()
+        ~exponentialRepulsion()
         {}
 
 
     // Member Functions
 
-        virtual scalar energy (const vector r) const = 0;
+        scalar unscaledEnergy(const scalar r) const;
 
-        virtual vector force (const vector r) const = 0;
-
-        const dictionary& tetherPotentialProperties() const
-        {
-            return tetherPotentialProperties_;
-        }
-
-        //- Read tetherPotential dictionary
-        virtual bool read(const dictionary& tetherPotentialProperties) = 0;
+        //- Read transportProperties dictionary
+        bool read(const dictionary& pairPotentialProperties);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace pairPotentials
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

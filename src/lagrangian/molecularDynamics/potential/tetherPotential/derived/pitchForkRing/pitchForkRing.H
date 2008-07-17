@@ -23,89 +23,55 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::tetherPotential
+    Foam::tetherPotentials::pitchForkRing
 
 Description
 
+
 SourceFiles
-    tetherPotential.C
-    newTetherPotential.C
+    pitchForkRing.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetherPotential_H
-#define tetherPotential_H
+#ifndef pitchForkRing_H
+#define pitchForkRing_H
 
-#include "IOdictionary.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "autoPtr.H"
-#include "vector.H"
+#include "tetherPotential.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                Class tetherPotential Declaration
-\*---------------------------------------------------------------------------*/
-
-class tetherPotential
+namespace tetherPotentials
 {
 
-protected:
+/*---------------------------------------------------------------------------*\
+                           Class pitchForkRing Declaration
+\*---------------------------------------------------------------------------*/
 
-    // Protected data
+class pitchForkRing
+:
+    public tetherPotential
+{
+    // Private data
 
-        word name_;
-        dictionary tetherPotentialProperties_;
+        dictionary pitchForkRingCoeffs_;
 
-
-    // Private Member Functions
-
-        //- Disallow copy construct
-        tetherPotential(const tetherPotential&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const tetherPotential&);
+        scalar mu_;
+        scalar alpha_;
+        scalar rOrbit_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("tetherPotential");
-
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            tetherPotential,
-            dictionary,
-            (
-                const word& name,
-                const dictionary& tetherPotentialProperties
-            ),
-            (name, tetherPotentialProperties)
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected viscosity model
-        static autoPtr<tetherPotential> New
-        (
-            const word& name,
-            const dictionary& tetherPotentialProperties
-        );
+    TypeName("pitchForkRing");
 
 
     // Constructors
 
         //- Construct from components
-        tetherPotential
+        pitchForkRing
         (
             const word& name,
             const dictionary& tetherPotentialProperties
@@ -114,28 +80,24 @@ public:
 
     // Destructor
 
-        virtual ~tetherPotential()
+        ~pitchForkRing()
         {}
 
 
     // Member Functions
 
-        virtual scalar energy (const vector r) const = 0;
+        scalar energy(const vector r) const;
 
-        virtual vector force (const vector r) const = 0;
+        vector force(const vector r) const;
 
-        const dictionary& tetherPotentialProperties() const
-        {
-            return tetherPotentialProperties_;
-        }
-
-        //- Read tetherPotential dictionary
-        virtual bool read(const dictionary& tetherPotentialProperties) = 0;
+        //- Read transportProperties dictionary
+        bool read(const dictionary& tetherPotentialProperties);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace tetherPotentials
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

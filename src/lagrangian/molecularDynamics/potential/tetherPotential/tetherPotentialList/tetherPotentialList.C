@@ -136,27 +136,23 @@ const Foam::tetherPotential& Foam::tetherPotentialList::tetherPotentialFunction
 }
 
 
-Foam::scalar Foam::tetherPotentialList::force
+Foam::vector Foam::tetherPotentialList::force
 (
     const label a,
-    const scalar rITMag
+    const vector rIT
 ) const
 {
-    scalar f = (*this)[tetherPotentialIndex (a)].force(rITMag);
-
-    return f;
+    return (*this)[tetherPotentialIndex (a)].force(rIT);
 }
 
 
 Foam::scalar Foam::tetherPotentialList::energy
 (
     const label a,
-    const scalar rITMag
+    const vector rIT
 ) const
 {
-    scalar e = (*this)[tetherPotentialIndex (a)].energy(rITMag);
-
-    return e;
+    return (*this)[tetherPotentialIndex (a)].energy(rIT);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

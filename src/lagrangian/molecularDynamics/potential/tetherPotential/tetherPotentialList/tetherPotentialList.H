@@ -113,16 +113,16 @@ public:
                 const label a
             ) const;
 
-            scalar force
+            vector force
             (
                 const label a,
-                const scalar rIJMag
+                const vector rIT
             ) const;
 
             scalar energy
             (
                 const label a,
-                const scalar rIJMag
+                const vector rIT
             ) const;
 };
 

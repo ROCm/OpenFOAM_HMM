@@ -22,86 +22,72 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::tetherPotentials::restrainedHarmonicSpring
-
-Description
-
-
-SourceFiles
-    restrainedHarmonicSpring.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef restrainedHarmonicSpring_H
-#define restrainedHarmonicSpring_H
-
-#include "tetherPotential.H"
+#include "exponentialRepulsion.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace tetherPotentials
+namespace pairPotentials
 {
 
-/*---------------------------------------------------------------------------*\
-                           Class restrainedHarmonicSpring Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class restrainedHarmonicSpring
+defineTypeNameAndDebug(exponentialRepulsion, 0);
+
+addToRunTimeSelectionTable
+(
+    pairPotential,
+    exponentialRepulsion,
+    dictionary
+);
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+exponentialRepulsion::exponentialRepulsion
+(
+    const word& name,
+    const dictionary& exponentialRepulsion
+)
 :
-    public tetherPotential
+    pairPotential(name, exponentialRepulsion),
+    exponentialRepulsionCoeffs_(exponentialRepulsion.subDict(typeName + "Coeffs")),
+    rm_(readScalar(exponentialRepulsionCoeffs_.lookup("rm"))),
+    epsilon_(readScalar(exponentialRepulsionCoeffs_.lookup("epsilon")))
 {
-    // Private data
+    setLookupTables();
+}
 
-        dictionary restrainedHarmonicSpringCoeffs_;
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-        scalar springConstant_;
-
-        scalar rR_;
-
-
-public:
-
-    //- Runtime type information
-    TypeName("restrainedHarmonicSpring");
+scalar exponentialRepulsion::unscaledEnergy(const scalar r) const
+{
+    return epsilon_ * exp(-r/rm_);
+}
 
 
-    // Constructors
+bool exponentialRepulsion::read(const dictionary& exponentialRepulsion)
+{
+    pairPotential::read(exponentialRepulsion);
 
-        //- Construct from components
-        restrainedHarmonicSpring
-        (
-            const word& name,
-            const dictionary& tetherPotentialProperties
-        );
+    exponentialRepulsionCoeffs_ = exponentialRepulsion.subDict(typeName + "Coeffs");
 
+    exponentialRepulsionCoeffs_.lookup("rm") >> rm_;
+    exponentialRepulsionCoeffs_.lookup("epsilon") >> epsilon_;
 
-    // Destructor
-
-        ~restrainedHarmonicSpring()
-        {}
-
-
-    // Member Functions
-
-        scalar energy(const vector r) const;
-
-        vector force(const vector r) const;
-
-        //- Read transportProperties dictionary
-        bool read(const dictionary& tetherPotentialProperties);
-};
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace tetherPotentials
+} // End namespace pairPotentials
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

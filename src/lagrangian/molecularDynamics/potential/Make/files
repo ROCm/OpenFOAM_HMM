@@ -9,6 +9,7 @@ $(pairPotential)/basic/newPairPotential.C
 $(pairPotential)/derived/lennardJones/lennardJones.C
 $(pairPotential)/derived/maitlandSmith/maitlandSmith.C
 $(pairPotential)/derived/azizChen/azizChen.C
+$(pairPotential)/derived/exponentialRepulsion/exponentialRepulsion.C
 
 energyScalingFunction = energyScalingFunction
 
@@ -30,6 +31,7 @@ $(tetherPotential)/basic/newTetherPotential.C
 
 $(tetherPotential)/derived/harmonicSpring/harmonicSpring.C
 $(tetherPotential)/derived/restrainedHarmonicSpring/restrainedHarmonicSpring.C
+$(tetherPotential)/derived/pitchForkRing/pitchForkRing.C
 
 LIB = $(FOAM_LIBBIN)/libpotential
 
