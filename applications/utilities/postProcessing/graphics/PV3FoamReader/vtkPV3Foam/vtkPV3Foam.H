@@ -64,7 +64,7 @@ SourceFiles
 #include "fileName.H"
 #include "volPointInterpolation.H"
 #include "stringList.H"
-
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -449,6 +449,7 @@ private:
             (
                 const fvMesh&,
                 const volPointInterpolation& pInterp,
+                const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,
                 const IOobjectList& objects,
                 vtkDataArraySelection* fieldSelection,
                 vtkMultiBlockDataSet* output
