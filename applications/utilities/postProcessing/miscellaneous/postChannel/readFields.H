@@ -1,19 +1,19 @@
-    IOobject UmeanHeader
+    IOobject UMeanHeader
     (
-        "Umean",
+        "UMean",
         runTime.times()[i].name(),
         mesh,
         IOobject::MUST_READ
     );
 
-    if (!UmeanHeader.headerOk())
+    if (!UMeanHeader.headerOk())
     {
         continue;
     }
 
-    volVectorField Umean
+    volVectorField UMean
     (
-        UmeanHeader,
+        UMeanHeader,
         mesh
     );
 

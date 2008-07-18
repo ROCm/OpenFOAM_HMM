@@ -1,16 +1,16 @@
-    scalarField UmeanXvalues = channelIndexing.collapse
+    scalarField UMeanXvalues = channelIndexing.collapse
     (
-        Umean.component(vector::X)
+        UMean.component(vector::X)
     );
 
-    scalarField UmeanYvalues = channelIndexing.collapse
+    scalarField UMeanYvalues = channelIndexing.collapse
     (
-        Umean.component(vector::Y)
+        UMean.component(vector::Y)
     );
 
-    scalarField UmeanZvalues = channelIndexing.collapse
+    scalarField UMeanZvalues = channelIndexing.collapse
     (
-        Umean.component(vector::Z)
+        UMean.component(vector::Z)
     );
 
     scalarField RxxValues = channelIndexing.collapse(Rxx);
@@ -41,7 +41,7 @@
 
     scalarField y = channelIndexing.y(mesh.C());
 
-    makeGraph(y, UmeanXvalues, "Uf", R.path(), gFormat);
+    makeGraph(y, UMeanXvalues, "Uf", R.path(), gFormat);
     makeGraph(y, urmsValues, "u", R.path(), gFormat);
     makeGraph(y, vrmsValues, "v", R.path(), gFormat);
     makeGraph(y, wrmsValues, "w", R.path(), gFormat);
