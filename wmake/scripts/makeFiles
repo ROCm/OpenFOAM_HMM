@@ -28,43 +28,36 @@
 #
 # Description
 #     Scan the current directory for source files and construct Make/files
-#     It has to be written in the C-shell rather than the Bourne shell
-#     because it uses file name manipulators.
 #
 #     Usage : makeFiles
 #
 #------------------------------------------------------------------------------
 
-if [ -r "Make/files" ]
+if [ -r Make/files ]
 then
-    echo "makeFiles: Make/files already exists, exiting"
-    exit 1
-fi
-
-
-if [ ! -d "Make" ]
-then
-    mkdir Make
+   echo "makeFiles: Make/files already exists, exiting"
+   exit 1
 fi
 
 rulesPath=$WM_DIR/rules/$WM_ARCH$WM_COMPILER
 
+[ -d Make ] || mkdir Make
 rm -f Make/files
 
 dirs=`find . -name "*" -type d -print`
 
 for dir in $dirs
 do
-	if [ $dir != "." ]
-	then
-        baseDirName=`echo $dir | sed 's%^\./%%' | $rulesPath/dirToString`
-        baseDir=`echo $dir | sed 's%^\./%%'`
+   if [ $dir != . ]
+   then
+      baseDirName=`echo $dir | sed 's%^\./%%' | $rulesPath/dirToString`
+      baseDir=`echo $dir | sed 's%^\./%%'`
 
-        if [ $baseDirName != "Make" ]
-        then
-            echo $baseDirName " = " $baseDir >> Make/files
-        fi
-	fi
+      if [ $baseDirName != Make ]
+      then
+         echo $baseDirName " = " $baseDir >> Make/files
+      fi
+   fi
 done
 
 echo >> Make/files
@@ -86,7 +79,6 @@ done
 
 echo >> Make/files
 
-pwd=`pwd`
-echo 'EXE = $(FOAM_APPBIN)/'${pwd##*/} >> Make/files
+echo 'EXE = $(FOAM_APPBIN)/'${PWD##*/} >> Make/files
 
 #------------------------------------------------------------------------------

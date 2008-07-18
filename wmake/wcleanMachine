@@ -27,44 +27,39 @@
 #     wcleanMachine
 #
 # Description
-#     Searches all the directories below the current for the
-#     object file directories of the specified machine and then deletes them.
+#     Searches the directories below the current directory for the object
+#     file directories of the specified machine type(s) and deletes them
 #
-#     Usage: wcleanMachine <machineType>
+#     Usage: wcleanMachine <machineType> [ .. <machineTypeN> ]
 #
 #------------------------------------------------------------------------------
 
-if [ $# = 0 ]
+if [ $# -eq 0 ]
 then
-   echo $0: wcleanMachine : Machine type expected, exiting !
+   echo "${0##*/}: Machine type(s) expected, exiting !"
    exit 1
 fi
 
-
-if [ ! -d lib -o ! -d src ]
-then
-   echo $0: not in the project top level directory !
+[ -d lib -a -d src ] || {
+   echo "${0##*/}: not in the project top level directory !"
    exit 1
-fi
-
-find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` \
-    -depth \( -type d -name "*$1" -o -name "*$1$WM_MPLIB" \) -exec rm -r {} \;
-
-#find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
+}
 
 
-if [ -d lib/$1 ]
-then
-    rm -r lib/$1
-fi
+for machType
+do
+   echo "Cleaning machine type: $machType"
 
-if [ applications/bin ]
-then
-    if [ -d applications/bin/$1 ]
-    then
-       rm -r applications/bin/$1
-    fi
-fi
+   find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` \
+       -depth \( -type d -name "*$machType" -o -name "*$machType$WM_MPLIB" \) -exec rm -r {} \;
 
+   # find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
+
+   for dir in lib/$machType applications/bin/$machType
+   do
+      [ -d $dir ] && rm -r $dir
+   done
+
+done
 
 #------------------------------------------------------------------------------

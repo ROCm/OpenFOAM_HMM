@@ -35,48 +35,34 @@
 #------------------------------------------------------------------------------
 Script=${0##*/}
 
-if [ ! "$WM_OPTIONS" ]
+#
+# check environment variables
+#
+for check in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR
+do
+   eval test "\$$check" || {
+      echo "$Script error"
+      echo "    environment variable \$$check not set"
+      exit 1
+   }
+done
+
+if [ -d Make ]
 then
-    echo "$Script: environment variable $WM_OPTIONS not set, exiting!"
-    exit 1
-fi
-
-
-if [ ! "$WM_DIR" ]
-then
-    echo "$Script: environment variable $WM_DIR not set"
-    exit 1
-fi
-
-
-if [ ! "$WM_LINK_LANGUAGE" ]
-then
-    echo "$Script: environment variable $WM_LINK_LANGUAGE not set"
-    exit 1
-fi
-
-
-if [ -d "Make" ]
-then
-    echo "$Script: Make directory already exists"
-    exit 1
+   echo "$Script: Make directory already exists"
+   exit 1
 else
-    mkdir Make
+   mkdir Make
 fi
 
+[ -e Make/files ] || {
+   echo "$Script: Creating files"
+   $WM_DIR/scripts/makeFiles
+}
 
-if [ ! -e "Make/files"  ]
-then
-    echo "$Script: Creating files"
-    $WM_DIR/scripts/makeFiles
-fi
-
-
-if [ ! -e "Make/options"  ]
-then
-    echo "$Script: Creating options"
-    $WM_DIR/scripts/makeOptions
-fi
-
+[ -e Make/options ] || {
+   echo "$Script: Creating options"
+   $WM_DIR/scripts/makeOptions
+}
 
 #------------------------------------------------------------------------------
