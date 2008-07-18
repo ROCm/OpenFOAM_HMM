@@ -1,9 +1,9 @@
         /*
         volTensorField gradU = fvc::grad(U);
         volSymmTensorField D = symm(fvc::grad(U));
-        volTensorField Dprim = symm(fvc::grad(U - Umean));
+        volTensorField Dprim = symm(fvc::grad(U - UMean));
 
-        volScalarField prod = -((U - Umean)*(U - Umean)) && D;
+        volScalarField prod = -((U - UMean)*(U - UMean)) && D;
         */
 
         /*
@@ -20,7 +20,7 @@
             mesh,
             dimensionSet(0, 1, -1, 0, 0)
         );
-        txx =sqrt(Txx - (Umeanx*Umeanx));
+        txx =sqrt(Txx - (UMeanx*UMeanx));
         txx.write();
 
         volScalarField tyy
@@ -36,7 +36,7 @@
             mesh,
             dimensionSet(0, 1, -1, 0, 0)
         );
-        tyy = sqrt(Tyy - (Umeany*Umeany));
+        tyy = sqrt(Tyy - (UMeany*UMeany));
         tyy.write();
 
         volScalarField tzz
@@ -52,7 +52,7 @@
             mesh,
             dimensionSet(0, 1, -1, 0, 0)
         );
-        tzz = sqrt(Tzz - (Umeanz*Umeanz));
+        tzz = sqrt(Tzz - (UMeanz*UMeanz));
         tzz.write();
 
         volScalarField txy
@@ -68,6 +68,6 @@
             mesh,
             dimensionSet(0, 2, -2, 0, 0)
         );
-        txy = Txy - (Umeanx*Umeany);
+        txy = Txy - (UMeanx*UMeany);
         txy.write();
 */

@@ -8,6 +8,7 @@
 
     if (!UMeanHeader.headerOk())
     {
+        Info<< "    No UMean field" << endl;
         continue;
     }
 
@@ -17,21 +18,21 @@
         mesh
     );
 
-    volSymmTensorField R
+    volSymmTensorField UPrime2Mean
     (
         IOobject
         (
-            "R",
+            "UPrime2Mean",
             runTime.times()[i].name(),
             mesh,
             IOobject::MUST_READ
         ),
         mesh
     );
-    volScalarField Rxx(R.component(symmTensor::XX));
-    volScalarField Ryy(R.component(symmTensor::YY));
-    volScalarField Rzz(R.component(symmTensor::ZZ));
-    volScalarField Rxy(R.component(symmTensor::XY));
+    volScalarField Rxx(UPrime2Mean.component(symmTensor::XX));
+    volScalarField Ryy(UPrime2Mean.component(symmTensor::YY));
+    volScalarField Rzz(UPrime2Mean.component(symmTensor::ZZ));
+    volScalarField Rxy(UPrime2Mean.component(symmTensor::XY));
 
     volScalarField pPrime2Mean
     (
@@ -45,6 +46,7 @@
         mesh
     );
 
+    /*
     volScalarField epsilonMean
     (
         IOobject
@@ -57,7 +59,6 @@
         mesh
     );
 
-    /*
     volScalarField nuMean
     (
         IOobject
