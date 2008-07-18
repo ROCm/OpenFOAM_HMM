@@ -20,9 +20,9 @@
 
     scalarField pPrime2MeanValues = channelIndexing.collapse(pPrime2Mean);
 
+    /*
     scalarField epsilonValues = channelIndexing.collapse(epsilonMean);
 
-    /*
     scalarField nuMeanValues = channelIndexing.collapse(nuMean);
     scalarField nuPrimeValues = channelIndexing.collapse(nuPrime);
 
@@ -49,9 +49,8 @@
 
     makeGraph(y, pPrime2MeanValues, "pPrime2Mean", UMean.path(), gFormat);
 
-    makeGraph(y, epsilonValues, "epsilon", UMean.path(), gFormat);
-
     /*
+    makeGraph(y, epsilonValues, "epsilon", UMean.path(), gFormat);
     makeGraph(y, nuMeanValues, "nu", UMean.path(), gFormat);
     makeGraph(y, nuPrimeValues, "nuPrime", UMean.path(), gFormat);
     makeGraph(y, gammaDotMeanValues, "gammaDot", UMean.path(), gFormat);

@@ -46,6 +46,7 @@
         mesh
     );
 
+    /*
     volScalarField epsilonMean
     (
         IOobject
@@ -58,7 +59,6 @@
         mesh
     );
 
-    /*
     volScalarField nuMean
     (
         IOobject
