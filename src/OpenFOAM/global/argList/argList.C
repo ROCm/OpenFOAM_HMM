@@ -168,7 +168,6 @@ Foam::argList::argList
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar (might filter argv)
-
     for (int argi=0; argi<argc; argi++)
     {
         if (argv[argi][0] == '-')
@@ -181,12 +180,6 @@ Foam::argList::argList
                 break;
             }
         }
-    }
-
-    // Print the banner once only for parallel runs
-    if (Pstream::master())
-    {
-        IOobject::writeBanner(Info, true);
     }
 
     // convert argv -> args_ and capture ( ... ) lists
@@ -291,8 +284,10 @@ Foam::argList::argList
     string dateString = clock::date();
     string timeString = clock::clockTime();
 
+    // Print the banner once only for parallel runs
     if (Pstream::master())
     {
+        IOobject::writeBanner(Info, true);
         Info<< "Exec   : " << argListString.c_str() << nl
             << "Date   : " << dateString.c_str() << nl
             << "Time   : " << timeString.c_str() << nl
@@ -609,9 +604,9 @@ void Foam::argList::printUsage() const
         Info<< ']';
     }
 
-    // place help/doc options of the way at the end,
+    // place help/doc/srcDoc options of the way at the end,
     // but with an extra space to separate it a little
-    Info<< "  [-help] [-doc] [-srcDoc]" << endl;
+    Info<< "  [-help] [-doc] [-srcDoc]\n" << endl;
 }
 
 
@@ -663,7 +658,9 @@ void Foam::argList::displayDoc(bool source) const
     }
     else
     {
-        Info<< "No documentation found" << endl;
+        Info<< nl
+            << "No documentation found for " << executable_
+            << ", but you can use -help to display the usage\n" << endl;
     }
 }
 
