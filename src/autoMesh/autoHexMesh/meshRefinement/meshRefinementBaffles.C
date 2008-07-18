@@ -40,7 +40,7 @@ License
 #include "polyRemoveFace.H"
 #include "polyAddPoint.H"
 #include "localPointRegion.H"
-//#include "directDuplicatePoints.H"
+#include "duplicatePoints.H"
 #include "OFstream.H"
 #include "regionSplit.H"
 #include "removeCells.H"
@@ -457,11 +457,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        // Delete mesh volumes. No other way to do this?
-        mesh_.clearOut();
     }
 
     //- Redo the intersections on the newly create baffle faces. Note that
@@ -1181,11 +1176,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        // Delete mesh volumes. No other way to do this?
-        mesh_.clearOut();
     }
 
     // Update intersections. Recalculate intersections on merged faces since
@@ -2050,273 +2040,29 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
 // split them.
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
 {
-    // Pick all points
-    // - on the outside
-    // - that are used by faces that are not all reachable by single
-    //   cell-face-cell walk
-    indirectPrimitivePatch allOutside
-    (
-        IndirectList<face>
-        (
-            mesh_.faces(),
-            identity
-            (
-                mesh_.nFaces()
-              - mesh_.nInternalFaces()
-            )
-          + mesh_.nInternalFaces()
-        ),
-        mesh_.points()
-    );
-
-
-    // All points on non-manifold regions.
-    labelList nonManifPoints;
-    {
-        pointSet nonManifPointSet
-        (
-            mesh_,
-            "nonManifoldPoints",
-            mesh_.nPoints()/1000
-        );
-
-        forAll(allOutside.meshPoints(), localPointI)
-        {
-            label pointI = allOutside.meshPoints()[localPointI];
-
-            if (!localPointRegion::isSingleCellRegion(mesh_, pointI))
-            {
-                nonManifPointSet.insert(pointI);
-            }
-        }
-
-        // Remove points on coupled boundaries since these are too hard
-        // to handle (and snapping probably goes wrong on them anyway)
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-        forAll(patches, patchI)
-        {
-            const polyPatch& pp = patches[patchI];
-
-            if (pp.coupled())
-            {
-                const labelList& meshPoints = pp.meshPoints();
-
-                forAll(meshPoints, i)
-                {
-                    nonManifPointSet.erase(meshPoints[i]);
-                }
-            }
-        }
-
-        if (debug)
-        {
-            Pout<< "Writing " << nonManifPointSet.size()
-                << " non-manif points to " << nonManifPointSet.objectPath()
-                << endl;
-            nonManifPointSet.write();
-        }
-
-
-        label nNonManifPoints = nonManifPointSet.size();
-        reduce(nNonManifPoints, sumOp<label>());
-
-        Info<< "dupNonManifoldPoints : Found : " << nNonManifPoints
-            << " non-manifold points (out of "
-            << mesh_.globalData().nTotalPoints()
-            << ')' << endl;
-
-        nonManifPoints = nonManifPointSet.toc();
-    }
-
-
     // Topochange container
     polyTopoChange meshMod(mesh_);
 
 
-//    // Analyse which points need to be duplicated
-//    localPointRegion regionSide(mesh_, nonManifPoints);
-//
-//    Pout<< "dupNonManifoldPoints : Found regions:"
-//        << regionSide.nRegions() << endl;
-//
-//    // Topo change engine
-//    directDuplicatePoints pointDuplicator(mesh_);
-//
-//    pointDuplicator.setRefinement
-//    (
-//        nonManifPoints,
-//        regionSide,
-//        meshMod
-//    );
+    // Analyse which points need to be duplicated
+    localPointRegion regionSide(mesh_);
 
-//DIY replacement of localPointRegion+directDuplicatePoints
-    {
-        labelListList pointFaceRegion(nonManifPoints.size());
-        forAll(nonManifPoints, i)
-        {
-            label pointI = nonManifPoints[i];
+    label nNonManifPoints = returnReduce
+    (
+        regionSide.meshPointMap().size(),
+        sumOp<label>()
+    );
 
-            const labelList& pFaces = mesh_.pointFaces()[pointI];
+    Info<< "dupNonManifoldPoints : Found : " << nNonManifPoints
+        << " non-manifold points (out of "
+        << mesh_.globalData().nTotalPoints()
+        << ')' << endl;
 
-            labelList& pRegions = pointFaceRegion[i];
-            pRegions.setSize(pFaces.size());
-            pRegions = -1;
+    // Topo change engine
+    duplicatePoints pointDuplicator(mesh_);
 
-            // Walk cell face cell on the point
-            label regionI = 0;
-
-            forAll(pRegions, j)
-            {
-                label faceI = pFaces[j];
-
-                label nChanged = localPointRegion::walkCellFaceCell
-                (
-                    mesh_,
-                    mesh_.faceOwner()[faceI],
-                    pointI,
-                    regionI,
-                    pRegions
-                );
-
-                if (nChanged > 0)
-                {
-                    regionI++;
-                }
-            }
-
-            if (regionI <= 1)
-            {
-                FatalErrorIn("dupNonManifoldPoints")
-                    << "Problem pointI:" << pointI
-                    << " pRegions:" << pRegions << " nRegions:" << regionI
-                    << abort(FatalError);
-            }
-        }
-
-        // Do point duplication
-        // ~~~~~~~~~~~~~~~~~~~~
-
-        // Copy of faces
-        faceList newFaces(mesh_.faces());
-
-        // For all points-to-be-duplicated replace occurences of region with
-        // newly added point
-        forAll(nonManifPoints, nonI)
-        {
-            label pointI = nonManifPoints[nonI];
-
-            // Per local region the point to use (original or added)
-            Map<label> regionToPoint;
-
-            // original point gets used for region 0
-            regionToPoint.insert(0, pointI);
-
-            const labelList& pFaces = mesh_.pointFaces()[pointI];
-            const labelList& pRegions = pointFaceRegion[nonI];
-
-            forAll(pFaces, pFaceI)
-            {
-                // Get connected face and its region
-                label faceI = pFaces[pFaceI];
-                label region = pRegions[pFaceI];
-
-                label newPointI = -1;
-
-                Map<label>::const_iterator iter = regionToPoint.find(region);
-
-                if (iter != regionToPoint.end())
-                {
-                    newPointI = iter();
-                }
-                else
-                {
-                    // Add a point for this region
-                    newPointI = meshMod.setAction
-                    (
-                        polyAddPoint
-                        (
-                            mesh_.points()[pointI], // point
-                            pointI,                 // master point
-                            -1,                     // zone for point
-                            true                    // supports a cell
-                        )
-                    );
-
-                    regionToPoint.insert(region, newPointI);
-                }
-
-                // Replace point with newPointI
-                if (newPointI != pointI)
-                {
-                    const face& f = mesh_.faces()[faceI];
-
-                    label fp = findIndex(f, pointI);
-                    newFaces[faceI][fp] = newPointI;
-
-                    // Extra check.
-                    {
-                        labelList indices = findIndices(f, pointI);
-                        if (indices.size() != 1)
-                        {
-                            FatalErrorIn("dupNonManifoldPoints")
-                                << "point:" << pointI
-                                << " coord:" << mesh_.points()[pointI]
-                                << " face:" << faceI << " verts:" << f
-                                << " indices:" << indices
-                                << abort(FatalError);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Modify faces
-        forAll(newFaces, faceI)
-        {
-            if (newFaces[faceI] != mesh_.faces()[faceI])
-            {
-                label own = mesh_.faceOwner()[faceI];
-                label nei = -1;
-                label patchID = -1;
-                if (mesh_.isInternalFace(faceI))
-                {
-                    nei = mesh_.faceNeighbour()[faceI];
-                }
-                else
-                {
-                    patchID = mesh_.boundaryMesh().whichPatch(faceI);
-                }
-
-                // Get current zone info
-                label zoneID = mesh_.faceZones().whichZone(faceI);
-                bool zoneFlip = false;
-                if (zoneID >= 0)
-                {
-                    const faceZone& fZone = mesh_.faceZones()[zoneID];
-                    zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
-                }
-
-                meshMod.setAction
-                (
-                    polyModifyFace
-                    (
-                        newFaces[faceI],        // modified face
-                        faceI,                  // label of face being modified
-                        own,                    // owner
-                        nei,                    // neighbour
-                        false,                  // face flip
-                        patchID,                // patch for face
-                        false,                  // remove from zone
-                        zoneID,                 // zone for face
-                        zoneFlip                // face flip in zone
-                    )
-                );
-            }
-        }
-    }
-//END OF DIY
-
+    // Insert changes into meshMod
+    pointDuplicator.setRefinement(regionSide, meshMod);
 
     // Change the mesh (no inflation, parallel sync)
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
@@ -2328,11 +2074,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        // Delete mesh volumes. No other way to do this?
-        mesh_.clearOut();
     }
 
     // Update intersections. Is mapping only (no faces created, positions stay
@@ -2756,11 +2497,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        // Delete mesh volumes. No other way to do this?
-        mesh_.clearOut();
     }
 
     return map;
