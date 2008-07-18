@@ -41,23 +41,14 @@ usage() {
 
 usage: ${0##*/} <turbulenceProperties>
 
-    Where <turbulenceProperties> is the full path to the
-    turbulenceProperties dictionary
+  Where <turbulenceProperties> is the full path to the
+  turbulenceProperties dictionary
+
+  Note: can upgrade several files at once
 
 USAGE
    exit 1
 }
-
-[ $# = 1 ] || usage
-
-turbDict=$1
-if [ ! -f $turbDict ]
-then
-   echo "    Error: file $turbDict does not exist"
-   echo ""
-   usage
-fi
-
 
 #
 # $1: turbulence model
@@ -66,7 +57,7 @@ fi
 #
 convertDict()
 {
-    echo "    Identified $1 turbulence model in $3"
+    echo "Identified $1 turbulence model in '$3'"
     outputPath=`dirname $3`
 
     sed -e "s/turbulenceProperties/$1Properties/" \
@@ -77,20 +68,26 @@ convertDict()
      echo "    wrote $outputPath/$1Properties"
 }
 
-#
-# Identify type of turbulence model and convert
-#
-if grep turbulenceModel $turbDict >/dev/null 2>&1
-then
-    convertDict RAS turbulenceModel $turbDict
-elif grep LESmodel $turbDict >/dev/null 2>&1
-then
-    convertDict LES LESmodel $turbDict
-else
-    echo "Unable to determine turbulence model type - nothing changed"
-    exit 1
-fi
+[ $# -ge 1 ] || usage
 
-echo "done."
+for turbDict
+do
+   # Identify type of turbulence model and convert
+   if [ -f $turbDict ]
+   then
+      if grep turbulenceModel $turbDict >/dev/null 2>&1
+      then
+          convertDict RAS turbulenceModel $turbDict
+      elif grep LESmodel $turbDict >/dev/null 2>&1
+      then
+          convertDict LES LESmodel $turbDict
+      else
+          echo "Unable to determine turbulence model type in '$turbDict'"
+          echo "    - nothing changed"
+      fi
+   else
+      echo "Error: file '$turbDict' does not exist"
+   fi
+done
 
 #------------------------------------------------------------------------------
