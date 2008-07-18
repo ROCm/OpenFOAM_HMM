@@ -34,27 +34,26 @@
     scalarField vrmsValues = sqrt(mag(RyyValues));
     scalarField wrmsValues = sqrt(mag(RzzValues));
 
-    scalarField kValues
-        = 0.5*(sqr(urmsValues) + sqr(vrmsValues) + sqr(wrmsValues));
-
+    scalarField kValues =
+        0.5*(sqr(urmsValues) + sqr(vrmsValues) + sqr(wrmsValues));
 
 
     scalarField y = channelIndexing.y(mesh.C());
 
-    makeGraph(y, UMeanXvalues, "Uf", R.path(), gFormat);
-    makeGraph(y, urmsValues, "u", R.path(), gFormat);
-    makeGraph(y, vrmsValues, "v", R.path(), gFormat);
-    makeGraph(y, wrmsValues, "w", R.path(), gFormat);
-    makeGraph(y, RxyValues, "uv", R.path(), gFormat);
-    makeGraph(y, kValues, "k", R.path(), gFormat);
+    makeGraph(y, UMeanXvalues, "Uf", UMean.path(), gFormat);
+    makeGraph(y, urmsValues, "u", UMean.path(), gFormat);
+    makeGraph(y, vrmsValues, "v", UMean.path(), gFormat);
+    makeGraph(y, wrmsValues, "w", UMean.path(), gFormat);
+    makeGraph(y, RxyValues, "uv", UMean.path(), gFormat);
+    makeGraph(y, kValues, "k", UMean.path(), gFormat);
 
-    makeGraph(y, pPrime2MeanValues, "pPrime2Mean", R.path(), gFormat);
+    makeGraph(y, pPrime2MeanValues, "pPrime2Mean", UMean.path(), gFormat);
 
-    makeGraph(y, epsilonValues, "epsilon", R.path(), gFormat);
+    makeGraph(y, epsilonValues, "epsilon", UMean.path(), gFormat);
 
     /*
-    makeGraph(y, nuMeanValues, "nu", R.path(), gFormat);
-    makeGraph(y, nuPrimeValues, "nuPrime", R.path(), gFormat);
-    makeGraph(y, gammaDotMeanValues, "gammaDot", R.path(), gFormat);
-    makeGraph(y, gammaDotPrimeValues, "gammaDotPrime", R.path(), gFormat);
+    makeGraph(y, nuMeanValues, "nu", UMean.path(), gFormat);
+    makeGraph(y, nuPrimeValues, "nuPrime", UMean.path(), gFormat);
+    makeGraph(y, gammaDotMeanValues, "gammaDot", UMean.path(), gFormat);
+    makeGraph(y, gammaDotPrimeValues, "gammaDotPrime", UMean.path(), gFormat);
     */
