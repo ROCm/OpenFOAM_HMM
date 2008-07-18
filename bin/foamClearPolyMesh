@@ -35,7 +35,7 @@ usage() {
    while [ "$#" -ge 1 ]; do echo "$1" 1>&2; shift; done
    cat <<USAGE 1>&2
 
-usage: ${0##*/} [-case dir]
+usage: ${0##*/} [-case dir] [-region name]
 
     Remove the contents of the constant/polyMesh directory
     as per the Foam::polyMesh::removeFiles() method.
@@ -44,47 +44,60 @@ USAGE
    exit 1
 }
 
-unset caseDir
+unset caseDir regionName
 
 # parse a single option
-if [ "$#" -gt 0 ]; then
+while [ "$#" -gt 0 ]
+do
    case "$1" in
    -h | -help)
       usage
       ;;
    -case)
-      shift
-      caseDir=$1
-      [ "$#" -ge 1 ] || usage "'-case' option requires an argument"
+      [ "$#" -ge 2 ] || usage "'-case' option requires an argument"
+      caseDir=$2
+      shift 2
       cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
+      ;;
+   -region)
+      [ "$#" -ge 2 ] || usage "'-region' option requires an argument"
+      regionName=$2
+      shift 2
       ;;
    *)
       usage "unknown option/argument: '$*'"
       ;;
    esac
+done
+
+if [ -n "$regionName" ]
+then
+   meshDir=$regionName/polyMesh
+else
+   meshDir=polyMesh
 fi
 
-# meshDir is only set if -case was specified: insist upon 'constant/polyMesh'
+# if -case was specified: insist upon 'constant/polyMesh'
 if [ -n "$caseDir" ]
 then
-   # require constant/polyMesh
-   meshDir=constant/polyMesh
-
-   if [ ! -d "$meshDir" ]
+   if [ -d constant/$meshDir ]
    then
-      echo "Error: no '$meshDir' in $caseDir" 1>&2
+      # use constant/polyMesh
+      meshDir=constant/$meshDir
+   else
+      echo "Error: no 'constant/$meshDir' in $caseDir" 1>&2
       exit 1
    fi
 else
-   if [ -d constant/polyMesh ]
+   if [ -d constant/$meshDir ]
    then
       # use constant/polyMesh
-      meshDir=constant/polyMesh
-   elif [ -d polyMesh ]
+      meshDir=constant/$meshDir
+   elif [ -d $meshDir ]
    then
-      # likely already in constant/
-      meshDir=polyMesh
-   elif [ "${PWD##*/}" = polyMesh ]
+      # likely already in constant/ - do not adjust anything
+      :
+   elif [ "${PWD##*/}" = polyMesh -a -z "$regionName" ]
    then
       # apparently already within polyMesh/
       meshDir=.
