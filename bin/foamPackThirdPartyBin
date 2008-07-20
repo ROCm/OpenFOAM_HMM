@@ -33,14 +33,14 @@
 
 if [ $# = 0 ]
 then
-   echo "Error: archOptionsitecture type expected, exiting"
+   echo "Error: archOptions type expected, exiting"
    echo
    echo "Usage : ${0##*/} <archOptions> [outputDir]"
    echo
    exit 1
 fi
 archOptions=$1
-arch=${archOptions%%G*}
+arch=${archOptions%%G*}  # TODO: works for Gcc only
 arch3264=$(echo "$arch" | sed 's@64@-64@')
 
 timeStamp=$(date +%Y-%m-%d)

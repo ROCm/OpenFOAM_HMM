@@ -29,13 +29,11 @@
 # Description
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-
 usage() {
    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
    cat<<USAGE
 
-usage: $Script [OPTION] <application> ...
+usage: ${0##*/} [OPTION] <application> ...
 
 options:
   -case dir     specify case directory
@@ -108,9 +106,9 @@ do
       usage
       ;;
    -case)
-      shift
-      caseDir=$1
-      [ "$#" -ge 1 ] || usage "'-case' option requires an argument"
+      [ "$#" -ge 2 ] || usage "'-case' option requires an argument"
+      caseDir=$2
+      shift 2
       cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
       ;;
    -s)
