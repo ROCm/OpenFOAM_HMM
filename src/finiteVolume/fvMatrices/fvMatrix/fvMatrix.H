@@ -342,11 +342,11 @@ public:
 
             //- Relax matrix (for steady-state solution).
             //  alpha = 1 : diagonally equal
-            //  alpha < 1 :    ,,      dominant
+            //  alpha < 1 : diagonally dominant
             //  alpha = 0 : do nothing
             void relax(const scalar alpha);
 
-            //- Relax matrix (for steadty-state solution).
+            //- Relax matrix (for steady-state solution).
             //  alpha is read from controlDict
             void relax();
 
