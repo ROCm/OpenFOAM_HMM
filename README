@@ -30,7 +30,7 @@
     type:
     + qmake --version
 
-      The ParaView binary executables in the ThirdParty distribution will only
+    The ParaView binary executables in the ThirdParty distribution will only
     work with PRECISELY the same version of Qt with which it was compiled.  The
     64-bit version of ParaView was compiled with Qt-4.3.1 (with openSuSE-10.3)
     and the 32-bit version of ParaView was compiled with Qt-4.3.2 (with
@@ -46,11 +46,14 @@
     + openSuSE-10.3: Version 4.3.1
     + openSuSE-11.0: Version 4.4.0 - too new
 
-    For openSuSE 10.2, 10.3 and 11.0, Qt version 4.3.5 can be downloaded from:
-    http://download.opensuse.org/repositories/KDE:/Qt43
-
     Compilation and running of ParaView has been successful using the libraries
     downloaded in the "libqt4-dev" package on ubuntu.
+
+    If you don't have an appropriate version of Qt installed you can download
+    the sources from TrollTech e.g.:
+    ftp://ftp.trolltech.com/qt/source/qt-x11-opensource-src-4.3.5.tar.bz2
+    and compile and install in /usr/local or some other location that does to
+    conflict with the pre-installed version.
 
 * Installation
   Download and unpack the files in the $HOME/OpenFOAM directory as described in:
