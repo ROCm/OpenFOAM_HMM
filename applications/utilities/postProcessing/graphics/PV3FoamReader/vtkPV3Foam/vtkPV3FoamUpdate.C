@@ -114,6 +114,21 @@ void Foam::vtkPV3Foam::updateVolFields
     }
 
     volPointInterpolation pInterp(mesh, pMesh);
+
+    PtrList<PrimitivePatchInterpolation<primitivePatch> >
+        ppInterpList(mesh.boundaryMesh().size());
+
+    forAll(ppInterpList, i)
+    {
+        ppInterpList.set
+        (
+            i,
+            new PrimitivePatchInterpolation<primitivePatch>
+            (
+                mesh.boundaryMesh()[i]
+            )
+        );
+    }
 /*
     convertVolFields<Foam::label>
     (
@@ -122,23 +137,23 @@ void Foam::vtkPV3Foam::updateVolFields
 */
     convertVolFields<Foam::scalar>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::vector>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::sphericalTensor>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::symmTensor>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
     convertVolFields<Foam::tensor>
     (
-        mesh, pInterp, objects, arraySelection, output
+        mesh, pInterp, ppInterpList, objects, arraySelection, output
     );
 }
 

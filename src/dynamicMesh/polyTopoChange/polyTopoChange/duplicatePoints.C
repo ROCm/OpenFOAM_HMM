@@ -30,6 +30,9 @@ License
 #include "polyAddPoint.H"
 #include "polyModifyFace.H"
 #include "polyMesh.H"
+#include "OFstream.H"
+#include "meshTools.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,8 +42,6 @@ namespace Foam
 defineTypeNameAndDebug(duplicatePoints, 0);
 
 }
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -57,98 +58,92 @@ Foam::duplicatePoints::duplicatePoints(const polyMesh& mesh)
 
 void Foam::duplicatePoints::setRefinement
 (
-    const labelList& nonManifPoints,
     const localPointRegion& regionSide,
     polyTopoChange& meshMod
 )
 {
-    const labelList& faceRegion = regionSide.faceRegion();
-    const labelList& meshFaces = regionSide.meshFaces();
-    const Map<label>& localFaces = regionSide.localFaces();
+    const Map<label>& meshPointMap = regionSide.meshPointMap();
+    const labelListList& pointRegions = regionSide.pointRegions();
+    const Map<label>& meshFaceMap = regionSide.meshFaceMap();
+    const faceList& faceRegions = regionSide.faceRegions();
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // New faces
-    faceList newFaces(faceRegion.size());
+    // Create duplicates for points. One for each region.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Initialise to current faces
-    forAll(meshFaces, localFaceI)
+    // Per point-to-be-duplicated, in order of the regions the point added.
+    duplicates_.setSize(meshPointMap.size());
+
+    forAllConstIter(Map<label>, meshPointMap, iter)
     {
-        newFaces[localFaceI] = mesh_.faces()[meshFaces[localFaceI]];
+        label pointI = iter.key();
+        label localI = iter();
+        const labelList& regions = pointRegions[localI];
+
+        duplicates_[localI].setSize(regions.size());
+        duplicates_[localI][0] = pointI;
+        for (label i = 1; i < regions.size(); i++)
+        {
+            duplicates_[localI][i] = meshMod.addPoint
+            (
+                mesh_.points()[pointI],  // point
+                pointI,                 // master point
+                -1,                     // zone for point
+                true                    // supports a cell
+            );
+        }
+
+        //Pout<< "For point:" << pointI << " coord:" << mesh_.points()[pointI]
+        //    << endl;
+        //forAll(duplicates_[localI], i)
+        //{
+        //    Pout<< "    region:" << regions[i]
+        //        << "  addedpoint:" << duplicates_[localI][i]
+        //        << endl;
+        //}
     }
 
 
-    duplicates_.setSize(regionSide.pointRegions().size());
 
-    // Create new point for point with more than one region
-    forAll(regionSide.pointRegions(), localPointI)
+    // Modfify faces according to face region
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    face newFace;
+
+    forAllConstIter(Map<label>, meshFaceMap, iter)
     {
-        label pointI = nonManifPoints[localPointI];
-        const labelList& regions = regionSide.pointRegions()[localPointI];
+        label faceI = iter.key();
+        label localI = iter();
 
-        if (regions.size() > 1)
+        // Replace points with duplicated ones.
+        const face& fRegion = faceRegions[localI];
+        const face& f = mesh_.faces()[faceI];
+
+        newFace.setSize(f.size());
+        forAll(f, fp)
         {
-            // First region for point gets the original point label
-            duplicates_[localPointI].setSize(regions.size());
-            duplicates_[localPointI][0] = pointI;
+            label pointI = f[fp];
 
-            for (label i = 1; i < regions.size(); i++)
+            Map<label>::const_iterator iter = meshPointMap.find(pointI);
+
+            if (iter != meshPointMap.end())
             {
-                // Add a point for the point for all faces with the same region
-                label addedPointI = meshMod.setAction
-                (
-                    polyAddPoint
-                    (
-                        mesh_.points()[pointI], // point
-                        pointI,                 // master point
-                        -1,                     // zone for point
-                        true                    // supports a cell
-                    )
-                );
+                // Point has been duplicated. Find correct one for my
+                // region.
 
-                // Store added point
-                duplicates_[localPointI][i] = addedPointI;
+                // Get the regions and added points for this point
+                const labelList& regions = pointRegions[iter()];
+                const labelList& dupPoints = duplicates_[iter()];
 
-                const labelList& pFaces = mesh_.pointFaces()[pointI];
-
-                // Replace all the vertices with the same region with the new
-                // point label.
-                forAll(pFaces, pFaceI)
-                {
-                    label faceI = pFaces[pFaceI];
-                    label localFaceI = localFaces[faceI];
-
-                    if (faceRegion[localFaceI] == regions[i])
-                    {
-                        const face& f = mesh_.faces()[faceI];
-
-                        forAll(f, fp)
-                        {
-                            if (f[fp] == pointI)
-                            {
-                                newFaces[localFaceI][fp] = addedPointI;
-                            }
-                        }
-                    }
-                }
+                // Look up index of my region in the regions for this point
+                label index = findIndex(regions, fRegion[fp]);
+                // Get the corresponding added point
+                newFace[fp] = dupPoints[index];
             }
-        }
-    }
-
-    // Modify the faces
-
-    forAll(meshFaces, localFaceI)
-    {
-        label faceI = meshFaces[localFaceI];
-
-        label own = mesh_.faceOwner()[faceI];
-        label nei = -1;
-        label patchID = -1;
-        if (mesh_.isInternalFace(faceI))
-        {
-            nei = mesh_.faceNeighbour()[faceI];
-        }
-        else
-        {
-            patchID = mesh_.boundaryMesh().whichPatch(faceI);
+            else
+            {
+                newFace[fp] = pointI;
+            }
         }
 
         // Get current zone info
@@ -160,21 +155,36 @@ void Foam::duplicatePoints::setRefinement
             zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
         }
 
-        meshMod.setAction
+        meshMod.modifyFace
         (
-            polyModifyFace
-            (
-                newFaces[localFaceI],   // modified face
-                faceI,                  // label of face being modified
-                own,                    // owner
-                nei,                    // neighbour
-                false,                  // face flip
-                patchID,                // patch for face
-                false,                  // remove from zone
-                zoneID,                 // zone for face
-                zoneFlip                // face flip in zone
-            )
+            newFace,                    // modified face
+            faceI,                      // label of face being modified
+            mesh_.faceOwner()[faceI],   // owner
+            -1,                         // neighbour
+            false,                      // face flip
+            patches.whichPatch(faceI),  // patch for face
+            zoneID,                     // zone for face
+            zoneFlip                    // face flip in zone
         );
+    }
+
+
+    if (debug)
+    {
+        // Output duplicated points
+        {
+            OFstream str(mesh_.time().path()/"duplicatedPoints.obj");
+            forAllConstIter(Map<label>, meshPointMap, iter)
+            {
+                label localI = iter();
+                const labelList& dups = duplicates_[localI];
+
+                forAll(dups, i)
+                {
+                    meshTools::writeOBJ(str, meshMod.points()[dups[i]]);
+                }
+            }
+        }
     }
 }
 

@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "syncTools.H"
 #include "localPointRegion.H"
+#include "syncTools.H"
 #include "polyMesh.H"
-#include "indirectPrimitivePatch.H"
 #include "mapPolyMesh.H"
-#include "meshTools.H"
+#include "globalIndex.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -38,257 +38,31 @@ namespace Foam
 
 defineTypeNameAndDebug(localPointRegion, 0);
 
+// Reduction class to get minimum value over face.
+class minEqOpFace
+{
+public:
+
+    void operator()( face& x, const face& y ) const
+    {
+        forAll(x, i)
+        {
+            x[i] = min(x[i], y[i]);
+        }
+    };
+};
+
+// Dummy transform for faces. Used in synchronisation
+void transformList
+(
+    const tensorField& rotTensor,
+    UList<face>& field
+)
+{};
+
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Set face to global region. Do its connected points.
-void Foam::localPointRegion::setFaceRegion
-(
-    const polyMesh& mesh,
-    const Map<label>& localPoints,
-    const label faceI,
-
-    labelListList& pointFaceRegion // in pointFaces addressing.
-)
-{
-    label localFaceI = localFaces_[faceI];
-
-    if (faceRegion_[localFaceI] == -1)
-    {
-        faceRegion_[localFaceI] = nRegions_;
-
-        // And visit all points on face
-        const face& f = mesh.faces()[faceI];
-
-        forAll(f, fp)
-        {
-            label pointI = f[fp];
-
-            Map<label>::const_iterator iter = localPoints.find(pointI);
-
-            if (iter != localPoints.end())
-            {
-                setPointRegion
-                (
-                    mesh,
-                    localPoints,
-                    pointI,     // global point index
-                    iter(),     // local point index
-                    faceI,
-
-                    pointFaceRegion
-                );
-            }
-        }
-    }
-    else if (faceRegion_[localFaceI] != nRegions_)
-    {
-        FatalErrorIn
-        (
-            "localPointRegion::setFaceRegion"
-            "(const polyMesh&, const Map<label>&, const label, const label)"
-        )   << "face:" << faceI << " fc:" << mesh.faceCentres()[faceI]
-            << " has global region " << faceRegion_[localFaceI]
-            << " but is also connected to region " << nRegions_
-            << abort(FatalError);
-    }
-}
-
-
-// Set faces using point to global region 
-void Foam::localPointRegion::setPointRegion
-(
-    const polyMesh& mesh,
-    const Map<label>& localPoints,
-
-    const label pointI,
-    const label localPointI,
-    const label faceI,
-
-    labelListList& pointFaceRegion
-)
-{
-    const labelList& pFaces = mesh.pointFaces()[pointI];
-
-    // faceI is set to global region. Find the corresponding local region.
-
-    label facePos = findIndex(pFaces, faceI);
-
-    if (facePos != -1)
-    {
-        // Face uses point. Check what local region (from pointFaceRegion)
-        // corresponds to the global region and renumber all local regions.
-
-        labelList& pRegions = pointFaceRegion[localPointI];
-
-        if (pRegions.size() > 0 && pRegions[facePos] != -1)
-        {
-            label localRegionI = pRegions[facePos];
-
-            // Renumber all pRegions with same local region
-            forAll(pFaces, i)
-            {
-                if (pRegions[i] == localRegionI)
-                {
-                    // Mark point region (prevents extra layer of recursion)
-                    pRegions[i] = -1;
-
-                    // Set the corresponding face region
-                    setFaceRegion
-                    (
-                        mesh,
-                        localPoints,
-                        pFaces[i],          // faceI
-
-                        pointFaceRegion
-                    );
-                }
-            }
-        }
-    }
-}
-
-
-// Gets local face regions (local to each point) and merges them into global
-// point region (always possible since faces cannot cross a baffle.
-void Foam::localPointRegion::mergeLocalRegions
-(
-    const polyMesh& mesh,
-    const labelList& pointsToBeDuplicated,
-    labelListList& pointFaceRegion
-)
-{
-    // Build inverse addressing
-    Map<label> localPoints(2*pointsToBeDuplicated.size());
-
-    forAll(pointsToBeDuplicated, i)
-    {
-        localPoints.insert(pointsToBeDuplicated[i], i);
-    }
-
-
-    nRegions_ = 0;
-
-    forAll(meshFaces_, localFaceI)
-    {
-        label meshFaceI = meshFaces_[localFaceI];
-
-        if (faceRegion_[localFaceI] == -1)
-        {
-            setFaceRegion
-            (
-                mesh,
-                localPoints,
-                meshFaceI,
-
-                pointFaceRegion // in pointFaces addressing.
-            );
-
-            nRegions_++;
-        }
-    }
-}
-
-
-// Change whole region to different region number
-void Foam::localPointRegion::changeRegion
-(
-    const polyMesh& mesh,
-    const label faceI,
-    const label oldRegionI,
-    const label newRegionI,
-    labelHashSet& changedFaces
-)
-{
-    Map<label>::const_iterator iter = localFaces_.find(faceI);
-
-    if (iter != localFaces_.end())
-    {
-        if (faceRegion_[iter()] == oldRegionI)
-        {
-            faceRegion_[iter()] = newRegionI;
-            changedFaces.insert(iter());
-
-            // And visit all points on face
-            const face& f = mesh.faces()[faceI];
-
-            forAll(f, fp)
-            {
-                label pointI = f[fp];
-
-                const labelList& pFaces = mesh.pointFaces()[pointI];
-
-                forAll(pFaces, i)
-                {
-                    changeRegion
-                    (
-                        mesh,
-                        pFaces[i],
-                        oldRegionI,
-                        newRegionI,
-                        changedFaces
-                    );
-                }
-            }
-        }
-    }
-}
-
-
-// Walk cell-face-cell whilst staying on a point. Used to determine
-// whether point is a non-manifold point.
-Foam::label Foam::localPointRegion::walkCellFaceCell
-(
-    const primitiveMesh& mesh,
-    const label startCellI,
-    const label startPointI,
-    const label regionI,
-    labelList& regionPerFace    // in order of pFaces.
-)
-{
-    const cell& cFaces = mesh.cells()[startCellI];
-    const labelList& pFaces = mesh.pointFaces()[startPointI];
-
-    label nChanged = 0;
-
-    forAll(cFaces, i)
-    {
-        label faceI = cFaces[i];
-
-        label index = findIndex(pFaces, faceI);
-
-        if (index != -1)
-        {
-            if (regionPerFace[index] == -1)
-            {
-                regionPerFace[index] = regionI;
-                nChanged++;
-
-                if (mesh.isInternalFace(faceI))
-                {
-                    label otherCellI = mesh.faceOwner()[faceI];
-
-                    if (otherCellI == startCellI)
-                    {
-                        otherCellI = mesh.faceNeighbour()[faceI];
-                    }
-
-                    nChanged += walkCellFaceCell
-                    (
-                        mesh,
-                        otherCellI,
-                        startPointI,
-                        regionI,
-                        regionPerFace
-                    );
-                }
-            }
-        }
-    }
-    return nChanged;
-}
-
 
 // Are two lists identical either in forward or in reverse order.
 bool Foam::localPointRegion::isDuplicate
@@ -325,470 +99,368 @@ bool Foam::localPointRegion::isDuplicate
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
-Foam::localPointRegion::localPointRegion
+// Count regions per point
+void Foam::localPointRegion::countPointRegions
 (
     const polyMesh& mesh,
-    const labelList& pointsToBeDuplicated
+    const Map<label>& candidateFace,
+    faceList& minRegion
 )
-:
-    nRegions_(0),
-    localFaces_(2*pointsToBeDuplicated.size()),
-    meshFaces_(0),
-    faceRegion_(0),
-    pointRegions_(pointsToBeDuplicated.size())
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    // Almost all will have only one so only
+    // populate Map if more than one.
+    labelList minPointRegion(mesh.nPoints(), -1);
+    // From global point to local (multi-region) point numbering
+    meshPointMap_.resize(candidateFace.size()/100);
+    // From local (multi-region) point to regions
+    DynamicList<labelList> pointRegions(meshPointMap_.size());
 
-    //if (debug)
+    // From faces with any duplicated point on it to local face
+    meshFaceMap_.resize(meshPointMap_.size());
+
+    forAllConstIter(Map<label>, candidateFace, iter)
     {
-        //// Check that pointsToBeDuplicated are not on coupled boundaries.
-        //labelHashSet dupPoints(pointsToBeDuplicated);
-        //
-        //forAll(patches, patchI)
+        label faceI = iter();
+
+        if (!mesh.isInternalFace(faceI))
+        {
+            const face& f = mesh.faces()[faceI];
+
+            if (minRegion[faceI].size() == 0)
+            {
+                FatalErrorIn("localPointRegion::countPointRegions(..)")
+                    << "Face from candidateFace without minRegion set." << endl
+                    << "Face:" << faceI << " fc:" << mesh.faceCentres()[faceI]
+                    << " verts:" << f << abort(FatalError);
+            }
+
+            forAll(f, fp)
+            {
+                label pointI = f[fp];
+                label region = minRegion[faceI][fp];
+
+                if (minPointRegion[pointI] == -1)
+                {
+                    minPointRegion[pointI] = region;
+                }
+                else if (minPointRegion[pointI] != region)
+                {
+                    // Multiple regions for this point. Add.
+                    Map<label>::iterator iter = meshPointMap_.find(pointI);
+                    if (iter != meshPointMap_.end())
+                    {
+                        labelList& regions = pointRegions[iter()];
+                        if (findIndex(regions, region) == -1)
+                        {
+                            label sz = regions.size();
+                            regions.setSize(sz+1);
+                            regions[sz] = region;
+                        }
+                    }
+                    else
+                    {
+                        label localPointI = meshPointMap_.size();
+                        meshPointMap_.insert(pointI, localPointI);
+                        labelList regions(2);
+                        regions[0] = minPointRegion[pointI];
+                        regions[1] = region;
+                        pointRegions.append(regions);
+                    }
+
+                    label meshFaceMapI = meshFaceMap_.size();
+                    meshFaceMap_.insert(faceI, meshFaceMapI);
+                }
+            }
+        }
+    }
+    minPointRegion.clear();
+    // Transfer to member data
+    pointRegions.shrink();
+    pointRegions_.setSize(pointRegions.size());
+    forAll(pointRegions, i)
+    {
+        pointRegions_[i].transfer(pointRegions[i]);
+    }
+
+    // Compact minRegion
+    faceRegions_.setSize(meshFaceMap_.size());
+    forAllConstIter(Map<label>, meshFaceMap_, iter)
+    {
+        faceRegions_[iter()].labelList::transfer(minRegion[iter.key()]);
+
+        //// Print a bit
         //{
-        //    const polyPatch& pp = patches[patchI];
-        //
-        //    if (pp.coupled())
+        //    label faceI = iter.key();
+        //    const face& f = mesh.faces()[faceI];
+        //    Pout<< "Face:" << faceI << " fc:" << mesh.faceCentres()[faceI]
+        //        << " verts:" << f << endl;
+        //    forAll(f, fp)
         //    {
-        //        const labelList& meshPoints = pp.meshPoints();
-        //
-        //        forAll(meshPoints, i)
-        //        {
-        //            label pointI = meshPoints[i];
-        //
-        //            if (dupPoints.found(pointI))
-        //            {
-        //                FatalErrorIn
-        //                (
-        //                    "localPointRegion::localPointRegion"
-        //                    "(const polyMesh&, const labelList&)"
-        //                )   << "Point-to-be-duplicated " << pointI
-        //                    << " coord:" << mesh.points()[pointI]
-        //                    << " is on coupled patch " << pp.name() << '.' << nl
-        //                    << "This is not allowed." << abort(FatalError);
-        //            }
-        //        }
+        //        Pout<< "    " << f[fp] << " min:" << faceRegions_[iter()][fp]
+        //            << endl;
         //    }
+        //    Pout<< endl;
         //}
-
-        // Check that pointsToBeDuplicated are non-manifold
-        forAll(pointsToBeDuplicated, i)
-        {
-            label pointI = pointsToBeDuplicated[i];
-
-            if (isSingleCellRegion(mesh, pointI))
-            {
-                FatalErrorIn
-                (
-                    "localPointRegion::localPointRegion"
-                    "(const polyMesh&, const labelList&)"
-                )   << "Point-to-be-duplicated " << pointI
-                    << " coord:" << mesh.points()[pointI]
-                    << " is on a single cell region."
-                    << abort(FatalError);
-            }
-        }
     }
 
+    // Compact region numbering
+    // ? TBD.
+}
 
-    // Precalculate all faces connected to pointsToBeDuplicated and assign
-    // local face labels.
 
-    label localFaceI = 0;
+void Foam::localPointRegion::calcPointRegions
+(
+    const polyMesh& mesh,
+    boolList& candidatePoint
+)
+{
+    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+    const labelList& faceOwner = mesh.faceOwner();
+    const labelList& faceNeighbour = mesh.faceNeighbour();
 
-    forAll(pointsToBeDuplicated, i)
+
+    syncTools::syncPointList
+    (
+        mesh,
+        candidatePoint,
+        orEqOp<bool>(),
+        false,              // nullValue
+        false               // applySeparation
+    );
+
+
+    // Mark any face/boundaryFace/cell with a point on a candidate point.
+    // - candidateFace does not necessary have to be a baffle!
+    // - candidateFace is synchronised (since candidatePoint is)
+    Map<label> candidateFace(2*nBnd);
+    label candidateFaceI = 0;
+
+    Map<label> candidateCell(nBnd);
+    label candidateCellI = 0;
+
+    forAll(mesh.faces(), faceI)
     {
-        label pointI = pointsToBeDuplicated[i];
+        const face& f = mesh.faces()[faceI];
 
-        const labelList& pFaces = mesh.pointFaces()[pointI];
-
-        forAll(pFaces, j)
+        forAll(f, fp)
         {
-            label faceI = pFaces[j];
-
-            if (localFaces_.insert(faceI, localFaceI))
+            if (candidatePoint[f[fp]])
             {
-                localFaceI++;
-            }
-        }
-    }
-
-
-    // Calculate reverse addressing (so from local face to mesh face)
-    meshFaces_.setSize(localFaceI);
-
-    forAllConstIter(Map<label>, localFaces_, iter)
-    {
-        meshFaces_[iter()] = iter.key();
-    }
-
-
-    // Calculate local point wise regions
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Per points-to-be-duplicated
-    // either size 0 or give per connected face the local region
-    labelListList pointFaceRegion(pointsToBeDuplicated.size());
-    {
-        forAll(pointsToBeDuplicated, i)
-        {
-            label pointI = pointsToBeDuplicated[i];
-
-            const labelList& pFaces = mesh.pointFaces()[pointI];
-
-            labelList& pRegions = pointFaceRegion[i];
-            pRegions.setSize(pFaces.size());
-            pRegions = -1;
-
-            // Walk cell face cell on the point
-            label regionI = 0;
-
-            forAll(pRegions, j)
-            {
-                label faceI = pFaces[j];
-
-                label nChanged = walkCellFaceCell
-                (
-                    mesh,
-                    mesh.faceOwner()[faceI],
-                    pointI,
-                    regionI,
-                    pRegions
-                );
-
-                if (nChanged > 0)
+                // Mark face
+                if (candidateFace.insert(faceI, candidateFaceI))
                 {
-                    regionI++;
+                    candidateFaceI++;
                 }
-            }
 
-            if (regionI <= 1)
-            {
-                // Single region so save some storage.
-                pRegions.setSize(0);
-            }
-        }
-    }
-
-
-    // Set the face regions from connected point regions
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    faceRegion_.setSize(meshFaces_.size());
-    faceRegion_ = -1;
-
-    mergeLocalRegions(mesh, pointsToBeDuplicated, pointFaceRegion);
-
-    if (debug)
-    {
-        Pout<< "localPointRegion :"
-            << "pointsToBeDuplicated:" << pointsToBeDuplicated.size()
-            << " point connected faces:" << meshFaces_.size()
-            << " disconnected face regions:" << nRegions_
-            << endl;
-
-        forAll(faceRegion_, localFaceI)
-        {
-            label faceI = meshFaces_[localFaceI];
-
-            Pout<< "    face:" << faceI
-                <<  " fc:" << mesh.faceCentres()[faceI]
-                << " region:" << faceRegion_[localFaceI]
-                << endl;
-        }
-        Pout<< endl;
-    }
-
-
-    bool hasCoupledPatches = false;    
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].coupled())
-        {
-            hasCoupledPatches = true;
-            break;
-        }
-    }
-    reduce(hasCoupledPatches, orOp<bool>());
-
-    if (hasCoupledPatches)
-    {
-        // Calculate global offsets
-        labelList nLocalRegions(Pstream::nProcs());
-        nLocalRegions[Pstream::myProcNo()] = nRegions_;
-        Pstream::gatherList(nLocalRegions);
-        Pstream::scatterList(nLocalRegions);
-
-        label myOffset = 0;
-        for (label procI = 0; procI < Pstream::myProcNo(); procI++)
-        {
-            myOffset += nLocalRegions[procI];
-        }
-        label nGlobalRegions = sum(nLocalRegions);
-
-        if (debug)
-        {
-            Pout<< "nLocalRegions:" << nLocalRegions << endl
-                << "My region offset:" << myOffset
-                << " Global regions:" << nGlobalRegions
-                << endl;
-        }
-
-        // Make all regions global
-        forAll(faceRegion_, localFaceI)
-        {
-            if (faceRegion_[localFaceI] != -1)
-            {
-                faceRegion_[localFaceI] += myOffset;
-            }
-        }
-
-        // Merge regions
-        // ~~~~~~~~~~~~~
-        // Does iteratively merge connected regions. Stops if no regions
-        // merged.
-
-        while (true)
-        {
-            labelList boundaryRegion
-            (
-                mesh.nFaces()-mesh.nInternalFaces(),
-                labelMax
-            );
-
-            forAll(faceRegion_, localFaceI)
-            {
-                if (faceRegion_[localFaceI] != -1)
+                // Mark cells
+                if (candidateCell.insert(faceOwner[faceI], candidateCellI))
                 {
-                    label bFaceI = meshFaces_[localFaceI]-mesh.nInternalFaces();
+                    candidateCellI++;
+                }
 
-                    if (bFaceI >= 0)
+                if (mesh.isInternalFace(faceI))
+                {
+                    label nei = faceNeighbour[faceI];
+                    if (candidateCell.insert(nei, candidateCellI))
                     {
-                        boundaryRegion[bFaceI] = faceRegion_[localFaceI];
+                        candidateCellI++;
                     }
                 }
-            }
 
-            syncTools::syncBoundaryFaceList
-            (
-                mesh,
-                boundaryRegion,
-                minEqOp<label>(),
-                false
-            );
-
-            // Now on coupled faces the boundaryRegion will be a valid region
-            // or labelMax.
-
-
-            // Count of merged regions so we know when to stop.
-            label nMerged = 0;
-
-            // To keep track of regions already changed. Makes sure we
-            // don't go into loop. Scenario:
-            // - at some face myRegion=2, bRegion=0
-            // - all faces with myRegion=2 get changed
-            // - some other face which had myRegion 2 but now has myRegion 0
-            //   now sees bRegion=2 and starts changing back.
-
-            labelHashSet changedLocalFaces(2*faceRegion_.size());
-
-            forAll(faceRegion_, localFaceI)
-            {
-                if (!changedLocalFaces.found(localFaceI))
-                {
-                    label meshFaceI = meshFaces_[localFaceI];
-                    label bFaceI = meshFaceI-mesh.nInternalFaces();
-
-                    if (bFaceI >= 0)
-                    {
-                        label bRegion = boundaryRegion[bFaceI];
-                        if (bRegion == labelMax)
-                        {
-                            bRegion = -1;
-                        }
-                        label myRegion = faceRegion_[localFaceI];
-
-                        if (myRegion == -1 || bRegion  == -1)
-                        {
-                            // Both sides should have no region
-
-                            if (myRegion != bRegion)
-                            {
-                                FatalErrorIn
-                                (
-                                    "localPointRegion::localPointRegion"
-                                    "(const polyMesh&, const labelList&)"
-                                )   << "Two coupled faces of which one has"
-                                    << " an illegal region." << endl
-                                    << "Face:" << meshFaceI
-                                    << " has global region:" << myRegion
-                                    << " and is coupled to a face"
-                                    << " with global region " << bRegion
-                                    << abort(FatalError);
-                            }
-                        }
-                        else if (myRegion != bRegion)
-                        {
-                            // Both sides have valid and different region
-
-                            if (debug)
-                            {
-                                Pout<< "Merging my region:"
-                                    << myRegion << " and " << bRegion
-                                    << " into " << bRegion << endl;
-                            }
-                            changeRegion
-                            (
-                                mesh,
-                                meshFaceI,
-                                myRegion,
-                                bRegion,
-                                changedLocalFaces
-                            );
-
-                            nMerged++;
-                        }
-                    }
-                }
-            }
-
-            if (returnReduce(nMerged, sumOp<label>()) == 0)
-            {
                 break;
             }
         }
-
-
-        // Compact region numbering
-        // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-        // Determine (global) number of faces per region
-
-        labelList nFaces(nGlobalRegions, 0);
-        forAll(faceRegion_, localFaceI)
-        {
-            label region = faceRegion_[localFaceI];
-
-            if (region != -1)
-            {
-                nFaces[region]++;
-            }
-        }
-        Pstream::listCombineGather(nFaces, plusEqOp<label>());
-        Pstream::listCombineScatter(nFaces);
-
-        // Make compaction list.
-        labelList oldToNew(nGlobalRegions, -1);
-        nRegions_ = 0;
-        forAll(nFaces, regionI)
-        {
-            if (nFaces[regionI] > 0)
-            {
-                oldToNew[regionI] = nRegions_++;
-            }
-        }
-        inplaceRenumber(oldToNew, faceRegion_);
-
-        if (debug)
-        {
-            Pout<< "Compacted from local regions:"
-                << nLocalRegions[Pstream::myProcNo()]
-                << " global regions:" << nGlobalRegions
-                << " down to:" << nRegions_
-                << endl;
-        }
     }
 
 
-    if (debug)
+
+    // Get global indices for cells
+    globalIndex globalCells(mesh.nCells());
+
+
+    // Determine for every candidate face per point the minimum region
+    // (global cell) it is connected to. (candidateFaces are the
+    // only ones using a
+    // candidate point so the only ones that can be affected)
+    faceList minRegion(mesh.nFaces());
+    forAllConstIter(Map<label>, candidateFace, iter)
     {
-        Pout<< "localPointRegion :"
-            << "pointsToBeDuplicated:" << pointsToBeDuplicated.size()
-            << " point connected faces:" << meshFaces_.size()
-            << " disconnected face regions:" << nRegions_
-            << endl;
+        label faceI = iter();
+        const face& f = mesh.faces()[faceI];
 
-        forAll(faceRegion_, localFaceI)
+        if (mesh.isInternalFace(faceI))
         {
-            label faceI = meshFaces_[localFaceI];
-
-            Pout<< "    face:" << faceI
-                <<  " fc:" << mesh.faceCentres()[faceI]
-                << " region:" << faceRegion_[localFaceI]
-                << endl;
+            label globOwn = globalCells.toGlobal(faceOwner[faceI]);
+            label globNei = globalCells.toGlobal(faceNeighbour[faceI]);
+            minRegion[faceI].setSize(f.size(), min(globOwn, globNei));
         }
-        Pout<< endl;
+        else
+        {
+            label globOwn = globalCells.toGlobal(faceOwner[faceI]);
+            minRegion[faceI].setSize(f.size(), globOwn);
+        }
     }
 
+    // Now minimize over all faces that are connected through internal
+    // faces or through cells. This loop iterates over the max number of
+    // cells connected to a point (=8 for hex mesh)
 
-
-    // Collect regions per point
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Done in one pass since usually only one or two regions.
-
-    forAll(pointsToBeDuplicated, i)
+    while (true)
     {
-        label pointI = pointsToBeDuplicated[i];
+        // Transport minimum from face across cell
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        labelList& pRegions = pointRegions_[i];
-
-        const labelList& pFaces = mesh.pointFaces()[pointI];
-
-        forAll(pFaces, pFaceI)
+        Map<label> minPointValue(100);
+        label nChanged = 0;
+        forAllConstIter(Map<label>, candidateCell, iter)
         {
-            label faceI = pFaces[pFaceI];
+            minPointValue.clear();
 
-            label region = faceRegion_[localFaces_[faceI]];
+            label cellI = iter.key();
+            const cell& cFaces = mesh.cells()[cellI];
 
-            if (findIndex(pRegions, region) == -1)
+            // Determine minimum per point
+            forAll(cFaces, cFaceI)
             {
-                label sz = pRegions.size();
-                pRegions.setSize(sz+1);
-                pRegions[sz] = region;
+                label faceI = cFaces[cFaceI];
+
+                if (minRegion[faceI].size() > 0)
+                {
+                    const face& f = mesh.faces()[faceI];
+
+                    forAll(f, fp)
+                    {
+                        label pointI = f[fp];
+                        Map<label>::iterator iter = minPointValue.find(pointI);
+
+                        if (iter == minPointValue.end())
+                        {
+                            minPointValue.insert(pointI, minRegion[faceI][fp]);
+                        }
+                        else
+                        {
+                            label currentMin = iter();
+                            iter() = min(currentMin, minRegion[faceI][fp]);
+                        }
+                    }
+                }
+            }
+
+            // Set face minimum from point minimum
+            forAll(cFaces, cFaceI)
+            {
+                label faceI = cFaces[cFaceI];
+
+                if (minRegion[faceI].size() > 0)
+                {
+                    const face& f = mesh.faces()[faceI];
+
+                    forAll(f, fp)
+                    {
+                        label minVal = minPointValue[f[fp]];
+
+                        if (minVal != minRegion[faceI][fp])
+                        {
+                            minRegion[faceI][fp] = minVal;
+                            nChanged++;
+                        }
+                    }
+                }
             }
         }
 
-        if (debug)
+        //Pout<< "nChanged:" << nChanged << endl;
+
+        if (returnReduce(nChanged, sumOp<label>()) == 0)
         {
-            Pout<< "    point:" << pointI << " coord:" << mesh.points()[pointI]
-                << " regions:" << pRegions << endl;
+            break;
+        }
+
+
+        // Transport minimum across coupled faces
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        syncTools::syncFaceList
+        (
+            mesh,
+            minRegion,
+            minEqOpFace(),
+            false               // applySeparation
+        );
+    }
+
+
+    // Count regions per point
+    countPointRegions(mesh, candidateFace, minRegion);
+    minRegion.clear();
+
+
+    //// Print points with multiple regions. These points need to be duplicated.
+    //forAllConstIter(Map<label>, meshPointMap_, iter)
+    //{
+    //    Pout<< "point:" << iter.key()
+    //        << " coord:" << mesh.points()[iter.key()]
+    //        << " regions:" << pointRegions_[iter()] << endl;
+    //}
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::localPointRegion::localPointRegion(const polyMesh& mesh)
+:
+    //nRegions_(0),
+    meshPointMap_(0),
+    pointRegions_(0),
+    meshFaceMap_(0),
+    faceRegions_(0)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Get any point on the outside which is on a non-coupled boundary
+    boolList candidatePoint(mesh.nPoints(), false);
+
+    forAll(patches, patchI)
+    {
+        if (!patches[patchI].coupled())
+        {
+            const polyPatch& pp = patches[patchI];
+
+            forAll(pp.meshPoints(), i)
+            {
+                candidatePoint[pp.meshPoints()[i]] = true;
+            }
         }
     }
+
+    calcPointRegions(mesh, candidatePoint);
+}
+
+
+Foam::localPointRegion::localPointRegion
+(
+    const polyMesh& mesh,
+    const labelList& candidatePoints
+)
+:
+    //nRegions_(0),
+    meshPointMap_(0),
+    pointRegions_(0),
+    meshFaceMap_(0),
+    faceRegions_(0)
+{
+    boolList candidatePoint(mesh.nPoints(), false);
+
+    forAll(candidatePoints, i)
+    {
+        candidatePoint[candidatePoints[i]] = true;
+    }
+
+    calcPointRegions(mesh, candidatePoint);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::localPointRegion::isSingleCellRegion
-(
-    const primitiveMesh& mesh,
-    const label pointI
-)
-{
-    const labelList& pFaces = mesh.pointFaces()[pointI];
-
-    // Mark off visited faces.
-    labelList regionPerFace(pFaces.size(), -1);
-
-    // Check if all faces using pointI can be reached through face-cell-face
-    // walk
-    label nVisited = walkCellFaceCell
-    (
-        mesh,
-        mesh.faceOwner()[pFaces[0]],
-        pointI,
-        1,              // arbitrary value to mark visited faces with
-        regionPerFace   // status of face
-    );
-
-    return (nVisited == pFaces.size());
-}
-
 
 // Return a list (in allPatch indices) with either -1 or the face label
 // of the face that uses the same vertices.
@@ -879,20 +551,35 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
 
 void Foam::localPointRegion::updateMesh(const mapPolyMesh& map)
 {
-    Map<label> newLocalFaces(localFaces_.size());
-
-    forAllConstIter(Map<label>, localFaces_, iter)
     {
-        label newFaceI = map.reverseFaceMap()[iter.key()];
+        Map<label> newMap(meshFaceMap_.size());
 
-        if (newFaceI >= 0)
+        forAllConstIter(Map<label>, meshFaceMap_, iter)
         {
-            newLocalFaces.insert(newFaceI, iter());
-            meshFaces_[iter()] = newFaceI;
-        }
-    }
+            label newFaceI = map.reverseFaceMap()[iter.key()];
 
-    localFaces_.transfer(newLocalFaces);
+            if (newFaceI >= 0)
+            {
+                newMap.insert(newFaceI, iter());
+            }
+        }
+        meshFaceMap_.transfer(newMap);
+    }
+    {
+        Map<label> newMap(meshPointMap_.size());
+
+        forAllConstIter(Map<label>, meshPointMap_, iter)
+        {
+            label newPointI = map.reversePointMap()[iter.key()];
+
+            if (newPointI >= 0)
+            {
+                newMap.insert(newPointI, iter());
+            }
+        }
+
+        meshPointMap_.transfer(newMap);
+    }
 }
 
 

@@ -762,7 +762,7 @@ int main(int argc, char *argv[])
 
     Pout<< "Please type 'help', 'quit' or a set command after prompt." << endl;
 
-    bool ok = false;
+    bool ok = true;
 
     FatalError.throwExceptions();
     FatalIOError.throwExceptions();

@@ -1,19 +1,19 @@
 /*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.3.2                                 |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
+Exec   : equilibriumFlameT -case . controlDict
+Date   : Jul 14 2008
+Time   : 14:42:27
+Host   : auglx106
+PID    : 21318
+Case   : ./.
+nProcs : 1
 
-Exec   : equilibriumFlameT controlDict 
-Date   : Aug 20 2006
-Time   : 12:29:44
-Host   : dm
-PID    : 28934
-Root   : 
-Case   : 
-Nprocs : 1
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Reading Burcat data dictionary
 

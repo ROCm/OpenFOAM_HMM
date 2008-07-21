@@ -47,6 +47,8 @@ SourceFiles
 #include "Map.H"
 #include "labelList.H"
 #include "labelHashSet.H"
+#include "faceList.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,64 +69,40 @@ class localPointRegion
 {
     // Private data
 
-        //- (global) number of regions
-        label nRegions_;
+        ////- (global) number of regions
+        //label nRegions_;
 
-        //- From mesh face to local face
-        Map<label> localFaces_;
+        //- Per point that is to duplicated to the local index
+        Map<label> meshPointMap_;
 
-        //- From local face addressing to mesh faces.
-        labelList meshFaces_;
-
-        //- Per local face the region
-        labelList faceRegion_;
-
-        //- Per local point (i.e. index in pointsToBeDuplicated) the list
-        //  of regions
+        //- Per local point the regions it is in
         labelListList pointRegions_;
+
+        //- Per face that uses a duplicated point the local index
+        Map<label> meshFaceMap_;
+
+        //- Per face the region of its points
+        faceList faceRegions_;
 
 
     // Private Member Functions
 
-        //- Set face (and its connected points) to global region nRegions_.
-        void setFaceRegion
+        //- Given minimum cell the points on a face are connected to
+        //  determine the points to be duplicated.
+        void countPointRegions
         (
-            const polyMesh&,
-            const Map<label>&,
-            const label faceI,
-            labelListList& pointFaceRegion // in pointFaces addressing.
+            const polyMesh& mesh,
+            const Map<label>& candidateFace,
+            faceList& minRegion
         );
 
-        //- Set point (and its connected faces) to global region nRegions_
-        void setPointRegion
+        //- Do all: calculate points that need to be duplicated.
+        void calcPointRegions
         (
-            const polyMesh&,
-            const Map<label>&,
-            const label pointI,
-            const label localPointI,
-            const label faceI,
-            labelListList& pointFaceRegion
+            const polyMesh& mesh,
+            boolList& candidatePoint
         );
 
-        //- Gets local face regions (local to each point) and merges them into
-        //  global face region (always possible since faces cannot cross
-        //  a baffle.
-        void mergeLocalRegions
-        (
-            const polyMesh&,
-            const labelList& pointsToBeDuplicated,
-            labelListList& pointFaceRegion
-        );
-
-        //- Change region
-        void changeRegion
-        (
-            const polyMesh&,
-            const label faceI,
-            const label oldRegionI,
-            const label newRegionI,
-            labelHashSet& changedFaces
-        );
 
         //- Check if two faces are equal. If forward = false checks f1 in
         //  reverse order.
@@ -143,11 +121,15 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and points that should be separated.
+        //- Construct from mesh. Assumes all non-coupled boundary points
+        //  are candidates for duplication
+        localPointRegion(const polyMesh& mesh);
+
+        //- Construct from mesh and candidate points for duplication
         localPointRegion
         (
             const polyMesh& mesh,
-            const labelList& pointsToBeDuplicated
+            const labelList& candidatePoints
         );
 
 
@@ -167,59 +149,39 @@ public:
                 const labelList&
             );
 
-            //- Are all the cells using pointI reachable through (processor
-            //  local) cell-face-cell walk.
-            static bool isSingleCellRegion
-            (
-                const primitiveMesh& mesh,
-                const label pointI
-            );
-
-            //- See walkPointConnectedFaces. Temporarily exposed so as to
-            //  use outside since par problem with localPointRegion (which is
-            //  probably fixed now with plusEqOp v.s. sumOp in gather/scatter)
-            static label walkCellFaceCell
-            (
-                const primitiveMesh&,
-                const label startCellI,
-                const label startPointI,
-                const label regionI,
-                labelList& regionPerFace
-            );
-
 
         // Access
 
-            //- Global number of regions
-            label nRegions() const
+            ////- Global number of regions. TBD. regions not compacted yet.
+            //label nRegions() const
+            //{
+            //    return nRegions_;
+            //}
+
+            //- Per point that is to duplicated to the local index
+            const Map<label>& meshPointMap() const
             {
-                return nRegions_;
+                return meshPointMap_;
             }
 
-            //- From local face addressing to mesh faces.
-            const labelList& meshFaces() const
-            {   
-                return meshFaces_;
-            }
-
-            //- From mesh face to local face
-            const Map<label>& localFaces() const
-            {   
-                return localFaces_;
-            }
-
-            //- Per local face the global region. Regions are not consecutive
-            //  per processor. They will be -1..nRegions_.
-            const labelList& faceRegion() const
-            {
-                return faceRegion_;
-            }
-
-            //- Per pointsToBeDuplicated the list of regions
+            //- Per local point the regions it is in
             const labelListList& pointRegions() const
             {
                 return pointRegions_;
             }
+
+            //- Per face that uses a duplicated point the local index
+            const Map<label>& meshFaceMap() const
+            {
+                return meshFaceMap_;
+            }
+
+            //- Per face the region of its points
+            const faceList& faceRegions() const
+            {
+                return faceRegions_;
+            }
+
 
         // Edit
 
