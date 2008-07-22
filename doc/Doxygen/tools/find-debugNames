@@ -1,0 +1,62 @@
+#!/usr/bin/perl -w
+use strict;
+
+# -----------------------------------------------------------------------------
+#
+# Script
+#     find-debugNames
+#
+# Description
+#     Use git-grep to find these macros.
+#
+#         defineTypeNameAndDebug
+#         defineTemplateTypeNameAndDebugWithName
+#         defineTemplateTypeNameAndDebug
+#         defineNamedTemplateTypeNameAndDebug
+#
+#     print sorted list
+#
+# Note
+#     will miss debug switches that are defined usign two defines
+# -----------------------------------------------------------------------------
+
+$ENV{WM_PROJECT_DIR} and chdir "$ENV{WM_PROJECT_DIR}"
+  or die "cannot change to OpenFOAM dir\n";
+
+local @ARGV =
+q{git-grep -e 'define\(Named\)*\(Template\)*TypeNameAndDebug\(WithName\)*' src applications |};
+
+# parse stuff that looks like this:
+# ODE/ODESolvers/KRR4/KRR4.C:defineTypeNameAndDebug(Foam::KRR4, 0);
+
+my %debug;
+
+while (<>) {
+    /#/ and next;    # avoid defines
+    if (s{,\s*(\d+)\s*\)\s*\;\s*$}{})    # get value and chop end
+    {
+        my $v = $1;
+        s{\s*,.*$}{};                    # remove all trailing info
+        s{^(.+?):(.+?)\(\s*(Foam::)?}{} or next;    # get file and chop begin
+
+        my $file = $1;
+        my $k    = $_;
+
+        $debug{$k} = [ $v, $file ];
+    }
+}
+
+print "DebugSwitches\n{\n";
+
+for my $k ( sort keys %debug ) {
+    my ( $v, $file ) = @{ $debug{$k} };
+    my $pad = ( 20 - length $k );
+    while ( $pad <= 1 ) {
+        $pad += 4;
+    }
+    $pad = ' ' x $pad;
+
+    print "    $k$pad$v;    // $file\n";
+}
+
+print "}\n";
