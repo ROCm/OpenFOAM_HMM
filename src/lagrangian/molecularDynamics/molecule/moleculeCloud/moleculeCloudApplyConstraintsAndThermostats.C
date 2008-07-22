@@ -43,7 +43,7 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
         << targetTemperature << nl
         << "Measured temperature = "
         << measuredTemperature << nl
-        << "Temperature correction factor ="
+        << "Temperature correction factor = "
         << temperatureCorrectionFactor << nl
         << "----------------------------------------"
         << endl;
