@@ -38,6 +38,7 @@ Foam::CV3D::controls::controls(const dictionary& controlDict)
     (
         controlDict.lookup("insertSurfaceNearestPointPairs")
     ),
+    mirrorPoints(controlDict.lookup("mirrorPoints")),
     insertSurfaceNearPointPairs
     (
         controlDict.lookup("insertSurfaceNearPointPairs")

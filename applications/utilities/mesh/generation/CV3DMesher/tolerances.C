@@ -41,6 +41,11 @@ Foam::CV3D::tolerances::tolerances
       + max(mag(bb.max().y()), mag(bb.min().y()))
       + max(mag(bb.max().z()), mag(bb.min().z()))
     ),
+    span2(Foam::sqr(span)),
+
+    minEdgeLen(readScalar(controlDict.lookup("minEdgeLenCoeff"))*minCellSize),
+    minEdgeLen2(Foam::sqr(minEdgeLen)),
+
     ppDist(readScalar(controlDict.lookup("ppDistCoeff"))*minCellSize),
     ppDist2(Foam::sqr(ppDist))
 {}

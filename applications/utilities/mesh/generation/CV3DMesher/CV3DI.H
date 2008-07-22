@@ -53,6 +53,44 @@ inline Foam::label Foam::CV3D::insertPoint
 }
 
 
+inline bool Foam::CV3D::insertMirrorPoint
+(
+    const point& nearSurfPt,
+    const point& surfPt
+)
+{
+    point mirrorPoint(2*surfPt - nearSurfPt);
+
+    if (qSurf_.outside(mirrorPoint))
+    {
+        insertPoint(mirrorPoint, Vb::MIRROR_POINT);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+inline void Foam::CV3D::insertPointPair
+(
+    const scalar ppDist,
+    const point& surfPt,
+    const vector& n
+)
+{
+    vector ppDistn = ppDist*n;
+
+    label master = insertPoint
+    (
+        surfPt - ppDistn,
+        number_of_vertices() + 1
+    );
+
+    insertPoint(surfPt + ppDistn, master);
+}
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

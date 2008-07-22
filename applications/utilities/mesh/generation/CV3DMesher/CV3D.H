@@ -75,7 +75,7 @@ public:
     class controls
     {
     public:
-    
+
         //- Minimum cell size below which protusions through the surface are
         //  not split
         scalar minCellSize;
@@ -94,6 +94,9 @@ public:
 
         //- Insert near-boundary point mirror or point-pairs
         Switch insertSurfaceNearestPointPairs;
+
+        //- Mirror near-boundary points rather than insert point-pairs
+        Switch mirrorPoints;
 
         //- Insert point-pairs for dual-cell vertices very near the surface
         Switch insertSurfaceNearPointPairs;
@@ -116,6 +119,17 @@ public:
 
         //- Maximum cartesian span of the geometry
         scalar span;
+
+        //- Square of span
+        scalar span2;
+
+
+        //- Minumum edge-length of the cell size below which protusions
+        //  through the surface are not split
+        scalar minEdgeLen;
+
+        //- Square of minEdgeLen
+        scalar minEdgeLen2;
 
         //- Distance between boundary conforming point-pairs
         scalar ppDist;
@@ -171,6 +185,21 @@ private:
             const label type
         );
 
+        inline bool insertMirrorPoint
+        (
+            const point& nearSurfPt,
+            const point& surfPt
+        );
+
+        //- Insert a point-pair at a distance ppDist either side of
+        //  surface point point surfPt in the direction n
+        inline void insertPointPair
+        (
+            const scalar mirrorDist,
+            const point& surfPt,
+            const vector& n
+        );
+
         //- Create the initial mesh from the bounding-box
         void insertBoundingBox();
 
@@ -195,7 +224,7 @@ private:
             const Triangulation::Finite_vertices_iterator& vit
         ) const;
 
-        //- Insert point-pairs at the nearest points on the surface to the 
+        //- Insert point-pairs at the nearest points on the surface to the
         //  control vertex of dual-cells which intersect the boundary in order
         //  to provide a boundary-layer mesh.
         //  NB: This is not guaranteed to close the boundary
@@ -265,7 +294,7 @@ public:
                 const scalar nearness
             );
 
-            //- Create the initial mesh from the internal points in the given 
+            //- Create the initial mesh from the internal points in the given
             //  file.  Points outside the geometry are ignored.
             void insertPoints(const fileName& pointFileName);
 

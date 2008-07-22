@@ -33,8 +33,106 @@ bool Foam::CV3D::dualCellSurfaceIntersection
     const Triangulation::Finite_vertices_iterator& vit
 ) const
 {
-  // I think that this needs to be done with facets, but think it through.
+    std::list<Facet>  facets;
+    incident_facets(vit, std::back_inserter(facets));
+
+    for
+    (
+        std::list<Facet>::iterator fit=facets.begin();
+        fit != facets.end();
+        ++fit
+    )
+    {
+        if
+        (
+            is_infinite(fit->first)
+         || is_infinite(fit->first->neighbor(fit->second))
+        )
+        {
+            return true;
+        }
+
+        point dE0 = topoint(dual(fit->first));
+
+        // If edge end is outside bounding box then edge cuts boundary
+        if (!qSurf_.bb().contains(dE0))
+        {
+            return true;
+        }
+
+        point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
+
+        // If other edge end is outside bounding box then edge cuts boundary
+        if (!qSurf_.bb().contains(dE1))
+        {
+            return true;
+        }
+
+        if (magSqr(dE1 - dE0) > tols_.minEdgeLen2)
+        {
+            pointIndexHit pHit = qSurf_.tree().findLineAny(dE0, dE1);
+
+            if (pHit.hit())
+            {
+                return true;
+            }
+        }
+
+    }
+
     return false;
+}
+
+
+void Foam::CV3D::insertPointPairs
+(
+    const DynamicList<point>& nearSurfacePoints,
+    const DynamicList<point>& surfacePoints,
+    const DynamicList<label>& surfaceTris,
+    const fileName fName
+)
+{
+    if (controls_.mirrorPoints)
+    {
+        forAll(surfacePoints, ppi)
+        {
+            insertMirrorPoint
+            (
+                nearSurfacePoints[ppi],
+                surfacePoints[ppi]
+            );
+        }
+    }
+    else
+    {
+        forAll(surfacePoints, ppi)
+        {
+            insertPointPair
+            (
+                tols_.ppDist,
+                surfacePoints[ppi],
+                qSurf_.faceNormals()[surfaceTris[ppi]]
+            );
+        }
+    }
+
+    Info<< surfacePoints.size() << " point-pairs inserted" << endl;
+
+    if (controls_.writeInsertedPointPairs)
+    {
+        OFstream str(fName);
+        label vertI = 0;
+
+        forAll(surfacePoints, ppi)
+        {
+            meshTools::writeOBJ(str, surfacePoints[ppi]);
+            vertI++;
+        }
+
+        Info<< "insertPointPairs: Written " << surfacePoints.size()
+            << " inserted point-pair locations to file "
+            << str.name() << endl;
+    }
 }
 
 
@@ -63,7 +161,7 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
     {
         if (vit->internalPoint())
         {
-	    point vert(topoint(vit->point()));
+            point vert(topoint(vit->point()));
 
             pointIndexHit pHit = qSurf_.tree().findNearest
             (
@@ -115,17 +213,17 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
                     surfacePoints.append(pHit.hitPoint());
                     surfaceTris.append(pHit.index());
                 }
-	    }
-	}
+            }
+        }
     }
 
-    // insertPointPairs
-    // (
-    //     nearSurfacePoints,
-    //     surfacePoints,
-    //     surfaceTris,
-    //     "surfaceNearestIntersections.obj"
-    // );
+    insertPointPairs
+    (
+        nearSurfacePoints,
+        surfacePoints,
+        surfaceTris,
+        "surfaceNearestIntersections.obj"
+    );
 }
 
 

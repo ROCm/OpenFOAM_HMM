@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         mesh.insertSurfacePointPairs();
         mesh.boundaryConform();
     }
-    
+
     mesh.write();
 
     mesh.writeDual("dualMesh.obj");

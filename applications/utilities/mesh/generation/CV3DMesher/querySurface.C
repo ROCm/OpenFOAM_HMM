@@ -96,30 +96,39 @@ Foam::labelList Foam::querySurface::extractFeatures3D
 {
     scalar featCos = cos(mathematicalConstant::pi*featAngle/180.0);
 
-    const labelListList& edgeFaces = this->edgeFaces();
-//     const pointField& localPoints = this->localPoints();
+    const labelListList& pointEdges = this->pointEdges();
+    const pointField& localPoints = this->localPoints();
     const edgeList& edges = this->edges();
-    const vectorField& faceNormals = this->faceNormals();
+    const vectorField& pointNormals = this->pointNormals();
 
-    DynamicList<label> featEdges(edges.size());
+    DynamicList<label> featPoints(localPoints.size());
 
-    forAll(edgeFaces, edgeI)
+    forAll(pointEdges, ptI)
     {
-//         const edge& e = edges[edgeI];
+        const point& p = localPoints[ptI];
 
-        const labelList& eFaces = edgeFaces[edgeI];
+        const vector& pNormal = pointNormals[ptI];
 
-        if
-        (
-            eFaces.size() == 2
-            && (faceNormals[eFaces[0]] & faceNormals[eFaces[1]]) < featCos
-        )
+        const labelList& pEdges = pointEdges[ptI];
+
+        forAll(pEdges, pE)
         {
-            featEdges.append(edgeI);
+            const edge& e = edges[pEdges[pE]];
+
+
+        // if
+        // (
+        //     eFaces.size() == 2
+        //     && (faceNormals[eFaces[0]] & faceNormals[eFaces[1]]) < featCos
+        // )
+        // {
+            featPoints.append(ptI);
+            break;
+        // }
         }
     }
 
-    return featEdges.shrink();
+    return featPoints.shrink();
 }
 
 Foam::indexedOctree<Foam::treeDataTriSurface>::volumeType

@@ -12,4 +12,4 @@ insertSurfaceNearestPointPairs.C
 insertSurfaceNearPointPairs.C
 insertBoundaryConformPointPairs.C
 
-EXE = $(FOAM_USER_APPBIN)/CV3DMesher
+EXE = $(FOAM_APPBIN)/CV3DMesher
