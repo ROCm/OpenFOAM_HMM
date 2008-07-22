@@ -471,6 +471,9 @@ Foam::vtkPV3Foam::vtkPV3Foam
         fullCasePath = cwd();
     }
 
+    // Set the case as an environment variable - some BCs might use this
+    setEnv("FOAM_CASE", fullCasePath, true);
+
     // Create time object
     dbPtr_.reset
     (
