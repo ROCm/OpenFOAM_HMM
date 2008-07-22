@@ -112,7 +112,7 @@ void Foam::CV3D::writeDual(const fileName& fName) const
                             " tetrahedron with no internal or boundary points."
                             << exit(FatalError);
                     }
-        
+
                     str<< ' ' << cc->cellIndex() + 1;
                 }
             } while (++cc != ccStart);
@@ -153,7 +153,7 @@ void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
     )
     {
         const Cell_handle& c(fit->first);
-        
+
         const int& oppositeVertex(fit->second);
 
         List<label> facetIndices(3,-1);
@@ -161,7 +161,7 @@ void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
         bool writeFacet = true;
 
         for(label i = 0, k = 0;i < 4; i++)
-        {            
+        {
             if(i != oppositeVertex)
             {
                 if(!internalOnly || !c->vertex(i)->farPoint())
@@ -175,7 +175,7 @@ void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
                 }
             }
         }
-    
+
         if(writeFacet)
         {
                 str << "f "
@@ -190,28 +190,6 @@ void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
 void Foam::CV3D::writeMesh(const Time& runTime)
 {
     Info<< nl << "Writing polyMesh." << endl;
-
-    Info << nl << "Temporary hack to produce boundary" << endl;
-
-    // for
-    // (
-    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
-    //     vit != finite_vertices_end();
-    //     ++vit
-    // )
-    // {
-    //     if
-    //     (
-    //         mag(topoint(vit->point()).x()) > 1.5
-    //      || mag(topoint(vit->point()).y()) > 1.5
-    //      || mag(topoint(vit->point()).z()) > 1.5   
-    //     )
-    //     {
-    // 	    vit->type() = Vb::FAR_POINT;
-    //     }
-    // }
-
-    markNearBoundaryPoints();
 
     pointField points(0);
     faceList faces(0);

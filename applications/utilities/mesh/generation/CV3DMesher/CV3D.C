@@ -37,7 +37,7 @@ void Foam::CV3D::insertBoundingBox()
     Info<< "insertBoundingBox: creating bounding mesh" << nl << endl;
     scalar bigSpan = 10*tols_.span;
     insertPoint(point(-bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
-    insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);    
+    insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);
     insertPoint(point(-bigSpan,  bigSpan, -bigSpan), Vb::FAR_POINT);
     insertPoint(point(-bigSpan,  bigSpan,  bigSpan), Vb::FAR_POINT);
     insertPoint(point( bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
@@ -45,6 +45,7 @@ void Foam::CV3D::insertBoundingBox()
     insertPoint(point( bigSpan,  bigSpan, -bigSpan), Vb::FAR_POINT);
     insertPoint(point( bigSpan,  bigSpan , bigSpan), Vb::FAR_POINT);
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -61,9 +62,10 @@ Foam::CV3D::CV3D
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0)
 {
-//    insertBoundingBox();
+    // insertBoundingBox();
     insertFeaturePoints();
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -95,7 +97,7 @@ void Foam::CV3D::insertPoints
         }
         else
         {
-            Warning 
+            Warning
                 << "Rejecting point " << p << " outside surface" << endl;
         }
     }
@@ -172,7 +174,7 @@ void Foam::CV3D::insertGrid()
                     p1.y() += pert*(rndGen.scalar01() - 0.5);
                     p1.z() += pert*(rndGen.scalar01() - 0.5);
                 }
-    
+
                 if (qSurf_.wellInside(p1, 0.5*controls_.minCellSize2))
                 {
                     insert(Point(p1.x(), p1.y(), p1.z()))->index() = nVert++;
@@ -184,7 +186,7 @@ void Foam::CV3D::insertGrid()
                     p2.y() += pert*(rndGen.scalar01() - 0.5);
                     p2.z() += pert*(rndGen.scalar01() - 0.5);
                 }
-    
+
                 if (qSurf_.wellInside(p2, 0.5*controls_.minCellSize2))
                 {
                     insert(Point(p2.x(), p2.y(), p2.z()))->index() = nVert++;
@@ -216,7 +218,7 @@ void Foam::CV3D::insertSurfacePointPairs()
     }
 
     if (controls_.writeNearestTriangulation)
-    {   
+    {
         // writeFaces("near_allFaces.obj", false);
         // writeFaces("near_faces.obj", true);
         writeTriangles("near_triangles.obj", true);

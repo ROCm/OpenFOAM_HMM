@@ -41,13 +41,12 @@ void Foam::CV3D::markNearBoundaryPoints()
         {
             point vert(topoint(vit->point()));
 
-            pointIndexHit pHit = 
+            pointIndexHit pHit =
                 qSurf_.tree().findNearest(vert, 4*controls_.minCellSize2);
 
             if (pHit.hit())
             {
-                // vit->setNearBoundary();
-	        vit->type() = Vb::FAR_POINT;
+                vit->setNearBoundary();
             }
         }
     }
