@@ -176,6 +176,7 @@ void Foam::vtkPV3Foam::resetCounters()
 
 void Foam::vtkPV3Foam::initializeTime()
 {
+#ifdef PV3FOAM_TIMESELECTION
     if (debug)
     {
         Info<< "entered Foam::vtkPV3Foam::initializeTime" << endl;
@@ -206,6 +207,7 @@ void Foam::vtkPV3Foam::initializeTime()
             times[timeI].name().c_str()
         );
     }
+#endif /* PV3FOAM_TIMESELECTION */
 }
 
 
@@ -676,15 +678,16 @@ double* Foam::vtkPV3Foam::timeSteps(int& nTimeSteps)
     int nTimes = 0;
     double* ts = NULL;
 
-    vtkDataArraySelection* arraySelection = reader_->GetTimeSelection();
-
     if (dbPtr_.valid())
     {
         Time& runTime = dbPtr_();
 
         instantList times = runTime.times();
+
+#ifdef PV3FOAM_TIMESELECTION
         List<bool> selected = List<bool>(times.size(), false);
 
+        vtkDataArraySelection* arraySelection = reader_->GetTimeSelection();
         const label nSelectedTimes = arraySelection->GetNumberOfArrays();
 
         for (int i = 0; i < nSelectedTimes; ++i)
@@ -697,14 +700,15 @@ double* Foam::vtkPV3Foam::timeSteps(int& nTimeSteps)
              && timeI < times.size()
             )
             {
-#if 0
-                Info<<"timeSelection["
-                    << i
-                    <<"] = "
-                    << arraySelection->GetArraySetting(i)
-                    << " is "
-                    << arraySelection->GetArrayName(i) << endl;
-#endif
+                if (debug)
+                {
+                    Info<<"timeSelection["
+                        << i
+                        <<"] = "
+                        << arraySelection->GetArraySetting(i)
+                            << " is "
+                        << arraySelection->GetArrayName(i) << endl;
+                }
                 selected[timeI] = true;
                 ++nTimes;
             }
@@ -735,6 +739,27 @@ double* Foam::vtkPV3Foam::timeSteps(int& nTimeSteps)
                 }
             }
         }
+
+#else /* PV3FOAM_TIMESELECTION */
+        // always skip "constant" time, unless there are no other times
+        nTimes = times.size();
+        label timeI = 0;
+
+        if (nTimes > 1)
+        {
+            timeI = 1;
+            --nTimes;
+        }
+
+        if (nTimes)
+        {
+            ts = new double[nTimes];
+            for (label stepI = 0; stepI < nTimes; ++stepI, ++timeI)
+            {
+                ts[stepI] = times[timeI].value();
+            }
+        }
+#endif /* PV3FOAM_TIMESELECTION */
     }
     else
     {
@@ -744,7 +769,7 @@ double* Foam::vtkPV3Foam::timeSteps(int& nTimeSteps)
         }
     }
 
-    // return length via the parameter
+    // return vector length via the parameter
     nTimeSteps = nTimes;
 
     return ts;

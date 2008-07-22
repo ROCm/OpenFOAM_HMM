@@ -53,7 +53,10 @@ void Foam::vtkPV3Foam::updateFoamMesh()
     if
     (
         !reader_->GetCacheMesh()
+#ifdef PV3FOAM_TIMESELECTION
+        // This is only useful if the times are individually selectable
      || reader_->GetTimeSelection()->GetArraySetting(0)
+#endif
     )
     {
         delete meshPtr_;
