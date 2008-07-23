@@ -75,7 +75,7 @@ Foam::GAMGPreconditioner::~GAMGPreconditioner()
 void Foam::GAMGPreconditioner::readControls()
 {
     GAMGSolver::readControls();
-    readControl(controlDict_, nVcycles_, "nVcycles");
+    controlDict_.readIfPresent("nVcycles", nVcycles_);
 }
 
 

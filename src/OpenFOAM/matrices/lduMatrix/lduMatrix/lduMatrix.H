@@ -87,8 +87,7 @@ class lduMatrix
 
 public:
 
-    //- Class returned by the solver
-    //  containing performance statistics
+    //- Class returned by the solver, containing performance statistics
     class solverPerformance
     {
         word   solverName_;
@@ -237,16 +236,6 @@ public:
 
         // Protected Member Functions
 
-            //- Read a control parameter from controlDict
-            template<class T>
-            inline void readControl
-            (
-                const dictionary& controlDict,
-                T& control,
-                const word& controlName
-            );
-
-
             //- Read the control parameters from the controlDict_
             virtual void readControls();
 
@@ -318,7 +307,6 @@ public:
                 Istream& solverData
             );
 
-
         // Selectors
 
             //- Return a new solver
@@ -331,6 +319,7 @@ public:
                 const lduInterfaceFieldPtrsList& interfaces,
                 Istream& solverData
             );
+
 
 
         // Destructor
@@ -749,7 +738,7 @@ public:
                 const lduInterfaceFieldPtrsList&,
                 const direction cmpt
             ) const;
-    
+
             //- Matrix transpose multiplication with updated interfaces.
             void Tmul
             (
@@ -800,7 +789,7 @@ public:
                 scalarField& result,
                 const direction cmpt
             ) const;
-    
+
             //- Update interfaced interfaces for matrix operations
             void updateMatrixInterfaces
             (
@@ -810,7 +799,7 @@ public:
                 scalarField& result,
                 const direction cmpt
             ) const;
-    
+
 
             template<class Type>
             tmp<Field<Type> > H(const Field<Type>&) const;

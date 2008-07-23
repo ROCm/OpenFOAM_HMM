@@ -29,6 +29,9 @@ Description
     List of function objects with execute function which is called for
     each object.
 
+See Also
+    Foam::functionObject and Foam::OutputFilterFunctionObject
+
 SourceFiles
     functionObjectList.C
 

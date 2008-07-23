@@ -171,9 +171,9 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    readControl(controlDict_, maxIter_, "maxIter");
-    readControl(controlDict_, tolerance_, "tolerance");
-    readControl(controlDict_, relTol_, "relTol");
+    controlDict_.readIfPresent("maxIter", maxIter_);
+    controlDict_.readIfPresent("tolerance", tolerance_);
+    controlDict_.readIfPresent("relTol", relTol_);
 }
 
 

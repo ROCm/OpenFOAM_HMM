@@ -289,16 +289,10 @@ void Foam::sampledSets::read(const dictionary& dict)
     fieldNames_ = wordList(dict_.lookup("fields"));
 
     interpolationScheme_ = "cell";
-    if (dict_.found("interpolationScheme"))
-    {
-        dict_.lookup("interpolationScheme") >> interpolationScheme_;
-    }
+    dict_.readIfPresent("interpolationScheme", interpolationScheme_);
 
     writeFormat_ = "null";
-    if (dict_.found("setFormat"))
-    {
-        dict_.lookup("setFormat") >> writeFormat_;
-    }
+    dict_.readIfPresent("setFormat", writeFormat_);
 
     scalarFields_.clear();
     vectorFields_.clear();

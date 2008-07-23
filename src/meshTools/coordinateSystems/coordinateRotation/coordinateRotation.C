@@ -162,10 +162,7 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 
     // default type is self (alias: "axes")
     word rotType(typeName_());
-    if (dict.found("type"))
-    {
-	dict.lookup("type") >> rotType;
-    }
+    dict.readIfPresent("type", rotType);
 
     // can (must) construct base class directly
     if (rotType == typeName_() || rotType == "axes")

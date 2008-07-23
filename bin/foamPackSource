@@ -33,7 +33,8 @@
 #------------------------------------------------------------------------------
 tmpFile=${TMPDIR:-/tmp}/foamPackFiles.$$
 
-if [ $# -ne 2 ]; then
+if [ $# -ne 2 ]
+then
    echo "Usage : ${0##*/} directory tarFile"
    echo ""
    echo "Packs all .C and .H files and Make/options and Make/files into"
@@ -46,12 +47,14 @@ fi
 packDir=$(echo "$1" | sed -e 's@//*@/@g' -e 's@/$@@')
 packFile=$2
 
-if [ ! -d $packDir ]; then
+if [ ! -d $packDir ]
+then
    echo "Error: directory $packDir does not exist"
    exit 1
 fi
 
-if [ -f $packFile ]; then
+if [ -f $packFile ]
+then
    echo "Error: $packFile already exists"
    exit 1
 fi

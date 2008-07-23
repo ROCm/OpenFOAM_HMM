@@ -102,14 +102,7 @@ Foam::scalar Foam::layerAdditionRemoval::readOldThickness
     const dictionary& dict
 )
 {
-    if (dict.found("oldLayerThickness"))
-    {
-        return readScalar(dict.lookup("oldLayerThickness"));
-    }
-    else
-    {
-        return -1.0;
-    }
+    dict.lookupOrDefault("oldLayerThickness", -1.0);
 }
 
 
@@ -279,7 +272,7 @@ bool Foam::layerAdditionRemoval::changeTopology() const
             << "Layer thickness: min: " << minDelta
             << " max: " << maxDelta << " avg: " << avgDelta
             << " old thickness: " << oldLayerThickness_ << nl
-            << "Removal threshold: " << minLayerThickness_ 
+            << "Removal threshold: " << minLayerThickness_
             << " addition threshold: " << maxLayerThickness_ << endl;
     }
 
@@ -295,7 +288,7 @@ bool Foam::layerAdditionRemoval::changeTopology() const
         }
 
         // No topological changes allowed before first mesh motion
-        // 
+        //
         oldLayerThickness_ = avgDelta;
 
         topologicalChange = false;
@@ -314,7 +307,7 @@ bool Foam::layerAdditionRemoval::changeTopology() const
                     // At this point, info about moving the old mesh
                     // in a way to collapse the cells in the removed
                     // layer is available.  Not sure what to do with
-                    // it.  
+                    // it.
 
                     if (debug)
                     {

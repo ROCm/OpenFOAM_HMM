@@ -50,7 +50,7 @@ void Foam::vtkPV3Foam::addLagrangianMesh
 {
     if (debug)
     {
-        Info<< "entered add Lagrangian mesh with timePath "
+        Info<< "<beg> Foam::vtkPV3Foam::addLagrangianMesh - timePath "
             << mesh.time().timePath()/"lagrangian" << endl;
     }
 
@@ -61,7 +61,7 @@ void Foam::vtkPV3Foam::addLagrangianMesh
 
     if (debug && cloudDirs.size())
     {
-        Info<< "check cloudDirs: " << cloudDirs << endl;
+        Info<< "... check cloudDirs: " << cloudDirs << endl;
     }
 
     bool foundCloud = false;
@@ -98,6 +98,11 @@ void Foam::vtkPV3Foam::addLagrangianMesh
             vtkmesh->SetPoints(vtkpoints);
             vtkpoints->Delete();
         }
+    }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::addLagrangianMesh" << endl;
     }
 }
 

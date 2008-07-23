@@ -47,7 +47,7 @@ void Foam::vtkPV3Foam::addPointSetMesh
 {
     if (debug)
     {
-        Info<< "entered add point set mesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::addPointSetMesh" << endl;
     }
 
     const pointField& meshPoints = mesh.points();
@@ -62,6 +62,11 @@ void Foam::vtkPV3Foam::addPointSetMesh
 
     vtkmesh->SetPoints(vtkpoints);
     vtkpoints->Delete();
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::addPointSetMesh" << endl;
+    }
 }
 
 

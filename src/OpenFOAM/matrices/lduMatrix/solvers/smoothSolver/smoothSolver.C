@@ -72,7 +72,7 @@ Foam::smoothSolver::smoothSolver
 void Foam::smoothSolver::readControls()
 {
     lduMatrix::solver::readControls();
-    readControl(controlDict_, nSweeps_, "nSweeps");
+    controlDict_.readIfPresent("nSweeps", nSweeps_);
 }
 
 
