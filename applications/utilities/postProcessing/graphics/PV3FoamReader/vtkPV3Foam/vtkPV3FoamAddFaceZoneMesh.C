@@ -47,7 +47,7 @@ void Foam::vtkPV3Foam::addFaceZoneMesh
 {
     if (debug)
     {
-        Info<< "entered addFaceZoneMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::addFaceZoneMesh" << endl;
     }
 
     // Construct primitivePatch of faces in fSet.
@@ -94,6 +94,11 @@ void Foam::vtkPV3Foam::addFaceZoneMesh
 
     vtkmesh->SetPolys(vtkcells);
     vtkcells->Delete();
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::addFaceZoneMesh" << endl;
+    }
 }
 
 

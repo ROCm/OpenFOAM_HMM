@@ -47,7 +47,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateFoamMesh" << endl;
     }
 
     if
@@ -87,6 +87,11 @@ void Foam::vtkPV3Foam::updateFoamMesh()
             Info<< "Using existing Foam mesh" << endl;
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+    }
 }
 
 
@@ -97,7 +102,7 @@ void Foam::vtkPV3Foam::updateVolFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateVolFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateVolFields" << endl;
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -143,6 +148,11 @@ void Foam::vtkPV3Foam::updateVolFields
     (
         mesh, pInterp, objects, arraySelection, output
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateVolFields" << endl;
+    }
 }
 
 
@@ -153,7 +163,7 @@ void Foam::vtkPV3Foam::updatePointFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updatePointFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updatePointFields" << endl;
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -163,11 +173,6 @@ void Foam::vtkPV3Foam::updatePointFields
 
     vtkDataArraySelection* arraySelection = reader_->GetPointFieldSelection();
 
-    // Convert point fields
-    if (debug)
-    {
-        Info<< "converting Foam point fields" << endl;
-    }
 /*
     convertPointFields<Foam::label>
     (
@@ -194,6 +199,11 @@ void Foam::vtkPV3Foam::updatePointFields
     (
         mesh, objects, arraySelection, output
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updatePointFields" << endl;
+    }
 }
 
 
@@ -204,7 +214,7 @@ void Foam::vtkPV3Foam::updateLagrangianFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -252,6 +262,11 @@ void Foam::vtkPV3Foam::updateLagrangianFields
     (
         mesh, objects, arraySelection, output
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+    }
 }
 
 

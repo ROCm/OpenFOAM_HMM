@@ -54,7 +54,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
 {
     if (debug)
     {
-        Info<< "entered add volume mesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::addVolumeMesh" << endl;
     }
 
     // Number of additional points needed by the decomposition of polyhedra
@@ -74,13 +74,13 @@ void Foam::vtkPV3Foam::addVolumeMesh
     // and cells
     if (debug)
     {
-        Info<< "building cell-shapes" << endl;
+        Info<< "... building cell-shapes" << endl;
     }
     const cellShapeList& cellShapes = mesh.cellShapes();
 
     if (debug)
     {
-        Info<< "scanning" << endl;
+        Info<< "... scanning" << endl;
     }
     forAll(cellShapes, cellI)
     {
@@ -133,7 +133,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
     if (debug)
     {
-        Info<< "converting points" << endl;
+        Info<< "... converting points" << endl;
     }
 
     // Convert Foam mesh vertices to VTK
@@ -150,7 +150,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
     if (debug)
     {
-        Info<< "converting cells" << endl;
+        Info<< "... converting cells" << endl;
     }
 
     vtkmesh->Allocate(mesh.nCells() + nAddCells);
@@ -350,6 +350,11 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
     vtkmesh->SetPoints(vtkpoints);
     vtkpoints->Delete();
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::addVolumeMesh" << endl;
+    }
 }
 
 
