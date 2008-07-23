@@ -154,100 +154,6 @@ void insertDuplicateMerge
 }
 
 
-// Get points on the inside of baffle regions.
-labelList getNonManifoldPointsInsideBaffles
-(
-    const primitiveMesh& mesh,
-    const labelList& baffleFaces
-)
-{
-    // Get points to split. These are the edges of the duplicate-faces
-    // region
-
-    indirectPrimitivePatch dupPatch
-    (
-        IndirectList<face>(mesh.faces(), baffleFaces),
-        mesh.points()
-    );
-
-    labelHashSet insideSet(dupPatch.nPoints());
-
-    // Pick up all points but the ones on the edge of the region.
-    // Edge of the region since has two faces along edge.
-
-    forAll(dupPatch.meshPoints(), i)
-    {
-        insideSet.insert(dupPatch.meshPoints()[i]);
-    }
-    forAll(dupPatch.edgeFaces(), edgeI)
-    {
-        const labelList& eFaces = dupPatch.edgeFaces()[edgeI];
-
-        if (eFaces.size() == 2)
-        {
-            const edge& e = dupPatch.edges()[edgeI];
-
-            insideSet.erase(dupPatch.meshPoints()[e[0]]);
-            insideSet.erase(dupPatch.meshPoints()[e[1]]);
-        }
-    }
-
-    return insideSet.toc();
-}
-
-
-// Find all non-manifold points on the outside of the mesh.
-labelList getAllNonManifoldPoints
-(
-    const polyMesh& mesh,
-    const labelList& boundaryFaces
-)
-{
-    indirectPrimitivePatch allOutside
-    (
-        IndirectList<face>(mesh.faces(), boundaryFaces),
-        mesh.points()
-    );
-
-    // All points on non-manifold edges.
-    boolList nonManifoldPoint(mesh.nPoints(), false);
-
-    forAll(allOutside.meshPoints(), localPointI)
-    {
-        label pointI = allOutside.meshPoints()[localPointI];
-
-        if (!localPointRegion::isSingleCellRegion(mesh, pointI))
-        {
-            nonManifoldPoint[pointI] = true;
-        }
-    }
-
-    // Splittable only if all processors decide to split it.
-    syncTools::syncPointList
-    (
-        mesh,
-        nonManifoldPoint,
-        andEqOp<bool>(),        // combineop
-        true,                   // null value
-        false                   // no separation
-    );
-
-    // Extract 'true' elements
-    labelList nonManifPoints(findIndices(nonManifoldPoint, true));
-
-    // Write to pointSet for ease of postprocessing
-    pointSet nonManifPointSet(mesh, "nonManifoldPoints", nonManifPoints);
-
-    Pout<< "Writing " << nonManifPointSet.size()
-        << " non-manif points to " << nonManifPointSet.objectPath()
-        << endl;
-
-    nonManifPointSet.write();
-
-    return nonManifPoints;
-}
-
-
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("split", "");
@@ -316,26 +222,14 @@ int main(int argc, char *argv[])
             << ", i.e. duplicating points internal to duplicate surfaces."
             << nl << endl;
 
-        labelList nonManifPoints
-         (
-             getAllNonManifoldPoints
-             (
-                 mesh,
-                 boundaryFaces
-             )
-        );
-
         // Analyse which points need to be duplicated
-        localPointRegion regionSide(mesh, nonManifPoints);
+        localPointRegion regionSide(mesh);
 
+        // Point duplication engine
         duplicatePoints pointDuplicator(mesh);
 
-        pointDuplicator.setRefinement
-        (
-            nonManifPoints,
-            regionSide,
-            meshMod
-        );
+        // Insert topo changes
+        pointDuplicator.setRefinement(regionSide, meshMod);
     }
     else
     {
