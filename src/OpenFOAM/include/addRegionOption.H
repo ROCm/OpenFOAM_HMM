@@ -1,1 +1,1 @@
-    argList::validOptions.insert("region", "region name");
+    argList::validOptions.insert("region", "name");

@@ -70,11 +70,13 @@ public:
     // Constructors
 
         //- Construct for given objectRegistry and dictionary
-        //  allow the possibility to load fields from files
+        //  Allow dictionary to be optional
+        //  Allow the possibility to load fields from files
         IOOutputFilter
         (
             const objectRegistry&,
             const fileName& dictName = OutputFilter::typeName() + "Dict",
+            const IOobject::readOption rOpt = IOobject::MUST_READ,
             const bool loadFromFile = false
         );
 

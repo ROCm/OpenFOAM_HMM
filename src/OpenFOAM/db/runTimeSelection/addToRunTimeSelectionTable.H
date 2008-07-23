@@ -26,7 +26,7 @@ InClass
     Foam::runTimeSelectionTables
 
 Description
-    Macros to enable the easy insertion into run-time selection tables.
+    Macros for easy insertion into run-time selection tables
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +45,7 @@ Description
                                                                               \
     /* Add the thisType constructor function to the table */                  \
     baseType::add##argNames##ConstructorToTable<thisType>                     \
-        add##thisType##argNames##ConstructorTo##baseType##Table_(#lookup)
+        add_##lookup##_##thisType##argNames##ConstructorTo##baseType##Table_(#lookup)
 
 #define addTemplateToRunTimeSelectionTable(baseType,thisType,Targ,argNames)   \
                                                                               \

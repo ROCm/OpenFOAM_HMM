@@ -156,9 +156,8 @@ Foam::sampledPlane::sampledPlane
 
 
     label zoneId = -1;
-    if (dict.found("zone"))
+    if (dict.readIfPresent("zone", zoneName_))
     {
-        dict.lookup("zone") >> zoneName_;
         zoneId = mesh.cellZones().findZoneID(zoneName_);
         if (debug && zoneId < 0)
         {

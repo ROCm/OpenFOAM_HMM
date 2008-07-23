@@ -176,12 +176,7 @@ Foam::searchableSurfaces::searchableSurfaces
         const dictionary& dict = topDict.subDict(key);
 
         names_[surfI] = key;
-
-        if (dict.found("name"))
-        {
-            dict.lookup("name") >> names_[surfI];
-        }
-
+        dict.readIfPresent("name", names_[surfI]);
 
         // Make IOobject with correct name
         autoPtr<IOobject> namedIO(io.clone());

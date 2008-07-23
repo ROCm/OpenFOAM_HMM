@@ -1,4 +1,5 @@
 EXE_INC = \
+    /* -DPV3FOAM_TIMESELECTION */ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \

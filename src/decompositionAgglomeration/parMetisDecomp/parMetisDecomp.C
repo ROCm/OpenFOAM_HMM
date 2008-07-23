@@ -516,26 +516,20 @@ Foam::labelList Foam::parMetisDecomp::decompose(const pointField& points)
     // Check for user supplied weights and decomp options
     if (decompositionDict_.found("metisCoeffs"))
     {
-        dictionary parMetisDecompCoeffs
-        (
-            decompositionDict_.subDict("metisCoeffs")
-        );
+        const dictionary& metisCoeffs =
+            decompositionDict_.subDict("metisCoeffs");
+        word weightsFile;
 
-        if (parMetisDecompCoeffs.found("cellWeightsFile"))
+        if (metisCoeffs.readIfPresent("cellWeightsFile", weightsFile))
         {
-            word cellWeightsFile
-            (
-                parMetisDecompCoeffs.lookup("cellWeightsFile")
-            );
-
             Info<< "parMetisDecomp : Using cell-based weights read from "
-                << cellWeightsFile << endl;
+                << weightsFile << endl;
 
             labelIOField cellIOWeights
             (
                 IOobject
                 (
-                    cellWeightsFile,
+                    weightsFile,
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -554,21 +548,16 @@ Foam::labelList Foam::parMetisDecomp::decompose(const pointField& points)
             }
         }
 
-        if (parMetisDecompCoeffs.found("faceWeightsFile"))
+        if (metisCoeffs.readIfPresent("faceWeightsFile", weightsFile))
         {
-            word faceWeightsFile
-            (
-                parMetisDecompCoeffs.lookup("faceWeightsFile")
-            );
-
             Info<< "parMetisDecomp : Using face-based weights read from "
-                << faceWeightsFile << endl;
+                << weightsFile << endl;
 
             labelIOField weights
             (
                 IOobject
                 (
-                    faceWeightsFile,
+                    weightsFile,
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -621,12 +610,10 @@ Foam::labelList Foam::parMetisDecomp::decompose(const pointField& points)
             }
         }
 
-        if (parMetisDecompCoeffs.found("options"))
+        if (metisCoeffs.readIfPresent("options", options))
         {
-            parMetisDecompCoeffs.lookup("options") >> options;
-
             Info<< "Using Metis options     " << options
-                << endl << endl;
+                << nl << endl;
 
             if (options.size() != 3)
             {
@@ -835,26 +822,20 @@ Foam::labelList Foam::parMetisDecomp::decompose
     // Check for user supplied weights and decomp options
     if (decompositionDict_.found("metisCoeffs"))
     {
-        dictionary parMetisDecompCoeffs
-        (
-            decompositionDict_.subDict("metisCoeffs")
-        );
+        const dictionary& metisCoeffs = 
+            decompositionDict_.subDict("metisCoeffs");
+        word weightsFile;
 
-        if (parMetisDecompCoeffs.found("cellWeightsFile"))
+        if (metisCoeffs.readIfPresent("cellWeightsFile", weightsFile))
         {
-            word cellWeightsFile
-            (
-                parMetisDecompCoeffs.lookup("cellWeightsFile")
-            );
-
             Info<< "parMetisDecomp : Using cell-based weights read from "
-                << cellWeightsFile << endl;
+                << weightsFile << endl;
 
             labelIOField cellIOWeights
             (
                 IOobject
                 (
-                    cellWeightsFile,
+                    weightsFile,
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -877,21 +858,16 @@ Foam::labelList Foam::parMetisDecomp::decompose
         }
 
         //- faceWeights disabled. Only makes sense for cellCells from mesh.
-        //if (parMetisDecompCoeffs.found("faceWeightsFile"))
+        //if (metisCoeffs.readIfPresent("faceWeightsFile", weightsFile))
         //{
-        //    word faceWeightsFile
-        //    (
-        //        parMetisDecompCoeffs.lookup("faceWeightsFile")
-        //    );
-        //
         //    Info<< "parMetisDecomp : Using face-based weights read from "
-        //        << faceWeightsFile << endl;
+        //        << weightsFile << endl;
         //
         //    labelIOField weights
         //    (
         //        IOobject
         //        (
-        //            faceWeightsFile,
+        //            weightsFile,
         //            mesh_.time().timeName(),
         //            mesh_,
         //            IOobject::MUST_READ,
@@ -944,12 +920,10 @@ Foam::labelList Foam::parMetisDecomp::decompose
         //    }
         //}
 
-        if (parMetisDecompCoeffs.found("options"))
+        if (metisCoeffs.readIfPresent("options", options))
         {
-            parMetisDecompCoeffs.lookup("options") >> options;
-
             Info<< "Using Metis options     " << options
-                << endl << endl;
+                << nl << endl;
 
             if (options.size() != 3)
             {

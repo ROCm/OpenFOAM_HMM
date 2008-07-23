@@ -28,39 +28,39 @@ Description
 
     Keywords:
 
-    setFormat: set output format, choice of
-        xmgr
-        jplot
-        gnuplot
-        raw
+    @param setFormat : set output format, choice of \n
+      - xmgr
+      - jplot
+      - gnuplot
+      - raw
 
-    surfaceFormat: surface output format, choice of
-        null        : suppress output
-        foamFile    : separate points, faces and values file
-        dx          : DX scalar or vector format
-        vtk         : VTK ascii format
-        raw         : x y z value format for use with e.g. gnuplot 'splot'.
-        stl         : ascii stl. Does not contain values!
+    @param surfaceFormat : surface output format, choice of \n
+      - null        : suppress output
+      - foamFile    : separate points, faces and values file
+      - dx          : DX scalar or vector format
+      - vtk         : VTK ascii format
+      - raw         : x y z value format for use with e.g. gnuplot 'splot'.
+      - stl         : ascii stl. Does not contain values!
 
-    interpolationScheme: interpolation scheme, choice of
-        cell          : use cell-centre value; constant over cells (default)
-        cellPoint     : use cell-centre and vertex values
-   	    cellPointFace : use cell-centre, vertex and face values.
-          1] vertex values determined from neighbouring cell-centre values
-          2] face values determined using the current face interpolation scheme
-             for the field (linear, limitedLinear, etc.)
+    @param interpolationScheme : interpolation scheme, choice of \n
+      - cell          : use cell-centre value; constant over cells (default)
+      - cellPoint     : use cell-centre and vertex values
+      - cellPointFace : use cell-centre, vertex and face values. \n
+        -# vertex values determined from neighbouring cell-centre values
+        -# face values determined using the current face interpolation scheme
+           for the field (linear, limitedLinear, etc.)
 
-    fields: list of fields to sample
+    @param fields : list of fields to sample
 
-    sets: list of sets to sample, choice of
-        uniform             evenly distributed points on line
-        face                one point per face intersection
-        midPoint            one point per cell, inbetween two face intersections
-        midPointAndFace     combination of face and midPoint
+    @param sets : list of sets to sample, choice of \n
+      - uniform             evenly distributed points on line
+      - face                one point per face intersection
+      - midPoint            one point per cell, inbetween two face intersections
+      - midPointAndFace     combination of face and midPoint
 
-        curve               specified points, not nessecary on line, uses
+      - curve               specified points, not nessecary on line, uses
                             tracking
-        cloud               specified points, uses findCell
+      - cloud               specified points, uses findCell
 
         Option axis: how to write point coordinate. Choice of
           - x/y/z: x/y/z coordinate only
@@ -74,11 +74,12 @@ Description
             uniform: extra number of sampling points
             curve, cloud: list of coordinates
 
-    surfaces: list of surfaces to sample, choice of
-        plane : values on plane defined by point, normal.
-        patch : values on patch.
+    @param surfaces : list of surfaces to sample, choice of \n
+      - plane : values on plane defined by point, normal.
+      - patch : values on patch.
 
-    Runs in parallel.
+Notes
+    Runs in parallel
 
 \*---------------------------------------------------------------------------*/
 
@@ -100,8 +101,8 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
-    IOsampledSets sSets(mesh, "sampleDict", true);
-    IOsampledSurfaces sSurfaces(mesh, "sampleDict", true);
+    IOsampledSets sSets(mesh, "sampleDict", IOobject::MUST_READ, true);
+    IOsampledSurfaces sSurfs(mesh, "sampleDict", IOobject::MUST_READ, true);
 
     forAll(timeDirs, timeI)
     {
@@ -112,10 +113,10 @@ int main(int argc, char *argv[])
         polyMesh::readUpdateState state = mesh.readUpdate();
 
         sSets.readUpdate(state);
-        sSurfaces.readUpdate(state);
+        sSurfs.readUpdate(state);
 
         sSets.write();
-        sSurfaces.write();
+        sSurfs.write();
 
         Info<< endl;
     }

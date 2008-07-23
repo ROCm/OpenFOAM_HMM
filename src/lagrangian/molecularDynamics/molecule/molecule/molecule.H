@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    molecule
+    Foam::molecule
 
 Description
+    Foam::molecule
 
 SourceFiles
     moleculeI.H
@@ -59,12 +60,12 @@ class molecule
 {
     // Private data
 
-        //- Be careful with the ordering of data.  It has an impact on binary
-        //  transfer:
-        //  1) Put the largest data members 1st
-        //  2) Pair up labels,
-        //  3) Don't go scalar-label, scalar-label, becasue in 64bit mode,
-        //     the labels will be padded by 4bytes.
+        //- Be careful with the ordering of data.
+        //  It has an impact on binary transfer:
+        //    -# Put the largest data members 1st
+        //    -# Pair up labels,
+        //    -# Don't go scalar-label, scalar-label, because in 64bit mode,
+        //       the labels will be padded by 4bytes.
 
         // - mass of molecule
         scalar mass_;
@@ -200,16 +201,15 @@ public:
 
     // Member Operators
 
-        //- Overridable function to handle the particle hitting a
-        //  processorPatch
+        //- Overridable function to handle the particle hitting a processorPatch
         void hitProcessorPatch
         (
             const processorPolyPatch&,
             molecule::trackData& td
         );
 
-        //- Overridable function to handle the particle hitting a
-        //  processorPatch without trackData
+        //- Overridable function to handle the particle hitting a processorPatch
+        //  without trackData
         void hitProcessorPatch
         (
             const processorPolyPatch&,
@@ -224,7 +224,7 @@ public:
         );
 
         //- Overridable function to handle the particle hitting a wallPatch
-        //- without trackData
+        //  without trackData
         void hitWallPatch
         (
             const wallPolyPatch&,
@@ -239,7 +239,7 @@ public:
         );
 
         //- Overridable function to handle the particle hitting a polyPatch
-        //- without trackData
+        //  without trackData
         void hitPatch
         (
             const polyPatch&,

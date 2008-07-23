@@ -637,10 +637,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero)
 {
-    if (dict.found("featureCos"))
-    {
-        dict.lookup("featureCos") >> featureCos_;
-    }
+    dict.readIfPresent("featureCos", featureCos_);
+
     if (dict.found("transform"))
     {
         transform_ = transformTypeNames.read(dict.lookup("transform"));

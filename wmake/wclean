@@ -54,7 +54,8 @@ USAGE
 }
 
 # provide immediate help
-if [ "$1" = "-h" -o "$1" = "-help" ]; then
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
    usage
 fi
 
@@ -93,7 +94,7 @@ then
          echo "$Script error"
          echo "    could not change to directory '$dir'"
          exit 1
-      }      
+      }
    fi
 
    # provide some feedback

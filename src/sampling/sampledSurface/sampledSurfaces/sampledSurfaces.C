@@ -327,16 +327,10 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
     fieldNames_ = wordList(dict.lookup("fields"));
 
     interpolationScheme_ = "cell";
-    if (dict.found("interpolationScheme"))
-    {
-        dict.lookup("interpolationScheme") >> interpolationScheme_;
-    }
+    dict.readIfPresent("interpolationScheme", interpolationScheme_);
 
     writeFormat_ = "null";
-    if (dict.found("surfaceFormat"))
-    {
-        dict.lookup("surfaceFormat") >> writeFormat_;
-    }
+    dict.readIfPresent("surfaceFormat", writeFormat_);
 
 
     PtrList<sampledSurface> newList

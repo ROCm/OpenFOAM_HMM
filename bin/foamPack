@@ -43,7 +43,8 @@ then
 fi
 
 # add optional output directory
-if [ -d "$1" ]; then
+if [ -d "$1" ]
+then
    packFile="$1/$packFile"
 fi
 

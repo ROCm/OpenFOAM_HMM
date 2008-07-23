@@ -87,10 +87,7 @@ LESModel::LESModel
 
     delta_(LESdelta::New("delta", U.mesh(), *this))
 {
-    if (found("k0"))
-    {
-        lookup("k0") >> k0_;
-    }
+    readIfPresent("k0", k0_);
 }
 
 
@@ -117,10 +114,7 @@ bool LESModel::read()
 
         delta_().read(*this);
 
-        if (found("k0"))
-        {
-            lookup("k0") >> k0_;
-        }
+        readIfPresent("k0", k0_);
 
         return true;
     }
