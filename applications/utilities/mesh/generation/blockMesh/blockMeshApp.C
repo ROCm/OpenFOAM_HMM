@@ -28,12 +28,12 @@ Application
 Description
     A multi-block mesh generator.
 
-    The @a constant/blockMeshDict (or @a constant/\<region\>/blockMeshDict)
-    is used.
+    A @a constant/polyMesh/blockMeshDict
+    (or @a constant/\<region\>/polyMesh/blockMeshDict) is used.
 
-    For backwards compatibility, @a constant/polyMesh/blockMeshDict
-    (or @a constant/\<region\>/polyMesh/blockMeshDict) can also be used
-    if the previous search failed.
+    For people who like to accidentally remove their entire
+    @a constant/polyMesh/, the path @a constant/blockMeshDict
+    (or @a constant/\<region\>/blockMeshDict) will also be checked.
 
 Usage
 
@@ -86,76 +86,82 @@ int main(int argc, char *argv[])
 
     if (args.options().found("region"))
     {
-        regionName = args.options()["region"];
+        regionName  = args.options()["region"];
         polyMeshDir = regionName/polyMesh::meshSubDir;
         constantDir = runTime.constant()/regionName;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
-
-        // try constant/<region>/blockMeshDict
-        meshDictPtr.reset
-        (
-            new IOobject
-            (
-                "blockMeshDict",
-                runTime.constant(),
-                regionName,
-                runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
     }
     else
     {
-        regionName = polyMesh::defaultRegion;
+        regionName  = polyMesh::defaultRegion;
         polyMeshDir = polyMesh::meshSubDir;
         constantDir = runTime.constant();
-
-        // try constant/blockMeshDict
-        meshDictPtr.reset
-        (
-            new IOobject
-            (
-                "blockMeshDict",
-                runTime.constant(),
-                runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
     }
 
-    // not found, fallback to polyMesh directory
-    if (!meshDictPtr->headerOk())
-    {
-        meshDictPtr.reset
+    // check constant/polyMesh or constant/polyMesh/<region>/
+    meshDictPtr.reset
+    (
+        new IOobject
         (
-            new IOobject
-            (
-                "blockMeshDict",
-                runTime.constant(),
-                polyMeshDir,
-                runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
-    }
+            "blockMeshDict",
+            runTime.constant(),
+            polyMeshDir,
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
 
     if (!meshDictPtr->headerOk())
     {
-        FatalErrorIn(args.executable())
-            << "Cannot open mesh description file " << nl
-            << constantDir/"blockMeshDict" << nl
-            << "or "<< nl
-            << constantDir/polyMeshDir/polyMesh::meshSubDir/"blockMeshDict"
-            << nl
-            << exit(FatalError);
+        // not found, failsafe checks
+        if (args.options().found("region"))
+        {
+            // try constant/<region>/blockMeshDict
+            meshDictPtr.reset
+            (
+                new IOobject
+                (
+                    "blockMeshDict",
+                    runTime.constant(),
+                    regionName,
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+        }
+        else
+        {
+            // try constant/blockMeshDict
+            meshDictPtr.reset
+            (
+                new IOobject
+                (
+                    "blockMeshDict",
+                    runTime.constant(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+        }
+
+        if (!meshDictPtr->headerOk())
+        {
+            FatalErrorIn(args.executable())
+                << "Cannot open mesh description file\n    "
+                << constantDir/polyMeshDir/"blockMeshDict"
+                << "\n    (or " << constantDir/"blockMeshDict" << ")" << nl
+                << nl
+                << exit(FatalError);
+        }
     }
+
 
     Info<< nl << "Reading mesh description file" << endl;
 
