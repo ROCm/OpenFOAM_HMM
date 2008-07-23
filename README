@@ -183,5 +183,5 @@
   Linux users with a 64-bit machine may install either the OpenFOAM 32-bit
   version (linux) or the OpenFOAM 64-bit version (linux64), or both.  The 64-bit
   is the default mode on a 64-bit machine.  To use an installed 32-bit version,
-  the user must set the environment variable $WM_32 (to anything, e.g. "on")
-  before sourcing the etc/bashrc (or etc/cshrc) file.
+  the user must set the environment variable WM_ARCH_OPTION to 32 before
+  sourcing the etc/bashrc (or etc/cshrc) file.
