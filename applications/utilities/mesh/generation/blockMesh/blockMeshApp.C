@@ -22,35 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    blockMesh
-
 Description
     A multi-block mesh generator.
-
-    The @a constant/blockMeshDict (or @a constant/\<region\>/blockMeshDict)
-    is used.
-
-    For backwards compatibility, @a constant/polyMesh/blockMeshDict
-    (or @a constant/\<region\>/polyMesh/blockMeshDict) can also be used
-    if the previous search failed.
-
-Usage
-
-    - blockMesh [OPTION]
-
-    @param -blockTopology \n
-    Write the topology as a set of edges in OBJ format.
-
-    @param -region \<name\>\n
-    Specify an alternative mesh region
 
 \*---------------------------------------------------------------------------*/
 
 #include "Time.H"
 #include "IOdictionary.H"
 #include "IOPtrList.H"
-#include "autoPtr.H"
 
 #include "blockMesh.H"
 #include "attachPolyTopoChanger.H"
@@ -81,89 +60,47 @@ int main(int argc, char *argv[])
 
     word regionName;
     fileName polyMeshDir;
-    fileName constantDir;
-    autoPtr<IOobject> meshDictPtr;
 
     if (args.options().found("region"))
     {
         regionName = args.options()["region"];
         polyMeshDir = regionName/polyMesh::meshSubDir;
-        constantDir = runTime.constant()/regionName;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
-
-        // try constant/<region>/blockMeshDict
-        meshDictPtr.reset
-        (
-            new IOobject
-            (
-                "blockMeshDict",
-                runTime.constant(),
-                regionName,
-                runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
     }
     else
     {
         regionName = polyMesh::defaultRegion;
         polyMeshDir = polyMesh::meshSubDir;
-        constantDir = runTime.constant();
-
-        // try constant/blockMeshDict
-        meshDictPtr.reset
-        (
-            new IOobject
-            (
-                "blockMeshDict",
-                runTime.constant(),
-                runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
     }
 
-    // not found, fallback to polyMesh directory
-    if (!meshDictPtr->headerOk())
-    {
-        meshDictPtr.reset
-        (
-            new IOobject
-            (
-                "blockMeshDict",
-                runTime.constant(),
-                polyMeshDir,
-                runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
-    }
 
-    if (!meshDictPtr->headerOk())
+    Info<< nl << "Reading block mesh description dictionary" << endl;
+
+    IOobject meshDescriptionIOobject
+    (
+        "blockMeshDict",
+        runTime.constant(),
+        polyMeshDir,
+        runTime,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (!meshDescriptionIOobject.headerOk())
     {
         FatalErrorIn(args.executable())
             << "Cannot open mesh description file " << nl
-            << constantDir/"blockMeshDict" << nl
-            << "or "<< nl
-            << constantDir/polyMeshDir/polyMesh::meshSubDir/"blockMeshDict"
-            << nl
+            << runTime.constant()/polyMeshDir/"blockMeshDict" << nl
             << exit(FatalError);
     }
 
-    Info<< nl << "Reading mesh description file" << endl;
-
-    IOdictionary blockMeshDict(meshDictPtr());
+    IOdictionary meshDescription(meshDescriptionIOobject);
 
     Info<< nl << "Creating block mesh" << endl;
 
-    blockMesh blocks(blockMeshDict);
+    blockMesh blocks(meshDescription);
 
 
     if (writeTopo)
@@ -208,6 +145,7 @@ int main(int argc, char *argv[])
     }
 
 
+
     Info<< nl << "Creating mesh from block mesh" << endl;
 
     wordList patchNames = blocks.patchNames();
@@ -248,11 +186,11 @@ int main(int argc, char *argv[])
 
 
     // Read in a list of dictionaries for the merge patch pairs
-    if (blockMeshDict.found("mergePatchPairs"))
+    if (meshDescription.found("mergePatchPairs"))
     {
         List<Pair<word> > mergePatchPairs
         (
-            blockMeshDict.lookup("mergePatchPairs")
+            meshDescription.lookup("mergePatchPairs")
         );
 
         if (mergePatchPairs.size())
@@ -358,7 +296,7 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info<< nl << "Writing polyMesh" << endl;
+    Info << nl << "Writing polyMesh" << endl;
     mesh.removeFiles(mesh.instance());
     if (!mesh.write())
     {

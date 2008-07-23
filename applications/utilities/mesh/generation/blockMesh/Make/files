@@ -26,6 +26,6 @@ blockPoints.C
 blockCells.C
 blockBoundary.C
 
-blockMeshApp.C
+genBlockMesh.C
 
 EXE = $(FOAM_APPBIN)/blockMesh
