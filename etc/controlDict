@@ -57,8 +57,8 @@ DebugSwitches
     C8H18               0;
     C9H20               0;
     CH3OH               0;
-    CallbackRegistryName    0;
-    CarnahanStarlingRadial  0;
+    CallbackRegistry    0;
+    CarnahanStarling    0;
     ChomiakInjector     0;
     Cloud<indexedParticle>  0;
     Cloud<kinematicParcel>  0;
@@ -208,7 +208,7 @@ DebugSwitches
     SIBS                0;
     SKA                 0;
     SLTS                0;
-    STARCDCoordinateRotation    0;
+    STARCDRotation      0;
     Schaeffer           0;
     SchillerNaumann     0;
     SinclairJackson     0;
@@ -781,7 +781,6 @@ DebugSwitches
     volVectorField      0;
     volVectorField::DimensionedInternalField 0;
     vtk                 0;
-    vtkPV3Foam          0;
     walkPatch           0;
     wall                0;
     wallHeatTransfer    0;
