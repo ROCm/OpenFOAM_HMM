@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< "\nCreating boundary-layer for U of thickness" << ybl.value() << " m"
-        << nl << endl;
+    Info<< "\nCreating boundary-layer for U of thickness "
+        << ybl.value() << " m" << nl << endl;
 
     // Modify velocity by applying a 1/7th power law boundary-layer
     // u/U0 = (y/ybl)^(1/7)
