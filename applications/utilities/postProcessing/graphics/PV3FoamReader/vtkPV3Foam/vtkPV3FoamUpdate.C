@@ -50,14 +50,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
         Info<< "<beg> Foam::vtkPV3Foam::updateFoamMesh" << endl;
     }
 
-    if
-    (
-        !reader_->GetCacheMesh()
-#ifdef PV3FOAM_TIMESELECTION
-        // This is only useful if the times are individually selectable
-     || reader_->GetTimeSelection()->GetArraySetting(0)
-#endif
-    )
+    if (!reader_->GetCacheMesh())
     {
         delete meshPtr_;
         meshPtr_ = NULL;

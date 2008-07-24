@@ -172,38 +172,6 @@ void Foam::vtkPV3Foam::resetCounters()
 }
 
 
-void Foam::vtkPV3Foam::initializeTime()
-{
-#ifdef PV3FOAM_TIMESELECTION
-    Time& runTime = dbPtr_();
-
-    // Get times list
-    instantList times = runTime.times();
-
-    vtkDataArraySelection* arraySelection = reader_->GetTimeSelection();
-
-    // only execute this if there is a mismatch between
-    // the times available according to FOAM and according to VTK
-    int nArrays = arraySelection->GetNumberOfArrays();
-
-    if (nArrays && nArrays == times.size() - 1)
-    {
-        return;
-    }
-
-    // "constant" is implicit - skip it
-    // All the time selections are enabled by default
-    for (label timeI = 1; timeI < times.size(); ++timeI)
-    {
-        arraySelection->AddArray
-        (
-            times[timeI].name().c_str()
-        );
-    }
-#endif /* PV3FOAM_TIMESELECTION */
-}
-
-
 bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
 {
     if (debug)
@@ -301,7 +269,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
     if (debug)
     {
-        Info << "selections(";
+        Info<< "selections(";
     }
 
     forAll (selections, elemI)
@@ -322,7 +290,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
             if (debug)
             {
-                Info << " " << selections[nElem];
+                Info<< " " << selections[nElem];
             }
 
             ++nElem;
@@ -331,7 +299,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
     if (debug)
     {
-        Info << " )" << endl;
+        Info<< " )" << endl;
     }
 
     selections.setSize(nElem);
@@ -351,7 +319,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
     if (debug)
     {
-        Info << "selections(";
+        Info<< "selections(";
     }
 
     for
@@ -377,7 +345,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
             if (debug)
             {
-                Info << " " << selections[nElem];
+                Info<< " " << selections[nElem];
             }
 
             ++nElem;
@@ -386,7 +354,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
     if (debug)
     {
-        Info << " )" << endl;
+        Info<< " )" << endl;
     }
 
 
@@ -569,8 +537,6 @@ void Foam::vtkPV3Foam::UpdateInformation()
     // Clear current region list/array
     reader_->GetRegionSelection()->RemoveAllArrays();
 
-    initializeTime();
-
     // Update region array
     updateInformationInternalMesh();
 
@@ -693,16 +659,13 @@ void Foam::vtkPV3Foam::Update
             << GetNumberOfDataSets(output, selectInfoPointSets_) << nl;
 
         // traverse blocks:
-
-        int nBlocks = output->GetNumberOfBlocks();
-        Info << "nBlocks = " << nBlocks << endl;
-
+        cout<< "nBlocks = " << output->GetNumberOfBlocks() << "\n";
         cout<< "done Update\n";
         output_->Print(cout);
         cout<< " has " << output_->GetNumberOfBlocks() << " blocks\n";
         output_->GetInformation()->Print(cout);
 
-        cout <<"ShouldIReleaseData :" << output_->ShouldIReleaseData() << "\n";
+        cout<<"ShouldIReleaseData :" << output_->ShouldIReleaseData() << "\n";
     }
 }
 
@@ -710,71 +673,13 @@ void Foam::vtkPV3Foam::Update
 double* Foam::vtkPV3Foam::timeSteps(int& nTimeSteps)
 {
     int nTimes = 0;
-    double* ts = NULL;
+    double* tsteps = NULL;
 
     if (dbPtr_.valid())
     {
         Time& runTime = dbPtr_();
-
         instantList times = runTime.times();
 
-#ifdef PV3FOAM_TIMESELECTION
-        List<bool> selected = List<bool>(times.size(), false);
-
-        vtkDataArraySelection* arraySelection = reader_->GetTimeSelection();
-        const label nSelectedTimes = arraySelection->GetNumberOfArrays();
-
-        for (int i = 0; i < nSelectedTimes; ++i)
-        {
-            // always skip "constant" time
-            const int timeI = i + 1;
-            if
-            (
-                arraySelection->GetArraySetting(i)
-             && timeI < times.size()
-            )
-            {
-                if (debug > 1)
-                {
-                    Info<<"timeSelection["
-                        << i
-                        <<"] = "
-                        << arraySelection->GetArraySetting(i)
-                            << " is "
-                        << arraySelection->GetArrayName(i) << endl;
-                }
-                selected[timeI] = true;
-                ++nTimes;
-            }
-        }
-
-        if (debug > 1)
-        {
-            Info<< "selected " << nTimes << " times ";
-            Info<< "found " << times.size() << " times: (";
-            forAll(times, timeI)
-            {
-                Info<< " " << times[timeI].value();
-            }
-            Info<< " )" << endl;
-        }
-
-        if (nTimes)
-        {
-            ts = new double[nTimes];
-            int stepI = 0;
-
-            forAll(selected, selectI)
-            {
-                if (selected[selectI])
-                {
-                    ts[stepI] = times[selectI].value();
-                    stepI++;
-                }
-            }
-        }
-
-#else /* PV3FOAM_TIMESELECTION */
         // always skip "constant" time, unless there are no other times
         nTimes = times.size();
         label timeI = 0;
@@ -787,26 +692,25 @@ double* Foam::vtkPV3Foam::timeSteps(int& nTimeSteps)
 
         if (nTimes)
         {
-            ts = new double[nTimes];
+            tsteps = new double[nTimes];
             for (label stepI = 0; stepI < nTimes; ++stepI, ++timeI)
             {
-                ts[stepI] = times[timeI].value();
+                tsteps[stepI] = times[timeI].value();
             }
         }
-#endif /* PV3FOAM_TIMESELECTION */
     }
     else
     {
         if (debug)
         {
-            Info<< "no valid dbPtr:" <<endl;
+            cout<< "no valid dbPtr:\n";
         }
     }
 
-    // return vector length via the parameter
+    // vector length returned via the parameter
     nTimeSteps = nTimes;
 
-    return ts;
+    return tsteps;
 }
 
 

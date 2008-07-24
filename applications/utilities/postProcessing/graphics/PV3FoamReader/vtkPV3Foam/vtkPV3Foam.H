@@ -287,9 +287,6 @@ private:
         //- Reset data counters
         void resetCounters();
 
-        //- Get all the available times and select the latestTime
-        void initializeTime();
-
         // Update information helper functions
 
             //- Update the regions selected in the GUI
