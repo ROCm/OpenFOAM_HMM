@@ -1,6 +1,7 @@
 volScalarField rUA = 1.0/UEqn().A();
 U = rUA*UEqn().H();
 UEqn.clear();
+
 phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
 bool closedVolume = adjustPhi(phi, U, p);
 phi -= fvc::interpolate(rho*gh*rUA)*fvc::snGrad(rho)*mesh.magSf();
@@ -46,6 +47,7 @@ if (closedVolume)
 {
     p += (initialMass - fvc::domainIntegrate(thermo->psi()*p))
         /fvc::domainIntegrate(thermo->psi());
+    pd == p - (rho*gh + pRef);
 }
 
 rho = thermo->rho();
