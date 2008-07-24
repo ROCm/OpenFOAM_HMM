@@ -1,0 +1,63 @@
+// Min cell size used in tolerances when inserting points for
+// boundary conforming.
+// Also used to as the grid spacing usind in insertGrid.
+minCellSize  0.05;
+
+// Feature angle used to inser feature points
+// 0 = all features, 180 = no features
+featureAngle 45;
+
+// Maximum quadrant angle allowed at a concave corner before
+// additional "mitering" lines are added
+maxQuadAngle 110;
+
+// Should the mesh be square-dominated or of unbiased hexagons
+squares      yes;
+
+// Near-wall region where cells are aligned with the wall specified as a number
+// of cell layers
+nearWallAlignedDist 3;
+
+// Chose if the cell orientation should relax during the iterations
+//  or remain fixed to the x-y directions
+relaxOrientation    yes;
+
+// Insert near-boundary point mirror or point-pairs
+insertSurfaceNearestPointPairs yes;
+
+// Mirror near-boundary points rather than insert point-pairs
+mirrorPoints   no;
+
+// Insert point-pairs vor dual-cell vertices very near the surface
+insertSurfaceNearPointPairs yes;
+
+// Choose if to randomise the initial grid created by insertGrid.
+randomiseInitialGrid yes;
+
+// Perturbation fraction, 1 = cell-size.
+randomPurturbation   0.1;
+
+// Number of relaxation iterations.
+nIterations      1000;
+
+// Relaxation factor at the start of the iteration sequence.
+// 0.5 is a sensible maximum and < 0.2 converges better.
+relaxationFactorStart 1.0;
+
+// Relaxation factor at the end of the iteration sequence.
+// Should be <= relaxationFactorStart
+relaxationFactorEnd   0;
+
+writeInitialTriangulation no;
+writeFeatureTriangulation yes;
+writeNearestTriangulation no;
+writeInsertedPointPairs   no;
+writeFinalTriangulation   yes;
+
+// Maximum number of iterations used in boundaryConform.
+maxBoundaryConformingIter 5;
+
+minEdgeLenCoeff           0.5;
+maxNotchLenCoeff          0.3;
+minNearPointDistCoeff     0.25;
+ppDistCoeff               0.05;

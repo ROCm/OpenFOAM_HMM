@@ -108,15 +108,6 @@ public:
             //  using the given feature angle in deg
             labelList extractFeatures2D(const scalar featAngle) const;
 
-            //- Extract feature edges/points(3D)
-            //  using the given feature angle in deg
-            void extractFeatures3D
-            (
-                const scalar featAngle,
-                labelList& featPoints,
-                labelListList& featPointFeatEdges
-            ) const;
-
             //- Returns inside, outside or mixed (= close to surface)
             indexedOctree<Foam::treeDataTriSurface>::volumeType insideOutside
             (

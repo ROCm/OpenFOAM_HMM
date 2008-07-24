@@ -160,7 +160,7 @@ void Foam::CV3D::calcDualMesh
 		    verticesOnFace.append(cc->cellIndex());
 		}
             } while (++cc != ccStart);
-    
+
             verticesOnFace.shrink();
 
             face newDualFace(verticesOnFace);
@@ -208,7 +208,7 @@ void Foam::CV3D::calcDualMesh
                 {
                     dcOwn = dcA;
                 }
-                
+
                 // find which patch this face is on;  Hardcoded for now.
                 label patchIndex = 0;
 
@@ -228,8 +228,10 @@ void Foam::CV3D::calcDualMesh
                 {
                     dcOwn = dcB;
                     dcNei = dcA;
-    
+
                     // reverse face order to correctly orientate normal
+                    // unsure if CGAL always circulates consistently,
+                    // needs to be more rigorous
                     reverse(newDualFace);
                 }
 
@@ -249,9 +251,9 @@ void Foam::CV3D::calcDualMesh
     faces.setSize(nInternalFaces);
 
     owner.setSize(nInternalFaces);
-   
+
     neighbour.setSize(nInternalFaces);
- 
+
     // ~~~~~~~~ sort owner, reordinging neighbour and faces to match ~~~~~~~~~~~
     // two stage sort for upper triangular order:  sort by owner first, then for
     // each block of owners sort by neighbour
@@ -273,7 +275,7 @@ void Foam::CV3D::calcDualMesh
         {
             copyOwner[sI] = owner[sortingIndices[sI]];
         }
-        
+
         owner = copyOwner;
     }
 
@@ -284,7 +286,7 @@ void Foam::CV3D::calcDualMesh
         {
             copyNeighbour[sI] = neighbour[sortingIndices[sI]];
         }
-        
+
         neighbour = copyNeighbour;
     }
 
@@ -295,12 +297,12 @@ void Foam::CV3D::calcDualMesh
         {
             copyFaces[sI] = faces[sortingIndices[sI]];
         }
-        
+
         faces = copyFaces;
     }
 
     // Stage 2
-    
+
     sortingIndices = -1;
 
     DynamicList<label> ownerCellJumps;
@@ -353,7 +355,7 @@ void Foam::CV3D::calcDualMesh
         {
             copyOwner[sI] = owner[sortingIndices[sI]];
         }
-        
+
         owner = copyOwner;
     }
 
@@ -364,7 +366,7 @@ void Foam::CV3D::calcDualMesh
         {
             copyNeighbour[sI] = neighbour[sortingIndices[sI]];
         }
-        
+
         neighbour = copyNeighbour;
     }
 
@@ -375,7 +377,7 @@ void Foam::CV3D::calcDualMesh
         {
             copyFaces[sI] = faces[sortingIndices[sI]];
         }
-        
+
         faces = copyFaces;
     }
 
@@ -401,13 +403,13 @@ void Foam::CV3D::calcDualMesh
     faces.setSize(nInternalFaces + nBoundaryFaces);
 
     owner.setSize(nInternalFaces + nBoundaryFaces);
-    
+
     forAll (patchFaces, p)
     {
         forAll (patchFaces[p], f)
         {
             faces[dualFacei] = patchFaces[p][f];
-    
+
             owner[dualFacei] = patchOwners[p][f];
 
             dualFacei++;
