@@ -22,8 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    blockMesh
+
 Description
     A multi-block mesh generator.
+
+    Uses the block mesh description found in
+    @a constant/polyMesh/blockMeshDict
+    (or @a constant/\<region\>/polyMesh/blockMeshDict).
+
+Usage
+
+    - blockMesh [OPTION]
+
+    @param -blockTopology \n
+    Write the topology as a set of edges in OBJ format.
+
+    @param -region \<name\> \n
+    Specify an alternative mesh region.
+
+    @param -dict \<dictionary\> \n
+    Specify an alternative dictionary for the block mesh description.
 
 \*---------------------------------------------------------------------------*/
 
@@ -74,9 +94,6 @@ int main(int argc, char *argv[])
         polyMeshDir = polyMesh::meshSubDir;
     }
 
-
-    Info<< nl << "Reading block mesh description dictionary" << endl;
-
     word dictName("blockMeshDict");
     fileName dictPath(runTime.constant()/polyMeshDir);
 
@@ -87,6 +104,8 @@ int main(int argc, char *argv[])
         dictName = userDict.name();
         dictPath = userDict.path();
     }
+
+    Info<< nl << "Reading block mesh description dictionary" << endl;
 
     IOobject meshDescriptionIOobject
     (
@@ -107,7 +126,6 @@ int main(int argc, char *argv[])
     }
 
     IOdictionary meshDescription(meshDescriptionIOobject);
-
 
     Info<< nl << "Creating block mesh" << endl;
 
