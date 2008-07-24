@@ -69,7 +69,7 @@ Foam::label Foam::metisDecomp::decompose
 
     // Method of decomposition
     // recursive: multi-level recursive bisection (default)
-    // k-way: multi-level k-way 
+    // k-way: multi-level k-way
     word method("k-way");
 
     // decomposition options. 0 = use defaults
@@ -88,15 +88,12 @@ Foam::label Foam::metisDecomp::decompose
     // Check for user supplied weights and decomp options
     if (decompositionDict_.found("metisCoeffs"))
     {
-        dictionary metisDecompCoeffs
-        (
-            decompositionDict_.subDict("metisCoeffs")
-        );
+        const dictionary& metisCoeffs =
+            decompositionDict_.subDict("metisCoeffs");
+        word weightsFile;
 
-        if (metisDecompCoeffs.found("method"))
+        if (metisCoeffs.readIfPresent("method", method))
         {
-            metisDecompCoeffs.lookup("method") >> method;
-
             if (method != "recursive" && method != "k-way")
             {
                 FatalErrorIn("metisDecomp::decompose()")
@@ -106,14 +103,12 @@ Foam::label Foam::metisDecomp::decompose
                     << exit(FatalError);
             }
 
-            Info<< "metisDecomp : Using Metis options     " << options
-                << endl << endl;
+            Info<< "metisDecomp : Using Metis method     " << method
+                << nl << endl;
         }
 
-        if (metisDecompCoeffs.found("options"))
+        if (metisCoeffs.readIfPresent("options", options))
         {
-            metisDecompCoeffs.lookup("options") >> options;
-
             if (options.size() != 5)
             {
                 FatalErrorIn("metisDecomp::decompose()")
@@ -124,12 +119,11 @@ Foam::label Foam::metisDecomp::decompose
             }
 
             Info<< "metisDecomp : Using Metis options     " << options
-                << endl << endl;
+                << nl << endl;
         }
 
-        if (metisDecompCoeffs.found("processorWeights"))
+        if (metisCoeffs.readIfPresent("processorWeights", processorWeights))
         {
-            metisDecompCoeffs.lookup("processorWeights") >> processorWeights;
             processorWeights /= sum(processorWeights);
 
             if (processorWeights.size() != nProcessors_)
@@ -142,20 +136,15 @@ Foam::label Foam::metisDecomp::decompose
             }
         }
 
-        if (metisDecompCoeffs.found("cellWeightsFile"))
+        if (metisCoeffs.readIfPresent("cellWeightsFile", weightsFile))
         {
             Info<< "metisDecomp : Using cell-based weights." << endl;
-
-            word cellWeightsFile
-            (
-                metisDecompCoeffs.lookup("cellWeightsFile")
-            );
 
             IOList<int> cellIOWeights
             (
                 IOobject
                 (
-                    cellWeightsFile,
+                    weightsFile,
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -174,20 +163,15 @@ Foam::label Foam::metisDecomp::decompose
         }
 
         //- faceWeights disabled. Only makes sense for cellCells from mesh.
-        //if (metisDecompCoeffs.found("faceWeightsFile"))
+        //if (metisCoeffs.readIfPresent("faceWeightsFile", weightsFile))
         //{
         //    Info<< "metisDecomp : Using face-based weights." << endl;
-        //
-        //    word faceWeightsFile
-        //    (
-        //        metisDecompCoeffs.lookup("faceWeightsFile")
-        //    );
         //
         //    IOList<int> weights
         //    (
         //        IOobject
         //        (
-        //            faceWeightsFile,
+        //            weightsFile,
         //            mesh_.time().timeName(),
         //            mesh_,
         //            IOobject::MUST_READ,
@@ -366,7 +350,7 @@ Foam::labelList Foam::metisDecomp::decompose(const pointField& points)
     // number of internal faces
     label nInternalFaces = 2*mesh_.nInternalFaces();
 
-    // Check the boundary for coupled patches and add to the number of 
+    // Check the boundary for coupled patches and add to the number of
     // internal faces
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 

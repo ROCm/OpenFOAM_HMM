@@ -27,18 +27,18 @@ Class
 
 Description
     Given a displacement moves the mesh by scaling the displacement back
-    until there are no more mesh errors. Holds displacement field
-    (read upon construction since need boundary conditions) and scaling factor
-    and optional patch number on which to scale back displacement.
+    until there are no more mesh errors.
 
-    E.g.
+    Holds displacement field (read upon construction since need boundary
+    conditions) and scaling factor and optional patch number on which to
+    scale back displacement.
 
     E.g.
     @verbatim
         // Construct iterative mesh mover.
         motionSmoother meshMover(mesh, labelList(1, patchI));
 
-        // Set wanted displacement:
+        // Set desired displacement:
         meshMover.displacement() = ..
 
         for (label iter = 0; iter < maxIter; iter++)
@@ -49,19 +49,20 @@ Description
                 return true;
             }
         }
-    @envverbatim
+    @endverbatim
 
+Note
+    Shared points (parallel): a processor can have points which are part of
+    pp on another processor but have no pp itself (i.e. it has points
+    and/or edges but no faces of pp). Hence we have to be careful when e.g.
+    synchronising displacements that the value from the processor which has
+    faces of pp get priority. This is currently handled in setDisplacement
+    by resetting the internal displacement to zero before doing anything
+    else. The combine operator used will give preference to non-zero
+    values.
 
-    Note: shared points (parallel). A processor can have points which are
-    part of pp on another processor but have no pp itself (i.e. it has points
-    and/or edges but no faces of pp). Hence we have to be careful when
-    e.g. synchronising displacements that the value from the processor which
-    has faces of pp get priority. This is currently handled in setDisplacement
-    by resetting the internal displacement to zero before doing anything else.
-    The combine operator used will give preference to non-zero values.
-
-    Note: various routines take baffles. These are sets of boundary faces
-    that are treated as a single internal face. This is a hack used to apply
+    Various routines take baffles. These are sets of boundary faces that
+    are treated as a single internal face. This is a hack used to apply
     movement to internal faces.
 
 SourceFiles
@@ -420,7 +421,7 @@ public:
                 labelHashSet& wrongFaces
             );
 
-            //- Check (subset of mesh including baffles) with mesh settings 
+            //- Check (subset of mesh including baffles) with mesh settings
             //  in dict. Collects incorrect faces in set. Returns true if one
             //  or more faces in error. Parallel ok.
             static bool checkMesh

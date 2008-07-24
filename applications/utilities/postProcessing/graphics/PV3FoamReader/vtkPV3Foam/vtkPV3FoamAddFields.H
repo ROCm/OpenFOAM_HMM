@@ -64,7 +64,7 @@ Foam::label Foam::vtkPV3Foam::addFields
         {
             if (debug)
             {
-                Info<<"add region " << GeoField::typeName
+                Info<<"    addField to GUI " << GeoField::typeName
                     << ":" << fields[fieldI] << endl;
             }
 

@@ -46,10 +46,7 @@ Foam::autoPtr<Foam::chemistryReader> Foam::chemistryReader::New
     word chemistryReaderTypeName("chemkinReader");
 
     // otherwise use the specified reader
-    if (thermoDict.found("chemistryReader"))
-    {
-        thermoDict.lookup("chemistryReader") >> chemistryReaderTypeName;
-    }
+    thermoDict.readIfPresent("chemistryReader", chemistryReaderTypeName);
 
     Info<< "Selecting chemistryReader " << chemistryReaderTypeName << endl;
 

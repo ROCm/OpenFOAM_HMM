@@ -501,7 +501,7 @@ Foam::scalar Foam::octreeDataFaceList::calcSign
 (
     const label index,
     const point& sample,
-    point&
+    vector&
 ) const
 {
     label faceI = faceLabels_[index];

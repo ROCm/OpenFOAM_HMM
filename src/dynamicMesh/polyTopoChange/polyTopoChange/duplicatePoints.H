@@ -103,10 +103,10 @@ public:
         // Topology changes
 
             //- Play commands into polyTopoChange to duplicate points. Gets
-            //  structure with regions per point.
+            //  localPointRegion structure which is per non-manifold point
+            //  the regions per point.
             void setRefinement
             (
-                const labelList& nonManifPoints,
                 const localPointRegion& regionSide,
                 polyTopoChange&
             );

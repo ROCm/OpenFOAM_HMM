@@ -47,7 +47,7 @@ Description
         D = symm(grad(U));
         nuSgs = ck*sqrt(k)*delta
         nuEff = nuSgs + nu
-    @endverabtim
+    @endverbatim
 
 SourceFiles
     dynOneEqEddy.C

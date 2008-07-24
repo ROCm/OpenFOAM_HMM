@@ -1,29 +1,34 @@
-    surfaceScalarField muf = twoPhaseProperties.muf();
+surfaceScalarField muEff
+(
+    "muEff",
+    twoPhaseProperties.muf()
+  + fvc::interpolate(rho*turbulence->nut())
+);
 
-    fvVectorMatrix UEqn
+fvVectorMatrix UEqn
+(
+    fvm::ddt(rho, U)
+  + fvm::div(rhoPhi, U)
+  - fvm::laplacian(muEff, U)
+  - (fvc::grad(U) & fvc::grad(muEff))
+//- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
+);
+
+UEqn.relax();
+
+if (momentumPredictor)
+{
+    solve
     (
-        fvm::ddt(rho, U)
-      + fvm::div(rhoPhi, U)
-      - fvm::laplacian(muf, U)
-      - (fvc::grad(U) & fvc::grad(muf))
-    //- fvc::div(muf*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
-    );
-
-    UEqn.relax();
-
-    if (momentumPredictor)
-    {
-        solve
+        UEqn
+      ==
+        fvc::reconstruct
         (
-            UEqn
-         ==
-            fvc::reconstruct
             (
-                (
-                    fvc::interpolate(interface.sigmaK())*fvc::snGrad(gamma)
-                  - ghf*fvc::snGrad(rho)
-                  - fvc::snGrad(pd)
-                ) * mesh.magSf()
-            )
-        );
-    }
+                fvc::interpolate(interface.sigmaK())*fvc::snGrad(gamma)
+              - ghf*fvc::snGrad(rho)
+              - fvc::snGrad(pd)
+            )*mesh.magSf()
+        )
+    );
+}

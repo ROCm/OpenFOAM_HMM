@@ -48,7 +48,7 @@ void Foam::vtkPV3Foam::addPatchMesh
 {
     if (debug)
     {
-        Info<< "Adding patch: " << p.name() << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::addPatchMesh - " << p.name() << endl;
     }
 
     // Convert Foam mesh vertices to VTK
@@ -84,6 +84,11 @@ void Foam::vtkPV3Foam::addPatchMesh
 
     vtkmesh->SetPolys(vtkcells);
     vtkcells->Delete();
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::addPatchMesh - " << p.name() << endl;
+    }
 }
 
 

@@ -45,6 +45,7 @@ void Foam::vtkPV3Foam::convertVolFields
 (
     const fvMesh& mesh,
     const volPointInterpolation& pInterp,
+    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
     const IOobjectList& objects,
     vtkDataArraySelection *fieldSelection,
     vtkMultiBlockDataSet* output
@@ -153,7 +154,6 @@ void Foam::vtkPV3Foam::convertVolFields
                 tf.boundaryField()[patchId]
             );
 
-
             if
             (
                 isType<emptyFvPatchField<Type> >(ptf)
@@ -195,8 +195,7 @@ void Foam::vtkPV3Foam::convertVolFields
             convertPatchPointField
             (
                 tf.name(),
-                tptf().boundaryField()[patchId]
-                    .patchInternalField()(),
+                ppInterpList[patchId].faceToPointInterpolate(ptf)(),
                 output,
                 selectInfoPatches_,
                 selectedRegionDatasetIds_[regionId]

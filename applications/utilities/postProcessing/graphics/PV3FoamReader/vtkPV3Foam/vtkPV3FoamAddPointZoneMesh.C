@@ -46,7 +46,7 @@ void Foam::vtkPV3Foam::addPointZoneMesh
 {
     if (debug)
     {
-        Info<< "entered add point zone mesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::addPointZoneMesh" << endl;
     }
 
     const pointField& meshPoints = mesh.points();
@@ -61,6 +61,11 @@ void Foam::vtkPV3Foam::addPointZoneMesh
 
     vtkmesh->SetPoints(vtkpoints);
     vtkpoints->Delete();
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::addPointZoneMesh" << endl;
+    }
 }
 
 

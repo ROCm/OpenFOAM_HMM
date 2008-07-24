@@ -66,7 +66,7 @@ void Foam::vtkPV3Foam::convertPointFields
 
                 if (debug)
                 {
-                    Info<< "converting Foam point field: " << fieldName
+                    Info<< "Foam::vtkPV3Foam::convertPointFields : " << fieldName
                         << endl;
                 }
 

@@ -31,7 +31,7 @@
 #
 #------------------------------------------------------------------------------
 
-if [ $# = 0 ]
+if [ $# -eq 0 ]
 then
    echo "Error: architecture type expected, exiting"
    echo

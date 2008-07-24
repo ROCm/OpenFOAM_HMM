@@ -745,17 +745,17 @@ void Foam::meshReaders::STARCD::readBoundary(const fileName& inputName)
             iter != boundaryRegion_.end()
         )
         {
-            if (iter().found("BoundaryType"))
-            {
-                iter().lookup("BoundaryType") >> patchTypes_[patchI];
-                foundType = true;
-            }
+            foundType = iter().readIfPresent
+            (
+                "BoundaryType",
+                patchTypes_[patchI]
+            );
 
-            if (iter().found("Label"))
-            {
-                iter().lookup("Label") >> patchNames_[patchI];
-                foundName = true;
-            }
+            foundName = iter().readIfPresent
+            (
+                "Label",
+                patchNames_[patchI]
+            );
         }
 
         // consistent names, in long form and in lowercase

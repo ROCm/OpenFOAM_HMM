@@ -26,22 +26,24 @@ Class
     Foam::pairPotentials::azizChen
 
 Description
+    Foam::pairPotentials::azizChen
 
     From:
-
-    @article{MA_Aziz_Chen,
-    author = {R. A. Aziz and H. H. Chen},
-    collaboration = {},
-    title = {An accurate intermolecular potential for argon},
-    publisher = {AIP},
-    year = {1977},
-    journal = {The Journal of Chemical Physics},
-    volume = {67},
-    number = {12},
-    pages = {5719-5726},
-    url = {http://link.aip.org/link/?JCP/67/5719/1},
-    doi = {10.1063/1.434827}
-    }
+    @verbatim
+        @article{MA_Aziz_Chen,
+        author = {R. A. Aziz and H. H. Chen},
+        collaboration = {},
+        title = {An accurate intermolecular potential for argon},
+        publisher = {AIP},
+        year = {1977},
+        journal = {The Journal of Chemical Physics},
+        volume = {67},
+        number = {12},
+        pages = {5719-5726},
+        url = {http://link.aip.org/link/?JCP/67/5719/1},
+        doi = {10.1063/1.434827}
+        }
+    @endverbatim
 
 SourceFiles
     azizChen.C

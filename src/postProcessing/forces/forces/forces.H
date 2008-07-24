@@ -33,7 +33,7 @@ Description
     moments.
 
     Member function forces::write() calls calcForcesMoment() and writes the
-    forces and moments into the file <time dir>/forces.dat
+    forces and moments into the file \<timeDir\>/forces.dat
 
 SourceFiles
     forces.C

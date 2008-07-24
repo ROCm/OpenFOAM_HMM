@@ -31,21 +31,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class T>
-inline void Foam::lduMatrix::solver::readControl
-(
-    const dictionary& controlDict,
-    T& control,
-    const word& controlName
-)
-{
-    if (controlDict.found(controlName))
-    {
-        controlDict.lookup(controlName) >> control;
-    }
-}
-
-
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::lduMatrix::H(const Field<Type>& psi) const
 {

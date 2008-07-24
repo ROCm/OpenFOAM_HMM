@@ -24,7 +24,7 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wmakeAll
+#     wcleanAll
 #
 # Description
 #     script that searches all the directories below the current for the
@@ -32,19 +32,14 @@
 #
 #------------------------------------------------------------------------------
 
-if [ ! -d bin -o ! -d src ]
-then
-   echo $0: not in the project top level directory !
+[ -d bin -a -d src ] || {
+   echo "${0##*/}: not in the project top level directory"
    exit 1
-fi
-
+}
 
 for dir in lib applications/bin
 do
-   if [ -d $dir ]
-   then
-      rm -rf $dir/*
-   fi
+   [ -d $dir ] && rm -rf $dir/*
 done
 
 ( cd tutorials && ./Allclean )

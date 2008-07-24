@@ -98,9 +98,6 @@ private:
         //  Used to split cyclic into halves.
         scalar featureCos_;
 
-        //- Index of largest cell face
-        label maxI_;
-
         //- Type of transformation - rotational or translational
         transformType transform_;
 
@@ -113,7 +110,11 @@ private:
 
     // Private member functions
 
+        //- Find amongst selected faces the one with the largest area
+        static label findMaxArea(const pointField&, const faceList&);
+
         void calcTransforms();
+
 
         // Face ordering
 
@@ -169,16 +170,16 @@ protected:
     // Protected Member functions
 
         //- Initialise the calculation of the patch geometry
-        void initGeometry();
+        virtual void initGeometry();
 
         //- Calculate the patch geometry
-        void calcGeometry();
+        virtual void calcGeometry();
 
         //- Initialise the patches for moving points
-        void initMovePoints(const pointField&);
+        virtual void initMovePoints(const pointField&);
 
         //- Correct patches after moving points
-        void movePoints(const pointField&);
+        virtual void movePoints(const pointField&);
 
         //- Initialise the update of the patch topology
         virtual void initUpdateMesh();
