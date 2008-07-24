@@ -1,0 +1,1321 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4.2                                 |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Exec   : CV2DMesher stls/shapeForHenry3.stl
+Date   : Dec 03 2007
+Time   : 11:37:48
+Host   : lime
+PID    : 31407
+Case   : /export/lime/data-04/sws02hs/OpenFOAM/sws02hs-1.4.2/applications/utilities/mesh/CV2DMesher/testCase
+nProcs : 1
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Read surface with 560 triangles from file "stls/shapeForHenry3.stl"
+
+insertBoundingBox: creating bounding mesh
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.000191825 1.0973)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.00177297 1.10204)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.00204425 1.10177)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.298024 0.998024)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.299605 1.00277)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.302767 0.999605)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.401802 0.6975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.397058 0.700919)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.398198 0.6975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.401802 0.7025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.598964 0.6975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.6025 0.698964)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.601036 0.6975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.598964 0.7025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.700319 0.996783)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.703092 1.00094)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.696783 1.00032)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.2975 0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.3025 0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.2975 -0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.496908 0.799057)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.503217 0.799681)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.500319 0.796783)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.499681 0.803217)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.3975 -0.298048)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.401287 -0.302899)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.3975 -0.301952)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.4025 -0.298048)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.3975 -0.10205)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.401519 -0.0971466)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.3975 -0.0979505)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.4025 -0.10205)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.0979 -0.997743)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.09852 -1.0027)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.1028 -0.998723)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.400947 -0.903696)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.398056 -0.896717)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.403525 -0.89854)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.396475 -0.90146)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.8 0.896464)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.796464 0.9)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.803536 0.9)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.19708 -0.501847)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.19829 -0.496996)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (1.20198 -0.502828)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.304325 -1.09694)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.304945 -1.1019)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (0.299853 -1.0947)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.400822 -0.897286)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.401802 -0.902189)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.397286 -0.900822)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.19802 -0.698024)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.1996 -0.702767)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.20277 -0.699605)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.29714 -0.400675)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.30188 -0.402256)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.30068 -0.39714)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.20286 -0.699325)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.197744 -0.698117)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.8975 0.193964)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.906036 0.1975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.8975 0.206036)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.9025 0.193964)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.8975 -0.0984549)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.900264 -0.102927)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.8975 -0.101545)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.9025 -0.0984549)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.1 0.00353553)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.09646 2.63418e-10)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.10354 2.37076e-09)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.2972 0.3)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.30168 0.302236)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.30168 0.297764)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.2975 0.795955)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.3025 0.795955)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.29526 0.800427)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.10224 0.698323)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.09776 0.698323)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.1 0.697205)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-1.1 0.702795)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.3025 0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.2975 -0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.2975 0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.3025 -0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.6975 0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.7025 -0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.7025 0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.6975 -0.0025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.2975 -0.3975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.3025 -0.4025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.2975 -0.4025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.3025 -0.3975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.7025 -0.3975)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.6975 -0.4025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.7025 -0.4025)
+--> FOAM Warning : 
+    From function Foam::CV2D::insertPoint
+    in file CV2DI.H at line 41
+    Failed to insert point (-0.6975 -0.3975)
+insertInitialGrid: 1315 vertices inserted
+insertSurfaceNearestPointPairs: 212 point-pairs inserted
+insertSurfaceNearPointPairs: 11 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 1
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (2.89014 0.78354) total distance = 7.61088
+insertSurfaceNearestPointPairs: 223 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 2
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.108812 -0.231855) total distance = 7.4027
+insertSurfaceNearestPointPairs: 229 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 13 point-pairs inserted
+
+
+Relaxation iteration 3
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.247725 -0.449736) total distance = 7.26963
+insertSurfaceNearestPointPairs: 231 point-pairs inserted
+insertSurfaceNearPointPairs: 5 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 4
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.134377 -0.0935877) total distance = 7.4251
+insertSurfaceNearestPointPairs: 231 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 5
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.110406 -0.228968) total distance = 7.57408
+insertSurfaceNearestPointPairs: 230 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 6
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0485375 -0.660286) total distance = 7.52728
+insertSurfaceNearestPointPairs: 233 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 7
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.252906 0.105498) total distance = 7.52463
+insertSurfaceNearestPointPairs: 233 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 8
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0758164 -0.726607) total distance = 7.64528
+insertSurfaceNearestPointPairs: 234 point-pairs inserted
+insertSurfaceNearPointPairs: 11 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 9
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.213362 -0.129185) total distance = 7.61866
+insertSurfaceNearestPointPairs: 232 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 10
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.440259 -0.430492) total distance = 7.7418
+insertSurfaceNearestPointPairs: 238 point-pairs inserted
+insertSurfaceNearPointPairs: 5 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 11
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.411898 -0.581924) total distance = 7.73844
+insertSurfaceNearestPointPairs: 237 point-pairs inserted
+insertSurfaceNearPointPairs: 11 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 12
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0630369 -0.00825584) total distance = 7.68011
+insertSurfaceNearestPointPairs: 237 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 13 point-pairs inserted
+
+
+Relaxation iteration 13
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.1366 -0.158069) total distance = 7.67214
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 14
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.377926 -0.0520413) total distance = 7.56419
+insertSurfaceNearestPointPairs: 240 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 15
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.211228 0.196134) total distance = 7.71822
+insertSurfaceNearestPointPairs: 240 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 16
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0532789 -0.0999046) total distance = 7.7814
+insertSurfaceNearestPointPairs: 240 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 17
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.556325 0.100787) total distance = 7.67206
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 18
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0492046 -0.0784256) total distance = 7.8337
+insertSurfaceNearestPointPairs: 239 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 19
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.21993 0.150954) total distance = 7.81204
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 20
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.10205 0.123758) total distance = 7.73021
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 21
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0211728 -0.298294) total distance = 7.69486
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 13 point-pairs inserted
+
+
+Relaxation iteration 22
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.00819006 -0.0782556) total distance = 7.48045
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 23
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.402796 0.083532) total distance = 7.58416
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 24
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.237746 -0.12133) total distance = 7.64687
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 25
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.161654 0.209397) total distance = 7.52597
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 26
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.325378 -0.515369) total distance = 7.30888
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 27
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.560406 0.0999224) total distance = 7.33967
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 28
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.304641 -0.250258) total distance = 7.32515
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 29
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0818833 0.383304) total distance = 7.29301
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 30
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.282546 -0.274439) total distance = 7.19572
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 31
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.00281616 0.00622841) total distance = 7.19022
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 32
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.000635342 -0.139918) total distance = 7.18641
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 33
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0731962 0.683368) total distance = 7.1544
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 34
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.131458 -0.0653615) total distance = 7.22714
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 35
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.575913 0.518925) total distance = 7.06244
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 36
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.270698 -0.397583) total distance = 7.06104
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 37
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0541794 -0.0699848) total distance = 6.9313
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 38
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.624865 -0.24133) total distance = 6.87568
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 39
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.208146 0.292991) total distance = 7.00129
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 40
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.193067 0.176701) total distance = 6.9361
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 12 point-pairs inserted
+
+
+Relaxation iteration 41
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.122678 -0.331647) total distance = 6.91992
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 42
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.127907 0.20663) total distance = 6.74018
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 43
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0370317 -0.0994773) total distance = 6.76521
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 44
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.121153 -0.236416) total distance = 6.66601
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 45
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0301368 0.289873) total distance = 6.67628
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 46
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0658578 -0.280833) total distance = 6.57287
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 47
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.109897 -0.261003) total distance = 6.63833
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 48
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.234859 0.376153) total distance = 6.59694
+insertSurfaceNearestPointPairs: 241 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 11 point-pairs inserted
+
+
+Relaxation iteration 49
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.136184 -0.157168) total distance = 6.61574
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 50
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.110038 -0.145537) total distance = 6.54274
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 51
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.410849 0.148433) total distance = 6.60652
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 52
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.130395 0.285986) total distance = 6.34343
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 53
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.132244 0.010014) total distance = 6.3648
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 54
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.01647 0.0129211) total distance = 6.29684
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 55
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.100453 0.0487191) total distance = 6.29885
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 56
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.309149 0.18878) total distance = 6.29022
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 12 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 57
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.187035 0.254661) total distance = 6.11306
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 58
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0848404 0.0540496) total distance = 6.12811
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 59
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.331489 0.0353803) total distance = 6.0849
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 60
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.153028 -0.0592366) total distance = 5.93683
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 61
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.115351 0.0477746) total distance = 5.85881
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 10 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 62
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0548825 0.195611) total distance = 5.95435
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 10 point-pairs inserted
+
+
+Relaxation iteration 63
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.215714 -0.112891) total distance = 5.89878
+insertSurfaceNearestPointPairs: 242 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 64
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.16407 0.174922) total distance = 5.86762
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 65
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0414719 0.209462) total distance = 5.69091
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 66
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.129741 0.133188) total distance = 5.6552
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 67
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.228982 0.0844263) total distance = 5.49366
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 68
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.127739 -0.0654772) total distance = 5.356
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 69
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.551343 -0.348259) total distance = 5.42979
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 70
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.136773 0.162138) total distance = 5.39026
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 71
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0182624 -0.00783802) total distance = 5.36268
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 72
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0934274 0.121227) total distance = 5.2826
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 73
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.338935 -0.0253542) total distance = 5.16296
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 74
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0909008 0.100217) total distance = 5.08037
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 75
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.174989 0.0457873) total distance = 5.0308
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 76
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0444765 -0.281877) total distance = 4.80951
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 77
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.14722 0.217544) total distance = 4.86967
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 78
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.249497 -0.0272881) total distance = 4.80147
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 79
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.202848 0.114058) total distance = 4.72826
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 80
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.16869 -0.0818054) total distance = 4.45743
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 81
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0365714 -0.012582) total distance = 4.34283
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 82
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0892363 -0.0552955) total distance = 4.29586
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 83
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0655333 0.0250308) total distance = 4.04317
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 84
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.178539 0.121695) total distance = 4.05289
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 85
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0943584 0.0145164) total distance = 3.99222
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 86
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.121516 -0.155048) total distance = 3.80426
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 87
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.00766381 0.299779) total distance = 3.67042
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 88
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0395924 -0.210345) total distance = 3.54066
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 6 point-pairs inserted
+
+
+Relaxation iteration 89
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0233336 0.0785363) total distance = 3.22833
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 9 point-pairs inserted
+
+
+Relaxation iteration 90
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0990734 -0.159984) total distance = 3.19974
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 91
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.00450882 0.0503467) total distance = 3.05627
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 92
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.08492 -0.118871) total distance = 2.88589
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 9 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 93
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.057753 0.0372847) total distance = 2.92658
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 94
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.103185 -0.0358135) total distance = 2.63219
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 95
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0275371 -0.108538) total distance = 2.4684
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 8 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 96
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (-0.0352063 0.0325545) total distance = 2.22634
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 6 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 97
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0251991 -0.0305686) total distance = 2.13286
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 98
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0181491 -0.0613643) total distance = 1.92426
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 8 point-pairs inserted
+
+
+Relaxation iteration 99
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.00230911 0.0592602) total distance = 1.71293
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+
+Relaxation iteration 100
+~~~~~~~~~~~~~~~~~~~~~~~~
+newPointsFromVertices: 
+Total displacement = (0.0652484 -0.0822144) total distance = 1.53528
+insertSurfaceNearestPointPairs: 243 point-pairs inserted
+insertSurfaceNearPointPairs: 7 point-pairs inserted
+BC iteration 1: 7 point-pairs inserted
+
+Writing dual faces to "allFaces.obj"
+
+Writing dual faces to "faces.obj"
+
+Writing triangles to "allTriangles.obj"
+
+Writing triangles to "triangles.obj"
+
+Writing patch to be used with extrudeMesh to file "patch.pch"
+
+End
+

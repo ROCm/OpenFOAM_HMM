@@ -1,0 +1,86 @@
+solid defaultPatch
+  facet normal -0 0 1
+    outer loop
+       vertex 0.3 0.8 0.4
+       vertex 0.3 0.3 0.4
+       vertex 0.8 0.8 0.4
+    endloop
+  endfacet
+  facet normal 0 0 1
+    outer loop
+       vertex 0.3 0.3 0.4
+       vertex 0.8 0.3 0.4
+       vertex 0.8 0.8 0.4
+    endloop
+  endfacet
+  facet normal -0 -0 -1
+    outer loop
+       vertex 0.5 0.5 0.1
+       vertex 0.5 0.1 0.1
+       vertex 0.1 0.5 0.1
+    endloop
+  endfacet
+  facet normal 0 0 -1
+    outer loop
+       vertex 0.5 0.1 0.1
+       vertex 0.1 0.1 0.1
+       vertex 0.1 0.5 0.1
+    endloop
+  endfacet
+  facet normal 0.707107 0 -0.707107
+    outer loop
+       vertex 0.8 0.8 0.4
+       vertex 0.8 0.3 0.4
+       vertex 0.5 0.5 0.1
+    endloop
+  endfacet
+  facet normal 0.707107 0 -0.707107
+    outer loop
+       vertex 0.8 0.3 0.4
+       vertex 0.5 0.1 0.1
+       vertex 0.5 0.5 0.1
+    endloop
+  endfacet
+  facet normal 0 0.707107 -0.707107
+    outer loop
+       vertex 0.1 0.5 0.1
+       vertex 0.3 0.8 0.4
+       vertex 0.5 0.5 0.1
+    endloop
+  endfacet
+  facet normal 0 0.707107 -0.707107
+    outer loop
+       vertex 0.3 0.8 0.4
+       vertex 0.8 0.8 0.4
+       vertex 0.5 0.5 0.1
+    endloop
+  endfacet
+  facet normal -0.83205 0 0.5547
+    outer loop
+       vertex 0.1 0.5 0.1
+       vertex 0.1 0.1 0.1
+       vertex 0.3 0.8 0.4
+    endloop
+  endfacet
+  facet normal -0.83205 0 0.5547
+    outer loop
+       vertex 0.1 0.1 0.1
+       vertex 0.3 0.3 0.4
+       vertex 0.3 0.8 0.4
+    endloop
+  endfacet
+  facet normal 0 -0.83205 0.5547
+    outer loop
+       vertex 0.3 0.3 0.4
+       vertex 0.1 0.1 0.1
+       vertex 0.8 0.3 0.4
+    endloop
+  endfacet
+  facet normal 0 -0.83205 0.5547
+    outer loop
+       vertex 0.1 0.1 0.1
+       vertex 0.5 0.1 0.1
+       vertex 0.8 0.3 0.4
+    endloop
+  endfacet
+endsolid defaultPatch

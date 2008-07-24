@@ -1,0 +1,46 @@
+// The FOAM Project // File: fvSolution
+/*
+-------------------------------------------------------------------------------
+ =========         | dictionary
+ \\      /         | 
+  \\    /          | Name:   fvSolution
+   \\  /           | Family: FoamX configuration file
+    \\/            | 
+    F ield         | FOAM version: 2.3
+    O peration     | Product of Nabla Ltd.
+    A and          | 
+    M anipulation  | Email: Enquiries@Nabla.co.uk
+-------------------------------------------------------------------------------
+*/
+// FoamX Case Dictionary.
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "/home/storm/chris/foam/chris2.3/run/tutorials/icoFoam";
+    case            "cavity";
+    instance        "system";
+    local           "";
+
+    class           dictionary;
+    object          fvSolution;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p               ICCG 1e-06 0;
+    U               BICCG 1e-05 0;
+}
+
+PISO
+{
+    nCorrectors     2;
+    nNonOrthogonalCorrectors 0;
+}
+
+
+// ************************************************************************* //
