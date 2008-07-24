@@ -128,7 +128,7 @@ public:
 
     // Member Functions
 
-        // fundamaental properties
+        // Fundamaental properties
 
             //- Heat capacity at constant pressure [J/(kmol K)]
             inline scalar cp(const scalar T) const;
@@ -152,10 +152,8 @@ public:
 
     // Member operators
 
-        inline eConstThermo& operator=
-        (
-            const eConstThermo&
-        );
+        inline void operator+=(const hConstThermo&);
+        inline void operator-=(const hConstThermo&);
 
 
     // Friend operators
