@@ -32,13 +32,13 @@ void Foam::moleculeCloud::calculateExternalForce()
 {
     iterator mol(this->begin());
 
-    Info<< "Warning! Includes dissipation term!" << endl;
+    // Info<< "Warning! Includes dissipation term!" << endl;
 
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
         mol().A() += gravity_;
 
-        mol().A() += -1.0 * mol().U() /mol().mass();
+        // mol().A() += -1.0 * mol().U() /mol().mass();
     }
 }
 
