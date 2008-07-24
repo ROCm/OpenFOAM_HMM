@@ -52,10 +52,7 @@ Foam::patchIdentifier::patchIdentifier
     name_(name),
     boundaryIndex_(index)
 {
-    if (dict.found("physicalType"))
-    {
-        dict.lookup("physicalType") >> physicalType_;
-    }
+    dict.readIfPresent("physicalType", physicalType_);
 }
 
 

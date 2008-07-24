@@ -147,7 +147,7 @@ public:
             wordList components(const char delimiter='/') const;
 
             //- Return a component of the path
-            word component(const size_t, const char delimiter='/') const;
+            word component(const size_type, const char delimiter='/') const;
 
 
         // Interogation

@@ -188,10 +188,7 @@ Foam::sampledSurface::sampledSurface
     CfPtr_(NULL),
     area_(-1)
 {
-    if (dict.found("name"))
-    {
-        dict.lookup("name") >> name_;
-    }
+    dict.readIfPresent("name", name_);
 }
 
 

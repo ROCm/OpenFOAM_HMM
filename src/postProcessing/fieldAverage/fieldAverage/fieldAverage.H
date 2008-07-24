@@ -66,7 +66,7 @@ Description
 
     Information regarding the number of averaging steps, and total averaging
     time are written on a (base) per-field basis to the
-    fieldAveragingProperties dictionary, located in <time>/uniform
+    fieldAveragingProperties dictionary, located in \<time\>/uniform
 
 SourceFiles
     fieldAverage.C

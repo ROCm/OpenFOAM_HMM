@@ -37,13 +37,11 @@
 #         foamExec -v <foamVersion> <foamCommand> ... -parallel
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-
 usage() {
    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
    cat<<USAGE
 
-usage: $Script [OPTION] <application> ...
+usage: ${0##*/} [OPTION] <application> ...
 
 options:
   -v ver        specify OpenFOAM version

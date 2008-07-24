@@ -90,52 +90,6 @@
             <BooleanDomain name="bool"/>
         </IntVectorProperty>
 
-<!-- Time step edit box -->
-<!-- OLESEN
-<IntVectorProperty
-            name="TimeStepRangeInfo"
-            command="GetTimeStepRange"
-            information_only="1">
-            <SimpleIntInformationHelper/>
-        </IntVectorProperty>
-        <IntVectorProperty
-            name="TimeStep"
-            command="SetTimeStep"
-            number_of_elements="1"
-            animateable="1"
-            default_values="0"
-            information_property="TimestepValues">
-            <IntRangeDomain
-                name="range">
-                <RequiredProperties>
-                    <Property name="TimeStepRangeInfo"
-                              function="Range"/>
-                </RequiredProperties>
-            </IntRangeDomain>
-        </IntVectorProperty>
--->
-
-<!-- Time step limits boxes -->
-<!--        <IntVectorProperty
-            name="TimeStepLimitsInfo"
-            command="GetTimeStepLimits"
-            information_only="1">
-            <SimpleIntInformationHelper/>
-        </IntVectorProperty>
-        <IntVectorProperty
-            name="TimeStepLimits"
-            command="SetTimeStepLimits"
-            number_of_elements="2"
-            default_values="2 5" >
-            <IntRangeDomain
-                name="range">
-                <RequiredProperties>
-                    <Property name="TimeStepLimitsInfo"
-                              function="Range"/>
-                </RequiredProperties>
-            </IntRangeDomain>
-        </IntVectorProperty>-->
-
 <!-- Available regions array -->
         <StringVectorProperty
             name="RegionArrayInfo"
@@ -233,7 +187,9 @@
         </StringVectorProperty>
 
 <!-- Available times array -->
-<!--        <StringVectorProperty
+<!-- PV3FOAM_TIMESELECTION must be defined when compiling vtkPV3Foam
+     might discard this in the future
+        <StringVectorProperty
             name="TimeArrayInfo"
             information_only="1">
             <ArraySelectionInformationHelper
@@ -255,6 +211,8 @@
                 </RequiredProperties>
             </ArraySelectionDomain>
         </StringVectorProperty>
+
+PV3FOAM_TIMESELECTION
 -->
 
     </SourceProxy>

@@ -28,6 +28,9 @@ Class
 Description
     Abstract base-class for Time/database function objects.
 
+See Also
+    Foam::OutputFilterFunctionObject
+
 SourceFiles
     functionObject.C
 

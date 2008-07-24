@@ -101,14 +101,12 @@ void Foam::Time::setControls()
 {
     // default is to resume calculation from "latestTime"
     word startFrom("latestTime");
-    if (controlDict_.found("startFrom"))
-    {
-        controlDict_.lookup("startFrom") >> startFrom;
-    }
+
+    controlDict_.readIfPresent("startFrom", startFrom);
 
     if (startFrom == "startTime")
     {
-        startTime_ = readScalar(controlDict_.lookup("startTime"));
+        controlDict_.lookup("startTime") >> startTime_;
     }
     else
     {
@@ -158,7 +156,7 @@ void Foam::Time::setControls()
             FatalErrorIn("Time::setControls()")
                 << "Start time is not the same for all processors" << nl
                 << "processor " << Pstream::myProcNo() << " has startTime "
-                << startTime_ << exit(FatalError); 
+                << startTime_ << exit(FatalError);
         }
     }
 
@@ -176,15 +174,13 @@ void Foam::Time::setControls()
         )
     );
 
-    if (timeDict.found("deltaT"))
+    if (timeDict.readIfPresent("deltaT", deltaTSave_))
     {
-        deltaTSave_ = readScalar(timeDict.lookup("deltaT"));
         deltaT0_ = deltaTSave_;
     }
 
-    if (timeDict.found("index"))
+    if (timeDict.readIfPresent("index", startTimeIndex_))
     {
-        timeDict.lookup("index") >> startTimeIndex_;
         timeIndex_ = startTimeIndex_;
     }
 }
@@ -503,20 +499,9 @@ void Foam::Time::setTime(const instant& inst, const label newIndex)
         )
     );
 
-    if (timeDict.found("deltaT"))
-    {
-        deltaT_ = readScalar(timeDict.lookup("deltaT"));
-    }
-
-    if (timeDict.found("deltaT0"))
-    {
-        deltaT0_ = readScalar(timeDict.lookup("deltaT0"));
-    }
-
-    if (timeDict.found("index"))
-    {
-        timeIndex_ = readLabel(timeDict.lookup("index"));
-    }
+    timeDict.readIfPresent("deltaT", deltaT_);
+    timeDict.readIfPresent("deltaT0", deltaT0_);
+    timeDict.readIfPresent("index", timeIndex_);
 }
 
 
@@ -647,7 +632,7 @@ Foam::Time& Foam::Time::operator++()
         case wcRunTime:
         case wcAdjustableRunTime:
         {
-            label outputTimeIndex = 
+            label outputTimeIndex =
                 label(((value() - startTime_) + 0.5*deltaT_)/writeInterval_);
 
             if (outputTimeIndex > outputTimeIndex_)

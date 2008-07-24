@@ -175,9 +175,7 @@ Foam::layerParameters::layerParameters
     featureAngle_(readScalar(dict.lookup("featureAngle"))),
     concaveAngle_
     (
-        dict.found("concaveAngle")
-      ? readScalar(dict.lookup("concaveAngle"))
-      : defaultConcaveAngle
+        dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
     ),
     nGrow_(readLabel(dict.lookup("nGrow"))),
     nSmoothSurfaceNormals_
@@ -242,9 +240,7 @@ Foam::layerParameters::layerParameters
     featureAngle_(readScalar(dict.lookup("featureAngle"))),
     concaveAngle_
     (
-        dict.found("concaveAngle")
-      ? readScalar(dict.lookup("concaveAngle"))
-      : defaultConcaveAngle
+        dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
     ),
     nGrow_(readLabel(dict.lookup("nGrow"))),
     nSmoothSurfaceNormals_

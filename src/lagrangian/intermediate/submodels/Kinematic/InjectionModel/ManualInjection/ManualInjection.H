@@ -27,15 +27,17 @@ Class
 
 Description
     Manual injection
+
     - User specifies
       - Total mass to inject
-      - Parcel positions in file <positionsFile>
+      - Parcel positions in file @c positionsFile
       - Initial parcel velocity
     - Parcel diameters obtained by PDF model
     - All parcels introduced at the start of the calculation
 
-    NOTE - not suitable for 2-D slab/wedge simulations unless the positions
-           file describes 2-D data!
+Note
+    Not suitable for 2-D slab/wedge simulations unless the @c positionsFile
+    describes 2-D data.
 
 SourceFiles
     ManualInjection.C

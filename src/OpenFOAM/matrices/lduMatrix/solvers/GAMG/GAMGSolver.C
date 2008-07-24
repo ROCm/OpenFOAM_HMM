@@ -154,13 +154,12 @@ void Foam::GAMGSolver::readControls()
 {
     lduMatrix::solver::readControls();
 
-    readControl(controlDict_, cacheAgglomeration_, "cacheAgglomeration");
-
-    readControl(controlDict_, nPreSweeps_, "nPreSweeps");
-    readControl(controlDict_, nPostSweeps_, "nPostSweeps");
-    readControl(controlDict_, nFinestSweeps_, "nFinestSweeps");
-    readControl(controlDict_, scaleCorrection_, "scaleCorrection");
-    readControl(controlDict_, directSolveCoarsest_, "directSolveCoarsest");
+    controlDict_.readIfPresent("cacheAgglomeration", cacheAgglomeration_);
+    controlDict_.readIfPresent("nPreSweeps", nPreSweeps_);
+    controlDict_.readIfPresent("nPostSweeps", nPostSweeps_);
+    controlDict_.readIfPresent("nFinestSweeps", nFinestSweeps_);
+    controlDict_.readIfPresent("scaleCorrection", scaleCorrection_);
+    controlDict_.readIfPresent("directSolveCoarsest", directSolveCoarsest_);
 }
 
 

@@ -84,23 +84,11 @@ Foam::engineTime::engineTime
     stroke_(dimensionedScalar("stroke", dimLength, 0)),
     clearance_(dimensionedScalar("clearance", dimLength, 0))
 {
-    // the geometric parameters are not strictly required for Time
-    if (dict_.found("conRodLength"))
-    {
-        dict_.lookup("conRodLength") >> conRodLength_;
-    }
-    if (dict_.found("bore"))
-    {
-        dict_.lookup("bore") >> bore_;
-    }
-    if (dict_.found("stroke"))
-    {
-        dict_.lookup("stroke") >> stroke_;
-    }
-    if (dict_.found("clearance"))
-    {
-        dict_.lookup("clearance") >> clearance_;
-    }
+    // geometric parameters are not strictly required for Time
+    dict_.readIfPresent("conRodLength", conRodLength_);
+    dict_.readIfPresent("bore", bore_);
+    dict_.readIfPresent("stroke", stroke_);
+    dict_.readIfPresent("clearance", clearance_);
 
     timeAdjustment();
 

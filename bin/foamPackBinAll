@@ -27,7 +27,7 @@
 #     foamPackBinAll [outputDir]
 #
 # Description
-#     Packs and compresses all binary version of foam for release
+#     Packs and compresses all binary versions of foam for release
 #
 #------------------------------------------------------------------------------
 packDir=$WM_PROJECT-$WM_PROJECT_VERSION
@@ -38,6 +38,7 @@ then
    exit 1
 fi
 
+# obtain arch types from lib/
 for bin in $packDir/lib/*
 do
    foamPackBin ${bin##*/} $@

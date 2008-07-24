@@ -30,13 +30,11 @@
 #     Create a new standard OpenFOAM source file
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: $Script <type> {args}
+usage: ${0##*/} <type> {args}
 
 * create a new standard OpenFOAM source file
 

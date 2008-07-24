@@ -26,7 +26,7 @@ InClass
     Foam::memberFunctionSelectionTables
 
 Description
-    Macros to enable the easy insertion into member function selection tables.
+    Macros for easy insertion into member function selection tables
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,14 +47,13 @@ Description
                                                                               \
     /* Add the thisType constructor function to the table */                  \
     baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType>  \
-    add##thisType##memberFunction##argNames##MemberFunctionTo##baseType##Table_(#lookup)
+    add_##lookup##_##thisType##memberFunction##argNames##MemberFunctionTo##baseType##Table_(#lookup)
 
 #define addTemplateToMemberFunctionSelectionTable\
 (baseType,thisType,Targ,memberFunction,argNames)                              \
                                                                               \
     /* Add the thisType constructor function to the table */                  \
-    baseType::add##memberFunction##argNames##MemberFunctionToTable            \
-    <thisType<Targ> >                                                         \
+    baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
     add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Table_
 
 

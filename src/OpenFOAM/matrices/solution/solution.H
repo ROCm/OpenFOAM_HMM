@@ -97,7 +97,7 @@ public:
             const dictionary& solverDict(const word& name) const;
 
             //- Return the stream of solver parameters for the given field
-            //  (Provided for backward compatibility only)
+            //  @deprecated Backward compatibility only - should use solverDict
             ITstream& solver(const word& name) const;
 
 

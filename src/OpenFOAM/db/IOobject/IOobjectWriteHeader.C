@@ -49,7 +49,6 @@ bool Foam::IOobject::writeHeader(Ostream& os) const
         << "    format      " << os.format() << ";\n"
         << "    class       " << type() << ";\n";
 
-    // outdent for visibility and more space
     if (note().size())
     {
         os  << "    note        " << note() << ";\n";
