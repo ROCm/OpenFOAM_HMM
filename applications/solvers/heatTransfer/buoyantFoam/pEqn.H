@@ -55,5 +55,6 @@ if (closedVolume)
 {
     p += (initialMass - fvc::domainIntegrate(thermo->psi()*p))
         /fvc::domainIntegrate(thermo->psi());
+    pd == p - (rho*gh + pRef);
     rho = thermo->rho();
 }
