@@ -40,7 +40,7 @@ void Foam::vtkPV3Foam::updateInformationFields
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationFields" << endl;
     }
 
     // preserve the currently selected values
@@ -94,6 +94,11 @@ void Foam::vtkPV3Foam::updateInformationFields
         arraySelection,
         selectedEntries
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationFields" << endl;
+    }
 }
 
 

@@ -77,11 +77,21 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Reading block mesh description dictionary" << endl;
 
+    word dictName("blockMeshDict");
+    fileName dictPath(runTime.constant()/polyMeshDir);
+
+    if (args.options().found("dict"))
+    {
+        fileName userDict(args.options()["dict"]);
+
+        dictName = userDict.name();
+        dictPath = userDict.path();
+    }
+
     IOobject meshDescriptionIOobject
     (
-        "blockMeshDict",
-        runTime.constant(),
-        polyMeshDir,
+        dictName,
+        dictPath,
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -91,12 +101,13 @@ int main(int argc, char *argv[])
     if (!meshDescriptionIOobject.headerOk())
     {
         FatalErrorIn(args.executable())
-            << "Cannot open mesh description file " << nl
-            << runTime.constant()/polyMeshDir/"blockMeshDict" << nl
+            << "Cannot open mesh description file: " << nl
+            << dictPath/dictName << nl
             << exit(FatalError);
     }
 
     IOdictionary meshDescription(meshDescriptionIOobject);
+
 
     Info<< nl << "Creating block mesh" << endl;
 

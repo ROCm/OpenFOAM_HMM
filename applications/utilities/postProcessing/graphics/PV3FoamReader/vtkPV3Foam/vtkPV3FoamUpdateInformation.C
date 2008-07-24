@@ -86,8 +86,7 @@ void Foam::vtkPV3Foam::updateInformationInternalMesh()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationInternalMesh"
-            << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationInternalMesh" << endl;
     }
 
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
@@ -101,6 +100,12 @@ void Foam::vtkPV3Foam::updateInformationInternalMesh()
     selectInfoVolume_ = arraySelection->GetNumberOfArrays();
     arraySelection->AddArray("internalMesh");
     selectInfoVolume_ += 1;
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationInternalMesh" << endl;
+    }
+
 }
 
 
@@ -108,8 +113,8 @@ void Foam::vtkPV3Foam::updateInformationLagrangian()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationLagrangian "
-            << "at timePath " << dbPtr_->timePath()/"lagrangian" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationLagrangian" << nl
+            << "    " << dbPtr_->timePath()/"lagrangian" << endl;
     }
 
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
@@ -144,11 +149,15 @@ void Foam::vtkPV3Foam::updateInformationLagrangian()
     {
         if (debug)
         {
-            Info<<"no clouds identified in "
-                << dbPtr_->timePath()/"lagrangian" << endl;
+            Info<<"no clouds identified in " <<nl
+                << "    " <<dbPtr_->timePath()/"lagrangian" << endl;
         }
     }
 
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationLagrangian" << endl;
+    }
 }
 
 
@@ -156,7 +165,7 @@ void Foam::vtkPV3Foam::updateInformationPatches()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationPatches" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationPatches" << endl;
     }
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
@@ -198,6 +207,10 @@ void Foam::vtkPV3Foam::updateInformationPatches()
     }
     selectInfoPatches_ += nPatches;
 
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationPatches" << endl;
+    }
 }
 
 
@@ -205,7 +218,7 @@ void Foam::vtkPV3Foam::updateInformationZones()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationZones" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationZones" << endl;
     }
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
@@ -301,6 +314,12 @@ void Foam::vtkPV3Foam::updateInformationZones()
             selectInfoPointZones_ += zones.size();
         }
     }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationZones" << endl;
+    }
+
 }
 
 
@@ -308,7 +327,7 @@ void Foam::vtkPV3Foam::updateInformationSets()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationSets" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationSets" << endl;
     }
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
@@ -346,6 +365,11 @@ void Foam::vtkPV3Foam::updateInformationSets()
         objects,
         " - pointSet"
     );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationSets" << endl;
+    }
 }
 
 
@@ -353,7 +377,7 @@ void Foam::vtkPV3Foam::updateInformationLagrangianFields()
 {
     if (debug)
     {
-        Info<< "entered Foam::vtkPV3Foam::updateInformationLagrangianFields"
+        Info<< "<beg> Foam::vtkPV3Foam::updateInformationLagrangianFields"
             << endl;
     }
 
@@ -415,8 +439,8 @@ void Foam::vtkPV3Foam::updateInformationLagrangianFields()
 
     if (debug)
     {
-        Info<< "lagrangian objects.size() = " << objects.size()
-            << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInformationLagrangianFields - "
+            << "lagrangian objects.size() = " << objects.size() << endl;
     }
 }
 

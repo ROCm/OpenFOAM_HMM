@@ -32,18 +32,14 @@
 #
 #------------------------------------------------------------------------------
 
-if [ ! -d bin -o ! -d src ]
-then
-   echo $0: not in the project top level directory !
+[ -d bin -a -d src ] || {
+   echo "${0##*/}: not in the project top level directory"
    exit 1
-fi
-
+}
 
 for dir in lib applications/bin
 do
-   if [ -d $dir ]
-      rm -rf $dir/*
-   fi
+   [ -d $dir ] && rm -rf $dir/*
 done
 
 ( cd tutorials && ./Allclean )

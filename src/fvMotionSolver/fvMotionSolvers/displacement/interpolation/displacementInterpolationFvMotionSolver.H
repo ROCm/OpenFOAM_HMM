@@ -35,7 +35,7 @@ Description
     - interpolates the displacement of all points based on the
       faceZone motion.
 
-    Tables are in the <verbatim>constant/tables</verbatim> directory.
+    Tables are in the @a constant/tables directory.
 
 Note
     could be a motionSolver - does not use any fvMesh structure.

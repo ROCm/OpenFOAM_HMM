@@ -34,25 +34,10 @@ License
 template<class OutputFilter>
 void Foam::OutputFilterFunctionObject<OutputFilter>::readDict()
 {
-    if (dict_.found("region"))
-    {
-        dict_.lookup("region") >> regionName_;
-    }
-
-    if (dict_.found("dictionary"))
-    {
-        dict_.lookup("dictionary") >> dictName_;
-    }
-
-    if (dict_.found("interval"))
-    {
-        dict_.lookup("interval") >> interval_;
-    }
-
-    if (dict_.found("enabled"))
-    {
-        dict_.lookup("enabled") >> execution_;
-    }
+    dict_.readIfPresent("region", regionName_);
+    dict_.readIfPresent("dictionary", dictName_);
+    dict_.readIfPresent("interval", interval_);
+    dict_.readIfPresent("enabled", execution_);
 }
 
 

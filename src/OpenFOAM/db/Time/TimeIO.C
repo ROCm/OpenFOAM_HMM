@@ -44,10 +44,8 @@ void Foam::Time::readDict()
         );
     }
 
-    if (controlDict_.found("writeInterval"))
+    if (controlDict_.readIfPresent("writeInterval", writeInterval_))
     {
-        controlDict_.lookup("writeInterval") >> writeInterval_;
-
         if (writeControl_ == wcTimeStep && label(writeInterval_) < 1)
         {
             FatalIOErrorIn("Time::readDict()", controlDict_)
@@ -60,10 +58,8 @@ void Foam::Time::readDict()
         controlDict_.lookup("writeFrequency") >> writeInterval_;
     }
 
-    if (controlDict_.found("purgeWrite"))
+    if (controlDict_.readIfPresent("purgeWrite", purgeWrite_))
     {
-        purgeWrite_ = readInt(controlDict_.lookup("purgeWrite"));
-
         if (purgeWrite_ < 0)
         {
             WarningIn("Time::readDict()")
@@ -106,10 +102,7 @@ void Foam::Time::readDict()
         }
     }
 
-    if (controlDict_.found("timePrecision"))
-    {
-        precision_ = readLabel(controlDict_.lookup("timePrecision"));
-    }
+    controlDict_.readIfPresent("timePrecision", precision_);
 
     // stopAt at 'endTime' or a specified value
     // if nothing is specified, the endTime is zero
@@ -119,18 +112,14 @@ void Foam::Time::readDict()
 
         if (stopAt_ == saEndTime)
         {
-            endTime_ = readScalar(controlDict_.lookup("endTime"));
+            controlDict_.lookup("endTime") >> endTime_;
         }
         else
         {
             endTime_ = GREAT;
         }
     }
-    else if (controlDict_.found("endTime"))
-    {
-        endTime_ = readScalar(controlDict_.lookup("endTime"));
-    }
-    else
+    else if (!controlDict_.readIfPresent("endTime", endTime_))
     {
         endTime_ = 0;
     }
@@ -175,10 +164,7 @@ void Foam::Time::readDict()
         );
     }
 
-    if (controlDict_.found("graphFormat"))
-    {
-        graphFormat_ = word(controlDict_.lookup("graphFormat"));
-    }
+    controlDict_.readIfPresent("graphFormat", graphFormat_);
 
     if (controlDict_.found("runTimeModifiable"))
     {

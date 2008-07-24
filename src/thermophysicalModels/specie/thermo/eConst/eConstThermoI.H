@@ -24,15 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Construct from components
-inline eConstThermo::eConstThermo
+inline Foam::eConstThermo::eConstThermo
 (
     const specieThermo& st,
     const scalar cv,
@@ -47,8 +41,11 @@ inline eConstThermo::eConstThermo
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct as named copy
-inline eConstThermo::eConstThermo(const word& name, const eConstThermo& ct)
+inline Foam::eConstThermo::eConstThermo
+(
+    const word& name,
+    const eConstThermo& ct
+)
 :
     specieThermo(name, ct),
     CV(ct.CV),
@@ -56,10 +53,9 @@ inline eConstThermo::eConstThermo(const word& name, const eConstThermo& ct)
 {}
 
 
-// Construct and return a clone
 template<class equationOfState>
-inline autoPtr<eConstThermo<equationOfState> > eConstThermo<equationOfState>::
-clone() const
+inline Foam::autoPtr<eConstThermo<equationOfState> >
+Foam::eConstThermo<equationOfState>::clone() const
 {
     return autoPtr<eConstThermo<equationOfState> >
     (
@@ -68,10 +64,9 @@ clone() const
 }
 
 
-// Selector from Istream
 template<class equationOfState>
-inline autoPtr<eConstThermo<equationOfState> > eConstThermo<equationOfState>::
-New(Istream& is)
+inline autoPtr<eConstThermo<equationOfState> >
+Foam::eConstThermo<equationOfState>::New(Istream& is)
 {
     return autoPtr<eConstThermo<equationOfState> >
     (
@@ -82,37 +77,40 @@ New(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Heat capacity at constant pressure [J/(kmol K)]
-inline scalar eConstThermo::cp(const scalar) const
+inline Foam::scalar Foam::eConstThermo::cp(const scalar) const
 {
     return CV*W() + RR;
 }
 
 
-//- Enthalpy [J/kmol]
-inline scalar eConstThermo::h(const scalar T) const
+inline Foam::scalar Foam::eConstThermo::h(const scalar T) const
 {
     return cp(T)*T + Hf*W();
 }
 
 
-//- Entropy [J/(kmol K)]
-inline scalar eConstThermo::s(const scalar T) const
+inline Foam::scalar Foam::eConstThermo::s(const scalar T) const
 {
     notImplemented("scalar eConstThermo::s(const scalar T) const");
     return T;
 }
 
 
-//- Temperature from Enthalpy given an initial temperature T0
-inline scalar eConstThermo::TH(const scalar h, const scalar T0) const
+inline Foam::scalar Foam::eConstThermo::TH
+(
+    const scalar h,
+    const scalar T0
+) const
 {
     return (h - Hf)/Cp(T0);
 }
 
 
-//- Temperature from internal energy given an initial temperature T0
-inline scalar eConstThermo::TE(const scalar e, const scalar) const
+inline Foam::scalar Foam::eConstThermo::TE
+(
+    const scalar e,
+    const scalar
+) const
 {
     return (e - Hf)/CV;
 }
@@ -120,7 +118,7 @@ inline scalar eConstThermo::TE(const scalar e, const scalar) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline  eConstThermo& eConstThermo::operator=
+inline Foam::eConstThermo& Foam::eConstThermo::operator=
 (
     const eConstThermo& ct
 )
@@ -136,7 +134,7 @@ inline  eConstThermo& eConstThermo::operator=
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline eConstThermo operator+
+inline Foam::eConstThermo Foam::operator+
 (
     const eConstThermo& ct1,
     const eConstThermo& ct2
@@ -153,7 +151,7 @@ inline eConstThermo operator+
 }
 
 
-inline eConstThermo operator-
+inline Foam::eConstThermo Foam::operator-
 (
     const eConstThermo& ct1,
     const eConstThermo& ct2
@@ -170,7 +168,7 @@ inline eConstThermo operator-
 }
 
 
-inline eConstThermo operator*
+inline Foam::eConstThermo Foam::operator*
 (
     const scalar s,
     const eConstThermo& ct
@@ -185,7 +183,7 @@ inline eConstThermo operator*
 }
 
 
-inline eConstThermo operator==
+inline Foam::eConstThermo Foam::operator==
 (
     const eConstThermo& ct1,
     const eConstThermo& ct2
@@ -194,9 +192,5 @@ inline eConstThermo operator==
     return ct2 - ct1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

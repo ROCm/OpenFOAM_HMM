@@ -34,6 +34,7 @@ Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
 (
     const objectRegistry& obr,
     const fileName& dictName,
+    const IOobject::readOption rOpt,
     const bool readFromFiles
 )
 :
@@ -44,7 +45,7 @@ Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
             dictName,
             obr.time().system(),
             obr,
-            IOobject::MUST_READ,
+            rOpt,
             IOobject::NO_WRITE
         )
     ),

@@ -41,7 +41,7 @@ Description
         Etemad, S., et al.,
         "Turbulent flow and heat transfer in a square-sectioned U bend"
         Progress in compuational fluid dynamics 6, 89-100. 2006.
-    @verbatim
+    @endverbatim
 
 SourceFiles
     LienCubicKELowRe.C

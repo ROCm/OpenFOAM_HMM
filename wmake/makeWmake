@@ -27,9 +27,12 @@
 #     makeWmake
 #
 # Description
-#     Script to build all the system specific parts of wmake
+#     Script to build all the system-specific parts of wmake
 #
 #------------------------------------------------------------------------------
+
+# run from this directory only
+cd ${0%/*} || exit 1
 
 ( cd src && make )
 

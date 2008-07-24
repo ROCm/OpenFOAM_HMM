@@ -2,7 +2,7 @@
 #
 #+TITLE:          *OpenFOAM release notes for version 1.5*
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                        10 July 2008
+#+DATE:                        14 July 2008
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil
 
@@ -30,11 +30,11 @@
 * C++ Compiler version
   + Released compiled with GCC 4.3.1, the latest version.
   + Built in support for the Intel C++ 10.? compiler (untested).
-  + The choice of the compiler is controlled by the setting of the $WM\_COMPILER
-    and $WM\_COMPILER\_ARCH environment variables in the OpenFOAM-1.5/etc/bashrc
+  + The choice of the compiler is controlled by the setting of the $WM_COMPILER
+    and $WM_COMPILER_ARCH environment variables in the OpenFOAM-1.5/etc/bashrc
     (or cshrc) file.
   + The location of the installation of the compiler is controlled by the
-    $WM\_COMPILER\_INST environment variable in the OpenFOAM-1.5/etc/settings.sh
+    $WM_COMPILER_INST environment variable in the OpenFOAM-1.5/etc/settings.sh
     (or settings.csh) file.
 
 * Developments to solvers (applications)
@@ -131,9 +131,9 @@
     cloud types, accommodating kinematic, thermodynamic and reacting
     applications, including coupling to the new radiation library. Sub-models
     are added at the relevant level of physics, e.g.:
-	- kinematic: injection, wall interaction, drag, dispersion;
-	- thermo: heat transfer;
-	- reacting: reacting composition, mass transfer, surface reactions.
+    - kinematic: injection, wall interaction, drag, dispersion;
+    - thermo: heat transfer;
+    - reacting: reacting composition, mass transfer, surface reactions.
   + New single rotating frame of reference (SRF) library for rotating flow
     applications, e.g. turbo-machinery.
   + New radiation library including the P1 model and associated Marshak boundary
