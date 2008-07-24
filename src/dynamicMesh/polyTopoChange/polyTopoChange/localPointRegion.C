@@ -43,14 +43,21 @@ class minEqOpFace
 {
 public:
 
-    void operator()( face& x, const face& y ) const
+    void operator()(face& x, const face& y) const
     {
-        forAll(x, i)
+        if (x.size() > 0)
         {
-            x[i] = min(x[i], y[i]);
+            label j = 0;
+            forAll(x, i)
+            {
+                x[i] = min(x[i], y[j]);
+
+                j = y.rcIndex(j);
+            }
         }
     };
 };
+
 
 // Dummy transform for faces. Used in synchronisation
 void transformList
@@ -120,7 +127,7 @@ void Foam::localPointRegion::countPointRegions
 
     forAllConstIter(Map<label>, candidateFace, iter)
     {
-        label faceI = iter();
+        label faceI = iter.key();
 
         if (!mesh.isInternalFace(faceI))
         {
@@ -174,6 +181,29 @@ void Foam::localPointRegion::countPointRegions
         }
     }
     minPointRegion.clear();
+
+    // Add internal faces that use any duplicated point. Can only have one
+    // region!
+    forAllConstIter(Map<label>, candidateFace, iter)
+    {
+        label faceI = iter.key();
+
+        if (mesh.isInternalFace(faceI))
+        {
+            const face& f = mesh.faces()[faceI];
+
+            forAll(f, fp)
+            {
+                if (meshPointMap_.found(f[fp]))
+                {
+                    label meshFaceMapI = meshFaceMap_.size();
+                    meshFaceMap_.insert(faceI, meshFaceMapI);
+                }
+            }
+        }
+    }
+
+
     // Transfer to member data
     pointRegions.shrink();
     pointRegions_.setSize(pointRegions.size());
@@ -285,7 +315,7 @@ void Foam::localPointRegion::calcPointRegions
     faceList minRegion(mesh.nFaces());
     forAllConstIter(Map<label>, candidateFace, iter)
     {
-        label faceI = iter();
+        label faceI = iter.key();
         const face& f = mesh.faces()[faceI];
 
         if (mesh.isInternalFace(faceI))
