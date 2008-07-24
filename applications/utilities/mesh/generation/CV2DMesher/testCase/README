@@ -1,0 +1,3 @@
+CV2DMesher stls/shapeForHenry4.stl
+
+extrudeMesh .. testCase 1 0.01 -surface patch.pch
