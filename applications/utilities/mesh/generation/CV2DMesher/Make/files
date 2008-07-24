@@ -11,4 +11,4 @@ insertBoundaryConformPointPairs.C
 CV2DIO.C
 CV2DMesher.C
 
-EXE = $(FOAM_USER_APPBIN)/CV2DMesher
+EXE = $(FOAM_APPBIN)/CV2DMesher
