@@ -52,7 +52,7 @@ defineTypeNameAndDebug(Foam::vtkPV3Foam, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-#include "vtkPV3FoamAddFields.H"
+#include "vtkPV3FoamAddToSelection.H"
 #include "vtkPV3FoamUpdateInformationFields.H"
 
 
@@ -233,13 +233,13 @@ void Foam::vtkPV3Foam::updateSelectedRegions()
 
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
 
-    const label nRegions = arraySelection->GetNumberOfArrays();
+    const label nSelect = arraySelection->GetNumberOfArrays();
 
-    selectedRegions_.setSize(nRegions);
-    selectedRegionDatasetIds_.setSize(nRegions);
+    selectedRegions_.setSize(nSelect);
+    selectedRegionDatasetIds_.setSize(nSelect);
 
     // Read the selected patches and add to the region list
-    for (int regionId=0; regionId < nRegions; ++regionId)
+    forAll (selectedRegions_, regionId)
     {
         selectedRegions_[regionId] = arraySelection->GetArraySetting(regionId);
         selectedRegionDatasetIds_[regionId] = -1;
@@ -269,7 +269,13 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
     if (debug)
     {
-        Info<< "selections(";
+        Info<< "available(";
+        forAll (selections, elemI)
+        {
+            Info<< " \"" << arraySelection->GetArrayName(elemI) << "\"";
+        }
+        Info<< " )\n"
+            << "selected(";
     }
 
     forAll (selections, elemI)
@@ -319,28 +325,40 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
     if (debug)
     {
-        Info<< "selections(";
+        Info<< "available(";
+        for
+        (
+            int elemI = selector.start();
+            elemI < selector.end();
+            ++elemI
+        )
+        {
+            Info<< " \"" << arraySelection->GetArrayName(elemI) << "\"";
+        }
+
+        Info<< " )\n"
+            << "selected(";
     }
 
     for
     (
-        int regionId = selector.start();
-        regionId < selector.end();
-        ++regionId
+        int elemI = selector.start();
+        elemI < selector.end();
+        ++elemI
     )
     {
-        if (arraySelection->GetArraySetting(regionId))
+        if (arraySelection->GetArraySetting(elemI))
         {
             if (firstWord)
             {
                 selections[nElem] = getFirstWord
                 (
-                    arraySelection->GetArrayName(regionId)
+                    arraySelection->GetArrayName(elemI)
                 );
             }
             else
             {
-                selections[nElem] = arraySelection->GetArrayName(regionId);
+                selections[nElem] = arraySelection->GetArrayName(elemI);
             }
 
             if (debug)
@@ -400,10 +418,7 @@ void Foam::vtkPV3Foam::setSelectedArrayEntries
                         << endl;
                 }
 
-                arraySelection->EnableArray
-                (
-                    arrayName.c_str()
-                );
+                arraySelection->EnableArray(arrayName.c_str());
                 break;
             }
         }
@@ -523,25 +538,37 @@ void Foam::vtkPV3Foam::UpdateInformation()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::UpdateInformation - "
-            << "TimeStep = " << reader_->GetTimeStep() << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::UpdateInformation"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "] TimeStep="
+            << reader_->GetTimeStep() << endl;
     }
 
     resetCounters();
 
-    // preserve the currently selected values
-    const stringList selectedEntries = getSelectedArrayEntries
-    (
-        reader_->GetRegionSelection()
-    );
+    vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+
+    stringList selectedEntries;
+    // enable 'internalMesh' on the first call
+    if (arraySelection->GetNumberOfArrays() == 0)
+    {
+        selectedEntries.setSize(1);
+        selectedEntries[0] = "internalMesh";
+    }
+    else
+    {
+        // preserve the currently selected values
+        selectedEntries = getSelectedArrayEntries
+        (
+            arraySelection
+        );
+    }
+
     // Clear current region list/array
-    reader_->GetRegionSelection()->RemoveAllArrays();
+    arraySelection->RemoveAllArrays();
 
     // Update region array
     updateInformationInternalMesh();
-
     updateInformationLagrangian();
-
     updateInformationPatches();
 
     if (reader_->GetIncludeSets())
@@ -554,10 +581,10 @@ void Foam::vtkPV3Foam::UpdateInformation()
         updateInformationZones();
     }
 
-    // Update region selection with the data just read in
+    // restore the currently enabled values
     setSelectedArrayEntries
     (
-        reader_->GetRegionSelection(),
+        arraySelection,
         selectedEntries
     );
 
@@ -610,9 +637,7 @@ void Foam::vtkPV3Foam::Update
 
     // Convert meshes
     convertMeshVolume(output);
-
     convertMeshLagrangian(output);
-
     convertMeshPatches(output);
 
     if (reader_->GetIncludeZones())
@@ -624,16 +649,14 @@ void Foam::vtkPV3Foam::Update
 
     if (reader_->GetIncludeSets())
     {
-        convertMeshCellSet(output);
-        convertMeshFaceSet(output);
-        convertMeshPointSet(output);
+        convertMeshCellSets(output);
+        convertMeshFaceSets(output);
+        convertMeshPointSets(output);
     }
 
     // Update fields
     updateVolFields(output);
-
     updatePointFields(output);
-
     updateLagrangianFields(output);
 
     if (debug)
@@ -724,8 +747,7 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         Info<< "<beg> Foam::vtkPV3Foam::addPatchNames" << endl;
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+    const polyBoundaryMesh& pbMesh = meshPtr_->boundaryMesh();
 
     const selectionInfo& selector = selectInfoPatches_;
 

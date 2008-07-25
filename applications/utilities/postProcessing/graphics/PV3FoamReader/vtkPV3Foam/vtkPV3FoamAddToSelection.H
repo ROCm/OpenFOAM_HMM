@@ -22,13 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    vtkPV3Foam
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamAddFields_H
-#define vtkPV3FoamAddFields_H
+#ifndef vtkPV3FoamAddToSelection_H
+#define vtkPV3FoamAddToSelection_H
 
 // FOAM includes
 #include "SortableList.H"
@@ -38,48 +35,48 @@ InClass
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class GeoField>
-Foam::label Foam::vtkPV3Foam::addFields
+template<class Type>
+Foam::label Foam::vtkPV3Foam::addToSelection
 (
-    vtkDataArraySelection *fieldSelection,
-    const IOobjectList& objects,
+    vtkDataArraySelection *arraySelection,
+    const IOobjectList& objectLst,
     const string& suffix
 )
 {
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    IOobjectList objects(objectLst.lookupClass(Type::typeName));
 
-    SortableList<word> fields(fieldObjects.size());
+    SortableList<word> objectNames(objects.size());
 
     label count = 0;
-    forAllConstIter(IOobjectList, fieldObjects, iter)
+    forAllConstIter(IOobjectList, objects, iter)
     {
-        fields[count++] = iter()->name();
+        objectNames[count++] = iter()->name();
     }
 
     if (count)
     {
-        fields.sort();
+        objectNames.sort();
 
-        forAll(fields, fieldI)
+        forAll (objectNames, objI)
         {
             if (debug)
             {
-                Info<<"    addField to GUI " << GeoField::typeName
-                    << ":" << fields[fieldI] << endl;
+                Info<<"    addToSelection<" << Type::typeName << "> to GUI "
+                    << ":" << objectNames[objI] << endl;
             }
 
             if (suffix.size())
             {
-                fieldSelection->AddArray
+                arraySelection->AddArray
                 (
-                    (fields[fieldI] + suffix).c_str()
+                    (objectNames[objI] + suffix).c_str()
                 );
             }
             else
             {
-                fieldSelection->AddArray
+                arraySelection->AddArray
                 (
-                    fields[fieldI].c_str()
+                    objectNames[objI].c_str()
                 );
             }
         }

@@ -29,18 +29,16 @@ Description
     Provides a reader interface for OpenFOAM to VTK interaction.
 
 SourceFiles
-    interpolatePointToCell.C
-    interpolatePointToCell.H
     vtkPV3Foam.C
     vtkPV3Foam.H
-    vtkPV3FoamAddFaceSetMesh.C
-    vtkPV3FoamAddFaceZoneMesh.C
-    vtkPV3FoamAddFields.H
+    vtkPV3FoamI.H
     vtkPV3FoamAddLagrangianMesh.C
     vtkPV3FoamAddPatchMesh.C
-    vtkPV3FoamAddPointSetMesh.C
-    vtkPV3FoamAddPointZoneMesh.C
+    vtkPV3FoamAddSetMesh.C
+    vtkPV3FoamAddToSelection.H
     vtkPV3FoamAddVolumeMesh.C
+    vtkPV3FoamAddZoneMesh.C
+    vtkPV3FoamConvertFaceField.H
     vtkPV3FoamConvertLagrangianFields.H
     vtkPV3FoamConvertMesh.C
     vtkPV3FoamConvertPatchFaceField.H
@@ -52,7 +50,7 @@ SourceFiles
     vtkPV3FoamUpdateInformation.C
     vtkPV3FoamUpdateInformationFields.H
 
-    // Needed by VTK?
+    // Needed by VTK:
     vtkDataArrayTemplateImplicit.txx
 
 \*---------------------------------------------------------------------------*/
@@ -64,6 +62,7 @@ SourceFiles
 #include "fileName.H"
 #include "volPointInterpolation.H"
 #include "stringList.H"
+#include "wordList.H"
 #include "primitivePatch.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
@@ -304,8 +303,20 @@ private:
             //- Set info
             void updateInformationSets();
 
+            //- Read zone names for zoneType from file
+            wordList readZoneNames(const word& zoneType);
+
             //- Zone info
             void updateInformationZones();
+
+            //- Add to paraview array selection
+            template<class Type>
+            label addToSelection
+            (
+                vtkDataArraySelection *arraySelection,
+                const IOobjectList&,
+                const string& suffix = ""
+            );
 
             //- Field info
             template<template<class> class patchType, class meshType>
@@ -347,20 +358,20 @@ private:
             //- Cell zone meshes
             void convertMeshCellZones(vtkMultiBlockDataSet* output);
 
-            //- Cell zone meshes
+            //- Face zone meshes
             void convertMeshFaceZones(vtkMultiBlockDataSet* output);
 
-            //- Cell zone meshes
+            //- Point zone meshes
             void convertMeshPointZones(vtkMultiBlockDataSet* output);
 
             //- Cell set meshes
-            void convertMeshCellSet(vtkMultiBlockDataSet* output);
+            void convertMeshCellSets(vtkMultiBlockDataSet* output);
 
             //- Face set meshes
-            void convertMeshFaceSet(vtkMultiBlockDataSet* output);
+            void convertMeshFaceSets(vtkMultiBlockDataSet* output);
 
             //- Point set meshes
-            void convertMeshPointSet(vtkMultiBlockDataSet* output);
+            void convertMeshPointSets(vtkMultiBlockDataSet* output);
 
 
         // Add mesh functions
@@ -430,7 +441,7 @@ private:
         //- Add the fields in the selected time directory to the selection
         //  lists
         template<class GeoField>
-        label addFields
+        label addObjectsToSelection
         (
             vtkDataArraySelection* fieldSelection,
             const IOobjectList& objects,
