@@ -92,6 +92,7 @@ class localPointRegion
         void countPointRegions
         (
             const polyMesh& mesh,
+            const boolList& candidatePoint,
             const Map<label>& candidateFace,
             faceList& minRegion
         );

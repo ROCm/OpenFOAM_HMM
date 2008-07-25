@@ -24,16 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Construct from components
 template<class equationOfState>
-inline hConstThermo<equationOfState>::hConstThermo
+inline Foam::hConstThermo<equationOfState>::hConstThermo
 (
     const equationOfState& st,
     const scalar cp,
@@ -48,9 +42,8 @@ inline hConstThermo<equationOfState>::hConstThermo
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct as named copy
 template<class equationOfState>
-inline hConstThermo<equationOfState>::hConstThermo
+inline Foam::hConstThermo<equationOfState>::hConstThermo
 (
     const word& name,
     const hConstThermo& ct
@@ -62,10 +55,9 @@ inline hConstThermo<equationOfState>::hConstThermo
 {}
 
 
-// Construct and return a clone
 template<class equationOfState>
-inline autoPtr<hConstThermo<equationOfState> > hConstThermo<equationOfState>::
-clone() const
+inline Foam::autoPtr<Foam::hConstThermo<equationOfState> >
+Foam::hConstThermo<equationOfState>::clone() const
 {
     return autoPtr<hConstThermo<equationOfState> >
     (
@@ -74,10 +66,9 @@ clone() const
 }
 
 
-// Selector from Istream
 template<class equationOfState>
-inline autoPtr<hConstThermo<equationOfState> > hConstThermo<equationOfState>::
-New(Istream& is)
+inline Foam::autoPtr<Foam::hConstThermo<equationOfState> >
+Foam::hConstThermo<equationOfState>::New(Istream& is)
 {
     return autoPtr<hConstThermo<equationOfState> >
     (
@@ -88,68 +79,73 @@ New(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Heat capacity at constant pressure [J/(kmol K)]
 template<class equationOfState>
-inline scalar hConstThermo<equationOfState>::cp(const scalar) const
+inline Foam::scalar Foam::hConstThermo<equationOfState>::cp(const scalar) const
 {
     return CP*this->W();
 }
 
 
-//- Enthalpy [J/kmol]
 template<class equationOfState>
-inline scalar hConstThermo<equationOfState>::h(const scalar T) const
+inline Foam::scalar Foam::hConstThermo<equationOfState>::h(const scalar T) const
 {
     return (CP*T + Hf)*this->W();
 }
 
 
-//- Entropy [J/(kmol K)]
 template<class equationOfState>
-inline scalar hConstThermo<equationOfState>::s(const scalar T) const
+inline Foam::scalar Foam::hConstThermo<equationOfState>::s(const scalar T) const
 {
-    notImplemented("scalar hConstThermo<equationOfState>::s(const scalar T) const");
+    notImplemented
+    (
+        "scalar hConstThermo<equationOfState>::s(const scalar T) const"
+    );
     return T;
 }
 
-/*
-//- Temperature from Enthalpy given an initial temperature T0
-template<class equationOfState>
-inline scalar hConstThermo<equationOfState>::TH(const scalar h, const scalar T0) const
-{
-    return (h - Hf)/Cp(T0);
-}
-
-
-//- Temperature from internal energy given an initial temperature T0
-template<class equationOfState>
-inline scalar hConstThermo<equationOfState>::TE(const scalar e, const scalar T0) const
-{
-    return (e - Hf)/Cv(T0);
-}
-*/
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class equationOfState>
-inline hConstThermo<equationOfState>& hConstThermo<equationOfState>::operator=
+inline void Foam::hConstThermo<equationOfState>::operator+=
 (
-    const hConstThermo& ct
+    const hConstThermo<equationOfState>& ct
 )
 {
-    equationOfState::operator=(ct);
+    scalar molr1 = this->nMoles();
 
-    CP = ct.CP;
-    Hf = ct.Hf;
+    equationOfState::operator+=(ct);
 
-    return *this;
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    CP = molr1*CP + molr2*ct.CP;
+    Hf = molr1*Hf + molr2*ct.Hf;
+}
+
+
+template<class equationOfState>
+inline void Foam::hConstThermo<equationOfState>::operator-=
+(
+    const hConstThermo<equationOfState>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    equationOfState::operator-=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    CP = molr1*CP - molr2*ct.CP;
+    Hf = molr1*Hf - molr2*ct.Hf;
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 template<class equationOfState>
-inline hConstThermo<equationOfState> operator+
+inline Foam::hConstThermo<equationOfState> Foam::operator+
 (
     const hConstThermo<equationOfState>& ct1,
     const hConstThermo<equationOfState>& ct2
@@ -158,7 +154,7 @@ inline hConstThermo<equationOfState> operator+
     equationOfState eofs
     (
         static_cast<const equationOfState&>(ct1)
-        + static_cast<const equationOfState&>(ct2)
+      + static_cast<const equationOfState&>(ct2)
     );
 
     return hConstThermo<equationOfState>
@@ -171,7 +167,7 @@ inline hConstThermo<equationOfState> operator+
 
 
 template<class equationOfState>
-inline hConstThermo<equationOfState> operator-
+inline Foam::hConstThermo<equationOfState> Foam::operator-
 (
     const hConstThermo<equationOfState>& ct1,
     const hConstThermo<equationOfState>& ct2
@@ -193,7 +189,7 @@ inline hConstThermo<equationOfState> operator-
 
 
 template<class equationOfState>
-inline hConstThermo<equationOfState> operator*
+inline Foam::hConstThermo<equationOfState> Foam::operator*
 (
     const scalar s,
     const hConstThermo<equationOfState>& ct
@@ -209,7 +205,7 @@ inline hConstThermo<equationOfState> operator*
 
 
 template<class equationOfState>
-inline hConstThermo<equationOfState> operator==
+inline Foam::hConstThermo<equationOfState> Foam::operator==
 (
     const hConstThermo<equationOfState>& ct1,
     const hConstThermo<equationOfState>& ct2
@@ -218,9 +214,5 @@ inline hConstThermo<equationOfState> operator==
     return ct2 - ct1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

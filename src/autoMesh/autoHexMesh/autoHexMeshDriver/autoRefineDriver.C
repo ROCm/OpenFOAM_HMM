@@ -248,7 +248,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
                 refineParams.keepPoints()[0],
                 refineParams.curvature(),
 
-                PtrList<featureEdgeMesh>(0),    // dummy featureMeshes;
+                PtrList<featureEdgeMesh>(),     // dummy featureMeshes;
                 labelList(0),                   // dummy featureLevels;
 
                 false,              // featureRefinement
@@ -389,7 +389,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 refineParams.keepPoints()[0],
                 refineParams.curvature(),
 
-                PtrList<featureEdgeMesh>(0),    // dummy featureMeshes;
+                PtrList<featureEdgeMesh>(),    // dummy featureMeshes;
                 labelList(0),                   // dummy featureLevels;
 
                 false,              // featureRefinement
