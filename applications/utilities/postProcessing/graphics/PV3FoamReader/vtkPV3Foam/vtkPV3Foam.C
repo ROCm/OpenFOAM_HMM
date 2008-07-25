@@ -183,24 +183,10 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
     Time& runTime = dbPtr_();
 
     // Get times list
-    instantList times = runTime.times();
+    instantList Times = runTime.times();
 
-    // logic as per "checkTimeOption.H"
     bool found = false;
-    int nearestIndex = -1;
-    scalar nearestDiff = Foam::GREAT;
-
-    forAll (times, timeIndex)
-    {
-        if (times[timeIndex].name() == "constant") continue;
-
-        scalar diff = fabs(times[timeIndex].value() - requestedTime);
-        if (diff < nearestDiff)
-        {
-            nearestDiff = diff;
-            nearestIndex = timeIndex;
-        }
-    }
+    int nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
 
     if (nearestIndex == -1)
     {
@@ -212,12 +198,12 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
         found = true;
     }
 
-    runTime.setTime(times[nearestIndex], nearestIndex);
+    runTime.setTime(Times[nearestIndex], nearestIndex);
 
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::setTime() - selected time "
-            << times[nearestIndex].name() << endl;
+            << Times[nearestIndex].name() << endl;
     }
 
     return found;
