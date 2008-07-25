@@ -110,6 +110,7 @@ bool Foam::localPointRegion::isDuplicate
 void Foam::localPointRegion::countPointRegions
 (
     const polyMesh& mesh,
+    const boolList& candidatePoint,
     const Map<label>& candidateFace,
     faceList& minRegion
 )
@@ -144,38 +145,45 @@ void Foam::localPointRegion::countPointRegions
             forAll(f, fp)
             {
                 label pointI = f[fp];
-                label region = minRegion[faceI][fp];
 
-                if (minPointRegion[pointI] == -1)
+                // Even points which were not candidates for splitting might
+                // be on multiple baffles that are being split so check.
+
+                if (candidatePoint[pointI])
                 {
-                    minPointRegion[pointI] = region;
-                }
-                else if (minPointRegion[pointI] != region)
-                {
-                    // Multiple regions for this point. Add.
-                    Map<label>::iterator iter = meshPointMap_.find(pointI);
-                    if (iter != meshPointMap_.end())
+                    label region = minRegion[faceI][fp];
+
+                    if (minPointRegion[pointI] == -1)
                     {
-                        labelList& regions = pointRegions[iter()];
-                        if (findIndex(regions, region) == -1)
+                        minPointRegion[pointI] = region;
+                    }
+                    else if (minPointRegion[pointI] != region)
+                    {
+                        // Multiple regions for this point. Add.
+                        Map<label>::iterator iter = meshPointMap_.find(pointI);
+                        if (iter != meshPointMap_.end())
                         {
-                            label sz = regions.size();
-                            regions.setSize(sz+1);
-                            regions[sz] = region;
+                            labelList& regions = pointRegions[iter()];
+                            if (findIndex(regions, region) == -1)
+                            {
+                                label sz = regions.size();
+                                regions.setSize(sz+1);
+                                regions[sz] = region;
+                            }
                         }
-                    }
-                    else
-                    {
-                        label localPointI = meshPointMap_.size();
-                        meshPointMap_.insert(pointI, localPointI);
-                        labelList regions(2);
-                        regions[0] = minPointRegion[pointI];
-                        regions[1] = region;
-                        pointRegions.append(regions);
-                    }
+                        else
+                        {
+                            label localPointI = meshPointMap_.size();
+                            meshPointMap_.insert(pointI, localPointI);
+                            labelList regions(2);
+                            regions[0] = minPointRegion[pointI];
+                            regions[1] = region;
+                            pointRegions.append(regions);
+                        }
 
-                    label meshFaceMapI = meshFaceMap_.size();
-                    meshFaceMap_.insert(faceI, meshFaceMapI);
+                        label meshFaceMapI = meshFaceMap_.size();
+                        meshFaceMap_.insert(faceI, meshFaceMapI);
+                    }
                 }
             }
         }
@@ -194,7 +202,9 @@ void Foam::localPointRegion::countPointRegions
 
             forAll(f, fp)
             {
-                if (meshPointMap_.found(f[fp]))
+                // Note: candidatePoint test not really necessary but
+                // speeds up rejection.
+                if (candidatePoint[f[fp]] && meshPointMap_.found(f[fp]))
                 {
                     label meshFaceMapI = meshFaceMap_.size();
                     meshFaceMap_.insert(faceI, meshFaceMapI);
@@ -421,7 +431,7 @@ void Foam::localPointRegion::calcPointRegions
 
 
     // Count regions per point
-    countPointRegions(mesh, candidateFace, minRegion);
+    countPointRegions(mesh, candidatePoint, candidateFace, minRegion);
     minRegion.clear();
 
 
