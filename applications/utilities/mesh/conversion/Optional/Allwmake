@@ -5,15 +5,12 @@ set -x
 # run from this directory only
 cd ${0%/*} || exit 1
 
-# build libccmio if required
-if [ ! -e $FOAM_LIBBIN/libccmio.so ]
-then
+# build libccmio and create lnInclude directory
 (
    cd $WM_THIRD_PARTY_DIR && ./AllwmakeLibccmio
 )
-fi
 
-# if the library built okay, the headers must exist too
+# if the library built okay, the headers should exist too
 if [ -e $FOAM_LIBBIN/libccmio.so ]
 then
    wmake ccm26ToFoam
