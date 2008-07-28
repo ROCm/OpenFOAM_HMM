@@ -315,12 +315,6 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
             }
         }
 
-        newOwn = own[faceI];
-        if (newOwn > -1) newOwn = renumberCells[newOwn];
-
-        newNei = nei[faceI];
-        if (newNei > -1) newNei = renumberCells[newNei];
-
         if (faceI < m.nInternalFaces() || faceI >= m.nFaces())
         {
             newPatch = -1;
@@ -329,6 +323,20 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         {
             newPatch = patchIndices[bm.whichPatch(faceI)];
         }
+
+        newOwn = own[faceI];
+        if (newOwn > -1) newOwn = renumberCells[newOwn];
+
+        if (newPatch > -1) 
+        {
+            newNei = -1;
+        } 
+        else 
+        {
+            newNei = nei[faceI];
+            newNei = renumberCells[newNei];
+        }
+
 
         newZone = fz.whichZone(faceI);
         newZoneFlip = false;
