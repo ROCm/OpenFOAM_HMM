@@ -140,6 +140,7 @@ buildParaView ()
 {
     # set general options
     addCMakeVariable "BUILD_SHARED_LIBS:BOOL=ON"
+    addCMakeVariable "VTK_USE_RPATH:BOOL=OFF"
     addCMakeVariable "CMAKE_BUILD_TYPE:STRING=Release"
 
     # set paraview environment

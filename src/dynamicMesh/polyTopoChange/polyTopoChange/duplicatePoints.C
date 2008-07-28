@@ -155,17 +155,35 @@ void Foam::duplicatePoints::setRefinement
             zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
         }
 
-        meshMod.modifyFace
-        (
-            newFace,                    // modified face
-            faceI,                      // label of face being modified
-            mesh_.faceOwner()[faceI],   // owner
-            -1,                         // neighbour
-            false,                      // face flip
-            patches.whichPatch(faceI),  // patch for face
-            zoneID,                     // zone for face
-            zoneFlip                    // face flip in zone
-        );
+
+        if (mesh_.isInternalFace(faceI))
+        {
+            meshMod.modifyFace
+            (
+                newFace,                    // modified face
+                faceI,                      // label of face being modified
+                mesh_.faceOwner()[faceI],   // owner
+                mesh_.faceNeighbour()[faceI],   // neighbour
+                false,                      // face flip
+                -1,                         // patch for face
+                zoneID,                     // zone for face
+                zoneFlip                    // face flip in zone
+            );
+        }
+        else
+        {
+            meshMod.modifyFace
+            (
+                newFace,                    // modified face
+                faceI,                      // label of face being modified
+                mesh_.faceOwner()[faceI],   // owner
+                -1,                         // neighbour
+                false,                      // face flip
+                patches.whichPatch(faceI),  // patch for face
+                zoneID,                     // zone for face
+                zoneFlip                    // face flip in zone
+            );
+        }
     }
 
 
