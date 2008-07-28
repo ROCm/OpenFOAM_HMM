@@ -47,6 +47,8 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     FileName  = NULL;
     foamData_ = NULL;
 
+    output1_ = NULL;
+
     TimeStep = 0;
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
@@ -60,7 +62,6 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     UpdateGUI = 1;
     UpdateGUIOld = 1;
-
 
     RegionSelection = vtkDataArraySelection::New();
     VolFieldSelection = vtkDataArraySelection::New();
@@ -148,38 +149,6 @@ int vtkPV3FoamReader::RequestInformation
         return 0;
     }
 
-    if (Foam::vtkPV3Foam::debug)
-    {
-        vtkInformation* outputInfo = this->GetOutputPortInformation(0);
-
-        vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
-        (
-            outputInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
-        );
-
-        outputInfo->Print(cout);
-        if (output)
-        {
-            output->Print(cout);
-        }
-        else
-        {
-            cout<< "no output\n";
-        }
-
-        this->GetExecutive()->GetOutputInformation(0)->Print(cout);
-
-        int nInfo = outputVector->GetNumberOfInformationObjects();
-
-        cout<< "requestInfo with " << nInfo << " items:\n";
-
-        for (int i = 0; i < nInfo; ++i)
-        {
-            vtkInformation *info = outputVector->GetInformationObject(i);
-            info->Print(cout);
-        }
-    }
-
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
     if (!foamData_)
@@ -189,17 +158,22 @@ int vtkPV3FoamReader::RequestInformation
         (
             outInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
         );
-        foamData_ = new Foam::vtkPV3Foam(FileName, this, output);
-        foamData_->UpdateInformation();
+
+        if (Foam::vtkPV3Foam::debug)
+        {
+            cout<< "constructed vtkPV3Foam with output: ";
+            output->Print(cout);
+        }
+
+        foamData_ = new Foam::vtkPV3Foam(FileName, this);
     }
     else
     {
-        vtkDebugMacro("RequestInformation: updating information");
         foamData_->UpdateInformation();
     }
 
     int nTimeSteps = 0;
-    double* timeSteps = foamData_->timeSteps(nTimeSteps);
+    double* timeSteps = foamData_->findTimes(nTimeSteps);
 
     outInfo->Set
     (
@@ -402,27 +376,20 @@ void vtkPV3FoamReader::removePatchNamesFromView()
 }
 
 
-void vtkPV3FoamReader::PrintSelf
-(
-    ostream& os,
-    vtkIndent indent
-)
+void vtkPV3FoamReader::PrintSelf(ostream& os, vtkIndent indent)
 {
     vtkDebugMacro(<<"PrintSelf");
 
     this->Superclass::PrintSelf(os,indent);
     os<< indent << "File name: "
       << (this->FileName ? this->FileName : "(none)") << "\n";
-    os<< indent << "Number of meshes: " << foamData_->numberOfMeshes() << "\n";
-    os<< indent << "Number of nodes: " << foamData_->numberOfPoints() << "\n";
-    os<< indent << "Number of cells: " << foamData_->numberOfCells() << "\n";
-    os<< indent << "Number of available time steps: " << foamData_->numberOfAvailableTimes()
-      << endl;
+
+    foamData_->PrintSelf(os, indent);
+
     os<< indent << "Time step range: "
       << this->TimeStepRange[0] << " - " << this->TimeStepRange[1]
-      << endl;
+      << "\n";
     os<< indent << "Time step: " << this->TimeStep << endl;
-    return;
 }
 
 
@@ -478,7 +445,6 @@ void vtkPV3FoamReader::SetRegionArrayStatus(const char* name, int status)
 vtkDataArraySelection* vtkPV3FoamReader::GetVolFieldSelection()
 {
     vtkDebugMacro(<<"GetVolFieldSelection");
-
     return VolFieldSelection;
 }
 
@@ -486,7 +452,6 @@ vtkDataArraySelection* vtkPV3FoamReader::GetVolFieldSelection()
 int vtkPV3FoamReader::GetNumberOfVolFieldArrays()
 {
     vtkDebugMacro(<<"GetNumberOfVolFieldArrays");
-
     return VolFieldSelection->GetNumberOfArrays();
 }
 
@@ -494,7 +459,6 @@ int vtkPV3FoamReader::GetNumberOfVolFieldArrays()
 const char* vtkPV3FoamReader::GetVolFieldArrayName(int index)
 {
     vtkDebugMacro(<<"GetVolFieldArrayName");
-
     return VolFieldSelection->GetArrayName(index);
 }
 
@@ -502,7 +466,6 @@ const char* vtkPV3FoamReader::GetVolFieldArrayName(int index)
 int vtkPV3FoamReader::GetVolFieldArrayStatus(const char* name)
 {
     vtkDebugMacro(<<"GetVolFieldArrayStatus");
-
     return VolFieldSelection->ArrayIsEnabled(name);
 }
 
@@ -510,7 +473,6 @@ int vtkPV3FoamReader::GetVolFieldArrayStatus(const char* name)
 void vtkPV3FoamReader::SetVolFieldArrayStatus(const char* name, int status)
 {
     vtkDebugMacro(<<"SetVolFieldArrayStatus");
-
     if (status)
     {
         VolFieldSelection->EnableArray(name);
@@ -528,7 +490,6 @@ void vtkPV3FoamReader::SetVolFieldArrayStatus(const char* name, int status)
 vtkDataArraySelection* vtkPV3FoamReader::GetPointFieldSelection()
 {
     vtkDebugMacro(<<"GetPointFieldSelection");
-
     return PointFieldSelection;
 }
 
@@ -536,7 +497,6 @@ vtkDataArraySelection* vtkPV3FoamReader::GetPointFieldSelection()
 int vtkPV3FoamReader::GetNumberOfPointFieldArrays()
 {
     vtkDebugMacro(<<"GetNumberOfPointFieldArrays");
-
     return PointFieldSelection->GetNumberOfArrays();
 }
 
@@ -544,7 +504,6 @@ int vtkPV3FoamReader::GetNumberOfPointFieldArrays()
 const char* vtkPV3FoamReader::GetPointFieldArrayName(int index)
 {
     vtkDebugMacro(<<"GetPointFieldArrayName");
-
     return PointFieldSelection->GetArrayName(index);
 }
 
@@ -552,7 +511,6 @@ const char* vtkPV3FoamReader::GetPointFieldArrayName(int index)
 int vtkPV3FoamReader::GetPointFieldArrayStatus(const char* name)
 {
     vtkDebugMacro(<<"GetPointFieldArrayStatus");
-
     return PointFieldSelection->ArrayIsEnabled(name);
 }
 
@@ -560,7 +518,6 @@ int vtkPV3FoamReader::GetPointFieldArrayStatus(const char* name)
 void vtkPV3FoamReader::SetPointFieldArrayStatus(const char* name, int status)
 {
     vtkDebugMacro(<<"SetPointFieldArrayStatus");
-
     if (status)
     {
         PointFieldSelection->EnableArray(name);
@@ -578,7 +535,6 @@ void vtkPV3FoamReader::SetPointFieldArrayStatus(const char* name, int status)
 vtkDataArraySelection* vtkPV3FoamReader::GetLagrangianFieldSelection()
 {
     vtkDebugMacro(<<"GetLagrangianFieldSelection");
-
     return LagrangianFieldSelection;
 }
 
@@ -586,7 +542,6 @@ vtkDataArraySelection* vtkPV3FoamReader::GetLagrangianFieldSelection()
 int vtkPV3FoamReader::GetNumberOfLagrangianFieldArrays()
 {
     vtkDebugMacro(<<"GetNumberOfLagrangianFieldArrays");
-
     return LagrangianFieldSelection->GetNumberOfArrays();
 }
 
@@ -594,7 +549,6 @@ int vtkPV3FoamReader::GetNumberOfLagrangianFieldArrays()
 const char* vtkPV3FoamReader::GetLagrangianFieldArrayName(int index)
 {
     vtkDebugMacro(<<"GetLagrangianFieldArrayName");
-
     return LagrangianFieldSelection->GetArrayName(index);
 }
 
@@ -602,7 +556,6 @@ const char* vtkPV3FoamReader::GetLagrangianFieldArrayName(int index)
 int vtkPV3FoamReader::GetLagrangianFieldArrayStatus(const char* name)
 {
     vtkDebugMacro(<<"GetLagrangianFieldArrayStatus");
-
     return LagrangianFieldSelection->ArrayIsEnabled(name);
 }
 
@@ -614,7 +567,6 @@ void vtkPV3FoamReader::SetLagrangianFieldArrayStatus
 )
 {
     vtkDebugMacro(<<"SetLagrangianFieldArrayStatus");
-
     if (status)
     {
         LagrangianFieldSelection->EnableArray(name);
@@ -642,7 +594,6 @@ void vtkPV3FoamReader::SelectionModifiedCallback
 void vtkPV3FoamReader::SelectionModified()
 {
     vtkDebugMacro(<<"SelectionModified");
-
     Modified();
 }
 

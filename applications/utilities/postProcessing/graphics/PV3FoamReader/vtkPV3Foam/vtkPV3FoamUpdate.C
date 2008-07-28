@@ -72,6 +72,8 @@ void Foam::vtkPV3Foam::updateFoamMesh()
                 dbPtr_()
             )
         );
+
+        meshChanged_ = true;
     }
     else
     {

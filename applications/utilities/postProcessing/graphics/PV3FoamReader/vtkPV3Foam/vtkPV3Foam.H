@@ -69,13 +69,14 @@ SourceFiles
 
 class vtkDataArraySelection;
 class vtkDataSet;
-class vtkMultiBlockDataSet;
 class vtkPoints;
 class vtkPV3FoamReader;
 class vtkRenderer;
 class vtkTextActor;
+class vtkMultiBlockDataSet;
 class vtkPolyData;
 class vtkUnstructuredGrid;
+class vtkIndent;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -195,9 +196,6 @@ private:
         //- Access to the controlling vtkPV3FoamReader
         vtkPV3FoamReader* reader_;
 
-        //- Access to the output block
-        vtkMultiBlockDataSet* output_;
-
         //- Foam time control
         autoPtr<Time> dbPtr_;
 
@@ -231,12 +229,12 @@ private:
         labelList superCells_;
 
         //- Label of original cell for decomposed cells
-        //  - cell zone meshes
-        List<labelList> superCellZonesCells_;
+        //  - cellZone meshes
+        List<labelList> zoneSuperCells_;
 
         //- Label of original cell for decomposed cells
-        //  - cell set meshes
-        List<labelList> superCellSetCells_;
+        //  - cellSet meshes
+        List<labelList> csetSuperCells_;
 
         //- List of patch names
         List<vtkTextActor*> patchTextActorsPtrs_;
@@ -251,6 +249,15 @@ private:
             //- Cloud name to be processed
             // TODO - currently only set up to process ONE cloud
             word cloudName_;
+
+            //- The time index
+            int timeIndex_;
+
+            //- Track changes in mesh geometry
+            bool meshChanged_;
+
+            //- Track changes in fields
+            bool fieldsChanged_;
 
 
     // Private Member Functions
@@ -610,8 +617,7 @@ public:
         vtkPV3Foam
         (
             const char* const FileName,
-            vtkPV3FoamReader* reader,
-            vtkMultiBlockDataSet* output
+            vtkPV3FoamReader* reader
         );
 
 
@@ -622,13 +628,14 @@ public:
 
     // Member Functions
 
+        //- Update 
         void UpdateInformation();
 
         void Update(vtkMultiBlockDataSet* output);
 
-        //- allocate and return a list of selected times
+        //- Allocate and return a list of selected times
         //  returns the count via the parameter
-        double* timeSteps(int& nTimeSteps);
+        double* findTimes(int& nTimeSteps);
 
         //- Add patch names to the display
         void addPatchNames(vtkRenderer* renderer);
@@ -643,14 +650,8 @@ public:
 
      // Access
 
-        //- Return the total number of available timesets
-        int numberOfAvailableTimes() const;
-
-        int numberOfCells();
-
-        int numberOfPoints();
-
-        int numberOfMeshes() const;
+        //- Debug information
+        void PrintSelf(ostream&, vtkIndent) const;
 
 };
 

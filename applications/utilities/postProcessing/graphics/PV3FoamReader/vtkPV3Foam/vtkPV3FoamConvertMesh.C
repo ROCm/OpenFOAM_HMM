@@ -258,14 +258,14 @@ void Foam::vtkPV3Foam::convertMeshCellZones
             (
                 subsetter.subMesh(),
                 vtkmesh,
-                superCellZonesCells_[datasetId]
+                zoneSuperCells_[datasetId]
             );
 
             // renumber - superCells must contain global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                superCellZonesCells_[datasetId]
+                zoneSuperCells_[datasetId]
             );
 
             AddToBlock
@@ -337,14 +337,14 @@ void Foam::vtkPV3Foam::convertMeshCellSets
             (
                 subsetter.subMesh(),
                 vtkmesh,
-                superCellSetCells_[datasetId]
+                csetSuperCells_[datasetId]
             );
 
             // renumber - superCells must contain global cell ids
             inplaceRenumber
             (
                 subsetter.cellMap(),
-                superCellSetCells_[datasetId]
+                csetSuperCells_[datasetId]
             );
 
             AddToBlock

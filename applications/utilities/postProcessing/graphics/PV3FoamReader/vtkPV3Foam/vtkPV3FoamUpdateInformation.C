@@ -36,6 +36,10 @@ License
 #include "entry.H"
 #include "vtkPV3FoamReader.h"
 
+// local headers
+#include "vtkPV3FoamAddToSelection.H"
+#include "vtkPV3FoamUpdateInformationFields.H"
+
 // VTK includes
 #include "vtkDataArraySelection.h"
 
@@ -75,10 +79,43 @@ public:
 
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-#include "vtkPV3FoamAddToSelection.H"
-#include "vtkPV3FoamUpdateInformationFields.H"
+Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
+{
+    wordList zoneNames;
+
+    // mesh not loaded - read from file
+    IOobject ioObj
+    (
+        zoneType,
+        dbPtr_().findInstance
+        (
+            polyMesh::meshSubDir,
+            zoneType,
+            IOobject::READ_IF_PRESENT
+        ),
+        polyMesh::meshSubDir,
+        dbPtr_(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (ioObj.headerOk())
+    {
+        zonesEntries zones(ioObj);
+
+        zoneNames.setSize(zones.size());
+        forAll (zones, zoneI)
+        {
+            zoneNames[zoneI] = zones[zoneI].keyword();
+        }
+    }
+
+    return zoneNames;
+}
+
 
 void Foam::vtkPV3Foam::updateInformationInternalMesh()
 {
@@ -222,42 +259,6 @@ void Foam::vtkPV3Foam::updateInformationPatches()
 }
 
 
-Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
-{
-    wordList zoneNames;
-
-    // mesh not loaded - read from file
-    IOobject ioObj
-    (
-        zoneType,
-        dbPtr_().findInstance
-        (
-            polyMesh::meshSubDir,
-            zoneType,
-            IOobject::READ_IF_PRESENT
-        ),
-        polyMesh::meshSubDir,
-        dbPtr_(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE,
-        false
-    );
-
-    if (ioObj.headerOk())
-    {
-        zonesEntries zones(ioObj);
-
-        zoneNames.setSize(zones.size());
-        forAll (zones, zoneI)
-        {
-            zoneNames[zoneI] = zones[zoneI].keyword();
-        }
-    }
-
-    return zoneNames;
-}
-
-
 void Foam::vtkPV3Foam::updateInformationZones()
 {
     if (debug)
@@ -288,7 +289,7 @@ void Foam::vtkPV3Foam::updateInformationZones()
         arraySelection->AddArray((zoneNames[zoneI] + " - cellZone").c_str());
     }
     selectInfoCellZones_ += zoneNames.size();
-    superCellZonesCells_.setSize(selectInfoCellZones_.size());
+    zoneSuperCells_.setSize(selectInfoCellZones_.size());
 
 
     //
@@ -366,7 +367,7 @@ void Foam::vtkPV3Foam::updateInformationSets()
         objects,
         " - cellSet"
     );
-    superCellSetCells_.setSize(selectInfoCellSets_.size());
+    csetSuperCells_.setSize(selectInfoCellSets_.size());
 
     selectInfoFaceSets_ = arraySelection->GetNumberOfArrays();
     selectInfoFaceSets_ += addToSelection<faceSet>
@@ -464,5 +465,8 @@ void Foam::vtkPV3Foam::updateInformationLagrangianFields()
             << "lagrangian objects.size() = " << objects.size() << endl;
     }
 }
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 
 // ************************************************************************* //

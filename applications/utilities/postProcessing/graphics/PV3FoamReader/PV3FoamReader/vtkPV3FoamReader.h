@@ -191,6 +191,9 @@ private:
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;
 
+    //- Access to the output port1
+    vtkMultiBlockDataSet* output1_;
+
     //BTX
     Foam::vtkPV3Foam* foamData_;
     //ETX
