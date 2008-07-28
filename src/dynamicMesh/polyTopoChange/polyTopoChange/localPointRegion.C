@@ -43,14 +43,21 @@ class minEqOpFace
 {
 public:
 
-    void operator()( face& x, const face& y ) const
+    void operator()(face& x, const face& y) const
     {
-        forAll(x, i)
+        if (x.size() > 0)
         {
-            x[i] = min(x[i], y[i]);
+            label j = 0;
+            forAll(x, i)
+            {
+                x[i] = min(x[i], y[j]);
+
+                j = y.rcIndex(j);
+            }
         }
     };
 };
+
 
 // Dummy transform for faces. Used in synchronisation
 void transformList
@@ -103,6 +110,7 @@ bool Foam::localPointRegion::isDuplicate
 void Foam::localPointRegion::countPointRegions
 (
     const polyMesh& mesh,
+    const boolList& candidatePoint,
     const Map<label>& candidateFace,
     faceList& minRegion
 )
@@ -120,7 +128,7 @@ void Foam::localPointRegion::countPointRegions
 
     forAllConstIter(Map<label>, candidateFace, iter)
     {
-        label faceI = iter();
+        label faceI = iter.key();
 
         if (!mesh.isInternalFace(faceI))
         {
@@ -137,43 +145,75 @@ void Foam::localPointRegion::countPointRegions
             forAll(f, fp)
             {
                 label pointI = f[fp];
-                label region = minRegion[faceI][fp];
 
-                if (minPointRegion[pointI] == -1)
+                // Even points which were not candidates for splitting might
+                // be on multiple baffles that are being split so check.
+
+                if (candidatePoint[pointI])
                 {
-                    minPointRegion[pointI] = region;
-                }
-                else if (minPointRegion[pointI] != region)
-                {
-                    // Multiple regions for this point. Add.
-                    Map<label>::iterator iter = meshPointMap_.find(pointI);
-                    if (iter != meshPointMap_.end())
+                    label region = minRegion[faceI][fp];
+
+                    if (minPointRegion[pointI] == -1)
                     {
-                        labelList& regions = pointRegions[iter()];
-                        if (findIndex(regions, region) == -1)
+                        minPointRegion[pointI] = region;
+                    }
+                    else if (minPointRegion[pointI] != region)
+                    {
+                        // Multiple regions for this point. Add.
+                        Map<label>::iterator iter = meshPointMap_.find(pointI);
+                        if (iter != meshPointMap_.end())
                         {
-                            label sz = regions.size();
-                            regions.setSize(sz+1);
-                            regions[sz] = region;
+                            labelList& regions = pointRegions[iter()];
+                            if (findIndex(regions, region) == -1)
+                            {
+                                label sz = regions.size();
+                                regions.setSize(sz+1);
+                                regions[sz] = region;
+                            }
                         }
-                    }
-                    else
-                    {
-                        label localPointI = meshPointMap_.size();
-                        meshPointMap_.insert(pointI, localPointI);
-                        labelList regions(2);
-                        regions[0] = minPointRegion[pointI];
-                        regions[1] = region;
-                        pointRegions.append(regions);
-                    }
+                        else
+                        {
+                            label localPointI = meshPointMap_.size();
+                            meshPointMap_.insert(pointI, localPointI);
+                            labelList regions(2);
+                            regions[0] = minPointRegion[pointI];
+                            regions[1] = region;
+                            pointRegions.append(regions);
+                        }
 
+                        label meshFaceMapI = meshFaceMap_.size();
+                        meshFaceMap_.insert(faceI, meshFaceMapI);
+                    }
+                }
+            }
+        }
+    }
+    minPointRegion.clear();
+
+    // Add internal faces that use any duplicated point. Can only have one
+    // region!
+    forAllConstIter(Map<label>, candidateFace, iter)
+    {
+        label faceI = iter.key();
+
+        if (mesh.isInternalFace(faceI))
+        {
+            const face& f = mesh.faces()[faceI];
+
+            forAll(f, fp)
+            {
+                // Note: candidatePoint test not really necessary but
+                // speeds up rejection.
+                if (candidatePoint[f[fp]] && meshPointMap_.found(f[fp]))
+                {
                     label meshFaceMapI = meshFaceMap_.size();
                     meshFaceMap_.insert(faceI, meshFaceMapI);
                 }
             }
         }
     }
-    minPointRegion.clear();
+
+
     // Transfer to member data
     pointRegions.shrink();
     pointRegions_.setSize(pointRegions.size());
@@ -285,7 +325,7 @@ void Foam::localPointRegion::calcPointRegions
     faceList minRegion(mesh.nFaces());
     forAllConstIter(Map<label>, candidateFace, iter)
     {
-        label faceI = iter();
+        label faceI = iter.key();
         const face& f = mesh.faces()[faceI];
 
         if (mesh.isInternalFace(faceI))
@@ -391,7 +431,7 @@ void Foam::localPointRegion::calcPointRegions
 
 
     // Count regions per point
-    countPointRegions(mesh, candidateFace, minRegion);
+    countPointRegions(mesh, candidatePoint, candidateFace, minRegion);
     minRegion.clear();
 
 
