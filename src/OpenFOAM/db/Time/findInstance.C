@@ -33,10 +33,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-word Time::findInstance
+Foam::word Foam::Time::findInstance
 (
     const fileName& dir,
     const word& name,
@@ -110,7 +107,7 @@ word Time::findInstance
     // constant function of the time, because the latter points to
     // the case constant directory in parallel cases
 
-    if 
+    if
     (
         file(path()/constant()/dir/name)
      && IOobject(name, constant(), dir, *this).headerOk()
@@ -138,10 +135,5 @@ word Time::findInstance
 
     return constant();
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

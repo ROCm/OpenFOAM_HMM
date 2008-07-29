@@ -173,8 +173,7 @@ void Foam::vtkPV3Foam::convertVolFields
                 convertPatchFaceField
                 (
                     tf.name(),
-                    fvPatchField<Type>(p, tf)
-                       .patchInternalField()(),
+                    fvPatchField<Type>(p, tf).patchInternalField()(),
                     output,
                     selectInfoPatches_,
                     selectedRegionDatasetIds_[regionId]
@@ -236,7 +235,7 @@ void Foam::vtkPV3Foam::convertVolFields
             (
                 tf,
                 output, selectInfoCellZones_, datasetId,
-                superCellZonesCells_[datasetId]
+                zoneSuperCells_[datasetId]
             );
         }
 
@@ -273,7 +272,7 @@ void Foam::vtkPV3Foam::convertVolFields
             (
                 tf,
                 output, selectInfoCellSets_, datasetId,
-                superCellSetCells_[datasetId]
+                csetSuperCells_[datasetId]
             );
         }
 

@@ -29,18 +29,16 @@ Description
     Provides a reader interface for OpenFOAM to VTK interaction.
 
 SourceFiles
-    interpolatePointToCell.C
-    interpolatePointToCell.H
     vtkPV3Foam.C
     vtkPV3Foam.H
-    vtkPV3FoamAddFaceSetMesh.C
-    vtkPV3FoamAddFaceZoneMesh.C
-    vtkPV3FoamAddFields.H
+    vtkPV3FoamI.H
     vtkPV3FoamAddLagrangianMesh.C
     vtkPV3FoamAddPatchMesh.C
-    vtkPV3FoamAddPointSetMesh.C
-    vtkPV3FoamAddPointZoneMesh.C
+    vtkPV3FoamAddSetMesh.C
+    vtkPV3FoamAddToSelection.H
     vtkPV3FoamAddVolumeMesh.C
+    vtkPV3FoamAddZoneMesh.C
+    vtkPV3FoamConvertFaceField.H
     vtkPV3FoamConvertLagrangianFields.H
     vtkPV3FoamConvertMesh.C
     vtkPV3FoamConvertPatchFaceField.H
@@ -52,7 +50,7 @@ SourceFiles
     vtkPV3FoamUpdateInformation.C
     vtkPV3FoamUpdateInformationFields.H
 
-    // Needed by VTK?
+    // Needed by VTK:
     vtkDataArrayTemplateImplicit.txx
 
 \*---------------------------------------------------------------------------*/
@@ -64,19 +62,21 @@ SourceFiles
 #include "fileName.H"
 #include "volPointInterpolation.H"
 #include "stringList.H"
+#include "wordList.H"
 #include "primitivePatch.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
 class vtkDataArraySelection;
 class vtkDataSet;
-class vtkMultiBlockDataSet;
 class vtkPoints;
 class vtkPV3FoamReader;
 class vtkRenderer;
 class vtkTextActor;
+class vtkMultiBlockDataSet;
 class vtkPolyData;
 class vtkUnstructuredGrid;
+class vtkIndent;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,9 +196,6 @@ private:
         //- Access to the controlling vtkPV3FoamReader
         vtkPV3FoamReader* reader_;
 
-        //- Access to the output block
-        vtkMultiBlockDataSet* output_;
-
         //- Foam time control
         autoPtr<Time> dbPtr_;
 
@@ -232,12 +229,12 @@ private:
         labelList superCells_;
 
         //- Label of original cell for decomposed cells
-        //  - cell zone meshes
-        List<labelList> superCellZonesCells_;
+        //  - cellZone meshes
+        List<labelList> zoneSuperCells_;
 
         //- Label of original cell for decomposed cells
-        //  - cell set meshes
-        List<labelList> superCellSetCells_;
+        //  - cellSet meshes
+        List<labelList> csetSuperCells_;
 
         //- List of patch names
         List<vtkTextActor*> patchTextActorsPtrs_;
@@ -252,6 +249,15 @@ private:
             //- Cloud name to be processed
             // TODO - currently only set up to process ONE cloud
             word cloudName_;
+
+            //- The time index
+            int timeIndex_;
+
+            //- Track changes in mesh geometry
+            bool meshChanged_;
+
+            //- Track changes in fields
+            bool fieldsChanged_;
 
 
     // Private Member Functions
@@ -287,9 +293,6 @@ private:
         //- Reset data counters
         void resetCounters();
 
-        //- Get all the available times and select the latestTime
-        void initializeTime();
-
         // Update information helper functions
 
             //- Update the regions selected in the GUI
@@ -307,8 +310,20 @@ private:
             //- Set info
             void updateInformationSets();
 
+            //- Read zone names for zoneType from file
+            wordList readZoneNames(const word& zoneType);
+
             //- Zone info
             void updateInformationZones();
+
+            //- Add to paraview array selection
+            template<class Type>
+            label addToSelection
+            (
+                vtkDataArraySelection *arraySelection,
+                const IOobjectList&,
+                const string& suffix = ""
+            );
 
             //- Field info
             template<template<class> class patchType, class meshType>
@@ -350,20 +365,20 @@ private:
             //- Cell zone meshes
             void convertMeshCellZones(vtkMultiBlockDataSet* output);
 
-            //- Cell zone meshes
+            //- Face zone meshes
             void convertMeshFaceZones(vtkMultiBlockDataSet* output);
 
-            //- Cell zone meshes
+            //- Point zone meshes
             void convertMeshPointZones(vtkMultiBlockDataSet* output);
 
             //- Cell set meshes
-            void convertMeshCellSet(vtkMultiBlockDataSet* output);
+            void convertMeshCellSets(vtkMultiBlockDataSet* output);
 
             //- Face set meshes
-            void convertMeshFaceSet(vtkMultiBlockDataSet* output);
+            void convertMeshFaceSets(vtkMultiBlockDataSet* output);
 
             //- Point set meshes
-            void convertMeshPointSet(vtkMultiBlockDataSet* output);
+            void convertMeshPointSets(vtkMultiBlockDataSet* output);
 
 
         // Add mesh functions
@@ -433,7 +448,7 @@ private:
         //- Add the fields in the selected time directory to the selection
         //  lists
         template<class GeoField>
-        label addFields
+        label addObjectsToSelection
         (
             vtkDataArraySelection* fieldSelection,
             const IOobjectList& objects,
@@ -602,8 +617,7 @@ public:
         vtkPV3Foam
         (
             const char* const FileName,
-            vtkPV3FoamReader* reader,
-            vtkMultiBlockDataSet* output
+            vtkPV3FoamReader* reader
         );
 
 
@@ -614,13 +628,14 @@ public:
 
     // Member Functions
 
+        //- Update 
         void UpdateInformation();
 
         void Update(vtkMultiBlockDataSet* output);
 
-        //- allocate and return a list of selected times
+        //- Allocate and return a list of selected times
         //  returns the count via the parameter
-        double* timeSteps(int& nTimeSteps);
+        double* findTimes(int& nTimeSteps);
 
         //- Add patch names to the display
         void addPatchNames(vtkRenderer* renderer);
@@ -635,14 +650,8 @@ public:
 
      // Access
 
-        //- Return the total number of available timesets
-        int numberOfAvailableTimes() const;
-
-        int numberOfCells();
-
-        int numberOfPoints();
-
-        int numberOfMeshes() const;
+        //- Debug information
+        void PrintSelf(ostream&, vtkIndent) const;
 
 };
 

@@ -29,7 +29,6 @@ Description
 #include "vtkPV3Foam.H"
 
 // Foam includes
-#include "faceSet.H"
 #include "vtkPV3FoamInsertNextPoint.H"
 
 // VTK includes
@@ -39,26 +38,26 @@ Description
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPV3Foam::addFaceSetMesh
+
+void Foam::vtkPV3Foam::addFaceZoneMesh
 (
     const fvMesh& mesh,
-    const faceSet& fSet,
+    const labelList& faceLabels,
     vtkPolyData* vtkmesh
 )
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::addFaceSetMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::addFaceZoneMesh" << endl;
     }
 
     // Construct primitivePatch of faces in fSet.
 
     const faceList& meshFaces = mesh.faces();
-    faceList patchFaces(fSet.size());
-    label faceI = 0;
-    forAllConstIter(faceSet, fSet, iter)
+    faceList patchFaces(faceLabels.size());
+    forAll(faceLabels, faceI)
     {
-        patchFaces[faceI++] = meshFaces[iter.key()];
+        patchFaces[faceI] = meshFaces[faceLabels[faceI]];
     }
     primitiveFacePatch p(patchFaces, mesh.points());
 
@@ -69,7 +68,7 @@ void Foam::vtkPV3Foam::addFaceSetMesh
     const pointField& points = p.localPoints();
 
     vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(points.size());
+    vtkpoints->Allocate(p.size());
     forAll(points, i)
     {
         vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
@@ -81,7 +80,7 @@ void Foam::vtkPV3Foam::addFaceSetMesh
     const faceList& faces = p.localFaces();
 
     vtkCellArray* vtkcells = vtkCellArray::New();
-    vtkcells->Allocate(p.size());
+    vtkcells->Allocate(points.size());
     forAll(faces, faceI)
     {
         const face& f = faces[faceI];
@@ -99,7 +98,40 @@ void Foam::vtkPV3Foam::addFaceSetMesh
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::addFaceSetMesh" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::addFaceZoneMesh" << endl;
+    }
+}
+
+
+
+void Foam::vtkPV3Foam::addPointZoneMesh
+(
+    const fvMesh& mesh,
+    const labelList& pointLabels,
+    vtkPolyData* vtkmesh
+)
+{
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::addPointZoneMesh" << endl;
+    }
+
+    const pointField& meshPoints = mesh.points();
+
+    vtkPoints *vtkpoints = vtkPoints::New();
+    vtkpoints->Allocate(pointLabels.size());
+
+    forAll(pointLabels, pointI)
+    {
+        vtkPV3FoamInsertNextPoint(vtkpoints, meshPoints[pointLabels[pointI]]);
+    }
+
+    vtkmesh->SetPoints(vtkpoints);
+    vtkpoints->Delete();
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::addPointZoneMesh" << endl;
     }
 }
 
