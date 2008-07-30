@@ -275,6 +275,12 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         patchIndices[patchI] = patchIndex(bm[patchI]);
     }
 
+    // Temporary: update number of allowable patches. This should be
+    // determined at the top - before adding anything.
+    meshMod_.setNumPatches(patchNames_.size());
+
+
+
     const faceZoneMesh& fz = m.faceZones();
     labelList faceZoneIndices(fz.size());
 
