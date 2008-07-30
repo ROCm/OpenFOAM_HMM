@@ -256,8 +256,7 @@ void Foam::kineticTheoryModel::solve()
        /(alpha*rhoa_*sqrtPi*(ThetaSqrt + TsmallSqrt));
 
     // bulk viscosity  p. 45 (Lun et al. 1984).
-    volScalarField lambda_ =
-        (4.0/3.0)*sqr(alpha_)*rhoa_*da_*gs0_*(1.0+e_)*ThetaSqrt/sqrtPi;
+    lambda_ = (4.0/3.0)*sqr(alpha_)*rhoa_*da_*gs0_*(1.0+e_)*ThetaSqrt/sqrtPi;
 
 
     // stress tensor, Definitions, Table 3.1, p. 43
