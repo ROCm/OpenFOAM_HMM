@@ -50,6 +50,7 @@ void Foam::vtkPV3Foam::addFaceSetMesh
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::addFaceSetMesh" << endl;
+        printMemory();
     }
 
     // Construct primitivePatch of faces in fSet.
@@ -101,6 +102,7 @@ void Foam::vtkPV3Foam::addFaceSetMesh
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::addFaceSetMesh" << endl;
+        printMemory();
     }
 }
 
@@ -115,6 +117,7 @@ void Foam::vtkPV3Foam::addPointSetMesh
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::addPointSetMesh" << endl;
+        printMemory();
     }
 
     const pointField& meshPoints = mesh.points();
@@ -133,6 +136,7 @@ void Foam::vtkPV3Foam::addPointSetMesh
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::addPointSetMesh" << endl;
+        printMemory();
     }
 }
 

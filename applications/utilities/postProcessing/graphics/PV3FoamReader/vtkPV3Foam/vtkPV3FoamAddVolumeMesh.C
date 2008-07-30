@@ -55,6 +55,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::addVolumeMesh" << endl;
+        printMemory();
     }
 
     // Number of additional points needed by the decomposition of polyhedra
@@ -354,6 +355,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::addVolumeMesh" << endl;
+        printMemory();
     }
 }
 

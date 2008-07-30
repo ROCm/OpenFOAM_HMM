@@ -45,7 +45,7 @@ void Foam::vtkPV3Foam::updateInformationFields
 
     stringList selectedEntries;
     // enable 'p' and 'U' on the first call
-    if (arraySelection->GetNumberOfArrays() == 0)
+    if (arraySelection->GetNumberOfArrays() == 0 && !meshPtr_)
     {
         selectedEntries.setSize(2);
         selectedEntries[0] = "p";

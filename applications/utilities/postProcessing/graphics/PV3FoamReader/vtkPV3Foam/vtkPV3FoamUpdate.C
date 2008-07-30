@@ -48,6 +48,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        printMemory();
     }
 
     if (!reader_->GetCacheMesh())
@@ -86,6 +87,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        printMemory();
     }
 }
 
@@ -98,6 +100,7 @@ void Foam::vtkPV3Foam::updateVolFields
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updateVolFields" << endl;
+        printMemory();
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -162,6 +165,7 @@ void Foam::vtkPV3Foam::updateVolFields
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::updateVolFields" << endl;
+        printMemory();
     }
 }
 
@@ -174,6 +178,7 @@ void Foam::vtkPV3Foam::updatePointFields
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updatePointFields" << endl;
+        printMemory();
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -213,6 +218,7 @@ void Foam::vtkPV3Foam::updatePointFields
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::updatePointFields" << endl;
+        printMemory();
     }
 }
 
@@ -225,6 +231,7 @@ void Foam::vtkPV3Foam::updateLagrangianFields
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        printMemory();
     }
 
     const fvMesh& mesh = *meshPtr_;
@@ -276,6 +283,7 @@ void Foam::vtkPV3Foam::updateLagrangianFields
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        printMemory();
     }
 }
 

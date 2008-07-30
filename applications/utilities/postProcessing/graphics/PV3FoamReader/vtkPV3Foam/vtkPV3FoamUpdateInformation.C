@@ -211,42 +211,68 @@ void Foam::vtkPV3Foam::updateInformationPatches()
     }
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
-
-    // Read patches
-    polyBoundaryMeshEntries patchEntries
-    (
-        IOobject
-        (
-            "boundary",
-            dbPtr_().findInstance(polyMesh::meshSubDir, "boundary"),
-            polyMesh::meshSubDir,
-            dbPtr_(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     selectInfoPatches_ = arraySelection->GetNumberOfArrays();
+
     int nPatches = 0;
 
-    // Start regions at patches
-    forAll (patchEntries, entryI)
+    if (meshPtr_)
     {
-        label nFaces(readLabel(patchEntries[entryI].dict().lookup("nFaces")));
-
-        // Valid patch if nFace > 0
-        if (nFaces)
+        const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
+        forAll (patches, patchI)
         {
-            // Add patch to GUI region list
-            arraySelection->AddArray
-            (
-                (patchEntries[entryI].keyword() + " - patch").c_str()
-            );
+            const polyPatch& pp = patches[patchI];
 
-            ++nPatches;
+            if (pp.size())
+            {
+                // Add patch to GUI region list
+                arraySelection->AddArray
+                (
+                    (pp.name() + " - patch").c_str()
+                );
+
+                ++nPatches;
+            }
         }
     }
+    else
+    {
+        // Read patches
+        polyBoundaryMeshEntries patchEntries
+        (
+            IOobject
+            (
+                "boundary",
+                dbPtr_().findInstance(polyMesh::meshSubDir, "boundary"),
+                polyMesh::meshSubDir,
+                dbPtr_(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        // Start regions at patches
+        forAll (patchEntries, entryI)
+        {
+            label nFaces
+            (
+                readLabel(patchEntries[entryI].dict().lookup("nFaces"))
+            );
+
+            // Valid patch if nFace > 0
+            if (nFaces)
+            {
+                // Add patch to GUI region list
+                arraySelection->AddArray
+                (
+                    (patchEntries[entryI].keyword() + " - patch").c_str()
+                );
+
+                ++nPatches;
+            }
+        }
+    }
+
     selectInfoPatches_ += nPatches;
 
     if (debug)
@@ -269,26 +295,26 @@ void Foam::vtkPV3Foam::updateInformationZones()
 
     vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
 
-    wordList zoneNames;
+    wordList namesLst;
 
     //
     // cellZones information
     // ~~~~~~~~~~~~~~~~~~~~~
     if (meshPtr_)
     {
-        zoneNames = meshPtr_->cellZones().names();
+        namesLst = meshPtr_->cellZones().names();
     }
     else
     {
-        zoneNames = readZoneNames("cellZones");
+        namesLst = readZoneNames("cellZones");
     }
 
     selectInfoCellZones_ = arraySelection->GetNumberOfArrays();
-    forAll (zoneNames, zoneI)
+    forAll (namesLst, elemI)
     {
-        arraySelection->AddArray((zoneNames[zoneI] + " - cellZone").c_str());
+        arraySelection->AddArray((namesLst[elemI] + " - cellZone").c_str());
     }
-    selectInfoCellZones_ += zoneNames.size();
+    selectInfoCellZones_ += namesLst.size();
     zoneSuperCells_.setSize(selectInfoCellZones_.size());
 
 
@@ -297,19 +323,19 @@ void Foam::vtkPV3Foam::updateInformationZones()
     // ~~~~~~~~~~~~~~~~~~~~~
     if (meshPtr_)
     {
-        zoneNames = meshPtr_->faceZones().names();
+        namesLst = meshPtr_->faceZones().names();
     }
     else
     {
-        zoneNames = readZoneNames("faceZones");
+        namesLst = readZoneNames("faceZones");
     }
 
     selectInfoFaceZones_ = arraySelection->GetNumberOfArrays();
-    forAll (zoneNames, zoneI)
+    forAll (namesLst, elemI)
     {
-        arraySelection->AddArray((zoneNames[zoneI] + " - faceZone").c_str());
+        arraySelection->AddArray((namesLst[elemI] + " - faceZone").c_str());
     }
-    selectInfoFaceZones_ += zoneNames.size();
+    selectInfoFaceZones_ += namesLst.size();
 
 
     //
@@ -317,19 +343,19 @@ void Foam::vtkPV3Foam::updateInformationZones()
     // ~~~~~~~~~~~~~~~~~~~~~~
     if (meshPtr_)
     {
-        zoneNames = meshPtr_->pointZones().names();
+        namesLst = meshPtr_->pointZones().names();
     }
     else
     {
-        zoneNames = readZoneNames("pointZones");
+        namesLst = readZoneNames("pointZones");
     }
 
     selectInfoPointZones_ = arraySelection->GetNumberOfArrays();
-    forAll (zoneNames, zoneI)
+    forAll (namesLst, elemI)
     {
-        arraySelection->AddArray((zoneNames[zoneI] + " - pointZone").c_str());
+        arraySelection->AddArray((namesLst[elemI] + " - pointZone").c_str());
     }
-    selectInfoPointZones_ += zoneNames.size();
+    selectInfoPointZones_ += namesLst.size();
 
 
     if (debug)

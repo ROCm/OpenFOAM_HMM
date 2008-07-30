@@ -32,6 +32,7 @@ License
 #include "IOobjectList.H"
 #include "patchZones.H"
 #include "vtkPV3FoamReader.h"
+#include "IFstream.H"
 
 // VTK includes
 #include "vtkCharArray.h"
@@ -212,6 +213,8 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
             if (meshPtr_->readUpdate() != polyMesh::UNCHANGED)
             {
                 meshChanged_ = true;
+                // patches, zones etc might have changed
+                UpdateInformation();
             }
         }
         else
@@ -396,7 +399,6 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
         Info<< " )" << endl;
     }
 
-
     selections.setSize(nElem);
     return selections;
 }
@@ -480,6 +482,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
     if (debug)
     {
         Info<< "Foam::vtkPV3Foam::vtkPV3Foam - " << FileName << endl;
+        printMemory();
     }
 
     // avoid argList and get rootPath/caseName directly from the file
@@ -565,7 +568,7 @@ void Foam::vtkPV3Foam::UpdateInformation()
 
     stringList selectedEntries;
     // enable 'internalMesh' on the first call
-    if (arraySelection->GetNumberOfArrays() == 0)
+    if (arraySelection->GetNumberOfArrays() == 0 && !meshPtr_)
     {
         selectedEntries.setSize(1);
         selectedEntries[0] = "internalMesh";
@@ -647,6 +650,7 @@ void Foam::vtkPV3Foam::Update
         output->Print(cout);
 
         cout<< " has " << output->GetNumberOfBlocks() << " blocks\n";
+        printMemory();
     }
 
     // Set up region selection(s)
@@ -713,6 +717,7 @@ void Foam::vtkPV3Foam::Update
         output->GetInformation()->Print(cout);
 
         cout<<"ShouldIReleaseData :" << output->ShouldIReleaseData() << "\n";
+        printMemory();
     }
 
     meshChanged_ = fieldsChanged_ = false;
@@ -787,7 +792,7 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
 
     if (debug)
     {
-        Info<<"... add patches: " << selectedPatches <<endl;
+        Info<<"... add patches: " << selectedPatches << endl;
     }
 
     // Find the total number of zones
@@ -876,8 +881,8 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
 
     if (debug)
     {
-        Info<< "patch zone centres = " << zoneCentre << endl;
-        Info<< "zones per patch = " << nZones << endl;
+        Info<< "patch zone centres = " << zoneCentre << nl
+            << "zones per patch = " << nZones << endl;
     }
 
     // Set the size of the patch labels to max number of zones
@@ -898,9 +903,9 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         {
             if (debug)
             {
-                Info<< "patch name = " << pp.name() << endl;
-                Info<< "anchor = " << zoneCentre[globalZoneI] << endl;
-                Info<< "globalZoneI = " << globalZoneI << endl;
+                Info<< "patch name = " << pp.name() << nl
+                    << "anchor = " << zoneCentre[globalZoneI] << nl
+                    << "globalZoneI = " << globalZoneI << endl;
             }
 
             vtkTextActor* txt = vtkTextActor::New();
@@ -967,14 +972,56 @@ void Foam::vtkPV3Foam::removePatchNames(vtkRenderer* renderer)
 void Foam::vtkPV3Foam::PrintSelf(ostream& os, vtkIndent indent) const
 {
     os  << indent << "Number of meshes: " << nMesh_ << "\n";
-    os  << indent << "Number of nodes: " 
+    os  << indent << "Number of nodes: "
         << (meshPtr_ ? meshPtr_->nPoints() : 0) << "\n";
-    
-    os  << indent << "Number of cells: " 
+
+    os  << indent << "Number of cells: "
         << (meshPtr_ ? meshPtr_->nCells() : 0) << "\n";
 
     os  << indent << "Number of available time steps: "
         << (dbPtr_.valid() ? dbPtr_().times().size() : 0) << endl;
+}
+
+
+// parse these bits of info from /proc/meminfo (Linux)
+//
+// MemTotal:      2062660 kB
+// MemFree:       1124400 kB
+//
+// used = MemTotal - MemFree is what the free(1) uses.
+//
+void Foam::vtkPV3Foam::printMemory()
+{
+    const char* meminfo = "/proc/meminfo";
+
+    if (exists(meminfo))
+    {
+        IFstream is(meminfo);
+        label memTotal = 0;
+        label memFree = 0;
+
+        string line;
+
+        while (is.getLine(line).good())
+        {
+            char tag[32];
+            int value;
+
+            if (sscanf(line.c_str(), "%30s %d", tag, &value) == 2)
+            {
+                if (!strcmp(tag, "MemTotal:"))
+                {
+                    memTotal = value;
+                }
+                else if (!strcmp(tag, "MemFree:"))
+                {
+                    memFree = value;
+                }
+            }
+        }
+
+        Info << "memUsed: " << (memTotal - memFree) << " kB\n";
+    }
 }
 
 // ************************************************************************* //

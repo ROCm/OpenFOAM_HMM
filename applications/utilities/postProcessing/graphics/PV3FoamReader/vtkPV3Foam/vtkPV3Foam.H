@@ -628,7 +628,7 @@ public:
 
     // Member Functions
 
-        //- Update 
+        //- Update
         void UpdateInformation();
 
         void Update(vtkMultiBlockDataSet* output);
@@ -652,6 +652,9 @@ public:
 
         //- Debug information
         void PrintSelf(ostream&, vtkIndent) const;
+
+        //- Simple memory used debugging information
+        static void printMemory();
 
 };
 
