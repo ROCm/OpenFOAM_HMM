@@ -337,23 +337,21 @@ Foam::argList::argList
 
             Switch distributed(false);
 
-            if (decompositionDict.found("distributed"))
+            if
+            (
+                decompositionDict.readIfPresent("distributed", distributed)
+             && distributed
+            )
             {
-                decompositionDict.lookup("distributed") >> distributed;
+                decompositionDict.lookup("roots") >> roots;
 
-                if (distributed)
+                if (roots.size() != Pstream::nProcs()-1)
                 {
-                    decompositionDict.lookup("roots") >> roots;
-
-                    if (roots.size() != Pstream::nProcs())
-                    {
-                        FatalError
-                            << "number of entries in "
-                            << "decompositionDict::roots"
-                            << " is not equal to the number of processors "
-                            << Pstream::nProcs()
-                            << exit(FatalError);
-                    }
+                    FatalError
+                        << "number of entries in decompositionDict::roots"
+                        << " is not equal to the number of slaves "
+                        << Pstream::nProcs()-1
+                        << exit(FatalError);
                 }
             }
 

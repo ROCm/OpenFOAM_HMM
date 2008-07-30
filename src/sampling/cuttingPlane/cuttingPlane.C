@@ -29,6 +29,15 @@ License
 #include "linePointRef.H"
 #include "meshTools.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// set values for what is close to zero and what is considered to
+// be positive (and not just rounding noise)
+//! @cond localScope
+const Foam::scalar zeroish  = Foam::SMALL;
+const Foam::scalar positive = Foam::SMALL * 1E3;
+//! @endcond localScope
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Find cut cells
@@ -71,8 +80,8 @@ void Foam::cuttingPlane::calcCutCells
 
             if
             (
-                (dotProducts[e[0]] < 0 && dotProducts[e[1]] > 0)
-             || (dotProducts[e[1]] < 0 && dotProducts[e[0]] > 0)
+                (dotProducts[e[0]] < zeroish && dotProducts[e[1]] > positive)
+             || (dotProducts[e[1]] < zeroish && dotProducts[e[0]] > positive)
             )
             {
                 nCutEdges++;
@@ -116,8 +125,8 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
 
         if
         (
-            (dotProducts[e[0]] < 0 && dotProducts[e[1]] > 0)
-         || (dotProducts[e[1]] < 0 && dotProducts[e[0]] > 0)
+            (dotProducts[e[0]] < zeroish && dotProducts[e[1]] > positive)
+         || (dotProducts[e[1]] < zeroish && dotProducts[e[0]] > positive)
         )
         {
             // Edge is cut.
@@ -126,7 +135,19 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
 
             scalar alpha = lineIntersect(linePointRef(p0, p1));
 
-            dynCuttingPoints.append((1-alpha)*p0 + alpha*p1);
+            if (alpha < zeroish)
+            {
+                dynCuttingPoints.append(p0);
+            }
+            else if (alpha > 1.0)
+            {
+                dynCuttingPoints.append(p1);
+            }
+            else
+            {
+                dynCuttingPoints.append((1-alpha)*p0 + alpha*p1);
+            }
+
             edgePoint[edgeI] = dynCuttingPoints.size() - 1;
         }
     }

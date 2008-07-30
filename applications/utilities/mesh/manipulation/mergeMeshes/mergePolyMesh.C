@@ -275,6 +275,12 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         patchIndices[patchI] = patchIndex(bm[patchI]);
     }
 
+    // Temporary: update number of allowable patches. This should be
+    // determined at the top - before adding anything.
+    meshMod_.setNumPatches(patchNames_.size());
+
+
+
     const faceZoneMesh& fz = m.faceZones();
     labelList faceZoneIndices(fz.size());
 
@@ -315,12 +321,6 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
             }
         }
 
-        newOwn = own[faceI];
-        if (newOwn > -1) newOwn = renumberCells[newOwn];
-
-        newNei = nei[faceI];
-        if (newNei > -1) newNei = renumberCells[newNei];
-
         if (faceI < m.nInternalFaces() || faceI >= m.nFaces())
         {
             newPatch = -1;
@@ -329,6 +329,20 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         {
             newPatch = patchIndices[bm.whichPatch(faceI)];
         }
+
+        newOwn = own[faceI];
+        if (newOwn > -1) newOwn = renumberCells[newOwn];
+
+        if (newPatch > -1) 
+        {
+            newNei = -1;
+        } 
+        else 
+        {
+            newNei = nei[faceI];
+            newNei = renumberCells[newNei];
+        }
+
 
         newZone = fz.whichZone(faceI);
         newZoneFlip = false;

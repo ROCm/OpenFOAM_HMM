@@ -14,11 +14,9 @@
 =========================================================================*/
 // .NAME vtkPV3FoamReader - reads a dataset in OpenFOAM format
 // .SECTION Description
-// vtkPV3FoamReader creates an multiblock dataset. It reads a controlDict
-// file, mesh information, and time dependent data.  The controlDict file
-// contains timestep information. The polyMesh folders contain mesh information
-// The time folders contain transient data for the cells  Each folder can
-// contain any number of data files.
+// vtkPV3FoamReader creates an multiblock dataset.
+// It uses the OpenFOAM infrastructure (fvMesh, etc) to
+// handle mesh and field data.
 
 #ifndef __vtkPV3FoamReader_h
 #define __vtkPV3FoamReader_h
@@ -66,6 +64,13 @@ public:
     vtkSetStringMacro(FileName);
     vtkGetStringMacro(FileName);
 
+    // Time control
+    // Set/Get the timestep and the timestep range
+    vtkSetMacro(TimeStep, int);
+    vtkGetMacro(TimeStep, int);
+    vtkSetVector2Macro(TimeStepRange, int);
+    vtkGetVector2Macro(TimeStepRange, int);
+
     // GUI update control
     vtkSetMacro(UpdateGUI, int);
     vtkGetMacro(UpdateGUI, int);
@@ -86,23 +91,9 @@ public:
     vtkSetMacro(IncludeZones, int);
     vtkGetMacro(IncludeZones, int);
 
-    // FOAM patch names control
+    // FOAM display patch names control
     vtkSetMacro(ShowPatchNames, int);
     vtkGetMacro(ShowPatchNames, int);
-
-    // Time-step slider control
-    vtkSetMacro(TimeStep, int);
-    vtkGetMacro(TimeStep, int);
-    vtkSetVector2Macro(TimeStepRange, int);
-    vtkGetVector2Macro(TimeStepRange, int);
-
-    // Time selection list control
-    vtkDataArraySelection* GetTimeSelection();
-    int GetNumberOfTimeArrays();
-    const char* GetTimeArrayName(int index);
-    int GetTimeArrayStatus(const char* name);
-    void SetTimeArrayStatus(const char* name, int status);
-
 
     // Region selection list control
     vtkDataArraySelection* GetRegionSelection();
@@ -121,16 +112,16 @@ public:
     // pointField selection list control
     vtkDataArraySelection* GetPointFieldSelection();
     int GetNumberOfPointFieldArrays();
-    const char* GetPointFieldArrayName(int index);
     int GetPointFieldArrayStatus(const char* name);
     void SetPointFieldArrayStatus(const char* name, int status);
+    const char* GetPointFieldArrayName(int index);
 
     // lagrangianField selection list control
     vtkDataArraySelection* GetLagrangianFieldSelection();
     int GetNumberOfLagrangianFieldArrays();
-    const char* GetLagrangianFieldArrayName(int index);
     int GetLagrangianFieldArrayStatus(const char* name);
     void SetLagrangianFieldArrayStatus(const char* name, int status);
+    const char* GetLagrangianFieldArrayName(int index);
 
     // Callback registered with the SelectionObserver
     // for all the selection lists
@@ -182,7 +173,11 @@ private:
     //- Remove patch names from the view
     void removePatchNamesFromView();
 
+    int TimeStep;
+    int TimeStepRange[2];
+
     int CacheMesh;
+
     int ExtrapolateWalls;
     int IncludeSets;
     int IncludeZones;
@@ -190,18 +185,22 @@ private:
 
     int UpdateGUI;
     int UpdateGUIOld;
-    int TimeStep;
-    int TimeStepRange[2];
 
-    vtkDataArraySelection* TimeSelection;
     vtkDataArraySelection* RegionSelection;
     vtkDataArraySelection* VolFieldSelection;
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;
+
+    //- Access to the output port1
+    vtkMultiBlockDataSet* output1_;
 
     //BTX
     Foam::vtkPV3Foam* foamData_;
     //ETX
 };
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
+
+// ************************************************************************* //

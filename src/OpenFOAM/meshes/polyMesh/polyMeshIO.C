@@ -284,6 +284,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
+        pointZones_.setSize(newPointZones.size());
         forAll (pointZones_, pzI)
         {
             pointZones_[pzI] = newPointZones[pzI];
@@ -304,6 +305,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
+        faceZones_.setSize(newFaceZones.size());
         forAll (faceZones_, fzI)
         {
             faceZones_[fzI].resetAddressing
@@ -328,6 +330,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
+        cellZones_.setSize(newCellZones.size());
         forAll (cellZones_, czI)
         {
             cellZones_[czI] = newCellZones[czI];

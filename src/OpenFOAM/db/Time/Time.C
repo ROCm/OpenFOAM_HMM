@@ -418,19 +418,55 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
         return times[times.size() - 1];
     }
 
+    label nearestIndex = -1;
     scalar deltaT = GREAT;
-    label closesti = 0;
 
     for (label i=1; i<times.size(); i++)
     {
-        if (mag(times[i].value() - t) < deltaT)
+        scalar diff = mag(times[i].value() - t);
+        if (diff < deltaT)
         {
-            deltaT = mag(times[i].value() - t);
-            closesti = i;
+            deltaT = diff;
+            nearestIndex = i;
         }
     }
 
-    return times[closesti];
+    return times[nearestIndex];
+}
+
+//
+// This should work too,
+// if we don't worry about checking "constant" explicitly
+//
+// Foam::instant Foam::Time::findClosestTime(const scalar t) const
+// {
+//     instantList times = Time::findTimes(path());
+//     label timeIndex = min(findClosestTimeIndex(times, t), 0);
+//     return times[timeIndex];
+// }
+
+Foam::label Foam::Time::findClosestTimeIndex
+(
+    const instantList& times,
+    const scalar t
+)
+{
+    label nearestIndex = -1;
+    scalar deltaT = GREAT;
+
+    forAll (times, i)
+    {
+        if (times[i].name() == "constant") continue;
+
+        scalar diff = fabs(times[i].value() - t);
+        if (diff < deltaT)
+        {
+            deltaT = diff;
+            nearestIndex = i;
+        }
+    }
+
+    return nearestIndex;
 }
 
 

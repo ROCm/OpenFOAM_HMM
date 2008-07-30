@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -9,40 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      decomposeParDict;
+    class       polyBoundaryMesh;
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-numberOfSubdomains 6;
-
-method          hierarchical;
-//method          metis;
-//method          parMetis;
-
-simpleCoeffs
+4
+(
+inlet
 {
-    n               (4 1 1);
-    delta           0.001;
+    type patch;
+    physicalType inlet;
+    nFaces 134;
+    startFace 21254;
 }
 
-hierarchicalCoeffs
+outlet
 {
-    n               (3 2 1);
-    delta           0.001;
-    order           xyz;
+    type patch;
+    physicalType outlet;
+    nFaces 160;
+    startFace 21388;
 }
 
-manualCoeffs
+wall
 {
-    dataFile        "cellDecomposition";
+    type wall;
+    physicalType wall;
+    nFaces 78;
+    startFace 21548;
 }
 
-metisCoeffs
+frontAndBack
 {
-    //n                   (5 1 1);
-    //cellWeightsFile     "constant/cellWeightsFile";
+    type empty;
+    physicalType empty;
+    nFaces 21440;
+    startFace 21626;
 }
-
+)
 
 // ************************************************************************* //

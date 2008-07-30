@@ -30,6 +30,10 @@ Description
 
     No attempt at resolving degenerate cases.
 
+Note
+    When the cutting plane coincides with a mesh face, the cell edge on the
+    positive side of the plane is taken.
+
 SourceFiles
     cuttingPlane.C
 
