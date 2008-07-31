@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "writers.H"
@@ -35,20 +33,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineNamedTemplateTypeNameAndDebug(scalarWriter, 0);
-defineTemplateRunTimeSelectionTable(scalarWriter, word);
+defineNamedTemplateTypeNameAndDebug(writerScalarWriter, 0);
+defineTemplateRunTimeSelectionTable(writerScalarWriter, word);
 
-defineNamedTemplateTypeNameAndDebug(vectorWriter, 0);
-defineTemplateRunTimeSelectionTable(vectorWriter, word);
+defineNamedTemplateTypeNameAndDebug(writerVectorWriter, 0);
+defineTemplateRunTimeSelectionTable(writerVectorWriter, word);
 
-defineNamedTemplateTypeNameAndDebug(sphericalTensorWriter, 0);
-defineTemplateRunTimeSelectionTable(sphericalTensorWriter, word);
+defineNamedTemplateTypeNameAndDebug(writerSphericalTensorWriter, 0);
+defineTemplateRunTimeSelectionTable(writerSphericalTensorWriter, word);
 
-defineNamedTemplateTypeNameAndDebug(symmTensorWriter, 0);
-defineTemplateRunTimeSelectionTable(symmTensorWriter, word);
+defineNamedTemplateTypeNameAndDebug(writerSymmTensorWriter, 0);
+defineTemplateRunTimeSelectionTable(writerSymmTensorWriter, word);
 
-defineNamedTemplateTypeNameAndDebug(tensorWriter, 0);
-defineTemplateRunTimeSelectionTable(tensorWriter, word);
+defineNamedTemplateTypeNameAndDebug(writerTensorWriter, 0);
+defineTemplateRunTimeSelectionTable(writerTensorWriter, word);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

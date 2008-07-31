@@ -31,11 +31,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 template<class Type>
-autoPtr<writer<Type> > writer<Type>::New(const word& writeType)
+Foam::autoPtr<Foam::writer<Type> > Foam::writer<Type>::New
+(
+    const word& writeType
+)
 {
     typename wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_
@@ -60,7 +60,7 @@ autoPtr<writer<Type> > writer<Type>::New(const word& writeType)
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-fileName writer<Type>::getBaseName
+Foam::fileName Foam::writer<Type>::getBaseName
 (
     const coordSet& points,
     const wordList& valueSets
@@ -78,7 +78,7 @@ fileName writer<Type>::getBaseName
 
 
 template<class Type>
-void writer<Type>::writeCoord
+void Foam::writer<Type>::writeCoord
 (
     const coordSet& points,
     const label pointI,
@@ -97,7 +97,7 @@ void writer<Type>::writeCoord
 
 
 template<class Type>
-void writer<Type>::writeTable
+void Foam::writer<Type>::writeTable
 (
     const coordSet& points,
     const List<Type>& values,
@@ -109,16 +109,14 @@ void writer<Type>::writeTable
         writeCoord(points, pointI, os);
 
         os << token::SPACE;
-
         write(values[pointI], os);
-
         os << endl;
     }
 }
 
 
 template<class Type>
-void writer<Type>::writeTable
+void Foam::writer<Type>::writeTable
 (
     const coordSet& points,
     const List<const List<Type>*>& valuesPtrList,
@@ -132,9 +130,7 @@ void writer<Type>::writeTable
         forAll(valuesPtrList, i)
         {
             os << token::SPACE;
-
             const List<Type>& values = *valuesPtrList[i];
-
             write(values[pointI], os);
         }
         os << endl;
@@ -144,36 +140,44 @@ void writer<Type>::writeTable
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 template<class Type>
-writer<Type>::writer()
+Foam::writer<Type>::writer()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-writer<Type>::~writer()
+Foam::writer<Type>::~writer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Ostream& Foam::writer<Type>::write(const scalar value, Ostream& os) const
+Foam::Ostream& Foam::writer<Type>::write
+(
+    const scalar value,
+    Ostream& os
+) const
 {
     return os << value;
 }
 
 
 template<class Type>
-Foam::Ostream& Foam::writer<Type>::write(const vector& value, Ostream& os) const
+template<class VSType>
+Foam::Ostream& Foam::writer<Type>::writeVS
+(
+    const VSType& value,
+    Ostream& os
+) const
 {
-    for (direction d=0; d<vector::nComponents; d++)
+    for (direction d=0; d<VSType::nComponents; d++)
     {
         os << value.component(d);
 
-        if (d <= vector::nComponents-1)
+        if (d <= VSType::nComponents-1)
         {
             os << token::TAB;
         }
@@ -183,23 +187,47 @@ Foam::Ostream& Foam::writer<Type>::write(const vector& value, Ostream& os) const
 
 
 template<class Type>
-Foam::Ostream& Foam::writer<Type>::write(const tensor& value, Ostream& os) const
+Foam::Ostream& Foam::writer<Type>::write
+(
+    const vector& value,
+    Ostream& os
+) const
 {
-    for (direction d=0; d<tensor::nComponents; d++)
-    {
-        os << value.component(d);
-
-        if (d <= tensor::nComponents-1)
-        {
-            os << token::TAB;
-        }
-    }
-    return os;
+    return writeVS(value, os);
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+Foam::Ostream& Foam::writer<Type>::write
+(
+    const sphericalTensor& value,
+    Ostream& os
+) const
+{
+    return writeVS(value, os);
+}
 
-} // End namespace Foam
+
+template<class Type>
+Foam::Ostream& Foam::writer<Type>::write
+(
+    const symmTensor& value,
+    Ostream& os
+) const
+{
+    return writeVS(value, os);
+}
+
+
+template<class Type>
+Foam::Ostream& Foam::writer<Type>::write
+(
+    const tensor& value,
+    Ostream& os
+) const
+{
+    return writeVS(value, os);
+}
+
 
 // ************************************************************************* //

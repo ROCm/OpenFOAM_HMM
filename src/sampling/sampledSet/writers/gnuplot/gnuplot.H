@@ -63,28 +63,26 @@ public:
         //- Construct null
         gnuplot();
 
-    // Destructor
 
-        virtual ~gnuplot();
+    //- Destructor
+    virtual ~gnuplot();
 
 
     // Member Functions
 
-        // Write
+        virtual fileName getFileName
+        (
+            const coordSet&,
+            const wordList&
+        ) const;
 
-            virtual fileName getFileName
-            (
-                const coordSet&,
-                const wordList&
-            ) const;
-
-            void write
-            (
-                const coordSet&,
-                const wordList&,
-                const List<const Field<Type>*>&,
-                Ostream& os
-            ) const;
+        void write
+        (
+            const coordSet&,
+            const wordList&,
+            const List<const Field<Type>*>&,
+            Ostream& os
+        ) const;
 };
 
 
