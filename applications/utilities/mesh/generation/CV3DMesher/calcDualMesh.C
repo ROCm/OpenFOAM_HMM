@@ -391,8 +391,6 @@ void Foam::CV3D::calcDualMesh
 
         patchOwners[p].shrink();
 
-        // TODO SORT BOUNDARY FACES AND NEIGHBOURS?
-
         patchSizes[p] = patchFaces[p].size();
 
         patchStarts[p] = nInternalFaces + nBoundaryFaces;
