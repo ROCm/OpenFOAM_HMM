@@ -9,37 +9,48 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    object      boundary;
+    class       volScalarField;
+    object      G;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
-(
-    box
-    {
-        type            wall;
-        nFaces          300;
-        startFace       303675;
-    }
+dimensions      [1 0 -3 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
     floor
     {
-        type            wall;
-        nFaces          5125;
-        startFace       303975;
+        type            MarshakRadiation;
+        T               T;
+        emissivity      1;
+        value           uniform 0;
     }
-    ceiling
-    {
-        type            wall;
-        nFaces          5225;
-        startFace       309100;
-    }
+
     fixedWalls
     {
-        type            wall;
-        nFaces          6000;
-        startFace       314325;
+        type            MarshakRadiation;
+        T               T;
+        emissivity      1;
+        value           uniform 0;
     }
-)
+
+    ceiling
+    {
+        type            MarshakRadiation;
+        T               T;
+        emissivity      1;
+        value           uniform 0;
+    }
+
+    box
+    {
+        type            MarshakRadiation;
+        T               T;
+        emissivity      1;
+        value           uniform 0;
+    }
+}
 
 // ************************************************************************* //
