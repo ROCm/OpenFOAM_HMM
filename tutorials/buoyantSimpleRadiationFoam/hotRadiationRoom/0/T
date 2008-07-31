@@ -9,37 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    object      boundary;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
-(
-    box
-    {
-        type            wall;
-        nFaces          300;
-        startFace       303675;
-    }
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 300;
+
+boundaryField
+{
     floor
     {
-        type            wall;
-        nFaces          5125;
-        startFace       303975;
+        type            fixedValue;
+        value           uniform 300.0;
     }
+
     ceiling
     {
-        type            wall;
-        nFaces          5225;
-        startFace       309100;
+        type            fixedValue;
+        value           uniform 300.0;
     }
+
     fixedWalls
     {
-        type            wall;
-        nFaces          6000;
-        startFace       314325;
+        type            zeroGradient;
     }
-)
+
+    box
+    {
+        type            fixedValue;
+        value           uniform 500.0;
+    }
+}
 
 // ************************************************************************* //
