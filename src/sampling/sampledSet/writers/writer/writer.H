@@ -29,8 +29,8 @@ Description
     Base class for graphics format writing. Entry points are
     - write(..). \n
       Write to an Ostream a table of points with corresponding values.
-    - write(scalar/vector/tensor). \n
-      Write single scalar/vector/tensor.
+    - write(scalar/vector/sphericalTensor/symmTensor/tensor). \n
+      Write single scalar/vector/sphericalTensor/symmTensor/tensor.
       Default is to write space separated components.
 
     Example:
@@ -151,43 +151,47 @@ public:
         writer();
 
 
-    // Destructor
-
-        virtual ~writer() = 0;
+    //- Destructor
+    virtual ~writer() = 0;
 
 
     // Member Functions
 
-        // Access
+        //- Generate file name with correct extension
+        virtual fileName getFileName
+        (
+            const coordSet&,
+            const wordList&
+        ) const = 0;
 
-        // Write
+        //- General entry point for writing.
+        //  The data is organized in a set of point with one or
+        //  more values per point
+        virtual void write
+        (
+            const coordSet&,
+            const wordList&,
+            const List<const Field<Type>*>&,
+            Ostream&
+        ) const = 0;
 
-            //- Generate file name with correct extension
-            virtual fileName getFileName
-            (
-                const coordSet&,
-                const wordList&
-            ) const = 0;
+        //- Write scalar as ascii
+        virtual Ostream& write(const scalar, Ostream&) const;
 
-            //- General entry point for writing.
-            //  The data is organized in a set of point with one or
-            //  more values per point
-            virtual void write
-            (
-                const coordSet&,
-                const wordList&,
-                const List<const Field<Type>*>&,
-                Ostream&
-            ) const = 0;
+        template<class VSType>
+        Ostream& writeVS(const VSType& value, Ostream& os) const;
 
-            //- Write scalar as ascii
-            virtual Ostream& write(const scalar, Ostream&) const;
+        //- Write vector. Tab separated ascii
+        virtual Ostream& write(const vector&, Ostream&) const;
 
-            //- Write vector. Tab separated ascii
-            virtual Ostream& write(const vector&, Ostream&) const;
+        //- Write sphericalTensor. Tab separated ascii
+        virtual Ostream& write(const sphericalTensor&, Ostream&) const;
 
-            //- Write tensor. Tab separated ascii
-            virtual Ostream& write(const tensor&, Ostream&) const;
+        //- Write symmTensor. Tab separated ascii
+        virtual Ostream& write(const symmTensor&, Ostream&) const;
+
+        //- Write tensor. Tab separated ascii
+        virtual Ostream& write(const tensor&, Ostream&) const;
 };
 
 
@@ -202,34 +206,47 @@ public:
 #endif
 
 // Only used internally
-#define makeTypeWritersTypeName(type)                       \
-                                                            \
+#define makeTypeWritersTypeName(type)                                         \
+                                                                              \
 defineNamedTemplateTypeNameAndDebug(type, 0);
 
 // Used externally sometimes
-#define makeWritersTypeName(typeWriter)                     \
-                                                            \
-makeTypeWritersTypeName(typeWriter##ScalarWriter);          \
-makeTypeWritersTypeName(typeWriter##VectorWriter);          \
+#define makeWritersTypeName(typeWriter)                                       \
+                                                                              \
+makeTypeWritersTypeName(typeWriter##ScalarWriter);                            \
+makeTypeWritersTypeName(typeWriter##VectorWriter);                            \
+makeTypeWritersTypeName(typeWriter##SphericalTensorWriter);                   \
+makeTypeWritersTypeName(typeWriter##SymmTensorWriter);                        \
 makeTypeWritersTypeName(typeWriter##TensorWriter);
 
 // Define type info for single template instantiation (e.g. vector)
-#define makeWriterTypes(WriterType, type)                   \
-                                                            \
-defineNamedTemplateTypeNameAndDebug(type, 0);               \
-                                                            \
-addToRunTimeSelectionTable                                  \
-(                                                           \
-    WriterType, type, word                                  \
+#define makeWriterTypes(WriterType, type)                                     \
+                                                                              \
+defineNamedTemplateTypeNameAndDebug(type, 0);                                 \
+                                                                              \
+addToRunTimeSelectionTable                                                    \
+(                                                                             \
+    WriterType, type, word                                                    \
 );
 
 
 // Define type info info for scalar, vector etc. instantiations
-#define makeWriters(typeWriter)                             \
-                                                            \
-makeWriterTypes(scalarWriter, typeWriter##ScalarWriter);    \
-makeWriterTypes(vectorWriter, typeWriter##VectorWriter);    \
-makeWriterTypes(tensorWriter, typeWriter##TensorWriter);
+#define makeWriters(typeWriter)                                               \
+                                                                              \
+makeWriterTypes(writerScalarWriter, typeWriter##ScalarWriter);                \
+makeWriterTypes(writerVectorWriter, typeWriter##VectorWriter);                \
+makeWriterTypes(writerSphericalTensorWriter, typeWriter##SphericalTensorWriter);\
+makeWriterTypes(writerSymmTensorWriter, typeWriter##SymmTensorWriter);        \
+makeWriterTypes(writerTensorWriter, typeWriter##TensorWriter);
+
+
+#define makeWritersTypedefs(typeWriter)                                       \
+                                                                              \
+typedef typeWriter<scalar> typeWriter##ScalarWriter;                          \
+typedef typeWriter<vector> typeWriter##VectorWriter;                          \
+typedef typeWriter<sphericalTensor> typeWriter##SphericalTensorWriter;        \
+typedef typeWriter<symmTensor> typeWriter##SymmTensorWriter;                  \
+typedef typeWriter<tensor> typeWriter##TensorWriter;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

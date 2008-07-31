@@ -49,6 +49,7 @@ void Foam::vtkPV3Foam::addPatchMesh
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::addPatchMesh - " << p.name() << endl;
+        printMemory();
     }
 
     // Convert Foam mesh vertices to VTK
@@ -88,6 +89,7 @@ void Foam::vtkPV3Foam::addPatchMesh
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::addPatchMesh - " << p.name() << endl;
+        printMemory();
     }
 }
 

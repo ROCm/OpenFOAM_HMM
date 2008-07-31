@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::writer
+    Foam::rawWriters
 
-Description
+SourceFiles
+    writers.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,18 +40,8 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef writer<scalar> scalarWriter;
-typedef writer<vector> vectorWriter;
-typedef writer<sphericalTensor> sphericalTensorWriter;
-typedef writer<symmTensor> symmTensorWriter;
-typedef writer<tensor> tensorWriter;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeWritersTypedefs(writer)
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -31,26 +31,6 @@
             <TimeRangeInformationHelper/>
         </DoubleVectorProperty>
 
-<!-- Update GUI check box -->
-        <IntVectorProperty
-            name="UpdateGUI"
-            command="SetUpdateGUI"
-            number_of_elements="1"
-            default_values="0">
-            <BooleanDomain
-                name="bool"/>
-        </IntVectorProperty>
-
-<!-- Cache mesh check box -->
-        <IntVectorProperty
-            name="CacheMesh"
-            command="SetCacheMesh"
-            number_of_elements="1"
-            default_values="1">
-            <BooleanDomain
-                name="bool"/>
-        </IntVectorProperty>
-
 <!-- ExtrapolateWalls check box -->
         <IntVectorProperty
             name="ExtrapolateWalls"
@@ -186,34 +166,25 @@
             </ArraySelectionDomain>
         </StringVectorProperty>
 
-<!-- Available times array -->
-<!-- PV3FOAM_TIMESELECTION must be defined when compiling vtkPV3Foam
-     might discard this in the future
-        <StringVectorProperty
-            name="TimeArrayInfo"
-            information_only="1">
-            <ArraySelectionInformationHelper
-                attribute_name="Time"/>
-        </StringVectorProperty>
-        <StringVectorProperty
-            name="TimeStatus"
-            command="SetTimeArrayStatus"
-            number_of_elements="0"
-            repeat_command="1"
-            number_of_elements_per_command="2"
-            element_types="2 0"
-            information_property="TimeArrayInfo">
-            <ArraySelectionDomain
-                name="array_list">
-                <RequiredProperties>
-                    <Property name="TimeArrayInfo"
-                              function="ArrayList"/>
-                </RequiredProperties>
-            </ArraySelectionDomain>
-        </StringVectorProperty>
+<!-- Cache mesh check box -->
+        <IntVectorProperty
+            name="CacheMesh"
+            command="SetCacheMesh"
+            number_of_elements="1"
+            default_values="1">
+            <BooleanDomain
+                name="bool"/>
+        </IntVectorProperty>
 
-PV3FOAM_TIMESELECTION
--->
+<!-- Update GUI check box -->
+        <IntVectorProperty
+            name="UpdateGUI"
+            command="SetUpdateGUI"
+            number_of_elements="1"
+            default_values="0">
+            <BooleanDomain
+                name="bool"/>
+        </IntVectorProperty>
 
     </SourceProxy>
     </ProxyGroup>

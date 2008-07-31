@@ -13,10 +13,10 @@ sampledSet/sampledSets/sampledSets.C
 sampledSet/sampledSetsFunctionObject/sampledSetsFunctionObject.C
 
 sampledSet/writers/writer/writers.C
+sampledSet/writers/raw/rawWriters.C
 sampledSet/writers/xmgr/xmgrWriters.C
 sampledSet/writers/gnuplot/gnuplotWriters.C
 sampledSet/writers/jplot/jplotWriters.C
-sampledSet/writers/raw/rawWriters.C
 
 cuttingPlane/cuttingPlane.C
 

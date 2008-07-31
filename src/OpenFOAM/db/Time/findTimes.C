@@ -35,12 +35,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-instantList Time::findTimes(const fileName& directory)
+Foam::instantList Foam::Time::findTimes(const fileName& directory)
 {
     if (debug)
     {
@@ -100,10 +95,5 @@ instantList Time::findTimes(const fileName& directory)
 
     return Times;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

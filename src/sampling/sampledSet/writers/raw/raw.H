@@ -64,28 +64,25 @@ public:
         raw();
 
 
-    // Destructor
-
-        virtual ~raw();
+    //- Destructor
+    virtual ~raw();
 
 
     // Member Functions
 
-        // Write
+        virtual fileName getFileName
+        (
+            const coordSet&,
+            const wordList&
+        ) const;
 
-            virtual fileName getFileName
-            (
-                const coordSet&,
-                const wordList&
-            ) const;
-
-            virtual void write
-            (
-                const coordSet&,
-                const wordList&,
-                const List<const Field<Type>*>&,
-                Ostream& os
-            ) const;
+        virtual void write
+        (
+            const coordSet&,
+            const wordList&,
+            const List<const Field<Type>*>&,
+            Ostream& os
+        ) const;
 };
 
 

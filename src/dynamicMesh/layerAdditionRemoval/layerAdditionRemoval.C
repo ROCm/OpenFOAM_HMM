@@ -102,7 +102,7 @@ Foam::scalar Foam::layerAdditionRemoval::readOldThickness
     const dictionary& dict
 )
 {
-    dict.lookupOrDefault("oldLayerThickness", -1.0);
+    return dict.lookupOrDefault("oldLayerThickness", -1.0);
 }
 
 

@@ -58,4 +58,15 @@ manualCoeffs
     dataFile    "decompositionData";
 }
 
+
+//// Is the case distributred
+//distributed     yes;
+//// Per slave (so nProcs-1 entries) the directory above the case.
+//roots           
+//(
+//    "/tmp"
+//    "/tmp"
+//);
+
+
 // ************************************************************************* //
