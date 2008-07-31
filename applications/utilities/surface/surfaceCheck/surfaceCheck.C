@@ -49,20 +49,20 @@ bool validTri(const triSurface& surf, const label faceI)
      || (f[2] < 0) || (f[2] >= surf.points().size())
     )
     {
-        WarningIn("validTri(const triSurface&, const label)")
-            << "triangle " << faceI << " vertices " << f
-            << " uses point indices outside point range 0.."
-            << surf.points().size()-1 << endl;
+        //WarningIn("validTri(const triSurface&, const label)")
+        //    << "triangle " << faceI << " vertices " << f
+        //    << " uses point indices outside point range 0.."
+        //    << surf.points().size()-1 << endl;
 
         return false;
     }
 
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
     {
-        WarningIn("validTri(const triSurface&, const label)")
-            << "triangle " << faceI
-            << " uses non-unique vertices " << f
-            << endl;
+        //WarningIn("validTri(const triSurface&, const label)")
+        //    << "triangle " << faceI
+        //    << " uses non-unique vertices " << f
+        //    << endl;
         return false;
     }
 
@@ -91,11 +91,11 @@ bool validTri(const triSurface& surf, const label faceI)
          && ((f[2] == nbrF[0]) || (f[2] == nbrF[1]) || (f[2] == nbrF[2]))
         )
         {
-            WarningIn("validTri(const triSurface&, const label)")
-                << "triangle " << faceI << " vertices " << f
-                << " has the same vertices as triangle " << nbrFaceI
-                << " vertices " << nbrF
-                << endl;
+            //WarningIn("validTri(const triSurface&, const label)")
+            //    << "triangle " << faceI << " vertices " << f
+            //    << " has the same vertices as triangle " << nbrFaceI
+            //    << " vertices " << nbrF
+            //    << endl;
 
             return false;
         }
@@ -270,9 +270,9 @@ int main(int argc, char *argv[])
 
             if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
             {
-                WarningIn(args.executable())
-                    << "Illegal triangle " << faceI << " vertices " << f
-                    << " coords " << f.points(surf.points()) << endl;
+                //WarningIn(args.executable())
+                //    << "Illegal triangle " << faceI << " vertices " << f
+                //    << " coords " << f.points(surf.points()) << endl;
             }
             else
             {

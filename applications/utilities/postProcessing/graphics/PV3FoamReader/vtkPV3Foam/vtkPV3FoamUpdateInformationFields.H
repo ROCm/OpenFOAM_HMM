@@ -43,11 +43,23 @@ void Foam::vtkPV3Foam::updateInformationFields
         Info<< "<beg> Foam::vtkPV3Foam::updateInformationFields" << endl;
     }
 
-    // preserve the currently selected values
-    const stringList selectedEntries = getSelectedArrayEntries
-    (
-        arraySelection
-    );
+    stringList selectedEntries;
+    // enable 'p' and 'U' on the first call
+    if (arraySelection->GetNumberOfArrays() == 0 && !meshPtr_)
+    {
+        selectedEntries.setSize(2);
+        selectedEntries[0] = "p";
+        selectedEntries[1] = "U";
+    }
+    else
+    {
+        // preserve the currently selected values
+        selectedEntries = getSelectedArrayEntries
+        (
+            arraySelection
+        );
+    }
+
     arraySelection->RemoveAllArrays();
 
     // Search for list of objects for this time
@@ -56,33 +68,33 @@ void Foam::vtkPV3Foam::updateInformationFields
 
     //- Add volume fields to GUI
 /*
-    addFields<GeometricField<label, patchType, meshType> >
+    addToSelection<GeometricField<label, patchType, meshType> >
     (
         arraySelection,
         objects
     );
 */
-    addFields<GeometricField<scalar, patchType, meshType> >
+    addToSelection<GeometricField<scalar, patchType, meshType> >
     (
         arraySelection,
         objects
     );
-    addFields<GeometricField<vector, patchType, meshType> >
+    addToSelection<GeometricField<vector, patchType, meshType> >
     (
         arraySelection,
         objects
     );
-    addFields<GeometricField<sphericalTensor, patchType, meshType> >
+    addToSelection<GeometricField<sphericalTensor, patchType, meshType> >
     (
         arraySelection,
         objects
     );
-    addFields<GeometricField<symmTensor, patchType, meshType> >
+    addToSelection<GeometricField<symmTensor, patchType, meshType> >
     (
         arraySelection,
         objects
     );
-    addFields<GeometricField<tensor, patchType, meshType> >
+    addToSelection<GeometricField<tensor, patchType, meshType> >
     (
         arraySelection,
         objects

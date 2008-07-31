@@ -22,8 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    blockMesh
+
 Description
     A multi-block mesh generator.
+
+    Uses the block mesh description found in
+    @a constant/polyMesh/blockMeshDict
+    (or @a constant/\<region\>/polyMesh/blockMeshDict).
+
+Usage
+
+    - blockMesh [OPTION]
+
+    @param -blockTopology \n
+    Write the topology as a set of edges in OBJ format.
+
+    @param -region \<name\> \n
+    Specify an alternative mesh region.
+
+    @param -dict \<dictionary\> \n
+    Specify an alternative dictionary for the block mesh description.
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,59 +80,70 @@ int main(int argc, char *argv[])
 
     word regionName;
     fileName polyMeshDir;
+    word dictName("blockMeshDict");
+    fileName dictPath(runTime.constant());
 
     if (args.options().found("region"))
     {
-        regionName = args.options()["region"];
+        // constant/<region>/polyMesh/blockMeshDict
+        regionName  = args.options()["region"];
         polyMeshDir = regionName/polyMesh::meshSubDir;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
     }
     else
     {
-        regionName = polyMesh::defaultRegion;
+        // constant/polyMesh/blockMeshDict
+        regionName  = polyMesh::defaultRegion;
         polyMeshDir = polyMesh::meshSubDir;
     }
 
-
-    Info<< nl << "Reading block mesh description dictionary" << endl;
-
-    word dictName("blockMeshDict");
-    fileName dictPath(runTime.constant()/polyMeshDir);
+    fileName dictLocal = polyMeshDir;
 
     if (args.options().found("dict"))
     {
-        fileName userDict(args.options()["dict"]);
+        wordList elems(fileName(args.options()["dict"]).components());
+        dictName = elems[elems.size()-1];
+        dictPath = elems[0];
+        dictLocal = "";
 
-        dictName = userDict.name();
-        dictPath = userDict.path();
+        if (elems.size() == 1)
+        {
+            dictPath = ".";
+        }
+        else if (elems.size() > 2)
+        {
+            dictLocal = fileName(SubList<word>(elems, elems.size()-2, 1));
+        }
     }
 
-    IOobject meshDescriptionIOobject
+
+    IOobject meshDictIo
     (
         dictName,
         dictPath,
+        dictLocal,
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
         false
     );
 
-    if (!meshDescriptionIOobject.headerOk())
+    if (!meshDictIo.headerOk())
     {
         FatalErrorIn(args.executable())
-            << "Cannot open mesh description file: " << nl
-            << dictPath/dictName << nl
+            << "Cannot open mesh description file\n    "
+            << meshDictIo.objectPath()
+            << nl
             << exit(FatalError);
     }
 
-    IOdictionary meshDescription(meshDescriptionIOobject);
+    Info<< nl << "Creating block mesh from\n    "
+        << meshDictIo.objectPath() << endl;
 
+    IOdictionary meshDict(meshDictIo);
 
-    Info<< nl << "Creating block mesh" << endl;
-
-    blockMesh blocks(meshDescription);
-
+    blockMesh blocks(meshDict);
 
     if (writeTopo)
     {
@@ -169,7 +200,7 @@ int main(int argc, char *argv[])
     (
         runTime,
         runTime.constant(),
-        polyMeshDir,            //polyMesh::meshSubDir
+        polyMeshDir,
         patchNames,
         patchTypes,
         defaultFacesName,
@@ -197,11 +228,11 @@ int main(int argc, char *argv[])
 
 
     // Read in a list of dictionaries for the merge patch pairs
-    if (meshDescription.found("mergePatchPairs"))
+    if (meshDict.found("mergePatchPairs"))
     {
         List<Pair<word> > mergePatchPairs
         (
-            meshDescription.lookup("mergePatchPairs")
+            meshDict.lookup("mergePatchPairs")
         );
 
         if (mergePatchPairs.size())

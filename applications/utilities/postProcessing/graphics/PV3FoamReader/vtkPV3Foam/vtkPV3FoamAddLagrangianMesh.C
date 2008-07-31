@@ -52,6 +52,7 @@ void Foam::vtkPV3Foam::addLagrangianMesh
     {
         Info<< "<beg> Foam::vtkPV3Foam::addLagrangianMesh - timePath "
             << mesh.time().timePath()/"lagrangian" << endl;
+        printMemory();
     }
 
     fileNameList cloudDirs
@@ -103,6 +104,7 @@ void Foam::vtkPV3Foam::addLagrangianMesh
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::addLagrangianMesh" << endl;
+        printMemory();
     }
 }
 
