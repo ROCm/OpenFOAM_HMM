@@ -104,13 +104,9 @@ public:
 
         // Query
 
-            //- Extract feature edges/points(2D)
+            //- Extract feature edges/points
             //  using the given feature angle in deg
-            labelList extractFeatures2D(const scalar featAngle) const;
-
-            //- Extract feature edges/points(3D)
-            //  using the given feature angle in deg
-            void extractFeatures3D
+            void extractFeatures
             (
                 const scalar featAngle,
                 labelList& featPoints,

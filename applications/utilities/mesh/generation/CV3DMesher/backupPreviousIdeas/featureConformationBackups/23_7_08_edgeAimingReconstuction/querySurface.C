@@ -53,7 +53,43 @@ Foam::querySurface::~querySurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::querySurface::extractFeatures
+Foam::labelList Foam::querySurface::extractFeatures2D
+(
+    const scalar featAngle
+) const
+{
+    scalar featCos = cos(mathematicalConstant::pi*featAngle/180.0);
+
+    const labelListList& edgeFaces = this->edgeFaces();
+    const pointField& localPoints = this->localPoints();
+    const edgeList& edges = this->edges();
+    const vectorField& faceNormals = this->faceNormals();
+
+    DynamicList<label> featEdges(edges.size());
+
+    forAll(edgeFaces, edgeI)
+    {
+        const edge& e = edges[edgeI];
+
+        if (magSqr(e.vec(localPoints) & vector(1,1,0)) < SMALL)
+        {
+            const labelList& eFaces = edgeFaces[edgeI];
+
+            if
+            (
+                eFaces.size() == 2
+             && (faceNormals[eFaces[0]] & faceNormals[eFaces[1]]) < featCos
+            )
+            {
+                featEdges.append(edgeI);
+            }
+        }
+    }
+
+    return featEdges.shrink();
+}
+
+void Foam::querySurface::extractFeatures3D
 (
     const scalar featAngle,
     labelList& featPoints,
@@ -100,7 +136,7 @@ void Foam::querySurface::extractFeatures
 
         tempFeatEdges.shrink();
 
-        if(tempFeatEdges.size() > 2)
+        if(tempFeatEdges.size())
         {
             tempFeatPoints.append(ptI);
 
