@@ -45,7 +45,8 @@ Description
 
 void Foam::vtkPV3Foam::convertMeshVolume
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -54,8 +55,12 @@ void Foam::vtkPV3Foam::convertMeshVolume
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoVolume_;
     const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoVolume_;
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the internal mesh and add as dataset 0
     for
@@ -88,6 +93,13 @@ void Foam::vtkPV3Foam::convertMeshVolume
         AddToBlock(output, selector, datasetId, vtkmesh, "internalMesh");
         selectedRegionDatasetIds_[regionId] = datasetId;
         vtkmesh->Delete();
+
+        created = true;
+    }
+
+    if (created)
+    {
+        ++blockNo;
     }
 
     if (debug)
@@ -100,7 +112,8 @@ void Foam::vtkPV3Foam::convertMeshVolume
 
 void Foam::vtkPV3Foam::convertMeshLagrangian
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -109,10 +122,14 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoLagrangian_;
     const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoLagrangian_;
 
-    // Create the Lagrangian mesh and add as dataset 0
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
+
+    // Create a single Lagrangian mesh and add as dataset 0
     for
     (
         int regionId = selector.start();
@@ -138,7 +155,15 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
         AddToBlock(output, selector, datasetId, vtkmesh, cloudName_);
         selectedRegionDatasetIds_[regionId] = datasetId;
         vtkmesh->Delete();
+
+        created = true;
     }
+
+    if (created)
+    {
+        ++blockNo;
+    }
+
     if (debug)
     {
         Info<< "<end> Foam::vtkPV3Foam::convertMeshLagrangian" << endl;
@@ -149,7 +174,8 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
 
 void Foam::vtkPV3Foam::convertMeshPatches
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -158,12 +184,16 @@ void Foam::vtkPV3Foam::convertMeshPatches
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoPatches_;
+    const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoPatches_;
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     if (selector.size())
     {
-        const fvMesh& mesh = *meshPtr_;
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
         // Create the patches and add as dataset ...
@@ -208,8 +238,17 @@ void Foam::vtkPV3Foam::convertMeshPatches
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
     }
+
+    if (created)
+    {
+        ++blockNo;
+    }
+
+
 
     if (debug)
     {
@@ -221,7 +260,8 @@ void Foam::vtkPV3Foam::convertMeshPatches
 
 void Foam::vtkPV3Foam::convertMeshCellZones
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -230,8 +270,12 @@ void Foam::vtkPV3Foam::convertMeshCellZones
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoCellZones_;
     const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoCellZones_;
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the cell zone(s) and add as DataSet(CELLZONE, 0..n)
     if (selector.size())
@@ -282,7 +326,14 @@ void Foam::vtkPV3Foam::convertMeshCellZones
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
+    }
+
+    if (created)
+    {
+        ++blockNo;
     }
 
     if (debug)
@@ -295,7 +346,8 @@ void Foam::vtkPV3Foam::convertMeshCellZones
 
 void Foam::vtkPV3Foam::convertMeshCellSets
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -304,14 +356,17 @@ void Foam::vtkPV3Foam::convertMeshCellSets
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoCellSets_;
+    const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoCellSets_;
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the cell sets and add as dataset
     if (selector.size())
     {
-        const fvMesh& mesh = *meshPtr_;
-
         for
         (
             int regionId = selector.start();
@@ -363,7 +418,14 @@ void Foam::vtkPV3Foam::convertMeshCellSets
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
+    }
+
+    if (created)
+    {
+        ++blockNo;
     }
 
     if (debug)
@@ -376,7 +438,8 @@ void Foam::vtkPV3Foam::convertMeshCellSets
 
 void Foam::vtkPV3Foam::convertMeshFaceZones
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -385,8 +448,12 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoFaceZones_;
     const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoFaceZones_;
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the cell zone(s) and add as datasets
     if (selector.size())
@@ -427,7 +494,15 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
+    }
+
+
+    if (created)
+    {
+        ++blockNo;
     }
 
     if (debug)
@@ -440,7 +515,8 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
 
 void Foam::vtkPV3Foam::convertMeshFaceSets
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -449,14 +525,17 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoFaceSets_;
+    const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoFaceSets_;
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the face sets and add as dataset
     if (selector.size())
     {
-        const fvMesh& mesh = *meshPtr_;
-
         for
         (
             int regionId = selector.start();
@@ -499,7 +578,14 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
+    }
+
+    if (created)
+    {
+        ++blockNo;
     }
 
     if (debug)
@@ -512,7 +598,8 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
 
 void Foam::vtkPV3Foam::convertMeshPointZones
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -521,8 +608,12 @@ void Foam::vtkPV3Foam::convertMeshPointZones
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoPointZones_;
     const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoPointZones_;
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the point sets and add as dataset
     if (selector.size())
@@ -563,8 +654,16 @@ void Foam::vtkPV3Foam::convertMeshPointZones
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
     }
+
+    if (created)
+    {
+        ++blockNo;
+    }
+
 
     if (debug)
     {
@@ -577,7 +676,8 @@ void Foam::vtkPV3Foam::convertMeshPointZones
 
 void Foam::vtkPV3Foam::convertMeshPointSets
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    int& blockNo
 )
 {
     if (debug)
@@ -586,14 +686,17 @@ void Foam::vtkPV3Foam::convertMeshPointSets
         printMemory();
     }
 
-    const selectionInfo& selector = selectInfoPointSets_;
+    const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = selectInfoPointSets_;
     vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+
+    // set output block and note if anything was added
+    selector.block(blockNo);
+    bool created = false;
 
     // Create the point sets and add as dataset
     if (selector.size())
     {
-        const fvMesh& mesh = *meshPtr_;
-
         for
         (
             int regionId = selector.start();
@@ -636,7 +739,14 @@ void Foam::vtkPV3Foam::convertMeshPointSets
             );
             selectedRegionDatasetIds_[regionId] = datasetId;
             vtkmesh->Delete();
+
+            created = true;
         }
+    }
+
+    if (created)
+    {
+        ++blockNo;
     }
 
     if (debug)

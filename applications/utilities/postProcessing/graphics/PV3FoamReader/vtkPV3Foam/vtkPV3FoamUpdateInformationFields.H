@@ -53,7 +53,7 @@ void Foam::vtkPV3Foam::updateInformationFields
     }
     else
     {
-        // preserve the currently selected values
+        // preserve the enabled selections
         selectedEntries = getSelectedArrayEntries
         (
             arraySelection
@@ -67,13 +67,6 @@ void Foam::vtkPV3Foam::updateInformationFields
     // Populate the GUI volume/point field arrays
 
     //- Add volume fields to GUI
-/*
-    addToSelection<GeometricField<label, patchType, meshType> >
-    (
-        arraySelection,
-        objects
-    );
-*/
     addToSelection<GeometricField<scalar, patchType, meshType> >
     (
         arraySelection,
@@ -100,7 +93,7 @@ void Foam::vtkPV3Foam::updateInformationFields
         objects
     );
 
-    // restore the currently enabled values
+    // restore the enabled selections
     setSelectedArrayEntries
     (
         arraySelection,

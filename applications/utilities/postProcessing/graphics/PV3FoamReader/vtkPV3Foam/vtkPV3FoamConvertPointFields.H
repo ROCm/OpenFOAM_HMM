@@ -52,81 +52,93 @@ void Foam::vtkPV3Foam::convertPointFields
         )
     );
 
-    label nSelectedFields = fieldSelection->GetNumberOfArrays();
+    label nFields = fieldSelection->GetNumberOfArrays();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    for (label i=0; i<nSelectedFields; i++)
+    for (label i=0; i<nFields; i++)
     {
-        if (fieldSelection->GetArraySetting(i))
+        const word fieldName = fieldSelection->GetArrayName(i);
+
+        if
+        (
+            !fieldSelection->GetArraySetting(i)
+         || !fieldObjects.found(fieldName))
         {
-            word fieldName = fieldSelection->GetArrayName(i);
+            continue;
+        }
 
-            if (fieldObjects.found(fieldName))
+        if (debug)
+        {
+            Info<< "Foam::vtkPV3Foam::convertPointFields : "
+                << fieldName << endl;
+        }
+
+        pointMesh pMesh(mesh);
+
+        GeometricField<Type, pointPatchField, pointMesh> ptf
+        (
+            IOobject
+            (
+                fieldName,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::MUST_READ
+            ),
+            pMesh
+        );
+
+
+        //
+        // Convert internal mesh - if activated
+        //
+        for
+        (
+            int regionId = selectInfoVolume_.start();
+            regionId < selectInfoVolume_.end();
+            ++regionId
+        )
+        {
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
+                continue;
+            }
 
-                if (debug)
+            convertPointField
+            (
+                ptf,
+                GeometricField<Type, fvPatchField, volMesh>::null(),
+                output,
+                selectInfoVolume_,
+                datasetId
+            );
+        }
+
+
+        //
+        // Convert patches - if activated
+        //
+        label regionId = selectInfoPatches_.start();
+        forAll (patches, patchI)
+        {
+            if (patches[patchI].size())
+            {
+                const label datasetId = selectedRegionDatasetIds_[regionId];
+
+                if (selectedRegions_[regionId] && datasetId >= 0)
                 {
-                    Info<< "Foam::vtkPV3Foam::convertPointFields : " << fieldName
-                        << endl;
-                }
 
-                pointMesh pMesh(mesh);
-
-                GeometricField<Type, pointPatchField, pointMesh> ptf
-                (
-                    IOobject
+                    convertPatchPointField
                     (
                         fieldName,
-                        mesh.time().timeName(),
-                        mesh,
-                        IOobject::MUST_READ
-                    ),
-                    pMesh
-                );
-
-                // Convert internal mesh
-                for
-                (
-                    int regionId = selectInfoVolume_.start();
-                    regionId < selectInfoVolume_.end();
-                    ++regionId
-                )
-                {
-                    if (selectedRegions_[regionId])
-                    {
-                        convertPointField
-                        (
-                            ptf,
-                            GeometricField<Type, fvPatchField, volMesh>::null(),
-                            output,
-                            selectInfoVolume_,
-                            selectedRegionDatasetIds_[regionId]
-                        );
-                    }
+                        ptf.boundaryField()[patchI].patchInternalField()(),
+                        output,
+                        selectInfoPatches_,
+                        datasetId
+                    );
                 }
-
-
-                // Convert patches
-                label regionId = selectInfoPatches_.start();
-                forAll (patches, patchI)
-                {
-                    if (patches[patchI].size())
-                    {
-                        if (selectedRegions_[regionId])
-                        {
-                            convertPatchPointField
-                            (
-                                fieldName,
-                                ptf.boundaryField()[patchI]
-                                   .patchInternalField()(),
-                                output,
-                                selectInfoPatches_,
-                                selectedRegionDatasetIds_[regionId]
-                            );
-                        }
-                        regionId++;
-                    }
-                }
+                regionId++;
             }
         }
     }

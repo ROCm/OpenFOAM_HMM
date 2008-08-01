@@ -213,6 +213,8 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
             if (meshPtr_->readUpdate() != polyMesh::UNCHANGED)
             {
                 meshChanged_ = true;
+                reader_->UpdateProgress(0.05);
+
                 // patches, zones etc might have changed
                 UpdateInformation();
             }
@@ -464,15 +466,15 @@ Foam::vtkPV3Foam::vtkPV3Foam
     reader_(reader),
     dbPtr_(NULL),
     meshPtr_(NULL),
-    selectInfoVolume_(VOLUME, "unzoned"),
-    selectInfoPatches_(PATCHES, "patches"),
-    selectInfoLagrangian_(LAGRANGIAN, "lagrangian"),
-    selectInfoCellZones_(CELLZONE, "cellZone"),
-    selectInfoFaceZones_(FACEZONE, "faceZone"),
-    selectInfoPointZones_(POINTZONE, "pointZone"),
-    selectInfoCellSets_(CELLSET, "cellSet"),
-    selectInfoFaceSets_(FACESET, "faceSet"),
-    selectInfoPointSets_(POINTSET, "pointSet"),
+    selectInfoVolume_("unzoned"),
+    selectInfoPatches_("patches"),
+    selectInfoLagrangian_("lagrangian"),
+    selectInfoCellZones_("cellZone"),
+    selectInfoFaceZones_("faceZone"),
+    selectInfoPointZones_("pointZone"),
+    selectInfoCellSets_("cellSet"),
+    selectInfoFaceSets_("faceSet"),
+    selectInfoPointSets_("pointSet"),
     patchTextActorsPtrs_(0),
     nMesh_(0),
     timeIndex_(-1),
@@ -543,11 +545,7 @@ Foam::vtkPV3Foam::~vtkPV3Foam()
         Info<< "<end> Foam::vtkPV3Foam::~vtkPV3Foam" << endl;
     }
 
-    if (meshPtr_)
-    {
-        delete meshPtr_;
-        meshPtr_ = NULL;
-    }
+    delete meshPtr_;
 }
 
 
@@ -575,10 +573,11 @@ void Foam::vtkPV3Foam::UpdateInformation()
     }
     else
     {
-        // preserve the currently selected values
+        // preserve the enabled selections
         selectedEntries = getSelectedArrayEntries
         (
-            arraySelection
+            arraySelection,
+            false
         );
     }
 
@@ -600,7 +599,7 @@ void Foam::vtkPV3Foam::UpdateInformation()
         updateInformationZones();
     }
 
-    // restore the currently enabled values
+    // restore the enabled selections
     setSelectedArrayEntries
     (
         arraySelection,
@@ -635,23 +634,72 @@ void Foam::vtkPV3Foam::UpdateInformation()
 }
 
 
+void Foam::vtkPV3Foam::updateFoamMesh()
+{
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        printMemory();
+    }
+
+    if (!reader_->GetCacheMesh())
+    {
+        delete meshPtr_;
+        meshPtr_ = NULL;
+    }
+
+    // Check to see if the FOAM mesh has been created
+    if (!meshPtr_)
+    {
+        if (debug)
+        {
+            Info<< "Creating Foam mesh" << endl;
+        }
+        meshPtr_ = new fvMesh
+        (
+            IOobject
+            (
+                fvMesh::defaultRegion,
+                dbPtr_().timeName(),
+                dbPtr_()
+            )
+        );
+
+        meshChanged_ = true;
+    }
+    else
+    {
+        if (debug)
+        {
+            Info<< "Using existing Foam mesh" << endl;
+        }
+    }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::updateFoamMesh" << endl;
+        printMemory();
+    }
+}
+
+
 void Foam::vtkPV3Foam::Update
 (
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    vtkMultiBlockDataSet* lagrangianOutput
 )
 {
     if (debug)
     {
-        cout<< "<beg> Foam::vtkPV3Foam::Update" << nl
-            <<"Update\n";
-        output->Print(cout);
+        cout<< "<beg> Foam::vtkPV3Foam::Update - output with "
+            << output->GetNumberOfBlocks() << " and "
+            << lagrangianOutput->GetNumberOfBlocks() << " blocks\n";
 
-        cout<<"Internally:\n";
         output->Print(cout);
-
-        cout<< " has " << output->GetNumberOfBlocks() << " blocks\n";
+        lagrangianOutput->Print(cout);
         printMemory();
     }
+    reader_->UpdateProgress(0.1);
 
     // Set up region selection(s)
     updateSelectedRegions();
@@ -661,64 +709,36 @@ void Foam::vtkPV3Foam::Update
     reader_->UpdateProgress(0.2);
 
     // Convert meshes
-    convertMeshVolume(output);
-    convertMeshLagrangian(output);
-    convertMeshPatches(output);
+    int blockNo = 0;
+
+    convertMeshVolume(output, blockNo);
+    convertMeshPatches(output, blockNo);
     reader_->UpdateProgress(0.4);
 
     if (reader_->GetIncludeZones())
     {
-        convertMeshCellZones(output);
-        convertMeshFaceZones(output);
-        convertMeshPointZones(output);
+        convertMeshCellZones(output, blockNo);
+        convertMeshFaceZones(output, blockNo);
+        convertMeshPointZones(output, blockNo);
     }
 
     if (reader_->GetIncludeSets())
     {
-        convertMeshCellSets(output);
-        convertMeshFaceSets(output);
-        convertMeshPointSets(output);
+        convertMeshCellSets(output, blockNo);
+        convertMeshFaceSets(output, blockNo);
+        convertMeshPointSets(output, blockNo);
     }
+
+    blockNo = 0;
+    convertMeshLagrangian(lagrangianOutput, blockNo);
+
     reader_->UpdateProgress(0.8);
 
     // Update fields
-    updateVolFields(output);
-    updatePointFields(output);
-    updateLagrangianFields(output);
+    convertVolFields(output);
+    convertPointFields(output);
+    convertLagrangianFields(lagrangianOutput);
     reader_->UpdateProgress(1.0);
-
-    if (debug)
-    {
-        Info<< "Number of data sets after update" << nl
-            << "  VOLUME = "
-            << GetNumberOfDataSets(output, selectInfoVolume_) << nl
-            << "  PATCHES = "
-            << GetNumberOfDataSets(output, selectInfoPatches_) << nl
-            << "  LAGRANGIAN = "
-            << GetNumberOfDataSets(output, selectInfoLagrangian_) << nl
-            << "  CELLZONE = "
-            << GetNumberOfDataSets(output, selectInfoCellZones_) << nl
-            << "  FACEZONE = "
-            << GetNumberOfDataSets(output, selectInfoFaceZones_) << nl
-            << "  POINTZONE = "
-            << GetNumberOfDataSets(output, selectInfoPointZones_) << nl
-            << "  CELLSET = "
-            << GetNumberOfDataSets(output, selectInfoCellSets_) << nl
-            << "  FACESET = "
-            << GetNumberOfDataSets(output, selectInfoFaceSets_) << nl
-            << "  POINTSET = "
-            << GetNumberOfDataSets(output, selectInfoPointSets_) << nl;
-
-        // traverse blocks:
-        cout<< "nBlocks = " << output->GetNumberOfBlocks() << "\n";
-        cout<< "done Update\n";
-        output->Print(cout);
-        cout<< " has " << output->GetNumberOfBlocks() << " blocks\n";
-        output->GetInformation()->Print(cout);
-
-        cout<<"ShouldIReleaseData :" << output->ShouldIReleaseData() << "\n";
-        printMemory();
-    }
 
     meshChanged_ = fieldsChanged_ = false;
 }
@@ -778,15 +798,11 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         Info<< "<beg> Foam::vtkPV3Foam::addPatchNames" << endl;
     }
 
-    const polyBoundaryMesh& pbMesh = meshPtr_->boundaryMesh();
-
-    const selectionInfo& selector = selectInfoPatches_;
-
-    // the currently selected patches, strip off any suffix
+    // get the display patches, strip off any suffix
     const stringList selectedPatches = getSelectedArrayEntries
     (
         reader_->GetRegionSelection(),
-        selector,
+        selectInfoPatches_,
         true
     );
 
@@ -795,9 +811,15 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         Info<<"... add patches: " << selectedPatches << endl;
     }
 
+    if (!selectedPatches.size())
+    {
+        return;
+    }
+
+    const polyBoundaryMesh& pbMesh = meshPtr_->boundaryMesh();
+
     // Find the total number of zones
     // Each zone will take the patch name
-
     // Number of zones per patch ... zero zones should be skipped
     labelList nZones(pbMesh.size(), 0);
 
@@ -948,7 +970,7 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::addPatchNames)" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::addPatchNames" << endl;
     }
 }
 
@@ -965,7 +987,7 @@ void Foam::vtkPV3Foam::removePatchNames(vtkRenderer* renderer)
         renderer->RemoveViewProp(patchTextActorsPtrs_[patchI]);
         patchTextActorsPtrs_[patchI]->Delete();
     }
-    patchTextActorsPtrs_.setSize(0);
+    patchTextActorsPtrs_.clear();
 }
 
 

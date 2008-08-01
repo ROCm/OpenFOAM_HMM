@@ -4,8 +4,8 @@ vtkPV3FoamAddLagrangianMesh.C
 vtkPV3FoamAddPatchMesh.C
 vtkPV3FoamAddZoneMesh.C
 vtkPV3FoamAddSetMesh.C
-vtkPV3FoamUpdate.C
 vtkPV3FoamUpdateInformation.C
 vtkPV3FoamConvertMesh.C
+vtkPV3FoamConvertFields.C
 
 LIB = $(FOAM_LIBBIN)/libvtkPV3Foam

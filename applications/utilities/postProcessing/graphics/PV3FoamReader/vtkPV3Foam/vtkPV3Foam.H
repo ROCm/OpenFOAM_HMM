@@ -38,6 +38,7 @@ SourceFiles
     vtkPV3FoamAddToSelection.H
     vtkPV3FoamAddVolumeMesh.C
     vtkPV3FoamAddZoneMesh.C
+    vtkPV3FoamConvertFields.C
     vtkPV3FoamConvertFaceField.H
     vtkPV3FoamConvertLagrangianFields.H
     vtkPV3FoamConvertMesh.C
@@ -46,7 +47,6 @@ SourceFiles
     vtkPV3FoamConvertPointFields.H
     vtkPV3FoamConvertVolFields.H
     vtkPV3FoamInsertNextPoint.H
-    vtkPV3FoamUpdate.C
     vtkPV3FoamUpdateInformation.C
     vtkPV3FoamUpdateInformationFields.H
 
@@ -111,17 +111,17 @@ public:
         //- bookkeeping for the GUI checklists and the multi-block organization
         class selectionInfo
         {
-            int block_;
             const char *name_;
+            int block_;
             int start_;
             int size_;
 
         public:
 
-            selectionInfo(const int blockNo, const char *name)
+            selectionInfo(const char *name, const int blockNo=0)
             :
-                block_(blockNo),
                 name_(name),
+                block_(blockNo),
                 start_(-1),
                 size_(0)
             {}
@@ -130,6 +130,13 @@ public:
             int block() const
             {
                 return block_;
+            }
+
+            int block(int blockNo)
+            {
+                int prev = block_;
+                block_ = blockNo;
+                return prev;
             }
 
             const char* name() const
@@ -170,28 +177,21 @@ public:
             {
                 size_ += n;
             }
+
+            friend Ostream& operator<<(Ostream& os, const selectionInfo& s)
+            {
+                os  << "selector: " << s.name_
+                    << " (block " << s.block_ << ") "
+                    << " = " << s.start_ << " + " << s.size_;
+                return os;
+            }
+
         };
 
 
 private:
 
     // Private data
-
-        //BTX
-        //- Indices for datasets in vtkMultiBlockDataSet
-        enum
-        {
-            VOLUME      = 0, // internal mesh
-            PATCHES     = 1, // patches
-            LAGRANGIAN  = 2,
-            CELLZONE    = 3,
-            FACEZONE    = 4,
-            POINTZONE   = 5,
-            CELLSET     = 6,
-            FACESET     = 7,
-            POINTSET    = 8
-        };
-        //ETX
 
         //- Access to the controlling vtkPV3FoamReader
         vtkPV3FoamReader* reader_;
@@ -270,7 +270,7 @@ private:
             const selectionInfo&,
             const label datasetNo,
             vtkDataSet* dataset,
-            const string& blockName = string::null
+            const string& blockName=string::null
         );
 
         // Convenience method use to convert the readers from VTK 5
@@ -322,7 +322,7 @@ private:
             (
                 vtkDataArraySelection *arraySelection,
                 const IOobjectList&,
-                const string& suffix = ""
+                const string& suffix=string::null
             );
 
             //- Field info
@@ -342,43 +342,43 @@ private:
             void updateFoamMesh();
 
             //- Volume fields
-            void updateVolFields(vtkMultiBlockDataSet* output);
+            void updateVolFields(vtkMultiBlockDataSet*);
 
             //- Point fields
-            void updatePointFields(vtkMultiBlockDataSet* output);
+            void updatePointFields(vtkMultiBlockDataSet*);
 
             //- Lagrangian fields
-            void updateLagrangianFields(vtkMultiBlockDataSet* output);
+            void updateLagrangianFields(vtkMultiBlockDataSet*);
 
 
         // Mesh conversion functions
 
             //- Volume mesh
-            void convertMeshVolume(vtkMultiBlockDataSet* output);
+            void convertMeshVolume(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Lagrangian mesh
-            void convertMeshLagrangian(vtkMultiBlockDataSet* output);
+            void convertMeshLagrangian(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Patch meshes
-            void convertMeshPatches(vtkMultiBlockDataSet* output);
+            void convertMeshPatches(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Cell zone meshes
-            void convertMeshCellZones(vtkMultiBlockDataSet* output);
+            void convertMeshCellZones(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Face zone meshes
-            void convertMeshFaceZones(vtkMultiBlockDataSet* output);
+            void convertMeshFaceZones(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Point zone meshes
-            void convertMeshPointZones(vtkMultiBlockDataSet* output);
+            void convertMeshPointZones(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Cell set meshes
-            void convertMeshCellSets(vtkMultiBlockDataSet* output);
+            void convertMeshCellSets(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Face set meshes
-            void convertMeshFaceSets(vtkMultiBlockDataSet* output);
+            void convertMeshFaceSets(vtkMultiBlockDataSet*, int& blockNo);
 
             //- Point set meshes
-            void convertMeshPointSets(vtkMultiBlockDataSet* output);
+            void convertMeshPointSets(vtkMultiBlockDataSet*, int& blockNo);
 
 
         // Add mesh functions
@@ -444,6 +444,17 @@ private:
                 vtkPolyData*
             );
 
+        // Field conversion functions
+
+            //- Convert volume fields
+            void convertVolFields(vtkMultiBlockDataSet*);
+
+            //- Convert point fields
+            void convertPointFields(vtkMultiBlockDataSet*);
+
+            //- Convert Lagrangian fields
+            void convertLagrangianFields(vtkMultiBlockDataSet*);
+
 
         //- Add the fields in the selected time directory to the selection
         //  lists
@@ -452,7 +463,7 @@ private:
         (
             vtkDataArraySelection* fieldSelection,
             const IOobjectList& objects,
-            const string& suffix = string::null
+            const string& suffix=string::null
         );
 
 
@@ -578,7 +589,7 @@ private:
             static stringList getSelectedArrayEntries
             (
                 vtkDataArraySelection* arraySelection,
-                const bool firstWord = false
+                const bool firstWord=false
             );
 
             //- Store the current selection(s) for a sub-selection
@@ -586,7 +597,7 @@ private:
             (
                 vtkDataArraySelection* arraySelection,
                 const selectionInfo&,
-                const bool firstWord = false
+                const bool firstWord=false
             );
 
             //- Set selection(s)
@@ -631,7 +642,11 @@ public:
         //- Update
         void UpdateInformation();
 
-        void Update(vtkMultiBlockDataSet* output);
+        void Update
+        (
+            vtkMultiBlockDataSet* output,
+            vtkMultiBlockDataSet* lagrangianOutput
+        );
 
         //- Allocate and return a list of selected times
         //  returns the count via the parameter

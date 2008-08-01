@@ -43,63 +43,15 @@ Description
 #include "vtkPV3FoamConvertPointFields.H"
 #include "vtkPV3FoamConvertLagrangianFields.H"
 
-void Foam::vtkPV3Foam::updateFoamMesh()
-{
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::updateFoamMesh" << endl;
-        printMemory();
-    }
 
-    if (!reader_->GetCacheMesh())
-    {
-        delete meshPtr_;
-        meshPtr_ = NULL;
-    }
-
-    // Check to see if the FOAM mesh has been created
-    if (!meshPtr_)
-    {
-        if (debug)
-        {
-            Info<< "Creating Foam mesh" << endl;
-        }
-        meshPtr_ = new fvMesh
-        (
-            IOobject
-            (
-                fvMesh::defaultRegion,
-                dbPtr_().timeName(),
-                dbPtr_()
-            )
-        );
-
-        meshChanged_ = true;
-    }
-    else
-    {
-        if (debug)
-        {
-            Info<< "Using existing Foam mesh" << endl;
-        }
-    }
-
-    if (debug)
-    {
-        Info<< "<end> Foam::vtkPV3Foam::updateFoamMesh" << endl;
-        printMemory();
-    }
-}
-
-
-void Foam::vtkPV3Foam::updateVolFields
+void Foam::vtkPV3Foam::convertVolFields
 (
     vtkMultiBlockDataSet* output
 )
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateVolFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertVolFields" << endl;
         printMemory();
     }
 
@@ -135,12 +87,7 @@ void Foam::vtkPV3Foam::updateVolFields
             )
         );
     }
-/*
-    convertVolFields<Foam::label>
-    (
-        mesh, pInterp, objects, arraySelection, output
-    );
-*/
+
     convertVolFields<Foam::scalar>
     (
         mesh, pInterp, ppInterpList, objects, arraySelection, output
@@ -164,20 +111,20 @@ void Foam::vtkPV3Foam::updateVolFields
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::updateVolFields" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::convertVolFields" << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPV3Foam::updatePointFields
+void Foam::vtkPV3Foam::convertPointFields
 (
     vtkMultiBlockDataSet* output
 )
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updatePointFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertPointFields" << endl;
         printMemory();
     }
 
@@ -188,12 +135,6 @@ void Foam::vtkPV3Foam::updatePointFields
 
     vtkDataArraySelection* arraySelection = reader_->GetPointFieldSelection();
 
-/*
-    convertPointFields<Foam::label>
-    (
-        mesh, objects, arraySelection, output
-    );
-*/
     convertPointFields<Foam::scalar>
     (
         mesh, objects, arraySelection, output
@@ -217,20 +158,20 @@ void Foam::vtkPV3Foam::updatePointFields
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::updatePointFields" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::convertPointFields" << endl;
         printMemory();
     }
 }
 
 
-void Foam::vtkPV3Foam::updateLagrangianFields
+void Foam::vtkPV3Foam::convertLagrangianFields
 (
     vtkMultiBlockDataSet* output
 )
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::convertLagrangianFields" << endl;
         printMemory();
     }
 
@@ -251,7 +192,8 @@ void Foam::vtkPV3Foam::updateLagrangianFields
     // Convert Lagrangian fields
     if (debug)
     {
-        Info<< "converting Foam Lagrangian fields" << endl;
+        Info<< "converting Lagrangian fields - "
+            << selectInfoLagrangian_ << endl;
     }
 
     convertLagrangianFields<Foam::label>
@@ -282,7 +224,7 @@ void Foam::vtkPV3Foam::updateLagrangianFields
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::updateLagrangianFields" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::convertLagrangianFields" << endl;
         printMemory();
     }
 }

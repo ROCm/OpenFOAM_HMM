@@ -157,10 +157,11 @@ protected:
         vtkInformationVector*
     );
 
+    virtual int FillOutputPortInformation(int, vtkInformation*);
+
     // The observer to modify this object when the array selections
     // are modified
     vtkCallbackCommand* SelectionObserver;
-
 
 private:
 
@@ -183,16 +184,16 @@ private:
     int IncludeZones;
     int ShowPatchNames;
 
+    //- Dummy variable/switch for provoking a reader update
     int UpdateGUI;
-    int UpdateGUIOld;
 
     vtkDataArraySelection* RegionSelection;
     vtkDataArraySelection* VolFieldSelection;
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;
 
-    //- Access to the output port1
-    vtkMultiBlockDataSet* output1_;
+    //- Cached data for output port0
+    vtkMultiBlockDataSet* output0_;
 
     //BTX
     Foam::vtkPV3Foam* foamData_;

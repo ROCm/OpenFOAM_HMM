@@ -432,11 +432,13 @@ void Foam::vtkPV3Foam::updateInformationLagrangianFields()
     vtkDataArraySelection *arraySelection =
         reader_->GetLagrangianFieldSelection();
 
-    // preserve the currently selected values
-    const stringList selectedEntries = getSelectedArrayEntries
+    // preserve the enabled selections
+    stringList selectedEntries = getSelectedArrayEntries
     (
-        arraySelection
+        arraySelection,
+        true
     );
+
     arraySelection->RemoveAllArrays();
 
     // TODO - currently hard-coded to ONE cloud
@@ -478,7 +480,7 @@ void Foam::vtkPV3Foam::updateInformationLagrangianFields()
         objects
     );
 
-    // restore the currently enabled values
+    // restore the enabled selections
     setSelectedArrayEntries
     (
         arraySelection,

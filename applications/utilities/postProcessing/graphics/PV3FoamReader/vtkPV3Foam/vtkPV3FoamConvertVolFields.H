@@ -78,8 +78,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
         if (debug)
         {
-            Info<< "converting Foam volume field: " << fieldName
-                << endl;
+            Info<< "converting volume field: " << fieldName << endl;
         }
 
         GeometricField<Type, fvPatchField, volMesh> tf
@@ -99,7 +98,10 @@ void Foam::vtkPV3Foam::convertVolFields
             pInterp.interpolate(tf)
         );
 
-        // Convert internal mesh
+
+        //
+        // Convert internal mesh - if activated
+        //
         for
         (
             int regionId = selectInfoVolume_.start();
@@ -107,29 +109,34 @@ void Foam::vtkPV3Foam::convertVolFields
             ++regionId
         )
         {
-            if (selectedRegions_[regionId])
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
-                convertVolField
-                (
-                    tf,
-                    output,
-                    selectInfoVolume_,
-                    selectedRegionDatasetIds_[regionId],
-                    superCells_
-                );
-                convertPointField
-                (
-                    tptf(),
-                    tf,
-                    output,
-                    selectInfoVolume_,
-                    selectedRegionDatasetIds_[regionId]
-                );
+                continue;
             }
+
+            convertVolField
+            (
+                tf,
+                output,
+                selectInfoVolume_,
+                datasetId,
+                superCells_
+            );
+            convertPointField
+            (
+                tptf(),
+                tf,
+                output,
+                selectInfoVolume_,
+                datasetId
+            );
         }
 
-
-        // Convert patches
+        //
+        // Convert patches - if activated
+        //
         for
         (
             int regionId = selectInfoPatches_.start();
@@ -137,7 +144,9 @@ void Foam::vtkPV3Foam::convertVolFields
             ++regionId
         )
         {
-            if (!selectedRegions_[regionId])
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
                 continue;
             }
@@ -176,7 +185,7 @@ void Foam::vtkPV3Foam::convertVolFields
                     fvPatchField<Type>(p, tf).patchInternalField()(),
                     output,
                     selectInfoPatches_,
-                    selectedRegionDatasetIds_[regionId]
+                    datasetId
                 );
             }
             else
@@ -187,7 +196,7 @@ void Foam::vtkPV3Foam::convertVolFields
                     ptf,
                     output,
                     selectInfoPatches_,
-                    selectedRegionDatasetIds_[regionId]
+                    datasetId
                 );
             }
 
@@ -197,11 +206,13 @@ void Foam::vtkPV3Foam::convertVolFields
                 ppInterpList[patchId].faceToPointInterpolate(ptf)(),
                 output,
                 selectInfoPatches_,
-                selectedRegionDatasetIds_[regionId]
+                datasetId
             );
         }
 
-        // Convert cell zones
+        //
+        // Convert cell zones - if activated
+        //
         for
         (
             int regionId = selectInfoCellZones_.start();
@@ -209,37 +220,35 @@ void Foam::vtkPV3Foam::convertVolFields
             ++regionId
         )
         {
-            if (!selectedRegions_[regionId])
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
                 continue;
             }
 
             if (debug)
             {
-
-                word selectName = getFirstWord
-                (
-                    arraySelector->GetArrayName(regionId)
-                );
-
-                Info<< "wish to convert cellzone: " << selectName
+                Info<< "wish to convert cellzone: "
+                    << getFirstWord(arraySelector->GetArrayName(regionId))
                     << " regionId: " << regionId
                     << " volume field: " << fieldName
                     << endl;
             }
 
-            const label datasetId =
-                selectedRegionDatasetIds_[regionId];
-
             convertVolField
             (
                 tf,
-                output, selectInfoCellZones_, datasetId,
+                output,
+                selectInfoCellZones_,
+                datasetId,
                 zoneSuperCells_[datasetId]
             );
         }
 
-        // Convert cell sets
+        //
+        // Convert cell sets - if activated
+        //
         for
         (
             int regionId = selectInfoCellSets_.start();
@@ -247,36 +256,35 @@ void Foam::vtkPV3Foam::convertVolFields
             ++regionId
         )
         {
-            if (!selectedRegions_[regionId])
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
                 continue;
             }
 
             if (debug)
             {
-                word selectName = getFirstWord
-                (
-                    arraySelector->GetArrayName(regionId)
-                );
-
-                Info<< "wish to convert cellset: " << selectName
+                Info<< "wish to convert cellset: "
+                    << getFirstWord(arraySelector->GetArrayName(regionId))
                     << " regionId: " << regionId
                     << " volume field: " << fieldName
                     << endl;
             }
 
-            const label datasetId =
-                selectedRegionDatasetIds_[regionId];
-
             convertVolField
             (
                 tf,
-                output, selectInfoCellSets_, datasetId,
+                output,
+                selectInfoCellSets_,
+                datasetId,
                 csetSuperCells_[datasetId]
             );
         }
 
-        // Convert face zones
+        //
+        // Convert face zones - if activated
+        //
         for
         (
             int regionId = selectInfoFaceZones_.start();
@@ -284,19 +292,17 @@ void Foam::vtkPV3Foam::convertVolFields
             ++regionId
         )
         {
-            if (!selectedRegions_[regionId])
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
                 continue;
             }
 
             if (debug)
             {
-                word selectName = getFirstWord
-                (
-                    arraySelector->GetArrayName(regionId)
-                );
-
-                Info<< "wish to convert facezone: " << selectName
+                Info<< "wish to convert facezone: "
+                    << getFirstWord(arraySelector->GetArrayName(regionId))
                     << " regionId: " << regionId
                     << " volume field: " << fieldName
                     << endl;
@@ -305,19 +311,20 @@ void Foam::vtkPV3Foam::convertVolFields
             const faceZoneMesh& fzMesh = mesh.faceZones();
             const label zoneI = regionId - selectInfoFaceZones_.start();
 
-            const label datasetId =
-                selectedRegionDatasetIds_[regionId];
-
             convertFaceField
             (
                 tf,
-                output, selectInfoFaceZones_, datasetId,
+                output,
+                selectInfoFaceZones_,
+                datasetId,
                 mesh,
                 fzMesh[zoneI]
             );
         }
 
-        // Convert face sets
+        //
+        // Convert face sets - if activated
+        //
         for
         (
             int regionId = selectInfoFaceSets_.start();
@@ -325,7 +332,9 @@ void Foam::vtkPV3Foam::convertVolFields
             ++regionId
         )
         {
-            if (!selectedRegions_[regionId])
+            const label datasetId = selectedRegionDatasetIds_[regionId];
+
+            if (!selectedRegions_[regionId] || datasetId < 0)
             {
                 continue;
             }
@@ -345,13 +354,13 @@ void Foam::vtkPV3Foam::convertVolFields
 
             const faceSet fSet(mesh, selectName);
 
-            const label datasetId =
-                selectedRegionDatasetIds_[regionId];
 
             convertFaceField
             (
                 tf,
-                output, selectInfoFaceSets_, datasetId,
+                output,
+                selectInfoFaceSets_,
+                datasetId,
                 mesh,
                 fSet
             );

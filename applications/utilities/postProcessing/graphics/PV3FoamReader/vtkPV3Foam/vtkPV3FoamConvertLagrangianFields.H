@@ -42,12 +42,6 @@ void Foam::vtkPV3Foam::convertLagrangianFields
 )
 {
     const selectionInfo& selector = selectInfoLagrangian_;
-    const label datasetId = 0;
-
-    if (!selector.size())
-    {
-        return;
-    }
 
     IOobjectList fieldObjects
     (
@@ -58,28 +52,46 @@ void Foam::vtkPV3Foam::convertLagrangianFields
     );
 
     label nFields = fieldSelection->GetNumberOfArrays();
-
     for (label i=0; i<nFields; i++)
     {
-        if (fieldSelection->GetArraySetting(i))
+        const word fieldName = fieldSelection->GetArrayName(i);
+
+        if
+        (
+            !fieldSelection->GetArraySetting(i)
+         || !fieldObjects.found(fieldName))
         {
-            const word fieldName = fieldSelection->GetArrayName(i);
+            continue;
+        }
 
-            if (fieldObjects.found(fieldName))
+        IOField<Type> iotf
+        (
+            IOobject
+            (
+                fieldName,
+                mesh.time().timeName(),
+                "lagrangian"/cloudName_,
+                mesh,
+                IOobject::MUST_READ
+            )
+        );
+
+
+        // Convert Lagrangian points
+        for
+        (
+            int regionId = selector.start();
+            regionId < selector.end();
+            ++regionId
+        )
+        {
+            if (selectedRegions_[regionId])
             {
-                IOField<Type> iotf
+                convertLagrangianField
                 (
-                    IOobject
-                    (
-                        fieldName,
-                        mesh.time().timeName(),
-                        "lagrangian"/cloudName_,
-                        mesh,
-                        IOobject::MUST_READ
-                    )
+                    iotf, output, selector,
+                    selectedRegionDatasetIds_[regionId]
                 );
-
-                convertLagrangianField(iotf, output, selector, datasetId);
             }
         }
     }
