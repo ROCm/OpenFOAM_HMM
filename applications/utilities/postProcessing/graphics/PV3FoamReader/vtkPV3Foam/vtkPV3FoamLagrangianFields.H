@@ -27,19 +27,42 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamConvertPatchPointField_H
-#define vtkPV3FoamConvertPatchPointField_H
-
-// VTK includes
-#include "vtkPointData.h"
+#ifndef vtkPV3FoamLagrangianFields_H
+#define vtkPV3FoamLagrangianFields_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtkPV3Foam::convertPatchPointField
+void Foam::vtkPV3Foam::convertLagrangianFields
 (
-    const word& name,
-    const Field<Type>& pptf,
+    const IOobjectList& objects,
+    vtkMultiBlockDataSet* output,
+    const label datasetNo
+)
+{
+    const selectionInfo& selector = regionInfoLagrangian_;
+
+    // field subset based on type
+    IOobjectList fieldObjects
+    (
+        objects.lookupClass
+        (
+            IOField<Type>::typeName
+        )
+    );
+
+    forAllIter(IOobjectList, fieldObjects, iter)
+    {
+        IOField<Type> tf(*iter());
+        convertLagrangianField(tf, output, selector, datasetNo);
+    }
+}
+
+
+template<class Type>
+void Foam::vtkPV3Foam::convertLagrangianField
+(
+    const IOField<Type>& tf,
     vtkMultiBlockDataSet* output,
     const selectionInfo& selector,
     const label datasetNo
@@ -53,18 +76,27 @@ void Foam::vtkPV3Foam::convertPatchPointField
     );
 
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples(pptf.size());
-    pointData->SetNumberOfComponents(nComp);
-    pointData->Allocate(nComp*pptf.size());
-    pointData->SetName(name.c_str());
+    pointData->SetNumberOfTuples( tf.size() );
+    pointData->SetNumberOfComponents( nComp );
+    pointData->Allocate( nComp*tf.size() );
+    pointData->SetName( tf.name().c_str() );
+
+    if (debug)
+    {
+        Info<< "convert LagrangianField: "
+            << tf.name()
+            << " size = " << tf.size()
+            << " nComp=" << nComp
+            << " nTuples = " << tf.size() <<  endl;
+    }
 
     float vec[nComp];
-
-    forAll(pptf, i)
+    forAll(tf, i)
     {
+        const Type& t = tf[i];
         for (direction d=0; d<nComp; d++)
         {
-            vec[d] = component(pptf[i], d);
+            vec[d] = component(t, d);
         }
 
         pointData->InsertTuple(i, vec);

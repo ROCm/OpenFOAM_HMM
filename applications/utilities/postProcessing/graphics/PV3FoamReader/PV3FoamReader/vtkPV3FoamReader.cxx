@@ -59,11 +59,10 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     this->GetExecutive()->SetOutputData(1, lagrangian);
     lagrangian->Delete();
 
-    TimeStep = 0;
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
 
-    CacheMesh = 0;
+    CacheMesh = 1;
 
     ExtrapolateWalls = 0;
     IncludeSets = 0;
@@ -181,7 +180,7 @@ int vtkPV3FoamReader::RequestInformation
     }
     else
     {
-        foamData_->UpdateInformation();
+        foamData_->updateInfo();
     }
 
     int nTimeSteps = 0;
@@ -349,6 +348,15 @@ int vtkPV3FoamReader::RequestData
 
     foamData_->Update(output, lagrangianOutput);
 
+    if (ShowPatchNames)
+    {
+        addPatchNamesToView();
+    }
+    else
+    {
+        removePatchNamesFromView();
+    }
+
 #endif
 
     return 1;
@@ -408,7 +416,13 @@ void vtkPV3FoamReader::PrintSelf(ostream& os, vtkIndent indent)
     os<< indent << "Time step range: "
       << this->TimeStepRange[0] << " - " << this->TimeStepRange[1]
       << "\n";
-    os<< indent << "Time step: " << this->TimeStep << endl;
+    os<< indent << "Time step: " << this->GetTimeStep() << endl;
+}
+
+
+int vtkPV3FoamReader::GetTimeStep()
+{
+    return foamData_ ? foamData_->timeIndex() : -1;
 }
 
 
@@ -446,7 +460,6 @@ int vtkPV3FoamReader::GetRegionArrayStatus(const char* name)
 void vtkPV3FoamReader::SetRegionArrayStatus(const char* name, int status)
 {
     vtkDebugMacro(<<"SetRegionArrayStatus");
-
     if (status)
     {
         RegionSelection->EnableArray(name);

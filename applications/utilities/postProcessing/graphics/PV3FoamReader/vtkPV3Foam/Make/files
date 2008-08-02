@@ -1,11 +1,11 @@
 vtkPV3Foam.C
-vtkPV3FoamAddVolumeMesh.C
-vtkPV3FoamAddLagrangianMesh.C
-vtkPV3FoamAddPatchMesh.C
-vtkPV3FoamAddZoneMesh.C
-vtkPV3FoamAddSetMesh.C
-vtkPV3FoamUpdateInformation.C
-vtkPV3FoamConvertMesh.C
-vtkPV3FoamConvertFields.C
+vtkPV3FoamFields.C
+vtkPV3FoamMesh.C
+vtkPV3FoamMeshLagrangian.C
+vtkPV3FoamMeshPatch.C
+vtkPV3FoamMeshSet.C
+vtkPV3FoamMeshVolume.C
+vtkPV3FoamMeshZone.C
+vtkPV3FoamUpdateInfo.C
 
 LIB = $(FOAM_LIBBIN)/libvtkPV3Foam

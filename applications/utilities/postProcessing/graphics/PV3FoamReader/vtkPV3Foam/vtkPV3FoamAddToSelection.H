@@ -28,6 +28,7 @@ License
 #define vtkPV3FoamAddToSelection_H
 
 // FOAM includes
+#include "IOobjectList.H"
 #include "SortableList.H"
 
 // VTK includes
@@ -38,7 +39,7 @@ License
 template<class Type>
 Foam::label Foam::vtkPV3Foam::addToSelection
 (
-    vtkDataArraySelection *arraySelection,
+    vtkDataArraySelection *select,
     const IOobjectList& objectLst,
     const string& suffix
 )
@@ -57,7 +58,7 @@ Foam::label Foam::vtkPV3Foam::addToSelection
     {
         objectNames.sort();
 
-        forAll (objectNames, objI)
+        forAll(objectNames, objI)
         {
             if (debug)
             {
@@ -67,14 +68,14 @@ Foam::label Foam::vtkPV3Foam::addToSelection
 
             if (suffix.size())
             {
-                arraySelection->AddArray
+                select->AddArray
                 (
                     (objectNames[objI] + suffix).c_str()
                 );
             }
             else
             {
-                arraySelection->AddArray
+                select->AddArray
                 (
                     objectNames[objI].c_str()
                 );

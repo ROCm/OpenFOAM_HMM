@@ -26,35 +26,30 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamAddVolumeMesh_H
-#define vtkPV3FoamAddVolumeMesh_H
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #include "vtkPV3Foam.H"
 
 // Foam includes
 #include "fvMesh.H"
 #include "cellModeller.H"
-#include "vtkPV3FoamInsertNextPoint.H"
+#include "vtkPV3FoamPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
 #include "vtkUnstructuredGrid.h"
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPV3Foam::addVolumeMesh
+vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
 (
     const fvMesh& mesh,
-    vtkUnstructuredGrid* vtkmesh,
     labelList& superCells
 )
 {
+    vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
+
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::addVolumeMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::volumeVTKMesh" << endl;
         printMemory();
     }
 
@@ -124,10 +119,10 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
     if (debug)
     {
-        Info<<"mesh.nCells()  = " << mesh.nCells() << nl
-            <<"mesh.nPoints() = " << mesh.nPoints() << nl
-            <<"nAddCells      = " << nAddCells << nl
-            <<"nAddPoints     = " << nAddPoints << endl;
+        Info<<" mesh nCells     = " << mesh.nCells() << nl
+            <<"      nPoints    = " << mesh.nPoints() << nl
+            <<"      nAddCells  = " << nAddCells << nl
+            <<"      nAddPoints = " << nAddPoints << endl;
     }
 
     superCells.setSize(mesh.nCells() + nAddCells);
@@ -139,7 +134,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
     // Convert Foam mesh vertices to VTK
     vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(mesh.nPoints() + nAddPoints);
+    vtkpoints->Allocate( mesh.nPoints() + nAddPoints );
 
     const Foam::pointField& points = mesh.points();
 
@@ -154,21 +149,21 @@ void Foam::vtkPV3Foam::addVolumeMesh
         Info<< "... converting cells" << endl;
     }
 
-    vtkmesh->Allocate(mesh.nCells() + nAddCells);
+    vtkmesh->Allocate( mesh.nCells() + nAddCells );
 
     // Set counters for additional points and additional cells
-    label api = 0, aci = 0;
+    label addPointI = 0, addCellI = 0;
 
     // Create storage for points - needed for mapping from Foam to VTK
     // data types - max 'order' = hex = 8 points
     vtkIdType nodeIds[8];
 
-    forAll(cellShapes, celli)
+    forAll(cellShapes, cellI)
     {
-        const cellShape& cellShape = cellShapes[celli];
+        const cellShape& cellShape = cellShapes[cellI];
         const cellModel& cellModel = cellShape.model();
 
-        superCells[aci++] = celli;
+        superCells[addCellI++] = cellI;
 
         if (cellModel == tet)
         {
@@ -265,16 +260,16 @@ void Foam::vtkPV3Foam::addVolumeMesh
             // Polyhedral cell. Decompose into tets + prisms.
 
             // Mapping from additional point to cell
-            addPointCellLabels_[api] = celli;
+            addPointCellLabels_[addPointI] = cellI;
 
             // Insert the new vertex from the cell-centre
-            label newVertexLabel = mesh.nPoints() + api;
-            vtkPV3FoamInsertNextPoint(vtkpoints, mesh.C()[celli]);
+            label newVertexLabel = mesh.nPoints() + addPointI;
+            vtkPV3FoamInsertNextPoint(vtkpoints, mesh.C()[cellI]);
 
             // Whether to insert cell in place of original or not.
             bool substituteCell = true;
 
-            const labelList& cFaces = mesh.cells()[celli];
+            const labelList& cFaces = mesh.cells()[cellI];
 
             forAll(cFaces, cFaceI)
             {
@@ -293,13 +288,13 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
                     if (substituteCell)
                     {
-                        thisCellI = celli;
+                        thisCellI = cellI;
                         substituteCell = false;
                     }
                     else
                     {
-                        thisCellI = mesh.nCells() + aci;
-                        superCells[aci++] = celli;
+                        thisCellI = mesh.nCells() + addCellI;
+                        superCells[addCellI++] = cellI;
                     }
 
                     nodeIds[0] = f[0];
@@ -323,13 +318,13 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
                     if (substituteCell)
                     {
-                        thisCellI = celli;
+                        thisCellI = cellI;
                         substituteCell = false;
                     }
                     else
                     {
-                        thisCellI = mesh.nCells() + aci;
-                        superCells[aci++] = celli;
+                        thisCellI = mesh.nCells() + addCellI;
+                        superCells[addCellI++] = cellI;
                     }
 
                     nodeIds[0] = f[0];
@@ -345,7 +340,7 @@ void Foam::vtkPV3Foam::addVolumeMesh
                 }
             }
 
-            api++;
+            addPointI++;
         }
     }
 
@@ -354,14 +349,11 @@ void Foam::vtkPV3Foam::addVolumeMesh
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::addVolumeMesh" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::volumeVTKMesh" << endl;
         printMemory();
     }
+
+    return vtkmesh;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

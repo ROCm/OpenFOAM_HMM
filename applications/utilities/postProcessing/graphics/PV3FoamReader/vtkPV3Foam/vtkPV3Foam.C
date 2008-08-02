@@ -25,13 +25,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vtkPV3Foam.H"
+#include "vtkPV3FoamReader.h"
 
 // Foam includes
-#include "Time.H"
 #include "fvMesh.H"
-#include "IOobjectList.H"
+#include "Time.H"
 #include "patchZones.H"
-#include "vtkPV3FoamReader.h"
 #include "IFstream.H"
 
 // VTK includes
@@ -54,8 +53,7 @@ defineTypeNameAndDebug(Foam::vtkPV3Foam, 0);
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 #include "vtkPV3FoamAddToSelection.H"
-#include "vtkPV3FoamUpdateInformationFields.H"
-
+#include "vtkPV3FoamUpdateInfoFields.H"
 
 void Foam::vtkPV3Foam::AddToBlock
 (
@@ -161,19 +159,19 @@ Foam::label Foam::vtkPV3Foam::GetNumberOfDataSets
 void Foam::vtkPV3Foam::resetCounters()
 {
     // Reset region ids and sizes
-    selectInfoVolume_.reset();
-    selectInfoPatches_.reset();
-    selectInfoLagrangian_.reset();
-    selectInfoCellZones_.reset();
-    selectInfoFaceZones_.reset();
-    selectInfoPointZones_.reset();
-    selectInfoCellSets_.reset();
-    selectInfoFaceSets_.reset();
-    selectInfoPointSets_.reset();
+    regionInfoVolume_.reset();
+    regionInfoPatches_.reset();
+    regionInfoLagrangian_.reset();
+    regionInfoCellZones_.reset();
+    regionInfoFaceZones_.reset();
+    regionInfoPointZones_.reset();
+    regionInfoCellSets_.reset();
+    regionInfoFaceSets_.reset();
+    regionInfoPointSets_.reset();
 }
 
 
-bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
+int Foam::vtkPV3Foam::setTime(const double& requestedTime)
 {
     if (debug)
     {
@@ -186,17 +184,12 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
     // Get times list
     instantList Times = runTime.times();
 
-    bool found = false;
-    int nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
+    int foundIndex = Time::findClosestTimeIndex(Times, requestedTime);
+    int nearestIndex = foundIndex;
 
-    if (nearestIndex == -1)
+    if (foundIndex < 0)
     {
         nearestIndex = 0;
-        found = false;
-    }
-    else
-    {
-        found = true;
     }
 
     // see what has changed
@@ -213,16 +206,17 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
             if (meshPtr_->readUpdate() != polyMesh::UNCHANGED)
             {
                 meshChanged_ = true;
-                reader_->UpdateProgress(0.05);
-
-                // patches, zones etc might have changed
-                UpdateInformation();
             }
         }
         else
         {
             meshChanged_ = true;
         }
+
+        reader_->UpdateProgress(0.05);
+
+        // this seems to be needed for catching Lagrangian fields
+        updateInfo();
     }
 
     if (debug)
@@ -233,91 +227,109 @@ bool Foam::vtkPV3Foam::setTime(const double& requestedTime)
             << " fieldsChanged=" << fieldsChanged_ << endl;
     }
 
-    return found;
+    return foundIndex;
 }
 
 
-void Foam::vtkPV3Foam::updateSelectedRegions()
+void Foam::vtkPV3Foam::updateRegionStatus()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateSelectedRegions" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateRegionStatus" << endl;
     }
 
-    vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
-
-    const label nSelect = arraySelection->GetNumberOfArrays();
-
-    if (selectedRegions_.size() != nSelect)
+    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
+    const label nSelect = regionSelection->GetNumberOfArrays();
+    if (regionStatus_.size() != nSelect)
     {
-        selectedRegions_.setSize(nSelect);
-        selectedRegions_ = 0;
+        regionStatus_.setSize(nSelect);
+        regionStatus_ = false;
         meshChanged_ = true;
     }
 
-    selectedRegionDatasetIds_.setSize(nSelect);
+    // this needs fixing if we wish to re-use the datasets
+    regionDataset_.setSize(nSelect);
+    regionDataset_ = -1;
 
     // Read the selected cell regions, zones, patches and add to region list
-    forAll (selectedRegions_, regionId)
+    forAll(regionStatus_, regionId)
     {
-        int setting = arraySelection->GetArraySetting(regionId);
+        int setting = regionSelection->GetArraySetting(regionId);
 
-        if (selectedRegions_[regionId] != setting)
+        if (regionStatus_[regionId] != setting)
         {
-            selectedRegions_[regionId] = setting;
+            regionStatus_[regionId] = setting;
             meshChanged_ = true;
         }
-
-        selectedRegionDatasetIds_[regionId] = -1;
 
         if (debug)
         {
             Info<< "  region[" << regionId << "] = "
-                << selectedRegions_[regionId]
-                << " : " << arraySelection->GetArrayName(regionId) << endl;
+                << regionStatus_[regionId]
+                << " : " << regionSelection->GetArrayName(regionId) << endl;
         }
     }
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::updateSelectedRegions" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateRegionStatus" << endl;
     }
+}
+
+Foam::wordHashSet Foam::vtkPV3Foam::getSelected
+(
+    vtkDataArraySelection* select
+)
+{
+    int nElem = select->GetNumberOfArrays();
+    wordHashSet selections(2*nElem);
+
+    for (int elemI=0; elemI < nElem; ++elemI)
+    {
+        if (select->GetArraySetting(elemI))
+        {
+            word name(getFirstWord(select->GetArrayName(elemI)));
+            selections.insert(name);
+        }
+    }
+
+    return selections;
 }
 
 
 Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 (
-    vtkDataArraySelection* arraySelection,
+    vtkDataArraySelection* select,
     const bool firstWord
 )
 {
-    stringList selections(arraySelection->GetNumberOfArrays());
+    stringList selections(select->GetNumberOfArrays());
     label nElem = 0;
 
     if (debug)
     {
         Info<< "available(";
-        forAll (selections, elemI)
+        forAll(selections, elemI)
         {
-            Info<< " \"" << arraySelection->GetArrayName(elemI) << "\"";
+            Info<< " \"" << select->GetArrayName(elemI) << "\"";
         }
         Info<< " )\n"
             << "selected(";
     }
 
-    forAll (selections, elemI)
+    forAll(selections, elemI)
     {
-        if (arraySelection->GetArraySetting(elemI))
+        if (select->GetArraySetting(elemI))
         {
             if (firstWord)
             {
                 selections[nElem] = getFirstWord
                 (
-                    arraySelection->GetArrayName(elemI)
+                    select->GetArrayName(elemI)
                 );
             }
             else
             {
-                selections[nElem] = arraySelection->GetArrayName(elemI);
+                selections[nElem] = select->GetArrayName(elemI);
             }
 
             if (debug)
@@ -341,7 +353,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
 Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 (
-    vtkDataArraySelection* arraySelection,
+    vtkDataArraySelection* select,
     const selectionInfo& selector,
     const bool firstWord
 )
@@ -359,7 +371,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
             ++elemI
         )
         {
-            Info<< " \"" << arraySelection->GetArrayName(elemI) << "\"";
+            Info<< " \"" << select->GetArrayName(elemI) << "\"";
         }
 
         Info<< " )\n"
@@ -373,18 +385,18 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
         ++elemI
     )
     {
-        if (arraySelection->GetArraySetting(elemI))
+        if (select->GetArraySetting(elemI))
         {
             if (firstWord)
             {
                 selections[nElem] = getFirstWord
                 (
-                    arraySelection->GetArrayName(elemI)
+                    select->GetArrayName(elemI)
                 );
             }
             else
             {
-                selections[nElem] = arraySelection->GetArrayName(elemI);
+                selections[nElem] = select->GetArrayName(elemI);
             }
 
             if (debug)
@@ -408,7 +420,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 
 void Foam::vtkPV3Foam::setSelectedArrayEntries
 (
-    vtkDataArraySelection* arraySelection,
+    vtkDataArraySelection* select,
     const stringList& selections
 )
 {
@@ -416,13 +428,13 @@ void Foam::vtkPV3Foam::setSelectedArrayEntries
     {
         Info<< "<beg> Foam::vtkPV3Foam::setSelectedArrayEntries" << endl;
     }
-    const label nEntries = arraySelection->GetNumberOfArrays();
+    const label nEntries = select->GetNumberOfArrays();
 
     // Reset all current entries to 'not selected'
-    arraySelection->DisableAllArrays();
+    select->DisableAllArrays();
 
     // Loop through entries, setting values from selectedEntries
-    forAll (selections, elemI)
+    forAll(selections, elemI)
     {
         if (debug > 1)
         {
@@ -432,7 +444,7 @@ void Foam::vtkPV3Foam::setSelectedArrayEntries
 
         for (label i=0; i<nEntries; i++)
         {
-            string arrayName = arraySelection->GetArrayName(i);
+            string arrayName = select->GetArrayName(i);
 
             if (arrayName == selections[elemI])
             {
@@ -443,7 +455,7 @@ void Foam::vtkPV3Foam::setSelectedArrayEntries
                         << endl;
                 }
 
-                arraySelection->EnableArray(arrayName.c_str());
+                select->EnableArray(arrayName.c_str());
                 break;
             }
         }
@@ -466,20 +478,19 @@ Foam::vtkPV3Foam::vtkPV3Foam
     reader_(reader),
     dbPtr_(NULL),
     meshPtr_(NULL),
-    selectInfoVolume_("unzoned"),
-    selectInfoPatches_("patches"),
-    selectInfoLagrangian_("lagrangian"),
-    selectInfoCellZones_("cellZone"),
-    selectInfoFaceZones_("faceZone"),
-    selectInfoPointZones_("pointZone"),
-    selectInfoCellSets_("cellSet"),
-    selectInfoFaceSets_("faceSet"),
-    selectInfoPointSets_("pointSet"),
-    patchTextActorsPtrs_(0),
     nMesh_(0),
     timeIndex_(-1),
     meshChanged_(true),
-    fieldsChanged_(true)
+    fieldsChanged_(true),
+    regionInfoVolume_("unzoned"),
+    regionInfoPatches_("patches"),
+    regionInfoLagrangian_("lagrangian"),
+    regionInfoCellZones_("cellZone"),
+    regionInfoFaceZones_("faceZone"),
+    regionInfoPointZones_("pointZone"),
+    regionInfoCellSets_("cellSet"),
+    regionInfoFaceSets_("faceSet"),
+    regionInfoPointSets_("pointSet")
 {
     if (debug)
     {
@@ -528,11 +539,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
 
     dbPtr_().functionObjects().off();
 
-    // Set initial cloud name
-    // TODO - TEMPORARY MEASURE UNTIL CAN PROCESS MULTIPLE CLOUDS
-    cloudName_ = "";
-
-    UpdateInformation();
+    updateInfo();
 }
 
 
@@ -551,22 +558,22 @@ Foam::vtkPV3Foam::~vtkPV3Foam()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPV3Foam::UpdateInformation()
+void Foam::vtkPV3Foam::updateInfo()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::UpdateInformation"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "] TimeStep="
-            << reader_->GetTimeStep() << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfo"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "] timeIndex="
+            << timeIndex_ << endl;
     }
 
     resetCounters();
 
-    vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
 
     stringList selectedEntries;
     // enable 'internalMesh' on the first call
-    if (arraySelection->GetNumberOfArrays() == 0 && !meshPtr_)
+    if (regionSelection->GetNumberOfArrays() == 0 && !meshPtr_)
     {
         selectedEntries.setSize(1);
         selectedEntries[0] = "internalMesh";
@@ -576,33 +583,25 @@ void Foam::vtkPV3Foam::UpdateInformation()
         // preserve the enabled selections
         selectedEntries = getSelectedArrayEntries
         (
-            arraySelection,
+            regionSelection,
             false
         );
     }
 
     // Clear current region list/array
-    arraySelection->RemoveAllArrays();
+    regionSelection->RemoveAllArrays();
 
-    // Update region array
-    updateInformationInternalMesh();
-    updateInformationLagrangian();
-    updateInformationPatches();
-
-    if (reader_->GetIncludeSets())
-    {
-        updateInformationSets();
-    }
-
-    if (reader_->GetIncludeZones())
-    {
-        updateInformationZones();
-    }
+    // Update region array - add Lagrangian at the bottom
+    updateInfoInternalMesh();
+    updateInfoPatches();
+    updateInfoSets();
+    updateInfoZones();
+    updateInfoLagrangian();
 
     // restore the enabled selections
     setSelectedArrayEntries
     (
-        arraySelection,
+        regionSelection,
         selectedEntries
     );
 
@@ -611,24 +610,20 @@ void Foam::vtkPV3Foam::UpdateInformation()
         fieldsChanged_ = true;
     }
 
-    // Update volField array
-    updateInformationFields<fvPatchField, volMesh>
+    // Update volume, point and lagrangian fields
+    updateInfoFields<fvPatchField, volMesh>
     (
         reader_->GetVolFieldSelection()
     );
-
-    // Update pointField array
-    updateInformationFields<pointPatchField, pointMesh>
+    updateInfoFields<pointPatchField, pointMesh>
     (
         reader_->GetPointFieldSelection()
     );
-
-    // Update lagrangian field array
-    updateInformationLagrangianFields();
+    updateInfoLagrangianFields();
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::UpdateInformation" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfo" << endl;
     }
 
 }
@@ -702,7 +697,7 @@ void Foam::vtkPV3Foam::Update
     reader_->UpdateProgress(0.1);
 
     // Set up region selection(s)
-    updateSelectedRegions();
+    updateRegionStatus();
 
     // Update the Foam mesh
     updateFoamMesh();
@@ -793,27 +788,23 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
     // Remove any patch names previously added to the renderer
     removePatchNames(renderer);
 
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::addPatchNames" << endl;
-    }
-
     // get the display patches, strip off any suffix
     const stringList selectedPatches = getSelectedArrayEntries
     (
         reader_->GetRegionSelection(),
-        selectInfoPatches_,
+        regionInfoPatches_,
         true
     );
-
-    if (debug)
-    {
-        Info<<"... add patches: " << selectedPatches << endl;
-    }
 
     if (!selectedPatches.size())
     {
         return;
+    }
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::addPatchNames" << nl
+            <<"... add patches: " << selectedPatches << endl;
     }
 
     const polyBoundaryMesh& pbMesh = meshPtr_->boundaryMesh();
@@ -977,11 +968,6 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
 
 void Foam::vtkPV3Foam::removePatchNames(vtkRenderer* renderer)
 {
-    if (debug)
-    {
-        Info<< "removePatchNames()" << endl;
-    }
-
     forAll(patchTextActorsPtrs_, patchI)
     {
         renderer->RemoveViewProp(patchTextActorsPtrs_[patchI]);

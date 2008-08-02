@@ -27,8 +27,8 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamConvertPointFields_H
-#define vtkPV3FoamConvertPointFields_H
+#ifndef vtkPV3FoamPointFields_H
+#define vtkPV3FoamPointFields_H
 
 // Foam includes
 #include "interpolatePointToCell.H"
@@ -39,11 +39,12 @@ template<class Type>
 void Foam::vtkPV3Foam::convertPointFields
 (
     const fvMesh& mesh,
+    const pointMesh& pMesh,
     const IOobjectList& objects,
-    vtkDataArraySelection* fieldSelection,
     vtkMultiBlockDataSet* output
 )
 {
+    // field subset based on type
     IOobjectList fieldObjects
     (
         objects.lookupClass
@@ -52,20 +53,12 @@ void Foam::vtkPV3Foam::convertPointFields
         )
     );
 
-    label nFields = fieldSelection->GetNumberOfArrays();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
 
-    for (label i=0; i<nFields; i++)
+    forAllIter(IOobjectList, fieldObjects, iter)
     {
-        const word fieldName = fieldSelection->GetArrayName(i);
-
-        if
-        (
-            !fieldSelection->GetArraySetting(i)
-         || !fieldObjects.found(fieldName))
-        {
-            continue;
-        }
+        word fieldName = iter()->name();
 
         if (debug)
         {
@@ -73,17 +66,9 @@ void Foam::vtkPV3Foam::convertPointFields
                 << fieldName << endl;
         }
 
-        pointMesh pMesh(mesh);
-
         GeometricField<Type, pointPatchField, pointMesh> ptf
         (
-            IOobject
-            (
-                fieldName,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::MUST_READ
-            ),
+            *iter(),
             pMesh
         );
 
@@ -93,14 +78,14 @@ void Foam::vtkPV3Foam::convertPointFields
         //
         for
         (
-            int regionId = selectInfoVolume_.start();
-            regionId < selectInfoVolume_.end();
+            int regionId = regionInfoVolume_.start();
+            regionId < regionInfoVolume_.end();
             ++regionId
         )
         {
-            const label datasetId = selectedRegionDatasetIds_[regionId];
+            const label datasetNo = regionDataset_[regionId];
 
-            if (!selectedRegions_[regionId] || datasetId < 0)
+            if (!regionStatus_[regionId] || datasetNo < 0)
             {
                 continue;
             }
@@ -110,36 +95,42 @@ void Foam::vtkPV3Foam::convertPointFields
                 ptf,
                 GeometricField<Type, fvPatchField, volMesh>::null(),
                 output,
-                selectInfoVolume_,
-                datasetId
+                regionInfoVolume_,
+                datasetNo
             );
         }
-
 
         //
         // Convert patches - if activated
         //
-        label regionId = selectInfoPatches_.start();
-        forAll (patches, patchI)
+        for
+        (
+            int regionId = regionInfoPatches_.start();
+            regionId < regionInfoPatches_.end();
+            ++regionId
+        )
         {
-            if (patches[patchI].size())
+            word patchName = getFirstWord
+            (
+                regionSelection->GetArrayName(regionId)
+            );
+
+            const label datasetNo = regionDataset_[regionId];
+            const label patchId = patches.findPatchID(patchName);
+
+            if (!regionStatus_[regionId] || datasetNo < 0 || patchId < 0)
             {
-                const label datasetId = selectedRegionDatasetIds_[regionId];
-
-                if (selectedRegions_[regionId] && datasetId >= 0)
-                {
-
-                    convertPatchPointField
-                    (
-                        fieldName,
-                        ptf.boundaryField()[patchI].patchInternalField()(),
-                        output,
-                        selectInfoPatches_,
-                        datasetId
-                    );
-                }
-                regionId++;
+                continue;
             }
+
+            convertPatchPointField
+            (
+                fieldName,
+                ptf.boundaryField()[patchId].patchInternalField()(),
+                output,
+                regionInfoPatches_,
+                datasetNo
+            );
         }
     }
 }
@@ -157,37 +148,48 @@ void Foam::vtkPV3Foam::convertPointField
 {
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkUnstructuredGrid* internalMesh = vtkUnstructuredGrid::SafeDownCast
+    vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::SafeDownCast
     (
         GetDataSetFromBlock(output, selector, datasetNo)
     );
 
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples(ptf.size() + addPointCellLabels_.size());
-    pointData->SetNumberOfComponents(nComp);
-    pointData->Allocate(nComp*ptf.size());
-    pointData->SetName(tf.name().c_str());
+    pointData->SetNumberOfTuples( ptf.size() + addPointCellLabels_.size() );
+    pointData->SetNumberOfComponents( nComp );
+    pointData->Allocate( nComp*(ptf.size() + addPointCellLabels_.size()) );
+    pointData->SetName( tf.name().c_str() );
+
+
+    if (debug)
+    {
+        Info<< "convert convertPointField: "
+            << tf.name()
+            << " size = " << ptf.size()
+            << " nComp=" << nComp
+            << " nTuples = " << (ptf.size() + addPointCellLabels_.size())
+            <<  endl;
+    }
 
     float vec[nComp];
-
     forAll(ptf, i)
     {
+        const Type& t = ptf[i];
         for (direction d=0; d<nComp; d++)
         {
-            vec[d] = component(ptf[i], d);
+            vec[d] = component(t, d);
         }
 
         pointData->InsertTuple(i, vec);
     }
 
+    // continue insertion from here
     label i = ptf.size();
 
     if (&tf != &GeometricField<Type, fvPatchField, volMesh>::null())
     {
         forAll(addPointCellLabels_, api)
         {
-            Type t = tf[addPointCellLabels_[api]];
-
+            const Type& t = tf[addPointCellLabels_[api]];
             for (direction d=0; d<nComp; d++)
             {
                 vec[d] = component(t, d);
@@ -211,10 +213,9 @@ void Foam::vtkPV3Foam::convertPointField
         }
     }
 
-    internalMesh->GetPointData()->AddArray(pointData);
+    vtkmesh->GetPointData()->AddArray(pointData);
     pointData->Delete();
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

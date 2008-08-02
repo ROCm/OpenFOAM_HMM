@@ -27,19 +27,20 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamConvertPatchFaceField_H
-#define vtkPV3FoamConvertPatchFaceField_H
+#ifndef vtkPV3FoamPatchField_H
+#define vtkPV3FoamPatchField_H
 
 // VTK includes
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
 #include "vtkMultiBlockDataSet.h"
+#include "vtkPointData.h"
 #include "vtkPolyData.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtkPV3Foam::convertPatchFaceField
+void Foam::vtkPV3Foam::convertPatchField
 (
     const word& name,
     const Field<Type>& ptf,
@@ -55,14 +56,13 @@ void Foam::vtkPV3Foam::convertPatchFaceField
         GetDataSetFromBlock(output, selector, datasetNo)
     );
 
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(ptf.size());
-    cellData->SetNumberOfComponents(nComp);
-    cellData->Allocate(nComp*ptf.size());
-    cellData->SetName(name.c_str());
+    vtkFloatArray* cellData = vtkFloatArray::New();
+    cellData->SetNumberOfTuples( ptf.size() );
+    cellData->SetNumberOfComponents( nComp );
+    cellData->Allocate( nComp*ptf.size() );
+    cellData->SetName( name.c_str() );
 
     float vec[nComp];
-
     forAll(ptf, i)
     {
         const Type& t = ptf[i];
@@ -78,6 +78,46 @@ void Foam::vtkPV3Foam::convertPatchFaceField
     cellData->Delete();
 }
 
+
+// as above, but with PointData()
+template<class Type>
+void Foam::vtkPV3Foam::convertPatchPointField
+(
+    const word& name,
+    const Field<Type>& pptf,
+    vtkMultiBlockDataSet* output,
+    const selectionInfo& selector,
+    const label datasetNo
+)
+{
+    const label nComp = pTraits<Type>::nComponents;
+
+    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    );
+
+    vtkFloatArray *pointData = vtkFloatArray::New();
+    pointData->SetNumberOfTuples( pptf.size() );
+    pointData->SetNumberOfComponents( nComp );
+    pointData->Allocate( nComp*pptf.size() );
+    pointData->SetName( name.c_str() );
+
+    float vec[nComp];
+    forAll(pptf, i)
+    {
+        const Type& t = pptf[i];
+        for (direction d=0; d<nComp; d++)
+        {
+            vec[d] = component(t, d);
+        }
+
+        pointData->InsertTuple(i, vec);
+    }
+
+    vtkmesh->GetPointData()->AddArray(pointData);
+    pointData->Delete();
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

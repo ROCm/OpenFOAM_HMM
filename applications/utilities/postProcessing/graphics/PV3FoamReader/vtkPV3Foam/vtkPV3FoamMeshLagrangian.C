@@ -31,81 +31,68 @@ Description
 // Foam includes
 #include "Cloud.H"
 #include "fvMesh.H"
-#include "passiveParticle.H"
-#include "vtkPV3FoamInsertNextPoint.H"
 #include "IOobjectList.H"
+#include "passiveParticle.H"
+#include "vtkPV3FoamPoints.H"
 
 // VTK includes
-#include "vtkCellArray.h"
+#include "vtkPoints.h"
 #include "vtkPolyData.h"
-#include "vtkUnstructuredGrid.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPV3Foam::addLagrangianMesh
+vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
 (
     const fvMesh& mesh,
-    vtkPolyData *vtkmesh
+    const word& cloudName
 )
 {
+    vtkPolyData* vtkmesh = NULL;
+
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::addLagrangianMesh - timePath "
-            << mesh.time().timePath()/"lagrangian" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::lagrangianVTKMesh - timePath "
+            << mesh.time().timePath()/"lagrangian"/cloudName << endl;
         printMemory();
     }
 
-    fileNameList cloudDirs
+    IOobjectList sprayObjs
     (
-        readDir(mesh.time().timePath()/"lagrangian", fileName::DIRECTORY)
+        mesh,
+        mesh.time().timeName(),
+        "lagrangian"/cloudName
     );
 
-    if (debug && cloudDirs.size())
+    IOobject* positionsPtr = sprayObjs.lookup("positions");
+    if (positionsPtr)
     {
-        Info<< "... check cloudDirs: " << cloudDirs << endl;
-    }
+        Cloud<passiveParticle> parcels(mesh, cloudName, false);
 
-    bool foundCloud = false;
-    forAll(cloudDirs, i)
-    {
-        IOobjectList sprayObjs
-        (
-            mesh,
-            mesh.time().timeName(),
-            "lagrangian"/cloudDirs[i]
-        );
-
-        IOobject* positionsPtr = sprayObjs.lookup("positions");
-
-        if (positionsPtr && !foundCloud)
+        if (debug)
         {
-            foundCloud = true;
-
-            Cloud<passiveParticle> parcels(mesh, cloudDirs[i], false);
-
-            if (debug)
-            {
-                Info<< "cloud with " << parcels.size() << " parcels" << endl;
-            }
-
-            vtkPoints* vtkpoints = vtkPoints::New();
-            vtkpoints->Allocate(parcels.size());
-
-            forAllConstIter(Cloud<passiveParticle>, parcels, elmnt)
-            {
-                vtkPV3FoamInsertNextPoint(vtkpoints, elmnt().position());
-            }
-
-            vtkmesh->SetPoints(vtkpoints);
-            vtkpoints->Delete();
+            Info<< "cloud with " << parcels.size() << " parcels" << endl;
         }
+
+        vtkmesh = vtkPolyData::New();
+        vtkPoints* vtkpoints = vtkPoints::New();
+        vtkpoints->Allocate( parcels.size() );
+
+        forAllConstIter(Cloud<passiveParticle>, parcels, iter)
+        {
+            vtkPV3FoamInsertNextPoint(vtkpoints, iter().position());
+        }
+
+        vtkmesh->SetPoints(vtkpoints);
+        vtkpoints->Delete();
     }
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::addLagrangianMesh" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::lagrangianVTKMesh" << endl;
         printMemory();
     }
+
+    return vtkmesh;
 }
 
 

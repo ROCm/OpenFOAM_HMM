@@ -1,0 +1,332 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Description
+
+\*---------------------------------------------------------------------------*/
+
+#include "vtkPV3Foam.H"
+
+// Foam includes
+#include "IOobjectList.H"
+#include "vtkPV3FoamReader.h"
+
+// VTK includes
+#include "vtkDataArraySelection.h"
+#include "vtkPolyData.h"
+#include "vtkUnstructuredGrid.h"
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+#include "vtkPV3FoamVolFields.H"
+#include "vtkPV3FoamPointFields.H"
+#include "vtkPV3FoamLagrangianFields.H"
+
+
+void Foam::vtkPV3Foam::subsetObjectList
+(
+    IOobjectList& objects,
+    const wordHashSet& selected
+)
+{
+    // hash all the selected field names
+    if (!selected.size())
+    {
+        objects.clear();
+    }
+
+    // only keep selected fields
+    forAllIter(IOobjectList, objects, iter)
+    {
+        if (!selected.found(iter()->name()))
+        {
+            objects.erase(iter);
+        }
+    }
+}
+
+
+void Foam::vtkPV3Foam::convertVolFields
+(
+    vtkMultiBlockDataSet* output
+)
+{
+    wordHashSet selectedFields = getSelected
+    (
+        reader_->GetVolFieldSelection()
+    );
+
+    if (!selectedFields.size())
+    {
+        return;
+    }
+
+    const fvMesh& mesh = *meshPtr_;
+
+    // Get objects (fields) for this time - only keep selected fields
+    IOobjectList objects(mesh, dbPtr_().timeName());
+    subsetObjectList(objects, selectedFields);
+
+    if (!objects.size())
+    {
+        return;
+    }
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::convertVolFields" << nl
+            << "converting Foam volume fields" << endl;
+        forAllConstIter(IOobjectList, objects, iter)
+        {
+            Info<< "  " << iter()->name()
+                << " == " << iter()->objectPath() << nl;
+        }
+        printMemory();
+    }
+
+    // Construct interpolation on the raw mesh
+    pointMesh pMesh(mesh);
+    volPointInterpolation pInterp(mesh, pMesh);
+
+    PtrList<PrimitivePatchInterpolation<primitivePatch> >
+        ppInterpList(mesh.boundaryMesh().size());
+
+    forAll(ppInterpList, i)
+    {
+        ppInterpList.set
+        (
+            i,
+            new PrimitivePatchInterpolation<primitivePatch>
+            (
+                mesh.boundaryMesh()[i]
+            )
+        );
+    }
+
+
+    convertVolFields<scalar>
+    (
+        mesh, pInterp, ppInterpList, objects, output
+    );
+    convertVolFields<vector>
+    (
+        mesh, pInterp, ppInterpList, objects, output
+    );
+    convertVolFields<sphericalTensor>
+    (
+        mesh, pInterp, ppInterpList, objects, output
+    );
+    convertVolFields<symmTensor>
+    (
+        mesh, pInterp, ppInterpList, objects, output
+    );
+    convertVolFields<tensor>
+    (
+        mesh, pInterp, ppInterpList, objects, output
+    );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertVolFields" << endl;
+        printMemory();
+    }
+}
+
+
+void Foam::vtkPV3Foam::convertPointFields
+(
+    vtkMultiBlockDataSet* output
+)
+{
+    wordHashSet selectedFields = getSelected
+    (
+        reader_->GetPointFieldSelection()
+    );
+
+    if (!selectedFields.size())
+    {
+        return;
+    }
+
+    const fvMesh& mesh = *meshPtr_;
+
+    // Get objects (fields) for this time - only keep selected fields
+    IOobjectList objects(mesh, dbPtr_().timeName());
+
+    subsetObjectList(objects, selectedFields);
+
+    if (!objects.size())
+    {
+        return;
+    }
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::convertPointFields" << nl
+            << "converting Foam volume fields" << endl;
+        forAllConstIter(IOobjectList, objects, iter)
+        {
+            Info<< "  " << iter()->name()
+                << " == " << iter()->objectPath() << nl;
+        }
+        printMemory();
+    }
+
+    // Construct interpolation on the raw mesh
+    pointMesh pMesh(mesh);
+
+
+    convertPointFields<scalar>
+    (
+        mesh, pMesh, objects, output
+    );
+    convertPointFields<vector>
+    (
+        mesh, pMesh, objects, output
+    );
+    convertPointFields<sphericalTensor>
+    (
+        mesh, pMesh, objects, output
+    );
+    convertPointFields<symmTensor>
+    (
+        mesh, pMesh, objects, output
+    );
+    convertPointFields<tensor>
+    (
+        mesh, pMesh, objects, output
+    );
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertPointFields" << endl;
+        printMemory();
+    }
+}
+
+
+void Foam::vtkPV3Foam::convertLagrangianFields
+(
+    vtkMultiBlockDataSet* output
+)
+{
+    wordHashSet selectedFields = getSelected
+    (
+        reader_->GetLagrangianFieldSelection()
+    );
+
+    if (!selectedFields.size())
+    {
+        return;
+    }
+
+    const fvMesh& mesh = *meshPtr_;
+    selectionInfo& selector = regionInfoLagrangian_;
+    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::convertLagrangianFields" << endl;
+        printMemory();
+    }
+
+    for
+    (
+        int regionId = selector.start();
+        regionId < selector.end();
+        ++regionId
+    )
+    {
+        const label datasetNo = regionDataset_[regionId];
+
+        if (!regionStatus_[regionId] || datasetNo < 0)
+        {
+            continue;
+        }
+
+        word cloudName = getFirstWord
+        (
+            regionSelection->GetArrayName(regionId)
+        );
+
+        // Get the Lagrangian fields for this time and this cloud
+        // but only keep selected fields
+        IOobjectList objects
+        (
+            mesh,
+            dbPtr_().timeName(),
+            "lagrangian"/cloudName
+        );
+        subsetObjectList(objects, selectedFields);
+
+        if (!objects.size())
+        {
+            continue;
+        }
+
+        if (debug)
+        {
+            Info<< "converting Foam lagrangian fields" << nl;
+            forAllConstIter(IOobjectList, objects, iter)
+            {
+                Info<< "  " << iter()->name()
+                    << " == " << iter()->objectPath() << nl;
+            }
+        }
+
+        convertLagrangianFields<label>
+        (
+            objects, output, datasetNo
+        );
+        convertLagrangianFields<scalar>
+        (
+            objects, output, datasetNo
+        );
+        convertLagrangianFields<vector>
+        (
+            objects, output, datasetNo
+        );
+        convertLagrangianFields<sphericalTensor>
+        (
+            objects, output, datasetNo
+        );
+        convertLagrangianFields<symmTensor>
+        (
+            objects, output, datasetNo
+        );
+        convertLagrangianFields<tensor>
+        (
+            objects, output, datasetNo
+        );
+    }
+
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3Foam::convertLagrangianFields" << endl;
+        printMemory();
+    }
+}
+
+
+// ************************************************************************* //
