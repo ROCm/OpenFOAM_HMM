@@ -44,7 +44,7 @@ Description
 #include "vtkPV3FoamLagrangianFields.H"
 
 
-void Foam::vtkPV3Foam::subsetObjectList
+void Foam::vtkPV3Foam::pruneObjectList
 (
     IOobjectList& objects,
     const wordHashSet& selected
@@ -83,10 +83,9 @@ void Foam::vtkPV3Foam::convertVolFields
     }
 
     const fvMesh& mesh = *meshPtr_;
-
     // Get objects (fields) for this time - only keep selected fields
     IOobjectList objects(mesh, dbPtr_().timeName());
-    subsetObjectList(objects, selectedFields);
+    pruneObjectList(objects, selectedFields);
 
     if (!objects.size())
     {
@@ -170,11 +169,9 @@ void Foam::vtkPV3Foam::convertPointFields
     }
 
     const fvMesh& mesh = *meshPtr_;
-
     // Get objects (fields) for this time - only keep selected fields
     IOobjectList objects(mesh, dbPtr_().timeName());
-
-    subsetObjectList(objects, selectedFields);
+    pruneObjectList(objects, selectedFields);
 
     if (!objects.size())
     {
@@ -231,6 +228,9 @@ void Foam::vtkPV3Foam::convertLagrangianFields
     vtkMultiBlockDataSet* output
 )
 {
+    partInfo& selector = partInfoLagrangian_;
+    const fvMesh& mesh = *meshPtr_;
+
     wordHashSet selectedFields = getSelected
     (
         reader_->GetLagrangianFieldSelection()
@@ -241,34 +241,21 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         return;
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoLagrangian_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertLagrangianFields" << endl;
         printMemory();
     }
 
-    for
-    (
-        int regionId = selector.start();
-        regionId < selector.end();
-        ++regionId
-    )
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        const label datasetNo = regionDataset_[regionId];
+        const word  cloudName = getPartName(partId);
+        const label datasetNo = partDataset_[partId];
 
-        if (!regionStatus_[regionId] || datasetNo < 0)
+        if (!partStatus_[partId] || datasetNo < 0)
         {
             continue;
         }
-
-        word cloudName = getFirstWord
-        (
-            regionSelection->GetArrayName(regionId)
-        );
 
         // Get the Lagrangian fields for this time and this cloud
         // but only keep selected fields
@@ -278,7 +265,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
             dbPtr_().timeName(),
             "lagrangian"/cloudName
         );
-        subsetObjectList(objects, selectedFields);
+        pruneObjectList(objects, selectedFields);
 
         if (!objects.size())
         {

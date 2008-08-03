@@ -43,18 +43,18 @@ void Foam::vtkPV3Foam::updateInfoFields
         Info<< "<beg> Foam::vtkPV3Foam::updateInfoFields" << endl;
     }
 
-    stringList selectedEntries;
+    stringList enabledEntries;
     // enable 'p' and 'U' on the first call
     if (select->GetNumberOfArrays() == 0 && !meshPtr_)
     {
-        selectedEntries.setSize(2);
-        selectedEntries[0] = "p";
-        selectedEntries[1] = "U";
+        enabledEntries.setSize(2);
+        enabledEntries[0] = "p";
+        enabledEntries[1] = "U";
     }
     else
     {
         // preserve the enabled selections
-        selectedEntries = getSelectedArrayEntries(select);
+        enabledEntries = getSelectedArrayEntries(select);
     }
 
     select->RemoveAllArrays();
@@ -90,11 +90,7 @@ void Foam::vtkPV3Foam::updateInfoFields
     );
 
     // restore the enabled selections
-    setSelectedArrayEntries
-    (
-        select,
-        selectedEntries
-    );
+    setSelectedArrayEntries(select, enabledEntries);
 
     if (debug)
     {

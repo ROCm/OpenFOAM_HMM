@@ -40,21 +40,16 @@ void Foam::vtkPV3Foam::convertLagrangianFields
     const label datasetNo
 )
 {
-    const selectionInfo& selector = regionInfoLagrangian_;
+    const partInfo& selector = partInfoLagrangian_;
 
-    // field subset based on type
-    IOobjectList fieldObjects
-    (
-        objects.lookupClass
-        (
-            IOField<Type>::typeName
-        )
-    );
-
-    forAllIter(IOobjectList, fieldObjects, iter)
+    forAllConstIter(IOobjectList, objects, iter)
     {
-        IOField<Type> tf(*iter());
-        convertLagrangianField(tf, output, selector, datasetNo);
+        // restrict to this IOField<Type>
+        if (iter()->headerClassName() == IOField<Type>::typeName)
+        {
+            IOField<Type> tf(*iter());
+            convertLagrangianField(tf, output, selector, datasetNo);
+        }
     }
 }
 
@@ -64,16 +59,11 @@ void Foam::vtkPV3Foam::convertLagrangianField
 (
     const IOField<Type>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
 
     vtkFloatArray *pointData = vtkFloatArray::New();
     pointData->SetNumberOfTuples( tf.size() );
@@ -102,10 +92,15 @@ void Foam::vtkPV3Foam::convertLagrangianField
         pointData->InsertTuple(i, vec);
     }
 
-    vtkmesh->GetPointData()->AddArray(pointData);
+
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetPointData()
+        ->AddArray(pointData);
+
     pointData->Delete();
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

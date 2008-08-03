@@ -88,12 +88,12 @@ public:
     int  GetTimeStep();
 
     // Description:
-    // Region selection list control
-    vtkDataArraySelection* GetRegionSelection();
-    int  GetNumberOfRegionArrays();
-    int  GetRegionArrayStatus(const char* name);
-    void SetRegionArrayStatus(const char* name, int status);
-    const char* GetRegionArrayName(int index);
+    // Parts selection list control
+    vtkDataArraySelection* GetPartSelection();
+    int  GetNumberOfPartArrays();
+    int  GetPartArrayStatus(const char* name);
+    void SetPartArrayStatus(const char* name, int status);
+    const char* GetPartArrayName(int index);
 
     // Description:
     // volField selection list control
@@ -191,7 +191,7 @@ private:
     //- Dummy variable/switch for invoke a reader update
     int UpdateGUI;
 
-    vtkDataArraySelection* RegionSelection;
+    vtkDataArraySelection* PartSelection;
     vtkDataArraySelection* VolFieldSelection;
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;

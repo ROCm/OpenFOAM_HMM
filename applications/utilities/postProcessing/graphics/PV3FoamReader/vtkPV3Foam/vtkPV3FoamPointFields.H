@@ -44,21 +44,20 @@ void Foam::vtkPV3Foam::convertPointFields
     vtkMultiBlockDataSet* output
 )
 {
-    // field subset based on type
-    IOobjectList fieldObjects
-    (
-        objects.lookupClass
-        (
-            GeometricField<Type, pointPatchField, pointMesh>::typeName
-        )
-    );
-
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
 
-    forAllIter(IOobjectList, fieldObjects, iter)
+    forAllConstIter(IOobjectList, objects, iter)
     {
-        word fieldName = iter()->name();
+        const word& fieldName = iter()->name();
+        // restrict to this GeometricField<Type, ...>
+        if
+        (
+            iter()->headerClassName()
+         != GeometricField<Type, pointPatchField, pointMesh>::typeName
+        )
+        {
+            continue;
+        }
 
         if (debug)
         {
@@ -73,52 +72,49 @@ void Foam::vtkPV3Foam::convertPointFields
         );
 
 
-        //
-        // Convert internal mesh - if activated
-        //
-        for
+        // Convert activated internalMesh regions
+        convertPointFieldBlock
         (
-            int regionId = regionInfoVolume_.start();
-            regionId < regionInfoVolume_.end();
-            ++regionId
-        )
-        {
-            const label datasetNo = regionDataset_[regionId];
+            ptf,
+            output,
+            partInfoVolume_,
+            regionPolyDecomp_
+        );
 
-            if (!regionStatus_[regionId] || datasetNo < 0)
-            {
-                continue;
-            }
+        // Convert activated cellZones
+        convertPointFieldBlock
+        (
+            ptf,
+            output,
+            partInfoCellZones_,
+            zonePolyDecomp_
+        );
 
-            convertPointField
-            (
-                ptf,
-                GeometricField<Type, fvPatchField, volMesh>::null(),
-                output,
-                regionInfoVolume_,
-                datasetNo
-            );
-        }
+        // Convert activated cellSets
+        convertPointFieldBlock
+        (
+            ptf,
+            output,
+            partInfoCellSets_,
+            csetPolyDecomp_
+        );
+
 
         //
         // Convert patches - if activated
         //
         for
         (
-            int regionId = regionInfoPatches_.start();
-            regionId < regionInfoPatches_.end();
-            ++regionId
+            int partId = partInfoPatches_.start();
+            partId < partInfoPatches_.end();
+            ++partId
         )
         {
-            word patchName = getFirstWord
-            (
-                regionSelection->GetArrayName(regionId)
-            );
+            const word  patchName = getPartName(partId);
+            const label datasetNo = partDataset_[partId];
+            const label   patchId = patches.findPatchID(patchName);
 
-            const label datasetNo = regionDataset_[regionId];
-            const label patchId = patches.findPatchID(patchName);
-
-            if (!regionStatus_[regionId] || datasetNo < 0 || patchId < 0)
+            if (!partStatus_[partId] || datasetNo < 0 || patchId < 0)
             {
                 continue;
             }
@@ -128,12 +124,43 @@ void Foam::vtkPV3Foam::convertPointFields
                 fieldName,
                 ptf.boundaryField()[patchId].patchInternalField()(),
                 output,
-                regionInfoPatches_,
+                partInfoPatches_,
                 datasetNo
             );
         }
     }
 }
+
+
+
+template<class Type>
+void Foam::vtkPV3Foam::convertPointFieldBlock
+(
+    const GeometricField<Type, pointPatchField, pointMesh>& ptf,
+    vtkMultiBlockDataSet* output,
+    const partInfo& selector,
+    const List<polyDecomp>& decompLst
+)
+{
+   for (int partId = selector.start(); partId < selector.end(); ++partId)
+   {
+       const label datasetNo = partDataset_[partId];
+
+       if (datasetNo >= 0 && partStatus_[partId])
+       {
+           convertPointField
+           (
+               ptf,
+               GeometricField<Type, fvPatchField, volMesh>::null(),
+               output,
+               selector,
+               datasetNo,
+               decompLst[datasetNo]
+           );
+       }
+   }
+}
+
 
 
 template<class Type>
@@ -142,21 +169,30 @@ void Foam::vtkPV3Foam::convertPointField
     const GeometricField<Type, pointPatchField, pointMesh>& ptf,
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
-    const label datasetNo
+    const partInfo& selector,
+    const label datasetNo,
+    const polyDecomp& decomp
 )
 {
     const label nComp = pTraits<Type>::nComponents;
+    const labelList& addPointCellLabels = decomp.addPointCellLabels();
+    const labelList& pointMap = decomp.pointMap();
 
-    vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
+    // use a pointMap or address directly into mesh
+    label nPoints;
+    if (pointMap.size())
+    {
+        nPoints = pointMap.size();
+    }
+    else
+    {
+        nPoints = ptf.size();
+    }
 
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( ptf.size() + addPointCellLabels_.size() );
+    pointData->SetNumberOfTuples( nPoints + addPointCellLabels.size() );
     pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*(ptf.size() + addPointCellLabels_.size()) );
+    pointData->Allocate( nComp*(nPoints + addPointCellLabels.size()) );
     pointData->SetName( tf.name().c_str() );
 
 
@@ -164,56 +200,73 @@ void Foam::vtkPV3Foam::convertPointField
     {
         Info<< "convert convertPointField: "
             << tf.name()
-            << " size = " << ptf.size()
+            << " size = " << nPoints
             << " nComp=" << nComp
-            << " nTuples = " << (ptf.size() + addPointCellLabels_.size())
+            << " nTuples = " << (nPoints + addPointCellLabels.size())
             <<  endl;
     }
 
     float vec[nComp];
-    forAll(ptf, i)
+
+    if (pointMap.size())
     {
-        const Type& t = ptf[i];
-        for (direction d=0; d<nComp; d++)
+        forAll(pointMap, i)
         {
-            vec[d] = component(t, d);
-        }
-
-        pointData->InsertTuple(i, vec);
-    }
-
-    // continue insertion from here
-    label i = ptf.size();
-
-    if (&tf != &GeometricField<Type, fvPatchField, volMesh>::null())
-    {
-        forAll(addPointCellLabels_, api)
-        {
-            const Type& t = tf[addPointCellLabels_[api]];
+            const Type& t = ptf[pointMap[i]];
             for (direction d=0; d<nComp; d++)
             {
                 vec[d] = component(t, d);
             }
+            pointData->InsertTuple(i, vec);
+        }
+    }
+    else
+    {
+        forAll(ptf, i)
+        {
+            const Type& t = ptf[i];
+            for (direction d=0; d<nComp; d++)
+            {
+                vec[d] = component(t, d);
+            }
+            pointData->InsertTuple(i, vec);
+        }
+    }
 
+    // continue insertion from here
+    label i = nPoints;
+
+    if (&tf != &GeometricField<Type, fvPatchField, volMesh>::null())
+    {
+        forAll(addPointCellLabels, apI)
+        {
+            const Type& t = tf[addPointCellLabels[apI]];
+            for (direction d=0; d<nComp; d++)
+            {
+                vec[d] = component(t, d);
+            }
             pointData->InsertTuple(i++, vec);
         }
     }
     else
     {
-        forAll(addPointCellLabels_, api)
+        forAll(addPointCellLabels, apI)
         {
-            Type t = interpolatePointToCell(ptf, addPointCellLabels_[api]);
-
+            Type t = interpolatePointToCell(ptf, addPointCellLabels[apI]);
             for (direction d=0; d<nComp; d++)
             {
                 vec[d] = component(t, d);
             }
-
             pointData->InsertTuple(i++, vec);
         }
     }
 
-    vtkmesh->GetPointData()->AddArray(pointData);
+    vtkUnstructuredGrid::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetPointData()
+        ->AddArray(pointData);
+
     pointData->Delete();
 }
 

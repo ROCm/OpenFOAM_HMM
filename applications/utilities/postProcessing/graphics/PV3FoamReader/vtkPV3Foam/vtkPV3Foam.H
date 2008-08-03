@@ -46,6 +46,7 @@ SourceFiles
     vtkPV3FoamPoints.H
     vtkPV3FoamUpdateInfo.C
     vtkPV3FoamUpdateInfoFields.H
+    vtkPV3FoamUtilities.C
     vtkPV3FoamVolFields.H
     vtkPV3FoamAddToSelection.H
 
@@ -103,58 +104,10 @@ class List;
 
 class vtkPV3Foam
 {
-    // Private data
-
-        //- Access to the controlling vtkPV3FoamReader
-        vtkPV3FoamReader* reader_;
-
-        //- Foam time control
-        autoPtr<Time> dbPtr_;
-
-        //- Foam mesh
-        fvMesh* meshPtr_;
-
-        //- Number of meshes
-        // TODO - for info only - only set up to process ONE mesh
-        int nMesh_;
-
-        //- The time index
-        int timeIndex_;
-
-        //- Track changes in mesh geometry
-        bool meshChanged_;
-
-        //- Track changes in fields
-        bool fieldsChanged_;
-
-        //- Cell-centre labels used as additional points for decomposed cells
-        labelList addPointCellLabels_;
-
-        //- Label of original cell for decomposed cells (internal mesh)
-        labelList superCells_;
-
-        //- Label of original cell for decomposed cells (cellZone meshes)
-        List<labelList> zoneSuperCells_;
-
-        //- Label of original cell for decomposed cells (cellSet meshes)
-        List<labelList> csetSuperCells_;
-
-        //- List of patch names
-        List<vtkTextActor*> patchTextActorsPtrs_;
-
-
-        //- Selected geometrical pieces
-        //  [0] = internal mesh, patches, zones, sets, lagrangian
-        boolList regionStatus_;
-
-        //- Selected regions indices in each respective block
-        labelList regionDataset_;
-
-
     // Private classes
 
-        //- bookkeeping for the GUI checklists and the multi-block organization
-        class selectionInfo
+        //- Bookkeeping for GUI checklists and the multi-block organization
+        class partInfo
         {
             const char *name_;
             int block_;
@@ -163,7 +116,7 @@ class vtkPV3Foam
 
         public:
 
-            selectionInfo(const char *name, const int blockNo=0)
+            partInfo(const char *name, const int blockNo=0)
             :
                 name_(name),
                 block_(blockNo),
@@ -224,19 +177,121 @@ class vtkPV3Foam
             }
         };
 
-    // Private data
+        //- bookkeeping for polyhedral cell decomposition
+        //  hide in extra pointMap (cellSet/cellZone) for now
+        class polyDecomp
+        {
+            labelList superCells_;
+            labelList addPointCellLabels_;
+            labelList pointMap_;
 
-        //- First instance and size of various regions
-        selectionInfo regionInfoVolume_;
-        selectionInfo regionInfoPatches_;
-        selectionInfo regionInfoLagrangian_;
-        selectionInfo regionInfoCellZones_;
-        selectionInfo regionInfoFaceZones_;
-        selectionInfo regionInfoPointZones_;
-        selectionInfo regionInfoCellSets_;
-        selectionInfo regionInfoFaceSets_;
-        selectionInfo regionInfoPointSets_;
+        public:
 
+            polyDecomp()
+            {}
+
+            //- Label of original cell for decomposed cells
+            labelList& superCells()
+            {
+                return superCells_;
+            }
+
+            //- Label of original cell for decomposed cells
+            const labelList& superCells() const
+            {
+                return superCells_;
+            }
+
+            //- Cell-centre labels for additional points of decomposed cells
+            labelList& addPointCellLabels()
+            {
+                return addPointCellLabels_;
+            }
+
+            //- Cell-centre labels for additional points of decomposed cells
+            const labelList& addPointCellLabels() const
+            {
+                return addPointCellLabels_;
+            }
+
+            //- Point labels for subsetted meshes
+            labelList& pointMap()
+            {
+                return pointMap_;
+            }
+
+            //- Point labels for subsetted meshes
+            const labelList& pointMap() const
+            {
+                return pointMap_;
+            }
+
+
+            //- Clear
+            void clear()
+            {
+                superCells_.clear();
+                addPointCellLabels_.clear();
+                pointMap_.clear();
+            }
+        };
+
+
+    // Private Data
+
+        //- Access to the controlling vtkPV3FoamReader
+        vtkPV3FoamReader* reader_;
+
+        //- Foam time control
+        autoPtr<Time> dbPtr_;
+
+        //- Foam mesh
+        fvMesh* meshPtr_;
+
+        //- Number of meshes
+        // TODO - for info only - only set up to process ONE mesh
+        int nMesh_;
+
+        //- The time index
+        int timeIndex_;
+
+        //- Track changes in mesh geometry
+        bool meshChanged_;
+
+        //- Track changes in fields
+        bool fieldsChanged_;
+
+        //- Selected geometrical parts (internalMesh, patches, ...)
+        boolList partStatus_;
+
+        //- Datasets corresponding to selected geometrical pieces
+        //  a negative number indicates that no vtkmesh exists for this piece
+        labelList partDataset_;
+
+        //- First instance and size of various mesh parts
+        //  used to index into partStatus_ and partDataset_
+        partInfo partInfoVolume_;
+        partInfo partInfoPatches_;
+        partInfo partInfoLagrangian_;
+        partInfo partInfoCellZones_;
+        partInfo partInfoFaceZones_;
+        partInfo partInfoPointZones_;
+        partInfo partInfoCellSets_;
+        partInfo partInfoFaceSets_;
+        partInfo partInfoPointSets_;
+
+        //- Decomposed cells information (mesh regions)
+        //  TODO: regions
+        List<polyDecomp> regionPolyDecomp_;
+
+        //- Decomposed cells information (cellZone meshes)
+        List<polyDecomp> zonePolyDecomp_;
+
+        //- Decomposed cells information (cellSet meshes)
+        List<polyDecomp> csetPolyDecomp_;
+
+        //- List of patch names for rendering to window
+        List<vtkTextActor*> patchTextActorsPtrs_;
 
     // Private Member Functions
 
@@ -245,10 +300,10 @@ class vtkPV3Foam
         static void AddToBlock
         (
             vtkMultiBlockDataSet* output,
-            const selectionInfo&,
-            const label datasetNo,
             vtkDataSet* dataset,
-            const string& blockName=string::null
+            const partInfo&,
+            const label datasetNo,
+            const string& datasetName
         );
 
         // Convenience method use to convert the readers from VTK 5
@@ -256,7 +311,7 @@ class vtkPV3Foam
         static vtkDataSet* GetDataSetFromBlock
         (
             vtkMultiBlockDataSet* output,
-            const selectionInfo&,
+            const partInfo&,
             const label datasetNo
         );
 
@@ -265,7 +320,7 @@ class vtkPV3Foam
         static label GetNumberOfDataSets
         (
             vtkMultiBlockDataSet* output,
-            const selectionInfo&
+            const partInfo&
         );
 
         //- Reset data counters
@@ -273,8 +328,8 @@ class vtkPV3Foam
 
         // Update information helper functions
 
-            //- Update the regions selected in the GUI
-            void updateRegionStatus();
+            //- Update the mesh parts selected in the GUI
+            void updateMeshPartsStatus();
 
             //- Internal mesh info
             void updateInfoInternalMesh();
@@ -294,7 +349,7 @@ class vtkPV3Foam
             //- Read zone names for zoneType from file
             wordList readZoneNames(const word& zoneType);
 
-            //- Add to paraview array selection
+            //- Add objects of Type to paraview array selection
             template<class Type>
             label addToSelection
             (
@@ -315,6 +370,9 @@ class vtkPV3Foam
 
             //- Foam mesh
             void updateFoamMesh();
+
+            //- Reduce memory footprint after conversion
+            void reduceMemory();
 
             //- Volume fields
             void updateVolFields(vtkMultiBlockDataSet*);
@@ -359,11 +417,7 @@ class vtkPV3Foam
         // Add mesh functions
 
             //- Add internal mesh/cell set meshes
-            vtkUnstructuredGrid* volumeVTKMesh
-            (
-                const fvMesh&,
-                labelList& superCells
-            );
+            vtkUnstructuredGrid* volumeVTKMesh(const fvMesh&, polyDecomp&);
 
             //- Add Lagrangian mesh
             vtkPolyData* lagrangianVTKMesh
@@ -439,15 +493,26 @@ class vtkPV3Foam
                 vtkMultiBlockDataSet* output
             );
 
+            //- Volume field - all selected parts
+            template<class Type>
+            void convertVolFieldBlock
+            (
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                const GeometricField<Type, pointPatchField, pointMesh>&,
+                vtkMultiBlockDataSet* output,
+                const partInfo& selector,
+                const List<polyDecomp>& decompLst
+            );
+
             //- Volume field
             template<class Type>
             void convertVolField
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
+                const partInfo&,
                 const label datasetNo,
-                labelList& superCells
+                const polyDecomp&
             );
 
             //- Patch field
@@ -457,7 +522,7 @@ class vtkPV3Foam
                 const word& name,
                 const Field<Type>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
+                const partInfo&,
                 const label datasetNo
             );
 
@@ -467,7 +532,7 @@ class vtkPV3Foam
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
+                const partInfo&,
                 const label datasetNo,
                 const fvMesh&,
                 const labelList& faceLabels
@@ -479,7 +544,7 @@ class vtkPV3Foam
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
+                const partInfo&,
                 const label datasetNo,
                 const fvMesh&,
                 const faceSet&
@@ -500,7 +565,7 @@ class vtkPV3Foam
             (
                 const IOField<Type>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
+                const partInfo&,
                 const label datasetNo
             );
 
@@ -514,6 +579,16 @@ class vtkPV3Foam
                 vtkMultiBlockDataSet* output
             );
 
+            //- Point field - all selected parts
+            template<class Type>
+            void convertPointFieldBlock
+            (
+                const GeometricField<Type, pointPatchField, pointMesh>&,
+                vtkMultiBlockDataSet* output,
+                const partInfo& selector,
+                const List<polyDecomp>&
+            );
+
             //- Point fields
             template<class Type>
             void convertPointField
@@ -521,8 +596,9 @@ class vtkPV3Foam
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
-                const label datasetNo
+                const partInfo&,
+                const label datasetNo,
+                const polyDecomp&
             );
 
             //- Patch point field
@@ -532,7 +608,7 @@ class vtkPV3Foam
                 const word& name,
                 const Field<Type>&,
                 vtkMultiBlockDataSet* output,
-                const selectionInfo&,
+                const partInfo&,
                 const label datasetNo
             );
 
@@ -542,29 +618,31 @@ class vtkPV3Foam
             //- Extract up to the first non-word characters
             inline static word getFirstWord(const char*);
 
-            //- Subset an IOobjectList based on a hashSet
-            static void subsetObjectList
+            //- Only keep what is listed in hashSet
+            static void pruneObjectList
             (
                 IOobjectList&,
                 const wordHashSet&
             );
 
-            //- Store the current selection(s)
+            //- Retrieve the current selections
             static wordHashSet getSelected(vtkDataArraySelection*);
 
-            //- Store the current selection(s)
-            static stringList getSelectedArrayEntries
+            //- Retrieve a sub-list of the current selections
+            static wordHashSet getSelected
             (
                 vtkDataArraySelection*,
-                const bool firstWord=false
+                const partInfo&
             );
 
-            //- Store the current selection(s) for a sub-selection
+            //- Retrieve the current selections
+            static stringList getSelectedArrayEntries(vtkDataArraySelection*);
+
+            //- Retrieve a sub-list of the current selections
             static stringList getSelectedArrayEntries
             (
                 vtkDataArraySelection*,
-                const selectionInfo&,
-                const bool firstWord=false
+                const partInfo&
             );
 
             //- Set selection(s)
@@ -573,6 +651,9 @@ class vtkPV3Foam
                 vtkDataArraySelection*,
                 const stringList&
             );
+
+            //- Get the first word from the mesh parts selection
+            word getPartName(int);
 
 
         //- Disallow default bitwise copy construct

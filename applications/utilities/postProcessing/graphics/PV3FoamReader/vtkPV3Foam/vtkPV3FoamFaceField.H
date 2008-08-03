@@ -42,19 +42,13 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo,
     const fvMesh& mesh,
     const labelList& faceLabels
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
     const label nInternalFaces = mesh.nInternalFaces();
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
@@ -102,7 +96,13 @@ void Foam::vtkPV3Foam::convertFaceField
         cellData->InsertTuple(faceI, vec);
     }
 
-    vtkmesh->GetCellData()->AddArray(cellData);
+
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetCellData()
+        ->AddArray(cellData);
+
     cellData->Delete();
 }
 
@@ -112,19 +112,13 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo,
     const fvMesh& mesh,
     const faceSet& fSet
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
     const label nInternalFaces = mesh.nInternalFaces();
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
@@ -175,7 +169,13 @@ void Foam::vtkPV3Foam::convertFaceField
         ++faceI;
     }
 
-    vtkmesh->GetCellData()->AddArray(cellData);
+
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetCellData()
+        ->AddArray(cellData);
+
     cellData->Delete();
 }
 

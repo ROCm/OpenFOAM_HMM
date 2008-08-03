@@ -49,54 +49,47 @@ void Foam::vtkPV3Foam::convertMeshVolume
     int& blockNo
 )
 {
+    partInfo& selector = partInfoVolume_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
+    // resize for decomposed polyhedra
+    regionPolyDecomp_.setSize(selector.size());
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshVolume" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoVolume_;
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    // Create the internalMesh
-    // TODO: multiple regions
-    for
-    (
-        int regionId = selector.start();
-        regionId < selector.end();
-        ++regionId
-    )
+    // Convert the internalMesh
+    // TODO: multiple mesh regions
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        if (!regionStatus_[regionId])
+        const word partName = "internalMesh";
+
+        if (!partStatus_[partId])
         {
             continue;
-        }
-
-        if (debug)
-        {
-            Info<< "Creating VTK internalMesh" << endl;
         }
 
         vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
         (
             mesh,
-            superCells_
+            regionPolyDecomp_[datasetNo]
         );
 
         if (vtkmesh)
         {
-            AddToBlock(output, selector, datasetNo, vtkmesh, "internalMesh");
+            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
             vtkmesh->Delete();
 
-            regionDataset_[regionId] = datasetNo++;
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -116,49 +109,38 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
     int& blockNo
 )
 {
+    partInfo& selector = partInfoLagrangian_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshLagrangian" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoLagrangian_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    // Create Lagrangian meshes
-    for
-    (
-        int regionId = selector.start();
-        regionId < selector.end();
-        ++regionId
-    )
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        if (!regionStatus_[regionId])
+        const word cloudName = getPartName(partId);
+
+        if (!partStatus_[partId])
         {
             continue;
         }
 
-        word cloudName = getFirstWord
-        (
-            regionSelection->GetArrayName(regionId)
-        );
-
         vtkPolyData* vtkmesh = lagrangianVTKMesh(mesh, cloudName);
+
         if (vtkmesh)
         {
-            AddToBlock(output, selector, datasetNo, vtkmesh, cloudName);
+            AddToBlock(output, vtkmesh, selector, datasetNo, cloudName);
             vtkmesh->Delete();
 
-            regionDataset_[regionId] = datasetNo++;
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -178,61 +160,46 @@ void Foam::vtkPV3Foam::convertMeshPatches
     int& blockNo
 )
 {
+    partInfo& selector = partInfoPatches_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshPatches" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoPatches_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    if (selector.size())
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        const word patchName = getPartName(partId);
+        const label  patchId = patches.findPatchID(patchName);
 
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId
-        )
+        if (!partStatus_[partId] || patchId < 0)
         {
-            word patchName = getFirstWord
-            (
-                regionSelection->GetArrayName(regionId)
-            );
+            continue;
+        }
 
-            label patchId = patches.findPatchID(patchName);
+        if (debug)
+        {
+            Info<< "Creating VTK mesh for patch[" << patchId <<"] "
+                << patchName  << endl;
+        }
 
-            if (!regionStatus_[regionId] || patchId < 0)
-            {
-                continue;
-            }
+        vtkPolyData* vtkmesh = patchVTKMesh(patches[patchId]);
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for patch: " << patchName
-                    << " patch index: " << patchId << endl;
-            }
+        if (vtkmesh)
+        {
+            AddToBlock(output, vtkmesh, selector, datasetNo, patchName);
+            vtkmesh->Delete();
 
-            vtkPolyData* vtkmesh = patchVTKMesh(patches[patchId]);
-            if (vtkmesh)
-            {
-                AddToBlock(output, selector, datasetNo, vtkmesh, patchName);
-                vtkmesh->Delete();
-
-                regionDataset_[regionId] = datasetNo++;
-            }
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -252,80 +219,77 @@ void Foam::vtkPV3Foam::convertMeshCellZones
     int& blockNo
 )
 {
+    partInfo& selector = partInfoCellZones_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
+    // resize for decomposed polyhedra
+    zonePolyDecomp_.setSize(selector.size());
+
+    if (!selector.size())
+    {
+        return;
+    }
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshCellZones" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoCellZones_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
+    const cellZoneMesh& zMesh = mesh.cellZones();
 
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    if (selector.size())
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        const cellZoneMesh& zMesh = mesh.cellZones();
+        const word zoneName = getPartName(partId);
+        const label  zoneId = zMesh.findZoneID(zoneName);
 
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId
-        )
+        if (!partStatus_[partId] || zoneId < 0)
         {
-            word zoneName = getFirstWord
+            continue;
+        }
+
+        if (debug)
+        {
+            Info<< "Creating VTK mesh for cellZone[" << zoneId << "] "
+                << zoneName << endl;
+        }
+
+        fvMeshSubset subsetter(mesh);
+        subsetter.setLargeCellSubset(zMesh[zoneId]);
+
+        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
+        (
+            subsetter.subMesh(),
+            zonePolyDecomp_[datasetNo]
+        );
+
+        if (vtkmesh)
+        {
+            // superCells + addPointCellLabels must contain global cell ids
+            inplaceRenumber
             (
-                regionSelection->GetArrayName(regionId)
+                subsetter.cellMap(),
+                zonePolyDecomp_[datasetNo].superCells()
+            );
+            inplaceRenumber
+            (
+                subsetter.cellMap(),
+                zonePolyDecomp_[datasetNo].addPointCellLabels()
             );
 
-            label zoneId = zMesh.findZoneID(zoneName);
+            // copy pointMap as well, otherwise pointFields fail
+            zonePolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
 
-            if (!regionStatus_[regionId] || zoneId < 0)
-            {
-                continue;
-            }
+            AddToBlock(output, vtkmesh, selector, datasetNo, zoneName);
+            vtkmesh->Delete();
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for cellZone: "
-                    << zoneId << endl;
-            }
-
-            fvMeshSubset subsetter(mesh);
-            subsetter.setLargeCellSubset(zMesh[zoneId]);
-
-            vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
-            (
-                subsetter.subMesh(),
-                zoneSuperCells_[datasetNo]
-            );
-
-            if (vtkmesh)
-            {
-                // renumber - superCells must contain global cell ids
-                inplaceRenumber
-                (
-                    subsetter.cellMap(),
-                    zoneSuperCells_[datasetNo]
-                );
-
-                AddToBlock
-                (
-                    output, selector, datasetNo, vtkmesh,
-                    zMesh[zoneId].name() + ":cellZone"
-                );
-                vtkmesh->Delete();
-
-                regionDataset_[regionId] = datasetNo++;
-            }
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -345,77 +309,69 @@ void Foam::vtkPV3Foam::convertMeshCellSets
     int& blockNo
 )
 {
+    partInfo& selector = partInfoCellSets_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
+    // resize for decomposed polyhedra
+    csetPolyDecomp_.setSize(selector.size());
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshCellSets" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoCellSets_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    // Create the cell sets and add as dataset
-    if (selector.size())
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId)
+        const word partName = getPartName(partId);
+
+        if (!partStatus_[partId])
         {
-            if (!regionStatus_[regionId])
-            {
-                continue;
-            }
+            continue;
+        }
 
-            word selectedName = getFirstWord
+        if (debug)
+        {
+            Info<< "Creating VTK mesh for cellSet=" << partName << endl;
+        }
+
+        const cellSet cSet(mesh, partName);
+        fvMeshSubset subsetter(mesh);
+        subsetter.setLargeCellSubset(cSet);
+
+        vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
+        (
+            subsetter.subMesh(),
+            csetPolyDecomp_[datasetNo]
+        );
+
+        if (vtkmesh)
+        {
+            // superCells + addPointCellLabels must contain global cell ids
+            inplaceRenumber
             (
-                regionSelection->GetArrayName(regionId)
+                subsetter.cellMap(),
+                csetPolyDecomp_[datasetNo].superCells()
+            );
+            inplaceRenumber
+            (
+                subsetter.cellMap(),
+                csetPolyDecomp_[datasetNo].addPointCellLabels()
             );
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for cellSet: " << selectedName
-                    << " region index: " << regionId << endl;
-            }
+            // copy pointMap as well, otherwise pointFields fail
+            csetPolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
 
-            const cellSet cSet(mesh, selectedName);
-            fvMeshSubset subsetter(mesh);
-            subsetter.setLargeCellSubset(cSet);
+            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            vtkmesh->Delete();
 
-            vtkUnstructuredGrid* vtkmesh = volumeVTKMesh
-            (
-                subsetter.subMesh(),
-                csetSuperCells_[datasetNo]
-            );
-
-            if (vtkmesh)
-            {
-                // renumber - superCells must contain global cell ids
-                inplaceRenumber
-                (
-                    subsetter.cellMap(),
-                    csetSuperCells_[datasetNo]
-                );
-
-                AddToBlock
-                (
-                    output, selector, datasetNo, vtkmesh,
-                    selectedName + ":cellSet"
-                );
-                vtkmesh->Delete();
-
-                regionDataset_[regionId] = datasetNo++;
-            }
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -435,71 +391,51 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
     int& blockNo
 )
 {
+    partInfo& selector = partInfoFaceZones_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
+    if (!selector.size())
+    {
+        return;
+    }
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshFaceZones" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoFaceZones_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
+    const faceZoneMesh& zMesh = mesh.faceZones();
 
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    // Create the cell zone(s)
-    if (selector.size())
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        const faceZoneMesh& zMesh = mesh.faceZones();
+        const word zoneName = getPartName(partId);
+        const label  zoneId = zMesh.findZoneID(zoneName);
 
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId
-        )
+        if (!partStatus_[partId] || zoneId < 0)
         {
-            word zoneName = getFirstWord
-            (
-                regionSelection->GetArrayName(regionId)
-            );
+            continue;
+        }
 
-            const label zoneId = zMesh.findZoneID(zoneName);
+        if (debug)
+        {
+            Info<< "Creating VTKmesh for faceZone[" << zoneId << "] "
+                << zoneName << endl;
+        }
 
-            if (!regionStatus_[regionId] || zoneId < 0)
-            {
-                continue;
-            }
+        vtkPolyData* vtkmesh = faceZoneVTKMesh(mesh, zMesh[zoneId]);
+        if (vtkmesh)
+        {
+            AddToBlock(output, vtkmesh, selector, datasetNo, zoneName);
+            vtkmesh->Delete();
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for faceZone[" << zoneId
-                    << "] " << zoneName << endl;
-            }
-
-            vtkPolyData* vtkmesh = faceZoneVTKMesh
-            (
-                mesh,
-                zMesh[zoneId]
-            );
-
-            if (vtkmesh)
-            {
-                AddToBlock
-                (
-                    output, selector, datasetNo, vtkmesh,
-                    zMesh[zoneId].name() + ":faceZone"
-                );
-                vtkmesh->Delete();
-
-                regionDataset_[regionId] = datasetNo++;
-            }
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -519,69 +455,44 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
     int& blockNo
 )
 {
+    partInfo& selector = partInfoFaceSets_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshFaceSets" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoFaceSets_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    // Create the face sets and add as dataset
-    if (selector.size())
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId
-        )
+        const word partName = getPartName(partId);
+
+        if (!partStatus_[partId])
         {
-            if (!regionStatus_[regionId])
-            {
-                continue;
-            }
+            continue;
+        }
 
-            word selectedName = getFirstWord
-            (
-                regionSelection->GetArrayName(regionId)
-            );
+        if (debug)
+        {
+            Info<< "Creating VTK mesh for faceSet=" << partName << endl;
+        }
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for faceSet: " << selectedName
-                    << " region index: " << regionId << endl;
-            }
+        const faceSet fSet(mesh, partName);
 
-            const faceSet fSet(mesh, selectedName);
+        vtkPolyData* vtkmesh = faceSetVTKMesh(mesh, fSet);
+        if (vtkmesh)
+        {
+            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            vtkmesh->Delete();
 
-            vtkPolyData* vtkmesh = faceSetVTKMesh
-            (
-                mesh,
-                fSet
-            );
-
-            if (vtkmesh)
-            {
-                AddToBlock
-                (
-                    output, selector, datasetNo, vtkmesh,
-                    selectedName + ":faceSet"
-                );
-                vtkmesh->Delete();
-
-                regionDataset_[regionId] = datasetNo++;
-            }
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -601,6 +512,10 @@ void Foam::vtkPV3Foam::convertMeshPointZones
     int& blockNo
 )
 {
+    partInfo& selector = partInfoPointZones_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshPointZones" << endl;
@@ -608,53 +523,33 @@ void Foam::vtkPV3Foam::convertMeshPointZones
     }
 
     const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoPointZones_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
 
     if (selector.size())
     {
         const pointZoneMesh& zMesh = mesh.pointZones();
 
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId
-        )
+        for (int partId = selector.start(); partId < selector.end(); ++partId)
         {
-            word zoneName = getFirstWord
-            (
-                regionSelection->GetArrayName(regionId)
-            );
-
+            word zoneName = getPartName(partId);
             label zoneId = zMesh.findZoneID(zoneName);
 
-            if (!regionStatus_[regionId] || zoneId < 0)
+            if (!partStatus_[partId] || zoneId < 0)
             {
                 continue;
             }
 
             vtkPolyData* vtkmesh = pointZoneVTKMesh(mesh, zMesh[zoneId]);
-
             if (vtkmesh)
             {
-                AddToBlock
-                (
-                    output, selector, datasetNo, vtkmesh,
-                    zMesh[zoneId].name() + ":pointZone"
-                );
+                AddToBlock(output, vtkmesh, selector, datasetNo, zoneName);
                 vtkmesh->Delete();
 
-                regionDataset_[regionId] = datasetNo++;
+                partDataset_[partId] = datasetNo++;
             }
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;
@@ -675,63 +570,44 @@ void Foam::vtkPV3Foam::convertMeshPointSets
     int& blockNo
 )
 {
+    partInfo& selector = partInfoPointSets_;
+    selector.block(blockNo);   // set output block
+    label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
+
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertMeshPointSets" << endl;
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-    selectionInfo& selector = regionInfoPointSets_;
-    vtkDataArraySelection* regionSelection = reader_->GetRegionSelection();
-
-    // set output block, restart at dataset 0
-    selector.block(blockNo);
-    label datasetNo = 0;
-
-    if (selector.size())
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
-        for
-        (
-            int regionId = selector.start();
-            regionId < selector.end();
-            ++regionId
-        )
+        word partName = getPartName(partId);
+
+        if (!partStatus_[partId])
         {
-            if (!regionStatus_[regionId])
-            {
-                continue;
-            }
+            continue;
+        }
 
-            word selectedName = getFirstWord
-            (
-                regionSelection->GetArrayName(regionId)
-            );
+        if (debug)
+        {
+            Info<< "Creating VTK mesh for pointSet=" << partName << endl;
+        }
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for pointSet: " << selectedName
-                    << " region index: " << regionId << endl;
-            }
+        const pointSet pSet(mesh, partName);
 
-            const pointSet pSet(mesh, selectedName);
+        vtkPolyData* vtkmesh = pointSetVTKMesh(mesh, pSet);
+        if (vtkmesh)
+        {
+            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            vtkmesh->Delete();
 
-            vtkPolyData* vtkmesh = pointSetVTKMesh(mesh, pSet);
-            if (vtkmesh)
-            {
-                AddToBlock
-                (
-                    output, selector, datasetNo, vtkmesh,
-                    selectedName + ":pointSet"
-                );
-                vtkmesh->Delete();
-
-                regionDataset_[regionId] = datasetNo++;
-            }
+            partDataset_[partId] = datasetNo++;
         }
     }
 
-    // was anything added?
+    // anything added?
     if (datasetNo)
     {
         ++blockNo;

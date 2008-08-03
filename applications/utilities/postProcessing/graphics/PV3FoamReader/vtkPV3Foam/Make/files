@@ -7,5 +7,6 @@ vtkPV3FoamMeshSet.C
 vtkPV3FoamMeshVolume.C
 vtkPV3FoamMeshZone.C
 vtkPV3FoamUpdateInfo.C
+vtkPV3FoamUtilities.C
 
 LIB = $(FOAM_LIBBIN)/libvtkPV3Foam

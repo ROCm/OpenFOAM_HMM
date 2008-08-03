@@ -71,7 +71,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     UpdateGUI = 0;
 
-    RegionSelection = vtkDataArraySelection::New();
+    PartSelection = vtkDataArraySelection::New();
     VolFieldSelection = vtkDataArraySelection::New();
     PointFieldSelection = vtkDataArraySelection::New();
     LagrangianFieldSelection = vtkDataArraySelection::New();
@@ -85,7 +85,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     );
     SelectionObserver->SetClientData(this);
 
-    RegionSelection->AddObserver
+    PartSelection->AddObserver
     (
         vtkCommand::ModifiedEvent,
         this->SelectionObserver
@@ -128,14 +128,14 @@ vtkPV3FoamReader::~vtkPV3FoamReader()
     }
 
 
-    RegionSelection->RemoveObserver(this->SelectionObserver);
+    PartSelection->RemoveObserver(this->SelectionObserver);
     VolFieldSelection->RemoveObserver(this->SelectionObserver);
     PointFieldSelection->RemoveObserver(this->SelectionObserver);
     LagrangianFieldSelection->RemoveObserver(this->SelectionObserver);
 
     SelectionObserver->Delete();
 
-    RegionSelection->Delete();
+    PartSelection->Delete();
     VolFieldSelection->Delete();
     PointFieldSelection->Delete();
     LagrangianFieldSelection->Delete();
@@ -427,46 +427,46 @@ int vtkPV3FoamReader::GetTimeStep()
 
 
 // ----------------------------------------------------------------------
-// Region selection list control
+// Parts selection list control
 
-vtkDataArraySelection* vtkPV3FoamReader::GetRegionSelection()
+vtkDataArraySelection* vtkPV3FoamReader::GetPartSelection()
 {
-    vtkDebugMacro(<<"GetRegionSelection");
-    return RegionSelection;
+    vtkDebugMacro(<<"GetPartSelection");
+    return PartSelection;
 }
 
 
-int vtkPV3FoamReader::GetNumberOfRegionArrays()
+int vtkPV3FoamReader::GetNumberOfPartArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfRegionArrays");
-    return RegionSelection->GetNumberOfArrays();
+    vtkDebugMacro(<<"GetNumberOfPartArrays");
+    return PartSelection->GetNumberOfArrays();
 }
 
 
-const char* vtkPV3FoamReader::GetRegionArrayName(int index)
+const char* vtkPV3FoamReader::GetPartArrayName(int index)
 {
-    vtkDebugMacro(<<"GetRegionArrayName");
-    return RegionSelection->GetArrayName(index);
+    vtkDebugMacro(<<"GetPartArrayName");
+    return PartSelection->GetArrayName(index);
 }
 
 
-int vtkPV3FoamReader::GetRegionArrayStatus(const char* name)
+int vtkPV3FoamReader::GetPartArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetRegionArrayStatus");
-    return RegionSelection->ArrayIsEnabled(name);
+    vtkDebugMacro(<<"GetPartArrayStatus");
+    return PartSelection->ArrayIsEnabled(name);
 }
 
 
-void vtkPV3FoamReader::SetRegionArrayStatus(const char* name, int status)
+void vtkPV3FoamReader::SetPartArrayStatus(const char* name, int status)
 {
-    vtkDebugMacro(<<"SetRegionArrayStatus");
+    vtkDebugMacro(<<"SetPartArrayStatus");
     if (status)
     {
-        RegionSelection->EnableArray(name);
+        PartSelection->EnableArray(name);
     }
     else
     {
-        RegionSelection->DisableArray(name);
+        PartSelection->DisableArray(name);
     }
 }
 

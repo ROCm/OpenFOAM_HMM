@@ -45,16 +45,11 @@ void Foam::vtkPV3Foam::convertPatchField
     const word& name,
     const Field<Type>& ptf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
 
     vtkFloatArray* cellData = vtkFloatArray::New();
     cellData->SetNumberOfTuples( ptf.size() );
@@ -70,11 +65,15 @@ void Foam::vtkPV3Foam::convertPatchField
         {
             vec[d] = component(t, d);
         }
-
         cellData->InsertTuple(i, vec);
     }
 
-    vtkmesh->GetCellData()->AddArray(cellData);
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetCellData()
+        ->AddArray(cellData);
+
     cellData->Delete();
 }
 
@@ -86,16 +85,11 @@ void Foam::vtkPV3Foam::convertPatchPointField
     const word& name,
     const Field<Type>& pptf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
 
     vtkFloatArray *pointData = vtkFloatArray::New();
     pointData->SetNumberOfTuples( pptf.size() );
@@ -115,7 +109,12 @@ void Foam::vtkPV3Foam::convertPatchPointField
         pointData->InsertTuple(i, vec);
     }
 
-    vtkmesh->GetPointData()->AddArray(pointData);
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetPointData()
+        ->AddArray(pointData);
+
     pointData->Delete();
 }
 
