@@ -79,6 +79,12 @@ void Foam::vtkPV3Foam::reduceMemory()
     {
         csetPolyDecomp_[i].clear();
     }
+
+    if (!reader_->GetCacheMesh())
+    {
+        delete meshPtr_;
+        meshPtr_ = NULL;
+    }
 }
 
 
@@ -413,22 +419,25 @@ void Foam::vtkPV3Foam::Update
     // Set up mesh parts selection(s)
     updateMeshPartsStatus();
 
+    reader_->UpdateProgress(0.15);
+
     // Update the Foam mesh
     updateFoamMesh();
-    reader_->UpdateProgress(0.2);
+    reader_->UpdateProgress(0.4);
 
     // Convert meshes - start port0 at block=0
     int blockNo = 0;
 
     convertMeshVolume(output, blockNo);
     convertMeshPatches(output, blockNo);
-    reader_->UpdateProgress(0.4);
+    reader_->UpdateProgress(0.6);
 
     if (reader_->GetIncludeZones())
     {
         convertMeshCellZones(output, blockNo);
         convertMeshFaceZones(output, blockNo);
         convertMeshPointZones(output, blockNo);
+        reader_->UpdateProgress(0.65);
     }
 
     if (reader_->GetIncludeSets())
@@ -436,6 +445,7 @@ void Foam::vtkPV3Foam::Update
         convertMeshCellSets(output, blockNo);
         convertMeshFaceSets(output, blockNo);
         convertMeshPointSets(output, blockNo);
+        reader_->UpdateProgress(0.7);
     }
 
     // restart port1 at block=0

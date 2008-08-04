@@ -12,20 +12,22 @@
       animateable="0">
       <FileListDomain name="files"/>
       <Documentation>
-        Specifies the filename for the OpenFOAM Reader
+        Specifies the filename for the OpenFOAM Reader.
       </Documentation>
     </StringVectorProperty>
 
-    <!-- Time info sent to animation controls (top of window) -->
+    <!-- Send discrete time info to the animation panel -->
     <DoubleVectorProperty
       name="TimestepValues"
+      repeatable="1"
       information_only="1">
       <TimeStepsInformationHelper/>
       <Documentation>
-        Available timestep values
+        Available timestep values.
       </Documentation>
     </DoubleVectorProperty>
 
+    <!-- Send continuous time info to the animation panel -->
     <DoubleVectorProperty
       name="TimeRange"
       information_only="1">
@@ -189,6 +191,7 @@
         Cache the fvMesh in memory.
       </Documentation>
     </IntVectorProperty>
+
 
     <!-- Update GUI check box -->
     <IntVectorProperty
