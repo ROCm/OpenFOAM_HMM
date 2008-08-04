@@ -25,11 +25,8 @@ License
 InClass
     Foam::gnuplotWriters
 
-Description
-
 SourceFiles
     gnuplotWriters.C
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,16 +41,8 @@ SourceFiles
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef gnuplot<scalar> gnuplotScalarWriter;
-typedef gnuplot<vector> gnuplotVectorWriter;
-typedef gnuplot<tensor> gnuplotTensorWriter;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeWritersTypedefs(gnuplot)
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

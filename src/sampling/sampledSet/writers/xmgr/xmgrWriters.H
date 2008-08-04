@@ -44,16 +44,8 @@ SourceFiles
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef xmgr<scalar> xmgrScalarWriter;
-typedef xmgr<vector> xmgrVectorWriter;
-typedef xmgr<tensor> xmgrTensorWriter;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeWritersTypedefs(xmgr)
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

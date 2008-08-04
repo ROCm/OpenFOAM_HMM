@@ -25,8 +25,6 @@ License
 Class
     Foam::jplot
 
-Description
-
 SourceFiles
     jplot.C
 
@@ -42,8 +40,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class jplot Declaration
@@ -71,30 +67,26 @@ public:
         //- Construct null
         jplot();
 
-    // Destructor
 
-        virtual ~jplot();
+    //- Destructor
+    virtual ~jplot();
 
 
     // Member Functions
 
-        // Access
+        virtual fileName getFileName
+        (
+            const coordSet&,
+            const wordList&
+        ) const;
 
-        // Write
-
-            virtual fileName getFileName
-            (
-                const coordSet&,
-                const wordList&
-            ) const;
-
-            void write
-            (
-                const coordSet&,
-                const wordList&,
-                const List<const Field<Type>*>&,
-                Ostream& os
-            ) const;
+        void write
+        (
+            const coordSet&,
+            const wordList&,
+            const List<const Field<Type>*>&,
+            Ostream& os
+        ) const;
 };
 
 

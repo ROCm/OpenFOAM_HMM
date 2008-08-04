@@ -107,11 +107,12 @@ int main(int argc, char *argv[])
                        *mag(U.boundaryField()[patchi].snGrad())
                     )
                    /sgsModel->nu().boundaryField()[patchi];
+                const scalarField& Yp = yPlus.boundaryField()[patchi];
 
                 Info<< "Patch " << patchi
                     << " named " << currPatch.name()
-                    << " y+ : min: " << min(yPlus) << " max: " << max(yPlus)
-                    << " average: " << average(yPlus) << nl << endl;
+                    << " y+ : min: " << min(Yp) << " max: " << max(Yp)
+                    << " average: " << average(Yp) << nl << endl;
             }
         }
 
