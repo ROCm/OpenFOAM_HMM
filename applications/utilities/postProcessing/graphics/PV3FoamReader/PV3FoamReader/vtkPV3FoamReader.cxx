@@ -186,7 +186,6 @@ int vtkPV3FoamReader::RequestInformation
     int nTimeSteps = 0;
     double* timeSteps = foamData_->findTimes(nTimeSteps);
 
-
     // set identical time steps for all ports
     for (int infoI = 0; infoI < nInfo; ++infoI)
     {

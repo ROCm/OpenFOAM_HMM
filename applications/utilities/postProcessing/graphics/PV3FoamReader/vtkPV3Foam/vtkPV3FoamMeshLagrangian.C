@@ -36,6 +36,7 @@ Description
 #include "vtkPV3FoamPoints.H"
 
 // VTK includes
+#include "vtkCellArray.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 
@@ -75,15 +76,25 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
 
         vtkmesh = vtkPolyData::New();
         vtkPoints* vtkpoints = vtkPoints::New();
-        vtkpoints->Allocate( parcels.size() );
+        vtkCellArray* vtkcells = vtkCellArray::New();
 
+        vtkpoints->Allocate( parcels.size() );
+        vtkcells->Allocate( parcels.size() );
+
+        vtkIdType particleId = 0;
         forAllConstIter(Cloud<passiveParticle>, parcels, iter)
         {
             vtkPV3FoamInsertNextPoint(vtkpoints, iter().position());
+
+            vtkcells->InsertNextCell(1, &particleId);
+            particleId++;
         }
 
         vtkmesh->SetPoints(vtkpoints);
         vtkpoints->Delete();
+
+        vtkmesh->SetVerts(vtkcells);
+        vtkcells->Delete();
     }
 
     if (debug)

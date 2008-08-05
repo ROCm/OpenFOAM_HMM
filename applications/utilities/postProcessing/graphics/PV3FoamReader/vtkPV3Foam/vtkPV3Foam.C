@@ -103,10 +103,8 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
     // Get times list
     instantList Times = runTime.times();
 
-    int foundIndex = Time::findClosestTimeIndex(Times, requestedTime);
-    int nearestIndex = foundIndex;
-
-    if (foundIndex < 0)
+    int nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
+    if (nearestIndex < 0)
     {
         nearestIndex = 0;
     }
@@ -146,7 +144,7 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
             << " fieldsChanged=" << fieldsChanged_ << endl;
     }
 
-    return foundIndex;
+    return nearestIndex;
 }
 
 
