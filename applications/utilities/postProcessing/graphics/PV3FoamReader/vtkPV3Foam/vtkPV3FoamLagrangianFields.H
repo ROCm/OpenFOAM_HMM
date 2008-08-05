@@ -27,60 +27,28 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamConvertLagrangianFields_H
-#define vtkPV3FoamConvertLagrangianFields_H
+#ifndef vtkPV3FoamLagrangianFields_H
+#define vtkPV3FoamLagrangianFields_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::vtkPV3Foam::convertLagrangianFields
 (
-    const fvMesh& mesh,
     const IOobjectList& objects,
-    vtkDataArraySelection* fieldSelection,
-    vtkMultiBlockDataSet* output
+    vtkMultiBlockDataSet* output,
+    const label datasetNo
 )
 {
-    const selectionInfo& selector = selectInfoLagrangian_;
-    const label datasetId = 0;
+    const partInfo& selector = partInfoLagrangian_;
 
-    if (!selector.size())
+    forAllConstIter(IOobjectList, objects, iter)
     {
-        return;
-    }
-
-    IOobjectList fieldObjects
-    (
-        objects.lookupClass
-        (
-            IOField<Type>::typeName
-        )
-    );
-
-    label nFields = fieldSelection->GetNumberOfArrays();
-
-    for (label i=0; i<nFields; i++)
-    {
-        if (fieldSelection->GetArraySetting(i))
+        // restrict to this IOField<Type>
+        if (iter()->headerClassName() == IOField<Type>::typeName)
         {
-            const word fieldName = fieldSelection->GetArrayName(i);
-
-            if (fieldObjects.found(fieldName))
-            {
-                IOField<Type> iotf
-                (
-                    IOobject
-                    (
-                        fieldName,
-                        mesh.time().timeName(),
-                        "lagrangian"/cloudName_,
-                        mesh,
-                        IOobject::MUST_READ
-                    )
-                );
-
-                convertLagrangianField(iotf, output, selector, datasetId);
-            }
+            IOField<Type> tf(*iter());
+            convertLagrangianField(tf, output, selector, datasetNo);
         }
     }
 }
@@ -91,46 +59,48 @@ void Foam::vtkPV3Foam::convertLagrangianField
 (
     const IOField<Type>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo
 )
 {
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples(tf.size());
-    pointData->SetNumberOfComponents(nComp);
-    pointData->Allocate(nComp*tf.size());
-    pointData->SetName(tf.name().c_str());
+    pointData->SetNumberOfTuples( tf.size() );
+    pointData->SetNumberOfComponents( nComp );
+    pointData->Allocate( nComp*tf.size() );
+    pointData->SetName( tf.name().c_str() );
 
     if (debug)
     {
-        Info<< "converting Lagrangian <Type>Field: " << tf.name() << nl
-            << "tf.size() = " << tf.size() << nl
-            << "nComp  = " << nComp << endl;
+        Info<< "convert LagrangianField: "
+            << tf.name()
+            << " size = " << tf.size()
+            << " nComp=" << nComp
+            << " nTuples = " << tf.size() <<  endl;
     }
 
     float vec[nComp];
-
     forAll(tf, i)
     {
+        const Type& t = tf[i];
         for (direction d=0; d<nComp; d++)
         {
-            vec[d] = component(tf[i], d);
+            vec[d] = component(t, d);
         }
 
         pointData->InsertTuple(i, vec);
     }
 
-    vtkmesh->GetPointData()->AddArray(pointData);
+
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetPointData()
+        ->AddArray(pointData);
+
     pointData->Delete();
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -36,6 +36,7 @@
 vtkCxxRevisionMacro(vtkPV3FoamReader, "$Revision: 1.5$");
 vtkStandardNewMacro(vtkPV3FoamReader);
 
+#undef EXPERIMENTAL_TIME_CACHING
 
 vtkPV3FoamReader::vtkPV3FoamReader()
 {
@@ -47,23 +48,30 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     FileName  = NULL;
     foamData_ = NULL;
 
-    output1_ = NULL;
+    output0_  = NULL;
 
-    TimeStep = 0;
+    // Add second output for the Lagrangian
+    this->SetNumberOfOutputPorts(2);
+    vtkMultiBlockDataSet *lagrangian;
+    lagrangian = vtkMultiBlockDataSet::New();
+    lagrangian->ReleaseData();
+
+    this->GetExecutive()->SetOutputData(1, lagrangian);
+    lagrangian->Delete();
+
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
 
-    CacheMesh = 0;
+    CacheMesh = 1;
 
     ExtrapolateWalls = 0;
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;
 
-    UpdateGUI = 1;
-    UpdateGUIOld = 1;
+    UpdateGUI = 0;
 
-    RegionSelection = vtkDataArraySelection::New();
+    PartSelection = vtkDataArraySelection::New();
     VolFieldSelection = vtkDataArraySelection::New();
     PointFieldSelection = vtkDataArraySelection::New();
     LagrangianFieldSelection = vtkDataArraySelection::New();
@@ -77,7 +85,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     );
     SelectionObserver->SetClientData(this);
 
-    RegionSelection->AddObserver
+    PartSelection->AddObserver
     (
         vtkCommand::ModifiedEvent,
         this->SelectionObserver
@@ -114,14 +122,20 @@ vtkPV3FoamReader::~vtkPV3FoamReader()
         delete [] FileName;
     }
 
-    RegionSelection->RemoveObserver(this->SelectionObserver);
+    if (output0_)
+    {
+        output0_->Delete();
+    }
+
+
+    PartSelection->RemoveObserver(this->SelectionObserver);
     VolFieldSelection->RemoveObserver(this->SelectionObserver);
     PointFieldSelection->RemoveObserver(this->SelectionObserver);
     LagrangianFieldSelection->RemoveObserver(this->SelectionObserver);
 
     SelectionObserver->Delete();
 
-    RegionSelection->Delete();
+    PartSelection->Delete();
     VolFieldSelection->Delete();
     PointFieldSelection->Delete();
     LagrangianFieldSelection->Delete();
@@ -149,38 +163,40 @@ int vtkPV3FoamReader::RequestInformation
         return 0;
     }
 
-    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    int nInfo = outputVector->GetNumberOfInformationObjects();
+
+    if (Foam::vtkPV3Foam::debug)
+    {
+        cout<<"RequestInformation with " << nInfo << " item(s)\n";
+        for (int infoI = 0; infoI < nInfo; ++infoI)
+        {
+            outputVector->GetInformationObject(infoI)->Print(cout);
+        }
+    }
 
     if (!foamData_)
     {
-        vtkDebugMacro("RequestInformation: creating foamData_");
-        vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
-        (
-            outInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
-        );
-
-        if (Foam::vtkPV3Foam::debug)
-        {
-            cout<< "constructed vtkPV3Foam with output: ";
-            output->Print(cout);
-        }
-
         foamData_ = new Foam::vtkPV3Foam(FileName, this);
     }
     else
     {
-        foamData_->UpdateInformation();
+        foamData_->updateInfo();
     }
 
     int nTimeSteps = 0;
     double* timeSteps = foamData_->findTimes(nTimeSteps);
 
-    outInfo->Set
-    (
-        vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
-        timeSteps,
-        nTimeSteps
-    );
+
+    // set identical time steps for all ports
+    for (int infoI = 0; infoI < nInfo; ++infoI)
+    {
+        outputVector->GetInformationObject(infoI)->Set
+        (
+            vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
+            timeSteps,
+            nTimeSteps
+        );
+    }
 
     double timeRange[2];
     if (nTimeSteps)
@@ -190,21 +206,25 @@ int vtkPV3FoamReader::RequestInformation
 
         if (Foam::vtkPV3Foam::debug > 1)
         {
-            cout<<"nTimeSteps " << nTimeSteps << "\n";
-            cout<<"timeRange " << timeRange[0] << " to " << timeRange[1] << "\n";
+            cout<<"nTimeSteps " << nTimeSteps << "\n"
+                <<"timeRange " << timeRange[0] << " to " << timeRange[1]
+                << "\n";
 
-            for (int i = 0; i < nTimeSteps; ++i)
+            for (int timeI = 0; timeI < nTimeSteps; ++timeI)
             {
-                cout<< "step[" << i << "] = " << timeSteps[i] << "\n";
+                cout<< "step[" << timeI << "] = " << timeSteps[timeI] << "\n";
             }
         }
 
-        outInfo->Set
-        (
-            vtkStreamingDemandDrivenPipeline::TIME_RANGE(),
-            timeRange,
-            2
-        );
+        for (int infoI = 0; infoI < nInfo; ++infoI)
+        {
+            outputVector->GetInformationObject(infoI)->Set
+            (
+                vtkStreamingDemandDrivenPipeline::TIME_RANGE(),
+                timeRange,
+                2
+            );
+        }
     }
 
     delete timeSteps;
@@ -229,75 +249,41 @@ int vtkPV3FoamReader::RequestData
         return 0;
     }
 
+    int nInfo = outputVector->GetNumberOfInformationObjects();
+
     if (Foam::vtkPV3Foam::debug)
     {
-        int nInfo = outputVector->GetNumberOfInformationObjects();
-        cout<<"requestData with " << nInfo << " items\n";
-
-        for (int i = 0; i < nInfo; ++i)
+        cout<<"RequestData with " << nInfo << " item(s)\n";
+        for (int infoI = 0; infoI < nInfo; ++infoI)
         {
-            vtkInformation *info = outputVector->GetInformationObject(i);
-            info->Print(cout);
+            outputVector->GetInformationObject(infoI)->Print(cout);
         }
     }
 
-    vtkInformation* outInfo = outputVector->GetInformationObject(0);
+    // take port0 as the lead for other outputs
+    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
     (
-        outInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
+        outInfo->Get
+        (
+            vtkMultiBlockDataSet::DATA_OBJECT()
+        )
     );
 
-    if (Foam::vtkPV3Foam::debug)
-    {
-        vtkInformation* outputInfo = this->GetOutputPortInformation(0);
-        outputInfo->Print(cout);
 
-        vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
+    vtkMultiBlockDataSet* lagrangianOutput = vtkMultiBlockDataSet::SafeDownCast
+    (
+        outputVector->GetInformationObject(1)->Get
         (
-            outputInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
-        );
-        if (output)
-        {
-            output->Print(cout);
-        }
-        else
-        {
-            cout<< "no output\n";
-        }
-
-        vtkInformation* execInfo = this->GetExecutive()->GetOutputInformation(0);
-        execInfo->Print(cout);
-
-        outInfo->Print(cout);
-
-        vtkMultiBlockDataSet* dobj = vtkMultiBlockDataSet::SafeDownCast
-        (
-            outInfo->Get(vtkMultiBlockDataSet::DATA_OBJECT())
-        );
-        if (dobj)
-        {
-            dobj->Print(cout);
-
-            vtkInformation* dobjInfo = dobj->GetInformation();
-            dobjInfo->Print(cout);
-        }
-        else
-        {
-            cout<< "no data_object\n";
-        }
-    }
+            vtkMultiBlockDataSet::DATA_OBJECT()
+        )
+    );
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
     {
-        if (Foam::vtkPV3Foam::debug)
-        {
-            cout<<"Has UPDATE_TIME_STEPS\n";
-            cout<<"output->GetNumberOfBlocks() = "
-                << output->GetNumberOfBlocks() << "\n";
-        }
-
         // Get the requested time step.
-        // We only supprt requests of a single time step
+        // We only support requests for a single time step
         int nRequestedTimeSteps = outInfo->Length
         (
             vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()
@@ -313,24 +299,65 @@ int vtkPV3FoamReader::RequestData
         }
     }
 
-    if
-    (
-        (UpdateGUIOld == GetUpdateGUI())
-     || (output->GetNumberOfBlocks() == 0)
-    )
+    if (Foam::vtkPV3Foam::debug)
+    {
+        cout<< "update output with "
+            << output->GetNumberOfBlocks() << " blocks\n";
+    }
+
+#ifdef EXPERIMENTAL_TIME_CACHING
+    bool needsUpdate = false;
+
+    if (!output0_)
+    {
+        output0_ = vtkMultiBlockDataSet::New();
+        needsUpdate = true;
+    }
+
+    // This experimental bit of code seems to work for the geometry,
+    // but trashes the fields and still triggers the GeometryFilter
+    if (needsUpdate)
     {
         foamData_->Update(output);
+        output0_->ShallowCopy(output);
+    }
+    else
+    {
+        output->ShallowCopy(output0_);
+    }
 
-        if (ShowPatchNames == 1)
+    if (Foam::vtkPV3Foam::debug)
+    {
+        if (needsUpdate)
         {
-            addPatchNamesToView();
+            cout<< "full UPDATE ---------\n";
         }
         else
         {
-            removePatchNamesFromView();
+            cout<< "cached UPDATE ---------\n";
         }
+
+        cout<< "UPDATED output: ";
+        output->Print(cout);
+
+        cout<< "UPDATED output0_: ";
+        output0_->Print(cout);
     }
-    UpdateGUIOld = GetUpdateGUI();
+
+#else
+
+    foamData_->Update(output, lagrangianOutput);
+
+    if (ShowPatchNames)
+    {
+        addPatchNamesToView();
+    }
+    else
+    {
+        removePatchNamesFromView();
+    }
+
+#endif
 
     return 1;
 }
@@ -389,52 +416,57 @@ void vtkPV3FoamReader::PrintSelf(ostream& os, vtkIndent indent)
     os<< indent << "Time step range: "
       << this->TimeStepRange[0] << " - " << this->TimeStepRange[1]
       << "\n";
-    os<< indent << "Time step: " << this->TimeStep << endl;
+    os<< indent << "Time step: " << this->GetTimeStep() << endl;
+}
+
+
+int vtkPV3FoamReader::GetTimeStep()
+{
+    return foamData_ ? foamData_->timeIndex() : -1;
 }
 
 
 // ----------------------------------------------------------------------
-// Region selection list control
+// Parts selection list control
 
-vtkDataArraySelection* vtkPV3FoamReader::GetRegionSelection()
+vtkDataArraySelection* vtkPV3FoamReader::GetPartSelection()
 {
-    vtkDebugMacro(<<"GetRegionSelection");
-    return RegionSelection;
+    vtkDebugMacro(<<"GetPartSelection");
+    return PartSelection;
 }
 
 
-int vtkPV3FoamReader::GetNumberOfRegionArrays()
+int vtkPV3FoamReader::GetNumberOfPartArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfRegionArrays");
-    return RegionSelection->GetNumberOfArrays();
+    vtkDebugMacro(<<"GetNumberOfPartArrays");
+    return PartSelection->GetNumberOfArrays();
 }
 
 
-const char* vtkPV3FoamReader::GetRegionArrayName(int index)
+const char* vtkPV3FoamReader::GetPartArrayName(int index)
 {
-    vtkDebugMacro(<<"GetRegionArrayName");
-    return RegionSelection->GetArrayName(index);
+    vtkDebugMacro(<<"GetPartArrayName");
+    return PartSelection->GetArrayName(index);
 }
 
 
-int vtkPV3FoamReader::GetRegionArrayStatus(const char* name)
+int vtkPV3FoamReader::GetPartArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetRegionArrayStatus");
-    return RegionSelection->ArrayIsEnabled(name);
+    vtkDebugMacro(<<"GetPartArrayStatus");
+    return PartSelection->ArrayIsEnabled(name);
 }
 
 
-void vtkPV3FoamReader::SetRegionArrayStatus(const char* name, int status)
+void vtkPV3FoamReader::SetPartArrayStatus(const char* name, int status)
 {
-    vtkDebugMacro(<<"SetRegionArrayStatus");
-
+    vtkDebugMacro(<<"SetPartArrayStatus");
     if (status)
     {
-        RegionSelection->EnableArray(name);
+        PartSelection->EnableArray(name);
     }
     else
     {
-        RegionSelection->DisableArray(name);
+        PartSelection->DisableArray(name);
     }
 }
 
@@ -595,6 +627,21 @@ void vtkPV3FoamReader::SelectionModified()
 {
     vtkDebugMacro(<<"SelectionModified");
     Modified();
+}
+
+
+int vtkPV3FoamReader::FillOutputPortInformation
+(
+    int port,
+    vtkInformation* info
+)
+{
+    if (port == 0)
+    {
+        return this->Superclass::FillOutputPortInformation(port, info);
+    }
+    info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkMultiBlockDataSet");
+    return 1;
 }
 
 // ************************************************************************* //
