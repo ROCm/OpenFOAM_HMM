@@ -22,76 +22,59 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
+InClass
+    vtkPV3Foam
 
 \*---------------------------------------------------------------------------*/
 
-#include "vtkPV3Foam.H"
-
-// Foam includes
-#include "polyPatch.H"
-#include "primitivePatch.H"
-#include "vtkPV3FoamInsertNextPoint.H"
+#ifndef vtkPV3FoamPoints_H
+#define vtkPV3FoamPoints_H
 
 // VTK includes
-#include "vtkCellArray.h"
-#include "vtkPolyData.h"
-#include "vtkUnstructuredGrid.h"
+#include "vtkPoints.h"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::vtkPV3Foam::addPatchMesh
+inline void vtkPV3FoamInsertNextPoint
 (
-    const polyPatch& p,
-    vtkPolyData *vtkmesh
+    vtkPoints *points,
+    const Foam::point& p
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::addPatchMesh - " << p.name() << endl;
-        printMemory();
-    }
-
-    // Convert Foam mesh vertices to VTK
-    const Foam::pointField& points = p.localPoints();
-
-    vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(points.size());
-    forAll(points, i)
-    {
-        vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
-    }
-
-    vtkmesh->SetPoints(vtkpoints);
-    vtkpoints->Delete();
-
-
-    // Add faces as polygons
-    const faceList& faces = p.localFaces();
-
-    vtkCellArray * vtkcells = vtkCellArray::New();
-    vtkcells->Allocate(faces.size());
-    forAll(faces, faceI)
-    {
-        const face& f = faces[faceI];
-        vtkIdType nodeIds[f.size()];
-
-        forAll (f, fp)
-        {
-            nodeIds[fp] = f[fp];
-        }
-        vtkcells->InsertNextCell(f.size(), nodeIds);
-    }
-
-    vtkmesh->SetPolys(vtkcells);
-    vtkcells->Delete();
-
-    if (debug)
-    {
-        Info<< "<end> Foam::vtkPV3Foam::addPatchMesh - " << p.name() << endl;
-        printMemory();
-    }
+    points->InsertNextPoint(p.x(), p.y(), p.z());
 }
 
+#if 0
+// this should be faster, but didn't get it working ...
+inline void vtkPV3FoamSetPoint
+(
+    vtkPoints *points,
+    const Foam::label id,
+    const Foam::point& p
+)
+{
+    points->SetPoint(id, p.x(), p.y(), p.z());
+}
+
+
+// Convert Foam mesh vertices to VTK
+inline vtkPoints* vtkPV3FoamVTKPoints(const Foam::pointField& points)
+{
+    vtkPoints *vtkpoints = vtkPoints::New();
+    vtkpoints->SetNumberOfPoints(points.size());
+    forAll(points, i)
+    {
+        const Foam::point& p = points[i];
+        vtkpoints->SetPoint(i, p.x(), p.y(), p.z());
+    }
+
+    return vtkpoints;
+}
+
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

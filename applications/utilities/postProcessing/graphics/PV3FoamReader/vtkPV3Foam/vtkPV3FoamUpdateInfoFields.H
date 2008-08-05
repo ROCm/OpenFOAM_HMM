@@ -27,95 +27,78 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamUpdateInformationFields_H
-#define vtkPV3FoamUpdateInformationFields_H
+#ifndef vtkPV3FoamUpdateInfoFields_H
+#define vtkPV3FoamUpdateInfoFields_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<template<class> class patchType, class meshType>
-void Foam::vtkPV3Foam::updateInformationFields
+void Foam::vtkPV3Foam::updateInfoFields
 (
-    vtkDataArraySelection *arraySelection
+    vtkDataArraySelection *select
 )
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoFields" << endl;
     }
 
-    stringList selectedEntries;
+    stringList enabledEntries;
     // enable 'p' and 'U' on the first call
-    if (arraySelection->GetNumberOfArrays() == 0 && !meshPtr_)
+    if (select->GetNumberOfArrays() == 0 && !meshPtr_)
     {
-        selectedEntries.setSize(2);
-        selectedEntries[0] = "p";
-        selectedEntries[1] = "U";
+        enabledEntries.setSize(2);
+        enabledEntries[0] = "p";
+        enabledEntries[1] = "U";
     }
     else
     {
-        // preserve the currently selected values
-        selectedEntries = getSelectedArrayEntries
-        (
-            arraySelection
-        );
+        // preserve the enabled selections
+        enabledEntries = getSelectedArrayEntries(select);
     }
 
-    arraySelection->RemoveAllArrays();
+    select->RemoveAllArrays();
 
     // Search for list of objects for this time
     IOobjectList objects(dbPtr_(), dbPtr_().timeName());
-    // Populate the GUI volume/point field arrays
 
     //- Add volume fields to GUI
-/*
-    addToSelection<GeometricField<label, patchType, meshType> >
-    (
-        arraySelection,
-        objects
-    );
-*/
     addToSelection<GeometricField<scalar, patchType, meshType> >
     (
-        arraySelection,
+        select,
         objects
     );
     addToSelection<GeometricField<vector, patchType, meshType> >
     (
-        arraySelection,
+        select,
         objects
     );
     addToSelection<GeometricField<sphericalTensor, patchType, meshType> >
     (
-        arraySelection,
+        select,
         objects
     );
     addToSelection<GeometricField<symmTensor, patchType, meshType> >
     (
-        arraySelection,
+        select,
         objects
     );
     addToSelection<GeometricField<tensor, patchType, meshType> >
     (
-        arraySelection,
+        select,
         objects
     );
 
-    // restore the currently enabled values
-    setSelectedArrayEntries
-    (
-        arraySelection,
-        selectedEntries
-    );
+    // restore the enabled selections
+    setSelectedArrayEntries(select, enabledEntries);
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationFields" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoFields" << endl;
     }
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
-
 // ************************************************************************* //

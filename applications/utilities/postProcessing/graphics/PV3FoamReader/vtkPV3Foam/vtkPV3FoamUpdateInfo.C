@@ -38,7 +38,7 @@ License
 
 // local headers
 #include "vtkPV3FoamAddToSelection.H"
-#include "vtkPV3FoamUpdateInformationFields.H"
+#include "vtkPV3FoamUpdateInfoFields.H"
 
 // VTK includes
 #include "vtkDataArraySelection.h"
@@ -107,7 +107,7 @@ Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
         zonesEntries zones(ioObj);
 
         zoneNames.setSize(zones.size());
-        forAll (zones, zoneI)
+        forAll(zones, zoneI)
         {
             zoneNames[zoneI] = zones[zoneI].keyword();
         }
@@ -117,45 +117,43 @@ Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
 }
 
 
-void Foam::vtkPV3Foam::updateInformationInternalMesh()
+void Foam::vtkPV3Foam::updateInfoInternalMesh()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationInternalMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoInternalMesh" << endl;
     }
 
-    vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
+    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
 
     // Determine number of meshes available
     HashTable<const fvMesh*> meshObjects = dbPtr_().lookupClass<const fvMesh>();
     nMesh_ = meshObjects.size();
 
-    // Determine regions (internal mesh and patches...)
+    // Determine mesh parts (internalMesh, patches...)
     //- Add internal mesh as first entry
-    selectInfoVolume_ = arraySelection->GetNumberOfArrays();
-    arraySelection->AddArray("internalMesh");
-    selectInfoVolume_ += 1;
+    partInfoVolume_ = partSelection->GetNumberOfArrays();
+    partSelection->AddArray("internalMesh");
+    partInfoVolume_ += 1;
 
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(arraySelection);
+        getSelectedArrayEntries(partSelection);
 
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationInternalMesh" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoInternalMesh" << endl;
     }
 
 }
 
 
-void Foam::vtkPV3Foam::updateInformationLagrangian()
+void Foam::vtkPV3Foam::updateInfoLagrangian()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationLagrangian" << nl
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoLagrangian" << nl
             << "    " << dbPtr_->timePath()/"lagrangian" << endl;
     }
-
-    vtkDataArraySelection* arraySelection = reader_->GetRegionSelection();
 
     // Search for list of lagrangian objects for this time
     fileNameList cloudDirs
@@ -163,69 +161,56 @@ void Foam::vtkPV3Foam::updateInformationLagrangian()
         readDir(dbPtr_->timePath()/"lagrangian", fileName::DIRECTORY)
     );
 
-    selectInfoLagrangian_ = arraySelection->GetNumberOfArrays();
+    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
+    partInfoLagrangian_ = partSelection->GetNumberOfArrays();
 
-    if (cloudDirs.size())
+    int nClouds = 0;
+    forAll(cloudDirs, cloudI)
     {
-        arraySelection->AddArray("lagrangian");
-        selectInfoLagrangian_ += 1;
+        // Add cloud to GUI list
+        partSelection->AddArray
+        (
+            (cloudDirs[cloudI] + " - lagrangian").c_str()
+        );
 
-        Info<< "... added cloudDirs\n";
+        ++nClouds;
+    }
 
-        if (cloudDirs.size() > 1)
-        {
-            WarningIn("void Foam::vtkPV3Foam::updateInformationLagrangian()")
-                << "Multiple lagrangian clouds identified. Currently only able "
-                << "to process ONE cloud: " << cloudDirs[0]
-                << endl;
-        }
-        // Set cloud name to first cloud found
-        // TODO - multiple clouds
-        cloudName_ = cloudDirs[0];
-    }
-    else
-    {
-        if (debug)
-        {
-            Info<< "... no clouds identified in " <<nl
-                << "    " <<dbPtr_->timePath()/"lagrangian" << endl;
-        }
-    }
+    partInfoLagrangian_ += nClouds;
 
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(arraySelection);
+        getSelectedArrayEntries(partSelection);
 
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationLagrangian" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoLagrangian" << endl;
     }
 }
 
 
-void Foam::vtkPV3Foam::updateInformationPatches()
+void Foam::vtkPV3Foam::updateInfoPatches()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationPatches"
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoPatches"
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
-    vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
-    selectInfoPatches_ = arraySelection->GetNumberOfArrays();
+    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
+    partInfoPatches_ = partSelection->GetNumberOfArrays();
 
     int nPatches = 0;
-
     if (meshPtr_)
     {
         const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
-        forAll (patches, patchI)
+        forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
             if (pp.size())
             {
-                // Add patch to GUI region list
-                arraySelection->AddArray
+                // Add patch to GUI list
+                partSelection->AddArray
                 (
                     (pp.name() + " - patch").c_str()
                 );
@@ -251,8 +236,8 @@ void Foam::vtkPV3Foam::updateInformationPatches()
             )
         );
 
-        // Start regions at patches
-        forAll (patchEntries, entryI)
+        // Add (non-zero) patches to the list of mesh parts
+        forAll(patchEntries, entryI)
         {
             label nFaces
             (
@@ -262,8 +247,8 @@ void Foam::vtkPV3Foam::updateInformationPatches()
             // Valid patch if nFace > 0
             if (nFaces)
             {
-                // Add patch to GUI region list
-                arraySelection->AddArray
+                // Add patch to GUI list
+                partSelection->AddArray
                 (
                     (patchEntries[entryI].keyword() + " - patch").c_str()
                 );
@@ -273,28 +258,32 @@ void Foam::vtkPV3Foam::updateInformationPatches()
         }
     }
 
-    selectInfoPatches_ += nPatches;
+    partInfoPatches_ += nPatches;
 
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(arraySelection);
+        getSelectedArrayEntries(partSelection);
 
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationPatches" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoPatches" << endl;
     }
 }
 
 
-void Foam::vtkPV3Foam::updateInformationZones()
+void Foam::vtkPV3Foam::updateInfoZones()
 {
+    if (!reader_->GetIncludeZones())
+    {
+        return;
+    }
+
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationZones"
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoZones"
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
-    vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
-
+    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
     wordList namesLst;
 
     //
@@ -309,13 +298,12 @@ void Foam::vtkPV3Foam::updateInformationZones()
         namesLst = readZoneNames("cellZones");
     }
 
-    selectInfoCellZones_ = arraySelection->GetNumberOfArrays();
-    forAll (namesLst, elemI)
+    partInfoCellZones_ = partSelection->GetNumberOfArrays();
+    forAll(namesLst, elemI)
     {
-        arraySelection->AddArray((namesLst[elemI] + " - cellZone").c_str());
+        partSelection->AddArray((namesLst[elemI] + " - cellZone").c_str());
     }
-    selectInfoCellZones_ += namesLst.size();
-    zoneSuperCells_.setSize(selectInfoCellZones_.size());
+    partInfoCellZones_ += namesLst.size();
 
 
     //
@@ -330,12 +318,15 @@ void Foam::vtkPV3Foam::updateInformationZones()
         namesLst = readZoneNames("faceZones");
     }
 
-    selectInfoFaceZones_ = arraySelection->GetNumberOfArrays();
-    forAll (namesLst, elemI)
+    partInfoFaceZones_ = partSelection->GetNumberOfArrays();
+    forAll(namesLst, elemI)
     {
-        arraySelection->AddArray((namesLst[elemI] + " - faceZone").c_str());
+        partSelection->AddArray
+        (
+            (namesLst[elemI] + " - faceZone").c_str()
+        );
     }
-    selectInfoFaceZones_ += namesLst.size();
+    partInfoFaceZones_ += namesLst.size();
 
 
     //
@@ -350,32 +341,40 @@ void Foam::vtkPV3Foam::updateInformationZones()
         namesLst = readZoneNames("pointZones");
     }
 
-    selectInfoPointZones_ = arraySelection->GetNumberOfArrays();
-    forAll (namesLst, elemI)
+    partInfoPointZones_ = partSelection->GetNumberOfArrays();
+    forAll(namesLst, elemI)
     {
-        arraySelection->AddArray((namesLst[elemI] + " - pointZone").c_str());
+        partSelection->AddArray
+        (
+            (namesLst[elemI] + " - pointZone").c_str()
+        );
     }
-    selectInfoPointZones_ += namesLst.size();
+    partInfoPointZones_ += namesLst.size();
 
 
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(arraySelection);
+        getSelectedArrayEntries(partSelection);
 
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationZones" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoZones" << endl;
     }
 }
 
 
-void Foam::vtkPV3Foam::updateInformationSets()
+void Foam::vtkPV3Foam::updateInfoSets()
 {
-    if (debug)
+    if (!reader_->GetIncludeSets())
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationSets" << endl;
+        return;
     }
 
-    vtkDataArraySelection *arraySelection = reader_->GetRegionSelection();
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoSets" << endl;
+    }
+
+    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
 
     // Add names of sets
     IOobjectList objects
@@ -386,27 +385,26 @@ void Foam::vtkPV3Foam::updateInformationSets()
     );
 
 
-    selectInfoCellSets_ = arraySelection->GetNumberOfArrays();
-    selectInfoCellSets_ += addToSelection<cellSet>
+    partInfoCellSets_ = partSelection->GetNumberOfArrays();
+    partInfoCellSets_ += addToSelection<cellSet>
     (
-        arraySelection,
+        partSelection,
         objects,
         " - cellSet"
     );
-    csetSuperCells_.setSize(selectInfoCellSets_.size());
 
-    selectInfoFaceSets_ = arraySelection->GetNumberOfArrays();
-    selectInfoFaceSets_ += addToSelection<faceSet>
+    partInfoFaceSets_ = partSelection->GetNumberOfArrays();
+    partInfoFaceSets_ += addToSelection<faceSet>
     (
-        arraySelection,
+        partSelection,
         objects,
         " - faceSet"
     );
 
-    selectInfoPointSets_ = arraySelection->GetNumberOfArrays();
-    selectInfoPointSets_ += addToSelection<pointSet>
+    partInfoPointSets_ = partSelection->GetNumberOfArrays();
+    partInfoPointSets_ += addToSelection<pointSet>
     (
-        arraySelection,
+        partSelection,
         objects,
         " - pointSet"
     );
@@ -414,85 +412,92 @@ void Foam::vtkPV3Foam::updateInformationSets()
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(arraySelection);
+        getSelectedArrayEntries(partSelection);
 
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationSets" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoSets" << endl;
     }
 }
 
 
-void Foam::vtkPV3Foam::updateInformationLagrangianFields()
+void Foam::vtkPV3Foam::updateInfoLagrangianFields()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInformationLagrangianFields"
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoLagrangianFields"
             << endl;
     }
 
-    vtkDataArraySelection *arraySelection =
+    vtkDataArraySelection *fieldSelection =
         reader_->GetLagrangianFieldSelection();
 
-    // preserve the currently selected values
-    const stringList selectedEntries = getSelectedArrayEntries
-    (
-        arraySelection
-    );
-    arraySelection->RemoveAllArrays();
+    // preserve the enabled selections
+    stringList enabledEntries = getSelectedArrayEntries(fieldSelection);
+    fieldSelection->RemoveAllArrays();
 
-    // TODO - currently hard-coded to ONE cloud
+    //
+    // TODO - currently only get fields from ONE cloud
+    // have to decide if the second set of fields get mixed in
+    // or dealt with separately
+
+    const partInfo& selector = partInfoLagrangian_;
+    int partId = selector.start();
+
+    if (!selector.size() || partId < 0)
+    {
+        return;
+    }
+
+    word cloudName = getPartName(partId);
+
     IOobjectList objects
     (
         dbPtr_(),
         dbPtr_().timeName(),
-        "lagrangian"/cloudName_
+        "lagrangian"/cloudName
     );
 
     addToSelection<IOField<label> >
     (
-        arraySelection,
+        fieldSelection,
         objects
     );
     addToSelection<IOField<scalar> >
     (
-        arraySelection,
+        fieldSelection,
         objects
     );
     addToSelection<IOField<vector> >
     (
-        arraySelection,
+        fieldSelection,
         objects
     );
     addToSelection<IOField<sphericalTensor> >
     (
-        arraySelection,
+        fieldSelection,
+
         objects
     );
     addToSelection<IOField<symmTensor> >
     (
-        arraySelection,
+        fieldSelection,
         objects
     );
     addToSelection<IOField<tensor> >
     (
-        arraySelection,
+        fieldSelection,
         objects
     );
 
-    // restore the currently enabled values
-    setSelectedArrayEntries
-    (
-        arraySelection,
-        selectedEntries
-    );
+    // restore the enabled selections
+    setSelectedArrayEntries(fieldSelection, enabledEntries);
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::updateInformationLagrangianFields - "
+        Info<< "<end> Foam::vtkPV3Foam::updateInfoLagrangianFields - "
             << "lagrangian objects.size() = " << objects.size() << endl;
     }
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 // ************************************************************************* //

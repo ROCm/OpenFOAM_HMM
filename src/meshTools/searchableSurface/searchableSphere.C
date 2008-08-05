@@ -233,10 +233,9 @@ void Foam::searchableSphere::findLineAll
 {
     info.setSize(start.size());
 
-    pointIndexHit near, far;
-
     forAll(start, i)
     {
+        pointIndexHit near, far;
         findLineAll(start[i], end[i], near, far);
 
         if (near.hit())
@@ -259,6 +258,10 @@ void Foam::searchableSphere::findLineAll
             {
                 info[i].setSize(1);
                 info[i][0] = far;
+            }
+            else
+            {
+                info[i].clear();
             }
         }
     }
