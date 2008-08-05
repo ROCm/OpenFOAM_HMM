@@ -238,8 +238,7 @@ void Foam::kineticTheoryModel::solve()
     volScalarField ThetaSqrt = sqrt(Theta_);
 
     // 'thermal' conductivity (Table 3.3, p. 49)
-    volScalarField kappa_ =
-        conductivityModel_->kappa(alpha, Theta_, gs0_, rhoa_, da_, e_);
+    kappa_ = conductivityModel_->kappa(alpha, Theta_, gs0_, rhoa_, da_, e_);
 
     // particle viscosity (Table 3.2, p.47)
     mua_ = viscosityModel_->mua(alpha, Theta_, gs0_, rhoa_, da_, e_);
@@ -351,8 +350,7 @@ void Foam::kineticTheoryModel::solve()
     mua_.min(1.0e+2);
     mua_.max(0.0);
 
-    lambda_ = (4.0/3.0)*sqr(alpha_)*rhoa_*da_*gs0_*(1.0 + e_)
-        *ThetaSqrt/sqrtPi;
+    lambda_ = (4.0/3.0)*sqr(alpha_)*rhoa_*da_*gs0_*(1.0 + e_)*ThetaSqrt/sqrtPi;
 
     Info<< "kinTheory: max(Theta) = " << max(Theta_).value() << endl;
 

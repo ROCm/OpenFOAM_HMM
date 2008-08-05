@@ -25,11 +25,8 @@ License
 InClass
     Foam::rawWriters
 
-Description
-
 SourceFiles
     rawWriters.C
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,16 +41,8 @@ SourceFiles
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef raw<scalar> rawScalarWriter;
-typedef raw<vector> rawVectorWriter;
-typedef raw<tensor> rawTensorWriter;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeWritersTypedefs(raw)
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

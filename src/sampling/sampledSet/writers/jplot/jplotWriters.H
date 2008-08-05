@@ -25,11 +25,8 @@ License
 InClass
     Foam::jplotWriters
 
-Description
-
 SourceFiles
     jplotWriters.C
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,16 +41,8 @@ SourceFiles
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef jplot<scalar> jplotScalarWriter;
-typedef jplot<vector> jplotVectorWriter;
-typedef jplot<tensor> jplotTensorWriter;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeWritersTypedefs(jplot)
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
