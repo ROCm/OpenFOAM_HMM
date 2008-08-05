@@ -570,7 +570,9 @@ public:
             //  region and split them.
             autoPtr<mapPolyMesh> dupNonManifoldPoints();
 
-            //- Create baffle for every internal face where ownPatch != -1
+            //- Create baffle for every internal face where ownPatch != -1.
+            //  External faces get repatched according to ownPatch (neiPatch
+            //  should be -1 for these)
             autoPtr<mapPolyMesh> createBaffles
             (
                 const labelList& ownPatch,

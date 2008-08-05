@@ -178,6 +178,11 @@ public:
         {
             return lambda_;
         }
+
+        const volScalarField& kappa() const
+        {
+            return kappa_;
+        }
 };
 
 

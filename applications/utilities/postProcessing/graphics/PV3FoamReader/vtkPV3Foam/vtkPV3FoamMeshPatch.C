@@ -29,65 +29,55 @@ Description
 #include "vtkPV3Foam.H"
 
 // Foam includes
-#include "vtkPV3FoamInsertNextPoint.H"
+#include "polyPatch.H"
+#include "primitivePatch.H"
+#include "vtkPV3FoamPoints.H"
 
 // VTK includes
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
 #include "vtkCellArray.h"
+#include "vtkPolyData.h"
+#include "vtkUnstructuredGrid.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-void Foam::vtkPV3Foam::addFaceZoneMesh
+vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh
 (
-    const fvMesh& mesh,
-    const labelList& faceLabels,
-    vtkPolyData* vtkmesh
+    const polyPatch& p
 )
 {
+    vtkPolyData* vtkmesh = vtkPolyData::New();
+
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::addFaceZoneMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::patchVTKMesh - " << p.name() << endl;
         printMemory();
     }
 
-    // Construct primitivePatch of faces in fSet.
-
-    const faceList& meshFaces = mesh.faces();
-    faceList patchFaces(faceLabels.size());
-    forAll(faceLabels, faceI)
-    {
-        patchFaces[faceI] = meshFaces[faceLabels[faceI]];
-    }
-    primitiveFacePatch p(patchFaces, mesh.points());
-
-
-    // The balance of this routine should be identical to addPatchMesh
-
     // Convert Foam mesh vertices to VTK
-    const pointField& points = p.localPoints();
+    const Foam::pointField& points = p.localPoints();
 
     vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(p.size());
+    vtkpoints->Allocate( points.size() );
     forAll(points, i)
     {
         vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
     }
+
     vtkmesh->SetPoints(vtkpoints);
     vtkpoints->Delete();
+
 
     // Add faces as polygons
     const faceList& faces = p.localFaces();
 
     vtkCellArray* vtkcells = vtkCellArray::New();
-    vtkcells->Allocate(points.size());
+    vtkcells->Allocate( faces.size() );
     forAll(faces, faceI)
     {
         const face& f = faces[faceI];
         vtkIdType nodeIds[f.size()];
 
-        forAll (f, fp)
+        forAll(f, fp)
         {
             nodeIds[fp] = f[fp];
         }
@@ -99,44 +89,12 @@ void Foam::vtkPV3Foam::addFaceZoneMesh
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::addFaceZoneMesh" << endl;
+        Info<< "<end> Foam::vtkPV3Foam::patchVTKMesh - " << p.name() << endl;
         printMemory();
     }
+
+    return vtkmesh;
 }
 
-
-
-void Foam::vtkPV3Foam::addPointZoneMesh
-(
-    const fvMesh& mesh,
-    const labelList& pointLabels,
-    vtkPolyData* vtkmesh
-)
-{
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::addPointZoneMesh" << endl;
-        printMemory();
-    }
-
-    const pointField& meshPoints = mesh.points();
-
-    vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(pointLabels.size());
-
-    forAll(pointLabels, pointI)
-    {
-        vtkPV3FoamInsertNextPoint(vtkpoints, meshPoints[pointLabels[pointI]]);
-    }
-
-    vtkmesh->SetPoints(vtkpoints);
-    vtkpoints->Delete();
-
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::addPointZoneMesh" << endl;
-        printMemory();
-    }
-}
 
 // ************************************************************************* //

@@ -27,8 +27,8 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamConvertFaceField_H
-#define vtkPV3FoamConvertFaceField_H
+#ifndef vtkPV3FoamFaceField_H
+#define vtkPV3FoamFaceField_H
 
 // VTK includes
 #include "vtkCellData.h"
@@ -42,31 +42,36 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo,
     const fvMesh& mesh,
     const labelList& faceLabels
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
     const label nInternalFaces = mesh.nInternalFaces();
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
     vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(faceLabels.size());
-    cellData->SetNumberOfComponents(nComp);
-    cellData->Allocate(nComp*faceLabels.size());
-    cellData->SetName(tf.name().c_str());
+    cellData->SetNumberOfTuples( faceLabels.size() );
+    cellData->SetNumberOfComponents( nComp );
+    cellData->Allocate( nComp*faceLabels.size() );
+    cellData->SetName( tf.name().c_str() );
+
+    if (debug)
+    {
+        Info<< "convert convertFaceField: "
+            << tf.name()
+            << " size = " << tf.size()
+            << " nComp=" << nComp
+            << " nTuples = " << faceLabels.size() <<  endl;
+    }
 
     float vec[nComp];
 
+    // for interior faces: average owner/neighbour
+    // for boundary faces: owner
     forAll(faceLabels, faceI)
     {
         const label faceNo = faceLabels[faceI];
@@ -91,7 +96,13 @@ void Foam::vtkPV3Foam::convertFaceField
         cellData->InsertTuple(faceI, vec);
     }
 
-    vtkmesh->GetCellData()->AddArray(cellData);
+
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetCellData()
+        ->AddArray(cellData);
+
     cellData->Delete();
 }
 
@@ -101,31 +112,36 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const selectionInfo& selector,
+    const partInfo& selector,
     const label datasetNo,
     const fvMesh& mesh,
     const faceSet& fSet
 )
 {
     const label nComp = pTraits<Type>::nComponents;
-
-    vtkPolyData* vtkmesh = vtkPolyData::SafeDownCast
-    (
-        GetDataSetFromBlock(output, selector, datasetNo)
-    );
-
     const label nInternalFaces = mesh.nInternalFaces();
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
     vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples(fSet.size());
-    cellData->SetNumberOfComponents(nComp);
-    cellData->Allocate(nComp*fSet.size());
-    cellData->SetName(tf.name().c_str());
+    cellData->SetNumberOfTuples( fSet.size() );
+    cellData->SetNumberOfComponents( nComp );
+    cellData->Allocate( nComp*fSet.size() );
+    cellData->SetName( tf.name().c_str() );
+
+    if (debug)
+    {
+        Info<< "convert convertFaceField: "
+            << tf.name()
+            << " size = " << tf.size()
+            << " nComp=" << nComp
+            << " nTuples = " << fSet.size() <<  endl;
+    }
 
     float vec[nComp];
 
+    // for interior faces: average owner/neighbour
+    // for boundary faces: owner
     label faceI = 0;
     forAllConstIter(faceSet, fSet, iter)
     {
@@ -153,10 +169,15 @@ void Foam::vtkPV3Foam::convertFaceField
         ++faceI;
     }
 
-    vtkmesh->GetCellData()->AddArray(cellData);
+
+    vtkPolyData::SafeDownCast
+    (
+        GetDataSetFromBlock(output, selector, datasetNo)
+    )   ->GetCellData()
+        ->AddArray(cellData);
+
     cellData->Delete();
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
