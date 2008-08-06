@@ -35,6 +35,7 @@ License
 namespace Foam
 {
     defineParticleTypeNameAndDebug(solidParticle, 0);
+    defineTemplateTypeNameAndDebug(Cloud<solidParticle>, 0);
 };
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

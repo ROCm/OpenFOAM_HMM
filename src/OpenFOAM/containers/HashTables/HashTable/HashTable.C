@@ -485,6 +485,43 @@ void HashTable<T, Key, Hash>::operator=(const HashTable<T, Key, Hash>& ht)
 }
 
 
+template<class T, class Key, class Hash>
+bool HashTable<T, Key, Hash>::operator==(const HashTable<T, Key, Hash>& ht)
+ const
+{
+    // Are all my elements in ht?
+    for (const_iterator iter = begin(); iter != end(); ++iter)
+    {
+        const_iterator fnd = ht.find(iter.key());
+
+        if (fnd == ht.end() || (fnd() != iter()))
+        {
+            return false;
+        }
+    }
+
+    // Are all ht elements in me?
+    for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
+    {
+        const_iterator fnd = find(iter.key());
+
+        if (fnd == end() || (fnd() != iter()))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+template<class T, class Key, class Hash>
+bool HashTable<T, Key, Hash>::operator!=(const HashTable<T, Key, Hash>& ht)
+ const
+{
+    return !(operator==(ht));
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
