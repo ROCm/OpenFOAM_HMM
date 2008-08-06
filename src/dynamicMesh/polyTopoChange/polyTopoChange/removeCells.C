@@ -214,6 +214,18 @@ void Foam::removeCells::setRefinement
     {
         label patchI = exposedPatchIDs[i];
 
+        if (patchI < 0 || patchI >= patches.size())
+        {
+            FatalErrorIn
+            (
+                "removeCells::setRefinement(const labelList&"
+                ", const labelList&, const labelList&, polyTopoChange&)"
+            )   << "Invalid patch " << patchI
+                << " for exposed face " << exposedFaceLabels[i] << endl
+                << "Valid patches 0.." << patches.size()-1
+                << abort(FatalError);
+        }
+
         if (patches[patchI].coupled())
         {
             FatalErrorIn

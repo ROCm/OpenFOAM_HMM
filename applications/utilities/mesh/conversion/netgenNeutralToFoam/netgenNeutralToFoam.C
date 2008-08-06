@@ -89,13 +89,11 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("Neutral file");
-    argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     fileName neuFile(args.additionalArgs()[0]);
-    bool overwrite = args.options().found("overwrite");
 
 
     IFstream str(neuFile);
@@ -299,11 +297,6 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-
-    if (!overwrite)
-    {
-        runTime++;
-    }
 
     polyMesh mesh
     (
