@@ -235,7 +235,18 @@ void Foam::layerAdditionRemoval::removeCellLayer
                     mesh.faceZones()[modifiedFaceZone].whichFace(curFaceID)
                 ];
         }
-            
+        
+        label newNei;
+        
+        if (curFaceID < mesh.nInternalFaces())
+        {
+            newNei = nei[curFaceID];
+        }
+        else
+        {
+            newNei = -1;
+        }
+
         // Modify the face
         ref.setAction
         (
@@ -244,7 +255,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
                 newFace,                // modified face
                 curFaceID,              // label of face being modified
                 own[curFaceID],         // owner
-                nei[curFaceID],         // neighbour
+                newNei,                 // neighbour
                 false,                  // face flip
                 mesh.boundaryMesh().whichPatch(curFaceID),// patch for face
                 false,                  // remove from zone
