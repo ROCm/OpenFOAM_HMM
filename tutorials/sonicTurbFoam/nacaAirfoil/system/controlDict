@@ -44,4 +44,60 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
+functions
+(
+    //forces
+    //{
+    //    type                forces;
+    //    functionObjectLibs  ("libforces.so");
+    //
+    //    // Patches to sample
+    //    patches (WALL10);
+    //    // Name of fields
+    //    pName   p;
+    //    Uname   U;
+    //    // Dump to file
+    //    log true;
+    //    // Density
+    //    rhoInf  1;
+    //    // Centre of rotation
+    //    CofR    (0 0 0);
+    //}
+
+    forces
+    {
+        type                forceCoeffs;
+        functionObjectLibs  ("libforces.so");
+
+        // Patches to sample
+        patches (WALL10);
+        // Name of fields
+        pName   p;
+        Uname   U;
+        // Dump to file
+        log true;
+        // Density
+        rhoInf  1;
+        // Centre of rotation
+        CofR    (0 0 0);
+
+        // Direction for lift
+        liftDir     (-0.239733 0.970839 0);
+        // Direction for drag
+        dragDir     ( 0.970839 0.239733 0);
+
+        // Pitching axis
+        pitchAxis   (0 0 1);
+
+        magUInf     618.022;
+
+        lRef        1.0;      
+        Aref        1.0;
+    }
+
+
+);
+
+
+
 // ************************************************************************* //

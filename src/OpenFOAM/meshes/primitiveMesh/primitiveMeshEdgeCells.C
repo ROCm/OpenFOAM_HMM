@@ -38,6 +38,10 @@ const labelListList& primitiveMesh::edgeCells() const
 {
     if (!ecPtr_)
     {
+        if (debug)
+        {
+            Pout<< "primitiveMesh::edgeCells() : calculating edgeCells" << endl;
+        }
         // Invert cellEdges
         ecPtr_ = new labelListList(nEdges());
         invertManyToMany(nEdges(), cellEdges(), *ecPtr_);
