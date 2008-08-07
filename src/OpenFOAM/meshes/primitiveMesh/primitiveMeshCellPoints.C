@@ -38,6 +38,12 @@ const labelListList& primitiveMesh::cellPoints() const
 {
     if (!cpPtr_)
     {
+        if (debug)
+        {
+            Pout<< "primitiveMesh::cellPoints() : "
+                << "calculating cellPoints" << endl;
+        }
+
         // Invert pointCells
         cpPtr_ = new labelListList(nCells());
         invertManyToMany(nCells(), pointCells(), *cpPtr_);
