@@ -117,10 +117,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 
     // default type is self
     word coordType(typeName_());
-    if (dict.found("type"))
-    {
-	dict.lookup("type") >> coordType;
-    }
+    dict.readIfPresent("type", coordType);
 
     // can (must) construct base class directly
     if (coordType == typeName_())

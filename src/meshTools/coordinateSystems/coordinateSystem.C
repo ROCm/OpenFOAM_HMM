@@ -267,14 +267,8 @@ void Foam::coordinateSystem::operator=(const dictionary& rhs)
     );
 
     // unspecified origin is (0 0 0)
-    if (dict.found("origin"))
-    {
-        dict.lookup("origin") >> origin_;
-    }
-    else
-    {
-        origin_ = vector::zero;
-    }
+    origin_ = vector::zero;
+    dict.readIfPresent("origin", origin_);
 
     // specify via coordinateRotation
     if (dict.found("coordinateRotation"))
