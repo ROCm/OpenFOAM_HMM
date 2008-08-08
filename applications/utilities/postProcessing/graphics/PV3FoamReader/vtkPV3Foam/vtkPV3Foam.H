@@ -92,11 +92,8 @@ class polyPatch;
 class faceSet;
 class pointSet;
 
-template<class Type>
-class IOField;
-
-template<class Type>
-class List;
+template<class Type> class IOField;
+template<class Type> class List;
 
 /*---------------------------------------------------------------------------*\
                         Class vtkPV3Foam Declaration
@@ -248,9 +245,11 @@ class vtkPV3Foam
         //- Foam mesh
         fvMesh* meshPtr_;
 
-        //- Number of meshes
-        // TODO - for info only - only set up to process ONE mesh
-        int nMesh_;
+        //- The mesh region
+        word meshRegion_;
+
+        //- The mesh directory for the region
+        fileName meshDir_;
 
         //- The time index
         int timeIndex_;

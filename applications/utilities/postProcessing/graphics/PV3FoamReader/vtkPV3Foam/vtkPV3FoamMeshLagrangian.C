@@ -57,6 +57,8 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
         printMemory();
     }
 
+
+    // the region name is already in the mesh db
     IOobjectList sprayObjs
     (
         mesh,

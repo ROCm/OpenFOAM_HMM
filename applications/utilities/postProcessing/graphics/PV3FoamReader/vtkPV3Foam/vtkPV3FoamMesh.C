@@ -64,7 +64,7 @@ void Foam::vtkPV3Foam::convertMeshVolume
     }
 
     // Convert the internalMesh
-    // TODO: multiple mesh regions
+    // this looks like more than one part, but it isn't
     for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
         const word partName = "internalMesh";
@@ -239,7 +239,6 @@ void Foam::vtkPV3Foam::convertMeshCellZones
     }
 
     const cellZoneMesh& zMesh = mesh.cellZones();
-
     for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
         const word zoneName = getPartName(partId);
@@ -408,7 +407,6 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
     }
 
     const faceZoneMesh& zMesh = mesh.faceZones();
-
     for (int partId = selector.start(); partId < selector.end(); ++partId)
     {
         const word zoneName = getPartName(partId);
@@ -515,6 +513,7 @@ void Foam::vtkPV3Foam::convertMeshPointZones
     partInfo& selector = partInfoPointZones_;
     selector.block(blockNo);   // set output block
     label datasetNo = 0;       // restart at dataset 0
+    const fvMesh& mesh = *meshPtr_;
 
     if (debug)
     {
@@ -522,12 +521,9 @@ void Foam::vtkPV3Foam::convertMeshPointZones
         printMemory();
     }
 
-    const fvMesh& mesh = *meshPtr_;
-
     if (selector.size())
     {
         const pointZoneMesh& zMesh = mesh.pointZones();
-
         for (int partId = selector.start(); partId < selector.end(); ++partId)
         {
             word zoneName = getPartName(partId);
