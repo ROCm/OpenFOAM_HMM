@@ -1,15 +1,19 @@
 #!/bin/sh
 
-if [ $# -eq 0 ]
+if [ "$1" = "-h" -o "$1" = "-help" -o "$#" -gt 1 ]
 then
-   find . \( -name '*.dep' \) -print | xargs -t rm
-elif [ $# -eq 1 ]
-then
-   echo "Removing all dep files containing $1..."
-   find . -name '*.dep' -exec grep "$1" '{}' \; -exec rm '{}' \;
-else
-   echo "Usage: ${0##/}        to remove all .dep files"
-   echo "       ${0##/} <file> to remove all .dep files referring to <file>"
+   echo "Usage: ${0##*/}         : remove all .dep files"
+   echo "       ${0##*/} <file>  : remove all .dep files referring to <file>"
    exit 1
 fi
 
+if [ "$#" -eq 0 ]
+then
+   echo "removing all .dep files"
+   find . -name '*.dep' -print | xargs -t rm
+else
+   echo "removing all .dep files containing $1..."
+   find . -name '*.dep' -exec grep "$1" '{}' \; -exec rm '{}' \;
+fi
+
+#------------------------------------------------------------------------------
