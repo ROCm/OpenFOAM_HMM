@@ -34,13 +34,19 @@ usage() {
    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
    cat<<USAGE
 
-usage: ${0##*/} [-case dir]
+usage: ${0##*/} [OPTION]
+options:
+  -case   dir    specify alternative case directory
+  -region name   specify mesh region name
+  -touch         create the .OpenFOAM file only and exit
 
 * start paraview $ParaView_VERSION with the OpenFOAM libraries
 
 USAGE
    exit 1
 }
+
+unset regionName touchOnly
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -55,6 +61,15 @@ do
       shift 2
       cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
       ;;
+   -region)
+      [ "$#" -ge 2 ] || usage "'-region' option requires an argument"
+      regionName=$2
+      shift 2
+      ;;
+   -touch)
+      touchOnly=1
+      shift
+      ;;
    *)
       usage "unknown option/argument: '$*'"
       ;;
@@ -64,6 +79,17 @@ done
 # get a sensible caseName
 caseName=${PWD##*/}
 caseFile="$caseName.OpenFOAM"
+if [ -n "$regionName" ]
+then
+   caseFile="$caseName=$regionName.OpenFOAM"
+fi
+
+if [ -n "$touchOnly" ];
+then
+   touch $caseFile
+   echo "created '$caseFile'"
+   exit 0
+fi
 
 # parent directory for normal or parallel results
 case "$caseName" in
@@ -80,7 +106,6 @@ done
 
 case "$ParaView_VERSION" in
 2*)
-   # Clean up on termination and on Ctrl-C
    trap "rm -f paraFoam.pvs $caseFile 2>/dev/null; exit 0" EXIT TERM INT
    touch $caseFile
 
@@ -92,9 +117,12 @@ case "$ParaView_VERSION" in
    ;;
 
 *)
-   # Clean up on termination and on Ctrl-C
-   trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
-   touch $caseFile
+   # only create/remove caseFile if it doesn't exist
+   [ -e $caseFile ] || {
+      trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
+      touch $caseFile
+   }
+
    paraview --data=$caseFile
    ;;
 
