@@ -8,12 +8,24 @@ runApplication setSet -batch makeCellSets.setSet
 rm constant/polyMesh/sets/*_old
 runApplication setsToZones -noFlipMap
 runApplication splitMeshRegions -cellZones
+
 changeDictionary -region bottomAir
 changeDictionary -region topAir
 changeDictionary -region heater
 changeDictionary -region leftSolid
 changeDictionary -region rightSolid
+
+
+# remove fluid fields from solid regions (for post-processing only)
+for i in heater leftSolid rightSolid
+do
+   rm -f 0*/$i/{epsilon,k,p,pd,U}
+done
+
+# remove solid fields from fluid regions (for post-processing only)
+for i in bottomAir topAir
+do
+   rm -f 0*/$i/{cp,K}
+done
+
 runApplication chtMultiRegionFoam
-
-
-

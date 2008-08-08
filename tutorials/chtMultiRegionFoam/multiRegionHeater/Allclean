@@ -4,4 +4,7 @@
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cleanCase
-rm -r VTK
+rm -rf VTK
+
+rm -rf constant/cellToRegion constant/polyMesh/sets
+
