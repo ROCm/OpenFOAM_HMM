@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::turbulentMixingLengthFrequencyInletFvPatchScalarField
+    Foam::compressible::turbulentMixingLengthFrequencyInletFvPatchScalarField
 
 Description
     Calculate omega via the mixing length
@@ -44,14 +44,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentMixingLengthFrequencyInletFvPatchScalarField_H
-#define turbulentMixingLengthFrequencyInletFvPatchScalarField_H
+#ifndef compressibleturbulentMixingLengthFrequencyInletFvPatchScalarField_H
+#define compressibleturbulentMixingLengthFrequencyInletFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
@@ -159,6 +161,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

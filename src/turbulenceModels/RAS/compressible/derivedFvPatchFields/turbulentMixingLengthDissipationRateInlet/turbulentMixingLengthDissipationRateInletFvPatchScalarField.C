@@ -35,6 +35,8 @@ License
 
 namespace Foam
 {
+namespace compressible
+{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -144,6 +146,7 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //
