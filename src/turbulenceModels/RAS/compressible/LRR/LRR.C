@@ -214,8 +214,8 @@ LRR::LRR
         FatalErrorIn
         (
             "LRR::LRR"
-            "(const volVectorField& U, const surfaceScalarField& phi,"
-            "incompressibleTransportModel& lamTransportModel)"
+            "( const volScalarField&, const volVectorField&"
+            ", const surfaceScalarField&, incompressibleTransportModel&)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);

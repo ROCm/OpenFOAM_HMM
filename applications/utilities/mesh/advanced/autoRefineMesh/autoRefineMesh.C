@@ -520,7 +520,7 @@ void subsetMesh
     (
         cellLabels,
         exposedFaces,
-        labelList(patchI, exposedFaces.size()),
+        labelList(exposedFaces.size(), patchI),
         meshMod
     );
 
