@@ -40,7 +40,7 @@
 #            rm -rf ${T} > /dev/null 2>&1
 #        fi
 #    done
-#    rm -rf {log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.foam} > /dev/null 2>&1
+#    rm -rf {log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.OpenFOAM} > /dev/null 2>&1
 #}
 
 cleanTimeDirectories ()
@@ -55,7 +55,7 @@ cleanTimeDirectories ()
         zeros=`printf %0${nZeros}d 0`
         nZeros=$(($nZeros + 1))
     done
-    rm -rf ./{[1-9]*,-[1-9]*,log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.foam} > /dev/null 2>&1
+    rm -rf ./{[1-9]*,-[1-9]*,log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.OpenFOAM} > /dev/null 2>&1
 }
 
 cleanCase ()
