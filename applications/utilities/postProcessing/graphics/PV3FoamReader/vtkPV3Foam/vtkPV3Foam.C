@@ -247,15 +247,20 @@ Foam::vtkPV3Foam::vtkPV3Foam
         setEnv("FOAM_CASE", fullCasePath, true);
     }
 
-    // get the caseName, and look for '=regionName' in it
-    // we could also be more stringent and insist that the
-    // prefix match the directory name, etc ..
-    fileName caseName(fileName(FileName).lessExt());
+    // look for 'case{region}.OpenFOAM'
+    // could be stringent and insist the prefix match the directory name...
+    // Note: cannot use fileName::name() due to the embedded '{}'
+    string caseName(fileName(FileName).lessExt());
+    string::size_type beg = caseName.find_last_of("/{");
+    string::size_type end = caseName.find('}', beg);
 
-    string::size_type delimiter = caseName.find("=");
-    if (delimiter != string::npos)
+    if
+    (
+        beg != string::npos && caseName[beg] == '{'
+     && end != string::npos && end == caseName.size()-1
+    )
     {
-        meshRegion_ = caseName.substr(delimiter+1);
+        meshRegion_ = caseName.substr(beg+1, end-beg-1);
 
         // some safety
         if (!meshRegion_.size())

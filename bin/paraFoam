@@ -81,12 +81,12 @@ caseName=${PWD##*/}
 caseFile="$caseName.OpenFOAM"
 if [ -n "$regionName" ]
 then
-   caseFile="$caseName=$regionName.OpenFOAM"
+   caseFile="$caseName{$regionName}.OpenFOAM"
 fi
 
 if [ -n "$touchOnly" ];
 then
-   touch $caseFile
+   touch "$caseFile"
    echo "created '$caseFile'"
    exit 0
 fi
@@ -120,10 +120,11 @@ case "$ParaView_VERSION" in
    # only create/remove caseFile if it doesn't exist
    [ -e $caseFile ] || {
       trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
-      touch $caseFile
+      touch "$caseFile"
+      echo "created temporary '$caseFile'"
    }
 
-   paraview --data=$caseFile
+   paraview --data="$caseFile"
    ;;
 
 esac
