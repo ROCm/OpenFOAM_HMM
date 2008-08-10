@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     chtFoam;
+application     chtMultiRegionFoam;
 
 startFrom       latestTime;
 
@@ -28,8 +28,8 @@ deltaT          0.001;
 
 writeControl    adjustableRunTime;
 writeInterval   5;
-//writeControl    timeStep;
-//writeInterval   20;
+// writeControl    timeStep;
+// writeInterval   20;
 
 purgeWrite      0;
 
