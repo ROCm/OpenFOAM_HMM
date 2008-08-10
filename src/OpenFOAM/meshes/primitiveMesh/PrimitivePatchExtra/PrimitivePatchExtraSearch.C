@@ -26,8 +26,6 @@ License
 
 #include "PrimitivePatchExtra.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Finds area, starting at faceI, delimited by borderEdge. Marks all visited
@@ -58,13 +56,13 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
         // Pick up neighbours of changedFaces
         DynamicList<label> newChangedFaces(2*changedFaces.size());
 
-        forAll (changedFaces, i)
+        forAll(changedFaces, i)
         {
             label faceI = changedFaces[i];
 
             const labelList& fEdges = faceEs[faceI];
 
-            forAll(fEdges, i)
+            forAllfEdges, i)
             {
                 label edgeI = fEdges[i];
 
@@ -202,7 +200,7 @@ subsetMap
 
     boolList pointHad(numPoints, false);
 
-    forAll (include, oldFaceI)
+    forAll(include, oldFaceI)
     {
         if (include[oldFaceI])
         {
@@ -212,7 +210,7 @@ subsetMap
             // Renumber labels for face
             const FaceType& f = locFaces[oldFaceI];
 
-            forAll (f, fp)
+            forAll(f, fp)
             {
                 const label ptLabel = f[fp];
                 if (!pointHad[ptLabel])

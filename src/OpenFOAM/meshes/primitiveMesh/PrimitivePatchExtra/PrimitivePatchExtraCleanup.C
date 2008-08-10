@@ -28,14 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Check/fix edges with more than two faces
@@ -52,16 +44,15 @@ checkEdges
     const bool verbose
 ) const
 {
-    const labelListList& eFaces =
-       PrimitivePatch<Face, ListType, PointField>::edgeFaces();
+    const labelListList& eFaces = TemplateType::edgeFaces();
+    const edgeList& edgeLst = TemplateType::edges();
 
-    const edgeList& edgeLst =
-        PrimitivePatch<Face, ListType, PointField>::edges();
-
-    forAll (eFaces, edgeI)
+    forAll(eFaces, edgeI)
     {
         const labelList& myFaces = eFaces[edgeI];
 
+        // boundary edges have one face
+        // interior edges have two faces
         if (myFaces.size() == 0)
         {
             FatalErrorIn("PrimitivePatchExtra::checkEdges(bool verbose)")
@@ -97,15 +88,15 @@ checkOrientation
     const bool verbose
 ) const
 {
+    const ListType<FaceType>& faceLst = *this;
     const edgeList& edgeLst = TemplateType::edges();
     const labelListList& faceEs = TemplateType::faceEdges();
-    const List<FaceType>& faceLst = TemplateType::faces();
     const label numEdges = TemplateType::nEdges();
     const pointField& pointLst = TemplateType::points();
     const vectorField& normLst = TemplateType::faceNormals();
 
     // Check edge normals, face normals, point normals.
-    forAll (faceEs, faceI)
+    forAll(faceEs, faceI)
     {
         const labelList& edgeLabels = faceEs[faceI];
 
@@ -118,7 +109,7 @@ checkOrientation
         }
 
         bool valid = true;
-        forAll (edgeLabels, i)
+        forAll(edgeLabels, i)
         {
             if (edgeLabels[i] < 0 || edgeLabels[i] >= numEdges)
             {
@@ -126,8 +117,8 @@ checkOrientation
                 (
                     "PrimitivePatchExtra::checkOrientation(bool)"
                 )   << "edge number " << edgeLabels[i] << " on face " << faceI
-                    << " out of range"
-                    << "\nThis usually means that the input surface has "
+                    << " out-of-range\n"
+                    << "This usually means that the input surface has "
                     << "edges with more than 2 faces connected.\n"
                     << endl;
                 valid = false;
@@ -141,7 +132,7 @@ checkOrientation
 
         //
         //- Compute normal from 3 points, use the first as the origin
-        //
+        // minor warpage should not be a problem
         const FaceType& f = faceLst[faceI];
         const point p0(pointLst[f[0]]);
         const point p1(pointLst[f[1]]);
@@ -169,58 +160,34 @@ checkOrientation
     // edge
     boolList borderEdge(numEdges, false);
 
-    forAll (edgeLst, edgeI)
+    forAll(edgeLst, edgeI)
     {
+        const edge& e = edgeLst[edgeI];
         const labelList& neighbours = eFaces[edgeI];
 
         if (neighbours.size() == 2)
         {
-            // Two faces, A and B. Check if edge orientation is
-            // anticlockwise on both.
-            const labelList& fEdgesA = faceEs[neighbours[0]];
-            const labelList& fEdgesB = faceEs[neighbours[1]];
+            const FaceType& faceA = faceLst[neighbours[0]];
+            const FaceType& faceB = faceLst[neighbours[1]];
 
-            // Get next edge after edgeI
-            label nextEdgeA = fEdgesA.fcIndex(findIndex(fEdgesA, edgeI));
-            label nextEdgeB = fEdgesB.fcIndex(findIndex(fEdgesB, edgeI));
-
-            // Now check if nextEdgeA and nextEdgeB have any common points
+            // The edge cannot be going in the same direction if both faces
+            // are oriented counterclockwise.
+            // Thus the next face point *must* different between the faces.
             if
             (
-                edgeLst[nextEdgeA].start() == edgeLst[nextEdgeB].start()
-             || edgeLst[nextEdgeA].start() == edgeLst[nextEdgeB].end()
-             || edgeLst[nextEdgeA].end() == edgeLst[nextEdgeB].start()
-             || edgeLst[nextEdgeA].end() == edgeLst[nextEdgeB].end()
+                faceA[faceA.fcIndex(findIndex(faceA, e.start()))]
+             == faceB[faceB.fcIndex(findIndex(faceB, e.start()))]
             )
             {
                 borderEdge[edgeI] = true;
                 if (verbose)
                 {
-                    // just list first three points
-                    // to simplify generating the message
                     WarningIn("PrimitivePatchExtra::checkOrientation(bool)")
                         << "face orientation incorrect." << nl
-                        << "edge neighbours:" << neighbours << nl
-                        << "face " << neighbours[0] << " has edges "
-                        << fEdgesA << nl
-                        << "    with points " << nl
-                        << "    " << edgeLst[fEdgesA[0]].start() << ' '
-                        << edgeLst[fEdgesA[0]].end() << nl
-                        << "    " << edgeLst[fEdgesA[1]].start() << ' '
-                        << edgeLst[fEdgesA[1]].end() << nl
-                        << "    " << edgeLst[fEdgesA[2]].start() << ' '
-                        << edgeLst[fEdgesA[2]].end()
-                        << endl
-                        << "face " << neighbours[1] << " has edges "
-                        << fEdgesB << nl
-                        << "    with points " << nl
-                        << "    " << edgeLst[fEdgesB[0]].start() << ' '
-                        << edgeLst[fEdgesB[0]].end() << nl
-                        << "    " << edgeLst[fEdgesB[1]].start() << ' '
-                        << edgeLst[fEdgesB[1]].end() << nl
-                        << "    " << edgeLst[fEdgesB[2]].start() << ' '
-                        << edgeLst[fEdgesB[2]].end() << nl
-                        << endl;
+                        << "edge[" << edgeI << "] " << e
+                        << " between faces " << neighbours << ":" << nl
+                        << "face[" << neighbours[0] << "] " << faceA << nl
+                        << "face[" << neighbours[1] << "] " << faceB << endl;
                 }
             }
         }
@@ -228,10 +195,9 @@ checkOrientation
         {
             if (verbose)
             {
-                const edge& e = edgeLst[edgeI];
                 WarningIn("PrimitivePatchExtra::checkOrientation(bool)")
                     << "Wrong number of edge neighbours." << endl
-                    << "Edge:" << e
+                    << "edge[" << edgeI << "] " << e
                     << "with points:" << locPointsLst[e.start()]
                     << ' ' << locPointsLst[e.end()]
                     << " has neighbours:" << neighbours << endl;

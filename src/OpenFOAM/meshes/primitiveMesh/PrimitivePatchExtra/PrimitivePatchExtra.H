@@ -79,8 +79,8 @@ private:
         //- Edge-face addressing (sorted)
         mutable labelListList* sortedEdgeFacesPtr_;
 
-        //- Label of face that 'owns' edge (i.e. e.vec() is righthanded walk
-        //  along face)
+        //- Label of face that 'owns' edge
+        //  i.e. e.vec() is righthanded walk along face
         mutable labelList* edgeOwnerPtr_;
 
 
@@ -91,42 +91,6 @@ private:
 
         //- Calculate owner
         void calcEdgeOwner() const;
-
-protected:
-    // Protected Member Functions
-
-    // Edit
-
-        //- Fill faceZone with currentZone for every face reachable
-        //  from faceI without crossing edge marked in borderEdge.
-        //  Note: faceZone has to be sized nFaces before calling this fun.
-        void markZone
-        (
-            const boolList& borderEdge,
-            const label faceI,
-            const label currentZone,
-            labelList& faceZone
-        ) const;
-
-        //- (size and) fills faceZone with zone of face.
-        //  Zone is area reachable by edge crossing without crossing borderEdge
-        //  (bool for every edge in surface). Returns number of zones.
-        label markZones
-        (
-            const boolList& borderEdge,
-            labelList& faceZone
-        ) const;
-
-        //- Determine the mapping for a sub mesh.
-        //  Only include faces for which boolList entry is true
-        //  Sets: pointMap: from new to old localPoints
-        //        faceMap:  new to old faces
-        void subsetMap
-        (
-            const boolList& include,
-            labelList& pointMap,
-            labelList& faceMap
-        ) const;
 
 public:
 
@@ -183,12 +147,45 @@ public:
 
     // Check
 
-        //- Check triply (or more) connected edges. 
-        //  Return list of faces sharing these edges.
+        //- Check multiply-connected edges.
         void checkEdges(const bool verbose) const;
 
         //- Check orientation (normals) and normals of neighbouring faces
         boolList checkOrientation(const bool verbose) const;
+
+
+    // Edit
+
+        //- Fill faceZone with currentZone for every face reachable
+        //  from faceI without crossing edge marked in borderEdge.
+        //  Note: faceZone has to be sized nFaces before calling.
+        void markZone
+        (
+            const boolList& borderEdge,
+            const label faceI,
+            const label currentZone,
+            labelList& faceZone
+        ) const;
+
+        //- (size and) fills faceZone with zone of face.
+        //  Zone is area reachable by edge crossing without crossing borderEdge
+        //  (bool for every edge in surface). Returns number of zones.
+        label markZones
+        (
+            const boolList& borderEdge,
+            labelList& faceZone
+        ) const;
+
+        //- Determine the mapping for a sub-mesh.
+        //  Only include faces for which boolList entry is true
+        //  @param[out] pointMap mapping new to old localPoints
+        //  @param[out] faceMap  mapping new to old faces
+        void subsetMap
+        (
+            const boolList& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
 
 
 };
