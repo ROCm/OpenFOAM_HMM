@@ -29,7 +29,12 @@ if (transonic)
           - fvm::laplacian(rho*rUA, p)
         );
 
-        if (oCorr == nOuterCorr-1 && corr == nCorr-1 && nonOrth == nNonOrthCorr)
+        if
+        (
+            oCorr == nOuterCorr-1
+            && corr == nCorr-1
+            && nonOrth == nNonOrthCorr
+        )
         {
             pEqn.solve(mesh.solver("pFinal"));
         }
@@ -46,7 +51,7 @@ if (transonic)
 }
 else
 {
-    phi = 
+    phi =
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())
@@ -57,6 +62,7 @@ else
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
+        // Pressure corrector
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
@@ -64,7 +70,12 @@ else
           - fvm::laplacian(rho*rUA, p)
         );
 
-        if (oCorr == nOuterCorr-1 && corr == nCorr-1 && nonOrth == nNonOrthCorr)
+        if
+        (
+            oCorr == nOuterCorr-1
+         && corr == nCorr-1
+         && nonOrth == nNonOrthCorr
+        )
         {
             pEqn.solve(mesh.solver("pFinal"));
         }

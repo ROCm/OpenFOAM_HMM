@@ -68,9 +68,8 @@ int main(int argc, char *argv[])
             rho.storePrevIter();
         }
 
-        // --- PIMPLE loop
-        int oCorr=0;
-        do
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
             #include "UEqn.H"
             #include "hEqn.H"
@@ -82,8 +81,7 @@ int main(int argc, char *argv[])
             }
 
             turbulence->correct();
-
-        } while (++oCorr < nOuterCorr);
+        }
 
         runTime.write();
 
