@@ -533,7 +533,7 @@ Foam::labelList Foam::meshRefinement::getRefineCandidateFaces
     const labelList& refineCell
 ) const
 {
-    labelList testFaces(mesh_.nCells());
+    labelList testFaces(mesh_.nFaces());
 
     label nTest = 0;
 

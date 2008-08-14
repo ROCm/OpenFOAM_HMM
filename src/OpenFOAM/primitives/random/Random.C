@@ -33,19 +33,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#if INT_MAX    != 2147483647
+#    error "INT_MAX    != 2147483647"
+#    error "The random number generator may not work!"
+#endif
+
 #ifdef USE_RANDOM
-
 #   include <climits>
-
-#   if INT_MAX    != 2147483647
-#       error "INT_MAX    != 2147483647"
-#       error "The random number generator random() may not work!"
-#   endif
-
 #else
-
 #   include <cstdlib>
-
 #endif
 
 
@@ -77,7 +73,7 @@ int Random::bit()
 #   ifdef USE_RANDOM
     if (random() > INT_MAX/2)
 #   else
-    if (mrand48() > 0)
+    if (lrand48() > INT_MAX/2)
 #   endif
     {
         return 1;
