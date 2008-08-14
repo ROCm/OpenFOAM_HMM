@@ -97,13 +97,17 @@ public:
             inline scalar mu() const;
 
 
-        // Check
-
         // Edit
 
-        //- Move the particles under the influence of the given
-        //  gravitational acceleration
-        void move(const dimensionedVector& g);
+            //- Move the particles under the influence of the given
+            //  gravitational acceleration
+            void move(const dimensionedVector& g);
+
+
+        // I-O
+
+            //- Write fields
+            void writeFields() const;
 };
 
 

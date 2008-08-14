@@ -158,7 +158,7 @@ public:
             //- Return velocity
             inline const vector& U() const;
 
-            //- The nearest distance to a wall that 
+            //- The nearest distance to a wall that
             //  the particle can be in the n direction
             inline scalar wallImpactDistance(const vector& n) const;
 
@@ -226,6 +226,14 @@ public:
             const vector& separation
         );
 
+
+    // I-O
+
+        static void readFields(Cloud<solidParticle>& c);
+
+        static void writeFields(const Cloud<solidParticle>& c);
+
+
     // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const solidParticle&);
@@ -237,12 +245,6 @@ inline bool contiguous<solidParticle>()
 {
     return true;
 }
-
-template<>
-void Cloud<solidParticle>::readFields();
-
-template<>
-void Cloud<solidParticle>::writeFields() const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
