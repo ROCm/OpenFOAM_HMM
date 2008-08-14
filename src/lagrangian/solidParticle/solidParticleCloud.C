@@ -40,9 +40,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidParticleCloud::solidParticleCloud(const fvMesh& mesh)
+Foam::solidParticleCloud::solidParticleCloud
+(
+    const fvMesh& mesh,
+    const word& cloudName
+)
 :
-    Cloud<solidParticle>(mesh),
+    Cloud<solidParticle>(mesh, cloudName, false),
     mesh_(mesh),
     particleProperties_
     (

@@ -83,7 +83,11 @@ public:
     // Constructors
 
         //- Construct given mesh
-        solidParticleCloud(const fvMesh&);
+        solidParticleCloud
+        (
+            const fvMesh&,
+            const word& cloudName = "defaultCloud"
+        );
 
 
     // Member Functions
