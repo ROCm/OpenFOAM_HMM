@@ -1,3 +1,17 @@
 #!/bin/sh
 
-touch $FOAM_LIBBIN/*
+if [ "$#" -ne 0 ]
+then
+   echo "Usage: ${0##*/}"
+   echo "    touch FOAM_LIBBIN"
+   exit 1
+fi
+
+if [ -d "$FOAM_LIBBIN" ]
+then
+   echo "touching FOAM_LIBBIN: $FOAM_LIBBIN"
+   touch $FOAM_LIBBIN/* $FOAM_LIBBIN/*/*
+else
+   echo "no FOAM_LIBBIN: $FOAM_LIBBIN"
+fi
+#------------------------------------------------------------------------------

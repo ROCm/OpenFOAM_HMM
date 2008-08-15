@@ -38,6 +38,52 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Foam
+{
+    tmp<volScalarField> Co(const surfaceScalarField& Cof)
+    {
+        const fvMesh& mesh = Cof.mesh();
+
+        tmp<volScalarField> tCo
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "Co",
+                    mesh.time().timeName(),
+                    mesh
+                ),
+                mesh,
+                dimensionedScalar("0", Cof.dimensions(), 0)
+            )
+        );
+
+        volScalarField& Co = tCo();
+
+        // Set local references to mesh data
+        const unallocLabelList& owner = mesh.owner();
+        const unallocLabelList& neighbour = mesh.neighbour();
+
+        forAll(owner, facei)
+        {
+            label own = owner[facei];
+            label nei = neighbour[facei];
+
+            Co[own] = max(Co[own], Cof[facei]);
+            Co[nei] = max(Co[nei], Cof[facei]);
+        }
+
+        forAll(Co.boundaryField(), patchi)
+        {
+            Co.boundaryField()[patchi] = Cof.boundaryField()[patchi];
+        }
+
+        return tCo;
+    }
+}
+
+
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.options().found("noWrite");
@@ -79,7 +125,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 (
                     IOobject
                     (
-                        "Co",
+                        "Cof",
                         runTime.timeName(),
                         mesh,
                         IOobject::NO_READ
@@ -101,7 +147,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 (
                     IOobject
                     (
-                        "Co",
+                        "Cof",
                         runTime.timeName(),
                         mesh,
                         IOobject::NO_READ
@@ -126,6 +172,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         if (writeResults)
         {
             CoPtr().write();
+            Co(CoPtr())().write();
         }
     }
     else

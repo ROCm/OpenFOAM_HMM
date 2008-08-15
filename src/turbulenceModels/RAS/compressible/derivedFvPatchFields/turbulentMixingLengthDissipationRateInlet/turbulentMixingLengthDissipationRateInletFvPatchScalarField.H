@@ -23,7 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::turbulentMixingLengthDissipationRateInletFvPatchScalarField
+    Foam::compressible::
+        turbulentMixingLengthDissipationRateInletFvPatchScalarField
 
 Description
     Calculate epsilon via the mixing length [m]
@@ -43,14 +44,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentMixingLengthDissipationRateInletFvPatchScalarField_H
-#define turbulentMixingLengthDissipationRateInletFvPatchScalarField_H
+#ifndef compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
+#define compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
@@ -154,6 +157,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

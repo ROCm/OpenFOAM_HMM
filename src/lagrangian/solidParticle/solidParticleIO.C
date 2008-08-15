@@ -36,7 +36,7 @@ Foam::solidParticle::solidParticle
     bool readFields
 )
 :
-    Particle<solidParticle>(cloud, is)
+    Particle<solidParticle>(cloud, is, readFields)
 {
     if (readFields)
     {
@@ -60,20 +60,20 @@ Foam::solidParticle::solidParticle
 }
 
 
-namespace Foam
+void Foam::solidParticle::readFields(Cloud<solidParticle>& c)
 {
+    if (!c.size())
+    {
+        return;
+    }
+    IOField<scalar> d(c.fieldIOobject("d"));
+    c.checkFieldIOobject(c, d);
 
-template<>
-void Cloud<solidParticle>::readFields()
-{
-    IOField<scalar> d(fieldIOobject("d"));
-    checkFieldIOobject(*this, d);
-
-    IOField<vector> U(fieldIOobject("U"));
-    checkFieldIOobject(*this, U);
+    IOField<vector> U(c.fieldIOobject("U"));
+    c.checkFieldIOobject(c, U);
 
     label i = 0;
-    forAllIter(Cloud<solidParticle>::iterator, *this, iter)
+    forAllIter(Cloud<solidParticle>::iterator, c, iter)
     {
         solidParticle& p = iter();
 
@@ -84,16 +84,17 @@ void Cloud<solidParticle>::readFields()
 }
 
 
-template<>
-void Cloud<solidParticle>::writeFields() const
+void Foam::solidParticle::writeFields(const Cloud<solidParticle>& c)
 {
-    label np = size();
+    Particle<solidParticle>::writeFields(c);
 
-    IOField<scalar> d(fieldIOobject("d"), np);
-    IOField<vector> U(fieldIOobject("U"), np);
+    label np = c.size();
+
+    IOField<scalar> d(c.fieldIOobject("d"), np);
+    IOField<vector> U(c.fieldIOobject("U"), np);
 
     label i = 0;
-    forAllConstIter(Cloud<solidParticle>, *this, iter)
+    forAllConstIter(Cloud<solidParticle>, c, iter)
     {
         const solidParticle& p = iter();
 
@@ -105,8 +106,6 @@ void Cloud<solidParticle>::writeFields() const
     d.write();
     U.write();
 }
-
-};
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

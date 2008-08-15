@@ -1,0 +1,233 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "PrimitivePatchExtra.H"
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+// Finds area, starting at faceI, delimited by borderEdge. Marks all visited
+// faces (from face-edge-face walk) with currentZone.
+template
+<
+    class Face,
+    template<class> class ListType,
+    class PointField,
+    class PointType
+>
+void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
+(
+    const boolList& borderEdge,
+    const label faceI,
+    const label currentZone,
+    labelList& faceZone
+) const
+{
+    // List of faces whose faceZone has been set.
+    labelList changedFaces(1, faceI);
+
+    const labelListList& faceEs = TemplateType::faceEdges();
+    const labelListList& eFaces = TemplateType::edgeFaces();
+
+    while (true)
+    {
+        // Pick up neighbours of changedFaces
+        DynamicList<label> newChangedFaces(2*changedFaces.size());
+
+        forAll(changedFaces, i)
+        {
+            label faceI = changedFaces[i];
+
+            const labelList& fEdges = faceEs[faceI];
+
+            forAllfEdges, i)
+            {
+                label edgeI = fEdges[i];
+
+                if (!borderEdge[edgeI])
+                {
+                    const labelList& eFaceLst = eFaces[edgeI];
+
+                    forAll(eFaceLst, j)
+                    {
+                        label nbrFaceI = eFaceLst[j];
+
+                        if (faceZone[nbrFaceI] == -1)
+                        {
+                            faceZone[nbrFaceI] = currentZone;
+                            newChangedFaces.append(nbrFaceI);
+                        }
+                        else if (faceZone[nbrFaceI] != currentZone)
+                        {
+                            FatalErrorIn
+                            (
+                                "PrimitivePatchExtra<Face, ListType, PointField>::markZone"
+                                "(const boolList&, const label, const label, labelList&) const"
+                            )
+                                << "Zones " << faceZone[nbrFaceI]
+                                << " at face " << nbrFaceI
+                                << " connects to zone " << currentZone
+                                << " at face " << faceI
+                                << abort(FatalError);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (newChangedFaces.size() == 0)
+        {
+            break;
+        }
+
+        changedFaces.transfer(newChangedFaces.shrink());
+        newChangedFaces.clear();
+    }
+}
+
+
+// Finds areas delimited by borderEdge (or 'real' edges).
+// Fills faceZone accordingly
+template
+<
+    class Face,
+    template<class> class ListType,
+    class PointField,
+    class PointType
+>
+Foam::label Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+markZones
+(
+    const boolList& borderEdge,
+    labelList& faceZone
+) const
+{
+    const label numEdges = TemplateType::nEdges();
+    const label numFaces = TemplateType::size();
+
+    faceZone.setSize(numFaces);
+    faceZone = -1;
+
+    if (borderEdge.size() != numEdges)
+    {
+        FatalErrorIn
+        (
+            "PrimitivePatchExtra<Face, ListType, PointField>::markZones"
+            "(const boolList&, labelList&)"
+        )
+            << "borderEdge boolList not same size as number of edges" << endl
+            << "borderEdge:" << borderEdge.size() << endl
+            << "nEdges    :" << numEdges
+            << exit(FatalError);
+    }
+
+    label zoneI = 0;
+    label startFaceI = 0;
+
+    for (;;zoneI++)
+    {
+        // Find first non-coloured face
+        for (; startFaceI < numFaces; startFaceI++)
+        {
+            if (faceZone[startFaceI] == -1)
+            {
+                break;
+            }
+        }
+
+        if (startFaceI >= numFaces)
+        {
+            break;
+        }
+
+        faceZone[startFaceI] = zoneI;
+
+        markZone(borderEdge, startFaceI, zoneI, faceZone);
+    }
+
+    return zoneI;
+}
+
+
+
+// Finds areas delimited by borderEdge (or 'real' edges).
+// Fills faceZone accordingly
+template
+<
+    class Face,
+    template<class> class ListType,
+    class PointField,
+    class PointType
+>
+void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+subsetMap
+(
+    const boolList& include,
+    labelList& pointMap,
+    labelList& faceMap
+) const
+{
+    const List<FaceType>& locFaces = TemplateType::localFaces();
+    const label numPoints = TemplateType::nPoints();
+
+    label faceI = 0;
+    label pointI = 0;
+
+    faceMap.setSize(locFaces.size());
+    pointMap.setSize(numPoints);
+
+    boolList pointHad(numPoints, false);
+
+    forAll(include, oldFaceI)
+    {
+        if (include[oldFaceI])
+        {
+            // Store new faces compact
+            faceMap[faceI++] = oldFaceI;
+
+            // Renumber labels for face
+            const FaceType& f = locFaces[oldFaceI];
+
+            forAll(f, fp)
+            {
+                const label ptLabel = f[fp];
+                if (!pointHad[ptLabel])
+                {
+                    pointHad[ptLabel] = true;
+                    pointMap[pointI++] = ptLabel;
+                }
+            }
+        }
+    }
+
+    // Trim
+    faceMap.setSize(faceI);
+    pointMap.setSize(pointI);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// ************************************************************************* //

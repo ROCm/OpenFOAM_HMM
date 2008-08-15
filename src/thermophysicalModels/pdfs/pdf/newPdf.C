@@ -37,31 +37,23 @@ autoPtr<Foam::pdf> Foam::pdf::New
     Random& rndGen
 )
 {
-    word pdfType
-    (
-        dict.lookup("pdfType")
-    );
+    word pdfType(dict.lookup("pdfType"));
 
-        Info << "Selecting pdfType "
-            << pdfType << endl;
+    Info<< "Selecting pdfType " << pdfType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(pdfType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "pdf::New(const dictionary&, Random&) : " << endl
-            << "    unknown pdfType type "
-            << pdfType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid pdf types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->toc() << abort(FatalError);
+        FatalErrorIn("pdf::New(const dictionary&, Random&)")
+            << "unknown pdf type " << pdfType << endl << endl
+            << "Valid pdf types are :" << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
     }
 
     return autoPtr<pdf>(cstrIter()(dict, rndGen));
-
-    //return autoPtr<pdf>(new pdf);
 }
 
 // ************************************************************************* //

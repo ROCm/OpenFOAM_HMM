@@ -38,6 +38,11 @@ const labelListList& primitiveMesh::edgeFaces() const
 {
     if (!efPtr_)
     {
+        if (debug)
+        {
+            Pout<< "primitiveMesh::edgeFaces() : calculating edgeFaces" << endl;
+        }
+
         // Invert faceEdges
         efPtr_ = new labelListList(nEdges());
         invertManyToMany(nEdges(), faceEdges(), *efPtr_);

@@ -1,19 +1,18 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "/home/warhol/chris/foam/chris2.1/run/tutorials/interFoam";
-    case            "damBreak";
-    instance        "system";
-    local           "";
-
-    class           dictionary;
-    object          changePatchTypeDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      changeDictionaryDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 dictionaryReplacement
 {
@@ -33,7 +32,6 @@ dictionaryReplacement
                 inletValue      uniform (0 0 0);
             }
 
-
             topAir_to_leftSolid
             {
                 type            fixedValue;
@@ -52,8 +50,6 @@ dictionaryReplacement
             }
         }
     }
-
-
 
     T
     {
@@ -94,7 +90,6 @@ dictionaryReplacement
             }
         }
     }
-
 
     epsilon
     {
@@ -152,7 +147,6 @@ dictionaryReplacement
         }
     }
 
-
     k
     {
         internalField   uniform 0.1;
@@ -209,7 +203,6 @@ dictionaryReplacement
             }
         }
     }
-
 
     pd
     {

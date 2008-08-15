@@ -121,17 +121,18 @@ do
    if grep FoamFile $caseFile >/dev/null 2>&1
    then
       echo "Updating case file: $caseFile"
-      sed -n '/FoamFile/,/}/p' $caseFile > FoamFile
+      sed -n '/FoamFile/,/}/p' $caseFile > FoamFile.tmp
 
-      CLASS=`FoamFileAttribute class FoamFile`
-      OBJECT=`FoamFileAttribute object FoamFile`
-      FORMAT=`FoamFileAttribute format FoamFile`
+      CLASS=`FoamFileAttribute class FoamFile.tmp`
+      OBJECT=`FoamFileAttribute object FoamFile.tmp`
+      FORMAT=`FoamFileAttribute format FoamFile.tmp`
 
       printHeader $FORMAT $CLASS $OBJECT $NOTE > FoamFile.tmp
       sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> FoamFile.tmp
 
-      mv FoamFile.tmp $caseFile
-      rm FoamFile
+      # use cat to avoid removing/replace soft-links
+      [ -s FoamFile.tmp ] && cat FoamFile.tmp >| $caseFile
+      rm FoamFile.tmp
    else
       echo " Invalid case file: $caseFile"
    fi

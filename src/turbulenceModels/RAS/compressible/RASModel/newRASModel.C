@@ -74,8 +74,8 @@ autoPtr<RASModel> RASModel::New
     {
         FatalErrorIn
         (
-            "RASModel::New(const volScalarField& rho, "
-            "const volVectorField& U, const surfaceScalarField& phi, "
+            "RASModel::New(const volScalarField&, "
+            "const volVectorField&, const surfaceScalarField&, "
             "basicThermo&)"
         )   << "Unknown RASModel type " << RASModelTypeName
             << endl << endl

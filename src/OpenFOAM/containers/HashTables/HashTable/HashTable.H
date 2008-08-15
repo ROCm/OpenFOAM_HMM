@@ -223,6 +223,15 @@ public:
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>&);
 
+        //- Equality. Two hashtables are equal if all contents of first are
+        //  also in second and vice versa. So does not depend on table size or
+        //  order!
+        bool operator==(const HashTable<T, Key, Hash>&) const;
+
+        //- The opposite of the equality operation. Takes linear time.
+        bool operator!=(const HashTable<T, Key, Hash>&) const;
+
+
 
     // STL type definitions
 

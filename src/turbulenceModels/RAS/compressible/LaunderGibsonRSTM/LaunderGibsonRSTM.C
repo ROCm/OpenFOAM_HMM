@@ -236,8 +236,8 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         FatalErrorIn
         (
             "LaunderGibsonRSTM::LaunderGibsonRSTM"
-            "(const volVectorField& U, const surfaceScalarField& phi,"
-            "incompressibleTransportModel& lamTransportModel)"
+            "(const volScalarField&, const volVectorField&"
+            ", const surfaceScalarField&, basicThermo&)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);

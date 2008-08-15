@@ -533,7 +533,7 @@ Foam::labelList Foam::meshRefinement::getRefineCandidateFaces
     const labelList& refineCell
 ) const
 {
-    labelList testFaces(mesh_.nCells());
+    labelList testFaces(mesh_.nFaces());
 
     label nTest = 0;
 
@@ -1164,7 +1164,12 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         // Refinement based on curvature of surface
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if (curvatureRefinement && (curvature >= -1 && curvature <= 1))
+        if
+        (
+            curvatureRefinement
+         && (curvature >= -1 && curvature <= 1)
+         && (surfaces_.minLevel() != surfaces_.maxLevel())
+        )
         {
             label nCurv = markSurfaceCurvatureRefinement
             (

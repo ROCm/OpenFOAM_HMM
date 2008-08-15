@@ -443,7 +443,12 @@ void Foam::triSurfaceMesh::findLineAll
     // Work array
     DynamicList<pointIndexHit, 1, 1> hits;
 
-    // Tolerances
+    // Tolerances:
+    // To find all intersections we add a small vector to the last intersection
+    // This is chosen such that
+    // - it is significant (SMALL is smallest representative relative tolerance;
+    //   we need something bigger since we're doing calculations)
+    // - if the start-end vector is zero we still progress
     const vectorField dirVec(end-start);
     const scalarField magSqrDirVec(magSqr(dirVec));
     const vectorField smallVec
@@ -454,34 +459,44 @@ void Foam::triSurfaceMesh::findLineAll
 
     forAll(start, pointI)
     {
-        hits.clear();
+        // See if any intersection between pt and end
+        pointIndexHit inter = octree.findLine(start[pointI], end[pointI]);
 
-        // Current starting point of ray.
-        point pt = start[pointI];
-
-        while (true)
+        if (inter.hit())
         {
-            // See if any intersection between pt and end
-            pointIndexHit inter = octree.findLine(pt, end[pointI]);
-
-            if (!inter.hit())
-            {
-                break;
-            }
+            hits.clear();
             hits.append(inter);
 
-            pt = inter.hitPoint() + smallVec[pointI];
+            point pt = inter.hitPoint() + smallVec[pointI];
 
-            if (((pt-start[pointI])&dirVec[pointI]) > magSqrDirVec[pointI])
+            while (((pt-start[pointI])&dirVec[pointI]) <= magSqrDirVec[pointI])
             {
-                // Adding smallVec has taken us beyond end
-                break;
-            }
-        }
+                // See if any intersection between pt and end
+                pointIndexHit inter = octree.findLine(pt, end[pointI]);
 
-        hits.shrink();
-        info[pointI].transfer(hits);
-        hits.clear();
+                // Check for not hit or hit same triangle as before (can happen
+                // if vector along surface of triangle)
+                if
+                (
+                    !inter.hit()
+                 || (inter.index() == hits[hits.size()-1].index())
+                )
+                {
+                    break;
+                }
+                hits.append(inter);
+
+                pt = inter.hitPoint() + smallVec[pointI];
+            }
+
+            hits.shrink();
+            info[pointI].transfer(hits);
+            hits.clear();
+        }
+        else
+        {
+            info[pointI].clear();
+        }
     }
 }
 

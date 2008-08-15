@@ -112,10 +112,7 @@ vtkPV3FoamReader::~vtkPV3FoamReader()
 {
     vtkDebugMacro(<<"Deconstructor");
 
-    if (foamData_)
-    {
-        delete foamData_;
-    }
+    delete foamData_;
 
     if (FileName)
     {
@@ -186,6 +183,15 @@ int vtkPV3FoamReader::RequestInformation
     int nTimeSteps = 0;
     double* timeSteps = foamData_->findTimes(nTimeSteps);
 
+    if (!nTimeSteps)
+    {
+        vtkErrorMacro("could not find valid OpenFOAM mesh");
+
+        // delete foamData and flag it as fatal error
+        delete foamData_;
+        foamData_ = NULL;
+        return 0;
+    }
 
     // set identical time steps for all ports
     for (int infoI = 0; infoI < nInfo; ++infoI)
@@ -249,6 +255,13 @@ int vtkPV3FoamReader::RequestData
         return 0;
     }
 
+    // catch previous error
+    if (!foamData_)
+    {
+        vtkErrorMacro("Reader failed - perhaps no mesh?");
+        return 0;
+    }
+
     int nInfo = outputVector->GetNumberOfInformationObjects();
 
     if (Foam::vtkPV3Foam::debug)
@@ -262,6 +275,7 @@ int vtkPV3FoamReader::RequestData
 
     // take port0 as the lead for other outputs
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
+
 
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
     (
