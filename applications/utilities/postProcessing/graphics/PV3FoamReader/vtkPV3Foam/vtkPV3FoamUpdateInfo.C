@@ -91,11 +91,11 @@ Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
         zoneType,
         dbPtr_().findInstance
         (
-            polyMesh::meshSubDir,
+            meshDir_,
             zoneType,
             IOobject::READ_IF_PRESENT
         ),
-        polyMesh::meshSubDir,
+        meshDir_,
         dbPtr_(),
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE,
@@ -126,10 +126,6 @@ void Foam::vtkPV3Foam::updateInfoInternalMesh()
 
     vtkDataArraySelection* partSelection = reader_->GetPartSelection();
 
-    // Determine number of meshes available
-    HashTable<const fvMesh*> meshObjects = dbPtr_().lookupClass<const fvMesh>();
-    nMesh_ = meshObjects.size();
-
     // Determine mesh parts (internalMesh, patches...)
     //- Add internal mesh as first entry
     partInfoVolume_ = partSelection->GetNumberOfArrays();
@@ -155,10 +151,19 @@ void Foam::vtkPV3Foam::updateInfoLagrangian()
             << "    " << dbPtr_->timePath()/"lagrangian" << endl;
     }
 
+
+    // use the db directly since this might be called without a mesh,
+    // but the region must get added back in
+    fileName lagrangianPrefix("lagrangian");
+    if (meshRegion_ != polyMesh::defaultRegion)
+    {
+        lagrangianPrefix = meshRegion_/"lagrangian";
+    }
+
     // Search for list of lagrangian objects for this time
     fileNameList cloudDirs
     (
-        readDir(dbPtr_->timePath()/"lagrangian", fileName::DIRECTORY)
+        readDir(dbPtr_->timePath()/lagrangianPrefix, fileName::DIRECTORY)
     );
 
     vtkDataArraySelection* partSelection = reader_->GetPartSelection();
@@ -221,43 +226,50 @@ void Foam::vtkPV3Foam::updateInfoPatches()
     }
     else
     {
-        // Read patches
-        polyBoundaryMeshEntries patchEntries
+        // mesh not loaded - read from file
+        // but this could fail if we've supplied a bad region name
+        IOobject ioObj
         (
-            IOobject
+            "boundary",
+            dbPtr_().findInstance
             (
+                meshDir_,
                 "boundary",
-                dbPtr_().findInstance(polyMesh::meshSubDir, "boundary"),
-                polyMesh::meshSubDir,
-                dbPtr_(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
+                IOobject::READ_IF_PRESENT
+            ),
+            meshDir_,
+            dbPtr_(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
         );
 
-        // Add (non-zero) patches to the list of mesh parts
-        forAll(patchEntries, entryI)
+        // this should only ever fail if the mesh region doesn't exist
+        if (ioObj.headerOk())
         {
-            label nFaces
-            (
-                readLabel(patchEntries[entryI].dict().lookup("nFaces"))
-            );
+            polyBoundaryMeshEntries patchEntries(ioObj);
 
-            // Valid patch if nFace > 0
-            if (nFaces)
+            // Add (non-zero) patches to the list of mesh parts
+            forAll(patchEntries, entryI)
             {
-                // Add patch to GUI list
-                partSelection->AddArray
+                label nFaces
                 (
-                    (patchEntries[entryI].keyword() + " - patch").c_str()
+                    readLabel(patchEntries[entryI].dict().lookup("nFaces"))
                 );
 
-                ++nPatches;
+                // Valid patch if nFace > 0 - add patch to GUI list
+                if (nFaces)
+                {
+                    partSelection->AddArray
+                    (
+                        (patchEntries[entryI].keyword() + " - patch").c_str()
+                    );
+
+                    ++nPatches;
+                }
             }
         }
     }
-
     partInfoPatches_ += nPatches;
 
     if (debug)
@@ -380,8 +392,8 @@ void Foam::vtkPV3Foam::updateInfoSets()
     IOobjectList objects
     (
         dbPtr_(),
-        dbPtr_().findInstance(polyMesh::meshSubDir, "faces"),
-        polyMesh::meshSubDir/"sets"
+        dbPtr_().findInstance(meshDir_, "faces", IOobject::READ_IF_PRESENT),
+        meshDir_/"sets"
     );
 
 
@@ -449,11 +461,19 @@ void Foam::vtkPV3Foam::updateInfoLagrangianFields()
 
     word cloudName = getPartName(partId);
 
+    // use the db directly since this might be called without a mesh,
+    // but the region must get added back in
+    fileName lagrangianPrefix("lagrangian");
+    if (meshRegion_ != polyMesh::defaultRegion)
+    {
+        lagrangianPrefix = meshRegion_/"lagrangian";
+    }
+
     IOobjectList objects
     (
         dbPtr_(),
         dbPtr_().timeName(),
-        "lagrangian"/cloudName
+        lagrangianPrefix/cloudName
     );
 
     addToSelection<IOField<label> >

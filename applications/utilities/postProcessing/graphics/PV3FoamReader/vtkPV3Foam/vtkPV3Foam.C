@@ -103,10 +103,8 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
     // Get times list
     instantList Times = runTime.times();
 
-    int foundIndex = Time::findClosestTimeIndex(Times, requestedTime);
-    int nearestIndex = foundIndex;
-
-    if (foundIndex < 0)
+    int nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
+    if (nearestIndex < 0)
     {
         nearestIndex = 0;
     }
@@ -146,7 +144,7 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
             << " fieldsChanged=" << fieldsChanged_ << endl;
     }
 
-    return foundIndex;
+    return nearestIndex;
 }
 
 
@@ -206,7 +204,8 @@ Foam::vtkPV3Foam::vtkPV3Foam
     reader_(reader),
     dbPtr_(NULL),
     meshPtr_(NULL),
-    nMesh_(0),
+    meshRegion_(polyMesh::defaultRegion),
+    meshDir_(polyMesh::meshSubDir),
     timeIndex_(-1),
     meshChanged_(true),
     fieldsChanged_(true),
@@ -248,10 +247,38 @@ Foam::vtkPV3Foam::vtkPV3Foam
         setEnv("FOAM_CASE", fullCasePath, true);
     }
 
+    // look for 'case{region}.OpenFOAM'
+    // could be stringent and insist the prefix match the directory name...
+    // Note: cannot use fileName::name() due to the embedded '{}'
+    string caseName(fileName(FileName).lessExt());
+    string::size_type beg = caseName.find_last_of("/{");
+    string::size_type end = caseName.find('}', beg);
+
+    if
+    (
+        beg != string::npos && caseName[beg] == '{'
+     && end != string::npos && end == caseName.size()-1
+    )
+    {
+        meshRegion_ = caseName.substr(beg+1, end-beg-1);
+
+        // some safety
+        if (!meshRegion_.size())
+        {
+            meshRegion_ = polyMesh::defaultRegion;
+        }
+
+        if (meshRegion_ != polyMesh::defaultRegion)
+        {
+            meshDir_ = meshRegion_/polyMesh::meshSubDir;
+        }
+    }
+
     if (debug)
     {
         Info<< "fullCasePath=" << fullCasePath << nl
-            << "FOAM_CASE=" << getEnv("FOAM_CASE") << endl;
+            << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+            << "region=" << meshRegion_ << endl;
     }
 
     // Create time object
@@ -368,15 +395,20 @@ void Foam::vtkPV3Foam::updateFoamMesh()
     {
         if (debug)
         {
-            Info<< "Creating Foam mesh" << endl;
+            Info<< "Creating Foam mesh for region " << meshRegion_
+                << " at time=" << dbPtr_().timeName()
+                << endl;
+
         }
+
         meshPtr_ = new fvMesh
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                meshRegion_,
                 dbPtr_().timeName(),
-                dbPtr_()
+                dbPtr_(),
+                IOobject::MUST_READ
             )
         );
 
@@ -478,11 +510,26 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
         Time& runTime = dbPtr_();
         instantList timeLst = runTime.times();
 
-        // always skip "constant" time, unless there are no other times
-        nTimes = timeLst.size();
+        // find the first time for which this mesh appears to exist
         label timeI = 0;
+        for (; timeI < timeLst.size(); ++timeI)
+        {
+            const word& timeName = timeLst[timeI].name();
 
-        if (nTimes > 1)
+            if
+            (
+                file(runTime.path()/timeName/meshDir_/"points")
+             && IOobject("points", timeName, meshDir_, runTime).headerOk()
+            )
+            {
+                break;
+            }
+        }
+
+        nTimes = timeLst.size() - timeI;
+
+        // always skip "constant" time if possible
+        if (timeI == 0 && nTimes > 1)
         {
             timeI = 1;
             --nTimes;
@@ -699,7 +746,6 @@ void Foam::vtkPV3Foam::removePatchNames(vtkRenderer* renderer)
 
 void Foam::vtkPV3Foam::PrintSelf(ostream& os, vtkIndent indent) const
 {
-    os  << indent << "Number of meshes: " << nMesh_ << "\n";
     os  << indent << "Number of nodes: "
         << (meshPtr_ ? meshPtr_->nPoints() : 0) << "\n";
 
@@ -708,6 +754,8 @@ void Foam::vtkPV3Foam::PrintSelf(ostream& os, vtkIndent indent) const
 
     os  << indent << "Number of available time steps: "
         << (dbPtr_.valid() ? dbPtr_().times().size() : 0) << endl;
+
+    os  << indent << "mesh region: " << meshRegion_ << "\n";
 }
 
 // ************************************************************************* //

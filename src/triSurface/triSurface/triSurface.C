@@ -161,7 +161,7 @@ void triSurface::printTriangle
     const pointField& points
 )
 {
-    os 
+    os
         << pre.c_str() << "vertex numbers:"
         << f[0] << ' ' << f[1] << ' ' << f[2] << endl
         << pre.c_str() << "vertex coords :"
@@ -274,13 +274,13 @@ void triSurface::checkTriangles(const bool verbose)
                             "triSurface::checkTriangles(bool verbose)"
                         )   << "triangles share the same vertices:\n"
                             << "    face 1 :" << faceI << endl;
-                        printTriangle(Warning, "    ", f, points()); 
+                        printTriangle(Warning, "    ", f, points());
 
                         Warning
                             << endl
                             << "    face 2 :"
                             << neighbours[neighbourI] << endl;
-                        printTriangle(Warning, "    ", n, points()); 
+                        printTriangle(Warning, "    ", n, points());
                     }
 
                     break;
@@ -375,8 +375,8 @@ boolList triSurface::checkOrientation(const bool verbose)
                 (
                     "triSurface::checkOrientation(bool)"
                 )   << "edge number " << edgeLabels[i] << " on face " << facei
-                    << " out of range"
-                    << "\nThis usually means that the input surface has "
+                    << " out-of-range\n"
+                    << "This usually means that the input surface has "
                     << "edges with more than 2 triangles connected.\n"
                     << endl;
                 valid = false;
@@ -413,63 +413,39 @@ boolList triSurface::checkOrientation(const bool verbose)
 
 
     const labelListList& eFaces = edgeFaces();
-    
+
     // Storage for holding status of edge. True if normal flips across this
     // edge
     boolList borderEdge(nEdges(), false);
 
-    forAll(es, edgei)
+    forAll(es, edgeI)
     {
-        const labelList& neighbours = eFaces[edgei];
+        const edge& e = es[edgeI];
+        const labelList& neighbours = eFaces[edgeI];
 
         if (neighbours.size() == 2)
         {
-            // Two triangles, A and B. Check if edge orientation is
-            // anticlockwise on both.
-            const labelList& fEdgesA = faceEdges()[neighbours[0]];
+            const labelledTri& faceA = (*this)[neighbours[0]];
+            const labelledTri& faceB = (*this)[neighbours[1]];
 
-            // Get next edge after edgei
-            label nextEdgeA = fEdgesA.fcIndex(findIndex(fEdgesA, edgei));
-
-            const labelList& fEdgesB = faceEdges()[neighbours[1]];
-
-            label nextEdgeB = fEdgesB.fcIndex(findIndex(fEdgesB, edgei));
-
-            // Now check if nextEdgeA and nextEdgeB have any common points
+            // The edge cannot be going in the same direction if both faces
+            // are oriented counterclockwise.
+            // Thus the next face point *must* different between the faces.
             if
             (
-                (es[nextEdgeA].start() == es[nextEdgeB].start())
-             || (es[nextEdgeA].start() == es[nextEdgeB].end())
-             || (es[nextEdgeA].end() == es[nextEdgeB].start())
-             || (es[nextEdgeA].end() == es[nextEdgeB].end())
+                faceA[faceA.fcIndex(findIndex(faceA, e.start()))]
+             == faceB[faceB.fcIndex(findIndex(faceB, e.start()))]
             )
             {
-                borderEdge[edgei] = true;
+                borderEdge[edgeI] = true;
                 if (verbose)
                 {
-                    WarningIn("triSurface::checkOrientation(bool)")
-                        << "Triangle orientation incorrect." << endl
-                        << "edge neighbours:" << neighbours << endl
-                        << "triangle " << neighbours[0] << " has edges "
-                        << fEdgesA << endl
-                        << "    with points " << endl
-                        << "    " << es[fEdgesA[0]].start() << ' '
-                        << es[fEdgesA[0]].end() << endl
-                        << "    " << es[fEdgesA[1]].start() << ' '
-                        << es[fEdgesA[1]].end() << endl
-                        << "    " << es[fEdgesA[2]].start() << ' '
-                        << es[fEdgesA[2]].end() << endl
-
-                        << "triangle " << neighbours[1] << " has edges "
-                        << fEdgesB << endl
-                        << "    with points " << endl
-                        << "    " << es[fEdgesB[0]].start() << ' '
-                        << es[fEdgesB[0]].end() << endl
-                        << "    " << es[fEdgesB[1]].start() << ' '
-                        << es[fEdgesB[1]].end() << endl
-                        << "    " << es[fEdgesB[2]].start() << ' '
-                        << es[fEdgesB[2]].end() << endl
-                        << endl;
+                    WarningIn("PrimitivePatchExtra::checkOrientation(bool)")
+                        << "face orientation incorrect." << nl
+                        << "edge[" << edgeI << "] " << e
+                        << " between faces " << neighbours << ":" << nl
+                        << "face[" << neighbours[0] << "] " << faceA << nl
+                        << "face[" << neighbours[1] << "] " << faceB << endl;
                 }
             }
         }
@@ -477,15 +453,14 @@ boolList triSurface::checkOrientation(const bool verbose)
         {
             if (verbose)
             {
-                const edge& e = es[edgei];
                 WarningIn("triSurface::checkOrientation(bool)")
                     << "Wrong number of edge neighbours." << endl
-                    << "Edge:" << e
+                    << "edge[" << edgeI << "] " << e
                     << "with points:" << localPoints()[e.start()]
                     << ' ' << localPoints()[e.end()]
                     << " has neighbours:" << neighbours << endl;
             }
-            borderEdge[edgei] = true;
+            borderEdge[edgeI] = true;
         }
     }
 
@@ -1109,7 +1084,7 @@ void triSurface::subsetMeshMap
             if (!pointHad[a])
             {
                 pointHad[a] = true;
-                pointMap[pointI++] = a;                
+                pointMap[pointI++] = a;
             }
 
             label b = tri[1];
@@ -1147,7 +1122,7 @@ triSurface triSurface::subsetMesh
 
     // Fill pointMap, faceMap
     subsetMeshMap(include, pointMap, faceMap);
-    
+
 
     // Create compact coordinate list and forward mapping array
     pointField newPoints(pointMap.size());

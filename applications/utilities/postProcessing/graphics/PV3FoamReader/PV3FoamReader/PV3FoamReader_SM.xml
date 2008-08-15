@@ -27,13 +27,6 @@
       </Documentation>
     </DoubleVectorProperty>
 
-    <!-- Send continuous time info to the animation panel -->
-    <DoubleVectorProperty
-      name="TimeRange"
-      information_only="1">
-      <TimeRangeInformationHelper/>
-    </DoubleVectorProperty>
-
     <!-- Available Parts (volume, patches, lagrangian) array -->
     <StringVectorProperty
       name="PartArrayInfo"

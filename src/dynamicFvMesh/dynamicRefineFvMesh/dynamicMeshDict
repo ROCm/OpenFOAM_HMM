@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      dynamicMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //dynamicFvMeshLib   "libtopoChangerFvMesh.so";
@@ -37,7 +36,6 @@ mixerFvMeshCoeffs
         outside     outsideSlider;
     }
 }
-
 
 // Refinement
 dynamicRefineFvMeshCoeffs

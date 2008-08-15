@@ -1,9 +1,11 @@
 #!/bin/sh
+#
 # Build optional components (eg, may depend on third-party libraries)
+# -----------------------------------------------------------------------------
+
+cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-# run from this directory only
-cd ${0%/*} || exit 1
 
 # build libccmio and create lnInclude directory
 (

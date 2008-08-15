@@ -72,6 +72,8 @@ void Foam::vtkPV3Foam::convertVolFields
     vtkMultiBlockDataSet* output
 )
 {
+    const fvMesh& mesh = *meshPtr_;
+
     wordHashSet selectedFields = getSelected
     (
         reader_->GetVolFieldSelection()
@@ -82,8 +84,8 @@ void Foam::vtkPV3Foam::convertVolFields
         return;
     }
 
-    const fvMesh& mesh = *meshPtr_;
     // Get objects (fields) for this time - only keep selected fields
+    // the region name is already in the mesh db
     IOobjectList objects(mesh, dbPtr_().timeName());
     pruneObjectList(objects, selectedFields);
 
@@ -158,6 +160,8 @@ void Foam::vtkPV3Foam::convertPointFields
     vtkMultiBlockDataSet* output
 )
 {
+    const fvMesh& mesh = *meshPtr_;
+
     wordHashSet selectedFields = getSelected
     (
         reader_->GetPointFieldSelection()
@@ -168,8 +172,8 @@ void Foam::vtkPV3Foam::convertPointFields
         return;
     }
 
-    const fvMesh& mesh = *meshPtr_;
     // Get objects (fields) for this time - only keep selected fields
+    // the region name is already in the mesh db
     IOobjectList objects(mesh, dbPtr_().timeName());
     pruneObjectList(objects, selectedFields);
 
@@ -257,8 +261,10 @@ void Foam::vtkPV3Foam::convertLagrangianFields
             continue;
         }
 
+
         // Get the Lagrangian fields for this time and this cloud
         // but only keep selected fields
+        // the region name is already in the mesh db
         IOobjectList objects
         (
             mesh,

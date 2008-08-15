@@ -57,15 +57,20 @@ USAGE
 #
 convertDict()
 {
-    echo "Identified $1 turbulence model in '$3'"
-    outputPath=`dirname $3`
+   echo "Identified $1 turbulence model in '$3'"
+   outputPath=`dirname $3`
 
-    sed -e "s/turbulenceProperties/$1Properties/" \
-        -e "s/$2/$1Model/" \
-        -e "s/[a-zA-Z0-9]* [ ]*\[[0-9 ]*\]//" \
-        $3 > "$outputPath/$1Properties"
+   if [ -e "$outputPath/$1Properties" ]
+   then
+      echo "Error: file already exists $outputPath/$1Properties'"
+   else
+      sed -e "s/turbulenceProperties/$1Properties/" \
+          -e "s/$2/$1Model/" \
+          -e "s/[a-zA-Z0-9]* [ ]*\[[0-9 ]*\]//" \
+          $3 > "$outputPath/$1Properties"
 
-     echo "    wrote $outputPath/$1Properties"
+      echo "    wrote $outputPath/$1Properties"
+   fi
 }
 
 [ $# -ge 1 ] || usage
