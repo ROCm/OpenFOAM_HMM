@@ -24,7 +24,7 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     buildParaView
+#     buildParaView3.2.1
 #
 # Description
 #     Build and install ParaView
@@ -34,34 +34,38 @@
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/buildParaViewFunctions
 
-# set -x
-
 PARAVIEW_SRC="ParaView3.2.1"
 PARAVIEW_MAJOR_VERSION="3.2"
 
-VERBOSE=OFF
-INCLUDE_MPI=ON
+# User options:
+# ~~~~~~~~~~~~~
+
+WITH_MPI=ON
 MPI_MAX_PROCS=32
-INCLUDE_PYTHON=ON
+WITH_PYTHON=ON
 PYTHON_LIBRARY=""
-INCLUDE_MESA=OFF
+WITH__MESA=OFF
 
-set +x
+#
+# No further editing below this line
+#------------------------------------------------------------------------------
 
-# provide a shortcut for repeated builds - use with caution
-if [ "$#" -gt 0 ]
+# shortcut for repeated builds - use with caution
+if [ "$1" = "-fast" ]
 then
    CMAKE_SKIP=YES
+elif [ "$#" -gt 0 ]
+then
+   echo "$0: only supports a -fast option"
+   exit 1
 fi
 
-# set paraview environment
-PARAVIEW_SRC_DIR=$PWD/$PARAVIEW_SRC
-#PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_OPTIONS/obj$OBJ_ADD
-PARAVIEW_OBJ_DIR=$PARAVIEW_SRC_DIR/platforms/$WM_ARCH$WM_COMPILER
-
-addMpiSupport       # set MPI specific options
-addPythonSupport    # set python specific options
-addMesaSupport      # set MESA specific options
+# Set configure options
+#~~~~~~~~~~~~~~~~~~~~~~
+addVerbosity        # set cmake verbosity
+addMpiSupport       # set MPI-specific options
+addPythonSupport    # set Python-specific options
+addMesaSupport      # set MESA-specific options
 
 buildParaView
 installParaView

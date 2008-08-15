@@ -29,65 +29,107 @@
 # Description
 #     Build and install ParaView
 #     - run from folder above ParaView source folder or place the
-#       ParaView source under $WM_PROJECT_INST_DIR
+#       ParaView source under $WM_THIRD_PARTY_DIR
 #
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/buildParaViewFunctions
 
-# set -x
-
 PARAVIEW_SRC="ParaView3.3-cvs"
 PARAVIEW_MAJOR_VERSION="3.3"
-VERBOSE=OFF
 
+# User options:
+# ~~~~~~~~~~~~~
 
-# User options
-# ~~~~~~~~~~~~
-
-# MPI suport
-INCLUDE_MPI=OFF
+# MPI support:
+WITH_MPI=OFF
 MPI_MAX_PROCS=32
 
-# Python
-# note: script will try to determine python library. If it fails, specify the
-#       path using the PYTHON_LIBRARY variable
-INCLUDE_PYTHON=OFF
-#PYTHON_LIBRARY="/usr/lib64/libpython2.5.so.1.0"
+# Python support:
+# note: script will try to determine python library.
+#       If it fails, specify the path using the PYTHON_LIBRARY variable
+WITH_PYTHON=OFF
 PYTHON_LIBRARY=""
+# PYTHON_LIBRARY="/usr/lib64/libpython2.5.so.1.0"
 
-# MESA graphics
-INCLUDE_MESA=OFF
+# MESA graphics support:
+WITH_MESA=OFF
 
+#
+# No further editing below this line
+#------------------------------------------------------------------------------
+Script=${0##*/}
 
-# No further editing should be required below this line
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+usage() {
+   while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+   cat<<USAGE
 
-set +x
+usage: ${0##*/} [OPTION]
+options:
+  -fast      skip cmake for repeated builds - use with caution
+  -mpi       with mpi (if not already enabled)
+  -python    with python (if not already enabled)
+  -mesa      with mesa (if not already enabled)
+  -verbose   verbose cmake output
+  -help
 
-# Provide a shortcut for repeated builds - use with caution
-if [ "$#" -gt 0 ]
-then
-   CMAKE_SKIP=YES
-fi
+Build and install $PARAVIEW_SRC
+  - run from folder above the ParaView source folder or place the
+    ParaView source under \$WM_THIRD_PARTY_DIR
 
+USAGE
+   exit 1
+}
 
-# Initialisation
-#~~~~~~~~~~~~~~~
-initialiseVariables
+# options based on the script name:
+case "$Script" in *-fast*)   CMAKE_SKIP=ON;; esac
+case "$Script" in *-mpi*)    WITH_MPI=ON;; esac
+case "$Script" in *-python*) WITH_PYTHON=ON;; esac
+case "$Script" in *-mesa*)   WITH_MESA=ON;; esac
 
+# parse options
+while [ "$#" -gt 0 ]
+do
+   case "$1" in
+   -h | -help)
+      usage
+      ;;
+   -fast)
+      CMAKE_SKIP=YES
+      shift
+      ;;
+   -mpi)
+      WITH_MPI=ON
+      shift
+      ;;
+   -python)
+      WITH_PYTHON=ON
+      shift
+      ;;
+   -mesa)
+      WITH_MESA=ON
+      shift
+      ;;
+   -verbose)
+      VERBOSE=ON
+      shift
+      ;;
+   *)
+      usage "unknown option/argument: '$*'"
+      ;;
+   esac
+done
 
 # Set configure options
 #~~~~~~~~~~~~~~~~~~~~~~
-addMpiSupport       # set MPI specific options
-addPythonSupport    # set python specific options
-addMesaSupport      # set MESA specific options
-
+addVerbosity        # set CMake verbosity
+addMpiSupport       # set MPI-specific options
+addPythonSupport    # set Python-specific options
+addMesaSupport      # set MESA-specific options
 
 # Build and install
 # ~~~~~~~~~~~~~~~~~
 buildParaView
 installParaView
-
 
 echo "done"
 

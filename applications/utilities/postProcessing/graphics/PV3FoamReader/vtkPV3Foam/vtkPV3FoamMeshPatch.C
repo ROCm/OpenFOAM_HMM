@@ -35,8 +35,8 @@ Description
 
 // VTK includes
 #include "vtkCellArray.h"
+#include "vtkPoints.h"
 #include "vtkPolyData.h"
-#include "vtkUnstructuredGrid.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

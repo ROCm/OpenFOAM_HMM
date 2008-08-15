@@ -30,10 +30,12 @@
 #
 #------------------------------------------------------------------------------
 
+cd ${0%/*} || exit 1    # run from this directory
+
 echo "Cleaning backup files"
 find . -type f \( -name "*~" -o -name "*.bak" \) -exec rm {} \;
 find . \( -name 'core' -o -name 'core.[1-9]*' \) -exec rm {} \;
-find . \( -name '*.pvs' -o -name '*.foam' \) -exec rm {} \;
+find . \( -name '*.pvs' -o -name '*.OpenFOAM' \) -exec rm {} \;
 rm logs > /dev/null 2>&1
 rm testLoopReport > /dev/null 2>&1
 

@@ -16,8 +16,7 @@ FoamFile
 // General macros to create 2D/extruded-2D meshes
 
 changecom(//)changequote([,])
-define(calc, [esyscmd(perl -e 'printf ($1)')])
-//define(calc, [esyscmd(echo $1 | bc | tr -d \\n)])
+define(calc, [esyscmd(perl -e 'print ($1)')])
 define(VCOUNT, 0)
 define(vlabel, [[// ]Vertex $1 = VCOUNT define($1, VCOUNT)define([VCOUNT], incr(VCOUNT))])
 define(pi, 3.14159265)
