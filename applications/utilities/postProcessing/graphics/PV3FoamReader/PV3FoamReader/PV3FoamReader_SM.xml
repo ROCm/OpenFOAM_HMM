@@ -27,6 +27,92 @@
       </Documentation>
     </DoubleVectorProperty>
 
+
+    <!-- Global settings -->
+
+    <!-- Extrapolate Walls check-box -->
+    <IntVectorProperty
+      name="ExtrapolateWalls"
+      command="SetExtrapolateWalls"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Extrapolate internalField to wall and empty patches
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Include Sets check-box -->
+    <IntVectorProperty
+      name="IncludeSets"
+      command="SetIncludeSets"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <Documentation>
+        Searches the polyMesh/sets/ directory
+      </Documentation>
+      <BooleanDomain name="bool"/>
+    </IntVectorProperty>
+
+    <!-- Include Zones check-box -->
+    <IntVectorProperty
+      name="IncludeZones"
+      command="SetIncludeZones"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <Documentation>
+        ZoneMesh information is used to find {cell,face,point}Zones.
+        The polyMesh/ directory is only checked on startup.
+      </Documentation>
+      <BooleanDomain name="bool"/>
+    </IntVectorProperty>
+
+    <!-- Show Patch Names check-box -->
+    <IntVectorProperty
+      name="ShowPatchNames"
+      command="SetShowPatchNames"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Show patch names in render window.
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Cache Mesh check-box -->
+    <IntVectorProperty
+      name="CacheMesh"
+      command="SetCacheMesh"
+      number_of_elements="1"
+      default_values="1"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Cache the fvMesh in memory.
+      </Documentation>
+    </IntVectorProperty>
+
+
+    <!-- Update GUI check box -->
+    <IntVectorProperty
+      name="UpdateGUI"
+      command="SetUpdateGUI"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        A simple way cause a reader GUI modification.
+      </Documentation>
+    </IntVectorProperty>
+
+
+    <!-- Selections -->
+
     <!-- Available Parts (volume, patches, lagrangian) array -->
     <StringVectorProperty
       name="PartArrayInfo"
@@ -118,87 +204,6 @@
         </RequiredProperties>
       </ArraySelectionDomain>
     </StringVectorProperty>
-
-    <!-- Extrapolate Walls check-box -->
-    <IntVectorProperty
-      name="ExtrapolateWalls"
-      command="SetExtrapolateWalls"
-      number_of_elements="1"
-      default_values="0"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Extrapolate internalField to wall and empty patches
-      </Documentation>
-    </IntVectorProperty>
-
-    <!-- Include Sets check-box -->
-    <IntVectorProperty
-      name="IncludeSets"
-      command="SetIncludeSets"
-      number_of_elements="1"
-      default_values="0"
-      animateable="0">
-      <Documentation>
-        Searches the polyMesh/sets/ directory
-      </Documentation>
-      <BooleanDomain name="bool"/>
-    </IntVectorProperty>
-
-    <!-- Include Zones check-box -->
-    <IntVectorProperty
-      name="IncludeZones"
-      command="SetIncludeZones"
-      number_of_elements="1"
-      default_values="0"
-      animateable="0">
-      <Documentation>
-        ZoneMesh information is used to find {cell,face,point}Zones.
-        The polyMesh/ directory is only checked on startup.
-      </Documentation>
-      <BooleanDomain name="bool"/>
-    </IntVectorProperty>
-
-    <!-- Show Patch Names check-box -->
-    <IntVectorProperty
-      name="ShowPatchNames"
-      command="SetShowPatchNames"
-      number_of_elements="1"
-      default_values="0"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Show patch names in render window.
-      </Documentation>
-    </IntVectorProperty>
-
-    <!-- Cache Mesh check-box -->
-    <IntVectorProperty
-      name="CacheMesh"
-      command="SetCacheMesh"
-      number_of_elements="1"
-      default_values="1"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Cache the fvMesh in memory.
-      </Documentation>
-    </IntVectorProperty>
-
-
-    <!-- Update GUI check box -->
-    <IntVectorProperty
-      name="UpdateGUI"
-      command="SetUpdateGUI"
-      number_of_elements="1"
-      default_values="0"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        A simple way cause a reader GUI modification.
-      </Documentation>
-    </IntVectorProperty>
-
   </SourceProxy>
   </ProxyGroup>
 </ServerManagerConfiguration>
