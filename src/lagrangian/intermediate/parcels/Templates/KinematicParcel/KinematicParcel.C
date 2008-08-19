@@ -234,13 +234,17 @@ bool Foam::KinematicParcel<ParcelType>::move
         // Update cell based properties
         p.updateCellQuantities(td, dt, celli);
 
-        if (td.cloud().coupled())
+        // Avoid problems with extremely small timesteps
+        if (dt > ROOTVSMALL)
         {
-            p.calcCoupled(td, dt, celli);
-        }
-        else
-        {
-            p.calcUncoupled(td, dt, celli);
+            if (td.cloud().coupled())
+            {
+                p.calcCoupled(td, dt, celli);
+            }
+            else
+            {
+                p.calcUncoupled(td, dt, celli);
+            }
         }
 
         if (p.onBoundary() && td.keepParticle)
