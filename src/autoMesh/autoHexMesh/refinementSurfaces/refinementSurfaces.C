@@ -377,15 +377,34 @@ Foam::refinementSurfaces::refinementSurfaces
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Get indices of named surfaces (surfaces with cellZoneName)
+// Get indices of unnamed surfaces (surfaces without faceZoneName)
+Foam::labelList Foam::refinementSurfaces::getUnnamedSurfaces() const
+{
+   labelList anonymousSurfaces(faceZoneNames_.size());
+
+    label i = 0;
+    forAll(faceZoneNames_, surfI)
+    {
+        if (faceZoneNames_[surfI].size() == 0)
+        {
+            anonymousSurfaces[i++] = surfI;
+        }
+    }
+    anonymousSurfaces.setSize(i);
+
+    return anonymousSurfaces;
+}
+
+
+// Get indices of named surfaces (surfaces with faceZoneName)
 Foam::labelList Foam::refinementSurfaces::getNamedSurfaces() const
 {
-   labelList namedSurfaces(cellZoneNames_.size());
+   labelList namedSurfaces(faceZoneNames_.size());
 
     label namedI = 0;
-    forAll(cellZoneNames_, surfI)
+    forAll(faceZoneNames_, surfI)
     {
-        if (cellZoneNames_[surfI].size() > 0)
+        if (faceZoneNames_[surfI].size() > 0)
         {
             namedSurfaces[namedI++] = surfI;
         }
@@ -841,6 +860,69 @@ void Foam::refinementSurfaces::findNearest
         if (hitSurface[pointI] != -1)
         {
             hitSurface[pointI] = surfacesToTest[hitSurface[pointI]];
+        }
+    }
+}
+
+
+void Foam::refinementSurfaces::findNearestRegion
+(
+    const labelList& surfacesToTest,
+    const pointField& samples,
+    const  scalarField& nearestDistSqr,
+    labelList& hitSurface,
+    labelList& hitRegion
+) const
+{
+    labelList geometries(IndirectList<label>(surfaces_, surfacesToTest));
+
+    // Do the tests. Note that findNearest returns index in geometries.
+    List<pointIndexHit> hitInfo;
+    searchableSurfacesQueries::findNearest
+    (
+        allGeometry_,
+        geometries,
+        samples,
+        nearestDistSqr,
+        hitSurface,
+        hitInfo
+    );
+
+    // Rework the hitSurface to be surface (i.e. index into surfaces_)
+    forAll(hitSurface, pointI)
+    {
+        if (hitSurface[pointI] != -1)
+        {
+            hitSurface[pointI] = surfacesToTest[hitSurface[pointI]];
+        }
+    }
+
+    // Collect the region
+    hitRegion.setSize(hitSurface.size());
+    hitRegion = -1;
+
+    forAll(surfacesToTest, i)
+    {
+        label surfI = surfacesToTest[i];
+
+        // Collect hits for surfI
+        const labelList localIndices(findIndices(hitSurface, surfI));
+
+        List<pointIndexHit> localHits
+        (
+            IndirectList<pointIndexHit> 
+            (
+                hitInfo,
+                localIndices
+            )
+        );
+
+        labelList localRegion;
+        allGeometry_[surfaces_[surfI]].getRegion(localHits, localRegion);
+
+        forAll(localIndices, i)
+        {
+            hitRegion[localIndices[i]] = localRegion[i];
         }
     }
 }

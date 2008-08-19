@@ -491,6 +491,8 @@ void Foam::autoHexMeshDriver::doMesh()
 
     if (wantRefine)
     {
+        const dictionary& motionDict = dict_.subDict("motionDict");
+
         autoRefineDriver refineDriver
         (
             meshRefinerPtr_(),
@@ -502,7 +504,7 @@ void Foam::autoHexMeshDriver::doMesh()
         // Get all the refinement specific params
         refinementParameters refineParams(dict_, 1);
 
-        refineDriver.doRefine(dict_, refineParams, wantSnap);
+        refineDriver.doRefine(dict_, refineParams, wantSnap, motionDict);
 
         // Write mesh
         writeMesh("Refined mesh");

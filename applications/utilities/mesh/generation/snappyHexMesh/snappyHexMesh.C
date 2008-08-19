@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
         // Refinement parameters
         refinementParameters refineParams(refineDict);
 
-        refineDriver.doRefine(refineDict, refineParams, wantSnap);
+        refineDriver.doRefine(refineDict, refineParams, wantSnap, motionDict);
 
         writeMesh
         (

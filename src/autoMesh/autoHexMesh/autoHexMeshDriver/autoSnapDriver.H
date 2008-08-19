@@ -215,6 +215,14 @@ public:
                 motionSmoother&
             );
 
+            //- Repatch faces according to surface nearest the face centre
+            autoPtr<mapPolyMesh> repatchToSurface
+            (
+                const snapParameters& snapParams,
+                const labelList& adaptPatchIDs
+            );
+
+
             void doSnap
             (
                 const dictionary& snapDict,
