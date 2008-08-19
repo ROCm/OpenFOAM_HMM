@@ -185,7 +185,12 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 
     inject(td);
 
-    this->move(td);
+    if (this->coupled())
+    {
+        resetSourceTerms();
+    }
+
+    Cloud<ParcelType>::move(td);
 }
 
 

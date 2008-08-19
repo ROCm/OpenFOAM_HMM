@@ -332,21 +332,11 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
     inject(td);
 
-    move(td);
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::KinematicCloud<ParcelType>::move
-(
-    TrackingData& td
-)
-{
     if (coupled_)
     {
         resetSourceTerms();
     }
+
     Cloud<ParcelType>::move(td);
 }
 

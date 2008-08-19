@@ -257,10 +257,6 @@ protected:
             ParcelType* p
         );
 
-        //- Move the parcels
-        template<class TrackingData>
-        void move(TrackingData& td);
-
         //- Post-injection checks
         void postInjectCheck();
 
@@ -436,7 +432,7 @@ public:
             //- Reset the spray source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (move, inject)
+            //- Evolve the spray (inject, inject)
             void evolve();
 };
 
