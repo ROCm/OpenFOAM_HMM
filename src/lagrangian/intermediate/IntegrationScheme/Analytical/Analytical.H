@@ -74,7 +74,7 @@ public:
     // Member Functions
 
         //- Perform the integration
-        virtual typename IntegrationScheme<Type>::IntegrationResult integrate
+        virtual typename IntegrationScheme<Type>::integrationResult integrate
         (
             const Type phi,
             const scalar dt,

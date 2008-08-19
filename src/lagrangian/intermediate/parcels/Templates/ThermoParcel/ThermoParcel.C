@@ -204,7 +204,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Integrate to find the new parcel temperature
-    IntegrationScheme<scalar>::IntegrationResult Tres =
+    IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
 
     // Using average parcel temperature for enthalpy transfer calculation

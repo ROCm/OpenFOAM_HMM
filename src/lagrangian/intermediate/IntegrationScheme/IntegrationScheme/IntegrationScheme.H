@@ -57,7 +57,7 @@ class IntegrationScheme
 public:
 
     //- Helper class to supply results of integration
-    class IntegrationResult
+    class integrationResult
     {
         //- Integration value
         Type value_;
@@ -69,7 +69,7 @@ public:
     public:
 
         //- Constructor
-        IntegrationResult()
+        integrationResult()
         :
             value_(pTraits<Type>::zero),
             average_(pTraits<Type>::zero)
@@ -177,7 +177,7 @@ public:
     // Member Functions
 
         //- Perform the Integration
-        virtual IntegrationResult integrate
+        virtual integrationResult integrate
         (
             const Type phi,
             const scalar dt,

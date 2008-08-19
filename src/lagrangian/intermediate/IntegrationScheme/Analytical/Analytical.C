@@ -50,7 +50,7 @@ Foam::Analytical<Type>::~Analytical()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-typename Foam::IntegrationScheme<Type>::IntegrationResult
+typename Foam::IntegrationScheme<Type>::integrationResult
 Foam::Analytical<Type>::integrate
 (
     const Type phi,
@@ -59,7 +59,7 @@ Foam::Analytical<Type>::integrate
     const scalar beta
 ) const
 {
-    typename IntegrationScheme<Type>::IntegrationResult retValue;
+    typename IntegrationScheme<Type>::integrationResult retValue;
     retValue.average() = alpha + (phi - alpha)*(1 - exp(-beta*dt))/(beta*dt);
     retValue.value() =  alpha + (phi - alpha)*exp(-beta*dt);
 
