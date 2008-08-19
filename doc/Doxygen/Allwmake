@@ -5,5 +5,7 @@ umask 22
 rm -rf html latex man
 doxygen
 
-# fix permissions (NB: '-X' and not '-x'!)
+# fix permissions (NB: '+X' and not '+x'!)
 chmod -R a+rX ./
+
+# ----------------------------------------------------------------- end-of-file

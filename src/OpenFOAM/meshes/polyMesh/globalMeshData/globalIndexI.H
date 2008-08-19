@@ -53,14 +53,9 @@ inline Foam::label Foam::globalIndex::toGlobal(const label i) const
 //- Is on local processor
 inline bool Foam::globalIndex::isLocal(const label i) const
 {
-    label localI =
-    (
-        Pstream::myProcNo() == 0
-      ? i
-      : i - offsets_[Pstream::myProcNo()-1]
-    );
-
-    return localI >= 0 && localI < offsets_[Pstream::myProcNo()];
+    return
+        (i < offsets_[Pstream::myProcNo()])
+     && (i >= (Pstream::myProcNo() == 0 ? 0 : offsets_[Pstream::myProcNo()-1]));
 }
 
 
@@ -69,7 +64,7 @@ inline Foam::label Foam::globalIndex::toLocal(const label procI, const label i)
 {
     label localI = (procI == 0 ? i : i - offsets_[procI-1]);
 
-    if (localI < 0 || localI >= offsets_[procI])
+    if (localI < 0 || i >= offsets_[procI])
     {
         FatalErrorIn("globalIndex::toLocal(const label, const label)")
             << "Global " << i << " does not belong on processor "

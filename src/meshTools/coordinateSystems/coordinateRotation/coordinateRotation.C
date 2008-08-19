@@ -210,25 +210,19 @@ void Foam::coordinateRotation::operator=(const dictionary& rhs)
     );
 
     vector axis1, axis2;
-    axisOrder order = e3e1;
+    axisOrder order(e3e1);
 
-    if (dict.found("e1") && dict.found("e2"))
+    if (dict.readIfPresent("e1", axis1) && dict.readIfPresent("e2", axis2))
     {
         order = e1e2;
-        dict.lookup("e1") >> axis1;
-        dict.lookup("e2") >> axis2;
     }
-    else if (dict.found("e2") && dict.found("e3"))
+    else if (dict.readIfPresent("e2", axis1) && dict.readIfPresent("e3", axis2))
     {
         order = e2e3;
-        dict.lookup("e2") >> axis1;
-        dict.lookup("e3") >> axis2;
     }
-    else if (dict.found("e3") && dict.found("e1"))
+    else if (dict.readIfPresent("e3", axis1) && dict.readIfPresent("e1", axis2))
     {
         order = e3e1;
-        dict.lookup("e3") >> axis1;
-        dict.lookup("e1") >> axis2;
     }
     else if (dict.found("axis") || dict.found("direction"))
     {

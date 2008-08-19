@@ -71,11 +71,6 @@ public:
 
 private:
 
-    // Private data
-
-        //- Not VSMALL - but smaller than SMALL
-        static const scalar NVSMALL;
-
     // Private Member Functions
 
         //- Helper function for intersect. Sets pt to be anywhere on the edge

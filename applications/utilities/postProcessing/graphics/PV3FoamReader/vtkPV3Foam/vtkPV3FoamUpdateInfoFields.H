@@ -59,8 +59,16 @@ void Foam::vtkPV3Foam::updateInfoFields
 
     select->RemoveAllArrays();
 
-    // Search for list of objects for this time
-    IOobjectList objects(dbPtr_(), dbPtr_().timeName());
+    // use the db directly since this might be called without a mesh,
+    // but the region must get added back in
+    word regionPrefix;
+    if (meshRegion_ != polyMesh::defaultRegion)
+    {
+        regionPrefix = meshRegion_;
+    }
+
+    // Search for list of objects for this time and mesh region
+    IOobjectList objects(dbPtr_(), dbPtr_().timeName(), regionPrefix);
 
     //- Add volume fields to GUI
     addToSelection<GeometricField<scalar, patchType, meshType> >
