@@ -251,9 +251,6 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     scalar htc = 0.0;
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
-    // Limit new temp max by vapourisarion temperature
-    T1 = min(td.constProps().Tvap(), T1);
-
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate mass transfer
