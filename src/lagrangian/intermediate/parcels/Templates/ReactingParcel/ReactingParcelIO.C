@@ -297,10 +297,7 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const ThermoParcel<ParcelType>& >(p);
         os.write
         (
-            reinterpret_cast<const char*>
-            (
-                &const_cast<ReactingParcel<ParcelType>&>(p).mass0()
-            ),
+            reinterpret_cast<const char*>(&p.mass0_),
             sizeof(p.mass0())
         );
         os << p.YMixture() << YGasLoc << YLiquidLoc << YSolidLoc;
