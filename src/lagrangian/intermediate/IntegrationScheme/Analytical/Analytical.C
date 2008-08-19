@@ -60,7 +60,7 @@ Foam::Analytical<Type>::integrate
 ) const
 {
     typename IntegrationScheme<Type>::IntegrationResult retValue;
-    retValue.average() = alpha + (phi - alpha)*(1-exp(-beta*dt))/(beta*dt);
+    retValue.average() = alpha + (phi - alpha)*(1 - exp(-beta*dt))/(beta*dt);
     retValue.value() =  alpha + (phi - alpha)*exp(-beta*dt);
 
     return retValue;

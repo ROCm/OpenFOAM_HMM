@@ -60,7 +60,7 @@ Foam::Euler<Type>::integrate
 ) const
 {
     typename IntegrationScheme<Type>::IntegrationResult retValue;
-    retValue.value() = (phi + dt*alpha)/(1.0 + dt/beta);
+    retValue.value() = (phi + beta*dt*alpha)/(1.0 + beta*dt);
     retValue.average() = 0.5*(phi + retValue.value());
 
     return retValue;
