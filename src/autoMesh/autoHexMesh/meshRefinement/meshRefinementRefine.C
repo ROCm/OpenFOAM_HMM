@@ -1277,22 +1277,13 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
 
     if (Pstream::nProcs() > 1)
     {
-        labelList distribution(decomposer.decompose(mesh_.cellCentres()));
-        // Get distribution such that baffle faces stay internal to the
-        // processor.
-        //labelList distribution(decomposePreserveBaffles(decomposer));
-
-        if (debug)
-        {
-            Pout<< "Wanted distribution:"
-                << distributor.countCells(distribution)
-                << endl;
-        }
-        // Do actual sending/receiving of mesh
-        distMap = distributor.distribute(distribution);
-
-        // Update numbering of meshRefiner
-        distribute(distMap);
+        distMap = balance
+        (
+            false,  //keepZoneFaces
+            false,  //keepBaffles
+            decomposer,
+            distributor
+        );
 
         Info<< "Balanced mesh in = "
             << mesh_.time().cpuTimeIncrement() << " s" << endl;
@@ -1302,7 +1293,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
 
         if (debug)
         {
-            Pout<< "Writing " << msg
+            Pout<< "Writing balanced " << msg
                 << " mesh to time " << mesh_.time().timeName() << endl;
             write
             (
