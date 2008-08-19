@@ -214,9 +214,6 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 
 #include "ThermoParcelIO.C"
