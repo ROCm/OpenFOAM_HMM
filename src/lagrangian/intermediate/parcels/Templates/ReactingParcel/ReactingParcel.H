@@ -89,6 +89,9 @@ public:
             //- Boiling point [K]
             const scalar Tbp_;
 
+            //- Latent heat of devolatilisation [J/kg]
+            const scalar Ldevol_;
+
 
     public:
 
@@ -102,6 +105,9 @@ public:
 
             //- Return const access to the boiling point
             inline scalar Tbp() const;
+
+            //- Return const access to the latent heat of devolatilisation
+            inline scalar Ldevol() const;
     };
 
 
@@ -210,8 +216,9 @@ protected:
             const label celli,
             const scalar T0,
             const scalar T1,
-            scalar& dMassMTSR,
-            scalarList& dMassMT
+            const scalarList& dMassMT,
+            scalarList& dMassSR,
+            scalar& dhRet
         );
 
 

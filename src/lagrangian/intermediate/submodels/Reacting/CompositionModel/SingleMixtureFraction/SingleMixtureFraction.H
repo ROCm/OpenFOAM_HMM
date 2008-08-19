@@ -188,8 +188,11 @@ public:
             //- Return the gas constant for the gas mixture
             scalar RGas(const scalarField& YGas) const;
 
-            //- Return enthalpy for the gas mixture
+            //- Return enthalpy for the gas mixture [energy per unit mass]
             scalar HGas(const scalarField& YGas, const scalar T) const;
+
+            //- Return enthalpy for the solid mixture [energy per unit mass]
+            scalar HSolid(const scalarField& YSolid, const scalar T) const;
 
             //- Return specific heat caparcity for the gas mixture
             scalar cpGas(const scalarField& YGas, const scalar T) const;
