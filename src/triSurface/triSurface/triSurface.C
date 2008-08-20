@@ -626,7 +626,7 @@ surfacePatchList triSurface::calcPatches(labelList& faceMap) const
     {
         sortedRegion[faceI] = operator[](faceI).region();
     }
-    sortedRegion.stableSort();
+    sortedRegion.sort();
 
     faceMap = sortedRegion.indices();
 
