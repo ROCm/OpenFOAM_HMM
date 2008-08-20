@@ -57,8 +57,6 @@ void Foam::CV3D::insertFeaturePoints()
         label ptI = featPoints[i];
         const point& featPt = localPts[ptI];
 
-        Info<< nl <<"Feature at " << featPt << endl;;
-
         const labelList& featEdges = featPointFeatEdges[i];
 
         DynamicList<label> convexEdges(0);
@@ -170,67 +168,86 @@ void Foam::CV3D::insertFeaturePoints()
             }
         }
 
-        if (concaveEdges.size() == 0)
+        if (concaveEdges.size() + convexEdges.size() == 3)
         {
-            Info<< tab << "Convex feature, "
-                << convexEdges.size() << " edges." << endl;
+            Info<< "3 edge feature at " << featPt << endl;
 
-            vector cornerNormal = sum(uniquePlaneNormals);
-            cornerNormal /= mag(cornerNormal);
-
-            point internalPt =  featPt - tols_.ppDist*cornerNormal;
-            label internalPtIndex = insertPoint(internalPt, number_of_vertices() + 1);
-
-            forAll (uniquePlaneNormals, uPN)
+            if (concaveEdges.size() == 3)
             {
-                const vector& n = uniquePlaneNormals[uPN];
+                Info << tab << "Concave feature" << endl;
 
-                plane planeN = plane(featPt, n);
+                const vector& n0 = uniquePlaneNormals[0];
+                const vector& n1 = uniquePlaneNormals[1];
+                const vector& n2 = uniquePlaneNormals[2];
 
-                point externalPt = internalPt + 2.0 * planeN.distance(internalPt) * n;
+                // Interest planes outside the corner to find the common point
+                plane plane0(featPt +  tols_.ppDist*n0, n0);
+                plane plane1(featPt +  tols_.ppDist*n1, n1);
+                plane plane2(featPt +  tols_.ppDist*n2, n2);
 
-                insertPoint(externalPt, internalPtIndex);
+                point externalPt = plane2.planePlaneIntersect(plane0,plane1);
+                label externalPtIndex = number_of_vertices() + 3;
+
+                // Redfine planes to be on the corner surfaces to project through
+
+                plane0 = plane(featPt, n0);
+                plane1 = plane(featPt, n1);
+                plane2 = plane(featPt, n2);
+
+                point internalPt0 = externalPt - 2*plane0.distance(externalPt)*n0;
+                label internalPt0Index = insertPoint(internalPt0, externalPtIndex);
+
+                point internalPt1 = externalPt - 2*plane1.distance(externalPt)*n1;
+                insertPoint(internalPt1, externalPtIndex);
+
+                point internalPt2 = externalPt - 2*plane2.distance(externalPt)*n2;
+                insertPoint(internalPt2, externalPtIndex);
+
+                insertPoint(externalPt,internalPt0Index);
             }
-
-        }
-        else if (convexEdges.size() == 0)
-        {
-            Info<< tab << "Concave feature, "
-                << concaveEdges.size() << " edges." << endl;
-
-            vector cornerNormal = sum(uniquePlaneNormals);
-            cornerNormal /= mag(cornerNormal);
-
-            point externalPt = featPt +  tols_.ppDist*cornerNormal;
-            label externalPtIndex = number_of_vertices() + concaveEdges.size();
-
-            label internalPtIndex = -1;
-
-            forAll (uniquePlaneNormals, uPN)
+            else if (convexEdges.size() == 3)
             {
-                const vector& n = uniquePlaneNormals[uPN];
+                Info << tab << "Convex feature" << endl;
 
-                plane planeN = plane(featPt, n);
+                const vector& n0 = uniquePlaneNormals[0];
+                const vector& n1 = uniquePlaneNormals[1];
+                const vector& n2 = uniquePlaneNormals[2];
 
-                point internalPt = externalPt - 2.0 * planeN.distance(externalPt) * n;
+                // Intersect planes inside the corner to find the common point
+                plane plane0(featPt -  tols_.ppDist*n0, n0);
+                plane plane1(featPt -  tols_.ppDist*n1, n1);
+                plane plane2(featPt -  tols_.ppDist*n2, n2);
 
-                internalPtIndex = insertPoint(internalPt, externalPtIndex);
+                point internalPt = plane1.planePlaneIntersect(plane2,plane0);
+                label internalPtIndex = insertPoint(internalPt, number_of_vertices() + 1);
+
+                // Redefine planes to be on the corner surfaces to project through
+
+                plane0 = plane(featPt, n0);
+                plane1 = plane(featPt, n1);
+                plane2 = plane(featPt, n2);
+
+                point externalPt0 = internalPt + 2*plane0.distance(internalPt)*n0;
+                insertPoint(externalPt0, internalPtIndex);
+
+                point externalPt1 = internalPt + 2*plane1.distance(internalPt)*n1;
+                insertPoint(externalPt1, internalPtIndex);
+
+                point externalPt2 = internalPt + 2*plane2.distance(internalPt)*n2;
+                insertPoint(externalPt2, internalPtIndex);
             }
-
-            insertPoint(externalPt,internalPtIndex);
-        }
-        else
-        {
-            Info<< tab << "Mixed feature: convex, concave = "
-                << convexEdges.size() << ", " << concaveEdges.size() << endl;
-
-            if (convexEdges.size() + concaveEdges.size() > 3)
+            else
             {
-                Info<< concaveEdges.size() + convexEdges.size() << " mixed edge feature."
-                    << " NOT IMPLEMENTED." << endl;
-            }
-            else if (convexEdges.size() > concaveEdges.size())
-            {
+                Info<< tab << "Mixed feature: convex, concave = "
+                    << convexEdges.size() << ", " << concaveEdges.size() << endl;
+
+                if (concaveEdges.size() > 1)
+                {
+                    FatalErrorIn("insertFeaturePoints")
+                        << "Assumption that only one concave edge possible is wrong."
+                        << exit(FatalError);
+                }
+
                 // Find which planes are joined to the concave edge
 
                 List<label> concaveEdgePlanes(2,label(-1));
@@ -324,15 +341,15 @@ void Foam::CV3D::insertFeaturePoints()
                 );
 
                 point concaveEdgeLocalFeatPt = featPt
-                + tols_.ppDist*edgeDirection
-                * concaveEdge.vec(localPts)/concaveEdge.mag(localPts);
+                  + tols_.ppDist*edgeDirection
+                  * concaveEdge.vec(localPts)/concaveEdge.mag(localPts);
 
                 plane planeF(concaveEdgeLocalFeatPt, concaveEdge.vec(localPts));
 
                 point concaveEdgeExternalPt = planeF.planePlaneIntersect(planeA,planeB);
                 label concaveEdgeExternalPtI = number_of_vertices() + 4;
 
-                // Redefine planes to be on the feature surfaces to project through
+                // Redfine planes to be on the corner surfaces to project through
 
                 planeA = plane(featPt, concaveEdgePlaneANormal);
                 planeB = plane(featPt, concaveEdgePlaneBNormal);
@@ -360,24 +377,42 @@ void Foam::CV3D::insertFeaturePoints()
                 scalar totalAngle = 180/mathematicalConstant::pi *
                 (
                     mathematicalConstant::pi +
-                    acos(mag(concaveEdgePlaneANormal & concaveEdgePlaneBNormal))
+                        acos(mag(concaveEdgePlaneANormal & concaveEdgePlaneBNormal))
                 );
 
                 if (totalAngle > controls_.maxQuadAngle)
                 {
                     // Add additional mitering points
 
+                    // Redefine planes to be inside the surface, further away from
+                    // the surface than the main points.
+
+                    // scalar guardFactor = max(3 - totalAngle/150.0, 1);
+                    // // Ad-hoc function, do some analysis to determine properly
+
+                    // planeA = plane
+                    // (
+                    //     featPt - guardFactor*tols_.ppDist*concaveEdgePlaneANormal,
+                    //     concaveEdgePlaneANormal
+                    // );
+
+                    // planeB = plane
+                    // (
+                    //     featPt - guardFactor*tols_.ppDist*concaveEdgePlaneBNormal,
+                    //     concaveEdgePlaneBNormal
+                    // );
+
+                    // point internalPtF = planeF.planePlaneIntersect(planeA,planeB);
+                    // label internalPtFI = insertPoint(internalPtF, number_of_vertices() + 1);
+
+                    // point externalPtG = internalPtF +
+                    //     2*planeC.distance(internalPtF) * convexEdgesPlaneNormal;
+                    // insertPoint(externalPtG, internalPtFI);
+
                     vector concaveEdgeNormal =
                         edgeDirection*concaveEdge.vec(localPts)/concaveEdge.mag(localPts);
 
-                    scalar angleSign = 1.0;
-
-                    if (qSurf_.outside(featPt - convexEdgesPlaneNormal*tols_.ppDist))
-                    {
-                        angleSign = -1.0;
-                    }
-
-                    scalar phi = angleSign*acos(concaveEdgeNormal & -convexEdgesPlaneNormal);
+                    scalar phi = acos(concaveEdgeNormal & -convexEdgesPlaneNormal);
 
                     scalar guard =
                     (
@@ -387,151 +422,24 @@ void Foam::CV3D::insertFeaturePoints()
                         )
                     )/cos(phi) - 1;
 
-                    Info<< tab << guard << endl;
+                    Info<< guard << endl;
 
                     point internalPtF = concaveEdgeExternalPt + (2 + guard) *
-                        (concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
-
+                    (
+                        concaveEdgeLocalFeatPt - concaveEdgeExternalPt
+                    );
                     label internalPtFI = insertPoint(internalPtF, number_of_vertices() + 1);
 
                     point externalPtG = internalPtF +
                         2*planeC.distance(internalPtF) * convexEdgesPlaneNormal;
-                        insertPoint(externalPtG, internalPtFI);
+                    insertPoint(externalPtG, internalPtFI);
                 }
             }
-            else
-            {
-                // Find which planes are joined to the convex edge
-
-                List<label> convexEdgePlanes(2,label(-1));
-
-                label convexEdgeI = convexEdges[0];
-
-                // Pick up the two faces adjacent to the convex feature edge
-                const labelList& eFaces = qSurf_.edgeFaces()[convexEdgeI];
-
-                label faceA = eFaces[0];
-                vector nA = qSurf_.faceNormals()[faceA];
-
-                scalar maxNormalDotProduct = -SMALL;
-
-                forAll(uniquePlaneNormals, uPN)
-                {
-                    scalar normalDotProduct = nA & uniquePlaneNormals[uPN];
-
-                    if (normalDotProduct > maxNormalDotProduct)
-                    {
-                        maxNormalDotProduct = normalDotProduct;
-
-                        convexEdgePlanes[0] = uPN;
-                    }
-                }
-
-                label faceB = eFaces[1];
-                vector nB = qSurf_.faceNormals()[faceB];
-
-                maxNormalDotProduct = -SMALL;
-
-                forAll(uniquePlaneNormals, uPN)
-                {
-                    scalar normalDotProduct = nB & uniquePlaneNormals[uPN];
-
-                    if (normalDotProduct > maxNormalDotProduct)
-                    {
-                        maxNormalDotProduct = normalDotProduct;
-
-                        convexEdgePlanes[1] = uPN;
-                    }
-                }
-
-                const vector& convexEdgePlaneANormal =
-                    uniquePlaneNormals[convexEdgePlanes[0]];
-                const vector& convexEdgePlaneBNormal =
-                    uniquePlaneNormals[convexEdgePlanes[1]];
-
-                label concaveEdgesPlaneI;
-
-                if (findIndex(convexEdgePlanes, 0) == -1)
-                {
-                    concaveEdgesPlaneI = 0;
-                }
-                else if (findIndex(convexEdgePlanes, 1) == -1)
-                {
-                    concaveEdgesPlaneI = 1;
-                }
-                else
-                {
-                    concaveEdgesPlaneI = 2;
-                }
-
-                const vector& concaveEdgesPlaneNormal =
-                    uniquePlaneNormals[concaveEdgesPlaneI];
-
-                const edge& convexEdge = edges[convexEdgeI];
-
-                // Check direction of edge, if the feature point is at the end()
-                // the reverse direction.
-
-                scalar edgeDirection = 1.0;
-
-                if (ptI == convexEdge.end())
-                {
-                    edgeDirection *= -1.0;
-                }
-
-                // Intersect planes parallel to the convex edge planes offset by ppDist
-                // and the plane defined by featPt and the edge vector.
-                plane planeA
-                (
-                    featPt - tols_.ppDist*convexEdgePlaneANormal,
-                    convexEdgePlaneANormal
-                );
-
-                plane planeB
-                (
-                    featPt - tols_.ppDist*convexEdgePlaneBNormal,
-                    convexEdgePlaneBNormal
-                );
-
-                point convexEdgeLocalFeatPt = featPt
-                  + tols_.ppDist*edgeDirection
-                  * convexEdge.vec(localPts)/convexEdge.mag(localPts);
-
-                plane planeF(convexEdgeLocalFeatPt, convexEdge.vec(localPts));
-
-                point convexEdgeInternalPt = planeF.planePlaneIntersect(planeA,planeB);
-
-                planeA = plane(featPt, convexEdgePlaneANormal);
-                planeB = plane(featPt, convexEdgePlaneBNormal);
-
-                point externalPtA = convexEdgeInternalPt +
-                    2*planeA.distance(convexEdgeInternalPt) * convexEdgePlaneANormal;
-                label externalPtAI = number_of_vertices() + 3;
-
-                point externalPtB = convexEdgeInternalPt +
-                    2*planeB.distance(convexEdgeInternalPt) * convexEdgePlaneBNormal;
-                label externalPtBI = number_of_vertices() + 4;
-
-                label convexEdgeInternalPtI = insertPoint
-                (
-                    convexEdgeInternalPt,
-                    externalPtAI
-                );
-
-                plane planeC(featPt, concaveEdgesPlaneNormal);
-
-                point internalPtD = externalPtA -
-                    2*planeC.distance(externalPtA) * concaveEdgesPlaneNormal;
-                insertPoint(internalPtD, externalPtAI);
-
-                point internalPtE = externalPtB -
-                    2*planeC.distance(externalPtB) * concaveEdgesPlaneNormal;
-                insertPoint(internalPtE, externalPtBI);
-
-                insertPoint(externalPtA,convexEdgeInternalPtI);
-
-                insertPoint(externalPtB,convexEdgeInternalPtI);
-            }
+        }
+        else
+        {
+            Info<< concaveEdges.size() + convexEdges.size() << " edge feature."
+                << " NOT IMPLEMENTED." << endl;
         }
     }
 
