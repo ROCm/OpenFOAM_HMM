@@ -209,11 +209,11 @@ public:
 
         // Cloud evolution functions
 
-            //- Evolve the spray (move, inject)
-            void evolve();
-
             //- Reset the spray source terms
             void resetSourceTerms();
+
+            //- Evolve the spray (inject, move)
+            void evolve();
 };
 
 

@@ -62,11 +62,6 @@ Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
     const scalar
 ) const
 {
-    notImplemented
-    (
-        "Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu"
-        "(const scalar, const scalar)"
-    );
     return 0.0;
 }
 
@@ -74,8 +69,7 @@ Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
 template <class CloudType>
 Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr() const
 {
-    notImplemented("Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr()");
-    return 0.0;
+    return 1.0;
 }
 
 

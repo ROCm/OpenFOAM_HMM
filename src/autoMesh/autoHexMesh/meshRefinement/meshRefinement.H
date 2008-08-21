@@ -68,6 +68,7 @@ class featureEdgeMesh;
 class fvMeshDistribute;
 class searchableSurface;
 class regionSplit;
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
                            Class meshRefinement Declaration
@@ -157,15 +158,6 @@ private:
             labelList& neiLevel,
             pointField& neiCc
         ) const;
-        ////- Calculate coupled boundary end vector and refinement level. Sort
-        ////  so both sides of coupled face have data in same order.
-        //void calcCanonicalBoundaryData
-        //(
-        //    labelList& leftLevel,
-        //    pointField& leftCc,
-        //    labelList& rightLevel,
-        //    pointField& rightCc
-        //)  const;
 
         //- Find any intersection of surface. Store in surfaceIndex_.
         void updateIntersections(const labelList& changedFaces);
@@ -194,15 +186,51 @@ private:
             const label exposedPatchI
         );
 
-        //- Used in decomposeCombineRegions. Given global region per cell
-        //  determines master processor/cell for regions straddling
-        //  procboundaries.
-        void getRegionMaster
-        (
-            const boolList& blockedFace,
-            const regionSplit& globalRegion,
-            Map<label>& regionToMaster
-        ) const;
+        // For decomposeCombineRegions
+
+            //- Used in decomposeCombineRegions. Given global region per cell
+            //  determines master processor/cell for regions straddling
+            //  procboundaries.
+            void getCoupledRegionMaster
+            (
+                const globalIndex& globalCells,
+                const boolList& blockedFace,
+                const regionSplit& globalRegion,
+                Map<label>& regionToMaster
+            ) const;
+
+            //- Determine regions that are local to me or coupled ones that
+            //  are owned by me. Determine representative location.
+            void calcLocalRegions
+            (
+                const globalIndex& globalCells,
+                const labelList& globalRegion,
+                const Map<label>& coupledRegionToMaster,
+
+                Map<label>& globalToLocalRegion,
+                pointField& localPoints
+            ) const;
+
+            //- Convert region into global index.
+            static label getShiftedRegion
+            (
+                const globalIndex& indexer,
+                const Map<label>& globalToLocalRegion,
+                const Map<label>& coupledRegionToShifted,
+                const label globalRegion
+            );
+
+            //- helper: add element if not in list. Linear search.
+            static void addUnique(const label, labelList&);
+
+            //- Calculate region connectivity. Major communication.
+            void calcRegionRegions
+            (
+                const labelList& globalRegion,
+                const Map<label>& globalToLocalRegion,
+                const Map<label>& coupledRegionToMaster,
+                labelListList& regionRegions
+            ) const;
 
 
         // Refinement candidate selection
@@ -331,6 +359,14 @@ private:
             //  they should be baffled into.
             labelList markFacesOnProblemCells
             (
+                const labelList& globalToPatch
+            ) const;
+
+            //- Returns list with for every internal face -1 or the patch
+            //  they should be baffled into.
+            labelList markFacesOnProblemCellsGeometric
+            (
+                const dictionary& motionDict,
                 const labelList& globalToPatch
             ) const;
 
@@ -552,6 +588,7 @@ public:
             (
                 const bool handleSnapProblems,
                 const bool mergeFreeStanding,
+                const dictionary& motionDict,
                 Time& runTime,
                 const labelList& globalToPatch,
                 const point& keepPoint

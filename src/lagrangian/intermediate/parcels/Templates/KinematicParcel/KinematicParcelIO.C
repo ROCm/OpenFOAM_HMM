@@ -203,7 +203,7 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const Particle<ParcelType>& >(p);
         os.write
         (
-            reinterpret_cast<const char*>(p.typeId()),
+            reinterpret_cast<const char*>(&p.typeId_),
             sizeof(p.typeId())
           + sizeof(p.d())
           + sizeof(p.U())

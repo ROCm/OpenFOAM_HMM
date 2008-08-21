@@ -301,7 +301,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
         // Is any of the faces a boundary face?  If so, grab the patch
         // A boundary-to-boundary collapse is checked for in validCollapse()
-        // and cannnot happen here.  
+        // and cannot happen here.  
 
         if (!mesh.isInternalFace(mf[faceI]))
         {

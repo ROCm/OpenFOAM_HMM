@@ -155,15 +155,16 @@ Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const scalar bp = 1.0/(Cud + VSMALL);
-    const vector ap = Uc_/bp + rhoc_/rho_*td.g();
+    const vector ap = Uc_ + (1 - rhoc_/rho_)/(Cud + VSMALL)*td.g();
+    const scalar bp = Cud;
 
-    vector Unew = td.cloud().UIntegrator().integrate(U_, dt, ap, bp);
+    vector Unew = td.cloud().UIntegrator().integrate(U_, dt, ap, bp).value();
 
 //    Info<< "U_, Unew = " << U_ << ", " << Unew << endl;
 
     // Calculate the momentum transfer to the continuous phase
-    dUTrans = -mass()*(Unew - U_);
+    // - do not include gravity impulse
+    dUTrans = -mass()*(Unew - U_ - dt*td.g());
 
     // Make corrections for 2-D cases
     if (meshInfo.caseIs2d())
@@ -233,13 +234,17 @@ bool Foam::KinematicParcel<ParcelType>::move
         // Update cell based properties
         p.updateCellQuantities(td, dt, celli);
 
-        if (td.cloud().coupled())
+        // Avoid problems with extremely small timesteps
+        if (dt > ROOTVSMALL)
         {
-            p.calcCoupled(td, dt, celli);
-        }
-        else
-        {
-            p.calcUncoupled(td, dt, celli);
+            if (td.cloud().coupled())
+            {
+                p.calcCoupled(td, dt, celli);
+            }
+            else
+            {
+                p.calcUncoupled(td, dt, celli);
+            }
         }
 
         if (p.onBoundary() && td.keepParticle)

@@ -203,15 +203,15 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     // Set new particle temperature
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    scalar Tnew = td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
+    // Integrate to find the new parcel temperature
+    IntegrationScheme<scalar>::integrationResult Tres =
+        td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
 
-    dhTrans = -this->mass()*cp_*(Tnew - T_);
+    // Using average parcel temperature for enthalpy transfer calculation
+    dhTrans = dt*this->areaS()*htc*(Tres.average() - Tc_);
 
-    return Tnew;
+    return Tres.value();
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //

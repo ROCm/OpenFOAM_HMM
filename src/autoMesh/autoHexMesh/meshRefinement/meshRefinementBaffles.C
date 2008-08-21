@@ -44,9 +44,9 @@ License
 #include "OFstream.H"
 #include "regionSplit.H"
 #include "removeCells.H"
-
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "motionSmoother.H"
+#include "polyMeshGeometry.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -555,28 +555,28 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     boolList isBoundaryFace(mesh_.nFaces(), false);
 
     // Fill boundary data. All elements on meshed patches get marked.
-    forAll(globalToPatch, i)
+    // Get the labels of added patches.
+    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
+
+    forAll(adaptPatchIDs, i)
     {
-        label patchI = globalToPatch[i];
+        label patchI = adaptPatchIDs[i];
 
-        if (patchI != -1)
+        const polyPatch& pp = patches[patchI];
+
+        label faceI = pp.start();
+
+        forAll(pp, j)
         {
-            const polyPatch& pp = patches[patchI];
+            markBoundaryFace
+            (
+                faceI,
+                isBoundaryFace,
+                isBoundaryEdge,
+                isBoundaryPoint
+            );
 
-            label faceI = pp.start();
-
-            forAll(pp, j)
-            {
-                markBoundaryFace
-                (
-                    faceI,
-                    isBoundaryFace,
-                    isBoundaryEdge,
-                    isBoundaryPoint
-                );
-
-                faceI++;
-            }
+            faceI++;
         }
     }
 
@@ -872,6 +872,264 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     return facePatch;
 }
+//XXXXXXXXXXXXXX
+// Mark faces to be baffled to prevent snapping problems. Does
+// test to find nearest surface and checks which faces would get squashed.
+Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
+(
+    const dictionary& motionDict,
+    const labelList& globalToPatch
+) const
+{
+    // Get the labels of added patches.
+    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
+
+    // Construct addressing engine.
+    autoPtr<indirectPrimitivePatch> ppPtr
+    (
+        meshRefinement::makePatch
+        (
+            mesh_,
+            adaptPatchIDs
+        )
+    );
+    const indirectPrimitivePatch& pp = ppPtr();
+    const pointField& localPoints = pp.localPoints();
+    const labelList& meshPoints = pp.meshPoints();
+
+    // Find nearest (non-baffle) surface
+    pointField newPoints(mesh_.points());
+    {
+        List<pointIndexHit> hitInfo;
+        labelList hitSurface;
+        surfaces_.findNearest
+        (
+            surfaces_.getUnnamedSurfaces(),
+            localPoints,
+            scalarField(localPoints.size(), sqr(GREAT)),    // sqr of attraction
+            hitSurface,
+            hitInfo
+        );
+    
+        forAll(hitInfo, i)
+        {
+            if (hitInfo[i].hit())
+            {
+                //label pointI = meshPoints[i];
+                //Pout<< "   " << pointI << " moved from "
+                //    << mesh_.points()[pointI] << " by "
+                //    << mag(hitInfo[i].hitPoint()-mesh_.points()[pointI])
+                //    << endl;
+                newPoints[meshPoints[i]] = hitInfo[i].hitPoint();
+            }
+        }
+    }
+
+    // Per face (internal or coupled!) the patch that the
+    // baffle should get (or -1).
+    labelList facePatch(mesh_.nFaces(), -1);
+    // Count of baffled faces
+    label nBaffleFaces = 0;
+
+
+//    // Sync position? Or not since same face on both side so just sync
+//    // result of baffle.
+//
+//    const scalar minArea(readScalar(motionDict.lookup("minArea")));
+//
+//    Pout<< "markFacesOnProblemCellsGeometric : Comparing to minArea:"
+//        << minArea << endl;
+//
+//    pointField facePoints;
+//    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
+//    {
+//        const face& f = mesh_.faces()[faceI];
+//
+//        bool usesPatchPoint = false;
+//
+//        facePoints.setSize(f.size());
+//        forAll(f, fp)
+//        {
+//            Map<label>::const_iterator iter = pp.meshPointMap().find(f[fp]);
+//
+//            if (iter != pp.meshPointMap().end())
+//            {
+//                facePoints[fp] = newPosition[iter()];
+//                usesPatchPoint = true;
+//            }
+//            else
+//            {
+//                facePoints[fp] = mesh_.points()[f[fp]];
+//            }
+//        }
+//
+//        if (usesPatchPoint)
+//        {
+//            // Check area of face wrt original area
+//            face identFace(identity(f.size()));
+//
+//            if (identFace.mag(facePoints) < minArea)
+//            {
+//                facePatch[faceI] = getBafflePatch(facePatch, faceI);
+//                nBaffleFaces++;
+//            }
+//        }
+//    }
+//
+//
+//    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+//    forAll(patches, patchI)
+//    {
+//        const polyPatch& pp = patches[patchI];
+//
+//        if (pp.coupled())
+//        {
+//            forAll(pp, i)
+//            {
+//                label faceI = pp.start()+i;
+//
+//                const face& f = mesh_.faces()[faceI];
+//
+//                bool usesPatchPoint = false;
+//
+//                facePoints.setSize(f.size());
+//                forAll(f, fp)
+//                {
+//                    Map<label>::const_iterator iter =
+//                        pp.meshPointMap().find(f[fp]);
+//
+//                    if (iter != pp.meshPointMap().end())
+//                    {
+//                        facePoints[fp] = newPosition[iter()];
+//                        usesPatchPoint = true;
+//                    }
+//                    else
+//                    {
+//                        facePoints[fp] = mesh_.points()[f[fp]];
+//                    }
+//                }
+//
+//                if (usesPatchPoint)
+//                {
+//                    // Check area of face wrt original area
+//                    face identFace(identity(f.size()));
+//
+//                    if (identFace.mag(facePoints) < minArea)
+//                    {
+//                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
+//                        nBaffleFaces++;
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+    {
+        pointField oldPoints(mesh_.points());
+        mesh_.movePoints(newPoints);
+        faceSet wrongFaces(mesh_, "wrongFaces", 100);
+        {
+            //motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
+
+            // Just check the errors from squashing
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            const labelList allFaces(identity(mesh_.nFaces()));
+            label nWrongFaces = 0;
+
+            scalar minArea(readScalar(motionDict.lookup("minArea")));
+            if (minArea > -SMALL)
+            {
+                polyMeshGeometry::checkFaceArea
+                (
+                    false,
+                    minArea,
+                    mesh_,
+                    mesh_.faceAreas(),
+                    allFaces,
+                    &wrongFaces
+                );
+
+                label nNewWrongFaces = returnReduce
+                (
+                    wrongFaces.size(),
+                    sumOp<label>()
+                );
+
+                Info<< "    faces with area < "
+                    << setw(5) << minArea
+                    << " m^2                            : "
+                    << nNewWrongFaces-nWrongFaces << endl;
+
+                nWrongFaces = nNewWrongFaces;
+            }
+
+//            scalar minDet(readScalar(motionDict.lookup("minDeterminant")));
+            scalar minDet = 0.01;
+            if (minDet > -1)
+            {
+                polyMeshGeometry::checkCellDeterminant
+                (
+                    false,
+                    minDet,
+                    mesh_,
+                    mesh_.faceAreas(),
+                    allFaces,
+                    polyMeshGeometry::affectedCells(mesh_, allFaces),
+                    &wrongFaces
+                );
+
+                label nNewWrongFaces = returnReduce
+                (
+                    wrongFaces.size(),
+                    sumOp<label>()
+                );
+
+                Info<< "    faces on cells with determinant < "
+                    << setw(5) << minDet << "                : "
+                    << nNewWrongFaces-nWrongFaces << endl;
+
+                nWrongFaces = nNewWrongFaces;
+            }
+        }
+
+
+        forAllConstIter(faceSet, wrongFaces, iter)
+        {
+            label patchI = mesh_.boundaryMesh().whichPatch(iter.key());
+
+            if (patchI == -1 || mesh_.boundaryMesh()[patchI].coupled())
+            {
+                facePatch[iter.key()] = getBafflePatch(facePatch, iter.key());
+                nBaffleFaces++;
+
+                //Pout<< "    " << iter.key()
+                //    //<< " on patch " << mesh_.boundaryMesh()[patchI].name()
+                //    << " is destined for patch " << facePatch[iter.key()]
+                //    << endl;
+            }
+        }
+        // Restore points.
+        mesh_.movePoints(oldPoints);
+    }
+
+
+    Info<< "markFacesOnProblemCellsGeometric : marked "
+        << returnReduce(nBaffleFaces, sumOp<label>())
+        << " additional internal and coupled faces"
+        << " to be converted into baffles." << endl;
+
+    syncTools::syncFaceList
+    (
+        mesh_,
+        facePatch,
+        maxEqOp<label>(),
+        false               // no separation
+    );
+
+    return facePatch;
+}
+//XXXXXXXX
 
 
 // Return a list of coupled face pairs, i.e. faces that use the same vertices.
@@ -1554,6 +1812,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 (
     const bool handleSnapProblems,
     const bool mergeFreeStanding,
+    const dictionary& motionDict,
     Time& runTime,
     const labelList& globalToPatch,
     const point& keepPoint
@@ -1584,6 +1843,12 @@ void Foam::meshRefinement::baffleAndSplitMesh
         ownPatch,
         neiPatch
     );
+
+    if (debug)
+    {
+        runTime++;
+    }
+
     createBaffles(ownPatch, neiPatch);
 
     if (debug)
@@ -1621,13 +1886,64 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
         labelList facePatch
         (
-            markFacesOnProblemCells
+            //markFacesOnProblemCells
+            //(
+            //    globalToPatch
+            //)
+            markFacesOnProblemCellsGeometric
             (
+                motionDict,
                 globalToPatch
             )
         );
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
+
+        if (debug)
+        {
+            // Dump all these faces to a faceSet.
+            faceSet problemGeom(mesh_, "problemFacesGeom", 100);
+
+            const labelList facePatchGeom
+            (
+                markFacesOnProblemCellsGeometric
+                (
+                    motionDict,
+                    globalToPatch
+                )
+            );
+            forAll(facePatchGeom, faceI)
+            {
+                if (facePatchGeom[faceI] != -1)
+                {
+                    problemGeom.insert(faceI);
+                }
+            }
+            Pout<< "Dumping " << problemGeom.size()
+                << " problem faces to " << problemGeom.objectPath() << endl;
+            problemGeom.write();
+
+
+            faceSet problemTopo(mesh_, "problemFacesTopo", 100);
+
+            const labelList facePatchTopo
+            (    
+                markFacesOnProblemCells
+                (
+                    globalToPatch
+                )
+            );
+            forAll(facePatchTopo, faceI)
+            {
+                if (facePatchTopo[faceI] != -1)
+                {
+                    problemTopo.insert(faceI);
+                }
+            }
+            Pout<< "Dumping " << problemTopo.size()
+                << " problem faces to " << problemTopo.objectPath() << endl;
+            problemTopo.write();
+        }
 
         Info<< "Introducing baffles to delete problem cells." << nl << endl;
 

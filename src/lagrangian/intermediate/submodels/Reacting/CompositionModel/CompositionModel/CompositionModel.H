@@ -209,11 +209,18 @@ public:
             //- Return the gas constant for the gas mixture
             virtual scalar RGas(const scalarField& YGas) const = 0;
 
-            //- Return enthalpy for the gas mixture
+            //- Return enthalpy for the gas mixture [energy per unit mass]
             virtual scalar HGas
             (
                  const scalarField& YGas,
                  const scalar T
+            ) const = 0;
+
+            //- Return enthalpy for the solid mixture [energy per unit mass]
+            virtual scalar HSolid
+            (
+                const scalarField& YSolid,
+                const scalar T
             ) const = 0;
 
             //- Return specific heat caparcity for the gas mixture

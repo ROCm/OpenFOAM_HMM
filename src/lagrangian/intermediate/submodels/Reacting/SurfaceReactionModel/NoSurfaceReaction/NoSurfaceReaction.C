@@ -64,16 +64,20 @@ void Foam::NoSurfaceReaction<CloudType>::calculate
     const scalar T0,
     const scalar T1,
     const scalar Tc,
+    const scalar pc,
     const scalar rhoc,
     const scalar massp,
+    const scalarList& dMassMT,
     scalarField& YGas,
     scalarField& YLiquid,
     scalarField& YSolid,
     scalarField& YMixture,
-    scalar& dMassMTSR,
-    scalarList& dMassSR
+    scalarList& dMassSR,
+    scalar& dhRet
 ) const
-{}
+{
+    // do nothing
+}
 
 
 // ************************************************************************* //

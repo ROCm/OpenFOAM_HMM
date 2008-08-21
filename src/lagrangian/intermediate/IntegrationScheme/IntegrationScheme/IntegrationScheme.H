@@ -53,6 +53,63 @@ namespace Foam
 template<class Type>
 class IntegrationScheme
 {
+
+public:
+
+    //- Helper class to supply results of integration
+    class integrationResult
+    {
+        //- Integration value
+        Type value_;
+
+        //- Average value across integration step
+        Type average_;
+
+
+    public:
+
+        //- Constructor
+        integrationResult()
+        :
+            value_(pTraits<Type>::zero),
+            average_(pTraits<Type>::zero)
+        {}
+
+
+        // Member functions
+
+            // Access
+
+                //- Return const access to the value
+                Type value() const
+                {
+                    return value_;
+                }
+
+                //- Return const access to the average
+                Type average() const
+                {
+                    return average_;
+                }
+
+
+            // Edit
+
+                //- Return access to the value for changing
+                Type& value()
+                {
+                    return value_;
+                }
+
+                //- Return access to the average for changing
+                Type& average()
+                {
+                    return average_;
+                }
+        };
+
+
+private:
     // Private data
 
         //- Name of the Integration variable
@@ -120,7 +177,7 @@ public:
     // Member Functions
 
         //- Perform the Integration
-        virtual Type integrate
+        virtual integrationResult integrate
         (
             const Type phi,
             const scalar dt,
@@ -151,7 +208,7 @@ public:
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                         \
                                                                               \
-    IntegrationScheme<Type>::adddictionaryConstructorToTable<SS<Type> >          \
+    IntegrationScheme<Type>::adddictionaryConstructorToTable<SS<Type> >       \
         add##SS##Type##ConstructorToTable_;
 
 
