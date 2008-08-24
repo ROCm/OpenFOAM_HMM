@@ -52,6 +52,10 @@ Foam::scalar Foam::moleculeCloud::transTol = 1e-12;
 
 Foam::scalar Foam::moleculeCloud::kb = 1.380650277e-23;
 
+Foam::scalar Foam::moleculeCloud::elementaryCharge = 1.602176487e-19;
+
+Foam::scalar Foam::moleculeCloud::vacuumPermittivity = 8.854187817e-12;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

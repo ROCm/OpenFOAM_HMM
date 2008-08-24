@@ -1,0 +1,3 @@
+mdWaterTest.C
+
+EXE = $(FOAM_APPBIN)/mdWaterTest

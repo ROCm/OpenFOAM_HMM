@@ -142,6 +142,9 @@ public:
 
         static scalar kb;
 
+        static scalar elementaryCharge;
+
+        static scalar vacuumPermittivity;
 
     // Constructors
 
