@@ -50,6 +50,7 @@ License
 #include "globalIndex.H"
 #include "meshTools.H"
 #include "OFstream.H"
+#include "geomDecomp.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -426,15 +427,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
 
 // Determine for multi-processor regions the lowest numbered cell on the lowest
 // numbered processor.
-void Foam::meshRefinement::getRegionMaster
+void Foam::meshRefinement::getCoupledRegionMaster
 (
+    const globalIndex& globalCells,
     const boolList& blockedFace,
     const regionSplit& globalRegion,
     Map<label>& regionToMaster
 ) const
 {
-    globalIndex globalCells(mesh_.nCells());
-
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     forAll(patches, patchI)
@@ -480,6 +480,274 @@ void Foam::meshRefinement::getRegionMaster
     // Do reduction
     Pstream::mapCombineGather(regionToMaster, minEqOp<label>());
     Pstream::mapCombineScatter(regionToMaster);
+}
+
+
+void Foam::meshRefinement::calcLocalRegions
+(
+    const globalIndex& globalCells,
+    const labelList& globalRegion,
+    const Map<label>& coupledRegionToMaster,
+
+    Map<label>& globalToLocalRegion,
+    pointField& localPoints
+) const
+{
+    globalToLocalRegion.resize(globalRegion.size());
+    DynamicList<point> localCc(globalRegion.size()/2);
+
+    forAll(globalRegion, cellI)
+    {
+        Map<label>::const_iterator fndMaster =
+            coupledRegionToMaster.find(globalRegion[cellI]);
+
+        if (fndMaster != coupledRegionToMaster.end())
+        {
+            // Multi-processor region.
+            if (globalCells.toGlobal(cellI) == fndMaster())
+            {
+                // I am master. Allocate region for me.
+                globalToLocalRegion.insert(globalRegion[cellI], localCc.size());
+                localCc.append(mesh_.cellCentres()[cellI]);
+            }
+        }
+        else
+        {
+            // Single processor region.
+            if (globalToLocalRegion.insert(globalRegion[cellI], localCc.size()))
+            {
+                localCc.append(mesh_.cellCentres()[cellI]);
+            }
+        }
+    }
+    localCc.shrink();
+    localPoints.transfer(localCc);
+
+    if (localPoints.size() != globalToLocalRegion.size())
+    {
+        FatalErrorIn("calcLocalRegions(..)")
+            << "localPoints:" << localPoints.size()
+            << " globalToLocalRegion:" << globalToLocalRegion.size()
+            << exit(FatalError);
+    }
+}
+
+
+Foam::label Foam::meshRefinement::getShiftedRegion
+(
+    const globalIndex& indexer,
+    const Map<label>& globalToLocalRegion,
+    const Map<label>& coupledRegionToShifted,
+    const label globalRegion
+)
+{
+    Map<label>::const_iterator iter =
+        globalToLocalRegion.find(globalRegion);
+
+    if (iter != globalToLocalRegion.end())
+    {
+        // Region is 'owned' locally. Convert local region index into global.
+        return indexer.toGlobal(iter());
+    }
+    else
+    {
+        return coupledRegionToShifted[globalRegion];
+    }
+}
+
+
+// Add if not yet present
+void Foam::meshRefinement::addUnique(const label elem, labelList& lst)
+{
+    if (findIndex(lst, elem) == -1)
+    {
+        label sz = lst.size();
+        lst.setSize(sz+1);
+        lst[sz] = elem;
+    }
+}
+
+
+void Foam::meshRefinement::calcRegionRegions
+(
+    const labelList& globalRegion,
+    const Map<label>& globalToLocalRegion,
+    const Map<label>& coupledRegionToMaster,
+    labelListList& regionRegions
+) const
+{
+    // Global region indexing since we now know the shifted regions.
+    globalIndex shiftIndexer(globalToLocalRegion.size());
+
+    // Redo the coupledRegionToMaster to be in shifted region indexing.
+    Map<label> coupledRegionToShifted(coupledRegionToMaster.size());
+    forAllConstIter(Map<label>, coupledRegionToMaster, iter)
+    {
+        label region = iter.key();
+
+        Map<label>::const_iterator fndRegion = globalToLocalRegion.find(region);
+
+        if (fndRegion != globalToLocalRegion.end())
+        {
+            // A local cell is master of this region. Get its shifted region.
+            coupledRegionToShifted.insert
+            (
+                region,
+                shiftIndexer.toGlobal(fndRegion())
+            );
+        }
+        Pstream::mapCombineGather(coupledRegionToShifted, minEqOp<label>());
+        Pstream::mapCombineScatter(coupledRegionToShifted);
+    }
+
+
+    // Determine region-region connectivity.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // This is for all my regions (so my local ones or the ones I am master
+    // of) the neighbouring region indices.
+
+
+    // Transfer lists.
+    PtrList<HashSet<edge, Hash<edge> > > regionConnectivity(Pstream::nProcs());
+    forAll(regionConnectivity, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            regionConnectivity.set
+            (
+                procI,
+                new HashSet<edge, Hash<edge> >
+                (
+                    coupledRegionToShifted.size()
+                  / Pstream::nProcs()
+                )
+            );
+        }
+    }
+
+
+    // Connectivity. For all my local regions the connected regions.
+    regionRegions.setSize(globalToLocalRegion.size());
+
+    // Add all local connectivity to regionRegions; add all non-local
+    // to the transferlists.
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    {
+        label ownRegion = globalRegion[mesh_.faceOwner()[faceI]];
+        label neiRegion = globalRegion[mesh_.faceNeighbour()[faceI]];
+
+        if (ownRegion != neiRegion)
+        {
+            label shiftOwnRegion = getShiftedRegion
+            (
+                shiftIndexer,
+                globalToLocalRegion,
+                coupledRegionToShifted,
+                ownRegion
+            );
+            label shiftNeiRegion = getShiftedRegion
+            (
+                shiftIndexer,
+                globalToLocalRegion,
+                coupledRegionToShifted,
+                neiRegion
+            );
+
+
+            // Connection between two regions. Send to owner of region.
+            // - is ownRegion 'owned' by me
+            // - is neiRegion 'owned' by me
+
+            if (shiftIndexer.isLocal(shiftOwnRegion))
+            {
+                label localI = shiftIndexer.toLocal(shiftOwnRegion);
+                addUnique(shiftNeiRegion, regionRegions[localI]);
+            }
+            else
+            {
+                label masterProc = shiftIndexer.whichProcID(shiftOwnRegion);
+                regionConnectivity[masterProc].insert
+                (
+                    edge(shiftOwnRegion, shiftNeiRegion)
+                );
+            }
+
+            if (shiftIndexer.isLocal(shiftNeiRegion))
+            {
+                label localI = shiftIndexer.toLocal(shiftNeiRegion);
+                addUnique(shiftOwnRegion, regionRegions[localI]);
+            }
+            else
+            {
+                label masterProc = shiftIndexer.whichProcID(shiftNeiRegion);
+                regionConnectivity[masterProc].insert
+                (
+                    edge(shiftOwnRegion, shiftNeiRegion)
+                );
+            }
+        }
+    }
+
+
+    // Send
+    forAll(regionConnectivity, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            OPstream str(Pstream::blocking, procI);
+            str << regionConnectivity[procI];
+        }
+    }
+    // Receive
+    forAll(regionConnectivity, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            IPstream str(Pstream::blocking, procI);
+            str >> regionConnectivity[procI];
+        }
+    }
+
+    // Add to addressing.
+    forAll(regionConnectivity, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            for
+            (
+                HashSet<edge, Hash<edge> >::const_iterator iter =
+                    regionConnectivity[procI].begin();
+                iter != regionConnectivity[procI].end();
+                ++iter
+            )
+            {
+                const edge& e = iter.key();
+
+                bool someLocal = false;
+                if (shiftIndexer.isLocal(e[0]))
+                {
+                    label localI = shiftIndexer.toLocal(e[0]);
+                    addUnique(e[1], regionRegions[localI]);
+                    someLocal = true;
+                }
+                if (shiftIndexer.isLocal(e[1]))
+                {
+                    label localI = shiftIndexer.toLocal(e[1]);
+                    addUnique(e[0], regionRegions[localI]);
+                    someLocal = true;
+                }
+
+                if (!someLocal)
+                {
+                    FatalErrorIn("calcRegionRegions(..)")
+                        << "Received from processor " << procI
+                        << " connection " << e
+                        << " where none of the elements is local to me."
+                        << abort(FatalError);
+                }
+            }
+        }
+    }
 }
 
 
@@ -598,88 +866,88 @@ Foam::labelList Foam::meshRefinement::decomposeCombineRegions
     // the region might span multiple domains so we want to get
     // a "region master" per domain. Note that multi-processor
     // regions can only occur on cells on coupled patches.
-
-
-    // Determine per coupled region the master cell (lowest numbered cell
-    // on lowest numbered processor)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Map<label> regionToMaster(mesh_.nFaces()-mesh_.nInternalFaces());
-    getRegionMaster(blockedFace, globalRegion, regionToMaster);
+    // Note: since the number of regions does not change by this the
+    // process can be seen as just a shift of a region onto a single
+    // processor.
 
 
     // Global cell numbering engine
     globalIndex globalCells(mesh_.nCells());
 
 
-    // Determine cell centre per region
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Now we can divide regions into
-    // - single-processor regions (almost all)
-    //   - allocate local region + coordinate for it
-    // - multi-processor for which I am master
-    //   - allocate local region + coordinate for it
-    // - multi-processor for which I am not master
-    //   - do not allocate region.
-    //   - but inherit new distribution from master.
+    // Determine per coupled region the master cell (lowest numbered cell
+    // on lowest numbered processor)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // (does not determine master for non-coupled=fully-local regions)
 
-    Map<label> globalToLocalRegion(mesh_.nCells());
-    DynamicList<point> localCc(mesh_.nCells()/10);
+    Map<label> coupledRegionToMaster(mesh_.nFaces()-mesh_.nInternalFaces());
+    getCoupledRegionMaster
+    (
+        globalCells,
+        blockedFace,
+        globalRegion,
+        coupledRegionToMaster
+    );
 
-    forAll(globalRegion, cellI)
-    {
-        Map<label>::const_iterator fndMaster =
-            regionToMaster.find(globalRegion[cellI]);
+    // Determine my regions
+    // ~~~~~~~~~~~~~~~~~~~~
+    // These are the fully local ones or the coupled ones of which I am master.
 
-        if (fndMaster != regionToMaster.end())
-        {
-            // Multi-processor region.
-            if (globalCells.toGlobal(cellI) == fndMaster())
-            {
-                // I am master. Allocate region for me.
-                globalToLocalRegion.insert(globalRegion[cellI], localCc.size());
-                localCc.append(mesh_.cellCentres()[cellI]);
-            }
-        }
-        else
-        {
-            // Single processor region.
-            Map<label>::iterator iter =
-                globalToLocalRegion.find(globalRegion[cellI]);
-
-            if (iter == globalToLocalRegion.end())
-            {
-                globalToLocalRegion.insert(globalRegion[cellI], localCc.size());
-                localCc.append(mesh_.cellCentres()[cellI]);
-            }
-        }
-    }
-    localCc.shrink();
+    Map<label> globalToLocalRegion;
     pointField localPoints;
-    localPoints.transfer(localCc);
+    calcLocalRegions
+    (
+        globalCells,
+        globalRegion,
+        coupledRegionToMaster,
+
+        globalToLocalRegion,
+        localPoints
+    );
 
 
-    // Call decomposer on localCc
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList localDistribution = decomposer.decompose(localPoints);
+    // Find distribution for regions
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    labelList regionDistribution;
 
-    // Distribute the destination processor for coupled regions
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Map<label> regionToDist(regionToMaster.size());
-
-    forAllConstIter(Map<label>, regionToMaster, iter)
+    if (isA<geomDecomp>(decomposer))
     {
-        if (globalCells.isLocal(iter()))
+        regionDistribution = decomposer.decompose(localPoints);
+    }
+    else
+    {
+        labelListList regionRegions;
+        calcRegionRegions
+        (
+            globalRegion,
+            globalToLocalRegion,
+            coupledRegionToMaster,
+
+            regionRegions
+        );
+
+        regionDistribution = decomposer.decompose(regionRegions, localPoints);
+    }
+
+
+
+    // Convert region-based decomposition back to cell-based one
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Transfer destination processor back to all. Use global reduce for now.
+    Map<label> regionToDist(coupledRegionToMaster.size());
+    forAllConstIter(Map<label>, coupledRegionToMaster, iter)
+    {
+        label region = iter.key();
+
+        Map<label>::const_iterator regionFnd = globalToLocalRegion.find(region);
+
+        if (regionFnd != globalToLocalRegion.end())
         {
-            // Master cell is local.
-            regionToDist.insert
-            (
-                iter.key(),
-                localDistribution[globalToLocalRegion[iter.key()]]
-            );
+            // Master cell is local. Store my distribution.
+            regionToDist.insert(iter.key(), regionDistribution[regionFnd()]);
         }
         else
         {
@@ -691,29 +959,27 @@ Foam::labelList Foam::meshRefinement::decomposeCombineRegions
     Pstream::mapCombineScatter(regionToDist);
 
 
-    // Convert region-based decomposition back to cell-based one
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    // Determine destination for all cells
     labelList distribution(mesh_.nCells());
 
     forAll(globalRegion, cellI)
     {
-        Map<label>::const_iterator fndMaster =
+        Map<label>::const_iterator fndRegion =
             regionToDist.find(globalRegion[cellI]);
 
-        if (fndMaster != regionToDist.end())
+        if (fndRegion != regionToDist.end())
         {
-            // Special handling
-            distribution[cellI] = fndMaster();
+            distribution[cellI] = fndRegion();
         }
         else
         {
             // region is local to the processor.
             label localRegionI = globalToLocalRegion[globalRegion[cellI]];
 
-            distribution[cellI] = localDistribution[localRegionI];
+            distribution[cellI] = regionDistribution[localRegionI];
         }
     }
+
     return distribution;
 }
 
@@ -839,9 +1105,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
         if (debug)
         {
-            Pout<< "Wanted distribution:"
-                << distributor.countCells(distribution)
-                << endl;
+            labelList nProcCells(distributor.countCells(distribution));
+            Pout<< "Wanted distribution:" << nProcCells << endl;
+
+            Pstream::listCombineGather(nProcCells, plusEqOp<label>());
+            Pstream::listCombineScatter(nProcCells);
+
+            Pout<< "Wanted resulting decomposition:" << endl;
+            forAll(nProcCells, procI)
+            {
+                Pout<< "    " << procI << '\t' << nProcCells[procI] << endl;
+            }
+            Pout<< endl;
         }
         // Do actual sending/receiving of mesh
         map = distributor.distribute(distribution);

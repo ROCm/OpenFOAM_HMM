@@ -176,7 +176,12 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 
     inject(td);
 
-    this->move(td);
+    if (this->coupled())
+    {
+        resetSourceTerms();
+    }
+
+    Cloud<ParcelType>::move(td);
 }
 
 

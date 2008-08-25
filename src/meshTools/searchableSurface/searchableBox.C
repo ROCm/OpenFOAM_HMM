@@ -436,7 +436,6 @@ void Foam::searchableBox::findLineAll
     // Work array
     DynamicList<pointIndexHit, 1, 1> hits;
 
-//XXX
     // Tolerances:
     // To find all intersections we add a small vector to the last intersection
     // This is chosen such that

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    rhoSimpleFoam
+    rhoPimpleFoam
 
 Description
     Transient solver for turbulent flow of compressible fluids for

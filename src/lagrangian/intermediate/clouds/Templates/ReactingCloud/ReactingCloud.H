@@ -204,7 +204,7 @@ public:
             //- Reset the spray source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (move, inject)
+            //- Evolve the spray (inject, move)
             void evolve();
 };
 

@@ -1294,6 +1294,169 @@ void Foam::autoSnapDriver::scaleMesh
 }
 
 
+// After snapping: correct patching according to nearest surface.
+// Code is very similar to calcNearestSurface.
+// - calculate face-wise snap distance as max of point-wise
+// - calculate face-wise nearest surface point
+// - repatch face according to patch for surface point.
+Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
+(
+    const snapParameters& snapParams,
+    const labelList& adaptPatchIDs
+)
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
+
+    Info<< "Repatching faces according to nearest surface ..." << endl;
+
+    // Get the labels of added patches.
+    autoPtr<indirectPrimitivePatch> ppPtr
+    (
+        meshRefinement::makePatch
+        (
+            mesh,
+            adaptPatchIDs
+        )
+    );
+    indirectPrimitivePatch& pp = ppPtr();
+
+    // Divide surfaces into zoned and unzoned
+    labelList zonedSurfaces;
+    labelList unzonedSurfaces;
+    getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
+
+
+    // Faces that do not move
+    PackedList<1> isZonedFace(mesh.nFaces(), 0);
+    {
+        // 1. All faces on zoned surfaces
+        const wordList& faceZoneNames = surfaces.faceZoneNames();
+        const faceZoneMesh& fZones = mesh.faceZones();
+
+        forAll(zonedSurfaces, i)
+        {
+            label zoneSurfI = zonedSurfaces[i];
+
+            label zoneI = fZones.findZoneID(faceZoneNames[zoneSurfI]);
+
+            const faceZone& fZone = fZones[zoneI];
+
+            forAll(fZone, i)
+            {
+                isZonedFace.set(fZone[i], 1);
+            }  
+        }
+    }
+
+
+    // Determine per pp face which patch it should be in
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Patch that face should be in
+    labelList closestPatch(pp.size(), -1);
+    {
+        // face snap distance as max of point snap distance
+        scalarField faceSnapDist(pp.size(), -GREAT);
+        {
+            // Distance to attract to nearest feature on surface
+            const scalarField snapDist(calcSnapDistance(snapParams, pp));
+
+            const faceList& localFaces = pp.localFaces();
+
+            forAll(localFaces, faceI)
+            {
+                const face& f = localFaces[faceI];
+
+                forAll(f, fp)
+                {
+                    faceSnapDist[faceI] = max
+                    (
+                        faceSnapDist[faceI],
+                        snapDist[f[fp]]
+                    );
+                }
+            }
+        }
+
+        pointField localFaceCentres(pp.size());
+        forAll(pp, i)
+        {
+            localFaceCentres[i] = mesh.faceCentres()[pp.addressing()[i]];
+        }
+
+        // Get nearest surface and region
+        labelList hitSurface;
+        labelList hitRegion;
+        surfaces.findNearestRegion
+        (
+            unzonedSurfaces,
+            localFaceCentres,
+            sqr(4*faceSnapDist),    // sqr of attract distance
+            hitSurface,
+            hitRegion
+        );
+
+        // Get patch
+        forAll(pp, i)
+        {
+            label faceI = pp.addressing()[i];
+
+            if (hitSurface[i] != -1 && (isZonedFace.get(faceI) == 0))
+            {
+                closestPatch[i] = globalToPatch_
+                [
+                    surfaces.globalRegion
+                    (
+                        hitSurface[i],
+                        hitRegion[i]
+                    )
+                ];
+            }
+        }
+    }
+
+
+    // Change those faces for which there is a different closest patch
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList ownPatch(mesh.nFaces(), -1);
+    labelList neiPatch(mesh.nFaces(), -1);
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        forAll(pp, i)
+        {
+            ownPatch[pp.start()+i] = patchI;
+            neiPatch[pp.start()+i] = patchI;
+        }
+    }
+
+    label nChanged = 0;
+    forAll(closestPatch, i)
+    {
+        label faceI = pp.addressing()[i];
+
+        if (closestPatch[i] != -1 && closestPatch[i] != ownPatch[faceI])
+        {
+            ownPatch[faceI] = closestPatch[i];
+            neiPatch[faceI] = closestPatch[i];
+            nChanged++;
+        }
+    }
+
+    Info<< "Repatched " << returnReduce(nChanged, sumOp<label>())
+        << " faces in = " << mesh.time().cpuTimeIncrement() << " s\n" << nl
+        << endl;
+
+    return meshRefiner_.createBaffles(ownPatch, neiPatch);
+}
+
+
 void Foam::autoSnapDriver::doSnap
 (
     const dictionary& snapDict,
@@ -1329,7 +1492,7 @@ void Foam::autoSnapDriver::doSnap
         );
         indirectPrimitivePatch& pp = ppPtr();
 
-        // Distance to attact to nearest feature on surface
+        // Distance to attract to nearest feature on surface
         const scalarField snapDist(calcSnapDistance(snapParams, pp));
 
 
@@ -1383,6 +1546,9 @@ void Foam::autoSnapDriver::doSnap
 
     // Merge any introduced baffles.
     mergeZoneBaffles(baffles);
+
+    // Repatch faces according to nearest.
+    repatchToSurface(snapParams, adaptPatchIDs);
 }
 
 
