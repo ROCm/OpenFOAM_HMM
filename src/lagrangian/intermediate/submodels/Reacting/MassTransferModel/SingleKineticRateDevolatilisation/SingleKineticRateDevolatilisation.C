@@ -63,13 +63,6 @@ bool Foam::SingleKineticRateDevolatilisation<CloudType>::active() const
 
 
 template<class CloudType>
-bool Foam::SingleKineticRateDevolatilisation<CloudType>::changesVolume() const
-{
-    return false;
-}
-
-
-template<class CloudType>
 Foam::scalar Foam::SingleKineticRateDevolatilisation<CloudType>::calculate
 (
     const scalar dt,

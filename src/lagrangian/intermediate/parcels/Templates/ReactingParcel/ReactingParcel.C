@@ -191,13 +191,13 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
           + YMixture_[2]*td.cloud().composition().cpSolid(YSolid_);
 
         // Update particle density or diameter
-        if (td.cloud().massTransfer().changesVolume())
+        if (td.constProps().constantVolume())
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
+            this->rho_ = mass1/this->volume();
         }
         else
         {
-            this->rho_ = mass1/this->volume();
+            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
         }
     }
 }
@@ -296,13 +296,13 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
         this->cp_ = cp1;
 
         // Update particle density or diameter
-        if (td.cloud().massTransfer().changesVolume())
+        if (td.constProps().constantVolume())
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
+            this->rho_ = mass1/this->volume();
         }
         else
         {
-            this->rho_ = mass1/this->volume();
+            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
         }
     }
 }
