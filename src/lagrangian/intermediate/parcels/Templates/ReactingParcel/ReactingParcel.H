@@ -92,6 +92,9 @@ public:
             //- Latent heat of devolatilisation [J/kg]
             const scalar Ldevol_;
 
+            //- Constant volume flag - e.g. during mass transfer
+            Switch constantVolume_;
+
 
     public:
 
@@ -108,6 +111,9 @@ public:
 
             //- Return const access to the latent heat of devolatilisation
             inline scalar Ldevol() const;
+
+            //- Return const access to the constant volume flag
+            inline Switch constantVolume() const;
     };
 
 
