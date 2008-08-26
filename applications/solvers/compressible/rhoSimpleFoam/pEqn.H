@@ -16,12 +16,13 @@ if (transonic)
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pEqn0
+        fvScalarMatrix pEqn
         (
             fvm::div(phid, p)
           - fvm::laplacian(rho*rUA, p)
         );
-        fvScalarMatrix pEqn = pEqn0;
+
+        // Relax the pressure equation to ensure diagonal-dominance
         pEqn.relax(mesh.relaxationFactor("pEqn"));
 
         pEqn.setReference(pRefCell, pRefValue);
@@ -39,14 +40,13 @@ if (transonic)
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi == pEqn0.flux();
+            phi == pEqn.flux();
         }
     }
 }
 else
 {
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
-    //phi = fvc::interpolate(rho*U) & mesh.Sf();
     closedVolume = adjustPhi(phi, U, p);
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -58,7 +58,7 @@ else
 
         pEqn.setReference(pRefCell, pRefValue);
 
-        // retain the residual from the first iteration
+        // Retain the residual from the first iteration
         if (nonOrth == 0)
         {
             eqnResidual = pEqn.solve().initialResidual();
