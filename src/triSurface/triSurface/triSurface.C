@@ -31,6 +31,7 @@ License
 #include "Time.H"
 #include "boundBox.H"
 #include "SortableList.H"
+#include "PackedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -745,6 +746,26 @@ triSurface::triSurface
 
 triSurface::triSurface
 (
+    List<labelledTri>& triangles,
+    const geometricSurfacePatchList& patches,
+    pointField& points,
+    const bool reUse
+)
+:
+    PrimitivePatch<labelledTri, ::Foam::List, pointField>
+    (
+        triangles,
+        points,
+        reUse
+    ),
+    patches_(patches),
+    sortedEdgeFacesPtr_(NULL),
+    edgeOwnerPtr_(NULL)
+{}
+
+
+triSurface::triSurface
+(
     const List<labelledTri>& triangles,
     const pointField& points
 )
@@ -1148,9 +1169,7 @@ triSurface triSurface::subsetMesh
     }
 
     // Construct subsurface
-    triSurface subSurface(newTriangles, patches(), newPoints);
-
-    return subSurface;
+    return triSurface(newTriangles, patches(), newPoints, true);
 }
 
 
@@ -1187,30 +1206,36 @@ void triSurface::write(const Time& d) const
 
 void triSurface::writeStats(Ostream& os) const
 {
-    // Calculate bounding box without any additional addressing
-    // Copy of treeBoundBox code. Cannot use meshTools from triSurface...
+    // Unfortunately nPoints constructs meshPoints() so do compact version
+    // ourselves.
+    PackedList<1> pointIsUsed(points().size());
+    pointIsUsed = 0U;
+
+    label nPoints = 0;
     boundBox bb
     (
         point(VGREAT, VGREAT, VGREAT),
         point(-VGREAT, -VGREAT, -VGREAT)
     );
+
     forAll(*this, triI)
     {
         const labelledTri& f = operator[](triI);
 
         forAll(f, fp)
         {
-            const point& pt = points()[f[fp]];
-            bb.min() = ::Foam::min(bb.min(), pt);
-            bb.max() = ::Foam::max(bb.max(), pt);
+            label pointI = f[fp];
+            if (pointIsUsed.set(pointI, 1))
+            {
+                bb.min() = ::Foam::min(bb.min(), points()[pointI]);
+                bb.max() = ::Foam::max(bb.max(), points()[pointI]);
+                nPoints++;
+            }
         }
     }
 
-    // Unfortunately nPoints constructs meshPoints() ...
-
     os  << "Triangles    : " << size() << endl
-        //<< "Edges        : " << nEdges() << endl
-        << "Vertices     : " << nPoints() << endl
+        << "Vertices     : " << nPoints << endl
         << "Bounding Box : " << bb << endl;
 }
 
