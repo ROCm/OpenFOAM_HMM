@@ -32,7 +32,7 @@ Foam::CV3D::controls::controls(const dictionary& controlDict)
 :
     minCellSize(readScalar(controlDict.lookup("minCellSize"))),
     minCellSize2(Foam::sqr(minCellSize)),
-    featAngle(readScalar(controlDict.lookup("featureAngle"))),
+    includedAngle(readScalar(controlDict.lookup("includedAngle"))),
     maxQuadAngle(readScalar(controlDict.lookup("maxQuadAngle"))),
     insertSurfaceNearestPointPairs
     (

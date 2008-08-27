@@ -29,7 +29,11 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::querySurface::querySurface(const fileName& surfaceFileName)
+Foam::querySurface::querySurface
+(
+    const fileName& surfaceFileName,
+    const scalar& includedAngle
+)
 :
     triSurface(surfaceFileName),
     rndGen_(12345),
@@ -41,7 +45,8 @@ Foam::querySurface::querySurface(const fileName& surfaceFileName)
         8,                         // maxLevel
         4, //10,                   // leafsize
         10.0 //3.0                 // duplicity
-    )
+    ),
+    sFeat_(*this, includedAngle)
 {}
 
 
@@ -53,71 +58,41 @@ Foam::querySurface::~querySurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::querySurface::extractFeatures
-(
-    const scalar featAngle,
-    labelList& featPoints,
-    labelListList& featPointFeatEdges
-) const
+Foam::labelListList Foam::querySurface::featurePointFeatureEdges() const
 {
-    scalar featCos = cos(mathematicalConstant::pi*featAngle/180.0);
+    const labelList& featPoints = features().featurePoints();
 
-    const labelListList& edgeFaces = this->edgeFaces();
-    const labelListList& pointEdges = this->pointEdges();
-    const pointField& localPoints = this->localPoints();
-    // const edgeList& edges = this->edges();
-    const vectorField& faceNormals = this->faceNormals();
+    const labelList& featEdges = features().featureEdges();
 
-    DynamicList<label> tempFeatPoints(localPoints.size());
+    const edgeList& edges = this->edges();
 
-    DynamicList<DynamicList<label> > tempFeatPointFeatEdges(localPoints.size());
+    List<DynamicList<label> > tempFeatPointFeatEdges(featPoints.size());
 
-    forAll(pointEdges, ptI)
+    forAll(featPoints, pI)
     {
-        // const point& p = localPoints[ptI];
+        label fP = featPoints[pI];
 
-        // const vector& pNormal = pointNormals[ptI];
-
-        const labelList& pEdges = pointEdges[ptI];
-
-        DynamicList<label> tempFeatEdges(0);
-
-        forAll(pEdges, pE)
+        forAll(featEdges, eI)
         {
-            label edgeI = pEdges[pE];
+            label fE = featEdges[eI];
 
-            const labelList& eFaces = edgeFaces[edgeI];
+            const edge& e(edges[fE]);
 
-            if
-            (
-                eFaces.size() == 2
-                && (faceNormals[eFaces[0]] & faceNormals[eFaces[1]]) < featCos
-            )
+            if (e.start() == fP || e.end() == fP)
             {
-                tempFeatEdges.append(edgeI);
+                tempFeatPointFeatEdges[pI].append(fE);
             }
-        }
-
-        tempFeatEdges.shrink();
-
-        if(tempFeatEdges.size() > 2)
-        {
-            tempFeatPoints.append(ptI);
-
-            tempFeatPointFeatEdges.append(tempFeatEdges);
         }
     }
 
-    featPoints.transfer(tempFeatPoints.shrink());
-
-    tempFeatPointFeatEdges.shrink();
-
-    featPointFeatEdges.setSize(tempFeatPointFeatEdges.size());
+    labelListList featPointFeatEdges(tempFeatPointFeatEdges.size());
 
     forAll(featPointFeatEdges, fPFE)
     {
         featPointFeatEdges[fPFE].transfer(tempFeatPointFeatEdges[fPFE].shrink());
     }
+
+    return featPointFeatEdges;
 }
 
 Foam::indexedOctree<Foam::treeDataTriSurface>::volumeType

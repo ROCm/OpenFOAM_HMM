@@ -207,7 +207,7 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
                     }
                 }
 
-               if (!internalFeatureEdge && dualCellSurfaceIntersection(vit))
+                if (!internalFeatureEdge && dualCellSurfaceIntersection(vit))
                 {
                     nearSurfacePoints.append(vert);
                     surfacePoints.append(pHit.hitPoint());

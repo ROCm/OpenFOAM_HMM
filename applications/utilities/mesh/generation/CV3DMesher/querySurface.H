@@ -39,6 +39,7 @@ SourceFiles
 #include "triSurface.H"
 #include "treeDataTriSurface.H"
 #include "indexedOctree.H"
+#include "surfaceFeatures.H"
 #include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -64,6 +65,8 @@ class querySurface
         // Search engine on surface
         indexedOctree<treeDataTriSurface> tree_;
 
+        surfaceFeatures sFeat_;
+
 
     // Private Member Functions
 
@@ -79,7 +82,11 @@ public:
     // Constructors
 
         //- Construct given file name of the surface
-        querySurface(const fileName& surfaceFileName);
+        querySurface
+        (
+            const fileName& surfaceFileName,
+            const scalar& includedAngle
+        );
 
 
     // Destructor
@@ -101,17 +108,15 @@ public:
                 return tree_;
             }
 
+            const surfaceFeatures& features() const
+            {
+                return sFeat_;
+            }
+
 
         // Query
 
-            //- Extract feature edges/points
-            //  using the given feature angle in deg
-            void extractFeatures
-            (
-                const scalar featAngle,
-                labelList& featPoints,
-                labelListList& featPointFeatEdges
-            ) const;
+            labelListList featurePointFeatureEdges() const;
 
             //- Returns inside, outside or mixed (= close to surface)
             indexedOctree<Foam::treeDataTriSurface>::volumeType insideOutside

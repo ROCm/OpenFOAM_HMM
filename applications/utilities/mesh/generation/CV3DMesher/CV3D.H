@@ -85,8 +85,8 @@ public:
 
         //- The feature angle used to select corners to be
         //  explicitly represented in the mesh.
-        //  0 = all features, 180 = no features
-        scalar featAngle;
+        //  0 = no features, 180 = all features
+        scalar includedAngle;
 
         //- Maximum quadrant angle allowed at a concave corner before
         //  additional "mitering" lines are added

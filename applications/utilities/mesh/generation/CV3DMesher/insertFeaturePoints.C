@@ -38,17 +38,10 @@ void Foam::CV3D::insertFeaturePoints()
     const edgeList& edges = qSurf_.edges();
     const pointField& localPts = qSurf_.localPoints();
 
-    labelList featPoints(0);
-    labelListList featPointFeatEdges(0);
+    const labelList& featPoints = qSurf_.features().featurePoints();
+    labelListList featPointFeatEdges = qSurf_.featurePointFeatureEdges();
 
-    qSurf_.extractFeatures
-    (
-        controls_.featAngle,
-        featPoints,
-        featPointFeatEdges
-    );
-
-    scalar planeErrorAngle = 0.1*controls_.featAngle;
+    scalar planeErrorAngle = 0.1*(180.0 - controls_.includedAngle);
 
     scalar planeErrorAngleCos = cos(mathematicalConstant::pi*planeErrorAngle/180.0);
 
@@ -57,7 +50,7 @@ void Foam::CV3D::insertFeaturePoints()
         label ptI = featPoints[i];
         const point& featPt = localPts[ptI];
 
-        Info<< nl <<"Feature at " << featPt << endl;;
+        Info<< nl <<"Feature at " << featPt << endl;
 
         const labelList& featEdges = featPointFeatEdges[i];
 
