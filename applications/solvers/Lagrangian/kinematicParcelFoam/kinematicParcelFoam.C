@@ -22,56 +22,56 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    kinematicParcelFoam
+
+Description
+    Transient solver a single kinematicCloud.
+
 \*---------------------------------------------------------------------------*/
 
-#include "NoMassTransfer.H"
+#include "fvCFD.H"
+#include "basicThermo.H"
+#include "compressible/RASModel/RASModel.H"
+#include "basicKinematicCloud.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoMassTransfer<CloudType>::NoMassTransfer
-(
-    const dictionary& dict,
-    CloudType& cloud
-)
-:
-    MassTransferModel<CloudType>(dict, cloud, typeName)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::NoMassTransfer<CloudType>::~NoMassTransfer()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoMassTransfer<CloudType>::active() const
+int main(int argc, char *argv[])
 {
-    return false;
-}
+    argList::validOptions.insert("cloudName", "cloud name");
 
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "compressibleCourantNo.H"
 
-template<class CloudType>
-Foam::scalar Foam::NoMassTransfer<CloudType>::calculate
-(
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalarField&,
-    const scalarField&,
-    const scalar,
-    bool& canCombust
-) const
-{
-    // Model does not stop combustion taking place
-    canCombust = true;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Nothing more to do...
-    return 0.0;
+    Info<< "\nStarting time loop\n" << endl;
+
+    while (runTime.run())
+    {
+        runTime++;
+
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        Info<< "Evolving " << kinematicCloud.name() << endl;
+        kinematicCloud.evolve();
+        kinematicCloud.info();
+
+        runTime.write();
+
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
+    }
+
+    Info<< "End\n" << endl;
+
+    return(0);
 }
 
 
