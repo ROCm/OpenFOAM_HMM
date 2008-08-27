@@ -350,6 +350,13 @@ public:
             //  alpha is read from controlDict
             void relax();
 
+            //- Manipulate based on a boundary field
+            void boundaryManipulate
+            (
+                typename GeometricField<Type, fvPatchField, volMesh>::
+                    GeometricBoundaryField& values
+            );
+
             //- Construct and return the solver
             //  Solver controls read from Istream
             autoPtr<fvSolver> solver(Istream&);
@@ -386,7 +393,7 @@ public:
 
             //- Return the face-flux field from the matrix
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-            flux() const;
+                flux() const;
 
 
     // Member operators

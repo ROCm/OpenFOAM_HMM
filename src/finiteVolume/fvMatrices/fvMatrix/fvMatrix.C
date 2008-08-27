@@ -456,10 +456,10 @@ void Foam::fvMatrix<Type>::setValues
 
                     if (internalCoeffs_[patchi].size())
                     {
-                        label patchFacei = 
+                        label patchFacei =
                             mesh.boundaryMesh()[patchi].whichFace(facei);
 
-                        internalCoeffs_[patchi][patchFacei] = 
+                        internalCoeffs_[patchi][patchFacei] =
                             pTraits<Type>::zero;
 
                         boundaryCoeffs_[patchi][patchFacei] =
@@ -592,6 +592,20 @@ void Foam::fvMatrix<Type>::relax()
 
 
 template<class Type>
+void Foam::fvMatrix<Type>::boundaryManipulate
+(
+    typename GeometricField<Type, fvPatchField, volMesh>::
+        GeometricBoundaryField& bFields
+)
+{
+    forAll(bFields, patchI)
+    {
+        bFields[patchI].manipulateMatrix(*this);
+    }
+}
+
+
+template<class Type>
 Foam::tmp<Foam::scalarField> Foam::fvMatrix<Type>::D() const
 {
     tmp<scalarField> tdiag(new scalarField(diag()));
@@ -653,7 +667,7 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::A() const
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> > 
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
 Foam::fvMatrix<Type>::H() const
 {
     tmp<GeometricField<Type, fvPatchField, volMesh> > tHphi
@@ -838,7 +852,7 @@ flux() const
 
     forAll(fieldFlux.boundaryField(), patchI)
     {
-        fieldFlux.boundaryField()[patchI] = 
+        fieldFlux.boundaryField()[patchI] =
             InternalContrib[patchI] - NeighbourContrib[patchI];
     }
 
@@ -1255,7 +1269,7 @@ Foam::lduMatrix::solverPerformance Foam::solve
     Istream& solverControls
 )
 {
-    lduMatrix::solverPerformance solverPerf = 
+    lduMatrix::solverPerformance solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve(solverControls);
 
     tfvm.clear();
