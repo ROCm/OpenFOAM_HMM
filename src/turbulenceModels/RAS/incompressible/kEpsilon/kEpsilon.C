@@ -117,9 +117,21 @@ kEpsilon::kEpsilon
         mesh_
     ),
 
-    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    )
 {
-#   include "wallViscosityI.H"
+    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -207,9 +219,10 @@ void kEpsilon::correct()
 
     RASModel::correct();
 
-    volScalarField G = nut_*2*magSqr(symm(fvc::grad(U_)));
+    volScalarField G("G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -225,7 +238,7 @@ void kEpsilon::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -250,9 +263,7 @@ void kEpsilon::correct()
 
     // Re-calculate viscosity
     nut_ = Cmu_*sqr(k_)/epsilon_;
-
-#   include "wallViscosityI.H"
-
+    nut_.correctBoundaryConditions();
 }
 
 

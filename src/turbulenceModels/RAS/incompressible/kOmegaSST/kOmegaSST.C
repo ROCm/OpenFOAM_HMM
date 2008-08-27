@@ -237,9 +237,27 @@ kOmegaSST::kOmegaSST
         mesh_
     ),
 
-    nut_(a1_*k_/max(a1_*(omega_ + omegaSmall_), F2()*mag(symm(fvc::grad(U_)))))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    )
 {
-#   include "kOmegaWallViscosityI.H"
+    nut_ ==
+        a1_*k_
+       /max
+        (
+            a1_*(omega_ + omegaSmall_),
+            F2()*mag(symm(fvc::grad(U_)))
+        );
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -341,9 +359,10 @@ void kOmegaSST::correct()
     }
 
     volScalarField S2 = magSqr(symm(fvc::grad(U_)));
-    volScalarField G = nut_*2*S2;
+    volScalarField G("G", nut_*2*S2);
 
-#   include "kOmegaWallFunctionsI.H"
+    // Update omega and G at the wall
+    omega_.boundaryField().updateCoeffs();
 
     volScalarField CDkOmega =
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
@@ -369,7 +388,7 @@ void kOmegaSST::correct()
 
     omegaEqn().relax();
 
-#   include "wallOmegaI.H"
+    omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
     bound(omega_, omega0_);
@@ -393,9 +412,7 @@ void kOmegaSST::correct()
 
     // Re-calculate viscosity
     nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
-
-#   include "kOmegaWallViscosityI.H"
-
+    nut_.correctBoundaryConditions();
 }
 
 

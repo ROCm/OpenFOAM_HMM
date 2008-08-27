@@ -204,9 +204,21 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         mesh_
     ),
 
-    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    )
 {
-#   include "wallViscosityI.H"
+    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
 
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
@@ -321,9 +333,10 @@ void LaunderGibsonRSTM::correct()
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G = 0.5*tr(P);
+    volScalarField G("G", 0.5*tr(P));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -339,7 +352,7 @@ void LaunderGibsonRSTM::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -411,9 +424,7 @@ void LaunderGibsonRSTM::correct()
 
     // Re-calculate turbulent viscosity
     nut_ = Cmu_*sqr(k_)/epsilon_;
-
-
-#   include "wallViscosityI.H"
+    nut_.correctBoundaryConditions();
 
 
     // Correct wall shear stresses
