@@ -26,8 +26,9 @@ Class
     Foam::incompressible::RASModels::nutWallFunctionFvPatchScalarField
 
 Description
-    Wall function boundary condition
-    - replicates OpenFOAM v1.5 (and lower) behaviour
+    Boundary condition for turbulent (kinematic) viscosity when using wall
+    functions
+    - replicates OpenFOAM v1.5 (and earlier) behaviour
 
 SourceFiles
     nutWallFunctionFvPatchScalarField.C

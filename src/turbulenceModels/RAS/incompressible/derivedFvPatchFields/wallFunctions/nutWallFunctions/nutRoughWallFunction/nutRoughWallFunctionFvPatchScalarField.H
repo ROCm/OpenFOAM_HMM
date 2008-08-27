@@ -26,7 +26,11 @@ Class
     Foam::incompressible::RASModels::nutRoughWallFunctionFvPatchScalarField
 
 Description
-    Rough wall function boundary condition
+    Boundary condition for turbulent (kinematic) viscosity when using wall
+    functions for rough walls.
+
+    Manipulates the E parameter to account for roughness effects, based on
+    KsPlus.
 
 SourceFiles
     nutRoughWallFunctionFvPatchScalarField.C

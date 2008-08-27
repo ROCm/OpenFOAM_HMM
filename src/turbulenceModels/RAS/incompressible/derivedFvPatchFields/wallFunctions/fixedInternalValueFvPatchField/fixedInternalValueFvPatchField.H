@@ -26,6 +26,9 @@ Class
     fixedInternalValueFvPatchField
 
 Description
+    Boundary condition providing mechanism to set boundary (cell) values
+    directly into a matrix, i.e. to set a constraint condition. Default
+    behaviour is to act as a zero gradient condition.
 
 SourceFiles
     fixedInternalValueFvPatchField.C

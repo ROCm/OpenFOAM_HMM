@@ -82,8 +82,8 @@ RASModel::RASModel
     turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDict(type + "Coeffs")),
-    wallFunctionDict_(subDict("wallFunctionCoeffs")),
 
+    wallFunctionDict_(subDict("wallFunctionCoeffs")),
     kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict

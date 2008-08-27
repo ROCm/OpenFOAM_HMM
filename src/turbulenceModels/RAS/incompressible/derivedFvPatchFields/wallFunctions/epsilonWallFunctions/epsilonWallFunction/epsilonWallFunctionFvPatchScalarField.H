@@ -26,7 +26,9 @@ Class
     Foam::epsilonWallFunctionFvPatchScalarField
 
 Description
-    Replaces functionality in wallFunctionsI.H
+    Boundary condition for epsilon when using wall functions
+    - calculates epsilon and G
+    - epsilon values added directly into the matrix to act as a constraint
 
 SourceFiles
     epsilonWallFunctionFvPatchScalarField.C

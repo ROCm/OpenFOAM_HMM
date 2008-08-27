@@ -26,6 +26,8 @@ Class
     Foam::kWallFunctionFvPatchScalarField
 
 Description
+    Boundary condition for turbulence kinetic energy when using wall functions.
+    Simply acts as a zero gradient condition.
 
 SourceFiles
     kWallFunctionFvPatchScalarField.C
