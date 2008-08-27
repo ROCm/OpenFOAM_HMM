@@ -75,9 +75,6 @@ Description
 
 SourceFiles
     kOmegaSST.C
-    kOmegaWallFunctionsI.H
-    kOmegaWallViscosityI.H
-    wallOmegaI.H
 
 \*---------------------------------------------------------------------------*/
 
