@@ -44,6 +44,10 @@ SourceFiles
 
 namespace Foam
 {
+namespace incompressible
+{
+namespace RASModels
+{
 
 /*---------------------------------------------------------------------------*\
               Class fixedInternalValueFvPatchField Declaration
@@ -162,6 +166,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

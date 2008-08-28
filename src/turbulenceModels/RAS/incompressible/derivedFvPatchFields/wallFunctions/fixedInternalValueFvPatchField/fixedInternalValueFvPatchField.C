@@ -26,10 +26,15 @@ License
 
 #include "fixedInternalValueFvPatchField.H"
 #include "fvPatchFieldMapper.H"
+#include "fvMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace incompressible
+{
+namespace RASModels
 {
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -179,6 +184,8 @@ void fixedInternalValueFvPatchField<Type>::manipulateMatrix
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

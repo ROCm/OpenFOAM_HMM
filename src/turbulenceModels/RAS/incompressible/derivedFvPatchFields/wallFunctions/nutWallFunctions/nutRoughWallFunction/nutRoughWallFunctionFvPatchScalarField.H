@@ -77,7 +77,7 @@ class nutRoughWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("nutWallFunction");
+    TypeName("nutRoughWallFunction");
 
 
     // Constructors

@@ -33,6 +33,10 @@ License
 
 namespace Foam
 {
+namespace incompressible
+{
+namespace RASModels
+{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,6 +44,8 @@ makePatchFields(fixedInternalValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //
