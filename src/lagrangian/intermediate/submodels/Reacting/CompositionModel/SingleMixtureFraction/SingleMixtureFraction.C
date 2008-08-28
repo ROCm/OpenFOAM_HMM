@@ -520,6 +520,29 @@ const
 
 
 template<class CloudType>
+Foam::scalar Foam::SingleMixtureFraction<CloudType>::HSolid
+(
+    const scalarField& YSolid,
+    const scalar T
+)
+const
+{
+    scalar HMixture = 0.0;
+    forAll(YSolid, i)
+    {
+        label id = solidGlobalIds_[i];
+        HMixture +=
+            YSolid[i]
+           *(
+                this->solids().properties()[id].Hf()
+              + this->solids().properties()[id].cp()*T
+            );
+    }
+    return HMixture;
+}
+
+
+template<class CloudType>
 Foam::scalar Foam::SingleMixtureFraction<CloudType>::cpGas
 (
     const scalarField& YGas,

@@ -109,7 +109,6 @@ private:
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
-//        const Time& runTime_;
 
         //- Reference to the interpolation for the carrier phase to the parcels
         const volPointInterpolation& vpi_;
@@ -257,18 +256,11 @@ protected:
             ParcelType* p
         );
 
-        //- Move the parcels
-        template<class TrackingData>
-        void move(TrackingData& td);
-
         //- Post-injection checks
         void postInjectCheck();
 
 
 public:
-
-    //- Runtime type information
-//    TypeName("KinematicCloud");
 
     // Constructors
 
@@ -284,9 +276,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~KinematicCloud();
+    //- Destructor
+    virtual ~KinematicCloud();
 
 
     // Member Functions
@@ -395,7 +386,6 @@ public:
                     inline tmp<fvVectorMatrix> SU2(volVectorField& U) const;
 
 
-
         // Check
 
             //- Total mass injected
@@ -436,7 +426,7 @@ public:
             //- Reset the spray source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (move, inject)
+            //- Evolve the spray (inject, inject)
             void evolve();
 };
 

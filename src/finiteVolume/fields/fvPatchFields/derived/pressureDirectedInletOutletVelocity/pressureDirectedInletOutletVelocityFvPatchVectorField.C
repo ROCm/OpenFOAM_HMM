@@ -45,6 +45,8 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
+    phiName_("phi"),
+    rhoName_("rho"),
     inletDir_(p.size())
 {
     refValue() = *this;
@@ -63,6 +65,8 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
+    phiName_(ptf.phiName_),
+    rhoName_(ptf.rhoName_),
     inletDir_(ptf.inletDir_, mapper)
 {}
 
@@ -76,6 +80,8 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     inletDir_("inletDirection", dict, p.size())
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
@@ -92,6 +98,8 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(pivpvf),
+    phiName_(pivpvf.phiName_),
+    rhoName_(pivpvf.rhoName_),
     inletDir_(pivpvf.inletDir_)
 {}
 
@@ -104,6 +112,8 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(pivpvf, iF),
+    phiName_(pivpvf.phiName_),
+    rhoName_(pivpvf.rhoName_),
     inletDir_(pivpvf.inletDir_)
 {}
 
@@ -129,7 +139,8 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::rmap
     mixedFvPatchVectorField::rmap(ptf, addr);
 
     const pressureDirectedInletOutletVelocityFvPatchVectorField& tiptf =
-        refCast<const pressureDirectedInletOutletVelocityFvPatchVectorField>(ptf);
+        refCast<const pressureDirectedInletOutletVelocityFvPatchVectorField>
+        (ptf);
 
     inletDir_.rmap(tiptf.inletDir_, addr);
 }
@@ -143,7 +154,7 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::updateCoeffs()
     }
 
     const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>("phi");
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
@@ -158,7 +169,7 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::updateCoeffs()
     else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>("rho");
+            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
         refValue() = inletDir_*phip/(rhop*ndmagS);
     }
@@ -185,8 +196,25 @@ void pressureDirectedInletOutletVelocityFvPatchVectorField::
 write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     inletDir_.writeEntry("inletDirection", os);
     writeEntry("value", os);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void pressureDirectedInletOutletVelocityFvPatchVectorField::operator=
+(
+    const fvPatchField<vector>& pvf
+)
+{
+    fvPatchField<vector>::operator=
+    (
+        valueFraction()*(inletDir_*(inletDir_ & pvf))
+      + (1 - valueFraction())*pvf
+    );
 }
 
 

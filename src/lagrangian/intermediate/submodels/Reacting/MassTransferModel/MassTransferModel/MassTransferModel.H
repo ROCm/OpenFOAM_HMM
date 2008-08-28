@@ -130,9 +130,6 @@ public:
         //- Flag to indicate whether model activates mass transfer model
         virtual bool active() const = 0;
 
-        //- Flag to indicate whether model changes particle volume
-        virtual bool changesVolume() const = 0;
-
         //- Update model
         virtual scalar calculate
         (

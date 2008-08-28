@@ -22,48 +22,56 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    kinematicParcelFoam
+
+Description
+    Transient solver a single kinematicCloud.
+
 \*---------------------------------------------------------------------------*/
 
-#include "Analytical.H"
-#include "addToRunTimeSelectionTable.H"
+#include "fvCFD.H"
+#include "basicThermo.H"
+#include "compressible/RASModel/RASModel.H"
+#include "basicKinematicCloud.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Analytical<Type>::Analytical
-(
-    const word& phiName,
-    const dictionary& dict
-)
-:
-    IntegrationScheme<Type>(phiName, dict)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Analytical<Type>::~Analytical()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-typename Foam::IntegrationScheme<Type>::integrationResult
-Foam::Analytical<Type>::integrate
-(
-    const Type phi,
-    const scalar dt,
-    const Type alpha,
-    const scalar beta
-) const
+int main(int argc, char *argv[])
 {
-    typename IntegrationScheme<Type>::integrationResult retValue;
-    retValue.average() = alpha + (phi - alpha)*(1 - exp(-beta*dt))/(beta*dt);
-    retValue.value() =  alpha + (phi - alpha)*exp(-beta*dt);
+    argList::validOptions.insert("cloudName", "cloud name");
 
-    return retValue;
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "compressibleCourantNo.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    Info<< "\nStarting time loop\n" << endl;
+
+    while (runTime.run())
+    {
+        runTime++;
+
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        Info<< "Evolving " << kinematicCloud.name() << endl;
+        kinematicCloud.evolve();
+        kinematicCloud.info();
+
+        runTime.write();
+
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
+    }
+
+    Info<< "End\n" << endl;
+
+    return(0);
 }
 
 

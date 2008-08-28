@@ -1,40 +1,92 @@
-volScalarField AU = UEqn().A();
-U = UEqn().H()/AU;
-UEqn.clear();
-phi = fvc::interpolate(rho*U) & mesh.Sf();
-bool closedVolume = adjustPhi(phi, U, p);
+rho = thermo->rho();
 
-for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+volScalarField rUA = 1.0/UEqn().A();
+U = rUA*UEqn().H();
+UEqn.clear();
+
+bool closedVolume = false;
+
+if (transonic)
 {
-    fvScalarMatrix pEqn
+    surfaceScalarField phid
     (
-        fvm::laplacian(rho/AU, p) == fvc::div(phi)
+        "phid",
+        fvc::interpolate(thermo->psi())*(fvc::interpolate(U) & mesh.Sf())
     );
 
-    pEqn.setReference(pRefCell, pRefValue);
-    // retain the residual from the first iteration
-    if (nonOrth == 0)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        eqnResidual = pEqn.solve().initialResidual();
-        maxResidual = max(eqnResidual, maxResidual);
-    }
-    else
-    {
-        pEqn.solve();
-    }
+        fvScalarMatrix pEqn
+        (
+            fvm::div(phid, p)
+          - fvm::laplacian(rho*rUA, p)
+        );
 
-    if (nonOrth == nNonOrthCorr)
-    {
-        phi -= pEqn.flux();
+        // Relax the pressure equation to ensure diagonal-dominance
+        pEqn.relax(mesh.relaxationFactor("pEqn"));
+
+        pEqn.setReference(pRefCell, pRefValue);
+
+        // retain the residual from the first iteration
+        if (nonOrth == 0)
+        {
+            eqnResidual = pEqn.solve().initialResidual();
+            maxResidual = max(eqnResidual, maxResidual);
+        }
+        else
+        {
+            pEqn.solve();
+        }
+
+        if (nonOrth == nNonOrthCorr)
+        {
+            phi == pEqn.flux();
+        }
     }
 }
+else
+{
+    phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
+    closedVolume = adjustPhi(phi, U, p);
+
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    {
+        fvScalarMatrix pEqn
+        (
+            fvm::laplacian(rho*rUA, p) == fvc::div(phi)
+        );
+
+        pEqn.setReference(pRefCell, pRefValue);
+
+        // Retain the residual from the first iteration
+        if (nonOrth == 0)
+        {
+            eqnResidual = pEqn.solve().initialResidual();
+            maxResidual = max(eqnResidual, maxResidual);
+        }
+        else
+        {
+            pEqn.solve();
+        }
+
+        if (nonOrth == nNonOrthCorr)
+        {
+            phi -= pEqn.flux();
+        }
+    }
+}
+
 
 #include "incompressible/continuityErrs.H"
 
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-U -= fvc::grad(p)/AU;
+rho = thermo->rho();
+rho.relax();
+Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;
+
+U -= rUA*fvc::grad(p);
 U.correctBoundaryConditions();
 
 bound(p, pMin);
@@ -46,7 +98,3 @@ if (closedVolume)
     p += (initialMass - fvc::domainIntegrate(thermo->psi()*p))
         /fvc::domainIntegrate(thermo->psi());
 }
-
-rho = thermo->rho();
-rho.relax();
-Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;

@@ -61,13 +61,6 @@ bool Foam::ConstantRateDevolatilisation<CloudType>::active() const
 
 
 template<class CloudType>
-bool Foam::ConstantRateDevolatilisation<CloudType>::changesVolume() const
-{
-    return false;
-}
-
-
-template<class CloudType>
 Foam::scalar Foam::ConstantRateDevolatilisation<CloudType>::calculate
 (
     const scalar dt,

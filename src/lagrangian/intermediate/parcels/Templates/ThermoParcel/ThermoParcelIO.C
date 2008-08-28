@@ -149,10 +149,7 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const KinematicParcel<ParcelType>& >(p);
         os.write
         (
-            reinterpret_cast<const char*>
-            (
-                &const_cast<ThermoParcel<ParcelType>&>(p).T()
-            ),
+            reinterpret_cast<const char*>(&p.T_),
             sizeof(p.T()) + sizeof(p.cp())
         );
     }
