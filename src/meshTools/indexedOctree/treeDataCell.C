@@ -137,11 +137,11 @@ bool Foam::treeDataCell::overlaps
 {
     if (cacheBb_)
     {
-        return cubeBb.intersects(bbs_[index]);
+        return cubeBb.overlaps(bbs_[index]);
     }
     else
     {
-        return cubeBb.intersects(calcCellBb(cellLabels_[index]));
+        return cubeBb.overlaps(calcCellBb(cellLabels_[index]));
     }
 }
 

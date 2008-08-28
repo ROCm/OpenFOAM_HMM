@@ -54,7 +54,7 @@ bool Foam::treeLeaf<Foam::octreeDataTriSurface>::findNearest
         label faceI = indices_[i];
 
         // Quick rejection test.
-        if (tightest.intersects(allBb[faceI]))
+        if (tightest.overlaps(allBb[faceI]))
         {
             // Full calculation
             scalar dist = shapes.calcNearest(faceI, sample, nearest);

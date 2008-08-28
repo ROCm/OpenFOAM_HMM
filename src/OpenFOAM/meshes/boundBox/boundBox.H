@@ -118,7 +118,7 @@ public:
         // Query
 
             //- Intersects other boundingbox?
-            bool intersects(const boundBox& bb) const
+            bool overlaps(const boundBox& bb) const
             {
                 if
                 (

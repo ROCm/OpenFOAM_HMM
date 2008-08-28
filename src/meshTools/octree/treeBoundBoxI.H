@@ -24,9 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "treeBoundBox.H"
-#include "point.H"
 #include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -414,9 +412,9 @@ inline void treeBoundBox::searchOrder
 
 // true if bb's intersect or overlap.
 // Note: <= to make sure we catch all.
-inline bool treeBoundBox::intersects(const treeBoundBox& bb) const
+inline bool treeBoundBox::overlaps(const treeBoundBox& bb) const
 {
-    return boundBox::intersects(bb);
+    return boundBox::overlaps(bb);
 }
 
 
