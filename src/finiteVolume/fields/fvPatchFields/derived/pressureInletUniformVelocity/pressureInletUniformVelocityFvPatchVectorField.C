@@ -108,6 +108,17 @@ void pressureInletUniformVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void pressureInletUniformVelocityFvPatchVectorField::operator=
+(
+    const fvPatchField<vector>& pvf
+)
+{
+    operator==(patch().nf()*sum(patch().Sf() & pvf)/sum(patch().magSf()));
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makePatchTypeField

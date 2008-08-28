@@ -29,6 +29,8 @@ License
 #include "ListListOps.H"
 #include "meshSearch.H"
 #include "mapDistribute.H"
+#include "meshTools.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,16 +49,18 @@ void Foam::directMappedPolyPatch::collectSamples
 (
     pointField& samples,
     labelList& patchFaceProcs,
-    labelList& patchFaces
+    labelList& patchFaces,
+    pointField& patchFc
 ) const
 {
-    const vectorField::subField fc = this->faceCentres();
 
     // Collect all sample points and the faces they come from.
+    List<pointField> globalFc(Pstream::nProcs());
     List<pointField> globalSamples(Pstream::nProcs());
     labelListList globalFaces(Pstream::nProcs());
 
-    globalSamples[Pstream::myProcNo()] = fc+offset_;
+    globalFc[Pstream::myProcNo()] = this->faceCentres();
+    globalSamples[Pstream::myProcNo()] = globalFc[Pstream::myProcNo()]+offset_;
     globalFaces[Pstream::myProcNo()] = identity(size());
 
     // Distribute to all processors
@@ -64,6 +68,8 @@ void Foam::directMappedPolyPatch::collectSamples
     Pstream::scatterList(globalSamples);
     Pstream::gatherList(globalFaces);
     Pstream::scatterList(globalFaces);
+    Pstream::gatherList(globalFc);
+    Pstream::scatterList(globalFc);
 
     // Rework into straight list
     samples = ListListOps::combine<pointField>
@@ -75,6 +81,11 @@ void Foam::directMappedPolyPatch::collectSamples
     (
         globalFaces,
         accessOp<labelList>()
+    );
+    patchFc = ListListOps::combine<pointField>
+    (
+        globalFc,
+        accessOp<pointField>()
     );
 
     patchFaceProcs.setSize(patchFaces.size());
@@ -103,11 +114,14 @@ void Foam::directMappedPolyPatch::findSamples
 (
     const pointField& samples,
     labelList& sampleCellProcs,
-    labelList& sampleCells
+    labelList& sampleCells,
+    pointField& sampleCc
 ) const
 {
     sampleCellProcs.setSize(samples.size());
     sampleCells.setSize(samples.size());
+    sampleCc.setSize(samples.size());
+    sampleCc = point(-GREAT, -GREAT, -GREAT);
 
     {
         // Octree based search engine
@@ -124,6 +138,8 @@ void Foam::directMappedPolyPatch::findSamples
             else
             {
                 sampleCellProcs[sampleI] = Pstream::myProcNo();
+                sampleCc[sampleI] =
+                    boundaryMesh().mesh().cellCentres()[sampleCells[sampleI]];
             }
         }
     }
@@ -136,6 +152,9 @@ void Foam::directMappedPolyPatch::findSamples
     Pstream::listCombineGather(sampleCellProcs, maxEqOp<label>());
     Pstream::listCombineScatter(sampleCellProcs);
 
+    Pstream::listCombineGather(sampleCc, maxEqOp<point>());
+    Pstream::listCombineScatter(sampleCc);
+
     if (debug)
     {
         Info<< "directMappedPolyPatch::findSamples : " << endl;
@@ -143,7 +162,8 @@ void Foam::directMappedPolyPatch::findSamples
         {
             Info<< "    " << sampleI << " coord:" << samples[sampleI]
                 << " found on processor:" << sampleCellProcs[sampleI]
-                << " in cell:" << sampleCells[sampleI] << endl;
+                << " in cell:" << sampleCells[sampleI]
+                << " with cc:" << sampleCc[sampleI] << endl;
         }
     }
 
@@ -213,12 +233,14 @@ void Foam::directMappedPolyPatch::calcMapping() const
     pointField samples;
     labelList patchFaceProcs;
     labelList patchFaces;
-    collectSamples(samples, patchFaceProcs, patchFaces);
+    pointField patchFc;
+    collectSamples(samples, patchFaceProcs, patchFaces, patchFc);
 
     // Find processor and cell samples are in
     labelList sampleCellProcs;
     labelList sampleCells;
-    findSamples(samples, sampleCellProcs, sampleCells);
+    pointField sampleCc;
+    findSamples(samples, sampleCellProcs, sampleCells, sampleCc);
 
 
     // Now we have all the data we need:
@@ -226,6 +248,60 @@ void Foam::directMappedPolyPatch::calcMapping() const
     //   patchFaces, patchFaceProcs.
     // - cell sample is in (so source when mapping)
     //   sampleCells, sampleCellProcs.
+
+
+    if (debug && Pstream::master())
+    {
+        OFstream str
+        (
+            boundaryMesh().mesh().time().path()
+          / name()
+          + "_directMapped.obj"
+        );
+        Pout<< "Dumping mapping as lines from patch faceCentres to"
+            << " sampled cellCentres to file " << str.name() << endl;
+
+        label vertI = 0;
+
+        forAll(patchFc, i)
+        {
+            meshTools::writeOBJ(str, patchFc[i]);
+            vertI++;
+            meshTools::writeOBJ(str, sampleCc[i]);
+            vertI++;
+            str << "l " << vertI-1 << ' ' << vertI << nl;
+        }
+    }
+
+
+    // Check that actual offset vector (sampleCc - patchFc) is more or less
+    // constant.
+    if (Pstream::master())
+    {
+        const scalarField magOffset(mag(sampleCc - patchFc));
+        const scalar avgOffset(average(magOffset));
+
+        forAll(magOffset, sampleI)
+        {
+            if (mag(magOffset[sampleI]-avgOffset) > 0.001*avgOffset)
+            {
+                WarningIn("directMappedPolyPatch::calcMapping() const")
+                    << "The actual cell centres picked up using offset "
+                    << offset_ << " are not" << endl
+                    << "    on a single plane."
+                    << " This might give numerical problems." << endl
+                    << "    At patchface " << patchFc[sampleI]
+                    << " the sampled cell " << sampleCc[sampleI] << endl
+                    << "    is not on a plane " << avgOffset
+                    << " offset from the patch." << endl
+                    << "    You might want to shift your plane offset."
+                    << " Set the debug flag to get a dump of sampled cells."
+                    << endl;
+                break;
+            }
+        }
+    }
+
 
     // Determine schedule.
     mapDistribute distMap(sampleCellProcs, patchFaceProcs);

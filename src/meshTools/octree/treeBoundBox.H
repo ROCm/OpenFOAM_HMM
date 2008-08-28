@@ -263,8 +263,11 @@ public:
                  FixedList<direction, 8>& octantOrder
             ) const;
 
-            //- Intersects other boundingbox?
-            inline bool intersects(const treeBoundBox&) const;
+            //- Overlaps other boundingbox?
+            inline bool overlaps(const treeBoundBox&) const;
+
+            //- Overlaps boundingSphere (centre + sqr(radius))?
+            bool overlaps(const point&, const scalar radiusSqr) const;
 
             //- Intersects segment; set point to intersection position,
             //  return true if intersection found.

@@ -36,9 +36,9 @@ SourceFiles
 #ifndef indexedOctree_H
 #define indexedOctree_H
 
+#include "treeBoundBox.H"
 #include "pointIndexHit.H"
 #include "FixedList.H"
-#include "treeBoundBox.H"
 #include "Ostream.H"
 #include "labelHashSet.H"
 #include "labelBits.H"
@@ -146,7 +146,7 @@ private:
 
         //- Like above but now bb is implicitly provided as parent bb + mid
         //  + octant
-        static bool intersects
+        static bool overlaps
         (
             const treeBoundBox& parentBb,
             const direction octant,
@@ -497,7 +497,7 @@ public:
 
             //- Helper: does bb intersect a sphere around sample? Or is any
             //  corner point of bb closer than nearestDistSqr to sample.
-            static bool intersects
+            static bool overlaps
             (
                 const point& bbMin,
                 const point& bbMax,

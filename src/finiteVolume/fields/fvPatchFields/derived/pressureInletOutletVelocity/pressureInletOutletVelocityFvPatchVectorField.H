@@ -26,7 +26,10 @@ Class
     Foam::pressureInletOutletVelocityFvPatchVectorField
 
 Description
-    Foam::pressureInletOutletVelocityFvPatchVectorField
+    Velocity inlet/outlet boundary condition patches for where the pressure is
+    specified.  zero-gradient is applied for outflow (as defined by the flux)
+    and for inflow the velocity is obtained from the patch-face normal
+    component of the internal-cell value.
 
 SourceFiles
     pressureInletOutletVelocityFvPatchVectorField.C
