@@ -101,82 +101,11 @@ fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void fixedInternalValueFvPatchField<Type>::evaluate(const Pstream::commsTypes)
-{
-    if (!this->updated())
-    {
-        this->updateCoeffs();
-    }
-
-    Info<< "fixedInternalValueFvPatchField<Type>::evaluate" << endl;
-    zeroGradientFvPatchField<Type>::evaluate();
-}
-
-
-template<class Type>
-tmp<Field<Type> > fixedInternalValueFvPatchField<Type>::valueInternalCoeffs
-(
-    const tmp<scalarField>&
-) const
-{
-    Info<< "fixedInternalValueFvPatchField<Type>::valueInternalCoeffs" << endl;
-    return tmp<Field<Type> >
-    (
-        new Field<Type>(this->size(), pTraits<Type>::one)
-    );
-}
-
-
-template<class Type>
-tmp<Field<Type> > fixedInternalValueFvPatchField<Type>::valueBoundaryCoeffs
-(
-    const tmp<scalarField>&
-) const
-{
-    Info<< "fixedInternalValueFvPatchField<Type>::valueBoundaryCoeffs" << endl;
-//    return tmp<Field<Type> >
-//    (
-//        new Field<Type>(this->size(), pTraits<Type>::zero)
-//    );
-    return this->patchInternalField();
-}
-
-
-template<class Type>
-tmp<Field<Type> > fixedInternalValueFvPatchField<Type>::
-gradientInternalCoeffs() const
-{
-    Info<< "fixedInternalValueFvPatchField<Type>::gradientInternalCoeffs"
-        << endl;
-    return tmp<Field<Type> >
-    (
-        new Field<Type>(this->size(), pTraits<Type>::zero)
-    );
-}
-
-
-template<class Type>
-tmp<Field<Type> > fixedInternalValueFvPatchField<Type>::
-gradientBoundaryCoeffs() const
-{
-    Info<< "fixedInternalValueFvPatchField<Type>::gradientBoundaryCoeffs"
-        << endl;
-    return tmp<Field<Type> >
-    (
-        new Field<Type>(this->size(), pTraits<Type>::zero)
-    );
-}
-
-
-template<class Type>
 void fixedInternalValueFvPatchField<Type>::manipulateMatrix
 (
     fvMatrix<Type>& matrix
 )
 {
-    Info<< "fixedInternalValueFvPatchField<Type>::manipulateMatrix(...)"
-        << endl;
-
     // Apply the patch internal field as a constraint in the matrix
     matrix.setValues(this->patch().faceCells(), this->patchInternalField());
 }

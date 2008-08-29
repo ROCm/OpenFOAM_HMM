@@ -112,7 +112,7 @@ void nutWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField& y = ras.y()[patch().index()];
 
-    const scalarField& k = db().lookupObject<volScalarField>("k");
+    const volScalarField& k = db().lookupObject<volScalarField>("k");
 
     const scalarField& nuw =
         patch().lookupPatchField<volScalarField, scalar>("nu");
@@ -123,7 +123,7 @@ void nutWallFunctionFvPatchScalarField::updateCoeffs()
     {
         label faceCellI = patch().faceCells()[faceI];
 
-        scalar yPlus = Cmu25*y[faceCellI]*sqrt(k[faceCellI])/nuw[faceI];
+        scalar yPlus = Cmu25*y[faceI]*sqrt(k[faceCellI])/nuw[faceI];
 
         if (yPlus > yPlusLam)
         {

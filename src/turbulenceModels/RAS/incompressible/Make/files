@@ -31,7 +31,7 @@ derivedFvPatchFields/wallFunctions/epsilonWallFunctions/epsilonWallFunction/epsi
 
 derivedFvPatchFields/wallFunctions/omegaWallFunctions/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
 
-derivedFvPatchFields/wallFunctions/kWallFunctions/kWallFunction/kWallFunctionFvPatchScalarField.C
+derivedFvPatchFields/wallFunctions/kQRWallFunctions/kQRWallFunction/kQRWallFunctionFvPatchFields.C
 
 
 /* Patch fields */

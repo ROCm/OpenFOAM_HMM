@@ -128,7 +128,7 @@ RASModel::~RASModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar RASModel::yPlusLam(const scalar kappa, const scalar E)
+scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 {
     scalar ypl = 11.0;
 
@@ -150,9 +150,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo) const
 
     if (typeid(curPatch) == typeid(wallFvPatch))
     {
-        scalar Cmu(readScalar(coeffDict_.lookup("Cmu")));
-
-        Yp = pow(Cmu, 0.25)*y_[patchNo]
+        Yp = pow(Cmu_.value(), 0.25)*y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
             /nu().boundaryField()[patchNo];
     }
@@ -161,9 +159,9 @@ tmp<scalarField> RASModel::yPlus(const label patchNo) const
         WarningIn
         (
             "tmp<scalarField> RASModel::yPlus(const label patchNo)"
-        )   << "const : " << endl
-            << "Patch " << patchNo << " is not a wall.  Returning blank field"
-            << endl;
+        )   << "const : " << nl
+            << "Patch " << patchNo << " is not a wall.  Returning zero field"
+            << nl << endl;
 
         Yp.setSize(0);
     }
@@ -187,9 +185,11 @@ bool RASModel::read()
     {
         lookup("turbulence") >> turbulence_;
         coeffDict_ = subDict(type() + "Coeffs");
+        wallFunctionDict_ = subDict("wallFunctionCoeffs");
 
-        kappa_.readIfPresent(subDict("wallFunctionCoeffs"));
-        E_.readIfPresent(subDict("wallFunctionCoeffs"));
+        kappa_.readIfPresent(wallFunctionDict_);
+        E_.readIfPresent(wallFunctionDict_);
+        Cmu_.readIfPresent(wallFunctionDict_);
 
         yPlusLam_ = yPlusLam(kappa_.value(), E_.value());
 

@@ -140,7 +140,7 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     volScalarField& epsilon = const_cast<volScalarField&>
         (db().lookupObject<volScalarField>("epsilon"));
 
-    const scalarField& k = db().lookupObject<volScalarField>("k");
+    const volScalarField& k = db().lookupObject<volScalarField>("k");
 
     const scalarField& nuw =
         patch().lookupPatchField<volScalarField, scalar>("nu");
@@ -158,9 +158,9 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     {
         label faceCellI = patch().faceCells()[faceI];
 
-        scalar yPlus = Cmu25*y[faceCellI]*sqrt(k[faceCellI])/nuw[faceI];
+        scalar yPlus = Cmu25*y[faceI]*sqrt(k[faceCellI])/nuw[faceI];
 
-        epsilon[faceCellI] = Cmu75*pow(k[faceCellI], 1.5)/(kappa*y[faceCellI]);
+        epsilon[faceCellI] = Cmu75*pow(k[faceCellI], 1.5)/(kappa*y[faceI]);
 
         if (yPlus > yPlusLam)
         {
@@ -168,7 +168,11 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
                 (nutw[faceI] + nuw[faceI])
                *magGradUw[faceI]
                *Cmu25*sqrt(k[faceCellI])
-               /(kappa*y[faceCellI]);
+               /(kappa*y[faceI]);
+        }
+        else
+        {
+            G[faceCellI] = 0.0;
         }
     }
 

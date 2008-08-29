@@ -93,7 +93,6 @@ protected:
         dimensionedScalar E_;
         dimensionedScalar Cmu_;
 
-        scalar yPlusLam(const scalar kappa, const scalar E);
         scalar yPlusLam_;
 
         dimensionedScalar k0_;
@@ -235,6 +234,9 @@ public:
             {
                 return y_;
             }
+
+            //- Calculate y+ at the edge of the laminar sublayer
+            scalar yPlusLam(const scalar kappa, const scalar E) const;
 
             //- Return y+ at the edge of the laminar sublayer
             //  for use in wall-functions

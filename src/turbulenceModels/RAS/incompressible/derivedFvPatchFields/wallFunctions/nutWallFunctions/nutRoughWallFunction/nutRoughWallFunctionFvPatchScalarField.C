@@ -45,6 +45,7 @@ namespace RASModels
 scalar nutRoughWallFunctionFvPatchScalarField::fnRough
 (
     const scalar KsPlus,
+    const scalar Cs,
     const scalar kappa
 ) const
 {
@@ -58,15 +59,15 @@ scalar nutRoughWallFunctionFvPatchScalarField::fnRough
     {
         deltaB =
             1.0/kappa
-            *log((KsPlus - 2.25)/87.75 + Cs_*KsPlus)
+            *log((KsPlus - 2.25)/87.75 + Cs*KsPlus)
             *sin(0.4258*(log(KsPlus) - 0.811));
     }
     else
     {
-        deltaB = 1.0/kappa*(1.0 + Cs_*KsPlus);
+        deltaB = 1.0/kappa*log(1.0 + Cs*KsPlus);
     }
 
-    return exp(deltaB*kappa);
+    return exp(min(deltaB*kappa, 50.0));
 }
 
 
@@ -80,8 +81,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Ks_(0.0),
-    Cs_(0.0)
+    Ks_(p.size(), 0.0),
+    Cs_(p.size(), 0.0)
 {}
 
 
@@ -95,8 +96,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    Ks_(ptf.Ks_),
-    Cs_(ptf.Cs_)
+    Ks_(ptf.Ks_, mapper),
+    Cs_(ptf.Cs_, mapper)
 {}
 
 
@@ -109,8 +110,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Ks_(readScalar(dict.lookup("Ks"))),
-    Cs_(readScalar(dict.lookup("Cs")))
+    Ks_("Ks", dict, p.size()),
+    Cs_("Cs", dict, p.size())
 {}
 
 
@@ -133,11 +134,40 @@ nutRoughWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(nrwfpsf, iF)
+    fixedValueFvPatchScalarField(nrwfpsf, iF),
+    Ks_(nrwfpsf.Ks_),
+    Cs_(nrwfpsf.Cs_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void nutRoughWallFunctionFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchScalarField::autoMap(m);
+    Ks_.autoMap(m);
+    Cs_.autoMap(m);
+}
+
+
+void nutRoughWallFunctionFvPatchScalarField::rmap
+(
+    const fvPatchScalarField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchScalarField::rmap(ptf, addr);
+
+    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf =
+        refCast<const nutRoughWallFunctionFvPatchScalarField>(ptf);
+
+    Cs_.rmap(nrwfpsf.Cs_, addr);
+    Ks_.rmap(nrwfpsf.Ks_, addr);
+}
+
 
 void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 {
@@ -147,7 +177,6 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
     const scalar Cmu25 = pow(Cmu, 0.25);
     const scalar kappa = ras.kappa().value();
     const scalar E = ras.E().value();
-    const scalar yPlusLam = ras.yPlusLam();
 
     const scalarField& y = ras.y()[patch().index()];
 
@@ -164,11 +193,13 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 
         scalar uStar = Cmu25*sqrt(k[faceCellI]);
 
-        scalar yPlus = uStar*y[faceCellI]/nuw[faceI];
+        scalar yPlus = uStar*y[faceI]/nuw[faceI];
 
-        scalar KsPlus = uStar*Ks_/nuw[faceI];
+        scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
 
-        scalar Edash = E/fnRough(KsPlus, kappa);
+        scalar Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
+
+        scalar yPlusLam = ras.yPlusLam(kappa, Edash);
 
         if (yPlus > yPlusLam)
         {

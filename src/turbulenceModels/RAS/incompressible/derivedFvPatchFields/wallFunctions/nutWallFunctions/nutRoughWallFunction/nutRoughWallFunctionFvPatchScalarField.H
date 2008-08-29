@@ -32,6 +32,9 @@ Description
     Manipulates the E parameter to account for roughness effects, based on
     KsPlus.
 
+    - roughness height = sand-grain roughness (0 for smooth walls)
+    - roughness constant = 0.5-1.0 (0.5 default)
+
 SourceFiles
     nutRoughWallFunctionFvPatchScalarField.C
 
@@ -62,16 +65,21 @@ class nutRoughWallFunctionFvPatchScalarField
     // Private data
 
         //- Roughness height
-        scalar Ks_;
+        scalarField Ks_;
 
         //- Roughness constant
-        scalar Cs_;
+        scalarField Cs_;
 
 
     // Private member functions
 
         //- Compute the roughness function
-        scalar fnRough(const scalar KsPlus, const scalar kappa) const;
+        scalar fnRough
+        (
+            const scalar KsPlus,
+            const scalar Cs,
+            const scalar kappa
+        ) const;
 
 
 public:
@@ -144,6 +152,21 @@ public:
 
 
     // Member functions
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
 
         // Evaluation functions
 

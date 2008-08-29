@@ -130,7 +130,7 @@ kEpsilon::kEpsilon
         mesh_
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -218,6 +218,11 @@ void kEpsilon::correct()
     }
 
     RASModel::correct();
+
+    if (mesh_.changing())
+    {
+        y_.correct();
+    }
 
     volScalarField G("G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
