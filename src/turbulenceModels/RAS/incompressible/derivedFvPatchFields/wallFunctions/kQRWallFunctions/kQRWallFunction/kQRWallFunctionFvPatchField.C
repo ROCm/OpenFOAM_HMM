@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kWallFunctionFvPatchScalarField.H"
+#include "kQRWallFunctionFvPatchField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -42,15 +42,16 @@ namespace RASModels
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void kWallFunctionFvPatchScalarField::checkType()
+template<class Type>
+void kQRWallFunctionFvPatchField<Type>::checkType()
 {
-    if (!isA<wallFvPatch>(patch()))
+    if (!isA<wallFvPatch>(this->patch()))
     {
-        FatalErrorIn("kWallFunctionFvPatchScalarField::checkType()")
+        FatalErrorIn("kQRWallFunctionFvPatchField::checkType()")
             << "Invalid wall function specification" << nl
-            << "    Patch type for patch " << patch().name()
+            << "    Patch type for patch " << this->patch().name()
             << " must be wall" << nl
-            << "    Current patch type is " << patch().type() << nl << endl
+            << "    Current patch type is " << this->patch().type() << nl << endl
             << abort(FatalError);
     }
 }
@@ -58,63 +59,68 @@ void kWallFunctionFvPatchScalarField::checkType()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-kWallFunctionFvPatchScalarField::kWallFunctionFvPatchScalarField
+template<class Type>
+kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 (
     const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF
+    const DimensionedField<Type, volMesh>& iF
 )
 :
-    zeroGradientFvPatchScalarField(p, iF)
+    zeroGradientFvPatchField<Type>(p, iF)
 {
     checkType();
 }
 
 
-kWallFunctionFvPatchScalarField::kWallFunctionFvPatchScalarField
+template<class Type>
+kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 (
-    const kWallFunctionFvPatchScalarField& ptf,
+    const kQRWallFunctionFvPatchField& ptf,
     const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
+    const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    zeroGradientFvPatchScalarField(ptf, p, iF, mapper)
+    zeroGradientFvPatchField<Type>(ptf, p, iF, mapper)
 {
     checkType();
 }
 
 
-kWallFunctionFvPatchScalarField::kWallFunctionFvPatchScalarField
+template<class Type>
+kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 (
     const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
+    const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict
 )
 :
-    zeroGradientFvPatchScalarField(p, iF, dict)
+    zeroGradientFvPatchField<Type>(p, iF, dict)
 {
     checkType();
 }
 
 
-kWallFunctionFvPatchScalarField::kWallFunctionFvPatchScalarField
+template<class Type>
+kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 (
-    const kWallFunctionFvPatchScalarField& tppsf
+    const kQRWallFunctionFvPatchField& tkqrwfpf
 )
 :
-    zeroGradientFvPatchScalarField(tppsf)
+    zeroGradientFvPatchField<Type>(tkqrwfpf)
 {
     checkType();
 }
 
 
-kWallFunctionFvPatchScalarField::kWallFunctionFvPatchScalarField
+template<class Type>
+kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 (
-    const kWallFunctionFvPatchScalarField& tppsf,
-    const DimensionedField<scalar, volMesh>& iF
+    const kQRWallFunctionFvPatchField& tkqrwfpf,
+    const DimensionedField<Type, volMesh>& iF
 )
 :
-    zeroGradientFvPatchScalarField(tppsf, iF)
+    zeroGradientFvPatchField<Type>(tkqrwfpf, iF)
 {
     checkType();
 }
@@ -122,29 +128,23 @@ kWallFunctionFvPatchScalarField::kWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void kWallFunctionFvPatchScalarField::evaluate
+template<class Type>
+void kQRWallFunctionFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes commsType
 )
 {
-    zeroGradientFvPatchScalarField::evaluate(commsType);
+    zeroGradientFvPatchField<Type>::evaluate(commsType);
 }
 
 
-void kWallFunctionFvPatchScalarField::write(Ostream& os) const
+template<class Type>
+void kQRWallFunctionFvPatchField<Type>::write(Ostream& os) const
 {
-    zeroGradientFvPatchScalarField::write(os);
-    writeEntry("value", os);
+    zeroGradientFvPatchField<Type>::write(os);
+    this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makePatchTypeField
-(
-    fvPatchScalarField,
-    kWallFunctionFvPatchScalarField
-);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
