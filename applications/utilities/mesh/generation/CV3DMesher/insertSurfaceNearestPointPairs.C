@@ -77,7 +77,6 @@ bool Foam::CV3D::dualCellSurfaceIntersection
                 return true;
             }
         }
-
     }
 
     return false;
@@ -136,21 +135,145 @@ void Foam::CV3D::insertPointPairs
 }
 
 
+void Foam::CV3D::insertEdgePointGroups
+(
+    const DynamicList<point>& edgePoints,
+    const DynamicList<label>& edgeLabels,
+    const fileName fName
+)
+{
+    const pointField& localPts = qSurf_.localPoints();
+
+    forAll(edgePoints, eP)
+    {
+        const point& edgePt = edgePoints[eP];
+
+        const label edgeI = edgeLabels[eP];
+
+        // Pick up the two faces adjacent to the feature edge
+        const labelList& eFaces = qSurf_.edgeFaces()[edgeI];
+
+        label faceA = eFaces[0];
+        vector nA = qSurf_.faceNormals()[faceA];
+
+        label faceB = eFaces[1];
+        vector nB = qSurf_.faceNormals()[faceB];
+
+        // Intersect planes parallel to faceA and faceB offset by ppDist
+        // and the plane defined by edgePt and the edge vector.
+        plane planeA(edgePt - tols_.ppDist*nA, nA);
+        plane planeB(edgePt - tols_.ppDist*nB, nB);
+
+        plane planeF(edgePt, (nA^nB));
+
+        Info<< "CHANGE TO FINDING THE NEAREST POINT ON THE INTERSECTING LINE TO THE EDGE POINT. "
+            << "Floating point errors in planePlane." << endl;
+
+        point refPt = planeF.planePlaneIntersect(planeA,planeB);
+
+        point faceAVert =
+        localPts[triSurfaceTools::oppositeVertex(qSurf_, faceA, edgeI)];
+
+        // Determine convex or concave angle
+        if (((faceAVert - edgePt) & nB) < 0)
+        {
+            // Convex. So refPt will be inside domain and hence a master point
+
+            // Insert the master point refering the the first slave
+            label masterPtIndex = insertPoint(refPt, number_of_vertices() + 1);
+
+            // Insert the slave points by reflecting refPt in both faces.
+            // with each slave refering to the master
+
+            point reflectedA = refPt + 2*((edgePt - refPt) & nA)*nA;
+            insertPoint(reflectedA, masterPtIndex);
+
+            point reflectedB = refPt + 2*((edgePt - refPt) & nB)*nB;
+            insertPoint(reflectedB, masterPtIndex);
+        }
+        else
+        {
+            // Concave. master and reflected points inside the domain.
+            // Generate reflected master to be outside.
+            point reflMasterPt = refPt + 2*(edgePt - refPt);
+
+            // Reflect refPt in both faces.
+            point reflectedA =
+            reflMasterPt + 2*((edgePt - reflMasterPt) & nA)*nA;
+
+            point reflectedB =
+            reflMasterPt + 2*((edgePt - reflMasterPt) & nB)*nB;
+
+            scalar totalAngle =
+            180*(mathematicalConstant::pi + acos(mag(nA & nB)))
+            /mathematicalConstant::pi;
+
+            // Number of quadrants the angle should be split into
+            int nQuads = int(totalAngle/controls_.maxQuadAngle) + 1;
+
+            // The number of additional master points needed to obtain the
+            // required number of quadrants.
+            int nAddPoints = min(max(nQuads - 2, 0), 2);
+
+            // index of reflMaster
+            label reflectedMaster = number_of_vertices() + 2 + nAddPoints;
+
+            // Master A is inside.
+            label reflectedAI = insertPoint(reflectedA, reflectedMaster);
+
+            // Master B is inside.
+            insertPoint(reflectedB, reflectedMaster);
+
+            if (nAddPoints == 1)
+            {
+                // One additinal point is the reflection of the slave point,
+                // i.e. the original reference point
+                insertPoint(refPt, reflectedMaster);
+            }
+            else if (nAddPoints == 2)
+            {
+                point reflectedAa = refPt
+                - ((edgePt - reflMasterPt) & nB)*nB;
+                insertPoint(reflectedAa, reflectedMaster);
+
+                point reflectedBb = refPt
+                - ((edgePt - reflMasterPt) & nA)*nA;
+                insertPoint(reflectedBb, reflectedMaster);
+            }
+
+            // Slave is outside.
+            insertPoint(reflMasterPt, reflectedAI);
+        }
+    }
+
+    if (controls_.writeInsertedPointPairs)
+    {
+        OFstream str(fName);
+        label vertI = 0;
+
+        forAll(edgePoints, eP)
+        {
+            meshTools::writeOBJ(str, edgePoints[eP]);
+            vertI++;
+        }
+
+        Info<< "insertEdgePointGroups: Written " << edgePoints.size()
+            << " inserted edge-control locations to file "
+            << str.name() << endl;
+    }
+}
+
+
 void Foam::CV3D::insertSurfaceNearestPointPairs()
 {
     Info<< "insertSurfaceNearestPointPairs: " << nl << endl;
 
     label nSurfacePointsEst = number_of_vertices();
 
-    DynamicList<point> nearSurfacePoints(nSurfacePointsEst);
-    DynamicList<point> surfacePoints(nSurfacePointsEst);
-    DynamicList<label> surfaceTris(nSurfacePointsEst);
+    scalar distanceFactor = 8.0;
+    scalar distanceFactor2 = distanceFactor*distanceFactor;
 
-    // Local references to surface mesh addressing
-    const pointField& localPoints = qSurf_.localPoints();
-    const labelListList& edgeFaces = qSurf_.edgeFaces();
-    const vectorField& faceNormals = qSurf_.faceNormals();
-    const labelListList& faceEdges = qSurf_.faceEdges();
+    DynamicList<point> nearSurfacePoints(nSurfacePointsEst);
 
     for
     (
@@ -166,48 +289,85 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
             pointIndexHit pHit = qSurf_.tree().findNearest
             (
                 vert,
-                4*controls_.minCellSize2
+                distanceFactor2*controls_.minCellSize2
             );
 
             if (pHit.hit())
             {
                 vit->setNearBoundary();
 
-                // Reference to the nearest triangle
-                const labelledTri& f = qSurf_[pHit.index()];
-
-                // Find where point is on triangle.
-                // Note tolerance needed is relative one
-                // (used in comparing normalized [0..1] triangle coordinates).
-                label nearType, nearLabel;
-                triPointRef
-                (
-                    localPoints[f[0]],
-                    localPoints[f[1]],
-                    localPoints[f[2]]
-                ).classify(pHit.hitPoint(), 1e-6, nearType, nearLabel);
-
-                // If point is on a edge check if it is an internal feature
-
-                bool internalFeatureEdge = false;
-
-                if (nearType == triPointRef::EDGE)
+                if (dualCellSurfaceIntersection(vit))
                 {
-                    label edgeI = faceEdges[pHit.index()][nearLabel];
-                    const labelList& eFaces = edgeFaces[edgeI];
-
-                    if
-                    (
-                        eFaces.size() == 2
-                     && (faceNormals[eFaces[0]] & faceNormals[eFaces[1]])
-                       < -0.2
-                    )
-                    {
-                        internalFeatureEdge = true;
-                    }
+                    nearSurfacePoints.append(vert);
                 }
+            }
+        }
+    }
 
-                if (!internalFeatureEdge && dualCellSurfaceIntersection(vit))
+    pointField nearSurfacePointsForEdges(nearSurfacePoints.shrink());
+
+    labelList allEdgeLabels;
+    labelList allEdgeEndPoints;
+    pointField allEdgePoints;
+
+    qSurf_.features().nearestSurfEdge
+    (
+        qSurf_.features().featureEdges(),
+        nearSurfacePointsForEdges,
+        vector::one * distanceFactor * controls_.minCellSize,
+        allEdgeLabels,
+        allEdgeEndPoints,
+        allEdgePoints
+    );
+
+    DynamicList<label> edgeLabels(allEdgeLabels.size());
+    DynamicList<vector> edgePoints(allEdgePoints.size());
+
+    forAll (allEdgePoints, eP)
+    {
+        if (allEdgeLabels[eP] >= 0 && allEdgeEndPoints[eP] < 0)
+        {
+            edgeLabels.append(allEdgeLabels[eP]);
+            edgePoints.append(allEdgePoints[eP]);
+        }
+    }
+
+    edgePoints.shrink();
+    edgeLabels.shrink();
+
+    insertEdgePointGroups
+    (
+        edgePoints,
+        edgeLabels,
+        "surfaceNearestEdgePoints.obj"
+    );
+
+    nearSurfacePoints.clear();
+    DynamicList<point> surfacePoints(nSurfacePointsEst);
+    DynamicList<label> surfaceTris(nSurfacePointsEst);
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalPoint())
+        {
+            point vert(topoint(vit->point()));
+
+            pointIndexHit pHit = qSurf_.tree().findNearest
+            (
+                vert,
+                distanceFactor2*controls_.minCellSize2
+            );
+
+            if (pHit.hit())
+            {
+                vit->setNearBoundary();
+
+                if (dualCellSurfaceIntersection(vit))
                 {
                     nearSurfacePoints.append(vert);
                     surfacePoints.append(pHit.hitPoint());
@@ -216,6 +376,10 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
             }
         }
     }
+
+    nearSurfacePoints.shrink();
+    surfacePoints.shrink();
+    surfaceTris.shrink();
 
     insertPointPairs
     (

@@ -25,9 +25,6 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "CV3D.H"
-#include "plane.H"
-#include "triSurfaceTools.H"
-#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

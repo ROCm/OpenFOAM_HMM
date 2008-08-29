@@ -196,6 +196,19 @@ bool Foam::querySurface::wellOutside(const point& pt, const scalar dist2) const
 }
 
 
+bool Foam::querySurface::featurePoint(const label ptI) const
+{
+    if (findIndex(features().featurePoints(), ptI) >= 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 void Foam::querySurface::writeTreeOBJ() const
 {
     OFstream str("tree.obj");

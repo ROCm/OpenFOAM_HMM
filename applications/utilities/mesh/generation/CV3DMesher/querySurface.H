@@ -137,6 +137,9 @@ public:
             //- Check if point is outside surface by at least dist2
             bool wellOutside(const point& pt, const scalar dist2) const;
 
+            //- Check if a point index is a feature point
+            bool featurePoint(const label ptI) const;
+
 
         // Write
 

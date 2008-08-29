@@ -71,32 +71,6 @@ int main(int argc, char *argv[])
         << "Read surface with " << surf.size() << " triangles from file "
         << args.args()[1] << nl << endl;
 
-    surf.features().writeObj("features");
-
-    pointField samples(3);
-
-    samples[0] = point(0.9, 0.9, 0.9);
-    samples[1] = point(0.85, 0.2, 0.2);
-    samples[2] = point(-0.1, -0.1, 0.25);
-
-    labelList edgeLabel;
-    labelList edgeEndPoint;
-    pointField edgePoint;
-
-    surf.features().nearestSurfEdge
-    (
-        surf.features().featureEdges(),
-        samples,
-        vector(0.25, 0.25, 0.25),
-        edgeLabel,
-        edgeEndPoint,
-        edgePoint
-    );
-
-    Info<< edgeLabel
-        << nl << edgeEndPoint
-        << nl << edgePoint << endl;
-
     // Read and triangulation
     // ~~~~~~~~~~~~~~~~~~~~~~
 

@@ -55,6 +55,9 @@ SourceFiles
 #include "Time.H"
 #include "polyMesh.H"
 #include "SortableList.H"
+#include "plane.H"
+#include "triSurfaceTools.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -214,6 +217,15 @@ private:
             const DynamicList<point>& nearSurfacePoints,
             const DynamicList<point>& surfacePoints,
             const DynamicList<label>& surfaceTris,
+            const fileName fName
+        );
+
+        //- Insert edge control groups at the given edge points using the
+        //  normals of the faces attached to the edge.
+        void insertEdgePointGroups
+        (
+            const DynamicList<point>& edgePoints,
+            const DynamicList<label>& edgeLabels,
             const fileName fName
         );
 
