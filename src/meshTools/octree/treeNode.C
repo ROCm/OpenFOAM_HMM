@@ -798,7 +798,7 @@ bool treeNode<Type>::findTightest
                 // Node: recurse into subnodes
                 const treeNode<Type>* subNodePtr = getNodePtr(octant);
 
-                if (subNodePtr->bb().intersects(tightest))
+                if (subNodePtr->bb().overlaps(tightest))
                 {
                     // there might be a better fit inside this subNode
                     changed |=
@@ -815,7 +815,7 @@ bool treeNode<Type>::findTightest
                 // Leaf: let leaf::find handle this
                 const treeLeaf<Type>* subLeafPtr = getLeafPtr(octant);
 
-                if (subLeafPtr->bb().intersects(tightest))
+                if (subLeafPtr->bb().overlaps(tightest))
                 {
                     // there might be a better fit inside this subLeaf
                     changed |=
@@ -884,7 +884,7 @@ bool treeNode<Type>::findNearest
                 // Node
                 const treeNode<Type>* subNodePtr = getNodePtr(octant);
 
-                if (subNodePtr->bb().intersects(tightest))
+                if (subNodePtr->bb().overlaps(tightest))
                 {
                     // there might be a better fit inside this subNode
                     changed |=
@@ -903,7 +903,7 @@ bool treeNode<Type>::findNearest
                 // Leaf: let leaf::find handle this
                 const treeLeaf<Type>* subLeafPtr = getLeafPtr(octant);
 
-                if (subLeafPtr->bb().intersects(tightest))
+                if (subLeafPtr->bb().overlaps(tightest))
                 {
                     // there might be a better fit inside this subNode
                     changed |=
@@ -975,7 +975,7 @@ bool treeNode<Type>::findNearest
                 // Node
                 const treeNode<Type>* subNodePtr = getNodePtr(octant);
 
-                if (subNodePtr->bb().intersects(tightest))
+                if (subNodePtr->bb().overlaps(tightest))
                 {
                     // there might be a better fit inside this subNode
                     changed |=
@@ -995,7 +995,7 @@ bool treeNode<Type>::findNearest
                 // Leaf: let leaf::find handle this
                 const treeLeaf<Type>* subLeafPtr = getLeafPtr(octant);
 
-                if (subLeafPtr->bb().intersects(tightest))
+                if (subLeafPtr->bb().overlaps(tightest))
                 {
                     // there might be a better fit inside this subNode
                     changed |=
@@ -1060,7 +1060,7 @@ bool treeNode<Type>::findBox
                 // Node
                 const treeNode<Type>* subNodePtr = getNodePtr(octant);
 
-                if (subNodePtr->bb().intersects(box))
+                if (subNodePtr->bb().overlaps(box))
                 {
                     // Visit sub node.
                     changed |= subNodePtr->findBox(shapes, box, elements);
@@ -1071,7 +1071,7 @@ bool treeNode<Type>::findBox
                 // Leaf: let leaf::find handle this
                 const treeLeaf<Type>* subLeafPtr = getLeafPtr(octant);
 
-                if (subLeafPtr->bb().intersects(box))
+                if (subLeafPtr->bb().overlaps(box))
                 {
                     // Visit sub leaf.
                     changed |= subLeafPtr->findBox(shapes, box, elements);

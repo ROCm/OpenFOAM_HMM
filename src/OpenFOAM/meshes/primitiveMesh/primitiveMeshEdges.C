@@ -467,7 +467,8 @@ const edgeList& primitiveMesh::edges() const
 {
     if (!edgesPtr_)
     {
-        calcEdges(true);
+        //calcEdges(true);
+        calcEdges(false);
     }
 
     return *edgesPtr_;
@@ -477,10 +478,8 @@ const labelListList& primitiveMesh::pointEdges() const
 {
     if (!pePtr_)
     {
-        //// Invert edges
-        //pePtr_ = new labelListList(nPoints());
-        //invertManyToMany(nPoints(), edges(), *pePtr_);
-        calcEdges(true);
+        //calcEdges(true);
+        calcEdges(false);
     }
 
     return *pePtr_;
@@ -491,11 +490,52 @@ const labelListList& primitiveMesh::faceEdges() const
 {
     if (!fePtr_)
     {
-        calcEdges(true);
+        if (debug)
+        {
+            Pout<< "primitiveMesh::faceEdges() : "
+                << "calculating faceEdges" << endl;
+        }
+
+        //calcEdges(true);
+        const faceList& fcs = faces();
+        const labelListList& pe = pointEdges();
+        const edgeList& es = edges();
+
+        fePtr_ = new labelListList(fcs.size());
+        labelListList& faceEdges = *fePtr_;
+
+        forAll(fcs, faceI)
+        {
+            const face& f = fcs[faceI];
+
+            labelList& fEdges = faceEdges[faceI];
+            fEdges.setSize(f.size());
+
+            forAll(f, fp)
+            {
+                label pointI = f[fp];
+                label nextPointI = f[f.fcIndex(fp)];
+
+                // Find edge between pointI, nextPontI
+                const labelList& pEdges = pe[pointI];
+
+                forAll(pEdges, i)
+                {
+                    label edgeI = pEdges[i];
+
+                    if (es[edgeI].otherVertex(pointI) == nextPointI)
+                    {
+                        fEdges[fp] = edgeI;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     return *fePtr_;
 }
+
 
 void primitiveMesh::clearOutEdges()
 {

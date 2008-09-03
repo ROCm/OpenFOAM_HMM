@@ -27,8 +27,6 @@ License
 #include "intersectedSurface.H"
 #include "surfaceIntersection.H"
 #include "faceList.H"
-#include "SortableList.H"
-#include "triSurfaceTools.H"
 #include "faceTriangulation.H"
 #include "treeBoundBox.H"
 #include "OFstream.H"

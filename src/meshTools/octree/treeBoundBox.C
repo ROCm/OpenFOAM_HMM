@@ -297,6 +297,45 @@ Foam::treeBoundBox Foam::treeBoundBox::subBbox
 }
 
 
+bool Foam::treeBoundBox::overlaps
+(
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    // Find out where centre is in relation to bb.
+    // Find nearest point on bb.
+    scalar distSqr = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; dir++)
+    {
+        scalar d0 = min()[dir] - centre[dir];
+        scalar d1 = max()[dir] - centre[dir];
+
+        if ((d0 > 0) != (d1 > 0))
+        {
+            // centre inside both extrema. This component does not add any
+            // distance.
+        }
+        else if (Foam::mag(d0) < Foam::mag(d1))
+        {
+            distSqr += d0*d0;
+        }
+        else
+        {
+            distSqr += d1*d1;
+        }
+
+        if (distSqr > radiusSqr)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 // line intersection. Returns true if line (start to end) inside
 // bb or intersects bb. Sets pt to intersection.
 //

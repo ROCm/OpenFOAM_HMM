@@ -109,11 +109,8 @@ public:
         //- Size the list. If grow can cause undefined indices (until next sort)
         void setSize(const label);
 
-        //- Sort the list (if changed after construction time)
+        //- (stable) sort the list (if changed after construction time)
         void sort();
-
-        //- Sort the list (if changed after construction time)
-        void stableSort();
 
 
     // Member Operators

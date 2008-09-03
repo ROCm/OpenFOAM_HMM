@@ -86,28 +86,7 @@ void Foam::SortableList<Type>::sort()
         indices_[i] = i;
     }
 
-    Foam::sort(indices_, less(*this));
-
-    List<Type> tmpValues(this->size());
-
-    forAll(indices_, i)
-    {
-        tmpValues[i] = this->operator[](indices_[i]);
-    }
-
-    List<Type>::transfer(tmpValues);
-}
-
-
-
-template <class Type>
-void Foam::SortableList<Type>::stableSort()
-{
-    forAll(indices_, i)
-    {
-        indices_[i] = i;
-    }
-
+    //Foam::sort(indices_, less(*this));
     Foam::stableSort(indices_, less(*this));
 
     List<Type> tmpValues(this->size());

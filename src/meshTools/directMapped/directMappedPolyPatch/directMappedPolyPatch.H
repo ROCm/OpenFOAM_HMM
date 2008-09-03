@@ -82,7 +82,8 @@ class directMappedPolyPatch
         (
             pointField&,
             labelList& patchFaceProcs,
-            labelList& patchFaces
+            labelList& patchFaces,
+            pointField& patchFc
         ) const;
 
         //- Find cells containing samples
@@ -90,7 +91,8 @@ class directMappedPolyPatch
         (
             const pointField&,
             labelList& sampleCellProcs,
-            labelList& sampleCells
+            labelList& sampleCells,
+            pointField& sampleCc
         ) const;
 
         //- Calculate matching

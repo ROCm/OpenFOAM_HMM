@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coupledPolyPatch.H"
-#include "SortableList.H"
 #include "ListOps.H"
 #include "transform.H"
 #include "OFstream.H"

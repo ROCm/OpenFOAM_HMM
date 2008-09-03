@@ -507,12 +507,12 @@ bool Foam::octreeDataFace::overlaps
     const treeBoundBox& sampleBb
 ) const
 {
-    //return sampleBb.intersects(allBb_[index]);
+    //return sampleBb.overlaps(allBb_[index]);
 
     //- Exact test of face intersecting bb
 
     // 1. Quick rejection: bb does not intersect face bb at all
-    if (!sampleBb.intersects(allBb_[index]))
+    if (!sampleBb.overlaps(allBb_[index]))
     {
         return false;
     }

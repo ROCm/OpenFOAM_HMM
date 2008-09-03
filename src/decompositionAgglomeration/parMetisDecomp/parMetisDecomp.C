@@ -41,8 +41,7 @@ extern "C"
 #   include "parmetis.h"
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -56,6 +55,8 @@ namespace Foam
     );
 }
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 //- Does prevention of 0 cell domains and calls parmetis.
 Foam::label Foam::parMetisDecomp::decompose
@@ -75,6 +76,16 @@ Foam::label Foam::parMetisDecomp::decompose
 
     // Number of dimensions
     int nDims = 3;
+
+
+    if (cellCentres.size() != xadj.size()-1)
+    {
+        FatalErrorIn("parMetisDecomp::decompose(..)")
+            << "cellCentres:" << cellCentres.size()
+            << " xadj:" << xadj.size()
+            << abort(FatalError);
+    }
+
 
     // Get number of cells on all processors
     List<int> nLocalCells(Pstream::nProcs());
@@ -106,12 +117,12 @@ Foam::label Foam::parMetisDecomp::decompose
     // Make sure every domain has at least one cell
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // (Metis falls over with zero sized domains)
-    // Trickle cells from processors that have them down to those that
+    // Trickle cells from processors that have them up to those that
     // don't.
 
 
-    // Number of cells to send down (is same as number of cells next processor
-    // has to receive)
+    // Number of cells to send to the next processor
+    // (is same as number of cells next processor has to receive)
     List<int> nSendCells(Pstream::nProcs(), 0);
 
     for (label procI = nLocalCells.size()-1; procI >=1; procI--)
@@ -134,6 +145,15 @@ Foam::label Foam::parMetisDecomp::decompose
         Field<floatScalar> prevXyz(fromPrevProc);
         Field<int> prevCellWeights(fromPrevProc);
         Field<int> prevFaceWeights(fromPrevProc);
+
+        if (prevXadj.size() != nSendCells[Pstream::myProcNo()-1])
+        {
+            FatalErrorIn("parMetisDecomp::decompose(..)")
+                << "Expected from processor " << Pstream::myProcNo()-1
+                << " connectivity for " << nSendCells[Pstream::myProcNo()-1]
+                << " nCells but only received " << prevXadj.size()
+                << abort(FatalError);
+        }
 
         // Insert adjncy
         prepend(prevAdjncy, adjncy);
@@ -222,6 +242,14 @@ Foam::label Foam::parMetisDecomp::decompose
     }
 
 
+    if (nLocalCells[Pstream::myProcNo()] != (xadj.size()-1))
+    {
+        FatalErrorIn("parMetisDecomp::decompose(..)")
+            << "Have connectivity for " << xadj.size()-1
+            << " cells but nLocalCells:" << nLocalCells[Pstream::myProcNo()]
+            << abort(FatalError);
+    }
+
     // Weight info
     int wgtFlag = 0;
     int* vwgtPtr = NULL;
@@ -291,6 +319,15 @@ Foam::label Foam::parMetisDecomp::decompose
         IPstream fromNextProc(Pstream::blocking, Pstream::myProcNo()+1);
 
         List<int> nextFinalDecomp(fromNextProc);
+
+        if (nextFinalDecomp.size() != nSendCells[Pstream::myProcNo()])
+        {
+            FatalErrorIn("parMetisDecomp::decompose(..)")
+                << "Expected from processor " << Pstream::myProcNo()+1
+                << " decomposition for " << nSendCells[Pstream::myProcNo()]
+                << " nCells but only received " << nextFinalDecomp.size()
+                << abort(FatalError);
+        }
 
         append(nextFinalDecomp, finalDecomp);
     }
