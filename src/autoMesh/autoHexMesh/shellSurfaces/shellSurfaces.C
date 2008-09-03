@@ -30,6 +30,7 @@ License
 #include "triSurfaceMesh.H"
 #include "refinementSurfaces.H"
 #include "searchableSurfaces.H"
+#include "orientedSurface.H"
 #include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -211,7 +212,27 @@ void Foam::shellSurfaces::orient()
                     refCast<const triSurfaceMesh>(s)
                 );
 
-                refinementSurfaces::orientSurface(outsidePt, shell);
+                // Flip surface so outsidePt is outside.
+                bool anyFlipped = orientedSurface::orient
+                (
+                    shell,
+                    outsidePt,
+                    true
+                );
+
+                if (anyFlipped)
+                {
+                    // orientedSurface will have done a clearOut of the surface.
+                    // we could do a clearout of the triSurfaceMeshes::trees()
+                    // but these aren't affected by orientation
+                    // (except for cached
+                    // sideness which should not be set at this point.
+                    // !!Should check!)
+
+                    Info<< "shellSurfaces : Flipped orientation of surface "
+                        << s.name()
+                        << " so point " << outsidePt << " is outside." << endl;
+                }
             }
         }
     }
