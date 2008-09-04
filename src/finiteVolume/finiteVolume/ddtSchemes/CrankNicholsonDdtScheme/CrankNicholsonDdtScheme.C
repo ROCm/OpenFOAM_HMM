@@ -978,14 +978,14 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
         ddt0_<GeometricField<Type, fvPatchField, volMesh> >
         (
             "ddt0(" + U.name() + ')',
-            rho.dimensions()*U.dimensions()
+            U.dimensions()
         );
 
     DDt0Field<fluxFieldType>& dphidt0 =
         ddt0_<fluxFieldType>
         (
             "ddt0(" + phi.name() + ')',
-            phi.dimensions()
+            U.dimensions()*dimArea
         );
 
     IOobject ddtIOobject
