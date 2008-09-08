@@ -41,7 +41,6 @@ Description
 #include "twoPhaseMixture.H"
 #include "incompressible/RASModel/RASModel.H"
 #include "probes.H"
-#include "EulerDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

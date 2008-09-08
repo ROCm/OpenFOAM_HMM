@@ -284,13 +284,13 @@ bool Foam::treeDataTriSurface::overlaps
     triBb.max() = max(triBb.max(), p2);
 
     //- For testing: robust one
-    //return cubeBb.intersects(triBb);
+    //return cubeBb.overlaps(triBb);
 
     //- Exact test of triangle intersecting bb
 
     // Quick rejection. If whole bounding box of tri is outside cubeBb then
     // there will be no intersection.
-    if (!cubeBb.intersects(triBb))
+    if (!cubeBb.overlaps(triBb))
     {
         return false;
     }

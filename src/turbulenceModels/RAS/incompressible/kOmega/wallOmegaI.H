@@ -22,35 +22,30 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::pointIndexHit
+Global
+    wallOmega
 
 Description
+    Set wall dissipation in the omega matrix
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointIndexHit_H
-#define pointIndexHit_H
-
-#include "point.H"
-#include "PointIndexHit.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
 {
+    const fvPatchList& patches = mesh_.boundary();
 
-typedef PointIndexHit<point> pointIndexHit;
+    forAll(patches, patchi)
+    {
+        const fvPatch& p = patches[patchi];
 
-
-//- Specify data associated with pointIndexHit type is contiguous
-template<>
-inline bool contiguous<pointIndexHit>() {return true;}
-
+        if (isType<wallFvPatch>(p))
+        {
+            omegaEqn().setValues
+            (
+                p.faceCells(),
+                omega_.boundaryField()[patchi].patchInternalField()
+            );
+        }
+    }
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

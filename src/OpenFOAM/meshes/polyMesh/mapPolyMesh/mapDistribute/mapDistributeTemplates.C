@@ -48,15 +48,28 @@ void Foam::mapDistribute::distribute
         // Send sub field to neighbour
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
         {
-            if (domain != Pstream::myProcNo())
+            const labelList& map = subMap[domain];
+
+            if (domain != Pstream::myProcNo() && map.size() > 0)
             {
+                List<T> subField(map.size());
+                forAll(map, i)
+                {
+                    subField[i] = field[map[i]];
+                }
                 OPstream toNbr(Pstream::blocking, domain);
-                toNbr << IndirectList<T>(field, subMap[domain])();
+                toNbr << subField;
             }
         }
 
         // Subset myself
-        List<T> subField(IndirectList<T>(field, subMap[Pstream::myProcNo()]));
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -71,7 +84,11 @@ void Foam::mapDistribute::distribute
         // Receive sub field from neighbour
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
         {
-            if (domain != Pstream::myProcNo())
+            if
+            (
+                domain != Pstream::myProcNo()
+             && constructMap[domain].size() > 0
+            )
             {
                 IPstream fromNbr(Pstream::blocking, domain);
                 List<T> subField(fromNbr);
@@ -93,7 +110,13 @@ void Foam::mapDistribute::distribute
         List<T> newField(constructSize);
 
         // Subset myself
-        List<T> subField(IndirectList<T>(field, subMap[Pstream::myProcNo()]));
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -112,8 +135,16 @@ void Foam::mapDistribute::distribute
             if (Pstream::myProcNo() == sendProc)
             {
                 // I am sender. Send to recvProc.
+                const labelList& map = subMap[recvProc];
+
+                List<T> subField(map.size());
+                forAll(map, i)
+                {
+                    subField[i] = field[map[i]];
+                }
+
                 OPstream toNbr(Pstream::scheduled, recvProc);
-                toNbr << IndirectList<T>(field, subMap[recvProc])();
+                toNbr << subField;
             }
             else
             {
@@ -136,7 +167,13 @@ void Foam::mapDistribute::distribute
         List<T> newField(constructSize);
 
         // Subset myself
-        List<T> subField(IndirectList<T>(field, subMap[Pstream::myProcNo()]));
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -149,10 +186,19 @@ void Foam::mapDistribute::distribute
         // Send sub field to neighbour
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
         {
-            if (domain != Pstream::myProcNo())
+            const labelList& map = subMap[domain];
+
+            if (domain != Pstream::myProcNo() && map.size() > 0)
             {
+
+                List<T> subField(map.size());
+                forAll(map, i)
+                {
+                    subField[i] = field[map[i]];
+                }
+
                 OPstream toNbr(Pstream::nonBlocking, domain);
-                toNbr << IndirectList<T>(field, subMap[domain])();
+                toNbr << subField;
             }
         }
 
@@ -160,12 +206,12 @@ void Foam::mapDistribute::distribute
         // Receive sub field from neighbour
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
         {
-            if (domain != Pstream::myProcNo())
+            const labelList& map = constructMap[domain];
+
+            if (domain != Pstream::myProcNo() && map.size() > 0)
             {
                 IPstream fromNbr(Pstream::nonBlocking, domain);
                 List<T> subField(fromNbr);
-
-                const labelList& map = constructMap[domain];
 
                 forAll(map, i)
                 {

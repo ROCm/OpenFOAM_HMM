@@ -31,7 +31,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::mapDistribute::calcSchedule() const
+Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
+(
+    const labelListList& subMap,
+    const labelListList& constructMap
+)
 {
     // Communications: send and receive processor
     List<labelPair> allComms;
@@ -40,16 +44,16 @@ void Foam::mapDistribute::calcSchedule() const
         HashSet<labelPair, labelPair::Hash<> > commsSet(Pstream::nProcs());
 
         // Find what communication is required
-        forAll(subMap_, procI)
+        forAll(subMap, procI)
         {
             if (procI != Pstream::myProcNo())
             {
-                if (subMap_[procI].size() > 0)
+                if (subMap[procI].size() > 0)
                 {
                     // I need to send to procI
                     commsSet.insert(labelPair(Pstream::myProcNo(), procI));
                 }
-                if (constructMap_[procI].size() > 0)
+                if (constructMap[procI].size() > 0)
                 {
                     // I need to receive from procI
                     commsSet.insert(labelPair(procI, Pstream::myProcNo()));
@@ -120,13 +124,7 @@ void Foam::mapDistribute::calcSchedule() const
     );
 
     // Processors involved in my schedule
-    schedulePtr_.reset
-    (
-        new List<labelPair>
-        (
-            IndirectList<labelPair>(allComms, mySchedule)
-        )
-    );
+    return IndirectList<labelPair>(allComms, mySchedule);
 
 
     //if (debug)
@@ -149,6 +147,22 @@ void Foam::mapDistribute::calcSchedule() const
     //        }
     //    }
     //}
+}
+
+
+const Foam::List<Foam::labelPair>& Foam::mapDistribute::schedule() const
+{
+    if (!schedulePtr_.valid())
+    {
+        schedulePtr_.reset
+        (
+            new List<labelPair>
+            (
+                schedule(subMap_, constructMap_)
+            )
+        );
+    }
+    return schedulePtr_();
 }
 
 
@@ -255,15 +269,6 @@ Foam::mapDistribute::mapDistribute
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

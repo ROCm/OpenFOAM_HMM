@@ -26,7 +26,6 @@ License
 
 #include "searchableSphere.H"
 #include "addToRunTimeSelectionTable.H"
-#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

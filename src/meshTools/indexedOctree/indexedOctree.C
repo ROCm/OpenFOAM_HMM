@@ -40,7 +40,7 @@ namespace Foam
 // Does bb intersect a sphere around sample? Or is any corner point of bb
 // closer than nearestDistSqr to sample.
 template <class Type>
-bool indexedOctree<Type>::intersects
+bool indexedOctree<Type>::overlaps
 (
     const point& p0,
     const point& p1,
@@ -84,7 +84,7 @@ bool indexedOctree<Type>::intersects
 // Does bb intersect a sphere around sample? Or is any corner point of bb
 // closer than nearestDistSqr to sample.
 template <class Type>
-bool indexedOctree<Type>::intersects
+bool indexedOctree<Type>::overlaps
 (
     const treeBoundBox& parentBb,
     const direction octant,
@@ -94,7 +94,7 @@ bool indexedOctree<Type>::intersects
 {
     //- Speeded up version of
     //     treeBoundBox subBb(parentBb.subBbox(mid, octant))
-    //     intersects
+    //     overlaps
     //     (
     //          subBb.min(),
     //          subBb.max(),
@@ -136,7 +136,7 @@ bool indexedOctree<Type>::intersects
 
     const point mid(0.5*(min+max));
 
-    return intersects(mid, other, nearestDistSqr, sample);
+    return overlaps(mid, other, nearestDistSqr, sample);
 }
 
 
@@ -567,7 +567,7 @@ void indexedOctree<Type>::findNearest
 
             const treeBoundBox& subBb = nodes_[subNodeI].bb_;
 
-            if (intersects(subBb.min(), subBb.max(), nearestDistSqr, sample))
+            if (overlaps(subBb.min(), subBb.max(), nearestDistSqr, sample))
             {
                 findNearest
                 (
@@ -584,7 +584,7 @@ void indexedOctree<Type>::findNearest
         {
             if
             (
-                intersects
+                overlaps
                 (
                     nod.bb_,
                     octant,
@@ -639,7 +639,7 @@ void indexedOctree<Type>::findNearest
         {
             const treeBoundBox& subBb = nodes_[getNode(index)].bb_;
 
-            if (subBb.intersects(tightest))
+            if (subBb.overlaps(tightest))
             {
                 findNearest
                 (
@@ -657,7 +657,7 @@ void indexedOctree<Type>::findNearest
         {
             const treeBoundBox subBb(nodeBb.subBbox(octant));
 
-            if (subBb.intersects(tightest))
+            if (subBb.overlaps(tightest))
             {
                 shapes_.findNearest
                 (
@@ -1121,7 +1121,7 @@ void indexedOctree<Type>::findBox
         {
             const treeBoundBox& subBb = nodes_[getNode(index)].bb_;
 
-            if (subBb.intersects(searchBox))
+            if (subBb.overlaps(searchBox))
             {
                 findBox(getNode(index), searchBox, elements);
             }
@@ -1130,7 +1130,7 @@ void indexedOctree<Type>::findBox
         {
             const treeBoundBox subBb(nodeBb.subBbox(octant));
 
-            if (subBb.intersects(searchBox))
+            if (subBb.overlaps(searchBox))
             {
                 const labelList& indices = contents_[getContent(index)];
 
