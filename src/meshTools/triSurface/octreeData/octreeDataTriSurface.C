@@ -385,12 +385,12 @@ bool Foam::octreeDataTriSurface::overlaps
     const treeBoundBox& cubeBb
 ) const
 {
-    //return cubeBb.intersects(allBb_[index]);
+    //return cubeBb.overlaps(allBb_[index]);
 
     //- Exact test of triangle intersecting bb
 
     // Quick rejection.
-    if (!cubeBb.intersects(allBb_[index]))
+    if (!cubeBb.overlaps(allBb_[index]))
     {
         return false;
     }

@@ -26,7 +26,10 @@ Class
     Foam::pressureDirectedInletOutletVelocityFvPatchVectorField
 
 Description
-    Foam::pressureDirectedInletOutletVelocityFvPatchVectorField
+    Velocity inlet/outlet boundary condition for pressure boundary where the
+    pressure is specified.  zero-gradient is applied for outflow (as defined
+    by the flux) and for inflow the velocity is obtained from the flux with
+    the specified `inletDirection'.
 
 SourceFiles
     pressureDirectedInletOutletVelocityFvPatchVectorField.C
@@ -53,7 +56,9 @@ class pressureDirectedInletOutletVelocityFvPatchVectorField
     public mixedFvPatchVectorField
 {
     // Private data
-    
+
+        word phiName_;
+        word rhoName_;
         vectorField inletDir_;
 
 
@@ -133,8 +138,34 @@ public:
         }
 
 
-
     // Member functions
+
+        // Access
+
+            //- Return the name of rho
+            const word& rhoName() const
+            {
+                return rhoName_;
+            }
+
+            //- Return reference to the name of rho to allow adjustment
+            word& rhoName()
+            {
+                return rhoName_;
+            }
+
+            //- Return the name of phi
+            const word& phiName() const
+            {
+                return phiName_;
+            }
+
+            //- Return reference to the name of phi to allow adjustment
+            word& phiName()
+            {
+                return phiName_;
+            }
+
 
         // Mapping functions
 
@@ -157,6 +188,11 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
+
+
+    // Member operators
+
+        virtual void operator=(const fvPatchField<vector>& pvf);
 };
 
 

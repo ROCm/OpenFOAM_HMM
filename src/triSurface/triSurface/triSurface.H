@@ -36,9 +36,9 @@ SourceFiles
 #ifndef triSurface_H
 #define triSurface_H
 
+#include "PrimitivePatch.H"
 #include "pointField.H"
 #include "labelledTri.H"
-#include "PrimitivePatch.H"
 #include "boolList.H"
 #include "geometricSurfacePatchList.H"
 #include "surfacePatchList.H"
@@ -213,6 +213,15 @@ public:
             const List<labelledTri>&,
             const geometricSurfacePatchList&,
             const pointField&
+        );
+
+        //- Construct from triangles, patches, points. Reuse storage.
+        triSurface
+        (
+            List<labelledTri>&,
+            const geometricSurfacePatchList&,
+            pointField&,
+            const bool reUse
         );
 
         //- Construct from triangles, points. Set patchnames to default.

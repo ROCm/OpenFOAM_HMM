@@ -22,35 +22,49 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::pointIndexHit
+Global
+    kOmegaWallViscosity
 
 Description
+    Calculate wall viscosity from wall-functions.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointIndexHit_H
-#define pointIndexHit_H
-
-#include "point.H"
-#include "PointIndexHit.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
 {
+    scalar Cmu25 = pow(Cmu_.value(), 0.25);
 
-typedef PointIndexHit<point> pointIndexHit;
+    const fvPatchList& patches = mesh_.boundary();
 
+    forAll(patches, patchi)
+    {
+        const fvPatch& curPatch = patches[patchi];
 
-//- Specify data associated with pointIndexHit type is contiguous
-template<>
-inline bool contiguous<pointIndexHit>() {return true;}
+        if (isType<wallFvPatch>(curPatch))
+        {
+            const scalarField& nuw = nu().boundaryField()[patchi];
+            scalarField& nutw = nut_.boundaryField()[patchi];
 
+            forAll(curPatch, facei)
+            {
+                label faceCelli = curPatch.faceCells()[facei];
+
+                scalar yPlus =
+                    Cmu25*y_[patchi][facei]*sqrt(k_[faceCelli])/nuw[facei];
+
+                if (yPlus > yPlusLam_)
+                {
+                    nutw[facei] =
+                         nuw[facei]
+                        *(yPlus*kappa_.value()/log(E_.value()*yPlus) - 1);
+                }
+                else
+                {
+                    nutw[facei] = 0.0;
+                }
+            }
+        }
+    }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

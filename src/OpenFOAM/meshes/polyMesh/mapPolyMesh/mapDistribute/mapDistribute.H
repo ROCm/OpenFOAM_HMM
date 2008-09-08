@@ -36,6 +36,8 @@ Note:
     Schedule is a list of processor pairs (one send, one receive. One of
     them will be myself) which forms a scheduled (i.e. non-buffered) exchange.
     See distribute on how to use it.
+    Note2: number of items send on one processor have to equal the number
+    of items received on the other processor.
 
 
 SourceFiles
@@ -79,8 +81,6 @@ class mapDistribute
 
 
     // Private Member Functions
-
-        void calcSchedule() const;
 
         //- Disallow default bitwise copy construct
         mapDistribute(const mapDistribute&);
@@ -142,15 +142,15 @@ public:
                 return constructMap_;
             }
 
+            //- Calculate a schedule. See above.
+            static List<labelPair> schedule
+            (
+                const labelListList& subMap,
+                const labelListList& constructMap
+            );
+
             //- Return a schedule. Demand driven. See above.
-            const List<labelPair>& schedule() const
-            {
-                if (!schedulePtr_.valid())
-                {
-                    calcSchedule();
-                }
-                return schedulePtr_();
-            }
+            const List<labelPair>& schedule() const;
 
 
         // Other

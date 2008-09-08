@@ -23,22 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::pressureInletUniformVelocityFvPatchVectorField
+    Foam::pressureNormalInletOutletVelocityFvPatchVectorField
 
 Description
-    Velocity inlet boundary condition for patches where the pressure is
-    specified. The uniform inflow velocity is obtained by averaging the flux
-    over the patch and apply it in the direction normal to the patch faces.
+    Velocity inlet/outlet boundary condition for patches where the pressure is
+    specified.  zero-gradient is applied for outflow (as defined by the flux)
+    and for inflow the velocity is obtained from the flux with a direction
+    normal to the patch faces.
 
 SourceFiles
-    pressureInletUniformVelocityFvPatchVectorField.C
+    pressureNormalInletOutletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pressureInletUniformVelocityFvPatchVectorField_H
-#define pressureInletUniformVelocityFvPatchVectorField_H
+#ifndef pressureNormalInletOutletVelocityFvPatchVectorField_H
+#define pressureNormalInletOutletVelocityFvPatchVectorField_H
 
-#include "pressureInletVelocityFvPatchVectorField.H"
+#include "fvPatchFields.H"
+#include "mixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,31 +48,36 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class pressureInletUniformVelocityFvPatch Declaration
+          Class pressureNormalInletOutletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class pressureInletUniformVelocityFvPatchVectorField
+class pressureNormalInletOutletVelocityFvPatchVectorField
 :
-    public pressureInletVelocityFvPatchVectorField
+    public mixedFvPatchVectorField
 {
+    // Private data
+
+        word phiName_;
+        word rhoName_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("pressureInletUniformVelocity");
+    TypeName("pressureNormalInletOutletVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        pressureInletUniformVelocityFvPatchVectorField
+        pressureNormalInletOutletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        pressureInletUniformVelocityFvPatchVectorField
+        pressureNormalInletOutletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -78,19 +85,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  pressureInletUniformVelocityFvPatchVectorField onto a new patch
-        pressureInletUniformVelocityFvPatchVectorField
+        //  pressureNormalInletOutletVelocityFvPatchVectorField
+        //  onto a new patch
+        pressureNormalInletOutletVelocityFvPatchVectorField
         (
-            const pressureInletUniformVelocityFvPatchVectorField&,
+            const pressureNormalInletOutletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        pressureInletUniformVelocityFvPatchVectorField
+        pressureNormalInletOutletVelocityFvPatchVectorField
         (
-            const pressureInletUniformVelocityFvPatchVectorField&
+            const pressureNormalInletOutletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -98,14 +106,17 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new pressureInletUniformVelocityFvPatchVectorField(*this)
+                new pressureNormalInletOutletVelocityFvPatchVectorField
+                (
+                    *this
+                )
             );
         }
 
         //- Construct as copy setting internal field reference
-        pressureInletUniformVelocityFvPatchVectorField
+        pressureNormalInletOutletVelocityFvPatchVectorField
         (
-            const pressureInletUniformVelocityFvPatchVectorField&,
+            const pressureNormalInletOutletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -117,15 +128,50 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new pressureInletUniformVelocityFvPatchVectorField(*this, iF)
+                new pressureNormalInletOutletVelocityFvPatchVectorField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
 
     // Member functions
 
+        // Access
+
+            //- Return the name of rho
+            const word& rhoName() const
+            {
+                return rhoName_;
+            }
+
+            //- Return reference to the name of rho to allow adjustment
+            word& rhoName()
+            {
+                return rhoName_;
+            }
+
+            //- Return the name of phi
+            const word& phiName() const
+            {
+                return phiName_;
+            }
+
+
+            //- Return reference to the name of phi to allow adjustment
+            word& phiName()
+            {
+                return phiName_;
+            }
+
+
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
+
+        //- Write
+        virtual void write(Ostream&) const;
 
 
     // Member operators

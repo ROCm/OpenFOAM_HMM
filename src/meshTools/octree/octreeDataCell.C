@@ -113,7 +113,7 @@ bool Foam::octreeDataCell::overlaps
     const treeBoundBox& cubeBb
 ) const
 {
-    return cubeBb.intersects(bbs_[index]);
+    return cubeBb.overlaps(bbs_[index]);
 }
 
 

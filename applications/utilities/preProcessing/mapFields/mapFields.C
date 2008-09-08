@@ -504,7 +504,7 @@ int main(int argc, char *argv[])
                     !bbsTargetSet[procITarget]
                   || (
                       bbsTargetSet[procITarget]
-                   && bbsTarget[procITarget].intersects(bbSource)
+                   && bbsTarget[procITarget].overlaps(bbSource)
                      )
                 )
                 {
@@ -533,7 +533,7 @@ int main(int argc, char *argv[])
                     bbsTarget[procITarget] = meshTarget.bounds();
                     bbsTargetSet[procITarget] = true;
 
-                    if (bbsTarget[procITarget].intersects(bbSource))
+                    if (bbsTarget[procITarget].overlaps(bbSource))
                     {
                         if (consistent)
                         {

@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fluxCorrectedVelocityFvPatchVectorField.H"
+#include "pressureNormalInletOutletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -37,79 +37,93 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fluxCorrectedVelocityFvPatchVectorField::
-fluxCorrectedVelocityFvPatchVectorField
+pressureNormalInletOutletVelocityFvPatchVectorField::
+pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    zeroGradientFvPatchVectorField(p, iF),
+    mixedFvPatchVectorField(p, iF),
     phiName_("phi"),
     rhoName_("rho")
-{}
+{
+    refValue() = *this;
+    refGrad() = vector::zero;
+    valueFraction() = 0.0;
+}
 
 
-fluxCorrectedVelocityFvPatchVectorField::
-fluxCorrectedVelocityFvPatchVectorField
+pressureNormalInletOutletVelocityFvPatchVectorField::
+pressureNormalInletOutletVelocityFvPatchVectorField
 (
-    const fluxCorrectedVelocityFvPatchVectorField& ptf,
+    const pressureNormalInletOutletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    zeroGradientFvPatchVectorField(ptf, p, iF, mapper),
+    mixedFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
 
 
-fluxCorrectedVelocityFvPatchVectorField::
-fluxCorrectedVelocityFvPatchVectorField
+pressureNormalInletOutletVelocityFvPatchVectorField::
+pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const dictionary& dict
 )
 :
-    zeroGradientFvPatchVectorField(p, iF),
+    mixedFvPatchVectorField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
-    fvPatchVectorField::operator=(patchInternalField());
+    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    refValue() = *this;
+    refGrad() = vector::zero;
+    valueFraction() = 0.0;
 }
 
 
-fluxCorrectedVelocityFvPatchVectorField::
-fluxCorrectedVelocityFvPatchVectorField
+pressureNormalInletOutletVelocityFvPatchVectorField::
+pressureNormalInletOutletVelocityFvPatchVectorField
 (
-    const fluxCorrectedVelocityFvPatchVectorField& fcvpvf,
+    const pressureNormalInletOutletVelocityFvPatchVectorField& pivpvf
+)
+:
+    mixedFvPatchVectorField(pivpvf),
+    phiName_(pivpvf.phiName_),
+    rhoName_(pivpvf.rhoName_)
+{}
+
+
+pressureNormalInletOutletVelocityFvPatchVectorField::
+pressureNormalInletOutletVelocityFvPatchVectorField
+(
+    const pressureNormalInletOutletVelocityFvPatchVectorField& pivpvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    zeroGradientFvPatchVectorField(fcvpvf, iF),
-    phiName_(fcvpvf.phiName_),
-    rhoName_(fcvpvf.rhoName_)
+    mixedFvPatchVectorField(pivpvf, iF),
+    phiName_(pivpvf.phiName_),
+    rhoName_(pivpvf.rhoName_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fluxCorrectedVelocityFvPatchVectorField::evaluate
-(
-    const Pstream::commsTypes
-)
+void pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
 {
-    if (!updated())
+    if (updated())
     {
-        updateCoeffs();
+        return;
     }
 
-    zeroGradientFvPatchVectorField::evaluate();
-
     const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
+    db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
@@ -119,28 +133,36 @@ void fluxCorrectedVelocityFvPatchVectorField::evaluate
 
     if (phi.dimensions() == dimVelocity*dimArea)
     {
-        operator==(*this - n*(n & *this) + n*phip/magS);
+        refValue() = n*phip/magS;
     }
     else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const fvPatchField<scalar>& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        operator==(*this - n*(n & *this) + n*phip/(rhop*magS));
+        refValue() = n*phip/(rhop*magS);
     }
     else
     {
-        FatalErrorIn("fluxCorrectedVelocityFvPatchVectorField::evaluate()")
-            << "dimensions of phi are not correct"
+        FatalErrorIn
+        (
+            "pressureNormalInletOutletVelocityFvPatchVectorField::"
+            "updateCoeffs()"
+        )   << "dimensions of phi are not correct"
             << "\n    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
+
+    valueFraction() = 1.0 - pos(phip);
+
+    mixedFvPatchVectorField::updateCoeffs();
 }
 
 
-void fluxCorrectedVelocityFvPatchVectorField::write(Ostream& os) const
+void pressureNormalInletOutletVelocityFvPatchVectorField::
+write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
@@ -149,12 +171,27 @@ void fluxCorrectedVelocityFvPatchVectorField::write(Ostream& os) const
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void pressureNormalInletOutletVelocityFvPatchVectorField::operator=
+(
+    const fvPatchField<vector>& pvf
+)
+{
+    fvPatchField<vector>::operator=
+    (
+        valueFraction()*(patch().nf()*(patch().nf() & pvf))
+      + (1 - valueFraction())*pvf
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makePatchTypeField
 (
     fvPatchVectorField,
-    fluxCorrectedVelocityFvPatchVectorField
+    pressureNormalInletOutletVelocityFvPatchVectorField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
