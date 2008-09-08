@@ -87,11 +87,11 @@ int main(int argc, char *argv[])
 
     vector p1(0, 0, 0);
 
-    vector v1(150.0, 0, 0);
+    vector v1(100, 0, 0);
 
     tensor R1(tensor(1, 0, 0, 0, 1, 0, 0, 0, 1));
 
-    vector omega1(6e12, 3e12, -5e12);
+    vector omega1(0, -2e12, 0);
 
     vectorList pSites1 = R1 & pSites;
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    Info<< "3" << nl << "Water test"
+    Info<< pSites.size() << nl << "Water test"
         << nl << "H1" << " " << pSites1[0].x() << " " << pSites1[0].y() << " " << pSites1[0].z()
         << nl << "H2" << " " << pSites1[1].x() << " " << pSites1[1].y() << " " << pSites1[1].z()
         << nl << "0"  << " " << pSites1[2].x() << " " << pSites1[2].y() << " " << pSites1[2].z()
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 
         // Force calculation
 
-        a1 = vector::zero;
+        a1 = vector();
 
         //        eForce.z() = ampl*Foam::sin(2*mathematicalConstant::pi*freq*runTime.timeOutputValue());
 
@@ -197,13 +197,16 @@ int main(int argc, char *argv[])
 
         alpha1 = R1 & inv(I) & R1.T() & tau1;
 
+        // a1 = vector(-5e13, 0, 0);
+        // alpha1 = vector(0, 1e24, 0);
+
         // Leapfrog part 2
 
         v1 += 0.5*runTime.deltaT().value()*a1;
 
         omega1 += 0.5*runTime.deltaT().value()*alpha1;
 
-        Info << "3" << nl << "Water test"
+        Info << pSites.size() << nl << "Water test"
             << nl << "H1" << " " << pSites1[0].x() << " " << pSites1[0].y() << " " << pSites1[0].z()
             << nl << "H2" << " " << pSites1[1].x() << " " << pSites1[1].y() << " " << pSites1[1].z()
             << nl << "0"  << " " << pSites1[2].x() << " " << pSites1[2].y() << " " << pSites1[2].z()
@@ -212,6 +215,9 @@ int main(int argc, char *argv[])
 
         // Info<< "Time = " << runTime.timeName() << endl;
     }
+
+    Info<< v1 << nl << omega1 << endl;
+
 
     Info << "End\n" << endl;
 
