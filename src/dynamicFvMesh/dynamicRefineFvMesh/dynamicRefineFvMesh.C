@@ -24,7 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SortableList.H"
 #include "dynamicRefineFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
@@ -32,7 +31,6 @@ License
 #include "surfaceFields.H"
 #include "fvCFD.H"
 #include "syncTools.H"
-#include "ListListOps.H"
 #include "pointFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

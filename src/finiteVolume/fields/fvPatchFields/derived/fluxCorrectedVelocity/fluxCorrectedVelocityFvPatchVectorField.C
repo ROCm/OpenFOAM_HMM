@@ -74,20 +74,10 @@ fluxCorrectedVelocityFvPatchVectorField
 )
 :
     zeroGradientFvPatchVectorField(p, iF),
-    phiName_("phi"),
-    rhoName_("rho")
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchVectorField::operator=(patchInternalField());
-
-    if (dict.found("phi"))
-    {
-        dict.lookup("phi") >> phiName_;
-    }
-
-    if (dict.found("rho"))
-    {
-        dict.lookup("rho") >> rhoName_;
-    }
 }
 
 
@@ -118,10 +108,8 @@ void fluxCorrectedVelocityFvPatchVectorField::evaluate
 
     zeroGradientFvPatchVectorField::evaluate();
 
-    const surfaceScalarField& phi = db().lookupObject<surfaceScalarField>
-    (
-        phiName_
-    );
+    const surfaceScalarField& phi =
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);

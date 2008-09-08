@@ -39,7 +39,14 @@ Description
 
 namespace Foam
 {
-    typedef PointIndexHit<point> pointIndexHit;
+
+typedef PointIndexHit<point> pointIndexHit;
+
+
+//- Specify data associated with pointIndexHit type is contiguous
+template<>
+inline bool contiguous<pointIndexHit>() {return true;}
+
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

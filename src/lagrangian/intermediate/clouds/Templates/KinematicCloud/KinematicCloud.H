@@ -109,7 +109,6 @@ private:
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
-//        const Time& runTime_;
 
         //- Reference to the interpolation for the carrier phase to the parcels
         const volPointInterpolation& vpi_;
@@ -263,9 +262,6 @@ protected:
 
 public:
 
-    //- Runtime type information
-//    TypeName("KinematicCloud");
-
     // Constructors
 
         //- Construct given carrier gas fields
@@ -280,9 +276,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~KinematicCloud();
+    //- Destructor
+    virtual ~KinematicCloud();
 
 
     // Member Functions
@@ -389,7 +384,6 @@ public:
 
                     //- Return tmp momentum source term - semi-implicit
                     inline tmp<fvVectorMatrix> SU2(volVectorField& U) const;
-
 
 
         // Check

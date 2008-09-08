@@ -56,13 +56,6 @@ bool Foam::NoMassTransfer<CloudType>::active() const
 
 
 template<class CloudType>
-bool Foam::NoMassTransfer<CloudType>::changesVolume() const
-{
-    return false;
-}
-
-
-template<class CloudType>
 Foam::scalar Foam::NoMassTransfer<CloudType>::calculate
 (
     const scalar,

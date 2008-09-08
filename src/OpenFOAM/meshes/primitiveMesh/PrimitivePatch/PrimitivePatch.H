@@ -235,6 +235,14 @@ public:
             const Field<PointType>& points
         );
 
+        //- Construct from components, reuse storage
+        PrimitivePatch
+        (
+            FaceList<Face>& faces,
+            Field<PointType>& points,
+            const bool reUse
+        );
+
         //- Construct as copy
         PrimitivePatch
         (
