@@ -399,7 +399,7 @@ bool Foam::octreeDataFaceList::overlaps
     const treeBoundBox& sampleBb
 ) const
 {
-    return sampleBb.intersects(allBb_[index]);
+    return sampleBb.overlaps(allBb_[index]);
 }
 
 

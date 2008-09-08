@@ -158,6 +158,22 @@ void inletOutletFvPatchField<Type>::write(Ostream& os) const
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+void inletOutletFvPatchField<Type>::operator=
+(
+    const fvPatchField<Type>& ptf
+)
+{
+    fvPatchField<Type>::operator=
+    (
+        this->valueFraction()*this->refValue()
+        + (1 - this->valueFraction())*ptf
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

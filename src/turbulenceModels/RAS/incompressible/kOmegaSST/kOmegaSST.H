@@ -238,6 +238,7 @@ public:
             return k_;
         }
 
+        //- Return the turbulence specific dissipation rate
         tmp<volScalarField> omega() const
         {
             return omega_;

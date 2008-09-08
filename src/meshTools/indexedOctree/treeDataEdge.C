@@ -110,11 +110,11 @@ bool Foam::treeDataEdge::overlaps
 {
     if (cacheBb_)
     {
-        return cubeBb.intersects(bbs_[index]);
+        return cubeBb.overlaps(bbs_[index]);
     }
     else
     {
-        return cubeBb.intersects(calcBb(edgeLabels_[index]));
+        return cubeBb.overlaps(calcBb(edgeLabels_[index]));
     }
 }
 
