@@ -86,13 +86,6 @@ void Foam::Time::readDict()
 
             purgeWrite_ = 0;
         }
-
-        if (writeControl_ != wcTimeStep && purgeWrite_ > 0)
-        {
-            FatalIOErrorIn("Time::readDict()", controlDict_)
-                << "writeControl must be set to timeStep for purgeWrite "
-                << exit(FatalIOError);
-        }
     }
 
     if (controlDict_.found("timeFormat"))
