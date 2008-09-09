@@ -36,12 +36,16 @@ SourceFiles
 #ifndef directInteractionList_H
 #define directInteractionList_H
 
-#include "interactionLists.H"
+#include "polyMesh.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class interactionLists;
 
 /*---------------------------------------------------------------------------*\
                            Class directInteractionList Declaration
@@ -57,6 +61,12 @@ class directInteractionList
 
     // Private Member Functions
 
+        void buildDirectInteractionList
+        (
+            scalar rCutMax,
+            bool pointPointListBuild
+        );
+
         //- Disallow default bitwise copy construct
         directInteractionList(const directInteractionList&);
 
@@ -67,18 +77,18 @@ public:
 
     // Constructors
 
-        //- Construct new data
+        //- Construct lists by searching the mesh
         directInteractionList
         (
             const interactionLists& interactionLists,
-            const scalar& rCutMax
+            scalar rCutMax,
+            bool pointPointListBuild = false
         );
 
         //- Construct from file
         directInteractionList
         (
-            const interactionLists& interactionLists,
-            const IOobject& io
+            const interactionLists& interactionLists
         );
 
     // Destructor
@@ -89,6 +99,8 @@ public:
     // Member Functions
 
         // Access
+
+        inline const interactionLists& interactionLists() const;
 
         // Check
 
