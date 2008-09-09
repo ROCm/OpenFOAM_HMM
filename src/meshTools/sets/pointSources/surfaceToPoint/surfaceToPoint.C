@@ -30,8 +30,6 @@ Description
 #include "polyMesh.H"
 #include "meshSearch.H"
 #include "triSurfaceSearch.H"
-#include "octree.H"
-#include "octreeDataTriSurface.H"
 
 #include "addToRunTimeSelectionTable.H"
 
