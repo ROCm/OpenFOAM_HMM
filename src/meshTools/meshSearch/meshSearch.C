@@ -86,7 +86,7 @@ bool Foam::meshSearch::findNearer
         if (distSqr < nearestDistSqr)
         {
             nearestDistSqr = distSqr;
-            nearestI = i;
+            nearestI = pointI;
             nearer = true;
         }
     }
@@ -117,18 +117,18 @@ Foam::label Foam::meshSearch::findNearestCellLinear(const point& location) const
 {
     const vectorField& centres = mesh_.cellCentres();
 
-    label nearestCelli = 0;
-    scalar minProximity = magSqr(centres[nearestCelli] - location);
+    label nearestIndex = 0;
+    scalar minProximity = magSqr(centres[nearestIndex] - location);
 
     findNearer
     (
         location,
         centres,
-        nearestCelli,
+        nearestIndex,
         minProximity
     );
 
-    return nearestCelli;
+    return nearestIndex;
 }
 
 
@@ -147,30 +147,27 @@ Foam::label Foam::meshSearch::findNearestCellWalk
         )   << "illegal seedCell:" << seedCellI << exit(FatalError);
     }
 
-    const vectorField& centres = mesh_.cellCentres();
-    const labelListList& cc = mesh_.cellCells();
-
-
     // Walk in direction of face that decreases distance
 
-    label curCell = seedCellI;
-    scalar distanceSqr = magSqr(centres[curCell] - location);
+    label curCellI = seedCellI;
+    scalar distanceSqr = magSqr(mesh_.cellCentres()[curCellI] - location);
 
     bool closer;
 
     do
     {
+        // Try neighbours of curCellI
         closer = findNearer
         (
             location,
-            centres,
-            cc[curCell],
-            curCell,
+            mesh_.cellCentres(),
+            mesh_.cellCells()[curCellI],
+            curCellI,
             distanceSqr
         );
     } while (closer);
 
-    return curCell;
+    return curCellI;
 }
 
 
@@ -195,6 +192,7 @@ Foam::label Foam::meshSearch::findNearestFaceTree(const point& location) const
     // Now check any of the faces of the nearest cell
     const vectorField& centres = mesh_.faceCentres();
     const cell& ownFaces = mesh_.cells()[info.index()];
+
     label nearestFaceI = ownFaces[0];
     scalar minProximity = magSqr(centres[nearestFaceI] - location);
 
@@ -251,43 +249,43 @@ Foam::label Foam::meshSearch::findNearestFaceWalk
 
     // Walk in direction of face that decreases distance
 
-    label curFace = seedFaceI;
-    scalar distanceSqr = magSqr(centres[curFace] - location);
+    label curFaceI = seedFaceI;
+    scalar distanceSqr = magSqr(centres[curFaceI] - location);
 
     while (true)
     {
-        label betterFace = curFace;
+        label betterFaceI = curFaceI;
 
         findNearer
         (
             location,
             centres,
-            mesh_.cells()[mesh_.faceOwner()[curFace]],
-            betterFace,
+            mesh_.cells()[mesh_.faceOwner()[curFaceI]],
+            betterFaceI,
             distanceSqr
         );
 
-        if (mesh_.isInternalFace(curFace))
+        if (mesh_.isInternalFace(curFaceI))
         {
             findNearer
             (
                 location,
                 centres,
-                mesh_.cells()[mesh_.faceNeighbour()[curFace]],
-                betterFace,
+                mesh_.cells()[mesh_.faceNeighbour()[curFaceI]],
+                betterFaceI,
                 distanceSqr
             );
         }
 
-        if (betterFace == curFace)
+        if (betterFaceI == curFaceI)
         {
             break;
         }
 
-        curFace = betterFace;
+        curFaceI = betterFaceI;
     }
 
-    return curFace;
+    return curFaceI;
 }
 
 
@@ -463,18 +461,20 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
 
         treeBoundBox overallBb(mesh_.points());
 
+        Random rndGen(123456);
+
         boundaryTreePtr_ = new indexedOctree<treeDataFace>
         (
             treeDataFace    // all information needed to search faces
             (
-                false,      // do not cache bb
+                false,                      // do not cache bb
                 mesh_,
-                bndFaces    // boundary faces only
+                bndFaces                    // boundary faces only
             ),
-            overallBb,      // overall search domain
-            8,      // maxLevel
-            10,     // leafsize
-            3.0     // duplicity
+            overallBb.extend(rndGen, 1E-3), // overall search domain
+            8,                              // maxLevel
+            10,                             // leafsize
+            3.0                             // duplicity
         );
     }
 

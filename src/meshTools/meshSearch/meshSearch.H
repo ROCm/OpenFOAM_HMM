@@ -215,8 +215,8 @@ public:
             label findNearestFace
             (
                 const point& location,
-                const label seedFaceI,
-                const bool useTreeSearch
+                const label seedFaceI = -1,
+                const bool useTreeSearch = true
             ) const;
 
             //- Find cell containing (using pointInCell) location.
