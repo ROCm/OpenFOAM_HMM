@@ -37,35 +37,25 @@ SourceFiles
 #ifndef interactionLists_H
 #define interactionLists_H
 
-#include ".H"
+#include "polyMesh.H"
+#include "directInteractionList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class interactionLists;
-Istream& operator>>(Istream&, interactionLists&);
-Ostream& operator<<(Ostream&, const interactionLists&);
-
-
 /*---------------------------------------------------------------------------*\
                            Class interactionLists Declaration
 \*---------------------------------------------------------------------------*/
 
 class interactionLists
-:
-    public baseClassName
 {
     // Private data
 
-        dataType data_;
+        const polyMesh& mesh_;
 
+        directInteractionList dil_;
 
     // Private Member Functions
 
@@ -78,32 +68,18 @@ class interactionLists
 
 public:
 
-    // Static data members
-
-        //- Static data someStaticData
-        static const dataType staticData;
-
-
     // Constructors
 
-        //- Construct null
-        interactionLists();
+        //- Construct and create all information from the mesh
+        interactionLists
+        (
+            const polyMesh& mesh,
+            scalar rCutMax,
+            bool pointPointListBuild = false
+        );
 
-        //- Construct from components
-        interactionLists(const dataType& data);
-
-        //- Construct from Istream
-        interactionLists(Istream&);
-
-        //- Construct as copy
-        interactionLists(const interactionLists&);
-
-
-    // Selectors
-
-        //- Select null constructed
-        static autoPtr<interactionLists> New();
-
+        //- Construct from file
+        interactionLists(const polyMesh& mesh);
 
     // Destructor
 
@@ -114,26 +90,9 @@ public:
 
         // Access
 
-        // Check
+        inline const polyMesh& mesh() const;
 
-        // Edit
-
-        // Write
-
-
-    // Member Operators
-
-        void operator=(const interactionLists&);
-
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream&, interactionLists&);
-        friend Ostream& operator<<(Ostream&, const interactionLists&);
+        inline const directInteractionList& dil();
 };
 
 

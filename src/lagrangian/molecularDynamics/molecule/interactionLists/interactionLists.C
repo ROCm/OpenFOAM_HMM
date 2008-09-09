@@ -26,43 +26,28 @@ License
 
 #include "interactionLists.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const dataType Foam::interactionLists::staticData();
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interactionLists::interactionLists()
+
+Foam::interactionLists::interactionLists
+interactionLists
+(
+    const polyMesh& mesh,
+    scalar rCutMax,
+    bool pointPointListBuild
+)
 :
-    baseClassName(),
-    data_()
+    mesh_(mesh),
+    dil_(*this, rCutMax, pointPointListBuild)
 {}
 
 
-Foam::interactionLists::interactionLists(const dataType& data)
+Foam::interactionLists::interactionLists(const polyMesh& mesh)
 :
-    baseClassName(),
-    data_(data)
+    mesh_(mesh),
+    dil_(*this)
 {}
-
-
-Foam::interactionLists::interactionLists(const interactionLists&)
-:
-    baseClassName(),
-    data_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::interactionLists> Foam::interactionLists::New()
-{
-    return autoPtr<interactionLists>(new interactionLists);
-}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -72,26 +57,6 @@ Foam::interactionLists::~interactionLists()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::interactionLists::operator=(const interactionLists& rhs)
-{
-    // Check for assignment to self
-    if (this == &rhs)
-    {
-        FatalErrorIn("Foam::interactionLists::operator=(const Foam::interactionLists&)")
-            << "Attempted assignment to self"
-            << abort(FatalError);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

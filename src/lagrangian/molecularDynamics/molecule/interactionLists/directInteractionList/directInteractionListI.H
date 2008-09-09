@@ -26,31 +26,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+inline const Foam::interactionLists&
+    Foam::interactionLists::interactionLists() const
+{
+    return interactionLists_;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
