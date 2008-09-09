@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
         indexedOctree<treeDataTriSurface> selectTree
         (
             treeDataTriSurface(selectSurf),
-            bb.extend(rndGen, 1E-3),    // slightly randomize bb
+            bb.extend(rndGen, 1E-4),    // slightly randomize bb
             8,      // maxLevel
             10,     // leafsize
             3.0     // duplicity

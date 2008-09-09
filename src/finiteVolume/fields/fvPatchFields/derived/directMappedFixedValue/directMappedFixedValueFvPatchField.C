@@ -159,7 +159,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     // Get the scheduling information
     const List<labelPair>& schedule = mpp.schedule();
-    const labelListList& sendCellLabels = mpp.sendCellLabels();
+    const labelListList& sendLabels = mpp.sendLabels();
     const labelListList& receiveFaceLabels = mpp.receiveFaceLabels();
 
 
@@ -177,7 +177,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
             toProc<< IndirectList<Type>
             (
                 this->internalField(),
-                sendCellLabels[recvProc]
+                sendLabels[recvProc]
             )();
         }
         else
@@ -204,7 +204,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
         IndirectList<Type> fromFld
         (
             this->internalField(),
-            sendCellLabels[Pstream::myProcNo()]
+            sendLabels[Pstream::myProcNo()]
         );
     
         // Destination faces

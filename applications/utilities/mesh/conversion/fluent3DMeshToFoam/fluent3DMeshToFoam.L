@@ -697,7 +697,7 @@ endOfSection               {space}")"{space}
 
  /* ------              Ignore remaining space and \n s.             ------  */
 
-<*>{some_space}|\n {
+<*>{some_space}|\n|\r {
     }
 
 

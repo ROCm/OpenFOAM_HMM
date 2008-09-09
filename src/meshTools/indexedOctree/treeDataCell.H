@@ -47,7 +47,7 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class polyMesh;
+class primitiveMesh;
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +58,7 @@ class treeDataCell
 {
     // Private data
 
-        const polyMesh& mesh_;
+        const primitiveMesh& mesh_;
 
         //- Subset of cells to work on
         const labelList cellLabels_;
@@ -87,12 +87,12 @@ public:
         treeDataCell
         (
             const bool cacheBb,
-            const polyMesh&,
+            const primitiveMesh&,
             const labelList&
         );
 
         //- Construct from mesh. Uses all cells in mesh.
-        treeDataCell(const bool cacheBb, const polyMesh&);
+        treeDataCell(const bool cacheBb, const primitiveMesh&);
 
 
     // Member Functions
@@ -104,7 +104,7 @@ public:
                 return cellLabels_;
             }
 
-            const polyMesh& mesh() const
+            const primitiveMesh& mesh() const
             {
                 return mesh_;
             }

@@ -153,10 +153,29 @@ public:
             }
 
 
-    // Ostream operator
+    // Friend Operators
 
-        friend Ostream& operator<<(Ostream& os, const boundBox& b);
+        friend bool operator==(const boundBox& a, const boundBox& b)
+        {
+            return (a.min_ == b.min_) && (a.max_ == b.max_);
+        }
+
+        friend bool operator!=(const boundBox& a, const boundBox& b)
+        {
+            return !(a == b);
+        }
+
+
+    // IOstream operator
+
+        friend Istream& operator>>(Istream& is, boundBox&);
+        friend Ostream& operator<<(Ostream& os, const boundBox&);
 };
+
+
+//- Specify data associated with boundBox type is contiguous
+template<>
+inline bool contiguous<boundBox>() {return contiguous<point>();}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
