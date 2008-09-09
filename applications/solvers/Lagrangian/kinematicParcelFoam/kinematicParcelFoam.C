@@ -26,7 +26,8 @@ Application
     kinematicParcelFoam
 
 Description
-    Transient solver a single kinematicCloud.
+    Transient solver for a single kinematicCloud. Uses precalculated velocity
+    field to evolve a cloud.
 
 \*---------------------------------------------------------------------------*/
 
