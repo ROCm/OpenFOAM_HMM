@@ -40,6 +40,18 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, dictionary);
+
+
+    template<>
+    const char* NamedEnum<directMappedPolyPatch::sampleMode, 3>::names[] =
+    {
+        "nearestCell",
+        "nearestPatchFace",
+        "nearestFace"
+    };
+
+    const NamedEnum<directMappedPolyPatch::sampleMode, 3>
+        directMappedPolyPatch::sampleModeNames_;
 }
 
 
@@ -113,107 +125,236 @@ void Foam::directMappedPolyPatch::collectSamples
 void Foam::directMappedPolyPatch::findSamples
 (
     const pointField& samples,
-    labelList& sampleCellProcs,
-    labelList& sampleCells,
-    pointField& sampleCc
+    labelList& sampleProcs,
+    labelList& sampleIndices,
+    pointField& sampleLocations
 ) const
 {
-    sampleCellProcs.setSize(samples.size());
-    sampleCells.setSize(samples.size());
-    sampleCc.setSize(samples.size());
-    sampleCc = point(-GREAT, -GREAT, -GREAT);
+    const polyMesh& mesh = boundaryMesh().mesh();
 
+    // All the info for nearest. Construct to miss
+    List<nearInfo> nearest(samples.size());
+
+    switch (mode_)
     {
-        // Octree based search engine
-        meshSearch meshSearchEngine(boundaryMesh().mesh(), false);
-
-        forAll(samples, sampleI)
+        case NEARESTCELL:
         {
-            sampleCells[sampleI] = meshSearchEngine.findCell(samples[sampleI]);
+            if (samplePatch_.size() != 0 && samplePatch_ != "none")
+            {
+                FatalErrorIn
+                (
+                    "directMappedPolyPatch::findSamples(const pointField&,"
+                    " labelList&, labelList&, pointField&) const"
+                )   << "No need to supply a patch name when in "
+                    << sampleModeNames_[mode_] << " mode." << exit(FatalError);
+            }
 
-            if (sampleCells[sampleI] == -1)
+            // Octree based search engine
+            meshSearch meshSearchEngine(mesh, false);
+
+            forAll(samples, sampleI)
             {
-                sampleCellProcs[sampleI] = -1;
+                const point& sample = samples[sampleI];
+
+                label cellI = meshSearchEngine.findCell(sample);
+
+                if (cellI == -1)
+                {
+                    nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
+                else
+                {
+                    const point& cc = mesh.cellCentres()[cellI];
+
+                    nearest[sampleI].first() = pointIndexHit
+                    (
+                        true,
+                        cc,
+                        cellI
+                    );
+                    nearest[sampleI].second().first() = magSqr(cc-sample);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
             }
-            else
+            break;
+        }
+
+        case NEARESTPATCHFACE:
+        {
+            label patchI = boundaryMesh().findPatchID(samplePatch_);
+
+            if (patchI == -1)
             {
-                sampleCellProcs[sampleI] = Pstream::myProcNo();
-                sampleCc[sampleI] =
-                    boundaryMesh().mesh().cellCentres()[sampleCells[sampleI]];
+                FatalErrorIn("directMappedPolyPatch::findSamples(..)")
+                    << "Cannot find patch " << samplePatch_ << endl
+                    << "Valid patches are " << boundaryMesh().names()
+                    << exit(FatalError);
             }
+
+            Random rndGen(123456);
+
+            const polyPatch& pp = boundaryMesh()[patchI];
+
+            // patch faces
+            const labelList patchFaces(identity(pp.size()) + pp.start());
+
+            const treeBoundBox patchBb
+            (
+                treeBoundBox(pp.points(), pp.meshPoints()).extend
+                (
+                    rndGen,
+                    1E-4
+                )
+            );
+
+            autoPtr<indexedOctree<treeDataFace> > boundaryTree
+            (
+                new indexedOctree<treeDataFace>
+                (
+                    treeDataFace    // all information needed to search faces
+                    (
+                        false,                      // do not cache bb
+                        mesh,
+                        patchFaces                  // boundary faces only
+                    ),
+                    patchBb,   // overall search domain
+                    8,                              // maxLevel
+                    10,                             // leafsize
+                    3.0                             // duplicity
+                )
+            );
+
+            forAll(samples, sampleI)
+            {
+                const point& sample = samples[sampleI];
+
+                pointIndexHit& nearInfo = nearest[sampleI].first();
+                nearInfo = boundaryTree().findNearest
+                (
+                    sample,
+                    magSqr(patchBb.max()-patchBb.min())
+                );
+
+                if (!nearInfo.hit())
+                {
+                    nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
+                else
+                {
+                    point fc(pp[nearInfo.index()].centre(pp.points()));
+                    nearInfo.setPoint(fc);
+                    nearest[sampleI].second().first() = magSqr(fc-sample);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
+            }
+            break;
+        }
+
+        case NEARESTFACE:
+        {
+            if (samplePatch_.size() != 0 && samplePatch_ != "none")
+            {
+                FatalErrorIn
+                (
+                    "directMappedPolyPatch::findSamples(const pointField&,"
+                    " labelList&, labelList&, pointField&) const"
+                )   << "No need to supply a patch name when in "
+                    << sampleModeNames_[mode_] << " mode." << exit(FatalError);
+            }
+
+            // Octree based search engine
+            meshSearch meshSearchEngine(mesh, false);
+
+            forAll(samples, sampleI)
+            {
+                const point& sample = samples[sampleI];
+
+                label faceI = meshSearchEngine.findNearestFace(sample);
+
+                if (faceI == -1)
+                {
+                    nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
+                else
+                {
+                    const point& fc = mesh.faceCentres()[faceI];
+
+                    nearest[sampleI].first() = pointIndexHit
+                    (
+                        true,
+                        fc,
+                        faceI
+                    );
+                    nearest[sampleI].second().first() = magSqr(fc-sample);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
+            }
+            break;
+        }
+
+        default:
+        {
+            FatalErrorIn("directMappedPolyPatch::findSamples(..)")
+                << "problem." << abort(FatalError);
         }
     }
 
-    // Use only that processor that contains the sample
-    Pstream::listCombineGather(sampleCells, maxEqOp<label>());
-    Pstream::listCombineScatter(sampleCells);
 
-    labelList minSampleCellProcs(sampleCellProcs);
-    Pstream::listCombineGather(sampleCellProcs, maxEqOp<label>());
-    Pstream::listCombineScatter(sampleCellProcs);
-
-    Pstream::listCombineGather(sampleCc, maxEqOp<point>());
-    Pstream::listCombineScatter(sampleCc);
+    // Find nearest.
+    Pstream::listCombineGather(nearest, nearestEqOp());
+    Pstream::listCombineScatter(nearest);
 
     if (debug)
     {
         Info<< "directMappedPolyPatch::findSamples : " << endl;
-        forAll(sampleCells, sampleI)
+        forAll(nearest, sampleI)
         {
-            Info<< "    " << sampleI << " coord:" << samples[sampleI]
-                << " found on processor:" << sampleCellProcs[sampleI]
-                << " in cell:" << sampleCells[sampleI]
-                << " with cc:" << sampleCc[sampleI] << endl;
+            label procI = nearest[sampleI].second().second();
+            label localI = nearest[sampleI].first().index();
+
+            Info<< "    " << sampleI << " coord:"<< samples[sampleI]
+                << " found on processor:" << procI
+                << " in local cell/face:" << localI
+                << " with cc:" << nearest[sampleI].first().rawPoint() << endl;
         }
     }
 
     // Check for samples not being found
-    forAll(sampleCells, sampleI)
+    forAll(nearest, sampleI)
     {
-        if (sampleCells[sampleI] == -1)
+        if (!nearest[sampleI].first().hit())
         {
             FatalErrorIn
             (
-                "findSamples(const pointField&, labelList&, labelList&)"
+                "directMappedPolyPatch::findSamples"
+                "(const pointField&, labelList&"
+                ", labelList&, pointField&)"
             )   << "Did not find sample " << samples[sampleI]
                 << " on any processor." << exit(FatalError);
         }
     }
 
 
-    // Check for samples being found in multiple cells
-    {
-        forAll(minSampleCellProcs, sampleI)
-        {
-            if (minSampleCellProcs[sampleI] == -1)
-            {
-                minSampleCellProcs[sampleI] = labelMax;
-            }
-        }
-        Pstream::listCombineGather(minSampleCellProcs, minEqOp<label>());
-        Pstream::listCombineScatter(minSampleCellProcs);
+    // Convert back into proc+local index
+    sampleProcs.setSize(samples.size());
+    sampleIndices.setSize(samples.size());
+    sampleLocations.setSize(samples.size());
 
-        forAll(minSampleCellProcs, sampleI)
-        {
-            if (minSampleCellProcs[sampleI] != sampleCellProcs[sampleI])
-            {
-                FatalErrorIn
-                (
-                    "directMappedPolyPatch::findSamples"
-                    "(const pointField&, labelList&, labelList&)"
-                )   << "Found sample " << samples[sampleI]
-                    << " on processor " << minSampleCellProcs[sampleI]
-                    << " and on processor " << sampleCellProcs[sampleI] << endl
-                    << "This is illegal. {lease move your sampling plane."
-                    << exit(FatalError);
-            }
-        }
+    forAll(nearest, sampleI)
+    {
+        sampleProcs[sampleI] = nearest[sampleI].second().second();
+        sampleIndices[sampleI] = nearest[sampleI].first().index();
+        sampleLocations[sampleI] = nearest[sampleI].first().hitPoint();
     }
 }
 
+
 void Foam::directMappedPolyPatch::calcMapping() const
 {
-    if (sendCellLabelsPtr_.valid())
+    if (sendLabelsPtr_.valid())
     {
         FatalErrorIn("directMappedPolyPatch::calcMapping() const")
             << "Mapping already calculated" << exit(FatalError);
@@ -236,18 +377,18 @@ void Foam::directMappedPolyPatch::calcMapping() const
     pointField patchFc;
     collectSamples(samples, patchFaceProcs, patchFaces, patchFc);
 
-    // Find processor and cell samples are in
-    labelList sampleCellProcs;
-    labelList sampleCells;
-    pointField sampleCc;
-    findSamples(samples, sampleCellProcs, sampleCells, sampleCc);
+    // Find processor and cell/face samples are in and actual location.
+    labelList sampleProcs;
+    labelList sampleIndices;
+    pointField sampleLocations;
+    findSamples(samples, sampleProcs, sampleIndices, sampleLocations);
 
 
     // Now we have all the data we need:
     // - where sample originates from (so destination when mapping):
     //   patchFaces, patchFaceProcs.
-    // - cell sample is in (so source when mapping)
-    //   sampleCells, sampleCellProcs.
+    // - cell/face sample is in (so source when mapping)
+    //   sampleIndices, sampleProcs.
 
 
     if (debug && Pstream::master())
@@ -267,18 +408,18 @@ void Foam::directMappedPolyPatch::calcMapping() const
         {
             meshTools::writeOBJ(str, patchFc[i]);
             vertI++;
-            meshTools::writeOBJ(str, sampleCc[i]);
+            meshTools::writeOBJ(str, sampleLocations[i]);
             vertI++;
             str << "l " << vertI-1 << ' ' << vertI << nl;
         }
     }
 
 
-    // Check that actual offset vector (sampleCc - patchFc) is more or less
-    // constant.
+    // Check that actual offset vector (sampleLocations - patchFc) is more or
+    // less constant.
     if (Pstream::master())
     {
-        const scalarField magOffset(mag(sampleCc - patchFc));
+        const scalarField magOffset(mag(sampleLocations - patchFc));
         const scalar avgOffset(average(magOffset));
 
         forAll(magOffset, sampleI)
@@ -291,7 +432,7 @@ void Foam::directMappedPolyPatch::calcMapping() const
                     << "    on a single plane."
                     << " This might give numerical problems." << endl
                     << "    At patchface " << patchFc[sampleI]
-                    << " the sampled cell " << sampleCc[sampleI] << endl
+                    << " the sampled cell " << sampleLocations[sampleI] << endl
                     << "    is not on a plane " << avgOffset
                     << " offset from the patch." << endl
                     << "    You might want to shift your plane offset."
@@ -304,7 +445,7 @@ void Foam::directMappedPolyPatch::calcMapping() const
 
 
     // Determine schedule.
-    mapDistribute distMap(sampleCellProcs, patchFaceProcs);
+    mapDistribute distMap(sampleProcs, patchFaceProcs);
 
     // Rework the schedule to cell data to send, face data to receive.
     schedulePtr_.reset(new List<labelPair>(distMap.schedule()));
@@ -313,17 +454,21 @@ void Foam::directMappedPolyPatch::calcMapping() const
     const labelListList& constructMap = distMap.constructMap();
 
     // Extract the particular data I need to send and receive.
-    sendCellLabelsPtr_.reset(new labelListList(subMap.size()));
-    labelListList& sendCellLabels = sendCellLabelsPtr_();
+    sendLabelsPtr_.reset(new labelListList(subMap.size()));
+    labelListList& sendLabels = sendLabelsPtr_();
 
     forAll(subMap, procI)
     {
-        sendCellLabels[procI] = IndirectList<label>(sampleCells, subMap[procI]);
+        sendLabels[procI] = IndirectList<label>
+        (
+            sampleIndices,
+            subMap[procI]
+        );
 
         if (debug)
         {
-            Pout<< "To proc:" << procI << " sending values of cells:"
-                << sendCellLabels[procI] << endl;
+            Pout<< "To proc:" << procI << " sending values of cells/faces:"
+                << sendLabels[procI] << endl;
         }
     }
 
@@ -356,9 +501,11 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 )
 :
     polyPatch(name, size, start, index, bm),
+    mode_(NEARESTPATCHFACE),
+    samplePatch_("none"),
     offset_(vector::zero),
     schedulePtr_(NULL),
-    sendCellLabelsPtr_(NULL),
+    sendLabelsPtr_(NULL),
     receiveFaceLabelsPtr_(NULL)
 {}
 
@@ -372,9 +519,11 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 )
 :
     polyPatch(name, dict, index, bm),
+    mode_(sampleModeNames_.read(dict.lookup("sampleMode"))),
+    samplePatch_(dict.lookup("samplePatch")),
     offset_(dict.lookup("offset")),
     schedulePtr_(NULL),
-    sendCellLabelsPtr_(NULL),
+    sendLabelsPtr_(NULL),
     receiveFaceLabelsPtr_(NULL)
 {}
 
@@ -386,9 +535,11 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 )
 :
     polyPatch(pp, bm),
+    mode_(pp.mode_),
+    samplePatch_(pp.samplePatch_),
     offset_(pp.offset_),
     schedulePtr_(NULL),
-    sendCellLabelsPtr_(NULL),
+    sendLabelsPtr_(NULL),
     receiveFaceLabelsPtr_(NULL)
 {}
 
@@ -403,9 +554,11 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 )
 :
     polyPatch(pp, bm, index, newSize, newStart),
+    mode_(pp.mode_),
+    samplePatch_(pp.samplePatch_),
     offset_(pp.offset_),
     schedulePtr_(NULL),
-    sendCellLabelsPtr_(NULL),
+    sendLabelsPtr_(NULL),
     receiveFaceLabelsPtr_(NULL)
 {}
 
@@ -423,7 +576,7 @@ Foam::directMappedPolyPatch::~directMappedPolyPatch()
 void Foam::directMappedPolyPatch::clearOut()
 {
     schedulePtr_.clear();
-    sendCellLabelsPtr_.clear();
+    sendLabelsPtr_.clear();
     receiveFaceLabelsPtr_.clear();
 }
 
@@ -431,6 +584,10 @@ void Foam::directMappedPolyPatch::clearOut()
 void Foam::directMappedPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
+    os.writeKeyword("sampleMode") << sampleModeNames_[mode_]
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("samplePatch") << samplePatch_
+        << token::END_STATEMENT << nl;
     os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
 }
 

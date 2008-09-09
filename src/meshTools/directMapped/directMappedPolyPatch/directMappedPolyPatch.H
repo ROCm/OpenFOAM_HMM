@@ -26,8 +26,8 @@ Class
     Foam::directMappedPolyPatch
 
 Description
-    Determines a mapping between patch face centres and mesh cell centres and
-    processors they're on.
+    Determines a mapping between patch face centres and mesh cell or face
+    centres and processors they're on.
 
 Note
     Storage is not optimal. It stores all face centres and cells on all
@@ -43,6 +43,9 @@ SourceFiles
 
 #include "polyPatch.H"
 #include "labelPair.H"
+#include "Tuple2.H"
+#include "pointIndexHit.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,10 +60,32 @@ class directMappedPolyPatch
 :
     public polyPatch
 {
+
+public:
+
+        //- Mesh items to sample
+        enum sampleMode
+        {
+            NEARESTCELL,
+            NEARESTPATCHFACE,
+            NEARESTFACE
+        };
+
+private:
+
     // Private data
+
+        static const NamedEnum<sampleMode, 3> sampleModeNames_;
+
+        //- What to sample
+        sampleMode mode_;
+
+        //- Patch (only if NEARESTBOUNDARY)
+        const word samplePatch_;
 
         //- Offset vector
         const vector offset_;
+
 
 
         // Derived information
@@ -68,8 +93,8 @@ class directMappedPolyPatch
             //- Communication schedule.
             mutable autoPtr<List<labelPair> > schedulePtr_;
 
-            //- Cells to sample per processor
-            mutable autoPtr<labelListList> sendCellLabelsPtr_;
+            //- Cells/faces to sample per processor
+            mutable autoPtr<labelListList> sendLabelsPtr_;
 
             //- Patch faces to receive per processor
             mutable autoPtr<labelListList> receiveFaceLabelsPtr_;
@@ -86,17 +111,48 @@ class directMappedPolyPatch
             pointField& patchFc
         ) const;
 
-        //- Find cells containing samples
+        //- Find cells/faces containing samples
         void findSamples
         (
             const pointField&,
-            labelList& sampleCellProcs,
-            labelList& sampleCells,
-            pointField& sampleCc
+            labelList& sampleProcs,     // processor containing sample
+            labelList& sampleIndices,   // local index of cell/face
+            pointField& sampleLocations // actual representative location
         ) const;
 
         //- Calculate matching
         void calcMapping() const;
+
+
+    // Private class
+
+        //- Private class for finding nearest
+        //  - point+local index
+        //  - sqr(distance)
+        //  - processor
+        typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
+
+        class nearestEqOp
+        {
+
+        public:
+
+            void operator()(nearInfo& x, const nearInfo& y) const
+            {
+                if (y.first().hit())
+                {
+                    if (!x.first().hit())
+                    {
+                        x = y;
+                    }
+                    else if (y.second().first() < x.second().first())
+                    {
+                        x = y;
+                    }
+                }
+            }
+        };
+
 
 
 protected:
@@ -231,21 +287,25 @@ public:
             return schedulePtr_();
         }
 
-        //- Cells to sample per processor
-        const labelListList& sendCellLabels() const
+        //- Cells/faces to sample per processor
+        const labelListList& sendLabels() const
         {
-            if (!sendCellLabelsPtr_.valid())
+            Pout<< "Asking for sendLabels." << endl;
+            if (!sendLabelsPtr_.valid())
             {
+                Pout<< "Calculating mapping." << endl;
                 calcMapping();
             }
-            return sendCellLabelsPtr_();
+            return sendLabelsPtr_();
         }
 
         //- Patch faces to receive per processor
         const labelListList& receiveFaceLabels() const
         {
+            Pout<< "Asking for receiveFaceLabels." << endl;
             if (!receiveFaceLabelsPtr_.valid())
             {
+                Pout<< "Calculating mapping." << endl;
                 calcMapping();
             }
             return receiveFaceLabelsPtr_();
