@@ -118,7 +118,8 @@ void Foam::Cloud<ParticleType>::checkFieldIOobject
             "void Cloud<ParticleType>::checkFieldIOobject"
             "(Cloud<ParticleType>, IOField<DataType>)"
         )   << "Size of " << data.name()
-            << " field does not match the number of particles"
+            << " field " << data.size()
+            << " does not match the number of particles " << c.size()
             << abort(FatalError);
     }
 }
