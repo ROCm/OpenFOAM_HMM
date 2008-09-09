@@ -314,6 +314,7 @@ public:
 
             //- Return slightly wider bounding box
             //  Extends all dimensions with s*span*Random::scalar01()
+            //  and guarantees in any direction s*mag(span) minimum width
             inline treeBoundBox extend(Random&, const scalar s) const;
 
     // Friend Operators
