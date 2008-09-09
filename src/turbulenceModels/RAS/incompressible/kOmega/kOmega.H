@@ -42,6 +42,7 @@ Description
         kOmegaCoeffs
         {
             Cmu         0.09;  // Equivalent to betaStar
+            alpha       0.52;
             beta        0.072;
             alphak      0.5;
             alphaOmega  0.5;
@@ -81,6 +82,7 @@ class kOmega
 
             dimensionedScalar Cmu_;
             dimensionedScalar beta_;
+            dimensionedScalar alpha_;
             dimensionedScalar alphaK_;
             dimensionedScalar alphaOmega_;
 
