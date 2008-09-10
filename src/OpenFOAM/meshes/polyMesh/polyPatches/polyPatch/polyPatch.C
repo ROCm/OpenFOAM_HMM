@@ -282,8 +282,7 @@ const Foam::labelList& Foam::polyPatch::meshEdges() const
                 primitivePatch::meshEdges
                 (
                     boundaryMesh().mesh().edges(),
-                    boundaryMesh().mesh().cellEdges(),
-                    faceCells()
+                    boundaryMesh().mesh().pointEdges()
                 )
             );
     }
