@@ -1295,7 +1295,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
                     selectFaces
                     (
                         mesh,
-                        mesh.edgeFaces()[iter()],
+                        mesh.edgeFaces(iter()),
                         true
                     )
                 );
@@ -1309,7 +1309,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
                     selectFaces
                     (
                         mesh,
-                        mesh.edgeFaces()[iter()],
+                        mesh.edgeFaces(iter()),
                         false
                     )
                 );

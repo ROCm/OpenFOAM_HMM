@@ -362,16 +362,27 @@ const Foam::labelList& Foam::faceZone::meshEdges() const
 {
     if (!mePtr_)
     {
-        labelList faceCells(size());
-
-        const labelList& own = zoneMesh().mesh().faceOwner();
-
-        const labelList& faceLabels = *this;
-
-        forAll (faceCells, faceI)
-        {
-            faceCells[faceI] = own[faceLabels[faceI]];
-        }
+        //labelList faceCells(size());
+        //
+        //const labelList& own = zoneMesh().mesh().faceOwner();
+        //
+        //const labelList& faceLabels = *this;
+        //
+        //forAll (faceCells, faceI)
+        //{
+        //    faceCells[faceI] = own[faceLabels[faceI]];
+        //}
+        //
+        //mePtr_ =
+        //    new labelList
+        //    (
+        //        operator()().meshEdges
+        //        (
+        //            zoneMesh().mesh().edges(),
+        //            zoneMesh().mesh().cellEdges(),
+        //            faceCells
+        //        )
+        //    );
 
         mePtr_ =
             new labelList
@@ -379,8 +390,7 @@ const Foam::labelList& Foam::faceZone::meshEdges() const
                 operator()().meshEdges
                 (
                     zoneMesh().mesh().edges(),
-                    zoneMesh().mesh().cellEdges(),
-                    faceCells
+                    zoneMesh().mesh().pointEdges()
                 )
             );
     }

@@ -137,6 +137,9 @@ public:
         //- Return a null List
         static const List<T>& null();
 
+        //- Return the number of elements in the UList.
+        inline label size() const;
+
 
         // Edit
 
@@ -155,6 +158,10 @@ public:
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
+
+            //- Override size to be inconsistent with allocated storage.
+            //  Use with care.
+            inline label& size();
 
 
     // Member operators

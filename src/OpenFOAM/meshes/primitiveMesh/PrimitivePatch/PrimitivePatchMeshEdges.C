@@ -111,6 +111,60 @@ labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
 }
 
 
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+
+labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
+(
+    const edgeList& allEdges,
+    const labelListList& pointEdges
+) const
+{
+    if (debug)
+    {
+        Info<< "labelList PrimitivePatch<Face, FaceList, PointField, PointType>"
+            << "::meshEdges() : "
+            << "calculating labels of patch edges in mesh edge list"
+            << endl;
+    }
+
+    // get reference to the list of edges on the patch 
+    const edgeList& PatchEdges = edges();
+
+    // create the storage
+    labelList meshEdges(PatchEdges.size());
+
+    // get reference to the points on the patch
+    const labelList& pp = meshPoints();
+
+    // WARNING: Remember that local edges address into local point list;
+    // local-to-global point label translation is necessary
+    forAll (PatchEdges, edgeI)
+    {
+        const label globalPointI = pp[PatchEdges[edgeI].start()];
+        const edge curEdge(globalPointI, pp[PatchEdges[edgeI].end()]);
+
+        const labelList& pe = pointEdges[globalPointI];
+
+        forAll (pe, i)
+        {
+            if (allEdges[pe[i]] == curEdge)
+            {
+                meshEdges[edgeI] = pe[i];
+                break;
+            } 
+        }
+    }
+
+    return meshEdges;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template

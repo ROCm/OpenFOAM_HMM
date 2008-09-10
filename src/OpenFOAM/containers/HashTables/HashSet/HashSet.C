@@ -24,83 +24,67 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "primitiveMesh.H"
-#include "ListOps.H"
+#ifndef HashSet_C
+#define HashSet_C
+
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::cellPoints() const
+template<class Key, class Hash>
+bool HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& ht) const
 {
-    if (!cpPtr_)
-    {
-        if (debug)
-        {
-            Pout<< "primitiveMesh::cellPoints() : "
-                << "calculating cellPoints" << endl;
-        }
+    const HashTable<empty, Key, Hash>& a = *this;
 
-        // Invert pointCells
-        cpPtr_ = new labelListList(nCells());
-        invertManyToMany(nCells(), pointCells(), *cpPtr_);
+    // Are all my elements in ht?
+    for
+    (
+        typename HashTable<empty, Key, Hash>::const_iterator iter = a.begin();
+        iter != a.end();
+        ++iter
+    )
+    {
+        if (!ht.found(iter.key()))
+        {
+            return false;
+        }
     }
-    
-    return *cpPtr_;
+
+    // Are all ht elements in me?
+    for
+    (
+        typename HashTable<empty, Key, Hash>::const_iterator iter = ht.begin();
+        iter != ht.end();
+        ++iter
+    )
+    {
+        if (!found(iter.key()))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 
-const labelList& primitiveMesh::cellPoints(const label cellI) const
+template<class Key, class Hash>
+bool HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& ht) const
 {
-    if (hasCellPoints())
-    {
-        return cellPoints()[cellI];
-    }
-    else
-    {
-        const faceList& fcs = faces();
-        const labelList& cFaces = cells()[cellI];
-
-        labelSet_.clear();
-
-        forAll(cFaces, i)
-        {
-            const labelList& f = fcs[cFaces[i]];
-
-            forAll(f, fp)
-            {
-                labelSet_.insert(f[fp]);    
-            }
-        }
-
-        labels_.size() = allocSize_;
-
-        if (labelSet_.size() > allocSize_)
-        {
-            labels_.clear();
-            allocSize_ = labelSet_.size();
-            labels_.setSize(allocSize_);
-        }
-
-        label n = 0;
-
-        forAllConstIter(labelHashSet, labelSet_, iter)
-        {
-            labels_[n++] = iter.key();
-        }
-
-        labels_.size() = n;
-
-        return labels_;
-    }
+    return !(operator==(ht));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
