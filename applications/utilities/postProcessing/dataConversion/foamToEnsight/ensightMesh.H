@@ -88,9 +88,6 @@ class ensightMesh
 
         List<faceSets> boundaryFaceSets_;
 
-
-
-
         HashTable<labelList> allPatchNames_;
 
         HashTable<label> patchIndices_;
@@ -246,9 +243,8 @@ public:
         ensightMesh(const fvMesh&, const argList& args, const bool binary);
 
 
-    // Destructor
-
-        ~ensightMesh();
+    //- Destructor
+    ~ensightMesh();
 
 
     // Member Functions
