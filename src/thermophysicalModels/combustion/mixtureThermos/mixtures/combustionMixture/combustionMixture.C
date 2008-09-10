@@ -107,18 +107,6 @@ combustionMixture::combustionMixture
             );
         }
     }
-
-    // Error check for single component mixtures - should be uniform 1
-    if (Y_.size() == 1)
-    {
-        if (average(Y_[0]).value() < 0.999)
-        {
-            FatalErrorIn("combustionMixture::combustionMixture")
-                << "Mass fraction for single component mixture must be unity"
-                << nl << "Please correct field: " << species_[0]
-                << " (Ydefault)" << nl << abort(FatalError);
-        }
-    }
 }
 
 

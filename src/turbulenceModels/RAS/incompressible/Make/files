@@ -5,6 +5,7 @@ laminar/laminar.C
 kEpsilon/kEpsilon.C
 RNGkEpsilon/RNGkEpsilon.C
 realizableKE/realizableKE.C
+kOmega/kOmega.C
 kOmegaSST/kOmegaSST.C
 SpalartAllmaras/SpalartAllmaras.C
 LRR/LRR.C

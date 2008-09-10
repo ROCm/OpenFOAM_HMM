@@ -23,66 +23,44 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::kOmegaSST
+    Foam::incompressible::RASModels::kOmega
 
 Description
-    Implementation of the k-omega-SST turbulence model for incompressible
-    flows.
+    Standard high Reynolds-number k-omega turbulence model for
+    incompressible flows.
 
-    Turbulence model described in:
+    References:
     @verbatim
-        Menter, F., Esch, T.
-        "Elements of Industrial Heat Transfer Prediction"
-        16th Brazilian Congress of Mechanical Engineering (COBEM),
-        Nov. 2001
+        "Turbulence Modeling for CFD"
+        D. C. Wilcox,
+        DCW Industries, Inc., La Canada,
+        California, 1998.
+
+        See also:
+        http://www.cfd-online.com/Wiki/Wilcox's_k-omega_model
     @endverbatim
-
-    Note that this implementation is written in terms of alpha diffusion
-    coefficients rather than the more traditional sigma (alpha = 1/sigma) so
-    that the blending can be applied to all coefficuients in a consistent
-    manner.  The paper suggests that sigma is blended but this would not be
-    consistent with the blending of the k-epsilon and k-omega models.
-
-    Also note that the error in the last term of equation (2) relating to
-    sigma has been corrected.
-
-    Wall-functions are applied in this implementation by using equations (14)
-    to specify the near-wall omega as appropriate.
-
-    The blending functions (15) and (16) are not currently used because of the
-    uncertainty in their origin, range of applicability and that is y+ becomes
-    sufficiently small blending u_tau in this manner clearly becomes nonsense.
 
     The default model coefficients correspond to the following:
     @verbatim
-        kOmegaSST
+        kOmegaCoeffs
         {
-            Cmu         0.09;
-            alphaK1     0.85034;
-            alphaK2     1.0;
-            alphaOmega1 0.5;
-            alphaOmega2 0.85616;
-            alphah      1.0;    // only for compressible
-            beta1       0.075;
-            beta2       0.0828;
-            betaStar    0.09;
-            gamma1      0.5532;
-            gamma2      0.4403;
-            a1          0.31;
-            c1          10.0;
+            Cmu         0.09;  // Equivalent to betaStar
+            alpha       0.52;
+            beta        0.072;
+            alphak      0.5;
+            alphaOmega  0.5;
         }
     @endverbatim
 
 SourceFiles
-    kOmegaSST.C
+    kOmega.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaSST_H
-#define kOmegaSST_H
+#ifndef kOmega_H
+#define kOmega_H
 
 #include "RASModel.H"
-#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,99 +75,41 @@ namespace RASModels
                            Class kOmega Declaration
 \*---------------------------------------------------------------------------*/
 
-class kOmegaSST
+class kOmega
 :
     public RASModel
 {
     // Private data
 
-        dimensionedScalar alphaK1_;
-        dimensionedScalar alphaK2_;
+        // Model coefficients
 
-        dimensionedScalar alphaOmega1_;
-        dimensionedScalar alphaOmega2_;
-
-        dimensionedScalar gamma1_;
-        dimensionedScalar gamma2_;
-
-        dimensionedScalar beta1_;
-        dimensionedScalar beta2_;
-
-        dimensionedScalar betaStar_;
-
-        dimensionedScalar a1_;
-        dimensionedScalar c1_;
-
-        dimensionedScalar omega0_;
-        dimensionedScalar omegaSmall_;
-
-        dimensionedScalar Cmu_;
-
-        wallDist y_;
-
-        volScalarField k_;
-        volScalarField omega_;
-        volScalarField nut_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar beta_;
+            dimensionedScalar alpha_;
+            dimensionedScalar alphaK_;
+            dimensionedScalar alphaOmega_;
 
 
-    // Private member functions
+            dimensionedScalar omega0_;
+            dimensionedScalar omegaSmall_;
 
-        tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
-        tmp<volScalarField> F2() const;
 
-        tmp<volScalarField> blend
-        (
-            const volScalarField& F1,
-            const dimensionedScalar& psi1,
-            const dimensionedScalar& psi2
-        ) const
-        {
-            return F1*(psi1 - psi2) + psi2;
-        }
+        // Fields
 
-        tmp<volScalarField> alphaK
-        (
-            const volScalarField& F1
-        ) const
-        {
-            return blend(F1, alphaK1_, alphaK2_);
-        }
-
-        tmp<volScalarField> alphaOmega
-        (
-            const volScalarField& F1
-        ) const
-        {
-            return blend(F1, alphaOmega1_, alphaOmega2_);
-        }
-
-        tmp<volScalarField> beta
-        (
-            const volScalarField& F1
-        ) const
-        {
-            return blend(F1, beta1_, beta2_);
-        }
-
-        tmp<volScalarField> gamma
-        (
-            const volScalarField& F1
-        ) const
-        {
-            return blend(F1, gamma1_, gamma2_);
-        }
+            volScalarField k_;
+            volScalarField omega_;
+            volScalarField nut_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("kOmegaSST");
-
+    TypeName("kOmega");
 
     // Constructors
 
         //- Construct from components
-        kOmegaSST
+        kOmega
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
@@ -199,7 +119,7 @@ public:
 
     // Destructor
 
-        ~kOmegaSST()
+        ~kOmega()
         {}
 
 
@@ -212,20 +132,20 @@ public:
         }
 
         //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff(const volScalarField& F1) const
+        tmp<volScalarField> DkEff() const
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphaK(F1)*nut_ + nu())
+                new volScalarField("DkEff", alphaK_*nut_ + nu())
             );
         }
 
         //- Return the effective diffusivity for omega
-        tmp<volScalarField> DomegaEff(const volScalarField& F1) const
+        tmp<volScalarField> DomegaEff() const
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DomegaEff", alphaOmega(F1)*nut_ + nu())
+                new volScalarField("DomegaEff", alphaOmega_*nut_ + nu())
             );
         }
 
@@ -254,7 +174,7 @@ public:
                         mesh_.time().timeName(),
                         mesh_
                     ),
-                    betaStar_*k_*omega_,
+                    Cmu_*k_*omega_,
                     omega_.boundaryField().types()
                 )
             );
@@ -280,7 +200,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // namespace incompressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

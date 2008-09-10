@@ -52,6 +52,20 @@ inline T& Foam::List<T>::newElmt(const label i)
 }
 
 
+template<class T>
+inline Foam::label Foam::List<T>::size() const
+{
+    return UList<T>::size_;
+}
+
+
+template<class T>
+inline Foam::label& Foam::List<T>::size()
+{
+    return UList<T>::size_;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

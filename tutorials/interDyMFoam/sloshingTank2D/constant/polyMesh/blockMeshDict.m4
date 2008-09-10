@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    `format'      ascii;
     class       dictionary;
     object      blockMeshDict;
 }
@@ -16,7 +16,7 @@ FoamFile
 // General m4 macros
 
 changecom(//)changequote([,])
-define(calc, [esyscmd(perl -e 'use Math::Trig; use POSIX; print ($1)')])
+define(calc, [esyscmd(perl -e 'use Math::Trig; use POSIX; printf ($1)')])
 define(VCOUNT, 0)
 define(vlabel, [[// ]Vertex $1 = VCOUNT define($1, VCOUNT)define([VCOUNT], incr(VCOUNT))])
 

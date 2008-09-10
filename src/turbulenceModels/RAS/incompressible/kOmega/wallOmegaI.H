@@ -22,58 +22,30 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    kinematicParcelFoam
+Global
+    wallOmega
 
 Description
-    Transient solver for a single kinematicCloud. Uses precalculated velocity
-    field to evolve a cloud.
+    Set wall dissipation in the omega matrix
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "basicKinematicCloud.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("cloudName", "cloud name");
+    const fvPatchList& patches = mesh_.boundary();
 
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
-    #include "createFields.H"
-    #include "compressibleCourantNo.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.run())
+    forAll(patches, patchi)
     {
-        runTime++;
+        const fvPatch& p = patches[patchi];
 
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        Info<< "Evolving " << kinematicCloud.name() << endl;
-        kinematicCloud.evolve();
-        kinematicCloud.info();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        if (isType<wallFvPatch>(p))
+        {
+            omegaEqn().setValues
+            (
+                p.faceCells(),
+                omega_.boundaryField()[patchi].patchInternalField()
+            );
+        }
     }
-
-    Info<< "End\n" << endl;
-
-    return(0);
 }
-
 
 // ************************************************************************* //

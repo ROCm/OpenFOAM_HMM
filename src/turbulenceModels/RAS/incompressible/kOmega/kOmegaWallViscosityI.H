@@ -22,57 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    kinematicParcelFoam
+Global
+    kOmegaWallViscosity
 
 Description
-    Transient solver for a single kinematicCloud. Uses precalculated velocity
-    field to evolve a cloud.
+    Calculate wall viscosity from wall-functions.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "basicKinematicCloud.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("cloudName", "cloud name");
+    scalar Cmu25 = pow(Cmu_.value(), 0.25);
 
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
-    #include "createFields.H"
-    #include "compressibleCourantNo.H"
+    const fvPatchList& patches = mesh_.boundary();
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.run())
+    forAll(patches, patchi)
     {
-        runTime++;
+        const fvPatch& curPatch = patches[patchi];
 
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        if (isType<wallFvPatch>(curPatch))
+        {
+            const scalarField& nuw = nu().boundaryField()[patchi];
+            scalarField& nutw = nut_.boundaryField()[patchi];
 
-        Info<< "Evolving " << kinematicCloud.name() << endl;
-        kinematicCloud.evolve();
-        kinematicCloud.info();
+            forAll(curPatch, facei)
+            {
+                label faceCelli = curPatch.faceCells()[facei];
 
-        runTime.write();
+                scalar yPlus =
+                    Cmu25*y_[patchi][facei]*sqrt(k_[faceCelli])/nuw[facei];
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+                if (yPlus > yPlusLam_)
+                {
+                    nutw[facei] =
+                         nuw[facei]
+                        *(yPlus*kappa_.value()/log(E_.value()*yPlus) - 1);
+                }
+                else
+                {
+                    nutw[facei] = 0.0;
+                }
+            }
+        }
     }
-
-    Info<< "End\n" << endl;
-
-    return(0);
 }
 
 

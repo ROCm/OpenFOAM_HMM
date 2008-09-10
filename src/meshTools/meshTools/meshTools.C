@@ -182,7 +182,7 @@ Foam::vectorField Foam::meshTools::calcBoxPointNormals(const primitivePatch& pp)
                     "Foam::meshTools::calcBoxPointNormals"
                     "(const primitivePatch& pp)"
                 )   << "No visible octant for point:" << pp.meshPoints()[pointI]
-                    << " cooord:" << pp.localPoints()[pointI] << nl
+                    << " cooord:" << pp.points()[pp.meshPoints()[pointI]] << nl
                     << "Normal set to " << pn[pointI] << endl;
             }
         }
@@ -299,7 +299,7 @@ bool Foam::meshTools::edgeOnCell
     const label edgeI
 )
 {
-    return findIndex(mesh.edgeCells()[edgeI], cellI) != -1;
+    return findIndex(mesh.edgeCells(edgeI), cellI) != -1;
 }        
 
 
@@ -310,7 +310,7 @@ bool Foam::meshTools::edgeOnFace
     const label edgeI
 )
 {
-    return findIndex(mesh.faceEdges()[faceI], edgeI) != -1;
+    return findIndex(mesh.faceEdges(faceI), edgeI) != -1;
 }        
 
 
@@ -403,7 +403,6 @@ Foam::label Foam::meshTools::getSharedEdge
     const labelList& f0Edges = mesh.faceEdges()[f0];
     const labelList& f1Edges = mesh.faceEdges()[f1];
 
-
     forAll(f0Edges, f0EdgeI)
     {
         label edge0 = f0Edges[f0EdgeI];
@@ -481,7 +480,7 @@ void Foam::meshTools::getEdgeFaces
     label& face1
 )
 {
-    const labelList& eFaces = mesh.edgeFaces()[edgeI];
+    const labelList& eFaces = mesh.edgeFaces(edgeI);
 
     face0 = -1;
     face1 = -1;
@@ -619,7 +618,7 @@ Foam::label Foam::meshTools::walkFace
     const label nEdges
 )
 {
-    const labelList& fEdges = mesh.faceEdges()[faceI];
+    const labelList& fEdges = mesh.faceEdges(faceI);
 
     label edgeI = startEdgeI;
 
@@ -788,15 +787,6 @@ Foam::label Foam::meshTools::cutDirToEdge
 
     return maxEdgeI;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

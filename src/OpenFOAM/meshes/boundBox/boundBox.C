@@ -87,9 +87,47 @@ boundBox::boundBox(Istream& is)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const boundBox& b)
+Ostream& operator<<(Ostream& os, const boundBox& bb)
 {
-    return os << b.min() << token::SPACE << b.max();
+    if (os.format() == IOstream::ASCII)
+    {
+        os << bb.min_ << token::SPACE << bb.max_;
+    }
+    else
+    {
+        os.write
+        (
+            reinterpret_cast<const char*>(&bb.min_),
+            sizeof(boundBox)
+        );
+    }
+
+    // Check state of Ostream
+    os.check("Ostream& operator<<(Ostream&, const boundBox&)");
+
+    return os;
+}
+
+
+Istream& operator>>(Istream& is, boundBox& bb)
+{
+    if (is.format() == IOstream::ASCII)
+    {
+        return is >> bb.min_ >>  bb.max_;
+    }
+    else
+    {
+        is.read
+        (
+            reinterpret_cast<char*>(&bb.min_),
+            sizeof(boundBox)
+        );
+    }
+
+    // Check state of Istream
+    is.check("Istream& operator>>(Istream&, boundBox&)");
+
+    return is;
 }
 
 
