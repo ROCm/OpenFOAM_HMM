@@ -187,21 +187,21 @@ time                       ({digit}{digit}":"{digit}{digit}":"{digit}{digit})
 
 versionNumber              ({digit}|".")*
 
-header                     {spaceNl}"(1"{some_space}
-dimension                  {spaceNl}"(2"{some_space}
-points                     {spaceNl}"(10"{some_space}
-faces                      {spaceNl}"(13"{some_space}
-cells                      {spaceNl}"(12"{some_space}
-zoneVariant1               {spaceNl}"(39"{some_space}
-zoneVariant2               {spaceNl}"(45"{some_space}
-faceTree                   {spaceNl}"(59"{some_space}
+header                     {spaceNl}"(1"{space}
+dimension                  {spaceNl}"(2"{space}
+points                     {spaceNl}"(10"{space}
+faces                      {spaceNl}"(13"{space}
+cells                      {spaceNl}"(12"{space}
+zoneVariant1               {spaceNl}"(39"{space}
+zoneVariant2               {spaceNl}"(45"{space}
+faceTree                   {spaceNl}"(59"{space}
 
-comment                    "0"{some_space}
-unknownPeriodicFace        "17"{some_space}
-periodicFace               "18"{some_space}
-cellTree                   "58"{some_space}
-faceParents                "61"{some_space}
-ignoreBlocks               ("4"|"37"|"38"|"41"|"60"|"64"){some_space}
+comment                    "0"{space}
+unknownPeriodicFace        "17"{space}
+periodicFace               "18"{space}
+cellTree                   "58"{space}
+faceParents                "61"{space}
+ignoreBlocks               ("4"|"37"|"38"|"41"|"60"|"64"){space}
 
 redundantBlock             {spaceNl}({comment}|{unknownPeriodicFace}|{periodicFace}|{cellTree}|{faceParents}|{ignoreBlocks}){space}
 
