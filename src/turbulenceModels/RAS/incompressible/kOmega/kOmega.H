@@ -35,6 +35,9 @@ Description
         D. C. Wilcox,
         DCW Industries, Inc., La Canada,
         California, 1998.
+
+        See also:
+        http://www.cfd-online.com/Wiki/Wilcox's_k-omega_model
     @endverbatim
 
     The default model coefficients correspond to the following:
