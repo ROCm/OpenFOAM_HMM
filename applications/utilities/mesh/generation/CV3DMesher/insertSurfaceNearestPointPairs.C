@@ -83,6 +83,208 @@ bool Foam::CV3D::dualCellSurfaceIntersection
 }
 
 
+void Foam::CV3D::smoothEdgePositions
+(
+    DynamicList<point>& edgePoints,
+    DynamicList<label>& edgeLabels
+) const
+{
+    const pointField& localPts = qSurf_.localPoints();
+    const edgeList& edges = qSurf_.edges();
+
+    // Sort by edge label then by distance from the start of the edge
+
+    SortableList<label> sortedEdgeLabels(edgeLabels);
+
+    labelList sortingIndices = sortedEdgeLabels.indices();
+
+    {
+        labelList copyEdgeLabels(edgeLabels.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyEdgeLabels[sI] = edgeLabels[sortingIndices[sI]];
+        }
+
+        edgeLabels.transfer(copyEdgeLabels);
+    }
+
+    {
+        List<point> copyEdgePoints(edgePoints.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyEdgePoints[sI] = edgePoints[sortingIndices[sI]];
+        }
+
+        edgePoints.transfer(copyEdgePoints);
+    }
+
+    List<scalar> edgeDistances(edgePoints.size());
+
+    forAll(edgeDistances, eD)
+    {
+        const point& edgeStart = localPts[edges[edgeLabels[eD]].start()];
+
+        edgeDistances[eD] = mag(edgeStart - edgePoints[eD]);
+    }
+
+    // Sort by edgeDistances in blocks of edgeLabel
+
+    DynamicList<label> edgeLabelJumps;
+
+    // Force first edgeLabel to be a jump
+    edgeLabelJumps.append(0);
+
+    for (label eL = 1; eL < edgeLabels.size(); eL++)
+    {
+        if (edgeLabels[eL] > edgeLabels[eL-1])
+        {
+            edgeLabelJumps.append(eL);
+        }
+    }
+
+    edgeLabelJumps.shrink();
+
+    forAll(edgeLabelJumps, eLJ)
+    {
+        label start = edgeLabelJumps[eLJ];
+
+        label length;
+
+        if (eLJ == edgeLabelJumps.size() - 1)
+        {
+            length = edgeLabels.size() - start;
+        }
+        else
+        {
+            length = edgeLabelJumps[eLJ + 1] - start;
+        }
+
+        SubList<scalar> edgeDistanceBlock(edgeDistances, length, start);
+
+        SortableList<scalar> sortedEdgeDistanceBlock(edgeDistanceBlock);
+
+        forAll(sortedEdgeDistanceBlock, sEDB)
+        {
+            sortingIndices[start + sEDB] =
+                sortedEdgeDistanceBlock.indices()[sEDB] + start;
+        }
+    }
+
+    {
+        List<point> copyEdgePoints(edgePoints.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyEdgePoints[sI] = edgePoints[sortingIndices[sI]];
+        }
+
+        edgePoints.transfer(copyEdgePoints);
+    }
+
+    {
+        List<scalar> copyEdgeDistances(edgeDistances.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyEdgeDistances[sI] = edgeDistances[sortingIndices[sI]];
+        }
+
+        edgeDistances.transfer(copyEdgeDistances);
+    }
+
+    // Process the points along each edge (in blocks of edgeLabel) performing 3
+    // functions:
+    // 1: move points away from feature edges
+    // 2: aggregate tight groups of points into one point
+    // 3: adjust the spacing of remaining points on a pair by pair basis to
+    //    remove excess points
+
+    DynamicList<point> tempEdgePoints(edgePoints.size());
+
+    DynamicList<label> tempEdgeLabels(edgeLabels.size());
+
+    forAll(edgeLabelJumps, eLJ)
+    {
+        label start = edgeLabelJumps[eLJ];
+
+        label edgeI = edgeLabels[start];
+
+        label length;
+
+        if (eLJ == edgeLabelJumps.size() - 1)
+        {
+            length = edgeLabels.size() - start;
+        }
+        else
+        {
+            length = edgeLabelJumps[eLJ + 1] - start;
+        }
+
+        List<point> edgePointBlock(SubList<point>(edgePoints, length, start));
+
+        List<scalar> edgeDistanceBlock(SubList<scalar>(edgeDistances, length, start));
+
+        scalar maxPointGroupSpacing = tols_.ppDist;
+
+        label groupSize = 0;
+
+        point newEdgePoint(vector::zero);
+
+        if (edgeDistanceBlock.size() == 1)
+        {
+            tempEdgePoints.append(edgePointBlock[0]);
+
+            tempEdgeLabels.append(edgeI);
+        }
+        else if ((edgeDistanceBlock[1] - edgeDistanceBlock[0]) > maxPointGroupSpacing)
+        {
+            tempEdgePoints.append(edgePointBlock[0]);
+
+            tempEdgeLabels.append(edgeI);
+        }
+
+        for (label eDB = 1; eDB < edgeDistanceBlock.size(); eDB++)
+        {
+            const scalar& edgeDist = edgeDistanceBlock[eDB];
+            const scalar& previousEdgeDist = edgeDistanceBlock[eDB - 1];
+
+            if ((edgeDist - previousEdgeDist) < maxPointGroupSpacing)
+            {
+                newEdgePoint += edgePointBlock[eDB];
+
+                groupSize++;
+            }
+            else if (groupSize > 0)
+            {
+                // A point group has been formed and has finished
+
+                newEdgePoint /= groupSize;
+
+                tempEdgePoints.append(newEdgePoint);
+
+                tempEdgeLabels.append(edgeI);
+
+                newEdgePoint = vector::zero;
+
+                groupSize = 0;
+            }
+            else
+            {
+                tempEdgePoints.append(edgePointBlock[eDB]);
+
+                tempEdgeLabels.append(edgeI);
+            }
+        }
+    }
+
+    edgePoints.transfer(tempEdgePoints.shrink());
+
+    edgeLabels.transfer(tempEdgeLabels.shrink());
+}
+
+
 void Foam::CV3D::insertPointPairs
 (
     const DynamicList<point>& nearSurfacePoints,
@@ -164,12 +366,20 @@ void Foam::CV3D::insertEdgePointGroups
         plane planeA(edgePt - tols_.ppDist*nA, nA);
         plane planeB(edgePt - tols_.ppDist*nB, nB);
 
-        plane planeF(edgePt, (nA^nB));
+        // Finding the nearest point on the intersecting line to the edge point.
+        // Floating point errors often encountered using planePlaneIntersect
+        // plane planeF(edgePt, (nA^nB));
+        // point refPt = planeF.planePlaneIntersect(planeA,planeB);
 
-        Info<< "CHANGE TO FINDING THE NEAREST POINT ON THE INTERSECTING LINE TO THE EDGE POINT. "
-            << "Floating point errors in planePlane." << endl;
+        plane::ray planeIntersect(planeA.planeIntersect(planeB));
 
-        point refPt = planeF.planePlaneIntersect(planeA,planeB);
+        pointHit refPtHit = linePointRef
+        (
+            planeIntersect.refPoint() + 2*tols_.span*planeIntersect.dir(),
+            planeIntersect.refPoint() - 2*tols_.span*planeIntersect.dir()
+        ).nearestDist(edgePt);
+
+        point refPt = refPtHit.hitPoint();
 
         point faceAVert =
         localPts[triSurfaceTools::oppositeVertex(qSurf_, faceA, edgeI)];
@@ -245,6 +455,8 @@ void Foam::CV3D::insertEdgePointGroups
             insertPoint(reflMasterPt, reflectedAI);
         }
     }
+
+    Info<< edgePoints.size() << " edge-control locations inserted" << endl;
 
     if (controls_.writeInsertedPointPairs)
     {
@@ -323,7 +535,7 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
     DynamicList<label> edgeLabels(allEdgeLabels.size());
     DynamicList<vector> edgePoints(allEdgePoints.size());
 
-    forAll (allEdgePoints, eP)
+    forAll(allEdgePoints, eP)
     {
         if (allEdgeLabels[eP] >= 0 && allEdgeEndPoints[eP] < 0)
         {
@@ -334,6 +546,8 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
 
     edgePoints.shrink();
     edgeLabels.shrink();
+
+    smoothEdgePositions(edgePoints, edgeLabels);
 
     insertEdgePointGroups
     (

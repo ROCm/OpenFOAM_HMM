@@ -271,7 +271,7 @@ void Foam::CV3D::calcDualMesh
     {
         labelList copyOwner(owner.size());
 
-        forAll (sortingIndices, sI)
+        forAll(sortingIndices, sI)
         {
             copyOwner[sI] = owner[sortingIndices[sI]];
         }
@@ -282,7 +282,7 @@ void Foam::CV3D::calcDualMesh
     {
         labelList copyNeighbour(neighbour.size());
 
-        forAll (sortingIndices, sI)
+        forAll(sortingIndices, sI)
         {
             copyNeighbour[sI] = neighbour[sortingIndices[sI]];
         }
@@ -293,7 +293,7 @@ void Foam::CV3D::calcDualMesh
     {
         faceList copyFaces(faces.size());
 
-        forAll (sortingIndices, sI)
+        forAll(sortingIndices, sI)
         {
             copyFaces[sI] = faces[sortingIndices[sI]];
         }
@@ -320,7 +320,7 @@ void Foam::CV3D::calcDualMesh
 
     ownerCellJumps.shrink();
 
-    forAll (ownerCellJumps, oCJ)
+    forAll(ownerCellJumps, oCJ)
     {
         label start = ownerCellJumps[oCJ];
 
@@ -339,7 +339,7 @@ void Foam::CV3D::calcDualMesh
 
         SortableList<label> sortedNeighbourBlock(neighbourBlock);
 
-        forAll (sortedNeighbourBlock, sNB)
+        forAll(sortedNeighbourBlock, sNB)
         {
             sortingIndices[start + sNB] =
                 sortedNeighbourBlock.indices()[sNB] + start;
@@ -351,7 +351,7 @@ void Foam::CV3D::calcDualMesh
     {
         labelList copyOwner(owner.size());
 
-        forAll (sortingIndices, sI)
+        forAll(sortingIndices, sI)
         {
             copyOwner[sI] = owner[sortingIndices[sI]];
         }
@@ -362,7 +362,7 @@ void Foam::CV3D::calcDualMesh
     {
         labelList copyNeighbour(neighbour.size());
 
-        forAll (sortingIndices, sI)
+        forAll(sortingIndices, sI)
         {
             copyNeighbour[sI] = neighbour[sortingIndices[sI]];
         }
@@ -373,7 +373,7 @@ void Foam::CV3D::calcDualMesh
     {
         faceList copyFaces(faces.size());
 
-        forAll (sortingIndices, sI)
+        forAll(sortingIndices, sI)
         {
             copyFaces[sI] = faces[sortingIndices[sI]];
         }
@@ -385,7 +385,7 @@ void Foam::CV3D::calcDualMesh
 
     label nBoundaryFaces = 0;
 
-    forAll (patchFaces, p)
+    forAll(patchFaces, p)
     {
         patchFaces[p].shrink();
 
@@ -402,9 +402,9 @@ void Foam::CV3D::calcDualMesh
 
     owner.setSize(nInternalFaces + nBoundaryFaces);
 
-    forAll (patchFaces, p)
+    forAll(patchFaces, p)
     {
-        forAll (patchFaces[p], f)
+        forAll(patchFaces[p], f)
         {
             faces[dualFacei] = patchFaces[p][f];
 

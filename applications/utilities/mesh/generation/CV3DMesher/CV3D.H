@@ -236,6 +236,14 @@ private:
             const Triangulation::Finite_vertices_iterator& vit
         ) const;
 
+        //- Smooths the points positioned along a feature edge by collecting
+        //- bunches together and deleting excess points.
+        void smoothEdgePositions
+        (
+            DynamicList<point>& edgePoints,
+            DynamicList<label>& edgeLabels
+        ) const;
+
         //- Insert point-pairs at the nearest points on the surface to the
         //  control vertex of dual-cells which intersect the boundary in order
         //  to provide a boundary-layer mesh.

@@ -377,8 +377,6 @@ void Foam::CV3D::insertFeaturePoints()
                         )
                     )/cos(phi) - 1;
 
-                    Info<< tab << guard << endl;
-
                     point internalPtF = concaveEdgeExternalPt + (2 + guard) *
                         (concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
 
