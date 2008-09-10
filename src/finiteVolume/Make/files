@@ -261,6 +261,7 @@ cfdTools/general/porousMedia/porousZone.C
 cfdTools/general/porousMedia/porousZones.C
 cfdTools/general/MRF/MRFZone.C
 cfdTools/general/MRF/MRFZones.C
+cfdTools/general/fieldSources/pressureGradientExplicitSource/pressureGradientExplicitSource.C
 cfdTools/general/fieldSources/timeActivatedExplicitSource/timeActivatedExplicitSource.C
 cfdTools/general/SRF/SRFModel/SRFModel/SRFModel.C
 cfdTools/general/SRF/SRFModel/SRFModel/newSRFModel.C
