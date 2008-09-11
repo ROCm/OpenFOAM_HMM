@@ -29,9 +29,9 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::interactionLists&
-    Foam::interactionLists::interactionLists() const
+    Foam::directInteractionList::il() const
 {
-    return interactionLists_;
+    return il_;
 }
 
 

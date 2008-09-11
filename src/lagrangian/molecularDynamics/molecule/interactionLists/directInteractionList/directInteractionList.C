@@ -25,37 +25,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "directInteractionList.H"
-
+#include "interactionLists.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::directInteractionList::buildDirectInteractionList
 (
-    scalar rCutMax,
     bool pointPointListBuild
 )
 {
     Info<< nl << "Building list of direct interaction neighbours" << endl;
 
-    scalar rCutMaxSqr = rCutMax*rCutMax;
-
-    const polyMesh& mesh(interactionLists_.mesh());
+    const polyMesh& mesh(il_.mesh());
 
     List<DynamicList<label> > directInteractionList(mesh.nCells());
 
     if (pointPointListBuild)
     {
-        Info<< "Point-Point direct interaction list build." << endl;
+        Info<< tab << "Point-Point direct interaction list build." << endl;
 
         label pointJIndex;
 
         forAll (mesh.points(), pointIIndex)
         {
-            const point& ptI
-            (
-                mesh.points()[pointIIndex]
-            );
-
             for
             (
                 pointJIndex = pointIIndex;
@@ -63,12 +55,7 @@ void Foam::directInteractionList::buildDirectInteractionList
                 ++pointJIndex
             )
             {
-                const point& ptJ
-                (
-                    mesh.points()[pointJIndex]
-                );
-
-                if (magSqr(ptI - ptJ) <= rCutMaxSqr)
+                if (il_.testPointPointDistance(pointIIndex, pointJIndex))
                 {
                     const labelList& ptICells
                     (
@@ -111,13 +98,13 @@ void Foam::directInteractionList::buildDirectInteractionList
     }
     else
     {
-        Info<< "Point-Face, Edge-Edge direct interaction list build." << endl;
+        Info<< tab << "Point-Face, Edge-Edge direct interaction list build." << endl;
 
         forAll (mesh.points(), p)
         {
             forAll(mesh.faces(), f)
             {
-                if(testPointFaceDistance(p, f))
+                if(il_.testPointFaceDistance(p, f))
                 {
                     const labelList& pCells(mesh.pointCells()[p]);
 
@@ -153,11 +140,7 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellN > cellI)
                             {
-                                if
-                                (
-                                    findIndex(directInteractionList[cellI], cellN)
-                                    == -1
-                                )
+                                if (findIndex(directInteractionList[cellI], cellN) == -1)
                                 {
                                     directInteractionList[cellI].append(cellN);
                                 }
@@ -165,11 +148,7 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellI > cellN)
                             {
-                                if
-                                (
-                                    findIndex(directInteractionList[cellN], cellI)
-                                    == -1
-                                )
+                                if (findIndex(directInteractionList[cellN], cellI) == -1)
                                 {
                                     directInteractionList[cellN].append(cellI);
                                 }
@@ -195,7 +174,7 @@ void Foam::directInteractionList::buildDirectInteractionList
             {
                 const edge& eJ(mesh.edges()[edgeJIndex]);
 
-                if (testEdgeEdgeDistance(eI, eJ))
+                if (il_.testEdgeEdgeDistance(eI, eJ))
                 {
                     const labelList& eICells(mesh.edgeCells()[edgeIIndex]);
 
@@ -211,11 +190,7 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellJ > cellI)
                             {
-                                if
-                                (
-                                    findIndex(directInteractionList[cellI], cellJ)
-                                    == -1
-                                )
+                                if (findIndex(directInteractionList[cellI], cellJ) == -1)
                                 {
                                     directInteractionList[cellI].append(cellJ);
                                 }
@@ -223,11 +198,7 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellI > cellJ)
                             {
-                                if
-                                (
-                                    findIndex(directInteractionList[cellJ], cellI)
-                                    == -1
-                                )
+                                if (findIndex(directInteractionList[cellJ], cellI) == -1)
                                 {
                                     directInteractionList[cellJ].append(cellI);
                                 }
@@ -246,6 +217,13 @@ void Foam::directInteractionList::buildDirectInteractionList
             directInteractionList[transDIL].shrink()
         );
     }
+
+    // sorting DILs
+
+    forAll((*this), dIL)
+    {
+        sort((*this)[dIL]);
+    }
 }
 
 
@@ -253,35 +231,26 @@ void Foam::directInteractionList::buildDirectInteractionList
 
 Foam::directInteractionList::directInteractionList
 (
-    const interactionLists& interactionLists,
-    scalar rCutMax,
+    const interactionLists& il,
     bool pointPointListBuild
 )
 :
-    labelListList(interactionLists.mesh().nCells()),
-    interactionLists_(interactionLists)
+    labelListList(il.mesh().nCells()),
+    il_(il)
 {
-    buildDirectInteractionList(rCutMax, pointPointListBuild);
+    buildDirectInteractionList(pointPointListBuild);
 }
 
 
 Foam::directInteractionList::directInteractionList
 (
-    const interactionLists& interactionLists
+    const interactionLists& il
 )
 :
-    labelListList(interactionLists.mesh().nCells()),
-    interactionLists_(interactionLists)
+    labelListList(il.mesh().nCells()),
+    il_(il)
 {
     Info<< "Read directInteractionList from disk not implemented" << endl;
-}
-
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::directInteractionList> Foam::directInteractionList::New()
-{
-    return autoPtr<directInteractionList>(new directInteractionList);
 }
 
 

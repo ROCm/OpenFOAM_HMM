@@ -57,13 +57,12 @@ class directInteractionList
 {
     // Private data
 
-        const interactionLists& interactionLists_;
+        const interactionLists& il_;
 
     // Private Member Functions
 
         void buildDirectInteractionList
         (
-            scalar rCutMax,
             bool pointPointListBuild
         );
 
@@ -81,8 +80,7 @@ public:
         directInteractionList
         (
             const interactionLists& interactionLists,
-            scalar rCutMax,
-            bool pointPointListBuild = false
+            bool pointPointListBuild
         );
 
         //- Construct from file
@@ -100,7 +98,7 @@ public:
 
         // Access
 
-        inline const interactionLists& interactionLists() const;
+        inline const interactionLists& il() const;
 
         // Check
 

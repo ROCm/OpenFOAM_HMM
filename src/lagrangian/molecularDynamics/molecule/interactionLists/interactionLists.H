@@ -39,6 +39,7 @@ SourceFiles
 
 #include "polyMesh.H"
 #include "directInteractionList.H"
+#include "referredCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +56,23 @@ class interactionLists
 
         const polyMesh& mesh_;
 
+        scalar rCutMaxSqr_;
+
         directInteractionList dil_;
+
+        // referredCellList ril_;
+
+        // labelList realCellsWithinRCutMaxOfAnyReferringPatch_;
+
+        // labelList realFacesWithinRCutMaxOfAnyReferringPatch_;
+
+        // labelList realEdgesWithinRCutMaxOfAnyReferringPatch_;
+
+        // labelList realPointsWithinRCutMaxOfAnyReferringPatch_;
+
+        // List<sendingReferralList> cellSendingReferralLists_;
+
+        // List<receivingReferralList> cellReceivingReferralLists_;
 
     // Private Member Functions
 
@@ -68,13 +85,18 @@ class interactionLists
 
 public:
 
+    // Static data members
+
+        //- Tolerance for checking that faces on a patch segment
+        static scalar transTol;
+
     // Constructors
 
         //- Construct and create all information from the mesh
         interactionLists
         (
             const polyMesh& mesh,
-            scalar rCutMax,
+            scalar rCutMaxSqr,
             bool pointPointListBuild = false
         );
 
@@ -88,11 +110,64 @@ public:
 
     // Member Functions
 
+            bool testPointPointDistance
+            (
+                const label ptI,
+                const label ptJ
+            ) const;
+
+            bool testPointFaceDistance
+            (
+                const label p,
+                const label faceNo
+            ) const;
+
+            bool testPointFaceDistance
+            (
+                const label p,
+                const referredCell& refCell
+            ) const;
+
+            bool testPointFaceDistance
+            (
+                const vectorList& pointsToTest,
+                const label faceNo
+            ) const;
+
+            bool testPointFaceDistance
+            (
+                const vector& p,
+                const label faceNo
+            ) const;
+
+            bool testPointFaceDistance
+            (
+                const vector& p,
+                const labelList& faceToTest,
+                const vectorList& points,
+                const vector& faceC,
+                const vector& faceA
+            ) const;
+
+            bool testEdgeEdgeDistance
+            (
+                const edge& eI,
+                const edge& eJ
+            ) const;
+
+            bool testEdgeEdgeDistance
+            (
+                const edge& eI,
+                const vector& eJs,
+                const vector& eJe
+            ) const;
+
+
         // Access
 
         inline const polyMesh& mesh() const;
 
-        inline const directInteractionList& dil();
+        inline const directInteractionList& dil() const;
 };
 
 

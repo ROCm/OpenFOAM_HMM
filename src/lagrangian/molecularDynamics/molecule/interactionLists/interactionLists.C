@@ -26,20 +26,24 @@ License
 
 #include "interactionLists.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+Foam::scalar Foam::interactionLists::transTol = 1e-12;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 
 Foam::interactionLists::interactionLists
-interactionLists
 (
     const polyMesh& mesh,
-    scalar rCutMax,
+    scalar rCutMaxSqr,
     bool pointPointListBuild
 )
 :
     mesh_(mesh),
-    dil_(*this, rCutMax, pointPointListBuild)
+    rCutMaxSqr_(rCutMaxSqr),
+    dil_(*this, pointPointListBuild)
 {}
 
 
@@ -57,6 +61,278 @@ Foam::interactionLists::~interactionLists()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::interactionLists::testPointPointDistance
+(
+    const label ptI,
+    const label ptJ
+) const
+{
+    return (magSqr(mesh_.points()[ptI] - mesh_.points()[ptJ]) <= rCutMaxSqr_);
+}
+
+
+bool Foam::interactionLists::testEdgeEdgeDistance
+(
+    const edge& eI,
+    const edge& eJ
+) const
+{
+    const vector& eJs(mesh_.points()[eJ.start()]);
+    const vector& eJe(mesh_.points()[eJ.end()]);
+
+    return testEdgeEdgeDistance(eI, eJs, eJe);
+}
+
+
+bool Foam::interactionLists::testPointFaceDistance
+(
+    const label p,
+    const label faceNo
+) const
+{
+    const vector& pointPosition(mesh_.points()[p]);
+
+    return testPointFaceDistance(pointPosition, faceNo);
+}
+
+
+bool Foam::interactionLists::testPointFaceDistance
+(
+    const label p,
+    const referredCell& refCell
+) const
+{
+    const vector& pointPosition(mesh_.points()[p]);
+
+    forAll (refCell.faces(), rCF)
+    {
+        if
+        (
+            testPointFaceDistance
+            (
+                pointPosition,
+                refCell.faces()[rCF],
+                refCell.vertexPositions(),
+                refCell.faceCentres()[rCF],
+                refCell.faceAreas()[rCF]
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool Foam::interactionLists::testPointFaceDistance
+(
+    const vectorList& pointsToTest,
+    const label faceNo
+) const
+{
+    forAll(pointsToTest, pTT)
+    {
+        const vector& p(pointsToTest[pTT]);
+
+        // if any point in the list is in range of the face
+        // then the rest do not need to be tested and
+        // true can be returned
+
+        if (testPointFaceDistance(p, faceNo))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool Foam::interactionLists::testPointFaceDistance
+(
+    const vector& p,
+    const label faceNo
+) const
+{
+    const face& faceToTest(mesh_.faces()[faceNo]);
+
+    const vector& faceC(mesh_.faceCentres()[faceNo]);
+
+    const vector& faceA(mesh_.faceAreas()[faceNo]);
+
+    const vectorList& points(mesh_.points());
+
+    return testPointFaceDistance
+    (
+        p,
+        faceToTest,
+        points,
+        faceC,
+        faceA
+    );
+}
+
+bool Foam::interactionLists::testPointFaceDistance
+(
+    const vector& p,
+    const labelList& faceToTest,
+    const vectorList& points,
+    const vector& faceC,
+    const vector& faceA
+) const
+{
+    vector faceN(faceA/mag(faceA));
+
+    scalar perpDist((p - faceC) & faceN);
+
+    if (magSqr(perpDist) > rCutMaxSqr_)
+    {
+        return false;
+    }
+
+    vector pointOnPlane = (p - faceN * perpDist);
+
+    if (magSqr(faceC - pointOnPlane) < rCutMaxSqr_*1e-8)
+    {
+        // If pointOnPlane is very close to the face centre
+        // then defining the local axes will be inaccurate
+        // and it is very likely that pointOnPlane will be
+        // inside the face, so return true if the points
+        // are in range to be safe
+
+        return (magSqr(pointOnPlane - p) <= rCutMaxSqr_);
+    }
+
+    vector xAxis = (faceC - pointOnPlane)/mag(faceC - pointOnPlane);
+
+    vector yAxis =
+        ((faceC - pointOnPlane) ^ faceN)
+       /mag((faceC - pointOnPlane) ^ faceN);
+
+    List<vector2D> local2DVertices(faceToTest.size());
+
+    forAll(faceToTest, fTT)
+    {
+        const vector& V(points[faceToTest[fTT]]);
+
+        if (magSqr(V-p) <= rCutMaxSqr_)
+        {
+            return true;
+        }
+
+        local2DVertices[fTT] = vector2D
+        (
+            ((V - pointOnPlane) & xAxis),
+            ((V - pointOnPlane) & yAxis)
+        );
+    }
+
+    scalar localFaceCx((faceC - pointOnPlane) & xAxis);
+
+    scalar la_valid = -1;
+
+    forAll(local2DVertices, fV)
+    {
+        const vector2D& va(local2DVertices[fV]);
+
+        const vector2D& vb
+        (
+            local2DVertices[(fV + 1) % local2DVertices.size()]
+        );
+
+        if (mag(vb.y()-va.y()) > SMALL)
+        {
+            scalar la =
+                (
+                    va.x() - va.y()*((vb.x() - va.x())/(vb.y() - va.y()))
+                )
+               /localFaceCx;
+
+            scalar lv = -va.y()/(vb.y() - va.y());
+
+
+            if (la >= 0 && la <= 1 && lv >= 0 && lv <= 1)
+            {
+                la_valid = la;
+
+                break;
+            }
+        }
+    }
+
+    if (la_valid < 0)
+    {
+        // perpendicular point inside face, nearest point is pointOnPlane;
+        return (magSqr(pointOnPlane-p) <= rCutMaxSqr_);
+    }
+    else
+    {
+        // perpendicular point outside face, nearest point is
+        // on edge that generated la_valid;
+        return
+        (
+            magSqr(pointOnPlane + la_valid*(faceC - pointOnPlane) - p)
+         <= rCutMaxSqr_
+        );
+    }
+
+    // if the algorithm hasn't returned anything by now then something has
+    // gone wrong.
+
+    FatalErrorIn("interactionLists.C") << nl
+        << "point " << p << " to face " << faceToTest
+        << " comparison did not find a nearest point"
+        << " to be inside or outside face."
+        << abort(FatalError);
+
+    return false;
+}
+
+
+bool Foam::interactionLists::testEdgeEdgeDistance
+(
+    const edge& eI,
+    const vector& eJs,
+    const vector& eJe
+) const
+{
+    vector a(eI.vec(mesh_.points()));
+    vector b(eJe - eJs);
+
+    const vector& eIs(mesh_.points()[eI.start()]);
+
+    vector c(eJs - eIs);
+
+    vector crossab = a ^ b;
+    scalar magCrossSqr = magSqr(crossab);
+
+    if (magCrossSqr > VSMALL)
+    {
+        // If the edges are parallel then a point-face
+        // search will pick them up
+
+        scalar s = ((c ^ b) & crossab)/magCrossSqr;
+        scalar t = ((c ^ a) & crossab)/magCrossSqr;
+
+        // Check for end points outside of range 0..1
+        // If the closest point is outside this range
+        // a point-face search will have found it.
+
+        return
+        (
+            s >= 0
+         && s <= 1
+         && t >= 0
+         && t <= 1
+         && magSqr(eIs + a*s - eJs - b*t) <= rCutMaxSqr_
+        );
+    }
+
+    return false;
+}
 
 
 // ************************************************************************* //

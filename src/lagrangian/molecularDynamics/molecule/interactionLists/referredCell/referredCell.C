@@ -25,7 +25,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "referredCell.H"
-#include "moleculeCloud.H"
+#include "interactionLists.H"
 
 namespace Foam
 {
@@ -378,7 +378,7 @@ bool referredCell::duplicate(const referredCell& refCellDupl) const
     (
         sourceProc_ == refCellDupl.sourceProc()
         && sourceCell_ == refCellDupl.sourceCell()
-        && mag(offset_ - refCellDupl.offset()) < moleculeCloud::transTol
+        && mag(offset_ - refCellDupl.offset()) < interactionLists::transTol
     );
 }
 
@@ -389,7 +389,7 @@ bool referredCell::duplicate(const label procNo,const label nCells) const
     (
         sourceProc_ == procNo
         && sourceCell_ < nCells
-        && mag(offset_) < moleculeCloud::transTol
+        && mag(offset_) < interactionLists::transTol
     );
 }
 

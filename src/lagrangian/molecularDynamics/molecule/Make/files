@@ -8,7 +8,7 @@ directInteractionList = $(interactionLists)/directInteractionList
 $(referralLists)/receivingReferralList.C
 $(referralLists)/sendingReferralList.C
 // $(referredCellList)/referredCellList.C
-// $(referredCell)/referredCell.C
+$(referredCell)/referredCell.C
 $(referredMolecule)/referredMolecule.C
 $(directInteractionList)/directInteractionList.C
 $(interactionLists)/interactionLists.C
