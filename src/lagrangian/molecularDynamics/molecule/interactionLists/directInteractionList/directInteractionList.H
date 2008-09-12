@@ -79,14 +79,14 @@ public:
         //- Construct lists by searching the mesh
         directInteractionList
         (
-            const interactionLists& interactionLists,
+            const interactionLists& il,
             bool pointPointListBuild
         );
 
         //- Construct from file
         directInteractionList
         (
-            const interactionLists& interactionLists
+            const interactionLists& il
         );
 
     // Destructor

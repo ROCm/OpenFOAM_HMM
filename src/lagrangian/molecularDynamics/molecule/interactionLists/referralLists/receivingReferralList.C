@@ -26,19 +26,17 @@ License
 
 #include "receivingReferralList.H"
 
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-receivingReferralList::receivingReferralList()
+Foam::receivingReferralList::receivingReferralList()
 :
     labelListList(),
     sourceProc_(-1)
 {}
 
 
-receivingReferralList::receivingReferralList
+Foam::receivingReferralList::receivingReferralList
 (
     const label sourceProc,
     const labelListList& refCellsToSendTo
@@ -49,7 +47,7 @@ receivingReferralList::receivingReferralList
 {}
 
 
-receivingReferralList::receivingReferralList
+Foam::receivingReferralList::receivingReferralList
 (
     const receivingReferralList& rL
 )
@@ -61,13 +59,13 @@ receivingReferralList::receivingReferralList
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-receivingReferralList::~receivingReferralList()
+Foam::receivingReferralList::~receivingReferralList()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void receivingReferralList::operator=(const receivingReferralList& rhs)
+void Foam::receivingReferralList::operator=(const receivingReferralList& rhs)
 {
     // Check for assignment to self
     if (this == &rhs)
@@ -91,8 +89,8 @@ void receivingReferralList::operator=(const receivingReferralList& rhs)
 
 bool operator==
 (
-    const receivingReferralList& a,
-    const receivingReferralList& b
+    const Foam::receivingReferralList& a,
+    const Foam::receivingReferralList& b
 )
 {
     // Trivial reject: lists are different size
@@ -107,11 +105,11 @@ bool operator==
         return false;
     }
 
-    List<bool> fnd(a.size(), false);
+    Foam::List<bool> fnd(a.size(), false);
 
     forAll (b, bI)
     {
-        labelList curLList = b[bI];
+        Foam::labelList curLList = b[bI];
 
         bool found = false;
 
@@ -143,7 +141,7 @@ bool operator==
 }
 
 
-Istream& operator>>(Istream& is, receivingReferralList& rRL)
+Foam::Istream& Foam::operator>>(Istream& is, receivingReferralList& rRL)
 {
     is >> rRL.sourceProc_ >> static_cast<labelListList&>(rRL);
 
@@ -156,7 +154,7 @@ Istream& operator>>(Istream& is, receivingReferralList& rRL)
 }
 
 
-Ostream& operator<<
+Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const receivingReferralList& rRL
@@ -174,8 +172,6 @@ Ostream& operator<<
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 
 // ************************************************************************* //

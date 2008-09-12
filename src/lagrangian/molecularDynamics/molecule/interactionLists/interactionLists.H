@@ -40,6 +40,10 @@ SourceFiles
 #include "polyMesh.H"
 #include "directInteractionList.H"
 #include "referredCell.H"
+#include "referredCellList.H"
+#include "sendingReferralList.H"
+#include "receivingReferralList.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,19 +64,11 @@ class interactionLists
 
         directInteractionList dil_;
 
-        // referredCellList ril_;
+        referredCellList ril_;
 
-        // labelList realCellsWithinRCutMaxOfAnyReferringPatch_;
+        List<sendingReferralList> cellSendingReferralLists_;
 
-        // labelList realFacesWithinRCutMaxOfAnyReferringPatch_;
-
-        // labelList realEdgesWithinRCutMaxOfAnyReferringPatch_;
-
-        // labelList realPointsWithinRCutMaxOfAnyReferringPatch_;
-
-        // List<sendingReferralList> cellSendingReferralLists_;
-
-        // List<receivingReferralList> cellReceivingReferralLists_;
+        List<receivingReferralList> cellReceivingReferralLists_;
 
     // Private Member Functions
 
@@ -162,12 +158,34 @@ public:
                 const vector& eJe
             ) const;
 
+            const labelList realCellsInRangeOfSegment
+            (
+                const labelList& segmentFaces,
+                const labelList& segmentEdges,
+                const labelList& segmentPoints
+            ) const;
+
+            const labelList referredCellsInRangeOfSegment
+            (
+                const List<referredCell>& referredInteractionList,
+                const labelList& segmentFaces,
+                const labelList& segmentEdges,
+                const labelList& segmentPoints
+            ) const;
 
         // Access
 
-        inline const polyMesh& mesh() const;
+            inline const polyMesh& mesh() const;
 
-        inline const directInteractionList& dil() const;
+            inline const directInteractionList& dil() const;
+
+            inline const referredCellList& referredInteractionList() const;
+
+            inline const List<sendingReferralList>& cellSendingReferralLists() const;
+
+            inline const List<receivingReferralList>& cellReceivingReferralLists() const;
+
+            inline label nInteractingProcs() const;
 };
 
 

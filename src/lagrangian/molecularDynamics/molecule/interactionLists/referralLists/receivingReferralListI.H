@@ -26,12 +26,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline label receivingReferralList::sourceProc() const
+inline Foam::label Foam::receivingReferralList::sourceProc() const
 {
     return sourceProc_;
 }
@@ -41,8 +38,8 @@ inline label receivingReferralList::sourceProc() const
 
 inline bool operator!=
 (
-    const receivingReferralList& a,
-    const receivingReferralList& b
+    const Foam::receivingReferralList& a,
+    const Foam::receivingReferralList& b
 )
 {
     return (!(a == b));
@@ -51,6 +48,5 @@ inline bool operator!=
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 
 // ************************************************************************* //

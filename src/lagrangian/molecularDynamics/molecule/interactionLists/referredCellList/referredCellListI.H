@@ -26,9 +26,9 @@ License
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline const Foam::moleculeCloud& Foam::referredCellList::molCloud()
+inline const Foam::interactionLists& Foam::referredCellList::il() const
 {
-    return molCloud_;
+    return il_;
 }
 
 

@@ -26,19 +26,16 @@ License
 
 #include "sendingReferralList.H"
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-sendingReferralList::sendingReferralList()
+Foam::sendingReferralList::sendingReferralList()
 :
     labelList(),
     destinationProc_(-1)
 {}
 
 
-sendingReferralList::sendingReferralList
+Foam::sendingReferralList::sendingReferralList
 (
     const label destinationProc,
     const labelList& cellsToSend
@@ -49,7 +46,7 @@ sendingReferralList::sendingReferralList
 {}
 
 
-sendingReferralList::sendingReferralList
+Foam::sendingReferralList::sendingReferralList
 (
     const sendingReferralList& rL
 )
@@ -61,13 +58,13 @@ sendingReferralList::sendingReferralList
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-sendingReferralList::~sendingReferralList()
+Foam::sendingReferralList::~sendingReferralList()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void sendingReferralList::operator=(const sendingReferralList& rhs)
+void Foam::sendingReferralList::operator=(const sendingReferralList& rhs)
 {
     // Check for assignment to self
     if (this == &rhs)
@@ -90,8 +87,8 @@ void sendingReferralList::operator=(const sendingReferralList& rhs)
 
 bool operator==
 (
-    const sendingReferralList& a,
-    const sendingReferralList& b
+    const Foam::sendingReferralList& a,
+    const Foam::sendingReferralList& b
 )
 {
     // Trivial reject: lists are different size
@@ -106,11 +103,11 @@ bool operator==
         return false;
     }
 
-    List<bool> fnd(a.size(), false);
+    Foam::List<bool> fnd(a.size(), false);
 
     forAll (b, bI)
     {
-        label curLabel = b[bI];
+        Foam::label curLabel = b[bI];
 
         bool found = false;
 
@@ -142,7 +139,7 @@ bool operator==
 }
 
 
-Istream& operator>>
+Foam::Istream& Foam::operator>>
 (
     Istream& is,
     sendingReferralList& sRL
@@ -156,7 +153,7 @@ Istream& operator>>
 }
 
 
-Ostream& operator<<
+Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const sendingReferralList& rL
@@ -172,7 +169,5 @@ Ostream& operator<<
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

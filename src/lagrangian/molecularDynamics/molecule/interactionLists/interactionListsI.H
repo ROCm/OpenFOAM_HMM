@@ -40,6 +40,32 @@ const Foam::directInteractionList& Foam::interactionLists::dil() const
 }
 
 
+inline const Foam::referredCellList& Foam::interactionLists::referredInteractionList() const
+{
+    return ril_;
+}
+
+
+inline const Foam::List<Foam::sendingReferralList>&
+    Foam::interactionLists::cellSendingReferralLists() const
+{
+    return cellSendingReferralLists_;
+}
+
+
+inline const Foam::List<Foam::receivingReferralList>&
+    Foam::interactionLists::cellReceivingReferralLists() const
+{
+    return cellReceivingReferralLists_;
+}
+
+
+inline Foam::label Foam::interactionLists::nInteractingProcs() const
+{
+    return cellReceivingReferralLists_.size();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 

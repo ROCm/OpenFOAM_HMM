@@ -5,9 +5,9 @@ referredCell = $(interactionLists)/referredCell
 referralLists = $(interactionLists)/referralLists
 directInteractionList = $(interactionLists)/directInteractionList
 
-$(referralLists)/receivingReferralList.C
 $(referralLists)/sendingReferralList.C
-// $(referredCellList)/referredCellList.C
+$(referralLists)/receivingReferralList.C
+$(referredCellList)/referredCellList.C
 $(referredCell)/referredCell.C
 $(referredMolecule)/referredMolecule.C
 $(directInteractionList)/directInteractionList.C

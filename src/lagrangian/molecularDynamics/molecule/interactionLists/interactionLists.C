@@ -43,14 +43,16 @@ Foam::interactionLists::interactionLists
 :
     mesh_(mesh),
     rCutMaxSqr_(rCutMaxSqr),
-    dil_(*this, pointPointListBuild)
+    dil_(*this, pointPointListBuild),
+    ril_(*this, pointPointListBuild)
 {}
 
 
 Foam::interactionLists::interactionLists(const polyMesh& mesh)
 :
     mesh_(mesh),
-    dil_(*this)
+    dil_(*this),
+    ril_(*this)
 {}
 
 
@@ -332,6 +334,183 @@ bool Foam::interactionLists::testEdgeEdgeDistance
     }
 
     return false;
+}
+
+
+const Foam::labelList Foam::interactionLists::realCellsInRangeOfSegment
+(
+    const labelList& segmentFaces,
+    const labelList& segmentEdges,
+    const labelList& segmentPoints
+) const
+{
+    DynamicList<label> realCellsFoundInRange;
+
+    forAll(segmentFaces, sF)
+    {
+        const label f = segmentFaces[sF];
+
+        forAll (mesh_.points(), p)
+        {
+            if (testPointFaceDistance(p, f))
+            {
+                const labelList& pCells(mesh_.pointCells()[p]);
+
+                forAll(pCells, pC)
+                {
+                    const label cellI(pCells[pC]);
+
+                    if (findIndex(realCellsFoundInRange, cellI) == -1)
+                    {
+                        realCellsFoundInRange.append(cellI);
+                    }
+                }
+            }
+        }
+    }
+
+    forAll(segmentPoints, sP)
+    {
+        const label p = segmentPoints[sP];
+
+        forAll(mesh_.faces(), f)
+        {
+            if (testPointFaceDistance(p, f))
+            {
+                const label cellO(mesh_.faceOwner()[f]);
+
+                if (findIndex(realCellsFoundInRange, cellO) == -1)
+                {
+                    realCellsFoundInRange.append(cellO);
+                }
+
+                if (mesh_.isInternalFace(f))
+                {
+                    // boundary faces will not have neighbour information
+
+                    const label cellN(mesh_.faceNeighbour()[f]);
+
+                    if (findIndex(realCellsFoundInRange, cellN) == -1)
+                    {
+                        realCellsFoundInRange.append(cellN);
+                    }
+                }
+            }
+        }
+    }
+
+    forAll(segmentEdges, sE)
+    {
+        const edge& eJ(mesh_.edges()[segmentEdges[sE]]);
+
+        forAll (mesh_.edges(), edgeIIndex)
+        {
+            const edge& eI(mesh_.edges()[edgeIIndex]);
+
+            if (testEdgeEdgeDistance(eI, eJ))
+            {
+                const labelList& eICells(mesh_.edgeCells()[edgeIIndex]);
+
+                forAll(eICells, eIC)
+                {
+                    const label cellI(eICells[eIC]);
+
+                    if (findIndex(realCellsFoundInRange, cellI) == -1)
+                    {
+                        realCellsFoundInRange.append(cellI);
+                    }
+                }
+            }
+        }
+    }
+
+    return realCellsFoundInRange.shrink();
+}
+
+
+const Foam::labelList Foam::interactionLists::referredCellsInRangeOfSegment
+(
+    const List<referredCell>& referredInteractionList,
+    const labelList& segmentFaces,
+    const labelList& segmentEdges,
+    const labelList& segmentPoints
+) const
+{
+    DynamicList<label> referredCellsFoundInRange;
+
+    forAll(segmentFaces, sF)
+    {
+        const label f = segmentFaces[sF];
+
+        forAll(referredInteractionList, rIL)
+        {
+            const vectorList& refCellPoints
+                = referredInteractionList[rIL].vertexPositions();
+
+            if (testPointFaceDistance(refCellPoints, f))
+            {
+                if (findIndex(referredCellsFoundInRange, rIL) == -1)
+                {
+                    referredCellsFoundInRange.append(rIL);
+                }
+            }
+        }
+    }
+
+    forAll(segmentPoints, sP)
+    {
+        const label p = segmentPoints[sP];
+
+        forAll(referredInteractionList, rIL)
+        {
+            const referredCell& refCell(referredInteractionList[rIL]);
+
+            if (testPointFaceDistance(p, refCell))
+            {
+                if (findIndex(referredCellsFoundInRange, rIL) == -1)
+                {
+                    referredCellsFoundInRange.append(rIL);
+                }
+            }
+        }
+    }
+
+    forAll(segmentEdges, sE)
+    {
+        const edge& eI(mesh_.edges()[segmentEdges[sE]]);
+
+        forAll(referredInteractionList, rIL)
+        {
+            const vectorList& refCellPoints
+                = referredInteractionList[rIL].vertexPositions();
+
+            const edgeList& refCellEdges
+                = referredInteractionList[rIL].edges();
+
+            forAll(refCellEdges, rCE)
+            {
+                const edge& eJ(refCellEdges[rCE]);
+
+                if
+                (
+                    testEdgeEdgeDistance
+                    (
+                        eI,
+                        refCellPoints[eJ.start()],
+                        refCellPoints[eJ.end()]
+                    )
+                )
+                {
+                    if(findIndex(referredCellsFoundInRange, rIL) == -1)
+                    {
+                        referredCellsFoundInRange.append(rIL);
+                    }
+                }
+            }
+        }
+    }
+
+    return referredCellsFoundInRange.shrink();
 }
 
 

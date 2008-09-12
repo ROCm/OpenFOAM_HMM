@@ -26,12 +26,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline label sendingReferralList::destinationProc() const
+inline Foam::label Foam::sendingReferralList::destinationProc() const
 {
     return destinationProc_;
 }
@@ -41,8 +38,8 @@ inline label sendingReferralList::destinationProc() const
 
 inline bool operator!=
 (
-    const sendingReferralList& a,
-    const sendingReferralList& b
+    const Foam::sendingReferralList& a,
+    const Foam::sendingReferralList& b
 )
 {
     return (!(a == b));
@@ -50,7 +47,5 @@ inline bool operator!=
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

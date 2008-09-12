@@ -37,12 +37,15 @@ SourceFiles
 #define referredCellList_H
 
 #include "referredCell.H"
-#include "molecule.H"
+//#include "molecule.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class interactionLists;
 
 /*---------------------------------------------------------------------------*\
                         Class referredCellList Declaration
@@ -50,27 +53,33 @@ namespace Foam
 
 class referredCellList
 :
-    public List< referredCell >
+    public List<referredCell>
 {
     // Private data
 
-        moleculeCloud& molCloud_;
+        const interactionLists& il_;
+
+        // Private Member Functions
+
+        void buildReferredCellList
+        (
+            bool pointPointListBuild
+        );
 
 
 public:
 
     // Constructors
 
-        //- Construct from moleculeCloud
-        referredCellList(moleculeCloud& molCloud);
-
-        //- Construct from components
+        //- Construct lists by searching the mesh
         referredCellList
         (
-            moleculeCloud& molCloud,
-            const List<referredCell>& referredCells,
-            const List<label>& realCells
+            interactionLists& il,
+            bool pointPointListBuild
         );
+
+        //- Construct from file
+        referredCellList (interactionLists& il);
 
 
     // Destructor
@@ -80,11 +89,9 @@ public:
 
     // Member Functions
 
-        void setRealCellsInRange();
+    //        void referMolecules(List<DynamicList<molecule*> >& cellOccupancy);
 
-        void referMolecules();
-
-        inline const moleculeCloud& molCloud();
+        inline const interactionLists& il() const;
 };
 
 

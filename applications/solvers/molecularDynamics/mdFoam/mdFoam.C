@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     interactionLists il(mesh, (1e-9*1e-9), false);
 
-    Info<< labelListList(il.dil()) << endl;
+    //    Info<< labelListList(il.dil()) << endl;
 
     Info << "\nStarting time loop\n" << endl;
 
