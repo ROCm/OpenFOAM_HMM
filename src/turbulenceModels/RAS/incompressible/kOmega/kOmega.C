@@ -128,9 +128,21 @@ kOmega::kOmega
         mesh_
     ),
 
-    nut_(k_/(omega_ + omegaSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    )
 {
-#   include "kOmegaWallViscosityI.H"
+    nut_ == k_/(omega_ + omegaSmall_);
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -218,9 +230,10 @@ void kOmega::correct()
 
     RASModel::correct();
 
-    volScalarField G = nut_*2*magSqr(symm(fvc::grad(U_)));
+    volScalarField G("G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
-#   include "kOmegaWallFunctionsI.H"
+    // Update omega and G at the wall
+    omega_.boundaryField().updateCoeffs();
 
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn
@@ -236,7 +249,7 @@ void kOmega::correct()
 
     omegaEqn().relax();
 
-#   include "wallOmegaI.H"
+    omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
     bound(omega_, omega0_);
@@ -261,9 +274,7 @@ void kOmega::correct()
 
     // Re-calculate viscosity
     nut_ = k_/omega_;
-
-#   include "kOmegaWallViscosityI.H"
-
+    nut_.correctBoundaryConditions();
 }
 
 

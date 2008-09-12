@@ -51,11 +51,7 @@ scalar nutRoughWallFunctionFvPatchScalarField::fnRough
 {
     // Set deltaB based on non-dimensional roughness height
     scalar deltaB = 0.0;
-    if (KsPlus <= 2.25)
-    {
-        deltaB = 0.0;
-    }
-    else if ((KsPlus > 2.25) && (KsPlus <= 90.0))
+    if (KsPlus < 90.0)
     {
         deltaB =
             1.0/kappa
@@ -177,6 +173,7 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
     const scalar Cmu25 = pow(Cmu, 0.25);
     const scalar kappa = ras.kappa().value();
     const scalar E = ras.E().value();
+    scalar yPlusLam = ras.yPlusLam();
 
     const scalarField& y = ras.y()[patch().index()];
 
@@ -197,11 +194,24 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 
         scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
 
-        scalar Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
+        scalar Edash = E;
+        scalar yPlusLamNew = yPlusLam;
+        if (KsPlus > 2.25)
+        {
+            Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
+            yPlusLam = ras.yPlusLam(kappa, Edash);
+        }
 
-        scalar yPlusLam = ras.yPlusLam(kappa, Edash);
+        if (debug)
+        {
+            Info<< "yPlus = " << yPlus
+                << ", KsPlus = " << KsPlus
+                << ", Edash = " << Edash
+                << ", yPlusLam = " << yPlusLam
+                << endl;
+        }
 
-        if (yPlus > yPlusLam)
+        if (yPlus > yPlusLamNew)
         {
             nutw[faceI] = nuw[faceI]*(yPlus*kappa/log(Edash*yPlus) - 1);
         }
@@ -216,8 +226,8 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("Cs") << Cs_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Ks") << Ks_ << token::END_STATEMENT << nl;
+    Cs_.writeEntry("Cs", os);
+    Ks_.writeEntry("Ks", os);
     writeEntry("value", os);
 }
 

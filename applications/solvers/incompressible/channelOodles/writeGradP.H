@@ -2,7 +2,7 @@
     {
         OFstream gradPFile
         (
-            runTime.path()/runTime.timeName()/"gradP.raw"
+            runTime.path()/runTime.timeName()/"uniform"/"gradP.raw"
         );
 
         if(gradPFile.good())
@@ -13,7 +13,7 @@
         {
             FatalErrorIn(args.executable())
                 << "Cannot open file "
-                << runTime.path()/runTime.timeName()/"gradP.raw"
+                << runTime.path()/runTime.timeName()/"uniform"/"gradP.raw"
                 << exit(FatalError);
         };
     };
