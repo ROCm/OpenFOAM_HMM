@@ -26,7 +26,7 @@ License
 
 #include "directMappedFixedValueFvPatchField.H"
 #include "directMappedFvPatch.H"
-#include "fvBoundaryMesh.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -164,6 +164,38 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
 
     Field<Type> newValues(this->size());
+    Field<Type> sendValues(this->size());
+
+    switch(mpp.mode())
+    {
+        case directMappedPolyPatch::NEARESTCELL:
+        {
+            sendValues = this->internalField();
+            break;
+        }
+        case directMappedPolyPatch::NEARESTPATCHFACE:
+        {
+            const label patchID =
+                 this->patch().patch().boundaryMesh().findPatchID
+                 (
+                    mpp.samplePatch()
+                 );
+            typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+            const word& fieldName = this->dimensionedInternalField().name();
+            const fieldType& sendField =
+                this->db().objectRegistry::lookupObject<fieldType>(fieldName);
+            sendValues = sendField.boundaryField()[patchID];
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "directMappedFixedValueFvPatchField<Type>::updateCoeffs()"
+            )<< "patch can only be used in NEARESTCELL or NEARESTPATCHFACE "
+             << "mode" << nl << abort(FatalError);
+        }
+    }
 
     forAll(schedule, i)
     {
@@ -174,11 +206,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
         if (Pstream::myProcNo() == sendProc)
         {
             OPstream toProc(Pstream::blocking, recvProc);
-            toProc<< IndirectList<Type>
-            (
-                this->internalField(),
-                sendLabels[recvProc]
-            )();
+            toProc<< IndirectList<Type>(sendValues, sendLabels[recvProc])();
         }
         else
         {
@@ -201,12 +229,8 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     // Do data from myself
     {
-        IndirectList<Type> fromFld
-        (
-            this->internalField(),
-            sendLabels[Pstream::myProcNo()]
-        );
-    
+        IndirectList<Type> fromFld(sendValues, sendLabels[Pstream::myProcNo()]);
+
         // Destination faces
         const labelList& faceLabels = receiveFaceLabels[Pstream::myProcNo()];
 
@@ -220,7 +244,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     if (setAverage_)
     {
-        Type averagePsi = 
+        Type averagePsi =
             gSum(this->patch().magSf()*newValues)
            /gSum(this->patch().magSf());
 
