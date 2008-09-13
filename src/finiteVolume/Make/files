@@ -187,6 +187,7 @@ $(limitedSchemes)/Phi/Phi.C
 $(limitedSchemes)/filteredLinear/filteredLinear.C
 $(limitedSchemes)/filteredLinear2/filteredLinear2.C
 $(limitedSchemes)/filteredLinear3/filteredLinear3.C
+$(limitedSchemes)/limitWith/limitWith.C
 
 multivariateSchemes = $(surfaceInterpolation)/multivariateSchemes
 $(multivariateSchemes)/multivariateSurfaceInterpolationScheme/multivariateSurfaceInterpolationSchemes.C
