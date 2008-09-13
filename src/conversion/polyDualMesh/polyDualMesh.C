@@ -746,8 +746,7 @@ void Foam::polyDualMesh::calcDual
         allBoundary.meshEdges
         (
             mesh.edges(),
-            mesh.cellEdges(),
-            SubList<label>(mesh.faceOwner(), allBoundary.size(), nIntFaces)
+            mesh.pointEdges()
         )
     );
 

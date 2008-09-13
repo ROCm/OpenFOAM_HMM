@@ -47,34 +47,52 @@ namespace Foam
 
 // Assume the data associated with type T is not contiguous
 template<class T>
-inline bool contiguous()              {return false;}
+inline bool contiguous()                        {return false;}
 
 
 // Specify data associated with primitive types is contiguous
 
 template<>
-inline bool contiguous<bool>()        {return true;}
+inline bool contiguous<bool>()                  {return true;}
 
 template<>
-inline bool contiguous<char>()        {return true;}
+inline bool contiguous<char>()                  {return true;}
 
 template<>
-inline bool contiguous<short>()       {return true;}
+inline bool contiguous<unsigned char>()         {return true;}
 
 template<>
-inline bool contiguous<int>()         {return true;}
+inline bool contiguous<short>()                 {return true;}
 
 template<>
-inline bool contiguous<long>()        {return true;}
+inline bool contiguous<unsigned short>()        {return true;}
 
 template<>
-inline bool contiguous<float>()       {return true;}
+inline bool contiguous<int>()                   {return true;}
 
 template<>
-inline bool contiguous<double>()      {return true;}
+inline bool contiguous<unsigned int>()          {return true;}
 
 template<>
-inline bool contiguous<long double>() {return true;}
+inline bool contiguous<long>()                  {return true;}
+
+template<>
+inline bool contiguous<unsigned long>()         {return true;}
+
+template<>
+inline bool contiguous<long long>()             {return true;}
+
+template<>
+inline bool contiguous<unsigned long long>()    {return true;}
+
+template<>
+inline bool contiguous<float>()                 {return true;}
+
+template<>
+inline bool contiguous<double>()                {return true;}
+
+template<>
+inline bool contiguous<long double>()           {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
