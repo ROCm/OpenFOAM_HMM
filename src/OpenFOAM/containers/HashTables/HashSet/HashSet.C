@@ -22,58 +22,69 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    kinematicParcelFoam
-
-Description
-    Transient solver for a single kinematicCloud. Uses precalculated velocity
-    field to evolve a cloud.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "basicKinematicCloud.H"
+#ifndef HashSet_C
+#define HashSet_C
+
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    argList::validOptions.insert("cloudName", "cloud name");
 
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
-    #include "createFields.H"
-    #include "compressibleCourantNo.H"
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Key, class Hash>
+bool HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& ht) const
+{
+    const HashTable<empty, Key, Hash>& a = *this;
 
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.run())
+    // Are all my elements in ht?
+    for
+    (
+        typename HashTable<empty, Key, Hash>::const_iterator iter = a.begin();
+        iter != a.end();
+        ++iter
+    )
     {
-        runTime++;
-
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        Info<< "Evolving " << kinematicCloud.name() << endl;
-        kinematicCloud.evolve();
-        kinematicCloud.info();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        if (!ht.found(iter.key()))
+        {
+            return false;
+        }
     }
 
-    Info<< "End\n" << endl;
-
-    return(0);
+    // Are all ht elements in me?
+    for
+    (
+        typename HashTable<empty, Key, Hash>::const_iterator iter = ht.begin();
+        iter != ht.end();
+        ++iter
+    )
+    {
+        if (!found(iter.key()))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
+
+template<class Key, class Hash>
+bool HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& ht) const
+{
+    return !(operator==(ht));
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -53,6 +53,52 @@ const labelListList& primitiveMesh::cellPoints() const
 }
 
 
+const labelList& primitiveMesh::cellPoints(const label cellI) const
+{
+    if (hasCellPoints())
+    {
+        return cellPoints()[cellI];
+    }
+    else
+    {
+        const faceList& fcs = faces();
+        const labelList& cFaces = cells()[cellI];
+
+        labelSet_.clear();
+
+        forAll(cFaces, i)
+        {
+            const labelList& f = fcs[cFaces[i]];
+
+            forAll(f, fp)
+            {
+                labelSet_.insert(f[fp]);    
+            }
+        }
+
+        labels_.size() = allocSize_;
+
+        if (labelSet_.size() > allocSize_)
+        {
+            labels_.clear();
+            allocSize_ = labelSet_.size();
+            labels_.setSize(allocSize_);
+        }
+
+        label n = 0;
+
+        forAllConstIter(labelHashSet, labelSet_, iter)
+        {
+            labels_[n++] = iter.key();
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

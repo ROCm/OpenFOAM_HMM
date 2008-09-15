@@ -51,6 +51,59 @@ const labelListList& primitiveMesh::edgeFaces() const
     return *efPtr_;
 }
 
+
+const labelList& primitiveMesh::edgeFaces(const label edgeI) const
+{
+    if (hasEdgeFaces())
+    {
+        return edgeFaces()[edgeI];
+    }
+    else
+    {
+        // Use the fact that pointEdges are sorted in incrementing edge order
+        const edge& e = edges()[edgeI];
+        const labelList& pFaces0 = pointFaces()[e[0]];
+        const labelList& pFaces1 = pointFaces()[e[1]];
+
+        label i0 = 0;
+        label i1 = 0;
+        label n = 0;
+
+        labels_.size() = allocSize_;
+
+        while (i0 < pFaces0.size() && i1 < pFaces1.size())
+        {
+            if (pFaces0[i0] < pFaces1[i1])
+            {
+                ++i0;
+            }
+            else if (pFaces0[i0] > pFaces1[i1])
+            {
+                ++i1;
+            }
+            else
+            {
+                // Equal. Append.
+                if (n == allocSize_)
+                {
+                    // Have setSize copy contents so far
+                    labels_.size() = n;
+                    allocSize_ = allocSize_*2 + 1;
+                    labels_.setSize(allocSize_);
+                }
+                labels_[n++] = pFaces0[i0];
+                ++i0;
+                ++i1;
+            }
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

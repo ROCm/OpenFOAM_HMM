@@ -51,6 +51,86 @@ const labelListList& primitiveMesh::edgeCells() const
 }
 
 
+const labelList& primitiveMesh::edgeCells(const label edgeI) const
+{
+    if (hasEdgeCells())
+    {
+        return edgeCells()[edgeI];
+    }
+    else
+    {
+        const labelList& own = faceOwner();
+        const labelList& nei = faceNeighbour();
+
+        // edge faces can either return labels_ or reference in edgeLabels.
+        labelList labelsCopy;
+        if (!hasEdgeFaces())
+        {
+            labelsCopy = edgeFaces(edgeI);
+        }
+
+        const labelList& eFaces =
+        (
+            hasEdgeFaces()
+          ? edgeFaces()[edgeI]
+          : labelsCopy
+        );
+
+        labels_.size() = allocSize_;
+
+        // labels_ should certainly be big enough for edge cells.
+        label n = 0;
+
+        // Do quadratic insertion.
+        forAll(eFaces, i)
+        {
+            label faceI = eFaces[i];
+
+            {
+                label ownCellI = own[faceI];
+
+                // Check if not already in labels_
+                for (label j = 0; j < n; j++)
+                {
+                    if (labels_[j] == ownCellI)
+                    {
+                        ownCellI = -1;
+                        break;
+                    }
+                }
+
+                if (ownCellI != -1)
+                {
+                    labels_[n++] = ownCellI;
+                }
+            }
+
+            if (isInternalFace(faceI))
+            {
+                label neiCellI = nei[faceI];
+
+                for (label j = 0; j < n; j++)
+                {
+                    if (labels_[j] == neiCellI)
+                    {
+                        neiCellI = -1;
+                        break;
+                    }
+                }
+
+                if (neiCellI != -1)
+                {
+                    labels_[n++] = neiCellI;
+                }
+            }
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

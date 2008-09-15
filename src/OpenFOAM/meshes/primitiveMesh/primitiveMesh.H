@@ -155,6 +155,17 @@ class primitiveMesh
             mutable labelListList* cpPtr_;
 
 
+        // On-the-fly edge addresing storage
+
+            //- Temporary storage for addressing. allocSize is the real size
+            //  of the labelList.
+            mutable label allocSize_;
+            mutable labelList labels_;
+
+            //- Temporary storage for addressing
+            mutable labelHashSet labelSet_;
+
+
         // Geometric data
 
             //- Cell centres
@@ -209,8 +220,14 @@ class primitiveMesh
             (
                 List<DynamicList<label> >&,
                 DynamicList<edge>&,
-                const label pA,
-                const label pB
+                const label,
+                const label
+            );
+            //- For on-the-fly addressing calculation
+            static label findFirstCommonElementFromSortedLists
+            ( 
+                const labelList&,
+                const labelList&
             );
 
 
@@ -666,6 +683,55 @@ public:
 
             //- Print a list of all the currently allocated mesh data
             void printAllocated() const;
+
+            // Per storage whether allocated
+            inline bool hasCellShapes() const;
+            inline bool hasEdges() const;
+            inline bool hasCellCells() const;
+            inline bool hasEdgeCells() const;
+            inline bool hasPointCells() const;
+            inline bool hasCells() const;
+            inline bool hasEdgeFaces() const;
+            inline bool hasPointFaces() const;
+            inline bool hasCellEdges() const;
+            inline bool hasFaceEdges() const;
+            inline bool hasPointEdges() const;
+            inline bool hasPointPoints() const;
+            inline bool hasCellPoints() const;
+            inline bool hasCellCentres() const;
+            inline bool hasFaceCentres() const;
+            inline bool hasCellVolumes() const;
+            inline bool hasFaceAreas() const;
+
+            // On-the-fly addressing calculation. These functions return either
+            // a reference to the full addressing (if already calculated) or
+            // a reference to member data labels_ so be careful when not storing
+            // result.
+
+            //- cellCells using cells
+            const labelList& cellCells(const label cellI) const;
+
+            //- cellPoints using cells
+            const labelList& cellPoints(const label cellI) const;
+
+            //- pointCells using pointFaces
+            const labelList& pointCells(const label pointI) const;
+
+            //- pointPoints using edges, pointEdges
+            const labelList& pointPoints(const label pointI) const;
+
+            //- faceEdges using pointFaces, edges, pointEdges
+            const labelList& faceEdges(const label faceI) const;
+
+            //- edgeFaces using pointFaces, edges, pointEdges
+            const labelList& edgeFaces(const label edgeI) const;
+
+            //- edgeCells using pointFaces, edges, pointEdges
+            const labelList& edgeCells(const label edgeI) const;
+
+            //- cellEdges using cells, pointFaces, edges, pointEdges
+            const labelList& cellEdges(const label cellI) const;
+
 
             //- Clear geometry
             void clearGeom();

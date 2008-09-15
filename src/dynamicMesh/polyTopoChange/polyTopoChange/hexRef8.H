@@ -174,9 +174,12 @@ class hexRef8
         label findMaxLevel(const labelList& f) const;
         //- Count number of vertices <= anchorLevel
         label countAnchors(const labelList&, const label) const;
+        //- Debugging: dump cell as .obj file
+        void dumpCell(const label cellI) const;
         //- Find index of point with wantedLevel, starting from fp.
         label findLevel
         (
+            const label faceI,
             const face& f,
             const label startFp,
             const bool searchForward,

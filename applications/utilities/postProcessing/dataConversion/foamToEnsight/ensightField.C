@@ -405,9 +405,9 @@ void writePatchField
 {
     const Time& runTime = eMesh.mesh().time();
 
-    const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets;
-    const HashTable<labelList>& allPatchNames = eMesh.allPatchNames;
-    const HashTable<label>& patchIndices = eMesh.patchIndices;
+    const List<faceSets>& boundaryFaceSets = eMesh.boundaryFaceSets();
+    const HashTable<labelList>& allPatchNames = eMesh.allPatchNames();
+    const HashTable<label>& patchIndices = eMesh.patchIndices();
     const HashTable<ensightMesh::nFacePrimitives>&
         nPatchPrims = eMesh.nPatchPrims();
 

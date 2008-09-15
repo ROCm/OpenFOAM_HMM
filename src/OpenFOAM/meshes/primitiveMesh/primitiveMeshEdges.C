@@ -461,6 +461,46 @@ void primitiveMesh::calcEdges(const bool doFaceEdges) const
 }
 
 
+label primitiveMesh::findFirstCommonElementFromSortedLists
+( 
+    const labelList& list1,
+    const labelList& list2
+)
+{
+    label result = -1;
+
+    labelList::const_iterator iter1 = list1.begin();
+    labelList::const_iterator iter2 = list2.begin();
+
+    while (iter1 != list1.end() && iter2 != list2.end())
+    {
+        if( *iter1 < *iter2)
+        {
+            ++iter1;
+        }
+        else if (*iter1 > *iter2)
+        {
+            ++iter2;
+        }
+        else
+        {
+            result = *iter1;
+            break;
+        }
+    }
+    if (result == -1)
+    {
+        FatalErrorIn
+        (
+            "primitiveMesh::findFirstCommonElementFromSortedLists"
+            "(const labelList&, const labelList&)"
+        )   << "No common elements in lists " << list1 << " and " << list2
+            << abort(FatalError);        
+    }
+    return result;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const edgeList& primitiveMesh::edges() const
@@ -542,6 +582,91 @@ void primitiveMesh::clearOutEdges()
     deleteDemandDrivenData(edgesPtr_);
     deleteDemandDrivenData(pePtr_);
     deleteDemandDrivenData(fePtr_);
+    labels_.clear();
+    allocSize_ = 0;
+}
+
+
+const labelList& primitiveMesh::faceEdges(const label faceI) const
+{
+    if (hasFaceEdges())
+    {
+        return faceEdges()[faceI];
+    }
+    else
+    {
+        const labelListList& pointEs = pointEdges();
+        const face& f = faces()[faceI];
+
+        labels_.size() = allocSize_;
+
+        if (f.size() > allocSize_)
+        {
+            labels_.clear();
+            allocSize_ = f.size();
+            labels_.setSize(allocSize_);
+        }
+
+        label n = 0;
+
+        forAll(f, fp)
+        {
+            labels_[n++] = findFirstCommonElementFromSortedLists
+            (
+                pointEs[f[fp]],
+                pointEs[f.nextLabel(fp)]
+            );
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
+}
+
+
+const labelList& primitiveMesh::cellEdges(const label cellI) const
+{
+    if (hasCellEdges())
+    {
+        return cellEdges()[cellI];
+    }
+    else
+    {
+        const labelList& cFaces = cells()[cellI];
+
+        labelSet_.clear();
+
+        forAll(cFaces, i)
+        {
+            const labelList& fe = faceEdges(cFaces[i]);
+
+            forAll(fe, feI)
+            {
+                labelSet_.insert(fe[feI]);    
+            }
+        }
+
+        labels_.size() = allocSize_;
+
+        if (labelSet_.size() > allocSize_)
+        {
+            labels_.clear();
+            allocSize_ = labelSet_.size();
+            labels_.setSize(allocSize_);
+        }
+
+        label n =0;
+
+        forAllConstIter(labelHashSet, labelSet_, iter)
+        {
+            labels_[n++] = iter.key();
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
 }
 
 

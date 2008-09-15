@@ -348,12 +348,21 @@ public:
                 //  index in the edge list.  If the edge is not found, return -1
                 label whichEdge(const edge& e) const;
 
-                //- Return labels of patch edges in the global edge list
+                //- Return labels of patch edges in the global edge list using
+                //  cell addressing
                 labelList meshEdges
                 (
                     const edgeList& allEdges,
                     const labelListList& cellEdges,
                     const labelList& faceCells
+                ) const;
+
+                //- Return labels of patch edges in the global edge list using
+                //  basic edge addressing.
+                labelList meshEdges
+                (
+                    const edgeList& allEdges,
+                    const labelListList& pointEdges
                 ) const;
 
                 //- Return face normals for patch

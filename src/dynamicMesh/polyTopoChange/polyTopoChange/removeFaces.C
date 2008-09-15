@@ -807,7 +807,7 @@ void Foam::removeFaces::setRefinement
     // Edges to remove
     labelHashSet edgesToRemove(faceLabels.size());
 
-    // Per face the region it is. -1 for removed faces, -2 for regions
+    // Per face the region it is in. -1 for removed faces, -2 for regions
     // consisting of single face only.
     labelList faceRegion(mesh_.nFaces(), -1);
 
@@ -1258,9 +1258,14 @@ void Foam::removeFaces::setRefinement
     // are only used by 2 unremoved edges.
     {
         // Usage of points by non-removed edges.
-        labelList nEdgesPerPoint(mesh_.nPoints(), labelMax);
+        labelList nEdgesPerPoint(mesh_.nPoints());
 
         const labelListList& pointEdges = mesh_.pointEdges();
+
+        forAll(pointEdges, pointI)
+        {
+            nEdgesPerPoint[pointI] = pointEdges[pointI].size();
+        }
 
         forAllConstIter(labelHashSet, edgesToRemove, iter)
         {
@@ -1269,16 +1274,7 @@ void Foam::removeFaces::setRefinement
 
             forAll(e, i)
             {
-                label pointI = e[i];
-
-                if (nEdgesPerPoint[pointI] == labelMax)
-                {
-                    nEdgesPerPoint[pointI] = pointEdges[pointI].size()-1;
-                }
-                else
-                {
-                    nEdgesPerPoint[pointI]--;
-                }
+                nEdgesPerPoint[e[i]]--;
             }
         }
 
