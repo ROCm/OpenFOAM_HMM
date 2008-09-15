@@ -101,8 +101,6 @@ bool Foam::triangleFuncs::intersectAxesBundle
     // Since direction is coordinate axis there is no need to do projection,
     // we can directly check u,v components for inclusion in triangle.
 
-    scalar localScale = max(max(magSqr(V10), magSqr(V20)), 1.0);
-
     // Get other components
     label i1 = (i0 + 1) % 3;
     label i2 = (i1 + 1) % 3;
@@ -112,6 +110,8 @@ bool Foam::triangleFuncs::intersectAxesBundle
 
     scalar u2 = V20[i1];
     scalar v2 = V20[i2];
+
+    scalar localScale = mag(u1)+mag(v1)+mag(u2)+mag(v2);
 
     scalar det = v2*u1 - u2*v1;
 
@@ -136,7 +136,7 @@ bool Foam::triangleFuncs::intersectAxesBundle
         scalar beta = 0;
         bool inter = false;
 
-        if (Foam::mag(u1)/localScale < SMALL)
+        if (Foam::mag(u1) < SMALL)
         {
             beta = u0/u2;
             if ((beta >= 0) && (beta <= 1))
