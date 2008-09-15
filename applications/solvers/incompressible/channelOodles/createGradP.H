@@ -8,7 +8,7 @@
 
     IFstream gradPFile
     (
-        runTime.path()/runTime.timeName()/"gradP.raw"
+        runTime.path()/runTime.timeName()/"uniform"/"gradP.raw"
     );
 
     if(gradPFile.good())

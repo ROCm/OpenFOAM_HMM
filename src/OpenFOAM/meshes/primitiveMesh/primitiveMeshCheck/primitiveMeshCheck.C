@@ -771,11 +771,12 @@ bool primitiveMesh::checkPoints
         }
     }
 
-    const labelListList& pc = pointCells();
 
-    forAll (pc, pointI)
+    forAll (pf, pointI)
     {
-        if (pc[pointI].size() == 0)
+        const labelList& pc = pointCells(pointI);
+
+        if (pc.size() == 0)
         {
             if (setPtr)
             {

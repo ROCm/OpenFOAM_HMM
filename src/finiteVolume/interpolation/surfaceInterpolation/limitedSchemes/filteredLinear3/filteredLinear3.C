@@ -22,58 +22,27 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    kinematicParcelFoam
-
-Description
-    Transient solver for a single kinematicCloud. Uses precalculated velocity
-    field to evolve a cloud.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "basicKinematicCloud.H"
+#include "LimitedScheme.H"
+#include "filteredLinear3.H"
+#include "filteredLinear3V.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    argList::validOptions.insert("cloudName", "cloud name");
+    makeLimitedSurfaceInterpolationScheme
+    (
+        filteredLinear3,
+        filteredLinear3Limiter
+    )
 
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
-    #include "createFields.H"
-    #include "compressibleCourantNo.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.run())
-    {
-        runTime++;
-
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        Info<< "Evolving " << kinematicCloud.name() << endl;
-        kinematicCloud.evolve();
-        kinematicCloud.info();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return(0);
+    makeLimitedVSurfaceInterpolationScheme
+    (
+        filteredLinear3V,
+        filteredLinear3VLimiter
+    )
 }
-
 
 // ************************************************************************* //

@@ -230,7 +230,7 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
             new indexedOctree<treeDataTriSurface>
             (
                 treeDataTriSurface(*this),
-                bb.extend(rndGen, 1E-3),    // slightly randomize bb
+                bb.extend(rndGen, 1E-4),    // slightly randomize bb
                 10,     // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
@@ -274,7 +274,7 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
                     localPoints(),  // points
                     bEdges          // selected edges
                 ),
-                bb.extend(rndGen, 1E-3),    // slightly randomize bb
+                bb.extend(rndGen, 1E-4),    // slightly randomize bb
                 8,      // maxLevel
                 10,     // leafsize
                 3.0     // duplicity

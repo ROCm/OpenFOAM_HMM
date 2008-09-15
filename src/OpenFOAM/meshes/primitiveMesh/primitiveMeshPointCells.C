@@ -114,6 +114,70 @@ const labelListList& primitiveMesh::pointCells() const
 }
 
 
+const labelList& primitiveMesh::pointCells(const label pointI) const
+{
+    if (hasPointCells())
+    {
+        return pointCells()[pointI];
+    }
+    else
+    {
+        const labelList& own = faceOwner();
+        const labelList& nei = faceNeighbour();
+        const labelList& pFaces = pointFaces()[pointI];
+
+        labels_.size() = allocSize_;
+
+        label n = 0;
+
+        forAll(pFaces, i)
+        {
+            const label faceI = pFaces[i];
+
+            // Append owner
+            if (n == allocSize_)
+            {
+                labels_.size() = n;
+                allocSize_ = allocSize_*2 + 1;
+                labels_.setSize(allocSize_);
+            }
+            labels_[n++] = own[faceI];
+
+            // Append neighbour
+            if (faceI < nInternalFaces())
+            {
+                if (n == allocSize_)
+                {
+                    labels_.size() = n;
+                    allocSize_ = allocSize_*2 + 1;
+                    labels_.setSize(allocSize_);
+                }
+                labels_[n++] = nei[faceI];
+            }
+        }
+        labels_.size() = n;
+
+
+        // Filter duplicates
+        sort(labels_);
+
+        n = 1;
+
+        for (label i = 1; i < labels_.size(); i++)
+        {
+            if (labels_[i] != labels_[i-1])
+            {
+                labels_[n++] = labels_[i];
+            }
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

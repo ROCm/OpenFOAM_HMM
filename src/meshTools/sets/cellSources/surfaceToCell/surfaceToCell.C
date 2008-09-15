@@ -31,8 +31,6 @@ Description
 #include "meshSearch.H"
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
-#include "octree.H"
-#include "octreeDataTriSurface.H"
 #include "cellClassification.H"
 
 #include "addToRunTimeSelectionTable.H"

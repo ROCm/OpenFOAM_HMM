@@ -100,6 +100,17 @@ public:
             {
                 return HashTable<empty, Key, Hash>::insert(key, empty());
             }
+
+
+    // Member Operators
+
+        //- Equality. Two hashtables are equal if all contents of first are
+        //  also in second and vice versa. So does not depend on table size or
+        //  order!
+        bool operator==(const HashSet<Key, Hash>&) const;
+
+        //- The opposite of the equality operation.
+        bool operator!=(const HashSet<Key, Hash>&) const;
 };
 
 
@@ -109,6 +120,12 @@ typedef HashSet<> wordHashSet;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "HashSet.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

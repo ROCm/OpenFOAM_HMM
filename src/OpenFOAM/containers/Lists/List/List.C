@@ -321,7 +321,7 @@ List<T>::List(const BiIndirectList<T>& idl)
 template<class T>
 List<T>::~List()
 {
-    if (this->size_) delete[] this->v_;
+    if (this->v_) delete[] this->v_;
 }
 
 
@@ -367,9 +367,8 @@ void List<T>::setSize(const label newSize)
                     register T* av = &nv[i];
                     while (i--) *--av = *--vv;
                 }
-
-                delete[] this->v_;
             }
+            if (this->v_) delete[] this->v_;
 
             this->size_ = newSize;
             this->v_ = nv;
@@ -400,7 +399,7 @@ void List<T>::setSize(const label newSize, const T& a)
 template<class T>
 void List<T>::clear()
 {
-    if (this->size_) delete[] this->v_;
+    if (this->v_) delete[] this->v_;
     this->size_ = 0;
     this->v_ = 0;
 }
@@ -411,7 +410,7 @@ void List<T>::clear()
 template<class T>
 void List<T>::transfer(List<T>& a)
 {
-    if (this->size_) delete[] this->v_;
+    if (this->v_) delete[] this->v_;
 
     this->size_ = a.size_;
     this->v_ = a.v_;
@@ -457,7 +456,8 @@ void List<T>::operator=(const UList<T>& a)
 {
     if (a.size_ != this->size_)
     {
-        if (this->size_) delete[] this->v_;
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
         this->size_ = a.size_;
         if (this->size_) this->v_ = new T[this->size_];
     }
@@ -503,7 +503,8 @@ void List<T>::operator=(const SLList<T>& sll)
 {
     if (sll.size() != this->size_)
     {
-        if (this->size_) delete[] this->v_;
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
         this->size_ = sll.size();
         if (this->size_) this->v_ = new T[this->size_];
     }
@@ -530,7 +531,8 @@ void List<T>::operator=(const IndirectList<T>& idl)
 {
     if (idl.size() != this->size_)
     {
-        if (this->size_) delete[] this->v_;
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
         this->size_ = idl.size();
         if (this->size_) this->v_ = new T[this->size_];
     }
@@ -551,7 +553,8 @@ void List<T>::operator=(const BiIndirectList<T>& idl)
 {
     if (idl.size() != this->size_)
     {
-        if (this->size_) delete[] this->v_;
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
         this->size_ = idl.size();
         if (this->size_) this->v_ = new T[this->size_];
     }

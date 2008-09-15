@@ -44,7 +44,6 @@ addToRunTimeSelectionTable(RASModel, kOmega, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 kOmega::kOmega
 (
     const volVectorField& U,
@@ -70,6 +69,15 @@ kOmega::kOmega
             "beta",
             coeffDict_,
             0.072
+        )
+    ),
+    alpha_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "alpha",
+            coeffDict_,
+            0.52
         )
     ),
     alphaK_
@@ -222,7 +230,7 @@ void kOmega::correct()
       - fvm::Sp(fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(), omega_)
      ==
-        G*omega_/k_
+        alpha_*G*omega_/k_
       - fvm::Sp(beta_*omega_, omega_)
     );
 
