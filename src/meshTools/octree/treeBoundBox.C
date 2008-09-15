@@ -679,7 +679,11 @@ Foam::label Foam::treeBoundBox::distanceCmp
 
 bool Foam::operator==(const treeBoundBox& a, const treeBoundBox& b)
 {
-    return (a.min() == b.min()) && (a.max() == b.max());
+    return operator==
+    (
+        static_cast<const boundBox&>(a),
+        static_cast<const boundBox&>(b)
+    );
 }
 
 
@@ -689,12 +693,17 @@ bool Foam::operator!=(const treeBoundBox& a, const treeBoundBox& b)
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operator  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const treeBoundBox& bb)
+{
+    return os << static_cast<const boundBox&>(bb);
+}
+
 
 Foam::Istream& Foam::operator>>(Istream& is, treeBoundBox& bb)
 {
-    is >> bb.min() >> bb.max();
-    return is;
+    return is >> static_cast<boundBox&>(bb);
 }
 
 
