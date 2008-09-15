@@ -1,0 +1,179 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*----------------------------------------------------------------------------*/
+
+#include "molecule.H"
+#include "Random.H"
+#include "Time.H"
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+bool Foam::molecule::move(molecule::trackData& td)
+{
+    td.switchProcessor = false;
+    td.keepParticle = true;
+
+    scalar deltaT = cloud().pMesh().time().deltaT().value();
+    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar dtMax = tEnd;
+
+    if (td.part() == 0)
+    {
+        // Leapfrog velocity adjust part, required before and after
+        // tracking+force part
+
+        U_ += 0.5*deltaT*A_;
+    }
+    else if (td.part() == 1)
+    {
+        // Leapfrog tracking part
+
+        while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+        {
+            // set the lagrangian time-step
+            scalar dt = min(dtMax, tEnd);
+
+            dt *= trackToFace(position() + dt*U_, td);
+
+            tEnd -= dt;
+            stepFraction() = 1.0 - tEnd/deltaT;
+        }
+    }
+    else
+    {
+        FatalErrorIn("molecule::move(molecule::trackData& td)") << nl
+            << td.part()
+            << " is an invalid part of integration method: "
+            << method << nl
+            << abort(FatalError);
+    }
+
+    return td.keepParticle;
+}
+
+
+void Foam::molecule::transformProperties(const tensor& T)
+{}
+
+
+void Foam::molecule::transformProperties(const vector& separation)
+{
+    if (special_)
+    {
+        specialPosition_ += separation;
+    }
+}
+
+
+void Foam::molecule::hitProcessorPatch
+(
+    const processorPolyPatch&,
+    molecule::trackData& td
+)
+{
+    td.switchProcessor = true;
+}
+
+
+void Foam::molecule::hitProcessorPatch
+(
+    const processorPolyPatch&,
+    int&
+)
+{}
+
+
+void Foam::molecule::hitWallPatch
+(
+    const wallPolyPatch& wpp,
+    molecule::trackData& td
+)
+{
+    vector nw = wpp.faceAreas()[wpp.whichFace(face())];
+    nw /= mag(nw);
+
+    scalar Un = U_ & nw;
+//     vector Ut = U_ - Un*nw;
+
+//     Random rand(clock::getTime());
+
+//     scalar tmac = 0.8;
+
+//     scalar wallTemp = 2.5;
+
+//     if (rand.scalar01() < tmac)
+//     {
+//         // Diffuse reflection
+//
+//         vector tw1 = Ut/mag(Ut);
+//
+//         vector tw2 = nw ^ tw1;
+//
+//         U_ = sqrt(wallTemp/mass_)*rand.GaussNormal()*tw1
+//                 + sqrt(wallTemp/mass_)*rand.GaussNormal()*tw2
+//                 - mag(sqrt(wallTemp/mass_)*rand.GaussNormal())*nw;
+//     }
+
+//     else
+//     {
+        // Specular reflection
+
+        if (Un > 0)
+        {
+            U_ -= 2*Un*nw;
+        }
+
+//     }
+
+}
+
+
+void Foam::molecule::hitWallPatch
+(
+    const wallPolyPatch&,
+    int&
+)
+{}
+
+
+void Foam::molecule::hitPatch
+(
+    const polyPatch&,
+    molecule::trackData& td
+)
+{
+    td.keepParticle = false;
+}
+
+
+void Foam::molecule::hitPatch
+(
+    const polyPatch&,
+    int&
+)
+{}
+
+
+// ************************************************************************* //

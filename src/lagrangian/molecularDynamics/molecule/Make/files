@@ -26,9 +26,6 @@ $(reducedUnits)/reducedUnitsIO.C
 // $(moleculeCloud)/moleculeCloudBuildCellOccupancy.C
 // $(moleculeCloud)/moleculeCloudBuildCellInteractionLists.C
 // $(moleculeCloud)/moleculeCloudBuildCellReferralLists.C
-// $(moleculeCloud)/moleculeCloudTestEdgeEdgeDistance.C
-// $(moleculeCloud)/moleculeCloudTestPointFaceDistance.C
-// $(moleculeCloud)/moleculeCloudRealCellsInRangeOfSegment.C
 // $(moleculeCloud)/moleculeCloudReferredCellsInRangeOfSegment.C
 // $(moleculeCloud)/moleculeCloudCalculateForce.C
 // $(moleculeCloud)/moleculeCloudCalculatePairForce.C
