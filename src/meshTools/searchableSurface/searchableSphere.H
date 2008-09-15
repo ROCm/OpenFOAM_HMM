@@ -36,8 +36,8 @@ SourceFiles
 #ifndef searchableSphere_H
 #define searchableSphere_H
 
-#include "searchableSurface.H"
 #include "treeBoundBox.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -125,6 +125,12 @@ public:
         virtual bool hasVolumeType() const
         {
             return true;
+        }
+
+        //- Range of local indices that can be returned.
+        virtual label size() const
+        {
+            return 1;
         }
 
 

@@ -28,6 +28,8 @@ License
 #include "Random.H"
 #include "addToRunTimeSelectionTable.H"
 #include "EdgeMap.H"
+#include "triSurfaceFields.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -299,57 +301,6 @@ const Foam::wordList& Foam::triSurfaceMesh::regions() const
 }
 
 
-//Foam::pointIndexHit Foam::triSurfaceMesh::findNearest
-//(
-//    const point& sample,
-//    const scalar nearestDistSqr
-//) const
-//{
-//    return tree().findNearest(sample, nearestDistSqr);
-//}
-//
-//
-//Foam::pointIndexHit Foam::triSurfaceMesh::findNearestOnEdge
-//(
-//    const point& sample,
-//    const scalar nearestDistSqr
-//) const
-//{
-//    return = edgeTree().findNearest(sample, nearestDistSqr);
-//}
-//
-//
-//Foam::pointIndexHit Foam::triSurfaceMesh::findNearest
-//(
-//    const linePointRef& ln,
-//    treeBoundBox& tightest,
-//    point& linePoint
-//) const
-//{
-//    return tree().findNearest(ln, tightest, linePoint);
-//}
-//
-//
-//Foam::pointIndexHit Foam::triSurfaceMesh::findLine
-//(
-//    const point& start,
-//    const point& end
-//) const
-//{
-//    return tree().findLine(start, end);
-//}
-//
-//
-//Foam::pointIndexHit Foam::triSurfaceMesh::findLineAny
-//(
-//    const point& start,
-//    const point& end
-//) const
-//{
-//    return tree().findLineAny(start, end);
-//}
-
-
 // Find out if surface is closed.
 bool Foam::triSurfaceMesh::hasVolumeType() const
 {
@@ -545,6 +496,29 @@ void Foam::triSurfaceMesh::getNormal
 }
 
 
+void Foam::triSurfaceMesh::getField
+(
+    const word& fieldName,
+    const List<pointIndexHit>& info,
+    labelList& values
+) const
+{
+    const triSurfaceLabelField& fld = lookupObject<triSurfaceLabelField>
+    (
+        fieldName
+    );
+
+    values.setSize(info.size());
+    forAll(info, i)
+    {
+        if (info[i].hit())
+        {
+            values[i] = fld[info[i].index()];
+        }
+    }
+}
+
+
 void Foam::triSurfaceMesh::getVolumeType
 (
     const pointField& points,
@@ -561,6 +535,33 @@ void Foam::triSurfaceMesh::getVolumeType
         // - cheat conversion since same values
         volType[pointI] = static_cast<volumeType>(tree().getVolumeType(pt));
     }
+}
+
+
+//- Write using given format, version and compression
+bool Foam::triSurfaceMesh::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    fileName fullPath(searchableSurface::objectPath());
+
+    if (!mkDir(fullPath.path()))
+    {
+        return false;
+    }
+
+    triSurface::write(fullPath);
+
+    if (!file(fullPath))
+    {
+        return false;
+    }
+
+    //return objectRegistry::writeObject(fmt, ver, cmp);
+    return true;
 }
 
 
