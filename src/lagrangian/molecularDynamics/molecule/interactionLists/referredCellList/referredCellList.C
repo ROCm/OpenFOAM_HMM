@@ -46,14 +46,17 @@ void Foam::referredCellList::buildReferredCellList
 
     DynamicList<referredCell> referredInteractionList;
 
-    DynamicList<label> realCellsWithinRCutMaxOfAnyReferringPatch;
+    // realCellsWithinRCutMaxOfAnyReferringPatch
+    DynamicList<label> rCellsWRRP;
 
-    DynamicList<label> realFacesWithinRCutMaxOfAnyReferringPatch;
+    // realFacesWithinRCutMaxOfAnyReferringPatch
+    DynamicList<label> rFacesWRRP;
 
-    DynamicList<label> realEdgesWithinRCutMaxOfAnyReferringPatch;
+    // realEdgesWithinRCutMaxOfAnyReferringPatch
+    DynamicList<label> rEdgesWRRP;
 
-    DynamicList<label> realPointsWithinRCutMaxOfAnyReferringPatch;
-
+    // realPointsWithinRCutMaxOfAnyReferringPatch
+    DynamicList<label> rPointsWRRP;
 
     labelListList processorPatchSegmentMapping
     (
@@ -77,17 +80,6 @@ void Foam::referredCellList::buildReferredCellList
         dictionary patchDictionary;
 
         DynamicList<word> patchNames;
-
-        //     IOobject undecomposedBoundaryHeader
-        //     (
-        //         "undecomposedBoundary",
-        //         mesh.time().constant(),
-        //         polyMesh::meshSubDir,
-        //         mesh,
-        //         IOobject::MUST_READ,
-        //         IOobject::NO_WRITE,
-        //         false
-        //     );
 
         Time undecomposedTime
         (
@@ -129,12 +121,9 @@ void Foam::referredCellList::buildReferredCellList
         }
         else
         {
-            FatalErrorIn
-            (
-                "moleculeCloudBuildCellInteractionLists.C"
-            )
-            << nl << "unable to read undecomposed boundary file from "
-            "constant/polyMesh" << nl
+            FatalErrorIn ("referredCellList.C")
+                << nl << "unable to read undecomposed boundary file from "
+                << "constant/polyMesh" << nl
                 << abort(FatalError);
         }
 
@@ -168,8 +157,7 @@ void Foam::referredCellList::buildReferredCellList
 
         forAll(procPatches,pP)
         {
-            const processorPolyPatch& patch =
-            refCast<const processorPolyPatch>
+            const processorPolyPatch& patch = refCast<const processorPolyPatch>
             (
                 mesh.boundaryMesh()[procPatches[pP]]
             );
@@ -186,12 +174,6 @@ void Foam::referredCellList::buildReferredCellList
 
                 label globalFace = abs(faceProcAdd)-1;
 
-                //             Pout << "Patch index: " << pI
-                //                     << " " << patch[pI]
-                //                     << " Mesh index: " << decomposedMeshFace
-                //                     << " faceProcAdd: " << faceProcAdd
-                //                     << " globalFace:" << globalFace << endl;
-
                 label minStart = -1;
 
                 forAll(patchNames, pN)
@@ -201,7 +183,6 @@ void Foam::referredCellList::buildReferredCellList
                         const dictionary& patchDict =
                         patchDictionary.subDict(patchNames[pN]);
 
-                        //                     word faceName(patchNames[pN]);
                         label startFace(readLabel(patchDict.lookup("startFace")));
                         label nFaces(readLabel(patchDict.lookup("nFaces")));
 
@@ -213,7 +194,7 @@ void Foam::referredCellList::buildReferredCellList
                         if
                         (
                             globalFace >= startFace
-                            && globalFace < startFace + nFaces/2
+                         && globalFace < startFace + nFaces/2
                         )
                         {
                             procPatchSegMap[pI] = pN + 1;
@@ -221,7 +202,7 @@ void Foam::referredCellList::buildReferredCellList
                         else if
                         (
                             globalFace >= startFace + nFaces/2
-                            && globalFace < startFace + nFaces
+                         && globalFace < startFace + nFaces
                         )
                         {
                             procPatchSegMap[pI] = -(pN + 1);
@@ -238,8 +219,7 @@ void Foam::referredCellList::buildReferredCellList
 
         forAll(procPatches,pP)
         {
-            const processorPolyPatch& patch =
-            refCast<const processorPolyPatch>
+            const processorPolyPatch& patch = refCast<const processorPolyPatch>
             (
                 mesh.boundaryMesh()[procPatches[pP]]
             );
@@ -252,20 +232,13 @@ void Foam::referredCellList::buildReferredCellList
                     + 2*(sizeof(label) + patch.size()*sizeof(vector))
                 );
 
-                toNeighbProc
-                << patch.faceCentres()
-                    << patch.faceAreas();
-
-                //             Pout << "sending face info to processor "
-                //                 << patch.neighbProcNo() << ", size = "
-                //                 << patch.size() << endl;
+                toNeighbProc << patch.faceCentres() << patch.faceAreas();
             }
         }
 
         forAll(procPatches,pP)
         {
-            const processorPolyPatch& patch =
-            refCast<const processorPolyPatch>
+            const processorPolyPatch& patch = refCast<const processorPolyPatch>
             (
                 mesh.boundaryMesh()[procPatches[pP]]
             );
@@ -285,13 +258,8 @@ void Foam::referredCellList::buildReferredCellList
                     patch.neighbProcNo(),
                     2*(sizeof(label) + patch.size()*sizeof(vector))
                 );
-                fromNeighbProc
-                >> neighbFaceCentres
-                    >> neighbFaceAreas;
 
-                //             Pout << "receiving face info from processor "
-                //                 << patch.neighbProcNo() << ", size = "
-                //                 << patch.size() << endl;
+                fromNeighbProc >> neighbFaceCentres >> neighbFaceAreas;
             }
         }
 
@@ -303,8 +271,7 @@ void Foam::referredCellList::buildReferredCellList
 
         forAll(procPatches,pP)
         {
-            const processorPolyPatch& patch =
-            refCast<const processorPolyPatch>
+            const processorPolyPatch& patch = refCast<const processorPolyPatch>
             (
                 mesh.boundaryMesh()[procPatches[pP]]
             );
@@ -356,15 +323,14 @@ void Foam::referredCellList::buildReferredCellList
                 {
                     if
                     (
-                        sum(mag(refOff-refOff[0]))/refOff.size() > interactionLists::transTol
-                        || sum(mag(refTrans-refTrans[0]))/refTrans.size() > interactionLists::transTol
+                        sum(mag(refOff-refOff[0]))/refOff.size()
+                            > interactionLists::transTol
+                     || sum(mag(refTrans-refTrans[0]))/refTrans.size()
+                            > interactionLists::transTol
                     )
                     {
-                        FatalErrorIn
-                        (
-                            "moleculeCloud::buildCellInteractionLists"
-                        )
-                        << nl << "Face pairs on patch "
+                        FatalErrorIn ("referredCellList.C")
+                            << nl << "Face pairs on patch "
                             << patch.name()
                             << ", segment " << patchNames[nUP]
                             << " do not give the same referring "
@@ -398,16 +364,13 @@ void Foam::referredCellList::buildReferredCellList
 
             if (mesh.boundaryMesh()[patchI].type() == "cyclic")
             {
-                const cyclicPolyPatch& patch =
-                refCast<const cyclicPolyPatch>
+                const cyclicPolyPatch& patch = refCast<const cyclicPolyPatch>
                 (
                     mesh.boundaryMesh()[patchI]
                 );
 
-                if(patch.size())
+                if (patch.size())
                 {
-                    //             Pout << patch << endl;
-
                     if (iterationNo == 0)
                     {
                         // Tests that all combinations of face pairs produce the
@@ -450,16 +413,13 @@ void Foam::referredCellList::buildReferredCellList
                         if
                         (
                             sum(mag(refOff - refOff[0]))/(patch.size()/2)
-                            > interactionLists::transTol
-                            || sum(mag(refTrans - refTrans[0]))/(patch.size()/2)
-                            > interactionLists::transTol
+                                > interactionLists::transTol
+                         || sum(mag(refTrans - refTrans[0]))/(patch.size()/2)
+                                > interactionLists::transTol
                         )
                         {
-                            FatalErrorIn
-                            (
-                                "moleculeCloud::buildCellInteractionLists"
-                            )
-                            << nl << "Face pairs on patch "
+                            FatalErrorIn ("referredCellList.C")
+                                << nl << "Face pairs on patch "
                                 << patch.name()
                                 << " do not give the same referring "
                                 << " transformations to within tolerance of "
@@ -518,11 +478,7 @@ void Foam::referredCellList::buildReferredCellList
                         {
                             const label facePoint(facePoints[fP]);
 
-                            if
-                            (
-                                findIndex(meshPointsOnThisSegment, facePoint)
-                                == -1
-                            )
+                            if (findIndex(meshPointsOnThisSegment, facePoint) == -1)
                             {
                                 meshPointsOnThisSegment.append(facePoint);
                             }
@@ -574,13 +530,7 @@ void Foam::referredCellList::buildReferredCellList
 
                             forAll(referredInteractionList, rIL)
                             {
-                                if
-                                (
-                                    cellToRefer.duplicate
-                                    (
-                                        referredInteractionList[rIL]
-                                    )
-                                )
+                                if (cellToRefer.duplicate (referredInteractionList[rIL]))
                                 {
                                     addCellToRefer = false;
 
@@ -591,14 +541,7 @@ void Foam::referredCellList::buildReferredCellList
                             // Check for cellToRefer being referred back
                             // ontop of a real cell
 
-                            if
-                            (
-                                cellToRefer.duplicate
-                                (
-                                    Pstream::myProcNo(),
-                                    mesh.nCells()
-                                )
-                            )
+                            if (cellToRefer.duplicate (Pstream::myProcNo(), mesh.nCells()))
                             {
                                 addCellToRefer = false;
                             }
@@ -611,19 +554,9 @@ void Foam::referredCellList::buildReferredCellList
                             // add real cells found in range of cyclic patch
                             // to whole mesh list
 
-                            if
-                            (
-                                findIndex
-                                (
-                                    realCellsWithinRCutMaxOfAnyReferringPatch,
-                                    realCell
-                                ) == -1
-                            )
+                            if (findIndex (rCellsWRRP, realCell) == -1)
                             {
-                                realCellsWithinRCutMaxOfAnyReferringPatch.append
-                                (
-                                    realCell
-                                );
+                                rCellsWRRP.append(realCell);
                             }
                         }
                     }
@@ -668,10 +601,7 @@ void Foam::referredCellList::buildReferredCellList
                         {
                             if
                             (
-                                cellToReRefer.duplicate
-                                (
-                                    referredInteractionList[rIL]
-                                )
+                                cellToReRefer.duplicate(referredInteractionList[rIL])
                             )
                             {
                                 addCellToReRefer = false;
@@ -685,17 +615,13 @@ void Foam::referredCellList::buildReferredCellList
 
                         if
                         (
-                            cellToReRefer.duplicate
-                            (
-                                Pstream::myProcNo(),
-                                mesh.nCells()
-                            )
+                            cellToReRefer.duplicate(Pstream::myProcNo(), mesh.nCells())
                         )
                         {
                             addCellToReRefer = false;
                         }
 
-                        if(addCellToReRefer)
+                        if (addCellToReRefer)
                         {
                             referredInteractionList.append(cellToReRefer);
                         }
@@ -731,7 +657,7 @@ void Foam::referredCellList::buildReferredCellList
                         {
                             const label faceEdge(faceEdges[fE]);
 
-                            if(findIndex(meshEdgesOnThisSegment, faceEdge) == -1)
+                            if (findIndex(meshEdgesOnThisSegment, faceEdge) == -1)
                             {
                                 meshEdgesOnThisSegment.append(faceEdge);
                             }
@@ -743,11 +669,7 @@ void Foam::referredCellList::buildReferredCellList
                         {
                             const label facePoint(facePoints[fP]);
 
-                            if
-                            (
-                                findIndex(meshPointsOnThisSegment, facePoint)
-                                == -1
-                            )
+                            if (findIndex(meshPointsOnThisSegment, facePoint) == -1)
                             {
                                 meshPointsOnThisSegment.append(facePoint);
                             }
@@ -799,13 +721,7 @@ void Foam::referredCellList::buildReferredCellList
 
                             forAll(referredInteractionList, rIL)
                             {
-                                if
-                                (
-                                    cellToRefer.duplicate
-                                    (
-                                        referredInteractionList[rIL]
-                                    )
-                                )
+                                if (cellToRefer.duplicate(referredInteractionList[rIL]))
                                 {
                                     addCellToRefer = false;
 
@@ -818,11 +734,7 @@ void Foam::referredCellList::buildReferredCellList
 
                             if
                             (
-                                cellToRefer.duplicate
-                                (
-                                    Pstream::myProcNo(),
-                                    mesh.nCells()
-                                )
+                                cellToRefer.duplicate(Pstream::myProcNo(), mesh.nCells())
                             )
                             {
                                 addCellToRefer = false;
@@ -836,19 +748,9 @@ void Foam::referredCellList::buildReferredCellList
                             // add real cells found in range of cyclic patch
                             // to whole mesh list
 
-                            if
-                            (
-                                findIndex
-                                (
-                                    realCellsWithinRCutMaxOfAnyReferringPatch,
-                                    realCell
-                                ) == -1
-                            )
+                            if (findIndex (rCellsWRRP, realCell) == -1)
                             {
-                                realCellsWithinRCutMaxOfAnyReferringPatch.append
-                                (
-                                    realCell
-                                );
+                                rCellsWRRP.append(realCell);
                             }
                         }
                     }
@@ -888,13 +790,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         forAll(referredInteractionList, rIL)
                         {
-                            if
-                            (
-                                cellToReRefer.duplicate
-                                (
-                                    referredInteractionList[rIL]
-                                )
-                            )
+                            if (cellToReRefer.duplicate (referredInteractionList[rIL]))
                             {
                                 addCellToReRefer = false;
 
@@ -905,14 +801,7 @@ void Foam::referredCellList::buildReferredCellList
                         // Check for cellToRefer being referred back
                         // ontop of a real cell
 
-                        if
-                        (
-                            cellToReRefer.duplicate
-                            (
-                                Pstream::myProcNo(),
-                                mesh.nCells()
-                            )
-                        )
+                        if (cellToReRefer.duplicate(Pstream::myProcNo(), mesh.nCells()))
                         {
                             addCellToReRefer = false;
                         }
@@ -932,8 +821,7 @@ void Foam::referredCellList::buildReferredCellList
 
             forAll(procPatches,pP)
             {
-                const processorPolyPatch& patch =
-                refCast<const processorPolyPatch>
+                const processorPolyPatch& patch = refCast<const processorPolyPatch>
                 (
                     mesh.boundaryMesh()[procPatches[pP]]
                 );
@@ -992,7 +880,7 @@ void Foam::referredCellList::buildReferredCellList
                         {
                             const label faceEdge(faceEdges[fE]);
 
-                            if(findIndex(meshEdgesOnThisSegment, faceEdge) == -1)
+                            if (findIndex(meshEdgesOnThisSegment, faceEdge) == -1)
                             {
                                 meshEdgesOnThisSegment.append(faceEdge);
                             }
@@ -1004,11 +892,7 @@ void Foam::referredCellList::buildReferredCellList
                         {
                             const label facePoint(facePoints[fP]);
 
-                            if
-                            (
-                                findIndex(meshPointsOnThisSegment, facePoint)
-                                == -1
-                            )
+                            if (findIndex(meshPointsOnThisSegment, facePoint) == -1)
                             {
                                 meshPointsOnThisSegment.append(facePoint);
                             }
@@ -1023,11 +907,8 @@ void Foam::referredCellList::buildReferredCellList
                     {
                         if (faceT == -1)
                         {
-                            FatalErrorIn
-                            (
-                                "moleculeCloudBuildReferredInteractionList.H"
-                            )
-                            << nl << "faceT == -1 encountered but "
+                            FatalErrorIn ("referredCellList.C")
+                                << nl << "faceT == -1 encountered but "
                                 << meshFacesOnThisSegment.size()
                                 << " faces found on patch segment."
                                 << abort(FatalError);
@@ -1070,20 +951,9 @@ void Foam::referredCellList::buildReferredCellList
                                 // add real cells found in range of processor patch
                                 // to whole mesh list
 
-                                if
-                                (
-                                    findIndex
-                                    (
-                                        realCellsWithinRCutMaxOfAnyReferringPatch,
-                                        realCell
-                                    )
-                                    == -1
-                                )
+                                if (findIndex (rCellsWRRP, realCell) == -1)
                                 {
-                                    realCellsWithinRCutMaxOfAnyReferringPatch.append
-                                    (
-                                        realCell
-                                    );
+                                    rCellsWRRP.append(realCell);
                                 }
                             }
                         }
@@ -1104,7 +974,7 @@ void Foam::referredCellList::buildReferredCellList
                         forAll(referredCellsFoundInRange,cFIR)
                         {
                             referredCell& existingRefCell
-                            = referredInteractionList[referredCellsFoundInRange[cFIR]];
+                                = referredInteractionList[referredCellsFoundInRange[cFIR]];
 
                             referredCell cellToReRefer = existingRefCell.reRefer
                             (
@@ -1131,22 +1001,16 @@ void Foam::referredCellList::buildReferredCellList
                         patch.neighbProcNo()
                     );
 
-                    //                 Pout << "Processor " << Pstream::myProcNo()
-                    //                     << " sending to " << patch.neighbProcNo()
-                    //                     << nl << referredCellsToTransfer << endl;
-
                     toNeighbProc << referredCellsToTransfer;
                 }
             }
 
             forAll(procPatches,pP)
             {
-                const processorPolyPatch& patch =
-                refCast<const processorPolyPatch>
+                const processorPolyPatch& patch = refCast<const processorPolyPatch>
                 (
                     mesh.boundaryMesh()[procPatches[pP]]
                 );
-
 
                 // Receive the cells from neighbour
 
@@ -1160,10 +1024,6 @@ void Foam::referredCellList::buildReferredCellList
                     );
 
                     fromNeighbProc >> referredCellsFromNeighbour;
-
-                    //                 Pout << "Processor " << Pstream::myProcNo()
-                    //                     << " receiving from " << patch.neighbProcNo()
-                    //                     << nl << referredCellsFromNeighbour << endl;
                 }
 
                 // Check to see if they are duplicates, if not append
@@ -1171,8 +1031,7 @@ void Foam::referredCellList::buildReferredCellList
 
                 forAll(referredCellsFromNeighbour,rCFN)
                 {
-                    referredCell& cellToRefer
-                    = referredCellsFromNeighbour[rCFN];
+                    referredCell& cellToRefer = referredCellsFromNeighbour[rCFN];
 
                     // Test all existing referred and real cells to check duplicates
                     // are not being made or cells aren't being referred back onto
@@ -1184,7 +1043,7 @@ void Foam::referredCellList::buildReferredCellList
 
                     forAll(referredInteractionList, rIL)
                     {
-                        if(cellToRefer.duplicate(referredInteractionList[rIL]))
+                        if (cellToRefer.duplicate(referredInteractionList[rIL]))
                         {
                             addCellToRefer = false;
 
@@ -1196,11 +1055,7 @@ void Foam::referredCellList::buildReferredCellList
 
                     if
                     (
-                        cellToRefer.duplicate
-                        (
-                            Pstream::myProcNo(),
-                            mesh.nCells()
-                        )
+                        cellToRefer.duplicate(Pstream::myProcNo(), mesh.nCells())
                     )
                     {
                         addCellToRefer = false;
@@ -1219,16 +1074,13 @@ void Foam::referredCellList::buildReferredCellList
             // record all real cells in range of any referring patch (cyclic or
             // processor) on the first iteration when the real cells are evaluated.
 
-            realCellsWithinRCutMaxOfAnyReferringPatch.shrink();
+            rCellsWRRP.shrink();
 
             // construct {faces, edges, points}WithinRCutMaxOfAnyReferringPatch
 
-            forAll(realCellsWithinRCutMaxOfAnyReferringPatch, rCWR)
+            forAll(rCellsWRRP, rCWR)
             {
-                const label realCell
-                (
-                    realCellsWithinRCutMaxOfAnyReferringPatch[rCWR]
-                );
+                const label realCell(rCellsWRRP[rCWR]);
 
                 const labelList& rCFaces
                 (
@@ -1239,13 +1091,9 @@ void Foam::referredCellList::buildReferredCellList
                 {
                     const label f(rCFaces[rCF]);
 
-                    if
-                    (
-                        findIndex(realFacesWithinRCutMaxOfAnyReferringPatch,f)
-                        == -1
-                    )
+                    if (findIndex(rFacesWRRP,f) == -1)
                     {
-                        realFacesWithinRCutMaxOfAnyReferringPatch.append(f);
+                        rFacesWRRP.append(f);
                     }
                 }
 
@@ -1258,13 +1106,9 @@ void Foam::referredCellList::buildReferredCellList
                 {
                     const label e(rCEdges[rCE]);
 
-                    if
-                    (
-                        findIndex(realEdgesWithinRCutMaxOfAnyReferringPatch,e)
-                        == -1
-                    )
+                    if (findIndex(rEdgesWRRP,e) == -1)
                     {
-                        realEdgesWithinRCutMaxOfAnyReferringPatch.append(e);
+                        rEdgesWRRP.append(e);
                     }
                 }
 
@@ -1277,46 +1121,39 @@ void Foam::referredCellList::buildReferredCellList
                 {
                     const label p(rCPoints[rCP]);
 
-                    if
-                    (
-                        findIndex(realPointsWithinRCutMaxOfAnyReferringPatch,p)
-                        == -1
-                    )
+                    if (findIndex(rPointsWRRP,p) == -1)
                     {
-                        realPointsWithinRCutMaxOfAnyReferringPatch.append(p);
+                        rPointsWRRP.append(p);
                     }
                 }
             }
 
-            realFacesWithinRCutMaxOfAnyReferringPatch.shrink();
+            rFacesWRRP.shrink();
 
-            realEdgesWithinRCutMaxOfAnyReferringPatch.shrink();
+            rEdgesWRRP.shrink();
 
-            realPointsWithinRCutMaxOfAnyReferringPatch.shrink();
+            rPointsWRRP.shrink();
         }
 
         iterationNo++;
 
         cellsReferredThisIteration =
-        referredInteractionList.size() - refIntListStartSize;
-
-        //     Pout << tab << "Cells added this iteration: "
-        //         << cellsReferredThisIteration << endl;
+            referredInteractionList.size() - refIntListStartSize;
 
         reduce(cellsReferredThisIteration, sumOp<label>());
 
-        Info << tab << "Cells added this iteration: "
+        Info<< tab << "Cells added this iteration: "
             << cellsReferredThisIteration << endl;
     }
 
     referredInteractionList.shrink();
 
-    //     Info << "referredInteractionList.size() = "
+    //     Info<< "referredInteractionList.size() = "
     //         << referredInteractionList.size() << endl;
 
     //     forAll(referredInteractionList,rIL)
     //     {
-    //         Info << referredInteractionList[rIL];
+    //         Info<< referredInteractionList[rIL];
     //     }
 
     (*this).setSize
@@ -1341,12 +1178,9 @@ void Foam::referredCellList::buildReferredCellList
 
         const vectorList& refCellPoints = refCell.vertexPositions();
 
-        forAll(realFacesWithinRCutMaxOfAnyReferringPatch, rCF)
+        forAll(rFacesWRRP, rCF)
         {
-            const label f
-            (
-                realFacesWithinRCutMaxOfAnyReferringPatch[rCF]
-            );
+            const label f(rFacesWRRP[rCF]);
 
             if (il_.testPointFaceDistance(refCellPoints,f))
             {
@@ -1371,12 +1205,9 @@ void Foam::referredCellList::buildReferredCellList
             }
         }
 
-        forAll(realPointsWithinRCutMaxOfAnyReferringPatch, rCP)
+        forAll(rPointsWRRP, rCP)
         {
-            const label p
-            (
-                realPointsWithinRCutMaxOfAnyReferringPatch[rCP]
-            );
+            const label p(rPointsWRRP[rCP]);
 
             if (il_.testPointFaceDistance(p,refCell))
             {
@@ -1397,12 +1228,9 @@ void Foam::referredCellList::buildReferredCellList
 
         const edgeList& refCellEdges = refCell.edges();
 
-        forAll(realEdgesWithinRCutMaxOfAnyReferringPatch, rCE)
+        forAll(rEdgesWRRP, rCE)
         {
-            const label edgeIIndex
-            (
-                realEdgesWithinRCutMaxOfAnyReferringPatch[rCE]
-            );
+            const label edgeIIndex(rEdgesWRRP[rCE]);
 
             const edge& eI(mesh.edges()[edgeIIndex]);
 
@@ -1457,7 +1285,7 @@ void Foam::referredCellList::buildReferredCellList
 //                     {
 //                         const label cellI(ptICells[pIC]);
 //
-//                         if(findIndex(realCellsFoundInRange, cellI) == -1)
+//                         if (findIndex(realCellsFoundInRange, cellI) == -1)
 //                         {
 //                             realCellsFoundInRange.append(cellI);
 //                         }
