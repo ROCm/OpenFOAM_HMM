@@ -61,6 +61,18 @@ class molecule
 
 public:
 
+    // Values of special that are less than zero are for built-in functionality.
+    // Values greater than zero are user specifiable/expandable (i.e. test
+    // special_ >= SPECIAL_USER)
+
+    enum specialTypes
+    {
+        SPECIAL_TETHERED = -1,
+        SPECIAL_FROZEN   = -2,
+        NOT_SPECIAL      = 0
+        SPECIAL_USER     = 1
+    };
+
     //- Class to hold molecule constant properties
     class constantProperties
     {
@@ -81,7 +93,15 @@ public:
     public:
 
         //- Constructor
-        inline constantProperties();
+        inline constantProperties
+        (
+            const List<vector>& siteReferencePositions,
+            const List<scalar>& siteCharges,
+            const List<label>& siteIds,
+            const diagTensor& momentOfInertia,
+            scalar mass,
+            label nSites
+        );
 
         // Member functions
 
@@ -95,6 +115,7 @@ public:
 
         inline scalar mass() const;
 
+        inline label nSites() const;
     };
 
 
@@ -139,9 +160,9 @@ private:
         //    -# Don't go scalar-label, scalar-label, because in 64bit mode,
         //       the labels will be padded by 4bytes.
 
-        // Centre of mass velocities and accelerations
+        tensor R_;
 
-        vector u_;
+        vector v_;
 
         vector a_;
 
@@ -160,11 +181,13 @@ private:
         // - r_ij f_ij, stress dyad
         tensor rf_;
 
-        const constantProperties& constProps_;
-
         label special_;
 
         label id_;
+
+    // Private Member Functions
+
+        tensor rotationTensor(scalar deltaT) const;
 
 public:
 
@@ -178,10 +201,13 @@ public:
             const Cloud<molecule>& c,
             const vector& position,
             const label celli,
-            const scalar mass,
-            const vector& U,
-            const vector& A,
+            const tensor& R,
+            const vector& v,
+            const vector& a,
+            const vector& omega,
+            const vector& alpha,
             const vector& specialPosition,
+            const constantProperties& constProps;
             const label special,
             const label id
         );
@@ -203,21 +229,40 @@ public:
 
     // Member Functions
 
-        void transformProperties(const tensor& T);
+        //- Tracking
+            bool move(trackData&);
 
-        void transformProperties(const vector& separation);
+            void transformProperties(const tensor& T);
+
+            void transformProperties(const vector& separation);
+
+            void setSitePositions(const constantProperties& constProps);
 
         // Access
 
-            inline label id() const;
+            inline const tensor& & R() const;
+            inline tensor& R();
 
-            inline scalar mass() const;
+            inline const vector& v() const;
+            inline vector& v();
 
-            inline const vector& U() const;
-            inline vector& U();
+            inline const vector& a() const;
+            inline vector& a();
 
-            inline const vector& A() const;
-            inline vector& A();
+            inline const vector& omega() const;
+            inline vector& omega();
+
+            inline const vector& alpha() const;
+            inline vector& alpha();
+
+            inline const List<vector>& siteForces() const;
+            inline List<vector>& siteForces();
+
+            inline const List<vector>& sitePositions() const;
+            inline List<vector>& sitePositions();
+
+            inline const vector& specialPosition() const;
+            inline vector& specialPosition();
 
             inline scalar potentialEnergy() const;
             inline scalar& potentialEnergy();
@@ -227,13 +272,7 @@ public:
 
             inline label special() const;
 
-            inline const vector& specialPosition() const;
-            inline vector& specialPosition();
-
-
-        //- Tracking
-        bool move(trackData&);
-
+            inline label id() const;
 
     // Member Operators
 

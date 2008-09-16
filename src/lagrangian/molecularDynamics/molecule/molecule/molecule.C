@@ -28,7 +28,51 @@ License
 #include "Random.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::tensor Foam::molecule::rotationTensor(scalar deltaT) const
+{
+    scalar phi1 = 0.5*deltaT*omega_.x();
+
+    tensor U1
+    (
+        tensor
+        (
+            1, 0, 0,
+            0, Foam::cos(phi1), Foam::sin(phi1),
+            0, -Foam::sin(phi1), Foam::cos(phi1)
+        )
+    );
+
+    scalar phi2 = 0.5*deltaT*omega_.y();
+
+    tensor U2
+    (
+        tensor
+        (
+            Foam::cos(phi2), 0, -Foam::sin(phi2),
+            0, 1, 0,
+            Foam::sin(phi2), 0, Foam::cos(phi2)
+        )
+    );
+
+    scalar phi3 = deltaT*omega_.z();
+
+    tensor U3
+    (
+        tensor
+        (
+            Foam::cos(phi3), Foam::sin(phi3), 0,
+            -Foam::sin(phi3), Foam::cos(phi3), 0,
+            0, 0, 1
+        )
+    );
+
+    return (U1.T() & U2.T() & U3.T() & U2.T() & U1.T());
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::molecule::move(molecule::trackData& td)
 {
@@ -61,12 +105,21 @@ bool Foam::molecule::move(molecule::trackData& td)
             stepFraction() = 1.0 - tEnd/deltaT;
         }
     }
+    else if (td.part() == 2)
+    {
+        // Leapfrog orientation adjustment, carried out before force calculation
+        // but after tracking stage, i.e. rotation carried once linear motion
+        // complete.
+
+        R_ = R_ & rotationTensor(deltaT);
+
+        setSitePositions(td.molCloud().constProps(id_));
+    }
     else
     {
         FatalErrorIn("molecule::move(molecule::trackData& td)") << nl
             << td.part()
-            << " is an invalid part of integration method: "
-            << method << nl
+            << " is an invalid part of the integration method."
             << abort(FatalError);
     }
 
@@ -80,10 +133,16 @@ void Foam::molecule::transformProperties(const tensor& T)
 
 void Foam::molecule::transformProperties(const vector& separation)
 {
-    if (special_)
+    if (special_ == SPECIAL_TETHERED)
     {
         specialPosition_ += separation;
     }
+}
+
+
+void Foam::molecule::setSitePositions(const constantProperties& constProps)
+{
+    sitePositions_ = position_ + R_ & constProps.siteReferencePositions();
 }
 
 

@@ -89,7 +89,7 @@ public:
 
     // Member Functions
 
-    //        void referMolecules(List<DynamicList<molecule*> >& cellOccupancy);
+        void referMolecules(List<DynamicList<molecule*> >& cellOccupancy);
 
         inline const interactionLists& il() const;
 };

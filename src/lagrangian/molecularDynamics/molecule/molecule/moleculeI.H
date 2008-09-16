@@ -49,24 +49,34 @@ inline Foam::molecule::molecule
     const Cloud<molecule>& c,
     const vector& position,
     const label celli,
-    const scalar mass,
-    const vector& U,
-    const vector& A,
-    const vector& tetherPosition,
-    const label tethered,
+    const tensor& R,
+    const vector& v,
+    const vector& a,
+    const vector& omega,
+    const vector& alpha,
+    const vector& specialPosition,
+    const constantProperties& constProps;
+    const label special,
     const label id
+
 )
 :
     Particle<molecule>(c, position, celli),
-    mass_(mass),
-    U_(U),
-    A_(A),
-    tetherPosition_(tetherPosition),
+    R_(R),
+    v_(v),
+    a_(a),
+    omega_(omega),
+    alpha_(alpha),
+    siteForces_(constProps.nSites(), vector::zero),
+    sitePositions_(constProps.nSites()),
+    specialPosition_(specialPosition),
     potentialEnergy_(0.0),
     rf_(tensor::zero),
-    tethered_(tethered),
+    special_(special),
     id_(id)
-{}
+{
+    setSitePositions(constProps);
+}
 
 
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
@@ -105,6 +115,12 @@ inline Foam::scalar Foam::molecule::constantProperties::mass() const
 }
 
 
+inline Foam::label Foam::molecule::constantProperties::nSites() const
+{
+    return siteIds_.size();
+
+}
+
 // * * * * * * * * * * *  trackData Member Functions * * * * * * * * * * * * //
 
 inline moleculeCloud& Foam::molecule::trackData::molCloud()
@@ -121,39 +137,99 @@ inline label Foam::molecule::trackData::part() const
 
 // * * * * * * * * * * * * molecule Member Functions * * * * * * * * * * * * //
 
-inline label Foam::molecule::id() const
+inline const Foam::tensor& Foam::molecule::R() const
 {
-    return id_;
+    return R_;
 }
 
 
-inline Foam::scalar Foam::molecule::mass() const
+inline Foam::tensor& Foam::molecule::R()
 {
-    return mass_;
+    return R_;
 }
 
 
-inline const Foam::vector& Foam::molecule::U() const
+inline const Foam::vector& Foam::molecule::v() const
 {
-    return U_;
+    return v_;
 }
 
 
-inline Foam::vector& Foam::molecule::U()
+inline Foam::vector& Foam::molecule::v()
 {
-    return U_;
+    return v_;
 }
 
 
-inline const Foam::vector& Foam::molecule::A() const
+inline const Foam::vector& Foam::molecule::a() const
 {
-    return A_;
+    return a_;
 }
 
 
-inline Foam::vector& Foam::molecule::A()
+inline Foam::vector& Foam::molecule::a()
 {
-    return A_;
+    return a_;
+}
+
+
+inline const Foam::vector& Foam::molecule::omega() const
+{
+    return omega_;
+}
+
+
+inline Foam::vector& Foam::molecule::omega()
+{
+    return omega_;
+}
+
+
+inline const Foam::vector& Foam::molecule::alpha() const
+{
+    return alpha_;
+}
+
+
+inline Foam::vector& Foam::molecule::alpha()
+{
+    return alpha_;
+}
+
+
+inline const Foam::List<vector>& Foam::molecule::siteForces() const
+{
+    return siteForces_;
+}
+
+
+inline Foam::List<vector>& Foam::molecule::siteForces()
+{
+    return siteForces_;
+}
+
+
+inline const Foam::List<vector>& Foam::molecule::sitePositions() const
+{
+    return sitePositions_;
+}
+
+
+inline Foam::List<vector>& Foam::molecule::sitePositions()
+{
+    return sitePositions_;
+}
+
+
+inline const Foam::vector& Foam::molecule::specialPosition() const
+{
+    return specialPosition_;
+}
+
+
+inline Foam::vector& Foam::molecule::specialPosition()
+{
+    return specialPosition_;
 }
 
 
@@ -181,21 +257,15 @@ inline Foam::tensor& Foam::molecule::rf()
 }
 
 
-inline Foam::label Foam::molecule::tethered() const
+inline Foam::label Foam::molecule::special() const
 {
-    return tethered_;
+    return special_;
 }
 
 
-inline const Foam::vector& Foam::molecule::tetherPosition() const
+inline label Foam::molecule::id() const
 {
-    return tetherPosition_;
-}
-
-
-inline Foam::vector& Foam::molecule::tetherPosition()
-{
-    return tetherPosition_;
+    return id_;
 }
 
 

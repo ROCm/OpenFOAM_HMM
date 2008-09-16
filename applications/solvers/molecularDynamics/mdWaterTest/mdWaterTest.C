@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "md.H"
+//#include "md.H"
 #include "diagTensor.H"
 
 int main(int argc, char *argv[])
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     scalar rM = 0.15e-10;
     scalar thetaH = mathematicalConstant::pi*104.52/(2.0*180.0);
 
-    vectorList pSites(nSites);
+    List<vector> pSites(nSites);
 
     pSites[0] = vector
     (
@@ -93,9 +93,9 @@ int main(int argc, char *argv[])
 
     vector omega1(0, -2e12, 0);
 
-    vectorList pSites1 = R1 & pSites;
+    List<vector> pSites1 = R1 & pSites;
 
-    vectorList fSites1(nSites, vector::zero);
+    List<vector> fSites1(nSites, vector::zero);
 
     vector a1(vector::zero);
 
@@ -117,15 +117,22 @@ int main(int argc, char *argv[])
     Info<< "\nStarting time loop\n" << endl;
 
     Info<< pSites.size() << nl << "Water test"
-        << nl << "H1" << " " << pSites1[0].x() << " " << pSites1[0].y() << " " << pSites1[0].z()
-        << nl << "H2" << " " << pSites1[1].x() << " " << pSites1[1].y() << " " << pSites1[1].z()
-        << nl << "0"  << " " << pSites1[2].x() << " " << pSites1[2].y() << " " << pSites1[2].z()
-        << nl << "M"  << " " << pSites1[3].x() << " " << pSites1[3].y() << " " << pSites1[3].z()
+        << nl << "H1"
+        << " " << pSites1[0].x() << " " << pSites1[0].y() << " " << pSites1[0].z()
+        << nl << "H2"
+        << " " << pSites1[1].x() << " " << pSites1[1].y() << " " << pSites1[1].z()
+        << nl << "0"
+        << " " << pSites1[2].x() << " " << pSites1[2].y() << " " << pSites1[2].z()
+        << nl << "M"
+        << " " << pSites1[3].x() << " " << pSites1[3].y() << " " << pSites1[3].z()
         << endl;
 
     while (runTime.run())
     {
         runTime++;
+
+        a1 = vector(-5e13, 0, 0);
+        alpha1 = vector(0, 1e24, 0);
 
         // Leapfrog part 1
         v1 += 0.5*runTime.deltaT().value()*a1;
@@ -197,8 +204,8 @@ int main(int argc, char *argv[])
 
         alpha1 = R1 & inv(I) & R1.T() & tau1;
 
-        // a1 = vector(-5e13, 0, 0);
-        // alpha1 = vector(0, 1e24, 0);
+        a1 = vector(-5e13, 0, 0);
+        alpha1 = vector(0, 1e24, 0);
 
         // Leapfrog part 2
 
@@ -206,18 +213,21 @@ int main(int argc, char *argv[])
 
         omega1 += 0.5*runTime.deltaT().value()*alpha1;
 
-        Info << pSites.size() << nl << "Water test"
-            << nl << "H1" << " " << pSites1[0].x() << " " << pSites1[0].y() << " " << pSites1[0].z()
-            << nl << "H2" << " " << pSites1[1].x() << " " << pSites1[1].y() << " " << pSites1[1].z()
-            << nl << "0"  << " " << pSites1[2].x() << " " << pSites1[2].y() << " " << pSites1[2].z()
-            << nl << "M"  << " " << pSites1[3].x() << " " << pSites1[3].y() << " " << pSites1[3].z()
+        Info<< pSites.size() << nl << "Water test"
+            << nl << "H1"
+            << " " << pSites1[0].x() << " " << pSites1[0].y() << " " << pSites1[0].z()
+            << nl << "H2"
+            << " " << pSites1[1].x() << " " << pSites1[1].y() << " " << pSites1[1].z()
+            << nl << "0"
+            << " " << pSites1[2].x() << " " << pSites1[2].y() << " " << pSites1[2].z()
+            << nl << "M"
+            << " " << pSites1[3].x() << " " << pSites1[3].y() << " " << pSites1[3].z()
             << endl;
 
         // Info<< "Time = " << runTime.timeName() << endl;
     }
 
     Info<< v1 << nl << omega1 << endl;
-
 
     Info << "End\n" << endl;
 

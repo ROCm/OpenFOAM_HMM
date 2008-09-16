@@ -1330,116 +1330,119 @@ Foam::referredCellList::~referredCellList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// void Foam::referredCellList::referMolecules (List<DynamicList<molecule*> >& cellOccupancy)
-// {
-//     // Create referred molecules for sending using cell occupancy and
-//     // cellSendingReferralLists
+void Foam::referredCellList::referMolecules
+(
+    List<DynamicList<molecule*> >& cellOccupancy
+)
+{
+    // Create referred molecules for sending using cell occupancy and
+    // cellSendingReferralLists
 
-//     forAll(molCloud_.cellSendingReferralLists(), cSRL)
-//     {
-//         const sendingReferralList& sRL
-//         (
-//             molCloud_.cellSendingReferralLists()[cSRL]
-//         );
+    forAll(molCloud_.cellSendingReferralLists(), cSRL)
+    {
+        const sendingReferralList& sRL
+        (
+            molCloud_.cellSendingReferralLists()[cSRL]
+        );
 
-//         List<DynamicList<referredMolecule> > molsToReferOut(sRL.size());
+        List<DynamicList<referredMolecule> > molsToReferOut(sRL.size());
 
-//         forAll(sRL, sRLI)
-//         {
-//             List<molecule*> realMols = cellOccupancy[sRL[sRLI]];
+        forAll(sRL, sRLI)
+        {
+            List<molecule*> realMols = cellOccupancy[sRL[sRLI]];
 
-//             forAll (realMols, rM)
-//             {
-//                 molecule* mol = realMols[rM];
+            forAll (realMols, rM)
+            {
+                molecule* mol = realMols[rM];
 
-//                 molsToReferOut[sRLI].append
-//                 (
-//                     referredMolecule
-//                     (
-//                         mol->id(),
-//                         mol->position()
-//                     )
-//                 );
-//             }
+                molsToReferOut[sRLI].append
+                (
+                    referredMolecule
+                    (
+                        mol->id(),
+                        mol->position()
+                    )
+                );
+            }
 
-//             molsToReferOut[sRLI].shrink();
-//         }
+            molsToReferOut[sRLI].shrink();
+        }
 
-//         // Send lists of referred molecules to other processors
+        // Send lists of referred molecules to other processors
 
-//         if (sRL.destinationProc() != Pstream::myProcNo())
-//         {
-//             if (Pstream::parRun())
-//             {
-//                 OPstream toInteractingProc
-//                 (
-//                     Pstream::blocking,
-//                     sRL.destinationProc()
-//                 );
+        if (sRL.destinationProc() != Pstream::myProcNo())
+        {
+            if (Pstream::parRun())
+            {
+                OPstream toInteractingProc
+                (
+                    Pstream::blocking,
+                    sRL.destinationProc()
+                );
 
-//                 toInteractingProc << molsToReferOut;
-//             }
-//         }
-//         else
-//         {
-//             // Refer molecules directly for referred cells on the same
-//             // processor.
+                toInteractingProc << molsToReferOut;
+            }
+        }
+        else
+        {
+            // Refer molecules directly for referred cells on the same
+            // processor.
 
-//             const receivingReferralList& rRL
-//             (
-//                 molCloud_.cellReceivingReferralLists()[cSRL]
-//             );
+            const receivingReferralList& rRL
+            (
+                molCloud_.cellReceivingReferralLists()[cSRL]
+            );
 
-//             forAll(rRL, rRLI)
-//             {
-//                 forAll(rRL[rRLI], rC)
-//                 {
-//                     referredCell& refCellToRefMolsTo = (*this)[rRL[rRLI][rC]];
+            forAll(rRL, rRLI)
+            {
+                forAll(rRL[rRLI], rC)
+                {
+                    referredCell& refCellToRefMolsTo = (*this)[rRL[rRLI][rC]];
 
-//                     refCellToRefMolsTo.referInMols(molsToReferOut[rRLI]);
-//                 }
-//             }
-//         }
-//     }
+                    refCellToRefMolsTo.referInMols(molsToReferOut[rRLI]);
+                }
+            }
+        }
+    }
 
-//     // Receive referred molecule lists to and distribute to referredCells
-//     // according tocellReceivingReferralLists, referredCells deal with the
-//     // transformations themselves
+    // Receive referred molecule lists to and distribute to referredCells
+    // according tocellReceivingReferralLists, referredCells deal with the
+    // transformations themselves
 
-//     forAll(molCloud_.cellReceivingReferralLists(), cRRL)
-//     {
-//         const receivingReferralList& rRL
-//         (
-//             molCloud_.cellReceivingReferralLists()[cRRL]
-//         );
+    forAll(molCloud_.cellReceivingReferralLists(), cRRL)
+    {
+        const receivingReferralList& rRL
+        (
+            molCloud_.cellReceivingReferralLists()[cRRL]
+        );
 
-//         List<List<referredMolecule> > molsToReferIn(rRL.size());
+        List<List<referredMolecule> > molsToReferIn(rRL.size());
 
-//         if (rRL.sourceProc() != Pstream::myProcNo())
-//         {
-//             if (Pstream::parRun())
-//             {
-//                 IPstream fromInteractingProc
-//                 (
-//                     Pstream::blocking,
-//                     rRL.sourceProc()
-//                 );
+        if (rRL.sourceProc() != Pstream::myProcNo())
+        {
+            if (Pstream::parRun())
+            {
+                IPstream fromInteractingProc
+                (
+                    Pstream::blocking,
+                    rRL.sourceProc()
+                );
 
-//                 fromInteractingProc >> molsToReferIn;
-//             }
+                fromInteractingProc >> molsToReferIn;
+            }
 
-//             forAll(rRL, rRLI)
-//             {
-//                 forAll(rRL[rRLI], rC)
-//                 {
-//                     referredCell& refCellToRefMolsTo = (*this)[rRL[rRLI][rC]];
+            forAll(rRL, rRLI)
+            {
+                forAll(rRL[rRLI], rC)
+                {
+                    referredCell& refCellToRefMolsTo = (*this)[rRL[rRLI][rC]];
 
-//                     refCellToRefMolsTo.referInMols(molsToReferIn[rRLI]);
-//                 }
-//             }
-//         }
-//     }
-// }
+                    refCellToRefMolsTo.referInMols(molsToReferIn[rRLI]);
+                }
+            }
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

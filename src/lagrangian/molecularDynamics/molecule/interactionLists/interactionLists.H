@@ -38,6 +38,7 @@ SourceFiles
 #define interactionLists_H
 
 #include "polyMesh.H"
+#include "vector2D.H"
 #include "directInteractionList.H"
 #include "referredCell.H"
 #include "referredCellList.H"
@@ -72,12 +73,15 @@ class interactionLists
 
     // Private Member Functions
 
+        //- Build referralLists which define how to send information
+        // to referredCells to source cells
+        void buildCellReferralLists();
+
         //- Disallow default bitwise copy construct
         interactionLists(const interactionLists&);
 
         //- Disallow default bitwise assignment
         void operator=(const interactionLists&);
-
 
 public:
 
