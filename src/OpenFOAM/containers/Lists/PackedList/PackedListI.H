@@ -221,7 +221,7 @@ inline void PackedList<nBits>::operator=(const unsigned int val)
     checkValue(val);
 #   endif
 
-    for (label i = 0; i < size; i++)
+    for (label i = 0; i < size_; i++)
     {
         set(i, val);
     }
