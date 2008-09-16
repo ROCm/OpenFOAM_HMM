@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
 
         #include "continuityErrs.H"
 
+        p = pd + rho*gh;
+
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
