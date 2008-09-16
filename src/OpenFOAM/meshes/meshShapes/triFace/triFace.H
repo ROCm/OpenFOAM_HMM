@@ -166,6 +166,9 @@ inline label Hash<triFace>::operator()(const triFace& t) const
     return (t[0]*t[1]*t[2] + t[0]+t[1]+t[2]);
 }
 
+template<>
+inline bool contiguous<triFace>()  {return true;}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

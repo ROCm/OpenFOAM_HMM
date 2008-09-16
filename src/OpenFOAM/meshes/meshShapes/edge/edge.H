@@ -141,6 +141,9 @@ inline label Hash<edge>::operator()(const edge& e) const
     return e[0]*e[1] + e[0]+e[1];
 }
 
+template<>
+inline bool contiguous<edge>()  {return true;}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
