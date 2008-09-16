@@ -24,55 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "fvMesh.H"
+#include "limitWith.H"
 
-template<class T>
-inline Foam::List<T>::List()
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-template<class T>
-inline Foam::autoPtr<Foam::List<T> > Foam::List<T>::clone() const
+namespace Foam
 {
-    return autoPtr<List<T> >(new List<T>(*this));
+    makeSurfaceInterpolationScheme(limitWith)
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T>
-inline T& Foam::List<T>::newElmt(const label i)
-{
-    if (i >= this->size())
-    {
-        setSize(2*this->size());
-    }
-
-    return UList<T>::operator[](i);
-}
-
-
-template<class T>
-inline Foam::label Foam::List<T>::size() const
-{
-    return UList<T>::size_;
-}
-
-
-template<class T>
-inline Foam::label& Foam::List<T>::size()
-{
-    return UList<T>::size_;
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-inline void Foam::List<T>::operator=(const T& t)
-{
-    UList<T>::operator=(t);
-}
-
 
 // ************************************************************************* //

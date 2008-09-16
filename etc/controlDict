@@ -808,7 +808,7 @@ OptimisationSwitches
 {
     fileModificationSkew 10;
     commsType       nonBlocking; //scheduled; //blocking;
-    floatTransfer   1;
+    floatTransfer   0;
     nProcsSimpleSum 0;
 }
 

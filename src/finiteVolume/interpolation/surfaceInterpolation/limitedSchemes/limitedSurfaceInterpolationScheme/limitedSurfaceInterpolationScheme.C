@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Abstract base class for surface interpolation schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "limitedSurfaceInterpolationScheme.H"
@@ -39,7 +36,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-// Return weighting factors for scheme given by name in dictionary
 template<class Type>
 tmp<limitedSurfaceInterpolationScheme<Type> >
 limitedSurfaceInterpolationScheme<Type>::New
@@ -160,17 +156,14 @@ limitedSurfaceInterpolationScheme<Type>::~limitedSurfaceInterpolationScheme()
 template<class Type>
 tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi
+    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    const surfaceScalarField& CDweights,
+    tmp<surfaceScalarField> tLimiter
 ) const
 {
-    const fvMesh& mesh = this->mesh();
-
     // Note that here the weights field is initialised as the limiter
     // from which the weight is calculated using the limiter value
-    tmp<surfaceScalarField> tWeights(this->limiter(phi));
-    surfaceScalarField& Weights = tWeights();
-
-    const surfaceScalarField& CDweights = mesh.surfaceInterpolation::weights();
+    surfaceScalarField& Weights = tLimiter();
 
     scalarField& pWeights = Weights.internalField();
 
@@ -199,9 +192,22 @@ tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
         }
     }
 
-    return tWeights;
+    return tLimiter;
 }
 
+template<class Type>
+tmp<surfaceScalarField> limitedSurfaceInterpolationScheme<Type>::weights
+(
+    const GeometricField<Type, fvPatchField, volMesh>& phi
+) const
+{
+    return this->weights
+    (
+        phi,
+        this->mesh().surfaceInterpolation::weights(),
+        this->limiter(phi)
+    );
+}
 
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >

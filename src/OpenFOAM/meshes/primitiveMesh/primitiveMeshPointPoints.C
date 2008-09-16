@@ -97,6 +97,40 @@ const labelListList& primitiveMesh::pointPoints() const
 }
 
 
+const labelList& primitiveMesh::pointPoints(const label pointI) const
+{
+    if (hasPointPoints())
+    {
+        return pointPoints()[pointI];
+    }
+    else
+    {
+        const edgeList& edges = this->edges();
+        const labelList& pEdges = pointEdges()[pointI];
+
+        labels_.size() = allocSize_;
+
+        if (pEdges.size() > allocSize_)
+        {
+            // Set size() so memory allocation behaves as normal.
+            labels_.clear();
+            allocSize_ = pEdges.size();
+            labels_.setSize(allocSize_);
+        }
+
+        label n = 0;
+
+        forAll(pEdges, i)
+        {
+            labels_[n++] = edges[pEdges[i]].otherVertex(pointI);
+        }
+
+        labels_.size() = n;
+
+        return labels_;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
