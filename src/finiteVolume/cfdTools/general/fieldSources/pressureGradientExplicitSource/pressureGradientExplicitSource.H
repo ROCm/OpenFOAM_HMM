@@ -23,22 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::forceCoeffs
+    Foam::pressureGradientExplicitSource
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift and drag forces.
+    Creates a cell set pressure gradient source
+
+    Note: Currently only handles kinematic pressure
 
 SourceFiles
-    forceCoeffs.C
-    IOforceCoeffs.H
+    pressureGradientExplicitSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forceCoeffs_H
-#define forceCoeffs_H
+#ifndef pressureGradientExplicitSource_H
+#define pressureGradientExplicitSource_H
 
-#include "forces.H"
+#include "autoPtr.H"
+#include "topoSetSource.H"
+#include "cellSet.H"
+#include "fvMesh.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,91 +50,76 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+              Class pressureGradientExplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class forceCoeffs
-:
-    public forces
+class pressureGradientExplicitSource
 {
     // Private data
 
-        // Force coefficient geometry
+        //- Properties dictionary
+        IOdictionary dict_;
 
-            //- Lift
-            vector liftDir_;
+        //- Reference to the mesh
+        const fvMesh& mesh_;
 
-            //- Drag
-            vector  dragDir_;
+        //- Reference to the velocity field
+        volVectorField& U_;
 
-            //- Pitch
-            vector pitchAxis_;
+        //- Average velocity
+        vector Ubar_;
+
+        //- Initial pressure gradient
+        scalar gradPini_;
+
+        //- Pressure gradient
+        scalar gradP_;
+
+        //- Flow direction
+        vector flowDir_;
+
+        //- Name of cell source
+        word cellSource_;
+
+        //- The method by which the cells will be selecetd
+        autoPtr<topoSetSource> cellSelector_;
+
+        //- The set of selected cells
+        cellSet selectedCellSet_;
 
 
-        // Free-stream conditions
-
-            //- Velocity magnitude
-            scalar magUInf_;
-
-
-        // Reference scales
-
-            //- Length
-            scalar lRef_;
-
-            //- Area
-            scalar Aref_;
-
-
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
+        pressureGradientExplicitSource(const pressureGradientExplicitSource&);
 
         //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
-
-
-protected:
-
-    //- Output file header information
-    virtual void writeFileHeader();
+        void operator=(const pressureGradientExplicitSource&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("forceCoeffs");
-
-
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
-        forceCoeffs
+        //- Construct from explicit source name and mesh
+        pressureGradientExplicitSource
         (
-            const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false
+            const word& sourceName,
+            const fvMesh& mesh,
+            volVectorField& U
         );
-
-
-    // Destructor
-
-        virtual ~forceCoeffs();
 
 
     // Member Functions
 
-        //- Read the forces data
-        virtual void read(const dictionary&);
+        // Access
 
-        //- Execute
-        virtual void execute();
+            //- Return a tmp field of the source
+            tmp<DimensionedField<vector, volMesh> > Su() const;
 
-        //- Write the forces
-        virtual void write();
+
+        //- Correct driving force for a constant mass flow rate
+        void update();
 };
 
 

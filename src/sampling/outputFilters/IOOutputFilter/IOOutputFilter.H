@@ -49,7 +49,7 @@ namespace Foam
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class probes Declaration
+                       Class IOOutputFilter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class OutputFilter>

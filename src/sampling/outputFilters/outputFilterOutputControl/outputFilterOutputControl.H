@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,22 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::forceCoeffs
+    Foam::outputFilterOutputControl
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift and drag forces.
 
 SourceFiles
-    forceCoeffs.C
-    IOforceCoeffs.H
+    outputFilterOutputControl.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forceCoeffs_H
-#define forceCoeffs_H
+#ifndef outputFilterOutputControl_H
+#define outputFilterOutputControl_H
 
-#include "forces.H"
+#include "dictionary.H"
+#include "Time.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,91 +45,74 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                  Class outputFilterOutputControl Declaration
 \*---------------------------------------------------------------------------*/
 
-class forceCoeffs
-:
-    public forces
+class outputFilterOutputControl
 {
+public:
+
+    enum outputControls
+    {
+        ocTimeStep,
+        ocOutputTime
+    };
+
+
+private:
+
     // Private data
 
-        // Force coefficient geometry
+        //- Time object
+        const Time& time_;
 
-            //- Lift
-            vector liftDir_;
+        //- String representation of outputControls enums
+        static const NamedEnum<outputControls, 2> outputControlNames_;
 
-            //- Drag
-            vector  dragDir_;
+        //- Type of output
+        outputControls outputControl_;
 
-            //- Pitch
-            vector pitchAxis_;
-
-
-        // Free-stream conditions
-
-            //- Velocity magnitude
-            scalar magUInf_;
+        //- The execution interval (in time steps) when using TIMESTEP mode
+        //  a value <= 1 means execute at every time step
+        label outputInterval_;
 
 
-        // Reference scales
+    // Private Member Functions
 
-            //- Length
-            scalar lRef_;
-
-            //- Area
-            scalar Aref_;
-
-
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
-
-
-protected:
-
-    //- Output file header information
-    virtual void writeFileHeader();
+        //- Disallow default bitwise copy construct and assignment
+        outputFilterOutputControl(const outputFilterOutputControl&);
+        void operator=(const outputFilterOutputControl&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("forceCoeffs");
-
-
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
-        forceCoeffs
+        //- Construct from dictionary and Time object
+        outputFilterOutputControl
         (
-            const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false
+            const Time& time,
+            const dictionary& dict
         );
 
 
     // Destructor
-
-        virtual ~forceCoeffs();
+    ~outputFilterOutputControl();
 
 
     // Member Functions
 
-        //- Read the forces data
-        virtual void read(const dictionary&);
+        //- Read from dictionary
+        void read(const dictionary& dict);
 
-        //- Execute
-        virtual void execute();
+        //- Return const access to the Time object
+        const Time& time() const
+        {
+            return time_;
+        }
 
-        //- Write the forces
-        virtual void write();
+        //- Flag to indicate whether to output
+        bool output() const;
 };
 
 

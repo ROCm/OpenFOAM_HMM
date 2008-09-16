@@ -200,6 +200,9 @@ public:
         //- Read the probes
         virtual void read(const dictionary&);
 
+        //- Execute
+        virtual void execute();
+
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&)
         {}

@@ -23,120 +23,116 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::forceCoeffs
+    Foam::calcTypes::randomise
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift and drag forces.
+    Adds a random component to a field, with a given perturbation magnitude.
 
 SourceFiles
-    forceCoeffs.C
-    IOforceCoeffs.H
+    randomise.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forceCoeffs_H
-#define forceCoeffs_H
+#ifndef randomise_H
+#define randomise_H
 
-#include "forces.H"
+#include "calcType.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+namespace calcTypes
+{
+
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                         Class randomise Declaration
 \*---------------------------------------------------------------------------*/
 
-class forceCoeffs
+class randomise
 :
-    public forces
+    public calcType
 {
-    // Private data
-
-        // Force coefficient geometry
-
-            //- Lift
-            vector liftDir_;
-
-            //- Drag
-            vector  dragDir_;
-
-            //- Pitch
-            vector pitchAxis_;
-
-
-        // Free-stream conditions
-
-            //- Velocity magnitude
-            scalar magUInf_;
-
-
-        // Reference scales
-
-            //- Length
-            scalar lRef_;
-
-            //- Area
-            scalar Aref_;
-
-
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
+        randomise(const randomise&);
 
         //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
+        void operator=(const randomise&);
 
 
 protected:
 
-    //- Output file header information
-    virtual void writeFileHeader();
+    // Member Functions
+
+        // Calculation routines
+
+            //- Initialise - typically setting static variables,
+            //  e.g. command line arguments
+            virtual void init();
+
+            //- Pre-time loop calculations
+            virtual void preCalc
+            (
+                const argList& args,
+                const Time& runTime,
+                const fvMesh& mesh
+            );
+
+            //- Time loop calculations
+            virtual void calc
+            (
+                const argList& args,
+                const Time& runTime,
+                const fvMesh& mesh
+            );
+
+
+        // I-O
+
+            //- Write component fields
+            template<class Type>
+            void writeRandomField
+            (
+                const IOobject& header,
+                const scalar pertMag,
+                Random& rand,
+                const fvMesh& mesh,
+                bool& processed
+            );
 
 
 public:
 
     //- Runtime type information
-    TypeName("forceCoeffs");
+    TypeName("randomise");
 
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
-        forceCoeffs
-        (
-            const word& name,
-            const objectRegistry&,
-            const dictionary&,
-            const bool loadFromFiles = false
-        );
+        //- Construct null
+        randomise();
 
 
     // Destructor
 
-        virtual ~forceCoeffs();
-
-
-    // Member Functions
-
-        //- Read the forces data
-        virtual void read(const dictionary&);
-
-        //- Execute
-        virtual void execute();
-
-        //- Write the forces
-        virtual void write();
+        virtual ~randomise();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace calcTypes
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "writeRandomField.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
