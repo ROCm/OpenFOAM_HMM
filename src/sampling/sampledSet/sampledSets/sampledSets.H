@@ -278,6 +278,9 @@ public:
         //- set verbosity level
         void verbose(const bool verbosity = true);
 
+        //- Execute
+        virtual void execute();
+
         //- Sample and write
         virtual void write();
 
