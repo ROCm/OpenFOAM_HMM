@@ -69,6 +69,7 @@ $(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
 derivedFvPatchFields = $(fvPatchFields)/derived
 $(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
 $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C

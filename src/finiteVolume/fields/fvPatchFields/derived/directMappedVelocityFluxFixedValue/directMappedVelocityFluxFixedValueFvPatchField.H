@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::directMappedFixedValueFvPatchField
+    Foam::directMappedVelocityFluxFixedValueFvPatchField
 
 Description
-    Recycles the value at a set of internal faces back to *this.
+    Recycles the velocity and flux at a patch to this patch
 
 SourceFiles
-    directMappedFixedValueFvPatchField.C
+    directMappedVelocityFluxFixedValueFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedFixedValueFvPatchField_H
-#define directMappedFixedValueFvPatchField_H
+#ifndef directMappedVelocityFluxFixedValueFvPatchField_H
+#define directMappedVelocityFluxFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "directMappedFvPatch.H"
@@ -45,22 +45,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class directMappedFixedValueFvPatch Declaration
+          Class directMappedVelocityFluxFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class directMappedFixedValueFvPatchField
+class directMappedVelocityFluxFixedValueFvPatchField
 :
-    public fixedValueFvPatchField<Type>
+    public fixedValueFvPatchVectorField
 {
     // Private data
 
-        //- If true adjust the mapped field to maintain average value average_
-        bool setAverage_;
-
-        //- Average value the mapped field is adjusted to maintain if
-        //  setAverage_ is set true
-        Type average_;
+        //- Name of flux field
+        word phiName_;
 
 
    // Private member functions
@@ -69,75 +64,78 @@ class directMappedFixedValueFvPatchField
         void getNewValues
         (
             const directMappedPolyPatch& mpp,
-            const Field<Type>& sendValues,
-            Field<Type>& newValues
+            const vectorField& sendUValues,
+            const scalarField& sendPhiValues,
+            vectorField& newUValues,
+            scalarField& newPhiValues
         ) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("directMapped");
+    TypeName("directMappedVelocityFlux");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        directMappedFixedValueFvPatchField
+        directMappedVelocityFluxFixedValueFvPatchField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        directMappedFixedValueFvPatchField
+        directMappedVelocityFluxFixedValueFvPatchField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given directMappedFixedValueFvPatchField
+        //- Construct by mapping given
+        //  directMappedVelocityFluxFixedValueFvPatchField
         //  onto a new patch
-        directMappedFixedValueFvPatchField
+        directMappedVelocityFluxFixedValueFvPatchField
         (
-            const directMappedFixedValueFvPatchField<Type>&,
+            const directMappedVelocityFluxFixedValueFvPatchField&,
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        directMappedFixedValueFvPatchField
+        directMappedVelocityFluxFixedValueFvPatchField
         (
-            const directMappedFixedValueFvPatchField<Type>&
+            const directMappedVelocityFluxFixedValueFvPatchField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchVectorField> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchVectorField>
             (
-                new directMappedFixedValueFvPatchField<Type>(*this)
+                new directMappedVelocityFluxFixedValueFvPatchField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        directMappedFixedValueFvPatchField
+        directMappedVelocityFluxFixedValueFvPatchField
         (
-            const directMappedFixedValueFvPatchField<Type>&,
-            const DimensionedField<Type, volMesh>&
+            const directMappedVelocityFluxFixedValueFvPatchField&,
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchVectorField> clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<vector, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchVectorField>
             (
-                new directMappedFixedValueFvPatchField<Type>(*this, iF)
+                new directMappedVelocityFluxFixedValueFvPatchField(*this, iF)
             );
         }
 
@@ -157,12 +155,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "directMappedFixedValueFvPatchField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
