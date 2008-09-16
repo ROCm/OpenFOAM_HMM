@@ -221,9 +221,16 @@ inline void PackedList<nBits>::operator=(const unsigned int val)
     checkValue(val);
 #   endif
 
-    for (label i = 0; i < size_; i++)
+    if (val == 0)
     {
-        set(i, val);
+        List<unsigned int>::operator=(val);
+    }
+    else
+    {
+        for (label i = 0; i < size_; i++)
+        {
+            set(i, val);
+        }
     }
 }
 
