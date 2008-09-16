@@ -48,6 +48,12 @@ namespace Foam
 
 class mapDistribute;
 
+// Typedefs
+typedef Pair<point> segment;
+template<>
+inline bool contiguous<segment>() {return contiguous<point>();}
+
+
 /*---------------------------------------------------------------------------*\
                            Class distributedTriSurfaceMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -101,7 +107,7 @@ private:
                 const point& start,
                 const point& end,
 
-                DynamicList<Pair<point> >&,
+                DynamicList<segment>&,
                 DynamicList<label>&,
                 List<DynamicList<label> >&
             ) const;
@@ -113,7 +119,7 @@ private:
                 const pointField& start,
                 const pointField& end,
 
-                List<Pair<point> >& allSegments,
+                List<segment>& allSegments,
                 List<label>& allSegmentMap
             ) const;
 

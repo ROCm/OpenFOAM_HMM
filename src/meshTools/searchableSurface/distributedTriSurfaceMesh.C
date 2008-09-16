@@ -88,7 +88,7 @@ void Foam::distributedTriSurfaceMesh::splitSegment
     const point& start,
     const point& end,
 
-    DynamicList<Pair<point> >& allSegments,
+    DynamicList<segment>& allSegments,
     DynamicList<label>& allSegmentMap,
     List<DynamicList<label> >& sendMap
 ) const
@@ -117,7 +117,7 @@ void Foam::distributedTriSurfaceMesh::splitSegment
                     //    << start << end << " on proc:" << procI << endl;
                     sendMap[procI].append(allSegments.size());
                     allSegmentMap.append(segmentI);
-                    allSegments.append(Pair<point>(start, end));
+                    allSegments.append(segment(start, end));
                     return;
                 }
             }
@@ -148,7 +148,7 @@ void Foam::distributedTriSurfaceMesh::splitSegment
                     // through proc.
                     sendMap[procI].append(allSegments.size());
                     allSegmentMap.append(segmentI);
-                    allSegments.append(Pair<point>(start, clipPt0));
+                    allSegments.append(segment(start, clipPt0));
                 }
             }
             else if (bb.contains(end))
@@ -163,7 +163,7 @@ void Foam::distributedTriSurfaceMesh::splitSegment
                     //    << " at " << clipPt0 << endl;
                     sendMap[procI].append(allSegments.size());
                     allSegmentMap.append(segmentI);
-                    allSegments.append(Pair<point>(clipPt0, end));
+                    allSegments.append(segment(clipPt0, end));
                 }
             }
             else
@@ -184,7 +184,7 @@ void Foam::distributedTriSurfaceMesh::splitSegment
                         // proc.
                         sendMap[procI].append(allSegments.size());
                         allSegmentMap.append(segmentI);
-                        allSegments.append(Pair<point>(clipPt0, clipPt1));
+                        allSegments.append(segment(clipPt0, clipPt1));
                     }
                 }
             }
@@ -199,7 +199,7 @@ Foam::distributedTriSurfaceMesh::constructSegments
     const pointField& start,
     const pointField& end,
 
-    List<Pair<point> >& allSegments,
+    List<segment>& allSegments,
     labelList& allSegmentMap
 ) const
 {
@@ -214,7 +214,7 @@ Foam::distributedTriSurfaceMesh::constructSegments
         // in the correct bin.
 
         // Segments to test
-        DynamicList<Pair<point> > dynAllSegments(start.size());
+        DynamicList<segment> dynAllSegments(start.size());
         // Original index of segment
         DynamicList<label> dynAllSegmentMap(start.size());
         // Per processor indices into allSegments to send
@@ -364,7 +364,7 @@ void Foam::distributedTriSurfaceMesh::findLine
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         // Segments to test
-        List<Pair<point> > allSegments(start.size());
+        List<segment> allSegments(start.size());
         // Original index of segment
         labelList allSegmentMap(start.size());
 
