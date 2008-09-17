@@ -140,6 +140,14 @@ public:
         //- Square of ppDist
         scalar ppDist2;
 
+        //- Maximum distance between adjacent control points on a feature edge
+        //- before they are considered a group
+        scalar edgeGroupSpacing;
+
+        //- Guard distance from a feature point within which an edge control
+        //- point may not be placed
+        scalar featurePointGuard;
+
         tolerances
         (
             const dictionary& controlDict,

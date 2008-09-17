@@ -47,8 +47,17 @@ Foam::CV3D::tolerances::tolerances
     minEdgeLen2(Foam::sqr(minEdgeLen)),
 
     ppDist(readScalar(controlDict.lookup("ppDistCoeff"))*minCellSize),
-    ppDist2(Foam::sqr(ppDist))
-{}
+    ppDist2(Foam::sqr(ppDist)),
 
+    edgeGroupSpacing
+    (
+        readScalar(controlDict.lookup("edgeGroupSpacingCoeff"))*minCellSize
+    ),
+
+    featurePointGuard
+    (
+        readScalar(controlDict.lookup("featurePointGuardCoeff"))*minCellSize
+    )
+{}
 
 // ************************************************************************* //
