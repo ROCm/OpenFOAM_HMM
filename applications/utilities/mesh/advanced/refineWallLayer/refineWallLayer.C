@@ -184,10 +184,6 @@ int main(int argc, char *argv[])
         << endl;
 
     // Transfer DynamicLists to straight ones.
-    labelList cutEdges;
-    cutEdges.transfer(allCutEdges);
-    allCutEdges.clear();
-
     scalarField cutEdgeWeights;
     cutEdgeWeights.transfer(allCutEdgeWeights);
     allCutEdgeWeights.clear();
@@ -199,7 +195,7 @@ int main(int argc, char *argv[])
         mesh,
         cutCells.toc(),     // cells candidate for cutting
         labelList(0),       // cut vertices
-        cutEdges,           // cut edges
+        allCutEdges,        // cut edges
         cutEdgeWeights      // weight on cut edges
     );
 

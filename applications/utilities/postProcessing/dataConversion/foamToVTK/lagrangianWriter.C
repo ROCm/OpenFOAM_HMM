@@ -29,9 +29,6 @@ License
 #include "Cloud.H"
 #include "passiveParticle.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components

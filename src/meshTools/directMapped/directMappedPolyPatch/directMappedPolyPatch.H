@@ -271,7 +271,19 @@ public:
 
     // Member functions
 
-        //- Offset vector (from patch faces to internal cells)
+        //- What to sample
+        const sampleMode& mode() const
+        {
+            return mode_;
+        }
+
+        //- Patch (only if NEARESTBOUNDARY)
+        const word& samplePatch() const
+        {
+            return samplePatch_;
+        }
+
+        //- Offset vector (from patch faces to destination mesh objects)
         const vector& offset() const
         {
             return offset_;
@@ -290,11 +302,18 @@ public:
         //- Cells/faces to sample per processor
         const labelListList& sendLabels() const
         {
-            Pout<< "Asking for sendLabels." << endl;
+            if (debug)
+            {
+                Pout<< "Asking for sendLabels." << endl;
+            }
+
             if (!sendLabelsPtr_.valid())
             {
-                Pout<< "Calculating mapping." << endl;
-                calcMapping();
+                if (debug)
+                {
+                    Pout<< "Calculating mapping." << endl;
+                    calcMapping();
+                }
             }
             return sendLabelsPtr_();
         }
@@ -302,11 +321,18 @@ public:
         //- Patch faces to receive per processor
         const labelListList& receiveFaceLabels() const
         {
-            Pout<< "Asking for receiveFaceLabels." << endl;
+            if (debug)
+            {
+                Pout<< "Asking for receiveFaceLabels." << endl;
+            }
+
             if (!receiveFaceLabelsPtr_.valid())
             {
-                Pout<< "Calculating mapping." << endl;
-                calcMapping();
+                if (debug)
+                {
+                    Pout<< "Calculating mapping." << endl;
+                    calcMapping();
+                }
             }
             return receiveFaceLabelsPtr_();
         }

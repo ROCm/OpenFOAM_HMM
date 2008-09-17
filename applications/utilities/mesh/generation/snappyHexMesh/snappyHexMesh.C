@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
     Info<< "Finished meshing in = "
         << runTime.elapsedCpuTime() << " s." << endl;
 
-    Pout<< "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return(0);
 }

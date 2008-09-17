@@ -196,57 +196,70 @@ void Foam::directMappedPolyPatch::findSamples
 
             const polyPatch& pp = boundaryMesh()[patchI];
 
-            // patch faces
-            const labelList patchFaces(identity(pp.size()) + pp.start());
-
-            const treeBoundBox patchBb
-            (
-                treeBoundBox(pp.points(), pp.meshPoints()).extend
-                (
-                    rndGen,
-                    1E-4
-                )
-            );
-
-            autoPtr<indexedOctree<treeDataFace> > boundaryTree
-            (
-                new indexedOctree<treeDataFace>
-                (
-                    treeDataFace    // all information needed to search faces
-                    (
-                        false,                      // do not cache bb
-                        mesh,
-                        patchFaces                  // boundary faces only
-                    ),
-                    patchBb,   // overall search domain
-                    8,                              // maxLevel
-                    10,                             // leafsize
-                    3.0                             // duplicity
-                )
-            );
-
-            forAll(samples, sampleI)
+            if (pp.size() == 0)
             {
-                const point& sample = samples[sampleI];
-
-                pointIndexHit& nearInfo = nearest[sampleI].first();
-                nearInfo = boundaryTree().findNearest
-                (
-                    sample,
-                    magSqr(patchBb.max()-patchBb.min())
-                );
-
-                if (!nearInfo.hit())
+                forAll(samples, sampleI)
                 {
                     nearest[sampleI].second().first() = Foam::sqr(GREAT);
                     nearest[sampleI].second().second() = Pstream::myProcNo();
                 }
-                else
+            }
+            else
+            {
+                // patch faces
+                const labelList patchFaces(identity(pp.size()) + pp.start());
+
+                const treeBoundBox patchBb
+                (
+                    treeBoundBox(pp.points(), pp.meshPoints()).extend
+                    (
+                        rndGen,
+                        1E-4
+                    )
+                );
+
+                autoPtr<indexedOctree<treeDataFace> > boundaryTree
+                (
+                    new indexedOctree<treeDataFace>
+                    (
+                        treeDataFace  // all information needed to search faces
+                        (
+                            false,                      // do not cache bb
+                            mesh,
+                            patchFaces                  // boundary faces only
+                        ),
+                        patchBb,   // overall search domain
+                        8,                              // maxLevel
+                        10,                             // leafsize
+                        3.0                             // duplicity
+                    )
+                );
+
+                forAll(samples, sampleI)
                 {
-                    point fc(pp[nearInfo.index()].centre(pp.points()));
-                    nearInfo.setPoint(fc);
-                    nearest[sampleI].second().first() = magSqr(fc-sample);
-                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                    const point& sample = samples[sampleI];
+
+                    pointIndexHit& nearInfo = nearest[sampleI].first();
+                    nearInfo = boundaryTree().findNearest
+                    (
+                        sample,
+                        magSqr(patchBb.max()-patchBb.min())
+                    );
+
+                    if (!nearInfo.hit())
+                    {
+                        nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                        nearest[sampleI].second().second() =
+                            Pstream::myProcNo();
+                    }
+                    else
+                    {
+                        point fc(pp[nearInfo.index()].centre(pp.points()));
+                        nearInfo.setPoint(fc);
+                        nearest[sampleI].second().first() = magSqr(fc-sample);
+                        nearest[sampleI].second().second() =
+                            Pstream::myProcNo();
+                    }
                 }
             }
             break;

@@ -595,6 +595,7 @@ void Foam::edgeCollapser::updateMesh(const mapPolyMesh& map)
 {
     pointRegion_.setSize(mesh_.nPoints());
     pointRegion_ = -1;
+    // Reset count, do not remove underlying storage
     pointRegionMaster_.clear();
     freeRegions_.clear();
 }

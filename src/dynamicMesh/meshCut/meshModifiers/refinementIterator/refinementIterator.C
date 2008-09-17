@@ -26,12 +26,10 @@ License
 
 #include "refinementIterator.H"
 #include "polyMesh.H"
-#include "polyTopoChanger.H"
 #include "Time.H"
 #include "refineCell.H"
 #include "undoableMeshCutter.H"
 #include "polyTopoChange.H"
-#include "DynamicList.H"
 #include "mapPolyMesh.H"
 #include "cellCuts.H"
 #include "OFstream.H"

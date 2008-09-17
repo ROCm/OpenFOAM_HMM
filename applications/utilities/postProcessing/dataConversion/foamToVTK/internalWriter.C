@@ -27,9 +27,6 @@ License
 #include "internalWriter.H"
 #include "writeFuns.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components

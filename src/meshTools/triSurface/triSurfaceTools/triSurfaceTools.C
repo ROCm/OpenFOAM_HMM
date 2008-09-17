@@ -300,11 +300,7 @@ Foam::triSurface Foam::triSurfaceTools::doRefine
     allPoints.transfer(newPoints);
     newPoints.clear();
 
-    List<labelledTri> allFaces;
-    allFaces.transfer(newFaces);
-    newFaces.clear();
-
-    return triSurface(allFaces, surf.patches(), allPoints);
+    return triSurface(newFaces, surf.patches(), allPoints, true);
 }
 
 
@@ -1988,7 +1984,7 @@ Foam::triSurface Foam::triSurfaceTools::greenRefine
     newFaces.shrink();
     newPoints.setSize(newPointI);
 
-    return triSurface(newFaces, surf.patches(), newPoints);
+    return triSurface(newFaces, surf.patches(), newPoints, true);
 }
 
 

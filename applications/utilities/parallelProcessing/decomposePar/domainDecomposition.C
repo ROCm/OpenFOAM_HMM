@@ -33,7 +33,7 @@ License
 #include "OSspecific.H"
 #include "Map.H"
 #include "globalMeshData.H"
-
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

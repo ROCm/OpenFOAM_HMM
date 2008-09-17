@@ -195,14 +195,9 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
     // Transfer DynamicLists to straight ones.
     pointField allPoints;
     allPoints.transfer(points);
-    points.clear();
-
-    List<labelledTri> allFaces;
-    allFaces.transfer(faces);
-    faces.clear();
 
     // Create triSurface
-    *this = triSurface(allFaces, patches, allPoints);
+    *this = triSurface(faces, patches, allPoints, true);
 
     return true;
 }

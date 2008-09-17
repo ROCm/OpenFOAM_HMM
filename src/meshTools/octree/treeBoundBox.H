@@ -322,11 +322,17 @@ public:
         friend bool operator==(const treeBoundBox&, const treeBoundBox&);
         friend bool operator!=(const treeBoundBox&, const treeBoundBox&);
 
-
     // IOstream operator
 
-        friend Istream& operator>>(Istream&, treeBoundBox&);
+        friend Istream& operator>>(Istream& is, treeBoundBox&);
+        friend Ostream& operator<<(Ostream& os, const treeBoundBox&);
+
 };
+
+
+//- Specify data associated with boundBox type is contiguous
+template<>
+inline bool contiguous<treeBoundBox>() {return contiguous<boundBox>();}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

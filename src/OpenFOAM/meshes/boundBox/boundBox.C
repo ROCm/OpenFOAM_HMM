@@ -79,10 +79,9 @@ boundBox::boundBox(const pointField& points, const bool doReduce)
 
 
 boundBox::boundBox(Istream& is)
-:
-    min_(is),
-    max_(is)
-{}
+{
+    operator>>(is, *this);
+}
 
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
@@ -113,7 +112,7 @@ Istream& operator>>(Istream& is, boundBox& bb)
 {
     if (is.format() == IOstream::ASCII)
     {
-        return is >> bb.min_ >>  bb.max_;
+        return is >> bb.min_ >> bb.max_;
     }
     else
     {

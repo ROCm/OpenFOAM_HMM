@@ -98,6 +98,12 @@ void Foam::forceCoeffs::writeFileHeader()
 }
 
 
+void Foam::forceCoeffs::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::forceCoeffs::write()
 {
     if (active_)

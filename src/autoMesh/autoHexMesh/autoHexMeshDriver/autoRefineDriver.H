@@ -35,7 +35,7 @@ SourceFiles
 #ifndef autoRefineDriver_H
 #define autoRefineDriver_H
 
-#include "meshRefinement.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,6 +45,9 @@ namespace Foam
 // Forward declaration of classes
 class featureEdgeMesh;
 class refinementParameters;
+class meshRefinement;
+class decompositionMethod;
+class fvMeshDistribute;
 
 /*---------------------------------------------------------------------------*\
                            Class autoRefineDriver Declaration
