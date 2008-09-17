@@ -199,7 +199,6 @@ void Foam::surfaceFeatures::calcFeatPoints(const List<edgeStatus>& edgeStat)
     }
     featurePoints.shrink();
     featurePoints_.transfer(featurePoints);
-    featurePoints.clear();
 }
 
 

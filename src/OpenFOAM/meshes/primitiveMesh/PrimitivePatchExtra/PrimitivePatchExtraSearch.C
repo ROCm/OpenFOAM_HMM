@@ -102,8 +102,9 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
             break;
         }
 
-        changedFaces.transfer(newChangedFaces.shrink());
-        newChangedFaces.clear();
+        // New dynamiclist: can leave dynamicList unshrunk
+        //changedFaces.transfer(newChangedFaces.shrink());
+        changedFaces.transfer(newChangedFaces);
     }
 }
 
