@@ -91,6 +91,16 @@ inline void Foam::CV3D::insertPointPair
     insertPoint(surfPt + ppDistn, master);
 }
 
+
+void Foam::CV3D::movePoint(const Vertex_handle& vh, const point& p)
+{
+    label nv = vh->index();
+
+    remove(vh);
+    insert(toPoint(p))->index() = nv;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

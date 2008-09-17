@@ -211,6 +211,8 @@ private:
             const vector& n
         );
 
+        inline void movePoint(const Vertex_handle& vh, const point& p);
+
         //- Create the initial mesh from the bounding-box
         void insertBoundingBox();
 
@@ -329,6 +331,12 @@ public:
             //- Create the initial mesh as a BCC lattice of points.
             //  Points outside the geometry are ignored.
             void insertGrid();
+
+
+        // Point motion
+
+            //- Calculate the displacements to relax the points
+            void relaxPoints(const scalar relaxation);
 
             //- Insert all surface point-pairs from
             //  insertSurfaceNearestPointPairs and

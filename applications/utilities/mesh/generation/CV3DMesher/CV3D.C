@@ -208,6 +208,27 @@ void Foam::CV3D::insertGrid()
     }
 }
 
+
+void Foam::CV3D::relaxPoints(const scalar relaxation)
+{
+    Info<< "Calculating new points: " << endl;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalPoint())
+        {
+            // movePoint(vit, newPoint);
+        }
+    }
+
+}
+
+
 void Foam::CV3D::insertSurfacePointPairs()
 {
     startOfSurfacePointPairs_ = number_of_vertices();
@@ -236,6 +257,7 @@ void Foam::CV3D::boundaryConform()
 {
 }
 
+
 void Foam::CV3D::removeSurfacePointPairs()
 {
     for
@@ -251,6 +273,7 @@ void Foam::CV3D::removeSurfacePointPairs()
         }
     }
 }
+
 
 void Foam::CV3D::write() const
 {
