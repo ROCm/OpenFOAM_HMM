@@ -35,11 +35,8 @@ Description
 #include "IOstreams.H"
 #include "SLPtrList.H"
 #include "boolList.H"
-#include "cellList.H"
 #include "primitiveMesh.H"
-#include "cyclicFvPatch.H"
-#include "fvPatchList.H"
-#include "DynamicList.H"
+#include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

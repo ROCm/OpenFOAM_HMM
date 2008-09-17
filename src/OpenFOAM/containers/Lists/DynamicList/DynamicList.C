@@ -33,7 +33,7 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList(Istream& is)
 :
     List<T>(is),
-    nextFree_(List<T>::size())
+    allocSize_(List<T>::size())
 {}
 
 
@@ -44,9 +44,6 @@ Foam::Ostream& Foam::operator<<
     const Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>& DL
 )
 {
-    const_cast<DynamicList<T, SizeInc, SizeMult, SizeDiv>&>(DL)
-        .setSize(DL.nextFree_);
-
     os << static_cast<const List<T>&>(DL);
     return os;
 }
@@ -60,7 +57,7 @@ Foam::Istream& Foam::operator>>
 )
 {
     is >> static_cast<List<T>&>(DL);
-    DL.nextFree_ = DL.List<T>::size();
+    DL.allocSize_ = DL.List<T>::size();
 
     return is;
 }
