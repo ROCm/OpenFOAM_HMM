@@ -224,7 +224,7 @@ inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 
     if (nextFree > allocSize_)
     {
-       allocSize_ = max
+        allocSize_ = max
         (
             nextFree,
             label(SizeMult*allocSize_/SizeDiv + SizeInc)

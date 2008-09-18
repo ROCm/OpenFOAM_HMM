@@ -136,7 +136,7 @@ public:
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list. Is same as List::transfer except
             //  checks that you're not changing the underlying list to something
-            //  smaller than nextFree_.
+            //  smaller than allocSize_.
             inline void transfer(List<T>&);
 
             //- Transfer the contents of the argument DynamicList into this
