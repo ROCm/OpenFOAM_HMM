@@ -269,7 +269,7 @@ void Foam::sampledSets::verbose(const bool verbosity)
 }
 
 
-void::Foam::sampledSets::execute()
+void Foam::sampledSets::execute()
 {
     // Do nothing - only valid on write
 }
