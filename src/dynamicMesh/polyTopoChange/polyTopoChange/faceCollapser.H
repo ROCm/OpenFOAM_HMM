@@ -54,7 +54,6 @@ SourceFiles
 #define faceCollapser_H
 
 #include "labelList.H"
-#include "DynamicList.H"
 #include "point.H"
 #include "Map.H"
 #include "labelHashSet.H"

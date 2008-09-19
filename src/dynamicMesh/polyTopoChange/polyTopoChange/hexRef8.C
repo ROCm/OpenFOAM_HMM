@@ -3021,7 +3021,9 @@ Foam::labelListList Foam::hexRef8::setRefinement
             << " Checking initial mesh just to make sure" << endl;
 
         checkMesh();
-        checkRefinementLevels(-1, labelList(0));
+        // Cannot call checkRefinementlevels since hanging points might
+        // get triggered by the mesher after subsetting.
+        //checkRefinementLevels(-1, labelList(0));
     }
 
     // Clear any saved point/cell data.
@@ -4813,7 +4815,7 @@ void Foam::hexRef8::checkRefinementLevels
             false                   // no separation
         );
 
-        OFstream str(mesh_.time().path()/"hangingPoints.obj");
+        //OFstream str(mesh_.time().path()/"hangingPoints.obj");
 
         label nHanging = 0;
 
@@ -4826,8 +4828,7 @@ void Foam::hexRef8::checkRefinementLevels
                 Pout<< "Hanging boundary point " << pointI
                     << " at " << mesh_.points()[pointI]
                     << endl;
-
-                meshTools::writeOBJ(str, mesh_.points()[pointI]);
+                //meshTools::writeOBJ(str, mesh_.points()[pointI]);
             }
         }
 

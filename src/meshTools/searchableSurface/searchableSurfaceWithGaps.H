@@ -23,21 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::searchableBox
+    Foam::searchableSurfaceWithGaps
 
 Description
-    Searching on bounding box
+    searchableSurface using multiple slightly shifted underlying surfaces
+    to make sure pierces don't go through gaps. 
 
 SourceFiles
-    searchableBox.C
+    searchableSurfaceWithGaps.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableBox_H
-#define searchableBox_H
+#ifndef searchableSurfaceWithGaps_H
+#define searchableSurfaceWithGaps_H
 
 #include "searchableSurface.H"
-#include "treeBoundBox.H"
+#include "UPtrList.H"
+#include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,60 +49,67 @@ namespace Foam
 // Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
-                           Class searchableBox Declaration
+                           Class searchableSurfaceWithGaps Declaration
 \*---------------------------------------------------------------------------*/
 
-class searchableBox
+class searchableSurfaceWithGaps
 :
-    public searchableSurface,
-    public treeBoundBox
+    public searchableSurface
 {
 private:
 
     // Private Member Data
 
-        mutable wordList regions_;
+        //- gap size in meter
+        const scalar gap_;
+
+        //- Underlying geometry (size 1)
+        UPtrList<searchableSurface> subGeom_;
 
 
     // Private Member Functions
 
-        //- Project onto component dir of planePt and update index() (=face)
-        void projectOntoCoordPlane
+        Pair<vector> offsetVecs(const point&, const point&) const;
+
+        void offsetVecs
         (
-            const direction dir,
-            const point& planePt,
-            pointIndexHit& info
+            const pointField& start,
+            const pointField& end,
+            pointField& offset0,
+            pointField& offset1
         ) const;
 
-        //- Returns miss or hit with face (0..5)
-        pointIndexHit findNearest
+        static label countMisses
         (
-            const point& bbMid,
-            const point& sample,
-            const scalar nearestDistSqr
-        ) const;
+            const List<pointIndexHit>& info,
+            labelList& missMap
+        );
+
+        static label countMisses
+        (
+            const List<pointIndexHit>& plusInfo,
+            const List<pointIndexHit>& minInfo,
+            labelList& missMap
+        );
 
 
         //- Disallow default bitwise copy construct
-        searchableBox(const searchableBox&);
+        searchableSurfaceWithGaps(const searchableSurfaceWithGaps&);
 
         //- Disallow default bitwise assignment
-        void operator=(const searchableBox&);
+        void operator=(const searchableSurfaceWithGaps&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("searchableBox");
+    TypeName("searchableSurfaceWithGaps");
 
 
     // Constructors
 
-        //- Construct from components
-        searchableBox(const IOobject& io, const treeBoundBox& bb);
-
         //- Construct from dictionary (used by searchableSurface)
-        searchableBox
+        searchableSurfaceWithGaps
         (
             const IOobject& io,
             const dictionary& dict
@@ -108,75 +117,33 @@ public:
 
     // Destructor
 
-        virtual ~searchableBox();
+        virtual ~searchableSurfaceWithGaps();
 
 
     // Member Functions
 
-        virtual const wordList& regions() const;
+        const searchableSurface& surface() const
+        {
+            return subGeom_[0];
+        }
+
+
+        virtual const wordList& regions() const
+        {
+            return surface().regions();
+        }
 
         //- Whether supports volume type below
         virtual bool hasVolumeType() const
         {
-            return true;
+            return surface().hasVolumeType();
         }
 
         //- Range of local indices that can be returned.
         virtual label size() const
         {
-            return 6;
+            return surface().size();
         }
-
-
-        // Single point queries.
-
-            //- Calculate nearest point on surface. Returns
-            //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface (=face 0..5)
-            //  - point: actual nearest point found
-            pointIndexHit findNearest
-            (
-                const point& sample,
-                const scalar nearestDistSqr
-            ) const;
-
-            //- Calculate nearest point on edge. Returns
-            //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface(=?)
-            //  - point: actual nearest point found
-            pointIndexHit findNearestOnEdge
-            (
-                const point& sample,
-                const scalar nearestDistSqr
-            ) const;
-
-            //- Find nearest to segment. Returns
-            //  - bool : any point found?
-            //  - label: relevant index in shapes (=face 0..5)
-            //  - point: actual nearest point found
-            //  sets:
-            //  - tightest  : bounding box
-            //  - linePoint : corresponding nearest point on line
-            pointIndexHit findNearest
-            (
-                const linePointRef& ln,
-                treeBoundBox& tightest,
-                point& linePoint
-            ) const;
-
-            //- Find nearest intersection of line between start and end.
-            pointIndexHit findLine
-            (
-                const point& start,
-                const point& end
-            ) const;
-
-            //- Find any intersection of line between start and end.
-            pointIndexHit findLineAny
-            (
-                const point& start,
-                const point& end
-            ) const;
 
 
         // Multiple point queries.
@@ -185,8 +152,16 @@ public:
             (
                 const pointField& sample,
                 const scalarField& nearestDistSqr,
-                List<pointIndexHit>&
-            ) const;
+                List<pointIndexHit>& info
+            ) const
+            {
+                surface().findNearest
+                (
+                    sample,
+                    nearestDistSqr,
+                    info
+                );
+            }
 
             virtual void findLine
             (
@@ -213,32 +188,40 @@ public:
             //- From a set of points and indices get the region
             virtual void getRegion
             (
-                const List<pointIndexHit>&,
+                const List<pointIndexHit>& info,
                 labelList& region
-            ) const;
+            ) const
+            {
+                surface().getRegion(info, region);
+            }
 
             //- From a set of points and indices get the normal
             virtual void getNormal
             (
-                const List<pointIndexHit>&,
+                const List<pointIndexHit>& info,
                 vectorField& normal
-            ) const;
+            ) const
+            {
+                surface().getNormal(info, normal);
+            }
 
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
-            ) const;
+                const pointField& samples,
+                List<volumeType>& info
+            ) const
+            {
+                surface().getVolumeType(samples, info);
+            }
 
 
         // regIOobject implementation
 
-            bool writeData(Ostream&) const
+            bool writeData(Ostream& os) const
             {
-                notImplemented("searchableBox::writeData(Ostream&) const");
-                return false;
+                return surface().writeData(os);
             }
 
 };

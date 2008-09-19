@@ -26,7 +26,7 @@ Typedef
     Foam::primitivePatch
 
 Description
-    Foam::primitivePatch
+    Addressing for a faceList slice.
 
 \*---------------------------------------------------------------------------*/
 

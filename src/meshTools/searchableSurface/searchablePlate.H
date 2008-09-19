@@ -23,131 +23,123 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::triSurfaceMesh
+    Foam::searchablePlate
 
 Description
-    IOoject and searching on triSurface
+    Searching on finite plate. Plate has to be aligned with coordinate
+    axes!
 
 SourceFiles
-    triSurfaceMesh.C
+    searchablePlate.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurfaceMesh_H
-#define triSurfaceMesh_H
+#ifndef searchablePlate_H
+#define searchablePlate_H
 
-#include "treeBoundBox.H"
 #include "searchableSurface.H"
-#include "objectRegistry.H"
-#include "indexedOctree.H"
-#include "treeDataTriSurface.H"
-#include "treeDataEdge.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+
 /*---------------------------------------------------------------------------*\
-                           Class triSurfaceMesh Declaration
+                           Class searchablePlate Declaration
 \*---------------------------------------------------------------------------*/
 
-class triSurfaceMesh
+class searchablePlate
 :
-    public searchableSurface,
-    public objectRegistry,      // so we can store fields
-    public triSurface
+    public searchableSurface
 {
 private:
 
-    // Private member data
+    // Private Member Data
 
-        //- Search tree (triangles)
-        mutable autoPtr<indexedOctree<treeDataTriSurface> > tree_;
+        const point origin_;
 
-        //- Search tree for boundary edges.
-        mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
+        const vector span_;
 
-        //- Names of regions
+        //- Coordinate direction which is normal
+        const direction normalDir_;
+
         mutable wordList regions_;
 
-        //- Is surface closed
-        mutable label surfaceClosed_;
 
     // Private Member Functions
 
-        //- Check file existence
-        static const fileName& checkFile
-        (
-            const fileName& fName,
-            const fileName& objectName
-        );
+        //- Calculate normal direction from span
+        static direction calcNormal(const point&);
 
-        //- Check whether surface is closed without calculating any permanent
-        //  addressing.
-        bool isSurfaceClosed() const;
+        pointIndexHit findNearest
+        (
+            const point& sample,
+            const scalar nearestDistSqr
+        ) const;
+
+        pointIndexHit findLine
+        (
+            const point& start,
+            const point& end
+        ) const;
+
 
         //- Disallow default bitwise copy construct
-        triSurfaceMesh(const triSurfaceMesh&);
+        searchablePlate(const searchablePlate&);
 
         //- Disallow default bitwise assignment
-        void operator=(const triSurfaceMesh&);
+        void operator=(const searchablePlate&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("triSurfaceMesh");
+    TypeName("searchablePlate");
 
 
     // Constructors
 
-        //- Construct from triSurface
-        triSurfaceMesh(const IOobject&, const triSurface&);
-
-        //- Construct read
-        triSurfaceMesh(const IOobject& io);
+        //- Construct from components
+        searchablePlate
+        (
+            const IOobject& io,
+            const point& origin,
+            const point& span
+        );
 
         //- Construct from dictionary (used by searchableSurface)
-        triSurfaceMesh
+        searchablePlate
         (
             const IOobject& io,
             const dictionary& dict
         );
 
-
     // Destructor
 
-        virtual ~triSurfaceMesh();
-
-        //- Clear storage
-        void clearOut();
+        virtual ~searchablePlate();
 
 
     // Member Functions
 
-        //- Move points
-        virtual void movePoints(const pointField&);
+        virtual const wordList& regions() const;
 
-        //- Demand driven contruction of octree
-        const indexedOctree<treeDataTriSurface>& tree() const;
+        //- Whether supports volume type below
+        virtual bool hasVolumeType() const
+        {
+            return false;
+        }
 
-        //- Demand driven contruction of octree for boundary edges
-        const indexedOctree<treeDataEdge>& edgeTree() const;
+        //- Range of local indices that can be returned.
+        virtual label size() const
+        {
+            return 1;
+        }
 
 
-        // searchableSurface implementation
-
-            virtual const wordList& regions() const;
-
-            //- Whether supports volume type below. I.e. whether is closed.
-            virtual bool hasVolumeType() const;
-
-            //- Range of local indices that can be returned.
-            virtual label size() const
-            {
-                return triSurface::size();
-            }
+        // Multiple point queries.
 
             virtual void findNearest
             (
@@ -200,46 +192,14 @@ public:
                 List<volumeType>&
             ) const;
 
-            //- Set bounds of surface. Bounds currently set as list of
-            //  bounding boxes. The bounds are hints to the surface as for
-            //  the range of queries it can expect. faceMap/pointMap can be
-            //  set if the surface has done any redistribution.
-            virtual void distribute
-            (
-                const List<treeBoundBox>&,
-                const bool keepNonLocal,
-                autoPtr<mapDistribute>& faceMap,
-                autoPtr<mapDistribute>& pointMap
-            )
-            {}
-
-        // Other
-
-            //- Specific to triSurfaceMesh: from a set of hits (points and
-            //  indices) get the specified field. Misses do not get set.
-            virtual void getField
-            (
-                const word& fieldName,
-                const List<pointIndexHit>&,
-                labelList& values
-            ) const;
-
 
         // regIOobject implementation
 
             bool writeData(Ostream&) const
             {
-                notImplemented("triSurfaceMesh::writeData(Ostream&) const");
+                notImplemented("searchablePlate::writeData(Ostream&) const");
                 return false;
             }
-
-            //- Write using given format, version and compression
-            virtual bool writeObject
-            (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp
-            ) const;
 
 };
 

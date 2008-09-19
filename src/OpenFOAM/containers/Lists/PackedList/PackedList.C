@@ -40,10 +40,7 @@ PackedList<nBits>::PackedList(const label size, const unsigned int val)
     List<unsigned int>(intSize(size)),
     size_(size)
 {
-    for (label i = 0; i < size; i++)
-    {
-        set(i, val);
-    }
+    operator=(val);
 }
 
 

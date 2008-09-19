@@ -921,14 +921,7 @@ Foam::List<Foam::pointIndexHit> Foam::meshSearch::intersections
 
     hits.shrink();
 
-    // Copy into straight list
-    List<pointIndexHit> allHits(hits.size());
-
-    forAll(hits, hitI)
-    {
-        allHits[hitI] = hits[hitI];
-    }
-    return allHits;
+    return hits;
 }
 
 

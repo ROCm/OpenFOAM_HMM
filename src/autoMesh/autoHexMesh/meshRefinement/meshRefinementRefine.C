@@ -1091,8 +1091,8 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         //    << "    local allowable refinement:" << nAllowRefine << nl
         //    << endl;
 
-        //- Disable refinement shortcut
-        label nAllowRefine = labelMax;
+        //- Disable refinement shortcut. nAllowRefine is per processor limit.
+        label nAllowRefine = labelMax / Pstream::nProcs();
 
         // Marked for refinement (>= 0) or not (-1). Actual value is the
         // index of the surface it intersects.
