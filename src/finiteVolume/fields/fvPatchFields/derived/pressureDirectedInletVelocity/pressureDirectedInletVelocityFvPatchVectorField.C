@@ -184,8 +184,14 @@ void pressureDirectedInletVelocityFvPatchVectorField::updateCoeffs()
 void pressureDirectedInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
+    if (rhoName_ != "rho")
+    {
+        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    }
     inletDir_.writeEntry("inletDirection", os);
     writeEntry("value", os);
 }
