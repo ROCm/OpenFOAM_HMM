@@ -47,8 +47,8 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 )
 :
     mixedFvPatchField<Type>(p, iF),
-    phiName_("Undefined"),
-    rhoName_("Undefined"),
+    phiName_("phi"),
+    rhoName_("rho"),
     fieldInf_(pTraits<Type>::zero),
     lInf_(0.0)
 {
@@ -84,8 +84,8 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 )
 :
     mixedFvPatchField<Type>(p, iF),
-    phiName_(dict.lookup("phi")),
-    rhoName_("Undefined"),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     fieldInf_(pTraits<Type>::zero),
     lInf_(0.0)
 {
@@ -105,15 +105,9 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
     this->refGrad() = pTraits<Type>::zero;
     this->valueFraction() = 0.0;
 
-    if (dict.found("rho"))
-    {
-        dict.lookup("rho") >> rhoName_;
-    }
-
-    if (dict.found("lInf"))
+    if (dict.readIfPresent("lInf", lInf_))
     {
         dict.lookup("fieldInf") >> fieldInf_;
-        dict.lookup("lInf") >> lInf_;
 
         if (lInf_ < 0.0)
         {
@@ -123,8 +117,8 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
                 "advectiveFvPatchField"
                 "(const fvPatch&, const Field<Type>&, const dictionary&)",
                 dict
-            )   << "unphysical lInf_ specified (lInf_ < 0)"
-                << "\n    on patch " << this->patch().name()
+            )   << "unphysical lInf specified (lInf < 0)\n"
+                << "    on patch " << this->patch().name()
                 << " of field " << this->dimensionedInternalField().name()
                 << " in file " << this->dimensionedInternalField().objectPath()
                 << exit(FatalIOError);
@@ -167,7 +161,7 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 template<class Type>
 tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
 {
-    const surfaceScalarField& phi = 
+    const surfaceScalarField& phi =
         this->db().objectRegistry::lookupObject<surfaceScalarField>(phiName_);
 
     fvsPatchField<scalar> phip = this->patch().lookupPatchField
@@ -210,7 +204,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
     );
     scalar deltaT = this->db().time().deltaT().value();
 
-    const GeometricField<Type, fvPatchField, volMesh>& field = 
+    const GeometricField<Type, fvPatchField, volMesh>& field =
         this->db().objectRegistry::
         lookupObject<GeometricField<Type, fvPatchField, volMesh> >
         (
@@ -239,7 +233,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
          || ddtScheme == fv::CrankNicholsonDdtScheme<scalar>::typeName
         )
         {
-            this->refValue() = 
+            this->refValue() =
             (
                 field.oldTime().boundaryField()[patchi] + k*fieldInf_
             )/(1.0 + k);
@@ -314,9 +308,12 @@ template<class Type>
 void advectiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
 
-    if (rhoName_ != "Undefined")
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
+    if (rhoName_ != "rho")
     {
         os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     }
@@ -324,9 +321,9 @@ void advectiveFvPatchField<Type>::write(Ostream& os) const
     if (lInf_ > SMALL)
     {
         os.writeKeyword("fieldInf") << fieldInf_
-            << token::END_STATEMENT << endl;
+            << token::END_STATEMENT << nl;
         os.writeKeyword("lInf") << lInf_
-            << token::END_STATEMENT << endl;
+            << token::END_STATEMENT << nl;
     }
 
     this->writeEntry("value", os);

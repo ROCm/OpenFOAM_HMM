@@ -77,8 +77,8 @@ class timeVaryingUniformTotalPressureFvPatchScalarField
         //- Total pressure
         scalar p0_;
 
-        //- Table of time vs total pressure
-        interpolationTable<scalar> totalPressureTimeSeries_;
+        //- Table of time vs total pressure, including the bounding treatment
+        interpolationTable<scalar> timeSeries_;
 
 
 public:

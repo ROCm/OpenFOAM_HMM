@@ -128,10 +128,8 @@ void Foam::massFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 
     vectorField n = patch().nf();
 
-    const surfaceScalarField& phi = db().lookupObject<surfaceScalarField>
-    (
-        phiName_
-    );
+    const surfaceScalarField& phi =
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     if (phi.dimensions() == dimVelocity*dimArea)
     {
