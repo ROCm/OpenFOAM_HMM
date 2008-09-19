@@ -29,7 +29,6 @@ License
 #include "polyMesh.H"
 #include "cellModeller.H"
 #include "mathematicalConstants.H"
-#include "DynamicList.H"
 #include "plane.H"
 #include "ListOps.H"
 #include "meshTools.H"

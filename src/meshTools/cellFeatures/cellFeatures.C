@@ -371,7 +371,7 @@ void Foam::cellFeatures::calcSuperFaces() const
                 {
                     superFace.shrink();
 
-                    faces[superFaceI] = face(superFace);
+                    faces[superFaceI].transfer(superFace);
                 }
             }
         }

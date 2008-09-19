@@ -156,7 +156,7 @@ label edgeMesh::regions(labelList& edgeRegion) const
                 }
             }
 
-            edgesToVisit.transfer(newEdgesToVisit.shrink());
+            edgesToVisit.transfer(newEdgesToVisit);
         }
 
         currentRegion++;

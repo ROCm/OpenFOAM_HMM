@@ -309,7 +309,7 @@ void Foam::sampledSurfaces::verbose(const bool verbosity)
 }
 
 
-void::Foam::sampledSurfaces::execute()
+void Foam::sampledSurfaces::execute()
 {
     // Do nothing - only valid on write
 }

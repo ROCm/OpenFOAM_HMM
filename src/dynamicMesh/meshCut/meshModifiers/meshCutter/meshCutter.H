@@ -113,10 +113,8 @@ SourceFiles
 #define meshCutter_H
 
 #include "edgeVertex.H"
-#include "boolList.H"
 #include "labelList.H"
 #include "typeInfo.H"
-#include "DynamicList.H"
 #include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

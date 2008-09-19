@@ -103,6 +103,7 @@ void writePointSet
     writeFuns::write(pStream, binary, pointIDs);
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

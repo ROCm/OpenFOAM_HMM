@@ -339,11 +339,7 @@ bool triSurface::readAC(const fileName& ACfileName)
     allPoints.transfer(points);
     points.clear();
 
-    List<labelledTri> allFaces;
-    allFaces.transfer(faces);
-    faces.clear();
-
-    *this = triSurface(allFaces, patches, allPoints);
+    *this = triSurface(faces, patches, allPoints, true);
 
     stitchTriangles(allPoints);
 

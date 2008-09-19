@@ -240,13 +240,10 @@ Foam::distributedTriSurfaceMesh::constructSegments
         {
             dynSendMap[procI].shrink();
             sendMap[procI].transfer(dynSendMap[procI]);
-            dynSendMap[procI].clear();
         }
 
         allSegments.transfer(dynAllSegments.shrink());
-        dynAllSegments.clear();
         allSegmentMap.transfer(dynAllSegmentMap.shrink());
-        dynAllSegmentMap.clear();
     }
 
 
@@ -708,15 +705,11 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         {
             dynSendMap[procI].shrink();
             sendMap[procI].transfer(dynSendMap[procI]);
-            dynSendMap[procI].clear();
         }
 
         allCentres.transfer(dynAllCentres.shrink());
-        dynAllCentres.clear();
         allRadiusSqr.transfer(dynAllRadiusSqr.shrink());
-        dynAllRadiusSqr.clear();
         allSegmentMap.transfer(dynAllSegmentMap.shrink());
-        dynAllSegmentMap.clear();
     }
 
 

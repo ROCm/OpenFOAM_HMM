@@ -61,6 +61,8 @@ template<class T> Istream& operator>>(Istream&, List<T>&);
 template<class T, label Size> class FixedList;
 template<class T> class PtrList;
 template<class T> class SLList;
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+ class DynamicList;
 template<class T> class IndirectList;
 template<class T> class BiIndirectList;
 
@@ -155,6 +157,11 @@ public:
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list.
             void transfer(List<T>&);
+
+            //- Transfer the contents of the argument List into this List
+            //  and annull the argument list.
+            template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+            void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
