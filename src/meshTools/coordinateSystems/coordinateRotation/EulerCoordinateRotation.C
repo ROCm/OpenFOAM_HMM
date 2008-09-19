@@ -133,18 +133,12 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 {
     vector rotation(dict.lookup("rotation"));
 
-    bool inDegrees = true;
-    if (dict.found("degrees"))
-    {
-        inDegrees = Switch(dict.lookup("degrees"));
-    }
-
     calcTransform
     (
         rotation.component(vector::X),
         rotation.component(vector::Y),
         rotation.component(vector::Z),
-        inDegrees
+        dict.lookupOrDefault<Switch>("degrees", true)
     );
 }
 
