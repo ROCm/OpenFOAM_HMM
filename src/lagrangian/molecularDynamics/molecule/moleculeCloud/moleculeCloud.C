@@ -42,6 +42,401 @@ Foam::scalar Foam::moleculeCloud::elementaryCharge = 1.602176487e-19;
 Foam::scalar Foam::moleculeCloud::vacuumPermittivity = 8.854187817e-12;
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::moleculeCloud::buildCellOccupancy()
+{
+    forAll(cellOccupancy_, cO)
+    {
+        cellOccupancy_[cO].clear();
+    }
+
+    iterator mol(this->begin());
+
+    for
+    (
+        mol = this->begin();
+        mol != this->end();
+        ++mol
+    )
+    {
+        cellOccupancy_[mol().cell()].append(&mol());
+    }
+
+    forAll(cellOccupancy_, cO)
+    {
+        cellOccupancy_[cO].shrink();
+    }
+
+    il_ril().referMolecules(cellOccupancy_);
+}
+
+
+void Foam::moleculeCloud::calculatePairForce()
+{
+    {
+        iterator mol(this->begin());
+
+        // Real-Real interactions
+        vector rIJ;
+
+        scalar rIJMag;
+
+        scalar rIJMagSq;
+
+        vector fIJ;
+
+        label idI;
+
+        label idJ;
+
+        mol = this->begin();
+
+        molecule* molI = &mol();
+
+        molecule* molJ = &mol();
+
+        forAll(directInteractionList_, dIL)
+        {
+            forAll(cellOccupancy_[dIL],cellIMols)
+            {
+                molI = cellOccupancy_[dIL][cellIMols];
+
+                forAll(directInteractionList_[dIL], interactingCells)
+                {
+                    List< molecule* > cellJ =
+                    cellOccupancy_[directInteractionList_[dIL][interactingCells]];
+
+                    forAll(cellJ, cellJMols)
+                    {
+                        molJ = cellJ[cellJMols];
+
+                        evaluatelPair(molI, molJ);
+                    }
+                }
+
+                forAll(cellOccupancy_[dIL],cellIOtherMols)
+                {
+                    molJ = cellOccupancy_[dIL][cellIOtherMols];
+
+                    if (molJ > molI)
+                    {
+                        evaluatePair(molI, molJ);
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        // Real-Referred interactions
+
+        vector rKL;
+
+        scalar rKLMag;
+
+        scalar rKLMagSq;
+
+        vector fKL;
+
+        label idK;
+
+        label idL;
+
+        molecule* molK = &mol();
+
+        forAll(referredInteractionList_, rIL)
+        {
+            const List<label>& realCells =
+            referredInteractionList_[rIL].realCellsForInteraction();
+
+            forAll(referredInteractionList_[rIL], refMols)
+            {
+                referredMolecule* molL = &(referredInteractionList_[rIL][refMols]);
+
+                forAll(realCells, rC)
+                {
+                    List<molecule*> cellK = cellOccupancy_[realCells[rC]];
+
+                    forAll(cellK, cellKMols)
+                    {
+                        molK = cellK[cellKMols];
+
+                        evaluatePair(molK, molL);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::moleculeCloud::calculateTetherForce()
+{
+    iterator mol(this->begin());
+
+    vector rIT;
+
+    vector fIT;
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        if (mol().tethered())
+        {
+            rIT = mol().position() - mol().tetherPosition();
+
+            fIT = tetherPotentials_.force
+            (
+                mol().id(),
+                rIT
+            );
+
+            mol().A() += fIT/(mol().mass());
+
+            mol().potentialEnergy() += tetherPotentials_.energy
+            (
+                mol().id(),
+                rIT
+            );
+
+            mol().rf() += rIT*fIT;
+        }
+    }
+}
+
+
+void Foam::moleculeCloud::calculateExternalForce()
+{
+    iterator mol(this->begin());
+
+    // Info<< "Warning! Includes dissipation term!" << endl;
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        mol().A() += gravity_;
+
+        // mol().A() += -1.0 * mol().U() /mol().mass();
+    }
+}
+
+
+void Foam::moleculeCloud::removeHighEnergyOverlaps()
+{
+    Info << nl << "Removing high energy overlaps, removal order:";
+
+    forAll(removalOrder_, rO)
+    {
+        Info << " " << pairPotentials_.idList()[removalOrder_[rO]];
+    }
+
+    Info << nl ;
+
+    label initialSize = this->size();
+
+    buildCellOccupancy();
+
+    // Real-Real interaction
+    iterator mol(this->begin());
+
+    {
+        vector rIJ;
+
+        scalar rIJMag;
+
+        scalar rIJMagSq;
+
+        label idI;
+
+        label idJ;
+
+        mol = this->begin();
+
+        molecule* molI = &mol();
+
+        molecule* molJ = &mol();
+
+        DynamicList<molecule*> molsToDelete;
+
+        forAll(directInteractionList_, dIL)
+        {
+            forAll(cellOccupancy_[dIL],cellIMols)
+            {
+                molI = cellOccupancy_[dIL][cellIMols];
+
+                forAll(directInteractionList_[dIL], interactingCells)
+                {
+                    List< molecule* > cellJ =
+                    cellOccupancy_[directInteractionList_[dIL][interactingCells]];
+
+                    forAll(cellJ, cellJMols)
+                    {
+                        molJ = cellJ[cellJMols];
+
+                        if (evaluatePotentialLimit(molI, molJ))
+                        {
+                            if
+                            (
+                                idI == idJ
+                             || findIndex(removalOrder_, idJ)
+                                    < findIndex(removalOrder_, idI)
+                            )
+                            {
+                                if (findIndex(molsToDelete, molJ) == -1)
+                                {
+                                    molsToDelete.append(molJ);
+                                }
+                            }
+                            else if (findIndex(molsToDelete, molI) == -1)
+                            {
+                                molsToDelete.append(molI);
+                            }
+                        }
+                    }
+                }
+            }
+
+            forAll(cellOccupancy_[dIL],cellIOtherMols)
+            {
+                molJ = cellOccupancy_[dIL][cellIOtherMols];
+
+                if (molJ > molI)
+                {
+                    if (evaluatePotentialLimit(molI, molJ))
+                    {
+                        if
+                        (
+                            idI == idJ
+                         || findIndex(removalOrder_, idJ)
+                                < findIndex(removalOrder_, idI)
+                        )
+                        {
+                            if (findIndex(molsToDelete, molJ) == -1)
+                            {
+                                molsToDelete.append(molJ);
+                            }
+                        }
+                        else if (findIndex(molsToDelete, molI) == -1)
+                        {
+                            molsToDelete.append(molI);
+                        }
+                    }
+                }
+            }
+        }
+
+        forAll (molsToDelete, mTD)
+        {
+            deleteParticle(*(molsToDelete[mTD]));
+        }
+    }
+
+    buildCellOccupancy();
+
+    // Real-Referred interaction
+
+    {
+        vector rKL;
+
+        scalar rKLMag;
+
+        scalar rKLMagSq;
+
+        label idK;
+
+        label idL;
+
+        molecule* molK = &mol();
+
+        DynamicList<molecule*> molsToDelete;
+
+        forAll(referredInteractionList_, rIL)
+        {
+            referredCell& refCell = referredInteractionList_[rIL];
+
+            forAll(refCell, refMols)
+            {
+                referredMolecule* molL = &(refCell[refMols]);
+
+                List <label> realCells = refCell.realCellsForInteraction();
+
+                forAll(realCells, rC)
+                {
+                    label cellK = realCells[rC];
+
+                    List<molecule*> cellKMols = cellOccupancy_[cellK];
+
+                    forAll(cellKMols, cKM)
+                    {
+                        molK = cellKMols[cKM];
+
+                        if (evaluatePotentialLimit(molK, molL))
+                        {
+                            if
+                            (
+                                findIndex(removalOrder_, idK)
+                                < findIndex(removalOrder_, idL)
+                            )
+                            {
+                                if (findIndex(molsToDelete, molK) == -1)
+                                {
+                                    molsToDelete.append(molK);
+                                }
+                            }
+
+                            else if
+                            (
+                                findIndex(removalOrder_, idK)
+                                == findIndex(removalOrder_, idL)
+                            )
+                            {
+                                if
+                                (
+                                    Pstream::myProcNo() == refCell.sourceProc()
+                                    && cellK <= refCell.sourceCell()
+                                )
+                                {
+                                    if (findIndex(molsToDelete, molK) == -1)
+                                    {
+                                        molsToDelete.append(molK);
+                                    }
+                                }
+
+                                else if
+                                (
+                                    Pstream::myProcNo() < refCell.sourceProc()
+                                )
+                                {
+                                    if (findIndex(molsToDelete, molK) == -1)
+                                    {
+                                        molsToDelete.append(molK);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        forAll (molsToDelete, mTD)
+        {
+            deleteParticle(*(molsToDelete[mTD]));
+        }
+    }
+
+    buildCellOccupancy();
+
+    label molsRemoved = initialSize - this->size();
+
+    if (Pstream::parRun())
+    {
+        reduce(molsRemoved, sumOp<label>());
+    }
+
+    Info << tab << molsRemoved << " molecules removed" << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::moleculeCloud::moleculeCloud(const polyMesh& mesh)
@@ -115,48 +510,74 @@ Foam::moleculeCloud::moleculeCloud(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::moleculeCloud::buildCellOccupancy()
-{
-    forAll(cellOccupancy_, cO)
-    {
-        cellOccupancy_[cO].clear();
-    }
-
-    iterator mol(this->begin());
-
-    for
-    (
-        mol = this->begin();
-        mol != this->end();
-        ++mol
-    )
-    {
-        cellOccupancy_[mol().cell()].append(&mol());
-    }
-
-    forAll(cellOccupancy_, cO)
-    {
-        cellOccupancy_[cO].shrink();
-    }
-
-    il_ril().referMolecules(cellOccupancy_);
-}
-
 void Foam::moleculeCloud::evolve()
 {
     molecule::trackData td0(*this, 0);
-    molecule::trackData td1(*this, 1);
-    molecule::trackData td2(*this, 2);
-
     Cloud<molecule>::move(td0);
+
+    molecule::trackData td1(*this, 1);
+    Cloud<molecule>::move(td1);
+
+    molecule::trackData td2(*this, 2);
+    Cloud<molecule>::move(td2);
 
     calculateForce();
 
-    Cloud<molecule>::move(td1);
+    molecule::trackData td2(*this, 3);
+    Cloud<molecule>::move(td3);
+}
 
-    Cloud<molecule>::move(td2);
 
-    Cloud<molecule>::move(td0);
+void Foam::moleculeCloud::calculateForce()
+{
+    buildCellOccupancy();
+
+    iterator mol(this->begin());
+
+    // Set accumulated quantities to zero
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        mol().siteForces() = vector::zero;
+
+        mol().potentialEnergy() = 0.0;
+
+        mol().rf() = tensor::zero;
+    }
+
+    calculatePairForce();
+
+    calculateTetherForce();
+
+    calculateExternalForce();
+}
+
+
+void Foam::moleculeCloud::applyConstraintsAndThermostats
+(
+    const scalar targetTemperature,
+    const scalar measuredTemperature
+)
+{
+    scalar temperatureCorrectionFactor =
+        sqrt(targetTemperature/measuredTemperature);
+
+    Info<< "----------------------------------------" << nl
+        << "Temperature equilibration" << nl
+        << "Target temperature = "
+        << targetTemperature << nl
+        << "Measured temperature = "
+        << measuredTemperature << nl
+        << "Temperature correction factor = "
+        << temperatureCorrectionFactor << nl
+        << "----------------------------------------"
+        << endl;
+
+    iterator mol(this->begin());
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        mol().u() *= temperatureCorrectionFactor;
+    }
 }
 
 

@@ -185,9 +185,11 @@ public:
 
             inline const referredCellList& referredInteractionList() const;
 
-            inline const List<sendingReferralList>& cellSendingReferralLists() const;
+            inline const List<sendingReferralList>&
+                cellSendingReferralLists() const;
 
-            inline const List<receivingReferralList>& cellReceivingReferralLists() const;
+            inline const List<receivingReferralList>&
+                cellReceivingReferralLists() const;
 
             inline label nInteractingProcs() const;
 };

@@ -63,13 +63,13 @@ private:
 
         const polyMesh& mesh_;
 
-            // MD solution parameters
+        // MD solution parameters
 
-            List<DynamicList<molecule*> > cellOccupancy_;
+        List<DynamicList<molecule*> > cellOccupancy_;
 
-            interactionLists il_;
+        interactionLists il_;
 
-            List<molecule::constantProperties> constPropList_;;
+        List<molecule::constantProperties> constPropList_;
 
     // Move to potential class and store reference to it ->
             scalar potentialEnergyLimit_;
@@ -83,29 +83,55 @@ private:
             vector gravity_;
     // <- Move to potential class and store reference to it
 
-        // Private Member Functions
+    // Private Member Functions
 
-            void applyConstraintsAndThermostats
-            (
-                const scalar targetTemperature,
-                const scalar measuredTemperature
-            );
+        //- Determine which molecules are in which cells
+        void buildCellOccupancy();
 
-            void calculateForce();
+        void calculatePairForce();
 
-            void calculatePairForce();
+        inline void evaluatePair
+        (
+            molecule* molI,
+            molecule* molJ
+        );
 
-            void calculateTetherForce();
+        inline void evaluatePair
+        (
+            molecule* molReal,
+            referredMolecule* molRef
+        )
 
-            void calculateExternalForce();
+        inline bool evaluatePotentialLimit
+        (
+            label idI,
+            label idJ,
+            scalar rIJMagSq
+        ) const;
 
-            void removeHighEnergyOverlaps();
+        inline bool evaluatePotentialLimit
+        (
+            molecule* molI,
+            molecule* molJ
+        ) const;
 
-            //- Disallow default bitwise copy construct
-            moleculeCloud(const moleculeCloud&);
+        inline bool evaluatePotentialLimit
+        (
+            molecule* molReal,
+            referredMolecule* molRef
+        ) const;
 
-            //- Disallow default bitwise assignment
-            void operator=(const moleculeCloud&);
+        void calculateTetherForce();
+
+        void calculateExternalForce();
+
+        void removeHighEnergyOverlaps();
+
+        //- Disallow default bitwise copy construct
+        moleculeCloud(const moleculeCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const moleculeCloud&);
 
 
 public:
@@ -142,22 +168,31 @@ public:
 
     // Member Functions
 
-    //- Determine which molecules are in which cells
-        void buildCellOccupancy();
 
         //- Evolve the molecules (move, calculate forces, control state etc)
         void evolve();
 
-        //- Integrate the equations of motion using algorithm selected at
-        //  runtime from a dictionary. This will also call the function
-        //  to calculate the intermolecular forces (calculatePairForce()).
+        void calculateForce();
 
-
+        void applyConstraintsAndThermostats
+        (
+            const scalar targetTemperature,
+            const scalar measuredTemperature
+        );
 
         // Access
 
             inline const polyMesh& mesh() const;
 
+            inline const interactionLists& interactionLists() const;
+
+            inline const List<DynamicList<molecule*> >& cellOccupancy() const;
+
+            inline const List<molecule::constantProperties> constProps() const;
+
+            inline const molecule::constantProperties& constProps(label id) const;
+
+    // Move to potential class and store reference to it ->
             inline scalar potentialEnergyLimit() const;
 
             inline const labelList& removalOrder() const;
@@ -167,10 +202,7 @@ public:
             inline const tetherPotentialList& tetherPotentials() const;
 
             inline const vector& gravity() const;
-
-            inline const List<DynamicList<molecule*> >& cellOccupancy() const;
-
-
+    // <- Move to potential class and store reference to it
 
     // Member Operators
 

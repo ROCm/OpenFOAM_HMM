@@ -85,10 +85,11 @@ bool Foam::molecule::move(molecule::trackData& td)
 
     if (td.part() == 0)
     {
-        // Leapfrog velocity adjust part, required before and after
-        // tracking+force part
+        // First leapfrog velocity adjust part, required before tracking+force part
 
-        U_ += 0.5*deltaT*A_;
+        v_ += 0.5*deltaT*a_;
+
+        omega1 += 0.5*deltaT*alpha_;
     }
     else if (td.part() == 1)
     {
@@ -99,7 +100,7 @@ bool Foam::molecule::move(molecule::trackData& td)
             // set the lagrangian time-step
             scalar dt = min(dtMax, tEnd);
 
-            dt *= trackToFace(position() + dt*U_, td);
+            dt *= trackToFace(position() + dt*v_, td);
 
             tEnd -= dt;
             stepFraction() = 1.0 - tEnd/deltaT;
@@ -114,6 +115,33 @@ bool Foam::molecule::move(molecule::trackData& td)
         R_ = R_ & rotationTensor(deltaT);
 
         setSitePositions(td.molCloud().constProps(id_));
+    }
+    else if (td.part() == 3)
+    {
+        // Second leapfrog velocity adjust part, required after tracking+force part
+
+        const diagTensor& I;  // TAKE REFERENCE TO CONST PROP TO GET THIS
+
+        scalar m;  // TAKE REFERENCE TO CONST PROP TO GET THIS
+
+        a_ = vector::zero;
+
+        vector tau(vector::zero);
+
+        forAll(siteForces_, s)
+        {
+            const vector& f = siteForces_[s];
+
+            a_ += f/m;
+
+            tau += (sitePositions_[s] - position_) ^ f;
+        }
+
+        alpha_ = R_ & inv(I) & R_.T() & tau;
+
+        v_ += 0.5*deltaT*a_;
+
+        omega_ += 0.5*deltaT*alpha_;
     }
     else
     {
@@ -173,8 +201,8 @@ void Foam::molecule::hitWallPatch
     vector nw = wpp.faceAreas()[wpp.whichFace(face())];
     nw /= mag(nw);
 
-    scalar Un = U_ & nw;
-//     vector Ut = U_ - Un*nw;
+    scalar vn = v_ & nw;
+//     vector vt = v_ - vn*nw;
 
 //     Random rand(clock::getTime());
 
@@ -186,11 +214,11 @@ void Foam::molecule::hitWallPatch
 //     {
 //         // Diffuse reflection
 //
-//         vector tw1 = Ut/mag(Ut);
+//         vector tw1 = vt/mag(vt);
 //
 //         vector tw2 = nw ^ tw1;
 //
-//         U_ = sqrt(wallTemp/mass_)*rand.GaussNormal()*tw1
+//         V_ = sqrt(wallTemp/mass_)*rand.GaussNormal()*tw1
 //                 + sqrt(wallTemp/mass_)*rand.GaussNormal()*tw2
 //                 - mag(sqrt(wallTemp/mass_)*rand.GaussNormal())*nw;
 //     }
@@ -199,9 +227,9 @@ void Foam::molecule::hitWallPatch
 //     {
         // Specular reflection
 
-        if (Un > 0)
+        if (vn > 0)
         {
-            U_ -= 2*Un*nw;
+            v_ -= 2*vn*nw;
         }
 
 //     }

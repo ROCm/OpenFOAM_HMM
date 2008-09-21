@@ -57,7 +57,7 @@ class pairPotentialList
     // Private data
 
         List<word> idList_;
-        
+
         scalar rCutMax_;
 
         scalar rCutMaxSqr_;
@@ -101,7 +101,7 @@ public:
         ~pairPotentialList();
 
     // Member Functions
-        
+
         void buildPotentials
         (
             const dictionary& idListDict,
