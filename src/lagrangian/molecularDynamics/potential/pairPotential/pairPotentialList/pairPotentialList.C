@@ -32,6 +32,7 @@ License
 
 void Foam::pairPotentialList::readPairPotentialDict
 (
+    const List<word>& idList,
     const dictionary& pairPotentialDict,
     const polyMesh& mesh
 )
@@ -40,13 +41,13 @@ void Foam::pairPotentialList::readPairPotentialDict
 
     rCutMax_ = 0.0;
 
-    for (label a = 0; a < nIds(); ++a)
+    for (label a = 0; a < nIds_; ++a)
     {
-        word idA = idList_[a];
+        word idA = idList[a];
 
-        for (label b = a; b < nIds(); ++b)
+        for (label b = a; b < nIds_; ++b)
         {
-            word idB = idList_[b];
+            word idB = idList[b];
 
             word pairPotentialName;
 
@@ -142,21 +143,19 @@ void Foam::pairPotentialList::readPairPotentialDict
 
 Foam::pairPotentialList::pairPotentialList()
 :
-    PtrList<pairPotential>(),
-    idList_()
+    PtrList<pairPotential>()
 {}
 
 Foam::pairPotentialList::pairPotentialList
 (
-    const dictionary& idListDict,
+    const List<word>& idList,
     const dictionary& pairPotentialDict,
     const polyMesh& mesh
 )
 :
-    PtrList<pairPotential>(),
-    idList_()
+    PtrList<pairPotential>()
 {
-    buildPotentials(idListDict, pairPotentialDict, mesh);
+    buildPotentials(idList, pairPotentialDict, mesh);
 }
 
 
@@ -170,16 +169,16 @@ Foam::pairPotentialList::~pairPotentialList()
 
 void Foam::pairPotentialList::buildPotentials
 (
-    const dictionary& idListDict,
+    const List<word>& idList,
     const dictionary& pairPotentialDict,
     const polyMesh& mesh
 )
 {
-    idList_ = List<word>(idListDict.lookup("idList"));
+    setSize(((idList.size()*(idList.size() + 1))/2));
 
-    setSize(((idList_.size()*(idList_.size() + 1))/2));
+    nIds_ = idList.size();
 
-    readPairPotentialDict(pairPotentialDict, mesh);
+    readPairPotentialDict(idList, pairPotentialDict, mesh);
 }
 
 

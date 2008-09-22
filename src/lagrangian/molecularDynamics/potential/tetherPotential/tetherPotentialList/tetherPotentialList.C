@@ -30,39 +30,40 @@ License
 
 void Foam::tetherPotentialList::readTetherPotentialDict
 (
-    const dictionary& tetherPotentialDict,
     const List<word>& idList,
-    const List<label>& tetherIds
+    const dictionary& tetherPotentialDict,
+    const List<word>& tetherIdList
 )
 {
-    if (!tetherIds.size())
+
+    Info<< nl << "Building tether potentials." << endl;
+
+    idMap_ = List<label>(idList.size(), -1);
+
+    label tetherMapIndex = 0;
+
+    forAll(tetherIdList, t)
     {
-        Info<< nl << "No tethered molecules found." << endl;
+        word tetherPotentialName = tetherIdList[t];
 
-        idMap_.setSize(0);
-    }
-    else
-    {
-        Info<< nl << "Building tether potentials." << endl;
+        label tetherId = findIndex(idList, tetherPotentialName);
 
-        idMap_ = List<label>(idList.size(), -1);
-
-        label tetherMapIndex = 0;
-
-        forAll(tetherIds, t)
+        if (tetherId == -1)
         {
-            const label tetherId = tetherIds[t];
-
-            word tetherPotentialName = idList[tetherId];
-
-            if (!tetherPotentialDict.found(tetherPotentialName))
-            {
-                FatalErrorIn("tetherPotentialList::readTetherPotentialDict")
-                        << nl << "tether potential specification subDict "
-                        << tetherPotentialName << " not found"
-                        << abort(FatalError);
-            }
-
+            FatalErrorIn("tetherPotentialList::readTetherPotentialDict")
+                << nl << "No matching entry found in idList for tether name "
+                << tetherPotentialName
+                << abort(FatalError);
+        }
+        else if (!tetherPotentialDict.found(tetherPotentialName))
+        {
+            FatalErrorIn("tetherPotentialList::readTetherPotentialDict")
+                << nl << "tether potential specification subDict "
+                << tetherPotentialName << " not found"
+                << abort(FatalError);
+        }
+        else
+        {
             this->set
             (
                 tetherMapIndex,
@@ -72,11 +73,11 @@ void Foam::tetherPotentialList::readTetherPotentialDict
                     tetherPotentialDict.subDict(tetherPotentialName)
                 )
             );
-
-            idMap_[tetherId] = tetherMapIndex;
-
-            tetherMapIndex++;
         }
+
+        idMap_[tetherId] = tetherMapIndex;
+
+        tetherMapIndex++;
     }
 }
 
@@ -92,15 +93,15 @@ Foam::tetherPotentialList::tetherPotentialList()
 
 Foam::tetherPotentialList::tetherPotentialList
 (
-    const dictionary& idListDict,
+    const List<word>& idList,
     const dictionary& tetherPotentialDict,
-    const List<label>& tetherIds
+    const List<word>& tetherIdList
 )
 :
     PtrList<tetherPotential>(),
     idMap_()
 {
-    buildPotentials(idListDict, tetherPotentialDict, tetherIds);
+    buildPotentials(idList, tetherPotentialDict, tetherIdList);
 }
 
 
@@ -114,16 +115,14 @@ Foam::tetherPotentialList::~tetherPotentialList()
 
 void Foam::tetherPotentialList::buildPotentials
 (
-    const dictionary& idListDict,
+    const List<word>& idList,
     const dictionary& tetherPotentialDict,
-    const List<label>& tetherIds
+    const List<word>& tetherIdList
 )
 {
-    setSize(tetherIds.size());
+    setSize(tetherIdList.size());
 
-    const List<word>& idList = List<word>(idListDict.lookup("idList"));
-
-    readTetherPotentialDict(tetherPotentialDict, idList, tetherIds);
+    readTetherPotentialDict(idList, tetherPotentialDict, tetherIdList);
 }
 
 

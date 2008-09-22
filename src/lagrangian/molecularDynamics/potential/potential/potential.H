@@ -23,22 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::tetherPotentialList
+    Foam::potential
 
 Description
 
 SourceFiles
-    tetherPotentialList.C
+    potentialI.H
+    potential.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetherPotentialList_H
-#define tetherPotentialList_H
+#ifndef potential_H
+#define potential_H
 
-#include "ListOps.H"
-#include "PtrList.H"
-#include "word.H"
-#include "tetherPotential.H"
+#include "polyMesh.H"
+#include "IOdictionary.H"
+#include "pairPotentialList.H"
+#include "tetherPotentialList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,74 +47,61 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class tetherPotentialList Declaration
+                           Class potential Declaration
 \*---------------------------------------------------------------------------*/
 
-class tetherPotentialList
-:
-    public PtrList<tetherPotential>
+class potential
 {
     // Private data
 
-        List<label> idMap_;
+        const polyMesh& mesh_;
+
+        List<word> idList_;
+
+        scalar potentialEnergyLimit_;
+
+        labelList removalOrder_;
+
+        pairPotentialList pairPotentials_;
+
+        tetherPotentialList tetherPotentials_;
+
+        vector gravity_;
 
     // Private Member Functions
 
-        inline label tetherPotentialIndex
-        (
-            const label a
-        ) const;
-
-        void readTetherPotentialDict
-        (
-            const List<word>& idList,
-            const dictionary& tetherPotentialDict,
-            const List<word>& tetherIdList
-        );
+        //- Disallow default bitwise copy construct
+        potential(const potential&);
 
         //- Disallow default bitwise assignment
-        void operator=(const tetherPotentialList&);
-
-        //- Disallow default bitwise copy construct
-        tetherPotentialList(const tetherPotentialList&);
+        void operator=(const potential&);
 
 
 public:
 
     // Constructors
 
-        tetherPotentialList();
-
-        //- Construct from idList and potental dictionaries
-        tetherPotentialList
-        (
-            const List<word>& idList,
-            const dictionary& tetherPotentialDict,
-            const List<word>& tetherIdList
-        );
+        //- Construct from mesh reference
+        potential(const polyMesh& mesh);
 
     // Destructor
 
-        ~tetherPotentialList();
+        ~potential();
+
 
     // Member Functions
 
-        void buildPotentials
-        (
-            const List<word>& idList,
-            const dictionary& tetherPotentialDict,
-            const List<word>& tetherIdList
-        );
-
         // Access
 
-            inline const List<word>& idMap() const;
+            inline scalar potentialEnergyLimit() const;
 
-            const tetherPotential& tetherPotentialFunction(const label a) const;
+            inline const labelList& removalOrder() const;
 
-            vector force(const label a, const vector rIT) const;
+            inline const pairPotentialList& pairPotentials() const;
 
-            scalar energy (const label a, const vector rIT) const;
+            inline const tetherPotentialList& tetherPotentials() const;
+
+            inline const vector& gravity() const;
 };
 
 
@@ -123,7 +111,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "tetherPotentialListI.H"
+#include "potentialI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

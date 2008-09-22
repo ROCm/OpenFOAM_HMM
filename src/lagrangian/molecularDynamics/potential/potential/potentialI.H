@@ -24,49 +24,57 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline Foam::label Foam::pairPotentialList::pairPotentialIndex
-(
-    const label a,
-    const label b
-) const
-{
-    label index;
-
-    if (a < b)
-    {
-        index = a*(2*nIds_ - a - 1)/2 + b;
-    }
-
-    else
-    {
-        index = b*(2*nIds_ - b - 1)/2 + a;
-    }
-
-    if (index > size() - 1)
-    {
-        FatalErrorIn("Foam::pairPotentialList::pairPotentialIndex ")
-            << "Attempting to access a pairPotential with too high an index."
-            << nl << "a = " << a << ", b = " << b << ", index = " << index
-            << nl << "max index = " << size() - 1
-            << nl << abort(FatalError);
-    }
-
-    return index;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::pairPotentialList::rCutMax() const
+inline Foam::label Foam::potential::nIds() const
 {
-    return rCutMax_;
+    return idList_.size();
 }
 
 
-inline Foam::scalar Foam::pairPotentialList::rCutMaxSqr() const
+inline const Foam::List<Foam::word>& Foam::potential::idList() const
 {
-    return rCutMaxSqr_;
+    return idList_;
+}
+
+
+inline Foam::scalar Foam::potential::potentialEnergyLimit() const
+{
+    return potentialEnergyLimit_;
+}
+
+
+inline Foam::label Foam::potential::nPairPotentials() const
+{
+    return pairPotentials_.size();
+}
+
+
+inline const Foam::labelList& Foam::potential::removalOrder() const
+{
+    return removalOrder_;
+}
+
+
+inline const Foam::pairPotentialList&
+    Foam::potential::pairPotentials() const
+{
+    return pairPotentials_;
+}
+
+
+inline const Foam::tetherPotentialList&
+    Foam::potential::tetherPotentials() const
+{
+    return tetherPotentials_;
+}
+
+
+inline const Foam::vector& Foam::potential::gravity() const
+{
+    return gravity_;
 }
 
 

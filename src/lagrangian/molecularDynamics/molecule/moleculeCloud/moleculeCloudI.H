@@ -213,10 +213,9 @@ inline const Foam::polyMesh& moleculeCloud::mesh() const
 }
 
 
-inline const Foam::interactionLists&
-    Foam::moleculeCloud::interactionLists() const
+inline const Foam::potential& moleculeCloud::potential() const
 {
-    return il_;
+    return pot_;
 }
 
 
@@ -224,6 +223,13 @@ inline const Foam::List<DynamicList<molecule*> >&
     Foam::moleculeCloud::cellOccupancy() const
 {
     return cellOccupancy_;
+}
+
+
+inline const Foam::interactionLists&
+    Foam::moleculeCloud::interactionLists() const
+{
+    return il_;
 }
 
 

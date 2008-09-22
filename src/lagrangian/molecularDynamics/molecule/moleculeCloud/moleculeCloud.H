@@ -28,6 +28,7 @@ Class
 Description
 
 SourceFiles
+    moleculeCloudI.H
     moleculeCloud.C
 
 
@@ -39,8 +40,7 @@ SourceFiles
 #include "Cloud.H"
 #include "molecule.H"
 #include "IOdictionary.H"
-#include "pairPotentialList.H"
-#include "tetherPotentialList.H"
+#include "potential.H"
 #include "interactionLists.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,25 +63,13 @@ private:
 
         const polyMesh& mesh_;
 
-        // MD solution parameters
+        const potential& pot_;
 
         List<DynamicList<molecule*> > cellOccupancy_;
 
         interactionLists il_;
 
         List<molecule::constantProperties> constPropList_;
-
-    // Move to potential class and store reference to it ->
-            scalar potentialEnergyLimit_;
-
-            labelList removalOrder_;
-
-            pairPotentialList pairPotentials_;
-
-            tetherPotentialList tetherPotentials_;
-
-            vector gravity_;
-    // <- Move to potential class and store reference to it
 
     // Private Member Functions
 
@@ -147,7 +135,7 @@ public:
     // Constructors
 
         //- Construct given mesh
-        moleculeCloud(const polyMesh&);
+        moleculeCloud(const polyMesh& mesh);
 
         //- Construct given polyMesh and fields of components.  Intended for use
         //- by the molConfig utility
@@ -184,30 +172,21 @@ public:
 
             inline const polyMesh& mesh() const;
 
-            inline const interactionLists& interactionLists() const;
+            inline const potential& potential() const
 
             inline const List<DynamicList<molecule*> >& cellOccupancy() const;
+
+            inline const interactionLists& interactionLists() const;
 
             inline const List<molecule::constantProperties> constProps() const;
 
             inline const molecule::constantProperties& constProps(label id) const;
 
-    // Move to potential class and store reference to it ->
-            inline scalar potentialEnergyLimit() const;
-
-            inline const labelList& removalOrder() const;
-
-            inline const pairPotentialList& pairPotentials() const;
-
-            inline const tetherPotentialList& tetherPotentials() const;
-
-            inline const vector& gravity() const;
-    // <- Move to potential class and store reference to it
-
     // Member Operators
 
         //- Write fields
-        void writeFields() const;
+
+            void writeFields() const;
 };
 
 

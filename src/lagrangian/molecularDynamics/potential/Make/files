@@ -1,3 +1,7 @@
+potential = potential
+
+$(potential) = potential.C
+
 pairPotential = pairPotential
 
 $(pairPotential)/pairPotentialList/pairPotentialList.C
