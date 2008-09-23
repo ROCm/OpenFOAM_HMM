@@ -32,6 +32,8 @@ inline void Foam::moleculeCloud::evaluatePair
     molecule* molJ
 )
 {
+    const pairPotentialList& pairPot(pot_.pairPotentials());
+
     idI = molI->id();
 
     idJ = molJ->id();
@@ -40,11 +42,11 @@ inline void Foam::moleculeCloud::evaluatePair
 
     rIJMagSq = magSqr(rIJ);
 
-    if(pairPotentials_.rCutSqr(idI, idJ, rIJMagSq))
+    if(pairPot.rCutSqr(idI, idJ, rIJMagSq))
     {
         rIJMag = mag(rIJ);
 
-        fIJ = (rIJ/rIJMag)*pairPotentials_.force(idI, idJ, rIJMag);
+        fIJ = (rIJ/rIJMag)*pairPot.force(idI, idJ, rIJMag);
 
         // Acceleration increment for molI
         molI->A() += fIJ/(molI->mass());
@@ -54,7 +56,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
         scalar potentialEnergy
         (
-            pairPotentials_.energy(idI, idJ, rIJMag)
+            pairPot.energy(idI, idJ, rIJMag)
         );
 
         molI->potentialEnergy() += 0.5*potentialEnergy;
@@ -73,6 +75,8 @@ inline void Foam::moleculeCloud::evaluatePair
     referredMolecule* molRef
 )
 {
+    const pairPotentialList& pairPot(pot_.pairPotentials());
+
     idReal = molReal->id();
 
     idRef = molRef->id();
@@ -81,12 +85,12 @@ inline void Foam::moleculeCloud::evaluatePair
 
     rRealRefMagSq = magSqr(rRealRef);
 
-    if (pairPotentials_.rCutSqr(idReal, idRef, rRealRefMagSq))
+    if (pairPot.rCutSqr(idReal, idRef, rRealRefMagSq))
     {
         rRealRefMag = mag(rRealRef);
 
         fRealRef = (rRealRef/rRealRefMag)
-            *pairPotentials_.force(idReal, idRef, rRealRefMag);
+            *pairPot.force(idReal, idRef, rRealRefMag);
 
         // Acceleration increment for molReal
         molReal->A() += fRealRef/(molReal->mass());
@@ -94,7 +98,7 @@ inline void Foam::moleculeCloud::evaluatePair
         // Adding a contribution of 1/2 of the potential energy
         // from this interaction
         molReal->potentialEnergy() +=
-        0.5*pairPotentials_.energy(idReal, idRef, rRealRefMag);
+            0.5*pairPot.energy(idReal, idRef, rRealRefMag);
 
         molReal->rf() += rRealRef * fRealRef;
     }
@@ -112,13 +116,15 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
         << "(label idI, label idJ, scalar rIJMagSq) const "
         << "to pairPotential class."
 
+    const pairPotentialList& pairPot(pot_.pairPotentials());
+
     bool remove = false;
 
-    if (pairPotentials_.rCutSqr(idI, idJ, rIJMagSq))
+    if (pairPot.rCutSqr(idI, idJ, rIJMagSq))
     {
         rIJMag = mag(rIJ);
 
-        // Guard against pairPotentials_.energy being evaluated
+        // Guard against pairPot.energy being evaluated
         // if rIJMag < SMALL. A floating point exception will
         // happen otherwise.
 
@@ -141,11 +147,11 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             remove = true;
         }
 
-        // Guard against pairPotentials_.energy being
+        // Guard against pairPot.energy being
         // evaluated if rIJMag < rMin. A tabulation lookup
         // error will occur otherwise.
 
-        if (rIJMag < pairPotentials_.rMin(idI, idJ))
+        if (rIJMag < pairPot.rMin(idI, idJ))
         {
             remove = true;
         }
@@ -154,7 +160,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
         {
             if
             (
-                pairPotentials_.energy(idI, idJ, rIJMag)
+                pairPot.energy(idI, idJ, rIJMag)
               > potentialEnergyLimit_
             )
             {
@@ -243,49 +249,6 @@ inline const molecule::constantProperties& constProps(label id) const
 {
     return constPropList_[id];
 }
-
-
-// Move to potential class and store reference to it ->
-
-inline Foam::scalar Foam::moleculeCloud::potentialEnergyLimit() const
-{
-    return potentialEnergyLimit_;
-}
-
-
-inline Foam::label Foam::moleculeCloud::nPairPotentials() const
-{
-    return pairPotentials_.size();
-}
-
-
-inline const Foam::labelList& Foam::moleculeCloud::removalOrder() const
-{
-    return removalOrder_;
-}
-
-
-inline const Foam::pairPotentialList&
-    Foam::moleculeCloud::pairPotentials() const
-{
-    return pairPotentials_;
-}
-
-
-inline const Foam::tetherPotentialList&
-    Foam::moleculeCloud::tetherPotentials() const
-{
-    return tetherPotentials_;
-}
-
-
-inline const Foam::vector& Foam::moleculeCloud::gravity() const
-{
-    return gravity_;
-}
-// <- Move to potential class and store reference to it
-
-
 
 
 // ************************************************************************* //

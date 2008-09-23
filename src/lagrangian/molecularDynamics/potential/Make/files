@@ -1,7 +1,3 @@
-potential = potential
-
-$(potential) = potential.C
-
 pairPotential = pairPotential
 
 $(pairPotential)/pairPotentialList/pairPotentialList.C
@@ -38,5 +34,8 @@ $(tetherPotential)/derived/harmonicSpring/harmonicSpring.C
 $(tetherPotential)/derived/restrainedHarmonicSpring/restrainedHarmonicSpring.C
 $(tetherPotential)/derived/pitchForkRing/pitchForkRing.C
 
-LIB = $(FOAM_LIBBIN)/libpotential
+potential = potential
 
+$(potential)/potential.C
+
+LIB = $(FOAM_LIBBIN)/libpotential

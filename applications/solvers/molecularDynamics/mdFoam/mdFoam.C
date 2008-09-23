@@ -31,8 +31,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-//#include "md.h"
-#include "interactionLists.H"
+//#include "md.H"
+#include "potential.H"
 
 int main(int argc, char *argv[])
 {
@@ -41,9 +41,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    interactionLists il(mesh, (1e-9*1e-9), false);
-
-    //    Info<< labelListList(il.dil()) << endl;
+    potential pot(mesh);
 
     Info << "\nStarting time loop\n" << endl;
 

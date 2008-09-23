@@ -134,8 +134,12 @@ public:
 
     // Constructors
 
-        //- Construct given mesh
-        moleculeCloud(const polyMesh& mesh);
+        //- Construct given mesh and potential references
+        moleculeCloud
+        (
+            const polyMesh& mesh,
+            const potential& pot
+        );
 
         //- Construct given polyMesh and fields of components.  Intended for use
         //- by the molConfig utility

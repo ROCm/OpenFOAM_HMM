@@ -226,7 +226,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
     forAll(removalOrder_, rO)
     {
-        Info << " " << pairPotentials_.idList()[removalOrder_[rO]];
+        Info << " " << pot_.idList()[removalOrder_[rO]];
     }
 
     Info << nl ;
@@ -439,10 +439,15 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::moleculeCloud::moleculeCloud(const polyMesh& mesh)
+Foam::moleculeCloud::moleculeCloud
+(
+    const polyMesh& mesh,
+    const potential& pot
+)
 :
     Cloud<molecule>(mesh, "moleculeCloud", false),
     mesh_(mesh),
+    pot_(pot),
     referredInteractionList_(*this)
     cellOccupancy_(mesh_.nCells())
 {

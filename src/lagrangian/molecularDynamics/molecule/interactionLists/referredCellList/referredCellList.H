@@ -37,7 +37,7 @@ SourceFiles
 #define referredCellList_H
 
 #include "referredCell.H"
-//#include "molecule.H"
+#include "molecule.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

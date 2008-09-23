@@ -38,6 +38,7 @@ SourceFiles
 
 #include "polyMesh.H"
 #include "IOdictionary.H"
+#include "Time.H"
 #include "pairPotentialList.H"
 #include "tetherPotentialList.H"
 
@@ -93,7 +94,13 @@ public:
 
         // Access
 
-            inline scalar potentialEnergyLimit() const;
+            inline label nIds() const;
+
+            inline const List<word>& idList() const;
+
+            inline scalar potentialEnergyLimit() const;;
+
+            inline label nPairPotentials() const;
 
             inline const labelList& removalOrder() const;
 

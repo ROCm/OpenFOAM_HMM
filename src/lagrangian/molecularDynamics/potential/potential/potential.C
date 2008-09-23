@@ -26,11 +26,7 @@ License
 
 #include "potential.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 Foam::potential::potential(const polyMesh& mesh)
 :
@@ -85,7 +81,7 @@ Foam::potential::potential(const polyMesh& mesh)
 
         forAll(removalOrder_, rO)
         {
-            removalOrder_[rO] = findIndex(pairPotentials_.idList(), remOrd[rO]);
+            removalOrder_[rO] = findIndex(idList_, remOrd[rO]);
         }
     }
 
@@ -101,7 +97,7 @@ Foam::potential::potential(const polyMesh& mesh)
 
     const dictionary& pairDict = potentialDict.subDict("pair");
 
-    pairPotentials_.buildPotentials(idList, pairDict, mesh_);
+    pairPotentials_.buildPotentials(idList_, pairDict, mesh_);
 
     // ****************************************************************************
     // Tether potentials
@@ -117,7 +113,7 @@ Foam::potential::potential(const polyMesh& mesh)
 
         const dictionary& tetherDict = potentialDict.subDict("tether");
 
-        tetherPotentials_.buildPotentials(idList, tetherDict, tetherIdList);
+        tetherPotentials_.buildPotentials(idList_, tetherDict, tetherIdList);
     }
 
     // ****************************************************************************
