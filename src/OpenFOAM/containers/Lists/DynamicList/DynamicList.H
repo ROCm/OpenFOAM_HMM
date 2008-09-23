@@ -26,7 +26,7 @@ Class
     Foam::DynamicList
 
 Description
-    A 1D vector of objects of type \<T\> which resizes itself as necessary to
+    A 1D vector of objects of type \<T\> that resizes itself as necessary to
     accept the new objects.
 
     Internal storage is a compact array and the list can be shrunk to compact
@@ -149,7 +149,7 @@ public:
         //- Append an element at the end of the list
         inline void append(const T& e);
 
-        //- Return and remove the top element
+        //- Remove and return the top element
         inline T remove();
 
         //- Return non-const access to an element,
