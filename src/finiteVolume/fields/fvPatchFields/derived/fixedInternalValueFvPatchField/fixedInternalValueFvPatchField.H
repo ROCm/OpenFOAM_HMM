@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::fixedInternalValueFvPatchField
+    Foam::fixedInternalValueFvPatchField
 
 Description
     Boundary condition providing mechanism to set boundary (cell) values
@@ -43,10 +43,6 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
-{
-namespace incompressible
-{
-namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -138,8 +134,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

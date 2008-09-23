@@ -28,19 +28,10 @@ License
 #include "fvPatchFieldMapper.H"
 #include "fvMatrix.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace incompressible
-{
-namespace RASModels
-{
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
+Foam::fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -51,7 +42,7 @@ fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 
 
 template<class Type>
-fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
+Foam::fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 (
     const fixedInternalValueFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -64,7 +55,7 @@ fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 
 
 template<class Type>
-fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
+Foam::fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -78,7 +69,7 @@ fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 
 
 template<class Type>
-fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
+Foam::fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 (
     const fixedInternalValueFvPatchField& fivpf
 )
@@ -88,7 +79,7 @@ fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 
 
 template<class Type>
-fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
+Foam::fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 (
     const fixedInternalValueFvPatchField& fivpf,
     const DimensionedField<Type, volMesh>& iF
@@ -101,7 +92,7 @@ fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void fixedInternalValueFvPatchField<Type>::manipulateMatrix
+void Foam::fixedInternalValueFvPatchField<Type>::manipulateMatrix
 (
     fvMatrix<Type>& matrix
 )
@@ -110,11 +101,5 @@ void fixedInternalValueFvPatchField<Type>::manipulateMatrix
     matrix.setValues(this->patch().faceCells(), this->patchInternalField());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace RASModels
-} // End namespace incompressible
-} // End namespace Foam
 
 // ************************************************************************* //

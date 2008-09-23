@@ -34,10 +34,6 @@ License
 
 namespace Foam
 {
-namespace incompressible
-{
-namespace RASModels
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,8 +41,6 @@ makePatchTypeFieldTypedefs(fixedInternalValue)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
