@@ -26,10 +26,9 @@ Application
     applyWallFunctionBounaryConditions
 
 Description
-    Updates OpenFOAM incompressible RAS cases to use the new wall function
-    framework
-
-    NOTE: For incompressible RAS calculations ONLY
+    Updates OpenFOAM RAS cases to use the new wall function framework
+    Attempts to determine whether case is compressible or incompressible, or
+    can be supplied with -compressible command line argument
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,6 +37,7 @@ Description
 #include "fvMesh.H"
 #include "Time.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 
 #include "wallPolyPatch.H"
 
@@ -45,39 +45,124 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// Main program:
-
-void createNut(const fvMesh& mesh)
+bool caseIsCompressible(const fvMesh& mesh)
 {
-    IOobject nutHeader
+    // Attempt flux field
+    IOobject phiHeader
     (
-        "nut",
+        "phi",
         mesh.time().timeName(),
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE
     );
 
-    if (!nutHeader.headerOk())
+    if (phiHeader.headerOk())
     {
-        Info<< "Creating field nut" << nl << endl;
+        surfaceScalarField phi(phiHeader, mesh);
+        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        {
+            return true;
+        }
+    }
 
-        volScalarField nut
+    // Attempt density field
+    IOobject rhoHeader
+    (
+        "rho",
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (rhoHeader.headerOk())
+    {
+        volScalarField rho(rhoHeader, mesh);
+        if (rho.dimensions() == dimDensity)
+        {
+            return true;
+        }
+    }
+
+    // Attempt pressure field
+    IOobject pHeader
+    (
+        "p",
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (pHeader.headerOk())
+    {
+        volScalarField p(pHeader, mesh);
+        if (p.dimensions() == dimMass/sqr(dimTime)/dimLength)
+        {
+            return true;
+        }
+    }
+
+    // Attempt hydrostatic pressure field
+    IOobject pdHeader
+    (
+        "pd",
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (pdHeader.headerOk())
+    {
+        volScalarField pd(pdHeader, mesh);
+        if (pd.dimensions() == dimMass/sqr(dimTime)/dimLength)
+        {
+            return true;
+        }
+    }
+
+    // If none of the above are true, assume that the case is incompressible
+    return false;
+}
+
+
+void createVolScalarField
+(
+    const fvMesh& mesh,
+    const word& fieldName,
+    const dimensionSet& dims
+)
+{
+    IOobject fieldHeader
+    (
+        fieldName,
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (!fieldHeader.headerOk())
+    {
+        Info<< "Creating field " << fieldName << nl << endl;
+
+        volScalarField field
         (
             IOobject
             (
-                "nut",
+                fieldName,
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar("zero", dimensionSet(0, 2, -1, 0, 0), 0.0)
+            dimensionedScalar("zero", dims, 0.0)
         );
 
-        nut.write();
+        field.write();
     }
 }
 
@@ -116,7 +201,7 @@ void replaceBoundaryType
 
     // Make a backup of the old field
     word backupName(dict.name() + ".old");
-    Info<< "    copying original " << dict.name() << " to "
+    Info<< "    copying " << dict.name() << " to "
         << backupName << endl;
     IOdictionary dictOld = dict;
     dictOld.rename(backupName);
@@ -149,18 +234,36 @@ int main(int argc, char *argv[])
 {
 
 #   include "addTimeOptions.H"
+    argList::validOptions.insert("compressible", "");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
 
+    bool compressible = args.options().found("compressible");
+
     Info<< "Updating turbulence fields to operate using new run time "
-        << "selectable" << nl << "wall functions" << nl << nl
-        << ">>>>NOTE: only applicable to incompressible RAS models"
+        << "selectable" << nl << "wall functions"
         << nl << endl;
 
-    createNut(mesh);
+    if (compressible || caseIsCompressible(mesh))
+    {
+        Info<< "Case treated as compressible" << nl << endl;
+        createVolScalarField
+        (
+            mesh,
+            "mut",
+            dimArea/dimTime*dimDensity
+        );
+        replaceBoundaryType(mesh, "mut", "mutWallFunction", "0");
+    }
+    else
+    {
+        Info<< "Case treated as incompressible" << nl << endl;
+        createVolScalarField(mesh, "nut", dimArea/dimTime);
+        replaceBoundaryType(mesh, "nut", "nutWallFunction", "0");
+    }
 
-    replaceBoundaryType(mesh, "nut", "nutWallFunction", "0");
     replaceBoundaryType(mesh, "epsilon", "epsilonWallFunction", "0");
     replaceBoundaryType(mesh, "omega", "omegaWallFunction", "0");
     replaceBoundaryType(mesh, "k", "kQRWallFunction", "0");
