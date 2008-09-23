@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mutStandardRoughWallFunctionFvPatchScalarField.H"
+#include "mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -41,8 +41,8 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mutStandardRoughWallFunctionFvPatchScalarField::
-mutStandardRoughWallFunctionFvPatchScalarField
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -55,10 +55,10 @@ mutStandardRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutStandardRoughWallFunctionFvPatchScalarField::
-mutStandardRoughWallFunctionFvPatchScalarField
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 (
-    const mutStandardRoughWallFunctionFvPatchScalarField& ptf,
+    const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -71,8 +71,8 @@ mutStandardRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutStandardRoughWallFunctionFvPatchScalarField::
-mutStandardRoughWallFunctionFvPatchScalarField
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -86,10 +86,10 @@ mutStandardRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutStandardRoughWallFunctionFvPatchScalarField::
-mutStandardRoughWallFunctionFvPatchScalarField
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 (
-    const mutStandardRoughWallFunctionFvPatchScalarField& tppsf
+    const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField& tppsf
 )
 :
     fixedValueFvPatchScalarField(tppsf),
@@ -99,10 +99,10 @@ mutStandardRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutStandardRoughWallFunctionFvPatchScalarField::
-mutStandardRoughWallFunctionFvPatchScalarField
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 (
-    const mutStandardRoughWallFunctionFvPatchScalarField& tppsf,
+    const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -115,7 +115,7 @@ mutStandardRoughWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
+void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
 (
     const Pstream::commsTypes
 )
@@ -282,7 +282,10 @@ void mutStandardRoughWallFunctionFvPatchScalarField::evaluate
 }
 
 
-void mutStandardRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
+void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fixedValueFvPatchScalarField::write(os);
     os.writeKeyword("roughnessHeight")
@@ -299,7 +302,7 @@ void mutStandardRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 makePatchTypeField
 (
     fvPatchScalarField,
-    mutStandardRoughWallFunctionFvPatchScalarField
+    mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -156,7 +156,7 @@ RNGkEpsilon::RNGkEpsilon
         mesh_
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();

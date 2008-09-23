@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::nutRoughWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::nutRoughWallFunctionFvPatchScalarField
 
 Description
     Boundary condition for turbulent (kinematic) viscosity when using wall
@@ -36,12 +36,12 @@ Description
     - roughness constant = 0.5-1.0 (0.5 default)
 
 SourceFiles
-    nutRoughWallFunctionFvPatchScalarField.C
+    mutRoughWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutRoughWallFunctionFvPatchScalarField_H
-#define nutRoughWallFunctionFvPatchScalarField_H
+#ifndef mutRoughWallFunctionFvPatchScalarField_H
+#define mutRoughWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -49,16 +49,16 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class nutRoughWallFunctionFvPatchScalarField Declaration
+          Class mutRoughWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutRoughWallFunctionFvPatchScalarField
+class mutRoughWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -85,20 +85,20 @@ class nutRoughWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("nutRoughWallFunction");
+    TypeName("mutRoughWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nutRoughWallFunctionFvPatchScalarField
+        mutRoughWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutRoughWallFunctionFvPatchScalarField
+        mutRoughWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -106,20 +106,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutRoughWallFunctionFvPatchScalarField
+        //  mutRoughWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutRoughWallFunctionFvPatchScalarField
+        mutRoughWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&,
+            const mutRoughWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nutRoughWallFunctionFvPatchScalarField
+        mutRoughWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&
+            const mutRoughWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -127,14 +127,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughWallFunctionFvPatchScalarField(*this)
+                new mutRoughWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nutRoughWallFunctionFvPatchScalarField
+        mutRoughWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&,
+            const mutRoughWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -146,7 +146,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughWallFunctionFvPatchScalarField(*this, iF)
+                new mutRoughWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
@@ -184,7 +184,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

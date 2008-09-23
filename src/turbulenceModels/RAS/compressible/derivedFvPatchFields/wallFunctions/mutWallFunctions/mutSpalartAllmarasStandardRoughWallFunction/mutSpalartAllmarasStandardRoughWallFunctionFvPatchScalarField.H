@@ -23,25 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::nutRoughWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::
+        mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for turbulent (kinematic) viscosity when using wall
-    functions for rough walls.
-
-    Manipulates the E parameter to account for roughness effects, based on
-    KsPlus.
-
-    - roughness height = sand-grain roughness (0 for smooth walls)
-    - roughness constant = 0.5-1.0 (0.5 default)
+    Wall function boundary condition for rough walls
 
 SourceFiles
-    nutRoughWallFunctionFvPatchScalarField.C
+    mutSpalartAllamarasStandardWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutRoughWallFunctionFvPatchScalarField_H
-#define nutRoughWallFunctionFvPatchScalarField_H
+#ifndef mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField_H
+#define mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -49,56 +43,43 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class nutRoughWallFunctionFvPatchScalarField Declaration
+Class mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutRoughWallFunctionFvPatchScalarField
+class mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
     // Private data
 
-        //- Roughness height
-        scalarField Ks_;
-
-        //- Roughness constant
-        scalarField Cs_;
-
-
-    // Private member functions
-
-        //- Compute the roughness function
-        scalar fnRough
-        (
-            const scalar KsPlus,
-            const scalar Cs,
-            const scalar kappa
-        ) const;
+        scalar roughnessHeight_;
+        scalar roughnessConstant_;
+        scalar roughnessFudgeFactor_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nutRoughWallFunction");
+    TypeName("mutSpalartAllmarasStandardRoughWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nutRoughWallFunctionFvPatchScalarField
+        mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutRoughWallFunctionFvPatchScalarField
+        mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -106,20 +87,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutRoughWallFunctionFvPatchScalarField
+        //  mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutRoughWallFunctionFvPatchScalarField
+        mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&,
+            const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nutRoughWallFunctionFvPatchScalarField
+        mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&
+            const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -127,14 +108,17 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughWallFunctionFvPatchScalarField(*this)
+                new mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
+                (
+                    *this
+                )
             );
         }
 
         //- Construct as copy setting internal field reference
-        nutRoughWallFunctionFvPatchScalarField
+        mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&,
+            const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -146,45 +130,75 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughWallFunctionFvPatchScalarField(*this, iF)
+                new mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
+                (
+                   *this,
+                    iF
+                )
             );
         }
 
 
     // Member functions
 
-        // Mapping functions
+        // Access
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
+            //- Return the fluctuation scale
+            const scalar& roughnessHeight() const
+            {
+                return roughnessHeight_;
+            }
 
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchScalarField&,
-                const labelList&
-            );
+            //- Return reference to the fluctuation scale to allow adjustment
+            scalar& roughnessHeight()
+            {
+                return roughnessHeight_;
+            }
+
+
+            //- Return the fluctuation scale
+            const scalar& roughnessConstant() const
+            {
+                return roughnessConstant_;
+            }
+
+            //- Return reference to the fluctuation scale to allow adjustment
+            scalar& roughnessConstant()
+            {
+                return roughnessConstant_;
+            }
+
+            //- Return the fluctuation scale
+            const scalar& roughnessFudgeFactor() const
+            {
+                return roughnessFudgeFactor_;
+            }
+
+            //- Return reference to the fluctuation scale to allow adjustment
+            scalar& roughnessFudgeFactor()
+            {
+                return roughnessFudgeFactor_;
+            }
+
 
         // Evaluation functions
 
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+            //- Evaluate the patchField
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
 
-        // I-O
-
-            //- Write
-            void write(Ostream&) const;
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -141,7 +141,7 @@ kOmega::kOmega
         mesh_
     )
 {
-    nut_ == k_/(omega_ + omegaSmall_);
+    nut_ = k_/(omega_ + omegaSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();

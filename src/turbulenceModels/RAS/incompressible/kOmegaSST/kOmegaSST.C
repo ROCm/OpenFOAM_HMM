@@ -250,7 +250,7 @@ kOmegaSST::kOmegaSST
         mesh_
     )
 {
-    nut_ ==
+    nut_ =
         a1_*k_
        /max
         (

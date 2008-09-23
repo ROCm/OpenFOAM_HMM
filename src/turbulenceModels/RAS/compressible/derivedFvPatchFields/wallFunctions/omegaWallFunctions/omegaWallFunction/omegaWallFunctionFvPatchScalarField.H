@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RASModels::mutStandardRoughWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::omegaWallFunctionFvPatchScalarField
 
 Description
-    Wall function boundary condition for rough walls
+    Replaces functionality in wallFunctionsI.H
 
 SourceFiles
-    mutStandardWallFunctionFvPatchScalarField.C
+    omegaWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutStandardRoughWallFunctionFvPatchScalarField_H
-#define mutStandardRoughWallFunctionFvPatchScalarField_H
+#ifndef omegaWallFunctionFvPatchScalarField_H
+#define omegaWallFunctionFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "fixedInternalValueFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,58 +48,58 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class mutWallFunctionFvPatch Declaration
+           Class omegaWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class mutStandardRoughWallFunctionFvPatchScalarField
+class omegaWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public fixedInternalValueFvPatchField<scalar>
 {
-    // Private data
 
-        scalar roughnessHeight_;
-        scalar roughnessConstant_;
-        scalar roughnessFudgeFactor_;
+    // Private member functions
+
+        //- Check the type of the patch
+        void checkType();
 
 
 public:
 
     //- Runtime type information
-    TypeName("mutStandardRoughWallFunction");
+    TypeName("omegaWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        mutStandardRoughWallFunctionFvPatchScalarField
+        omegaWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        mutStandardRoughWallFunctionFvPatchScalarField
+        omegaWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given 
-        //  mutStandardRoughWallFunctionFvPatchScalarField
+        //- Construct by mapping given
+        // omegaWallFunctionFvPatchScalarField
         //  onto a new patch
-        mutStandardRoughWallFunctionFvPatchScalarField
+        omegaWallFunctionFvPatchScalarField
         (
-            const mutStandardRoughWallFunctionFvPatchScalarField&,
+            const omegaWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        mutStandardRoughWallFunctionFvPatchScalarField
+        omegaWallFunctionFvPatchScalarField
         (
-            const mutStandardRoughWallFunctionFvPatchScalarField&
+            const omegaWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -107,14 +107,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new mutStandardRoughWallFunctionFvPatchScalarField(*this)
+                new omegaWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        mutStandardRoughWallFunctionFvPatchScalarField
+        omegaWallFunctionFvPatchScalarField
         (
-            const mutStandardRoughWallFunctionFvPatchScalarField&,
+            const omegaWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -126,64 +126,23 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new mutStandardRoughWallFunctionFvPatchScalarField(*this, iF)
+                new omegaWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        // Access
-
-            //- Return the fluctuation scale
-            const scalar& roughnessHeight() const
-            {
-                return roughnessHeight_;
-            }
-
-            //- Return reference to the fluctuation scale to allow adjustment
-            scalar& roughnessHeight()
-            {
-                return roughnessHeight_;
-            }
-
-
-            //- Return the fluctuation scale
-            const scalar& roughnessConstant() const
-            {
-                return roughnessConstant_;
-            }
-
-            //- Return reference to the fluctuation scale to allow adjustment
-            scalar& roughnessConstant()
-            {
-                return roughnessConstant_;
-            }
-
-            //- Return the fluctuation scale
-            const scalar& roughnessFudgeFactor() const
-            {
-                return roughnessFudgeFactor_;
-            }
-
-            //- Return reference to the fluctuation scale to allow adjustment
-            scalar& roughnessFudgeFactor()
-            {
-                return roughnessFudgeFactor_;
-            }
-
-
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
 
 
-        //- Write
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            void write(Ostream&) const;
 };
 
 

@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fixedInternalValueFvPatchField
+    Foam::compressible::RASModels::kQRWallFunctionFvPatchField
 
 Description
-    Boundary condition providing mechanism to set boundary (cell) values
-    directly into a matrix, i.e. to set a constraint condition. Default
-    behaviour is to act as a zero gradient condition.
+    Boundary condition for turbulence k, Q, and R when using wall functions.
+    Simply acts as a zero gradient condition.
 
 SourceFiles
-    fixedInternalValueFvPatchField.C
+    kQRWallFunctionFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedInternalValueFvPatchField_H
-#define fixedInternalValueFvPatchField_H
+#ifndef kQRWallFunctionFvPatchField_H
+#define kQRWallFunctionFvPatchField_H
 
 #include "zeroGradientFvPatchField.H"
 
@@ -44,58 +43,65 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-              Class fixedInternalValueFvPatchField Declaration
+                Class kQRWallFunctionFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class fixedInternalValueFvPatchField
+class kQRWallFunctionFvPatchField
 :
     public zeroGradientFvPatchField<Type>
 {
 
+    // Private member functions
+
+        //- Check the type of the patch
+        void checkType();
+
+
 public:
 
     //- Runtime type information
-    TypeName("fixedInternalValue");
+    TypeName("kQRWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        fixedInternalValueFvPatchField
+        kQRWallFunctionFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        fixedInternalValueFvPatchField
+        kQRWallFunctionFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedInternalValueFvPatchField<Type>
+        //- Construct by mapping given
+        // kQRWallFunctionFvPatchField
         //  onto a new patch
-        fixedInternalValueFvPatchField
+        kQRWallFunctionFvPatchField
         (
-            const fixedInternalValueFvPatchField<Type>&,
+            const kQRWallFunctionFvPatchField&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        fixedInternalValueFvPatchField
+        kQRWallFunctionFvPatchField
         (
-            const fixedInternalValueFvPatchField<Type>&
+            const kQRWallFunctionFvPatchField&
         );
 
         //- Construct and return a clone
@@ -103,14 +109,14 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new fixedInternalValueFvPatchField<Type>(*this)
+                new kQRWallFunctionFvPatchField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        fixedInternalValueFvPatchField
+        kQRWallFunctionFvPatchField
         (
-            const fixedInternalValueFvPatchField<Type>&,
+            const kQRWallFunctionFvPatchField&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -122,7 +128,7 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new fixedInternalValueFvPatchField<Type>(*this, iF)
+                new kQRWallFunctionFvPatchField(*this, iF)
             );
         }
 
@@ -131,21 +137,30 @@ public:
 
         // Evaluation functions
 
-            //-Manipulate a matrix
-            virtual void manipulateMatrix(fvMatrix<Type>& matrix);
+            //- Evaluate the patchField
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::Pstream::blocking
+            );
+
+
+        // I-O
+
+            //- Write
+            void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fixedInternalValueFvPatchField.C"
+#   include "kQRWallFunctionFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

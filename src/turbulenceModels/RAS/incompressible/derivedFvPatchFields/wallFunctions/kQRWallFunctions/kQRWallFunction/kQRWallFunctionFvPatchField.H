@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::kQRWallFunctionFvPatchField
+    Foam::incompressible::RASModels::kQRWallFunctionFvPatchField
 
 Description
     Boundary condition for turbulence k, Q, and R when using wall functions.

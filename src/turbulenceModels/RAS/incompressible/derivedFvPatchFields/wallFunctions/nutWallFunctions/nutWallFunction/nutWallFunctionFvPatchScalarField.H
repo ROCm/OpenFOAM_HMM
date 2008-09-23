@@ -50,7 +50,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class nutWallFunctionFvPatch Declaration
+             Class nutWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class nutWallFunctionFvPatchScalarField

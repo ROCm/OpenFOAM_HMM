@@ -201,13 +201,14 @@ LRR::LRR
             "mut",
             runTime_.timeName(),
             mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
         ),
-        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        mesh_
     )
 {
-#   include "wallViscosityI.H"
+    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
 
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
@@ -311,15 +312,17 @@ void LRR::correct()
     {
         // Re-calculate viscosity
         mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_.correctBoundaryConditions();
         return;
     }
 
     RASModel::correct();
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G = 0.5*tr(P);
+    volScalarField G("G", 0.5*tr(P));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -335,7 +338,7 @@ void LRR::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -398,8 +401,7 @@ void LRR::correct()
 
     // Re-calculate viscosity
     mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
-
-#   include "wallViscosityI.H"
+    mut_.correctBoundaryConditions();
 
 
     // Correct wall shear stresses

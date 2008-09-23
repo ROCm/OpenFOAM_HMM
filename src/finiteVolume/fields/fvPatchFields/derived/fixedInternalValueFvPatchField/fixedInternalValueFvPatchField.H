@@ -23,20 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::omegaWallFunctionFvPatchScalarField
+    Foam::incompressible::RASModels::fixedInternalValueFvPatchField
 
 Description
-    Replaces functionality in wallFunctionsI.H
+    Boundary condition providing mechanism to set boundary (cell) values
+    directly into a matrix, i.e. to set a constraint condition. Default
+    behaviour is to act as a zero gradient condition.
 
 SourceFiles
-    omegaWallFunctionFvPatchScalarField.C
+    fixedInternalValueFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef omegaWallFunctionFvPatchScalarField_H
-#define omegaWallFunctionFvPatchScalarField_H
+#ifndef fixedInternalValueFvPatchField_H
+#define fixedInternalValueFvPatchField_H
 
-#include "fixedInternalValueFvPatchField.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,85 +50,79 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class omegaWallFunctionFvPatchScalarField Declaration
+              Class fixedInternalValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
-class omegaWallFunctionFvPatchScalarField
+template<class Type>
+class fixedInternalValueFvPatchField
 :
-    public fixedInternalValueFvPatchField<scalar>
+    public zeroGradientFvPatchField<Type>
 {
-
-    // Private member functions
-
-        //- Check the type of the patch
-        void checkType();
-
 
 public:
 
     //- Runtime type information
-    TypeName("omegaWallFunction");
+    TypeName("fixedInternalValue");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        omegaWallFunctionFvPatchScalarField
+        fixedInternalValueFvPatchField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
+            const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        omegaWallFunctionFvPatchScalarField
+        fixedInternalValueFvPatchField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        // omegaWallFunctionFvPatchScalarField
+        //- Construct by mapping the given fixedInternalValueFvPatchField<Type>
         //  onto a new patch
-        omegaWallFunctionFvPatchScalarField
+        fixedInternalValueFvPatchField
         (
-            const omegaWallFunctionFvPatchScalarField&,
+            const fixedInternalValueFvPatchField<Type>&,
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        omegaWallFunctionFvPatchScalarField
+        fixedInternalValueFvPatchField
         (
-            const omegaWallFunctionFvPatchScalarField&
+            const fixedInternalValueFvPatchField<Type>&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
+        virtual tmp<fvPatchField<Type> > clone() const
         {
-            return tmp<fvPatchScalarField>
+            return tmp<fvPatchField<Type> >
             (
-                new omegaWallFunctionFvPatchScalarField(*this)
+                new fixedInternalValueFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        omegaWallFunctionFvPatchScalarField
+        fixedInternalValueFvPatchField
         (
-            const omegaWallFunctionFvPatchScalarField&,
-            const DimensionedField<scalar, volMesh>&
+            const fixedInternalValueFvPatchField<Type>&,
+            const DimensionedField<Type, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchScalarField> clone
+        virtual tmp<fvPatchField<Type> > clone
         (
-            const DimensionedField<scalar, volMesh>& iF
+            const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchScalarField>
+            return tmp<fvPatchField<Type> >
             (
-                new omegaWallFunctionFvPatchScalarField(*this, iF)
+                new fixedInternalValueFvPatchField<Type>(*this, iF)
             );
         }
 
@@ -135,14 +131,8 @@ public:
 
         // Evaluation functions
 
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
-
-        // I-O
-
-            //- Write
-            void write(Ostream&) const;
+            //-Manipulate a matrix
+            virtual void manipulateMatrix(fvMatrix<Type>& matrix);
 };
 
 
@@ -151,6 +141,12 @@ public:
 } // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "fixedInternalValueFvPatchField.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

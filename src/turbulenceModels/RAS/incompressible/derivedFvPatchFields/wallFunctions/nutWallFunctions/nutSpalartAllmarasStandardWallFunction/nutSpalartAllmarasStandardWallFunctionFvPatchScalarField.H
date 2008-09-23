@@ -49,7 +49,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class nutWallFunctionFvPatch Declaration
+  Class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField

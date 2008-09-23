@@ -182,7 +182,7 @@ realizableKE::realizableKE
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
 
-    nut_ == rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
