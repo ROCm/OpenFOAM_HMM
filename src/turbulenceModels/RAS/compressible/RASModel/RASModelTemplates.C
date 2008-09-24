@@ -26,9 +26,6 @@ License
 
 #include "RASModel.H"
 
-#include "wallFvPatch.H"
-#include "kQRWallFunctionFvPatchField.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

@@ -58,6 +58,10 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
+// Headers reqd for back-porting wall function boundary conditions
+#include "wallFvPatch.H"
+#include "kQRWallFunctionFvPatchField.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
