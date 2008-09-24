@@ -47,7 +47,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 )
 :
     advectiveFvPatchField<Type>(p, iF),
-    psiName_("Undefined"),
+    psiName_("psi"),
     gamma_(0.0)
 {}
 
@@ -76,7 +76,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 )
 :
     advectiveFvPatchField<Type>(p, iF, dict),
-    psiName_(dict.lookup("psi")),
+    psiName_(dict.lookupOrDefault<word>("psi", "psi")),
     gamma_(readScalar(dict.lookup("gamma")))
 {}
 
@@ -119,7 +119,7 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
         reinterpret_cast<const scalar*>(NULL)
     );
 
-    const surfaceScalarField& phi = 
+    const surfaceScalarField& phi =
         this->db().objectRegistry::lookupObject<surfaceScalarField>
         (this->phiName_);
 
@@ -153,22 +153,27 @@ template<class Type>
 void waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
 
-    if (this->rhoName_ != "Undefined")
+    if (this->phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
+    }
+    if (this->rhoName_ != "rho")
     {
         os.writeKeyword("rho") << this->rhoName_ << token::END_STATEMENT << nl;
     }
-
-    os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << endl;
+    if (psiName_ != "psi")
+    {
+        os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
+    }
+    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
 
     if (this->lInf_ > SMALL)
     {
         os.writeKeyword("fieldInf") << this->fieldInf_
-            << token::END_STATEMENT << endl;
-        os.writeKeyword("lInf") << this->lInf_
-            << token::END_STATEMENT << endl;
+            << token::END_STATEMENT << nl;
+        os.writeKeyword("lInf") << this->lInf_ 
+            << token::END_STATEMENT << nl;
     }
 
     this->writeEntry("value", os);

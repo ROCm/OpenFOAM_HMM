@@ -120,7 +120,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clearStorage()
 {
-    List<T>::size() = allocSize_;    // make List<T> consistent
     List<T>::clear();
     allocSize_ = 0;
 }
@@ -167,7 +166,6 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 {
     allocSize_ = l.allocSize();
     List<T>::transfer(l);       // take over storage
-    l.allocSize_ = 0;
 }
 
 
@@ -202,7 +200,7 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
     {
         FatalErrorIn
         (
-            "void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()"
+            "Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()"
         )   << "List is empty" << abort(FatalError);
     }
 
@@ -224,7 +222,7 @@ inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 
     if (nextFree > allocSize_)
     {
-       allocSize_ = max
+        allocSize_ = max
         (
             nextFree,
             label(SizeMult*allocSize_/SizeDiv + SizeInc)
@@ -267,7 +265,10 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 )
 {
     List<T>::operator=(l);
-    allocSize_ = l.allocSize();
+    // allocSize_ = l.allocSize();  // wrong
+    allocSize_ = List<T>::size();
+    // ^^^^ with this change, we could just use
+    //      DynamicList::operator=(const List<T>&) instead
 }
 
 

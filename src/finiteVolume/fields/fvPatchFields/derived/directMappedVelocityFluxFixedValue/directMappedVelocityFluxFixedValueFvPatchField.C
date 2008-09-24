@@ -238,11 +238,11 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 
     const word& fieldName = dimensionedInternalField().name();
     const volVectorField& UField = db().lookupObject<volVectorField>(fieldName);
-    surfaceScalarField& phiField =
-    const_cast<surfaceScalarField&>
-        (
-            db().lookupObject<surfaceScalarField>(phiName_)
-        );
+
+    surfaceScalarField& phiField = const_cast<surfaceScalarField&>
+    (
+        db().lookupObject<surfaceScalarField>(phiName_)
+    );
 
     switch (mpp.mode())
     {

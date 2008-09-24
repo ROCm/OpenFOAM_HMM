@@ -52,11 +52,9 @@ void fanFvPatchField<scalar>::updateCoeffs()
 
     if (f_.size() > 1)
     {
-        const surfaceScalarField& phi = db().lookupObject<surfaceScalarField>
-        (
-            "phi"
-        );
-        
+        const surfaceScalarField& phi =
+            db().lookupObject<surfaceScalarField>("phi");
+
         const fvsPatchField<scalar>& phip =
             patch().patchField<surfaceScalarField, scalar>(phi);
 
