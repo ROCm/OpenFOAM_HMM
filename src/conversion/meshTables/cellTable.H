@@ -86,8 +86,8 @@ class cellTable
 
     // Private Member Functions
 
-        //- Map from cellTable ID => zone number (unmapped = -1)
-        labelList zoneMap() const;
+        //- Map from cellTable ID => zone number
+        Map<label> zoneMap() const;
 
         //- A contiguous list of cellTable names
         List<word> namesList() const;

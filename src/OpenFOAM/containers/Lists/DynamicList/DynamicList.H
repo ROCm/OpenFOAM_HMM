@@ -26,7 +26,7 @@ Class
     Foam::DynamicList
 
 Description
-    A 1D vector of objects of type \<T\> which resizes itself as necessary to
+    A 1D vector of objects of type \<T\> that resizes itself as necessary to
     accept the new objects.
 
     Internal storage is a compact array and the list can be shrunk to compact
@@ -81,24 +81,29 @@ class DynamicList
 {
     // Private data
 
-        //- Number of next free element
-        label nextFree_;
+        //- Allocated size for underlying List.
+        label allocSize_;
 
 
 public:
+
+    // Related types
+
+        //- Declare friendship with the List class
+        friend class List<T>;
 
     // Constructors
 
         //- Construct null
         inline DynamicList();
 
-        //- Construct given size
+        //- Construct given size.
         explicit inline DynamicList(const label);
 
-        //- Construct from UList. nextFree_ set to size().
+        //- Construct from UList. Size set to UList size.
         explicit inline DynamicList(const UList<T>&);
 
-        //- Construct from Istream. nextFree_ set to size().
+        //- Construct from Istream. Size set to size of read list.
         explicit DynamicList(Istream&);
 
 
@@ -106,22 +111,24 @@ public:
 
         // Access
 
-            //- Size of the active part of the list.
-            //  Direct over-ride of list size member function
-            inline label size() const;
+            //- Size of the underlying storage.
+            inline label allocSize() const;
 
 
         // Edit
 
             //- Reset size of List.
-            void setSize(const label);
+            inline void setSize(const label);
 
             //- Reset size of List and value for new elements.
-            void setSize(const label, const T&);
+            inline void setSize(const label, const T&);
 
-            //- Clear the list, i.e. set next free to zero.
+            //- Clear the list, i.e. set the size to zero.
             //  Allocated size does not change
-            void clear();
+            inline void clear();
+
+            //- Clear the list and delete storage.
+            inline void clearStorage();
 
             //- Shrink the List<T> to the number of elements used
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
@@ -129,12 +136,12 @@ public:
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list. Is same as List::transfer except
             //  checks that you're not changing the underlying list to something
-            //  smaller than nextFree_.
-            void transfer(List<T>&);
+            //  smaller than allocSize_.
+            inline void transfer(List<T>&);
 
             //- Transfer the contents of the argument DynamicList into this
             //  DynamicList and annull the argument list.
-            void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
+            inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
 
     // Member Operators
@@ -142,7 +149,7 @@ public:
         //- Append an element at the end of the list
         inline void append(const T& e);
 
-        //- Return and remove the top element
+        //- Remove and return the top element
         inline T remove();
 
         //- Return non-const access to an element,
@@ -152,8 +159,14 @@ public:
         //- Assignment of all entries to the given value
         inline void operator=(const T&);
 
-        //- Assignment to List<T>
+        //- Assignment from List<T>
         inline void operator=(const List<T>&);
+
+        //- Assignment from DynamicList<T>
+        inline void operator=
+        (
+            const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+        );
 
 
     // IOstream operators

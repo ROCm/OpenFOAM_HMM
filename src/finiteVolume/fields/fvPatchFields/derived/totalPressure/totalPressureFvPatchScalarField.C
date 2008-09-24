@@ -32,28 +32,25 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
+Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    UName_("undefined"),
-    phiName_("undefined"),
-    rhoName_("undefined"),
-    psiName_("undefined"),
+    UName_("U"),
+    phiName_("phi"),
+    rhoName_("none"),
+    psiName_("none"),
     gamma_(0.0),
     p0_(p.size(), 0.0)
 {}
 
 
-totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
+Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -61,10 +58,10 @@ totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    UName_(dict.lookup("U")),
-    phiName_(dict.lookup("phi")),
-    rhoName_(dict.lookup("rho")),
-    psiName_(dict.lookup("psi")),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "none")),
+    psiName_(dict.lookupOrDefault<word>("psi", "none")),
     gamma_(readScalar(dict.lookup("gamma"))),
     p0_("p0", dict, p.size())
 {
@@ -82,7 +79,7 @@ totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 }
 
 
-totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
+Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 (
     const totalPressureFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -100,7 +97,7 @@ totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 {}
 
 
-totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
+Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 (
     const totalPressureFvPatchScalarField& tppsf
 )
@@ -115,7 +112,7 @@ totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 {}
 
 
-totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
+Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 (
     const totalPressureFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -133,7 +130,7 @@ totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void totalPressureFvPatchScalarField::autoMap
+void Foam::totalPressureFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -143,7 +140,7 @@ void totalPressureFvPatchScalarField::autoMap
 }
 
 
-void totalPressureFvPatchScalarField::rmap
+void Foam::totalPressureFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
@@ -158,7 +155,7 @@ void totalPressureFvPatchScalarField::rmap
 }
 
 
-void totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
+void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
 {
     if (updated())
     {
@@ -208,12 +205,12 @@ void totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
         FatalErrorIn
         (
             "totalPressureFvPatchScalarField::updateCoeffs()"
-        )   << " rho or psi set inconsitently, rho = " << rhoName_
-            << ", psi = " << psiName_ << '.' << nl
+        )   << " rho or psi set inconsistently, rho = " << rhoName_
+            << ", psi = " << psiName_ << ".\n"
             << "    Set either rho or psi or neither depending on the "
                "definition of total pressure." << nl
-            << "    Set the unused variables to 'none'."
-            << "\n    on patch " << this->patch().name()
+            << "    Set the unused variable(s) to 'none'.\n"
+            << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalError);
@@ -223,20 +220,26 @@ void totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
 }
 
 
-void totalPressureFvPatchScalarField::updateCoeffs()
+void Foam::totalPressureFvPatchScalarField::updateCoeffs()
 {
     updateCoeffs(patch().lookupPatchField<volVectorField, vector>(UName_));
 }
 
 
-void totalPressureFvPatchScalarField::write(Ostream& os) const
+void Foam::totalPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    if (UName_ != "U")
+    {
+        os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
+    }
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
     os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << endl;
+    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
     p0_.writeEntry("p0", os);
     writeEntry("value", os);
 }
@@ -244,10 +247,13 @@ void totalPressureFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, totalPressureFvPatchScalarField);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        totalPressureFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

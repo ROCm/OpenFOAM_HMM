@@ -38,6 +38,8 @@ graphField/writePatchGraph.C
 graphField/writeCellGraph.C
 graphField/makeGraph.C
 
+outputFilters/outputFilterOutputControl/outputFilterOutputControl.C
+
 meshToMesh = meshToMeshInterpolation/meshToMesh
 $(meshToMesh)/meshToMesh.C
 $(meshToMesh)/calculateMeshToMeshAddressing.C

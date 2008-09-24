@@ -26,7 +26,7 @@ License
 
 #include "directMappedFixedValueFvPatchField.H"
 #include "directMappedFvPatch.H"
-#include "fvBoundaryMesh.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -144,26 +144,17 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
+void directMappedFixedValueFvPatchField<Type>::getNewValues
+(
+    const directMappedPolyPatch& mpp,
+    const Field<Type>& sendValues,
+    Field<Type>& newValues
+) const
 {
-    if (this->updated())
-    {
-        return;
-    }
-
-    // Get the directMappedPolyPatch
-    const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
-    (
-        directMappedFixedValueFvPatchField<Type>::patch().patch()
-    );
-
     // Get the scheduling information
     const List<labelPair>& schedule = mpp.schedule();
     const labelListList& sendLabels = mpp.sendLabels();
     const labelListList& receiveFaceLabels = mpp.receiveFaceLabels();
-
-
-    Field<Type> newValues(this->size());
 
     forAll(schedule, i)
     {
@@ -173,17 +164,13 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
         if (Pstream::myProcNo() == sendProc)
         {
-            OPstream toProc(Pstream::blocking, recvProc);
-            toProc<< IndirectList<Type>
-            (
-                this->internalField(),
-                sendLabels[recvProc]
-            )();
+            OPstream toProc(Pstream::scheduled, recvProc);
+            toProc<< IndirectList<Type>(sendValues, sendLabels[recvProc])();
         }
         else
         {
             // I am receiver. Receive from sendProc.
-            IPstream fromProc(Pstream::blocking, sendProc);
+            IPstream fromProc(Pstream::scheduled, sendProc);
 
             Field<Type> fromFld(fromProc);
 
@@ -201,12 +188,8 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     // Do data from myself
     {
-        IndirectList<Type> fromFld
-        (
-            this->internalField(),
-            sendLabels[Pstream::myProcNo()]
-        );
-    
+        IndirectList<Type> fromFld(sendValues, sendLabels[Pstream::myProcNo()]);
+
         // Destination faces
         const labelList& faceLabels = receiveFaceLabels[Pstream::myProcNo()];
 
@@ -217,10 +200,93 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
             newValues[patchFaceI] = fromFld[i];
         }
     }
+}
+
+
+template<class Type>
+void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
+{
+    if (this->updated())
+    {
+        return;
+    }
+
+    // Get the directMappedPolyPatch
+    const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
+    (
+        directMappedFixedValueFvPatchField<Type>::patch().patch()
+    );
+
+    Field<Type> newValues(this->size());
+
+    switch (mpp.mode())
+    {
+        case directMappedPolyPatch::NEARESTCELL:
+        {
+            getNewValues(mpp, this->internalField(), newValues);
+
+            break;
+        }
+        case directMappedPolyPatch::NEARESTPATCHFACE:
+        {
+            const label patchID =
+                 this->patch().patch().boundaryMesh().findPatchID
+                 (
+                    mpp.samplePatch()
+                 );
+            typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+            const word& fieldName = this->dimensionedInternalField().name();
+            const fieldType& sendField =
+                this->db().objectRegistry::lookupObject<fieldType>(fieldName);
+
+            getNewValues(mpp, sendField.boundaryField()[patchID], newValues);
+
+            break;
+        }
+        case directMappedPolyPatch::NEARESTFACE:
+        {
+            typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+            const word& fieldName = this->dimensionedInternalField().name();
+            const fieldType& sendField =
+                this->db().objectRegistry::lookupObject<fieldType>(fieldName);
+
+            Field<Type> allValues
+            (
+                this->patch().patch().boundaryMesh().mesh().nFaces(),
+                pTraits<Type>::zero
+            );
+
+            forAll(sendField.boundaryField(), patchI)
+            {
+                const fvPatchField<Type>& pf =
+                    sendField.boundaryField()[patchI];
+                label faceStart = pf.patch().patch().start();
+
+                forAll(pf, faceI)
+                {
+                    allValues[faceStart++] = pf[faceI];
+                }
+            }
+
+            getNewValues(mpp, allValues, newValues);
+
+            newValues = this->patch().patchSlice(newValues);
+
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "directMappedFixedValueFvPatchField<Type>::updateCoeffs()"
+            )<< "Unknown sampling mode: " << mpp.mode()
+             << nl << abort(FatalError);
+        }
+    }
 
     if (setAverage_)
     {
-        Type averagePsi = 
+        Type averagePsi =
             gSum(this->patch().magSf()*newValues)
            /gSum(this->patch().magSf());
 

@@ -154,7 +154,6 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
 
     dynCuttingPoints.shrink();
     cutPoints_.transfer(dynCuttingPoints);
-    dynCuttingPoints.clear();
 
     return edgePoint;
 }

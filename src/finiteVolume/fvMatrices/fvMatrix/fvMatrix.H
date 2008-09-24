@@ -327,7 +327,8 @@ public:
             void setReference
             (
                 const label cell,
-                const Type& value
+                const Type& value,
+                const bool forceReference = false
             );
 
             //- Set reference level for a component of the solution

@@ -279,6 +279,9 @@ public:
         //- Read the field average data
         virtual void read(const dictionary&);
 
+        //- Execute the averaging
+        virtual void execute();
+
         //- Calculate the field average data and write
         virtual void write();
 };

@@ -477,10 +477,11 @@ template<class Type>
 void Foam::fvMatrix<Type>::setReference
 (
     const label cell,
-    const Type& value
+    const Type& value,
+    const bool forceReference
 )
 {
-    if (psi_.needReference())
+    if (psi_.needReference() || forceReference)
     {
         if (Pstream::master())
         {

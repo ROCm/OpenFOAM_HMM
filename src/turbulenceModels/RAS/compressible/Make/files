@@ -31,6 +31,7 @@ kQRWallFunctions = $(wallFunctions)/kQRWallFunctions
 $(kQRWallFunctions)/kQRWallFunction/kQRWallFunctionFvPatchFields.C
 
 /* Patch fields */
+derivedFvPatchFields/turbulentHeatFluxTemperature/turbulentHeatFluxTemperatureFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 

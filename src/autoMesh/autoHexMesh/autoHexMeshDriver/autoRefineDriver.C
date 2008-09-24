@@ -25,6 +25,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "autoRefineDriver.H"
+#include "meshRefinement.H"
 #include "fvMesh.H"
 #include "Time.H"
 #include "boundBox.H"

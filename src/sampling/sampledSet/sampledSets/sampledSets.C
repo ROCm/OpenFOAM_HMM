@@ -269,6 +269,12 @@ void Foam::sampledSets::verbose(const bool verbosity)
 }
 
 
+void Foam::sampledSets::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::sampledSets::write()
 {
     if (size() && checkFieldTypes())

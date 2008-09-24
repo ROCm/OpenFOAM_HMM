@@ -123,7 +123,7 @@ void pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
     }
 
     const surfaceScalarField& phi =
-    db().lookupObject<surfaceScalarField>(phiName_);
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);

@@ -26,7 +26,7 @@ Class
     Foam::limitedSurfaceInterpolationScheme
 
 Description
-    Abstract base class for surface interpolation schemes.
+    Abstract base class for limited surface interpolation schemes.
 
 SourceFiles
     limitedSurfaceInterpolationScheme.C
@@ -119,7 +119,7 @@ public:
         {}
 
 
-        //- Construct from mesh and Istream. 
+        //- Construct from mesh and Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         limitedSurfaceInterpolationScheme
@@ -169,6 +169,15 @@ public:
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const = 0;
+
+        //- Return the interpolation weighting factors for the given field,
+        //  by limiting the given weights with the given limiter
+        tmp<surfaceScalarField> weights
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const surfaceScalarField& CDweights,
+            tmp<surfaceScalarField> tLimiter
+        ) const;
 
         //- Return the interpolation weighting factors for the given field
         virtual tmp<surfaceScalarField> weights

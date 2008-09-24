@@ -48,7 +48,6 @@ maxAcousticCo              50.0;
 
 functions
 (
-/*
     fieldAverage1
     {
         // Type of functionObject
@@ -56,6 +55,10 @@ functions
 
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldAverage.so");
+
+        enabled false;
+
+        outputControl outputTime;
 
         // Fields to be probed. runTime modifiable!
         fields
@@ -80,7 +83,6 @@ functions
             }
         );
     }
-*/
 );
 
 // ************************************************************************* //

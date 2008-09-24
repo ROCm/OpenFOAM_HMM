@@ -226,18 +226,21 @@ void Foam::fieldAverage::read(const dictionary& dict)
 }
 
 
-void Foam::fieldAverage::write()
+void Foam::fieldAverage::execute()
 {
     if (active_)
     {
         calcAverages();
+    }
+}
 
-        if (obr_.time().outputTime())
-        {
-            writeAverages();
 
-            writeAveragingProperties();
-        }
+void Foam::fieldAverage::write()
+{
+    if (active_)
+    {
+        writeAverages();
+        writeAveragingProperties();
     }
 }
 

@@ -25,19 +25,13 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "refinementSurfaces.H"
-#include "orientedSurface.H"
 #include "Time.H"
 #include "searchableSurfaces.H"
 #include "shellSurfaces.H"
 #include "triSurfaceMesh.H"
 #include "labelPair.H"
 #include "searchableSurfacesQueries.H"
-
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "UPtrList.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -438,31 +432,6 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
 }
 
 
-// Orient surface (if they're closed) before any searching is done.
-void Foam::refinementSurfaces::orientSurface
-(
-    const point& keepPoint,
-    triSurfaceMesh& s
-)
-{
-    // Flip surface so keepPoint is outside.
-    bool anyFlipped = orientedSurface::orient(s, keepPoint, true);
-
-    if (anyFlipped)
-    {
-        // orientedSurface will have done a clearOut of the surface.
-        // we could do a clearout of the triSurfaceMeshes::trees()
-        // but these aren't affected by orientation (except for cached
-        // sideness which should not be set at this point. !!Should
-        // check!)
-
-        Info<< "orientSurfaces : Flipped orientation of surface "
-            << s.searchableSurface::name()
-            << " so point " << keepPoint << " is outside." << endl;
-    }
-}
-
-
 // Count number of triangles per surface region
 Foam::labelList Foam::refinementSurfaces::countRegions(const triSurface& s)
 {
@@ -485,7 +454,7 @@ void Foam::refinementSurfaces::setMinLevelFields
     const shellSurfaces& shells
 )
 {
-    minLevelFields_.setSize(surfaces_.size());
+    //minLevelFields_.setSize(surfaces_.size());
 
     forAll(surfaces_, surfI)
     {
@@ -495,26 +464,24 @@ void Foam::refinementSurfaces::setMinLevelFields
         {
             const triSurfaceMesh& triMesh = refCast<const triSurfaceMesh>(geom);
 
-            minLevelFields_.set
+            autoPtr<triSurfaceLabelField> minLevelFieldPtr
             (
-                surfI,
                 new triSurfaceLabelField
                 (
                     IOobject
                     (
-                        triMesh.searchableSurface::name(),
+                        "minLevel",
                         triMesh.objectRegistry::time().constant(),// directory
                         "triSurface",               // instance
                         triMesh,
                         IOobject::NO_READ,
-                        IOobject::AUTO_WRITE,
-                        false
+                        IOobject::AUTO_WRITE
                     ),
                     triMesh,
                     dimless
                 )
             );
-            triSurfaceLabelField& minLevelField = minLevelFields_[surfI];
+            triSurfaceLabelField& minLevelField = minLevelFieldPtr();
 
             const triSurface& s = static_cast<const triSurface&>(triMesh);
 
@@ -542,6 +509,9 @@ void Foam::refinementSurfaces::setMinLevelFields
                     shellLevel[triI]
                 );
             }
+
+            // Store field on triMesh
+            minLevelFieldPtr.ptr()->store();
         }
     }
 }
@@ -569,16 +539,37 @@ void Foam::refinementSurfaces::findHigherIntersection
         return;
     }
 
+
+    // Precalculate per surface whether it has a minlevelfield
+    UPtrList<triSurfaceLabelField> minLevelFields(surfaces_.size());
+    forAll(surfaces_, surfI)
+    {
+        const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
+
+        if (isA<triSurfaceMesh>(geom))
+        {
+            const triSurfaceMesh& triMesh = refCast<const triSurfaceMesh>(geom);
+            minLevelFields.set
+            (
+                surfI,
+               &const_cast<triSurfaceLabelField&>
+                (
+                    triMesh.lookupObject<triSurfaceLabelField>("minLevel")
+                )
+            );
+        }
+    }
+
     // Work arrays
     labelList hitMap(identity(start.size()));
     pointField p0(start);
     pointField p1(end);
     List<pointIndexHit> hitInfo(start.size());
 
-
     forAll(surfaces_, surfI)
     {
         allGeometry_[surfaces_[surfI]].findLineAny(p0, p1, hitInfo);
+
 
         // Copy all hits into arguments, continue with misses
         label newI = 0;
@@ -592,12 +583,12 @@ void Foam::refinementSurfaces::findHigherIntersection
                 // Check if minLevelField for this surface.
                 if
                 (
-                    minLevelFields_.set(surfI)
-                 && minLevelFields_[surfI].size() > 0
+                    minLevelFields.set(surfI)
+                 && minLevelFields[surfI].size() > 0
                 )
                 {
                     minLocalLevel =
-                        minLevelFields_[surfI][hitInfo[hitI].index()];
+                        minLevelFields[surfI][hitInfo[hitI].index()];
                 }
                 else
                 {
@@ -668,30 +659,57 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     {
         allGeometry_[surfaces_[surfI]].findLineAll(start, end, hitInfo);
 
+        // Repack hits for surface into flat list
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // To avoid overhead of calling getRegion for every point
+
+        label n = 0;
+        forAll(hitInfo, pointI)
+        {
+            n += hitInfo[pointI].size();
+        }
+
+        List<pointIndexHit> surfInfo(n);
+        labelList pointMap(n);
+        n = 0;
+
         forAll(hitInfo, pointI)
         {
             const List<pointIndexHit>& pHits = hitInfo[pointI];
-            allGeometry_[surfaces_[surfI]].getRegion(pHits, pRegions);
-            allGeometry_[surfaces_[surfI]].getNormal(pHits, pNormals);
 
-            // Extract those hits that are on higher levelled surfaces.
-            // Note: should move extraction of region, normal outside of loop
-            // below for if getRegion/getNormal have high overhead.
-
-            forAll(pHits, pHitI)
+            forAll(pHits, i)
             {
-                label region = globalRegion(surfI, pRegions[pHitI]);
+                surfInfo[n] = pHits[i];
+                pointMap[n] = pointI;
+                n++;
+            }
+        }
 
-                if (maxLevel_[region] > currentLevel[pointI])
-                {
-                    // Append to pointI info
-                    label sz = surfaceNormal[pointI].size();
-                    surfaceNormal[pointI].setSize(sz+1);
-                    surfaceNormal[pointI][sz] = pNormals[pHitI];
+        labelList surfRegion(n);
+        vectorField surfNormal(n);
+        allGeometry_[surfaces_[surfI]].getRegion(surfInfo, surfRegion);
+        allGeometry_[surfaces_[surfI]].getNormal(surfInfo, surfNormal);
 
-                    surfaceLevel[pointI].setSize(sz+1);
-                    surfaceLevel[pointI][sz] = maxLevel_[region];
-                }
+        surfInfo.clear();
+
+
+        // Extract back into pointwise
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        forAll(surfRegion, i)
+        {
+            label region = globalRegion(surfI, surfRegion[i]);
+            label pointI = pointMap[i];
+
+            if (maxLevel_[region] > currentLevel[pointI])
+            {
+                // Append to pointI info
+                label sz = surfaceNormal[pointI].size();
+                surfaceNormal[pointI].setSize(sz+1);
+                surfaceNormal[pointI][sz] = surfNormal[i];
+
+                surfaceLevel[pointI].setSize(sz+1);
+                surfaceLevel[pointI][sz] = maxLevel_[region];
             }
         }
     }

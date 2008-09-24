@@ -36,8 +36,7 @@ void Foam::OutputFilterFunctionObject<OutputFilter>::readDict()
 {
     dict_.readIfPresent("region", regionName_);
     dict_.readIfPresent("dictionary", dictName_);
-    dict_.readIfPresent("interval", interval_);
-    dict_.readIfPresent("enabled", execution_);
+    dict_.readIfPresent("enabled", enabled_);
 }
 
 
@@ -57,8 +56,8 @@ Foam::OutputFilterFunctionObject<OutputFilter>::OutputFilterFunctionObject
     dict_(dict),
     regionName_(polyMesh::defaultRegion),
     dictName_(),
-    interval_(0),
-    execution_(true)
+    enabled_(true),
+    outputControl_(t, dict)
 {
     readDict();
 }
@@ -71,7 +70,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
 {
     readDict();
 
-    if (execution_)
+    if (enabled_)
     {
         if (dictName_.size())
         {
@@ -105,9 +104,14 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
 template<class OutputFilter>
 bool Foam::OutputFilterFunctionObject<OutputFilter>::execute()
 {
-    if (execution_ && (interval_ <= 1 || !(time_.timeIndex() % interval_)) )
+    if (enabled_)
     {
-        ptr_->write();
+        ptr_->execute();
+
+        if (enabled_ && outputControl_.output())
+        {
+            ptr_->write();
+        }
     }
 
     return true;
@@ -117,14 +121,14 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute()
 template<class OutputFilter>
 void Foam::OutputFilterFunctionObject<OutputFilter>::on()
 {
-    execution_ = true;
+    enabled_ = true;
 }
 
 
 template<class OutputFilter>
 void Foam::OutputFilterFunctionObject<OutputFilter>::off()
 {
-    execution_ = false;
+    enabled_ = false;
 }
 
 
@@ -137,6 +141,8 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::read
     if (dict != dict_)
     {
         dict_ = dict;
+        outputControl_.read(dict);
+
         return start();
     }
     else

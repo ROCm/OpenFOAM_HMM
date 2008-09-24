@@ -386,7 +386,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
         FatalErrorIn
         (
             "meshRefinement::createBaffles"
-            "(const label, const labelList&, const labelList&)"
+            "(const labelList&, const labelList&)"
         )   << "Illegal size :"
             << " ownPatch:" << ownPatch.size()
             << " neiPatch:" << neiPatch.size()
@@ -412,7 +412,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
                 FatalErrorIn
                 (
                     "meshRefinement::createBaffles"
-                    "(const label, const labelList&, const labelList&)"
+                    "(const labelList&, const labelList&)"
                 )   << "Non synchronised at face:" << faceI
                     << " on patch:" << mesh_.boundaryMesh().whichPatch(faceI)
                     << " fc:" << mesh_.faceCentres()[faceI] << endl
@@ -461,7 +461,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
 
     //- Redo the intersections on the newly create baffle faces. Note that
     //  this changes also the cell centre positions.
-    labelHashSet baffledFacesSet(2*nBaffles);
+    faceSet baffledFacesSet(mesh_, "baffledFacesSet", 2*nBaffles);
 
     const labelList& reverseFaceMap = map().reverseFaceMap();
     const labelList& faceMap = map().faceMap();
@@ -496,6 +496,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
             }
         }
     }
+    baffledFacesSet.sync(mesh_);
 
     updateMesh(map, baffledFacesSet.toc());
 
@@ -1886,15 +1887,15 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
         labelList facePatch
         (
-            //markFacesOnProblemCells
-            //(
-            //    globalToPatch
-            //)
-            markFacesOnProblemCellsGeometric
+            markFacesOnProblemCells
             (
-                motionDict,
                 globalToPatch
             )
+            //markFacesOnProblemCellsGeometric
+            //(
+            //    motionDict,
+            //    globalToPatch
+            //)
         );
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;

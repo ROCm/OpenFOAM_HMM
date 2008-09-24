@@ -45,6 +45,7 @@ SourceFiles
 
 #include "functionObject.H"
 #include "dictionary.H"
+#include "outputFilterOutputControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,12 +69,10 @@ class OutputFilterFunctionObject
         word regionName_;
         word dictName_;
 
-        //- the execution interval (in time steps)
-        //  a value <= 1 means execute at every time step
-        label interval_;
-
         //- Switch for the execution of the functionObjects
-        bool execution_;
+        bool enabled_;
+
+        outputFilterOutputControl outputControl_;
 
         autoPtr<OutputFilter> ptr_;
 

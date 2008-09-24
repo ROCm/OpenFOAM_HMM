@@ -221,13 +221,51 @@ public:
                 const bool applySeparation
             );
 
+        // PackedList versions
+
+            template <int nBits, class CombineOp>
+            static void syncFaceList
+            (
+                const polyMesh& mesh,
+                PackedList<nBits>& faceValues,
+                const CombineOp& cop
+            );
+
+            template <int nBits>
+            static void swapFaceList
+            (
+                const polyMesh& mesh,
+                PackedList<nBits>& faceValues
+            );
+
+            template <int nBits, class CombineOp>
+            static void syncPointList
+            (
+                const polyMesh& mesh,
+                PackedList<nBits>& pointValues,
+                const CombineOp& cop,
+                const unsigned int nullValue
+            );
+
+            template <int nBits, class CombineOp>
+            static void syncEdgeList
+            (
+                const polyMesh& mesh,
+                PackedList<nBits>& edgeValues,
+                const CombineOp& cop,
+                const unsigned int nullValue
+            );
+
         // Other
 
             //- Get per point whether is it master (of a coupled set of points)
             static PackedList<1> getMasterPoints(const polyMesh&);
 
-            //- Get per edge whether is it master (of a coupled set of edge)
+            //- Get per edge whether is it master (of a coupled set of edges)
             static PackedList<1> getMasterEdges(const polyMesh&);
+
+            //- Get per face whether is it master (of a coupled set of faces)
+            static PackedList<1> getMasterFaces(const polyMesh&);
 
 };
 

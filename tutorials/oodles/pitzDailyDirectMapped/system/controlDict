@@ -54,6 +54,11 @@ functions
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libsampling.so");
 
+        enabled true;
+
+        outputControl timeStep;
+        outputInterval 1;
+
         // Locations to be probed. runTime modifiable!
         probeLocations
         (
@@ -80,6 +85,10 @@ functions
 
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldAverage.so");
+
+        enabled true;
+
+        outputControl outputTime;
 
         // Fields to be  averaged - runTime modifiable
         fields

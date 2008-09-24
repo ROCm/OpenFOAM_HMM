@@ -51,6 +51,9 @@ License
 #include "meshTools.H"
 #include "OFstream.H"
 #include "geomDecomp.H"
+#include "Random.H"
+#include "searchableSurfaces.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -122,13 +125,36 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 {
     const pointField& cellCentres = mesh_.cellCentres();
 
-    label nTotEdges = returnReduce(surfaceIndex_.size(), sumOp<label>());
-    label nChangedFaces = returnReduce(changedFaces.size(), sumOp<label>());
+    // Stats on edges to test. Count proc faces only once.
+    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
 
-    Info<< "Edge intersection testing:" << nl
-        << "    Number of edges             : " << nTotEdges << nl
-        << "    Number of edges to retest   : " << nChangedFaces
-        << endl;
+    {
+        label nMasterFaces = 0;
+        forAll(isMasterFace, faceI)
+        {
+            if (isMasterFace.get(faceI) == 1)
+            {
+                nMasterFaces++;
+            }
+        }
+        reduce(nMasterFaces, sumOp<label>());
+
+        label nChangedFaces = 0;
+        forAll(changedFaces, i)
+        {
+            if (isMasterFace.get(changedFaces[i]) == 1)
+            {
+                nChangedFaces++;
+            }
+        }
+        reduce(nChangedFaces, sumOp<label>());
+
+        Info<< "Edge intersection testing:" << nl
+            << "    Number of edges             : " << nMasterFaces << nl
+            << "    Number of edges to retest   : " << nChangedFaces
+            << endl;
+    }
+
 
     // Get boundary face centre and level. Coupled aware.
     labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
@@ -838,11 +864,14 @@ Foam::meshRefinement::meshRefinement
 
 Foam::label Foam::meshRefinement::countHits() const
 {
+    // Stats on edges to test. Count proc faces only once.
+    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+
     label nHits = 0;
 
     forAll(surfaceIndex_, faceI)
     {
-        if (surfaceIndex_[faceI] >= 0)
+        if (surfaceIndex_[faceI] >= 0 && isMasterFace.get(faceI) == 1)
         {
             nHits++;
         }
@@ -996,11 +1025,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
     if (Pstream::parRun())
     {
-        //Info<< nl
-        //    << "Doing final balancing" << nl
-        //    << "---------------------" << nl
-        //    << endl;
-        //
         //if (debug_)
         //{
         //    const_cast<Time&>(mesh_.time())++;
@@ -1014,17 +1038,12 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             // Faces where owner and neighbour are not 'connected' so can
             // go to different processors.
             boolList blockedFace(mesh_.nFaces(), true);
+            label nUnblocked = 0;
             // Pairs of baffles
             List<labelPair> couples;
 
             if (keepZoneFaces)
             {
-                label nNamed = surfaces().getNamedSurfaces().size();
-
-                Info<< "Found " << nNamed << " surfaces with faceZones."
-                    << " Applying special decomposition to keep those together."
-                    << endl;
-
                 // Determine decomposition to keep/move surface zones
                 // on one processor. The reason is that snapping will make these
                 // into baffles, move and convert them back so if they were
@@ -1038,8 +1057,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 // Get faces whose owner and neighbour should stay together,
                 // i.e. they are not 'blocked'.
-
-                label nZoned = 0;
 
                 forAll(fzNames, surfI)
                 {
@@ -1055,14 +1072,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                             if (blockedFace[fZone[i]])
                             {
                                 blockedFace[fZone[i]] = false;
-                                nZoned++;
+                                nUnblocked++;
                             }
                         }
                     }
                 }
-                Info<< "Found " << returnReduce(nZoned, sumOp<label>())
-                    << " zoned faces to keep together."
-                    << endl;
+            }
+            reduce(nUnblocked, sumOp<label>());
+
+            if (keepZoneFaces)
+            {
+                Info<< "Found " << nUnblocked
+                    << " zoned faces to keep together." << endl;
             }
 
             if (keepBaffles)
@@ -1073,29 +1094,43 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                     identity(mesh_.nFaces()-mesh_.nInternalFaces())
                    +mesh_.nInternalFaces()
                 );
+            }
+            label nCouples = returnReduce(couples.size(), sumOp<label>());
 
-                Info<< "Found " << returnReduce(couples.size(), sumOp<label>())
-                    << " baffles to keep together."
+            if (keepBaffles)
+            {
+                Info<< "Found " << nCouples << " baffles to keep together."
                     << endl;
             }
 
-            distribution = decomposeCombineRegions
-            (
-                blockedFace,
-                couples,
-                decomposer
-            );
-
-            labelList nProcCells(distributor.countCells(distribution));
-            Pstream::listCombineGather(nProcCells, plusEqOp<label>());
-            Pstream::listCombineScatter(nProcCells);
-
-            Info<< "Calculated decomposition:" << endl;
-            forAll(nProcCells, procI)
+            if (nUnblocked > 0 || nCouples > 0)
             {
-                Info<< "    " << procI << '\t' << nProcCells[procI] << endl;
+                Info<< "Applying special decomposition to keep baffles"
+                    << " and zoned faces together." << endl;
+
+                distribution = decomposeCombineRegions
+                (
+                    blockedFace,
+                    couples,
+                    decomposer
+                );
+
+                labelList nProcCells(distributor.countCells(distribution));
+                Pstream::listCombineGather(nProcCells, plusEqOp<label>());
+                Pstream::listCombineScatter(nProcCells);
+
+                Info<< "Calculated decomposition:" << endl;
+                forAll(nProcCells, procI)
+                {
+                    Info<< "    " << procI << '\t' << nProcCells[procI] << endl;
+                }
+                Info<< endl;
             }
-            Info<< endl;
+            else
+            {
+                // Normal decomposition
+                distribution = decomposer.decompose(mesh_.cellCentres());
+            }
         }
         else
         {
@@ -1714,6 +1749,36 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
     forAll(userFaceData_, i)
     {
         map.distributeFaceData(userFaceData_[i].second());
+    }
+
+    // Redistribute surface and any fields on it.
+    {
+        Random rndGen(653213);
+
+        // Get local mesh bounding box. Single box for now.
+        List<treeBoundBox> meshBb(1);
+        treeBoundBox& bb = meshBb[0];
+        bb = boundBox(mesh_.points(), false);
+        bb = bb.extend(rndGen, 1E-4);
+
+        // Distribute all geometry (so refinementSurfaces and shellSurfaces)
+        searchableSurfaces& geometry =
+            const_cast<searchableSurfaces&>(surfaces_.geometry());
+
+        forAll(geometry, i)
+        {
+            autoPtr<mapDistribute> faceMap;
+            autoPtr<mapDistribute> pointMap;
+            geometry[i].distribute
+            (
+                meshBb,
+                false,          // do not keep outside triangles
+                faceMap,
+                pointMap
+            );
+            faceMap.clear();
+            pointMap.clear();
+        }
     }
 }
 

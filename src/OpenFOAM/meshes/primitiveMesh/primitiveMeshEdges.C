@@ -441,11 +441,10 @@ void primitiveMesh::calcEdges(const bool doFaceEdges) const
         forAll(pe, pointI)
         {
             DynamicList<label>& pEdges = pe[pointI];
-            inplaceRenumber(oldToNew, pEdges);
             pEdges.shrink();
+            inplaceRenumber(oldToNew, pEdges);
             pointEdges[pointI].transfer(pEdges);
             Foam::sort(pointEdges[pointI]);
-            pEdges.clear();
         }
 
         // faceEdges

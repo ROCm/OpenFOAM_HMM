@@ -121,6 +121,12 @@ public:
             return true;
         }
 
+        //- Range of local indices that can be returned.
+        virtual label size() const
+        {
+            return 6;
+        }
+
 
         // Single point queries.
 
