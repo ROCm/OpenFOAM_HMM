@@ -150,44 +150,9 @@ realizableKE::realizableKE
         )
     ),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    epsilon_
-    (
-        IOobject
-        (
-            "epsilon",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    mut_
-    (
-        IOobject
-        (
-            "mut",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    )
+    k_(autoCreateKQR<scalar>("k", mesh_)),
+    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
+    mut_(autoCreateMut("mut", mesh_))
 {
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);

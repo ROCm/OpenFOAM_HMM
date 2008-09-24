@@ -136,57 +136,10 @@ LRR::LRR
         )
     ),
 
-    R_
-    (
-        IOobject
-        (
-            "R",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    epsilon_
-    (
-        IOobject
-        (
-            "epsilon",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    nut_
-    (
-        IOobject
-        (
-            "nut",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    )
+    R_(autoCreateKQR<symmTensor>("R", mesh_)),
+    k_(autoCreateKQR<scalar>("k", mesh_)),
+    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
+    nut_(autoCreateNut("nut", mesh_))
 {
     nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();

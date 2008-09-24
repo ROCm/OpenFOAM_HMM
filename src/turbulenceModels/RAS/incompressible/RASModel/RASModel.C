@@ -27,6 +27,13 @@ License
 #include "RASModel.H"
 #include "wallFvPatch.H"
 
+// Headers reqd for back-porting wall function boundary conditions
+#include "calculatedFvPatchField.H"
+#include "nutWallFunctionFvPatchScalarField.H"
+#include "epsilonWallFunctionFvPatchScalarField.H"
+#include "omegaWallFunctionFvPatchScalarField.H"
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -47,6 +54,128 @@ void RASModel::printCoeffs()
     {
         Info<< type() << "Coeffs" << coeffDict_ << endl;;
     }
+}
+
+
+wordList RASModel::replaceWallBoundaryTypes
+(
+    const fvMesh& mesh,
+    const wordList& oldTypeNames,
+    const wordList& newTypeNames
+) const
+{
+    const fvBoundaryMesh& bm = mesh.boundary();
+
+    wordList boundaryTypes(bm.size());
+
+    forAll(bm, patchI)
+    {
+        if (isType<wallFvPatch>(bm[patchI]))
+        {
+            boundaryTypes[patchI] = newTypeNames[patchI];
+        }
+        else
+        {
+            boundaryTypes[patchI] = oldTypeNames[patchI];
+        }
+    }
+
+    return boundaryTypes;
+}
+
+
+tmp<volScalarField> RASModel::autoCreateNut
+(
+    const word& fieldName,
+    const fvMesh& mesh
+) const
+{
+    IOobject nutHeader
+    (
+        fieldName,
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (nutHeader.headerOk())
+    {
+        return tmp<volScalarField>(new volScalarField(nutHeader, mesh));
+    }
+    else
+    {
+        Info<< "--> Upgrading " << fieldName << " to employ run-time "
+            << "selectable wall functions" << endl;
+
+        wordList nutBoundaryTypes = replaceWallBoundaryTypes
+        (
+            mesh,
+            wordList
+            (
+                mesh.boundary().size(),
+                calculatedFvPatchField<scalar>::typeName
+            ),
+            wordList
+            (
+                mesh.boundary().size(),
+                RASModels::nutWallFunctionFvPatchScalarField::typeName
+            )
+        );
+
+        tmp<volScalarField> nut
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    fieldName,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimArea/dimTime, 0.0),
+                nutBoundaryTypes
+            )
+        );
+
+        Info<< "    Writing updated " << fieldName << endl;
+        nut().write();
+
+        return nut;
+    }
+}
+
+
+tmp<volScalarField> RASModel::autoCreateEpsilon
+(
+    const word& fieldName,
+    const fvMesh& mesh
+) const
+{
+    return autoCreateWallFunctionField<scalar>
+    (
+        fieldName,
+        mesh,
+        RASModels::epsilonWallFunctionFvPatchScalarField::typeName
+    );
+}
+
+
+tmp<volScalarField> RASModel::autoCreateOmega
+(
+    const word& fieldName,
+    const fvMesh& mesh
+) const
+{
+    return autoCreateWallFunctionField<scalar>
+    (
+        fieldName,
+        mesh,
+        RASModels::omegaWallFunctionFvPatchScalarField::typeName
+    );
 }
 
 
