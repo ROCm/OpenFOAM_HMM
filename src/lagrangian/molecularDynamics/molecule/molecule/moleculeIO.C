@@ -37,21 +37,21 @@ Foam::molecule::molecule
     bool readFields
 )
 :
-    Particle<molecule>(cloud, is)
+    Particle<molecule>(cloud, is),
     R_(tensor::zero),
     v_(vector::zero),
     a_(vector::zero),
     omega_(vector::zero),
     alpha_(vector::zero),
     siteForces_(List<vector>(0,vector::zero)),
-    sitePostions_(List<vector>(0,vector::zero)),
+    sitePositions_(List<vector>(0,vector::zero)),
     specialPosition_(vector::zero),
     potentialEnergy_(0.0),
     rf_(tensor::zero),
     special_(0),
     id_(0)
 {
-    Info<< "Set sizes of siteForces_ and sitePostions_ "
+    Info<< "Set sizes of siteForces_ and sitePositions_ "
         << "from molCloud reference if possible" << endl;
 
     if (readFields)
@@ -64,7 +64,7 @@ Foam::molecule::molecule
             is >> omega_;
             is >> alpha_;
             is >> siteForces_;
-            is >> sitePostions_;
+            is >> sitePositions_;
             is >> specialPosition_;
             potentialEnergy_ = readScalar(is);
             is >> rf_;
@@ -82,7 +82,7 @@ Foam::molecule::molecule
                 + sizeof(omega_)
                 + sizeof(alpha_)
                 + sizeof(siteForces_)
-                + sizeof(sitePostions_)
+                + sizeof(sitePositions_)
                 + sizeof(specialPosition_)
                 + sizeof(rf_)
                 + sizeof(special_)
@@ -207,7 +207,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
             << token::SPACE << mol.omega_
             << token::SPACE << mol.alpha_
             << token::SPACE << mol.siteForces_
-            << token::SPACE << mol.sitePostions_
+            << token::SPACE << mol.sitePositions_
             << token::SPACE << mol.specialPosition_
             << token::SPACE << mol.potentialEnergy_
             << token::SPACE << mol.rf_
@@ -226,7 +226,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
             + sizeof(mol.omega_)
             + sizeof(mol.alpha_)
             + sizeof(mol.siteForces_)
-            + sizeof(mol.sitePostions_)
+            + sizeof(mol.sitePositions_)
             + sizeof(mol.specialPosition_)
             + sizeof(mol.potentialEnergy_)
             + sizeof(mol.rf_)

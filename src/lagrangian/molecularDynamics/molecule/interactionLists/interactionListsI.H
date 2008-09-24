@@ -40,8 +40,13 @@ const Foam::directInteractionList& Foam::interactionLists::dil() const
 }
 
 
-inline const Foam::referredCellList&
-    Foam::interactionLists::referredInteractionList() const
+inline const Foam::referredCellList& Foam::interactionLists::ril() const
+{
+    return ril_;
+}
+
+
+inline Foam::referredCellList& Foam::interactionLists::ril()
 {
     return ril_;
 }

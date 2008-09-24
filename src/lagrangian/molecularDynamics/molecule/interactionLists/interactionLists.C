@@ -37,7 +37,7 @@ void Foam::interactionLists::buildCellReferralLists()
 {
     Info<< nl << "Determining molecule referring schedule" << endl;
 
-    const referredCellList& refIntL(referredInteractionList());
+    const referredCellList& refIntL(ril());
 
     DynamicList<label> referralProcs;
 

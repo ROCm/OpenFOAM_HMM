@@ -88,7 +88,7 @@ private:
         (
             molecule* molReal,
             referredMolecule* molRef
-        )
+        );
 
         inline bool evaluatePotentialLimit
         (
@@ -176,11 +176,11 @@ public:
 
             inline const polyMesh& mesh() const;
 
-            inline const potential& potential() const
+            inline const potential& pot() const;
 
             inline const List<DynamicList<molecule*> >& cellOccupancy() const;
 
-            inline const interactionLists& interactionLists() const;
+            inline const interactionLists& il() const;
 
             inline const List<molecule::constantProperties> constProps() const;
 

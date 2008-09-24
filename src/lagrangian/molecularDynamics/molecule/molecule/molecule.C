@@ -24,6 +24,7 @@ License
 
 \*----------------------------------------------------------------------------*/
 
+#include "moleculeCloud.H"
 #include "molecule.H"
 #include "Random.H"
 #include "Time.H"
@@ -72,6 +73,20 @@ Foam::tensor Foam::molecule::rotationTensor(scalar deltaT) const
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::molecule::trackData::trackData
+(
+    moleculeCloud& molCloud,
+    label part
+)
+:
+    Particle<molecule>::trackData(molCloud),
+    molCloud_(molCloud),
+    part_(part)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::molecule::move(molecule::trackData& td)
@@ -89,7 +104,7 @@ bool Foam::molecule::move(molecule::trackData& td)
 
         v_ += 0.5*deltaT*a_;
 
-        omega1 += 0.5*deltaT*alpha_;
+        omega_ += 0.5*deltaT*alpha_;
     }
     else if (td.part() == 1)
     {
@@ -120,9 +135,9 @@ bool Foam::molecule::move(molecule::trackData& td)
     {
         // Second leapfrog velocity adjust part, required after tracking+force part
 
-        const diagTensor& I;  // TAKE REFERENCE TO CONST PROP TO GET THIS
+        const diagTensor& I(td.molCloud().constProps(id_).momentOfInertia());
 
-        scalar m;  // TAKE REFERENCE TO CONST PROP TO GET THIS
+        scalar m = td.molCloud().constProps(id_).mass();
 
         a_ = vector::zero;
 
@@ -170,7 +185,7 @@ void Foam::molecule::transformProperties(const vector& separation)
 
 void Foam::molecule::setSitePositions(const constantProperties& constProps)
 {
-    sitePositions_ = position_ + R_ & constProps.siteReferencePositions();
+    sitePositions_ = position_ + (R_ & constProps.siteReferencePositions());
 }
 
 

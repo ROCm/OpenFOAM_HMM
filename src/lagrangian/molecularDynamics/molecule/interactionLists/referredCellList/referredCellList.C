@@ -1332,17 +1332,17 @@ Foam::referredCellList::~referredCellList()
 
 void Foam::referredCellList::referMolecules
 (
-    List<DynamicList<molecule*> >& cellOccupancy
+    const List<DynamicList<molecule*> >& cellOccupancy
 )
 {
     // Create referred molecules for sending using cell occupancy and
     // cellSendingReferralLists
 
-    forAll(molCloud_.cellSendingReferralLists(), cSRL)
+    forAll(il_.cellSendingReferralLists(), cSRL)
     {
         const sendingReferralList& sRL
         (
-            molCloud_.cellSendingReferralLists()[cSRL]
+            il_.cellSendingReferralLists()[cSRL]
         );
 
         List<DynamicList<referredMolecule> > molsToReferOut(sRL.size());
@@ -1390,7 +1390,7 @@ void Foam::referredCellList::referMolecules
 
             const receivingReferralList& rRL
             (
-                molCloud_.cellReceivingReferralLists()[cSRL]
+                il_.cellReceivingReferralLists()[cSRL]
             );
 
             forAll(rRL, rRLI)
@@ -1409,11 +1409,11 @@ void Foam::referredCellList::referMolecules
     // according tocellReceivingReferralLists, referredCells deal with the
     // transformations themselves
 
-    forAll(molCloud_.cellReceivingReferralLists(), cRRL)
+    forAll(il_.cellReceivingReferralLists(), cRRL)
     {
         const receivingReferralList& rRL
         (
-            molCloud_.cellReceivingReferralLists()[cRRL]
+            il_.cellReceivingReferralLists()[cRRL]
         );
 
         List<List<referredMolecule> > molsToReferIn(rRL.size());

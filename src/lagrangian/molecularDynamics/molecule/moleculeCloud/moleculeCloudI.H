@@ -34,25 +34,29 @@ inline void Foam::moleculeCloud::evaluatePair
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
-    idI = molI->id();
+    label idI = molI->id();
 
-    idJ = molJ->id();
+    label idJ = molJ->id();
 
-    rIJ = molI->position() - molJ->position();
+    vector rIJ = molI->position() - molJ->position();
 
-    rIJMagSq = magSqr(rIJ);
+    scalar rIJMagSq = magSqr(rIJ);
 
     if(pairPot.rCutSqr(idI, idJ, rIJMagSq))
     {
-        rIJMag = mag(rIJ);
+        scalar rIJMag = mag(rIJ);
 
-        fIJ = (rIJ/rIJMag)*pairPot.force(idI, idJ, rIJMag);
+        vector fIJ = (rIJ/rIJMag)*pairPot.force(idI, idJ, rIJMag);
+
+        scalar massI = constProps(idI).mass();
+
+        scalar massJ = constProps(idJ).mass();
 
         // Acceleration increment for molI
-        molI->A() += fIJ/(molI->mass());
+        molI->a() += fIJ/massI;
 
         // Acceleration increment for molJ
-        molJ->A() += -fIJ/(molJ->mass());
+        molJ->a() += -fIJ/massJ;
 
         scalar potentialEnergy
         (
@@ -77,25 +81,27 @@ inline void Foam::moleculeCloud::evaluatePair
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
-    idReal = molReal->id();
+    label idReal = molReal->id();
 
-    idRef = molRef->id();
+    label idRef = molRef->id();
 
-    rRealRef = molReal->position() - molRef->position();
+    vector rRealRef = molReal->position() - molRef->position();
 
-    rRealRefMagSq = magSqr(rRealRef);
+    scalar rRealRefMagSq = magSqr(rRealRef);
 
     if (pairPot.rCutSqr(idReal, idRef, rRealRefMagSq))
     {
-        rRealRefMag = mag(rRealRef);
+        scalar rRealRefMag = mag(rRealRef);
 
-        fRealRef = (rRealRef/rRealRefMag)
+        vector fRealRef = (rRealRef/rRealRefMag)
             *pairPot.force(idReal, idRef, rRealRefMag);
 
-        // Acceleration increment for molReal
-        molReal->A() += fRealRef/(molReal->mass());
+        scalar massReal = constProps(idReal).mass();
 
-        // Adding a contribution of 1/2 of the potential energy
+        // Acceleration increment for molReal
+        molReal->a() += fRealRef/massReal;
+
+        // Adding a contribution 19f 1/2 of the potential energy
         // from this interaction
         molReal->potentialEnergy() +=
             0.5*pairPot.energy(idReal, idRef, rRealRefMag);
@@ -114,7 +120,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 {
     Info << "Move Foam::moleculeCloud::evaluatePotentialLimit "
         << "(label idI, label idJ, scalar rIJMagSq) const "
-        << "to pairPotential class."
+        << "to pairPotential class." << endl;
 
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
@@ -122,7 +128,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
     if (pairPot.rCutSqr(idI, idJ, rIJMagSq))
     {
-        rIJMag = mag(rIJ);
+        scalar rIJMag = sqrt(rIJMagSq);
 
         // Guard against pairPot.energy being evaluated
         // if rIJMag < SMALL. A floating point exception will
@@ -131,12 +137,8 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
         if (rIJMag < SMALL)
         {
             WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-            << "Real molecule pair "
-                << " idI = " << idI
-                << " at position " << molI->position()
-                << " idJ = " << idJ
-                << " at position " << molJ->position()
-                << " are closer than " << SMALL
+            << "Molecule pair are closer than "
+                << SMALL
                 << ": mag separation = " << rIJMag
                 << ". These may have been placed on top of each"
                 << " other by a rounding error in molConfig in parallel"
@@ -147,9 +149,8 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             remove = true;
         }
 
-        // Guard against pairPot.energy being
-        // evaluated if rIJMag < rMin. A tabulation lookup
-        // error will occur otherwise.
+        // Guard against pairPot.energy being evaluated if rIJMag < rMin.
+        // A tabulation lookup error will occur otherwise.
 
         if (rIJMag < pairPot.rMin(idI, idJ))
         {
@@ -160,11 +161,9 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
         {
             if
             (
-                pairPot.energy(idI, idJ, rIJMag)
-              > potentialEnergyLimit_
+                pairPot.energy(idI, idJ, rIJMag) > pot_.potentialEnergyLimit()
             )
             {
-
                 remove = true;
             }
         }
@@ -180,13 +179,13 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
     molecule* molJ
 ) const
 {
-    idI = molI->id();
+    label idI = molI->id();
 
-    idJ = molJ->id();
+    label idJ = molJ->id();
 
-    rIJ = molI->position() - molJ->position();
+    vector rIJ = molI->position() - molJ->position();
 
-    rIJMagSq = magSqr(rIJ);
+    scalar rIJMagSq = magSqr(rIJ);
 
     return evaluatePotentialLimit(idI, idJ, rIJMagSq);
 }
@@ -199,33 +198,33 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 ) const
 {
 
-    idReal = molReal->id();
+    label idReal = molReal->id();
 
-    idRef = molRef->id();
+    label idRef = molRef->id();
 
-    rRealRef = molReal->position() - molRef->position();
+    vector rRealRef = molReal->position() - molRef->position();
 
-    rRealRefMagSq = magSqr(rRealRef);
+    scalar rRealRefMagSq = magSqr(rRealRef);
 
-    return evaluatePotentialRefimit(idReal, idRef, rRealRefMagSq);
+    return evaluatePotentialLimit(idReal, idRef, rRealRefMagSq);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::polyMesh& moleculeCloud::mesh() const
+inline const Foam::polyMesh& Foam::moleculeCloud::mesh() const
 {
     return mesh_;
 }
 
 
-inline const Foam::potential& moleculeCloud::potential() const
+inline const Foam::potential& Foam::moleculeCloud::pot() const
 {
     return pot_;
 }
 
 
-inline const Foam::List<DynamicList<molecule*> >&
+inline const Foam::List<Foam::DynamicList<Foam::molecule*> >&
     Foam::moleculeCloud::cellOccupancy() const
 {
     return cellOccupancy_;
@@ -233,19 +232,21 @@ inline const Foam::List<DynamicList<molecule*> >&
 
 
 inline const Foam::interactionLists&
-    Foam::moleculeCloud::interactionLists() const
+    Foam::moleculeCloud::il() const
 {
     return il_;
 }
 
 
-inline const Foam::List<molecule::constantProperties> constProps() const
+inline const Foam::List<Foam::molecule::constantProperties>
+    Foam::moleculeCloud::constProps() const
 {
     return constPropList_;
 }
 
 
-inline const molecule::constantProperties& constProps(label id) const
+inline const Foam::molecule::constantProperties&
+    Foam::moleculeCloud::constProps(label id) const
 {
     return constPropList_[id];
 }

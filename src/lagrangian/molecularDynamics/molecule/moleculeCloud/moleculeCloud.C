@@ -68,56 +68,45 @@ void Foam::moleculeCloud::buildCellOccupancy()
         cellOccupancy_[cO].shrink();
     }
 
-    il_ril().referMolecules(cellOccupancy_);
+    il_.ril().referMolecules(cellOccupancy());
 }
 
 
 void Foam::moleculeCloud::calculatePairForce()
 {
+    iterator mol(this->begin());
+
     {
-        iterator mol(this->begin());
-
         // Real-Real interactions
-        vector rIJ;
-
-        scalar rIJMag;
-
-        scalar rIJMagSq;
-
-        vector fIJ;
-
-        label idI;
-
-        label idJ;
-
-        mol = this->begin();
 
         molecule* molI = &mol();
 
         molecule* molJ = &mol();
 
-        forAll(directInteractionList_, dIL)
-        {
-            forAll(cellOccupancy_[dIL],cellIMols)
-            {
-                molI = cellOccupancy_[dIL][cellIMols];
+        const directInteractionList& dil(il_.dil());
 
-                forAll(directInteractionList_[dIL], interactingCells)
+        forAll(dil, d)
+        {
+            forAll(cellOccupancy_[d],cellIMols)
+            {
+                molI = cellOccupancy_[d][cellIMols];
+
+                forAll(dil[d], interactingCells)
                 {
                     List< molecule* > cellJ =
-                    cellOccupancy_[directInteractionList_[dIL][interactingCells]];
+                    cellOccupancy_[dil[d][interactingCells]];
 
                     forAll(cellJ, cellJMols)
                     {
                         molJ = cellJ[cellJMols];
 
-                        evaluatelPair(molI, molJ);
+                        evaluatePair(molI, molJ);
                     }
                 }
 
-                forAll(cellOccupancy_[dIL],cellIOtherMols)
+                forAll(cellOccupancy_[d],cellIOtherMols)
                 {
-                    molJ = cellOccupancy_[dIL][cellIOtherMols];
+                    molJ = cellOccupancy_[d][cellIOtherMols];
 
                     if (molJ > molI)
                     {
@@ -131,28 +120,17 @@ void Foam::moleculeCloud::calculatePairForce()
     {
         // Real-Referred interactions
 
-        vector rKL;
-
-        scalar rKLMag;
-
-        scalar rKLMagSq;
-
-        vector fKL;
-
-        label idK;
-
-        label idL;
-
         molecule* molK = &mol();
 
-        forAll(referredInteractionList_, rIL)
-        {
-            const List<label>& realCells =
-            referredInteractionList_[rIL].realCellsForInteraction();
+        referredCellList& ril(il_.ril());
 
-            forAll(referredInteractionList_[rIL], refMols)
+        forAll(ril, r)
+        {
+            const List<label>& realCells = ril[r].realCellsForInteraction();
+
+            forAll(ril[r], refMols)
             {
-                referredMolecule* molL = &(referredInteractionList_[rIL][refMols]);
+                referredMolecule* molL(&(ril[r][refMols]));
 
                 forAll(realCells, rC)
                 {
@@ -173,31 +151,25 @@ void Foam::moleculeCloud::calculatePairForce()
 
 void Foam::moleculeCloud::calculateTetherForce()
 {
+    const tetherPotentialList& tetherPot(pot_.tetherPotentials());
+
     iterator mol(this->begin());
-
-    vector rIT;
-
-    vector fIT;
 
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
         if (mol().tethered())
         {
-            rIT = mol().position() - mol().tetherPosition();
+            vector rIT = mol().position() - mol().specialPosition();
 
-            fIT = tetherPotentials_.force
-            (
-                mol().id(),
-                rIT
-            );
+            label idI = mol().id();
 
-            mol().A() += fIT/(mol().mass());
+            scalar massI = constProps(idI).mass();
 
-            mol().potentialEnergy() += tetherPotentials_.energy
-            (
-                mol().id(),
-                rIT
-            );
+            vector fIT = tetherPot.force(idI, rIT);
+
+            mol().a() += fIT/massI;
+
+            mol().potentialEnergy() += tetherPot.energy(idI, rIT);
 
             mol().rf() += rIT*fIT;
         }
@@ -213,9 +185,9 @@ void Foam::moleculeCloud::calculateExternalForce()
 
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
-        mol().A() += gravity_;
+        mol().a() += pot_.gravity();
 
-        // mol().A() += -1.0 * mol().U() /mol().mass();
+        // mol().a() += -1.0 * mol().U() /constProps(mol.id()).mass()
     }
 }
 
@@ -224,9 +196,9 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 {
     Info << nl << "Removing high energy overlaps, removal order:";
 
-    forAll(removalOrder_, rO)
+    forAll(pot_.removalOrder(), rO)
     {
-        Info << " " << pot_.idList()[removalOrder_[rO]];
+        Info << " " << pot_.idList()[pot_.removalOrder()[rO]];
     }
 
     Info << nl ;
@@ -239,16 +211,6 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
     iterator mol(this->begin());
 
     {
-        vector rIJ;
-
-        scalar rIJMag;
-
-        scalar rIJMagSq;
-
-        label idI;
-
-        label idJ;
-
         mol = this->begin();
 
         molecule* molI = &mol();
@@ -257,16 +219,18 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
         DynamicList<molecule*> molsToDelete;
 
-        forAll(directInteractionList_, dIL)
-        {
-            forAll(cellOccupancy_[dIL],cellIMols)
-            {
-                molI = cellOccupancy_[dIL][cellIMols];
+        const directInteractionList& dil(il_.dil());
 
-                forAll(directInteractionList_[dIL], interactingCells)
+        forAll(dil, d)
+        {
+            forAll(cellOccupancy_[d],cellIMols)
+            {
+                molI = cellOccupancy_[d][cellIMols];
+
+                forAll(dil[d], interactingCells)
                 {
                     List< molecule* > cellJ =
-                    cellOccupancy_[directInteractionList_[dIL][interactingCells]];
+                    cellOccupancy_[dil[d][interactingCells]];
 
                     forAll(cellJ, cellJMols)
                     {
@@ -274,11 +238,15 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                         if (evaluatePotentialLimit(molI, molJ))
                         {
+                            label idI = molI->id();
+
+                            label idJ = molJ->id();
+
                             if
                             (
                                 idI == idJ
-                             || findIndex(removalOrder_, idJ)
-                                    < findIndex(removalOrder_, idI)
+                             || findIndex(pot_.removalOrder(), idJ)
+                                    < findIndex(pot_.removalOrder(), idI)
                             )
                             {
                                 if (findIndex(molsToDelete, molJ) == -1)
@@ -295,19 +263,23 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
                 }
             }
 
-            forAll(cellOccupancy_[dIL],cellIOtherMols)
+            forAll(cellOccupancy_[d],cellIOtherMols)
             {
-                molJ = cellOccupancy_[dIL][cellIOtherMols];
+                molJ = cellOccupancy_[d][cellIOtherMols];
 
                 if (molJ > molI)
                 {
                     if (evaluatePotentialLimit(molI, molJ))
                     {
+                        label idI = molI->id();
+
+                        label idJ = molJ->id();
+
                         if
                         (
                             idI == idJ
-                         || findIndex(removalOrder_, idJ)
-                                < findIndex(removalOrder_, idI)
+                         || findIndex(pot_.removalOrder(), idJ)
+                                < findIndex(pot_.removalOrder(), idI)
                         )
                         {
                             if (findIndex(molsToDelete, molJ) == -1)
@@ -335,23 +307,15 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
     // Real-Referred interaction
 
     {
-        vector rKL;
-
-        scalar rKLMag;
-
-        scalar rKLMagSq;
-
-        label idK;
-
-        label idL;
-
         molecule* molK = &mol();
 
         DynamicList<molecule*> molsToDelete;
 
-        forAll(referredInteractionList_, rIL)
+        referredCellList& ril(il_.ril());
+
+        forAll(ril, r)
         {
-            referredCell& refCell = referredInteractionList_[rIL];
+            referredCell& refCell = ril[r];
 
             forAll(refCell, refMols)
             {
@@ -371,10 +335,14 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                         if (evaluatePotentialLimit(molK, molL))
                         {
+                            label idK = molK->id();
+
+                            label idL = molL->id();
+
                             if
                             (
-                                findIndex(removalOrder_, idK)
-                                < findIndex(removalOrder_, idL)
+                                findIndex(pot_.removalOrder(), idK)
+                                    < findIndex(pot_.removalOrder(), idL)
                             )
                             {
                                 if (findIndex(molsToDelete, molK) == -1)
@@ -385,14 +353,14 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                             else if
                             (
-                                findIndex(removalOrder_, idK)
-                                == findIndex(removalOrder_, idL)
+                                findIndex(pot_.removalOrder(), idK)
+                                    == findIndex(pot_.removalOrder(), idL)
                             )
                             {
                                 if
                                 (
                                     Pstream::myProcNo() == refCell.sourceProc()
-                                    && cellK <= refCell.sourceCell()
+                                 && cellK <= refCell.sourceCell()
                                 )
                                 {
                                     if (findIndex(molsToDelete, molK) == -1)
@@ -448,8 +416,9 @@ Foam::moleculeCloud::moleculeCloud
     Cloud<molecule>(mesh, "moleculeCloud", false),
     mesh_(mesh),
     pot_(pot),
-    referredInteractionList_(*this)
-    cellOccupancy_(mesh_.nCells())
+    cellOccupancy_(mesh_.nCells()),
+    il_(mesh_, pot_.pairPotentials().rCutMaxSqr(), false),
+    constPropList_()
 {
     molecule::readFields(*this);
 
@@ -528,7 +497,7 @@ void Foam::moleculeCloud::evolve()
 
     calculateForce();
 
-    molecule::trackData td2(*this, 3);
+    molecule::trackData td3(*this, 3);
     Cloud<molecule>::move(td3);
 }
 
@@ -581,7 +550,7 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
 
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
-        mol().u() *= temperatureCorrectionFactor;
+        mol().v() *= temperatureCorrectionFactor;
     }
 }
 

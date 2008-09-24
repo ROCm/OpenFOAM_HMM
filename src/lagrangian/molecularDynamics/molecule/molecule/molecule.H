@@ -41,6 +41,7 @@ SourceFiles
 #include "Particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
+#include "diagTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,7 +70,7 @@ public:
     {
         SPECIAL_TETHERED = -1,
         SPECIAL_FROZEN   = -2,
-        NOT_SPECIAL      = 0
+        NOT_SPECIAL      = 0,
         SPECIAL_USER     = 1
     };
 
@@ -92,6 +93,8 @@ public:
 
     public:
 
+        inline constantProperties();
+
         //- Constructor
         inline constantProperties
         (
@@ -99,8 +102,7 @@ public:
             const List<scalar>& siteCharges,
             const List<label>& siteIds,
             const diagTensor& momentOfInertia,
-            scalar mass,
-            label nSites
+            scalar mass
         );
 
         // Member functions
@@ -127,7 +129,6 @@ public:
         moleculeCloud& molCloud_;
 
         // label specifying which part of the integration algorithm is taking
-        // place (i.e. leapfrog 1 or leapfrog 2. Predictor or Corrector)
         label part_;
 
 
@@ -135,7 +136,7 @@ public:
 
         // Constructors
 
-            inline trackData
+            trackData
             (
                 moleculeCloud& molCloud,
                 label part
@@ -172,7 +173,7 @@ private:
 
         List<vector> siteForces_;
 
-        List<vector> sitePostions_;
+        List<vector> sitePositions_;
 
         vector specialPosition_;
 
@@ -207,7 +208,7 @@ public:
             const vector& omega,
             const vector& alpha,
             const vector& specialPosition,
-            const constantProperties& constProps;
+            const constantProperties& constProps,
             const label special,
             const label id
         );
@@ -240,7 +241,7 @@ public:
 
         // Access
 
-            inline const tensor& & R() const;
+            inline const tensor& R() const;
             inline tensor& R();
 
             inline const vector& v() const;
@@ -271,6 +272,8 @@ public:
             inline tensor& rf();
 
             inline label special() const;
+
+            inline bool tethered() const;
 
             inline label id() const;
 

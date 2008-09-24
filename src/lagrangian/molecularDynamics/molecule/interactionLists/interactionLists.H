@@ -183,7 +183,8 @@ public:
 
             inline const directInteractionList& dil() const;
 
-            inline const referredCellList& referredInteractionList() const;
+            inline const referredCellList& ril() const;
+            inline referredCellList& ril();
 
             inline const List<sendingReferralList>&
                 cellSendingReferralLists() const;

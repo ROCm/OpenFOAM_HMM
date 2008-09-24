@@ -28,20 +28,42 @@ License
 
 inline Foam::molecule::constantProperties::constantProperties()
 :
+    siteReferencePositions_(List<vector>(0)),
+    siteCharges_(List<scalar>(0)),
+    siteIds_(List<label>(0)),
+    momentOfInertia_(diagTensor(0, 0, 0)),
+    mass_(0)
+{
 
-{}
+}
 
 
-inline Foam::molecule::trackData::trackData
+inline Foam::molecule::constantProperties::constantProperties
 (
-    moleculeCloud& molCloud,
-    label part
+    const List<vector>& siteReferencePositions,
+    const List<scalar>& siteCharges,
+    const List<label>& siteIds,
+    const diagTensor& momentOfInertia,
+    scalar mass
 )
 :
-    Particle<molecule>::trackData(refCast<Cloud<molecule> >(molCloud)),
-    molCloud_(molCloud),
-    part_(part)
-{}
+    siteReferencePositions_(siteReferencePositions),
+    siteCharges_(siteCharges),
+    siteIds_(siteIds),
+    momentOfInertia_(momentOfInertia),
+    mass_(mass)
+{
+    if
+    (
+        siteIds_.size() != siteReferencePositions_.size()
+     || siteIds_.size() != siteCharges_.size()
+    )
+    {
+        FatalErrorIn("molecule::constantProperties::constantProperties")
+            << "Sizes of site id, charge and referencePositions are not the same. "
+            << abort(FatalError);
+    }
+}
 
 
 inline Foam::molecule::molecule
@@ -55,7 +77,7 @@ inline Foam::molecule::molecule
     const vector& omega,
     const vector& alpha,
     const vector& specialPosition,
-    const constantProperties& constProps;
+    const constantProperties& constProps,
     const label special,
     const label id
 
@@ -81,21 +103,21 @@ inline Foam::molecule::molecule
 
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
 
-inline const Foam::List<vector>&
+inline const Foam::List<Foam::vector>&
     Foam::molecule::constantProperties::siteReferencePositions() const
 {
     return siteReferencePositions_;
 }
 
 
-inline const Foam::List<scalar>&
+inline const Foam::List<Foam::scalar>&
     Foam::molecule::constantProperties::siteCharges() const
 {
     return siteCharges_;
 }
 
 
-inline const Foam::List<label>&
+inline const Foam::List<Foam::label>&
     Foam::molecule::constantProperties::siteIds() const
 {
     return siteIds_;
@@ -123,13 +145,13 @@ inline Foam::label Foam::molecule::constantProperties::nSites() const
 
 // * * * * * * * * * * *  trackData Member Functions * * * * * * * * * * * * //
 
-inline moleculeCloud& Foam::molecule::trackData::molCloud()
+inline Foam::moleculeCloud& Foam::molecule::trackData::molCloud()
 {
     return molCloud_;
 }
 
 
-inline label Foam::molecule::trackData::part() const
+inline Foam::label Foam::molecule::trackData::part() const
 {
     return part_;
 }
@@ -197,25 +219,25 @@ inline Foam::vector& Foam::molecule::alpha()
 }
 
 
-inline const Foam::List<vector>& Foam::molecule::siteForces() const
+inline const Foam::List<Foam::vector>& Foam::molecule::siteForces() const
 {
     return siteForces_;
 }
 
 
-inline Foam::List<vector>& Foam::molecule::siteForces()
+inline Foam::List<Foam::vector>& Foam::molecule::siteForces()
 {
     return siteForces_;
 }
 
 
-inline const Foam::List<vector>& Foam::molecule::sitePositions() const
+inline const Foam::List<Foam::vector>& Foam::molecule::sitePositions() const
 {
     return sitePositions_;
 }
 
 
-inline Foam::List<vector>& Foam::molecule::sitePositions()
+inline Foam::List<Foam::vector>& Foam::molecule::sitePositions()
 {
     return sitePositions_;
 }
@@ -263,7 +285,13 @@ inline Foam::label Foam::molecule::special() const
 }
 
 
-inline label Foam::molecule::id() const
+inline bool Foam::molecule::tethered() const
+{
+    return special_ == SPECIAL_TETHERED;
+}
+
+
+inline Foam::label Foam::molecule::id() const
 {
     return id_;
 }
