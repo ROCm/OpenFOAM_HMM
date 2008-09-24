@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -155,8 +157,8 @@ LRR::LRR
         )
     ),
 
-    R_(autoCreateKQR<symmTensor>("R", mesh_)),
-    k_(autoCreateKQR<scalar>("k", mesh_)),
+    R_(autoCreateR("R", mesh_)),
+    k_(autoCreateK("k", mesh_)),
     epsilon_(autoCreateEpsilon("epsilon", mesh_)),
     mut_(autoCreateMut("mut", mesh_))
 {

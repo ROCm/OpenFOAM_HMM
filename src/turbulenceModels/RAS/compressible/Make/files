@@ -34,4 +34,6 @@ $(kQRWallFunctions)/kQRWallFunction/kQRWallFunctionFvPatchFields.C
 derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 
+backwardsCompatibilityWallFunctions/backwardsCompatibilityWallFunctions.C
+
 LIB = $(FOAM_LIBBIN)/libcompressibleRASModels

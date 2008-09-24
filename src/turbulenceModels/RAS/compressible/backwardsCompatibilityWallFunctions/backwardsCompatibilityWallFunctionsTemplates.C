@@ -24,29 +24,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "RASModel.H"
+#include "backwardsCompatibilityWallFunctions.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
-RASModel::autoCreateWallFunctionField
+autoCreateWallFunctionField
 (
     const word& fieldName,
     const fvMesh& mesh,
     const word& wallFunctionName
-) const
+)
 {
-    IOobject nutHeader
+    IOobject mutHeader
     (
-        "nut",
+        "mut",
         mesh.time().timeName(),
         mesh,
         IOobject::MUST_READ,
@@ -55,7 +56,7 @@ RASModel::autoCreateWallFunctionField
 
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    if (nutHeader.headerOk())
+    if (mutHeader.headerOk())
     {
         return tmp<fieldType>
         (
@@ -145,25 +146,9 @@ RASModel::autoCreateWallFunctionField
 }
 
 
-template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > RASModel::autoCreateKQR
-(
-    const word& fieldName,
-    const fvMesh& mesh
-) const
-{
-    return autoCreateWallFunctionField<Type>
-    (
-        fieldName,
-        mesh,
-        RASModels::kQRWallFunctionFvPatchField<Type>::typeName
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //

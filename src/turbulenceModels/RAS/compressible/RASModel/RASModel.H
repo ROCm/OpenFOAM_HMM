@@ -58,10 +58,6 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
-// Headers reqd for back-porting wall function boundary conditions
-#include "wallFvPatch.H"
-#include "kQRWallFunctionFvPatchField.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -110,57 +106,6 @@ protected:
 
 
     // Protected member functions
-
-        // Auto creation of fields to provide backwards compatibility with
-        // runtime selectable wall functions
-
-            //- Replace old wall BCs with new wall function BCs
-            wordList replaceWallBoundaryTypes
-            (
-                const fvMesh& mesh,
-                const wordList& oldTypeNames,
-                const wordList& newTypeNames
-            ) const;
-
-            //- mut
-            tmp<volScalarField> autoCreateMut
-            (
-                const word& fieldName,
-                const fvMesh& mesh
-            ) const;
-
-            //- epsilon
-            tmp<volScalarField> autoCreateEpsilon
-            (
-                const word& fieldName,
-                const fvMesh& mesh
-            ) const;
-
-            //- omega
-            tmp<volScalarField> autoCreateOmega
-            (
-                const word& fieldName,
-                const fvMesh& mesh
-            ) const;
-
-            //- kQR
-            template<class Type>
-            tmp<GeometricField<Type, fvPatchField, volMesh> >  autoCreateKQR
-            (
-                const word& fieldName,
-                const fvMesh& mesh
-            ) const;
-
-            //- Helper function to create the new field
-            template<class Type>
-            tmp<GeometricField<Type, fvPatchField, volMesh> >
-            autoCreateWallFunctionField
-            (
-                const word& fieldName,
-                const fvMesh& mesh,
-                const word& wallFunctionName
-            ) const;
-
 
         //- Print model coefficients
         virtual void printCoeffs();
@@ -379,12 +324,6 @@ public:
 
 } // End namespace compressible
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "RASModelTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

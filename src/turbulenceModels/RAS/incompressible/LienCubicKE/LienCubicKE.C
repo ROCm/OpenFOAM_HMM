@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -145,7 +147,7 @@ LienCubicKE::LienCubicKE
         )
     ),
 
-    k_(autoCreateKQR<scalar>("k", mesh_)),
+    k_(autoCreateK("k", mesh_)),
     epsilon_(autoCreateEpsilon("epsilon", mesh_)),
 
     gradU_(fvc::grad(U)),

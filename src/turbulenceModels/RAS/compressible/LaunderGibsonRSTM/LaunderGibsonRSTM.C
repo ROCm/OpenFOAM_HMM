@@ -30,6 +30,8 @@ License
 #include "wallDist.H"
 #include "wallDistReflection.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -190,7 +192,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         mesh_
     ),
 
-    k_(autoCreateKQR<scalar>("k", mesh_)),
+    k_(autoCreateK("k", mesh_)),
     epsilon_(autoCreateEpsilon("epsilon", mesh_)),
     mut_(autoCreateMut("mut", mesh_))
 {

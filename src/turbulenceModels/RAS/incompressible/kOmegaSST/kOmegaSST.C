@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -211,7 +213,7 @@ kOmegaSST::kOmegaSST
 
     y_(mesh_),
 
-    k_(autoCreateKQR<scalar>("k", mesh_)),
+    k_(autoCreateK("k", mesh_)),
     omega_(autoCreateOmega("omega", mesh_)),
     nut_(autoCreateNut("nut", mesh_))
 {
