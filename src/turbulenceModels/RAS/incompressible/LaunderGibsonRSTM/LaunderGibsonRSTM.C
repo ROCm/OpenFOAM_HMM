@@ -167,10 +167,54 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
 
     yr_(mesh_),
 
-    R_(autoCreateR("R", mesh_)),
-    k_(autoCreateK("k", mesh_)),
-    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
-    nut_(autoCreateNut("nut", mesh_))
+    R_
+    (
+        IOobject
+        (
+            "R",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateR("R", mesh_)
+    ),
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateK("k", mesh_)
+    ),
+    epsilon_
+    (
+        IOobject
+        (
+            "epsilon",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateEpsilon("epsilon", mesh_)
+    ),
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    )
 {
     nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();

@@ -80,7 +80,8 @@ tmp<volScalarField> autoCreateMut
         mesh.time().timeName(),
         mesh,
         IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
+        IOobject::NO_WRITE,
+        false
     );
 
     if (mutHeader.headerOk())
@@ -117,7 +118,8 @@ tmp<volScalarField> autoCreateMut
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 mesh,
                 dimensionedScalar("zero", dimDensity*dimArea/dimTime, 0.0),

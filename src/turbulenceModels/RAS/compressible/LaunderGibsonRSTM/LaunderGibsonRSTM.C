@@ -189,12 +189,44 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateR("R", mesh_)
     ),
-
-    k_(autoCreateK("k", mesh_)),
-    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
-    mut_(autoCreateMut("mut", mesh_))
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateK("k", mesh_)
+    ),
+    epsilon_
+    (
+        IOobject
+        (
+            "epsilon",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateEpsilon("epsilon", mesh_)
+    ),
+    mut_
+    (
+        IOobject
+        (
+            "mut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateMut("mut", mesh_)
+    )
 {
     mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
