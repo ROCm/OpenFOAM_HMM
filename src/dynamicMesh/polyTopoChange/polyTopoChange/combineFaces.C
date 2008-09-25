@@ -125,11 +125,11 @@ void Foam::combineFaces::regioniseFaces
 (
     const scalar minCos,
     const label cellI,
+    const labelList& cEdges,
     Map<label>& faceRegion
 ) const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const labelList& cEdges = mesh_.cellEdges()[cellI];
 
     forAll(cEdges, i)
     {
@@ -220,8 +220,9 @@ bool Foam::combineFaces::faceNeighboursValid
         return true;
     }
 
-    const labelListList& faceEdges = mesh_.faceEdges();
     const cell& cFaces = mesh_.cells()[cellI];
+
+    DynamicList<label> storage;
 
     // Test for face collapsing to edge since too many neighbours merged.
     forAll(cFaces, cFaceI)
@@ -230,7 +231,7 @@ bool Foam::combineFaces::faceNeighboursValid
 
         if (!faceRegion.found(faceI))
         {
-            const labelList& fEdges = faceEdges[faceI];
+            const labelList& fEdges = mesh_.faceEdges(faceI, storage);
 
             // Count number of remaining faces neighbouring faceI. This has
             // to be 3 or more.
@@ -299,6 +300,8 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 {
     // Lists of faces that can be merged.
     DynamicList<labelList> allFaceSets(boundaryCells.size() / 10);
+    // Storage for on-the-fly cell-edge addressing.
+    DynamicList<label> storage;
 
     // On all cells regionise the faces
     forAllConstIter(labelHashSet, boundaryCells, iter)
@@ -307,9 +310,11 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
         const cell& cFaces = mesh_.cells()[cellI];
 
+        const labelList& cEdges = mesh_.cellEdges(cellI, storage);
+
         // Region per face
         Map<label> faceRegion(cFaces.size());
-        regioniseFaces(featureCos, cellI, faceRegion);
+        regioniseFaces(featureCos, cellI, cEdges, faceRegion);
 
         // Now we have in faceRegion for every face the region with planar
         // face sharing the same region. We now check whether the resulting

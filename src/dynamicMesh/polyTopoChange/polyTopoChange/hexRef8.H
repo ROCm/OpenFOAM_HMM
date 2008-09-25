@@ -370,9 +370,6 @@ public:
 
         // Refinement
 
-            //- Helper:get points of a cell without using cellPoints addressing
-            labelList cellPoints(const label cellI) const;
-
             //- Given valid mesh and current cell level and proposed
             //  cells to refine calculate any clashes (due to 2:1) and return
             //  ok list of cells to refine.

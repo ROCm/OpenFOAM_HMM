@@ -42,6 +42,14 @@ const labelListList& primitiveMesh::cellPoints() const
         {
             Pout<< "primitiveMesh::cellPoints() : "
                 << "calculating cellPoints" << endl;
+
+            if (debug == -1)
+            {
+                // For checking calls:abort so we can quickly hunt down
+                // origin of call
+                FatalErrorIn("primitiveMesh::cellPoints()")
+                    << abort(FatalError);
+            }
         }
 
         // Invert pointCells
@@ -53,7 +61,11 @@ const labelListList& primitiveMesh::cellPoints() const
 }
 
 
-const labelList& primitiveMesh::cellPoints(const label cellI) const
+const labelList& primitiveMesh::cellPoints
+(
+    const label cellI,
+    DynamicList<label>& storage
+) const
 {
     if (hasCellPoints())
     {
@@ -76,26 +88,25 @@ const labelList& primitiveMesh::cellPoints(const label cellI) const
             }
         }
 
-        labels_.size() = allocSize_;
-
-        if (labelSet_.size() > allocSize_)
+        storage.clear();
+        if (labelSet_.size() > storage.allocSize())
         {
-            labels_.clear();
-            allocSize_ = labelSet_.size();
-            labels_.setSize(allocSize_);
+            storage.setSize(labelSet_.size());
         }
-
-        label n = 0;
 
         forAllConstIter(labelHashSet, labelSet_, iter)
         {
-            labels_[n++] = iter.key();
+            storage.append(iter.key());
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::cellPoints(const label cellI) const
+{
+    return cellPoints(cellI, labels_);
 }
 
 
