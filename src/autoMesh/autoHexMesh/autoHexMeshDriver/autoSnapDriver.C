@@ -1059,6 +1059,8 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         // Surfaces with zone information
         const wordList& faceZoneNames = surfaces.faceZoneNames();
 
+        scalarField minSnapDist(snapDist);
+
         forAll(zonedSurfaces, i)
         {
             label zoneSurfI = zonedSurfaces[i];
@@ -1075,17 +1077,14 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                 )
             );
 
-            pointField zonePoints(localPoints, zonePointIndices);
-            scalarField zoneSnapDist(snapDist, zonePointIndices);
-
             // Find nearest for points both on faceZone and pp.
             List<pointIndexHit> hitInfo;
             labelList hitSurface;
             surfaces.findNearest
             (
                 labelList(1, zoneSurfI),
-                zonePoints,
-                sqr(4*zoneSnapDist),
+                pointField(localPoints, zonePointIndices),
+                sqr(4*scalarField(minSnapDist, zonePointIndices)),
                 hitSurface,
                 hitInfo
             );
@@ -1093,11 +1092,18 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
             forAll(hitInfo, i)
             {
                 label pointI = zonePointIndices[i]; 
+
                 if (hitInfo[i].hit())
                 {
                     patchDisp[pointI] =
                         hitInfo[i].hitPoint()
                       - localPoints[pointI];
+
+                    minSnapDist[pointI] = min
+                    (
+                        minSnapDist[pointI],
+                        mag(patchDisp[pointI])
+                    );
                 }
                 else
                 {
@@ -1105,7 +1111,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                         << "For point:" << pointI
                         << " coordinate:" << localPoints[pointI]
                         << " did not find any surface within:"
-                        << 4*zoneSnapDist[i]
+                        << 4*minSnapDist[pointI]
                         << " meter." << endl;
                 }
             }
