@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -221,46 +223,12 @@ kOmegaSST::kOmegaSST
 
     y_(mesh_),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    omega_
-    (
-        IOobject
-        (
-            "omega",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    mut_
-    (
-        IOobject
-        (
-            "mut",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))))
-    )
+    k_(autoCreateK("k", mesh_)),
+    omega_(autoCreateOmega("omega", mesh_)),
+    mut_(autoCreateMut("mut", mesh_))
 {
-#   include "kOmegaWallViscosityI.H"
+    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+    mut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -353,7 +321,8 @@ void kOmegaSST::correct()
         mut_ =
             a1_*rho_*k_
            /max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
-#       include "kOmegaWallViscosityI.H"
+        mut_.correctBoundaryConditions();
+
         return;
     }
 
@@ -374,10 +343,11 @@ void kOmegaSST::correct()
     tmp<volTensorField> tgradU = fvc::grad(U_);
     volScalarField S2 = magSqr(symm(tgradU()));
     volScalarField GbyMu = (tgradU() && dev(twoSymm(tgradU())));
-    volScalarField G = mut_*GbyMu;
+    volScalarField G("G", mut_*GbyMu);
     tgradU.clear();
 
-#   include "kOmegaWallFunctionsI.H"
+    // Update omega and G at the wall
+    omega_.boundaryField().updateCoeffs();
 
     volScalarField CDkOmega =
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
@@ -404,7 +374,7 @@ void kOmegaSST::correct()
 
     omegaEqn().relax();
 
-#   include "wallOmegaI.H"
+    omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
     bound(omega_, omega0_);
@@ -428,9 +398,7 @@ void kOmegaSST::correct()
 
     // Re-calculate viscosity
     mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
-
-#   include "kOmegaWallViscosityI.H"
-
+    mut_.correctBoundaryConditions();
 }
 
 

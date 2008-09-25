@@ -2,7 +2,6 @@
 #
 # Build optional components (eg, may depend on third-party libraries)
 # -----------------------------------------------------------------------------
-
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
@@ -18,4 +17,4 @@ then
    wmake ccm26ToFoam
 fi
 
-# end
+# ----------------------------------------------------------------- end-of-file

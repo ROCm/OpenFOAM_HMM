@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -140,37 +142,15 @@ realizableKE::realizableKE
         )
     ),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    epsilon_
-    (
-        IOobject
-        (
-            "epsilon",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    nut_(rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_))
+    k_(autoCreateK("k", mesh_)),
+    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
+    nut_(autoCreateNut("nut", mesh_))
 {
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
-#   include "wallViscosityI.H"
+
+    nut_ = rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -266,9 +246,10 @@ void realizableKE::correct()
     volScalarField eta = magS*k_/epsilon_;
     volScalarField C1 = max(eta/(scalar(5) + eta), scalar(0.43));
 
-    volScalarField G = nut_*S2;
+    volScalarField G("G", nut_*S2);
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
 
     // Dissipation equation
@@ -289,7 +270,7 @@ void realizableKE::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -313,9 +294,7 @@ void realizableKE::correct()
 
     // Re-calculate viscosity
     nut_ = rCmu(gradU, S2, magS)*sqr(k_)/epsilon_;
-
-#   include "wallViscosityI.H"
-
+    nut_.correctBoundaryConditions();
 }
 
 

@@ -30,6 +30,8 @@ License
 #include "wallDist.H"
 #include "wallDistReflection.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -190,46 +192,12 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         mesh_
     ),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    epsilon_
-    (
-        IOobject
-        (
-            "epsilon",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    mut_
-    (
-        IOobject
-        (
-            "mut",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
-    )
+    k_(autoCreateK("k", mesh_)),
+    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
+    mut_(autoCreateMut("mut", mesh_))
 {
-#   include "wallViscosityI.H"
+    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
 
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
@@ -336,6 +304,7 @@ void LaunderGibsonRSTM::correct()
     {
         // Re-calculate viscosity
         mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_.correctBoundaryConditions();
         return;
     }
 
@@ -347,9 +316,10 @@ void LaunderGibsonRSTM::correct()
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G = 0.5*tr(P);
+    volScalarField G("G", 0.5*tr(P));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -365,7 +335,7 @@ void LaunderGibsonRSTM::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -437,9 +407,7 @@ void LaunderGibsonRSTM::correct()
 
     // Re-calculate turbulent viscosity
     mut_ = Cmu_*rho_*sqr(k_)/epsilon_;
-
-
-#   include "wallViscosityI.H"
+    mut_.correctBoundaryConditions();
 
 
     // Correct wall shear stresses

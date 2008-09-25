@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -145,31 +147,8 @@ LienCubicKE::LienCubicKE
         )
     ),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    epsilon_
-    (
-        IOobject
-        (
-            "epsilon",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
+    k_(autoCreateK("k", mesh_)),
+    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
 
     gradU_(fvc::grad(U)),
     eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
@@ -179,13 +158,14 @@ LienCubicKE::LienCubicKE
 
     C5viscosity_
     (
-        -2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)*
-        (magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()))
+      - 2.0*pow3(Cmu_)*pow4(k_)/pow3(epsilon_)
+       *(
+            magSqr(gradU_ + gradU_.T())
+          - magSqr(gradU_ - gradU_.T())
+        )
     ),
 
-    // C5 term, implicit
-    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_),
-    // turbulent viscosity, with implicit part of C5
+    nut_(autoCreateNut("nut", mesh_)),
 
     nonlinearStress_
     (
@@ -215,7 +195,8 @@ LienCubicKE::LienCubicKE
         )
     )
 {
-#   include "wallNonlinearViscosityI.H"
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_;
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -315,9 +296,14 @@ void LienCubicKE::correct()
     // generation term
     volScalarField S2 = symm(gradU_) && gradU_;
 
-    volScalarField G = Cmu_*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_);
+    volScalarField G
+    (
+        "G",
+        Cmu_*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_)
+    );
 
-#   include "nonLinearWallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -332,7 +318,7 @@ void LienCubicKE::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -367,8 +353,7 @@ void LienCubicKE::correct()
        *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()));
 
     nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
-
-#   include "wallNonlinearViscosityI.H"
+    nut_.correctBoundaryConditions();
 
     nonlinearStress_ = symm
     (

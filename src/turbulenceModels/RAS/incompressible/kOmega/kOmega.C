@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -102,35 +104,12 @@ kOmega::kOmega
     omega0_("omega0", dimless/dimTime, SMALL),
     omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    omega_
-    (
-        IOobject
-        (
-            "omega",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    nut_(k_/(omega_ + omegaSmall_))
+    k_(autoCreateK("k", mesh_)),
+    omega_(autoCreateOmega("omega", mesh_)),
+    nut_(autoCreateNut("nut", mesh_))
 {
-#   include "kOmegaWallViscosityI.H"
+    nut_ = k_/(omega_ + omegaSmall_);
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -218,9 +197,10 @@ void kOmega::correct()
 
     RASModel::correct();
 
-    volScalarField G = nut_*2*magSqr(symm(fvc::grad(U_)));
+    volScalarField G("G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
-#   include "kOmegaWallFunctionsI.H"
+    // Update omega and G at the wall
+    omega_.boundaryField().updateCoeffs();
 
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn
@@ -236,7 +216,7 @@ void kOmega::correct()
 
     omegaEqn().relax();
 
-#   include "wallOmegaI.H"
+    omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
     bound(omega_, omega0_);
@@ -261,9 +241,7 @@ void kOmega::correct()
 
     // Re-calculate viscosity
     nut_ = k_/omega_;
-
-#   include "kOmegaWallViscosityI.H"
-
+    nut_.correctBoundaryConditions();
 }
 
 

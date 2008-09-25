@@ -7,5 +7,4 @@ EXE_LIBS = \
     -lincompressibleRASModels \
     -lincompressibleTransportModels \
     -lfiniteVolume \
-    -lmeshTools \
-    /* $(LIB_WM_OPTIONS_DIR)/libfbsdmalloc.o */
+    -lmeshTools

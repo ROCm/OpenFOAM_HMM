@@ -124,7 +124,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clearStorage()
 {
-    List<T>::size() = allocSize_;    // make List<T> consistent
     List<T>::clear();
     allocSize_ = 0;
 }
@@ -205,7 +204,7 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
     {
         FatalErrorIn
         (
-            "void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()"
+            "Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()"
         )   << "List is empty" << abort(FatalError);
     }
 
@@ -233,7 +232,7 @@ inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 
     if (nextFree > allocSize_)
     {
-       allocSize_ = max
+        allocSize_ = max
         (
             nextFree,
             label(SizeMult*allocSize_/SizeDiv + SizeInc)

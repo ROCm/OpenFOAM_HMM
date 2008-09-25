@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -117,47 +119,12 @@ kEpsilon::kEpsilon
             1.0
         )
     ),
-
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    epsilon_
-    (
-        IOobject
-        (
-            "epsilon",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
-    mut_
-    (
-        IOobject
-        (
-            "mut",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
-    )
+    k_(autoCreateK("k", mesh_)),
+    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
+    mut_(autoCreateMut("mut", mesh_))
 {
-#   include "wallViscosityI.H"
+    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -243,7 +210,7 @@ void kEpsilon::correct()
     {
         // Re-calculate viscosity
         mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
-#       include "wallViscosityI.H"
+        mut_.correctBoundaryConditions();
         return;
     }
 
@@ -257,10 +224,11 @@ void kEpsilon::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField G = mut_*(tgradU() && dev(twoSymm(tgradU())));
+    volScalarField G("G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -274,9 +242,9 @@ void kEpsilon::correct()
       - fvm::Sp(C2_*rho_*epsilon_/k_, epsilon_)
     );
 
-#   include "wallDissipationI.H"
-
     epsEqn().relax();
+
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -302,9 +270,7 @@ void kEpsilon::correct()
 
     // Re-calculate viscosity
     mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
-
-#   include "wallViscosityI.H"
-
+    mut_.correctBoundaryConditions();
 }
 
 
