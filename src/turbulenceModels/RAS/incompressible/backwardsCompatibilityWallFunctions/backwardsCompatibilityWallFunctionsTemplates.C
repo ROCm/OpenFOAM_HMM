@@ -45,9 +45,9 @@ autoCreateWallFunctionField
     const word& wallFunctionName
 )
 {
-    IOobject mutHeader
+    IOobject nutHeader
     (
-        "mut",
+        "nut",
         mesh.time().timeName(),
         mesh,
         IOobject::MUST_READ,
@@ -56,7 +56,7 @@ autoCreateWallFunctionField
 
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    if (mutHeader.headerOk())
+    if (nutHeader.headerOk())
     {
         return tmp<fieldType>
         (
