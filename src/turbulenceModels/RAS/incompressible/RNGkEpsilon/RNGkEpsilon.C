@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -124,12 +126,11 @@ RNGkEpsilon::RNGkEpsilon
             "k",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
-
     epsilon_
     (
         IOobject
@@ -137,15 +138,26 @@ RNGkEpsilon::RNGkEpsilon
             "epsilon",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
-
-    nut_(Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    )
 {
-#   include "wallViscosityI.H"
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -239,13 +251,14 @@ void RNGkEpsilon::correct()
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 
-    volScalarField G = nut_*S2;
+    volScalarField G("G", nut_*S2);
 
     volScalarField eta = sqrt(S2)*k_/epsilon_;
     volScalarField R =
         ((eta*(scalar(1) - eta/eta0_))/(scalar(1) + beta_*eta*sqr(eta)));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -261,7 +274,7 @@ void RNGkEpsilon::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -285,9 +298,7 @@ void RNGkEpsilon::correct()
 
     // Re-calculate viscosity
     nut_ = Cmu_*sqr(k_)/epsilon_;
-
-#   include "wallViscosityI.H"
-
+    nut_.correctBoundaryConditions();
 }
 
 

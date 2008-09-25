@@ -95,7 +95,7 @@ timeVaryingMappedFixedValueFvPatchField
 {
     if (debug)
     {
-        Pout<< "timeVarying<appedFixedValue"
+        Pout<< "timeVaryingMappedFixedValue"
             << " : construct from mappedFixedValue and mapper" << endl;
     }
 }

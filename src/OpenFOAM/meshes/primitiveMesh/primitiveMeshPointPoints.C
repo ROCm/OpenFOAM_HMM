@@ -40,6 +40,14 @@ void primitiveMesh::calcPointPoints() const
         Pout<< "primitiveMesh::calcPointPoints() : "
             << "calculating pointPoints"
             << endl;
+
+        if (debug == -1)
+        {
+            // For checking calls:abort so we can quickly hunt down
+            // origin of call
+            FatalErrorIn("primitiveMesh::calcPointPoints()")
+                << abort(FatalError);
+        }
     }
 
     // It is an error to attempt to recalculate pointPoints
@@ -97,7 +105,11 @@ const labelListList& primitiveMesh::pointPoints() const
 }
 
 
-const labelList& primitiveMesh::pointPoints(const label pointI) const
+const labelList& primitiveMesh::pointPoints
+(
+    const label pointI,
+    DynamicList<label>& storage
+) const
 {
     if (hasPointPoints())
     {
@@ -108,27 +120,26 @@ const labelList& primitiveMesh::pointPoints(const label pointI) const
         const edgeList& edges = this->edges();
         const labelList& pEdges = pointEdges()[pointI];
 
-        labels_.size() = allocSize_;
+        storage.clear();
 
-        if (pEdges.size() > allocSize_)
+        if (pEdges.size() > storage.allocSize())
         {
-            // Set size() so memory allocation behaves as normal.
-            labels_.clear();
-            allocSize_ = pEdges.size();
-            labels_.setSize(allocSize_);
+            storage.setSize(pEdges.size());
         }
-
-        label n = 0;
 
         forAll(pEdges, i)
         {
-            labels_[n++] = edges[pEdges[i]].otherVertex(pointI);
+            storage.append(edges[pEdges[i]].otherVertex(pointI));
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::pointPoints(const label pointI) const
+{
+    return pointPoints(pointI, labels_);
 }
 
 

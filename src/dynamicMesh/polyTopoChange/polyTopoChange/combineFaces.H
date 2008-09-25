@@ -103,6 +103,7 @@ class combineFaces
         (
             const scalar minCos,
             const label cellI,
+            const labelList& cEdges,
             Map<label>& faceRegion
         ) const;
 

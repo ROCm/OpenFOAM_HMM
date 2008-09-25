@@ -2,32 +2,18 @@
 
     int nCorr(readInt(piso.lookup("nCorrectors")));
 
-    int nNonOrthCorr = 0;
-    if (piso.found("nNonOrthogonalCorrectors"))
-    {
-        nNonOrthCorr = readInt(piso.lookup("nNonOrthogonalCorrectors"));
-    }
+    int nNonOrthCorr =
+        piso.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
-    bool momentumPredictor = true;
-    if (piso.found("momentumPredictor"))
-    {
-        momentumPredictor = Switch(piso.lookup("momentumPredictor"));
-    }
+    bool momentumPredictor =
+        piso.lookupOrDefault<Switch>("momentumPredictor", true);
 
-    bool transonic = false;
-    if (piso.found("transonic"))
-    {
-        transonic = Switch(piso.lookup("transonic"));
-    }
+    bool transonic =
+        piso.lookupOrDefault<Switch>("transonic", false);
 
-    int nOuterCorr = 1;
-    if (piso.found("nOuterCorrectors"))
-    {
-        nOuterCorr = readInt(piso.lookup("nOuterCorrectors"));
-    }
+    int nOuterCorr =
+        piso.lookupOrDefault<int>("nOuterCorrectors", 1);
 
-    bool ddtPhiCorr = false;
-    if (piso.found("ddtPhiCorr"))
-    {
-        ddtPhiCorr = Switch(piso.lookup("ddtPhiCorr"));
-    }
+    bool ddtPhiCorr =
+        piso.lookupOrDefault<Switch>("ddtPhiCorr", false);
+

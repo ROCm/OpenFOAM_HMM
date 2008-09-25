@@ -54,6 +54,7 @@ SourceFiles
 #ifndef primitiveMesh_H
 #define primitiveMesh_H
 
+#include "DynamicList.H"
 #include "edgeList.H"
 #include "pointField.H"
 #include "SubField.H"
@@ -157,10 +158,8 @@ class primitiveMesh
 
         // On-the-fly edge addresing storage
 
-            //- Temporary storage for addressing. allocSize is the real size
-            //  of the labelList.
-            mutable label allocSize_;
-            mutable labelList labels_;
+            //- Temporary storage for addressing.
+            mutable DynamicList<label> labels_;
 
             //- Temporary storage for addressing
             mutable labelHashSet labelSet_;
@@ -705,31 +704,80 @@ public:
 
             // On-the-fly addressing calculation. These functions return either
             // a reference to the full addressing (if already calculated) or
-            // a reference to member data labels_ so be careful when not storing
+            // a reference to the supplied storage. The one-argument ones
+            // use member DynamicList labels_ so be careful when not storing
             // result.
 
-            //- cellCells using cells
+            //- cellCells using cells.
+            const labelList& cellCells
+            (
+                const label cellI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& cellCells(const label cellI) const;
 
             //- cellPoints using cells
+            const labelList& cellPoints
+            (
+                const label cellI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& cellPoints(const label cellI) const;
 
             //- pointCells using pointFaces
+            const labelList& pointCells
+            (
+                const label pointI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& pointCells(const label pointI) const;
 
             //- pointPoints using edges, pointEdges
+            const labelList& pointPoints
+            (
+                const label pointI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& pointPoints(const label pointI) const;
 
             //- faceEdges using pointFaces, edges, pointEdges
+            const labelList& faceEdges
+            (
+                const label faceI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& faceEdges(const label faceI) const;
 
             //- edgeFaces using pointFaces, edges, pointEdges
+            const labelList& edgeFaces
+            (
+                const label edgeI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& edgeFaces(const label edgeI) const;
 
             //- edgeCells using pointFaces, edges, pointEdges
+            const labelList& edgeCells
+            (
+                const label edgeI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& edgeCells(const label edgeI) const;
 
             //- cellEdges using cells, pointFaces, edges, pointEdges
+            const labelList& cellEdges
+            (
+                const label cellI,
+                DynamicList<label>&
+            ) const;
+
             const labelList& cellEdges(const label cellI) const;
 
 

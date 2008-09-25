@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
             }
 
             // Give patch area
-            Info<< "    Patch area = " << sum(mesh.Sf()) << endl;
+            Info<< "    Patch area = " << sum(mesh.Sf().boundaryField()[patchi]) << endl;
 
             if (fieldHeader.headerClassName() == "volScalarField")
             {

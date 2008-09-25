@@ -82,7 +82,10 @@ switch ("$WM_COMPILER_INST")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        #setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.3/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
     breaksw
     case Gcc42:
         setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH
@@ -105,13 +108,8 @@ case OpenFOAM:
 endsw
 
 if ($?WM_COMPILER_BIN) then
-    set path=($WM_COMPILER_BIN $path)
-
-    if ($?LD_LIBRARY_PATH) then
-        setenv LD_LIBRARY_PATH ${WM_COMPILER_LIB}:${LD_LIBRARY_PATH}
-    else
-        setenv LD_LIBRARY_PATH ${WM_COMPILER_LIB}
-    endif
+    _foamAddPath $WM_COMPILER_BIN
+    _foamAddLib $WM_COMPILER_LIB
 endif
 
 unset WM_COMPILER_BIN
