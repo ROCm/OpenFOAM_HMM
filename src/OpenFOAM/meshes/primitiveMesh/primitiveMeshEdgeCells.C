@@ -41,6 +41,14 @@ const labelListList& primitiveMesh::edgeCells() const
         if (debug)
         {
             Pout<< "primitiveMesh::edgeCells() : calculating edgeCells" << endl;
+
+            if (debug == -1)
+            {
+                // For checking calls:abort so we can quickly hunt down
+                // origin of call
+                FatalErrorIn("primitiveMesh::edgeCells()")
+                    << abort(FatalError);
+            }
         }
         // Invert cellEdges
         ecPtr_ = new labelListList(nEdges());
@@ -51,7 +59,11 @@ const labelListList& primitiveMesh::edgeCells() const
 }
 
 
-const labelList& primitiveMesh::edgeCells(const label edgeI) const
+const labelList& primitiveMesh::edgeCells
+(
+    const label edgeI,
+    DynamicList<label>& storage
+) const
 {
     if (hasEdgeCells())
     {
@@ -62,24 +74,11 @@ const labelList& primitiveMesh::edgeCells(const label edgeI) const
         const labelList& own = faceOwner();
         const labelList& nei = faceNeighbour();
 
-        // edge faces can either return labels_ or reference in edgeLabels.
-        labelList labelsCopy;
-        if (!hasEdgeFaces())
-        {
-            labelsCopy = edgeFaces(edgeI);
-        }
+        // Construct edgeFaces
+        DynamicList<label> eFacesStorage;
+        const labelList& eFaces = edgeFaces(edgeI, eFacesStorage);
 
-        const labelList& eFaces =
-        (
-            hasEdgeFaces()
-          ? edgeFaces()[edgeI]
-          : labelsCopy
-        );
-
-        labels_.size() = allocSize_;
-
-        // labels_ should certainly be big enough for edge cells.
-        label n = 0;
+        storage.clear();
 
         // Do quadratic insertion.
         forAll(eFaces, i)
@@ -89,10 +88,10 @@ const labelList& primitiveMesh::edgeCells(const label edgeI) const
             {
                 label ownCellI = own[faceI];
 
-                // Check if not already in labels_
-                for (label j = 0; j < n; j++)
+                // Check if not already in storage
+                forAll(storage, j)
                 {
-                    if (labels_[j] == ownCellI)
+                    if (storage[j] == ownCellI)
                     {
                         ownCellI = -1;
                         break;
@@ -101,7 +100,7 @@ const labelList& primitiveMesh::edgeCells(const label edgeI) const
 
                 if (ownCellI != -1)
                 {
-                    labels_[n++] = ownCellI;
+                    storage.append(ownCellI);
                 }
             }
 
@@ -109,9 +108,9 @@ const labelList& primitiveMesh::edgeCells(const label edgeI) const
             {
                 label neiCellI = nei[faceI];
 
-                for (label j = 0; j < n; j++)
+                forAll(storage, j)
                 {
-                    if (labels_[j] == neiCellI)
+                    if (storage[j] == neiCellI)
                     {
                         neiCellI = -1;
                         break;
@@ -120,15 +119,19 @@ const labelList& primitiveMesh::edgeCells(const label edgeI) const
 
                 if (neiCellI != -1)
                 {
-                    labels_[n++] = neiCellI;
+                    storage.append(neiCellI);
                 }
             }
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::edgeCells(const label edgeI) const
+{
+    return edgeCells(edgeI, labels_);
 }
 
 

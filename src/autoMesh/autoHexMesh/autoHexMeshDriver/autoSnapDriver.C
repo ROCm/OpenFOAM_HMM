@@ -1075,11 +1075,8 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                 )
             );
 
-            pointField zonePoints(zonePointIndices.size());
-            forAll(zonePointIndices, i)
-            {
-                zonePoints[i] = localPoints[zonePointIndices[i]];
-            }
+            pointField zonePoints(localPoints, zonePointIndices);
+            scalarField zoneSnapDist(snapDist, zonePointIndices);
 
             // Find nearest for points both on faceZone and pp.
             List<pointIndexHit> hitInfo;
@@ -1088,17 +1085,18 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
             (
                 labelList(1, zoneSurfI),
                 zonePoints,
-                sqr(4*snapDist),
+                sqr(4*zoneSnapDist),
                 hitSurface,
                 hitInfo
             );
 
-            forAll(hitInfo, pointI)
+            forAll(hitInfo, i)
             {
-                if (hitInfo[pointI].hit())
+                label pointI = zonePointIndices[i]; 
+                if (hitInfo[i].hit())
                 {
                     patchDisp[pointI] =
-                        hitInfo[pointI].hitPoint()
+                        hitInfo[i].hitPoint()
                       - localPoints[pointI];
                 }
                 else
@@ -1107,7 +1105,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                         << "For point:" << pointI
                         << " coordinate:" << localPoints[pointI]
                         << " did not find any surface within:"
-                        << 4*snapDist[pointI]
+                        << 4*zoneSnapDist[i]
                         << " meter." << endl;
                 }
             }
