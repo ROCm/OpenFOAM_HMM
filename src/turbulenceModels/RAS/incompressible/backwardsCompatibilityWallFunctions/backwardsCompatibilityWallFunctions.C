@@ -120,7 +120,7 @@ tmp<volScalarField> autoCreateNut
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("zero", dimDensity*dimArea/dimTime, 0.0),
+                dimensionedScalar("zero", dimArea/dimTime, 0.0),
                 nutBoundaryTypes
             )
         );
