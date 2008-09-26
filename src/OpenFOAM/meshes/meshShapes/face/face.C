@@ -526,7 +526,7 @@ Foam::point Foam::face::centre(const pointField& meshPoints) const
 }
 
 
-Foam::vector Foam::face::normal(const pointField& meshPoints) const
+Foam::vector Foam::face::normal(const pointField& p) const
 {
     // Calculate the normal by summing the face triangle normals.
     // Changed to deal with small concavity by using a central decomposition
@@ -539,17 +539,22 @@ Foam::vector Foam::face::normal(const pointField& meshPoints) const
     {
         return triPointRef
         (
-            meshPoints[operator[](0)],
-            meshPoints[operator[](1)],
-            meshPoints[operator[](2)]
+            p[operator[](0)],
+            p[operator[](1)],
+            p[operator[](2)]
         ).normal();
     }
 
+    label nPoints = size();
+
     vector n = vector::zero;
 
-    point centrePoint = Foam::average(points(meshPoints));
-
-    label nPoints = size();
+    point centrePoint = vector::zero;
+    for (pI = 0; pI < nPoints; pI++)
+    {
+        centrePoint += p[operator[](pI)];
+    }
+    centrePoint /= nPoints;
 
     point nextPoint = centrePoint;
 
@@ -559,18 +564,18 @@ Foam::vector Foam::face::normal(const pointField& meshPoints) const
     {
         if (pI < nPoints - 1)
         {
-            nextPoint = meshPoints[operator[](pI + 1)];
+            nextPoint = p[operator[](pI + 1)];
         }
         else
         {
-            nextPoint = meshPoints[operator[](0)];
+            nextPoint = p[operator[](0)];
         }
 
         // Note: for best accuracy, centre point always comes last
         //
         n += triPointRef
         (
-            meshPoints[operator[](pI)],
+            p[operator[](pI)],
             nextPoint,
             centrePoint
         ).normal();
