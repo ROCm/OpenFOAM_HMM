@@ -94,10 +94,13 @@ inline void Foam::CV3D::insertPointPair
 
 void Foam::CV3D::movePoint(const Vertex_handle& vh, const point& p)
 {
-    label nv = vh->index();
+    label vi = vh->index();
 
-    remove(vh);
-    insert(toPoint(p))->index() = nv;
+    // remove(vh);
+    // insert(toPoint(p))->index() = vi;
+
+    move_point(vh, toPoint(p));
+    vh->index() = vi;
 }
 
 

@@ -303,6 +303,13 @@ void Foam::CV3D::smoothEdgePositions
     }
 
 
+    // If no points are left on the edges then do not progress any further.
+
+    if (!edgePoints.size())
+    {
+        return;
+    }
+
     // Re-establish the correct distances and jumps
 
     edgeDistances.clear();
