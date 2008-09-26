@@ -137,6 +137,16 @@ done
 # is returned and not of colouring pipe.
 set -o pipefail
 
+# Define function to colour output by argument 1
+colourPipe(){
+    if [ "$1" ]; then
+        (while read line; do setterm -foreground $1; echo "$line" ; done; setterm -foreground default)
+    else
+        cat
+    fi
+}
+
+
 colourIndex=0
 
 while :
@@ -156,14 +166,14 @@ do
             if lockfile -r0 "$lockFile" 2>/dev/null; then
                 if [ "$WM_COLOURS" ]; then
                     # Set colour
-                    colourString=`setterm -foreground ${colours[$colourIndex]}`
+                    colour="${colours[$colourIndex]}"
 
                     if [ "$host" = "$HOST" ]; then
-                        eval $* 2>&1 | sed -e "s/^/$colourString/"
+                        eval $* 2>&1 | colourPipe "$colour"
                     elif [ -n "$JOB_ID" ]; then
                         qrsh -inherit -v PWD $host "$rcmd"
                     else
-                        ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | sed -e "s/^/$colourString/"
+                        ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | colourPipe "$colour"
                     fi
                     retval=$?
                 else
