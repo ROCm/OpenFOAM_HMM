@@ -38,14 +38,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 // Construct with length specified
 template<class T>
-List<T>::List(const label s)
+Foam::List<T>::List(const label s)
 :
     UList<T>(NULL, s)
 {
@@ -69,7 +66,7 @@ List<T>::List(const label s)
 
 // Construct with length and single value specified
 template<class T>
-List<T>::List(const label s, const T& a)
+Foam::List<T>::List(const label s, const T& a)
 :
     UList<T>(NULL, s)
 {
@@ -98,7 +95,7 @@ List<T>::List(const label s, const T& a)
 
 // Construct as copy
 template<class T>
-List<T>::List(const List<T>& a)
+Foam::List<T>::List(const List<T>& a)
 :
     UList<T>(NULL, a.size_)
 {
@@ -130,7 +127,7 @@ List<T>::List(const List<T>& a)
 
 // Construct as copy or re-use as specified.
 template<class T>
-List<T>::List(List<T>& a, bool reUse)
+Foam::List<T>::List(List<T>& a, bool reUse)
 :
     UList<T>(NULL, a.size_)
 {
@@ -166,10 +163,10 @@ List<T>::List(List<T>& a, bool reUse)
 }
 
 
-// Construct given size and start and end iterators.
+// Construct given start and end iterators.
 template<class T>
 template<class InputIterator>
-List<T>::List(InputIterator first, InputIterator last)
+Foam::List<T>::List(InputIterator first, InputIterator last)
 {
     label s = 0;
     for
@@ -200,8 +197,8 @@ List<T>::List(InputIterator first, InputIterator last)
 
 // Construct as copy of FixedList<T, Size>
 template<class T>
-template<label Size>
-List<T>::List(const FixedList<T, Size>& fl)
+template<Foam::label Size>
+Foam::List<T>::List(const FixedList<T, Size>& fl)
 :
     UList<T>(NULL, Size)
 {
@@ -223,7 +220,7 @@ List<T>::List(const FixedList<T, Size>& fl)
 
 // Construct as copy of PtrList<T>
 template<class T>
-List<T>::List(const PtrList<T>& sptrl)
+Foam::List<T>::List(const PtrList<T>& sptrl)
 :
     UList<T>(NULL, sptrl.size())
 {
@@ -245,7 +242,7 @@ List<T>::List(const PtrList<T>& sptrl)
 
 // Construct as copy of SLList<T>
 template<class T>
-List<T>::List(const SLList<T>& sll)
+Foam::List<T>::List(const SLList<T>& sll)
 :
     UList<T>(NULL, sll.size())
 {
@@ -273,7 +270,7 @@ List<T>::List(const SLList<T>& sll)
 
 // Construct as copy of IndirectList<T>
 template<class T>
-List<T>::List(const IndirectList<T>& idl)
+Foam::List<T>::List(const IndirectList<T>& idl)
 :
     UList<T>(NULL, idl.size())
 {
@@ -295,7 +292,7 @@ List<T>::List(const IndirectList<T>& idl)
 
 // Construct as copy of BiIndirectList<T>
 template<class T>
-List<T>::List(const BiIndirectList<T>& idl)
+Foam::List<T>::List(const BiIndirectList<T>& idl)
 :
     UList<T>(NULL, idl.size())
 {
@@ -319,7 +316,7 @@ List<T>::List(const BiIndirectList<T>& idl)
 
 // Destroy list elements
 template<class T>
-List<T>::~List()
+Foam::List<T>::~List()
 {
     if (this->v_) delete[] this->v_;
 }
@@ -328,7 +325,7 @@ List<T>::~List()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const List<T>& List<T>::null()
+const Foam::List<T>& Foam::List<T>::null()
 {
     List<T>* nullPtr = reinterpret_cast<List<T>*>(NULL);
     return *nullPtr;
@@ -336,7 +333,7 @@ const List<T>& List<T>::null()
 
 
 template<class T>
-void List<T>::setSize(const label newSize)
+void Foam::List<T>::setSize(const label newSize)
 {
     if (newSize < 0)
     {
@@ -382,7 +379,7 @@ void List<T>::setSize(const label newSize)
 
 
 template<class T>
-void List<T>::setSize(const label newSize, const T& a)
+void Foam::List<T>::setSize(const label newSize, const T& a)
 {
     label oldSize = this->size_;
     this->setSize(newSize);
@@ -397,7 +394,7 @@ void List<T>::setSize(const label newSize, const T& a)
 
 
 template<class T>
-void List<T>::clear()
+void Foam::List<T>::clear()
 {
     if (this->v_) delete[] this->v_;
     this->size_ = 0;
@@ -408,10 +405,9 @@ void List<T>::clear()
 // Transfer the contents of the argument List into this List
 // and anull the argument list
 template<class T>
-void List<T>::transfer(List<T>& a)
+void Foam::List<T>::transfer(List<T>& a)
 {
     if (this->v_) delete[] this->v_;
-
     this->size_ = a.size_;
     this->v_ = a.v_;
 
@@ -424,42 +420,41 @@ void List<T>::transfer(List<T>& a)
 // and anull the argument list
 template<class T>
 template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-void List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
+void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
 {
     if (this->v_) delete[] this->v_;
-
     this->size_ = a.size_;
     this->v_ = a.v_;
 
     a.size_ = 0;
-    a.allocSize_ = 0;
     a.v_ = 0;
+    a.allocSize_ = 0;
 }
 
 
 template<class T>
-void sort(List<T>& a)
+void Foam::sort(List<T>& a)
 {
     std::sort(a.begin(), a.end());
 }
 
 
 template<class T, class Cmp>
-void sort(List<T>& a, const Cmp& cmp)
+void Foam::sort(List<T>& a, const Cmp& cmp)
 {
     std::sort(a.begin(), a.end(), cmp);
 }
 
 
 template<class T>
-void stableSort(List<T>& a)
+void Foam::stableSort(List<T>& a)
 {
     std::stable_sort(a.begin(), a.end());
 }
 
 
 template<class T, class Cmp>
-void stableSort(List<T>& a, const Cmp& cmp)
+void Foam::stableSort(List<T>& a, const Cmp& cmp)
 {
     std::stable_sort(a.begin(), a.end(), cmp);
 }
@@ -469,7 +464,7 @@ void stableSort(List<T>& a, const Cmp& cmp)
 
 // Assignment to UList operator. Takes linear time.
 template<class T>
-void List<T>::operator=(const UList<T>& a)
+void Foam::List<T>::operator=(const UList<T>& a)
 {
     if (a.size_ != this->size_)
     {
@@ -501,7 +496,7 @@ void List<T>::operator=(const UList<T>& a)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void List<T>::operator=(const List<T>& a)
+void Foam::List<T>::operator=(const List<T>& a)
 {
     if (this == &a)
     {
@@ -516,7 +511,7 @@ void List<T>::operator=(const List<T>& a)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void List<T>::operator=(const SLList<T>& sll)
+void Foam::List<T>::operator=(const SLList<T>& sll)
 {
     if (sll.size() != this->size_)
     {
@@ -544,7 +539,7 @@ void List<T>::operator=(const SLList<T>& sll)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void List<T>::operator=(const IndirectList<T>& idl)
+void Foam::List<T>::operator=(const IndirectList<T>& idl)
 {
     if (idl.size() != this->size_)
     {
@@ -566,7 +561,7 @@ void List<T>::operator=(const IndirectList<T>& idl)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void List<T>::operator=(const BiIndirectList<T>& idl)
+void Foam::List<T>::operator=(const BiIndirectList<T>& idl)
 {
     if (idl.size() != this->size_)
     {
@@ -584,11 +579,6 @@ void List<T>::operator=(const BiIndirectList<T>& idl)
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 

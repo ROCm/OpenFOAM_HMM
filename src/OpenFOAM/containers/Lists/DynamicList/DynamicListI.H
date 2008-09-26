@@ -85,8 +85,10 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     }
     else
     {
+        label nextFree = List<T>::size();
         allocSize_ = s;
         List<T>::setSize(allocSize_);
+        List<T>::size() = nextFree;
     }
 }
 
@@ -104,8 +106,10 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     }
     else
     {
+        label nextFree = List<T>::size();
         allocSize_ = s;
         List<T>::setSize(allocSize_, t);
+        List<T>::size() = nextFree;
     }
 }
 
@@ -120,7 +124,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clearStorage()
 {
-    List<T>::size() = allocSize_;    // make List<T> consistent
     List<T>::clear();
     allocSize_ = 0;
 }
@@ -166,8 +169,7 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 )
 {
     allocSize_ = l.allocSize();
-    List<T>::transfer(l);       // take over storage
-    l.allocSize_ = 0;
+    List<T>::transfer(l);       // take over storage. Null l.
 }
 
 
@@ -189,9 +191,9 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append(const T& e)
         List<T>::setSize(allocSize_);
     }
 
-    this->operator[](nextFree - 1) = e;
-
     List<T>::size() = nextFree;
+
+    this->operator[](nextFree - 1) = e;
 }
 
 
@@ -202,11 +204,17 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
     {
         FatalErrorIn
         (
-            "void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()"
+            "Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()"
         )   << "List is empty" << abort(FatalError);
     }
 
-    return List<T>::operator[](--List<T>::size());
+    label nextFree = List<T>::size()-1;
+
+    const T& val = List<T>::operator[](nextFree);
+
+    List<T>::size() = nextFree;
+
+    return val;
 }
 
 
@@ -224,7 +232,7 @@ inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 
     if (nextFree > allocSize_)
     {
-       allocSize_ = max
+        allocSize_ = max
         (
             nextFree,
             label(SizeMult*allocSize_/SizeDiv + SizeInc)
@@ -257,17 +265,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 {
     List<T>::operator=(l);
     allocSize_ = List<T>::size();
-}
-
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
-(
-    const DynamicList<T, SizeInc, SizeMult, SizeDiv>& l
-)
-{
-    List<T>::operator=(l);
-    allocSize_ = l.allocSize();
 }
 
 

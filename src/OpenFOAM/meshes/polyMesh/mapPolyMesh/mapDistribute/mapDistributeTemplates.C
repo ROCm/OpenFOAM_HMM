@@ -241,7 +241,7 @@ void Foam::mapDistribute::distribute
                     Pstream::nonBlocking,
                     domain,
                     reinterpret_cast<const char*>(subField.begin()),
-                    subField.size()
+                    subField.size()*sizeof(T)
                 );
             }
         }
@@ -262,7 +262,7 @@ void Foam::mapDistribute::distribute
                     Pstream::nonBlocking,
                     domain,
                     reinterpret_cast<char*>(recvFields[domain].begin()),
-                    recvFields[domain].size()
+                    recvFields[domain].size()*sizeof(T)
                 );
             }
         }

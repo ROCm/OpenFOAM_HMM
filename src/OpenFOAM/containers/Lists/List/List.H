@@ -96,7 +96,7 @@ public:
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
 
-        //- Construct given size and start and end iterators.
+        //- Construct given start and end iterators.
         template<class InputIterator>
         List(InputIterator first, InputIterator last);
 
@@ -142,6 +142,9 @@ public:
         //- Return the number of elements in the UList.
         inline label size() const;
 
+        //- Override size to be inconsistent with allocated storage.
+        //  Use with care.
+        inline label& size();
 
         // Edit
 
@@ -165,11 +168,6 @@ public:
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
-
-            //- Override size to be inconsistent with allocated storage.
-            //  Use with care.
-            inline label& size();
-
 
     // Member operators
 

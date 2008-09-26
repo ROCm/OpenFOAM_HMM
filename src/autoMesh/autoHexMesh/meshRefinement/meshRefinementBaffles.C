@@ -514,7 +514,7 @@ void Foam::meshRefinement::markBoundaryFace
 {
     isBoundaryFace[faceI] = true;
 
-    const labelList& fEdges = mesh_.faceEdges()[faceI];
+    const labelList& fEdges = mesh_.faceEdges(faceI);
 
     forAll(fEdges, fp)
     {
@@ -623,12 +623,16 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     // If so what is the remaining non-boundary anchor point?
     labelHashSet nonBoundaryAnchors(mesh_.nCells()/10000);
 
+    // On-the-fly addressing storage.
+    DynamicList<label> dynFEdges;
+    DynamicList<label> dynCPoints;
+
     // Count of faces marked for baffling
     label nBaffleFaces = 0;
 
     forAll(cellLevel, cellI)
     {
-        const labelList cPoints(meshCutter_.cellPoints(cellI));
+        const labelList& cPoints = mesh_.cellPoints(cellI, dynCPoints);
 
         // Get number of anchor points (pointLevel == cellLevel)
 
@@ -714,11 +718,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     // Loop over all points. If a point is connected to 4 or more cells
     // with 7 anchor points on the boundary set those cell's non-boundary faces
     // to baffles
+
+    DynamicList<label> dynPCells;
+
     forAllConstIter(labelHashSet, nonBoundaryAnchors, iter)
     {
         label pointI = iter.key();
 
-        const labelList& pCells = mesh_.pointCells()[pointI];
+        const labelList& pCells = mesh_.pointCells(pointI, dynPCells);
 
         // Count number of 'hasSevenBoundaryAnchorPoints' cells.
         label n = 0;
@@ -806,7 +813,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     {
         if (facePatch[faceI] == -1)
         {
-            const labelList& fEdges = mesh_.faceEdges()[faceI];
+            const labelList& fEdges = mesh_.faceEdges(faceI, dynFEdges);
             label nFaceBoundaryEdges = 0;
 
             forAll(fEdges, fe)
@@ -840,7 +847,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             {
                 if (facePatch[faceI] == -1)
                 {
-                    const labelList& fEdges = mesh_.faceEdges()[faceI];
+                    const labelList& fEdges = mesh_.faceEdges(faceI, dynFEdges);
                     label nFaceBoundaryEdges = 0;
 
                     forAll(fEdges, fe)
@@ -1239,6 +1246,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
     labelList nBafflesPerEdge(mesh_.nEdges(), 0);
 
 
+
     // Count number of boundary faces per edge
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1255,7 +1263,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
 
             forAll(pp, i)
             {
-                const labelList& fEdges = mesh_.faceEdges()[faceI];
+                const labelList& fEdges = mesh_.faceEdges(faceI);
 
                 forAll(fEdges, fEdgeI)
                 {
@@ -1267,19 +1275,23 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
     }
 
 
+    DynamicList<label> fe0;
+    DynamicList<label> fe1;
+
+
     // Count number of duplicate boundary faces per edge
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     forAll(couples, i)
     {
-        const labelList& fEdges0 = mesh_.faceEdges()[couples[i].first()];
+        const labelList& fEdges0 = mesh_.faceEdges(couples[i].first(), fe0);
 
         forAll(fEdges0, fEdgeI)
         {
             nBafflesPerEdge[fEdges0[fEdgeI]] += 1000000;
         }
 
-        const labelList& fEdges1 = mesh_.faceEdges()[couples[i].second()];
+        const labelList& fEdges1 = mesh_.faceEdges(couples[i].second(), fe1);
 
         forAll(fEdges1, fEdgeI)
         {
@@ -1314,7 +1326,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
          == patches.whichPatch(couple.second())
         )
         {
-            const labelList& fEdges = mesh_.faceEdges()[couples[i].first()];
+            const labelList& fEdges = mesh_.faceEdges(couples[i].first());
 
             forAll(fEdges, fEdgeI)
             {
