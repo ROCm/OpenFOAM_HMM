@@ -343,7 +343,7 @@ void Foam::motionSmoother::getAffectedFacesAndPoints
 
         forAllConstIter(pointSet, nbrPoints, iter)
         {
-            const labelList& pCells = mesh_.pointCells()[iter.key()];  
+            const labelList& pCells = mesh_.pointCells(iter.key());
 
             forAll(pCells, pCellI)
             {

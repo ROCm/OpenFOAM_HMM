@@ -99,7 +99,10 @@ case "$WM_COMPILER_INST" in
 OpenFOAM)
     case "$WM_COMPILER" in
     Gcc)
-        export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        #export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.3/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc42)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH
@@ -123,8 +126,8 @@ OpenFOAM)
 esac
 
 if [ -d "$WM_COMPILER_BIN" ]; then
-    export PATH=$WM_COMPILER_BIN:$PATH
-    export LD_LIBRARY_PATH=$WM_COMPILER_LIB:$LD_LIBRARY_PATH
+    _foamAddPath $WM_COMPILER_BIN
+    _foamAddLib $WM_COMPILER_LIB
 fi
 
 unset WM_COMPILER_BIN WM_COMPILER_LIB

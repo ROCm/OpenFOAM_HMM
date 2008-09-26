@@ -87,6 +87,7 @@ RASModel::RASModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDict(type + "Coeffs")),
 
+    wallFunctionDict_(subDict("wallFunctionCoeffs")),
     kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -105,6 +106,15 @@ RASModel::RASModel
             9.0
         )
     ),
+    Cmu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            wallFunctionDict_,
+            0.09
+        )
+    ),
 
     yPlusLam_(yPlusLam(kappa_.value(), E_.value())),
 
@@ -118,7 +128,7 @@ RASModel::RASModel
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar RASModel::yPlusLam(const scalar kappa, const scalar E)
+scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 {
     scalar ypl = 11.0;
 

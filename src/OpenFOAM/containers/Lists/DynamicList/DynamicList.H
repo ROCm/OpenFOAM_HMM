@@ -26,7 +26,7 @@ Class
     Foam::DynamicList
 
 Description
-    A 1D vector of objects of type \<T\> which resizes itself as necessary to
+    A 1D vector of objects of type \<T\> that resizes itself as necessary to
     accept the new objects.
 
     Internal storage is a compact array and the list can be shrunk to compact
@@ -136,7 +136,7 @@ public:
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list. Is same as List::transfer except
             //  checks that you're not changing the underlying list to something
-            //  smaller than nextFree_.
+            //  smaller than allocSize_.
             inline void transfer(List<T>&);
 
             //- Transfer the contents of the argument DynamicList into this
@@ -149,7 +149,7 @@ public:
         //- Append an element at the end of the list
         inline void append(const T& e);
 
-        //- Return and remove the top element
+        //- Remove and return the top element
         inline T remove();
 
         //- Return non-const access to an element,
@@ -159,14 +159,8 @@ public:
         //- Assignment of all entries to the given value
         inline void operator=(const T&);
 
-        //- Assignment from List<T>
+        //- Assignment from List<T>. Also handles assignment from DynamicList.
         inline void operator=(const List<T>&);
-
-        //- Assignment from DynamicList<T>
-        inline void operator=
-        (
-            const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
-        );
 
 
     // IOstream operators

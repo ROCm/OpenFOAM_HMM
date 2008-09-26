@@ -582,11 +582,15 @@ void primitiveMesh::clearOutEdges()
     deleteDemandDrivenData(pePtr_);
     deleteDemandDrivenData(fePtr_);
     labels_.clear();
-    allocSize_ = 0;
+    labelSet_.clear();
 }
 
 
-const labelList& primitiveMesh::faceEdges(const label faceI) const
+const labelList& primitiveMesh::faceEdges
+(
+    const label faceI,
+    DynamicList<label>& storage
+) const
 {
     if (hasFaceEdges())
     {
@@ -597,34 +601,40 @@ const labelList& primitiveMesh::faceEdges(const label faceI) const
         const labelListList& pointEs = pointEdges();
         const face& f = faces()[faceI];
 
-        labels_.size() = allocSize_;
-
-        if (f.size() > allocSize_)
+        storage.clear();
+        if (f.size() > storage.allocSize())
         {
-            labels_.clear();
-            allocSize_ = f.size();
-            labels_.setSize(allocSize_);
+            storage.setSize(f.size());
         }
-
-        label n = 0;
 
         forAll(f, fp)
         {
-            labels_[n++] = findFirstCommonElementFromSortedLists
+            storage.append
             (
-                pointEs[f[fp]],
-                pointEs[f.nextLabel(fp)]
+                findFirstCommonElementFromSortedLists
+                (
+                    pointEs[f[fp]],
+                    pointEs[f.nextLabel(fp)]
+                )
             );
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
 }
 
 
-const labelList& primitiveMesh::cellEdges(const label cellI) const
+const labelList& primitiveMesh::faceEdges(const label faceI) const
+{
+    return faceEdges(faceI, labels_);
+}
+
+
+const labelList& primitiveMesh::cellEdges
+(
+    const label cellI,
+    DynamicList<label>& storage
+) const
 {
     if (hasCellEdges())
     {
@@ -646,26 +656,26 @@ const labelList& primitiveMesh::cellEdges(const label cellI) const
             }
         }
 
-        labels_.size() = allocSize_;
+        storage.clear();
 
-        if (labelSet_.size() > allocSize_)
+        if (labelSet_.size() > storage.allocSize())
         {
-            labels_.clear();
-            allocSize_ = labelSet_.size();
-            labels_.setSize(allocSize_);
+            storage.setSize(labelSet_.size());
         }
-
-        label n =0;
 
         forAllConstIter(labelHashSet, labelSet_, iter)
         {
-            labels_[n++] = iter.key();
+            storage.append(iter.key());
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::cellEdges(const label cellI) const
+{
+    return cellEdges(cellI, labels_);;
 }
 
 

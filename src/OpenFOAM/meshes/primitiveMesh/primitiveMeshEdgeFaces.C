@@ -41,6 +41,14 @@ const labelListList& primitiveMesh::edgeFaces() const
         if (debug)
         {
             Pout<< "primitiveMesh::edgeFaces() : calculating edgeFaces" << endl;
+
+            if (debug == -1)
+            {
+                // For checking calls:abort so we can quickly hunt down
+                // origin of call
+                FatalErrorIn("primitiveMesh::edgeFaces()")
+                    << abort(FatalError);
+            }
         }
 
         // Invert faceEdges
@@ -52,7 +60,11 @@ const labelListList& primitiveMesh::edgeFaces() const
 }
 
 
-const labelList& primitiveMesh::edgeFaces(const label edgeI) const
+const labelList& primitiveMesh::edgeFaces
+(
+    const label edgeI,
+    DynamicList<label>& storage
+) const
 {
     if (hasEdgeFaces())
     {
@@ -67,9 +79,8 @@ const labelList& primitiveMesh::edgeFaces(const label edgeI) const
 
         label i0 = 0;
         label i1 = 0;
-        label n = 0;
 
-        labels_.size() = allocSize_;
+        storage.clear();
 
         while (i0 < pFaces0.size() && i1 < pFaces1.size())
         {
@@ -84,23 +95,20 @@ const labelList& primitiveMesh::edgeFaces(const label edgeI) const
             else
             {
                 // Equal. Append.
-                if (n == allocSize_)
-                {
-                    // Have setSize copy contents so far
-                    labels_.size() = n;
-                    allocSize_ = allocSize_*2 + 1;
-                    labels_.setSize(allocSize_);
-                }
-                labels_[n++] = pFaces0[i0];
+                storage.append(pFaces0[i0]);
                 ++i0;
                 ++i1;
             }
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::edgeFaces(const label edgeI) const
+{
+    return edgeFaces(edgeI, labels_);
 }
 
 

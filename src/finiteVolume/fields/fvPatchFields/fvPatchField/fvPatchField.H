@@ -27,12 +27,12 @@ Class
 
 Description
     Abstract base class with a fat-interface to all derived classes
-    covering all possible ways in which they might be used. 
+    covering all possible ways in which they might be used.
 
     The first level of derivation is to basic patchFields which cover
     zero-gradient, fixed-gradient, fixed-value and mixed conditions.
 
-    The next level of derivation covers all the specialised typed with
+    The next level of derivation covers all the specialised types with
     specific evaluation proceedures, particularly with respect to specific
     fields.
 
@@ -65,6 +65,9 @@ class volMesh;
 
 template<class Type>
 class fvPatchField;
+
+template<class Type>
+class fvMatrix;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const fvPatchField<Type>&);
@@ -405,6 +408,10 @@ public:
                 notImplemented(type() + "::gradientBoundaryCoeffs()");
                 return *this;
             }
+
+
+            //- Manipulate matrix
+            virtual void manipulateMatrix(fvMatrix<Type>& matrix);
 
 
         //- Write

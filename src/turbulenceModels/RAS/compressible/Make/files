@@ -12,10 +12,29 @@ SpalartAllmaras/SpalartAllmaras.C
 kOmegaSST/kOmegaSST.C
 
 /* Wall functions */
-wallFunctions/mutWallFunctions/mutStandardRoughWallFunction/mutStandardRoughWallFunctionFvPatchScalarField.C
+wallFunctions = derivedFvPatchFields/wallFunctions
+
+mutWallFunctions = $(wallFunctions)/mutWallFunctions
+$(mutWallFunctions)/mutWallFunction/mutWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutRoughWallFunction/mutRoughWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutSpalartAllmarasWallFunction/mutSpalartAllmarasWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutSpalartAllmarasStandardWallFunction/mutSpalartAllmarasStandardWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutSpalartAllmarasStandardRoughWallFunction/mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField.C
+
+epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
+$(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.C
+
+omegaWallFunctions = $(wallFunctions)/omegaWallFunctions
+$(omegaWallFunctions)/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
+
+kQRWallFunctions = $(wallFunctions)/kQRWallFunctions
+$(kQRWallFunctions)/kQRWallFunction/kQRWallFunctionFvPatchFields.C
 
 /* Patch fields */
+derivedFvPatchFields/turbulentHeatFluxTemperature/turbulentHeatFluxTemperatureFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
+
+backwardsCompatibilityWallFunctions/backwardsCompatibilityWallFunctions.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleRASModels

@@ -105,6 +105,23 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const chemistryModel&);
 
+protected:
+
+    // Protected Member Functions
+
+        //- Write access to chemical source terms
+        //  (eg, for multi-chemistry model)
+        PtrList<scalarField>& RR()
+        {
+            return RR_;
+        }
+
+        //- Return the latest estimation of integration step
+        //  (eg, for multi-chemistry model)
+        scalarField& deltaTChem()
+        {
+            return deltaTChem_;
+        }
 
 public:
 

@@ -28,6 +28,7 @@ License
 #include "dictionary.H"
 #include "fvMesh.H"
 #include "fvPatchFieldMapper.H"
+//#include "fvMatrices.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -220,6 +221,13 @@ void Foam::fvPatchField<Type>::evaluate(const Pstream::commsTypes)
     }
 
     updated_ = false;
+}
+
+
+template<class Type>
+void Foam::fvPatchField<Type>::manipulateMatrix(fvMatrix<Type>& matrix)
+{
+    // do nothing
 }
 
 

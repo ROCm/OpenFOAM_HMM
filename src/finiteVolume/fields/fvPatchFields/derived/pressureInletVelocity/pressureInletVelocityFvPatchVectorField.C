@@ -109,10 +109,8 @@ void pressureInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const surfaceScalarField& phi = db().lookupObject<surfaceScalarField>
-    (
-        phiName_
-    );
+    const surfaceScalarField& phi =
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
@@ -148,8 +146,14 @@ void pressureInletVelocityFvPatchVectorField::updateCoeffs()
 void pressureInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
+    if (rhoName_ != "rho")
+    {
+        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    }
     writeEntry("value", os);
 }
 

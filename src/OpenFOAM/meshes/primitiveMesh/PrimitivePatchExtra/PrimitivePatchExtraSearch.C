@@ -62,7 +62,7 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
 
             const labelList& fEdges = faceEs[faceI];
 
-            forAllfEdges, i)
+            forAll(fEdges, i)
             {
                 label edgeI = fEdges[i];
 
@@ -102,8 +102,7 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
             break;
         }
 
-        // New dynamiclist: can leave dynamicList unshrunk
-        //changedFaces.transfer(newChangedFaces.shrink());
+        // New dynamicList: can leave dynamicList unshrunk
         changedFaces.transfer(newChangedFaces);
     }
 }
