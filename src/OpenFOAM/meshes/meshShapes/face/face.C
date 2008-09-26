@@ -547,7 +547,7 @@ Foam::vector Foam::face::normal(const pointField& p) const
 
     label nPoints = size();
 
-    vector n = vector::zero;
+    register label pI;
 
     point centrePoint = vector::zero;
     for (pI = 0; pI < nPoints; pI++)
@@ -556,9 +556,9 @@ Foam::vector Foam::face::normal(const pointField& p) const
     }
     centrePoint /= nPoints;
 
-    point nextPoint = centrePoint;
+    vector n = vector::zero;
 
-    register label pI;
+    point nextPoint = centrePoint;
 
     for (pI = 0; pI < nPoints; pI++)
     {
