@@ -93,6 +93,7 @@ class removeFaces
             const labelList& nFacesPerEdge,
             const label faceI,
             const label newRegion,
+            const labelList& fEdges,
             labelList& faceRegion
         ) const;
 

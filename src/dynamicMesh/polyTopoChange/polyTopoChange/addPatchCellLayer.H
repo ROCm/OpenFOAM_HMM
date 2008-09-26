@@ -232,6 +232,7 @@ class addPatchCellLayer
             const label meshEdgeI,
             const label layerI,
             const label numEdgeFaces,
+            const labelList& meshFaces,
             polyTopoChange&
         ) const;
 

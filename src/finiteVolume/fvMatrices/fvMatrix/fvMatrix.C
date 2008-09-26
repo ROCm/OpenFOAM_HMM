@@ -593,6 +593,20 @@ void Foam::fvMatrix<Type>::relax()
 
 
 template<class Type>
+void Foam::fvMatrix<Type>::boundaryManipulate
+(
+    typename GeometricField<Type, fvPatchField, volMesh>::
+        GeometricBoundaryField& bFields
+)
+{
+    forAll(bFields, patchI)
+    {
+        bFields[patchI].manipulateMatrix(*this);
+    }
+}
+
+
+template<class Type>
 Foam::tmp<Foam::scalarField> Foam::fvMatrix<Type>::D() const
 {
     tmp<scalarField> tdiag(new scalarField(diag()));

@@ -1,0 +1,4 @@
+minMaxFields.C
+minMaxFieldsFunctionObject.C
+
+LIB = $(FOAM_LIBBIN)/libminMaxFields
