@@ -27,6 +27,8 @@ License
 #include "backwardsCompatibilityWallFunctions.H"
 #include "Time.H"
 
+#include "wallPolyPatch.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -36,13 +38,12 @@ namespace compressible
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Type, class PatchType>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 autoCreateWallFunctionField
 (
     const word& fieldName,
-    const fvMesh& mesh,
-    const word& wallFunctionName
+    const fvMesh& mesh
 )
 {
     IOobject mutHeader
@@ -97,16 +98,32 @@ autoCreateWallFunctionField
             )
         );
 
-        wordList fieldBoundaryTypes = replaceWallBoundaryTypes
-        (
-            mesh,
-            fieldOrig().boundaryField().types(),
-            wordList
-            (
-                fieldOrig().boundaryField().types().size(),
-                wallFunctionName
-            )
-        );
+        PtrList<fvPatchField<Type> > newPatchFields(mesh.boundary().size());
+
+        forAll(newPatchFields, patchI)
+        {
+            if (isType<wallPolyPatch>(mesh.boundaryMesh()[patchI]))
+            {
+                newPatchFields.set
+                (
+                    patchI,
+                    new PatchType
+                    (
+                        mesh.boundary()[patchI],
+                        fieldOrig().dimensionedInternalField()
+                    )
+                );
+                newPatchFields[patchI] == fieldOrig().boundaryField()[patchI];
+            }
+            else
+            {
+                newPatchFields.set
+                (
+                    patchI,
+                    fieldOrig().boundaryField()[patchI].clone()
+                );
+            }
+        }
 
         tmp<fieldType> fieldNew
         (
@@ -122,17 +139,11 @@ autoCreateWallFunctionField
                     false
                 ),
                 mesh,
-                dimensioned<Type>
-                (
-                    "zero",
-                    fieldOrig().dimensions(),
-                    pTraits<Type>::zero
-                ),
-                fieldBoundaryTypes
+                fieldOrig().dimensions(),
+                fieldOrig().internalField(),
+                newPatchFields
             )
         );
-
-        fieldNew() == fieldOrig();
 
         Info<< "    Writing backup of original " << fieldName << " to "
             << fieldName << ".old" << endl;
