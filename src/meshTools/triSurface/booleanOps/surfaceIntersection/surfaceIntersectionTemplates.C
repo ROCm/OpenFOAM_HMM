@@ -40,7 +40,6 @@ void Foam::surfaceIntersection::transfer
 {
     dList.shrink();
     lList.transfer(dList);
-    dList.clear();
 }
 
 

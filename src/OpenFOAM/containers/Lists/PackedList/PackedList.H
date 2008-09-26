@@ -160,12 +160,14 @@ public:
             //- Number of packed elements
             inline label size() const;
 
-
             //- Get value at index I
             inline unsigned int get(const label i) const;
 
             //- Set value at index I. Return true if value changed.
             inline bool set(const label i, const unsigned int val);
+
+            //- Underlying storage
+            inline List<unsigned int>& storage();
 
 
     // Member operators
@@ -179,7 +181,8 @@ public:
             //- Assignment operator. Takes linear time.
             void operator=(const PackedList<nBits>&);
 
-            //- Assignment of all entries to the given value
+            //- Assignment of all entries to the given value. Does set on all
+            //  elements.
             inline void operator=(const unsigned int val);
 
             //- Return as labelList

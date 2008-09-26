@@ -634,7 +634,8 @@ surfacePatchList triSurface::calcPatches(labelList& faceMap) const
     // Compact regions
 
     // Get last region
-    label maxRegion = 0;
+    //label maxRegion = 0;                  // for compacted regions
+    label maxRegion = patches_.size()-1;    // for non-compacted regions
 
     if (faceMap.size() > 0)
     {

@@ -149,7 +149,7 @@ public:
                 const pointField& start,
                 const pointField& end,
                 labelListList& surfaces,
-                List<List<pointIndexHit> >& surfaceHits
+                List<List<pointIndexHit> >&
             ) const;
 
             //- Find nearest. Return -1 (and a miss()) or surface and nearest

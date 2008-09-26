@@ -88,10 +88,11 @@ protected:
         Switch printCoeffs_;
         dictionary coeffDict_;
 
+        dictionary wallFunctionDict_;
         dimensionedScalar kappa_;
         dimensionedScalar E_;
+        dimensionedScalar Cmu_;
 
-        scalar yPlusLam(const scalar kappa, const scalar E);
         scalar yPlusLam_;
 
         dimensionedScalar k0_;
@@ -192,7 +193,6 @@ public:
                 return epsilonSmall_;
             }
 
-
             //- Allow k0 to be changed
             dimensionedScalar& k0()
             {
@@ -211,7 +211,6 @@ public:
                 return epsilonSmall_;
             }
 
-
             //- Return kappa for use in wall-functions
             dimensionedScalar kappa() const
             {
@@ -224,6 +223,21 @@ public:
                 return E_;
             }
 
+            //- Return Cmu for use in wall-functions
+            dimensionedScalar Cmu() const
+            {
+                return Cmu_;
+            }
+
+            //- Return the near wall distances
+            const nearWallDist& y() const
+            {
+                return y_;
+            }
+
+            //- Calculate y+ at the edge of the laminar sublayer
+            scalar yPlusLam(const scalar kappa, const scalar E) const;
+
             //- Return y+ at the edge of the laminar sublayer
             //  for use in wall-functions
             scalar yPlusLam() const
@@ -235,6 +249,12 @@ public:
             const dictionary& coeffDict() const
             {
                 return coeffDict_;
+            }
+
+            //- Const access to the wall functions coefficients dictionary
+            const dictionary& walLFunctionDict() const
+            {
+                return wallFunctionDict_;
             }
 
 

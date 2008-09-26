@@ -36,6 +36,7 @@ SourceFiles
 #ifndef triSurfaceMesh_H
 #define triSurfaceMesh_H
 
+#include "treeBoundBox.H"
 #include "searchableSurface.H"
 #include "objectRegistry.H"
 #include "indexedOctree.H"
@@ -142,8 +143,11 @@ public:
             //- Whether supports volume type below. I.e. whether is closed.
             virtual bool hasVolumeType() const;
 
-
-        // Multiple point queries.
+            //- Range of local indices that can be returned.
+            virtual label size() const
+            {
+                return triSurface::size();
+            }
 
             virtual void findNearest
             (
@@ -196,6 +200,30 @@ public:
                 List<volumeType>&
             ) const;
 
+            //- Set bounds of surface. Bounds currently set as list of
+            //  bounding boxes. The bounds are hints to the surface as for
+            //  the range of queries it can expect. faceMap/pointMap can be
+            //  set if the surface has done any redistribution.
+            virtual void distribute
+            (
+                const List<treeBoundBox>&,
+                const bool keepNonLocal,
+                autoPtr<mapDistribute>& faceMap,
+                autoPtr<mapDistribute>& pointMap
+            )
+            {}
+
+        // Other
+
+            //- Specific to triSurfaceMesh: from a set of hits (points and
+            //  indices) get the specified field. Misses do not get set.
+            virtual void getField
+            (
+                const word& fieldName,
+                const List<pointIndexHit>&,
+                labelList& values
+            ) const;
+
 
         // regIOobject implementation
 
@@ -204,6 +232,14 @@ public:
                 notImplemented("triSurfaceMesh::writeData(Ostream&) const");
                 return false;
             }
+
+            //- Write using given format, version and compression
+            virtual bool writeObject
+            (
+                IOstream::streamFormat fmt,
+                IOstream::versionNumber ver,
+                IOstream::compressionType cmp
+            ) const;
 
 };
 

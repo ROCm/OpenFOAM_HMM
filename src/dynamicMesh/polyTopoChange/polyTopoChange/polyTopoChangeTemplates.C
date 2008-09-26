@@ -96,13 +96,5 @@ void Foam::polyTopoChange::renumberKey
     elems.transfer(newElems);
 }
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
 
 // ************************************************************************* //

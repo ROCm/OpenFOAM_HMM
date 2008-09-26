@@ -43,6 +43,14 @@ void primitiveMesh::calcPointCells() const
         Pout<< "primitiveMesh::calcPointCells() : "
             << "calculating pointCells"
             << endl;
+
+        if (debug == -1)
+        {
+            // For checking calls:abort so we can quickly hunt down
+            // origin of call
+            FatalErrorIn("primitiveMesh::calcPointCells()")
+                << abort(FatalError);
+        }
     }
 
     // It is an error to attempt to recalculate pointCells
@@ -114,7 +122,11 @@ const labelListList& primitiveMesh::pointCells() const
 }
 
 
-const labelList& primitiveMesh::pointCells(const label pointI) const
+const labelList& primitiveMesh::pointCells
+(
+    const label pointI,
+    DynamicList<label>& storage
+) const
 {
     if (hasPointCells())
     {
@@ -126,55 +138,45 @@ const labelList& primitiveMesh::pointCells(const label pointI) const
         const labelList& nei = faceNeighbour();
         const labelList& pFaces = pointFaces()[pointI];
 
-        labels_.size() = allocSize_;
-
-        label n = 0;
+        storage.clear();
 
         forAll(pFaces, i)
         {
             const label faceI = pFaces[i];
 
             // Append owner
-            if (n == allocSize_)
-            {
-                labels_.size() = n;
-                allocSize_ = allocSize_*2 + 1;
-                labels_.setSize(allocSize_);
-            }
-            labels_[n++] = own[faceI];
+            storage.append(own[faceI]);
 
             // Append neighbour
             if (faceI < nInternalFaces())
             {
-                if (n == allocSize_)
-                {
-                    labels_.size() = n;
-                    allocSize_ = allocSize_*2 + 1;
-                    labels_.setSize(allocSize_);
-                }
-                labels_[n++] = nei[faceI];
+                storage.append(nei[faceI]);
             }
         }
-        labels_.size() = n;
-
 
         // Filter duplicates
-        sort(labels_);
+        sort(storage);
 
-        n = 1;
+        label n = 1;
 
-        for (label i = 1; i < labels_.size(); i++)
+        for (label i = 1; i < storage.size(); i++)
         {
-            if (labels_[i] != labels_[i-1])
+            if (storage[i] != storage[i-1])
             {
-                labels_[n++] = labels_[i];
+                storage[n++] = storage[i];
             }
         }
 
-        labels_.size() = n;
+        storage.size() = n;
 
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::pointCells(const label pointI) const
+{
+    return pointCells(pointI, labels_);
 }
 
 

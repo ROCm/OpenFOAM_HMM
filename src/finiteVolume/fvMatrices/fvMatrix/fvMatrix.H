@@ -327,7 +327,8 @@ public:
             void setReference
             (
                 const label cell,
-                const Type& value
+                const Type& value,
+                const bool forceReference = false
             );
 
             //- Set reference level for a component of the solution
@@ -349,6 +350,13 @@ public:
             //- Relax matrix (for steady-state solution).
             //  alpha is read from controlDict
             void relax();
+
+            //- Manipulate based on a boundary field
+            void boundaryManipulate
+            (
+                typename GeometricField<Type, fvPatchField, volMesh>::
+                    GeometricBoundaryField& values
+            );
 
             //- Construct and return the solver
             //  Solver controls read from Istream
@@ -386,7 +394,7 @@ public:
 
             //- Return the face-flux field from the matrix
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-            flux() const;
+                flux() const;
 
 
     // Member operators

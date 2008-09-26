@@ -484,7 +484,6 @@ void Foam::searchableBox::findLineAll
 
             hits.shrink();
             info[pointI].transfer(hits);
-            hits.clear();
         }
         else
         {

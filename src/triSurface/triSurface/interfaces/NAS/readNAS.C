@@ -350,7 +350,7 @@ bool triSurface::readNAS(const fileName& OBJfileName)
     points.clear();
 
     // Create triSurface
-    *this = triSurface(faces, patches, allPoints);
+    *this = triSurface(faces, patches, allPoints, true);
 
     return true;
 }

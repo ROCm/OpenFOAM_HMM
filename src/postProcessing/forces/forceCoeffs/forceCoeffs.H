@@ -126,7 +126,10 @@ public:
         //- Read the forces data
         virtual void read(const dictionary&);
 
-        //- Calculate the forces and write
+        //- Execute
+        virtual void execute();
+
+        //- Write the forces
         virtual void write();
 };
 

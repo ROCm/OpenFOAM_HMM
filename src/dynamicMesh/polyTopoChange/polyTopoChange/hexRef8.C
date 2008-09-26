@@ -372,7 +372,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
         {
             const label cLevel = cellLevel_[cellI];
 
-            const labelList& cEdges = mesh_.cellEdges()[cellI];
+            const labelList& cEdges = mesh_.cellEdges(cellI);
 
             forAll(cEdges, i)
             {
@@ -447,7 +447,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
     {
         const label cLevel = cellLevel_[cellI];
 
-        const labelList& cEdges = mesh_.cellEdges()[cellI];
+        const labelList& cEdges = mesh_.cellEdges(cellI);
 
         forAll(cEdges, i)
         {
@@ -1190,6 +1190,10 @@ void Foam::hexRef8::createInternalFaces
     // From edge mid to face mids
     Map<edge> midPointToFaceMids(24);
 
+    // Storage for on-the-fly addressing
+    DynamicList<label> storage;
+
+
     // Running count of number of internal faces added so far.
     label nFacesAdded = 0;
 
@@ -1198,7 +1202,7 @@ void Foam::hexRef8::createInternalFaces
         label faceI = cFaces[i];
 
         const face& f = mesh_.faces()[faceI];
-        const labelList& fEdges = mesh_.faceEdges()[faceI];
+        const labelList& fEdges = mesh_.faceEdges(faceI, storage);
 
         // We are on the cellI side of face f. The face will have 1 or 4
         // cLevel points and lots of higher numbered ones.
@@ -1299,7 +1303,7 @@ void Foam::hexRef8::createInternalFaces
                     {
                         dumpCell(cellI);
 
-                        const labelList cPoints(cellPoints(cellI));
+                        const labelList& cPoints = mesh_.cellPoints(cellI);
 
                         FatalErrorIn("createInternalFaces(..)")
                             << "cell:" << cellI << " cLevel:" << cLevel
@@ -1372,7 +1376,7 @@ void Foam::hexRef8::createInternalFaces
                     {
                         dumpCell(cellI);
 
-                        const labelList cPoints(cellPoints(cellI));
+                        const labelList& cPoints = mesh_.cellPoints(cellI);
 
                         FatalErrorIn("createInternalFaces(..)")
                             << "cell:" << cellI << " cLevel:" << cLevel
@@ -1454,7 +1458,7 @@ void Foam::hexRef8::walkFaceToMid
 ) const
 {
     const face& f = mesh_.faces()[faceI];
-    const labelList& fEdges = mesh_.faceEdges()[faceI];
+    const labelList& fEdges = mesh_.faceEdges(faceI);
 
     label fp = startFp;
 
@@ -1503,7 +1507,7 @@ void Foam::hexRef8::walkFaceFromMid
 ) const
 {
     const face& f = mesh_.faces()[faceI];
-    const labelList& fEdges = mesh_.faceEdges()[faceI];
+    const labelList& fEdges = mesh_.faceEdges(faceI);
 
     label fp = f.rcIndex(startFp);
 
@@ -2013,27 +2017,6 @@ Foam::hexRef8::hexRef8
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Get points of a cell (without using cellPoints addressing)
-Foam::labelList Foam::hexRef8::cellPoints(const label cellI) const
-{
-    // Pick up points of the cell
-    const cell& cFaces = mesh_.cells()[cellI];
-
-    labelHashSet cPoints(4*cFaces.size());
-
-    forAll(cFaces, i)
-    {
-        const face& f = mesh_.faces()[cFaces[i]];
-
-        forAll(f, fp)
-        {
-            cPoints.insert(f[fp]);
-        }
-    }
-    return cPoints.toc();
-}
-
-
 Foam::labelList Foam::hexRef8::consistentRefinement
 (
     const labelList& cellsToRefine,
@@ -2358,13 +2341,11 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         // as cell level purely for ease)
         labelList maxPointCount(mesh_.nPoints(), 0);
 
-        const labelListList& pointCells = mesh_.pointCells();
-
-        forAll(pointCells, pointI)
+        forAll(maxPointCount, pointI)
         {
             label& pLevel = maxPointCount[pointI];
 
-            const labelList& pCells = pointCells[pointI];
+            const labelList& pCells = mesh_.pointCells(pointI);
 
             forAll(pCells, i)
             {
@@ -2395,7 +2376,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
             // Loop over all cells using the point and check whether their
             // refinement level is much less than the maximum.
 
-            const labelList& pCells = pointCells[pointI];
+            const labelList& pCells = mesh_.pointCells(pointI);
 
             forAll(pCells, pCellI)
             {
@@ -3021,7 +3002,9 @@ Foam::labelListList Foam::hexRef8::setRefinement
             << " Checking initial mesh just to make sure" << endl;
 
         checkMesh();
-        checkRefinementLevels(-1, labelList(0));
+        // Cannot call checkRefinementlevels since hanging points might
+        // get triggered by the mesher after subsetting.
+        //checkRefinementLevels(-1, labelList(0));
     }
 
     // Clear any saved point/cell data.
@@ -3119,7 +3102,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     {
         if (cellMidPoint[cellI] >= 0)
         {
-            const labelList& cEdges = mesh_.cellEdges()[cellI];
+            const labelList& cEdges = mesh_.cellEdges(cellI);
 
             forAll(cEdges, i)
             {
@@ -3456,7 +3439,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
         forAll(pointLevel_, pointI)
         {
-            const labelList& pCells = mesh_.pointCells()[pointI];
+            const labelList& pCells = mesh_.pointCells(pointI);
 
             forAll(pCells, pCellI)
             {
@@ -3496,7 +3479,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                 {
                     dumpCell(cellI);
 
-                    const labelList cPoints(cellPoints(cellI));
+                    const labelList& cPoints = mesh_.cellPoints(cellI);
 
                     FatalErrorIn
                     (
@@ -3608,7 +3591,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         {
             if (edgeMidPoint[edgeI] >= 0)
             {
-                const labelList& eFaces = mesh_.edgeFaces()[edgeI];
+                const labelList& eFaces = mesh_.edgeFaces(edgeI);
 
                 forAll(eFaces, i)
                 {
@@ -3766,13 +3749,16 @@ Foam::labelListList Foam::hexRef8::setRefinement
             << endl;
     }
 
+    DynamicList<label> eFacesStorage;
+    DynamicList<label> fEdgesStorage;
+
     forAll(edgeMidPoint, edgeI)
     {
         if (edgeMidPoint[edgeI] >= 0)
         {
             // Split edge. Check that face not already handled above.
 
-            const labelList& eFaces = mesh_.edgeFaces()[edgeI];
+            const labelList& eFaces = mesh_.edgeFaces(edgeI, eFacesStorage);
 
             forAll(eFaces, i)
             {
@@ -3783,7 +3769,11 @@ Foam::labelListList Foam::hexRef8::setRefinement
                     // Unsplit face. Add edge splits to face.
 
                     const face& f = mesh_.faces()[faceI];
-                    const labelList& fEdges = mesh_.faceEdges()[faceI];
+                    const labelList& fEdges = mesh_.faceEdges
+                    (
+                        faceI,
+                        fEdgesStorage
+                    );
 
                     DynamicList<label> newFaceVerts(f.size());
 
@@ -4713,14 +4703,12 @@ void Foam::hexRef8::checkRefinementLevels
     // Check 2:1 across points (instead of faces)
     if (maxPointDiff != -1)
     {
-        const labelListList& pointCells = mesh_.pointCells();
-
         // Determine per point the max cell level.
         labelList maxPointLevel(mesh_.nPoints(), 0);
 
-        forAll(pointCells, pointI)
+        forAll(maxPointLevel, pointI)
         {
-            const labelList& pCells = pointCells[pointI];
+            const labelList& pCells = mesh_.pointCells(pointI);
 
             label& pLevel = maxPointLevel[pointI];
 
@@ -4745,7 +4733,7 @@ void Foam::hexRef8::checkRefinementLevels
         {
             label pointI = pointsToCheck[i];
 
-            const labelList& pCells = pointCells[pointI];
+            const labelList& pCells = mesh_.pointCells(pointI);
 
             forAll(pCells, i)
             {
@@ -4813,7 +4801,7 @@ void Foam::hexRef8::checkRefinementLevels
             false                   // no separation
         );
 
-        OFstream str(mesh_.time().path()/"hangingPoints.obj");
+        //OFstream str(mesh_.time().path()/"hangingPoints.obj");
 
         label nHanging = 0;
 
@@ -4826,8 +4814,7 @@ void Foam::hexRef8::checkRefinementLevels
                 Pout<< "Hanging boundary point " << pointI
                     << " at " << mesh_.points()[pointI]
                     << endl;
-
-                meshTools::writeOBJ(str, mesh_.points()[pointI]);
+                //meshTools::writeOBJ(str, mesh_.points()[pointI]);
             }
         }
 
@@ -4880,11 +4867,11 @@ Foam::labelList Foam::hexRef8::getSplitPoints() const
     labelList splitMasterLevel(mesh_.nPoints(), 0);
 
     // Unmark all with not 8 cells
-    const labelListList& pointCells = mesh_.pointCells();
+    //const labelListList& pointCells = mesh_.pointCells();
 
-    forAll(pointCells, pointI)
+    for (label pointI = 0; pointI < mesh_.nPoints(); pointI++)
     {
-        const labelList& pCells = pointCells[pointI];
+        const labelList& pCells = mesh_.pointCells(pointI);
 
         if (pCells.size() != 8)
         {
@@ -4897,8 +4884,7 @@ Foam::labelList Foam::hexRef8::getSplitPoints() const
 
     forAll(visibleCells, cellI)
     {
-        //const labelList& cPoints = mesh_.cellPoints()[cellI];
-        const labelList cPoints(cellPoints(cellI));
+        const labelList& cPoints = mesh_.cellPoints(cellI);
 
         if (visibleCells[cellI] != -1 && history_.parentIndex(cellI) >= 0)
         {
@@ -5103,7 +5089,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         {
             if (unrefinePoint.get(pointI) == 1)
             {
-                const labelList& pCells = mesh_.pointCells()[pointI];
+                const labelList& pCells = mesh_.pointCells(pointI);
 
                 forAll(pCells, j)
                 {
@@ -5243,7 +5229,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         {
             if (unrefinePoint.get(pointI) == 1)
             {
-                const labelList& pCells = mesh_.pointCells()[pointI];
+                const labelList& pCells = mesh_.pointCells(pointI);
 
                 forAll(pCells, j)
                 {
@@ -5328,7 +5314,7 @@ void Foam::hexRef8::setUnrefinement
 
         forAll(splitPointLabels, i)
         {
-            const labelList& pCells = mesh_.pointCells()[splitPointLabels[i]];
+            const labelList& pCells = mesh_.pointCells(splitPointLabels[i]);
 
             forAll(pCells, j)
             {
@@ -5394,7 +5380,7 @@ void Foam::hexRef8::setUnrefinement
 
         // Get original cell label
 
-        const labelList& pCells = mesh_.pointCells()[pointI];
+        const labelList& pCells = mesh_.pointCells(pointI);
 
         // Check
         if (pCells.size() != 8)
@@ -5462,7 +5448,7 @@ void Foam::hexRef8::setUnrefinement
     {
         label pointI = splitPointLabels[i];
 
-        const labelList& pCells = mesh_.pointCells()[pointI];
+        const labelList& pCells = mesh_.pointCells(pointI);
 
         label masterCellI = min(pCells);
 

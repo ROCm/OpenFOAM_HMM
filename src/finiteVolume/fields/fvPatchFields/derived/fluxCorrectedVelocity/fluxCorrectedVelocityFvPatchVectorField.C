@@ -32,12 +32,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fluxCorrectedVelocityFvPatchVectorField::
+Foam::fluxCorrectedVelocityFvPatchVectorField::
 fluxCorrectedVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -50,7 +47,7 @@ fluxCorrectedVelocityFvPatchVectorField
 {}
 
 
-fluxCorrectedVelocityFvPatchVectorField::
+Foam::fluxCorrectedVelocityFvPatchVectorField::
 fluxCorrectedVelocityFvPatchVectorField
 (
     const fluxCorrectedVelocityFvPatchVectorField& ptf,
@@ -65,7 +62,7 @@ fluxCorrectedVelocityFvPatchVectorField
 {}
 
 
-fluxCorrectedVelocityFvPatchVectorField::
+Foam::fluxCorrectedVelocityFvPatchVectorField::
 fluxCorrectedVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -81,7 +78,7 @@ fluxCorrectedVelocityFvPatchVectorField
 }
 
 
-fluxCorrectedVelocityFvPatchVectorField::
+Foam::fluxCorrectedVelocityFvPatchVectorField::
 fluxCorrectedVelocityFvPatchVectorField
 (
     const fluxCorrectedVelocityFvPatchVectorField& fcvpvf,
@@ -96,7 +93,7 @@ fluxCorrectedVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fluxCorrectedVelocityFvPatchVectorField::evaluate
+void Foam::fluxCorrectedVelocityFvPatchVectorField::evaluate
 (
     const Pstream::commsTypes
 )
@@ -130,9 +127,12 @@ void fluxCorrectedVelocityFvPatchVectorField::evaluate
     }
     else
     {
-        FatalErrorIn("fluxCorrectedVelocityFvPatchVectorField::evaluate()")
-            << "dimensions of phi are not correct"
-            << "\n    on patch " << this->patch().name()
+        FatalErrorIn
+        (
+            "fluxCorrectedVelocityFvPatchVectorField::evaluate()"
+        )
+            << "dimensions of phi are incorrect\n"
+            << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalError);
@@ -140,25 +140,30 @@ void fluxCorrectedVelocityFvPatchVectorField::evaluate
 }
 
 
-void fluxCorrectedVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::fluxCorrectedVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
+    if (rhoName_ != "rho")
+    {
+        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    }
     writeEntry("value", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    fluxCorrectedVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        fluxCorrectedVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

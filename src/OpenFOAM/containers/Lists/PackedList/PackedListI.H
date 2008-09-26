@@ -83,7 +83,7 @@ inline void PackedList<nBits>::checkValue(const unsigned int val) const
 {
     if (val>=(1u << nBits))
     {
-        FatalErrorIn("PackedList<T>::set(const unsigned int)")
+        FatalErrorIn("PackedList<T>::checkValue(const unsigned int)")
             << "value " << label(val) << " out of range 0 ... "
             << label((1u << nBits)-1)
             << " representable by " << nBits << " bits"
@@ -184,6 +184,13 @@ inline bool PackedList<nBits>::set(const label i, const unsigned int val)
 
 
 template<int nBits>
+inline List<unsigned int>& PackedList<nBits>::storage()
+{
+    return static_cast<List<unsigned int>&>(*this);
+}
+
+
+template<int nBits>
 inline ::Foam::reference PackedList<nBits>::operator[](const label i)
 {
 #   ifdef DEBUGList
@@ -213,8 +220,20 @@ inline void PackedList<nBits>::operator=(const unsigned int val)
 #   ifdef DEBUGList
     checkValue(val);
 #   endif
-    List<unsigned int>::operator=(val);
+
+    if (val == 0)
+    {
+        List<unsigned int>::operator=(val);
+    }
+    else
+    {
+        for (label i = 0; i < size_; i++)
+        {
+            set(i, val);
+        }
+    }
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
