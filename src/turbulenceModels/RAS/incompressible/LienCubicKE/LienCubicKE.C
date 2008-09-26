@@ -147,8 +147,30 @@ LienCubicKE::LienCubicKE
         )
     ),
 
-    k_(autoCreateK("k", mesh_)),
-    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateK("k", mesh_)
+    ),
+    epsilon_
+    (
+        IOobject
+        (
+            "epsilon",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateEpsilon("epsilon", mesh_)
+    ),
 
     gradU_(fvc::grad(U)),
     eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
@@ -165,7 +187,18 @@ LienCubicKE::LienCubicKE
         )
     ),
 
-    nut_(autoCreateNut("nut", mesh_)),
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    ),
 
     nonlinearStress_
     (

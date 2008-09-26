@@ -213,9 +213,42 @@ kOmegaSST::kOmegaSST
 
     y_(mesh_),
 
-    k_(autoCreateK("k", mesh_)),
-    omega_(autoCreateOmega("omega", mesh_)),
-    nut_(autoCreateNut("nut", mesh_))
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateK("k", mesh_)
+    ),
+    omega_
+    (
+        IOobject
+        (
+            "omega",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateOmega("omega", mesh_)
+    ),
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    )
 {
     nut_ =
         a1_*k_

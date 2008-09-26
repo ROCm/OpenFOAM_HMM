@@ -223,9 +223,42 @@ kOmegaSST::kOmegaSST
 
     y_(mesh_),
 
-    k_(autoCreateK("k", mesh_)),
-    omega_(autoCreateOmega("omega", mesh_)),
-    mut_(autoCreateMut("mut", mesh_))
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateK("k", mesh_)
+    ),
+    omega_
+    (
+        IOobject
+        (
+            "omega",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateOmega("omega", mesh_)
+    ),
+    mut_
+    (
+        IOobject
+        (
+            "mut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateMut("mut", mesh_)
+    )
 {
     mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
     mut_.correctBoundaryConditions();

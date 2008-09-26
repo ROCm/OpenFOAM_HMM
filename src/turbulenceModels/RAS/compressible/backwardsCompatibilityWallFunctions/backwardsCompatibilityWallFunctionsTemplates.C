@@ -50,8 +50,7 @@ autoCreateWallFunctionField
         "mut",
         mesh.time().timeName(),
         mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
+        IOobject::MUST_READ
     );
 
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
@@ -68,7 +67,8 @@ autoCreateWallFunctionField
                     mesh.time().timeName(),
                     mesh,
                     IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 mesh
             )
@@ -118,7 +118,8 @@ autoCreateWallFunctionField
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 mesh,
                 dimensioned<Type>

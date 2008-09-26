@@ -152,9 +152,42 @@ realizableKE::realizableKE
         )
     ),
 
-    k_(autoCreateK("k", mesh_)),
-    epsilon_(autoCreateEpsilon("epsilon", mesh_)),
-    mut_(autoCreateMut("mut", mesh_))
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateK("k", mesh_)
+    ),
+    epsilon_
+    (
+        IOobject
+        (
+            "epsilon",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateEpsilon("epsilon", mesh_)
+    ),
+    mut_
+    (
+        IOobject
+        (
+            "mut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateMut("mut", mesh_)
+    )
 {
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
