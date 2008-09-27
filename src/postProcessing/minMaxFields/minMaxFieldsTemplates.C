@@ -24,40 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#include "minMaxFields.H"
+#include "volFields.H"
+#include "dictionary.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+void Foam::minMaxFields::calcMinMaxFields(const word& fieldName)
 {
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
+    if (obr_.foundObject<fieldType>(fieldName))
     {
-        if (re.matches(sl[i]))
+        const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
+        scalar minValue = min(mag(field)).value();
+        scalar maxValue = max(mag(field)).value();
+
+        reduce(minValue, minOp<scalar>());
+        reduce(maxValue, maxOp<scalar>());
+
+        if (Pstream::master())
         {
-            matches[matchi++] = i;
+            minMaxFieldsFilePtr_() << obr_.time().value() << tab
+                << fieldName << tab << minValue << tab << maxValue << endl;
+
+            if (log_)
+            {
+                Info<< "minMaxFields output:" << nl
+                    << "    min(mag(" << fieldName << ")) = " << minValue << nl
+                    << "    max(mag(" << fieldName << ")) = " << maxValue << nl
+                    << endl;
+            }
         }
     }
-
-    matches.setSize(matchi);
-
-    return matches;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -46,15 +46,6 @@ namespace Foam
 {
 namespace incompressible
 {
-
-    //- Replace old wall BCs with new wall function BCs
-    wordList replaceWallBoundaryTypes
-    (
-        const fvMesh& mesh,
-        const wordList& oldTypeNames,
-        const wordList& newTypeNames
-    );
-
     //- nut
     tmp<volScalarField> autoCreateNut
     (
@@ -98,13 +89,12 @@ namespace incompressible
     );
 
     //- Helper function to create the new field
-    template<class Type>
+    template<class Type, class PatchType>
     tmp<GeometricField<Type, fvPatchField, volMesh> >
     autoCreateWallFunctionField
     (
         const word& fieldName,
-        const fvMesh& mesh,
-        const word& wallFunctionName
+        const fvMesh& mesh
     );
 
 

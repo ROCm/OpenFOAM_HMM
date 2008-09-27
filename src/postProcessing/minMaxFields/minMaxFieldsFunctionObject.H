@@ -22,42 +22,34 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::minMaxFieldsFunctionObject
+
+Description
+    FunctionObject wrapper around minMaxFields to allow them to be created via
+    the functions list within controlDict.
+
+SourceFiles
+    minMaxFieldsFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#ifndef minMaxFieldsFunctionObject_H
+#define minMaxFieldsFunctionObject_H
+
+#include "minMaxFields.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
-    {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
-    }
-
-    matches.setSize(matchi);
-
-    return matches;
+    typedef OutputFilterFunctionObject<minMaxFields>
+        minMaxFieldsFunctionObject;
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //

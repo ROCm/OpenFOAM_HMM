@@ -24,40 +24,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#include "minMaxFieldsFunctionObject.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineNamedTemplateTypeNameAndDebug(minMaxFieldsFunctionObject, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
-    {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
-    }
-
-    matches.setSize(matchi);
-
-    return matches;
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        minMaxFieldsFunctionObject,
+        dictionary
+    );
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

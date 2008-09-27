@@ -22,42 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::IOminMaxFields
+
+Description
+    Instance of the generic IOOutputFilter for minMaxFields.
+
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#ifndef IOminMaxFields_H
+#define IOminMaxFields_H
+
+#include "minMaxFields.H"
+#include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
-    {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
-    }
-
-    matches.setSize(matchi);
-
-    return matches;
+    typedef IOOutputFilter<minMaxFields> IOminMaxFields;
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //
