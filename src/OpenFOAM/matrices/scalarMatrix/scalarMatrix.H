@@ -37,6 +37,7 @@ SourceFiles
 #define scalarMatrix_H
 
 #include "Matrix.H"
+#include "DiagonalMatrix.H"
 #include "scalarField.H"
 #include "labelList.H"
 
@@ -75,13 +76,13 @@ public:
 
         //- Solve the matrix using Gaussian elimination with pivoting,
         //  returning the solution in the source
-        template<class T>
-        static void solve(Matrix<scalar>& matrix, Field<T>& source);
+        template<class Type>
+        static void solve(Matrix<scalar>& matrix, Field<Type>& source);
 
         //- Solve the matrix using Gaussian elimination with pivoting
         //  and return the solution
-        template<class T>
-        void solve(Field<T>& psi, const Field<T>& source) const;
+        template<class Type>
+        void solve(Field<Type>& psi, const Field<Type>& source) const;
 
 
         //- LU decompose the matrix with pivoting
@@ -93,19 +94,48 @@ public:
 
         //- LU back-substitution with given source, returning the solution
         //  in the source
-        template<class T>
+        template<class Type>
         static void LUBacksubstitute
         (
             const Matrix<scalar>& luMmatrix,
             const labelList& pivotIndices,
-            Field<T>& source
+            Field<Type>& source
         );
 
         //- Solve the matrix using LU decomposition with pivoting
         //  returning the LU form of the matrix and the solution in the source
-        template<class T>
-        static void LUsolve(Matrix<scalar>& matrix, Field<T>& source);
+        template<class Type>
+        static void LUsolve(Matrix<scalar>& matrix, Field<Type>& source);
 };
+
+
+// Global functions
+
+void multiply
+(
+    Matrix<scalar>& answer,         // value changed in return
+    const Matrix<scalar>& A,
+    const Matrix<scalar>& B
+);
+
+void multiply
+(
+    Matrix<scalar>& answer,         // value changed in return
+    const Matrix<scalar>& A,
+    const Matrix<scalar>& B,
+    const Matrix<scalar>& C
+);
+
+void multiply
+(
+    Matrix<scalar>& answer,         // value changed in return
+    const Matrix<scalar>& A,
+    const DiagonalMatrix<scalar>& B,
+    const Matrix<scalar>& C
+);
+
+//- Return the inverse of matrix A using SVD
+Matrix<scalar> SVDinv(const Matrix<scalar>& A, scalar minCondition = 0);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

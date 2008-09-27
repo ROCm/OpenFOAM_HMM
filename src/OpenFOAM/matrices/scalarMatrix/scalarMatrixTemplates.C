@@ -29,11 +29,11 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
+template<class Type>
 void Foam::scalarMatrix::solve
 (
     Matrix<scalar>& tmpMatrix,
-    Field<T>& sourceSol
+    Field<Type>& sourceSol
 )
 {
     label n = tmpMatrix.n();
@@ -89,7 +89,7 @@ void Foam::scalarMatrix::solve
     // Back-substitution
     for (register label j=n-1; j>=0; j--)
     {
-        T ntempvec = pTraits<T>::zero;
+        Type ntempvec = pTraits<Type>::zero;
 
         for (register label k=j+1; k<n; k++)
         {
@@ -101,8 +101,8 @@ void Foam::scalarMatrix::solve
 }
 
 
-template<class T>
-void Foam::scalarMatrix::solve(Field<T>& psi, const Field<T>& source) const
+template<class Type>
+void Foam::scalarMatrix::solve(Field<Type>& psi, const Field<Type>& source) const
 {
     Matrix<scalar> tmpMatrix = *this;
     psi = source;
@@ -110,12 +110,12 @@ void Foam::scalarMatrix::solve(Field<T>& psi, const Field<T>& source) const
 }
 
 
-template<class T>
+template<class Type>
 void Foam::scalarMatrix::LUBacksubstitute
 (
     const Matrix<scalar>& luMatrix,
     const labelList& pivotIndices,
-    Field<T>& sourceSol
+    Field<Type>& sourceSol
 )
 {
     label n = luMatrix.n();
@@ -125,7 +125,7 @@ void Foam::scalarMatrix::LUBacksubstitute
     for (register label i=0; i<n; i++)
     {
         label ip = pivotIndices[i];
-        T sum = sourceSol[ip];
+        Type sum = sourceSol[ip];
         sourceSol[ip] = sourceSol[i];
         const scalar* __restrict__ luMatrixi = luMatrix[i];
 
@@ -136,7 +136,7 @@ void Foam::scalarMatrix::LUBacksubstitute
                 sum -= luMatrixi[j]*sourceSol[j];
             }
         }
-        else if (sum != pTraits<T>::zero)
+        else if (sum != pTraits<Type>::zero)
         {
             ii = i+1;
         }
@@ -146,11 +146,11 @@ void Foam::scalarMatrix::LUBacksubstitute
 
     for (register label i=n-1; i>=0; i--)
     {
-        T sum = sourceSol[i];
+        Type sum = sourceSol[i];
         const scalar* __restrict__ luMatrixi = luMatrix[i];
 
         for (register label j=i+1; j<n; j++)
-        { 
+        {
             sum -= luMatrixi[j]*sourceSol[j];
         }
 
@@ -159,11 +159,11 @@ void Foam::scalarMatrix::LUBacksubstitute
 }
 
 
-template<class T>
+template<class Type>
 void Foam::scalarMatrix::LUsolve
 (
     Matrix<scalar>& matrix,
-    Field<T>& sourceSol
+    Field<Type>& sourceSol
 )
 {
     labelList pivotIndices(matrix.n());
