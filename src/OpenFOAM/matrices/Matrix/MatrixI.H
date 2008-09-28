@@ -26,8 +26,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-inline Foam::Matrix<Type>::Matrix()
+template<class Form, class Type>
+inline Foam::Matrix<Form, Type>::Matrix()
 :
     n_(0),
     m_(0),
@@ -35,67 +35,67 @@ inline Foam::Matrix<Type>::Matrix()
 {}
 
 
-template<class Type>
-inline Foam::autoPtr<Foam::Matrix<Type> > Foam::Matrix<Type>::clone() const
+template<class Form, class Type>
+inline Foam::autoPtr<Foam::Matrix<Form, Type> > Foam::Matrix<Form, Type>::clone() const
 {
-    return autoPtr<Matrix<Type> >(new Matrix<Type>(*this));
+    return autoPtr<Matrix<Form, Type> >(new Matrix<Form, Type>(*this));
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 //- Return the number of rows
-template<class Type>
-inline Foam::label Foam::Matrix<Type>::n() const
+template<class Form, class Type>
+inline Foam::label Foam::Matrix<Form, Type>::n() const
 {
     return n_;
 }
 
 
-template<class Type>
-inline Foam::label Foam::Matrix<Type>::m() const
+template<class Form, class Type>
+inline Foam::label Foam::Matrix<Form, Type>::m() const
 {
     return m_;
 }
 
 
-template<class Type>
-inline Foam::label Foam::Matrix<Type>::size() const
+template<class Form, class Type>
+inline Foam::label Foam::Matrix<Form, Type>::size() const
 {
     return n_*m_;
 }
 
 
-template<class Type>
-inline void Foam::Matrix<Type>::checki(const label i) const
+template<class Form, class Type>
+inline void Foam::Matrix<Form, Type>::checki(const label i) const
 {
     if (!n_)
     {
-        FatalErrorIn("Matrix<Type>::checki(const label)")
+        FatalErrorIn("Matrix<Form, Type>::checki(const label)")
             << "attempt to access element from zero sized row"
             << abort(FatalError);
     }
     else if (i<0 || i>=n_)
     {
-        FatalErrorIn("Matrix<Type>::checki(const label)")
+        FatalErrorIn("Matrix<Form, Type>::checki(const label)")
             << "index " << i << " out of range 0 ... " << n_-1
             << abort(FatalError);
     }
 }
 
 
-template<class Type>
-inline void Foam::Matrix<Type>::checkj(const label j) const
+template<class Form, class Type>
+inline void Foam::Matrix<Form, Type>::checkj(const label j) const
 {
     if (!m_)
     {
-        FatalErrorIn("Matrix<Type>::checkj(const label)")
+        FatalErrorIn("Matrix<Form, Type>::checkj(const label)")
             << "attempt to access element from zero sized column"
             << abort(FatalError);
     }
     else if (j<0 || j>=m_)
     {
-        FatalErrorIn("Matrix<Type>::checkj(const label)")
+        FatalErrorIn("Matrix<Form, Type>::checkj(const label)")
             << "index " << j << " out of range 0 ... " << m_-1
             << abort(FatalError);
     }
@@ -104,8 +104,8 @@ inline void Foam::Matrix<Type>::checkj(const label j) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class Type>
-inline Type* Foam::Matrix<Type>::operator[](const label i)
+template<class Form, class Type>
+inline Type* Foam::Matrix<Form, Type>::operator[](const label i)
 {
 #   ifdef FULLDEBUG
     checki(i);
@@ -114,8 +114,8 @@ inline Type* Foam::Matrix<Type>::operator[](const label i)
 }
 
 
-template<class Type>
-inline const Type* Foam::Matrix<Type>::operator[](const label i) const
+template<class Form, class Type>
+inline const Type* Foam::Matrix<Form, Type>::operator[](const label i) const
 {
 #   ifdef FULLDEBUG
     checki(i);

@@ -114,7 +114,7 @@ Foam::scalarField Foam::chemistryModel::omega
     forAll(reactions_, i)
     {
         const reaction& R = reactions_[i];
-        
+
         scalar omegai = omega
         (
             R, c, T, p, pf, cf, lRef, pr, cr, rRef
@@ -164,13 +164,13 @@ Foam::scalar Foam::chemistryModel::omega
 
     pf = 1.0;
     pr = 1.0;
-    
+
     label Nl = R.lhs().size();
     label Nr = R.rhs().size();
-    
+
     label slRef = 0;
     lRef = R.lhs()[slRef].index;
-        
+
     pf = kf;
     for(label s=1; s<Nl; s++)
     {
@@ -212,7 +212,7 @@ Foam::scalar Foam::chemistryModel::omega
 
     label srRef = 0;
     rRef = R.rhs()[srRef].index;
-    
+
     // find the matrix element and element position for the rhs
     pr = kr;
     for(label s=1; s<Nr; s++)
@@ -250,7 +250,7 @@ Foam::scalar Foam::chemistryModel::omega
         {
             pr *= pow(cr, exp-1.0);
         }
-        
+
     }
 
     return pf*cf - pr*cr;
@@ -313,12 +313,12 @@ void Foam::chemistryModel::jacobian
     const scalar t,
     const scalarField& c,
     scalarField& dcdt,
-    Matrix<scalar>& dfdc
+    scalarSquareMatrix& dfdc
 ) const
 {
     scalar T = c[Ns_];
     scalar p = c[Ns_ + 1];
-    
+
     scalarField c2(Ns(), 0.0);
     for(label i=0; i<Ns(); i++)
     {
@@ -470,23 +470,23 @@ Foam::tmp<Foam::volScalarField> Foam::chemistryModel::tc() const
             scalar pi = thermo_.p()[celli];
             scalarField c(Ns_);
             scalar cSum = 0.0;
-            
+
             for(label i=0; i<Ns_; i++)
             {
                 scalar Yi = Y_[i][celli];
                 c[i] = rhoi*Yi/specieThermo_[i].W();
                 cSum += c[i];
             }
-            
+
             forAll(reactions_, i)
             {
                 const reaction& R = reactions_[i];
-                
+
                 omega
                 (
                     R, c, Ti, pi, pf, cf, lRef, pr, cr, rRef
                 );
-                
+
                 forAll(R.rhs(), s)
                 {
                     scalar sr = R.rhs()[s].stoichCoeff;
@@ -544,22 +544,22 @@ void Foam::chemistryModel::calculate()
             {
                 RR_[i][celli] = 0.0;
             }
-            
+
             scalar rhoi = rho_[celli];
             scalar Ti = thermo_.T()[celli];
             scalar pi = thermo_.p()[celli];
-            
+
             scalarField c(Ns_);
             scalarField dcdt(nEqns(), 0.0);
-            
+
             for(label i=0; i<Ns_; i++)
             {
                 scalar Yi = Y_[i][celli];
                 c[i] = rhoi*Yi/specieThermo_[i].W();
             }
-            
+
             dcdt = omega(c, Ti, pi);
-            
+
             for(label i=0; i<Ns_; i++)
             {
                 RR_[i][celli] = dcdt[i]*specieThermo_[i].W();
@@ -624,7 +624,7 @@ Foam::scalar Foam::chemistryModel::solve(const scalar t0, const scalar deltaT)
             for(label i=0; i<Ns_; i++)
             {
                 mixture += (c[i]/cTot)*specieThermo_[i];
-            }        
+            }
             Ti = mixture.TH(hi, Ti);
 
             timeLeft -= dt;
@@ -639,7 +639,7 @@ Foam::scalar Foam::chemistryModel::solve(const scalar t0, const scalar deltaT)
         for(label i=0; i<Ns_; i++)
         {
             WTot += c[i]*specieThermo_[i].W();
-        }        
+        }
         WTot /= cTot;
 
         for(label i=0; i<Ns_; i++)

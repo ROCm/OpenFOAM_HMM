@@ -46,7 +46,7 @@ namespace Foam
 
 // * * * * * *  * * * * * * Class Forward declaration  * * * * * * * * * * * //
 
-template<class Type> class Matrix;
+template<class Form, class Type> class Matrix;
 
 /*---------------------------------------------------------------------------*\
                            Class DiagonalMatrix Declaration
@@ -62,7 +62,8 @@ public:
     // Constructors
 
         //- Construct from diagonal component of a Matrix
-        DiagonalMatrix<Type>(const Matrix<Type>&);
+        template<class Form>
+        DiagonalMatrix<Type>(const Matrix<Form, Type>&);
 
         //- Construct empty from size
         DiagonalMatrix<Type>(const label size);

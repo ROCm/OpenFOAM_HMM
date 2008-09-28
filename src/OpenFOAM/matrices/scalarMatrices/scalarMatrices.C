@@ -24,39 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "scalarMatrix.H"
+#include "scalarMatrices.H"
 #include "SVD.H"
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::scalarMatrix::scalarMatrix()
-{}
-
-
-Foam::scalarMatrix::scalarMatrix(const label mSize)
-:
-    Matrix<scalar>(mSize, mSize, 0.0)
-{}
-
-
-Foam::scalarMatrix::scalarMatrix(const Matrix<scalar>& matrix)
-:
-    Matrix<scalar>(matrix)
-{}
-
-
-Foam::scalarMatrix::scalarMatrix(Istream& is)
-:
-    Matrix<scalar>(is)
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::scalarMatrix::LUDecompose
+void Foam::LUDecompose
 (
-    Matrix<scalar>& matrix,
+    scalarSquareMatrix& matrix,
     labelList& pivotIndices
 )
 {
@@ -81,8 +56,8 @@ void Foam::scalarMatrix::LUDecompose
         {
             FatalErrorIn
             (
-                "scalarMatrix::LUdecompose"
-                "(Matrix<scalar>& matrix, labelList& rowIndices)"
+                "LUdecompose"
+                "(scalarSquareMatrix& matrix, labelList& rowIndices)"
             )   << "Singular matrix" << exit(FatalError);
         }
 
@@ -164,9 +139,9 @@ void Foam::scalarMatrix::LUDecompose
 
 void Foam::multiply
 (
-    Matrix<scalar>& ans,         // value changed in return
-    const Matrix<scalar>& A,
-    const Matrix<scalar>& B
+    scalarRectangularMatrix& ans,         // value changed in return
+    const scalarRectangularMatrix& A,
+    const scalarRectangularMatrix& B
 )
 {
     if (A.m() != B.n())
@@ -174,15 +149,15 @@ void Foam::multiply
         FatalErrorIn
         (
             "multiply("
-            "Matrix<scalar>& answer "
-            "const Matrix<scalar>& A, "
-            "const Matrix<scalar>& B)"
+            "scalarRectangularMatrix& answer "
+            "const scalarRectangularMatrix& A, "
+            "const scalarRectangularMatrix& B)"
         )   << "A and B must have identical inner dimensions but A.m = "
             << A.m() << " and B.n = " << B.n()
             << abort(FatalError);
     }
 
-    ans = Matrix<scalar>(A.n(), B.m(), scalar(0));
+    ans = scalarRectangularMatrix(A.n(), B.m(), scalar(0));
 
     for(register label i = 0; i < A.n(); i++)
     {
@@ -199,10 +174,10 @@ void Foam::multiply
 
 void Foam::multiply
 (
-    Matrix<scalar>& ans,         // value changed in return
-    const Matrix<scalar>& A,
-    const Matrix<scalar>& B,
-    const Matrix<scalar>& C
+    scalarRectangularMatrix& ans,         // value changed in return
+    const scalarRectangularMatrix& A,
+    const scalarRectangularMatrix& B,
+    const scalarRectangularMatrix& C
 )
 {
     if (A.m() != B.n())
@@ -210,10 +185,10 @@ void Foam::multiply
         FatalErrorIn
         (
             "multiply("
-            "const Matrix<scalar>& A, "
-            "const Matrix<scalar>& B, "
-            "const Matrix<scalar>& C, "
-            "Matrix<scalar>& answer)"
+            "const scalarRectangularMatrix& A, "
+            "const scalarRectangularMatrix& B, "
+            "const scalarRectangularMatrix& C, "
+            "scalarRectangularMatrix& answer)"
         )   << "A and B must have identical inner dimensions but A.m = "
             << A.m() << " and B.n = " << B.n()
             << abort(FatalError);
@@ -224,16 +199,16 @@ void Foam::multiply
         FatalErrorIn
         (
             "multiply("
-            "const Matrix<scalar>& A, "
-            "const Matrix<scalar>& B, "
-            "const Matrix<scalar>& C, "
-            "Matrix<scalar>& answer)"
+            "const scalarRectangularMatrix& A, "
+            "const scalarRectangularMatrix& B, "
+            "const scalarRectangularMatrix& C, "
+            "scalarRectangularMatrix& answer)"
         )   << "B and C must have identical inner dimensions but B.m = "
             << B.m() << " and C.n = " << C.n()
             << abort(FatalError);
     }
 
-    ans = Matrix<scalar>(A.n(), C.m(), scalar(0));
+    ans = scalarRectangularMatrix(A.n(), C.m(), scalar(0));
 
     for(register label i = 0; i < A.n(); i++)
     {
@@ -255,10 +230,10 @@ void Foam::multiply
 
 void Foam::multiply
 (
-    Matrix<scalar>& ans,         // value changed in return
-    const Matrix<scalar>& A,
+    scalarRectangularMatrix& ans,         // value changed in return
+    const scalarRectangularMatrix& A,
     const DiagonalMatrix<scalar>& B,
-    const Matrix<scalar>& C
+    const scalarRectangularMatrix& C
 )
 {
     if (A.m() != B.size())
@@ -266,10 +241,10 @@ void Foam::multiply
         FatalErrorIn
         (
             "multiply("
-            "const Matrix<scalar>& A, "
+            "const scalarRectangularMatrix& A, "
             "const DiagonalMatrix<scalar>& B, "
-            "const Matrix<scalar>& C, "
-            "Matrix<scalar>& answer)"
+            "const scalarRectangularMatrix& C, "
+            "scalarRectangularMatrix& answer)"
         )   << "A and B must have identical inner dimensions but A.m = "
             << A.m() << " and B.n = " << B.size()
             << abort(FatalError);
@@ -280,16 +255,16 @@ void Foam::multiply
         FatalErrorIn
         (
             "multiply("
-            "const Matrix<scalar>& A, "
+            "const scalarRectangularMatrix& A, "
             "const DiagonalMatrix<scalar>& B, "
-            "const Matrix<scalar>& C, "
-            "Matrix<scalar>& answer)"
+            "const scalarRectangularMatrix& C, "
+            "scalarRectangularMatrix& answer)"
         )   << "B and C must have identical inner dimensions but B.m = "
             << B.size() << " and C.n = " << C.n()
             << abort(FatalError);
     }
 
-    ans = Matrix<scalar>(A.n(), C.m(), scalar(0));
+    ans = scalarRectangularMatrix(A.n(), C.m(), scalar(0));
 
     for(register label i = 0; i < A.n(); i++)
     {
@@ -304,9 +279,9 @@ void Foam::multiply
 }
 
 
-Foam::Matrix<Foam::scalar> Foam::SVDinv
+Foam::RectangularMatrix<Foam::scalar> Foam::SVDinv
 (
-    const Matrix<scalar>& A,
+    const scalarRectangularMatrix& A,
     scalar minCondition
 )
 {

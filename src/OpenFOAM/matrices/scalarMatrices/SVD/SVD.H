@@ -23,12 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SVD
+    Foam::SVD
 
 Description
     Singular value decomposition of a rectangular matrix.
 
 SourceFiles
+    SVDI.H
     SVD.C
 
 \*---------------------------------------------------------------------------*/
@@ -36,8 +37,7 @@ SourceFiles
 #ifndef SVD_H
 #define SVD_H
 
-#include "DiagonalMatrix.H"
-#include "Matrix.H"
+#include "scalarMatrices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,16 +56,16 @@ class SVD
     // Private data
 
         //- Rectangular matrix with the same dimensions as the input
-        Matrix<scalar> U_;
+        scalarRectangularMatrix U_;
 
         //- square matrix V
-        Matrix<scalar> V_;
+        scalarRectangularMatrix V_;
 
         //- The singular values
         DiagonalMatrix<scalar> S_;
 
         //- The matrix product V S^(-1) U^T
-        Matrix<scalar> VSinvUt_;
+        scalarRectangularMatrix VSinvUt_;
 
         //- The number of zero singular values
         label nZeros_;
@@ -88,22 +88,22 @@ public:
     // Constructors
 
         //- Construct from a rectangular Matrix
-        SVD(const Matrix<scalar>& A, const scalar minCondition = 0);
+        SVD(const scalarRectangularMatrix& A, const scalar minCondition = 0);
 
 
     // Access functions
 
         //- Return U
-        inline const Matrix<scalar>& U() const;
+        inline const scalarRectangularMatrix& U() const;
 
         //- Return the square matrix V
-        inline const Matrix<scalar>& V() const;
+        inline const scalarRectangularMatrix& V() const;
 
         //- Return the singular values
-        inline const DiagonalMatrix<scalar>& S() const;
+        inline const scalarDiagonalMatrix& S() const;
 
         //- Return VSinvUt (the pseudo inverse)
-        inline const Matrix<scalar>& VSinvUt() const;
+        inline const scalarRectangularMatrix& VSinvUt() const;
 
         //- Return the number of zero singular values
         inline label nZeros() const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,51 +24,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class T>
-inline const T Foam::SVD::sign(const T& a, const T& b)
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix()
+:
+    Matrix<RectangularMatrix<Type>, Type>()
+{}
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const label m,
+    const label n
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(m, n)
+{}
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const label m,
+    const label n,
+    const Type& t
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(m, n, t)
+{}
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix(Istream& is)
+:
+    Matrix<RectangularMatrix<Type>, Type>(is)
+{}
+
+template<class Type>
+inline Foam::autoPtr<Foam::RectangularMatrix<Type> >
+Foam::RectangularMatrix<Type>::clone() const
 {
-    return b >= 0 ? (a >= 0 ? a : -a) : (a >= 0 ? -a : a);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::Matrix<Foam::scalar>& Foam::SVD::U() const
-{
-    return U_;
-}
-
-inline const Foam::Matrix<Foam::scalar>& Foam::SVD::V() const
-{
-    return V_;
-}
-
-inline const Foam::DiagonalMatrix<Foam::scalar>& Foam::SVD::S() const
-{
-    return S_;
-}
-
-inline const Foam::Matrix<Foam::scalar>& Foam::SVD::VSinvUt() const
-{
-    return VSinvUt_;
-}
-
-inline Foam::label Foam::SVD::nZeros() const
-{
-    return nZeros_;
-}
-
-inline Foam::scalar Foam::SVD::minNonZeroS() const
-{
-    scalar minS = S_[0];
-    for(label i = 1; i < S_.size(); i++)
-    {
-        scalar s = S_[i];
-        if (s > VSMALL && s < minS) minS = s;
-    }
-    return minS;
+    return autoPtr<RectangularMatrix<Type> >(new RectangularMatrix<Type>(*this));
 }
 
 

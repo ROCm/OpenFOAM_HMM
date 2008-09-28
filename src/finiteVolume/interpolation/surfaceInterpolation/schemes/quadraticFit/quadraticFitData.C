@@ -49,11 +49,11 @@ Foam::quadraticFitData::quadraticFitData
 :
     MeshObject<fvMesh, quadraticFitData>(mesh),
     centralWeight_(cWeight),
-#ifdef SPHERICAL_GEOMETRY
+#   ifdef SPHERICAL_GEOMETRY
     dim_(2),
-#else
+#   else
     dim_(mesh.nGeometricD()),
-#endif
+#   endif
     minSize_
     (
         dim_ == 1 ? 3 :
@@ -204,7 +204,7 @@ Foam::label Foam::quadraticFitData::calcFit
     scalar scale = 0;
 
     // calculate the matrix of the polynomial components
-    Matrix<scalar> B(C.size(), minSize_, scalar(0));
+    scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
     for(label ip = 0; ip < C.size(); ip++)
     {
@@ -212,11 +212,11 @@ Foam::label Foam::quadraticFitData::calcFit
 
         scalar px = (p - p0)&idir;
         scalar py = (p - p0)&jdir;
-#ifndef SPHERICAL_GEOMETRY
+#       ifndef SPHERICAL_GEOMETRY
         scalar pz = (p - p0)&kdir;
-#else
+#       else
         scalar pz = mag(p) - mag(p0);
-#endif
+#       endif
 
         if (ip == 0)
         {

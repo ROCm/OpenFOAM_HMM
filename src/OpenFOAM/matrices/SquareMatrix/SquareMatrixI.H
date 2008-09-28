@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,76 +24,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DiagonalMatrix.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-template<class Form>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& a)
+inline Foam::SquareMatrix<Type>::SquareMatrix()
 :
-    List<Type>(min(a.n(), a.m()))
+    Matrix<SquareMatrix<Type>, Type>()
+{}
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix(const label n)
+:
+    Matrix<SquareMatrix<Type>, Type>(n, n)
+{}
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix(const label m, const label n)
+:
+    Matrix<SquareMatrix<Type>, Type>(m, n)
 {
-    forAll(*this, i)
+    if (m != n)
     {
-        this->operator[](i) = a[i][i];
+        FatalErrorIn
+        (
+            "SquareMatrix<Type>::SquareMatrix(const label m, const label n)"
+        ) << "m != n for constructing a square matrix" << exit(FatalError);
     }
 }
 
-
 template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size)
+inline Foam::SquareMatrix<Type>::SquareMatrix(const label n, const Type& t)
 :
-    List<Type>(size)
+    Matrix<SquareMatrix<Type>, Type>(n, t)
 {}
 
-
 template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size, const Type& val)
+inline Foam::SquareMatrix<Type>::SquareMatrix(Istream& is)
 :
-    List<Type>(size, val)
+    Matrix<SquareMatrix<Type>, Type>(is)
 {}
 
-
 template<class Type>
-Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
+inline Foam::autoPtr<Foam::SquareMatrix<Type> >
+Foam::SquareMatrix<Type>::clone() const
 {
-    forAll(*this, i)
-    {
-        Type x = this->operator[](i);
-        if (mag(x) < VSMALL)
-        {
-            this->operator[](i) = Type(0);
-        }
-        else
-        {
-            this->operator[](i) = Type(1)/x;
-        }
-    }
-
-    return this;
-}
-
-
-template<class Type>
-Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& A)
-{
-    DiagonalMatrix<Type> Ainv = A;
-
-    forAll(A, i)
-    {
-        Type x = A[i];
-        if (mag(x) < VSMALL)
-        {
-            Ainv[i] = Type(0);
-        }
-        else
-        {
-            Ainv[i] = Type(1)/x;
-        }
-    }
-
-    return Ainv;
+    return autoPtr<SquareMatrix<Type> >(new SquareMatrix<Type>(*this));
 }
 
 

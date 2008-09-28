@@ -24,15 +24,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "scalarMatrix.H"
+#include "scalarMatrices.H"
 #include "Swap.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::scalarMatrix::solve
+void Foam::solve
 (
-    Matrix<scalar>& tmpMatrix,
+    scalarSquareMatrix& tmpMatrix,
     Field<Type>& sourceSol
 )
 {
@@ -68,7 +68,7 @@ void Foam::scalarMatrix::solve
         // Check that the system of equations isn't singular
         if (mag(tmpMatrix[i][i]) < 1e-20)
         {
-            FatalErrorIn("scalarMatrix::solve()")
+            FatalErrorIn("solve(scalarSquareMatrix&, Field<Type>& sourceSol)")
                 << "Singular Matrix"
                 << exit(FatalError);
         }
@@ -102,18 +102,23 @@ void Foam::scalarMatrix::solve
 
 
 template<class Type>
-void Foam::scalarMatrix::solve(Field<Type>& psi, const Field<Type>& source) const
+void Foam::solve
+(
+    Field<Type>& psi,
+    const scalarSquareMatrix& matrix,
+    const Field<Type>& source
+)
 {
-    Matrix<scalar> tmpMatrix = *this;
+    scalarSquareMatrix tmpMatrix = matrix;
     psi = source;
     solve(tmpMatrix, psi);
 }
 
 
 template<class Type>
-void Foam::scalarMatrix::LUBacksubstitute
+void Foam::LUBacksubstitute
 (
-    const Matrix<scalar>& luMatrix,
+    const scalarSquareMatrix& luMatrix,
     const labelList& pivotIndices,
     Field<Type>& sourceSol
 )
@@ -160,9 +165,9 @@ void Foam::scalarMatrix::LUBacksubstitute
 
 
 template<class Type>
-void Foam::scalarMatrix::LUsolve
+void Foam::LUsolve
 (
-    Matrix<scalar>& matrix,
+    scalarSquareMatrix& matrix,
     Field<Type>& sourceSol
 )
 {

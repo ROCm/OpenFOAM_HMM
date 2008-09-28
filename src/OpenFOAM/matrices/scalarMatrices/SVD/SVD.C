@@ -26,12 +26,12 @@ License
 
 #include "SVD.H"
 #include "scalarList.H"
-#include "scalarMatrix.H"
+#include "scalarMatrices.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructor  * * * * * * * * * * * * * * //
 
-Foam::SVD::SVD(const Matrix<scalar>& A, const scalar minCondition)
+Foam::SVD::SVD(const scalarRectangularMatrix& A, const scalar minCondition)
 :
     U_(A),
     V_(A.m(), A.m()),
@@ -294,8 +294,11 @@ Foam::SVD::SVD(const Matrix<scalar>& A, const scalar minCondition)
             }
             if (its == 34)
             {
-                WarningIn("SVD::SVD(Matrix<scalar>& A)")
-                    << "no convergence in 35 SVD iterations"
+                WarningIn
+                (
+                    "SVD::SVD"
+                    "(scalarRectangularMatrix& A, const scalar minCondition)"
+                )   << "no convergence in 35 SVD iterations"
                     << endl;
             }
 
@@ -375,7 +378,7 @@ Foam::SVD::SVD(const Matrix<scalar>& A, const scalar minCondition)
     multiply(VSinvUt_, V_, inv(S_), U_.T());
 
     // test SVD
-    /*Matrix<scalar> SVDA(A.n(), A.m());
+    /*scalarRectangularMatrix SVDA(A.n(), A.m());
     multiply(SVDA, U_, S_, transpose(V_));
     scalar maxDiff = 0;
     scalar diff = 0;

@@ -36,7 +36,7 @@ SourceFiles
 #ifndef simpleMatrix_H
 #define simpleMatrix_H
 
-#include "scalarMatrix.H"
+#include "scalarMatrices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,27 +47,6 @@ namespace Foam
 
 template<class Type>
 class simpleMatrix;
-
-template<class Type>
-simpleMatrix<Type> operator+
-(
-    const simpleMatrix<Type>&,
-    const simpleMatrix<Type>&
-);
-
-template<class Type>
-simpleMatrix<Type> operator-
-(
-    const simpleMatrix<Type>&,
-    const simpleMatrix<Type>&
-);
-
-template<class Type>
-simpleMatrix<Type> operator*
-(
-    const scalar,
-    const simpleMatrix<Type>&
-);
 
 template<class Type>
 Ostream& operator<<
@@ -84,7 +63,7 @@ Ostream& operator<<
 template<class Type>
 class simpleMatrix
 :
-    public scalarMatrix
+    public scalarSquareMatrix
 {
     // Private data
 
@@ -99,7 +78,7 @@ public:
         simpleMatrix(const label);
 
         //- Construct from components
-        simpleMatrix(const scalarMatrix&, const Field<Type>&);
+        simpleMatrix(const scalarSquareMatrix&, const Field<Type>&);
 
         //- Construct from Istream
         simpleMatrix(Istream&);
@@ -137,27 +116,6 @@ public:
         void operator=(const simpleMatrix<Type>&);
 
 
-    // Friend Operators
-
-        friend simpleMatrix<Type> operator+ <Type>
-        (
-            const simpleMatrix<Type>&,
-            const simpleMatrix<Type>&
-        );
-
-        friend simpleMatrix<Type> operator- <Type>
-        (
-            const simpleMatrix<Type>&,
-            const simpleMatrix<Type>&
-        );
-
-        friend simpleMatrix<Type> operator* <Type>
-        (
-            const scalar,
-            const simpleMatrix<Type>&
-        );
-
-
     // Ostream Operator
 
         friend Ostream& operator<< <Type>
@@ -166,6 +124,30 @@ public:
             const simpleMatrix<Type>&
         );
 };
+
+
+// Global operators
+
+template<class Type>
+simpleMatrix<Type> operator+
+(
+    const simpleMatrix<Type>&,
+    const simpleMatrix<Type>&
+);
+
+template<class Type>
+simpleMatrix<Type> operator-
+(
+    const simpleMatrix<Type>&,
+    const simpleMatrix<Type>&
+);
+
+template<class Type>
+simpleMatrix<Type> operator*
+(
+    const scalar,
+    const simpleMatrix<Type>&
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

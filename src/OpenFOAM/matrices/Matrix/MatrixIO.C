@@ -32,8 +32,8 @@ License
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Matrix<Type>::Matrix(Istream& is)
+template<class Form, class Type>
+Foam::Matrix<Form, Type>::Matrix(Istream& is)
 :
     n_(0),
     m_(0),
@@ -43,17 +43,17 @@ Foam::Matrix<Type>::Matrix(Istream& is)
 }
 
 
-template<class Type>
-Foam::Istream& Foam::operator>>(Istream& is, Matrix<Type>& M)
+template<class Form, class Type>
+Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
 {
     // Anull matrix
     M.clear();
 
-    is.fatalCheck("operator>>(Istream&, Matrix<Type>&)");
+    is.fatalCheck("operator>>(Istream&, Matrix<Form, Type>&)");
 
     token firstToken(is);
 
-    is.fatalCheck("operator>>(Istream&, Matrix<Type>&) : reading first token");
+    is.fatalCheck("operator>>(Istream&, Matrix<Form, Type>&) : reading first token");
 
     if (firstToken.isLabel())
     {
@@ -88,7 +88,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Type>& M)
 
                             is.fatalCheck
                             (
-                                "operator>>(Istream&, Matrix<Type>&) : "
+                                "operator>>(Istream&, Matrix<Form, Type>&) : "
                                 "reading entry"
                             );
                         }
@@ -103,7 +103,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Type>& M)
 
                     is.fatalCheck
                     (
-                        "operator>>(Istream&, Matrix<Type>&) : "
+                        "operator>>(Istream&, Matrix<Form, Type>&) : "
                         "reading the single entry"
                     );
 
@@ -128,7 +128,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Type>& M)
 
                 is.fatalCheck
                 (
-                    "operator>>(Istream&, Matrix<Type>&) : "
+                    "operator>>(Istream&, Matrix<Form, Type>&) : "
                     "reading the binary block"
                 );
             }
@@ -136,7 +136,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Type>& M)
     }
     else
     {
-        FatalIOErrorIn("operator>>(Istream&, Matrix<Type>&)", is)
+        FatalIOErrorIn("operator>>(Istream&, Matrix<Form, Type>&)", is)
             << "incorrect first token, expected <int>, found "
             << firstToken.info()
             << exit(FatalIOError);
@@ -146,8 +146,8 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Type>& M)
 }
 
 
-template<class Type>
-Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Type>& M)
+template<class Form, class Type>
+Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
 {
     label nm = M.n_*M.m_;
 
