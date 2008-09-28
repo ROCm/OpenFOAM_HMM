@@ -179,6 +179,7 @@ matrices/solution/solution.C
 
 scalarMatrix = matrices/scalarMatrix
 $(scalarMatrix)/scalarMatrix.C
+$(scalarMatrix)/SVD/SVD.C
 
 LUscalarMatrix = matrices/LUscalarMatrix
 $(LUscalarMatrix)/LUscalarMatrix.C

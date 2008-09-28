@@ -25,6 +25,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "scalarMatrix.H"
+#include "SVD.H"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -136,7 +138,7 @@ void Foam::scalarMatrix::LUDecompose
             {
                 Swap(matrixj[k], matrixiMax[k]);
             }
-            
+
             vv[iMax] = vv[j];
         }
 
@@ -155,6 +157,161 @@ void Foam::scalarMatrix::LUDecompose
             }
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+void Foam::multiply
+(
+    Matrix<scalar>& ans,         // value changed in return
+    const Matrix<scalar>& A,
+    const Matrix<scalar>& B
+)
+{
+    if (A.m() != B.n())
+    {
+        FatalErrorIn
+        (
+            "multiply("
+            "Matrix<scalar>& answer "
+            "const Matrix<scalar>& A, "
+            "const Matrix<scalar>& B)"
+        )   << "A and B must have identical inner dimensions but A.m = "
+            << A.m() << " and B.n = " << B.n()
+            << abort(FatalError);
+    }
+
+    ans = Matrix<scalar>(A.n(), B.m(), scalar(0));
+
+    for(register label i = 0; i < A.n(); i++)
+    {
+        for(register label j = 0; j < B.m(); j++)
+        {
+            for(register label l = 0; l < B.n(); l++)
+            {
+                ans[i][j] += A[i][l]*B[l][j];
+            }
+        }
+    }
+}
+
+
+void Foam::multiply
+(
+    Matrix<scalar>& ans,         // value changed in return
+    const Matrix<scalar>& A,
+    const Matrix<scalar>& B,
+    const Matrix<scalar>& C
+)
+{
+    if (A.m() != B.n())
+    {
+        FatalErrorIn
+        (
+            "multiply("
+            "const Matrix<scalar>& A, "
+            "const Matrix<scalar>& B, "
+            "const Matrix<scalar>& C, "
+            "Matrix<scalar>& answer)"
+        )   << "A and B must have identical inner dimensions but A.m = "
+            << A.m() << " and B.n = " << B.n()
+            << abort(FatalError);
+    }
+
+    if (B.m() != C.n())
+    {
+        FatalErrorIn
+        (
+            "multiply("
+            "const Matrix<scalar>& A, "
+            "const Matrix<scalar>& B, "
+            "const Matrix<scalar>& C, "
+            "Matrix<scalar>& answer)"
+        )   << "B and C must have identical inner dimensions but B.m = "
+            << B.m() << " and C.n = " << C.n()
+            << abort(FatalError);
+    }
+
+    ans = Matrix<scalar>(A.n(), C.m(), scalar(0));
+
+    for(register label i = 0; i < A.n(); i++)
+    {
+        for(register label g = 0; g < C.m(); g++)
+        {
+            for(register label l = 0; l < C.n(); l++)
+            {
+                scalar ab = 0;
+                for(register label j = 0; j < A.m(); j++)
+                {
+                    ab += A[i][j]*B[j][l];
+                }
+                ans[i][g] += C[l][g] * ab;
+            }
+        }
+    }
+}
+
+
+void Foam::multiply
+(
+    Matrix<scalar>& ans,         // value changed in return
+    const Matrix<scalar>& A,
+    const DiagonalMatrix<scalar>& B,
+    const Matrix<scalar>& C
+)
+{
+    if (A.m() != B.size())
+    {
+        FatalErrorIn
+        (
+            "multiply("
+            "const Matrix<scalar>& A, "
+            "const DiagonalMatrix<scalar>& B, "
+            "const Matrix<scalar>& C, "
+            "Matrix<scalar>& answer)"
+        )   << "A and B must have identical inner dimensions but A.m = "
+            << A.m() << " and B.n = " << B.size()
+            << abort(FatalError);
+    }
+
+    if (B.size() != C.n())
+    {
+        FatalErrorIn
+        (
+            "multiply("
+            "const Matrix<scalar>& A, "
+            "const DiagonalMatrix<scalar>& B, "
+            "const Matrix<scalar>& C, "
+            "Matrix<scalar>& answer)"
+        )   << "B and C must have identical inner dimensions but B.m = "
+            << B.size() << " and C.n = " << C.n()
+            << abort(FatalError);
+    }
+
+    ans = Matrix<scalar>(A.n(), C.m(), scalar(0));
+
+    for(register label i = 0; i < A.n(); i++)
+    {
+        for(register label g = 0; g < C.m(); g++)
+        {
+            for(register label l = 0; l < C.n(); l++)
+            {
+                ans[i][g] += C[l][g] * A[i][l]*B[l];
+            }
+        }
+    }
+}
+
+
+Foam::Matrix<Foam::scalar> Foam::SVDinv
+(
+    const Matrix<scalar>& A,
+    scalar minCondition
+)
+{
+    SVD svd(A, minCondition);
+    return svd.VSinvUt();
 }
 
 

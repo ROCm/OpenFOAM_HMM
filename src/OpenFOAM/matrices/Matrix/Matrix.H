@@ -51,25 +51,37 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T> class Matrix;
+template<class Type> class Matrix;
 
-template<class T> const T& max(const Matrix<T>&);
-template<class T> const T& min(const Matrix<T>&);
+template<class Type> const Type& max(const Matrix<Type>&);
+template<class Type> const Type& min(const Matrix<Type>&);
 
-template<class T> Matrix<T> operator-(const Matrix<T>&);
-template<class T> Matrix<T> operator+(const Matrix<T>&, const Matrix<T>&);
-template<class T> Matrix<T> operator-(const Matrix<T>&, const Matrix<T>&);
-template<class T> Matrix<T> operator*(const scalar, const Matrix<T>&);
+template<class Type> Matrix<Type> operator-(const Matrix<Type>&);
+template<class Type> Matrix<Type> operator+
+(
+    const Matrix<Type>&,
+    const Matrix<Type>&
+);
+template<class Type> Matrix<Type> operator-
+(
+    const Matrix<Type>&,
+    const Matrix<Type>&
+);
+template<class Type> Matrix<Type> operator*
+(
+    const scalar,
+    const Matrix<Type>&
+);
 
-template<class T> Istream& operator>>(Istream&, Matrix<T>&);
-template<class T> Ostream& operator<<(Ostream&, const Matrix<T>&);
+template<class Type> Istream& operator>>(Istream&, Matrix<Type>&);
+template<class Type> Ostream& operator<<(Ostream&, const Matrix<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
                            Class Matrix Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
+template<class Type>
 class Matrix
 {
     // Private data
@@ -78,7 +90,7 @@ class Matrix
         label n_, m_;
 
         //- Row pointers
-        T** __restrict__ v_;
+        Type** __restrict__ v_;
 
         //- Allocate the storage for the row-pointers and the data
         //  and set the row pointers
@@ -97,16 +109,16 @@ public:
 
         //- Construct with given number of rows and columns
         //  and value for all elements.
-        Matrix(const label n, const label m, const T&);
+        Matrix(const label n, const label m, const Type&);
 
         //- Copy constructor.
-        Matrix(const Matrix<T>&);
+        Matrix(const Matrix<Type>&);
 
         //- Construct from Istream.
         Matrix(Istream&);
 
         //- Clone
-        inline autoPtr<Matrix<T> > clone() const;
+        inline autoPtr<Matrix<Type> > clone() const;
 
 
     // Destructor
@@ -117,7 +129,7 @@ public:
     // Member functions
 
         //- Return a null Matrix
-        static const Matrix<T>& null();
+        static const Matrix<Type>& null();
 
 
         // Access
@@ -148,45 +160,60 @@ public:
 
             //- Transfer the contents of the argument Matrix into this Matrix
             //  and annull the argument Matrix.
-            void transfer(Matrix<T>&);
+            void transfer(Matrix<Type>&);
 
 
     // Member operators
 
         //- Return subscript-checked element of Matrix.
-        inline T* operator[](const label);
+        inline Type* operator[](const label);
 
         //- Return subscript-checked element of constant Matrix.
-        inline const T* operator[](const label) const;
+        inline const Type* operator[](const label) const;
+
+        //- Return the transpose of the matrix
+        Matrix<Type> T() const;
 
         //- Assignment operator. Takes linear time.
-        void operator=(const Matrix<T>&);
+        void operator=(const Matrix<Type>&);
 
         //- Assignment of all entries to the given value
-        void operator=(const T&);
+        void operator=(const Type&);
 
 
     // Friend functions
 
-        friend const T& max<T>(const Matrix<T>&);
-        friend const T& min<T>(const Matrix<T>&);
+        friend const Type& max<Type>(const Matrix<Type>&);
+        friend const Type& min<Type>(const Matrix<Type>&);
 
 
     // Friend operators
 
-        friend Matrix<T> operator-<T>(const Matrix<T>&);
-        friend Matrix<T> operator+<T>(const Matrix<T>&, const Matrix<T>&);
-        friend Matrix<T> operator-<T>(const Matrix<T>&, const Matrix<T>&);
-        friend Matrix<T> operator*<T>(const scalar, const Matrix<T>&);
+        friend Matrix<Type> operator-<Type>(const Matrix<Type>&);
+        friend Matrix<Type> operator+<Type>
+        (
+            const Matrix<Type>&,
+            const Matrix<Type>&
+        );
+        friend Matrix<Type> operator-<Type>
+        (
+            const Matrix<Type>&,
+            const Matrix<Type>&
+        );
+        friend Matrix<Type> operator*<Type>
+        (
+            const scalar,
+            const Matrix<Type>&
+        );
 
 
     // IOstream operators
 
         //- Read Matrix from Istream, discarding contents of existing Matrix.
-        friend Istream& operator>> <T>(Istream&, Matrix<T>&);
+        friend Istream& operator>> <Type>(Istream&, Matrix<Type>&);
 
         // Write Matrix to Ostream.
-        friend Ostream& operator<< <T>(Ostream&, const Matrix<T>&);
+        friend Ostream& operator<< <Type>(Ostream&, const Matrix<Type>&);
 };
 
 

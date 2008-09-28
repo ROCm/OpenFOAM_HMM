@@ -28,19 +28,19 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class T>
-Foam::simpleMatrix<T>::simpleMatrix(const label mSize)
+template<class Type>
+Foam::simpleMatrix<Type>::simpleMatrix(const label mSize)
 :
     scalarMatrix(mSize),
-    source_(mSize, pTraits<T>::zero)
+    source_(mSize, pTraits<Type>::zero)
 {}
 
 
-template<class T>
-Foam::simpleMatrix<T>::simpleMatrix
+template<class Type>
+Foam::simpleMatrix<Type>::simpleMatrix
 (
     const scalarMatrix& matrix,
-    const Field<T>& source
+    const Field<Type>& source
 )
 :
     scalarMatrix(matrix),
@@ -48,8 +48,8 @@ Foam::simpleMatrix<T>::simpleMatrix
 {}
 
 
-template<class T>
-Foam::simpleMatrix<T>::simpleMatrix(Istream& is)
+template<class Type>
+Foam::simpleMatrix<Type>::simpleMatrix(Istream& is)
 :
     scalarMatrix(is),
     source_(is)
@@ -58,11 +58,11 @@ Foam::simpleMatrix<T>::simpleMatrix(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-Foam::Field<T> Foam::simpleMatrix<T>::solve() const
+template<class Type>
+Foam::Field<Type> Foam::simpleMatrix<Type>::solve() const
 {
     scalarMatrix tmpMatrix = *this;
-    Field<T> sourceSol = source_;
+    Field<Type> sourceSol = source_;
 
     scalarMatrix::solve(tmpMatrix, sourceSol);
 
@@ -70,11 +70,11 @@ Foam::Field<T> Foam::simpleMatrix<T>::solve() const
 }
 
 
-template<class T>
-Foam::Field<T> Foam::simpleMatrix<T>::LUsolve() const
+template<class Type>
+Foam::Field<Type> Foam::simpleMatrix<Type>::LUsolve() const
 {
     scalarMatrix luMatrix = *this;
-    Field<T> sourceSol = source_;
+    Field<Type> sourceSol = source_;
 
     scalarMatrix::LUsolve(luMatrix, sourceSol);
 
@@ -84,26 +84,26 @@ Foam::Field<T> Foam::simpleMatrix<T>::LUsolve() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class T>
-void Foam::simpleMatrix<T>::operator=(const simpleMatrix<T>& m)
+template<class Type>
+void Foam::simpleMatrix<Type>::operator=(const simpleMatrix<Type>& m)
 {
     if (this == &m)
     {
-        FatalErrorIn("simpleMatrix<T>::operator=(const simpleMatrix<T>&)")
+        FatalErrorIn("simpleMatrix<Type>::operator=(const simpleMatrix<Type>&)")
             << "Attempted assignment to self"
             << abort(FatalError);
     }
 
     if (n() != m.n())
     {
-        FatalErrorIn("simpleMatrix<T>::operator=(const simpleMatrix<T>&)")
+        FatalErrorIn("simpleMatrix<Type>::operator=(const simpleMatrix<Type>&)")
             << "Different size matrices"
             << abort(FatalError);
     }
 
     if (source_.size() != m.source_.size())
     {
-        FatalErrorIn("simpleMatrix<T>::operator=(const simpleMatrix<T>&)")
+        FatalErrorIn("simpleMatrix<Type>::operator=(const simpleMatrix<Type>&)")
             << "Different size source vectors"
             << abort(FatalError);
     }
@@ -115,14 +115,14 @@ void Foam::simpleMatrix<T>::operator=(const simpleMatrix<T>& m)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<class T>
-Foam::simpleMatrix<T> Foam::operator+
+template<class Type>
+Foam::simpleMatrix<Type> Foam::operator+
 (
-    const simpleMatrix<T>& m1,
-    const simpleMatrix<T>& m2
+    const simpleMatrix<Type>& m1,
+    const simpleMatrix<Type>& m2
 )
 {
-    return simpleMatrix<T>
+    return simpleMatrix<Type>
     (
         static_cast<const scalarMatrix&>(m1)
       + static_cast<const scalarMatrix&>(m2),
@@ -131,14 +131,14 @@ Foam::simpleMatrix<T> Foam::operator+
 }
 
 
-template<class T>
-Foam::simpleMatrix<T> Foam::operator-
+template<class Type>
+Foam::simpleMatrix<Type> Foam::operator-
 (
-    const simpleMatrix<T>& m1,
-    const simpleMatrix<T>& m2
+    const simpleMatrix<Type>& m1,
+    const simpleMatrix<Type>& m2
 )
 {
-    return simpleMatrix<T>
+    return simpleMatrix<Type>
     (
         static_cast<const scalarMatrix&>(m1)
       - static_cast<const scalarMatrix&>(m2),
@@ -147,17 +147,17 @@ Foam::simpleMatrix<T> Foam::operator-
 }
 
 
-template<class T>
-Foam::simpleMatrix<T> Foam::operator*(const scalar s, const simpleMatrix<T>& m)
+template<class Type>
+Foam::simpleMatrix<Type> Foam::operator*(const scalar s, const simpleMatrix<Type>& m)
 {
-    return simpleMatrix<T>(s*m.matrix_, s*m.source_);
+    return simpleMatrix<Type>(s*m.matrix_, s*m.source_);
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const simpleMatrix<T>& m)
+template<class Type>
+Foam::Ostream& Foam::operator<<(Ostream& os, const simpleMatrix<Type>& m)
 {
     os << static_cast<const scalarMatrix&>(m) << nl << m.source_;
     return os;

@@ -45,35 +45,35 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T>
+template<class Type>
 class simpleMatrix;
 
-template<class T>
-simpleMatrix<T> operator+
+template<class Type>
+simpleMatrix<Type> operator+
 (
-    const simpleMatrix<T>&,
-    const simpleMatrix<T>&
+    const simpleMatrix<Type>&,
+    const simpleMatrix<Type>&
 );
 
-template<class T>
-simpleMatrix<T> operator-
+template<class Type>
+simpleMatrix<Type> operator-
 (
-    const simpleMatrix<T>&,
-    const simpleMatrix<T>&
+    const simpleMatrix<Type>&,
+    const simpleMatrix<Type>&
 );
 
-template<class T>
-simpleMatrix<T> operator*
+template<class Type>
+simpleMatrix<Type> operator*
 (
     const scalar,
-    const simpleMatrix<T>&
+    const simpleMatrix<Type>&
 );
 
-template<class T>
+template<class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const simpleMatrix<T>&
+    const simpleMatrix<Type>&
 );
 
 
@@ -81,14 +81,14 @@ Ostream& operator<<
                            Class simpleMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
+template<class Type>
 class simpleMatrix
 :
     public scalarMatrix
 {
     // Private data
 
-        Field<T> source_;
+        Field<Type> source_;
 
 
 public:
@@ -99,25 +99,25 @@ public:
         simpleMatrix(const label);
 
         //- Construct from components
-        simpleMatrix(const scalarMatrix&, const Field<T>&);
+        simpleMatrix(const scalarMatrix&, const Field<Type>&);
 
         //- Construct from Istream
         simpleMatrix(Istream&);
 
         //- Construct as copy
-        simpleMatrix(const simpleMatrix<T>&);
+        simpleMatrix(const simpleMatrix<Type>&);
 
 
     // Member Functions
 
         // Access
 
-            Field<T>& source()
+            Field<Type>& source()
             {
                 return source_;
             }
 
-            const Field<T>& source() const
+            const Field<Type>& source() const
             {
                 return source_;
             }
@@ -125,45 +125,45 @@ public:
 
         //- Solve the matrix using Gaussian elimination with pivoting
         //  and return the solution
-        Field<T> solve() const;
+        Field<Type> solve() const;
 
         //- Solve the matrix using LU decomposition with pivoting
         //  and return the solution
-        Field<T> LUsolve() const;
+        Field<Type> LUsolve() const;
 
 
     // Member Operators
 
-        void operator=(const simpleMatrix<T>&);
+        void operator=(const simpleMatrix<Type>&);
 
 
     // Friend Operators
 
-        friend simpleMatrix<T> operator+ <T>
+        friend simpleMatrix<Type> operator+ <Type>
         (
-            const simpleMatrix<T>&,
-            const simpleMatrix<T>&
+            const simpleMatrix<Type>&,
+            const simpleMatrix<Type>&
         );
 
-        friend simpleMatrix<T> operator- <T>
+        friend simpleMatrix<Type> operator- <Type>
         (
-            const simpleMatrix<T>&,
-            const simpleMatrix<T>&
+            const simpleMatrix<Type>&,
+            const simpleMatrix<Type>&
         );
 
-        friend simpleMatrix<T> operator* <T>
+        friend simpleMatrix<Type> operator* <Type>
         (
             const scalar,
-            const simpleMatrix<T>&
+            const simpleMatrix<Type>&
         );
 
 
     // Ostream Operator
 
-        friend Ostream& operator<< <T>
+        friend Ostream& operator<< <Type>
         (
             Ostream&,
-            const simpleMatrix<T>&
+            const simpleMatrix<Type>&
         );
 };
 
