@@ -211,7 +211,7 @@ void Foam::CV3D::insertGrid()
 
 void Foam::CV3D::relaxPoints(const scalar relaxation)
 {
-    Info<< "Calculating new points: " << endl;
+    Info<< "Calculating new points: " << nl << endl;
 
     for
     (
@@ -260,6 +260,8 @@ void Foam::CV3D::boundaryConform()
 
 void Foam::CV3D::removeSurfacePointPairs()
 {
+    Info<< "Removing surface point pairs." << nl << endl;
+
     for
     (
         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();

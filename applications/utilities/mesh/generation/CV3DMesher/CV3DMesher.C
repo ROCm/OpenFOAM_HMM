@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         mesh.boundaryConform();
     }
 
-    scalar relaxation = 1;
+    scalar relaxation = 1.0;
 
     for (int iter=1; iter<=nIterations; iter++)
     {
