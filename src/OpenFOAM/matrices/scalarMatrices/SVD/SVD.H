@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,88 +23,93 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::scalarMatrix
+    Foam::SVD
 
 Description
-    Foam::scalarMatrix
+    Singular value decomposition of a rectangular matrix.
 
 SourceFiles
-    scalarMatrix.C
+    SVDI.H
+    SVD.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarMatrix_H
-#define scalarMatrix_H
+#ifndef SVD_H
+#define SVD_H
 
-#include "Matrix.H"
-#include "scalarField.H"
-#include "labelList.H"
+#include "scalarMatrices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
 /*---------------------------------------------------------------------------*\
-                           Class scalarMatrix Declaration
+                      Class SVD Declaration
 \*---------------------------------------------------------------------------*/
 
-class scalarMatrix
-:
-    public Matrix<scalar>
+class SVD
 {
+    // Private data
+
+        //- Rectangular matrix with the same dimensions as the input
+        scalarRectangularMatrix U_;
+
+        //- square matrix V
+        scalarRectangularMatrix V_;
+
+        //- The singular values
+        DiagonalMatrix<scalar> S_;
+
+        //- The matrix product V S^(-1) U^T
+        scalarRectangularMatrix VSinvUt_;
+
+        //- The number of zero singular values
+        label nZeros_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        SVD(const SVD&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const SVD&);
+
+        template<class T>
+        inline const T sign(const T& a, const T& b);
+
 
 public:
 
     // Constructors
 
-        //- Construct null
-        scalarMatrix();
-
-        //- Construct given size
-        scalarMatrix(const label);
-
-        //- Construct from Matrix<scalar>
-        scalarMatrix(const Matrix<scalar>&);
-
-        //- Construct from Istream
-        scalarMatrix(Istream&);
+        //- Construct from a rectangular Matrix
+        SVD(const scalarRectangularMatrix& A, const scalar minCondition = 0);
 
 
-    // Member Functions
+    // Access functions
 
-        //- Solve the matrix using Gaussian elimination with pivoting,
-        //  returning the solution in the source
-        template<class T>
-        static void solve(Matrix<scalar>& matrix, Field<T>& source);
+        //- Return U
+        inline const scalarRectangularMatrix& U() const;
 
-        //- Solve the matrix using Gaussian elimination with pivoting
-        //  and return the solution
-        template<class T>
-        void solve(Field<T>& psi, const Field<T>& source) const;
+        //- Return the square matrix V
+        inline const scalarRectangularMatrix& V() const;
 
+        //- Return the singular values
+        inline const scalarDiagonalMatrix& S() const;
 
-        //- LU decompose the matrix with pivoting
-        static void LUDecompose
-        (
-            Matrix<scalar>& matrix,
-            labelList& pivotIndices
-        );
+        //- Return VSinvUt (the pseudo inverse)
+        inline const scalarRectangularMatrix& VSinvUt() const;
 
-        //- LU back-substitution with given source, returning the solution
-        //  in the source
-        template<class T>
-        static void LUBacksubstitute
-        (
-            const Matrix<scalar>& luMmatrix,
-            const labelList& pivotIndices,
-            Field<T>& source
-        );
+        //- Return the number of zero singular values
+        inline label nZeros() const;
 
-        //- Solve the matrix using LU decomposition with pivoting
-        //  returning the LU form of the matrix and the solution in the source
-        template<class T>
-        static void LUsolve(Matrix<scalar>& matrix, Field<T>& source);
+        //- Return the minimum non-zero singular value
+        inline scalar minNonZeroS() const;
 };
 
 
@@ -114,9 +119,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "scalarMatrixTemplates.C"
-#endif
+#include "SVDI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

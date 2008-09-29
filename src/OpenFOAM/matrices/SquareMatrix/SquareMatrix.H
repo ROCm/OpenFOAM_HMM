@@ -23,21 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SIBS
+    Foam::SquareMatrix
 
 Description
-    Foam::SIBS
+    A templated 2D square matrix of objects of \<T\>, where the n x n matrix
+    dimension is known and used for subscript bounds checking, etc.
 
 SourceFiles
-    SIBSCK.C
-    SIBSQS.C
+    SquareMatrixI.H
+    SquareMatrix.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef SquareMatrix_H
+#define SquareMatrix_H
 
-#include "ODESolver.H"
+#include "Matrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,94 +46,48 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class Matrix Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
+template<class Type>
+class SquareMatrix
 :
-    public ODESolver
+    public Matrix<SquareMatrix<Type>, Type>
 {
-    // Private data
-
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
-
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarSquareMatrix d_p_;
-        mutable scalarField x_p_;
-        mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
-
-
-void SIMPR
-(
-    const ODE& ode,
-    const scalar xStart,
-    const scalarField& y,
-    const scalarField& dydx,
-    const scalarField& dfdx,
-    const scalarSquareMatrix& dfdy,
-    const scalar deltaX,
-    const label nSteps,
-    scalarField& yEnd
-) const;
-
-
-void polyExtrapolate
-(
-    const label iest,
-    const scalar xest,
-    const scalarField& yest,
-    scalarField& yz,
-    scalarField& dy,
-    scalarField& x_p,
-    scalarSquareMatrix& d_p
-) const;
-
 
 public:
 
-    //- Runtime type information
-    TypeName("SIBS");
-
-
     // Constructors
 
-        //- Construct from ODE
-        SIBS(const ODE& ode);
+        //- Null constructor.
+        inline SquareMatrix();
 
+        //- Construct given number of rows/columns.
+        inline SquareMatrix(const label n);
 
-    // Member Functions
+        //- Construct given number of rows and columns,
+        //  It checks that m == n.
+        inline SquareMatrix(const label m, const label n);
 
-        void solve
-        (
-            const ODE& ode,
-            scalar& x,
-            scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
-        ) const;
+        //- Construct with given number of rows/columns
+        //  and value for all elements.
+        inline SquareMatrix(const label n, const Type&);
+
+        //- Construct from Istream.
+        inline SquareMatrix(Istream&);
+
+        //- Clone
+        inline autoPtr<SquareMatrix<Type> > clone() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#   include "SquareMatrixI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

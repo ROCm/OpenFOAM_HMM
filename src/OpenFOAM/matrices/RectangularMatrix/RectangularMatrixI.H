@@ -24,40 +24,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix()
+:
+    Matrix<RectangularMatrix<Type>, Type>()
+{}
 
-namespace Foam
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const label m,
+    const label n
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(m, n)
+{}
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const label m,
+    const label n,
+    const Type& t
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(m, n, t)
+{}
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix(Istream& is)
+:
+    Matrix<RectangularMatrix<Type>, Type>(is)
+{}
+
+template<class Type>
+inline Foam::autoPtr<Foam::RectangularMatrix<Type> >
+Foam::RectangularMatrix<Type>::clone() const
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
-    {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
-    }
-
-    matches.setSize(matchi);
-
-    return matches;
+    return autoPtr<RectangularMatrix<Type> >(new RectangularMatrix<Type>(*this));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

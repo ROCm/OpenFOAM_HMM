@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,40 +24,77 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#include "DiagonalMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+template<class Form>
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& a)
+:
+    List<Type>(min(a.n(), a.m()))
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
+    forAll(*this, i)
     {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
+        this->operator[](i) = a[i][i];
     }
-
-    matches.setSize(matchi);
-
-    return matches;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size)
+:
+    List<Type>(size)
+{}
 
-} // End namespace Foam
+
+template<class Type>
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size, const Type& val)
+:
+    List<Type>(size, val)
+{}
+
+
+template<class Type>
+Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
+{
+    forAll(*this, i)
+    {
+        Type x = this->operator[](i);
+        if (mag(x) < VSMALL)
+        {
+            this->operator[](i) = Type(0);
+        }
+        else
+        {
+            this->operator[](i) = Type(1)/x;
+        }
+    }
+
+    return this;
+}
+
+
+template<class Type>
+Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& A)
+{
+    DiagonalMatrix<Type> Ainv = A;
+
+    forAll(A, i)
+    {
+        Type x = A[i];
+        if (mag(x) < VSMALL)
+        {
+            Ainv[i] = Type(0);
+        }
+        else
+        {
+            Ainv[i] = Type(1)/x;
+        }
+    }
+
+    return Ainv;
+}
+
 
 // ************************************************************************* //

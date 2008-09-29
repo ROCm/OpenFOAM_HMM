@@ -24,40 +24,52 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix()
+:
+    Matrix<SquareMatrix<Type>, Type>()
+{}
 
-namespace Foam
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix(const label n)
+:
+    Matrix<SquareMatrix<Type>, Type>(n, n)
+{}
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix(const label m, const label n)
+:
+    Matrix<SquareMatrix<Type>, Type>(m, n)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
+    if (m != n)
     {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
+        FatalErrorIn
+        (
+            "SquareMatrix<Type>::SquareMatrix(const label m, const label n)"
+        ) << "m != n for constructing a square matrix" << exit(FatalError);
     }
-
-    matches.setSize(matchi);
-
-    return matches;
 }
 
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix(const label n, const Type& t)
+:
+    Matrix<SquareMatrix<Type>, Type>(n, t)
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix(Istream& is)
+:
+    Matrix<SquareMatrix<Type>, Type>(is)
+{}
 
-} // End namespace Foam
+template<class Type>
+inline Foam::autoPtr<Foam::SquareMatrix<Type> >
+Foam::SquareMatrix<Type>::clone() const
+{
+    return autoPtr<SquareMatrix<Type> >(new SquareMatrix<Type>(*this));
+}
+
 
 // ************************************************************************* //

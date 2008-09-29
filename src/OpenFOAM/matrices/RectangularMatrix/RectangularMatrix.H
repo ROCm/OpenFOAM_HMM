@@ -23,21 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SIBS
+    Foam::RectangularMatrix
 
 Description
-    Foam::SIBS
+    A templated 2D rectangular matrix of objects of \<T\>, where the n x n matrix
+    dimension is known and used for subscript bounds checking, etc.
 
 SourceFiles
-    SIBSCK.C
-    SIBSQS.C
+    RectangularMatrixI.H
+    RectangularMatrix.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef RectangularMatrix_H
+#define RectangularMatrix_H
 
-#include "ODESolver.H"
+#include "Matrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,94 +46,44 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class Matrix Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
+template<class Type>
+class RectangularMatrix
 :
-    public ODESolver
+    public Matrix<RectangularMatrix<Type>, Type>
 {
-    // Private data
-
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
-
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarSquareMatrix d_p_;
-        mutable scalarField x_p_;
-        mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
-
-
-void SIMPR
-(
-    const ODE& ode,
-    const scalar xStart,
-    const scalarField& y,
-    const scalarField& dydx,
-    const scalarField& dfdx,
-    const scalarSquareMatrix& dfdy,
-    const scalar deltaX,
-    const label nSteps,
-    scalarField& yEnd
-) const;
-
-
-void polyExtrapolate
-(
-    const label iest,
-    const scalar xest,
-    const scalarField& yest,
-    scalarField& yz,
-    scalarField& dy,
-    scalarField& x_p,
-    scalarSquareMatrix& d_p
-) const;
-
 
 public:
 
-    //- Runtime type information
-    TypeName("SIBS");
-
-
     // Constructors
 
-        //- Construct from ODE
-        SIBS(const ODE& ode);
+        //- Null constructor.
+        inline RectangularMatrix();
 
+        //- Construct given number of rows and columns,
+        inline RectangularMatrix(const label m, const label n);
 
-    // Member Functions
+        //- Construct with given number of rows and columns
+        //  and value for all elements.
+        inline RectangularMatrix(const label m, const label n, const Type&);
 
-        void solve
-        (
-            const ODE& ode,
-            scalar& x,
-            scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
-        ) const;
+        //- Construct from Istream.
+        inline RectangularMatrix(Istream&);
+
+        //- Clone
+        inline autoPtr<RectangularMatrix<Type> > clone() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#   include "RectangularMatrixI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

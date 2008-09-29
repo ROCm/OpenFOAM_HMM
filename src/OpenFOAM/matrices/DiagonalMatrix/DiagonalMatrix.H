@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,95 +23,78 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::KRR4
+    Foam::DiagonalMatrix<Type>
 
 Description
-    Foam::KRR4
+    DiagonalMatrix<Type> is a 2D diagonal matrix of objects
+    of type Type, size nxn
 
 SourceFiles
-    KRR4CK.C
-    KRR4QS.C
+    DiagonalMatrix.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KRR4_H
-#define KRR4_H
+#ifndef DiagonalMatrix_H
+#define DiagonalMatrix_H
 
-#include "ODESolver.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// * * * * * *  * * * * * * Class Forward declaration  * * * * * * * * * * * //
+
+template<class Form, class Type> class Matrix;
+
 /*---------------------------------------------------------------------------*\
-                           Class KRR4 Declaration
+                           Class DiagonalMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
-class KRR4
+template<class Type>
+class DiagonalMatrix
 :
-    public ODESolver
+    public List<Type>
 {
-    // Private data
-
-        mutable scalarField yTemp_;
-        mutable scalarField dydxTemp_;
-        mutable scalarField g1_;
-        mutable scalarField g2_;
-        mutable scalarField g3_;
-        mutable scalarField g4_;
-        mutable scalarField yErr_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-        mutable scalarSquareMatrix a_;
-        mutable labelList pivotIndices_;
-
-        static const int maxtry = 40;
-
-        static const scalar safety, grow, pgrow, shrink, pshrink, errcon;
-
-        static const scalar
-            gamma,
-            a21, a31, a32,
-            c21, c31, c32, c41, c42, c43,
-            b1, b2, b3, b4,
-            e1, e2, e3, e4,
-            c1X, c2X, c3X, c4X,
-            a2X, a3X;
-
-
 public:
-
-    //- Runtime type information
-    TypeName("KRR4");
-
 
     // Constructors
 
-        //- Construct from ODE
-        KRR4(const ODE& ode);
+        //- Construct from diagonal component of a Matrix
+        template<class Form>
+        DiagonalMatrix<Type>(const Matrix<Form, Type>&);
+
+        //- Construct empty from size
+        DiagonalMatrix<Type>(const label size);
+
+        //- Construct from size and a value
+        DiagonalMatrix<Type>(const label, const Type&);
 
 
-    // Member Functions
+    // Member functions
 
-        void solve
-        (
-            const ODE& ode,
-            scalar& x,
-            scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
-        ) const;
+        //- Invert the diaganol matrix and return itself
+        DiagonalMatrix<Type>& invert();
 };
+
+
+// Global functions
+
+//- Return the diagonal Matrix inverse
+template<class Type>
+DiagonalMatrix<Type> inv(const DiagonalMatrix<Type>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "DiagonalMatrix.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

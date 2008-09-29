@@ -23,21 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SIBS
+    Foam::regularExpression
 
 Description
-    Foam::SIBS
+    Wrapper around regular expressions.
 
 SourceFiles
-    SIBSCK.C
-    SIBSQS.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef regularExpression_H
+#define regularExpression_H
 
-#include "ODESolver.H"
+#include <sys/types.h>
+#include <regex.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,88 +44,69 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class regularExpression Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
-:
-    public ODESolver
+class regularExpression
 {
     // Private data
 
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
-
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarSquareMatrix d_p_;
-        mutable scalarField x_p_;
-        mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
+        //- Precompiled regular expression
+        regex_t* preg_;
 
 
-void SIMPR
-(
-    const ODE& ode,
-    const scalar xStart,
-    const scalarField& y,
-    const scalarField& dydx,
-    const scalarField& dfdx,
-    const scalarSquareMatrix& dfdy,
-    const scalar deltaX,
-    const label nSteps,
-    scalarField& yEnd
-) const;
+    // Private member functions
 
+        //- Disallow default bitwise copy construct
+        regularExpression(const regularExpression&);
 
-void polyExtrapolate
-(
-    const label iest,
-    const scalar xest,
-    const scalarField& yest,
-    scalarField& yz,
-    scalarField& dy,
-    scalarField& x_p,
-    scalarSquareMatrix& d_p
-) const;
-
+        //- Disallow default bitwise assignment
+        void operator=(const regularExpression&);
 
 public:
-
-    //- Runtime type information
-    TypeName("SIBS");
 
 
     // Constructors
 
-        //- Construct from ODE
-        SIBS(const ODE& ode);
+        //- Construct from string
+        inline regularExpression(const string& s)
+        {
+            preg_ = new regex_t;
+
+            if (regcomp(preg_, s.c_str(), REG_EXTENDED|REG_NOSUB) != 0)
+            {
+                FatalErrorIn
+                (
+                    "regularExpression::regularExpression(const char*)"
+                )   << "Failed to compile regular expression " << s
+                    << exit(FatalError);
+            }
+        }
 
 
-    // Member Functions
+    // Destructor
 
-        void solve
-        (
-            const ODE& ode,
-            scalar& x,
-            scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
-        ) const;
+        //- Construct from string
+        inline ~regularExpression()
+        {
+            if (preg_)
+            {
+                regfree(preg_);
+                delete preg_;
+            }
+        }
+
+
+    // Member functions
+
+        //- Matches?
+        inline bool matches(const string& s)
+        {
+            size_t nmatch = 0;
+            regmatch_t *pmatch = NULL;
+
+            return regexec(preg_, s.c_str(), nmatch, pmatch, 0) == 0;
+        }
 };
 
 

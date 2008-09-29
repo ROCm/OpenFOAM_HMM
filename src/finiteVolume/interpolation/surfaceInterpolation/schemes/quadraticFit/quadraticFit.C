@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,40 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#include "quadraticFit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
-
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
-    {
-        if (re.matches(sl[i]))
-        {
-            matches[matchi++] = i;
-        }
-    }
-
-    matches.setSize(matchi);
-
-    return matches;
+    makeSurfaceInterpolationScheme(quadraticFit);
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
