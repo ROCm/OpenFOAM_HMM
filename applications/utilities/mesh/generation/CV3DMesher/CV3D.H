@@ -126,7 +126,6 @@ public:
         //- Square of span
         scalar span2;
 
-
         //- Minumum edge-length of the cell size below which protusions
         //  through the surface are not split
         scalar minEdgeLen;
@@ -147,6 +146,16 @@ public:
         //- Guard distance from a feature point within which an edge control
         //- point may not be placed
         scalar featurePointGuard;
+
+        //- Guard distance from a feature edge within which a surface control
+        //- point may not be placed
+        scalar featureEdgeGuard;
+
+        //- minimum and maximum distances along a feature edge allowed between
+        //- pairs of points.  Eventually these should be able to adapt to local
+        //- grading requirements.
+        scalar minEdgeSpacing;
+        scalar maxEdgeSpacing;
 
         tolerances
         (
@@ -252,6 +261,13 @@ private:
         (
             DynamicList<point>& edgePoints,
             DynamicList<label>& edgeLabels
+        ) const;
+
+        void smoothEdge
+        (
+            List<point>& edgePoints,
+            List<scalar>& edgeDistances,
+            const label edgeI
         ) const;
 
         //- Insert point-pairs at the nearest points on the surface to the

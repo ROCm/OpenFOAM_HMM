@@ -57,6 +57,20 @@ Foam::CV3D::tolerances::tolerances
     featurePointGuard
     (
         readScalar(controlDict.lookup("featurePointGuardCoeff"))*minCellSize
+    ),
+
+    featureEdgeGuard
+    (
+        readScalar(controlDict.lookup("featureEdgeGuardCoeff"))*minCellSize
+    ),
+
+    minEdgeSpacing
+    (
+        readScalar(controlDict.lookup("minEdgeSpacingCoeff"))*minCellSize
+    ),
+    maxEdgeSpacing
+    (
+        readScalar(controlDict.lookup("maxEdgeSpacingCoeff"))*minCellSize
     )
 {}
 

@@ -164,7 +164,12 @@ void Foam::CV3D::insertGrid()
         {
             for (int k=0; k<nk; k++)
             {
-                point p1 (x0 + i*delta.x(), y0 + j*delta.y(), z0 + k*delta.z());
+                point p1
+                (
+                    x0 + i*delta.x(),
+                    y0 + j*delta.y(),
+                    z0 + k*delta.z()
+                );
 
                 point p2 = p1 + 0.5*delta;
 
