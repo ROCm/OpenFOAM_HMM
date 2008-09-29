@@ -206,7 +206,7 @@ LRR::LRR
         autoCreateMut("mut", mesh_)
     )
 {
-    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
@@ -310,7 +310,7 @@ void LRR::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
         return;
     }
@@ -399,7 +399,7 @@ void LRR::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
 

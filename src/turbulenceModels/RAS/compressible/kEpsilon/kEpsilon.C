@@ -157,7 +157,7 @@ kEpsilon::kEpsilon
         autoCreateMut("mut", mesh_)
     )
 {
-    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -243,7 +243,7 @@ void kEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
         return;
     }
@@ -303,7 +303,7 @@ void kEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 }
 

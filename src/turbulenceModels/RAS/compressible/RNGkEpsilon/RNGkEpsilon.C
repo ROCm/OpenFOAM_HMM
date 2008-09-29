@@ -176,7 +176,7 @@ RNGkEpsilon::RNGkEpsilon
         autoCreateMut("mut", mesh_)
     )
 {
-    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -263,7 +263,7 @@ void RNGkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
         return;
     }
@@ -330,7 +330,7 @@ void RNGkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 }
 
