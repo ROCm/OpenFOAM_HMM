@@ -177,8 +177,9 @@ dimensionedTypes/dimensionedTensor/dimensionedTensor.C
 
 matrices/solution/solution.C
 
-scalarMatrix = matrices/scalarMatrix
-$(scalarMatrix)/scalarMatrix.C
+scalarMatrices = matrices/scalarMatrices
+$(scalarMatrices)/scalarMatrices.C
+$(scalarMatrices)/SVD/SVD.C
 
 LUscalarMatrix = matrices/LUscalarMatrix
 $(LUscalarMatrix)/LUscalarMatrix.C

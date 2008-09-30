@@ -134,6 +134,7 @@ class kOmegaSST
         volScalarField k_;
         volScalarField omega_;
         volScalarField mut_;
+        volScalarField alphat_;
 
 
     // Private member functions
@@ -238,7 +239,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
             );
         }
 

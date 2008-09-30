@@ -141,7 +141,7 @@ kOmega::kOmega
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ = k_/(omega_ + omegaSmall_);
+    nut_ == k_/(omega_ + omegaSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -273,7 +273,7 @@ void kOmega::correct()
 
 
     // Re-calculate viscosity
-    nut_ = k_/omega_;
+    nut_ == k_/omega_;
     nut_.correctBoundaryConditions();
 }
 
