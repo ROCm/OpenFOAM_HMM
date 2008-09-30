@@ -322,13 +322,13 @@ void Foam::CV3D::smoothEdge
             if
             (
                 edgeDist < tols_.featurePointGuard
-                && !startGuardPlaced
+             && !startGuardPlaced
             )
             {
                 tempEdgePoints.append
                 (
                     eStart + (edgePoint - eStart)
-                    * tols_.featurePointGuard/edgeDist
+                        * tols_.featurePointGuard/edgeDist
                 );
 
                 startGuardPlaced = true;
@@ -336,7 +336,7 @@ void Foam::CV3D::smoothEdge
             else if
             (
                 edgeDist > (edgeLength - tols_.featurePointGuard)
-                && !endGuardPlaced
+             && !endGuardPlaced
             )
             {
                 tempEdgePoints.append
@@ -359,6 +359,7 @@ void Foam::CV3D::smoothEdge
 
         edgePoints.transfer(tempEdgePoints.shrink());
     }
+
     // Recalculate edge distances.
 
     edgeDistances.setSize(edgePoints.size());
@@ -419,242 +420,171 @@ void Foam::CV3D::smoothEdge
 
         edgePoints.transfer(tempEdgePoints.shrink());
     }
+
+    // Recalculate edge distances.
+
+    edgeDistances.setSize(edgePoints.size());
+
+    forAll(edgeDistances, eD)
+    {
+        edgeDistances[eD] = mag(eStart - edgePoints[eD]);
+    }
+
+    // part 3
+    {
+        // Special treatment for gaps between closest point to start
+
+        DynamicList<point> tempEdgePoints;
+
+        if (edgeDistances[0] - tols_.featurePointGuard > tols_.maxEdgeSpacing)
+        {
+            scalar gap = edgeDistances[0] - tols_.featurePointGuard;
+
+            label nInsertions = label(gap/tols_.maxEdgeSpacing);
+
+            Info<< "Gap at start of edge of "  << gap
+                << ". Inserting " << nInsertions << " points" << endl;
+
+            scalar spacing = gap / (nInsertions + 1);
+
+            for (label nI = 1; nI <= nInsertions; nI++)
+            {
+                tempEdgePoints.append
+                (
+                    eStart + (eEnd - eStart)
+                    * (nI * spacing + tols_.featurePointGuard) /edgeLength
+                );
+            }
+        }
+
+        // Identify gaps in middle of edges.
+        // Insert first point by default.
+
+        tempEdgePoints.append(edgePoints[0]);
+
+        for (label eP = 1; eP < edgePoints.size(); eP++)
+        {
+            const scalar& edgeDist = edgeDistances[eP];
+            const scalar& previousEdgeDist = edgeDistances[eP - 1];
+
+            if ((edgeDist - previousEdgeDist) > tols_.maxEdgeSpacing)
+            {
+                scalar gap = edgeDist - previousEdgeDist;
+
+                label nInsertions = label(gap/tols_.maxEdgeSpacing);
+
+                Info<< "Gap in edge of "  << gap
+                    << ". Inserting " << nInsertions << " points" << endl;
+
+                scalar spacing = gap / (nInsertions + 1);
+
+                for (label nI = 1; nI<= nInsertions; nI++)
+                {
+                    tempEdgePoints.append
+                    (
+                        eStart + (eEnd - eStart)
+                        * (nI * spacing + previousEdgeDist) /edgeLength
+                    );
+                }
+
+
+            }
+
+            tempEdgePoints.append(edgePoints[eP]);
+        }
+
+        // Special treatment for gaps between closest point to start
+
+        if
+        (
+            (edgeLength - edgeDistances[edgeDistances.size() - 1]
+                - tols_.featurePointGuard)
+                > tols_.maxEdgeSpacing
+        )
+        {
+            scalar lastPointDist =  edgeDistances[edgeDistances.size() - 1];
+
+            const point& lastPoint = edgePoints[edgePoints.size() - 1];
+
+            scalar gap = edgeLength - lastPointDist - tols_.featurePointGuard;
+
+            label nInsertions = label(gap/tols_.maxEdgeSpacing);
+
+            Info<< "Gap at end of edge of "  << gap
+                << ". Inserting " << nInsertions << " points" << endl;
+
+            scalar spacing = gap / (nInsertions + 1);
+
+            for (label nI = 1; nI <= nInsertions; nI++)
+            {
+                tempEdgePoints.append
+                (
+                    lastPoint + (eEnd - lastPoint)
+                        * nI * spacing / gap
+                );
+            }
+        }
+
+        edgePoints.transfer(tempEdgePoints.shrink());
+
+        // Remove pairs of points that are too close together.
+
+        label nPointsRemoved = 1;
+
+        while (nPointsRemoved > 0)
+        {
+            nPointsRemoved = 0;
+
+            // Recalculate edge distances.
+
+            edgeDistances.setSize(edgePoints.size());
+
+            forAll(edgeDistances, eD)
+            {
+                edgeDistances[eD] = mag(eStart - edgePoints[eD]);
+            }
+
+            // Insert first point
+            tempEdgePoints.append(edgePoints[0]);
+
+            bool previousPointMustBeKept = false;
+
+            for (label eP = 1; eP < edgePoints.size(); eP++)
+            {
+                const scalar& edgeDist = edgeDistances[eP];
+                const scalar& previousEdgeDist = edgeDistances[eP - 1];
+
+                if ((edgeDist - previousEdgeDist) < tols_.minEdgeSpacing)
+                {
+                    if (!previousPointMustBeKept)
+                    {
+                        tempEdgePoints.remove();
+                    }
+
+                    const point& currentPoint = edgePoints[eP];
+
+                    const point& previousPoint = edgePoints[eP - 1];
+
+                    tempEdgePoints.append(0.5*(previousPoint + currentPoint));
+
+                    nPointsRemoved++;
+
+                    previousPointMustBeKept = true;
+                }
+                else
+                {
+                    tempEdgePoints.append(edgePoints[eP]);
+
+                    previousPointMustBeKept = false;
+                }
+            }
+
+            Info<< edgeI << tab << nPointsRemoved << " points removed." << endl;
+
+            edgePoints.transfer(tempEdgePoints.shrink());
+        }
+    }
 }
-
-
-//     {
-//         DynamicList<point> tempEdgePoints(edgePoints.size());
-
-//         DynamicList<label> tempEdgeLabels(edgeLabels.size());
-
-//         forAll(edgeLabelJumps, eLJ)
-//         {
-//             label start = edgeLabelJumps[eLJ];
-
-//             label edgeI = edgeLabels[start];
-
-//             label length;
-
-//             if (eLJ == edgeLabelJumps.size() - 1)
-//             {
-//                 length = edgeLabels.size() - start;
-//             }
-//             else
-//             {
-//                 length = edgeLabelJumps[eLJ + 1] - start;
-//             }
-
-//             List<point> edgePointBlock
-//             (
-//                 SubList<point>(edgePoints, length, start)
-//             );
-
-//             List<scalar> edgeDistanceBlock
-//             (
-//                 SubList<scalar>(edgeDistances, length, start)
-//             );
-
-//             const edge& e(edges[edgeI]);
-
-//             const point& eStart(localPts[e.start()]);
-
-//             const point& eEnd(localPts[e.end()]);
-
-//             scalar edgeLength = mag(eStart - eEnd);
-
-//             if (edgeLength < 2*tols_.featurePointGuard)
-//             {
-//                 Info<< "edge " << edgeI
-//                     << " is too short with respect to the featurePointGuard "
-//                     << "distance to allow edge control points to be placed."
-//                     << nl << "Edge length = " << edgeLength
-//                     << nl <<endl;
-//             }
-//             else
-//             {
-//                 forAll (edgeDistanceBlock, eDB)
-//                 {
-//                     bool startGuardPlaced = false;
-
-//                     bool endGuardPlaced = false;
-
-//                     const scalar& edgeDist = edgeDistanceBlock[eDB];
-
-//                     if
-//                     (
-//                         edgeDist < tols_.featurePointGuard
-//                         && !startGuardPlaced
-//                     )
-//                     {
-//                         tempEdgePoints.append
-//                         (
-//                             eStart + (edgePointBlock[eDB] - eStart)
-//                             * tols_.featurePointGuard/edgeDist
-//                         );
-
-//                         tempEdgeLabels.append(edgeI);
-
-//                         startGuardPlaced = true;
-//                     }
-//                     else if
-//                     (
-//                         edgeDist > (edgeLength - tols_.featurePointGuard)
-//                         && !endGuardPlaced
-//                     )
-//                     {
-//                         tempEdgePoints.append
-//                         (
-//                             eEnd + (edgePointBlock[eDB] - eEnd)
-//                             * tols_.featurePointGuard/(edgeLength - edgeDist)
-//                         );
-
-//                         tempEdgeLabels.append(edgeI);
-
-//                         endGuardPlaced = true;
-//                     }
-//                     else
-//                     {
-//                         tempEdgePoints.append(edgePointBlock[eDB]);
-
-//                         tempEdgeLabels.append(edgeI);
-//                     }
-//                 }
-//             }
-//         }
-
-//         edgePoints.transfer(tempEdgePoints.shrink());
-
-//         edgeLabels.transfer(tempEdgeLabels.shrink());
-//     }
-
-
-//     // If no points are left on the edges then do not progress any further.
-
-//     if (!edgePoints.size())
-//     {
-//         return;
-//     }
-
-//     // Re-establish the correct distances and jumps
-
-//     edgeDistances.clear();
-
-//     edgeDistances.setSize(edgePoints.size());
-
-//     forAll(edgeDistances, eD)
-//     {
-//         const point& edgeStart = localPts[edges[edgeLabels[eD]].start()];
-
-//         edgeDistances[eD] = mag(edgeStart - edgePoints[eD]);
-//     }
-
-//     edgeLabelJumps.clear();
-
-//     // Force first edgeLabel to be a jump
-//     edgeLabelJumps.append(0);
-
-//     for (label eL = 1; eL < edgeLabels.size(); eL++)
-//     {
-//         if (edgeLabels[eL] > edgeLabels[eL-1])
-//         {
-//             edgeLabelJumps.append(eL);
-//         }
-//     }
-
-//     edgeLabelJumps.shrink();
-
-//     // part 2
-//     {
-//         DynamicList<point> tempEdgePoints(edgePoints.size());
-
-//         DynamicList<label> tempEdgeLabels(edgeLabels.size());
-
-//         forAll(edgeLabelJumps, eLJ)
-//         {
-//             label start = edgeLabelJumps[eLJ];
-
-//             label edgeI = edgeLabels[start];
-
-//             label length;
-
-//             if (eLJ == edgeLabelJumps.size() - 1)
-//             {
-//                 length = edgeLabels.size() - start;
-//             }
-//             else
-//             {
-//                 length = edgeLabelJumps[eLJ + 1] - start;
-//             }
-
-//             List<point> edgePointBlock
-//             (
-//                 SubList<point>(edgePoints, length, start)
-//             );
-
-//             List<scalar> edgeDistanceBlock
-//             (
-//                 SubList<scalar>(edgeDistances, length, start)
-//             );
-
-//             label groupSize = 0;
-
-//             point newEdgePoint(vector::zero);
-
-//             if (edgeDistanceBlock.size() == 1)
-//             {
-//                 tempEdgePoints.append(edgePointBlock[0]);
-
-//                 tempEdgeLabels.append(edgeI);
-//             }
-//             else if
-//             (
-//                 (edgeDistanceBlock[1] - edgeDistanceBlock[0])
-//                     > tols_.edgeGroupSpacing)
-//             {
-//                 tempEdgePoints.append(edgePointBlock[0]);
-
-//                 tempEdgeLabels.append(edgeI);
-//             }
-
-//             for (label eDB = 1; eDB < edgeDistanceBlock.size(); eDB++)
-//             {
-//                 const scalar& edgeDist = edgeDistanceBlock[eDB];
-//                 const scalar& previousEdgeDist = edgeDistanceBlock[eDB - 1];
-
-//                 if ((edgeDist - previousEdgeDist) < tols_.edgeGroupSpacing)
-//                 {
-//                     newEdgePoint += edgePointBlock[eDB];
-
-//                     groupSize++;
-//                 }
-//                 else if (groupSize > 0)
-//                 {
-//                     // A point group has been formed and has finished
-
-//                     newEdgePoint /= groupSize;
-
-//                     tempEdgePoints.append(newEdgePoint);
-
-//                     tempEdgeLabels.append(edgeI);
-
-//                     newEdgePoint = vector::zero;
-
-//                     groupSize = 0;
-//                 }
-//                 else
-//                 {
-//                     tempEdgePoints.append(edgePointBlock[eDB]);
-
-//                     tempEdgeLabels.append(edgeI);
-//                 }
-//             }
-//         }
-
-//         edgePoints.transfer(tempEdgePoints.shrink());
-
-//         edgeLabels.transfer(tempEdgeLabels.shrink());
-//     }
-// }
 
 
 void Foam::CV3D::insertPointPairs
@@ -995,6 +925,11 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
             surfaceTris.append(allSurfaceTris[eP]);
         }
     }
+
+    Info<< nl << "Number of surface conformation points not placed because "
+        << nl << "they were too close to a feature edge = "
+        << allSurfacePoints.size() - surfacePoints.size()
+        << endl;
 
     nearSurfacePoints.shrink();
     surfacePoints.shrink();

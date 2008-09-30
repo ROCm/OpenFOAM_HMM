@@ -1,4 +1,7 @@
+
 #include CGAL_FILES
+
+plane.C
 
 querySurface.C
 CV3D.C

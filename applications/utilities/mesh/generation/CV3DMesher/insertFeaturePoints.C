@@ -317,9 +317,12 @@ void Foam::CV3D::insertFeaturePoints()
                 + tols_.ppDist*edgeDirection
                 * concaveEdge.vec(localPts)/concaveEdge.mag(localPts);
 
-                plane planeF(concaveEdgeLocalFeatPt, concaveEdge.vec(localPts));
+                // Finding the nearest point on the intersecting line to the edge point.
+                // Floating point errors often encountered using planePlaneIntersect
 
+                plane planeF(concaveEdgeLocalFeatPt, concaveEdge.vec(localPts));
                 point concaveEdgeExternalPt = planeF.planePlaneIntersect(planeA,planeB);
+
                 label concaveEdgeExternalPtI = number_of_vertices() + 4;
 
                 // Redefine planes to be on the feature surfaces to project through
@@ -485,8 +488,11 @@ void Foam::CV3D::insertFeaturePoints()
                   + tols_.ppDist*edgeDirection
                   * convexEdge.vec(localPts)/convexEdge.mag(localPts);
 
-                plane planeF(convexEdgeLocalFeatPt, convexEdge.vec(localPts));
 
+                // Finding the nearest point on the intersecting line to the edge point.
+                // Floating point errors often encountered using planePlaneIntersect
+
+                plane planeF(convexEdgeLocalFeatPt, convexEdge.vec(localPts));
                 point convexEdgeInternalPt = planeF.planePlaneIntersect(planeA,planeB);
 
                 planeA = plane(featPt, convexEdgePlaneANormal);
