@@ -48,8 +48,16 @@ int main(int argc, char *argv[])
     argList::noParallel();
     timeSelector::addOptions();
 #   include "addRegionOption.H"
+    argList::validOptions.insert("fields", "\"(list of fields)\"");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
+
+    HashSet<word> selectedFields;
+    if (args.options().found("fields"))
+    {
+        IStringStream(args.options()["fields"])() >> selectedFields;
+    }
 
     // determine the processor count directly
     label nProcs = 0;
@@ -184,13 +192,37 @@ int main(int argc, char *argv[])
                 procMeshes.boundaryProcAddressing()
             );
 
-            fvReconstructor.reconstructFvVolumeFields<scalar>(objects);
-            fvReconstructor.reconstructFvVolumeFields<vector>(objects);
-            fvReconstructor.reconstructFvVolumeFields<sphericalTensor>(objects);
-            fvReconstructor.reconstructFvVolumeFields<symmTensor>(objects);
-            fvReconstructor.reconstructFvVolumeFields<tensor>(objects);
+            fvReconstructor.reconstructFvVolumeFields<scalar>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeFields<vector>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeFields<sphericalTensor>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeFields<symmTensor>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeFields<tensor>
+            (
+                objects,
+                selectedFields
+            );
 
-            fvReconstructor.reconstructFvSurfaceFields<scalar>(objects);
+            fvReconstructor.reconstructFvSurfaceFields<scalar>
+            (
+                objects,
+                selectedFields
+            );
         }
         else
         {
