@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-( cd OpenFOAM && wmakeLnInclude . )
+( cd OpenFOAM && wmakeLnInclude -f . )
 ( cd Pstream && ./Allwmake )
 
 wmake libo  OSspecific/$WM_OS
