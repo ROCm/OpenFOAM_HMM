@@ -160,7 +160,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 
         scalar yPlus = Cmu25*y[faceI]*sqrt(k[faceCellI])/nuw[faceI];
 
-        omega[faceCellI] = sqrt(k[faceCellI])/(Cmu25*kappa*y[faceCellI]);
+        omega[faceCellI] = sqrt(k[faceCellI])/(Cmu25*kappa*y[faceI]);
 
         if (yPlus > yPlusLam)
         {
@@ -168,7 +168,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
                 (nutw[faceI] + nuw[faceI])
                *magGradUw[faceI]
                *Cmu25*sqrt(k[faceCellI])
-               /(kappa*y[faceCellI]);
+               /(kappa*y[faceI]);
         }
         else
         {
