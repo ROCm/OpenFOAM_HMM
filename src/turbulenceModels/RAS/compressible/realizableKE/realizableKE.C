@@ -187,6 +187,18 @@ realizableKE::realizableKE
             IOobject::AUTO_WRITE
         ),
         autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
     bound(k_, k0_);
@@ -194,6 +206,9 @@ realizableKE::realizableKE
 
     mut_ == rCmu(fvc::grad(U_))*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -278,6 +293,11 @@ void realizableKE::correct()
         // Re-calculate viscosity
         mut_ == rCmu(fvc::grad(U_))*rho_*sqr(k_)/epsilon_;
         mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -344,6 +364,10 @@ void realizableKE::correct()
     // Re-calculate viscosity
     mut_ == rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
+
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

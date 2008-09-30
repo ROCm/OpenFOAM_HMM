@@ -226,11 +226,20 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             IOobject::AUTO_WRITE
         ),
         autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
-    mut_.correctBoundaryConditions();
-
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
         FatalErrorIn
@@ -242,6 +251,12 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
     }
+
+    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -337,6 +352,11 @@ void LaunderGibsonRSTM::correct()
         // Re-calculate viscosity
         mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -441,6 +461,9 @@ void LaunderGibsonRSTM::correct()
     mut_ == Cmu_*rho_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     // Correct wall shear stresses
 

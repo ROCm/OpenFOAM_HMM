@@ -155,10 +155,25 @@ kEpsilon::kEpsilon
             IOobject::AUTO_WRITE
         ),
         autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
     mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -245,6 +260,11 @@ void kEpsilon::correct()
         // Re-calculate viscosity
         mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -305,6 +325,10 @@ void kEpsilon::correct()
     // Re-calculate viscosity
     mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
+
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 
