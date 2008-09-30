@@ -53,10 +53,24 @@ inline Foam::SquareMatrix<Type>::SquareMatrix(const label m, const label n)
 }
 
 template<class Type>
-inline Foam::SquareMatrix<Type>::SquareMatrix(const label n, const Type& t)
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const label m,
+    const label n,
+    const Type& t
+)
 :
-    Matrix<SquareMatrix<Type>, Type>(n, t)
-{}
+    Matrix<SquareMatrix<Type>, Type>(m, n, t)
+{
+    if (m != n)
+    {
+        FatalErrorIn
+        (
+            "SquareMatrix<Type>::SquareMatrix"
+            "(const label m, const label n, const Type&)"
+        ) << "m != n for constructing a square matrix" << exit(FatalError);
+    }
+}
 
 template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix(Istream& is)
