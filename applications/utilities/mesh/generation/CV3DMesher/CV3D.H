@@ -79,6 +79,12 @@ public:
     {
     public:
 
+        //- Relaxation factor at the start of the iteration
+        scalar relaxationFactorStart;
+
+        //- Relaxation factor at the end of the iteration
+        scalar relaxationFactorEnd;
+
         //- Minimum cell size below which protusions through the surface are
         //  not split
         scalar minCellSize;
@@ -94,6 +100,19 @@ public:
         //- Maximum quadrant angle allowed at a concave corner before
         //  additional "mitering" lines are added
         scalar maxQuadAngle;
+
+        //- Should the mesh be square-dominated or of unbiased hexagons
+        Switch squares;
+
+        //- Near-wall region where cells are aligned with the wall
+        scalar nearWallAlignedDist;
+
+        //- Square of nearWallAlignedDist
+        scalar nearWallAlignedDist2;
+
+        //- Chose if the cell orientation should relax during the iterations
+        //  or remain fixed to the x-y directions
+        Switch relaxOrientation;
 
         //- Insert near-boundary point mirror or point-pairs
         Switch insertSurfaceNearestPointPairs;
@@ -189,6 +208,7 @@ private:
         //  the boundary conform function is called more than once without
         //  removing and insertin the surface point-pairs
         label startOfBoundaryConformPointPairs_;
+
 
     // Private Member Functions
 

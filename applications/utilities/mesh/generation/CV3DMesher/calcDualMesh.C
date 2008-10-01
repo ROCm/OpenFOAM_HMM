@@ -158,7 +158,7 @@ void Foam::CV3D::calcDualMesh
                     }
 
 		    verticesOnFace.append(cc->cellIndex());
-		}
+                }
             } while (++cc != ccStart);
 
             verticesOnFace.shrink();

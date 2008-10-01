@@ -47,7 +47,7 @@ namespace CGAL
 \*---------------------------------------------------------------------------*/
 
 template<class Gt, class Cb=CGAL::Triangulation_cell_base_3<Gt> >
-class indexedCell 
+class indexedCell
 :
     public Cb
 {
@@ -96,11 +96,11 @@ public:
 
     indexedCell
     (
-        Vertex_handle v0, 
+        Vertex_handle v0,
         Vertex_handle v1,
         Vertex_handle v2,
         Vertex_handle v3,
-        Cell_handle n0, 
+        Cell_handle n0,
         Cell_handle n1,
         Cell_handle n2,
         Cell_handle n3

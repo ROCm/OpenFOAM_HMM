@@ -90,15 +90,21 @@ int main(int argc, char *argv[])
         mesh.boundaryConform();
     }
 
-    scalar relaxation = 1.0;
+    scalar relaxation =
+    mesh.meshingControls().relaxationFactorStart;
 
-    for (int iter=1; iter<=nIterations; iter++)
+    scalar relaxationDelta =
+    (
+        mesh.meshingControls().relaxationFactorStart
+      - mesh.meshingControls().relaxationFactorEnd
+    )
+    /max(nIterations, 1);
+
+    for (label iter = 0; iter < nIterations; iter++)
     {
         Info<< nl
             << "Relaxation iteration " << iter << nl
             << "~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-
-        relaxation -= 0.02;
 
         Info<< "relaxation = " << relaxation << endl;
 
@@ -107,6 +113,8 @@ int main(int argc, char *argv[])
         mesh.removeSurfacePointPairs();
         mesh.insertSurfacePointPairs();
         mesh.boundaryConform();
+
+        relaxation -= relaxationDelta;
     }
 
     mesh.write();

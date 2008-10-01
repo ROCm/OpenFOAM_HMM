@@ -442,8 +442,8 @@ void Foam::CV3D::smoothEdge
 
             label nInsertions = label(gap/tols_.maxEdgeSpacing);
 
-            Info<< "Gap at start of edge of "  << gap
-                << ". Inserting " << nInsertions << " points" << endl;
+            // Info<< "Gap at start of edge of "  << gap
+            //     << ". Inserting " << nInsertions << " points" << endl;
 
             scalar spacing = gap / (nInsertions + 1);
 
@@ -473,8 +473,8 @@ void Foam::CV3D::smoothEdge
 
                 label nInsertions = label(gap/tols_.maxEdgeSpacing);
 
-                Info<< "Gap in edge of "  << gap
-                    << ". Inserting " << nInsertions << " points" << endl;
+                // Info<< "Gap in edge of "  << gap
+                //     << ". Inserting " << nInsertions << " points" << endl;
 
                 scalar spacing = gap / (nInsertions + 1);
 
@@ -493,7 +493,7 @@ void Foam::CV3D::smoothEdge
             tempEdgePoints.append(edgePoints[eP]);
         }
 
-        // Special treatment for gaps between closest point to start
+        // Special treatment for gaps between closest point to end
 
         if
         (
@@ -510,8 +510,8 @@ void Foam::CV3D::smoothEdge
 
             label nInsertions = label(gap/tols_.maxEdgeSpacing);
 
-            Info<< "Gap at end of edge of "  << gap
-                << ". Inserting " << nInsertions << " points" << endl;
+            // Info<< "Gap at end of edge of "  << gap
+            //     << ". Inserting " << nInsertions << " points" << endl;
 
             scalar spacing = gap / (nInsertions + 1);
 
@@ -579,7 +579,7 @@ void Foam::CV3D::smoothEdge
                 }
             }
 
-            Info<< edgeI << tab << nPointsRemoved << " points removed." << endl;
+            // Info<< edgeI << tab << nPointsRemoved << " points removed." << endl;
 
             edgePoints.transfer(tempEdgePoints.shrink());
         }

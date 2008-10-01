@@ -216,7 +216,10 @@ void Foam::CV3D::insertGrid()
 
 void Foam::CV3D::relaxPoints(const scalar relaxation)
 {
-    Info<< "Calculating new points: " << nl << endl;
+    Info<< "Calculating new points: " << endl;
+
+    vector totalDisp = vector::zero;
+    scalar totalDist = 0;
 
     for
     (
@@ -227,10 +230,82 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     {
         if (vit->internalPoint())
         {
-            // movePoint(vit, newPoint);
+            std::list<Facet> facets;
+            incident_facets(vit, std::back_inserter(facets));
+
+            label maxIncidentFacets = 20;
+            List<point> vertices(maxIncidentFacets);
+            List<vector> edges(maxIncidentFacets);
+
+            point vd(topoint(vit->point()));
+
+            point vi0 = topoint(dual(facets.begin()->first));
+
+            label edgei = 0;
+
+            for
+            (
+                std::list<Facet>::iterator fit=facets.begin();
+                fit != facets.end();
+                ++fit
+            )
+            {
+                if
+                (
+                    is_infinite(fit->first)
+                 || is_infinite(fit->first->neighbor(fit->second))
+                )
+                {
+                    FatalErrorIn("relaxPoints")
+                        << "Finite cell attached to facet incident on vertex"
+                        << exit(FatalError);
+                }
+
+                point vi1 = topoint(dual(fit->first->neighbor(fit->second)));
+
+                edges[edgei] = vi1 - vi0;
+
+                vertices[edgei] = 0.5*(vi1 + vi0);
+
+                vi0 = vi1;
+
+                edgei++;
+            }
+
+            edgei = 0;
+
+            // Initialise the displacement for the centre and sum-weights
+            vector disp = vector::zero;
+            scalar sumw = 0;
+
+            for
+            (
+                std::list<Facet>::iterator fit=facets.begin();
+                fit != facets.end();
+                ++fit
+            )
+            {
+                vector deltai = vertices[edgei] - vd;
+
+                scalar w = 1;
+
+                disp += w*deltai;
+
+                sumw += w;
+
+                edgei++;
+            }
+
+            disp /= sumw;
+            totalDisp += disp;
+            totalDist += mag(disp);
+
+            movePoint(vit, vd + relaxation*disp);
         }
     }
 
+    Info<< "Total displacement = " << totalDisp
+        << " total distance = " << totalDist << endl;
 }
 
 

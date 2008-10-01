@@ -30,10 +30,22 @@ License
 
 Foam::CV3D::controls::controls(const dictionary& controlDict)
 :
+    relaxationFactorStart
+    (
+        readScalar(controlDict.lookup("relaxationFactorStart"))
+    ),
+    relaxationFactorEnd(readScalar(controlDict.lookup("relaxationFactorEnd"))),
     minCellSize(readScalar(controlDict.lookup("minCellSize"))),
     minCellSize2(Foam::sqr(minCellSize)),
     includedAngle(readScalar(controlDict.lookup("includedAngle"))),
     maxQuadAngle(readScalar(controlDict.lookup("maxQuadAngle"))),
+    squares(controlDict.lookup("squares")),
+    nearWallAlignedDist
+    (
+        readScalar(controlDict.lookup("nearWallAlignedDist"))*minCellSize
+    ),
+    nearWallAlignedDist2(Foam::sqr(nearWallAlignedDist)),
+    relaxOrientation(controlDict.lookup("relaxOrientation")),
     insertSurfaceNearestPointPairs
     (
         controlDict.lookup("insertSurfaceNearestPointPairs")
