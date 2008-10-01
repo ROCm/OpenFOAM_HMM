@@ -23,10 +23,16 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Nastran surface reader. Does Ansa $ANSA_NAME extension to get name
-    of patch. Handles Ansa coordinates like:
+    Nastran surface reader.
 
+    - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
+      to obtain patch names.
+    - Handles Nastran short and long formats, but not free format.
+    - Properly handles the Nastran compact floating point notation: \n
+    @verbatim
         GRID          28        10.20269-.030265-2.358-8
+    @endverbatim
+
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,13 +55,13 @@ static scalar parseNASCoord(const string& s)
     if (expSign != string::npos && expSign > 0 && !isspace(s[expSign-1]))
     {
         scalar mantissa = readScalar(IStringStream(s.substr(0, expSign))());
-        scalar exp = readScalar(IStringStream(s.substr(expSign+1))());
+        scalar exponent = readScalar(IStringStream(s.substr(expSign+1))());
 
         if (s[expSign] == '-')
         {
-            exp = -exp;
+            exponent = -exponent;
         }
-        return mantissa*pow(10, exp);
+        return mantissa*pow(10, exponent);
     }
     else
     {
@@ -64,14 +70,14 @@ static scalar parseNASCoord(const string& s)
 }
 
 
-bool triSurface::readNAS(const fileName& OBJfileName)
+bool triSurface::readNAS(const fileName& fName)
 {
-    IFstream OBJfile(OBJfileName);
+    IFstream is(fName);
 
-    if (!OBJfile.good())
+    if (!is.good())
     {
         FatalErrorIn("triSurface::readNAS(const fileName&)")
-            << "Cannot read file " << OBJfileName
+            << "Cannot read file " << fName
             << exit(FatalError);
     }
 
@@ -90,17 +96,17 @@ bool triSurface::readNAS(const fileName& OBJfileName)
     // Ansa tags. Denoted by $ANSA_NAME. These will appear just before the
     // first use of a type. We read them and store the pshell types which
     // are used to name the patches.
-    label ansaID = -1;
+    label ansaId = -1;
     word ansaType;
     string ansaName;
 
-    // Done warnings per unrecognized command
+    // A single warning per unrecognized command
     HashSet<word> unhandledCmd;
 
-    while (OBJfile.good())
+    while (is.good())
     {
         string line;
-        OBJfile.getLine(line);
+        is.getLine(line);
 
         // Ansa extension
         if (line.substr(0, 10) == "$ANSA_NAME")
@@ -116,14 +122,14 @@ bool triSurface::readNAS(const fileName& OBJfileName)
              && sem2 != string::npos
             )
             {
-                ansaID = readLabel
+                ansaId = readLabel
                 (
                     IStringStream(line.substr(sem0+1, sem1-sem0-1))()
                 );
                 ansaType = line.substr(sem1+1, sem2-sem1-1);
 
                 string nameString;
-                OBJfile.getLine(ansaName);
+                is.getLine(ansaName);
                 if (ansaName[ansaName.size()-1] == '\r')
                 {
                     ansaName = ansaName.substr(1, ansaName.size()-2);
@@ -132,10 +138,34 @@ bool triSurface::readNAS(const fileName& OBJfileName)
                 {
                     ansaName = ansaName.substr(1, ansaName.size()-1);
                 }
-                //Pout<< "ANSA tag for NastranID:" << ansaID
-                //    << " of type " << ansaType
-                //    << " name " << ansaName << endl;
+
+                // Info<< "ANSA tag for NastranID:" << ansaId
+                //     << " of type " << ansaType
+                //     << " name " << ansaName << endl;
             }
+        }
+
+
+        // Hypermesh extension
+        // $HMNAME COMP                   1"partName"
+        if
+        (
+            line.substr(0, 12) == "$HMNAME COMP"
+         && line.find ('"') != string::npos
+        )
+        {
+            label groupId = readLabel
+            (
+                IStringStream(line.substr(16, 16))()
+            );
+
+            IStringStream lineStream(line.substr(32));
+
+            string rawName;
+            lineStream >> rawName;
+
+            groupToName.insert(groupId, string::validate<word>(rawName));
+            Info<< "group " << groupId << " => " << rawName << endl;
         }
 
 
@@ -153,7 +183,7 @@ bool triSurface::readNAS(const fileName& OBJfileName)
             while (true)
             {
                 string buf;
-                OBJfile.getLine(buf);
+                is.getLine(buf);
 
                 if (buf.size() > 72 && buf[72]=='+')
                 {
@@ -174,26 +204,21 @@ bool triSurface::readNAS(const fileName& OBJfileName)
 
         if (cmd == "CTRIA3")
         {
-            //label index, group, a, b, c;
-            //lineStream >> index >> group >> a >> b >> c;
-            label group = readLabel(IStringStream(line.substr(16,8))());
+            label groupId = readLabel(IStringStream(line.substr(16,8))());
             label a = readLabel(IStringStream(line.substr(24,8))());
             label b = readLabel(IStringStream(line.substr(32,8))());
             label c = readLabel(IStringStream(line.substr(40,8))());
 
 
             // Convert group into patch
-            Map<label>::const_iterator iter = groupToPatch.find(group);
+            Map<label>::const_iterator iter = groupToPatch.find(groupId);
 
             label patchI;
             if (iter == groupToPatch.end())
             {
                 patchI = nPatches++;
-
-                Pout<< "Allocating Foam patch " << patchI
-                    << " for group " << group << endl;
-
-                groupToPatch.insert(group, patchI);
+                groupToPatch.insert(groupId, patchI);
+                Info<< "patch " << patchI << " => group " << groupId << endl;
             }
             else
             {
@@ -204,26 +229,21 @@ bool triSurface::readNAS(const fileName& OBJfileName)
         }
         else if (cmd == "CQUAD4")
         {
-            //label index, group, a, b, c, d;
-            //lineStream >> index >> group >> a >> b >> c >> d;
-            label group = readLabel(IStringStream(line.substr(16,8))());
+            label groupId = readLabel(IStringStream(line.substr(16,8))());
             label a = readLabel(IStringStream(line.substr(24,8))());
             label b = readLabel(IStringStream(line.substr(32,8))());
             label c = readLabel(IStringStream(line.substr(40,8))());
             label d = readLabel(IStringStream(line.substr(48,8))());
 
             // Convert group into patch
-            Map<label>::const_iterator iter = groupToPatch.find(group);
+            Map<label>::const_iterator iter = groupToPatch.find(groupId);
 
             label patchI;
             if (iter == groupToPatch.end())
             {
                 patchI = nPatches++;
-
-                Pout<< "Allocating Foam patch " << patchI
-                    << " for group " << group << endl;
-
-                groupToPatch.insert(group, patchI);
+                groupToPatch.insert(groupId, patchI);
+                Info<< "patch " << patchI << " => group " << groupId << endl;
             }
             else
             {
@@ -235,66 +255,56 @@ bool triSurface::readNAS(const fileName& OBJfileName)
         }
         else if (cmd == "PSHELL")
         {
-            // Read shell type since gives patchnames.
-            //label group;
-            //lineStream >> group;
-            label group = readLabel(IStringStream(line.substr(8,8))());
-
-            if (group == ansaID && ansaType == "PSHELL")
+            // Read shell type since group gives patchnames
+            label groupId = readLabel(IStringStream(line.substr(8,8))());
+            if (groupId == ansaId && ansaType == "PSHELL")
             {
-                Pout<< "Found name " << ansaName << " for group "
-                    << group << endl;
-                groupToName.insert(group, string::validate<word>(ansaName));
+                groupToName.insert(groupId, string::validate<word>(ansaName));
+                Info<< "group " << groupId << " => " << ansaName << endl;
             }
         }
         else if (cmd == "GRID")
         {
-            //label index;
-            //lineStream >> index;
             label index = readLabel(IStringStream(line.substr(8,8))());
-            indices.append(index);
-
             scalar x = parseNASCoord(line.substr(24, 8));
             scalar y = parseNASCoord(line.substr(32, 8));
             scalar z = parseNASCoord(line.substr(40, 8));
+
+            indices.append(index);
             points.append(point(x, y, z));
         }
         else if (cmd == "GRID*")
         {
-            // Assume on two lines with '*' continuation symbol on start of
-            // second line. (comes out of Tgrid. Typical line (spaces truncated)
+            // Long format is on two lines with '*' continuation symbol
+            // on start of second line.
+            // Typical line (spaces compacted)
             // GRID*      126   0 -5.55999875E+02 -5.68730474E+02
             // *         2.14897901E+02
-            string line2;
-            OBJfile.getLine(line2);
-            if (line2[0] != '*')
+
+            label index = readLabel(IStringStream(line.substr(8,16))());
+            scalar x = parseNASCoord(line.substr(40, 16));
+            scalar y = parseNASCoord(line.substr(56, 16));
+
+            is.getLine(line);
+            if (line[0] != '*')
             {
                 FatalErrorIn("triSurface::readNAS(const fileName&)")
                     << "Expected continuation symbol '*' when reading GRID*"
-                    << " (double precision coordinate) output by Tgrid" << nl
-                    << "Read:" << line2 << nl
-                    << "File:" << OBJfile.name()
-                    << " line:" << OBJfile.lineNumber()
+                    << " (double precision coordinate) output" << nl
+                    << "Read:" << line << nl
+                    << "File:" << is.name()
+                    << " line:" << is.lineNumber()
                     << exit(FatalError);
             }
-            IStringStream lineStream(line.substr(10) + line2.substr(1));
+            scalar z = parseNASCoord(line.substr(8, 16));
 
-            label index;
-            lineStream >> index;
             indices.append(index);
-
-            readScalar(lineStream); // What is this field?
-            scalar x = readScalar(lineStream);
-            scalar y = readScalar(lineStream);
-            scalar z = readScalar(lineStream);
             points.append(point(x, y, z));
         }
         else if (unhandledCmd.insert(cmd))
         {
             Info<< "Unhandled Nastran command " << line << nl
-                << "File:" << OBJfile.name()
-                << " line:" << OBJfile.lineNumber()
-                << endl;
+                << "File:" << is.name() << " line:" << is.lineNumber() << endl;
         }
     }
 
@@ -303,7 +313,7 @@ bool triSurface::readNAS(const fileName& OBJfileName)
     faces.shrink();
 
 
-    Pout<< "Read triangles:" << faces.size() << " points:" << points.size()
+    Info<< "Read triangles:" << faces.size() << " points:" << points.size()
         << endl;
 
     {
@@ -314,7 +324,7 @@ bool triSurface::readNAS(const fileName& OBJfileName)
             indexToPoint.insert(indices[i], i);
         }
 
-        // Relabel triangles
+        // Relabel faces
         forAll(faces, i)
         {
             labelledTri& f = faces[i];
@@ -341,7 +351,7 @@ bool triSurface::readNAS(const fileName& OBJfileName)
         );
     }
 
-    Pout<< "patches:" << patches << endl;
+    Info<< "patches:" << patches << endl;
 
 
     // Transfer DynamicLists to straight ones.
