@@ -258,10 +258,25 @@ kOmegaSST::kOmegaSST
             IOobject::AUTO_WRITE
         ),
         autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+    mut_ == a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
     mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -351,10 +366,14 @@ void kOmegaSST::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ =
+        mut_ ==
             a1_*rho_*k_
            /max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
         mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
 
         return;
     }
@@ -430,8 +449,12 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    mut_ == a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
     mut_.correctBoundaryConditions();
+
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

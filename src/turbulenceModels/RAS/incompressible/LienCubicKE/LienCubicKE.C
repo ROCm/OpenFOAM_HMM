@@ -228,7 +228,7 @@ LienCubicKE::LienCubicKE
         )
     )
 {
-    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_;
+    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_;
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -385,7 +385,7 @@ void LienCubicKE::correct()
         - 2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)
        *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()));
 
-    nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
+    nut_ == Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
     nut_.correctBoundaryConditions();
 
     nonlinearStress_ = symm

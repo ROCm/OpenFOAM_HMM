@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2005 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    SVD
+    Foam::SquareMatrix
 
 Description
-    Singular value decomposition of a rectangular matrix.
+    A templated 2D square matrix of objects of \<T\>, where the n x n matrix
+    dimension is known and used for subscript bounds checking, etc.
 
 SourceFiles
-    SVD.C
+    SquareMatrixI.H
+    SquareMatrix.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SVD_H
-#define SVD_H
+#ifndef SquareMatrix_H
+#define SquareMatrix_H
 
-#include "DiagonalMatrix.H"
 #include "Matrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,72 +45,40 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-
 /*---------------------------------------------------------------------------*\
-                      Class SVD Declaration
+                           Class Matrix Declaration
 \*---------------------------------------------------------------------------*/
 
-class SVD
+template<class Type>
+class SquareMatrix
+:
+    public Matrix<SquareMatrix<Type>, Type>
 {
-    // Private data
-
-        //- Rectangular matrix with the same dimensions as the input
-        Matrix<scalar> U_;
-
-        //- square matrix V
-        Matrix<scalar> V_;
-
-        //- The singular values
-        DiagonalMatrix<scalar> S_;
-
-        //- The matrix product V S^(-1) U^T
-        Matrix<scalar> VSinvUt_;
-
-        //- The number of zero singular values
-        label nZeros_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        SVD(const SVD&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const SVD&);
-
-        template<class T>
-        inline const T sign(const T& a, const T& b);
-
 
 public:
 
     // Constructors
 
-        //- Construct from a rectangular Matrix
-        SVD(const Matrix<scalar>& A, const scalar minCondition = 0);
+        //- Null constructor.
+        inline SquareMatrix();
 
+        //- Construct given number of rows/columns.
+        inline SquareMatrix(const label n);
 
-    // Access functions
+        //- Construct given number of rows and columns,
+        //  It checks that m == n.
+        inline SquareMatrix(const label m, const label n);
 
-        //- Return U
-        inline const Matrix<scalar>& U() const;
+        //- Construct with given number of rows and rows
+        //  and value for all elements.
+        //  It checks that m == n.
+        inline SquareMatrix(const label m, const label n, const Type&);
 
-        //- Return the square matrix V
-        inline const Matrix<scalar>& V() const;
+        //- Construct from Istream.
+        inline SquareMatrix(Istream&);
 
-        //- Return the singular values
-        inline const DiagonalMatrix<scalar>& S() const;
-
-        //- Return VSinvUt (the pseudo inverse)
-        inline const Matrix<scalar>& VSinvUt() const;
-
-        //- Return the number of zero singular values
-        inline label nZeros() const;
-
-        //- Return the minimum non-zero singular value
-        inline scalar minNonZeroS() const;
+        //- Clone
+        inline autoPtr<SquareMatrix<Type> > clone() const;
 };
 
 
@@ -119,7 +88,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "SVDI.H"
+#   include "SquareMatrixI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

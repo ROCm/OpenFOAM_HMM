@@ -14,6 +14,9 @@ kOmegaSST/kOmegaSST.C
 /* Wall functions */
 wallFunctions = derivedFvPatchFields/wallFunctions
 
+alphatWallFunctions = $(wallFunctions)/alphatWallFunctions
+$(alphatWallFunctions)/alphatWallFunction/alphatWallFunctionFvPatchScalarField.C
+
 mutWallFunctions = $(wallFunctions)/mutWallFunctions
 $(mutWallFunctions)/mutWallFunction/mutWallFunctionFvPatchScalarField.C
 $(mutWallFunctions)/mutRoughWallFunction/mutRoughWallFunctionFvPatchScalarField.C

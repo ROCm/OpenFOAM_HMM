@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "KRR4.H"
-#include "simpleMatrix.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -36,11 +35,11 @@ namespace Foam
 {
     addToRunTimeSelectionTable(ODESolver, KRR4, ODE);
 
-const scalar 
+const scalar
     KRR4::safety = 0.9, KRR4::grow = 1.5, KRR4::pgrow = -0.25,
     KRR4::shrink = 0.5, KRR4::pshrink = (-1.0/3.0), KRR4::errcon = 0.1296;
 
-const scalar 
+const scalar
     KRR4::gamma = 1.0/2.0,
     KRR4::a21 = 2.0, KRR4::a31 = 48.0/25.0, KRR4::a32 = 6.0/25.0,
     KRR4::c21 = -8.0, KRR4::c31 = 372.0/25.0, KRR4::c32 = 12.0/5.0,
@@ -81,8 +80,8 @@ void Foam::KRR4::solve
     const ODE& ode,
     scalar& x,
     scalarField& y,
-    scalarField& dydx, 
-    const scalar eps, 
+    scalarField& dydx,
+    const scalar eps,
     const scalarField& yScale,
     const scalar hTry,
     scalar& hDid,
@@ -109,14 +108,14 @@ void Foam::KRR4::solve
             a_[i][i] += 1.0/(gamma*h);
         }
 
-        simpleMatrix<scalar>::LUDecompose(a_, pivotIndices_);
+        LUDecompose(a_, pivotIndices_);
 
         for (register label i=0; i<n_; i++)
         {
             g1_[i] = dydxTemp_[i] + h*c1X*dfdx_[i];
         }
 
-        simpleMatrix<scalar>::LUBacksubstitute(a_, pivotIndices_, g1_);
+        LUBacksubstitute(a_, pivotIndices_, g1_);
 
         for (register label i=0; i<n_; i++)
         {
@@ -131,7 +130,7 @@ void Foam::KRR4::solve
             g2_[i] = dydx_[i] + h*c2X*dfdx_[i] + c21*g1_[i]/h;
         }
 
-        simpleMatrix<scalar>::LUBacksubstitute(a_, pivotIndices_, g2_);
+        LUBacksubstitute(a_, pivotIndices_, g2_);
 
         for (register label i=0; i<n_; i++)
         {
@@ -146,7 +145,7 @@ void Foam::KRR4::solve
             g3_[i] = dydx[i] + h*c3X*dfdx_[i] + (c31*g1_[i] + c32*g2_[i])/h;
         }
 
-        simpleMatrix<scalar>::LUBacksubstitute(a_, pivotIndices_, g3_);
+        LUBacksubstitute(a_, pivotIndices_, g3_);
 
         for (register label i=0; i<n_; i++)
         {
@@ -154,7 +153,7 @@ void Foam::KRR4::solve
                 + (c41*g1_[i] + c42*g2_[i] + c43*g3_[i])/h;
         }
 
-        simpleMatrix<scalar>::LUBacksubstitute(a_, pivotIndices_, g4_);
+        LUBacksubstitute(a_, pivotIndices_, g4_);
 
         for (register label i=0; i<n_; i++)
         {

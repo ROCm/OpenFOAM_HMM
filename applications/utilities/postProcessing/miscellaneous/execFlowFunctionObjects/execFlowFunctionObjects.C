@@ -139,7 +139,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
         IOobject LESPropertiesHeader
         (
-            "RASProperties",
+            "LESProperties",
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,

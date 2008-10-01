@@ -24,76 +24,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DiagonalMatrix.H"
+// * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-template<class Form>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& a)
-:
-    List<Type>(min(a.n(), a.m()))
+template<class T>
+inline const T Foam::SVD::sign(const T& a, const T& b)
 {
-    forAll(*this, i)
-    {
-        this->operator[](i) = a[i][i];
-    }
+    return b >= 0 ? (a >= 0 ? a : -a) : (a >= 0 ? -a : a);
 }
 
 
-template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size)
-:
-    List<Type>(size)
-{}
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size, const Type& val)
-:
-    List<Type>(size, val)
-{}
-
-
-template<class Type>
-Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
+inline const Foam::scalarRectangularMatrix& Foam::SVD::U() const
 {
-    forAll(*this, i)
-    {
-        Type x = this->operator[](i);
-        if (mag(x) < VSMALL)
-        {
-            this->operator[](i) = Type(0);
-        }
-        else
-        {
-            this->operator[](i) = Type(1)/x;
-        }
-    }
-
-    return this;
+    return U_;
 }
 
-
-template<class Type>
-Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& A)
+inline const Foam::scalarRectangularMatrix& Foam::SVD::V() const
 {
-    DiagonalMatrix<Type> Ainv = A;
+    return V_;
+}
 
-    forAll(A, i)
+inline const Foam::scalarDiagonalMatrix& Foam::SVD::S() const
+{
+    return S_;
+}
+
+inline const Foam::scalarRectangularMatrix& Foam::SVD::VSinvUt() const
+{
+    return VSinvUt_;
+}
+
+inline Foam::label Foam::SVD::nZeros() const
+{
+    return nZeros_;
+}
+
+inline Foam::scalar Foam::SVD::minNonZeroS() const
+{
+    scalar minS = S_[0];
+    for(label i = 1; i < S_.size(); i++)
     {
-        Type x = A[i];
-        if (mag(x) < VSMALL)
-        {
-            Ainv[i] = Type(0);
-        }
-        else
-        {
-            Ainv[i] = Type(1)/x;
-        }
+        scalar s = S_[i];
+        if (s > VSMALL && s < minS) minS = s;
     }
-
-    return Ainv;
+    return minS;
 }
 
 

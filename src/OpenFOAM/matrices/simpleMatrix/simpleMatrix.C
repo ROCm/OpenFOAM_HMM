@@ -31,7 +31,7 @@ License
 template<class Type>
 Foam::simpleMatrix<Type>::simpleMatrix(const label mSize)
 :
-    scalarMatrix(mSize),
+    scalarSquareMatrix(mSize),
     source_(mSize, pTraits<Type>::zero)
 {}
 
@@ -39,11 +39,11 @@ Foam::simpleMatrix<Type>::simpleMatrix(const label mSize)
 template<class Type>
 Foam::simpleMatrix<Type>::simpleMatrix
 (
-    const scalarMatrix& matrix,
+    const scalarSquareMatrix& matrix,
     const Field<Type>& source
 )
 :
-    scalarMatrix(matrix),
+    scalarSquareMatrix(matrix),
     source_(source)
 {}
 
@@ -51,7 +51,7 @@ Foam::simpleMatrix<Type>::simpleMatrix
 template<class Type>
 Foam::simpleMatrix<Type>::simpleMatrix(Istream& is)
 :
-    scalarMatrix(is),
+    scalarSquareMatrix(is),
     source_(is)
 {}
 
@@ -61,10 +61,10 @@ Foam::simpleMatrix<Type>::simpleMatrix(Istream& is)
 template<class Type>
 Foam::Field<Type> Foam::simpleMatrix<Type>::solve() const
 {
-    scalarMatrix tmpMatrix = *this;
+    scalarSquareMatrix tmpMatrix = *this;
     Field<Type> sourceSol = source_;
 
-    scalarMatrix::solve(tmpMatrix, sourceSol);
+    Foam::solve(tmpMatrix, sourceSol);
 
     return sourceSol;
 }
@@ -73,10 +73,10 @@ Foam::Field<Type> Foam::simpleMatrix<Type>::solve() const
 template<class Type>
 Foam::Field<Type> Foam::simpleMatrix<Type>::LUsolve() const
 {
-    scalarMatrix luMatrix = *this;
+    scalarSquareMatrix luMatrix = *this;
     Field<Type> sourceSol = source_;
 
-    scalarMatrix::LUsolve(luMatrix, sourceSol);
+    Foam::LUsolve(luMatrix, sourceSol);
 
     return sourceSol;
 }
@@ -108,7 +108,7 @@ void Foam::simpleMatrix<Type>::operator=(const simpleMatrix<Type>& m)
             << abort(FatalError);
     }
 
-    scalarMatrix::operator=(m);
+    scalarSquareMatrix::operator=(m);
     source_ = m.source_;
 }
 
@@ -124,8 +124,8 @@ Foam::simpleMatrix<Type> Foam::operator+
 {
     return simpleMatrix<Type>
     (
-        static_cast<const scalarMatrix&>(m1)
-      + static_cast<const scalarMatrix&>(m2),
+        static_cast<const scalarSquareMatrix&>(m1)
+      + static_cast<const scalarSquareMatrix&>(m2),
         m1.source_ + m2.source_
     );
 }
@@ -140,8 +140,8 @@ Foam::simpleMatrix<Type> Foam::operator-
 {
     return simpleMatrix<Type>
     (
-        static_cast<const scalarMatrix&>(m1)
-      - static_cast<const scalarMatrix&>(m2),
+        static_cast<const scalarSquareMatrix&>(m1)
+      - static_cast<const scalarSquareMatrix&>(m2),
         m1.source_ - m2.source_
     );
 }
@@ -159,7 +159,7 @@ Foam::simpleMatrix<Type> Foam::operator*(const scalar s, const simpleMatrix<Type
 template<class Type>
 Foam::Ostream& Foam::operator<<(Ostream& os, const simpleMatrix<Type>& m)
 {
-    os << static_cast<const scalarMatrix&>(m) << nl << m.source_;
+    os << static_cast<const scalarSquareMatrix&>(m) << nl << m.source_;
     return os;
 }
 
