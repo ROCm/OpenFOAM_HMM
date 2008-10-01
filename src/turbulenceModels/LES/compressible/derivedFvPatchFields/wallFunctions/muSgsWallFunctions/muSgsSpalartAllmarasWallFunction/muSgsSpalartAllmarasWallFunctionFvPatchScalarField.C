@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "muSgsWallFunctionFvPatchScalarField.H"
+#include "muSgsSpalartAllmarasWallFunctionFvPatchScalarField.H"
 #include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -41,7 +41,8 @@ namespace LESModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField::
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -51,9 +52,10 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField::
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& ptf,
+    const muSgsSpalartAllmarasWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -63,7 +65,8 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField::
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -74,7 +77,8 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField::
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -85,18 +89,20 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField::
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& tppsf
+    const muSgsSpalartAllmarasWallFunctionFvPatchScalarField& tppsf
 )
 :
     fixedValueFvPatchScalarField(tppsf)
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField::
+muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& tppsf,
+    const muSgsSpalartAllmarasWallFunctionFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -106,7 +112,7 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void muSgsWallFunctionFvPatchScalarField::evaluate
+void muSgsSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
 (
     const Pstream::commsTypes
 )
@@ -184,7 +190,11 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, muSgsWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
