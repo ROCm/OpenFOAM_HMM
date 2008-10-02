@@ -579,7 +579,8 @@ void Foam::CV3D::smoothEdge
                 }
             }
 
-            // Info<< edgeI << tab << nPointsRemoved << " points removed." << endl;
+            // Info<< edgeI << tab
+            //<< nPointsRemoved << " points removed." << endl;
 
             edgePoints.transfer(tempEdgePoints.shrink());
         }

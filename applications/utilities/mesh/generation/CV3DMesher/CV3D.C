@@ -233,7 +233,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
             std::list<Facet> facets;
             incident_facets(vit, std::back_inserter(facets));
 
-            label maxIncidentFacets = 20;
+            label maxIncidentFacets = 120;
             List<point> vertices(maxIncidentFacets);
             List<vector> edges(maxIncidentFacets);
 
