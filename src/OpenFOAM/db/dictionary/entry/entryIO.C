@@ -126,7 +126,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             (
                 keyword,
                 false,
-                true
+                false
             );
             if (existingPtr)
             {

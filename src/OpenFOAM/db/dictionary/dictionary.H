@@ -31,7 +31,7 @@ Description
     which are matched using Posix regular expressions. The general order for
     searching is
     - exact match
-    - wildcard match
+    - wildcard match (in reverse order)
     - optional recursion into subdictionaries
 
     The dictionary class is the base class for IOdictionary.

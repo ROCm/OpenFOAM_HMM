@@ -43,7 +43,6 @@ SourceFiles
 #ifndef dictionaryEntry_H
 #define dictionaryEntry_H
 
-#include "keyType.H"
 #include "entry.H"
 #include "dictionary.H"
 #include "InfoProxy.H"

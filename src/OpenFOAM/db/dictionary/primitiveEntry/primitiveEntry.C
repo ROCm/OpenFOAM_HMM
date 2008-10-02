@@ -24,7 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "word.H"
 #include "primitiveEntry.H"
 #include "dictionary.H"
 

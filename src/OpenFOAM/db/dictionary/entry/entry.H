@@ -76,6 +76,9 @@ class entry
 
     // Private Member Functions
 
+        //- Get the next valid keyword otherwise return false
+        static bool getKeyword(keyType& keyword, Istream& is);
+
 
 public:
 
@@ -112,9 +115,6 @@ public:
 
 
     // Member functions
-
-        //- Get the next valid keyword otherwise return false
-        static bool getKeyword(keyType& keyword, Istream& is);
 
         //- Return keyword
         const keyType& keyword() const
