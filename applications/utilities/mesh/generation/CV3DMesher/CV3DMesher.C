@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
         mesh.relaxPoints(relaxation);
 
-        mesh.removeSurfacePointPairs();
+        //mesh.removeSurfacePointPairs();
         mesh.insertSurfacePointPairs();
         mesh.boundaryConform();
 

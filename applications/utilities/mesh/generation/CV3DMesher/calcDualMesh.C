@@ -149,15 +149,14 @@ void Foam::CV3D::calcDualMesh
                 {
                     if (cc->cellIndex() < 0)
                     {
-                        FatalErrorIn
-                        (
-                            "Foam::CV3D::calcDualMesh"
-                        )<< "Dual face uses circumcenter defined by a Delaunay"
-                            " tetrahedron with no internal or boundary points."
+                        FatalErrorIn("Foam::CV3D::calcDualMesh")
+                            << "Dual face uses circumcenter defined by a "
+                            << " Delaunay tetrahedron with no internal "
+                            << "or boundary points."
                             << exit(FatalError);
                     }
 
-		    verticesOnFace.append(cc->cellIndex());
+                    verticesOnFace.append(cc->cellIndex());
                 }
             } while (++cc != ccStart);
 

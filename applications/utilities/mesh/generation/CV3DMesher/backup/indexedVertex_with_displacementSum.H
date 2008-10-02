@@ -35,6 +35,7 @@ Description
 #define indexedVertex_H
 
 #include <CGAL/Triangulation_3.h>
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +64,8 @@ class indexedVertex
         //                        Lowest numbered is inside one (master).
         int type_;
 
+        Foam::vector displacementSum_;
+
 
 public:
 
@@ -89,28 +92,32 @@ public:
     :
         Vb(),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        displacementSum_(Foam::vector::zero)
     {}
 
     indexedVertex(const Point& p)
     :
         Vb(p),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        displacementSum_(Foam::vector::zero)
     {}
 
     indexedVertex(const Point& p, Cell_handle f)
     :
         Vb(f, p),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        displacementSum_(Foam::vector::zero)
     {}
 
     indexedVertex(Cell_handle f)
     :
         Vb(f),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        displacementSum_(Foam::vector::zero)
     {}
 
 
@@ -135,6 +142,16 @@ public:
         return type_;
     }
 
+
+    Foam::vector& displacementSum()
+    {
+        return displacementSum_;
+    }
+
+    const Foam::vector& displacementSum() const
+    {
+        return displacementSum_;
+    }
 
     //- Is point a far-point
     inline bool farPoint() const

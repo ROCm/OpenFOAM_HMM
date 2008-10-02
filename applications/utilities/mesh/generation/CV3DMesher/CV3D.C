@@ -47,6 +47,25 @@ void Foam::CV3D::insertBoundingBox()
 }
 
 
+void Foam::CV3D::reinsertPoints(const pointField& points)
+{
+    Info<< "Reinserting points after motion. ";
+
+    startOfInternalPoints_ = number_of_vertices();
+    label nVert = startOfInternalPoints_;
+
+    // Add the points and index them
+    forAll(points, i)
+    {
+        const point& p = points[i];
+
+            insert(toPoint(p))->index() = nVert++;
+    }
+
+    Info<< nVert << " vertices reinserted" << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::CV3D::CV3D
@@ -60,7 +79,8 @@ Foam::CV3D::CV3D
     controls_(controlDict),
     tols_(controlDict, controls_.minCellSize, qSurf.bb()),
     startOfInternalPoints_(0),
-    startOfSurfacePointPairs_(0)
+    startOfSurfacePointPairs_(0),
+    featureConstrainingVertices_(0)
 {
     // insertBoundingBox();
     insertFeaturePoints();
@@ -218,8 +238,116 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 {
     Info<< "Calculating new points: " << endl;
 
-    vector totalDisp = vector::zero;
-    scalar totalDist = 0;
+    pointField dualVertices(number_of_cells());
+
+    pointField displacementAccumulator(startOfSurfacePointPairs_, vector::zero);
+
+    label dualVerti = 0;
+
+    // Find the dual point of each tetrahedron and assign it an index.
+
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if
+        (
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
+        )
+        {
+            cit->cellIndex() = dualVerti;
+            dualVertices[dualVerti] = topoint(dual(cit));
+            dualVerti++;
+        }
+        else
+        {
+            cit->cellIndex() = -1;
+        }
+    }
+
+    dualVertices.setSize(dualVerti);
+
+    // loop around the Delaunay edges to construct the dual faces.
+    // Find the face-centre and use it to calculate the displacement vector
+    // contribution to the Delaunay vertices (Dv) attached to the edge.  Add the
+    // contribution to the running displacement vector of each Dv.
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        if
+        (
+            eit->first->vertex(eit->second)->internalOrBoundaryPoint()
+         && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
+        )
+        {
+            Cell_circulator ccStart = incident_cells(*eit);
+            Cell_circulator cc = ccStart;
+
+            DynamicList<label> verticesOnFace;
+
+            do
+            {
+                if (!is_infinite(cc))
+                {
+                    if (cc->cellIndex() < 0)
+                    {
+                        FatalErrorIn("Foam::CV3D::relaxPoints")
+                            << "Dual face uses circumcenter defined by a "
+                            << " Delaunay tetrahedron with no internal "
+                            << "or boundary points."
+                            << exit(FatalError);
+                    }
+
+                    verticesOnFace.append(cc->cellIndex());
+                }
+            } while (++cc != ccStart);
+
+            verticesOnFace.shrink();
+
+            face dualFace(verticesOnFace);
+
+            Cell_handle c = eit->first;
+            Vertex_handle vA = c->vertex(eit->second);
+            Vertex_handle vB = c->vertex(eit->third);
+
+            point dVA = topoint(vA->point());
+            point dVB = topoint(vB->point());
+
+            point dualFaceCentre(dualFace.centre(dualVertices));
+
+            scalar weight = 1.0;
+
+            if (vA->internalPoint())
+            {
+               //displacementAccumulator[vA->index()] = vA->index()*vector::one;
+                displacementAccumulator[vA->index()] +=
+                relaxation*weight*(dualFaceCentre - dVA);
+            }
+            if (vB->internalPoint())
+            {
+               //displacementAccumulator[vB->index()] = vB->index()*vector::one;
+                displacementAccumulator[vB->index()] +=
+                relaxation*weight*(dualFaceCentre - dVB);
+            }
+        }
+    }
+
+    vector totalDisp = sum(displacementAccumulator);
+    scalar totalDist = sum(mag(displacementAccumulator));
+
+    Info<< "Total displacement = " << totalDisp
+        << " total distance = " << totalDist << endl;
 
     for
     (
@@ -230,82 +358,23 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     {
         if (vit->internalPoint())
         {
-            std::list<Facet> facets;
-            incident_facets(vit, std::back_inserter(facets));
-
-            label maxIncidentFacets = 120;
-            List<point> vertices(maxIncidentFacets);
-            List<vector> edges(maxIncidentFacets);
-
-            point vd(topoint(vit->point()));
-
-            point vi0 = topoint(dual(facets.begin()->first));
-
-            label edgei = 0;
-
-            for
-            (
-                std::list<Facet>::iterator fit=facets.begin();
-                fit != facets.end();
-                ++fit
-            )
-            {
-                if
-                (
-                    is_infinite(fit->first)
-                 || is_infinite(fit->first->neighbor(fit->second))
-                )
-                {
-                    FatalErrorIn("relaxPoints")
-                        << "Finite cell attached to facet incident on vertex"
-                        << exit(FatalError);
-                }
-
-                point vi1 = topoint(dual(fit->first->neighbor(fit->second)));
-
-                edges[edgei] = vi1 - vi0;
-
-                vertices[edgei] = 0.5*(vi1 + vi0);
-
-                vi0 = vi1;
-
-                edgei++;
-            }
-
-            edgei = 0;
-
-            // Initialise the displacement for the centre and sum-weights
-            vector disp = vector::zero;
-            scalar sumw = 0;
-
-            for
-            (
-                std::list<Facet>::iterator fit=facets.begin();
-                fit != facets.end();
-                ++fit
-            )
-            {
-                vector deltai = vertices[edgei] - vd;
-
-                scalar w = 1;
-
-                disp += w*deltai;
-
-                sumw += w;
-
-                edgei++;
-            }
-
-            disp /= sumw;
-            totalDisp += disp;
-            totalDist += mag(disp);
-
-            movePoint(vit, vd + relaxation*disp);
+            displacementAccumulator[vit->index()] += topoint(vit->point());
         }
     }
 
-    Info<< "Total displacement = " << totalDisp
-        << " total distance = " << totalDist << endl;
+    pointField internalDelaunayVertices = SubField<point>
+    (
+        displacementAccumulator,
+        displacementAccumulator.size() - startOfInternalPoints_,
+        startOfInternalPoints_
+    );
+
+    // Remove the entire triangulation
+    this->clear();
+
+    reinsertFeaturePoints();
+
+    reinsertPoints(internalDelaunayVertices);
 }
 
 

@@ -40,7 +40,8 @@ void Foam::CV3D::insertFeaturePoints()
 
     scalar planeErrorAngle = 0.1*(180.0 - controls_.includedAngle);
 
-    scalar planeErrorAngleCos = cos(mathematicalConstant::pi*planeErrorAngle/180.0);
+    scalar planeErrorAngleCos =
+    cos(mathematicalConstant::pi*planeErrorAngle/180.0);
 
     forAll(featPoints, i)
     {
@@ -169,7 +170,8 @@ void Foam::CV3D::insertFeaturePoints()
             cornerNormal /= mag(cornerNormal);
 
             point internalPt =  featPt - tols_.ppDist*cornerNormal;
-            label internalPtIndex = insertPoint(internalPt, number_of_vertices() + 1);
+            label internalPtIndex =
+            insertPoint(internalPt, number_of_vertices() + 1);
 
             forAll (uniquePlaneNormals, uPN)
             {
@@ -177,7 +179,8 @@ void Foam::CV3D::insertFeaturePoints()
 
                 plane planeN = plane(featPt, n);
 
-                point externalPt = internalPt + 2.0 * planeN.distance(internalPt) * n;
+                point externalPt =
+                internalPt + 2.0 * planeN.distance(internalPt) * n;
 
                 insertPoint(externalPt, internalPtIndex);
             }
@@ -192,6 +195,7 @@ void Foam::CV3D::insertFeaturePoints()
             cornerNormal /= mag(cornerNormal);
 
             point externalPt = featPt +  tols_.ppDist*cornerNormal;
+
             label externalPtIndex = number_of_vertices() + concaveEdges.size();
 
             label internalPtIndex = -1;
@@ -202,7 +206,8 @@ void Foam::CV3D::insertFeaturePoints()
 
                 plane planeN = plane(featPt, n);
 
-                point internalPt = externalPt - 2.0 * planeN.distance(externalPt) * n;
+                point internalPt = externalPt
+                - 2.0 * planeN.distance(externalPt) * n;
 
                 internalPtIndex = insertPoint(internalPt, externalPtIndex);
             }
@@ -216,7 +221,8 @@ void Foam::CV3D::insertFeaturePoints()
 
             if (convexEdges.size() + concaveEdges.size() > 3)
             {
-                Info<< concaveEdges.size() + convexEdges.size() << " mixed edge feature."
+                Info<< concaveEdges.size() + convexEdges.size()
+                    << " mixed edge feature."
                     << " NOT IMPLEMENTED." << endl;
             }
             else if (convexEdges.size() > concaveEdges.size())
@@ -231,6 +237,7 @@ void Foam::CV3D::insertFeaturePoints()
                 const labelList& eFaces = qSurf_.edgeFaces()[concaveEdgeI];
 
                 label faceA = eFaces[0];
+
                 vector nA = qSurf_.faceNormals()[faceA];
 
                 scalar maxNormalDotProduct = -SMALL;
@@ -265,9 +272,10 @@ void Foam::CV3D::insertFeaturePoints()
                 }
 
                 const vector& concaveEdgePlaneANormal =
-                    uniquePlaneNormals[concaveEdgePlanes[0]];
+                uniquePlaneNormals[concaveEdgePlanes[0]];
+
                 const vector& concaveEdgePlaneBNormal =
-                    uniquePlaneNormals[concaveEdgePlanes[1]];
+                uniquePlaneNormals[concaveEdgePlanes[1]];
 
                 label convexEdgesPlaneI;
 
@@ -299,8 +307,9 @@ void Foam::CV3D::insertFeaturePoints()
                     edgeDirection *= -1.0;
                 }
 
-                // Intersect planes parallel to the concave edge planes offset by ppDist
-                // and the plane defined by featPt and the edge vector.
+                // Intersect planes parallel to the concave edge planes offset
+                // by ppDist and the plane defined by featPt and the edge
+                // vector.
                 plane planeA
                 (
                     featPt + tols_.ppDist*concaveEdgePlaneANormal,
@@ -317,35 +326,48 @@ void Foam::CV3D::insertFeaturePoints()
                 + tols_.ppDist*edgeDirection
                 * concaveEdge.vec(localPts)/concaveEdge.mag(localPts);
 
-                // Finding the nearest point on the intersecting line to the edge point.
-                // Floating point errors often encountered using planePlaneIntersect
+                // Finding the nearest point on the intersecting line to the
+                // edge point.  Floating point errors often encountered using
+                // planePlaneIntersect
 
                 plane planeF(concaveEdgeLocalFeatPt, concaveEdge.vec(localPts));
-                point concaveEdgeExternalPt = planeF.planePlaneIntersect(planeA,planeB);
+
+                point concaveEdgeExternalPt =
+                planeF.planePlaneIntersect(planeA,planeB);
 
                 label concaveEdgeExternalPtI = number_of_vertices() + 4;
 
-                // Redefine planes to be on the feature surfaces to project through
+                // Redefine planes to be on the feature surfaces to project
+                // through
 
                 planeA = plane(featPt, concaveEdgePlaneANormal);
+
                 planeB = plane(featPt, concaveEdgePlaneBNormal);
 
-                point internalPtA = concaveEdgeExternalPt -
-                    2*planeA.distance(concaveEdgeExternalPt) * concaveEdgePlaneANormal;
-                label internalPtAI = insertPoint(internalPtA, concaveEdgeExternalPtI);
+                point internalPtA = concaveEdgeExternalPt
+                - 2*planeA.distance(concaveEdgeExternalPt)
+                *concaveEdgePlaneANormal;
 
-                point internalPtB = concaveEdgeExternalPt -
-                    2*planeB.distance(concaveEdgeExternalPt) * concaveEdgePlaneBNormal;
-                label internalPtBI = insertPoint(internalPtB, concaveEdgeExternalPtI);
+                label internalPtAI =
+                insertPoint(internalPtA, concaveEdgeExternalPtI);
+
+                point internalPtB = concaveEdgeExternalPt
+                - 2*planeB.distance(concaveEdgeExternalPt)
+                *concaveEdgePlaneBNormal;
+
+                label internalPtBI =
+                insertPoint(internalPtB, concaveEdgeExternalPtI);
 
                 plane planeC(featPt, convexEdgesPlaneNormal);
 
                 point externalPtD = internalPtA +
-                    2*planeC.distance(internalPtA) * convexEdgesPlaneNormal;
+                2*planeC.distance(internalPtA) * convexEdgesPlaneNormal;
+
                 insertPoint(externalPtD, internalPtAI);
 
                 point externalPtE = internalPtB +
-                    2*planeC.distance(internalPtB) * convexEdgesPlaneNormal;
+                2*planeC.distance(internalPtB) * convexEdgesPlaneNormal;
+
                 insertPoint(externalPtE, internalPtBI);
 
                 insertPoint(concaveEdgeExternalPt, internalPtAI);
@@ -361,16 +383,24 @@ void Foam::CV3D::insertFeaturePoints()
                     // Add additional mitering points
 
                     vector concaveEdgeNormal =
-                        edgeDirection*concaveEdge.vec(localPts)/concaveEdge.mag(localPts);
+                    edgeDirection*concaveEdge.vec(localPts)
+                    /concaveEdge.mag(localPts);
 
                     scalar angleSign = 1.0;
 
-                    if (qSurf_.outside(featPt - convexEdgesPlaneNormal*tols_.ppDist))
+                    if
+                    (
+                        qSurf_.outside
+                        (
+                            featPt - convexEdgesPlaneNormal*tols_.ppDist
+                        )
+                    )
                     {
                         angleSign = -1.0;
                     }
 
-                    scalar phi = angleSign*acos(concaveEdgeNormal & -convexEdgesPlaneNormal);
+                    scalar phi = angleSign
+                    *acos(concaveEdgeNormal & -convexEdgesPlaneNormal);
 
                     scalar guard =
                     (
@@ -380,14 +410,15 @@ void Foam::CV3D::insertFeaturePoints()
                         )
                     )/cos(phi) - 1;
 
-                    point internalPtF = concaveEdgeExternalPt + (2 + guard) *
-                        (concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
+                    point internalPtF = concaveEdgeExternalPt + (2 + guard)
+                    *(concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
 
-                    label internalPtFI = insertPoint(internalPtF, number_of_vertices() + 1);
+                    label internalPtFI =
+                    insertPoint(internalPtF, number_of_vertices() + 1);
 
                     point externalPtG = internalPtF +
-                        2*planeC.distance(internalPtF) * convexEdgesPlaneNormal;
-                        insertPoint(externalPtG, internalPtFI);
+                    2*planeC.distance(internalPtF) * convexEdgesPlaneNormal;
+                    insertPoint(externalPtG, internalPtFI);
                 }
             }
             else
@@ -470,8 +501,8 @@ void Foam::CV3D::insertFeaturePoints()
                     edgeDirection *= -1.0;
                 }
 
-                // Intersect planes parallel to the convex edge planes offset by ppDist
-                // and the plane defined by featPt and the edge vector.
+                // Intersect planes parallel to the convex edge planes offset by
+                // ppDist and the plane defined by featPt and the edge vector.
                 plane planeA
                 (
                     featPt - tols_.ppDist*convexEdgePlaneANormal,
@@ -489,21 +520,28 @@ void Foam::CV3D::insertFeaturePoints()
                   * convexEdge.vec(localPts)/convexEdge.mag(localPts);
 
 
-                // Finding the nearest point on the intersecting line to the edge point.
-                // Floating point errors often encountered using planePlaneIntersect
+                // Finding the nearest point on the intersecting line to the
+                // edge point.  Floating point errors often encountered using
+                // planePlaneIntersect
 
                 plane planeF(convexEdgeLocalFeatPt, convexEdge.vec(localPts));
-                point convexEdgeInternalPt = planeF.planePlaneIntersect(planeA,planeB);
+
+                point convexEdgeInternalPt =
+                planeF.planePlaneIntersect(planeA,planeB);
 
                 planeA = plane(featPt, convexEdgePlaneANormal);
+
                 planeB = plane(featPt, convexEdgePlaneBNormal);
 
-                point externalPtA = convexEdgeInternalPt +
-                    2*planeA.distance(convexEdgeInternalPt) * convexEdgePlaneANormal;
+                point externalPtA = convexEdgeInternalPt
+                + 2*planeA.distance(convexEdgeInternalPt)
+                * convexEdgePlaneANormal;
                 label externalPtAI = number_of_vertices() + 3;
 
-                point externalPtB = convexEdgeInternalPt +
-                    2*planeB.distance(convexEdgeInternalPt) * convexEdgePlaneBNormal;
+                point externalPtB = convexEdgeInternalPt
+                + 2*planeB.distance(convexEdgeInternalPt)
+                * convexEdgePlaneBNormal;
+
                 label externalPtBI = number_of_vertices() + 4;
 
                 label convexEdgeInternalPtI = insertPoint
@@ -522,11 +560,33 @@ void Foam::CV3D::insertFeaturePoints()
                     2*planeC.distance(externalPtB) * concaveEdgesPlaneNormal;
                 insertPoint(internalPtE, externalPtBI);
 
-                insertPoint(externalPtA,convexEdgeInternalPtI);
+                insertPoint(externalPtA, convexEdgeInternalPtI);
 
-                insertPoint(externalPtB,convexEdgeInternalPtI);
+                insertPoint(externalPtB, convexEdgeInternalPtI);
             }
         }
+    }
+
+    featureConstrainingVertices_.setSize(number_of_vertices());
+
+    label featPtI = 0;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        // featureConstrainingVertices_[featPtI] = vit;
+
+        featureConstrainingVertices_[featPtI] = Vb(vit->point());
+
+        featureConstrainingVertices_[featPtI].index() = vit->index();
+
+        featureConstrainingVertices_[featPtI].type() = vit->type();
+
+        featPtI++;
     }
 
     if (controls_.writeFeatureTriangulation)
@@ -537,5 +597,36 @@ void Foam::CV3D::insertFeaturePoints()
     }
 }
 
+
+void Foam::CV3D::reinsertFeaturePoints()
+{
+    if (featureConstrainingVertices_.size())
+    {
+
+        forAll(featureConstrainingVertices_, f)
+        {
+            const Point& fPt(featureConstrainingVertices_[f].point());
+
+            uint nVert = number_of_vertices();
+
+            Vertex_handle vh = insert(fPt);
+
+            if (nVert == number_of_vertices())
+            {
+                FatalErrorIn("Foam::CV3D::reinsertFeaturePoints")
+                << "Failed to reinsert feature point " << topoint(fPt)
+                    << endl;
+            }
+
+            vh->index() = featureConstrainingVertices_[f].index();
+            vh->type() = featureConstrainingVertices_[f].type();
+        }
+    }
+    else
+    {
+        WarningIn("Foam::CV3D::reinsertFeaturePoints")
+            << "No stored feature points to reinsert." << endl;
+    }
+}
 
 // ************************************************************************* //

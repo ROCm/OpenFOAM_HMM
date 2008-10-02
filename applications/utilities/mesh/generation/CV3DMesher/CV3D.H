@@ -209,6 +209,10 @@ private:
         //  removing and insertin the surface point-pairs
         label startOfBoundaryConformPointPairs_;
 
+        //- Store the feature constraining points to be reinserted after a
+        //- triangulation clear
+        List<Vb> featureConstrainingVertices_;
+
 
     // Private Member Functions
 
@@ -247,6 +251,12 @@ private:
 
         //- Insert point groups at the feature points.
         void insertFeaturePoints();
+
+        //- Reinsert stored feature point defining points.
+        void reinsertFeaturePoints();
+
+        //- Reinsert points that have been saved to clear the mesh.
+        void reinsertPoints (const pointField& points);
 
         //- Insert point-pairs at the given set of points using the surface
         //  normals corresponding to the given set of surface triangles
