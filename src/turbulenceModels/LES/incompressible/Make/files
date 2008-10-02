@@ -29,7 +29,7 @@ dynMixedSmagorinsky/dynMixedSmagorinsky.C
 wallFunctions=derivedFvPatchFields/wallFunctions
 
 nuSgsWallFunctions=$(wallFunctions)/nuSgsWallFunctions
-$(nuSgsWallFunctions)/nuSgsWallFunction/nuSgsWallFunctionFvPatchScalarField.C
+$(nuSgsWallFunctions)/nuSgsSpalartAllmarasWallFunction/nuSgsSpalartAllmarasWallFunctionFvPatchScalarField.C
 
 
 LIB = $(FOAM_LIBBIN)/libincompressibleLESModels

@@ -24,11 +24,10 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wmakeAlmostAll
+#     wcleanAlmostAll
 #
 # Description
-#     script that searches all the directories below the current for the
-#     object file directories of all machines and then deletes them.
+#     as per wcleanAll, but retains "*~" backup files
 #
 #------------------------------------------------------------------------------
 
@@ -39,18 +38,25 @@
 
 for dir in lib applications/bin
 do
+   echo "Removing $dir/"
    [ -d $dir ] && rm -rf $dir/*
 done
 
-( cd tutorials && ./Allclean )
+echo "Retaining *~ backup files"
+## find . -name '*~' -exec rm {} \;
 
-# find . -name '*~' -exec rm {} \;
+echo "Removing .dep files"
 find . -name '*.dep' -exec rm {} \;
 
-find `find . -depth \( -name "Make[.A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make[.A-Za-z]*" ! -name "*Make" \) -exec rm -r {} \;
+echo "Cleaning Make subdirectories"
+find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make.[A-Za-z]*" ! -name "*Make" \) -exec rm -rf {} \;
 
+echo "Removing lnInclude and intermediate directories"
 find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 
+echo "Removing misc files"
 find . \( -name exe -o -name log -o -name so_locations \) -exec rm {} \;
+
+( cd tutorials && ./Allclean )
 
 #------------------------------------------------------------------------------

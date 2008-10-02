@@ -15,8 +15,8 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // General m4 macros
 
-changecom(//)changequote([,])
-define(calc, [esyscmd(perl -e 'use Math::Trig; use POSIX; print ($1)')])
+changecom(//)changequote([,]) dnl>
+define(calc, [esyscmd(perl -e 'use Math::Trig; print ($1)')]) dnl>
 define(VCOUNT, 0)
 define(vlabel, [[// ]Vertex $1 = VCOUNT define($1, VCOUNT)define([VCOUNT], incr(VCOUNT))])
 
