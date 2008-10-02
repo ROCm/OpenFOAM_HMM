@@ -39,6 +39,7 @@ $(strings)/word/word.C
 $(strings)/word/wordIO.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
+$(strings)/keyType/keyTypeIO.C
 
 primitives/random/Random.C
 

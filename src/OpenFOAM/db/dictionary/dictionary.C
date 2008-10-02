@@ -34,6 +34,72 @@ defineTypeNameAndDebug(Foam::dictionary, 0);
 
 const Foam::dictionary Foam::dictionary::null;
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::dictionary::findInWildcards
+(
+    const bool wildCardMatch,
+    const word& Keyword,
+    DLList<entry*>::const_iterator& wcLink,
+    DLList<autoPtr<regularExpression> >::const_iterator& reLink
+) const
+{
+    if (wildCardEntries_.size() > 0)
+    {
+        //wcLink = wildCardEntries_.begin();
+        //reLink = wildCardRegexps_.end();
+
+        while (wcLink != wildCardEntries_.end())
+        {
+            if (!wildCardMatch && wcLink()->keyword() == Keyword)
+            {
+                return true;
+            }
+            else if (wildCardMatch && reLink()->matches(Keyword))
+            {
+                return true;
+            }
+
+            ++reLink;
+            ++wcLink;
+        }
+    }
+
+    return false;
+}
+
+
+bool Foam::dictionary::findInWildcards
+(
+    const bool wildCardMatch,
+    const word& Keyword,
+    DLList<entry*>::iterator& wcLink,
+    DLList<autoPtr<regularExpression> >::iterator& reLink
+)
+{
+    if (wildCardEntries_.size() > 0)
+    {
+        while (wcLink != wildCardEntries_.end())
+        {
+            if (!wildCardMatch && wcLink()->keyword() == Keyword)
+            {
+                return true;
+            }
+            else if (wildCardMatch && reLink()->matches(Keyword))
+            {
+                return true;
+            }
+
+            ++reLink;
+            ++wcLink;
+        }
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dictionary::dictionary()
@@ -60,6 +126,18 @@ Foam::dictionary::dictionary
     )
     {
         hashedEntries_.insert(iter().keyword(), &iter());
+
+        if (iter().keyword().isWildCard())
+        {
+            wildCardEntries_.insert(&iter());
+            wildCardRegexps_.insert
+            (
+                autoPtr<regularExpression>
+                (
+                    new regularExpression(iter().keyword())
+                )
+            );
+        }
     }
 }
 
@@ -81,6 +159,18 @@ Foam::dictionary::dictionary
     )
     {
         hashedEntries_.insert(iter().keyword(), &iter());
+
+        if (iter().keyword().isWildCard())
+        {
+            wildCardEntries_.insert(&iter());
+            wildCardRegexps_.insert
+            (
+                autoPtr<regularExpression>
+                (
+                    new regularExpression(iter().keyword())
+                )
+            );
+        }
     }
 }
 
@@ -133,13 +223,29 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     {
         return true;
     }
-    else if (recursive && &parent_ != &dictionary::null)
-    {
-        return parent_.found(keyword, recursive);
-    }
     else
     {
-        return false;
+        if (wildCardEntries_.size() > 0)
+        {
+            DLList<entry*>::const_iterator wcLink = wildCardEntries_.begin();
+            DLList<autoPtr<regularExpression> >::const_iterator reLink =
+                wildCardRegexps_.begin();
+
+            // Find in wildcards using regular expressions only
+            if (findInWildcards(true, keyword, wcLink, reLink))
+            {
+                return true;
+            }
+        }
+
+        if (recursive && &parent_ != &dictionary::null)
+        {
+            return parent_.found(keyword, recursive);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -147,16 +253,31 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
 const Foam::entry* Foam::dictionary::lookupEntryPtr
 (
     const word& keyword,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 ) const
 {
     HashTable<entry*>::const_iterator iter = hashedEntries_.find(keyword);
 
     if (iter == hashedEntries_.end())
     {
+        if (wildCardMatch && wildCardEntries_.size() > 0)
+        {
+            DLList<entry*>::const_iterator wcLink =
+                wildCardEntries_.begin();
+            DLList<autoPtr<regularExpression> >::const_iterator reLink =
+                wildCardRegexps_.begin();
+
+            // Find in wildcards using regular expressions only
+            if (findInWildcards(wildCardMatch, keyword, wcLink, reLink))
+            {
+                return wcLink();
+            }
+        }
+
         if (recursive && &parent_ != &dictionary::null)
         {
-            return parent_.lookupEntryPtr(keyword, recursive);
+            return parent_.lookupEntryPtr(keyword, recursive, wildCardMatch);
         }
         else
         {
@@ -171,19 +292,34 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
 Foam::entry* Foam::dictionary::lookupEntryPtr
 (
     const word& keyword,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 )
 {
     HashTable<entry*>::iterator iter = hashedEntries_.find(keyword);
 
     if (iter == hashedEntries_.end())
     {
+        if (wildCardMatch && wildCardEntries_.size() > 0)
+        {
+            DLList<entry*>::iterator wcLink =
+                wildCardEntries_.begin();
+            DLList<autoPtr<regularExpression> >::iterator reLink =
+                wildCardRegexps_.begin();
+            // Find in wildcards using regular expressions only
+            if (findInWildcards(wildCardMatch, keyword, wcLink, reLink))
+            {
+                return wcLink();
+            }
+        }
+
         if (recursive && &parent_ != &dictionary::null)
         {
             return const_cast<dictionary&>(parent_).lookupEntryPtr
             (
                 keyword,
-                recursive
+                recursive,
+                wildCardMatch
             );
         }
         else
@@ -199,16 +335,17 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
 const Foam::entry& Foam::dictionary::lookupEntry
 (
     const word& keyword,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
 
     if (entryPtr == NULL)
     {
         FatalIOErrorIn
         (
-            "dictionary::lookupEntry(const word& keyword) const",
+            "dictionary::lookupEntry(const word&, bool, bool) const",
             *this
         )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
@@ -222,16 +359,18 @@ const Foam::entry& Foam::dictionary::lookupEntry
 Foam::ITstream& Foam::dictionary::lookup
 (
     const word& keyword,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 ) const
 {
-    return lookupEntry(keyword, recursive).stream();
+    return lookupEntry(keyword, recursive, wildCardMatch).stream();
 }
 
 
 bool Foam::dictionary::isDict(const word& keyword) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword);
+    // Find non-recursive with wildcards
+    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
 
     if (entryPtr)
     {
@@ -246,7 +385,7 @@ bool Foam::dictionary::isDict(const word& keyword) const
 
 const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword);
+    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
 
     if (entryPtr)
     {
@@ -261,7 +400,8 @@ const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
 
 const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword);
+    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
+
     if (entryPtr == NULL)
     {
         FatalIOErrorIn
@@ -278,7 +418,8 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 
 Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 {
-    entry* entryPtr = lookupEntryPtr(keyword);
+    entry* entryPtr = lookupEntryPtr(keyword, false, true);
+
     if (entryPtr == NULL)
     {
         FatalIOErrorIn
@@ -314,7 +455,10 @@ Foam::wordList Foam::dictionary::toc() const
 
 bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 {
-    HashTable<entry*>::iterator iter = hashedEntries_.find(entryPtr->keyword());
+    HashTable<entry*>::iterator iter = hashedEntries_.find
+    (
+        entryPtr->keyword()
+    );
 
     if (mergeEntry && iter != hashedEntries_.end())
     {
@@ -336,6 +480,19 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
             {
                 entryPtr->name() = name_ + "::" + entryPtr->keyword();
+
+                if (entryPtr->keyword().isWildCard())
+                {
+                    wildCardEntries_.insert(entryPtr);
+                    wildCardRegexps_.insert
+                    (
+                        autoPtr<regularExpression>
+                        (
+                            new regularExpression(entryPtr->keyword())
+                        )
+                    );
+                }
+
                 return true;
             }
             else
@@ -355,6 +512,18 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
     {
         entryPtr->name() = name_ + "::" + entryPtr->keyword();
         IDLList<entry>::append(entryPtr);
+
+        if (entryPtr->keyword().isWildCard())
+        {
+            wildCardEntries_.insert(entryPtr);
+            wildCardRegexps_.insert
+            (
+                autoPtr<regularExpression>
+                (
+                    new regularExpression(entryPtr->keyword())
+                )
+            );
+        }
 
         return true;
     }
@@ -376,27 +545,37 @@ void Foam::dictionary::add(const entry& e, bool mergeEntry)
     add(e.clone(*this).ptr(), mergeEntry);
 }
 
-void Foam::dictionary::add(const word& k, const word& w, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const word& w, bool overwrite)
 {
     add(new primitiveEntry(k, token(w)), overwrite);
 }
 
-void Foam::dictionary::add(const word& k, const Foam::string& s, bool overwrite)
+void Foam::dictionary::add
+(
+    const keyType& k,
+    const Foam::string& s,
+    bool overwrite
+)
 {
     add(new primitiveEntry(k, token(s)), overwrite);
 }
 
-void Foam::dictionary::add(const word& k, const label l, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const label l, bool overwrite)
 {
     add(new primitiveEntry(k, token(l)), overwrite);
 }
 
-void Foam::dictionary::add(const word& k, const scalar s, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const scalar s, bool overwrite)
 {
     add(new primitiveEntry(k, token(s)), overwrite);
 }
 
-void Foam::dictionary::add(const word& k, const dictionary& d, bool mergeEntry)
+void Foam::dictionary::add
+(
+    const keyType& k,
+    const dictionary& d,
+    bool mergeEntry
+)
 {
     add(new dictionaryEntry(k, *this, d), mergeEntry);
 }
@@ -404,7 +583,7 @@ void Foam::dictionary::add(const word& k, const dictionary& d, bool mergeEntry)
 
 void Foam::dictionary::set(entry* entryPtr)
 {
-    entry* existingPtr = lookupEntryPtr(entryPtr->keyword());
+    entry* existingPtr = lookupEntryPtr(entryPtr->keyword(), false, true);
 
     // clear dictionary so merge acts like overwrite
     if (existingPtr && existingPtr->isDict())
@@ -420,7 +599,7 @@ void Foam::dictionary::set(const entry& e)
     set(e.clone(*this).ptr());
 }
 
-void Foam::dictionary::set(const word& k, const dictionary& d)
+void Foam::dictionary::set(const keyType& k, const dictionary& d)
 {
     set(new dictionaryEntry(k, *this, d));
 }
@@ -432,6 +611,19 @@ bool Foam::dictionary::remove(const word& Keyword)
 
     if (iter != hashedEntries_.end())
     {
+        // Delete from wildcards first
+        DLList<entry*>::iterator wcLink =
+            wildCardEntries_.begin();
+        DLList<autoPtr<regularExpression> >::iterator reLink =
+            wildCardRegexps_.begin();
+
+        // Find in wildcards using exact match only
+        if (findInWildcards(false, Keyword, wcLink, reLink))
+        {
+            wildCardEntries_.remove(wcLink);
+            wildCardRegexps_.remove(reLink);
+        }
+
         IDLList<entry>::remove(iter());
         delete iter();
         hashedEntries_.erase(iter);
@@ -447,8 +639,8 @@ bool Foam::dictionary::remove(const word& Keyword)
 
 bool Foam::dictionary::changeKeyword
 (
-    const word& oldKeyword,
-    const word& newKeyword,
+    const keyType& oldKeyword,
+    const keyType& newKeyword,
     bool forceOverwrite
 )
 {
@@ -466,6 +658,18 @@ bool Foam::dictionary::changeKeyword
         return false;
     }
 
+    if (iter()->keyword().isWildCard())
+    {
+        FatalErrorIn
+        (
+            "dictionary::changeKeyword(const word&, const word&, bool)"
+        )   << "Old keyword "<< oldKeyword
+            << " is a wildcard."
+            << "Wildcard replacement not yet implemented."
+            << exit(FatalError);
+    }
+
+
     HashTable<entry*>::iterator iter2 = hashedEntries_.find(newKeyword);
 
     // newKeyword already exists
@@ -473,14 +677,33 @@ bool Foam::dictionary::changeKeyword
     {
         if (forceOverwrite)
         {
+            if (iter2()->keyword().isWildCard())
+            {
+                // Delete from wildcards first
+                DLList<entry*>::iterator wcLink =
+                    wildCardEntries_.begin();
+                DLList<autoPtr<regularExpression> >::iterator reLink =
+                    wildCardRegexps_.begin();
+
+                // Find in wildcards using exact match only
+                if (findInWildcards(false, iter2()->keyword(), wcLink, reLink))
+                {
+                    wildCardEntries_.remove(wcLink);
+                    wildCardRegexps_.remove(reLink);
+                }
+            }
+
             IDLList<entry>::replace(iter2(), iter());
             delete iter2();
             hashedEntries_.erase(iter2);
+            
         }
         else
         {
-            WarningIn("dictionary::changeKeyword(const word&, const word&)")
-                << "cannot rename keyword "<< oldKeyword
+            WarningIn
+            (
+                "dictionary::changeKeyword(const word&, const word&, bool)"
+            )   << "cannot rename keyword "<< oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
             return false;
@@ -492,6 +715,18 @@ bool Foam::dictionary::changeKeyword
     iter()->name() = name_ + "::" + newKeyword;
     hashedEntries_.erase(oldKeyword);
     hashedEntries_.insert(newKeyword, iter());
+
+    if (newKeyword.isWildCard())
+    {
+        wildCardEntries_.insert(iter());
+        wildCardRegexps_.insert
+        (
+            autoPtr<regularExpression>
+            (
+                new regularExpression(newKeyword)
+            )
+        );
+    }
 
     return true;
 }
@@ -579,6 +814,7 @@ void Foam::dictionary::operator=(const dictionary& dict)
 
     // Create clones of the entries in the given dictionary
     // resetting the parentDict to this dictionary
+
     for
     (
         IDLList<entry>::const_iterator iter = dict.begin();
@@ -586,17 +822,7 @@ void Foam::dictionary::operator=(const dictionary& dict)
         ++iter
     )
     {
-        IDLList<entry>::append(iter().clone(*this).ptr());
-    }
-
-    for
-    (
-        IDLList<entry>::iterator iter = begin();
-        iter != end();
-        ++iter
-    )
-    {
-        hashedEntries_.insert(iter().keyword(), &iter());
+        add(iter().clone(*this).ptr());
     }
 }
 

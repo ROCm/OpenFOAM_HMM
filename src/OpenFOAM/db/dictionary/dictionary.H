@@ -27,7 +27,12 @@ Class
 
 Description
     A list of keyword definitions, which are a keyword followed by any number
-    of values (e.g. words and numbers).
+    of values (e.g. words and numbers). The keywords can represent wildcards
+    which are matched using Posix regular expressions. The general order for
+    searching is
+    - exact match
+    - wildcard match
+    - optional recursion into subdictionaries
 
     The dictionary class is the base class for IOdictionary.
     It also serves as a bootstrap dictionary for the objectRegistry data
@@ -49,11 +54,13 @@ SourceFiles
 
 #include "entry.H"
 #include "IDLList.H"
+#include "DLList.H"
 #include "fileName.H"
 #include "ITstream.H"
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
+#include "regularExpression.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,11 +87,39 @@ class dictionary
         //- Dictionary name
         fileName name_;
 
-        //- HashTable of the enries held on the DL-list for quick lookup
+        //- HashTable of the entries held on the DL-list for quick lookup
         HashTable<entry*> hashedEntries_;
 
         //- Parent dictionary
         const dictionary& parent_;
+
+        //- Wildcard entries
+        DLList<entry*> wildCardEntries_;
+
+        //- Wildcard precompiled regex
+        DLList<autoPtr<regularExpression> > wildCardRegexps_;
+
+   // Private Member Functions
+
+        //- Search wildcard table either for exact match or for regular
+        //  expression match.
+        bool findInWildcards
+        (
+            const bool wildCardMatch,
+            const word& Keyword,
+            DLList<entry*>::const_iterator& wcLink,
+            DLList<autoPtr<regularExpression> >::const_iterator& reLink
+        ) const;
+
+        //- Search wildcard table either for exact match or for regular
+        //  expression match.
+        bool findInWildcards
+        (
+            const bool wildCardMatch,
+            const word& Keyword,
+            DLList<entry*>::iterator& wcLink,
+            DLList<autoPtr<regularExpression> >::iterator& reLink
+        );
 
 
 public:
@@ -181,24 +216,44 @@ public:
 
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
-            //  If recursive search parent dictionaries
+            //  If recursive search parent dictionaries. If wildCardMatch
+            //  use wildcards.
             const entry* lookupEntryPtr
             (
-                const word&, bool recursive=false
+                const word&,
+                bool recursive,
+                bool wildCardMatch
             ) const;
 
             //- Find and return an entry data stream pointer for manipulation
             //  if present otherwise return NULL.
-            //  If recursive search parent dictionaries
-            entry* lookupEntryPtr(const word&, bool recursive=false);
+            //  If recursive search parent dictionaries. If wildCardMatch
+            //  use wildcards.
+            entry* lookupEntryPtr
+            (
+                const word&,
+                bool recursive,
+                bool wildCardMatch
+            );
 
             //- Find and return an entry data stream if present otherwise error.
-            //  If recursive search parent dictionaries
-            const entry& lookupEntry(const word&, bool recursive=false) const;
+            //  If recursive search parent dictionaries. If wildCardMatch
+            //  use wildcards.
+            const entry& lookupEntry
+            (
+                const word&,
+                bool recursive,
+                bool wildCardMatch
+            ) const;
 
             //- Find and return an entry data stream
             //  If recursive search parent dictionaries
-            ITstream& lookup(const word&, bool recursive=false) const;
+            ITstream& lookup
+            (
+                const word&,
+                bool recursive=false,
+                bool wildCardMatch=true
+            ) const;
 
             //- Find and return a T,
             //  if not found return the given default value
@@ -208,7 +263,8 @@ public:
             (
                 const word&,
                 const T&,
-                bool recursive=false
+                bool recursive=false,
+                bool wildCardMatch=true
             ) const;
 
             //- Find and return a T, if not found return the given
@@ -219,7 +275,8 @@ public:
             (
                 const word&,
                 const T&,
-                bool recursive=false
+                bool recursive=false,
+                bool wildCardMatch=true
             );
 
             //- Find an entry if present, and assign to T
@@ -229,7 +286,8 @@ public:
             (
                 const word&,
                 T&,
-                bool recursive=false
+                bool recursive=false,
+                bool wildCardMatch=true
             ) const;
 
             //- Check if entry is a sub-dictionary
@@ -248,7 +306,6 @@ public:
             //- Return the table of contents
             wordList toc() const;
 
-
         // Editing
 
             //- Add a new entry
@@ -263,25 +320,25 @@ public:
 
             //- Add a word entry
             //  optionally overwrite an existing entry
-            void add(const word& keyword, const word&, bool overwrite=false);
+            void add(const keyType&, const word&, bool overwrite=false);
 
             //- Add a string entry
             //  optionally overwrite an existing entry
-            void add(const word& keyword, const string&, bool overwrite=false);
+            void add(const keyType&, const string&, bool overwrite=false);
 
             //- Add a label entry
             //  optionally overwrite an existing entry
-            void add(const word& keyword, const label, bool overwrite=false);
+            void add(const keyType&, const label, bool overwrite=false);
 
             //- Add a scalar entry
             //  optionally overwrite an existing entry
-            void add (const word& keyword, const scalar, bool overwrite=false);
+            void add (const keyType&, const scalar, bool overwrite=false);
 
             //- Add a dictionary entry
             //  optionally merge with an existing sub-dictionary
             void add
             (
-                const word& keyword,
+                const keyType& keyword,
                 const dictionary&,
                 bool mergeEntry=false
             );
@@ -289,7 +346,7 @@ public:
             //- Add a T entry
             //  optionally overwrite an existing entry
             template<class T>
-            void add(const word& keyword, const T&, bool overwrite=false);
+            void add(const keyType& keyword, const T&, bool overwrite=false);
 
             //- Assign a new entry, overwrite any existing entry
             void set(entry*);
@@ -298,11 +355,11 @@ public:
             void set(const entry&);
 
             //- Assign a dictionary entry, overwrite any existing entry
-            void set(const word& keyword, const dictionary&);
+            void set(const keyType& keyword, const dictionary&);
 
             //- Assign a T entry, overwrite any existing entry
             template<class T>
-            void set(const word& keyword, const T&);
+            void set(const keyType& keyword, const T&);
 
             //- Remove an entry specified by keyword
             bool remove(const word& keyword);
@@ -311,8 +368,8 @@ public:
             //  optionally forcing overwrite of an existing entry
             bool changeKeyword
             (
-                const word& oldKeyword,
-                const word& newKeyword,
+                const keyType& oldKeyword,
+                const keyType& newKeyword,
                 bool forceOverwrite = false
             );
 
@@ -361,11 +418,13 @@ public:
 
 // Global Operators
 
-//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//- Combine dictionaries starting from the entries in dict1 and then including
+//  those from dict2.
 //  Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
 
-//- Combine dictionaries starting from the entries in dict1 and then including those from dict2.
+//- Combine dictionaries starting from the entries in dict1 and then including
+//  those from dict2.
 //  Do not overwrite the entries from dict1.
 dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 

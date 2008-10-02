@@ -43,6 +43,7 @@ SourceFiles
 #ifndef dictionaryEntry_H
 #define dictionaryEntry_H
 
+#include "keyType.H"
 #include "entry.H"
 #include "dictionary.H"
 #include "InfoProxy.H"
@@ -79,7 +80,7 @@ public:
         //- Construct from the keyword, parent dictionary and a Istream
         dictionaryEntry
         (
-            const word& keyword,
+            const keyType& keyword,
             const dictionary& parentDict,
             Istream& is
         );
@@ -87,7 +88,7 @@ public:
         //- Construct from the keyword, parent dictionary and a dictionary
         dictionaryEntry
         (
-            const word& keyword,
+            const keyType& keyword,
             const dictionary& parentDict,
             const dictionary& dict
         );

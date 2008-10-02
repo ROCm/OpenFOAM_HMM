@@ -42,6 +42,7 @@ SourceFiles
 #ifndef entry_H
 #define entry_H
 
+#include "keyType.H"
 #include "IDLList.H"
 #include "fileName.H"
 #include "autoPtr.H"
@@ -70,13 +71,10 @@ class entry
     // Private data
 
         //- Keyword of entry
-        word keyword_;
+        keyType keyword_;
 
 
     // Private Member Functions
-
-        //- Get the next valid keyword otherwise return false
-        static bool getKeyword(word& keyword, Istream& is);
 
 
 public:
@@ -84,7 +82,7 @@ public:
     // Constructors
 
         //- Construct from keyword
-        entry(const word& keyword);
+        entry(const keyType& keyword);
 
         //- Construct as copy
         entry(const entry&);
@@ -115,14 +113,17 @@ public:
 
     // Member functions
 
+        //- Get the next valid keyword otherwise return false
+        static bool getKeyword(keyType& keyword, Istream& is);
+
         //- Return keyword
-        const word& keyword() const
+        const keyType& keyword() const
         {
             return keyword_;
         }
 
         //- Return non-const access to keyword
-        word& keyword()
+        keyType& keyword()
         {
             return keyword_;
         }
