@@ -43,7 +43,7 @@ SourceFiles
 #ifndef CV3D_H
 #define CV3D_H
 
-#define CGAL_INEXACT
+//#define CGAL_INEXACT
 #define CGAL_HIERARCHY
 
 #include "CGALTriangulation3Ddefs.H"

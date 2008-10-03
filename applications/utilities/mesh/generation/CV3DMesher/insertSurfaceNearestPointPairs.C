@@ -286,6 +286,7 @@ void Foam::CV3D::smoothEdge
     // 3: adjust the spacing of remaining points on a pair by pair basis to
     //    remove excess points and add points to long uncontrolled spans.
 
+
     const edge& e(edges[edgeI]);
 
     const point& eStart(localPts[e.start()]);
@@ -328,7 +329,7 @@ void Foam::CV3D::smoothEdge
                 tempEdgePoints.append
                 (
                     eStart + (edgePoint - eStart)
-                        * tols_.featurePointGuard/edgeDist
+                    * tols_.featurePointGuard/edgeDist
                 );
 
                 startGuardPlaced = true;
@@ -350,7 +351,7 @@ void Foam::CV3D::smoothEdge
             else if
             (
                 edgeDist > tols_.featurePointGuard
-                && edgeDist < (edgeLength - tols_.featurePointGuard)
+             && edgeDist < (edgeLength - tols_.featurePointGuard)
             )
             {
                 tempEdgePoints.append(edgePoint);
@@ -377,15 +378,37 @@ void Foam::CV3D::smoothEdge
 
         point newEdgePoint(vector::zero);
 
-        if (edgePoints.size() == 1)
+        // if (edgePoints.size() == 1)
+        // {
+        //     tempEdgePoints.append(edgePoints[0]);
+        // }
+        // else if
+        // (
+        //     (edgeDistances[1] - edgeDistances[0]) > tols_.edgeGroupSpacing
+        // )
+        // {
+        //     tempEdgePoints.append(edgePoints[0]);
+        // }
+
+        if (edgePoints.size() > 1)
         {
-            tempEdgePoints.append(edgePoints[0]);
+            if ((edgeDistances[1] - edgeDistances[0]) < tols_.edgeGroupSpacing)
+            {
+                // ...the first two points on the edge start a group
+
+                newEdgePoint += edgePoints[0];
+
+                groupSize++;
+            }
+            else
+            {
+                tempEdgePoints.append(edgePoints[0]);
+            }
         }
-        else if
-        (
-            (edgeDistances[1] - edgeDistances[0]) > tols_.edgeGroupSpacing
-        )
+        else
         {
+            // ...add the first point by default
+
             tempEdgePoints.append(edgePoints[0]);
         }
 
@@ -416,6 +439,16 @@ void Foam::CV3D::smoothEdge
             {
                 tempEdgePoints.append(edgePoints[eP]);
             }
+        }
+
+        if (groupSize > 0)
+        {
+            // A point group has been formed at the end of the edge and needs to
+            // be finished.
+
+            newEdgePoint /= groupSize;
+
+            tempEdgePoints.append(newEdgePoint);
         }
 
         edgePoints.transfer(tempEdgePoints.shrink());
@@ -794,7 +827,8 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
 
         for
         (
-            Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+            Triangulation::Finite_vertices_iterator vit =
+            finite_vertices_begin();
             vit != finite_vertices_end();
             vit++
         )
@@ -852,14 +886,17 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
         edgePoints.shrink();
         edgeLabels.shrink();
 
-        smoothEdgePositions(edgePoints, edgeLabels);
+        if (edgePoints.size())
+        {
+            smoothEdgePositions(edgePoints, edgeLabels);
 
-        insertEdgePointGroups
-        (
-            edgePoints,
-            edgeLabels,
-            "surfaceNearestEdgePoints.obj"
-        );
+            insertEdgePointGroups
+            (
+                edgePoints,
+                edgeLabels,
+                "surfaceNearestEdgePoints.obj"
+            );
+        }
     }
 
     DynamicList<point> allNearSurfacePoints(nSurfacePointsEst);
