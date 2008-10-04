@@ -100,6 +100,11 @@ int main(int argc, char *argv[])
         meshSubsetDict.lookup("addFaceNeighbours")
     );
 
+    Switch invertSelection
+    (
+        meshSubsetDict.lookup("invertSelection")
+    );
+
     // Mark the cells for the subset
 
     // Faces to subset
@@ -336,6 +341,27 @@ int main(int argc, char *argv[])
         Info<< "Added " << nFaceNeighbours
             << " faces because of addFaceNeighbours" << endl;
     }
+
+
+    if (invertSelection)
+    {
+        Info<< "Inverting selection." << endl;
+        boolList newFacesToSubset(facesToSubset.size());
+
+        forAll(facesToSubset, i)
+        {
+            if (facesToSubset[i])
+            {
+                newFacesToSubset[i] = false;
+            }
+            else
+            {
+                newFacesToSubset[i] = true;
+            }
+        }
+        facesToSubset.transfer(newFacesToSubset);
+    }
+
 
     // Create subsetted surface
     labelList pointMap;

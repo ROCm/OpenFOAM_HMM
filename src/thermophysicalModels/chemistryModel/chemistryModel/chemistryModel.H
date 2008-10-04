@@ -39,7 +39,6 @@ SourceFiles
 
 #include "hCombustionThermo.H"
 #include "reactingMixture.H"
-#include "Matrix.H"
 #include "ODE.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -251,7 +250,7 @@ public:
             const scalar t,
             const scalarField& c,
             scalarField& dcdt,
-            Matrix<scalar>& dfdc
+            scalarSquareMatrix& dfdc
         ) const;
 
         //- Calculates the reaction rates

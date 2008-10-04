@@ -53,6 +53,13 @@ namespace compressible
         const fvMesh& mesh
     );
 
+    //- alphat
+    tmp<volScalarField> autoCreateAlphat
+    (
+        const word& fieldName,
+        const fvMesh& mesh
+    );
+
     //- epsilon
     tmp<volScalarField> autoCreateEpsilon
     (

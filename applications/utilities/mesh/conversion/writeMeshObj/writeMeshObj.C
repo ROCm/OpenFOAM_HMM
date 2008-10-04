@@ -346,6 +346,7 @@ int main(int argc, char *argv[])
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
+    runTime.functionObjects().off();
 
     bool patchFaces = args.options().found("patchFaces");
     bool doCell = args.options().found("cell");

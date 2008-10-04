@@ -87,6 +87,7 @@ class RNGkEpsilon
         volScalarField k_;
         volScalarField epsilon_;
         volScalarField mut_;
+        volScalarField alphat_;
 
 
 public:
@@ -142,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
             );
         }
 

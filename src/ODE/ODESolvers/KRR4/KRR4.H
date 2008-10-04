@@ -62,15 +62,15 @@ class KRR4
         mutable scalarField g4_;
         mutable scalarField yErr_;
         mutable scalarField dfdx_;
-        mutable Matrix<scalar> dfdy_;
-        mutable Matrix<scalar> a_;
+        mutable scalarSquareMatrix dfdy_;
+        mutable scalarSquareMatrix a_;
         mutable labelList pivotIndices_;
 
         static const int maxtry = 40;
 
         static const scalar safety, grow, pgrow, shrink, pshrink, errcon;
 
-        static const scalar 
+        static const scalar
             gamma,
             a21, a31, a32,
             c21, c31, c32, c41, c42, c43,

@@ -23,22 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::scalarMatrix
+    Foam::SquareMatrix
 
 Description
-    Foam::scalarMatrix
+    A templated 2D square matrix of objects of \<T\>, where the n x n matrix
+    dimension is known and used for subscript bounds checking, etc.
 
 SourceFiles
-    scalarMatrix.C
+    SquareMatrixI.H
+    SquareMatrix.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarMatrix_H
-#define scalarMatrix_H
+#ifndef SquareMatrix_H
+#define SquareMatrix_H
 
 #include "Matrix.H"
-#include "scalarField.H"
-#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,65 +46,39 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class scalarMatrix Declaration
+                           Class Matrix Declaration
 \*---------------------------------------------------------------------------*/
 
-class scalarMatrix
+template<class Type>
+class SquareMatrix
 :
-    public Matrix<scalar>
+    public Matrix<SquareMatrix<Type>, Type>
 {
 
 public:
 
     // Constructors
 
-        //- Construct null
-        scalarMatrix();
+        //- Null constructor.
+        inline SquareMatrix();
 
-        //- Construct given size
-        scalarMatrix(const label);
+        //- Construct given number of rows/columns.
+        inline SquareMatrix(const label n);
 
-        //- Construct from Matrix<scalar>
-        scalarMatrix(const Matrix<scalar>&);
+        //- Construct given number of rows and columns,
+        //  It checks that m == n.
+        inline SquareMatrix(const label m, const label n);
 
-        //- Construct from Istream
-        scalarMatrix(Istream&);
+        //- Construct with given number of rows and rows
+        //  and value for all elements.
+        //  It checks that m == n.
+        inline SquareMatrix(const label m, const label n, const Type&);
 
+        //- Construct from Istream.
+        inline SquareMatrix(Istream&);
 
-    // Member Functions
-
-        //- Solve the matrix using Gaussian elimination with pivoting,
-        //  returning the solution in the source
-        template<class T>
-        static void solve(Matrix<scalar>& matrix, Field<T>& source);
-
-        //- Solve the matrix using Gaussian elimination with pivoting
-        //  and return the solution
-        template<class T>
-        void solve(Field<T>& psi, const Field<T>& source) const;
-
-
-        //- LU decompose the matrix with pivoting
-        static void LUDecompose
-        (
-            Matrix<scalar>& matrix,
-            labelList& pivotIndices
-        );
-
-        //- LU back-substitution with given source, returning the solution
-        //  in the source
-        template<class T>
-        static void LUBacksubstitute
-        (
-            const Matrix<scalar>& luMmatrix,
-            const labelList& pivotIndices,
-            Field<T>& source
-        );
-
-        //- Solve the matrix using LU decomposition with pivoting
-        //  returning the LU form of the matrix and the solution in the source
-        template<class T>
-        static void LUsolve(Matrix<scalar>& matrix, Field<T>& source);
+        //- Clone
+        inline autoPtr<SquareMatrix<Type> > clone() const;
 };
 
 
@@ -114,9 +88,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "scalarMatrixTemplates.C"
-#endif
+#   include "SquareMatrixI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

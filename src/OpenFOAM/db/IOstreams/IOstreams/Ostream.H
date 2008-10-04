@@ -35,6 +35,7 @@ Description
 #define Ostream_H
 
 #include "IOstream.H"
+#include "keyType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -105,6 +106,9 @@ public:
             //- Write word
             virtual Ostream& write(const word&) = 0;
 
+            //- Write keyType
+            virtual Ostream& write(const keyType&);
+
             //- Write string
             virtual Ostream& write(const string&) = 0;
 
@@ -146,7 +150,7 @@ public:
 
             //- Write the keyword to the Ostream followed by
             //  appropriate indentation
-            Ostream& writeKeyword(const word& keyword);
+            Ostream& writeKeyword(const keyType& keyword);
 
 
         // Stream state functions
