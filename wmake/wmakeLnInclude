@@ -80,7 +80,17 @@ do
 done
 
 baseDir=$1
+# convert incorrect path/dir/lnInclude to something sensible
+while [ "${baseDir##*/}" = lnInclude ]
+do
+   baseDir="${baseDir%/*}"
+   if [ "$baseDir" = lnInclude ]
+   then
+      baseDir="."
+   fi
+done
 incDir=$baseDir/lnInclude
+
 
 if [ $# -eq 1 ]
 then
@@ -89,7 +99,7 @@ elif [ $# -eq 2 ]
 then
    lnOpt="$2"
 else
-   usage "ERROR: wrong number of arguments"
+   usage "ERROR: incorrect number of arguments"
 fi
 
 
@@ -101,7 +111,6 @@ fi
 
 if [ -d $incDir ]
 then
-   # could change force to remove lnInclude first
    if [ ! "$forceUpdate" ]
    then
       # echo $Script: include directory $incDir already exists, exiting.
@@ -117,24 +126,34 @@ then
    exit 0
 fi
 
+cd $incDir || exit 1
+
 
 # Link include files
 # ~~~~~~~~~~~~~~~~~~
 echo $Script: linking include files to $incDir
-echo
-
-cd $incDir
-
-find .. $findOpt \
-    \( -name lnInclude -o -name -Make -o -name config \) -prune  \
- -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
- -a ! -name ".#*"     \
- -exec ln $lnOpt {} . \;
-
 
 #
-# remove any broken links
+# remove any broken links first (this helps when file locations have moved)
 #
 find -L . -type l -exec rm \{\} \;
+
+#
+# create links, avoid recreating links unless necessary
+#
+find .. $findOpt \
+    \( -name lnInclude -o -name Make -o -name config \) -prune \
+ -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
+ -a ! -name ".#*" \
+ -print | \
+   while read src
+   do
+      link=$(readlink ${src##*/})
+      if [ "$link" != "$src" ]
+      then
+         rm $link 2>/dev/null
+         ln $lnOpt $src .
+      fi
+   done
 
 #------------------------------------------------------------------------------

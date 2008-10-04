@@ -95,6 +95,7 @@ protected:
         dimensionedScalar kappa_;
         dimensionedScalar E_;
         dimensionedScalar Cmu_;
+        dimensionedScalar Prt_;
 
         scalar yPlusLam_;
 
@@ -242,6 +243,12 @@ public:
             dimensionedScalar Cmu() const
             {
                 return Cmu_;
+            }
+
+            //- Return turbulent Prandtl number for use in wall-functions
+            dimensionedScalar Prt() const
+            {
+                return Prt_;
             }
 
             //- Return the near wall distances

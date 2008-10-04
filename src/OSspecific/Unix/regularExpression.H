@@ -100,7 +100,7 @@ public:
     // Member functions
 
         //- Matches?
-        inline bool matches(const string& s)
+        inline bool matches(const string& s) const
         {
             size_t nmatch = 0;
             regmatch_t *pmatch = NULL;

@@ -14,6 +14,6 @@ SpalartAllmaras/SpalartAllmaras.C
 wallFunctions=derivedFvPatchFields/wallFunctions
 
 muSgsWallFunctions=$(wallFunctions)/muSgsWallFunctions
-$(muSgsWallFunctions)/muSgsWallFunction/muSgsWallFunctionFvPatchScalarField.C
+$(muSgsWallFunctions)/muSgsSpalartAllmarasWallFunction/muSgsSpalartAllmarasWallFunctionFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleLESModels

@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("cellSet");
 #   include "setRootCase.H"
 #   include "createTime.H"
+    runTime.functionObjects().off();
 #   include "createMesh.H"
     pointMesh pMesh(mesh);
 

@@ -1,0 +1,142 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::keyType
+
+Description
+    A class for handling keywords in dictionaries.
+
+    A keyType is the keyword of a dictionary. It differs from word in that
+    it accepts wildcards.
+
+SourceFiles
+    keyType.C
+    keyTypeIO.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef keyType_H
+#define keyType_H
+
+#include "word.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
+
+/*---------------------------------------------------------------------------*\
+                           Class keyType Declaration
+\*---------------------------------------------------------------------------*/
+
+class keyType
+:
+    public word
+{
+    // Private member data
+
+        bool isWildCard_;
+
+    // Private Member Functions
+
+        //- Disallow assignments where we cannot determine string/word type
+        void operator=(const std::string&);
+
+public:
+
+
+    // Constructors
+
+        //- Construct null
+        inline keyType();
+
+        //- Construct as copy
+        inline keyType(const keyType& s);
+
+        //- Construct as copy of word
+        inline keyType(const word& s);
+
+        //- Construct as copy of string. Expect it to be regular expression.
+        inline keyType(const string& s);
+
+        //- Construct as copy of character array
+        inline keyType(const char* s);
+
+        //- Construct as copy of std::string
+        inline keyType(const std::string& s, const bool isWildCard);
+
+        //- Construct from Istream
+        keyType(Istream& is);
+
+
+    // Member functions
+
+        //- Is this character valid for a keyType
+        inline static bool valid(char c);
+
+        //- Is the type a wildcard?
+        inline bool isWildCard() const;
+
+
+    // Member operators
+
+        // Assignment
+
+            inline void operator=(const keyType& s);
+
+            //- Assign from regular expression.
+            inline void operator=(const string& s);
+
+            inline void operator=(const word& s);
+
+            inline void operator=(const char*);
+
+
+    // IOstream operators
+
+        friend Istream& operator>>(Istream& is, keyType& w);
+
+        friend Ostream& operator<<(Ostream& os, const keyType& w);
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "keyTypeI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

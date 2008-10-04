@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool Foam::entry::getKeyword(word& keyword, Istream& is)
+bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 {
     token keywordToken;
 
@@ -57,6 +57,12 @@ bool Foam::entry::getKeyword(word& keyword, Istream& is)
         keyword = keywordToken.wordToken();
         return true;
     }
+    else if (keywordToken.isString())
+    {
+        // Enable wildcards
+        keyword = keywordToken.stringToken();
+        return true;
+    }
     // If it is the end of the dictionary or file return false...
     else if (keywordToken == token::END_BLOCK || is.eof())
     {
@@ -67,7 +73,7 @@ bool Foam::entry::getKeyword(word& keyword, Istream& is)
     {
         cerr<< "--> FOAM Warning : " << std::endl
             << "    From function "
-            << "entry::getKeyword(word& keyword, Istream& is)" << std::endl
+            << "entry::getKeyword(keyType& keyword, Istream& is)" << std::endl
             << "    in file " << __FILE__
             << " at line " << __LINE__ << std::endl
             << "    Reading " << is.name().c_str() << std::endl
@@ -84,7 +90,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 {
     is.fatalCheck("entry::New(const dictionary& parentDict, Istream& is)");
 
-    word keyword;
+    keyType keyword;
 
     // Get the next keyword and if invalid return false
     if (!getKeyword(keyword, is))
@@ -115,7 +121,13 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             // Deal with duplicate entries
             bool mergeEntry = false;
 
-            entry* existingPtr = parentDict.lookupEntryPtr(keyword);
+            // See (using exact match) if entry already present
+            entry* existingPtr = parentDict.lookupEntryPtr
+            (
+                keyword,
+                false,
+                false
+            );
             if (existingPtr)
             {
                 if (functionEntries::inputModeEntry::overwrite())
@@ -158,7 +170,7 @@ Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
     is.fatalCheck("entry::New(Istream& is)");
 
-    word keyword;
+    keyType keyword;
 
     // Get the next keyword and if invalid return false
     if (!getKeyword(keyword, is))

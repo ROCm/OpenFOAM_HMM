@@ -27,7 +27,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "keyType.H"
 #include "dictionaryEntry.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -43,14 +45,14 @@ Foam::dictionaryEntry::dictionaryEntry
     is.fatalCheck
     (
         "dictionaryEntry::dictionaryEntry"
-        "(Istream& is, const dictionary& parentDict)"
+        "(const dictionary& parentDict, Istream& is)"
     );
 }
 
 
 Foam::dictionaryEntry::dictionaryEntry
 (
-    const word& key,
+    const keyType& key,
     const dictionary& parentDict,
     Istream& is
 )
@@ -63,7 +65,7 @@ Foam::dictionaryEntry::dictionaryEntry
     is.fatalCheck
     (
         "dictionaryEntry::dictionaryEntry"
-        "(const word& keyword, const dictionary& parentDict, Istream& is)"
+        "(const keyType& keyword, const dictionary& parentDict, Istream& is)"
     );
 }
 

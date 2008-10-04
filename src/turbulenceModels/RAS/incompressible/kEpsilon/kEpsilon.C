@@ -130,7 +130,7 @@ kEpsilon::kEpsilon
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -267,7 +267,7 @@ void kEpsilon::correct()
 
 
     // Re-calculate viscosity
-    nut_ = Cmu_*sqr(k_)/epsilon_;
+    nut_ == Cmu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 }
 
