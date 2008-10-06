@@ -72,6 +72,13 @@ Foam::PtrList<T>::PtrList(const PtrList<T>& a, const CloneArg& cloneArg)
 
 
 template<class T>
+Foam::PtrList<T>::PtrList(xfer<PtrList<T> >& lst)
+{
+    transfer(lst.ref());
+}
+
+
+template<class T>
 Foam::PtrList<T>::PtrList(PtrList<T>& a, bool reUse)
 :
     ptrs_(a.size())

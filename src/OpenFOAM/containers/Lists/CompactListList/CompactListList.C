@@ -93,6 +93,12 @@ CompactListList<T>::CompactListList(const UList<label>& rowSizes, const T& t)
 
 
 template<class T>
+CompactListList<T>::CompactListList(xfer<CompactListList<T> >& lst)
+{
+    transfer(lst.ref());
+}
+
+template<class T>
 CompactListList<T>::CompactListList(CompactListList<T>& cll, bool reUse)
 :
     offsets_(cll.offsets_, reUse),

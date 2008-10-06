@@ -125,6 +125,14 @@ Foam::List<T>::List(const List<T>& a)
 }
 
 
+// Construct by transferring the parameter contents
+template<class T>
+Foam::List<T>::List(xfer<List<T> >& lst)
+{
+    transfer(lst.ref());
+}
+
+
 // Construct as copy or re-use as specified.
 template<class T>
 Foam::List<T>::List(List<T>& a, bool reUse)

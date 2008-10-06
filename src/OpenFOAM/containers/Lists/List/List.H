@@ -43,6 +43,7 @@ SourceFiles
 
 #include "UList.H"
 #include "autoPtr.H"
+#include "xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,6 +93,9 @@ public:
 
         //- Copy constructor.
         List(const List<T>&);
+
+        //- Construct by transferring the parameter contents
+        List(xfer<List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
