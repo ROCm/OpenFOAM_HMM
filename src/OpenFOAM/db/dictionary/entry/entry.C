@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::entry::entry(const word& keyword)
+Foam::entry::entry(const keyType& keyword)
 :
     keyword_(keyword)
 {}

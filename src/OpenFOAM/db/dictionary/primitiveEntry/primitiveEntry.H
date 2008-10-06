@@ -108,23 +108,23 @@ public:
     // Constructors
 
         //- Construct from keyword and a Istream
-        primitiveEntry(const word& keyword, Istream&);
+        primitiveEntry(const keyType& keyword, Istream&);
 
         //- Construct from keyword, parent dictionary and a Istream
-        primitiveEntry(const word& keyword, const dictionary&, Istream&);
+        primitiveEntry(const keyType& keyword, const dictionary&, Istream&);
 
         //- Construct from keyword and a ITstream
-        primitiveEntry(const word& keyword, const ITstream&);
+        primitiveEntry(const keyType& keyword, const ITstream&);
 
         //- Construct from keyword and a token
-        primitiveEntry(const word&, const token&);
+        primitiveEntry(const keyType&, const token&);
 
         //- Construct from keyword and a tokenList
-        primitiveEntry(const word&, const tokenList&);
+        primitiveEntry(const keyType&, const tokenList&);
 
         //- Construct from keyword and a T
         template<class T>
-        primitiveEntry(const word&, const T&);
+        primitiveEntry(const keyType&, const T&);
 
         autoPtr<entry> clone(const dictionary&) const
         {

@@ -22,50 +22,66 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    attachMesh
-
 Description
-    Attach topologically detached mesh using prescribed mesh modifiers.
+    Istream constructor and IOstream operators for word.
 
 \*---------------------------------------------------------------------------*/
 
-#include "argList.H"
-#include "polyMesh.H"
-#include "Time.H"
-#include "attachPolyTopoChanger.H"
-
-using namespace Foam;
+#include "keyType.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+Foam::keyType::keyType(Istream& is)
+:
+    word()
 {
-    argList::noParallel();
-    argList::validOptions.insert("overwrite", "");
+    is >> *this;
+}
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-    runTime.functionObjects().off();
-#   include "createPolyMesh.H"
 
-    bool overwrite = args.options().found("overwrite");
+Foam::Istream& Foam::operator>>(Istream& is, keyType& w)
+{
+    token t(is);
 
-    if (!overwrite)
+    if (!t.good())
     {
-        runTime++;
+        is.setBad();
+        return is;
     }
 
-    Info<< "Time = " << runTime.timeName() << nl
-        << "Attaching sliding interface" << endl;
+    if (t.isWord())
+    {
+        w = t.wordToken();
+    }
+    else if (t.isString())
+    {
+        // Assign from string. Sets regular expression.
+        w = t.stringToken();
+    }
+    else
+    {
+        is.setBad();
+        FatalIOErrorIn("operator>>(Istream&, keyType&)", is)
+            << "wrong token type - expected word or string found "
+            << t.info()
+            << exit(FatalIOError);
 
-    attachPolyTopoChanger(mesh).attach();
+        return is;
+    }
 
-    mesh.write();
+    // Check state of IOstream
+    is.check("Istream& operator>>(Istream&, keyType&)");
 
-    Info<< "End\n" << endl;
+    return is;
+}
 
-    return(0);
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const keyType& w)
+{
+    os.write(w);
+    os.check("Ostream& operator<<(Ostream&, const keyType&)");
+    return os;
 }
 
 

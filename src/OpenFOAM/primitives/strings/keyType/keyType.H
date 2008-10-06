@@ -23,115 +23,107 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::word
+    Foam::keyType
 
 Description
-    A class for handling words, derived from string.
+    A class for handling keywords in dictionaries.
 
-    A word is a string of characters containing no whitespace and may be
-    constructed from a string by removing whitespace. Words are delimited
-    by whitespace.
+    A keyType is the keyword of a dictionary. It differs from word in that
+    it accepts wildcards.
 
 SourceFiles
-    word.C
-    wordIO.C
+    keyType.C
+    keyTypeIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef word_H
-#define word_H
+#ifndef keyType_H
+#define keyType_H
 
-#include "string.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-class word;
-inline word operator&(const word&, const word&);
-Istream& operator>>(Istream&, word&);
-Ostream& operator<<(Ostream&, const word&);
+// Forward declaration of classes
+class Istream;
+class Ostream;
 
 
 /*---------------------------------------------------------------------------*\
-                           Class word Declaration
+                           Class keyType Declaration
 \*---------------------------------------------------------------------------*/
 
-class word
+class keyType
 :
-    public string
+    public word
 {
-    // Private member functions
+    // Private member data
 
-        //- Strip invalid characters from this word
-        inline void stripInvalid();
+        bool isWildCard_;
 
+    // Private Member Functions
+
+        //- Disallow assignments where we cannot determine string/word type
+        void operator=(const std::string&);
 
 public:
-
-    // Static data members
-
-        static const char* const typeName;
-        static int debug;
-        static const word null;
 
 
     // Constructors
 
         //- Construct null
-        inline word();
+        inline keyType();
 
         //- Construct as copy
-        inline word(const word&);
+        inline keyType(const keyType& s);
+
+        //- Construct as copy of word
+        inline keyType(const word& s);
+
+        //- Construct as copy of string. Expect it to be regular expression.
+        inline keyType(const string& s);
 
         //- Construct as copy of character array
-        inline word(const char*, const bool doStripInvalid = true);
-
-        //- Construct as copy with a maximum number of characters
-        inline word
-        (
-            const char*,
-            const size_type,
-            const bool doStripInvalid
-        );
-
-        //- Construct as copy of string
-        inline word(const string&, const bool doStripInvalid = true);
+        inline keyType(const char* s);
 
         //- Construct as copy of std::string
-        inline word(const std::string&, const bool doStripInvalid = true);
+        inline keyType(const std::string& s, const bool isWildCard);
 
         //- Construct from Istream
-        word(Istream&);
+        keyType(Istream& is);
 
 
     // Member functions
 
-        //- Is this character valid for a word
-        inline static bool valid(char);
+        //- Is this character valid for a keyType
+        inline static bool valid(char c);
+
+        //- Is the type a wildcard?
+        inline bool isWildCard() const;
 
 
     // Member operators
 
         // Assignment
 
-            inline void operator=(const word&);
-            inline void operator=(const string&);
-            inline void operator=(const std::string&);
+            inline void operator=(const keyType& s);
+
+            //- Assign from regular expression.
+            inline void operator=(const string& s);
+
+            inline void operator=(const word& s);
+
             inline void operator=(const char*);
-
-
-    // Friend Operators
-
-        friend word operator&(const word&, const word&);
 
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, word&);
-        friend Ostream& operator<<(Ostream&, const word&);
+        friend Istream& operator>>(Istream& is, keyType& w);
+
+        friend Ostream& operator<<(Ostream& os, const keyType& w);
 };
 
 
@@ -141,7 +133,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "wordI.H"
+#include "keyTypeI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

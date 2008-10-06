@@ -71,7 +71,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword)
     word varName = keyword(1, keyword.size()-1);
 
     // lookup the variable name in the given dictionary....
-    const entry* ePtr = lookupEntryPtr(varName, true);
+    const entry* ePtr = lookupEntryPtr(varName, true, true);
 
     // ...if defined insert its entries into this dictionary...
     if (ePtr != NULL)
@@ -137,6 +137,8 @@ Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)
 
     dict.clear();
     dict.hashedEntries_.clear();
+    dict.wildCardEntries_.clear();
+    dict.wildCardRegexps_.clear();
     dict.read(is);
 
     return is;

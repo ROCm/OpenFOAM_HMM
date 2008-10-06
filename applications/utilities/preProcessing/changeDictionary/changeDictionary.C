@@ -164,7 +164,16 @@ int main(int argc, char *argv[])
             forAll(dictList, i)
             {
                 doneKeys[i] = dictList[i].keyword();
-                dictList.set(i, fieldDict.lookupEntry(doneKeys[i]).clone());
+                dictList.set
+                (
+                    i,
+                    fieldDict.lookupEntry
+                    (
+                        doneKeys[i],
+                        false,
+                        true
+                    ).clone()
+                );
                 fieldDict.remove(doneKeys[i]);
             }
             // Add remaining entries

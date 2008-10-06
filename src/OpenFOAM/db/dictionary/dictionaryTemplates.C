@@ -34,10 +34,11 @@ T Foam::dictionary::lookupOrDefault
 (
     const word& keyword,
     const T& deflt,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
 
     if (entryPtr == NULL)
     {
@@ -55,10 +56,11 @@ T Foam::dictionary::lookupOrAddDefault
 (
     const word& keyword,
     const T& deflt,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 )
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
 
     if (entryPtr == NULL)
     {
@@ -77,10 +79,11 @@ bool Foam::dictionary::readIfPresent
 (
     const word& k,
     T& val,
-    bool recursive
+    bool recursive,
+    bool wildCardMatch
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(k, recursive);
+    const entry* entryPtr = lookupEntryPtr(k, recursive, wildCardMatch);
 
     if (entryPtr == NULL)
     {
@@ -95,16 +98,17 @@ bool Foam::dictionary::readIfPresent
 
 
 template<class T>
-void Foam::dictionary::add(const word& k, const T& t, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const T& t, bool overwrite)
 {
     add(new primitiveEntry(k, t), overwrite);
 }
 
 
 template<class T>
-void Foam::dictionary::set(const word& k, const T& t)
+void Foam::dictionary::set(const keyType& k, const T& t)
 {
     set(new primitiveEntry(k, t));
 }
+
 
 // ************************************************************************* //

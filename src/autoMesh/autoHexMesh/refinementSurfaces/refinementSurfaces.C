@@ -826,6 +826,19 @@ void Foam::refinementSurfaces::findNearestIntersection
             }
         }
     }
+
+
+    // Make sure that if hit1 has hit something, hit2 will have at least the
+    // same point (due to tolerances it might miss its end point)
+    forAll(hit1, pointI)
+    {
+        if (hit1[pointI].hit() && !hit2[pointI].hit())
+        {
+            hit2[pointI] = hit1[pointI];
+            surface2[pointI] = surface1[pointI];
+            region2[pointI] = region1[pointI];
+        }
+    }
 }
 
 

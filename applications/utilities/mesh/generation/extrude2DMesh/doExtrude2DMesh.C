@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("overwrite", "");
 #   include "setRootCase.H"
 #   include "createTime.H"
+    runTime.functionObjects().off();
 #   include "createPolyMesh.H"
 
     scalar thickness(readScalar(IStringStream(args.additionalArgs()[0])()));
