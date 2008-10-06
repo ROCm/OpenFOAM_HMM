@@ -33,22 +33,40 @@
 
 _foamAddPath()
 {
-    while [ $# -ge 1 ]
-    do
-        [ -d $1 ] || mkdir -p $1
-        export PATH=$1:$PATH
-        shift
-    done
+   if [ $# -eq 1 ]
+   then
+      oldIFS="$IFS"
+      IFS=':'    # split on ':'
+      set -- $1
+      IFS="$oldIFS"
+      unset oldIFS
+   fi
+
+   while [ $# -ge 1 ]
+   do
+      [ -d $1 ] || mkdir -p $1
+      export PATH=$1:$PATH
+      shift
+   done
 }
 
 _foamAddLib()
 {
-    while [ $# -ge 1 ]
-    do
-        [ -d $1 ] || mkdir -p $1
-        export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
-        shift
-    done
+   if [ $# -eq 1 ]
+   then
+      oldIFS="$IFS"
+      IFS=':'    # split on ':'
+      set -- $1
+      IFS="$oldIFS"
+      unset oldIFS
+   fi
+
+   while [ $# -ge 1 ]
+   do
+      [ -d $1 ] || mkdir -p $1
+      export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
+      shift
+   done
 }
 
 
@@ -99,7 +117,6 @@ case "$WM_COMPILER_INST" in
 OpenFOAM)
     case "$WM_COMPILER" in
     Gcc)
-        #export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
         _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.3/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
@@ -127,7 +144,7 @@ esac
 
 if [ -d "$WM_COMPILER_BIN" ]; then
     _foamAddPath $WM_COMPILER_BIN
-    _foamAddLib $WM_COMPILER_LIB
+    _foamAddLib  $WM_COMPILER_LIB
 fi
 
 unset WM_COMPILER_BIN WM_COMPILER_LIB
