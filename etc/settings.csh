@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 alias _foamAddPath 'set path=(\!* $path) ; if ( ! -d \!* ) mkdir -p \!*'
-alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; if ( ! -d \!* ) mkdir -p \!*'
+alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; set xx=`echo $LD_LIBRARY_PATH | sed -e "s/:.*//"`; if ( ! -d  $xx ) mkdir -p $xx'
 
 
 #- Add the system-specific executables path to the path
