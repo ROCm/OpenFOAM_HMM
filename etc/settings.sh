@@ -119,7 +119,7 @@ OpenFOAM)
     Gcc)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
         _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.3/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc42)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH
