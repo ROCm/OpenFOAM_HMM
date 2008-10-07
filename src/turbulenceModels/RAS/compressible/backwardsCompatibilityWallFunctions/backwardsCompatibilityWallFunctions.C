@@ -27,6 +27,7 @@ License
 #include "backwardsCompatibilityWallFunctions.H"
 
 #include "calculatedFvPatchField.H"
+#include "alphatWallFunctionFvPatchScalarField.H"
 #include "mutWallFunctionFvPatchScalarField.H"
 #include "epsilonWallFunctionFvPatchScalarField.H"
 #include "kQRWallFunctionFvPatchField.H"
@@ -41,30 +42,73 @@ namespace compressible
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-wordList replaceWallBoundaryTypes
+tmp<volScalarField> autoCreateAlphat
 (
-    const fvMesh& mesh,
-    const wordList& oldTypeNames,
-    const wordList& newTypeNames
+    const word& fieldName,
+    const fvMesh& mesh
 )
 {
-    const fvBoundaryMesh& bm = mesh.boundary();
+    IOobject alphatHeader
+    (
+        fieldName,
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
 
-    wordList boundaryTypes(bm.size());
-
-    forAll(bm, patchI)
+    if (alphatHeader.headerOk())
     {
-        if (isType<wallFvPatch>(bm[patchI]))
-        {
-            boundaryTypes[patchI] = newTypeNames[patchI];
-        }
-        else
-        {
-            boundaryTypes[patchI] = oldTypeNames[patchI];
-        }
+        return tmp<volScalarField>(new volScalarField(alphatHeader, mesh));
     }
+    else
+    {
+        Info<< "--> Upgrading " << fieldName << " to employ run-time "
+            << "selectable wall functions" << endl;
 
-    return boundaryTypes;
+        const fvBoundaryMesh& bm = mesh.boundary();
+
+        wordList alphatBoundaryTypes(bm.size());
+
+        forAll(bm, patchI)
+        {
+            if (isType<wallFvPatch>(bm[patchI]))
+            {
+                alphatBoundaryTypes[patchI] =
+                    RASModels::alphatWallFunctionFvPatchScalarField::typeName;
+            }
+            else
+            {
+                alphatBoundaryTypes[patchI] =
+                    calculatedFvPatchField<scalar>::typeName;
+            }
+        }
+
+        tmp<volScalarField> alphat
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    fieldName,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh,
+                dimensionedScalar("zero", dimDensity*dimArea/dimTime, 0.0),
+                alphatBoundaryTypes
+            )
+        );
+
+        Info<< "    Writing updated " << fieldName << endl;
+        alphat().write();
+
+        return alphat;
+    }
 }
 
 
@@ -93,20 +137,23 @@ tmp<volScalarField> autoCreateMut
         Info<< "--> Upgrading " << fieldName << " to employ run-time "
             << "selectable wall functions" << endl;
 
-        wordList mutBoundaryTypes = replaceWallBoundaryTypes
-        (
-            mesh,
-            wordList
-            (
-                mesh.boundary().size(),
-                calculatedFvPatchField<scalar>::typeName
-            ),
-            wordList
-            (
-                mesh.boundary().size(),
-                RASModels::mutWallFunctionFvPatchScalarField::typeName
-            )
-        );
+        const fvBoundaryMesh& bm = mesh.boundary();
+
+        wordList mutBoundaryTypes(bm.size());
+
+        forAll(bm, patchI)
+        {
+            if (isType<wallFvPatch>(bm[patchI]))
+            {
+                mutBoundaryTypes[patchI] =
+                    RASModels::mutWallFunctionFvPatchScalarField::typeName;
+            }
+            else
+            {
+                mutBoundaryTypes[patchI] =
+                    calculatedFvPatchField<scalar>::typeName;
+            }
+        }
 
         tmp<volScalarField> mut
         (
@@ -141,12 +188,16 @@ tmp<volScalarField> autoCreateEpsilon
     const fvMesh& mesh
 )
 {
-    return autoCreateWallFunctionField<scalar>
-    (
-        fieldName,
-        mesh,
-        RASModels::epsilonWallFunctionFvPatchScalarField::typeName
-    );
+    return
+        autoCreateWallFunctionField
+        <
+            scalar,
+            RASModels::epsilonWallFunctionFvPatchScalarField
+        >
+        (
+            fieldName,
+            mesh
+        );
 }
 
 
@@ -156,12 +207,16 @@ tmp<volScalarField> autoCreateOmega
     const fvMesh& mesh
 )
 {
-    return autoCreateWallFunctionField<scalar>
-    (
-        fieldName,
-        mesh,
-        RASModels::omegaWallFunctionFvPatchScalarField::typeName
-    );
+    return
+        autoCreateWallFunctionField
+        <
+            scalar,
+            RASModels::omegaWallFunctionFvPatchScalarField
+        >
+        (
+            fieldName,
+            mesh
+        );
 }
 
 
@@ -171,12 +226,16 @@ tmp<volScalarField> autoCreateK
     const fvMesh& mesh
 )
 {
-    return autoCreateWallFunctionField<scalar>
-    (
-        fieldName,
-        mesh,
-        RASModels::kQRWallFunctionFvPatchField<scalar>::typeName
-    );
+    return
+        autoCreateWallFunctionField
+        <
+            scalar,
+            RASModels::kQRWallFunctionFvPatchField<scalar>
+        >
+        (
+            fieldName,
+            mesh
+        );
 }
 
 
@@ -186,12 +245,16 @@ tmp<volScalarField> autoCreateQ
     const fvMesh& mesh
 )
 {
-    return autoCreateWallFunctionField<scalar>
-    (
-        fieldName,
-        mesh,
-        RASModels::kQRWallFunctionFvPatchField<scalar>::typeName
-    );
+    return
+        autoCreateWallFunctionField
+        <
+            scalar,
+            RASModels::kQRWallFunctionFvPatchField<scalar>
+        >
+        (
+            fieldName,
+            mesh
+        );
 }
 
 
@@ -201,12 +264,16 @@ tmp<volSymmTensorField> autoCreateR
     const fvMesh& mesh
 )
 {
-    return autoCreateWallFunctionField<symmTensor>
-    (
-        fieldName,
-        mesh,
-        RASModels::kQRWallFunctionFvPatchField<symmTensor>::typeName
-    );
+    return
+        autoCreateWallFunctionField
+        <
+            symmTensor,
+            RASModels::kQRWallFunctionFvPatchField<symmTensor>
+        >
+        (
+            fieldName,
+            mesh
+        );
 }
 
 

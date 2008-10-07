@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
           + sgsModel->divDevBeff(U)
         );
 
+        // Optionally ensure diagonal-dominance of the momentum matrix
+        UEqn.relax();
+
         if (momentumPredictor)
         {
             solve(UEqn == -fvc::grad(p));

@@ -23,18 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::LESModels::muSgsWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::alphatWallFunctionFvPatchScalarField
 
 Description
-    wall function boundary condition for compressible flows
+    Boundary condition for turbulent thermal diffusivity when using wall
+    functions
+    - replicates OpenFOAM v1.5 (and earlier) behaviour
 
 SourceFiles
-    muSgsWallFunctionFvPatchScalarField.C
+    alphatWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef muSgsWallFunctionFvPatchScalarField_H
-#define muSgsWallFunctionFvPatchScalarField_H
+#ifndef alphatWallFunctionFvPatchScalarField_H
+#define alphatWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -44,65 +46,56 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LESModels
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class muSgsWallFunctionFvPatch Declaration
+            Class alphatWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class muSgsWallFunctionFvPatchScalarField
+class alphatWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
-
 
 public:
 
     //- Runtime type information
-    TypeName("muSgsWallFunction");
+    TypeName("alphatWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        muSgsWallFunctionFvPatchScalarField
+        alphatWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
-        //- Construct from patch, internal field and Istream
-        muSgsWallFunctionFvPatchScalarField
-        (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
-            Istream&
-        );
-
         //- Construct from patch, internal field and dictionary
-        muSgsWallFunctionFvPatchScalarField
+        alphatWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given muSgsWallFunctionFvPatchScalarField
+        //- Construct by mapping given
+        //  alphatWallFunctionFvPatchScalarField
         //  onto a new patch
-        muSgsWallFunctionFvPatchScalarField
+        alphatWallFunctionFvPatchScalarField
         (
-            const muSgsWallFunctionFvPatchScalarField&,
+            const alphatWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        muSgsWallFunctionFvPatchScalarField
+        alphatWallFunctionFvPatchScalarField
         (
-            const muSgsWallFunctionFvPatchScalarField&
+            const alphatWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -110,14 +103,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new muSgsWallFunctionFvPatchScalarField(*this)
+                new alphatWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        muSgsWallFunctionFvPatchScalarField
+        alphatWallFunctionFvPatchScalarField
         (
-            const muSgsWallFunctionFvPatchScalarField&,
+            const alphatWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -129,7 +122,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new muSgsWallFunctionFvPatchScalarField(*this, iF)
+                new alphatWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
@@ -138,17 +131,20 @@ public:
 
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
+
+        // I-O
+
+            //- Write
+            void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LESModels
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

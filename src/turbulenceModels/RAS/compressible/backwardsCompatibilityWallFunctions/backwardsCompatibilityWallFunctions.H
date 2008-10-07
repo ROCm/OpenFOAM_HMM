@@ -46,17 +46,15 @@ namespace Foam
 {
 namespace compressible
 {
-
-    //- Replace old wall BCs with new wall function BCs
-    wordList replaceWallBoundaryTypes
-    (
-        const fvMesh& mesh,
-        const wordList& oldTypeNames,
-        const wordList& newTypeNames
-    );
-
     //- mut
     tmp<volScalarField> autoCreateMut
+    (
+        const word& fieldName,
+        const fvMesh& mesh
+    );
+
+    //- alphat
+    tmp<volScalarField> autoCreateAlphat
     (
         const word& fieldName,
         const fvMesh& mesh
@@ -98,13 +96,12 @@ namespace compressible
     );
 
     //- Helper function to create the new field
-    template<class Type>
+    template<class Type, class PatchType>
     tmp<GeometricField<Type, fvPatchField, volMesh> >
     autoCreateWallFunctionField
     (
         const word& fieldName,
-        const fvMesh& mesh,
-        const word& wallFunctionName
+        const fvMesh& mesh
     );
 
 

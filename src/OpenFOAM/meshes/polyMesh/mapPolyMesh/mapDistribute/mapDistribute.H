@@ -168,19 +168,50 @@ public:
                 List<T>&
             );
 
-            //- Distribute data using scheduling.
+            //- Distribute data using default commsType.
             template<class T>
             void distribute(List<T>& fld) const
             {
-                distribute
+                if
                 (
-                    Pstream::scheduled,
-                    schedule(),
-                    constructSize_,
-                    subMap_,
-                    constructMap_,
-                    fld
-                );
+                    Pstream::defaultCommsType == Pstream::nonBlocking
+                 && contiguous<T>()
+                )
+                {
+                    distribute
+                    (
+                        Pstream::nonBlocking,
+                        List<labelPair>(),
+                        constructSize_,
+                        subMap_,
+                        constructMap_,
+                        fld
+                    );
+                }
+                else if (Pstream::defaultCommsType == Pstream::scheduled)
+                {
+                    distribute
+                    (
+                        Pstream::scheduled,
+                        schedule(),
+                        constructSize_,
+                        subMap_,
+                        constructMap_,
+                        fld
+                    );
+                }
+                else
+                {
+                    distribute
+                    (
+                        Pstream::blocking,
+                        List<labelPair>(),
+                        constructSize_,
+                        subMap_,
+                        constructMap_,
+                        fld
+                    );
+                }
             }
 
             //- Correct for topo change.

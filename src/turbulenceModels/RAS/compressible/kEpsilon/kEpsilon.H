@@ -74,7 +74,6 @@ class kEpsilon
 
         // Model coefficients
 
-//            dimensionedScalar Cmu;
             dimensionedScalar Cmu_;
             dimensionedScalar C1_;
             dimensionedScalar C2_;
@@ -88,6 +87,7 @@ class kEpsilon
             volScalarField k_;
             volScalarField epsilon_;
             volScalarField mut_;
+            volScalarField alphat_;
 
 
 public:
@@ -144,7 +144,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
             );
         }
 

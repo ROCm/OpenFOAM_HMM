@@ -6,5 +6,6 @@ wmake libo postCalc
 wmake libso forces
 wmake libso fieldAverage
 wmake libso foamCalcFunctions
+wmake libso minMaxFields
 
 # ----------------------------------------------------------------- end-of-file

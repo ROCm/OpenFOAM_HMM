@@ -100,13 +100,23 @@ int main(int argc, char *argv[])
 
                 if (dict.found(entryNames[0]))
                 {
-                    const entry* entPtr = &dict.lookupEntry(entryNames[0]);
+                    const entry* entPtr = &dict.lookupEntry
+                    (
+                        entryNames[0],
+                        false,
+                        true            // wildcards
+                    );
 
                     for (int i=1; i<entryNames.size(); i++)
                     {
                         if (entPtr->dict().found(entryNames[i]))
                         {
-                            entPtr = &entPtr->dict().lookupEntry(entryNames[i]);
+                            entPtr = &entPtr->dict().lookupEntry
+                            (
+                                entryNames[i],
+                                false,
+                                true    // wildcards
+                            );
                         }
                         else
                         {
