@@ -73,6 +73,8 @@ private:
 
     // Private Member Functions
 
+        void buildConstProps();
+
         //- Determine which molecules are in which cells
         void buildCellOccupancy();
 
@@ -141,7 +143,8 @@ public:
             const potential& pot
         );
 
-        //- Construct given polyMesh and fields of components.  Intended for use
+        //- Construct given polyMesh and fields of components.
+        //- Intended for use
         //- by the molConfig utility
         // moleculeCloud
         // (
@@ -184,7 +187,8 @@ public:
 
             inline const List<molecule::constantProperties> constProps() const;
 
-            inline const molecule::constantProperties& constProps(label id) const;
+            inline const molecule::constantProperties&
+            constProps(label id) const;
 
     // Member Operators
 

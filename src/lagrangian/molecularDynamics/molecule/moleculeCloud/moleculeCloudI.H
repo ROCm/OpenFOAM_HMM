@@ -101,7 +101,7 @@ inline void Foam::moleculeCloud::evaluatePair
         // Acceleration increment for molReal
         molReal->a() += fRealRef/massReal;
 
-        // Adding a contribution 19f 1/2 of the potential energy
+        // Adding a contribution of 1/2 of the potential energy
         // from this interaction
         molReal->potentialEnergy() +=
             0.5*pairPot.energy(idReal, idRef, rRealRefMag);

@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 #   include "createAutoCorrelationFunctions.H"
 
     label nAveragingSteps = 0;
-    
+
     Info << "\nStarting time loop\n" << endl;
 
     while (runTime.run())
@@ -87,6 +87,6 @@ int main(int argc, char *argv[])
 #   include "calculateTransportProperties.H"
 
     Info << "End\n" << endl;
-            
+
     return(0);
 }

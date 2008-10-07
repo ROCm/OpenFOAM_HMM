@@ -80,16 +80,19 @@ public:
 
         // Private data
 
-        List<vector> siteReferencePositions_;
+            List<vector> siteReferencePositions_;
 
-        List<scalar> siteCharges_;
+            List<scalar> siteCharges_;
 
-        List<label> siteIds_;
+            List<label> siteIds_;
 
-        diagTensor momentOfInertia_;
+            diagTensor momentOfInertia_;
 
-        scalar mass_;
+            scalar mass_;
 
+        // Private Member Functions
+
+            void checkSiteListSizes() const;
 
     public:
 
@@ -105,6 +108,9 @@ public:
             scalar mass
         );
 
+        //- Constructor
+        inline constantProperties(const dictionary& dict);
+
         // Member functions
 
         inline const List<vector>& siteReferencePositions() const;
@@ -112,6 +118,7 @@ public:
         inline const List<scalar>& siteCharges() const;
 
         inline const List<label>& siteIds() const;
+        inline List<label>& siteIds();
 
         inline const diagTensor& momentOfInertia() const;
 

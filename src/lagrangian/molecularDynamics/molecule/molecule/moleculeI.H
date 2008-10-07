@@ -33,9 +33,7 @@ inline Foam::molecule::constantProperties::constantProperties()
     siteIds_(List<label>(0)),
     momentOfInertia_(diagTensor(0, 0, 0)),
     mass_(0)
-{
-
-}
+{}
 
 
 inline Foam::molecule::constantProperties::constantProperties
@@ -53,16 +51,24 @@ inline Foam::molecule::constantProperties::constantProperties
     momentOfInertia_(momentOfInertia),
     mass_(mass)
 {
-    if
-    (
-        siteIds_.size() != siteReferencePositions_.size()
-     || siteIds_.size() != siteCharges_.size()
-    )
-    {
-        FatalErrorIn("molecule::constantProperties::constantProperties")
-            << "Sizes of site id, charge and referencePositions are not the same. "
-            << abort(FatalError);
-    }
+    checkSiteListSizes();
+}
+
+
+inline Foam::molecule::constantProperties::constantProperties
+(
+    const dictionary& dict
+)
+:
+    siteReferencePositions_(dict.lookup("siteReferencePositions")),
+    siteCharges_(dict.lookup("siteCharges")),
+    siteIds_(List<word>(dict.lookup("siteIds")).size(), -1),
+    momentOfInertia_(dict.lookup("momentOfInertia")),
+    mass_(readScalar(dict.lookup("mass")))
+{
+    checkSiteListSizes();
+
+    Info<< nl << "siteIds not set yet." << endl;
 }
 
 
@@ -101,6 +107,25 @@ inline Foam::molecule::molecule
 }
 
 
+// * * * constantProperties Private Member Functions * * * * * * * * * * * * //
+
+
+inline void Foam::molecule::constantProperties::checkSiteListSizes() const
+{
+    if
+    (
+        siteIds_.size() != siteReferencePositions_.size()
+     || siteIds_.size() != siteCharges_.size()
+    )
+    {
+        FatalErrorIn("molecule::constantProperties::checkSiteListSizes")
+            << "Sizes of site id, charge and "
+            << "referencePositions are not the same. "
+            << nl << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
 
 inline const Foam::List<Foam::vector>&
@@ -119,6 +144,13 @@ inline const Foam::List<Foam::scalar>&
 
 inline const Foam::List<Foam::label>&
     Foam::molecule::constantProperties::siteIds() const
+{
+    return siteIds_;
+}
+
+
+inline Foam::List<Foam::label>&
+    Foam::molecule::constantProperties::siteIds()
 {
     return siteIds_;
 }

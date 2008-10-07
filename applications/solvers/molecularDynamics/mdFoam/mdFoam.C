@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-//#include "md.H"
+#include "md.H"
 #include "potential.H"
 
 int main(int argc, char *argv[])
@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
 
     potential pot(mesh);
+
+    moleculeCloud molecules(mesh, pot);
 
     Info << "\nStarting time loop\n" << endl;
 

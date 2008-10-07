@@ -31,7 +31,22 @@ License
 Foam::potential::potential(const polyMesh& mesh)
 :
     mesh_(mesh)
+{}
 
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::potential::~potential()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+void Foam::potential::potential::readPotentialDict
+(
+    const List<word>& allSiteIdNames
+)
 {
     Info<< nl <<  "Reading potential dictionary:" << endl;
 
@@ -48,6 +63,52 @@ Foam::potential::potential(const polyMesh& mesh)
     );
 
     idList_ = List<word>(idListDict.lookup("idList"));
+
+    IOdictionary moleculePropertiesDict
+    (
+        IOobject
+        (
+            "moleculeProperties",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    DynamicList<word> allSiteIdNames;
+
+    forAll(idList, i)
+    {
+        const word& id(idList[i]);
+
+        if (!moleculePropertiesDict.found(id))
+        {
+            FatalErrorIn("potential.C") << nl
+                << id << " molecule subDict not found"
+                << nl << abort(FatalError);
+        }
+
+        const dictionary& molDict(moleculePropertiesDict.subDict(id));
+
+        List<word> siteIdNames = molDict.lookup("siteIds");
+
+        forAll(siteIdNames, sI)
+        {
+            const word& siteId = siteIdNames[sI];
+
+            if(findIndex(allSiteIdNames, siteId) == -1)
+            {
+                allSiteIdNames.append(siteId);
+            }
+        }
+    }
+
+    // CREATE allSiteIdNames_ DATA MEMBER
+    allSiteIdNames_.transfer(allSiteIdNames.shrink());
+
+    Info<< nl << "Unique site ids found: " << allSiteIdNames << endl;
 
     List<word> tetherIdList(0);
 
@@ -85,7 +146,7 @@ Foam::potential::potential(const polyMesh& mesh)
         }
     }
 
-    // ****************************************************************************
+    // *************************************************************************
     // Pair potentials
 
     if (!potentialDict.found("pair"))
@@ -99,7 +160,7 @@ Foam::potential::potential(const polyMesh& mesh)
 
     pairPotentials_.buildPotentials(idList_, pairDict, mesh_);
 
-    // ****************************************************************************
+    // *************************************************************************
     // Tether potentials
 
     if (tetherIdList.size())
@@ -116,7 +177,7 @@ Foam::potential::potential(const polyMesh& mesh)
         tetherPotentials_.buildPotentials(idList_, tetherDict, tetherIdList);
     }
 
-    // ****************************************************************************
+    // *************************************************************************
     // External Forces
 
     gravity_ = vector::zero;
@@ -128,7 +189,7 @@ Foam::potential::potential(const polyMesh& mesh)
 
         const dictionary& externalDict = potentialDict.subDict("external");
 
-        // ************************************************************************
+        // *********************************************************************
         // gravity
 
         if (externalDict.found("gravity"))
@@ -139,16 +200,6 @@ Foam::potential::potential(const polyMesh& mesh)
 
     Info << nl << tab << "gravity = " << gravity_ << endl;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::potential::~potential()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

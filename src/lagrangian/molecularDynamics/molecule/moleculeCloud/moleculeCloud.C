@@ -44,6 +44,57 @@ Foam::scalar Foam::moleculeCloud::vacuumPermittivity = 8.854187817e-12;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::moleculeCloud::buildConstProps()
+{
+    Info<< nl << "Reading moleculeProperties dictionary." << endl;
+
+    const List<word>& idList(pot_.idList());
+
+    constPropList_.setSize(idList.size());
+
+    const List<word>& allSiteIdNames(pot_.allSiteIdNames());
+
+    forAll(idList, i)
+    {
+        const word& id(idList[i]);
+
+        const dictionary& molDict(moleculePropertiesDict.subDict(id));
+
+        List<word> siteIdNames = molDict.lookup("siteIds");
+
+        List<label> siteIds(siteIdNames.size());
+
+        forAll(siteIdNames, sI)
+        {
+            const word& siteId = siteIdNames[sI];
+
+            siteIds[sI] = findIndex(allSiteIdNames, siteId);
+
+            if (siteIds[sI] == -1)
+            {
+                FatalErrorIn("moleculeCloud.C") << nl
+                    << siteId << " site not found."
+                    << nl << abort(FatalError);
+            }
+        }
+
+        molecule::constantProperties& constProp = constPropList_[i];
+
+        constProp = molecule::constantProperties(molDict);
+
+        constProp.siteIds() = siteIds;
+
+        Info<< constPropList_[i].siteReferencePositions()
+            << nl << constPropList_[i].siteCharges()
+            << nl << constPropList_[i].siteIds()
+            << nl << constPropList_[i].momentOfInertia()
+            << nl << constPropList_[i].mass()
+            << nl << constPropList_[i].nSites()
+            << endl;
+    }
+}
+
+
 void Foam::moleculeCloud::buildCellOccupancy()
 {
     forAll(cellOccupancy_, cO)
@@ -421,6 +472,8 @@ Foam::moleculeCloud::moleculeCloud
     constPropList_()
 {
     molecule::readFields(*this);
+
+    buildConstProps();
 
     buildCellOccupancy();
 
