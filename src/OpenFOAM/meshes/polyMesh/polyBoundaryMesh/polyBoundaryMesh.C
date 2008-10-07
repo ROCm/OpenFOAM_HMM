@@ -552,6 +552,8 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
         nextPatchStart += bm[patchI].size();
     }
 
+    reduce(boundaryError, orOp<bool>());
+
     if (boundaryError)
     {
         if (debug || report)
@@ -565,7 +567,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
     {
         if (debug || report)
         {
-            Pout << "    Boundary definition OK." << endl;
+            Info << "    Boundary definition OK." << endl;
         }
 
         return false;
