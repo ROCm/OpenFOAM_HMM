@@ -100,7 +100,8 @@ bool Foam::molecule::move(molecule::trackData& td)
 
     if (td.part() == 0)
     {
-        // First leapfrog velocity adjust part, required before tracking+force part
+        // First leapfrog velocity adjust part, required before tracking+force
+        // part
 
         v_ += 0.5*deltaT*a_;
 
@@ -133,7 +134,8 @@ bool Foam::molecule::move(molecule::trackData& td)
     }
     else if (td.part() == 3)
     {
-        // Second leapfrog velocity adjust part, required after tracking+force part
+        // Second leapfrog velocity adjust part, required after tracking+force
+        // part
 
         const diagTensor& I(td.molCloud().constProps(id_).momentOfInertia());
 
