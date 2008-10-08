@@ -101,11 +101,18 @@ private:
         //- Type of transformation - rotational or translational
         transformType transform_;
 
-        //- Axis of rotation for rotational cyclics
-        vector rotationAxis_;
+        // For rotation
 
-        //- point on axis of rotation for rotational cyclics
-        point rotationCentre_;
+            //- Axis of rotation for rotational cyclics
+            vector rotationAxis_;
+
+            //- point on axis of rotation for rotational cyclics
+            point rotationCentre_;
+
+        // For translation
+
+            //- Translation vector
+            vector separationVector_;
 
 
     // Private member functions
@@ -267,66 +274,94 @@ public:
         const edgeList& coupledEdges() const;
 
 
-        vector separation(const label facei) const
-        {
-            if (facei < size()/2)
-            {
-                return coupledPolyPatch::separation()[0];
-            }
-            else
-            {
-                return -coupledPolyPatch::separation()[0];
-            }
-        }
 
-        const tensor& transformT(const label facei) const
-        {
-            if (facei < size()/2)
-            {
-                return reverseT()[0];
-            }
-            else
-            {
-                return forwardT()[0];
-            }
-        }
+        // Transformation
 
-        template<class T>
-        T transform(const T& t, const label facei) const
-        {
-            if (parallel())
+            vector separation(const label facei) const
             {
-                return t;
+                if (facei < size()/2)
+                {
+                    return coupledPolyPatch::separation()[0];
+                }
+                else
+                {
+                    return -coupledPolyPatch::separation()[0];
+                }
             }
-            else
-            {
-                return Foam::transform(transformT(facei), t);
-            }
-        }
 
-        label transformLocalFace(const label facei) const
-        {
-            if (facei < size()/2)
+            const tensor& transformT(const label facei) const
             {
-                return facei + size()/2;
+                if (facei < size()/2)
+                {
+                    return reverseT()[0];
+                }
+                else
+                {
+                    return forwardT()[0];
+                }
             }
-            else
-            {
-                return facei - size()/2;
-            }
-        }
 
-        label transformGlobalFace(const label facei) const
-        {
-            if (facei - start() < size()/2)
+            template<class T>
+            T transform(const T& t, const label facei) const
             {
-                return facei + size()/2;
+                if (parallel())
+                {
+                    return t;
+                }
+                else
+                {
+                    return Foam::transform(transformT(facei), t);
+                }
             }
-            else
+
+            label transformLocalFace(const label facei) const
             {
-                return facei - size()/2;
+                if (facei < size()/2)
+                {
+                    return facei + size()/2;
+                }
+                else
+                {
+                    return facei - size()/2;
+                }
             }
-        }
+
+            label transformGlobalFace(const label facei) const
+            {
+                if (facei - start() < size()/2)
+                {
+                    return facei + size()/2;
+                }
+                else
+                {
+                    return facei - size()/2;
+                }
+            }
+
+            //- Type of transform
+            transformType transform() const
+            {
+                return transform_;
+            }
+
+            //- Axis of rotation for rotational cyclics
+            const vector& rotationAxis() const
+            {
+                return rotationAxis_;
+            }
+
+            //- point on axis of rotation for rotational cyclics
+            const point& rotationCentre() const
+            {
+                return rotationCentre_;
+            }
+
+            //- Translation vector for translational cyclics
+            const vector& separationVector() const
+            {
+                return separationVector_;
+            }
+
 
 
         //- Initialize ordering for primitivePatch. Does not

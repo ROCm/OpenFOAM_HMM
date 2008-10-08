@@ -206,7 +206,7 @@ Foam::label Foam::quadraticFitData::calcFit
     // calculate the matrix of the polynomial components
     scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
-    for(label ip = 0; ip < C.size(); ip++)
+        for(label ip = 0; ip < C.size(); ip++)
     {
         const point& p = C[ip];
 
@@ -228,9 +228,8 @@ Foam::label Foam::quadraticFitData::calcFit
         pz /= scale;
 
         label is = 0;
-        B[ip][is++] = wts[ip];
-
-        B[ip][is++] = wts[ip]*px;
+        B[ip][is++] = wts[0]*wts[ip];
+        B[ip][is++] = wts[0]*wts[ip]*px;
         B[ip][is++] = wts[ip]*sqr(px);
 
         if (dim_ >= 2)
@@ -255,14 +254,14 @@ Foam::label Foam::quadraticFitData::calcFit
     label nSVDzeros = 0;
 
     bool goodFit = false;
-    for(scalar tol = SMALL; tol < 0.1 && !goodFit; tol *= 10)
+    for(int iIt = 0; iIt < 35 && !goodFit; iIt++)
     {
-        SVD svd(B, tol);
+        SVD svd(B, SMALL);
 
-        scalar fit0 = wts[0]*svd.VSinvUt()[0][0];
-        scalar fit1 = wts[1]*svd.VSinvUt()[0][1];
+        scalar fit0 = wts[0]*wts[0]*svd.VSinvUt()[0][0];
+        scalar fit1 = wts[0]*wts[1]*svd.VSinvUt()[0][1];
 
-        goodFit = sign(fit0) == sign(fit1);
+        goodFit = sign(fit0) == sign(fit1) && fit0 < 1 && fit1 < 1;
 
         if (goodFit)
         {
@@ -270,11 +269,26 @@ Foam::label Foam::quadraticFitData::calcFit
             fit_[faci][1] = fit1;
             for(label i = 2; i < stencilSize; i++)
             {
-                fit_[faci][i] = wts[i]*svd.VSinvUt()[0][i];
+                fit_[faci][i] = wts[0]*wts[i]*svd.VSinvUt()[0][i];
             }
 
             singVals = svd.S();
             nSVDzeros = svd.nZeros();
+        }
+        else // (not good fit so increase weight in the centre and for linear)
+        {
+            wts[0] *= 10;
+            wts[1] *= 10;
+            for(label i = 0; i < B.n(); i++)
+            {
+                B[i][0] *= 10;
+                B[i][1] *= 10;
+            }
+            for(label j = 0; j < B.m(); j++)
+            {
+                B[0][j] *= 10;
+                B[1][j] *= 10;
+            }
         }
     }
     if (!goodFit)
@@ -283,7 +297,7 @@ Foam::label Foam::quadraticFitData::calcFit
         (
             "quadraticFitData::calcFit(const pointField&, const label)"
             ) << "For face " << faci << endl
-            << "Fit not good even once tol >= 0.1"
+            << "Cannot find good fit"
             << exit(FatalError);
     }
 
