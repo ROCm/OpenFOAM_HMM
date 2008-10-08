@@ -85,6 +85,11 @@ int main(int argc, char *argv[])
           + 2.0 * mSites[0] * (pSites[0].y() * pSites[0].y() + pSites[0].x() * pSites[0].x())
     );
 
+    Info<< m
+        << nl << qSites
+        << nl << pSites
+        << nl << I << endl;
+
     vector p1(0, 0, 0);
 
     vector v1(100, 0, 0);

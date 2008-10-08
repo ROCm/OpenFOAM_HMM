@@ -40,6 +40,12 @@ inline const Foam::List<Foam::word>& Foam::potential::idList() const
 }
 
 
+inline const Foam::List<Foam::word>& Foam::potential::allSiteIdNames() const
+{
+    return allSiteIdNames_;
+}
+
+
 inline Foam::scalar Foam::potential::potentialEnergyLimit() const
 {
     return potentialEnergyLimit_;

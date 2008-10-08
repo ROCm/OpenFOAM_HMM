@@ -67,8 +67,6 @@ inline Foam::molecule::constantProperties::constantProperties
     mass_(readScalar(dict.lookup("mass")))
 {
     checkSiteListSizes();
-
-    Info<< nl << "siteIds not set yet." << endl;
 }
 
 

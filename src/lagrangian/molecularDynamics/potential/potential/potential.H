@@ -59,6 +59,8 @@ class potential
 
         List<word> idList_;
 
+        List<word> allSiteIdNames_;
+
         scalar potentialEnergyLimit_;
 
         labelList removalOrder_;
@@ -70,6 +72,8 @@ class potential
         vector gravity_;
 
     // Private Member Functions
+
+        void readPotentialDict();
 
         //- Disallow default bitwise copy construct
         potential(const potential&);
@@ -97,6 +101,8 @@ public:
             inline label nIds() const;
 
             inline const List<word>& idList() const;
+
+            inline const List<word>& allSiteIdNames() const;
 
             inline scalar potentialEnergyLimit() const;;
 

@@ -40,8 +40,8 @@ Foam::tensor Foam::molecule::rotationTensor(scalar deltaT) const
         tensor
         (
             1, 0, 0,
-            0, Foam::cos(phi1), Foam::sin(phi1),
-            0, -Foam::sin(phi1), Foam::cos(phi1)
+            0, Foam::cos(phi1), -Foam::sin(phi1),
+            0, Foam::sin(phi1), Foam::cos(phi1)
         )
     );
 
@@ -51,9 +51,9 @@ Foam::tensor Foam::molecule::rotationTensor(scalar deltaT) const
     (
         tensor
         (
-            Foam::cos(phi2), 0, -Foam::sin(phi2),
+            Foam::cos(phi2), 0, Foam::sin(phi2),
             0, 1, 0,
-            Foam::sin(phi2), 0, Foam::cos(phi2)
+            -Foam::sin(phi2), 0, Foam::cos(phi2)
         )
     );
 
@@ -63,13 +63,13 @@ Foam::tensor Foam::molecule::rotationTensor(scalar deltaT) const
     (
         tensor
         (
-            Foam::cos(phi3), Foam::sin(phi3), 0,
-            -Foam::sin(phi3), Foam::cos(phi3), 0,
+            Foam::cos(phi3), -Foam::sin(phi3), 0,
+            Foam::sin(phi3), Foam::cos(phi3), 0,
             0, 0, 1
         )
     );
 
-    return (U1.T() & U2.T() & U3.T() & U2.T() & U1.T());
+    return (U1 & U2 & U3 & U2 & U1);
 }
 
 

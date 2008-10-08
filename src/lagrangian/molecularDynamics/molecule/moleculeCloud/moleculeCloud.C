@@ -54,6 +54,19 @@ void Foam::moleculeCloud::buildConstProps()
 
     const List<word>& allSiteIdNames(pot_.allSiteIdNames());
 
+    IOdictionary moleculePropertiesDict
+    (
+        IOobject
+        (
+            "moleculeProperties",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
     forAll(idList, i)
     {
         const word& id(idList[i]);
@@ -83,14 +96,6 @@ void Foam::moleculeCloud::buildConstProps()
         constProp = molecule::constantProperties(molDict);
 
         constProp.siteIds() = siteIds;
-
-        Info<< constPropList_[i].siteReferencePositions()
-            << nl << constPropList_[i].siteCharges()
-            << nl << constPropList_[i].siteIds()
-            << nl << constPropList_[i].momentOfInertia()
-            << nl << constPropList_[i].mass()
-            << nl << constPropList_[i].nSites()
-            << endl;
     }
 }
 

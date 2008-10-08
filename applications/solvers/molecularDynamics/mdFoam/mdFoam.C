@@ -43,6 +43,10 @@ int main(int argc, char *argv[])
 
     potential pot(mesh);
 
+    const pairPotentialList& pairPot(pot.pairPotentials());
+
+    Info<< pairPot.energy(0, 0, 0.45e-9) << endl;
+
     moleculeCloud molecules(mesh, pot);
 
     Info << "\nStarting time loop\n" << endl;
