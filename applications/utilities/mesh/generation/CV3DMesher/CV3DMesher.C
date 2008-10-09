@@ -49,22 +49,24 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    // Read control dictionary
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-
-    dictionary controlDict
+    IOdictionary CV3DMesherDict
     (
-        IFstream(runTime.system()/args.executable() + "Dict")()
+        IOobject
+        (
+            "CV3DMesherDict",
+            runTime.system(),
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     );
-
-    label nIterations(readLabel(controlDict.lookup("nIterations")));
 
     // Read the surface to conform to
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     querySurface surf
     (
         args.args()[1],
-        readScalar(controlDict.lookup("includedAngle"))
+        readScalar(CV3DMesherDict.lookup("includedAngle"))
     );
 
     Info<< nl
@@ -74,7 +76,7 @@ int main(int argc, char *argv[])
     // Read and triangulation
     // ~~~~~~~~~~~~~~~~~~~~~~
 
-    CV3D mesh(controlDict, surf);
+    CV3D mesh(runTime, surf);
 
     if (args.options().found("pointsFile"))
     {
@@ -93,6 +95,12 @@ int main(int argc, char *argv[])
     scalar relaxation =
     mesh.meshingControls().relaxationFactorStart;
 
+    label nIterations = label
+    (
+        (runTime.endTime().value() - runTime.startTime().value())
+        /runTime.deltaT().value()
+    );
+
     scalar relaxationDelta =
     (
         mesh.meshingControls().relaxationFactorStart
@@ -100,10 +108,12 @@ int main(int argc, char *argv[])
     )
     /max(nIterations, 1);
 
-    for (label iter = 0; iter < nIterations; iter++)
+    while (runTime.run())
     {
+        runTime++;
+
         Info<< nl
-            << "Relaxation iteration " << iter << nl
+            << "Relaxation iteration " << runTime.timeIndex() << nl
             << "~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
         Info<< "relaxation = " << relaxation << endl;
@@ -118,10 +128,6 @@ int main(int argc, char *argv[])
     }
 
     mesh.write();
-
-    mesh.writeDual("dualMesh.obj");
-
-    mesh.writeMesh(runTime);
 
     Info << nl << "End\n" << endl;
 

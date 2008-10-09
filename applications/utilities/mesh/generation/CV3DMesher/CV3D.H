@@ -49,7 +49,9 @@ SourceFiles
 #include "CGALTriangulation3Ddefs.H"
 
 #include "querySurface.H"
-#include "dictionary.H"
+#include "IOdictionary.H"
+#include "pointIOField.H"
+#include "argList.H"
 #include "DynamicList.H"
 #include "Switch.H"
 #include "Time.H"
@@ -132,7 +134,7 @@ public:
         Switch randomiseInitialGrid;
         scalar randomPerturbation;
 
-        controls(const dictionary& controlDict);
+        controls(const IOdictionary& controlDict);
     };
 
     class tolerances
@@ -178,7 +180,7 @@ public:
 
         tolerances
         (
-            const dictionary& controlDict,
+            const IOdictionary& controlDict,
             scalar minCellSize,
             const boundBox&
         );
@@ -190,6 +192,9 @@ private:
 
         //- The surface to mesh
         const querySurface& qSurf_;
+
+        //- The time registry of the application
+        const Time& runTime_;
 
         //- Meshing controls
         controls controls_;
@@ -330,7 +335,11 @@ public:
     // Constructors
 
         //- Construct for given surface
-        CV3D(const dictionary& controlDict, const querySurface& qSurf);
+        CV3D
+        (
+            const Time& runTime,
+            const querySurface& qSurf
+        );
 
     // Destructor
 
@@ -415,9 +424,9 @@ public:
             void writeDual(const fileName& fName) const;
 
             //- Write polyMesh
-            void writeMesh(const Time& runTime);
+            void writeMesh(bool writeToTimestep = false);
 
-            void write() const;
+            void write();
 };
 
 

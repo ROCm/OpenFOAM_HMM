@@ -30,7 +30,7 @@ License
 
 Foam::CV3D::tolerances::tolerances
 (
-    const dictionary& controlDict,
+    const IOdictionary& controlDict,
     const scalar minCellSize,
     const boundBox& bb
 )

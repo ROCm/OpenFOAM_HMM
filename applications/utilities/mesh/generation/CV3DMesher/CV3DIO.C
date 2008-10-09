@@ -187,10 +187,8 @@ void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
     }
 }
 
-void Foam::CV3D::writeMesh(const Time& runTime)
+void Foam::CV3D::writeMesh(bool writeToTimestep)
 {
-    Info<< nl << "Writing polyMesh." << endl;
-
     pointField points(0);
     faceList faces(0);
     labelList owner(0);
@@ -210,14 +208,34 @@ void Foam::CV3D::writeMesh(const Time& runTime)
         patchStarts
     );
 
+
     IOobject io
     (
         Foam::polyMesh::defaultRegion,
-        runTime.constant(),
-        runTime,
+        runTime_.constant(),
+        runTime_,
         IOobject::NO_READ,
         IOobject::AUTO_WRITE
     );
+
+    if (writeToTimestep)
+    {
+        Info<< nl << "Writing polyMesh to time directory "
+            << runTime_.timeName() << endl;
+
+        io = IOobject
+        (
+            Foam::polyMesh::defaultRegion,
+            runTime_.path()/runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        );
+    }
+    else
+    {
+        Info<< nl << "Writing polyMesh to constant." << endl;
+    }
 
     polyMesh pMesh
     (
@@ -246,7 +264,7 @@ void Foam::CV3D::writeMesh(const Time& runTime)
 
     if (!pMesh.write())
     {
-        FatalErrorIn("CV3D::writeMesh(const Time& runTime)")
+        FatalErrorIn("CV3D::writeMesh()")
             << "Failed writing polyMesh."
             << exit(FatalError);
     }

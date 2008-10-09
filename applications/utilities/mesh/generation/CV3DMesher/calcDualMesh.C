@@ -39,8 +39,6 @@ void Foam::CV3D::calcDualMesh
     labelList& patchStarts
 )
 {
-    Info << nl << "Calculating Voronoi diagram." << endl;
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ dual points ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     points.setSize(number_of_cells());

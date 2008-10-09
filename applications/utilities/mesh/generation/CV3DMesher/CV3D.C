@@ -26,7 +26,6 @@ License
 
 #include "CV3D.H"
 #include "Random.H"
-#include "IFstream.H"
 #include "uint.H"
 #include "ulong.H"
 
@@ -49,7 +48,7 @@ void Foam::CV3D::insertBoundingBox()
 
 void Foam::CV3D::reinsertPoints(const pointField& points)
 {
-    Info<< "Reinserting points after motion. ";
+    Info<< nl << "Reinserting points after motion. ";
 
     startOfInternalPoints_ = number_of_vertices();
     label nVert = startOfInternalPoints_;
@@ -70,14 +69,43 @@ void Foam::CV3D::reinsertPoints(const pointField& points)
 
 Foam::CV3D::CV3D
 (
-    const dictionary& controlDict,
+    const Time& runTime,
     const querySurface& qSurf
 )
 :
     HTriangulation(),
     qSurf_(qSurf),
-    controls_(controlDict),
-    tols_(controlDict, controls_.minCellSize, qSurf.bb()),
+    runTime_(runTime),
+    controls_
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                "CV3DMesherDict",
+                runTime_.system(),
+                runTime_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    ),
+    tols_
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                "CV3DMesherDict",
+                runTime_.system(),
+                runTime_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        ),
+        controls_.minCellSize,
+        qSurf.bb()
+    ),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
     featureConstrainingVertices_(0)
@@ -137,18 +165,19 @@ void Foam::CV3D::insertPoints
 
 void Foam::CV3D::insertPoints(const fileName& pointFileName)
 {
-    IFstream pointsFile(pointFileName);
+    pointIOField points
+    (
+        IOobject
+        (
+            pointFileName.name(),
+            pointFileName.path(),
+            runTime_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
 
-    if (pointsFile.good())
-    {
-        insertPoints(pointField(pointsFile), 0.5*controls_.minCellSize2);
-    }
-    else
-    {
-        FatalErrorIn("insertInitialPoints")
-            << "Could not open pointsFile " << pointFileName
-            << exit(FatalError);
-    }
+    insertPoints(points, 0.5*controls_.minCellSize2);
 }
 
 
@@ -262,7 +291,15 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
         )
         {
             cit->cellIndex() = dualVerti;
+
+            Info<< nl << topoint(cit->vertex(0)->point())
+                << nl << topoint(cit->vertex(1)->point())
+                << nl << topoint(cit->vertex(2)->point())
+                << nl << topoint(cit->vertex(3)->point())
+                << endl;
+
             dualVertices[dualVerti] = topoint(dual(cit));
+
             dualVerti++;
         }
         else
@@ -369,6 +406,12 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
         startOfInternalPoints_
     );
 
+    // Write the mesh before clearing it
+    if (runTime_.outputTime())
+    {
+        writeMesh(true);
+    }
+
     // Remove the entire triangulation
     this->clear();
 
@@ -426,18 +469,18 @@ void Foam::CV3D::removeSurfacePointPairs()
 }
 
 
-void Foam::CV3D::write() const
+void Foam::CV3D::write()
 {
     if (controls_.writeFinalTriangulation)
     {
         writePoints("allPoints.obj", false);
         writePoints("points.obj", true);
-//         writeFaces("allFaces.obj", false);
-//         writeFaces("faces.obj", true);
         writeTriangles("allTriangles.obj", false);
         writeTriangles("triangles.obj", true);
-//         writeMesh();
+        writeDual("dualMesh.obj");
     }
+
+    writeMesh();
 }
 
 // ************************************************************************* //

@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::CV3D::controls::controls(const dictionary& controlDict)
+Foam::CV3D::controls::controls(const IOdictionary& controlDict)
 :
     relaxationFactorStart
     (
