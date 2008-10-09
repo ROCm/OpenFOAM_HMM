@@ -113,7 +113,9 @@ Foam::quadraticFitData::quadraticFitData
     {
         interpPolySize[faci] = calcFit(stencilPoints[faci], faci);
     }
+
     interpPolySize.write();
+
     if (debug)
     {
         Info<< "quadraticFitData::quadraticFitData() :"
@@ -206,7 +208,7 @@ Foam::label Foam::quadraticFitData::calcFit
     // calculate the matrix of the polynomial components
     scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
-        for(label ip = 0; ip < C.size(); ip++)
+    for(label ip = 0; ip < C.size(); ip++)
     {
         const point& p = C[ip];
 
@@ -228,6 +230,7 @@ Foam::label Foam::quadraticFitData::calcFit
         pz /= scale;
 
         label is = 0;
+
         B[ip][is++] = wts[0]*wts[ip];
         B[ip][is++] = wts[0]*wts[ip]*px;
         B[ip][is++] = wts[ip]*sqr(px);
@@ -253,21 +256,36 @@ Foam::label Foam::quadraticFitData::calcFit
     scalarList singVals(minSize_);
     label nSVDzeros = 0;
 
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>& w =
+        mesh().surfaceInterpolation::weights();
+
     bool goodFit = false;
-    for(int iIt = 0; iIt < 35 && !goodFit; iIt++)
+    for(int iIt = 0; iIt < 10 && !goodFit; iIt++)
     {
         SVD svd(B, SMALL);
 
         scalar fit0 = wts[0]*wts[0]*svd.VSinvUt()[0][0];
         scalar fit1 = wts[0]*wts[1]*svd.VSinvUt()[0][1];
 
-        goodFit = sign(fit0) == sign(fit1) && fit0 < 1 && fit1 < 1;
+        //goodFit = (fit0 > 0 && fit1 > 0);
+
+        goodFit =
+            (mag(fit0 - w[faci])/w[faci] < 0.5)
+         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.5);
+
+        //scalar w0Err = fit0/w[faci];
+        //scalar w1Err = fit1/(1 - w[faci]);
+
+        //goodFit =
+        //    (w0Err > 0.5 && w0Err < 1.5)
+        // && (w1Err > 0.5 && w1Err < 1.5);
 
         if (goodFit)
         {
             fit_[faci][0] = fit0;
             fit_[faci][1] = fit1;
-            for(label i = 2; i < stencilSize; i++)
+
+            for(label i=2; i<stencilSize; i++)
             {
                 fit_[faci][i] = wts[0]*wts[i]*svd.VSinvUt()[0][i];
             }
@@ -279,11 +297,13 @@ Foam::label Foam::quadraticFitData::calcFit
         {
             wts[0] *= 10;
             wts[1] *= 10;
+
             for(label i = 0; i < B.n(); i++)
             {
                 B[i][0] *= 10;
                 B[i][1] *= 10;
             }
+
             for(label j = 0; j < B.m(); j++)
             {
                 B[0][j] *= 10;
@@ -291,23 +311,41 @@ Foam::label Foam::quadraticFitData::calcFit
             }
         }
     }
-    if (!goodFit)
+
+    //static const scalar alpha = 1.5;
+    //static const scalar beta = alpha/0.5;
+
+    if (goodFit)
     {
-        FatalErrorIn
-        (
-            "quadraticFitData::calcFit(const pointField&, const label)"
-            ) << "For face " << faci << endl
-            << "Cannot find good fit"
-            << exit(FatalError);
+        // scalar limiter =
+        // max
+        // (
+        //     min
+        //     (
+        //         min(alpha - beta*mag(fit_[faci][0] - w[faci])/w[faci], 1),
+        //         min(alpha - beta*mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]), 1)
+        //     ), 0
+        // );
+
+        // Remove the uncorrected linear coefficients
+        fit_[faci][0] -= w[faci];
+        fit_[faci][1] -= 1 - w[faci];
+
+        // if (limiter < 0.99)
+        // {
+        //     for(label i = 0; i < stencilSize; i++)
+        //     {
+        //         fit_[faci][i] *= limiter;
+        //     }
+        // }
     }
-
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>& w =
-        mesh().surfaceInterpolation::weights();
-
-    // remove the uncorrected linear coefficients
-
-    fit_[faci][0] -= w[faci];
-    fit_[faci][1] -= 1 - w[faci];
+    else
+    {
+        Pout<< "Could not fit face " << faci
+            << " " << fit_[faci][0] << " " << w[faci]
+            << " " << fit_[faci][1] << " " << 1 - w[faci]<< endl;
+        fit_[faci] = 0;
+    }
 
     return minSize_ - nSVDzeros;
 }
