@@ -135,7 +135,7 @@ public:
         PackedList(const PackedList<nBits>& PList);
 
         //- Construct by transferring the parameter contents
-        PackedList(xfer<PackedList<nBits> >&);
+        PackedList(const xfer<PackedList<nBits> >&);
 
         //- Construct from labelList.
         PackedList(const labelList&);

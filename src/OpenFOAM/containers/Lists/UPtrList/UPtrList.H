@@ -111,7 +111,7 @@ public:
         explicit UPtrList(const label);
 
         //- Construct by transferring the parameter contents
-        UPtrList(xfer<UPtrList<T> >&);
+        UPtrList(const xfer<UPtrList<T> >&);
 
         //- Construct as copy or re-use as specified.
         UPtrList(UPtrList<T>&, bool reUse);

@@ -27,125 +27,71 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::xfer<T>::xfer()
+inline Foam::xfer<T>::xfer()
 :
-    ref_()
+    ptr_(new T)
 {}
 
 
 template<class T>
-Foam::xfer<T>::xfer(T& t)
+inline Foam::xfer<T>::xfer(T& t)
 :
-    ref_()
+    ptr_(new T)
 {
-    transfer(t);
+    ptr_->transfer(t);
 }
 
 
 template<class T>
-Foam::xfer<T>::xfer(xfer<T>& t)
+inline Foam::xfer<T>::xfer(const xfer<T>& t)
 :
-    ref_()
+    ptr_(new T)
 {
-    transfer(t);
+    ptr_->transfer(*(t.ptr_));
 }
-
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::xfer<T>::~xfer()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T>
-T& Foam::xfer<T>::ref()
+inline Foam::xfer<T>::~xfer()
 {
-    return ref_;
-}
-
-
-template<class T>
-void Foam::xfer<T>::transfer(T& t)
-{
-    ref_.transfer(t);
-}
-
-
-template<class T>
-void Foam::xfer<T>::transfer(xfer<T>& t)
-{
-    ref_.transfer(t.ref_);
-}
-
-
-template<class T>
-void Foam::xfer<T>::yield(T& t)
-{
-    t.transfer(ref_);
-}
-
-
-template<class T>
-void Foam::xfer<T>::yield(xfer<T>& t)
-{
-    t.ref_.transfer(ref_);
+    delete ptr_;
+    ptr_ = 0;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-
 template<class T>
-void Foam::xfer<T>::operator=(T& t)
+inline void Foam::xfer<T>::operator=(T& t)
 {
-    transfer(t);
+    ptr_->transfer(t);
 }
 
 
 template<class T>
-void Foam::xfer<T>::operator=(xfer<T>& t)
+inline void Foam::xfer<T>::operator=(const xfer<T>& t)
 {
-    if (this == &t)
+    // silently ignore copy to self
+    if (this != &t)
     {
-        FatalErrorIn
-        (
-            "Foam::xfer<T>::operator="
-            "(const Foam::xfer<T>&)"
-        )   << "Attempted assignment to self"
-            << abort(FatalError);
+        ptr_->transfer(*(t.ptr_));
     }
-
-    transfer(t);
 }
 
 
 template<class T>
-Foam::xfer<T>& Foam::xfer<T>::operator()() const
+inline const Foam::xfer<T>& Foam::xfer<T>::operator()() const
 {
-    return const_cast<xfer<T>&>(*this);
-}
-
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, xfer<T>& t)
-{
-    is >> t.ref_;
-    return is;
+    return *this;
 }
 
 
 template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const xfer<T>& t)
+inline T& Foam::xfer<T>::operator*() const
 {
-    os << t.ref_;
-    return os;
+    return *ptr_;
 }
 
 // ************************************************************************* //

@@ -72,9 +72,9 @@ Foam::PtrList<T>::PtrList(const PtrList<T>& a, const CloneArg& cloneArg)
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(xfer<PtrList<T> >& lst)
+Foam::PtrList<T>::PtrList(const xfer<PtrList<T> >& lst)
 {
-    transfer(lst.ref());
+    transfer(*lst);
 }
 
 

@@ -95,7 +95,7 @@ public:
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(xfer<List<T> >&);
+        List(const xfer<List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);

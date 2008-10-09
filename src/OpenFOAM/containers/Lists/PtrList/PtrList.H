@@ -130,7 +130,7 @@ public:
         PtrList(const PtrList<T>&, const CloneArg&);
 
         //- Construct by transferring the parameter contents
-        PtrList(xfer<PtrList<T> >&);
+        PtrList(const xfer<PtrList<T> >&);
 
         //- Construct as copy or re-use as specified.
         PtrList(PtrList<T>&, bool reUse);
