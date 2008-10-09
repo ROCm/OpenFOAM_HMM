@@ -60,18 +60,24 @@ class xfer
         //- Pointer to temporary object
         mutable T* ptr_;
 
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        xfer(const xfer<T>&);
+
 public:
 
     // Constructors
 
-        //- Null constructor, transfer later by assignment
+        //- Null constructor
+        //  Can be used later to transfer by assignment
         inline xfer();
 
-        //- Construct by transferring the parameter contents into the object
-        inline xfer(T&);
+        //- Construct by copying or by transferring the parameter contents
+        inline xfer(T&, bool allowTransfer=false);
 
-        //- Construct by transferring the parameter contents into the object
-        inline xfer(const xfer<T>&);
+        //- Copy constructor
+        inline xfer(const T&);
 
     // Destructor
 

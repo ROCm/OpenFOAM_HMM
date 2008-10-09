@@ -34,20 +34,27 @@ inline Foam::xfer<T>::xfer()
 
 
 template<class T>
-inline Foam::xfer<T>::xfer(T& t)
+inline Foam::xfer<T>::xfer(T& t, bool allowTransfer)
 :
     ptr_(new T)
 {
-    ptr_->transfer(t);
+    if (allowTransfer)
+    {
+        ptr_->transfer(t);
+    }
+    else
+    {
+        ptr_->operator=(t);
+    }
 }
 
 
 template<class T>
-inline Foam::xfer<T>::xfer(const xfer<T>& t)
+inline Foam::xfer<T>::xfer(const T& t)
 :
     ptr_(new T)
 {
-    ptr_->transfer(*(t.ptr_));
+    ptr_->operator=(t);
 }
 
 
