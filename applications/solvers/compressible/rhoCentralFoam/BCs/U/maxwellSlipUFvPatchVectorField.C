@@ -157,9 +157,8 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
 
     if(thermalCreep_)
     {
-        const GeometricField<scalar, fvPatchField, volMesh>& vsfT =
-            this->db().objectRegistry::
-            lookupObject<GeometricField<scalar, fvPatchField, volMesh> >("T");
+        const volScalarField& vsfT =
+            this->db().objectRegistry::lookupObject<volScalarField>("T");
         label patchi = this->patch().index();
         const fvPatchScalarField& pT = vsfT.boundaryField()[patchi];
         Field<vector> gradpT = fvc::grad(vsfT)().boundaryField()[patchi];

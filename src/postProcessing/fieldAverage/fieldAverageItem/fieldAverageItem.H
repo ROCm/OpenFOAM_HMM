@@ -102,15 +102,6 @@ private:
         baseType base_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-//        fieldAverageItem(const fieldAverageItem&);
-
-        //- Disallow default bitwise assignment
-//        void operator=(const fieldAverageItem&);
-
-
 public:
 
     // Constructors
@@ -175,6 +166,29 @@ public:
 
         void operator=(const fieldAverageItem&);
 
+    // Friend Operators
+
+        friend bool operator==
+        (
+            const fieldAverageItem& a,
+            const fieldAverageItem& b
+        )
+        {
+            return
+                a.fieldName_ == b.fieldName_
+             && a.mean_ == b.mean_
+             && a.prime2Mean_ == b.prime2Mean_
+             && a.base_ == b.base_;
+        }
+
+        friend bool operator!=
+        (
+            const fieldAverageItem& a,
+            const fieldAverageItem& b
+        )
+        {
+            return !(a == b);
+        }
 
     // IOstream Operators
 

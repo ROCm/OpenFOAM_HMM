@@ -25,156 +25,269 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "channelIndex.H"
+#include "boolList.H"
+#include "syncTools.H"
+#include "OFstream.H"
+#include "meshTools.H"
+#include "Time.H"
+#include "SortableList.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-channelIndex::channelIndex(const fvMesh& m)
-:
-    indexingDict_
-    (
-        IOobject
-        (
-            "postChannelDict",
-            m.time().constant(),
-            m,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    nx_(readLabel(indexingDict_.lookup("Nx"))),
-    ny_(indexingDict_.lookup("Ny")),
-    nz_(readLabel(indexingDict_.lookup("Nz"))),
-    symmetric_
-    (
-        readBool(indexingDict_.lookup("symmetric"))
-    ),
-    cumNy_(ny_.size()),
-    nLayers_(ny_[0])
+template<>
+const char* Foam::NamedEnum<Foam::vector::components, 3>::names[] =
 {
-    // initialise the layers
-    cumNy_[0] = ny_[0];
+    "x",
+    "y",
+    "z"
+};
 
-    for (label j=1; j<ny_.size(); j++)
+const Foam::NamedEnum<Foam::vector::components, 3>
+    Foam::channelIndex::vectorComponentsNames_;
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Determines face blocking
+void Foam::channelIndex::walkOppositeFaces
+(
+    const polyMesh& mesh,
+    const labelList& startFaces,
+    boolList& blockedFace
+)
+{
+    const cellList& cells = mesh.cells();
+    const faceList& faces = mesh.faces();
+    label nBnd = mesh.nFaces() - mesh.nInternalFaces();
+
+    DynamicList<label> frontFaces(startFaces);
+    forAll(frontFaces, i)
     {
-        nLayers_ += ny_[j];
-        cumNy_[j] = ny_[j]+cumNy_[j-1];
+        label faceI = frontFaces[i];
+        blockedFace[faceI] = true;
+    }
+
+    while (returnReduce(frontFaces.size(), sumOp<label>()) > 0)
+    {
+        // Transfer across.
+        boolList isFrontBndFace(nBnd, false);
+        forAll(frontFaces, i)
+        {
+            label faceI = frontFaces[i];
+
+            if (!mesh.isInternalFace(faceI))
+            {
+                isFrontBndFace[faceI-mesh.nInternalFaces()] = true;
+            }
+        }
+        syncTools::swapBoundaryFaceList(mesh, isFrontBndFace, false);
+
+        // Add 
+        forAll(isFrontBndFace, i)
+        {
+            label faceI = mesh.nInternalFaces()+i;
+            if (isFrontBndFace[i] && !blockedFace[faceI])
+            {
+                blockedFace[faceI] = true;
+                frontFaces.append(faceI);
+            }
+        }
+
+        // Transfer across cells
+        DynamicList<label> newFrontFaces(frontFaces.size());
+
+        forAll(frontFaces, i)
+        {
+            label faceI = frontFaces[i];
+
+            {
+                const cell& ownCell = cells[mesh.faceOwner()[faceI]];
+
+                label oppositeFaceI = ownCell.opposingFaceLabel(faceI, faces);
+
+                if (oppositeFaceI == -1)
+                {
+                    FatalErrorIn("channelIndex::walkOppositeFaces(..)")
+                        << "Face:" << faceI << " owner cell:" << ownCell
+                        << " is not a hex?" << abort(FatalError);
+                }
+                else
+                {
+                    if (!blockedFace[oppositeFaceI])
+                    {
+                        blockedFace[oppositeFaceI] = true;
+                        newFrontFaces.append(oppositeFaceI);
+                    }
+                }
+            }
+
+            if (mesh.isInternalFace(faceI))
+            {
+                const cell& neiCell = mesh.cells()[mesh.faceNeighbour()[faceI]];
+
+                label oppositeFaceI = neiCell.opposingFaceLabel(faceI, faces);
+
+                if (oppositeFaceI == -1)
+                {
+                    FatalErrorIn("channelIndex::walkOppositeFaces(..)")
+                        << "Face:" << faceI << " neighbour cell:" << neiCell
+                        << " is not a hex?" << abort(FatalError);
+                }
+                else
+                {
+                    if (!blockedFace[oppositeFaceI])
+                    {
+                        blockedFace[oppositeFaceI] = true;
+                        newFrontFaces.append(oppositeFaceI);
+                    }
+                }
+            }
+        }
+
+        frontFaces.transfer(newFrontFaces);
     }
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// Calculate regions.
+void Foam::channelIndex::calcLayeredRegions
+(
+    const polyMesh& mesh,
+    const labelList& startFaces
+)
+{
+    boolList blockedFace(mesh.nFaces(), false);
+    walkOppositeFaces
+    (
+        mesh,
+        startFaces,
+        blockedFace
+    );
 
-channelIndex::~channelIndex()
-{}
+
+    if (false)
+    {
+        OFstream str(mesh.time().path()/"blockedFaces.obj");
+        label vertI = 0;
+        forAll(blockedFace, faceI)
+        {
+            if (blockedFace[faceI])
+            {
+                const face& f = mesh.faces()[faceI];
+                forAll(f, fp)
+                {
+                    meshTools::writeOBJ(str, mesh.points()[f[fp]]);
+                }
+                str<< 'f';
+                forAll(f, fp)
+                {
+                    str << ' ' << vertI+fp+1;
+                }
+                str << nl;
+                vertI += f.size();
+            }
+        }
+    }
+
+
+    // Do analysis for connected regions
+    cellRegion_.reset(new regionSplit(mesh, blockedFace));
+
+    Info<< "Detected " << cellRegion_().nRegions() << " layers." << nl << endl;
+
+    // Sum number of entries per region
+    regionCount_ = regionSum(scalarField(mesh.nCells(), 1.0));
+
+    // Average cell centres to determine ordering.
+    pointField regionCc
+    (
+        regionSum(mesh.cellCentres())
+      / regionCount_
+    );
+
+    SortableList<scalar> sortComponent(regionCc.component(dir_));
+
+    sortMap_ = sortComponent.indices();
+
+    y_ = sortComponent;
+
+    if (symmetric_)
+    {
+        y_.setSize(cellRegion_().nRegions()/2);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::channelIndex::channelIndex
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    symmetric_(readBool(dict.lookup("symmetric"))),
+    dir_(vectorComponentsNames_.read(dict.lookup("component")))
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    const wordList patchNames(dict.lookup("patches"));
+
+    label nFaces = 0;
+
+    forAll(patchNames, i)
+    {
+        label patchI = patches.findPatchID(patchNames[i]);
+
+        if (patchI == -1)
+        {
+            FatalErrorIn("channelIndex::channelIndex(const polyMesh&)")
+                << "Illegal patch " << patchNames[i]
+                << ". Valid patches are " << patches.name()
+                << exit(FatalError);
+        }
+
+        nFaces += patches[patchI].size();
+    }
+
+    labelList startFaces(nFaces);
+    nFaces = 0;
+
+    forAll(patchNames, i)
+    {
+        const polyPatch& pp = patches[patches.findPatchID(patchNames[i])];
+
+        forAll(pp, j)
+        {
+            startFaces[nFaces++] = pp.start()+j;
+        }
+    }
+
+    // Calculate regions.
+    calcLayeredRegions(mesh, startFaces);
+}
+
+
+Foam::channelIndex::channelIndex
+(
+    const polyMesh& mesh,
+    const labelList& startFaces,
+    const bool symmetric,
+    const direction dir
+)
+:
+    symmetric_(symmetric),
+    dir_(dir)
+{
+    // Calculate regions.
+    calcLayeredRegions(mesh, startFaces);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalarField channelIndex::collapse
-(
-    const volScalarField& vsf,
-    const bool asymmetric
-) const
-{
-    scalarField cs(nLayers(), 0.0);
-
-    forAll(cs, j)
-    {
-        // sweep over all cells in this layer
-        for (label i=0; i<nx(); i++)
-        {
-            for (label k=0; k<nz(); k++)
-            {
-                cs[j] += vsf[operator()(i,j,k)];
-            }
-        }
-
-        // and divide by the number of cells in the layer
-        cs[j] /= scalar(nx()*nz());
-    }
-
-    if (symmetric_)
-    {
-        label nlb2 = nLayers()/2;
-
-        if (asymmetric)
-        {
-            for (label j=0; j<nlb2; j++)
-            {
-                cs[j] = 0.5*(cs[j] - cs[nLayers() - j - 1]);
-            }
-        }
-        else
-        {
-            for (label j=0; j<nlb2; j++)
-            {
-                cs[j] = 0.5*(cs[j] + cs[nLayers() - j - 1]);
-            }
-        }
-
-        cs.setSize(nlb2);
-    }
-
-    return cs;
-}
-
-
-scalarField channelIndex::y
-(
-    const volVectorField& cellCentres
-) const
-{
-    if (symmetric_)
-    {
-        scalarField Y(nLayers()/2);
-
-        for (label j=0; j<nLayers()/2; j++)
-        {
-            Y[j] = cellCentres[operator()(0, j, 0)].y();
-        }
-
-        return Y;
-    }
-    else
-    {
-        scalarField Y(nLayers());
-
-        for (label j=0; j<nLayers(); j++)
-        {
-            Y[j] = cellCentres[operator()(0, j, 0)].y();
-        }
-
-        return Y;
-    }
-}
-
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-label channelIndex::operator()
-(
-    const label Jx,
-    const label Jy,
-    const label Jz
-) const
-{
-    label index(0);
-
-    // count up `full' layers in the mesh
-    label j(0);
-    label tmpJy(Jy);
-
-    while(Jy >= cumNy_[j])
-    {
-        index += nx_*ny_[j]*nz_;
-        tmpJy -= ny_[j];
-        j++;
-    }
-
-    index += Jx + nx_*tmpJy + nx_*ny_[j]*Jz;
-
-    return index;
-}
 
 
 // ************************************************************************* //

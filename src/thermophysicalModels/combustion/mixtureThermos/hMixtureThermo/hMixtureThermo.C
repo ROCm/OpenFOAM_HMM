@@ -28,22 +28,20 @@ License
 #include "fvMesh.H"
 #include "fixedValueFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class MixtureType>
-hMixtureThermo<MixtureType>::hMixtureThermo(const fvMesh& mesh)
+Foam::hMixtureThermo<MixtureType>::hMixtureThermo(const fvMesh& mesh)
 :
     hCombustionThermo(mesh),
     MixtureType(*this, mesh)
 {
-    forAll(h_, celli)
+    scalarField& hCells = h_.internalField();
+    const scalarField& TCells = T_.internalField();
+
+    forAll(hCells, celli)
     {
-        h_[celli] = this->cellMixture(celli).H(T_[celli]);
+        hCells[celli] = this->cellMixture(celli).H(TCells[celli]);
     }
 
     forAll(h_.boundaryField(), patchi)
@@ -61,25 +59,33 @@ hMixtureThermo<MixtureType>::hMixtureThermo(const fvMesh& mesh)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class MixtureType>
-hMixtureThermo<MixtureType>::~hMixtureThermo()
+Foam::hMixtureThermo<MixtureType>::~hMixtureThermo()
 {}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class MixtureType>
-void hMixtureThermo<MixtureType>::calculate()
+void Foam::hMixtureThermo<MixtureType>::calculate()
 {
-    forAll(T_, celli)
+    const scalarField& hCells = h_.internalField();
+    const scalarField& pCells = p_.internalField();
+
+    scalarField& TCells = T_.internalField();
+    scalarField& psiCells = psi_.internalField();
+    scalarField& muCells = mu_.internalField();
+    scalarField& alphaCells = alpha_.internalField();
+
+    forAll(TCells, celli)
     {
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        T_[celli] = mixture_.TH(h_[celli], T_[celli]);
-        psi_[celli] = mixture_.psi(p_[celli], T_[celli]);
+        TCells[celli] = mixture_.TH(hCells[celli], TCells[celli]);
+        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
-        mu_[celli] = mixture_.mu(T_[celli]);
-        alpha_[celli] = mixture_.alpha(T_[celli]);
+        muCells[celli] = mixture_.mu(TCells[celli]);
+        alphaCells[celli] = mixture_.alpha(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -128,7 +134,7 @@ void hMixtureThermo<MixtureType>::calculate()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class MixtureType>
-tmp<scalarField> hMixtureThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::h
 (
     const scalarField& T,
     const labelList& cells
@@ -147,7 +153,7 @@ tmp<scalarField> hMixtureThermo<MixtureType>::h
 
 
 template<class MixtureType>
-tmp<scalarField> hMixtureThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::h
 (
     const scalarField& T,
     const label patchi
@@ -166,7 +172,7 @@ tmp<scalarField> hMixtureThermo<MixtureType>::h
 
 
 template<class MixtureType>
-tmp<scalarField> hMixtureThermo<MixtureType>::Cp
+Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::Cp
 (
     const scalarField& T,
     const label patchi
@@ -186,7 +192,7 @@ tmp<scalarField> hMixtureThermo<MixtureType>::Cp
 
 
 template<class MixtureType>
-tmp<volScalarField> hMixtureThermo<MixtureType>::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::hMixtureThermo<MixtureType>::Cp() const
 {
     const fvMesh& mesh = T_.mesh();
 
@@ -224,7 +230,7 @@ tmp<volScalarField> hMixtureThermo<MixtureType>::Cp() const
 
 
 template<class MixtureType>
-void hMixtureThermo<MixtureType>::correct()
+void Foam::hMixtureThermo<MixtureType>::correct()
 {
     if (debug)
     {
@@ -244,7 +250,7 @@ void hMixtureThermo<MixtureType>::correct()
 
 
 template<class MixtureType>
-bool hMixtureThermo<MixtureType>::read()
+bool Foam::hMixtureThermo<MixtureType>::read()
 {
     if (hCombustionThermo::read())
     {
@@ -257,9 +263,5 @@ bool hMixtureThermo<MixtureType>::read()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
