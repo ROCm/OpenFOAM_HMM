@@ -625,10 +625,8 @@ int main(int argc, char *argv[])
                     << " as patch " << destPatchI
                     << " from " << patchDict << endl;
 
-                patchDict.remove("nFaces");
-                patchDict.add("nFaces", 0);
-                patchDict.remove("startFace");
-                patchDict.add("startFace", startFaceI);
+                patchDict.set("nFaces", 0);
+                patchDict.set("startFace", startFaceI);
 
                 // Add an empty patch.
                 allPatches.append
