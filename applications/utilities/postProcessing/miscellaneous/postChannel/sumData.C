@@ -22,50 +22,27 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    attachMesh
-
-Description
-    Attach topologically detached mesh using prescribed mesh modifiers.
-
 \*---------------------------------------------------------------------------*/
 
-#include "argList.H"
-#include "polyMesh.H"
-#include "Time.H"
-#include "attachPolyTopoChanger.H"
+#include "sumData.H"
 
-using namespace Foam;
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-int main(int argc, char *argv[])
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::sumData& wDist
+)
 {
-    argList::noParallel();
-    argList::validOptions.insert("overwrite", "");
+    return os
+        << wDist.oldFace_ << token::SPACE
+        << wDist.sum_ << token::SPACE << wDist.count_;
+}
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-    runTime.functionObjects().off();
-#   include "createPolyMesh.H"
 
-    bool overwrite = args.options().found("overwrite");
-
-    if (!overwrite)
-    {
-        runTime++;
-    }
-
-    Info<< "Time = " << runTime.timeName() << nl
-        << "Attaching sliding interface" << endl;
-
-    attachPolyTopoChanger(mesh).attach();
-
-    mesh.write();
-
-    Info<< "End\n" << endl;
-
-    return(0);
+Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::sumData& wDist)
+{
+    return is >> wDist.oldFace_ >> wDist.sum_ >> wDist.count_;
 }
 
 

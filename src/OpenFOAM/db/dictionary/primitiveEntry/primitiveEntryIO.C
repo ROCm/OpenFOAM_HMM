@@ -81,7 +81,7 @@ bool Foam::primitiveEntry::expandVariable
     word varName = w(1, w.size()-1);
 
     // lookup the variable name in the given dictionary....
-    const entry* ePtr = dict.lookupEntryPtr(varName, true);
+    const entry* ePtr = dict.lookupEntryPtr(varName, true, true);
 
     // ...if defined insert its tokens into this 
     if (ePtr != NULL)
@@ -218,7 +218,7 @@ void Foam::primitiveEntry::readEntry(const dictionary& dict, Istream& is)
 
 Foam::primitiveEntry::primitiveEntry
 (
-    const word& key,
+    const keyType& key,
     const dictionary& dict,
     Istream& is
 )
@@ -236,7 +236,7 @@ Foam::primitiveEntry::primitiveEntry
 }
 
 
-Foam::primitiveEntry::primitiveEntry(const word& key, Istream& is)
+Foam::primitiveEntry::primitiveEntry(const keyType& key, Istream& is)
 :
     entry(key),
     ITstream

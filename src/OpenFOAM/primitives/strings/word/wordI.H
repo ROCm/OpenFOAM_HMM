@@ -65,34 +65,51 @@ inline Foam::word::word()
 {}
 
 
-inline Foam::word::word(const string& s)
+inline Foam::word::word(const string& s, const bool doStripInvalid)
 :
     string(s)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
 
-inline Foam::word::word(const std::string& s)
+inline Foam::word::word(const std::string& s, const bool doStripInvalid)
 :
     string(s)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
 
-inline Foam::word::word(const char* s)
+inline Foam::word::word(const char* s, const bool doStripInvalid)
 :
     string(s)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
-inline Foam::word::word(const char* s, const size_type n)
+inline Foam::word::word
+(
+    const char* s,
+    const size_type n,
+    const bool doStripInvalid
+)
 :
     string(s, n)
 {
-    stripInvalid();
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
 }
 
 

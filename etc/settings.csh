@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 alias _foamAddPath 'set path=(\!* $path) ; if ( ! -d \!* ) mkdir -p \!*'
-alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; if ( ! -d \!* ) mkdir -p \!*'
+alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH} ; set xx=`echo $LD_LIBRARY_PATH | sed -e "s/:.*//"`; if ( ! -d  $xx ) mkdir -p $xx'
 
 
 #- Add the system-specific executables path to the path
@@ -82,7 +82,6 @@ switch ("$WM_COMPILER_INST")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
-        #setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
         setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
         _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.3/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib

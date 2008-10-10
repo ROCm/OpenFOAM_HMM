@@ -157,6 +157,7 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
+    runTime.functionObjects().off();
 #   include "createMesh.H"
 
     word setName(args.additionalArgs()[0]);

@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::primitiveEntry::primitiveEntry(const word& key, const ITstream& tokens)
+Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& tokens)
 :
     entry(key),
     ITstream(tokens)
@@ -38,7 +38,7 @@ Foam::primitiveEntry::primitiveEntry(const word& key, const ITstream& tokens)
 }
 
 
-Foam::primitiveEntry::primitiveEntry(const word& keyword, const token& t)
+Foam::primitiveEntry::primitiveEntry(const keyType& keyword, const token& t)
 :
     entry(keyword),
     ITstream(keyword, tokenList(1, t))
@@ -47,7 +47,7 @@ Foam::primitiveEntry::primitiveEntry(const word& keyword, const token& t)
 
 Foam::primitiveEntry::primitiveEntry
 (
-    const word& keyword,
+    const keyType& keyword,
     const tokenList& tokens
 )
 :

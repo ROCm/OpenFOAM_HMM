@@ -28,15 +28,10 @@ License
 #include "fvMesh.H"
 #include "fixedValueFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class MixtureType>
-hThermo<MixtureType>::hThermo(const fvMesh& mesh)
+Foam::hThermo<MixtureType>::hThermo(const fvMesh& mesh)
 :
     basicThermo(mesh),
     MixtureType(*this, mesh),
@@ -56,9 +51,12 @@ hThermo<MixtureType>::hThermo(const fvMesh& mesh)
         hBoundaryTypes()
     )
 {
-    forAll(h_, celli)
+    scalarField& hCells = h_.internalField();
+    const scalarField& TCells = T_.internalField();
+
+    forAll(hCells, celli)
     {
-        h_[celli] = this->cellMixture(celli).H(T_[celli]);
+        hCells[celli] = this->cellMixture(celli).H(TCells[celli]);
     }
 
     forAll(h_.boundaryField(), patchi)
@@ -76,25 +74,33 @@ hThermo<MixtureType>::hThermo(const fvMesh& mesh)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class MixtureType>
-hThermo<MixtureType>::~hThermo()
+Foam::hThermo<MixtureType>::~hThermo()
 {}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class MixtureType>
-void hThermo<MixtureType>::calculate()
+void Foam::hThermo<MixtureType>::calculate()
 {
-    forAll(T_, celli)
+    const scalarField& hCells = h_.internalField();
+    const scalarField& pCells = p_.internalField();
+
+    scalarField& TCells = T_.internalField();
+    scalarField& psiCells = psi_.internalField();
+    scalarField& muCells = mu_.internalField();
+    scalarField& alphaCells = alpha_.internalField();
+
+    forAll(TCells, celli)
     {
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        T_[celli] = mixture_.TH(h_[celli], T_[celli]);
-        psi_[celli] = mixture_.psi(p_[celli], T_[celli]);
+        TCells[celli] = mixture_.TH(hCells[celli], TCells[celli]);
+        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
-        mu_[celli] = mixture_.mu(T_[celli]);
-        alpha_[celli] = mixture_.alpha(T_[celli]);
+        muCells[celli] = mixture_.mu(TCells[celli]);
+        alphaCells[celli] = mixture_.alpha(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -143,7 +149,7 @@ void hThermo<MixtureType>::calculate()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class MixtureType>
-void hThermo<MixtureType>::correct()
+void Foam::hThermo<MixtureType>::correct()
 {
     if (debug)
     {
@@ -163,7 +169,7 @@ void hThermo<MixtureType>::correct()
 
 
 template<class MixtureType>
-tmp<scalarField>  hThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::h
 (
     const scalarField& T,
     const labelList& cells
@@ -182,7 +188,7 @@ tmp<scalarField>  hThermo<MixtureType>::h
 
 
 template<class MixtureType>
-tmp<scalarField>  hThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::h
 (
     const scalarField& T,
     const label patchi
@@ -201,7 +207,7 @@ tmp<scalarField>  hThermo<MixtureType>::h
 
 
 template<class MixtureType>
-tmp<scalarField> hThermo<MixtureType>::Cp
+Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::Cp
 (
     const scalarField& T,
     const label patchi
@@ -220,7 +226,7 @@ tmp<scalarField> hThermo<MixtureType>::Cp
 
 
 template<class MixtureType>
-tmp<volScalarField> hThermo<MixtureType>::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cp() const
 {
     const fvMesh& mesh = T_.mesh();
 
@@ -258,7 +264,7 @@ tmp<volScalarField> hThermo<MixtureType>::Cp() const
 
 
 template<class MixtureType>
-tmp<volScalarField> hThermo<MixtureType>::Cv() const
+Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cv() const
 {
     const fvMesh& mesh = T_.mesh();
 
@@ -303,7 +309,7 @@ tmp<volScalarField> hThermo<MixtureType>::Cv() const
 
 
 template<class MixtureType>
-bool hThermo<MixtureType>::read()
+bool Foam::hThermo<MixtureType>::read()
 {
     if (basicThermo::read())
     {
@@ -316,9 +322,5 @@ bool hThermo<MixtureType>::read()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

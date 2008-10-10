@@ -28,23 +28,23 @@ License
 #include "fvMesh.H"
 #include "fixedValueFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class MixtureType>
-hhuMixtureThermo<MixtureType>::hhuMixtureThermo(const fvMesh& mesh)
+Foam::hhuMixtureThermo<MixtureType>::hhuMixtureThermo(const fvMesh& mesh)
 :
     hhuCombustionThermo(mesh),
     MixtureType(*this, mesh)
 {
-    forAll(h_, celli)
+    scalarField& hCells = h_.internalField();
+    scalarField& huCells = hu_.internalField();
+    const scalarField& TCells = T_.internalField();
+    const scalarField& TuCells = Tu_.internalField();
+
+    forAll(hCells, celli)
     {
-        h_[celli] = this->cellMixture(celli).H(T_[celli]);
-        hu_[celli] = this->cellReactants(celli).H(Tu_[celli]);
+        hCells[celli] = this->cellMixture(celli).H(TCells[celli]);
+        huCells[celli] = this->cellReactants(celli).H(TuCells[celli]);
     }
 
     forAll(h_.boundaryField(), patchi)
@@ -71,27 +71,38 @@ hhuMixtureThermo<MixtureType>::hhuMixtureThermo(const fvMesh& mesh)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class MixtureType>
-hhuMixtureThermo<MixtureType>::~hhuMixtureThermo()
+Foam::hhuMixtureThermo<MixtureType>::~hhuMixtureThermo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class MixtureType>
-void hhuMixtureThermo<MixtureType>::calculate()
+void Foam::hhuMixtureThermo<MixtureType>::calculate()
 {
-    forAll(T_, celli)
+    const scalarField& hCells = h_.internalField();
+    const scalarField& huCells = hu_.internalField();
+    const scalarField& pCells = p_.internalField();
+
+    scalarField& TCells = T_.internalField();
+    scalarField& TuCells = Tu_.internalField();
+    scalarField& psiCells = psi_.internalField();
+    scalarField& muCells = mu_.internalField();
+    scalarField& alphaCells = alpha_.internalField();
+
+    forAll(TCells, celli)
     {
-        const typename MixtureType::thermoType& mixture_ = 
+        const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        T_[celli] = mixture_.TH(h_[celli], T_[celli]);
-        psi_[celli] = mixture_.psi(p_[celli], T_[celli]);
+        TCells[celli] = mixture_.TH(hCells[celli], TCells[celli]);
+        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
-        mu_[celli] = mixture_.mu(T_[celli]);
-        alpha_[celli] = mixture_.alpha(T_[celli]);
+        muCells[celli] = mixture_.mu(TCells[celli]);
+        alphaCells[celli] = mixture_.alpha(TCells[celli]);
 
-        Tu_[celli] = this->cellReactants(celli).TH(hu_[celli], Tu_[celli]);
+        TuCells[celli] =
+            this->cellReactants(celli).TH(huCells[celli], TuCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -144,7 +155,7 @@ void hhuMixtureThermo<MixtureType>::calculate()
 
 
 template<class MixtureType>
-void hhuMixtureThermo<MixtureType>::correct()
+void Foam::hhuMixtureThermo<MixtureType>::correct()
 {
     if (debug)
     {
@@ -163,7 +174,7 @@ void hhuMixtureThermo<MixtureType>::correct()
 }
 
 template<class MixtureType>
-tmp<scalarField> hhuMixtureThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::h
 (
     const scalarField& T,
     const labelList& cells
@@ -182,7 +193,7 @@ tmp<scalarField> hhuMixtureThermo<MixtureType>::h
 
 
 template<class MixtureType>
-tmp<scalarField> hhuMixtureThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::h
 (
     const scalarField& T,
     const label patchi
@@ -201,7 +212,7 @@ tmp<scalarField> hhuMixtureThermo<MixtureType>::h
 
 
 template<class MixtureType>
-tmp<scalarField> hhuMixtureThermo<MixtureType>::Cp
+Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::Cp
 (
     const scalarField& T,
     const label patchi
@@ -221,7 +232,7 @@ tmp<scalarField> hhuMixtureThermo<MixtureType>::Cp
 
 
 template<class MixtureType>
-tmp<volScalarField> hhuMixtureThermo<MixtureType>::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Cp() const
 {
     const fvMesh& mesh = T_.mesh();
 
@@ -260,7 +271,7 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::Cp() const
 
 
 template<class MixtureType>
-tmp<scalarField> hhuMixtureThermo<MixtureType>::hu
+Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
 (
     const scalarField& Tu,
     const labelList& cells
@@ -279,7 +290,7 @@ tmp<scalarField> hhuMixtureThermo<MixtureType>::hu
 
 
 template<class MixtureType>
-tmp<scalarField> hhuMixtureThermo<MixtureType>::hu
+Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
 (
     const scalarField& Tu,
     const label patchi
@@ -298,7 +309,7 @@ tmp<scalarField> hhuMixtureThermo<MixtureType>::hu
 
 
 template<class MixtureType>
-tmp<volScalarField> hhuMixtureThermo<MixtureType>::Tb() const
+Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Tb() const
 {
     tmp<volScalarField> tTb
     (
@@ -342,7 +353,8 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::Tb() const
 
 
 template<class MixtureType>
-tmp<volScalarField> hhuMixtureThermo<MixtureType>::psiu() const
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::psiu() const
 {
     tmp<volScalarField> tpsiu
     (
@@ -388,7 +400,8 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::psiu() const
 
 
 template<class MixtureType>
-tmp<volScalarField> hhuMixtureThermo<MixtureType>::psib() const
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::psib() const
 {
     tmp<volScalarField> tpsib
     (
@@ -426,7 +439,8 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::psib() const
         forAll(ppsib, facei)
         {
             ppsib[facei] =
-                this->patchFaceReactants(patchi, facei).psi(pp[facei], pTb[facei]);
+                this->patchFaceReactants
+                (patchi, facei).psi(pp[facei], pTb[facei]);
         }
     }
 
@@ -435,7 +449,7 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::psib() const
 
 
 template<class MixtureType>
-tmp<volScalarField> hhuMixtureThermo<MixtureType>::muu() const
+Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::muu() const
 {
     tmp<volScalarField> tmuu
     (
@@ -478,7 +492,7 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::muu() const
 
 
 template<class MixtureType>
-tmp<volScalarField> hhuMixtureThermo<MixtureType>::mub() const
+Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::mub() const
 {
     tmp<volScalarField> tmub
     (
@@ -521,7 +535,7 @@ tmp<volScalarField> hhuMixtureThermo<MixtureType>::mub() const
 
 
 template<class MixtureType>
-bool hhuMixtureThermo<MixtureType>::read()
+bool Foam::hhuMixtureThermo<MixtureType>::read()
 {
     if (hhuCombustionThermo::read())
     {
@@ -534,9 +548,5 @@ bool hhuMixtureThermo<MixtureType>::read()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

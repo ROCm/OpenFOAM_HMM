@@ -24,90 +24,77 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dictionary.H"
-#include "primitiveEntry.H"
+#include "channelIndex.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-T Foam::dictionary::lookupOrDefault
+Foam::Field<T> Foam::channelIndex::regionSum(const Field<T>& cellField) const
+{
+    Field<T> regionField(cellRegion_().nRegions(), pTraits<T>::zero);
+
+    forAll(cellRegion_(), cellI)
+    {
+        regionField[cellRegion_()[cellI]] += cellField[cellI];
+    }
+
+    // Global sum
+    Pstream::listCombineGather(regionField, plusEqOp<T>());
+    Pstream::listCombineScatter(regionField);
+
+    return regionField;
+}
+
+
+template<class T>
+Foam::Field<T> Foam::channelIndex::collapse
 (
-    const word& keyword,
-    const T& deflt,
-    bool recursive,
-    bool wildCardMatch
+    const Field<T>& cellField,
+    const bool asymmetric
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
+    // Average and order
+    Field<T> regionField
+    (
+        regionSum(cellField)
+      / regionCount_,
+        sortMap_
+    );
 
-    if (entryPtr == NULL)
+    // Symmetry?
+    if (symmetric_)
     {
-        return deflt;
+        label nlb2 = cellRegion_().nRegions()/2;
+
+        if (asymmetric)
+        {
+            for (label j=0; j<nlb2; j++)
+            {
+                regionField[j] =
+                    0.5
+                  * (
+                        regionField[j]
+                      - regionField[cellRegion_().nRegions() - j - 1]
+                    );
+            }
+        }
+        else
+        {
+            for (label j=0; j<nlb2; j++)
+            {
+                regionField[j] =
+                    0.5
+                  * (
+                        regionField[j]
+                      + regionField[cellRegion_().nRegions() - j - 1]
+                    );
+            }
+        }
+
+        regionField.setSize(nlb2);
     }
-    else
-    {
-        return pTraits<T>(entryPtr->stream());
-    }
-}
 
-
-template<class T>
-T Foam::dictionary::lookupOrAddDefault
-(
-    const word& keyword,
-    const T& deflt,
-    bool recursive,
-    bool wildCardMatch
-)
-{
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
-
-    if (entryPtr == NULL)
-    {
-        add(new primitiveEntry(keyword, deflt));
-        return deflt;
-    }
-    else
-    {
-        return pTraits<T>(entryPtr->stream());
-    }
-}
-
-
-template<class T>
-bool Foam::dictionary::readIfPresent
-(
-    const word& k,
-    T& val,
-    bool recursive,
-    bool wildCardMatch
-) const
-{
-    const entry* entryPtr = lookupEntryPtr(k, recursive, wildCardMatch);
-
-    if (entryPtr == NULL)
-    {
-        return false;
-    }
-    else
-    {
-        entryPtr->stream() >> val;
-        return true;
-    }
-}
-
-
-template<class T>
-void Foam::dictionary::add(const keyType& k, const T& t, bool overwrite)
-{
-    add(new primitiveEntry(k, t), overwrite);
-}
-
-
-template<class T>
-void Foam::dictionary::set(const keyType& k, const T& t)
-{
-    set(new primitiveEntry(k, t));
+    return regionField;
 }
 
 
