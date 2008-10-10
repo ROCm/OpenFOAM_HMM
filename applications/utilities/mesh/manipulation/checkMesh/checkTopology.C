@@ -16,7 +16,7 @@ Foam::label Foam::checkTopology
 {
     label noFailedChecks = 0;
 
-    Pout<< "Checking topology..." << endl;
+    Info<< "Checking topology..." << endl;
 
     // Check if the boundary definition is unique
     mesh.boundaryMesh().checkDefinition(true);
@@ -30,7 +30,9 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            Pout<< "  <<Writing " << points.size()
+            label nPoints = returnReduce(points.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nPoints
                 << " unused points to set " << points.name() << endl;
             points.write();
         }
@@ -42,9 +44,12 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
         }
-        if (faces.size() > 0)
+
+        label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+        if (nFaces > 0)
         {
-            Pout<< "  <<Writing " << faces.size()
+            Info<< "  <<Writing " << nFaces
                 << " unordered faces to set " << faces.name() << endl;
             faces.write();
         }
@@ -57,7 +62,9 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            Pout<< "  <<Writing " << cells.size()
+            label nCells = returnReduce(cells.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nCells
                 << " cells with over used edges to set " << cells.name()
                 << endl;
             cells.write();
@@ -70,7 +77,9 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            Pout<< "  <<Writing " << faces.size()
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nFaces
                 << " faces with out-of-range or duplicate vertices to set "
                 << faces.name() << endl;
             faces.write();
@@ -84,7 +93,9 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            Pout<< "  <<Writing " << faces.size()
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nFaces
                 << " faces with incorrect edges to set " << faces.name()
                 << endl;
             faces.write();

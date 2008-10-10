@@ -26,19 +26,25 @@ Class
     Foam::channelIndex
 
 Description
-    does indexing for a standard (Christer-style) channel.
-Assumes that the blocks are aranged in the y direction.
+    Does averaging of fields over layers of cells. Assumes layered mesh.
 
 SourceFiles
     channelIndex.C
-    channelIndexIO.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef channelIndex_H
 #define channelIndex_H
 
-#include "fvCFD.H"
+#include "regionSplit.H"
+#include "direction.H"
+#include "scalarField.H"
+#include "polyMesh.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 
 /*---------------------------------------------------------------------------*\
@@ -47,20 +53,46 @@ SourceFiles
 
 class channelIndex
 {
+
     // Private data
 
-        IOdictionary indexingDict_;
+        static const NamedEnum<vector::components, 3> vectorComponentsNames_;
 
-        const label nx_;
-        const labelList ny_;
-        const label nz_;
+        //- Is mesh symmetric
         const bool symmetric_;
 
-        labelList cumNy_;
-        label nLayers_;
+        //- direction to sort
+        const direction dir_;
+
+        //- Per cell the global region
+        autoPtr<regionSplit> cellRegion_;
+
+        //- Per global region the number of cells (scalarField so we can use
+        //  field algebra)
+        scalarField regionCount_;
+
+        //- From sorted region back to unsorted global region
+        labelList sortMap_;
+
+        //- Sorted component of cell centres
+        scalarField y_;
+
 
 
     // Private Member Functions
+
+        void walkOppositeFaces
+        (
+            const polyMesh& mesh,
+            const labelList& startFaces,
+            boolList& blockedFace
+        );
+
+        void calcLayeredRegions
+        (
+            const polyMesh& mesh,
+            const labelList& startFaces
+        );
 
         //- Disallow default bitwise copy construct and assignment
         channelIndex(const channelIndex&);
@@ -71,55 +103,53 @@ public:
 
     // Constructors
 
-        channelIndex(const fvMesh& m);
+        //- Construct from dictionary
+        channelIndex(const polyMesh&, const dictionary&);
 
-
-    // Destructor
-
-        ~channelIndex();
+        //- Construct from supplied starting faces
+        channelIndex
+        (
+            const polyMesh& mesh,
+            const labelList& startFaces,
+            const bool symmetric,
+            const direction dir
+        );
 
 
     // Member Functions
 
         // Access
 
-            //- return number of layers
-            label nLayers() const
-            {
-                return nLayers_;
-            }
-
-            //- number of cells in X direction
-            label nx() const
-            {
-                return nx_;
-            }
-
-            //- number of cells in Z direction
-            label nz() const
-            {
-                return nz_;
-            }
+            //- Sum field per region
+            template<class T>
+            Field<T> regionSum(const Field<T>& cellField) const;
 
             //- collapse a field to a line
-            scalarField collapse
+            template<class T>
+            Field<T> collapse
             (
-                const volScalarField& vsf,
+                const Field<T>& vsf,
                 const bool asymmetric=false
             ) const;
 
             //- return the field of Y locations from the cell centres
-            scalarField y
-            (
-                const volVectorField& cellCentres
-            ) const;
+            const scalarField& y() const
+            {
+                return y_;
+            }
 
-
-    // Member Operators
-
-        label operator()(const label, const label, const label) const;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "channelIndexTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

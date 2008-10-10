@@ -86,7 +86,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                     this->name() + "rhoTrans" + name(i),
+                     this->name() + "rhoTrans" + Foam::name(i),
                      this->db().time().timeName(),
                      this->db(),
                      IOobject::NO_READ,

@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("overwrite", "");
 #   include "setRootCase.H"
 #   include "createTime.H"
+    runTime.functionObjects().off();
 #   include "createMesh.H"
 
     bool split = args.options().found("split");

@@ -1,0 +1,245 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "nutRoughWallFunctionFvPatchScalarField.H"
+#include "RASModel.H"
+#include "fvPatchFieldMapper.H"
+#include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace incompressible
+{
+namespace RASModels
+{
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+scalar nutRoughWallFunctionFvPatchScalarField::fnRough
+(
+    const scalar KsPlus,
+    const scalar Cs,
+    const scalar kappa
+) const
+{
+    // Set deltaB based on non-dimensional roughness height
+    scalar deltaB = 0.0;
+    if (KsPlus < 90.0)
+    {
+        deltaB =
+            1.0/kappa
+            *log((KsPlus - 2.25)/87.75 + Cs*KsPlus)
+            *sin(0.4258*(log(KsPlus) - 0.811));
+    }
+    else
+    {
+        deltaB = 1.0/kappa*log(1.0 + Cs*KsPlus);
+    }
+
+    return exp(min(deltaB*kappa, 50.0));
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+nutRoughWallFunctionFvPatchScalarField::
+nutRoughWallFunctionFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    fixedValueFvPatchScalarField(p, iF),
+    Ks_(p.size(), 0.0),
+    Cs_(p.size(), 0.0)
+{}
+
+
+nutRoughWallFunctionFvPatchScalarField::
+nutRoughWallFunctionFvPatchScalarField
+(
+    const nutRoughWallFunctionFvPatchScalarField& ptf,
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    Ks_(ptf.Ks_, mapper),
+    Cs_(ptf.Cs_, mapper)
+{}
+
+
+nutRoughWallFunctionFvPatchScalarField::
+nutRoughWallFunctionFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedValueFvPatchScalarField(p, iF, dict),
+    Ks_("Ks", dict, p.size()),
+    Cs_("Cs", dict, p.size())
+{}
+
+
+nutRoughWallFunctionFvPatchScalarField::
+nutRoughWallFunctionFvPatchScalarField
+(
+    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf
+)
+:
+    fixedValueFvPatchScalarField(nrwfpsf),
+    Ks_(nrwfpsf.Ks_),
+    Cs_(nrwfpsf.Cs_)
+{}
+
+
+nutRoughWallFunctionFvPatchScalarField::
+nutRoughWallFunctionFvPatchScalarField
+(
+    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    fixedValueFvPatchScalarField(nrwfpsf, iF),
+    Ks_(nrwfpsf.Ks_),
+    Cs_(nrwfpsf.Cs_)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void nutRoughWallFunctionFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchScalarField::autoMap(m);
+    Ks_.autoMap(m);
+    Cs_.autoMap(m);
+}
+
+
+void nutRoughWallFunctionFvPatchScalarField::rmap
+(
+    const fvPatchScalarField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchScalarField::rmap(ptf, addr);
+
+    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf =
+        refCast<const nutRoughWallFunctionFvPatchScalarField>(ptf);
+
+    Cs_.rmap(nrwfpsf.Cs_, addr);
+    Ks_.rmap(nrwfpsf.Ks_, addr);
+}
+
+
+void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
+{
+    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+
+    const scalar Cmu = ras.Cmu().value();
+    const scalar Cmu25 = pow(Cmu, 0.25);
+    const scalar kappa = ras.kappa().value();
+    const scalar E = ras.E().value();
+    scalar yPlusLam = ras.yPlusLam();
+
+    const scalarField& y = ras.y()[patch().index()];
+
+    const scalarField& k = db().lookupObject<volScalarField>("k");
+
+    const scalarField& nuw =
+        patch().lookupPatchField<volScalarField, scalar>("nu");
+
+    scalarField& nutw = *this;
+
+    forAll(nutw, faceI)
+    {
+        label faceCellI = patch().faceCells()[faceI];
+
+        scalar uStar = Cmu25*sqrt(k[faceCellI]);
+
+        scalar yPlus = uStar*y[faceI]/nuw[faceI];
+
+        scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
+
+        scalar Edash = E;
+        scalar yPlusLamNew = yPlusLam;
+        if (KsPlus > 2.25)
+        {
+            Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
+            yPlusLam = ras.yPlusLam(kappa, Edash);
+        }
+
+        if (debug)
+        {
+            Info<< "yPlus = " << yPlus
+                << ", KsPlus = " << KsPlus
+                << ", Edash = " << Edash
+                << ", yPlusLam = " << yPlusLam
+                << endl;
+        }
+
+        if (yPlus > yPlusLamNew)
+        {
+            nutw[faceI] = nuw[faceI]*(yPlus*kappa/log(Edash*yPlus) - 1);
+        }
+        else
+        {
+            nutw[faceI] = 0.0;
+        }
+    }
+}
+
+
+void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
+{
+    fvPatchField<scalar>::write(os);
+    Cs_.writeEntry("Cs", os);
+    Ks_.writeEntry("Ks", os);
+    writeEntry("value", os);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makePatchTypeField(fvPatchScalarField, nutRoughWallFunctionFvPatchScalarField);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace RASModels
+} // End namespace incompressible
+} // End namespace Foam
+
+// ************************************************************************* //

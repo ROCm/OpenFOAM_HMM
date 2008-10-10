@@ -87,16 +87,21 @@ public:
         inline word(const word&);
 
         //- Construct as copy of character array
-        inline word(const char*);
+        inline word(const char*, const bool doStripInvalid = true);
 
         //- Construct as copy with a maximum number of characters
-        inline word(const char*, const size_type);
+        inline word
+        (
+            const char*,
+            const size_type,
+            const bool doStripInvalid
+        );
 
         //- Construct as copy of string
-        inline word(const string&);
+        inline word(const string&, const bool doStripInvalid = true);
 
         //- Construct as copy of std::string
-        inline word(const std::string&);
+        inline word(const std::string&, const bool doStripInvalid = true);
 
         //- Construct from Istream
         word(Istream&);

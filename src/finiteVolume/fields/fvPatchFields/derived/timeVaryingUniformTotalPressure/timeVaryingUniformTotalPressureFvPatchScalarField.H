@@ -192,7 +192,7 @@ public:
             //- Return the time series used
             const interpolationTable<scalar>& totalPressureTimeSeries() const
             {
-                return totalPressureTimeSeries_;
+                return timeSeries_;
             }
 
 

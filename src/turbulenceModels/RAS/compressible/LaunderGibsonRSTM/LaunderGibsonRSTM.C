@@ -30,6 +30,8 @@ License
 #include "wallDist.H"
 #include "wallDistReflection.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -187,9 +189,8 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateR("R", mesh_)
     ),
-
     k_
     (
         IOobject
@@ -197,12 +198,11 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             "k",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
-
     epsilon_
     (
         IOobject
@@ -210,12 +210,11 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             "epsilon",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
-
     mut_
     (
         IOobject
@@ -224,13 +223,23 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             runTime_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
-#   include "wallViscosityI.H"
-
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
         FatalErrorIn
@@ -242,6 +251,12 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
     }
+
+    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -335,7 +350,13 @@ void LaunderGibsonRSTM::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -347,9 +368,10 @@ void LaunderGibsonRSTM::correct()
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G = 0.5*tr(P);
+    volScalarField G("G", 0.5*tr(P));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -365,7 +387,7 @@ void LaunderGibsonRSTM::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -436,11 +458,12 @@ void LaunderGibsonRSTM::correct()
 
 
     // Re-calculate turbulent viscosity
-    mut_ = Cmu_*rho_*sqr(k_)/epsilon_;
+    mut_ == Cmu_*rho_*sqr(k_)/epsilon_;
+    mut_.correctBoundaryConditions();
 
-
-#   include "wallViscosityI.H"
-
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     // Correct wall shear stresses
 

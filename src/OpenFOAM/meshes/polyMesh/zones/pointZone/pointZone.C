@@ -112,6 +112,22 @@ Foam::pointZone::pointZone
 {}
 
 
+Foam::pointZone::pointZone
+(
+    const word& name,
+    const xfer<labelList>& addr,
+    const label index,
+    const pointZoneMesh& zm
+)
+:
+    labelList(addr),
+    name_(name),
+    index_(index),
+    zoneMesh_(zm),
+    pointLookupMapPtr_(NULL)
+{}
+
+
 // Construct from dictionary
 Foam::pointZone::pointZone
 (
@@ -135,6 +151,22 @@ Foam::pointZone::pointZone
 (
     const pointZone& pz,
     const labelList& addr,
+    const label index,
+    const pointZoneMesh& zm
+)
+:
+    labelList(addr),
+    name_(pz.name()),
+    index_(index),
+    zoneMesh_(zm),
+    pointLookupMapPtr_(NULL)
+{}
+
+
+Foam::pointZone::pointZone
+(
+    const pointZone& pz,
+    const xfer<labelList>& addr,
     const label index,
     const pointZoneMesh& zm
 )

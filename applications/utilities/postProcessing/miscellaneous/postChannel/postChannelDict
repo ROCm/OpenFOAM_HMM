@@ -15,13 +15,14 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Nx 40; 
-Ny 
-( 
- 25 
- 25 
-); 
-Nz 30; 
- 
+// Seed patches to start layering from
+patches (bottomWall);
+
+// Direction in which the layers are
+component y;
+
+// Is the mesh symmetric? If so average(symmetric fields) or
+// subtract(asymmetric) contributions from both halves
+symmetric true;
 
 // ************************************************************************* //

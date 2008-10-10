@@ -1,0 +1,4 @@
+xferListTest.C
+
+/* EXE = $(FOAM_USER_APPBIN)/xferListTest */
+EXE = ./xferListTest

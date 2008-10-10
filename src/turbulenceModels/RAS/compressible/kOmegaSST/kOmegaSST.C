@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -228,12 +230,11 @@ kOmegaSST::kOmegaSST
             "k",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
-
     omega_
     (
         IOobject
@@ -241,12 +242,11 @@ kOmegaSST::kOmegaSST
             "omega",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateOmega("omega", mesh_)
     ),
-
     mut_
     (
         IOobject
@@ -255,12 +255,28 @@ kOmegaSST::kOmegaSST
             runTime_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))))
+        autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
-#   include "kOmegaWallViscosityI.H"
+    mut_ == a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+    mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -350,10 +366,15 @@ void kOmegaSST::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ =
+        mut_ ==
             a1_*rho_*k_
            /max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
-#       include "kOmegaWallViscosityI.H"
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -374,10 +395,11 @@ void kOmegaSST::correct()
     tmp<volTensorField> tgradU = fvc::grad(U_);
     volScalarField S2 = magSqr(symm(tgradU()));
     volScalarField GbyMu = (tgradU() && dev(twoSymm(tgradU())));
-    volScalarField G = mut_*GbyMu;
+    volScalarField G("G", mut_*GbyMu);
     tgradU.clear();
 
-#   include "kOmegaWallFunctionsI.H"
+    // Update omega and G at the wall
+    omega_.boundaryField().updateCoeffs();
 
     volScalarField CDkOmega =
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
@@ -404,7 +426,7 @@ void kOmegaSST::correct()
 
     omegaEqn().relax();
 
-#   include "wallOmegaI.H"
+    omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
     bound(omega_, omega0_);
@@ -427,10 +449,12 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    mut_ == a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    mut_.correctBoundaryConditions();
 
-#   include "kOmegaWallViscosityI.H"
-
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

@@ -330,15 +330,14 @@ Foam::label Foam::addPatchCellLayer::addSideFace
     const label meshEdgeI,              // corresponding mesh edge
     const label layerI,                 // layer
     const label numEdgeFaces,           // number of layers for edge
+    const labelList& meshFaces,         // precalculated edgeFaces
     polyTopoChange& meshMod
 ) const
 {
     // Edge to 'inflate' from
     label inflateEdgeI = -1;
 
-    // Mesh faces using edge
-    const labelList& meshFaces = mesh_.edgeFaces()[meshEdgeI];
-
+    // Check mesh faces using edge
     forAll(meshFaces, i)
     {
         if (mesh_.isInternalFace(meshFaces[i]))
@@ -620,6 +619,9 @@ void Foam::addPatchCellLayer::setRefinement
 
     const labelList& meshPoints = pp.meshPoints();
 
+    // Some storage for edge-face-addressing.
+    DynamicList<label> ef;
+
     // Precalculate mesh edges for pp.edges.
     labelList meshEdges(calcMeshEdges(mesh_, pp));
 
@@ -777,7 +779,9 @@ void Foam::addPatchCellLayer::setRefinement
                 label meshEdgeI = meshEdges[edgeI];
 
                 // Mesh faces using edge
-                const labelList& meshFaces = mesh_.edgeFaces()[meshEdgeI];
+
+                // Mesh faces using edge
+                const labelList& meshFaces = mesh_.edgeFaces(meshEdgeI, ef);
 
                 // Check that there is only one patchface using edge.
                 const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -1353,6 +1357,12 @@ void Foam::addPatchCellLayer::setRefinement
                             patchFaceI
                         );
 
+                        const labelList& meshFaces = mesh_.edgeFaces
+                        (
+                            meshEdgeI,
+                            ef
+                        );
+
                         addSideFace
                         (
                             pp,
@@ -1365,6 +1375,7 @@ void Foam::addPatchCellLayer::setRefinement
                             meshEdgeI,      // corresponding mesh edge
                             i,
                             numEdgeSideFaces,
+                            meshFaces,
                             meshMod
                         );
                     }

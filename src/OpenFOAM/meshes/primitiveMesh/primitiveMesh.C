@@ -66,7 +66,6 @@ primitiveMesh::primitiveMesh()
     ppPtr_(NULL),
     cpPtr_(NULL),
 
-    allocSize_(0),
     labels_(0),
 
     cellCentresPtr_(NULL),
@@ -109,7 +108,6 @@ primitiveMesh::primitiveMesh
     ppPtr_(NULL),
     cpPtr_(NULL),
 
-    allocSize_(0),
     labels_(0),
 
     cellCentresPtr_(NULL),

@@ -43,6 +43,7 @@ SourceFiles
 
 #include "UList.H"
 #include "autoPtr.H"
+#include "xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +78,12 @@ class List
     public UList<T>
 {
 
+protected:
+
+    //- Override size to be inconsistent with allocated storage.
+    //  Use with care.
+    inline void size(const label);
+
 public:
 
     // Constructors
@@ -93,10 +100,13 @@ public:
         //- Copy constructor.
         List(const List<T>&);
 
+        //- Construct by transferring the parameter contents
+        List(const xfer<List<T> >&);
+
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
 
-        //- Construct given size and start and end iterators.
+        //- Construct given start and end iterators.
         template<class InputIterator>
         List(InputIterator first, InputIterator last);
 
@@ -165,11 +175,6 @@ public:
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
-
-            //- Override size to be inconsistent with allocated storage.
-            //  Use with care.
-            inline label& size();
-
 
     // Member operators
 

@@ -242,6 +242,30 @@ Foam::faceZone::faceZone
 }
 
 
+Foam::faceZone::faceZone
+(
+    const word& name,
+    const xfer<labelList>& addr,
+    const xfer<boolList>& fm,
+    const label index,
+    const faceZoneMesh& zm
+)
+:
+    labelList(addr),
+    name_(name),
+    flipMap_(fm),
+    index_(index),
+    zoneMesh_(zm),
+    patchPtr_(NULL),
+    masterCellsPtr_(NULL),
+    slaveCellsPtr_(NULL),
+    mePtr_(NULL),
+    faceLookupMapPtr_(NULL)
+{
+    checkAddressing();
+}
+
+
 // Construct from dictionary
 Foam::faceZone::faceZone
 (
@@ -273,6 +297,30 @@ Foam::faceZone::faceZone
     const faceZone& fz,
     const labelList& addr,
     const boolList& fm,
+    const label index,
+    const faceZoneMesh& zm
+)
+:
+    labelList(addr),
+    name_(fz.name()),
+    flipMap_(fm),
+    index_(index),
+    zoneMesh_(zm),
+    patchPtr_(NULL),
+    masterCellsPtr_(NULL),
+    slaveCellsPtr_(NULL),
+    mePtr_(NULL),
+    faceLookupMapPtr_(NULL)
+{
+    checkAddressing();
+}
+
+
+Foam::faceZone::faceZone
+(
+    const faceZone& fz,
+    const xfer<labelList>& addr,
+    const xfer<boolList>& fm,
     const label index,
     const faceZoneMesh& zm
 )

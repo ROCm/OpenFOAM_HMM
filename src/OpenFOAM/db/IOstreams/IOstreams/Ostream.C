@@ -22,14 +22,30 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
+#include "word.H"
 #include "Ostream.H"
 #include "token.H"
+#include "keyType.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+//- Write keyType
+Foam::Ostream& Foam::Ostream::write(const keyType& s)
+{
+    // Write as word?
+    if (s.isWildCard())
+    {
+        return write(static_cast<const string&>(s));
+    }
+    else
+    {
+        return write(static_cast<const word&>(s));
+    }
+}
+
 
 //- Decrememt the indent level
 void Foam::Ostream::decrIndent()
@@ -47,7 +63,7 @@ void Foam::Ostream::decrIndent()
 
 
 // Write the keyword to the Ostream followed by appropriate indentation
-Foam::Ostream& Foam::Ostream::writeKeyword(const Foam::word& keyword)
+Foam::Ostream& Foam::Ostream::writeKeyword(const Foam::keyType& keyword)
 {
     indent();
     write(keyword);

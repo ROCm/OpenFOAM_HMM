@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -144,12 +146,11 @@ RNGkEpsilon::RNGkEpsilon
             "k",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
-
     epsilon_
     (
         IOobject
@@ -157,12 +158,11 @@ RNGkEpsilon::RNGkEpsilon
             "epsilon",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
-
     mut_
     (
         IOobject
@@ -171,12 +171,28 @@ RNGkEpsilon::RNGkEpsilon
             runTime_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
-#   include "wallViscosityI.H"
+    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -262,7 +278,13 @@ void RNGkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -279,7 +301,7 @@ void RNGkEpsilon::correct()
     volScalarField S2 = (tgradU() && dev(twoSymm(tgradU())));
     tgradU.clear();
 
-    volScalarField G = mut_*S2;
+    volScalarField G("G", mut_*S2);
 
     volScalarField eta = sqrt(mag(S2))*k_/epsilon_;
     volScalarField eta3 = eta*sqr(eta);
@@ -287,7 +309,8 @@ void RNGkEpsilon::correct()
     volScalarField R =
         ((eta*(-eta/eta0_ + scalar(1)))/(beta_*eta3 + scalar(1)));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -303,7 +326,7 @@ void RNGkEpsilon::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -327,10 +350,12 @@ void RNGkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_.correctBoundaryConditions();
 
-#   include "wallViscosityI.H"
-
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

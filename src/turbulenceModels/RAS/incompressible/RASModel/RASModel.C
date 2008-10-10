@@ -45,7 +45,8 @@ void RASModel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< type() << "Coeffs" << coeffDict_ << endl;;
+        Info<< type() << "Coeffs" << coeffDict_ << nl
+            << "wallFunctionCoeffs" << wallFunctionDict_ << endl;
     }
 }
 
@@ -83,12 +84,13 @@ RASModel::RASModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDict(type + "Coeffs")),
 
+    wallFunctionDict_(subDict("wallFunctionCoeffs")),
     kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "kappa",
-            subDict("wallFunctionCoeffs"),
+            wallFunctionDict_,
             0.4187
         )
     ),
@@ -97,8 +99,17 @@ RASModel::RASModel
         dimensioned<scalar>::lookupOrAddToDict
         (
             "E",
-            subDict("wallFunctionCoeffs"),
+            wallFunctionDict_,
             9.0
+        )
+    ),
+    Cmu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            wallFunctionDict_,
+            0.09
         )
     ),
 
@@ -118,13 +129,13 @@ RASModel::~RASModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar RASModel::yPlusLam(const scalar kappa, const scalar E)
+scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 {
     scalar ypl = 11.0;
 
     for (int i=0; i<10; i++)
     {
-        ypl = log(E*ypl)/kappa;
+        ypl = log(max(E*ypl, 1))/kappa;
     }
 
     return ypl;
@@ -138,11 +149,10 @@ tmp<scalarField> RASModel::yPlus(const label patchNo) const
     tmp<scalarField> tYp(new scalarField(curPatch.size()));
     scalarField& Yp = tYp();
 
-    if (typeid(curPatch) == typeid(wallFvPatch))
+    if (isType<wallFvPatch>(curPatch))
     {
-        scalar Cmu(readScalar(coeffDict_.lookup("Cmu")));
-
-        Yp = pow(Cmu, 0.25)*y_[patchNo]
+        Yp = pow(Cmu_.value(), 0.25)
+            *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
             /nu().boundaryField()[patchNo];
     }
@@ -150,10 +160,9 @@ tmp<scalarField> RASModel::yPlus(const label patchNo) const
     {
         WarningIn
         (
-            "tmp<scalarField> RASModel::yPlus(const label patchNo)"
-        )   << "const : " << endl
-            << "Patch " << patchNo << " is not a wall.  Returning blank field"
-            << endl;
+            "tmp<scalarField> RASModel::yPlus(const label patchNo) const"
+        )   << "Patch " << patchNo << " is not a wall. Returning null field"
+            << nl << endl;
 
         Yp.setSize(0);
     }
@@ -178,8 +187,10 @@ bool RASModel::read()
         lookup("turbulence") >> turbulence_;
         coeffDict_ = subDict(type() + "Coeffs");
 
-        kappa_.readIfPresent(subDict("wallFunctionCoeffs"));
-        E_.readIfPresent(subDict("wallFunctionCoeffs"));
+        wallFunctionDict_ = subDict("wallFunctionCoeffs");
+        kappa_.readIfPresent(wallFunctionDict_);
+        E_.readIfPresent(wallFunctionDict_);
+        Cmu_.readIfPresent(wallFunctionDict_);
 
         yPlusLam_ = yPlusLam(kappa_.value(), E_.value());
 

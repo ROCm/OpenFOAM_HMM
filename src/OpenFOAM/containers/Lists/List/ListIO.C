@@ -30,16 +30,11 @@ License
 #include "SLList.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 // Construct from Istream
 template<class T>
-List<T>::List(Istream& is)
+Foam::List<T>::List(Istream& is)
 :
     UList<T>(NULL, 0)
 {
@@ -48,7 +43,7 @@ List<T>::List(Istream& is)
 
 
 template<class T>
-Istream& operator>>(Istream& is, List<T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
 {
     // Anull list
     L.setSize(0);
@@ -160,10 +155,5 @@ Istream& operator>>(Istream& is, List<T>& L)
 
     return is;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

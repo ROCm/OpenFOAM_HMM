@@ -72,7 +72,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     adjoint_(dict.lookup("adjoint"))
 {
     if (dict.found("gradient"))

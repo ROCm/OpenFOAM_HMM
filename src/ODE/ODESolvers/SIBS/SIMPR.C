@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SIBS.H"
-#include "simpleMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,7 +35,7 @@ void Foam::SIBS::SIMPR
     const scalarField& y,
     const scalarField& dydx,
     const scalarField& dfdx,
-    const Matrix<scalar>& dfdy,
+    const scalarSquareMatrix& dfdy,
     const scalar deltaX,
     const label nSteps,
     scalarField& yEnd
@@ -44,7 +43,7 @@ void Foam::SIBS::SIMPR
 {
     scalar h = deltaX/nSteps;
 
-    Matrix<scalar> a(n_, n_);
+    scalarSquareMatrix a(n_);
     for (register label i=0; i<n_; i++)
     {
         for (register label j=0; j<n_; j++)
@@ -55,14 +54,14 @@ void Foam::SIBS::SIMPR
     }
 
     labelList pivotIndices(n_);
-    simpleMatrix<scalar>::LUDecompose(a, pivotIndices);
+    LUDecompose(a, pivotIndices);
 
     for (register label i=0; i<n_; i++)
     {
         yEnd[i] = h*(dydx[i] + h*dfdx[i]);
     }
 
-    simpleMatrix<scalar>::LUBacksubstitute(a, pivotIndices, yEnd);
+    LUBacksubstitute(a, pivotIndices, yEnd);
 
     scalarField del(yEnd);
     scalarField ytemp(n_);
@@ -83,7 +82,7 @@ void Foam::SIBS::SIMPR
             yEnd[i] = h*yEnd[i] - del[i];
         }
 
-        simpleMatrix<scalar>::LUBacksubstitute(a, pivotIndices, yEnd);
+        LUBacksubstitute(a, pivotIndices, yEnd);
 
         for (register label i=0; i<n_; i++)
         {
@@ -99,7 +98,7 @@ void Foam::SIBS::SIMPR
         yEnd[i] = h*yEnd[i] - del[i];
     }
 
-    simpleMatrix<scalar>::LUBacksubstitute(a, pivotIndices, yEnd);
+    LUBacksubstitute(a, pivotIndices, yEnd);
 
     for (register label i=0; i<n_; i++)
     {

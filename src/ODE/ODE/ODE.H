@@ -34,7 +34,7 @@ Description
 #define ODE_H
 
 #include "scalarField.H"
-#include "Matrix.H"
+#include "scalarMatrices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,7 +80,7 @@ public:
             const scalar x,
             const scalarField& y,
             scalarField& dfdx,
-            Matrix<scalar>& dfdy
+            scalarSquareMatrix& dfdy
         ) const = 0;
 };
 

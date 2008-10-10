@@ -103,6 +103,9 @@ public:
         //- Construct given list of row-sizes
         CompactListList(const UList<label>& rowSizes, const T&);
 
+        //- Construct by transferring the parameter contents
+        CompactListList(const xfer<CompactListList<T> >&);
+
         //- Construct as copy or re-use as specified.
         CompactListList(CompactListList<T>&, bool reUse);
 

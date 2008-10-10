@@ -7,21 +7,21 @@ application="lesCavitatingFoam"
 
 refineMeshByCellSet()
 {
-    echo "creating cell set for primary zone - $1"
-    cp system/cellSetDict.$1 system/cellSetDict
-    cellSet >& log.cellSet.$1
+   while [ $# -ge 1 ]
+   do
+      echo "creating cell set for primary zone - $1"
+      cp system/cellSetDict.$1 system/cellSetDict
+      cellSet > log.cellSet.$1 2>&1
 
-    echo "refining primary zone - $1"
-    refineMesh -dict -overwrite >& log.refineMesh.$1
+      echo "refining primary zone - $1"
+      refineMesh -dict -overwrite > log.refineMesh.$1 2>&1
+      shift
+   done
 }
 
 cd throttle
     runApplication blockMesh
-
-    refineMeshByCellSet 1
-    refineMeshByCellSet 2
-    refineMeshByCellSet 3
-
+    refineMeshByCellSet 1 2 3
     runApplication $application
 cd ..
 
@@ -29,10 +29,7 @@ cd throttle3D
     cp -r 0.org 0
 
     runApplication blockMesh
-
-    refineMeshByCellSet 1
-    refineMeshByCellSet 2
-    refineMeshByCellSet 3
+    refineMeshByCellSet 1 2 3
 
     echo "mapping fields from 2D throttle case"
     mapFields ../throttle -sourceTime latestTime >& log.mapFields

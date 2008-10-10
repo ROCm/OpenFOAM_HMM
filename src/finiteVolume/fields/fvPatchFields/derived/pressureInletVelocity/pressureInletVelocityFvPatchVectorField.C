@@ -150,9 +150,9 @@ void pressureInletVelocityFvPatchVectorField::write(Ostream& os) const
     {
         os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     }
-    if (tangentialVelocity_.size())
+    if (rhoName_ != "rho")
     {
-        tangentialVelocity_.writeEntry("tangentialVelocity", os);
+        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     }
     writeEntry("value", os);
 }

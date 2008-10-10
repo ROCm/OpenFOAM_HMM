@@ -41,6 +41,14 @@ void primitiveMesh::calcCellCells() const
     {
         Pout<< "primitiveMesh::calcCellCells() : calculating cellCells"
             << endl;
+
+        if (debug == -1)
+        {
+            // For checking calls:abort so we can quickly hunt down
+            // origin of call
+            FatalErrorIn("primitiveMesh::calcCellCells()")
+                << abort(FatalError);
+        }
     }
 
     // It is an error to attempt to recalculate cellCells
@@ -105,7 +113,11 @@ const labelListList& primitiveMesh::cellCells() const
 }
 
 
-const labelList& primitiveMesh::cellCells(const label cellI) const
+const labelList& primitiveMesh::cellCells
+(
+    const label cellI,
+    DynamicList<label>& storage
+) const
 {
     if (hasCellCells())
     {
@@ -117,16 +129,7 @@ const labelList& primitiveMesh::cellCells(const label cellI) const
         const labelList& nei = faceNeighbour();
         const cell& cFaces = cells()[cellI];
 
-        labels_.size() = allocSize_;
-
-        if (cFaces.size() > allocSize_)
-        {
-            labels_.clear();
-            allocSize_ = cFaces.size();
-            labels_.setSize(allocSize_);
-        }
-
-        label n = 0;
+        storage.clear();
 
         forAll(cFaces, i)
         {
@@ -136,19 +139,23 @@ const labelList& primitiveMesh::cellCells(const label cellI) const
             {
                 if (own[faceI] == cellI)
                 {
-                    labels_[n++] = nei[faceI];
+                    storage.append(nei[faceI]);
                 }
                 else
                 {
-                    labels_[n++] = own[faceI];
+                    storage.append(own[faceI]);
                 }
             }
         }
 
-        labels_.size() = n;
-
-        return labels_;
+        return storage;
     }
+}
+
+
+const labelList& primitiveMesh::cellCells(const label cellI) const
+{
+    return cellCells(cellI, labels_);
 }
 
 

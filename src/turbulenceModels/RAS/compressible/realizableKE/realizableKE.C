@@ -28,6 +28,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -157,12 +159,11 @@ realizableKE::realizableKE
             "k",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
-
     epsilon_
     (
         IOobject
@@ -170,12 +171,11 @@ realizableKE::realizableKE
             "epsilon",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
-
     mut_
     (
         IOobject
@@ -184,14 +184,31 @@ realizableKE::realizableKE
             runTime_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
-        rCmu(fvc::grad(U_))*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        autoCreateMut("mut", mesh_)
+    ),
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
-#   include "wallViscosityI.H"
+
+    mut_ == rCmu(fvc::grad(U_))*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
+
+    alphat_ == mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -274,7 +291,13 @@ void realizableKE::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rCmu(fvc::grad(U_))*rho_*sqr(k_)/epsilon_;
+        mut_ == rCmu(fvc::grad(U_))*rho_*sqr(k_)/epsilon_;
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -294,9 +317,10 @@ void realizableKE::correct()
     volScalarField eta = magS*k_/epsilon_;
     volScalarField C1 = max(eta/(scalar(5) + eta), scalar(0.43));
 
-    volScalarField G = mut_*(gradU && dev(twoSymm(gradU)));
+    volScalarField G("G", mut_*(gradU && dev(twoSymm(gradU))));
 
-#   include "wallFunctionsI.H"
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -315,7 +339,7 @@ void realizableKE::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -338,10 +362,12 @@ void realizableKE::correct()
     bound(k_, k0_);
 
     // Re-calculate viscosity
-    mut_ = rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;
+    mut_ == rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;
+    mut_.correctBoundaryConditions();
 
-#   include "wallViscosityI.H"
-
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 
