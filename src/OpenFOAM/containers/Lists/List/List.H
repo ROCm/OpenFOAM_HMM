@@ -152,9 +152,6 @@ public:
         //- Return the number of elements in the UList.
         inline label size() const;
 
-        //- Override size to be inconsistent with allocated storage.
-        //  Use with care.
-        inline label& size();
 
         // Edit
 
