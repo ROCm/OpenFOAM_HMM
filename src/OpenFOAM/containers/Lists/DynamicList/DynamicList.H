@@ -117,16 +117,18 @@ public:
         // Edit
 
             //- Alter the list size.
-            //  When the new size is smaller than the addressed list size,
-            //  the addressed list size is reduced and the allocated size
-            //  does not change.
-            //  Otherwise the allocated size is adjusted, but the
-            //  addressed list size does not change.
+            //  When the new size is greater than the addressed list size, both
+            //  allocated and addressed list sizes are adjusted to the new size.
+            //  Otherwise the addressed list size is just reduced and
+            //  the allocated size does not change.
             inline void setSize(const label);
 
             //- Alter the list size and assign a value for new elements.
-            //  If the new size is larger than the addressed list size,
-            //  both allocated and addressed list sizes are adjusted.
+            //  When the new size is greater than the addressed list size, both
+            //  allocated and addressed list sizes are adjusted to the new size
+            //  and a const value is assigned for the newly addressed  elements.
+            //  Otherwise the addressed list size is just reduced and
+            //  the allocated size does not change.
             inline void setSize(const label, const T&);
 
             //- Clear the list, i.e. set the size to zero.
