@@ -81,12 +81,12 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 {
     if (s <= List<T>::size())
     {
-        // shrink addressable size, leave allocated size untouched
+        // adjust addressed size, leave allocated size untouched
         List<T>::size(s);
     }
-    else if (s > allocSize_)
+    else
     {
-        // increase allocated size, leave addressable size untouched
+        // adjust allocated size, leave addressed size untouched
         label nextFree = List<T>::size();
         allocSize_ = s;
         List<T>::setSize(allocSize_);
@@ -104,27 +104,16 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 {
     if (s <= List<T>::size())
     {
-        // shrink addressable size, leave allocated size untouched
+        // shrink addressed size, leave allocated size untouched
         List<T>::size(s);
-    }
-    else if (s > allocSize_)
-    {
-        // increase allocated size, leave addressable size untouched
-        // fill in newly allocated values with constant value
-        label nextFree = List<T>::size();
-        allocSize_ = s;
-        List<T>::setSize(allocSize_, t);
-        List<T>::size(nextFree);
     }
     else
     {
-        // leave allocated and addressable sizes untouched
-        // fill in new exposed values with constant value
-        label nextFree = List<T>::size();
-        while (nextFree < s)
-        {
-            this->operator[](nextFree++) = t;
-        }
+        // increase allocated size and fill previously unused elements
+        // with constant value.
+        // The addressed size now matches the allocated size
+        allocSize_ = s;
+        List<T>::setSize(allocSize_, t);
     }
 }
 
