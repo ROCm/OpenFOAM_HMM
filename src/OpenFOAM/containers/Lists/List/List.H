@@ -78,6 +78,12 @@ class List
     public UList<T>
 {
 
+protected:
+
+    //- Override size to be inconsistent with allocated storage.
+    //  Use with care.
+    inline void size(const label);
+
 public:
 
     // Constructors

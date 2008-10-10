@@ -33,7 +33,7 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
     List<T>(SizeInc),
     allocSize_(SizeInc)
 {
-    List<T>::size() = 0;
+    List<T>::size(0);
 }
 
 
@@ -47,7 +47,7 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
     List<T>(s),
     allocSize_(s)
 {
-    List<T>::size() = 0;
+    List<T>::size(0);
 }
 
 
@@ -81,14 +81,14 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 {
     if (s < List<T>::size())
     {
-        List<T>::size() = s;
+        List<T>::size(s);
     }
     else
     {
         label nextFree = List<T>::size();
         allocSize_ = s;
         List<T>::setSize(allocSize_);
-        List<T>::size() = nextFree;
+        List<T>::size(nextFree);
     }
 }
 
@@ -102,14 +102,14 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 {
     if (s < List<T>::size())
     {
-        List<T>::size() = s;
+        List<T>::size(s);
     }
     else
     {
         label nextFree = List<T>::size();
         allocSize_ = s;
         List<T>::setSize(allocSize_, t);
-        List<T>::size() = nextFree;
+        List<T>::size(nextFree);
     }
 }
 
@@ -117,7 +117,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 {
-    List<T>::size() = 0;
+    List<T>::size(0);
 }
 
 
@@ -191,7 +191,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append(const T& e)
         List<T>::setSize(allocSize_);
     }
 
-    List<T>::size() = nextFree;
+    List<T>::size(nextFree);
 
     this->operator[](nextFree - 1) = e;
 }
@@ -212,7 +212,7 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 
     const T& val = List<T>::operator[](nextFree);
 
-    List<T>::size() = nextFree;
+    List<T>::size(nextFree);
 
     return val;
 }
@@ -240,7 +240,7 @@ inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
         List<T>::setSize(allocSize_);
     }
 
-    List<T>::size() = nextFree;
+    List<T>::size(nextFree);
 
     return this->operator[](i);
 }
