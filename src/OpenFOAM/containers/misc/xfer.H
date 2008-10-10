@@ -26,14 +26,22 @@ Class
     Foam::xfer
 
 Description
-    A simple container that can be used to transfer the contents of objects
-    of type \<T\> of rather than copying them.
+    A simple container that can be used to copy or transfer the contents
+    of objects of type \<T\>.
 
-    The wrapped object of type \<T\> must implement a transfer() method.
+    Since it is decided upon construction of the xfer object whether the
+    parameter is to be copied or transferred, the contents of resulting
+    object can be transferred unconditionally.
+
+    This greatly simplifies defining the constructors for other classes
+    with mixed transfer/copy semantics.
+
+    The wrapped object of type \<T\> must implement a transfer() method and
+    an operator=() copy method.
 
 Note
-    The macro xferTmp(T,arg) can be used as a workaround for passing
-    temporaries to copy-constructors.
+    The macros xferCopy(T,arg) and xferTmp(T,arg) can be used as workarounds
+    for passing temporaries to copy-constructors.
 
 SourceFiles
     xferI.H
@@ -60,24 +68,22 @@ class xfer
         //- Pointer to temporary object
         mutable T* ptr_;
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        xfer(const xfer<T>&);
-
 public:
 
     // Constructors
 
-        //- Null constructor
-        //  Can be used later to transfer by assignment
-        inline xfer();
+        //- Store object pointer and manage its deletion
+        //  Can also be used later to transfer by assignment
+        inline explicit xfer(T* = 0);
 
         //- Construct by copying or by transferring the parameter contents
         inline xfer(T&, bool allowTransfer=false);
 
-        //- Copy constructor
+        //- Construct by copying the parameter contents
         inline xfer(const T&);
+
+        //- Construct by transferring the contents
+        inline xfer(const xfer<T>&);
 
     // Destructor
 
@@ -106,25 +112,37 @@ public:
 } // End namespace Foam
 
 /**
- * @def xferTmp(T,arg)
- * Construct a temporary and return a const reference to an xfer of
- * type \<T\> and return a const reference.
+ * @def xferCopy(T,arg)
+ * Construct by copying the contents of the @a arg
+ * and return a const reference to an xfer of type \<T\>
  *
- * Useful for copy-constructors where the argument is temporary.
- * This is a workaround for a template resolution problem.
+ * Useful for constructors where the argument is temporary.
+ * This is a workaround for a template resolution issue.
+ *
+ * @sa xferTmp and Foam::xfer
+*/
+#define xferCopy(T,arg) \
+    (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg)()))
+
+/**
+ * @def xferTmp(T,arg)
+ * Construct by transferring the contents of the @a arg
+ * and return a const reference to an xfer of type \<T\>
+ *
+ * Useful for constructors where the argument is temporary.
+ * This is a workaround for a template resolution issue.
  *
  * @par Example Use
  * @code
  *     List<label> a;
  *     ...
  *     List<label> b(xferTmp(List<label>, a));
- *
  * @endcode
- * @sa xfer class
+ *
+ * @sa xferCopy and Foam::xfer
 */
-
 #define xferTmp(T,arg) \
-    (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg)()))
+    (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg, true)()))
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

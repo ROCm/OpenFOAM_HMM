@@ -27,9 +27,9 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::xfer<T>::xfer()
+inline Foam::xfer<T>::xfer(T* p)
 :
-    ptr_(new T)
+    ptr_(p ? p : new T)
 {}
 
 
@@ -55,6 +55,15 @@ inline Foam::xfer<T>::xfer(const T& t)
     ptr_(new T)
 {
     ptr_->operator=(t);
+}
+
+
+template<class T>
+inline Foam::xfer<T>::xfer(const xfer<T>& t)
+:
+    ptr_(new T)
+{
+    ptr_->transfer(*(t.ptr_));
 }
 
 
