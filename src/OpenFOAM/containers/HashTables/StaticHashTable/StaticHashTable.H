@@ -46,6 +46,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "className.H"
+#include "xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,6 +147,8 @@ public:
         //- Construct as copy
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
 
+        //- Construct as copy
+        StaticHashTable(const xfer<StaticHashTable<T, Key, Hash> >&);
 
     // Destructor
 
