@@ -41,6 +41,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
+static int count = 0;
+
 Foam::quadraticFitData::quadraticFitData
 (
     const fvMesh& mesh,
@@ -114,13 +116,15 @@ Foam::quadraticFitData::quadraticFitData
         interpPolySize[faci] = calcFit(stencilPoints[faci], faci);
     }
 
-    interpPolySize.write();
+    Pout<< "count = " << count << endl;
 
     if (debug)
     {
         Info<< "quadraticFitData::quadraticFitData() :"
             << "Finished constructing polynomialFit data"
             << endl;
+
+        interpPolySize.write();
     }
 }
 
@@ -270,8 +274,8 @@ Foam::label Foam::quadraticFitData::calcFit
         //goodFit = (fit0 > 0 && fit1 > 0);
 
         goodFit =
-            (mag(fit0 - w[faci])/w[faci] < 0.5)
-         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.5);
+            (mag(fit0 - w[faci])/w[faci] < 0.15)
+         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.15);
 
         //scalar w0Err = fit0/w[faci];
         //scalar w1Err = fit1/(1 - w[faci]);
@@ -312,11 +316,21 @@ Foam::label Foam::quadraticFitData::calcFit
         }
     }
 
-    //static const scalar alpha = 1.5;
-    //static const scalar beta = alpha/0.5;
+    // static const scalar L = 0.1;
+    // static const scalar R = 0.2;
+
+    // static const scalar beta = 1.0/(R - L);
+    // static const scalar alpha = R*beta;
 
     if (goodFit)
     {
+         if ((mag(fit_[faci][0] - w[faci])/w[faci] < 0.15)
+         && (mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]) < 0.15))
+         {
+             count++;
+             //Pout<< "fit " << mag(fit_[faci][0] - w[faci])/w[faci] << " " << mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]) << endl;
+         }
+
         // scalar limiter =
         // max
         // (
