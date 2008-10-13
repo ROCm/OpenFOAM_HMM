@@ -81,7 +81,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
         const basicThermo& thermo =
              obr_.lookupObject<basicThermo>("thermophysicalProperties");
 
-        const volVectorField& U = obr_.lookupObject<volVectorField>(Uname_);
+        const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
         return -thermo.mu()*dev(twoSymm(fvc::grad(U)));
     }
@@ -94,7 +94,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
             obr_.lookupObject<singlePhaseTransportModel>
             ("transportProperties");
 
-        const volVectorField& U = obr_.lookupObject<volVectorField>(Uname_);
+        const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
         return -rhoRef_*laminarT.nu()*dev(twoSymm(fvc::grad(U)));
     }
@@ -105,7 +105,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 
         dimensionedScalar nu(transportProperties.lookup("nu"));
 
-        const volVectorField& U = obr_.lookupObject<volVectorField>(Uname_);
+        const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
         return -rhoRef_*nu*dev(twoSymm(fvc::grad(U)));
     }
@@ -149,7 +149,7 @@ Foam::forces::forces
     log_(false),
     patchSet_(),
     pName_(""),
-    Uname_(""),
+    UName_(""),
     rhoRef_(0),
     CofR_(vector::zero),
     forcesFilePtr_(NULL)
@@ -190,18 +190,18 @@ void Foam::forces::read(const dictionary& dict)
 
         // Optional entries U and p
         pName_ = dict.lookupOrDefault<word>("pName", "p");
-        Uname_ = dict.lookupOrDefault<word>("Uname", "U");
+        UName_ = dict.lookupOrDefault<word>("UName", "U");
 
-        // Check whether Uname and pName exists, if not deactivate forces
+        // Check whether UName and pName exists, if not deactivate forces
         if
         (
-            !obr_.foundObject<volVectorField>(Uname_)
+            !obr_.foundObject<volVectorField>(UName_)
          || !obr_.foundObject<volScalarField>(pName_)
         )
         {
             active_ = false;
             WarningIn("void forces::read(const dictionary& dict)")
-                << "Could not find " << Uname_ << " or "
+                << "Could not find " << UName_ << " or "
                 << pName_ << " in database." << nl
                 << "    De-activating forces."
                 << endl;
@@ -299,7 +299,7 @@ void Foam::forces::write()
 
 Foam::forces::forcesMoments Foam::forces::calcForcesMoment() const
 {
-    const volVectorField& U = obr_.lookupObject<volVectorField>(Uname_);
+    const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
     const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
 
     const fvMesh& mesh = U.mesh();

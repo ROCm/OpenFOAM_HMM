@@ -23,22 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFit
+    quadraticFitSnGradData
 
 Description
-    Quadratic fit interpolation scheme which applies an explicit correction to
-    linear.
+    Data for the quadratic fit correction snGrad scheme
 
 SourceFiles
-    quadraticFit.C
+    quadraticFitSnGradData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticFit_H
-#define quadraticFit_H
+#ifndef quadraticFitSnGradData_H
+#define quadraticFitSnGradData_H
 
-#include "linear.H"
-#include "quadraticFitData.H"
+#include "MeshObject.H"
+#include "fvMesh.H"
 #include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,83 +46,77 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quadraticFit Declaration
+                    Class quadraticFitSnGradData Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class quadraticFit
+class quadraticFitSnGradData
 :
-    public linear<Type>
+    public MeshObject<fvMesh, quadraticFitSnGradData>
 {
-    // Private Data
+    // Private data
+
         const scalar centralWeight_;
+        const label dim_;
 
-    // Private Member Functions
+        //- minimum stencil size
+        const label minSize_;
 
-        //- Disallow default bitwise copy construct
-        quadraticFit(const quadraticFit&);
+        //- Extended stencil addressing
+        extendedStencil stencil_;
 
-        //- Disallow default bitwise assignment
-        void operator=(const quadraticFit&);
+        //- For each cell in the mesh store the values which multiply the
+        //  values of the stencil to obtain the gradient for each direction
+        List<scalarList> fit_;
+
+
+    // Private member functions
+
+        //- Find the normal direction and i, j and k directions for face faci
+        static void findFaceDirs
+        (
+            vector& idir,        // value changed in return
+            vector& jdir,        // value changed in return
+            vector& kdir,        // value changed in return
+            const fvMesh& mesh,
+            const label faci
+        );
+
+        label calcFit(const List<point>&, const label faci);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("quadraticFit");
+    TypeName("quadraticFitSnGradData");
 
 
     // Constructors
 
-        //- Construct from mesh and Istream
-        quadraticFit(const fvMesh& mesh, Istream& is)
-        :
-            linear<Type>(mesh),
-            centralWeight_(readScalar(is))
-        {}
-
-
-        //- Construct from mesh, faceFlux and Istream
-        quadraticFit
+        explicit quadraticFitSnGradData
         (
             const fvMesh& mesh,
-            const surfaceScalarField& faceFlux,
-            Istream& is
-        )
-        :
-            linear<Type>(mesh),
-            centralWeight_(readScalar(is))
-        {}
+            const scalar cWeight
+        );
 
 
-    // Member Functions
+    // Destructor
 
-        //- Return true if this scheme uses an explicit correction
-        virtual bool corrected() const
+        virtual ~quadraticFitSnGradData()
+        {};
+
+
+    // Member functions
+
+        //- Return reference to the stencil
+        const extendedStencil& stencil() const
         {
-            return true;
+            return stencil_;
         }
 
-        //- Return the explicit correction to the face-interpolate
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-        correction
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const
-        {
-            const fvMesh& mesh = this->mesh();
+        //- Return reference to fit coefficients
+        const List<scalarList>& fit() const { return fit_; }
 
-            const quadraticFitData& cfd = quadraticFitData::New
-            (
-                mesh,
-                centralWeight_
-            );
-
-            const extendedStencil& stencil = cfd.stencil();
-            const List<scalarList>& f = cfd.fit();
-
-            return stencil.weightedSum(vf, f);
-        }
+        //- Delete the data when the mesh moves not implemented
+        virtual bool movePoints();
 };
 
 

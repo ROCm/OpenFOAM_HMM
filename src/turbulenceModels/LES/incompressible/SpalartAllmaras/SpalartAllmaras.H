@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LESModels::SpalartAllmaras
+    Foam::LESmodels::SpalartAllmaras
 
 Description
-    SpalartAllmaras for incompressible flows
+    SpalartAllmaras DES (SA + LES) turbulence model for incompressible flows
 
 SourceFiles
     SpalartAllmaras.C
@@ -49,43 +49,67 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SpalartAllmaras Declaration
+                        Class SpalartAllmaras Declaration
 \*---------------------------------------------------------------------------*/
 
 class SpalartAllmaras
 :
     public LESModel
 {
-    // Private data
-
-        dimensionedScalar alphaNut_;
-
-        dimensionedScalar Cb1_;
-        dimensionedScalar Cb2_;
-        dimensionedScalar Cv1_;
-        dimensionedScalar Cv2_;
-        dimensionedScalar CDES_;
-        dimensionedScalar ck_;
-        dimensionedScalar kappa_;
-        dimensionedScalar Cw1_;
-        dimensionedScalar Cw2_;
-        dimensionedScalar Cw3_;
-
-
     // Private member functions
-
-        tmp<volScalarField> fv1() const;
-        tmp<volScalarField> fv2() const;
-        tmp<volScalarField> fv3() const;
-        tmp<volScalarField> fw(const volScalarField& Stilda) const;
 
         // Disallow default bitwise copy construct and assignment
         SpalartAllmaras(const SpalartAllmaras&);
         SpalartAllmaras& operator=(const SpalartAllmaras&);
 
-        volScalarField nuTilda_;
-        volScalarField dTilda_;
-        volScalarField nuSgs_;
+
+protected:
+
+    // Protected data
+
+        dimensionedScalar alphaNut_;
+        dimensionedScalar kappa_;
+
+
+        // Model constants
+
+            dimensionedScalar Cb1_;
+            dimensionedScalar Cb2_;
+            dimensionedScalar Cv1_;
+            dimensionedScalar Cv2_;
+            dimensionedScalar CDES_;
+            dimensionedScalar ck_;
+            dimensionedScalar Cw1_;
+            dimensionedScalar Cw2_;
+            dimensionedScalar Cw3_;
+
+
+        // Fields
+
+            volScalarField nuTilda_;
+            volScalarField dTilda_;
+            volScalarField nuSgs_;
+
+
+    // Protected member functions
+
+        // Helper functions
+
+            virtual tmp<volScalarField> fv1() const;
+            virtual tmp<volScalarField> fv2() const;
+            virtual tmp<volScalarField> fv3() const;
+            //-
+            virtual tmp<volScalarField> calcS(const volTensorField& gradU);
+            virtual tmp<volScalarField> calcSTilda(const volTensorField& gradU);
+            virtual tmp<volScalarField> r
+            (
+                const volScalarField& visc,
+                const volScalarField& S
+            ) const;
+            virtual tmp<volScalarField> fw(const volScalarField& S) const;
+
+        //- Length scale calculation
+        virtual void dTildaUpdate(const volScalarField& S);
 
 
 public:
@@ -101,13 +125,14 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& modelName = typeName
         );
 
 
     // Destructor
 
-        ~SpalartAllmaras()
+        virtual ~SpalartAllmaras()
         {}
 
 
@@ -145,10 +170,10 @@ public:
         tmp<fvVectorMatrix> divDevBeff(volVectorField& U) const;
 
         //- Correct nuTilda and related properties
-        void correct(const tmp<volTensorField>& gradU);
+        virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

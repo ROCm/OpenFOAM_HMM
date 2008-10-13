@@ -23,22 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFit
+    quadraticFitSnGrad
 
 Description
-    Quadratic fit interpolation scheme which applies an explicit correction to
-    linear.
+    Simple central-difference snGrad scheme with quadratic fit correction from
+    a larger stencil.
 
 SourceFiles
-    quadraticFit.C
+    quadraticFitSnGrad.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticFit_H
-#define quadraticFit_H
+#ifndef quadraticFitSnGrad_H
+#define quadraticFitSnGrad_H
 
-#include "linear.H"
-#include "quadraticFitData.H"
+#include "snGradScheme.H"
+#include "quadraticFitSnGradData.H"
 #include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,25 +46,28 @@ SourceFiles
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace fv
+{
+
 /*---------------------------------------------------------------------------*\
-                           Class quadraticFit Declaration
+                 Class quadraticFitSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class quadraticFit
+class quadraticFitSnGrad
 :
-    public linear<Type>
+    public snGradScheme<Type>
 {
     // Private Data
+        //- weights for central stencil
         const scalar centralWeight_;
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        quadraticFit(const quadraticFit&);
-
         //- Disallow default bitwise assignment
-        void operator=(const quadraticFit&);
+        void operator=(const quadraticFitSnGrad&);
 
 
 public:
@@ -75,28 +78,41 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and Istream
-        quadraticFit(const fvMesh& mesh, Istream& is)
-        :
-            linear<Type>(mesh),
-            centralWeight_(readScalar(is))
-        {}
-
-
-        //- Construct from mesh, faceFlux and Istream
-        quadraticFit
+        //- Construct from mesh and scheme data
+        quadraticFitSnGrad
         (
             const fvMesh& mesh,
-            const surfaceScalarField& faceFlux,
-            Istream& is
+            const scalar centralWeight
         )
         :
-            linear<Type>(mesh),
+            snGradScheme<Type>(mesh),
+            centralWeight_(centralWeight)
+        {}
+
+
+        //- Construct from mesh and data stream
+        quadraticFitSnGrad(const fvMesh& mesh, Istream& is)
+        :
+            snGradScheme<Type>(mesh),
             centralWeight_(readScalar(is))
         {}
+
+
+    // Destructor
+
+        virtual ~quadraticFitSnGrad() {}
 
 
     // Member Functions
+
+        //- Return the interpolation weighting factors for the given field
+        virtual tmp<surfaceScalarField> deltaCoeffs
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&
+        ) const
+        {
+            return this->mesh().deltaCoeffs();
+        }
 
         //- Return true if this scheme uses an explicit correction
         virtual bool corrected() const
@@ -104,28 +120,35 @@ public:
             return true;
         }
 
-        //- Return the explicit correction to the face-interpolate
+        //- Return the explicit correction to the quadraticFitSnGrad
+        //  for the given field
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-        correction
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const
+        correction(const GeometricField<Type, fvPatchField, volMesh>& vf) const
         {
             const fvMesh& mesh = this->mesh();
 
-            const quadraticFitData& cfd = quadraticFitData::New
+            const quadraticFitSnGradData& qfd = quadraticFitSnGradData::New
             (
                 mesh,
                 centralWeight_
             );
 
-            const extendedStencil& stencil = cfd.stencil();
-            const List<scalarList>& f = cfd.fit();
+            const extendedStencil& stencil = qfd.stencil();
+            const List<scalarList>& f = qfd.fit();
 
-            return stencil.weightedSum(vf, f);
+            tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > sft
+                = stencil.weightedSum(vf, f);
+
+            sft().dimensions() /= dimLength;
+
+            return sft;
         }
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace fv
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

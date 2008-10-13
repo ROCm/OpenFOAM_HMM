@@ -8,6 +8,9 @@ GenSGSStress/GenSGSStress.C
 
 laminar/laminar.C
 SpalartAllmaras/SpalartAllmaras.C
+SpalartAllmarasDDES/SpalartAllmarasDDES.C
+SpalartAllmarasIDDES/SpalartAllmarasIDDES.C
+SpalartAllmarasIDDES/IDDESDelta/IDDESDelta.C
 
 oneEqEddy/oneEqEddy.C
 dynOneEqEddy/dynOneEqEddy.C

@@ -24,38 +24,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quadraticFitData.H"
+#include "quadraticFitSnGradData.H"
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
 #include "syncTools.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(quadraticFitData, 0);
+    defineTypeNameAndDebug(quadraticFitSnGradData, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-static int count = 0;
-
-Foam::quadraticFitData::quadraticFitData
+Foam::quadraticFitSnGradData::quadraticFitSnGradData
 (
     const fvMesh& mesh,
     const scalar cWeight
 )
 :
-    MeshObject<fvMesh, quadraticFitData>(mesh),
+    MeshObject<fvMesh, quadraticFitSnGradData>(mesh),
     centralWeight_(cWeight),
-#   ifdef SPHERICAL_GEOMETRY
-    dim_(2),
-#   else
-    dim_(mesh.nGeometricD()),
-#   endif
+    #ifdef SPHERICAL_GEOMETRY
+        dim_(2),
+    #else
+        dim_(mesh.nGeometricD()),
+    #endif
     minSize_
     (
         dim_ == 1 ? 3 :
@@ -67,13 +64,13 @@ Foam::quadraticFitData::quadraticFitData
 {
     if (debug)
     {
-        Info << "Contructing quadraticFitData" << endl;
+        Info << "Contructing quadraticFitSnGradData" << endl;
     }
 
     // check input
     if (centralWeight_ < 1 - SMALL)
     {
-        FatalErrorIn("quadraticFitData::quadraticFitData")
+        FatalErrorIn("quadraticFitSnGradData::quadraticFitSnGradData")
             << "centralWeight requested = " << centralWeight_
             << " should not be less than one"
             << exit(FatalError);
@@ -85,19 +82,19 @@ Foam::quadraticFitData::quadraticFitData
             << " dimension must be 1,2 or 3, not" << dim_ << exit(FatalError);
     }
 
-    // store the polynomial size for each cell to write out
-    surfaceScalarField interpPolySize
+    // store the polynomial size for each face to write out
+    surfaceScalarField snGradPolySize
     (
         IOobject
         (
-            "quadraticFitInterpPolySize",
+            "quadraticFitSnGradPolySize",
             "constant",
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("quadraticFitInterpPolySize", dimless, scalar(0))
+        dimensionedScalar("quadraticFitSnGradPolySize", dimless, scalar(0))
     );
 
     // Get the cell/face centres in stencil order.
@@ -113,25 +110,22 @@ Foam::quadraticFitData::quadraticFitData
 
     for(label faci = 0; faci < mesh.nInternalFaces(); faci++)
     {
-        interpPolySize[faci] = calcFit(stencilPoints[faci], faci);
+        snGradPolySize[faci] = calcFit(stencilPoints[faci], faci);
     }
-
-    Pout<< "count = " << count << endl;
 
     if (debug)
     {
-        Info<< "quadraticFitData::quadraticFitData() :"
+        snGradPolySize.write();
+        Info<< "quadraticFitSnGradData::quadraticFitSnGradData() :"
             << "Finished constructing polynomialFit data"
             << endl;
-
-        interpPolySize.write();
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::quadraticFitData::findFaceDirs
+void Foam::quadraticFitSnGradData::findFaceDirs
 (
     vector& idir,        // value changed in return
     vector& jdir,        // value changed in return
@@ -143,31 +137,31 @@ void Foam::quadraticFitData::findFaceDirs
     idir = mesh.Sf()[faci];
     idir /= mag(idir);
 
-#   ifndef SPHERICAL_GEOMETRY
-    if (mesh.nGeometricD() <= 2) // find the normal direcion
-    {
-        if (mesh.directions()[0] == -1)
+    #ifndef SPHERICAL_GEOMETRY
+        if (mesh.nGeometricD() <= 2) // find the normal direcion
         {
-            kdir = vector(1, 0, 0);
+            if (mesh.directions()[0] == -1)
+            {
+                kdir = vector(1, 0, 0);
+            }
+            else if (mesh.directions()[1] == -1)
+            {
+                kdir = vector(0, 1, 0);
+            }
+            else
+            {
+                kdir = vector(0, 0, 1);
+            }
         }
-        else if (mesh.directions()[1] == -1)
+        else // 3D so find a direction in the place of the face
         {
-            kdir = vector(0, 1, 0);
+            const face& f = mesh.faces()[faci];
+            kdir = mesh.points()[f[0]] - mesh.points()[f[1]];
         }
-        else
-        {
-            kdir = vector(0, 0, 1);
-        }
-    }
-    else // 3D so find a direction in the place of the face
-    {
-        const face& f = mesh.faces()[faci];
-        kdir = mesh.points()[f[0]] - mesh.points()[f[1]];
-    }
-#   else
-    // Spherical geometry so kdir is the radial direction
-    kdir = mesh.Cf()[faci];
-#   endif
+    #else
+        // Spherical geometry so kdir is the radial direction
+        kdir = mesh.Cf()[faci];
+    #endif
 
     if (mesh.nGeometricD() == 3)
     {
@@ -191,7 +185,7 @@ void Foam::quadraticFitData::findFaceDirs
 }
 
 
-Foam::label Foam::quadraticFitData::calcFit
+Foam::label Foam::quadraticFitSnGradData::calcFit
 (
     const List<point>& C,
     const label faci
@@ -218,16 +212,13 @@ Foam::label Foam::quadraticFitData::calcFit
 
         scalar px = (p - p0)&idir;
         scalar py = (p - p0)&jdir;
-#       ifndef SPHERICAL_GEOMETRY
-        scalar pz = (p - p0)&kdir;
-#       else
-        scalar pz = mag(p) - mag(p0);
-#       endif
+        #ifdef SPHERICAL_GEOMETRY
+            scalar pz = mag(p) - mag(p0);
+        #else
+            scalar pz = (p - p0)&kdir;
+        #endif
 
-        if (ip == 0)
-        {
-            scale = max(max(mag(px), mag(py)), mag(pz));
-        }
+        if (ip == 0) scale = max(max(mag(px), mag(py)), mag(pz));
 
         px /= scale;
         py /= scale;
@@ -260,40 +251,29 @@ Foam::label Foam::quadraticFitData::calcFit
     scalarList singVals(minSize_);
     label nSVDzeros = 0;
 
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>& w =
-        mesh().surfaceInterpolation::weights();
+    const scalar& deltaCoeff = mesh().deltaCoeffs()[faci];
 
     bool goodFit = false;
     for(int iIt = 0; iIt < 10 && !goodFit; iIt++)
     {
         SVD svd(B, SMALL);
 
-        scalar fit0 = wts[0]*wts[0]*svd.VSinvUt()[0][0];
-        scalar fit1 = wts[0]*wts[1]*svd.VSinvUt()[0][1];
-
-        //goodFit = (fit0 > 0 && fit1 > 0);
+        scalar fit0 = wts[0]*wts[0]*svd.VSinvUt()[1][0]/scale;
+        scalar fit1 = wts[0]*wts[1]*svd.VSinvUt()[1][1]/scale;
 
         goodFit =
-            (mag(fit0 - w[faci])/w[faci] < 0.15)
-         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.15);
-
-        //scalar w0Err = fit0/w[faci];
-        //scalar w1Err = fit1/(1 - w[faci]);
-
-        //goodFit =
-        //    (w0Err > 0.5 && w0Err < 1.5)
-        // && (w1Err > 0.5 && w1Err < 1.5);
+            fit0 < 0 && fit1 > 0
+         && mag(fit0 + deltaCoeff) < 0.5*deltaCoeff
+         && mag(fit1 - deltaCoeff) < 0.5*deltaCoeff;
 
         if (goodFit)
         {
             fit_[faci][0] = fit0;
             fit_[faci][1] = fit1;
-
-            for(label i=2; i<stencilSize; i++)
+            for(label i = 2; i < stencilSize; i++)
             {
-                fit_[faci][i] = wts[0]*wts[i]*svd.VSinvUt()[0][i];
+                fit_[faci][i] = wts[0]*wts[i]*svd.VSinvUt()[1][i]/scale;
             }
-
             singVals = svd.S();
             nSVDzeros = svd.nZeros();
         }
@@ -316,58 +296,27 @@ Foam::label Foam::quadraticFitData::calcFit
         }
     }
 
-    // static const scalar L = 0.1;
-    // static const scalar R = 0.2;
-
-    // static const scalar beta = 1.0/(R - L);
-    // static const scalar alpha = R*beta;
-
     if (goodFit)
     {
-         if ((mag(fit_[faci][0] - w[faci])/w[faci] < 0.15)
-         && (mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]) < 0.15))
-         {
-             count++;
-             //Pout<< "fit " << mag(fit_[faci][0] - w[faci])/w[faci] << " " << mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]) << endl;
-         }
-
-        // scalar limiter =
-        // max
-        // (
-        //     min
-        //     (
-        //         min(alpha - beta*mag(fit_[faci][0] - w[faci])/w[faci], 1),
-        //         min(alpha - beta*mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]), 1)
-        //     ), 0
-        // );
-
-        // Remove the uncorrected linear coefficients
-        fit_[faci][0] -= w[faci];
-        fit_[faci][1] -= 1 - w[faci];
-
-        // if (limiter < 0.99)
-        // {
-        //     for(label i = 0; i < stencilSize; i++)
-        //     {
-        //         fit_[faci][i] *= limiter;
-        //     }
-        // }
+        // remove the uncorrected snGradScheme coefficients
+        fit_[faci][0] += deltaCoeff;
+        fit_[faci][1] -= deltaCoeff;
     }
     else
     {
-        Pout<< "Could not fit face " << faci
-            << " " << fit_[faci][0] << " " << w[faci]
-            << " " << fit_[faci][1] << " " << 1 - w[faci]<< endl;
+        Pout<< "quadratifFitSnGradData could not fit face " << faci
+            << " fit_[faci][0] =  " << fit_[faci][0]
+            << " fit_[faci][1] =  " << fit_[faci][1]
+            << " deltaCoeff =  " << deltaCoeff << endl;
         fit_[faci] = 0;
     }
 
     return minSize_ - nSVDzeros;
 }
 
-
-bool Foam::quadraticFitData::movePoints()
+bool Foam::quadraticFitSnGradData::movePoints()
 {
-    notImplemented("quadraticFitData::movePoints()");
+    notImplemented("quadraticFitSnGradData::movePoints()");
 
     return true;
 }
