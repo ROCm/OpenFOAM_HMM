@@ -79,39 +79,19 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     const label s
 )
 {
-    if (s <= List<T>::size())
+    label nextFree = List<T>::size();
+    if (s <= nextFree)
     {
         // adjust addressed size, leave allocated size untouched
-        List<T>::size(s);
+        nextFree = s;
     }
     else
     {
-        // adjust allocated and addressed sizes
+        // adjust allocated size, leave addressed size untouched
         allocSize_ = s;
         List<T>::setSize(allocSize_);
     }
-}
-
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
-(
-    const label s,
-    const T& t
-)
-{
-    if (s <= List<T>::size())
-    {
-        // adjust addressed size, leave allocated size untouched
-        List<T>::size(s);
-    }
-    else
-    {
-        // adjust allocated and addressed sizes
-        // fill previously unused elements with constant value
-        allocSize_ = s;
-        List<T>::setSize(allocSize_, t);
-    }
+    List<T>::size(nextFree);
 }
 
 
@@ -254,7 +234,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 )
 {
     List<T>::operator=(t);
-    allocSize_ = List<T>::size();
 }
 
 
