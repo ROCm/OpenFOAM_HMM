@@ -40,8 +40,8 @@ Description
     an operator=() copy method.
 
 Note
-    The macros xferCopy(T,arg) and xferTmp(T,arg) can be used as workarounds
-    for passing temporaries to copy-constructors.
+    The macros xferCopy(T,arg) and xferMove(T,arg) can be used as
+    workarounds for passing temporaries to copy-constructors.
 
 SourceFiles
     xferI.H
@@ -98,7 +98,7 @@ public:
         inline void operator=(const xfer<T>&);
 
         //- Return a non-const reference to const object
-        //  @sa xferTmp macro for an alternative for copy-constructors
+        //  @sa xferCopy, xferMove macros alternatives for copy-constructors
         inline const xfer<T>& operator()() const;
 
         //- Reference to the underlying datatype
@@ -119,13 +119,13 @@ public:
  * Useful for constructors where the argument is temporary.
  * This is a workaround for a template resolution issue.
  *
- * @sa xferTmp and Foam::xfer
+ * @sa xferMove and Foam::xfer
 */
 #define xferCopy(T,arg) \
     (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg)()))
 
 /**
- * @def xferTmp(T,arg)
+ * @def xferMove(T,arg)
  * Construct by transferring the contents of the @a arg
  * and return a const reference to an xfer of type \<T\>
  *
@@ -136,12 +136,12 @@ public:
  * @code
  *     List<label> a;
  *     ...
- *     List<label> b(xferTmp(List<label>, a));
+ *     List<label> b(xferMove(List<label>, a));
  * @endcode
  *
  * @sa xferCopy and Foam::xfer
 */
-#define xferTmp(T,arg) \
+#define xferMove(T,arg) \
     (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg, true)()))
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
