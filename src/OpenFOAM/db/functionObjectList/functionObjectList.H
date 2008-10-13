@@ -63,7 +63,7 @@ class functionObjectList
         //- Dictionary containing the list of function object specifications
         const dictionary& foDict_;
 
-        //- Switch for the execultion of the functionObjects
+        //- Switch for the execution of the functionObjects
         bool execution_;
 
 
@@ -84,7 +84,7 @@ public:
         //  The functionObject specifications are read from the controlDict
         functionObjectList
         (
-            const Time& t,
+            const Time&,
             const bool execution = true
         );
 
@@ -93,7 +93,7 @@ public:
         //  setting
         functionObjectList
         (
-            const Time& t,
+            const Time&,
             const dictionary& foDict,
             const bool execution = true
         );

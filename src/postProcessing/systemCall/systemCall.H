@@ -60,8 +60,7 @@ protected:
 
     // Private data
 
-        //- Name of this set of forces,
-        //  Also used as the name of the probes directory.
+        //- Name of this set of system calls
         word name_;
 
         const objectRegistry& obr_;
