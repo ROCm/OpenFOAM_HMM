@@ -410,8 +410,14 @@ Foam::refinementHistory::refinementHistory
     }
     else
     {
-        splitCells_.setSize(nCells, splitCell8());
-        visibleCells_ = identity(nCells);
+        visibleCells_.setSize(nCells);
+        splitCells_.setSize(nCells);
+
+        for (label cellI = 0; cellI < nCells; cellI++)
+        {
+            visibleCells_[cellI] = cellI;
+            splitCells_.append(splitCell8());
+        }
     }
 
     // Check indices.
