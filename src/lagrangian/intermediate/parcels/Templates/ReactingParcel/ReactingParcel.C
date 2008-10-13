@@ -57,6 +57,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const vector U0 = this->U_;
     const scalar mass0 = this->mass();
+    const scalar cp0 = this->cp_;
     const scalar np0 = this->nParticle_;
     const scalar T0 = this->T_;
 
@@ -116,11 +117,11 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     T1 -=
         td.constProps().Ldevol()
        *sum(dMassMT)
-       /(0.5*(mass0 + mass1)*this->cp_);
+       /(0.5*(mass0 + mass1)*cp0);
 
     // Add retained enthalpy from surface reaction to particle and remove
     // from gas
-    T1 += dhRet/(0.5*(mass0 + mass1)*this->cp_);
+    T1 += dhRet/(0.5*(mass0 + mass1)*cp0);
     dhTrans -= dhRet;
 
     // Correct dhTrans to account for enthalpy of evolved volatiles

@@ -23,33 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::forces
+    Foam::systemCall
 
 Description
-    Calculates the forces and moments by integrating the pressure and
-    skin-friction forces over a given list of patches.
-
-    Member function calcForcesMoment()calculates and returns the forces and
-    moments.
-
-    Member function forces::write() calls calcForcesMoment() and writes the
-    forces and moments into the file \<timeDir\>/forces.dat
+    Executes system calls, entered in the form of a string list
 
 SourceFiles
-    forces.C
-    IOforces.H
+    systemCall.C
+    IOsystemCall.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forces_H
-#define forces_H
+#ifndef systemCall_H
+#define systemCall_H
 
-#include "primitiveFieldsFwd.H"
-#include "volFieldsFwd.H"
-#include "labelHashSet.H"
-#include "Tuple2.H"
-#include "OFstream.H"
-#include "Switch.H"
+#include "stringList.H"
 #include "pointFieldFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,48 +51,11 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class forces Declaration
+                       Class systemCall Declaration
 \*---------------------------------------------------------------------------*/
 
-class forces
+class systemCall
 {
-public:
-
-    // Tuple which holds the pressure (.first()) and viscous (.second) forces
-    typedef Tuple2<vector, vector> pressureViscous;
-
-    // Tuple which holds the forces (.first()) and moment (.second)
-    // pressure/viscous forces Tuples.
-    typedef Tuple2<pressureViscous, pressureViscous> forcesMoments;
-
-    //- Sum operation class to accumulate the pressure, viscous forces and moments
-    class sumOp
-    {
-    public:
-
-        forcesMoments operator()
-        (
-            const forcesMoments& fm1,
-            const forcesMoments& fm2
-        ) const
-        {
-            return forcesMoments
-            (
-                pressureViscous
-                (
-                    fm1.first().first() + fm2.first().first(),
-                    fm1.first().second() + fm2.first().second()
-                ),
-                pressureViscous
-                (
-                    fm1.second().first() + fm2.second().first(),
-                    fm1.second().second() + fm2.second().second()
-                )
-            );
-        }
-    };
-
-
 protected:
 
     // Private data
@@ -118,64 +69,33 @@ protected:
         //- on/off switch
         bool active_;
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
+        //- List of calls to execute - every step
+        stringList executeCalls_;
 
-        // Read from dictonary
-
-            //- Patches to integrate forces over
-            labelHashSet patchSet_;
-
-            //- Name of pressure field
-            word pName_;
-
-            //- Name of velocity field
-            word UName_;
-
-            //- Reference density needed for incompressible calculations
-            scalar rhoRef_;
-
-            //- Centre of rotation
-            vector CofR_;
-
-
-        //- Forces/moment file ptr
-        autoPtr<OFstream> forcesFilePtr_;
+        //- List of calls to execute - write steps
+        stringList writeCalls_;
 
 
     // Private Member Functions
 
-        //- If the forces file has not been created create it
-        void makeFile();
-
-        //- Return the effective viscous stress (laminar + turbulent).
-        tmp<volSymmTensorField> devRhoReff() const;
-
-        //- Return rhoRef if the pressure field is dynamic, i.e. p/rho
-        //  otherwise return 1
-        scalar rho(const volScalarField& p) const;
-
         //- Disallow default bitwise copy construct
-        forces(const forces&);
+        systemCall(const systemCall&);
 
         //- Disallow default bitwise assignment
-        void operator=(const forces&);
-
-        //- Output file header information
-        virtual void writeFileHeader();
+        void operator=(const systemCall&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("forces");
+    TypeName("systemCall");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        forces
+        systemCall
         (
             const word& name,
             const objectRegistry&,
@@ -186,28 +106,25 @@ public:
 
     // Destructor
 
-        virtual ~forces();
+        virtual ~systemCall();
 
 
     // Member Functions
 
-        //- Return name of the set of forces
+        //- Return name of the system call set
         virtual const word& name() const
         {
             return name_;
         }
 
-        //- Read the forces data
+        //- Read the system calls
         virtual void read(const dictionary&);
 
         //- Execute
         virtual void execute();
 
-        //- Write the forces
+        //- Write
         virtual void write();
-
-        //- Calculate and return forces and moment
-        virtual forcesMoments calcForcesMoment() const;
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&)
