@@ -79,8 +79,9 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     const label s
 )
 {
-    if (s < List<T>::size())
+    if (s <= List<T>::size())
     {
+        // shrink addressable size, leave allocated size untouched
         List<T>::size() = s;
     }
     else
@@ -100,8 +101,9 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     const T& t
 )
 {
-    if (s < List<T>::size())
+    if (s <= List<T>::size())
     {
+        // shrink addressable size, leave allocated size untouched
         List<T>::size() = s;
     }
     else
