@@ -77,7 +77,7 @@ void Foam::extendedStencil::collectData
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
-Foam::extendedStencil::interpolate
+Foam::extendedStencil::weightedSum
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld,
     const List<List<scalar> >& stencilWeights
@@ -120,7 +120,34 @@ Foam::extendedStencil::interpolate
             sf[faceI] += stField[i]*stWeight[i];
         }
     }
-    // And what for boundaries?
+
+    // Coupled boundaries
+    /*
+    typename GeometricField<Type, fvsPatchField, surfaceMesh>::
+        GeometricBoundaryField& bSfCorr = sf.boundaryField();
+    forAll(bSfCorr, patchi)
+    {
+        fvsPatchField<Type>& pSfCorr = bSfCorr[patchi];
+
+        if (pSfCorr.coupled())
+        {
+            label faceI = pSfCorr.patch().patch().start();
+
+            forAll(pSfCorr, i)
+            {
+                const List<Type>& stField = stencilFld[faceI];
+                const List<scalar>& stWeight = stencilWeights[faceI];
+
+                forAll(stField, j)
+                {
+                    pSfCorr[i] += stField[j]*stWeight[j];
+                }
+
+                faceI++;
+            }
+        }
+    }
+    */
 
     return tsfCorr;
 }

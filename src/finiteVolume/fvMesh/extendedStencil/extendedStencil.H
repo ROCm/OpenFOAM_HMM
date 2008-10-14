@@ -123,9 +123,9 @@ public:
             List<List<T> >& stencilFld
         ) const;
 
-        //- Given weights interpolate vol field
+        //- Calculate weighted sum of vol field
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > interpolate
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > weightedSum
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const List<List<scalar> >& stencilWeights
