@@ -84,7 +84,6 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
     {
         List<T>::operator=(list);
     }
-
 }
 
 
@@ -93,6 +92,16 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
 template<class T>
 Foam::IOList<T>::~IOList()
 {}
+
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+bool Foam::IOList<T>::writeData(Ostream& os) const
+{
+    return (os << *this).good();
+}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -108,13 +117,6 @@ template<class T>
 void Foam::IOList<T>::operator=(const List<T>& rhs)
 {
     List<T>::operator=(rhs);
-}
-
-
-template<class T>
-bool Foam::IOList<T>::writeData(Ostream& os) const
-{
-    return (os << *this).good();
 }
 
 
