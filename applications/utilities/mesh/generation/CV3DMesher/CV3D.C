@@ -282,6 +282,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
         ++cit
     )
     {
+        cit->cellIndex() = -1;
+
         if
         (
             cit->vertex(0)->internalOrBoundaryPoint()
@@ -292,20 +294,21 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
         {
             cit->cellIndex() = dualVerti;
 
-            Info<< nl << topoint(cit->vertex(0)->point())
-                << nl << topoint(cit->vertex(1)->point())
-                << nl << topoint(cit->vertex(2)->point())
-                << nl << topoint(cit->vertex(3)->point())
-                << endl;
+            // To output Delaunay tet which causes CGAL assertion failure.
+            // Info<< nl << topoint(cit->vertex(0)->point())
+            //     << nl << topoint(cit->vertex(1)->point())
+            //     << nl << topoint(cit->vertex(2)->point())
+            //     << nl << topoint(cit->vertex(3)->point())
+            //     << endl;
 
             dualVertices[dualVerti] = topoint(dual(cit));
 
             dualVerti++;
         }
-        else
-        {
-            cit->cellIndex() = -1;
-        }
+        // else
+        // {
+        //     cit->cellIndex() = -1;
+        // }
     }
 
     dualVertices.setSize(dualVerti);

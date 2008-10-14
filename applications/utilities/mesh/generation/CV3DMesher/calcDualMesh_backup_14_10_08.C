@@ -52,8 +52,6 @@ void Foam::CV3D::calcDualMesh
         ++cit
     )
     {
-        cit->cellIndex() = -1;
-
         if
         (
             cit->vertex(0)->internalOrBoundaryPoint()
@@ -66,11 +64,16 @@ void Foam::CV3D::calcDualMesh
             points[dualVerti] = topoint(dual(cit));
             dualVerti++;
         }
+        else
+        {
+            cit->cellIndex() = -1;
+        }
     }
 
     points.setSize(dualVerti);
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~ dual cell indexing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // resets type and index information for Delaunay vertices
     // assigns an index to the vertices which will be the dual cell index used
     // for owner neighbour assignment
 
@@ -85,7 +88,7 @@ void Foam::CV3D::calcDualMesh
     {
         if (vit->internalOrBoundaryPoint())
         {
-            //vit->type() = Vb::INTERNAL_POINT;
+            vit->type() = Vb::INTERNAL_POINT;
             vit->index() = dualCelli;
             dualCelli++;
         }
@@ -127,14 +130,10 @@ void Foam::CV3D::calcDualMesh
         ++eit
     )
     {
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
-
         if
         (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
+            eit->first->vertex(eit->second)->internalOrBoundaryPoint()
+         || eit->first->vertex(eit->third)->internalOrBoundaryPoint()
         )
         {
             Cell_circulator ccStart = incident_cells(*eit);
@@ -162,6 +161,10 @@ void Foam::CV3D::calcDualMesh
             verticesOnFace.shrink();
 
             face newDualFace(verticesOnFace);
+
+            Cell_handle c = eit->first;
+            Vertex_handle vA = c->vertex(eit->second);
+            Vertex_handle vB = c->vertex(eit->third);
 
             label dcA = vA->index();
 

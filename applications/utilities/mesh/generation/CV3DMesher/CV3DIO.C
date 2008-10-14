@@ -63,6 +63,8 @@ void Foam::CV3D::writeDual(const fileName& fName) const
         ++cit
     )
     {
+        cit->cellIndex() = -1;
+
         if
         (
             cit->vertex(0)->internalOrBoundaryPoint()
@@ -75,10 +77,10 @@ void Foam::CV3D::writeDual(const fileName& fName) const
             meshTools::writeOBJ(str, topoint(dual(cit)));
             dualVerti++;
         }
-        else
-        {
-            cit->cellIndex() = -1;
-        }
+        // else
+        // {
+        //     cit->cellIndex() = -1;
+        // }
     }
 
     for
@@ -108,9 +110,10 @@ void Foam::CV3D::writeDual(const fileName& fName) const
                         FatalErrorIn
                         (
                             "Foam::CV3D::writeDual(const fileName& fName)"
-                        )<< "Dual face uses circumcenter defined by a Delaunay"
-                            " tetrahedron with no internal or boundary points."
-                            << exit(FatalError);
+                        )
+                        << "Dual face uses circumcenter defined by a Delaunay "
+                        "tetrahedron with no internal or boundary points."
+                        << exit(FatalError);
                     }
 
                     str<< ' ' << cc->cellIndex() + 1;
