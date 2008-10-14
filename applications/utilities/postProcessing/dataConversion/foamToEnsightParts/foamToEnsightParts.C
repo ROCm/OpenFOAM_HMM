@@ -39,6 +39,10 @@ Usage
     @param -zeroTime \n
     Include the often incomplete initial conditions.
 
+    @param -index \<start\>\n
+    Ignore the time index contained in the time file and use a
+    simple indexing when creating the @c Ensight/data/######## files.
+
 Note
     - no parallel data.
     - writes to @a Ensight directory to avoid collisions with foamToEnsight.
@@ -70,6 +74,7 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, false);
     argList::noParallel();
     argList::validOptions.insert("ascii", "");
+    argList::validOptions.insert("index",  "start");
 
     const word volFieldTypes[] =
     {
@@ -102,6 +107,15 @@ int main(int argc, char *argv[])
     if (args.options().found("ascii"))
     {
         format = IOstream::ASCII;
+    }
+
+    // control for renumbering iterations
+    bool optIndex = false;
+    label indexingNumber = 0;
+    if (args.options().found("index"))
+    {
+        optIndex = true;
+        indexingNumber = readLabel(IStringStream(args.options()["index"])());
     }
 
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"Ensight";
