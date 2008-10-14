@@ -43,6 +43,10 @@ Usage
     Ignore the time index contained in the time file and use a
     simple indexing when creating the @c Ensight/data/######## files.
 
+    @param -noMesh \n
+    Suppress writing the geometry. Can be useful for converting partial
+    results for a static geometry.
+
 Note
     - no parallel data.
     - writes to @a Ensight directory to avoid collisions with foamToEnsight.
@@ -75,6 +79,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validOptions.insert("ascii", "");
     argList::validOptions.insert("index",  "start");
+    argList::validOptions.insert("noMesh", "");
 
     const word volFieldTypes[] =
     {
@@ -118,6 +123,9 @@ int main(int argc, char *argv[])
         indexingNumber = readLabel(IStringStream(args.options()["index"])());
     }
 
+    // always write the geometry, unless the -noMesh option is specified
+    bool optNoMesh = args.options().found("noMesh");
+
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"Ensight";
     fileName dataDir = ensightDir/"data";
     fileName caseFileName = "Ensight.case";
@@ -159,6 +167,13 @@ int main(int argc, char *argv[])
 #   include "checkHasMovingMesh.H"
 #   include "findFields.H"
 #   include "validateFields.H"
+
+    if (hasMovingMesh && optNoMesh)
+    {
+        Info<< "mesh is moving: ignoring '-noMesh' option" << endl;
+        optNoMesh = false;
+    }
+
 
     // map times used
     Map<scalar>  timeIndices;
@@ -206,15 +221,18 @@ int main(int argc, char *argv[])
                 partsList.recalculate(mesh);
             }
 
-            fileName geomDir;
-            if (hasMovingMesh)
+            if (!optNoMesh)
             {
-                geomDir = dataDir/subDir;
-            }
+                fileName geomDir;
+                if (hasMovingMesh)
+                {
+                    geomDir = dataDir/subDir;
+                }
 
-            ensightGeoFile geoFile(ensightDir/geomDir/geometryName, format);
-            partsList.writeGeometry(geoFile);
-            Info << nl;
+                ensightGeoFile geoFile(ensightDir/geomDir/geometryName, format);
+                partsList.writeGeometry(geoFile);
+                Info<< nl;
+            }
         }
 
         Info<< "write volume field (" << flush;
