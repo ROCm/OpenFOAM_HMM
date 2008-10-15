@@ -631,15 +631,16 @@ surfacePatchList triSurface::calcPatches(labelList& faceMap) const
 
     faceMap = sortedRegion.indices();
 
-    // Compact regions
-
-    // Get last region
-    //label maxRegion = 0;                  // for compacted regions
+    // Extend regions
     label maxRegion = patches_.size()-1;    // for non-compacted regions
 
     if (faceMap.size() > 0)
     {
-        maxRegion = operator[](faceMap[faceMap.size() - 1]).region();
+        maxRegion = max
+        (
+            maxRegion,
+            operator[](faceMap[faceMap.size() - 1]).region()
+        );
     }
 
     // Get new region list

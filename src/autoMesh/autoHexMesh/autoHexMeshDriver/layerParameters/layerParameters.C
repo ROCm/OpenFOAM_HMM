@@ -279,27 +279,13 @@ Foam::layerParameters::layerParameters
 {
     const dictionary& layersDict = dict.subDict("layers");
 
-    forAllConstIter(dictionary, layersDict, iter)
+    forAll(boundaryMesh, patchI)
     {
-        const word& key = iter().keyword();
+        const word& patchName = boundaryMesh[patchI].name();
 
-        if (layersDict.isDict(key))
+        if (layersDict.found(patchName))
         {
-            label patchI = boundaryMesh.findPatchID(key);
-
-            if (patchI == -1)
-            {
-                FatalErrorIn
-                (
-                    "layerParameters::layerParameters"
-                    "(const dictionary&, const polyBoundaryMesh&)"
-                )   << "Specified illegal patch " << key
-                    << " in layer dictionary." << endl
-                    << "Valid patch names are " << boundaryMesh.names()
-                    << exit(FatalError);
-            }
-
-            const dictionary& layerDict = layersDict.subDict(key);
+            const dictionary& layerDict = layersDict.subDict(patchName);
 
             numLayers_[patchI] =
                 readLabel(layerDict.lookup("nSurfaceLayers"));
