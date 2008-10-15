@@ -224,8 +224,6 @@ void Foam::CV3D::calcDualMesh
                     dcNei = dcA;
 
                     // reverse face order to correctly orientate normal
-                    // unsure if CGAL always circulates consistently,
-                    // needs to be more rigorous
                     reverse(newDualFace);
                 }
 
