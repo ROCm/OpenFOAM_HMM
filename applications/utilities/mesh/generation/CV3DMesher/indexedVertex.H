@@ -55,7 +55,7 @@ class indexedVertex
         //- The index for this triangle vertex
         int index_;
 
-        //- Index of pair-point :
+        //- type of pair-point :
         //  NEAR_BOUNDARY_POINT : internal near boundary point.
         //  INTERNAL_POINT      : internal point.
         //  FAR_POINT           : far-point.

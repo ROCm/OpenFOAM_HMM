@@ -74,6 +74,9 @@ void Foam::CV3D::calcDualMesh
     // assigns an index to the vertices which will be the dual cell index used
     // for owner neighbour assignment
 
+    // The indices of the points are reset which destroys the point-pair
+    // matching, so the type of each vertex are reset to avoid any ambiguity.
+
     label dualCelli = 0;
 
     for
@@ -85,7 +88,7 @@ void Foam::CV3D::calcDualMesh
     {
         if (vit->internalOrBoundaryPoint())
         {
-            //vit->type() = Vb::INTERNAL_POINT;
+            vit->type() = Vb::INTERNAL_POINT;
             vit->index() = dualCelli;
             dualCelli++;
         }
@@ -93,6 +96,61 @@ void Foam::CV3D::calcDualMesh
         {
             vit->type() = Vb::FAR_POINT;
             vit->index() = -1;
+        }
+    }
+
+    // ~~~~~~~~~~~~ removing short edges by reindexing vertices ~~~~~~~~~~~~~~~~
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
+        if
+        (
+            vA->internalOrBoundaryPoint()
+         || vB->internalOrBoundaryPoint()
+        )
+        {
+            Cell_circulator ccStart = incident_cells(*eit);
+            Cell_circulator cc1 = ccStart;
+            Cell_circulator cc2 = cc1;
+
+            // Advance the second circulator so that it always stays on the next
+            // cell around the edge;
+            cc2++;
+
+            DynamicList<label> verticesOnFace;
+
+            do
+            {
+                if (!is_infinite(cc))
+                {
+                    if (cc->cellIndex() < 0)
+                    {
+                        FatalErrorIn("Foam::CV3D::calcDualMesh")
+                            << "Dual face uses circumcenter defined by a "
+                            << " Delaunay tetrahedron with no internal "
+                            << "or boundary points."
+                            << exit(FatalError);
+                    }
+
+                    point& point1 = points[cc1->cellIndex()];
+
+                    point& point2 = points[cc2->cellIndex()];
+
+
+
+                    cc1++;
+                    cc2++;
+                }
+            } while (cc != ccStart);
         }
     }
 
