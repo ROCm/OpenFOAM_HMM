@@ -72,6 +72,9 @@ public:
         template<class Data>
         static const Type& New(const Mesh& mesh, const Data& d);
 
+        template<class Data1, class Data2>
+        static const Type& New(const Mesh& mesh, const Data1&, const Data2&);
+
 
     // Destructor
 
