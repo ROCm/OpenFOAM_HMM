@@ -23,114 +23,105 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::extendedStencil
+    Foam::extendedCentredStencil
 
 Description
-    Calculates/constains the extended face stencil.
-
-    The stencil is a list of indices into either cells or boundary faces
-    in a compact way. (element 0 is owner, 1 is neighbour). The index numbering
-    is
-    - cells first
-    - then all (non-empty patch) boundary faces
-
-    When used in evaluation is a two stage process:
-    - collect the data (cell data and non-empty boundaries) into a
-    single field
-    - (parallel) distribute the field
-    - sum the weights*field.
 
 SourceFiles
-    extendedStencil.C
-    extendedStencilTemplates.C
+    extendedCentredStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef extendedStencil_H
-#define extendedStencil_H
+#ifndef extendedCentredStencil_H
+#define extendedCentredStencil_H
 
-#include "mapDistribute.H"
-#include "volFields.H"
-#include "surfaceFields.H"
+#include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class globalIndex;
+class faceStencil;
 
 /*---------------------------------------------------------------------------*\
-                           Class extendedStencil Declaration
+                           Class extendedCentredStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-class extendedStencil
+class extendedCentredStencil
+:
+    public extendedStencil
 {
-protected:
+    // Private data
 
-    // Protected data
+        //- Swap map for getting neigbouring data
+        autoPtr<mapDistribute> mapPtr_;
 
-        const polyMesh& mesh_;
+        //- Per face the stencil.
+        labelListList stencil_;
 
-
-    // Protected Member Functions
-
-        //- Collect cell neighbours into extended stencil
-        void calcFaceStencil
-        (
-            const labelListList& globalCellCells,
-            labelListList& faceStencil
-        );
-
-        //- Calculate distribute map
-        autoPtr<mapDistribute> calcDistributeMap
-        (
-            const globalIndex& globalNumbering,
-            labelListList& faceStencil
-        );
-
-
-private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        extendedStencil(const extendedStencil&);
+        extendedCentredStencil(const extendedCentredStencil&);
 
         //- Disallow default bitwise assignment
-        void operator=(const extendedStencil&);
+        void operator=(const extendedCentredStencil&);
 
 
 public:
 
     // Constructors
 
-        //- Construct from mesh
-        explicit extendedStencil(const polyMesh&);
+        //- Construct from uncompacted face stencil
+        explicit extendedCentredStencil(const faceStencil&);
 
 
     // Member Functions
 
+        //- Return reference to the parallel distribution map
+        const mapDistribute& map() const
+        {
+            return mapPtr_();
+        }
+
+        //- Return reference to the stencil
+        const labelListList& stencil() const
+        {
+            return stencil_;
+        }
+
+        //- After removing elements from the stencil adapt the schedule (map).
+        void compact();
+
         //- Use map to get the data into stencil order
         template<class T>
-        static void collectData
+        void collectData
         (
-            const mapDistribute& map,
-            const labelListList& stencil,
             const GeometricField<T, fvPatchField, volMesh>& fld,
             List<List<T> >& stencilFld
-        );
+        ) const
+        {
+            extendedStencil::collectData(map(), stencil(), fld, stencilFld);
+        }
 
         //- Sum vol field contributions to create face values
         template<class Type>
-        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-        weightedSum
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > weightedSum
         (
-            const mapDistribute& map,
-            const labelListList& stencil,
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const List<List<scalar> >& stencilWeights
-        );
+        ) const
+        {
+            return extendedStencil::weightedSum
+            (
+                map(),
+                stencil(),
+                fld,
+                stencilWeights
+            );
+        }
 
 };
 
@@ -138,12 +129,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "extendedStencilTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

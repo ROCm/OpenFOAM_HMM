@@ -23,100 +23,58 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFitData
+    Foam::upwindCFCStencilObject
 
 Description
-    Data for the quadratic fit correction interpolation scheme
 
 SourceFiles
-    quadraticFitData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticFitData_H
-#define quadraticFitData_H
+#ifndef upwindCFCStencilObject_H
+#define upwindCFCStencilObject_H
 
+#include "extendedUpwindStencil.H"
+#include "cellFaceCellStencil.H"
 #include "MeshObject.H"
-#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class extendedCentredStencil;
-
 /*---------------------------------------------------------------------------*\
-                    Class quadraticFitData Declaration
+                           Class upwindCFCStencilObject Declaration
 \*---------------------------------------------------------------------------*/
 
-class quadraticFitData
+class upwindCFCStencilObject
 :
-    public MeshObject<fvMesh, quadraticFitData>
+    public MeshObject<fvMesh, upwindCFCStencilObject>,
+    public extendedUpwindStencil
 {
-    // Private data
-
-        //- weights for central stencil
-        const scalar centralWeight_;
-
-        //- dimensionality of the geometry
-        const label dim_;
-
-        //- minimum stencil size
-        const label minSize_;
-
-        //- For each cell in the mesh store the values which multiply the
-        //  values of the stencil to obtain the gradient for each direction
-        List<scalarList> fit_;
-
-
-    // Private member functions
-
-        //- Find the normal direction and i, j and k directions for face faci
-        static void findFaceDirs
-        (
-            vector& idir,        // value changed in return
-            vector& jdir,        // value changed in return
-            vector& kdir,        // value changed in return
-            const fvMesh& mesh,
-            const label faci
-        );
-
-        label calcFit(const List<point>&, const label faci);
-
 
 public:
 
-    TypeName("quadraticFitData");
-
+    TypeName("upwindCFCStencil");
 
     // Constructors
 
-        explicit quadraticFitData
+        //- Construct from uncompacted face stencil
+        explicit upwindCFCStencilObject
         (
             const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
-            scalar cWeightDim
-        );
+            const scalar minOpposedness
+        )
+        :
+            MeshObject<fvMesh, upwindCFCStencilObject>(mesh),
+            extendedUpwindStencil(cellFaceCellStencil(mesh), minOpposedness)
+        {}
 
 
     // Destructor
 
-        virtual ~quadraticFitData()
+        virtual ~upwindCFCStencilObject()
         {}
-
-
-    // Member functions
-
-
-        //- Return reference to fit coefficients
-        const List<scalarList>& fit() const
-        {
-            return fit_;
-        }
-
-        //- Delete the data when the mesh moves not implemented
-        virtual bool movePoints();
 };
 
 

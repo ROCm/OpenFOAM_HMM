@@ -109,7 +109,7 @@ void Foam::probes::sampleAndWrite
 
         forAll(values, probeI)
         {
-            probeStream << setw(w) << values[probeI];
+            probeStream << ' ' << setw(w) << values[probeI];
         }
         probeStream << endl;
     }

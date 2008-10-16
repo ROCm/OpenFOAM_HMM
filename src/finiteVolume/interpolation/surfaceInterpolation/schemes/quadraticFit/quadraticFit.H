@@ -37,9 +37,9 @@ SourceFiles
 #ifndef quadraticFit_H
 #define quadraticFit_H
 
-#include "linear.H"
 #include "quadraticFitData.H"
-#include "extendedStencil.H"
+#include "linear.H"
+#include "centredCFCStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,13 +113,19 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
+            const extendedCentredStencil& stencil =
+            centredCFCStencilObject::New
+            (
+                mesh
+            );
+
             const quadraticFitData& cfd = quadraticFitData::New
             (
                 mesh,
+                stencil,
                 centralWeight_
             );
 
-            const extendedStencil& stencil = cfd.stencil();
             const List<scalarList>& f = cfd.fit();
 
             return stencil.weightedSum(vf, f);

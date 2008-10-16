@@ -51,6 +51,7 @@ SourceFiles
 #include "labelList.H"
 #include "labelPair.H"
 #include "Pstream.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -155,6 +156,12 @@ public:
 
         // Other
 
+            //- Compact maps. Gets per field a bool whether it is used (locally)
+            //  and works out itself what this side and sender side can remove
+            //  from maps.
+            void compact(const boolList& elemIsUsed);
+
+
             //- Distribute data. Note:schedule only used for Pstream::scheduled
             //  for now, all others just use send-to-all, receive-from-all.
             template<class T>
@@ -166,6 +173,21 @@ public:
                 const labelListList& subMap,
                 const labelListList& constructMap,
                 List<T>&
+            );
+
+            //- Distribute data. If multiple processors writing to same
+            //  position adds contributions using cop.
+            template<class T, class CombineOp>
+            static void distribute
+            (
+                const Pstream::commsTypes commsType,
+                const List<labelPair>& schedule,
+                const label constructSize,
+                const labelListList& subMap,
+                const labelListList& constructMap,
+                List<T>&,
+                const CombineOp& cop,
+                const T& nullValue
             );
 
             //- Distribute data using default commsType.

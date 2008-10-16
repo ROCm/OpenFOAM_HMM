@@ -23,100 +23,64 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFitData
+    Foam::cellEdgeCellStencil
 
 Description
-    Data for the quadratic fit correction interpolation scheme
 
 SourceFiles
-    quadraticFitData.C
+    cellEdgeCellStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticFitData_H
-#define quadraticFitData_H
+#ifndef cellEdgeCellStencil_H
+#define cellEdgeCellStencil_H
 
-#include "MeshObject.H"
-#include "fvMesh.H"
+#include "faceStencil.H"
+#include "boolList.H"
+#include "labelHashSet.H"
+#include "Map.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class extendedCentredStencil;
-
 /*---------------------------------------------------------------------------*\
-                    Class quadraticFitData Declaration
+                           Class cellEdgeCellStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-class quadraticFitData
+class cellEdgeCellStencil
 :
-    public MeshObject<fvMesh, quadraticFitData>
+    public faceStencil
 {
-    // Private data
+    // Private Member Functions
 
-        //- weights for central stencil
-        const scalar centralWeight_;
-
-        //- dimensionality of the geometry
-        const label dim_;
-
-        //- minimum stencil size
-        const label minSize_;
-
-        //- For each cell in the mesh store the values which multiply the
-        //  values of the stencil to obtain the gradient for each direction
-        List<scalarList> fit_;
-
-
-    // Private member functions
-
-        //- Find the normal direction and i, j and k directions for face faci
-        static void findFaceDirs
+        //- Calculates per edge the neighbour data (= edgeCells)
+        void calcEdgeBoundaryData
         (
-            vector& idir,        // value changed in return
-            vector& jdir,        // value changed in return
-            vector& kdir,        // value changed in return
-            const fvMesh& mesh,
-            const label faci
-        );
+            const boolList& isValidBFace,
+            const labelList& boundaryEdges,
+            EdgeMap<labelList>& neiGlobal
+        ) const;
 
-        label calcFit(const List<point>&, const label faci);
+        void calcCellStencil(labelListList& globalCellCells) const;
+
+
+        //- Disallow default bitwise copy construct
+        cellEdgeCellStencil(const cellEdgeCellStencil&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const cellEdgeCellStencil&);
 
 
 public:
 
-    TypeName("quadraticFitData");
-
-
     // Constructors
 
-        explicit quadraticFitData
-        (
-            const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
-            scalar cWeightDim
-        );
+        //- Construct from all cells and boundary faces
+        explicit cellEdgeCellStencil(const polyMesh&);
 
-
-    // Destructor
-
-        virtual ~quadraticFitData()
-        {}
-
-
-    // Member functions
-
-
-        //- Return reference to fit coefficients
-        const List<scalarList>& fit() const
-        {
-            return fit_;
-        }
-
-        //- Delete the data when the mesh moves not implemented
-        virtual bool movePoints();
 };
 
 

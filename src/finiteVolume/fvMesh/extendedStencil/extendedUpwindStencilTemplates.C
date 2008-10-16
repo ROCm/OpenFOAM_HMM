@@ -29,69 +29,22 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::extendedStencil::collectData
-(
-    const mapDistribute& map,
-    const labelListList& stencil,
-    const GeometricField<Type, fvPatchField, volMesh>& fld,
-    List<List<Type> >& stencilFld
-)
-{
-    // 1. Construct cell data in compact addressing
-    List<Type> compactFld(map.constructSize(), pTraits<Type>::zero);
-
-    // Insert my internal values
-    forAll(fld, cellI)
-    {
-        compactFld[cellI] = fld[cellI];
-    }
-    // Insert my boundary values
-    label nCompact = fld.size();
-    forAll(fld.boundaryField(), patchI)
-    {
-        const fvPatchField<Type>& pfld = fld.boundaryField()[patchI];
-
-        forAll(pfld, i)
-        {
-            compactFld[nCompact++] = pfld[i];
-        }
-    }
-
-    // Do all swapping
-    map.distribute(compactFld);
-
-    // 2. Pull to stencil
-    stencilFld.setSize(stencil.size());
-
-    forAll(stencil, faceI)
-    {
-        const labelList& compactCells = stencil[faceI];
-
-        stencilFld[faceI].setSize(compactCells.size());
-
-        forAll(compactCells, i)
-        {
-            stencilFld[faceI][i] = compactFld[compactCells[i]];
-        }
-    }
-}
-
-
-template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
-Foam::extendedStencil::weightedSum
+Foam::extendedUpwindStencil::weightedSum
 (
-    const mapDistribute& map,
-    const labelListList& stencil,
+    const surfaceScalarField& phi,
     const GeometricField<Type, fvPatchField, volMesh>& fld,
-    const List<List<scalar> >& stencilWeights
-)
+    const List<List<scalar> >& ownWeights,
+    const List<List<scalar> >& neiWeights
+) const
 {
     const fvMesh& mesh = fld.mesh();
 
     // Collect internal and boundary values
-    List<List<Type> > stencilFld;
-    collectData(map, stencil, fld, stencilFld);
+    List<List<Type> > ownFld;
+    collectData(ownMap(), ownStencil(), fld, ownFld);
+    List<List<Type> > neiFld;
+    collectData(neiMap(), neiStencil(), fld, neiFld);
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr
     (
@@ -117,12 +70,26 @@ Foam::extendedStencil::weightedSum
     // Internal faces
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
-        const List<Type>& stField = stencilFld[faceI];
-        const List<scalar>& stWeight = stencilWeights[faceI];
-
-        forAll(stField, i)
+        if (phi[faceI] > 0)
         {
-            sf[faceI] += stField[i]*stWeight[i];
+            // Flux out of owner. Use upwind (= owner side) stencil.
+            const List<Type>& stField = ownFld[faceI];
+            const List<scalar>& stWeight = ownWeights[faceI];
+
+            forAll(stField, i)
+            {
+                sf[faceI] += stField[i]*stWeight[i];
+            }
+        }
+        else
+        {
+            const List<Type>& stField = neiFld[faceI];
+            const List<scalar>& stWeight = neiWeights[faceI];
+
+            forAll(stField, i)
+            {
+                sf[faceI] += stField[i]*stWeight[i];
+            }
         }
     }
 
@@ -139,14 +106,27 @@ Foam::extendedStencil::weightedSum
 
         forAll(pSfCorr, i)
         {
-            const List<Type>& stField = stencilFld[faceI];
-            const List<scalar>& stWeight = stencilWeights[faceI];
-
-            forAll(stField, j)
+            if (phi[faceI] > 0)
             {
-                pSfCorr[i] += stField[j]*stWeight[j];
-            }
+                // Flux out of owner. Use upwind (= owner side) stencil.
+                const List<Type>& stField = ownFld[faceI];
+                const List<scalar>& stWeight = ownWeights[faceI];
 
+                forAll(stField, j)
+                {
+                    pSfCorr[i] += stField[j]*stWeight[j];
+                }
+            }
+            else
+            {
+                const List<Type>& stField = neiFld[faceI];
+                const List<scalar>& stWeight = neiWeights[faceI];
+
+                forAll(stField, j)
+                {
+                    pSfCorr[i] += stField[j]*stWeight[j];
+                }
+            }
             faceI++;
         }
     }
