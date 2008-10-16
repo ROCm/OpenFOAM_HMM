@@ -96,31 +96,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
-(
-    const label s,
-    const T& t
-)
-{
-    if (s <= List<T>::size())
-    {
-        // shrink addressable size, leave allocated size untouched
-        List<T>::size() = s;
-    }
-    else
-    {
-        label nextFree = List<T>::size();
-        allocSize_ = s;
-        List<T>::setSize(allocSize_, t);
-        List<T>::size() = nextFree;
-=======
->>>>>>> olesenm:src/OpenFOAM/containers/Lists/DynamicList/DynamicListI.H
-    }
-    List<T>::size(nextFree);
-}
-
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 {
     List<T>::size(0);
