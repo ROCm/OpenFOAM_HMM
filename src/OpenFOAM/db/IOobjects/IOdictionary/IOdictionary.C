@@ -42,15 +42,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IOdictionary::IOdictionary
-(
-    const IOobject& io
-)
+Foam::IOdictionary::IOdictionary(const IOobject& io)
 :
     regIOobject(io)
 {
-    dictionary::name() = IOobject::objectPath();
-
     if
     (
         io.readOpt() == IOobject::MUST_READ
@@ -60,18 +55,29 @@ Foam::IOdictionary::IOdictionary
         readStream(typeName) >> *this;
         close();
     }
+
+    dictionary::name() = IOobject::objectPath();
 }
 
 
-Foam::IOdictionary::IOdictionary
-(
-    const IOobject& io,
-    const dictionary& dict
-)
+Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
 :
-    regIOobject(io),
-    dictionary(dict)
+    regIOobject(io)
 {
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+    else
+    {
+        dictionary::operator=(dict);
+    }
+
     dictionary::name() = IOobject::objectPath();
 }
 
@@ -92,9 +98,9 @@ const Foam::word& Foam::IOdictionary::name() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::IOdictionary::operator=(const IOdictionary& d)
+void Foam::IOdictionary::operator=(const IOdictionary& rhs)
 {
-    dictionary::operator=(d);
+    dictionary::operator=(rhs);
 }
 
 

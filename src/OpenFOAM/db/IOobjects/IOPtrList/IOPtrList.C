@@ -91,14 +91,7 @@ Foam::IOPtrList<T>::~IOPtrList()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-void Foam::IOPtrList<T>::operator=(const IOPtrList<T>& rhs)
-{
-    PtrList<T>::operator=(rhs);
-}
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
 bool Foam::IOPtrList<T>::writeData(Ostream& os) const
@@ -106,5 +99,13 @@ bool Foam::IOPtrList<T>::writeData(Ostream& os) const
     return (os << *this).good();
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class T>
+void Foam::IOPtrList<T>::operator=(const IOPtrList<T>& rhs)
+{
+    PtrList<T>::operator=(rhs);
+}
 
 // ************************************************************************* //

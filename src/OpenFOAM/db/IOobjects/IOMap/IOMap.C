@@ -31,8 +31,7 @@ License
 template<class T>
 Foam::IOMap<T>::IOMap(const IOobject& io)
 :
-    regIOobject(io),
-    Map<T>()
+    regIOobject(io)
 {
     if
     (

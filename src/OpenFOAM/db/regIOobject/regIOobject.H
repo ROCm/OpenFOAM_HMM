@@ -101,7 +101,7 @@ public:
         //- Construct as copy
         regIOobject(const regIOobject&);
 
-        //- Construct as copy, and transfering registry registration to copy
+        //- Construct as copy, and transferring registry registration to copy
         //  if registerCopy is true
         regIOobject(const regIOobject&, bool registerCopy);
 

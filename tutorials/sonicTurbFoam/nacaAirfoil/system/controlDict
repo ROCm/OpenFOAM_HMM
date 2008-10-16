@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application sonicTurbFoam;
+application     sonicTurbFoam;
 
 startFrom       latestTime;
 
@@ -52,16 +52,16 @@ functions
     //    functionObjectLibs  ("libforces.so");
     //
     //    // Patches to sample
-    //    patches (WALL10);
+    //    patches     (WALL10);
     //    // Name of fields
-    //    pName   p;
-    //    Uname   U;
+    //    pName       p;
+    //    UName       U;
     //    // Dump to file
-    //    log true;
+    //    log         true;
     //    // Density
-    //    rhoInf  1;
+    //    rhoInf      1;
     //    // Centre of rotation
-    //    CofR    (0 0 0);
+    //    CofR        (0 0 0);
     //}
 
     forces
@@ -70,16 +70,16 @@ functions
         functionObjectLibs  ("libforces.so");
 
         // Patches to sample
-        patches (WALL10);
+        patches     (WALL10);
         // Name of fields
-        pName   p;
-        Uname   U;
+        pName       p;
+        UName       U;
         // Dump to file
-        log true;
+        log         true;
         // Density
-        rhoInf  1;
+        rhoInf      1;
         // Centre of rotation
-        CofR    (0 0 0);
+        CofR        (0 0 0);
 
         // Direction for lift
         liftDir     (-0.239733 0.970839 0);
@@ -91,13 +91,10 @@ functions
 
         magUInf     618.022;
 
-        lRef        1.0;      
+        lRef        1.0;
         Aref        1.0;
     }
 
-
 );
-
-
 
 // ************************************************************************* //

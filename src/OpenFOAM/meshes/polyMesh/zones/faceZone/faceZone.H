@@ -163,24 +163,45 @@ public:
             const faceZoneMesh& zm
         );
 
+        //- Construct from components, transferring contents
+        faceZone
+        (
+            const word& name,
+            const xfer<labelList>& addr,
+            const xfer<boolList>& fm,
+            const label index,
+            const faceZoneMesh&
+        );
+
         //- Construct from dictionary
         faceZone
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
-            const faceZoneMesh& zm
+            const faceZoneMesh&
         );
 
         //- Construct given the original zone and resetting the
         //  face list and zone mesh information
         faceZone
         (
-            const faceZone& fz,
+            const faceZone&,
             const labelList& addr,
             const boolList& fm,
             const label index,
-            const faceZoneMesh& zm
+            const faceZoneMesh&
+        );
+
+        //- Construct given the original zone, resetting the
+        //  face list and zone mesh information
+        faceZone
+        (
+            const faceZone&,
+            const xfer<labelList>& addr,
+            const xfer<boolList>& fm,
+            const label index,
+            const faceZoneMesh&
         );
 
         //- Construct and return a clone, resetting the zone mesh
@@ -216,9 +237,9 @@ public:
         static autoPtr<faceZone> New
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
-            const faceZoneMesh& zm
+            const faceZoneMesh&
         );
 
 

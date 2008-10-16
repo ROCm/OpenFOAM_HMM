@@ -1,4 +1,3 @@
-
 # create a plugin that adds a reader to the ParaView GUI
 # it is added in the file dialog when doing opens/saves.
 
@@ -16,8 +15,8 @@ LINK_DIRECTORIES(
 )
 
 INCLUDE_DIRECTORIES(
-    $ENV{FOAM_SRC}/OpenFOAM/lnInclude
-    $ENV{FOAM_SRC}/finiteVolume/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPV3Foam
 )
 
@@ -52,3 +51,4 @@ TARGET_LINK_LIBRARIES(
     finiteVolume
     vtkPV3Foam
 )
+#-----------------------------------------------------------------------------

@@ -130,26 +130,45 @@ public:
             const word& name,
             const labelList& addr,
             const label index,
-            const pointZoneMesh& zm
+            const pointZoneMesh&
+        );
+
+        //- Construct from components, transferring contents
+        pointZone
+        (
+            const word& name,
+            const xfer<labelList>& addr,
+            const label index,
+            const pointZoneMesh&
         );
 
         //- Construct from dictionary
         pointZone
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
-            const pointZoneMesh& zm
+            const pointZoneMesh&
         );
 
         //- Construct given the original zone and resetting the
         //  point list and zone mesh information
         pointZone
         (
-            const pointZone& pz,
+            const pointZone&,
             const labelList& addr,
             const label index,
-            const pointZoneMesh& zm
+            const pointZoneMesh&
+        );
+
+        //- Construct given the original zone, resetting the
+        //  face list and zone mesh information
+        pointZone
+        (
+            const pointZone&,
+            const xfer<labelList>& addr,
+            const label index,
+            const pointZoneMesh&
         );
 
         //- Construct and return a clone, resetting the zone mesh
@@ -184,7 +203,7 @@ public:
         static autoPtr<pointZone> New
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
             const pointZoneMesh&
         );
