@@ -110,4 +110,10 @@ inline T& Foam::xfer<T>::operator*() const
     return *ptr_;
 }
 
+template<class T>
+inline T* Foam::xfer<T>::operator->() const
+{
+    return ptr_;
+}
+
 // ************************************************************************* //

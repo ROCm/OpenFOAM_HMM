@@ -30,7 +30,7 @@ Description
     of objects of type \<T\>.
 
     Since it is decided upon construction of the xfer object whether the
-    parameter is to be copied or transferred, the contents of resulting
+    parameter is to be copied or transferred, the contents of the resulting
     object can be transferred unconditionally.
 
     This greatly simplifies defining the constructors for other classes
@@ -103,6 +103,9 @@ public:
 
         //- Reference to the underlying datatype
         inline T& operator*() const;
+
+        //- Pointer to the underlying datatype
+        inline T* operator->() const;
 
 };
 

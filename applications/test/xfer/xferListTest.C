@@ -55,8 +55,6 @@ int main(int argc, char *argv[])
     xfer<List<label> > xA(lstA, true);
     xfer<List<label> > xB;
 
-//    List<label> lstB( xferTmp(List<label>, lstC) );
-//    List<label> lstB( xfer<List<label> >(lstC) );
     List<label> lstB( xA );
 
     Info<< "xA: " << *xA << endl;
@@ -74,12 +72,28 @@ int main(int argc, char *argv[])
     Info<< "lstC: " << lstC << endl;
 
     xB = xA;
+    
+    List<label> lstD( xferCopy(List<label>, lstC) );
+    List<label> lstE( xferMove(List<label>, lstC) );
+    
+    // this must be empty
+    List<label> lstF( xferCopy(List<label>, lstC) );
 
     Info<< "xA: " << *xA << endl;
     Info<< "xB: " << *xB << endl;
     Info<< "lstA: " << lstA << endl;
     Info<< "lstB: " << lstB << endl;
     Info<< "lstC: " << lstC << endl;
+    Info<< "lstD: " << lstD << endl;
+    Info<< "lstE: " << lstE << endl;
+    Info<< "lstF: " << lstF << endl;
+
+    Info<< "xB size: " << *xB << endl;
+
+    // clear the underlying List
+    xB->clear();
+
+    Info<< "xB size: " << *xB << endl;
 
     return 0;
 }
