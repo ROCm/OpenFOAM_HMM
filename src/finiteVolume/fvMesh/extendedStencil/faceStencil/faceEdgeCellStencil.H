@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::MeshObject
+    Foam::faceEdgeCellStencil
 
 Description
-    Templated abstract base-class for dynamic mesh objects used to automate
-    their allocation to the mesh database and the mesh-modifier event-loop.
+    All cells connected via edge to face.
 
 SourceFiles
-    MeshObject.C
+    faceEdgeCellStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MeshObject_H
-#define MeshObject_H
+#ifndef faceEdgeCellStencil_H
+#define faceEdgeCellStencil_H
 
-#include "regIOobject.H"
+#include "faceStencil.H"
+#include "boolList.H"
+#include "labelHashSet.H"
+#include "Map.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,65 +48,46 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class MeshObject Declaration
+                           Class faceEdgeCellStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-
-template<class Mesh, class Type>
-class MeshObject
+class faceEdgeCellStencil
 :
-    public regIOobject
+    public faceStencil
 {
+    // Private Member Functions
 
-protected:
+        //- Calculates per edge the neighbour data (= edgeCells)
+        void calcEdgeBoundaryData
+        (
+            const boolList& isValidBFace,
+            const labelList& boundaryEdges,
+            EdgeMap<labelList>& neiGlobal
+        ) const;
 
-        // Reference to Mesh
-        const Mesh& mesh_;
+        void calcFaceStencil(labelListList& faceStencil) const;
+
+
+        //- Disallow default bitwise copy construct
+        faceEdgeCellStencil(const faceEdgeCellStencil&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const faceEdgeCellStencil&);
 
 
 public:
 
     // Constructors
 
-        explicit MeshObject(const Mesh& mesh);
+        //- Construct from all cells and boundary faces
+        explicit faceEdgeCellStencil(const polyMesh&);
 
-        static const Type& New(const Mesh& mesh);
-
-        template<class Data>
-        static const Type& New(const Mesh& mesh, const Data& d);
-
-        template<class Data1, class Data2>
-        static const Type& New(const Mesh& mesh, const Data1&, const Data2&);
-
-
-    // Destructor
-
-        virtual ~MeshObject();
-
-
-    // Member Functions
-
-        const Mesh& mesh() const
-        {
-            return mesh_;
-        }
-
-        virtual bool writeData(Foam::Ostream&) const
-        {
-            return true;
-        }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "MeshObject.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

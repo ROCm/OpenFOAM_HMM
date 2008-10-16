@@ -24,18 +24,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quadraticFitData.H"
+#include "linearFitData.H"
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
 #include "syncTools.H"
-#include "extendedCentredStencil.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(quadraticFitData, 0);
+    defineTypeNameAndDebug(linearFitData, 0);
 }
 
 
@@ -43,14 +43,13 @@ namespace Foam
 
 static int count = 0;
 
-Foam::quadraticFitData::quadraticFitData
+Foam::linearFitData::linearFitData
 (
     const fvMesh& mesh,
-    const extendedCentredStencil& stencil,
     const scalar cWeight
 )
 :
-    MeshObject<fvMesh, quadraticFitData>(mesh),
+    MeshObject<fvMesh, linearFitData>(mesh),
     centralWeight_(cWeight),
 #   ifdef SPHERICAL_GEOMETRY
     dim_(2),
@@ -59,21 +58,22 @@ Foam::quadraticFitData::quadraticFitData
 #   endif
     minSize_
     (
-        dim_ == 1 ? 3 :
-        dim_ == 2 ? 6 :
-        dim_ == 3 ? 9 : 0
+        dim_ == 1 ? 2 :
+        dim_ == 2 ? 3 :
+        dim_ == 3 ? 4 : 0
     ),
+    stencil_(mesh),
     fit_(mesh.nInternalFaces())
 {
     if (debug)
     {
-        Info << "Contructing quadraticFitData" << endl;
+        Info << "Contructing linearFitData" << endl;
     }
 
     // check input
     if (centralWeight_ < 1 - SMALL)
     {
-        FatalErrorIn("quadraticFitData::quadraticFitData")
+        FatalErrorIn("linearFitData::linearFitData")
             << "centralWeight requested = " << centralWeight_
             << " should not be less than one"
             << exit(FatalError);
@@ -81,7 +81,7 @@ Foam::quadraticFitData::quadraticFitData
 
     if (minSize_ == 0)
     {
-        FatalErrorIn("quadraticFitSnGradData")
+        FatalErrorIn("linearFitSnGradData")
             << " dimension must be 1,2 or 3, not" << dim_ << exit(FatalError);
     }
 
@@ -90,20 +90,20 @@ Foam::quadraticFitData::quadraticFitData
     (
         IOobject
         (
-            "quadraticFitInterpPolySize",
+            "linearFitInterpPolySize",
             "constant",
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("quadraticFitInterpPolySize", dimless, scalar(0))
+        dimensionedScalar("linearFitInterpPolySize", dimless, scalar(0))
     );
 
     // Get the cell/face centres in stencil order.
     // Centred face stencils no good for triangles of tets. Need bigger stencils
-    List<List<point> > stencilPoints(mesh.nFaces());
-    stencil.collectData
+    List<List<point> > stencilPoints(stencil_.stencil().size());
+    stencil_.collectData
     (
         mesh.C(),
         stencilPoints
@@ -120,7 +120,7 @@ Foam::quadraticFitData::quadraticFitData
 
     if (debug)
     {
-        Info<< "quadraticFitData::quadraticFitData() :"
+        Info<< "linearFitData::linearFitData() :"
             << "Finished constructing polynomialFit data"
             << endl;
 
@@ -131,7 +131,7 @@ Foam::quadraticFitData::quadraticFitData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::quadraticFitData::findFaceDirs
+void Foam::linearFitData::findFaceDirs
 (
     vector& idir,        // value changed in return
     vector& jdir,        // value changed in return
@@ -141,6 +141,7 @@ void Foam::quadraticFitData::findFaceDirs
 )
 {
     idir = mesh.Sf()[faci];
+    //idir = mesh.C()[mesh.neighbour()[faci]] - mesh.C()[mesh.owner()[faci]];
     idir /= mag(idir);
 
 #   ifndef SPHERICAL_GEOMETRY
@@ -191,7 +192,7 @@ void Foam::quadraticFitData::findFaceDirs
 }
 
 
-Foam::label Foam::quadraticFitData::calcFit
+Foam::label Foam::linearFitData::calcFit
 (
     const List<point>& C,
     const label faci
@@ -237,20 +238,14 @@ Foam::label Foam::quadraticFitData::calcFit
 
         B[ip][is++] = wts[0]*wts[ip];
         B[ip][is++] = wts[0]*wts[ip]*px;
-        B[ip][is++] = wts[ip]*sqr(px);
 
         if (dim_ >= 2)
         {
             B[ip][is++] = wts[ip]*py;
-            B[ip][is++] = wts[ip]*px*py;
-            B[ip][is++] = wts[ip]*sqr(py);
         }
         if (dim_ == 3)
         {
             B[ip][is++] = wts[ip]*pz;
-            B[ip][is++] = wts[ip]*px*pz;
-            //B[ip][is++] = wts[ip]*py*pz;
-            B[ip][is++] = wts[ip]*sqr(pz);
         }
     }
 
@@ -274,8 +269,8 @@ Foam::label Foam::quadraticFitData::calcFit
         //goodFit = (fit0 > 0 && fit1 > 0);
 
         goodFit =
-            (mag(fit0 - w[faci])/w[faci] < 0.15)
-         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.15);
+            (mag(fit0 - w[faci])/w[faci] < 0.5)
+         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.5);
 
         //scalar w0Err = fit0/w[faci];
         //scalar w1Err = fit1/(1 - w[faci]);
@@ -365,9 +360,9 @@ Foam::label Foam::quadraticFitData::calcFit
 }
 
 
-bool Foam::quadraticFitData::movePoints()
+bool Foam::linearFitData::movePoints()
 {
-    notImplemented("quadraticFitData::movePoints()");
+    notImplemented("linearFitData::movePoints()");
 
     return true;
 }

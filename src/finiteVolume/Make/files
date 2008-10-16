@@ -40,6 +40,24 @@ $(fvMeshMapper)/fvSurfaceMapper.C
 
 extendedStencil = fvMesh/extendedStencil
 $(extendedStencil)/extendedStencil.C
+$(extendedStencil)/extendedUpwindStencil.C
+$(extendedStencil)/extendedCentredStencil.C
+
+$(extendedStencil)/faceStencil/faceStencil.C
+$(extendedStencil)/faceStencil/faceEdgeCellStencil.C
+$(extendedStencil)/faceStencil/cellFaceCellStencil.C
+$(extendedStencil)/faceStencil/cellPointCellStencil.C
+$(extendedStencil)/faceStencil/cellEdgeCellStencil.C
+
+$(extendedStencil)/extendedStencilMeshObjects/centredCECStencilObject.C
+$(extendedStencil)/extendedStencilMeshObjects/centredCFCStencilObject.C
+$(extendedStencil)/extendedStencilMeshObjects/centredCPCStencilObject.C
+$(extendedStencil)/extendedStencilMeshObjects/centredFECStencilObject.C
+
+$(extendedStencil)/extendedStencilMeshObjects/upwindCECStencilObject.C
+$(extendedStencil)/extendedStencilMeshObjects/upwindCFCStencilObject.C
+$(extendedStencil)/extendedStencilMeshObjects/upwindCPCStencilObject.C
+$(extendedStencil)/extendedStencilMeshObjects/upwindFECStencilObject.C
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
@@ -168,6 +186,8 @@ $(schemes)/harmonic/harmonic.C
 $(schemes)/localBlended/localBlended.C
 $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
+//$(schemes)/linearFit/linearFit.C
+//$(schemes)/linearFit/linearFitData.C
 $(schemes)/quadraticFit/quadraticFit.C
 $(schemes)/quadraticFit/quadraticFitData.C
 
@@ -251,8 +271,8 @@ $(snGradSchemes)/snGradScheme/snGradSchemes.C
 $(snGradSchemes)/correctedSnGrad/correctedSnGrads.C
 $(snGradSchemes)/limitedSnGrad/limitedSnGrads.C
 $(snGradSchemes)/uncorrectedSnGrad/uncorrectedSnGrads.C
-$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGradData.C
-$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
+//$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGradData.C
+//$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
 
 convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C

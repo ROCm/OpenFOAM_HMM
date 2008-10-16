@@ -83,6 +83,26 @@ const Type& Foam::MeshObject<Mesh, Type>::New
 }
 
 
+template<class Mesh, class Type>
+template<class Data1, class Data2>
+const Type& Foam::MeshObject<Mesh, Type>::New
+(
+    const Mesh& mesh,
+    const Data1& d1,
+    const Data2& d2
+)
+{
+    if (!mesh.db().objectRegistry::foundObject<Type>(Type::typeName))
+    {
+        return store(new Type(mesh, d1, d2));
+    }
+    else
+    {
+        return mesh.db().objectRegistry::lookupObject<Type>(Type::typeName);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class Mesh, class Type>

@@ -24,19 +24,326 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "extendedStencil.H"
-#include "globalIndex.H"
+#include "faceStencil.H"
 #include "syncTools.H"
 #include "SortableList.H"
+#include "emptyPolyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+// Merge two list and guarantee global0,global1 are first.
+void Foam::faceStencil::merge
+(
+    const label global0,
+    const label global1,
+    const labelList& listA,
+    labelList& listB
+)
+{
+    sort(listB);
+
+    // See if global0, global1 already present in listB
+    label nGlobalInsert = 0;
+
+    if (global0 != -1)
+    {
+        label index0 = findSortedIndex(listB, global0);
+        if (index0 == -1)
+        {
+            nGlobalInsert++;
+        }
+    }
+
+    if (global1 != -1)
+    {
+        label index1 = findSortedIndex(listB, global1);
+        if (index1 == -1)
+        {
+            nGlobalInsert++;
+        }
+    }
+
+
+    // For all in listA see if they are present
+    label nInsert = 0;
+
+    forAll(listA, i)
+    {
+        label elem = listA[i];
+
+        if (elem != global0 && elem != global1)
+        {
+            if (findSortedIndex(listB, elem) == -1)
+            {
+                nInsert++;
+            }
+        }
+    }
+
+    // Extend B with nInsert and whether global0,global1 need to be inserted.
+    labelList result(listB.size() + nGlobalInsert + nInsert);
+
+    label resultI = 0;
+
+    // Insert global0,1 first
+    if (global0 != -1)
+    {
+        result[resultI++] = global0;
+    }
+    if (global1 != -1)
+    {
+        result[resultI++] = global1;
+    }
+
+
+    // Insert listB
+    forAll(listB, i)
+    {
+        label elem = listB[i];
+
+        if (elem != global0 && elem != global1)
+        {
+            result[resultI++] = elem;
+        }
+    }
+
+
+    // Insert listA
+    forAll(listA, i)
+    {
+        label elem = listA[i];
+
+        if (elem != global0 && elem != global1)
+        {
+            if (findSortedIndex(listB, elem) == -1)
+            {
+                result[resultI++] = elem;
+            }
+        }
+    }
+
+    if (resultI != result.size())
+    {
+        FatalErrorIn("faceStencil::merge(..)")
+            << "problem" << abort(FatalError);
+    }
+
+    listB.transfer(result);
+}
+
+
+// Merge two list and guarantee globalI is first.
+void Foam::faceStencil::merge
+(
+    const label globalI,
+    const labelList& pGlobals,
+    labelList& cCells
+)
+{
+    labelHashSet set;
+    forAll(cCells, i)
+    {
+        if (cCells[i] != globalI)
+        {
+            set.insert(cCells[i]);
+        }
+    }
+
+    forAll(pGlobals, i)
+    {
+        if (pGlobals[i] != globalI)
+        {
+            set.insert(pGlobals[i]);
+        }
+    }
+
+    cCells.setSize(set.size()+1);
+    label n = 0;
+    cCells[n++] = globalI;
+
+    forAllConstIter(labelHashSet, set, iter)
+    {
+        cCells[n++] = iter.key();
+    }
+}
+
+
+void Foam::faceStencil::validBoundaryFaces(boolList& isValidBFace) const
+{
+    const polyBoundaryMesh& patches = mesh().boundaryMesh();
+
+    isValidBFace.setSize(mesh().nFaces()-mesh().nInternalFaces(), true);
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled() || isA<emptyPolyPatch>(pp))
+        {
+            label bFaceI = pp.start()-mesh().nInternalFaces();
+            forAll(pp, i)
+            {
+                isValidBFace[bFaceI++] = false;
+            }
+        }
+    }
+}
+
+
+Foam::autoPtr<Foam::indirectPrimitivePatch>
+Foam::faceStencil::allCoupledFacesPatch() const
+{
+    const polyBoundaryMesh& patches = mesh().boundaryMesh();
+
+    label nCoupled = 0;
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            nCoupled += pp.size();
+        }
+    }
+    labelList coupledFaces(nCoupled);
+    nCoupled = 0;
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            label faceI = pp.start();
+
+            forAll(pp, i)
+            {
+                coupledFaces[nCoupled++] = faceI++;
+            }
+        }
+    }
+
+    return autoPtr<indirectPrimitivePatch>
+    (
+        new indirectPrimitivePatch
+        (
+            IndirectList<face>
+            (
+                mesh().faces(),
+                coupledFaces
+            ),
+            mesh().points()
+        )
+    );
+}
+
+
+void Foam::faceStencil::unionEqOp::operator()
+(
+    labelList& x,
+    const labelList& y
+) const
+{
+    if (y.size() > 0)
+    {
+        if (x.size() == 0)
+        {
+            x = y;
+        }
+        else
+        {
+            labelHashSet set(x);
+            forAll(y, i)
+            {
+                set.insert(y[i]);
+            }
+            x = set.toc();
+        }
+    }
+}
+
+
+void Foam::faceStencil::insertFaceCells
+(
+    const label exclude0,
+    const label exclude1,
+    const boolList& isValidBFace,
+    const labelList& faceLabels,
+    labelHashSet& globals
+) const
+{
+    const labelList& own = mesh().faceOwner();
+    const labelList& nei = mesh().faceNeighbour();
+
+    forAll(faceLabels, i)
+    {
+        label faceI = faceLabels[i];
+
+        label globalOwn = globalNumbering().toGlobal(own[faceI]);
+        if (globalOwn != exclude0 && globalOwn != exclude1)
+        {
+            globals.insert(globalOwn);
+        }
+
+        if (mesh().isInternalFace(faceI))
+        {
+            label globalNei = globalNumbering().toGlobal(nei[faceI]);
+            if (globalNei != exclude0 && globalNei != exclude1)
+            {
+                globals.insert(globalNei);
+            }
+        }
+        else
+        {
+            label bFaceI = faceI-mesh().nInternalFaces();
+
+            if (isValidBFace[bFaceI])
+            {
+                label globalI = globalNumbering().toGlobal
+                (
+                    mesh().nCells()
+                  + bFaceI
+                );
+
+                if (globalI != exclude0 && globalI != exclude1)
+                {
+                    globals.insert(globalI);
+                }
+            }
+        }
+    }
+}
+
+
+Foam::labelList Foam::faceStencil::calcFaceCells
+(
+    const boolList& isValidBFace,
+    const labelList& faceLabels,
+    labelHashSet& globals
+) const
+{
+    globals.clear();
+
+    insertFaceCells
+    (
+        -1,
+        -1,
+        isValidBFace,
+        faceLabels,
+        globals
+    );
+
+    return globals.toc();
+}
+
+
 // Calculates per face a list of global cell/face indices.
-void Foam::extendedStencil::calcFaceStencil
+void Foam::faceStencil::calcFaceStencil
 (
     const labelListList& globalCellCells,
     labelListList& faceStencil
-)
+) const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
@@ -170,7 +477,7 @@ void Foam::extendedStencil::calcFaceStencil
                     faceStencilSet.insert(ownCCells[i]);
                 }
 
-                // Guarantee owner first, neighbour second.
+                // Guarantee owner first
                 faceStencil[faceI].setSize(faceStencilSet.size());
                 label n = 0;
                 faceStencil[faceI][n++] = globalOwn;
@@ -193,206 +500,12 @@ void Foam::extendedStencil::calcFaceStencil
 }
 
 
-Foam::autoPtr<Foam::mapDistribute> Foam::extendedStencil::calcDistributeMap
-(
-    const globalIndex& globalNumbering,
-    labelListList& faceStencil
-)
-{
-    const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
-
-
-    // Convert stencil to schedule
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // We now know what information we need from other processors. This needs
-    // to be converted into what information I need to send as well
-    // (mapDistribute)
-
-
-    // 1. Construct per processor compact addressing of the global cells
-    //    needed. The ones from the local processor are not included since
-    //    these are always all needed.
-    List<Map<label> > globalToProc(Pstream::nProcs());
-    {
-        const labelList& procPatchMap = mesh_.globalData().procPatchMap();
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-        // Presize with (as estimate) size of patch to neighbour.
-        forAll(procPatchMap, procI)
-        {
-            if (procPatchMap[procI] != -1)
-            {
-                globalToProc[procI].resize
-                (
-                    patches[procPatchMap[procI]].size()
-                );
-            }
-        }
-
-        // Collect all (non-local) globalcells/faces needed.
-        forAll(faceStencil, faceI)
-        {
-            const labelList& stencilCells = faceStencil[faceI];
-
-            forAll(stencilCells, i)
-            {
-                label globalCellI = stencilCells[i];
-                label procI = globalNumbering.whichProcID(stencilCells[i]);
-
-                if (procI != Pstream::myProcNo())
-                {
-                    label nCompact = globalToProc[procI].size();
-                    globalToProc[procI].insert(globalCellI, nCompact);
-                }
-            }
-        }
-        // Sort global cells needed (not really necessary)
-        forAll(globalToProc, procI)
-        {
-            if (procI != Pstream::myProcNo())
-            {
-                Map<label>& globalMap = globalToProc[procI];
-
-                SortableList<label> sorted(globalMap.toc());
-
-                forAll(sorted, i)
-                {
-                    Map<label>::iterator iter = globalMap.find(sorted[i]);
-                    iter() = i;
-                }
-            }
-        }
-
-
-        //forAll(globalToProc, procI)
-        //{
-        //    Pout<< "From processor:" << procI << " want cells/faces:" << endl;
-        //    forAllConstIter(Map<label>, globalToProc[procI], iter)
-        //    {
-        //        Pout<< "    global:" << iter.key()
-        //            << " local:" << globalNumbering.toLocal(procI, iter.key())
-        //            << endl;
-        //    }
-        //    Pout<< endl;
-        //}
-    }
-
-
-    // 2. The overall compact addressing is
-    // - myProcNo first
-    // - all other processors consecutively
-
-    labelList compactStart(Pstream::nProcs());
-    compactStart[Pstream::myProcNo()] = 0;
-    label nCompact = mesh_.nCells()+nBnd;
-    forAll(compactStart, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            compactStart[procI] = nCompact;
-            nCompact += globalToProc[procI].size();
-        }
-    }
-
-
-    // 3. Find out what to receive/send in compact addressing.
-    labelListList recvCompact(Pstream::nProcs());
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            labelList wantedGlobals(globalToProc[procI].size());
-            recvCompact[procI].setSize(globalToProc[procI].size());
-
-            label i = 0;
-            forAllConstIter(Map<label>, globalToProc[procI], iter)
-            {
-                wantedGlobals[i] = iter.key();
-                recvCompact[procI][i] = compactStart[procI]+iter();
-                i++;
-            }
-
-            // Send the global cell numbers I need from procI
-            OPstream str(Pstream::blocking, procI);
-            str << wantedGlobals;
-        }
-        else
-        {
-            recvCompact[procI] =
-                compactStart[procI]
-              + identity(mesh_.nCells()+nBnd);
-        }
-    }
-    labelListList sendCompact(Pstream::nProcs());
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            // See what neighbour wants to receive (= what I need to send)
-
-            IPstream str(Pstream::blocking, procI);
-            labelList globalCells(str);
-
-            labelList& procCompact = sendCompact[procI];
-            procCompact.setSize(globalCells.size());
-
-            // Convert from globalCells (all on my processor!) into compact
-            // addressing
-            forAll(globalCells, i)
-            {
-                label cellI = globalNumbering.toLocal(globalCells[i]);
-                procCompact[i] = compactStart[Pstream::myProcNo()]+cellI;
-            }
-        }
-        else
-        {
-            sendCompact[procI] = recvCompact[procI];
-        }
-    }
-
-    // Convert stencil to compact numbering
-    forAll(faceStencil, faceI)
-    {
-        labelList& stencilCells = faceStencil[faceI];
-
-        forAll(stencilCells, i)
-        {
-            label globalCellI = stencilCells[i];
-            label procI = globalNumbering.whichProcID(globalCellI);
-            if (procI != Pstream::myProcNo())
-            {
-                label localCompact = globalToProc[procI][globalCellI];
-                stencilCells[i] = compactStart[procI]+localCompact;
-            }
-            else
-            {
-                label localCompact = globalNumbering.toLocal(globalCellI);
-                stencilCells[i] = compactStart[procI]+localCompact;
-            }
-
-        }
-    }
-
-    // Constuct map for distribution of compact data.
-    return autoPtr<mapDistribute>
-    (
-        new mapDistribute
-        (
-            nCompact,
-            sendCompact,
-            recvCompact,
-            true            // reuse send/recv maps.
-        )
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::extendedStencil::extendedStencil(const polyMesh& mesh)
+Foam::faceStencil::faceStencil(const polyMesh& mesh)
 :
-    mesh_(mesh)
+    mesh_(mesh),
+    globalNumbering_(mesh_.nCells()+mesh_.nFaces()-mesh_.nInternalFaces())
 {}
 
 

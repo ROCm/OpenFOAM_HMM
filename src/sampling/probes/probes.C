@@ -240,7 +240,7 @@ bool Foam::probes::checkFieldTypes()
 
                     forAll(probeLocations_, probeI)
                     {
-                        *sPtr<< setw(w) << probeLocations_[probeI][cmpt];
+                        *sPtr<< ' ' << setw(w) << probeLocations_[probeI][cmpt];
                     }
                     *sPtr << endl;
                 }

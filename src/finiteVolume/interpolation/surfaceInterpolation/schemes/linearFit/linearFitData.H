@@ -23,36 +23,37 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFitData
+    linearFitData
 
 Description
-    Data for the quadratic fit correction interpolation scheme
+    Data for the linear fit correction interpolation scheme
 
 SourceFiles
-    quadraticFitData.C
+    linearFitData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticFitData_H
-#define quadraticFitData_H
+#ifndef linearFitData_H
+#define linearFitData_H
 
 #include "MeshObject.H"
 #include "fvMesh.H"
+#include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class extendedCentredStencil;
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
-                    Class quadraticFitData Declaration
+                    Class linearFitData Declaration
 \*---------------------------------------------------------------------------*/
 
-class quadraticFitData
+class linearFitData
 :
-    public MeshObject<fvMesh, quadraticFitData>
+    public MeshObject<fvMesh, linearFitData>
 {
     // Private data
 
@@ -64,6 +65,9 @@ class quadraticFitData
 
         //- minimum stencil size
         const label minSize_;
+
+        //- Extended stencil addressing
+        extendedStencil stencil_;
 
         //- For each cell in the mesh store the values which multiply the
         //  values of the stencil to obtain the gradient for each direction
@@ -87,27 +91,32 @@ class quadraticFitData
 
 public:
 
-    TypeName("quadraticFitData");
+    TypeName("linearFitData");
 
 
     // Constructors
 
-        explicit quadraticFitData
+        explicit linearFitData
         (
             const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
             scalar cWeightDim
         );
 
 
     // Destructor
 
-        virtual ~quadraticFitData()
+        virtual ~linearFitData()
         {}
 
 
     // Member functions
 
+
+        //- Return reference to the stencil
+        const extendedStencil& stencil() const
+        {
+            return stencil_;
+        }
 
         //- Return reference to fit coefficients
         const List<scalarList>& fit() const
