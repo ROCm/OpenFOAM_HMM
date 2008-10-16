@@ -76,6 +76,24 @@ StaticHashTable<T, Key, Hash>::StaticHashTable
 {}
 
 
+
+template<class T, class Key, class Hash>
+StaticHashTable<T, Key, Hash>::StaticHashTable
+(
+    const xfer<StaticHashTable<T, Key, Hash> >& ht
+)
+:
+    StaticHashTableName(),
+    keys_(0),
+    objects_(0),
+    nElmts_(0),
+    endIter_(*this, 0, 0),
+    endConstIter_(*this, 0, 0)
+{
+    transfer(*ht);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>

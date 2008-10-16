@@ -23,16 +23,17 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     bashrc
+#     etc/bashrc
 #
 # Description
 #     Startup file for OpenFOAM
 #     Sourced from ~/.profile or ~/.bashrc
+#     Should be usable by any POSIX-compliant shell (eg, ksh)
 #
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-#export WM_PROJECT_VERSION=1.5
+#export WM_PROJECT_VERSION=1.5.x
 : ${WM_PROJECT_VERSION:=dev}; export WM_PROJECT_VERSION
 
 
@@ -53,7 +54,7 @@ foamInstall=$HOME/$WM_PROJECT
 # Location of site/user files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 export WM_PROJECT_INST_DIR=$FOAM_INST_DIR
-export WM_PROJECT_DIR=$FOAM_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
+export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
 export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 
@@ -163,7 +164,7 @@ esac
 cleanProg=$WM_PROJECT_DIR/bin/foamCleanPath
 
 # Remove anything under top-level foam directory
-wildCards="$FOAM_INST_DIR $HOME/$WM_PROJECT/$USER"
+wildCards="$WM_PROJECT_INST_DIR $HOME/$WM_PROJECT/$USER"
 
 #- Clean path/PATH
 cleanPath=`$cleanProg "$PATH" "$wildCards"` && PATH="$cleanPath"
@@ -182,9 +183,7 @@ _foamSource()
 {
    while [ $# -ge 1 ]
    do
-      if [ "$FOAM_VERBOSE" -a "$PS1" ]; then
-         echo "Sourcing: $1"
-      fi
+      [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1"
       . $1
       shift
    done

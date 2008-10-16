@@ -44,6 +44,7 @@ PackedList<nBits>::PackedList(const label size, const unsigned int val)
 }
 
 
+
 //- Copy constructor.
 template<int nBits>
 PackedList<nBits>::PackedList(const PackedList<nBits>& PList)
@@ -51,6 +52,13 @@ PackedList<nBits>::PackedList(const PackedList<nBits>& PList)
     List<unsigned int>(PList),
     size_(PList.size())
 {}
+
+
+template<int nBits>
+PackedList<nBits>::PackedList(const xfer<PackedList<nBits> >& lst)
+{
+    transfer(*lst);
+}
 
 
 //- Construct from labelList

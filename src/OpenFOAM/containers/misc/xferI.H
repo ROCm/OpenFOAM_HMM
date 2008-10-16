@@ -24,100 +24,90 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOList.H"
-
-// * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::IOList<T>::IOList(const IOobject& io)
+inline Foam::xfer<T>::xfer(T* p)
 :
-    regIOobject(io)
-{
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-}
-
-
-template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const label size)
-:
-    regIOobject(io)
-{
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
-    {
-        List<T>::setSize(size);
-    }
-}
-
-
-template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
-:
-    regIOobject(io)
-{
-    if
-    (
-        io.readOpt() == IOobject::MUST_READ
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        readStream(typeName) >> *this;
-        close();
-    }
-    else
-    {
-        List<T>::operator=(list);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T>
-Foam::IOList<T>::~IOList()
+    ptr_(p ? p : new T)
 {}
 
 
+template<class T>
+inline Foam::xfer<T>::xfer(T& t, bool allowTransfer)
+:
+    ptr_(new T)
+{
+    if (allowTransfer)
+    {
+        ptr_->transfer(t);
+    }
+    else
+    {
+        ptr_->operator=(t);
+    }
+}
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-bool Foam::IOList<T>::writeData(Ostream& os) const
+inline Foam::xfer<T>::xfer(const T& t)
+:
+    ptr_(new T)
 {
-    return (os << *this).good();
+    ptr_->operator=(t);
+}
+
+
+template<class T>
+inline Foam::xfer<T>::xfer(const xfer<T>& t)
+:
+    ptr_(new T)
+{
+    ptr_->transfer(*(t.ptr_));
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class T>
+inline Foam::xfer<T>::~xfer()
+{
+    delete ptr_;
+    ptr_ = 0;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::IOList<T>::operator=(const IOList<T>& rhs)
+inline void Foam::xfer<T>::operator=(T& t)
 {
-    List<T>::operator=(rhs);
+    ptr_->transfer(t);
 }
 
 
 template<class T>
-void Foam::IOList<T>::operator=(const List<T>& rhs)
+inline void Foam::xfer<T>::operator=(const xfer<T>& t)
 {
-    List<T>::operator=(rhs);
+    // silently ignore copy to self
+    if (this != &t)
+    {
+        ptr_->transfer(*(t.ptr_));
+    }
 }
 
+
+template<class T>
+inline const Foam::xfer<T>& Foam::xfer<T>::operator()() const
+{
+    return *this;
+}
+
+
+template<class T>
+inline T& Foam::xfer<T>::operator*() const
+{
+    return *ptr_;
+}
 
 // ************************************************************************* //

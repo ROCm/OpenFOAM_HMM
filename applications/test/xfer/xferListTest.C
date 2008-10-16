@@ -22,29 +22,67 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+
 Description
-    IOdictionary is derived from dictionary and IOobject to give the
-    dictionary automatic IO functionality via the objectRegistry.  To facilitate
-    IO, IOdictioanry is provided with a constructor from IOobject and writeData
-    and write functions.
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOdictionary.H"
+#include "OSspecific.H"
+
+#include "IOstreams.H"
+#include "IStringStream.H"
+#include "labelList.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
 
-bool Foam::IOdictionary::readData(Istream& is)
+int main(int argc, char *argv[])
 {
-    is >> *this;
-    return !is.bad();
+    List<label> lstA(10);
+    List<label> lstC(IStringStream("(1 2 3 4)")());
+    
+    forAll(lstA, i)
+    {
+        lstA[i] = i;
+    }
+        
+    Info<< "lstA: " << lstA << endl;
+    Info<< "lstC: " << lstC << endl;
+
+    xfer<List<label> > xA(lstA, true);
+    xfer<List<label> > xB;
+
+//    List<label> lstB( xferTmp(List<label>, lstC) );
+//    List<label> lstB( xfer<List<label> >(lstC) );
+    List<label> lstB( xA );
+
+    Info<< "xA: " << *xA << endl;
+    Info<< "xB: " << *xB << endl;
+    Info<< "lstA: " << lstA << endl;
+    Info<< "lstB: " << lstB << endl;
+    Info<< "lstC: " << lstC << endl;
+
+    xA = lstB;
+
+    Info<< "xA: " << *xA << endl;
+    Info<< "xB: " << *xB << endl;
+    Info<< "lstA: " << lstA << endl;
+    Info<< "lstB: " << lstB << endl;
+    Info<< "lstC: " << lstC << endl;
+
+    xB = xA;
+
+    Info<< "xA: " << *xA << endl;
+    Info<< "xB: " << *xB << endl;
+    Info<< "lstA: " << lstA << endl;
+    Info<< "lstB: " << lstB << endl;
+    Info<< "lstC: " << lstC << endl;
+
+    return 0;
 }
 
-
-bool Foam::IOdictionary::writeData(Ostream& os) const
-{
-    dictionary::write(os, false);
-    return os.good();
-}
 
 // ************************************************************************* //

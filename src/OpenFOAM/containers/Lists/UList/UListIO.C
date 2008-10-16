@@ -60,7 +60,7 @@ void Foam::UList<T>::writeEntry(const word& keyword, Ostream& os) const
 
 
 template<class T>
-Foam::Ostream& Foam:: operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
+Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
 {
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())

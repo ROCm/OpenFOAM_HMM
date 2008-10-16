@@ -105,35 +105,31 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
         (
             "GeometricField<Type, PatchField, GeoMesh>::readIfPresent()"
         )   << "read option IOobject::MUST_READ "
-            << "suggests that a read constuctor for field " << this->name()
+            << "suggests that a read constructor for field " << this->name()
             << " would be more appropriate." << endl;
     }
-    else if (this->readOpt() == IOobject::READ_IF_PRESENT)
+    else if (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
     {
-        if (this->headerOk())
+        boundaryField_.transfer(readField(this->readStream(typeName))());
+        this->close();
+
+        // Check compatibility between field and mesh
+        if (this->size() != GeoMesh::size(this->mesh()))
         {
-            boundaryField_.transfer(readField(this->readStream(typeName))());
-            this->close();
-
-            // Check compatibility between field and mesh
-
-            if (this->size() != GeoMesh::size(this->mesh()))
-            {
-                FatalIOErrorIn
-                (
-                    "GeometricField<Type, PatchField, GeoMesh>::"
-                    "readIfPresent()",
-                    this->readStream(typeName)
-                )   << "   number of field elements = " << this->size()
-                    << " number of mesh elements = "
-                    << GeoMesh::size(this->mesh())
-                    << exit(FatalIOError);
-            }
-
-            readOldTimeIfPresent();
-
-            return true;
+            FatalIOErrorIn
+            (
+                "GeometricField<Type, PatchField, GeoMesh>::"
+                "readIfPresent()",
+                this->readStream(typeName)
+            )   << "   number of field elements = " << this->size()
+                << " number of mesh elements = "
+                << GeoMesh::size(this->mesh())
+                << exit(FatalIOError);
         }
+
+        readOldTimeIfPresent();
+
+        return true;
     }
 
     return false;
@@ -149,7 +145,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readOldTimeIfPresent()
         this->name()  + "_0",
         this->time().timeName(),
         this->db(),
-        IOobject::MUST_READ,
+        IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     );
 

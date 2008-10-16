@@ -5,7 +5,8 @@ forAllIter(HashTable<word>, volumeFields, fieldIter)
     const word& fieldName = fieldIter.key();
     const word& fieldType = fieldIter();
 
-    if (fieldName.size() > 2 &&  fieldName(fieldName.size() - 2, 2) != "_0")
+    // ignore _0 fields
+    if (fieldName.size() > 2 && fieldName(fieldName.size() - 2, 2) == "_0")
     {
         volumeFields.erase(fieldIter);
     }

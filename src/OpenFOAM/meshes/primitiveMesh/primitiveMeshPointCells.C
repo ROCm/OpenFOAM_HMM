@@ -167,7 +167,7 @@ const labelList& primitiveMesh::pointCells
             }
         }
 
-        storage.size() = n;
+        storage.setSize(n);
 
         return storage;
     }

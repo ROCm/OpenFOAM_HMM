@@ -5,9 +5,10 @@
 # Get application directory
 application="laplacianFoam"
 
-runIdeasToFoam ()
+runAnsysToFoam()
 {
-    if [ -f log.ideasToFoam ] ; then
+    if [ -f log.ansysToFoam ]
+    then
         echo "ansysToFoam already run on $PWD: remove log file to run"
     else
         echo "ansysToFoam: converting mesh $1"
@@ -15,7 +16,7 @@ runIdeasToFoam ()
     fi
 }
 
-runIdeasToFoam flange.ans 0.001
+runAnsysToFoam flange.ans 0.001
 runApplication $application
 runApplication foamToFieldview9
 runApplication foamToEnsight

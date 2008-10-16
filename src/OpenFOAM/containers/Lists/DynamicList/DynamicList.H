@@ -84,6 +84,10 @@ class DynamicList
         //- Allocated size for underlying List.
         label allocSize_;
 
+    // Private Member Functions
+
+        // Disabled, since the usefulness and semantics are not quite clear
+        void setSize(const label, const T&);
 
 public:
 
@@ -117,11 +121,13 @@ public:
 
         // Edit
 
-            //- Reset size of List.
+            //- Alter the list size.
+            //  When the new size is greater than the addressed list size, the
+            //  allocated list sizes is adjusted and the
+            //  addressed size does not change.
+            //  Otherwise the addressed list size is just reduced and the
+            //  allocated size does not change.
             inline void setSize(const label);
-
-            //- Reset size of List and value for new elements.
-            inline void setSize(const label, const T&);
 
             //- Clear the list, i.e. set the size to zero.
             //  Allocated size does not change
@@ -156,7 +162,7 @@ public:
         //  resizing the list if necessary
         inline T& operator()(const label);
 
-        //- Assignment of all entries to the given value
+        //- Assignment of all addressed entries to the given value
         inline void operator=(const T&);
 
         //- Assignment from List<T>. Also handles assignment from DynamicList.
