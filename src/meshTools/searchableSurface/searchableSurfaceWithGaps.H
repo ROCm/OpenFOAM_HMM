@@ -148,6 +148,8 @@ public:
 
         // Multiple point queries.
 
+            //- Find nearest on original surface. Note:does not use perturbation
+            //  and hence might be inconsistent with intersections.
             virtual void findNearest
             (
                 const pointField& sample,

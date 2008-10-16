@@ -112,7 +112,7 @@ case OpenFOAM:
     endif
 
     set compilerBin=$WM_COMPILER_DIR/bin
-    set compilerLib=$WM_COMPILER_DIR/lib$WM_COMPILER_LIB_ARCH:$WM_COMPILER_DIR/lib
+    set compilerLib=$WM_COMPILER_DIR/lib${WM_COMPILER_LIB_ARCH}:$WM_COMPILER_DIR/lib
     breaksw
 endsw
 

@@ -1280,8 +1280,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
             domainMesh.boundaryMesh()
         ).ptr();
     }
-    domainMesh.addFvPatches(patches);
-
+    // Add patches; no parallel comms
+    domainMesh.addFvPatches(patches, false);
 
     // Construct zones
     List<pointZone*> pZonePtrs(pointZoneNames.size());

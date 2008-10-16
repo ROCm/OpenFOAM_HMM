@@ -539,27 +539,6 @@ void Foam::refinementSurfaces::findHigherIntersection
         return;
     }
 
-
-    // Precalculate per surface whether it has a minlevelfield
-    UPtrList<triSurfaceLabelField> minLevelFields(surfaces_.size());
-    forAll(surfaces_, surfI)
-    {
-        const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
-
-        if (isA<triSurfaceMesh>(geom))
-        {
-            const triSurfaceMesh& triMesh = refCast<const triSurfaceMesh>(geom);
-            minLevelFields.set
-            (
-                surfI,
-               &const_cast<triSurfaceLabelField&>
-                (
-                    triMesh.lookupObject<triSurfaceLabelField>("minLevel")
-                )
-            );
-        }
-    }
-
     // Work arrays
     labelList hitMap(identity(start.size()));
     pointField p0(start);
@@ -568,7 +547,21 @@ void Foam::refinementSurfaces::findHigherIntersection
 
     forAll(surfaces_, surfI)
     {
-        allGeometry_[surfaces_[surfI]].findLineAny(p0, p1, hitInfo);
+        const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
+
+        geom.findLineAny(p0, p1, hitInfo);
+
+        labelList minLevelField;
+        if (isA<triSurfaceMesh>(geom))
+        {
+            const triSurfaceMesh& triMesh = refCast<const triSurfaceMesh>(geom);
+            triMesh.getField
+            (
+                "minLevel",
+                hitInfo,
+                minLevelField
+            );
+        }
 
 
         // Copy all hits into arguments, continue with misses
@@ -581,14 +574,9 @@ void Foam::refinementSurfaces::findHigherIntersection
             if (hitInfo[hitI].hit())
             {
                 // Check if minLevelField for this surface.
-                if
-                (
-                    minLevelFields.set(surfI)
-                 && minLevelFields[surfI].size() > 0
-                )
+                if (minLevelField.size() > 0)
                 {
-                    minLocalLevel =
-                        minLevelFields[surfI][hitInfo[hitI].index()];
+                    minLocalLevel = minLevelField[hitI];
                 }
                 else
                 {
@@ -618,7 +606,7 @@ void Foam::refinementSurfaces::findHigherIntersection
         }
 
         // All done? Note that this decision should be synchronised
-        if (newI == 0)
+        if (returnReduce(newI, sumOp<label>()) == 0)
         {
             break;
         }
