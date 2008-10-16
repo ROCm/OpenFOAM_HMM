@@ -122,7 +122,7 @@ public:
             const extendedStencil& stencil = cfd.stencil();
             const List<scalarList>& f = cfd.fit();
 
-            return stencil.interpolate(vf, f);
+            return stencil.weightedSum(vf, f);
         }
 };
 

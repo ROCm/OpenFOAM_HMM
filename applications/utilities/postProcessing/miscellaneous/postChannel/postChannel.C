@@ -67,7 +67,20 @@ int main(int argc, char *argv[])
     const word& gFormat = runTime.graphFormat();
 
     // Setup channel indexing for averaging over channel down to a line
-    channelIndex channelIndexing(mesh);
+
+    IOdictionary channelDict
+    (
+        IOobject
+        (
+            "postChannelDict",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
+    channelIndex channelIndexing(mesh, channelDict);
+
 
     // For each time step read all fields
     for (label i=startTime; i<endTime; i++)

@@ -459,6 +459,7 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
         patches_[iter()].name() = iter.key();
     }
 
+    // Fill in the missing information in the patches
     setDefaultPatches();
 
     return true;

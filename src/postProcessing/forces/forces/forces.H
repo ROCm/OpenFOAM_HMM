@@ -130,7 +130,7 @@ protected:
             word pName_;
 
             //- Name of velocity field
-            word Uname_;
+            word UName_;
 
             //- Reference density needed for incompressible calculations
             scalar rhoRef_;

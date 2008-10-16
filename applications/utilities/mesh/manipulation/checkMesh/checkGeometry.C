@@ -39,10 +39,15 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         if (mesh.checkEdgeAlignment(true, validDirs, &nonAlignedPoints))
         {
             noFailedChecks++;
+            label nNonAligned = returnReduce
+            (
+                nonAlignedPoints.size(),
+                sumOp<label>()
+            );
 
-            if (nonAlignedPoints.size() > 0)
+            if (nNonAligned > 0)
             {
-                Pout<< "  <<Writing " << nonAlignedPoints.size()
+                Info<< "  <<Writing " << nNonAligned
                     << " points on non-aligned edges to set "
                     << nonAlignedPoints.name() << endl;
                 nonAlignedPoints.write();
@@ -59,16 +64,21 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             noFailedChecks++;
 
-            if (cells.size() > 0)
+            label nNonClosed = returnReduce(cells.size(), sumOp<label>());
+
+            if (nNonClosed > 0)
             {
-                Pout<< "  <<Writing " << cells.size()
+                Info<< "  <<Writing " << nNonClosed
                     << " non closed cells to set " << cells.name() << endl;
                 cells.write();
             }
         }
-        if (aspectCells.size() > 0)
+
+        label nHighAspect = returnReduce(aspectCells.size(), sumOp<label>());
+
+        if (nHighAspect > 0)
         {
-            Pout<< "  <<Writing " << aspectCells.size()
+            Info<< "  <<Writing " << nHighAspect
                 << " cells with high aspect ratio to set "
                 << aspectCells.name() << endl;
             aspectCells.write();
@@ -81,9 +91,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             noFailedChecks++;
 
-            if (faces.size() > 0)
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
             {
-                Pout<< "  <<Writing " << faces.size()
+                Info<< "  <<Writing " << nFaces
                     << " zero area faces to set " << faces.name() << endl;
                 faces.write();
             }
@@ -96,9 +108,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             noFailedChecks++;
 
-            if (cells.size() > 0)
+            label nCells = returnReduce(cells.size(), sumOp<label>());
+
+            if (nCells > 0)
             {
-                Pout<< "  <<Writing " << cells.size()
+                Info<< "  <<Writing " << nCells
                     << " zero volume cells to set " << cells.name() << endl;
                 cells.write();
             }
@@ -112,9 +126,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             noFailedChecks++;
         }
 
-        if (faces.size() > 0)
+        label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+        if (nFaces > 0)
         {
-            Pout<< "  <<Writing " << faces.size()
+            Info<< "  <<Writing " << nFaces
                 << " non-orthogonal faces to set " << faces.name() << endl;
             faces.write();
         }
@@ -127,9 +143,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             noFailedChecks++;
 
-            if (faces.size() > 0)
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
             {
-                Pout<< "  <<Writing " << faces.size()
+                Info<< "  <<Writing " << nFaces
                     << " faces with incorrect orientation to set "
                     << faces.name() << endl;
                 faces.write();
@@ -143,9 +161,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             noFailedChecks++;
 
-            if (faces.size() > 0)
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
             {
-                Pout<< "  <<Writing " << faces.size()
+                Info<< "  <<Writing " << nFaces
                     << " skew faces to set " << faces.name() << endl;
                 faces.write();
             }
@@ -160,25 +180,29 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             //noFailedChecks++;
 
-            if (points.size() > 0)
+            label nPoints = returnReduce(points.size(), sumOp<label>());
+
+            if (nPoints > 0)
             {
-                Pout<< "  <<Writing " << points.size()
+                Info<< "  <<Writing " << nPoints
                     << " points on short edges to set " << points.name()
                     << endl;
                 points.write();
             }
         }
 
-        label nEdgeClose = points.size();
+        label nEdgeClose = returnReduce(points.size(), sumOp<label>());
 
         if (mesh.checkPointNearness(false, minDistSqr, &points))
         {
             //noFailedChecks++;
 
-            if (points.size() > nEdgeClose)
+            label nPoints = returnReduce(points.size(), sumOp<label>());
+
+            if (nPoints > nEdgeClose)
             {
                 pointSet nearPoints(mesh, "nearPoints", points);
-                Pout<< "  <<Writing " << nearPoints.size()
+                Info<< "  <<Writing " << nPoints
                     << " near (closer than " << Foam::sqrt(minDistSqr)
                     << " apart) points to set " << nearPoints.name() << endl;
                 nearPoints.write();
@@ -193,9 +217,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             //noFailedChecks++;
 
-            if (faces.size() > 0)
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
             {
-                Pout<< "  <<Writing " << faces.size()
+                Info<< "  <<Writing " << nFaces
                     << " faces with concave angles to set " << faces.name()
                     << endl;
                 faces.write();
@@ -210,9 +236,11 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             //noFailedChecks++;
 
-            if (faces.size() > 0)
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
             {
-                Pout<< "  <<Writing " << faces.size()
+                Info<< "  <<Writing " << nFaces
                     << " warped faces to set " << faces.name() << endl;
                 faces.write();
             }
@@ -226,7 +254,9 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             noFailedChecks++;
 
-            Pout<< "  <<Writing " << cells.size()
+            label nCells = returnReduce(cells.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nCells
                 << " under-determined cells to set " << cells.name() << endl;
             cells.write();
         }

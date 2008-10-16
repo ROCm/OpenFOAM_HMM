@@ -263,6 +263,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
         Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
             << "    (half)size:" << Cf.size() << nl
             << "    absTol:" << absTol << nl
+            //<< "    smallDist:" << smallDist << nl
             << "    sum(mag(nf & nr)):" << sum(mag(nf & nr)) << endl;
     }
 
@@ -316,6 +317,13 @@ void Foam::coupledPolyPatch::calcTransformTensors
             {
                 forwardT_.setSize(1);
                 reverseT_.setSize(1);
+
+                if (debug)
+                {
+                    Pout<< "    rotation " << sum(mag(forwardT_ - forwardT_[0]))
+                        << " more than local tolerance " << error
+                        << ". Assuming uniform rotation." << endl;
+                }
             }
         }
         else
@@ -384,7 +392,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
 
     if (debug)
     {
-        Pout<< "    separation_:" << separation_ << nl
+        Pout<< "    separation_:" << separation_.size() << nl
             << "    forwardT size:" << forwardT_.size() << endl;
     }
 }
