@@ -1330,7 +1330,7 @@ void Foam::fvMeshSubset::setLargeCellSubset
 
 
     // Add the fvPatches
-    fvMeshSubsetPtr_().addFvPatches(newBoundary);
+    fvMeshSubsetPtr_().addFvPatches(newBoundary, syncPar);
 
     // Subset and add any zones
     subsetZones();
