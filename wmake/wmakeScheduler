@@ -210,11 +210,11 @@ do
                retval=$?
             else
                if [ "$host" = "$HOST" ]; then
-                  eval $* 2>&1
+                  eval $* 2>&1 | prefixPipe "$host"
                elif [ -n "$JOB_ID" ]; then
-                  qrsh -inherit -v PWD $host "$rcmd"
+                  qrsh -inherit -v PWD $host "$rcmd" | prefixPipe "$host"
                else
-                  ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1
+                  ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | prefixPipe "$host"
                fi
                retval=$?
             fi
