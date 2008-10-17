@@ -129,7 +129,7 @@ Foam::List<T>::List(const List<T>& a)
 template<class T>
 Foam::List<T>::List(const xfer<List<T> >& lst)
 {
-    transfer(*lst);
+    transfer(lst());
 }
 
 

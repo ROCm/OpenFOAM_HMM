@@ -45,9 +45,9 @@ template <class Type>
 Foam::SortableList<Type>::SortableList(const xfer<List<Type> >& values)
 :
     List<Type>(),
-    indices_((*values).size())
+    indices_(values->size())
 {
-    List<Type>::transfer(*values);
+    List<Type>::transfer(values());
     sort();
 }
 

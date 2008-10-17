@@ -73,6 +73,9 @@ public:
         //- Construct from IOobject and a PtrList
         IOPtrList(const IOobject&, const PtrList<T>&);
 
+        //- Construct by transferring the PtrList contents
+        IOPtrList(const IOobject&, const xfer<PtrList<T> >&);
+
 
     // Destructor
 

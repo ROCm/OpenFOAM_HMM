@@ -65,11 +65,14 @@ public:
         //- Construct from IOobject
         IOField(const IOobject&);
 
+        //- Construct from IOobject and size (does not set values)
+        IOField(const IOobject&, const label size);
+
         //- Construct from components
         IOField(const IOobject&, const Field<Type>&);
 
-        //- Construct from IOobject and size (does not set values)
-        IOField(const IOobject&, const label size);
+        //- Construct by transferring the Field contents
+        IOField(const IOobject&, const xfer<Field<Type> >&);
 
 
     // Destructor

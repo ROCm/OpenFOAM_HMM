@@ -95,7 +95,7 @@ CompactListList<T>::CompactListList(const UList<label>& rowSizes, const T& t)
 template<class T>
 CompactListList<T>::CompactListList(const xfer<CompactListList<T> >& lst)
 {
-    transfer(*lst);
+    transfer(lst());
 }
 
 template<class T>

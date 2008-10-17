@@ -39,10 +39,6 @@ Description
     The wrapped object of type \<T\> must implement a transfer() method and
     an operator=() copy method.
 
-Note
-    The macros xferCopy(T,arg) and xferMove(T,arg) can be used as
-    workarounds for passing temporaries to copy-constructors.
-
 SourceFiles
     xferI.H
 
@@ -55,6 +51,9 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declaration of classes
+template<class T> class tmp;
 
 /*---------------------------------------------------------------------------*\
                            Class xfer Declaration
@@ -97,12 +96,8 @@ public:
         //- Transfer the contents into the object
         inline void operator=(const xfer<T>&);
 
-        //- Return a non-const reference to const object
-        //  @sa xferCopy, xferMove macros alternatives for copy-constructors
-        inline const xfer<T>& operator()() const;
-
         //- Reference to the underlying datatype
-        inline T& operator*() const;
+        inline T& operator()() const;
 
         //- Pointer to the underlying datatype
         inline T* operator->() const;
@@ -112,40 +107,54 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
 /**
- * @def xferCopy(T,arg)
+ * @fn template<class T> xferCopy(const T&)
  * Construct by copying the contents of the @a arg
- * and return a const reference to an xfer of type \<T\>
  *
- * Useful for constructors where the argument is temporary.
- * This is a workaround for a template resolution issue.
- *
- * @sa xferMove and Foam::xfer
+ * @sa xferMove, xferTmp and Foam::xfer
 */
-#define xferCopy(T,arg) \
-    (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg)()))
+template<class T>
+Foam::xfer<T> xferCopy(const T& t)
+{
+    return Foam::xfer<T>(t);
+}
+
 
 /**
- * @def xferMove(T,arg)
+ * @fn template<class T> xferMove(T&)
  * Construct by transferring the contents of the @a arg
- * and return a const reference to an xfer of type \<T\>
- *
- * Useful for constructors where the argument is temporary.
- * This is a workaround for a template resolution issue.
  *
  * @par Example Use
  * @code
  *     List<label> a;
  *     ...
- *     List<label> b(xferMove(List<label>, a));
+ *     List<label> b(xferMove(a));
  * @endcode
  *
- * @sa xferCopy and Foam::xfer
+ * @sa xferCopy, xferTmp and Foam::xfer
 */
-#define xferMove(T,arg) \
-    (static_cast<const Foam::xfer< T >&>(Foam::xfer< T >(arg, true)()))
+template<class T>
+Foam::xfer<T> xferMove(T& t)
+{
+    return Foam::xfer<T>(t, true);
+}
+
+
+/**
+ * @fn template<class T> xferTmp(tmp<T>&)
+ * Construct by transferring the contents of the @a arg
+ *
+ * @sa xferCopy, xferMove and Foam::xfer
+*/
+template<class T>
+Foam::xfer<T> xferTmp(Foam::tmp<T>& tt)
+{
+    return Foam::xfer<T>(tt(), tt.isTmp());
+}
+
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
