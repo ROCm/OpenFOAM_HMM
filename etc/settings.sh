@@ -151,7 +151,7 @@ unset MPI_ARCH_PATH
 
 case "$WM_MPLIB" in
 OPENMPI)
-    mpi_version=openmpi-1.2.6
+    mpi_version=openmpi-1.2.8
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
     export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
 
