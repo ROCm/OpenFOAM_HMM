@@ -31,12 +31,14 @@ License
 template<class Type>
 void Foam::extendedStencil::collectData
 (
+    const mapDistribute& map,
+    const labelListList& stencil,
     const GeometricField<Type, fvPatchField, volMesh>& fld,
     List<List<Type> >& stencilFld
-) const
+)
 {
     // 1. Construct cell data in compact addressing
-    List<Type> compactFld(map().constructSize(), pTraits<Type>::zero);
+    List<Type> compactFld(map.constructSize(), pTraits<Type>::zero);
 
     // Insert my internal values
     forAll(fld, cellI)
@@ -56,14 +58,14 @@ void Foam::extendedStencil::collectData
     }
 
     // Do all swapping
-    map().distribute(compactFld);
+    map.distribute(compactFld);
 
     // 2. Pull to stencil
-    stencilFld.setSize(stencil_.size());
+    stencilFld.setSize(stencil.size());
 
-    forAll(stencil_, faceI)
+    forAll(stencil, faceI)
     {
-        const labelList& compactCells = stencil_[faceI];
+        const labelList& compactCells = stencil[faceI];
 
         stencilFld[faceI].setSize(compactCells.size());
 
@@ -79,15 +81,17 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
 Foam::extendedStencil::weightedSum
 (
+    const mapDistribute& map,
+    const labelListList& stencil,
     const GeometricField<Type, fvPatchField, volMesh>& fld,
     const List<List<scalar> >& stencilWeights
-) const
+)
 {
     const fvMesh& mesh = fld.mesh();
 
     // Collect internal and boundary values
     List<List<Type> > stencilFld;
-    collectData(fld, stencilFld);
+    collectData(map, stencil, fld, stencilFld);
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr
     (
@@ -110,6 +114,7 @@ Foam::extendedStencil::weightedSum
     );
     GeometricField<Type, fvsPatchField, surfaceMesh>& sf = tsfCorr();
 
+    // Internal faces
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
         const List<Type>& stField = stencilFld[faceI];
@@ -121,33 +126,30 @@ Foam::extendedStencil::weightedSum
         }
     }
 
-    // Coupled boundaries
-    /*
+    // Boundaries. Either constrained or calculated so assign value
+    // directly (instead of nicely using operator==)
     typename GeometricField<Type, fvsPatchField, surfaceMesh>::
         GeometricBoundaryField& bSfCorr = sf.boundaryField();
+
     forAll(bSfCorr, patchi)
     {
         fvsPatchField<Type>& pSfCorr = bSfCorr[patchi];
 
-        if (pSfCorr.coupled())
+        label faceI = pSfCorr.patch().patch().start();
+
+        forAll(pSfCorr, i)
         {
-            label faceI = pSfCorr.patch().patch().start();
+            const List<Type>& stField = stencilFld[faceI];
+            const List<scalar>& stWeight = stencilWeights[faceI];
 
-            forAll(pSfCorr, i)
+            forAll(stField, j)
             {
-                const List<Type>& stField = stencilFld[faceI];
-                const List<scalar>& stWeight = stencilWeights[faceI];
-
-                forAll(stField, j)
-                {
-                    pSfCorr[i] += stField[j]*stWeight[j];
-                }
-
-                faceI++;
+                pSfCorr[i] += stField[j]*stWeight[j];
             }
+
+            faceI++;
         }
     }
-    */
 
     return tsfCorr;
 }

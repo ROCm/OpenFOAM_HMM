@@ -77,7 +77,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
         }
         else
         {
-            // Putback the openning bracket
+            // Putback the opening bracket
             is.putBack(firstToken);
         }
 
@@ -190,8 +190,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
 
         if (uniform)
         {
-            // Write size of list and start contents delimiter
-            os << token::BEGIN_BLOCK;
+            // Write size of list (so it is valid dictionary entry) and
+            // start contents delimiter
+            os << L.size() << token::BEGIN_BLOCK;
 
             // Write list contents
             os << L[0];
@@ -201,7 +202,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
         }
         else if (Size < 11 && contiguous<T>())
         {
-            // Write size of list and start contents delimiter
+            // Write start of contents delimiter
             os << token::BEGIN_LIST;
 
             // Write list contents
@@ -216,7 +217,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
         }
         else
         {
-            // Write size of list and start contents delimiter
+            // Write start of contents delimiter
             os << nl << token::BEGIN_LIST;
 
             // Write list contents

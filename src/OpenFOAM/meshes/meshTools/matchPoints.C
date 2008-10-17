@@ -45,9 +45,19 @@ bool Foam::matchPoints
 
     bool fullMatch = true;
 
-    SortableList<scalar> pts0MagSqr(magSqr(pts0 - origin));
+    point compareOrigin = origin;
 
-    SortableList<scalar> pts1MagSqr(magSqr(pts1 - origin));
+    if (origin == point(VGREAT, VGREAT, VGREAT))
+    {
+        if (pts1.size() > 0)
+        {
+            compareOrigin = sum(pts1)/pts1.size();
+        }
+    }
+
+    SortableList<scalar> pts0MagSqr(magSqr(pts0 - compareOrigin));
+
+    SortableList<scalar> pts1MagSqr(magSqr(pts1 - compareOrigin));
 
     forAll(pts0MagSqr, i)
     {

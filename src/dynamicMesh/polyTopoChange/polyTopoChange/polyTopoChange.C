@@ -2617,6 +2617,13 @@ void Foam::polyTopoChange::removePoint
             << abort(FatalError);
     }
 
+    if (pointI == mergePointI)
+    {
+        FatalErrorIn("polyTopoChange::removePoint(const label, const label)")
+            << "Cannot remove/merge point " << pointI << " onto itself."
+            << abort(FatalError);
+    }
+
     points_[pointI] = greatPoint;
     pointMap_[pointI] = -1;
     if (mergePointI >= 0)

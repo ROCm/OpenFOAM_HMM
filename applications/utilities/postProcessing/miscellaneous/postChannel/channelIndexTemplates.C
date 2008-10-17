@@ -54,9 +54,11 @@ Foam::Field<T> Foam::channelIndex::collapse
 ) const
 {
     // Average and order
+    const Field<T> summedField(regionSum(cellField));
+
     Field<T> regionField
     (
-        regionSum(cellField)
+        summedField
       / regionCount_,
         sortMap_
     );

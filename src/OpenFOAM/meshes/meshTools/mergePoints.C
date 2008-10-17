@@ -40,6 +40,16 @@ bool Foam::mergePoints
     const point& origin
 )
 {
+    point compareOrigin = origin;
+
+    if (origin == point(VGREAT, VGREAT, VGREAT))
+    {
+        if (points.size() > 0)
+        {
+            compareOrigin = sum(points)/points.size();
+        }
+    }
+
     // Create a old to new point mapping array
     pointMap.setSize(points.size());
     pointMap = -1;
@@ -56,7 +66,7 @@ bool Foam::mergePoints
     const scalar mergeTolSqr = sqr(mergeTol);
 
     // Sort points by magSqr
-    SortableList<scalar> sortedMagSqr(magSqr(points - origin));
+    SortableList<scalar> sortedMagSqr(magSqr(points - compareOrigin));
 
     bool hasMerged = false;
 

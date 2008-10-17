@@ -586,8 +586,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
                 "fvMeshDistribute::repatch(const labelList&, labelListList&)"
             )   << "reverseFaceMap contains -1 at index:"
                 << index << endl
-                << "This means that the repatch operation was not just a shuffle?"
-                << abort(FatalError);
+                << "This means that the repatch operation was not just"
+                << " a shuffle?" << abort(FatalError);
         }
     }
 
@@ -622,9 +622,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         )
     );
 
-    bool merged = pointToMaster.size() > 0;
-
-    if (!returnReduce(merged, orOp<bool>()))
+    if (returnReduce(pointToMaster.size(), sumOp<label>()) == 0)
     {
         return autoPtr<mapPolyMesh>(NULL);
     }
@@ -639,14 +637,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
     // Update fields. No inflation, parallel sync.
     mesh_.updateMesh(map);
 
-    // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
-    {
-        mesh_.movePoints(map().preMotionPoints());
-    }
-
     // Adapt constructMaps for merged points.
-    // 1.4.1: use reversePointMap < -1 feature.
     forAll(constructPointMap, procI)
     {
         labelList& constructMap = constructPointMap[procI];
@@ -655,16 +646,38 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         {
             label oldPointI = constructMap[i];
 
-            // See if merged into other point
-            Map<label>::const_iterator iter = pointToMaster.find(oldPointI);
+            label newPointI = map().reversePointMap()[oldPointI];
 
-            if (iter != pointToMaster.end())
+            if (newPointI < -1)
             {
-                oldPointI = iter();
+                constructMap[i] = -newPointI-2;
             }
-
-            constructMap[i] = map().reversePointMap()[oldPointI];
+            else if (newPointI >= 0)
+            {
+                constructMap[i] = newPointI;
+            }
+            else
+            {
+                FatalErrorIn("fvMeshDistribute::mergeSharedPoints()")
+                    << "Problem. oldPointI:" << oldPointI
+                    << " newPointI:" << newPointI << abort(FatalError);
+            }
         }
+        //- old: use pointToMaster map.
+        //forAll(constructMap, i)
+        //{
+        //    label oldPointI = constructMap[i];
+        //
+        //    // See if merged into other point
+        //    Map<label>::const_iterator iter = pointToMaster.find(oldPointI);
+        //
+        //    if (iter != pointToMaster.end())
+        //    {
+        //        oldPointI = iter();
+        //    }
+        //
+        //    constructMap[i] = map().reversePointMap()[oldPointI];
+        //}
     }
     return map;
 }
@@ -1267,8 +1280,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
             domainMesh.boundaryMesh()
         ).ptr();
     }
-    domainMesh.addFvPatches(patches);
-
+    // Add patches; no parallel comms
+    domainMesh.addFvPatches(patches, false);
 
     // Construct zones
     List<pointZone*> pZonePtrs(pointZoneNames.size());

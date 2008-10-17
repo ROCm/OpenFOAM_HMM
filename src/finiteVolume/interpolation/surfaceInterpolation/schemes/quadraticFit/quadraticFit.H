@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFit
+    Foam::quadraticFit
 
 Description
     Quadratic fit interpolation scheme which applies an explicit correction to
@@ -37,9 +37,9 @@ SourceFiles
 #ifndef quadraticFit_H
 #define quadraticFit_H
 
-#include "linear.H"
 #include "quadraticFitData.H"
-#include "extendedStencil.H"
+#include "linear.H"
+#include "centredCFCStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,15 @@ class quadraticFit
     public linear<Type>
 {
     // Private Data
+
+        //- Factor the fit is allowed to deviate from linear.
+        //  This limits the amount of high-order correction and increases
+        //  stability on bad meshes
+        const scalar linearLimitFactor_;
+
+        //- Weights for central stencil
         const scalar centralWeight_;
+
 
     // Private Member Functions
 
@@ -79,6 +87,7 @@ public:
         quadraticFit(const fvMesh& mesh, Istream& is)
         :
             linear<Type>(mesh),
+            linearLimitFactor_(readScalar(is)),
             centralWeight_(readScalar(is))
         {}
 
@@ -92,6 +101,7 @@ public:
         )
         :
             linear<Type>(mesh),
+            linearLimitFactor_(readScalar(is)),
             centralWeight_(readScalar(is))
         {}
 
@@ -113,13 +123,20 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
+            const extendedCentredStencil& stencil =
+            centredCFCStencilObject::New
+            (
+                mesh
+            );
+
             const quadraticFitData& cfd = quadraticFitData::New
             (
                 mesh,
+                stencil,
+                linearLimitFactor_,
                 centralWeight_
             );
 
-            const extendedStencil& stencil = cfd.stencil();
             const List<scalarList>& f = cfd.fit();
 
             return stencil.weightedSum(vf, f);
