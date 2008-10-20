@@ -430,6 +430,9 @@ template<class T>
 template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
 {
+    // shrink the allocated space to the number of elements used
+    a.shrink();
+
     if (this->v_) delete[] this->v_;
     this->size_ = a.size_;
     this->v_ = a.v_;

@@ -26,7 +26,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 :
@@ -37,7 +36,6 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 }
 
 
-//- Construct given size
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
@@ -51,15 +49,14 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 }
 
 
-//- Construct given size
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
-    const UList<T>& s
+    const UList<T>& lst
 )
 :
-    List<T>(s),
-    allocSize_(s.size())
+    List<T>(lst),
+    allocSize_(lst.size())
 {}
 
 
@@ -114,31 +111,24 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::shrink()
 {
-    allocSize_ = List<T>::size();
-    List<T>::setSize(allocSize_);
+    if (allocSize_ > List<T>::size())
+    {
+        allocSize_ = List<T>::size();
+        // force re-allocation/copying in List<T>::setSize() by temporarily
+        // faking a larger list size that will be truncated
+        List<T>::size(allocSize_+1);
+        List<T>::setSize(allocSize_);
+    }
     return *this;
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void
-Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer(List<T>& l)
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer(List<T>& lst)
 {
-    if (l.size() < List<T>::size())
-    {
-        FatalErrorIn
-        (
-            "void DynamicList<T, SizeInc, SizeMult"
-            ", SizeDiv>::transfer(List<T>&)"
-        )   << "Cannot replace the underlying storage of this DynamicList"
-            << " of which " << List<T>::size() << " elements are used" << nl
-            << "with a List of size " << l.size() << abort(FatalError);
-    }
-    else
-    {
-        allocSize_ = l.size();
-        List<T>::transfer(l);   // take over storage
-    }
+    allocSize_ = lst.size();
+    List<T>::transfer(lst);   // take over storage, null lst
 }
 
 
@@ -146,11 +136,11 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 (
-    DynamicList<T, SizeInc, SizeMult, SizeDiv>& l
+    DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
 )
 {
-    allocSize_ = l.allocSize();
-    List<T>::transfer(l);       // take over storage. Null l.
+    allocSize_ = lst.allocSize();
+    List<T>::transfer(lst);       // take over storage, null lst.
 }
 
 
