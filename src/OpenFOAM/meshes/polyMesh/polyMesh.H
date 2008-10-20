@@ -170,6 +170,9 @@ private:
         //- Initialise the polyMesh from the given set of cells
         void initMesh(cellList& c);
 
+        //- Initialise the polyMesh from the given set of cells
+        void initMesh(const xfer<cellList>& c);
+
         //- Calculate the valid directions in the mesh from the boundaries
         void calcDirections() const;
 
@@ -226,6 +229,18 @@ public:
             const bool syncPar = true
         );
 
+        //- Construct without boundary from components.
+        //  Boundary is added using addPatches() member function
+        polyMesh
+        (
+            const IOobject& io,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<labelList>& owner,
+            const xfer<labelList>& neighbour,
+            const bool syncPar = true
+        );
+
         //- Construct without boundary with cells rather than owner/neighbour.
         //  Boundary is added using addPatches() member function
         polyMesh
@@ -234,6 +249,17 @@ public:
             const pointField& points,
             const faceList& faces,
             const cellList& cells,
+            const bool syncPar = true
+        );
+
+        //- Construct without boundary with cells rather than owner/neighbour.
+        //  Boundary is added using addPatches() member function
+        polyMesh
+        (
+            const IOobject& io,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -439,6 +465,23 @@ public:
                 const faceList& faces,
                 const labelList& owner,
                 const labelList& neighbour,
+                const labelList& patchSizes,
+                const labelList& patchStarts,
+                const bool validBoundary = true
+            );
+
+            //- Reset mesh primitive data. Assumes all patch info correct
+            //  (so does e.g. parallel communication). If not use
+            //  validBoundary=false
+            //  (still assumes patchStarts[0] = nInternalFaces and last
+            //  patch ends at nActiveFaces) and change patches with addPatches.
+            void resetPrimitives
+            (
+                const label nUsedFaces,
+                const xfer<pointField>& points,
+                const xfer<faceList>& faces,
+                const xfer<labelList>& owner,
+                const xfer<labelList>& neighbour,
                 const labelList& patchSizes,
                 const labelList& patchStarts,
                 const bool validBoundary = true

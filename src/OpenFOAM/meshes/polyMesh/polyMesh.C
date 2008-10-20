@@ -428,6 +428,162 @@ Foam::polyMesh::polyMesh
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<labelList>& owner,
+    const xfer<labelList>& neighbour,
+    const bool syncPar
+)
+:
+    objectRegistry(io),
+    primitiveMesh(),
+    points_
+    (
+        IOobject
+        (
+            "points",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        points
+    ),
+    faces_
+    (
+        IOobject
+        (
+            "faces",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        faces
+    ),
+    owner_
+    (
+        IOobject
+        (
+            "owner",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        owner
+    ),
+    neighbour_
+    (
+        IOobject
+        (
+            "neighbour",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        neighbour
+    ),
+    clearedPrimitives_(false),
+    boundary_
+    (
+        IOobject
+        (
+            "boundary",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        *this,
+        0
+    ),
+    bounds_(points_, syncPar),
+    directions_(Vector<label>::zero),
+    pointZones_
+    (
+        IOobject
+        (
+            "pointZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    faceZones_
+    (
+        IOobject
+        (
+            "faceZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    cellZones_
+    (
+        IOobject
+        (
+            "cellZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    globalMeshDataPtr_(NULL),
+    moving_(false),
+    changing_(false),
+    curMotionTimeIndex_(time().timeIndex()),
+    oldPointsPtr_(NULL)
+{
+    // Check if the faces and cells are valid
+    forAll (faces_, faceI)
+    {
+        const face& curFace = faces_[faceI];
+
+        if (min(curFace) < 0 || max(curFace) > points_.size())
+        {
+            FatalErrorIn
+            (
+                "polyMesh::polyMesh\n"
+                "(\n"
+                "    const IOobject& io,\n"
+                "    const pointField& points,\n"
+                "    const faceList& faces,\n"
+                "    const cellList& cells\n"
+                ")\n"
+            )   << "Face " << faceI << "contains vertex labels out of range: "
+                << curFace << " Max point index = " << points_.size()
+                << abort(FatalError);
+        }
+    }
+
+    // Set the primitive mesh
+    initMesh();
+}
+
+
+Foam::polyMesh::polyMesh
+(
+    const IOobject& io,
     const pointField& points,
     const faceList& faces,
     const cellList& cells,
@@ -602,6 +758,185 @@ Foam::polyMesh::polyMesh
 }
 
 
+Foam::polyMesh::polyMesh
+(
+    const IOobject& io,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<cellList>& cells,
+    const bool syncPar
+)
+:
+    objectRegistry(io),
+    primitiveMesh(),
+    points_
+    (
+        IOobject
+        (
+            "points",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        points
+    ),
+    faces_
+    (
+        IOobject
+        (
+            "faces",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        faces
+    ),
+    owner_
+    (
+        IOobject
+        (
+            "owner",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    neighbour_
+    (
+        IOobject
+        (
+            "neighbour",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    clearedPrimitives_(false),
+    boundary_
+    (
+        IOobject
+        (
+            "boundary",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        *this,
+        0
+    ),
+    bounds_(points_, syncPar),
+    directions_(Vector<label>::zero),
+    pointZones_
+    (
+        IOobject
+        (
+            "pointZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    faceZones_
+    (
+        IOobject
+        (
+            "faceZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    cellZones_
+    (
+        IOobject
+        (
+            "cellZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    globalMeshDataPtr_(NULL),
+    moving_(false),
+    changing_(false),
+    curMotionTimeIndex_(time().timeIndex()),
+    oldPointsPtr_(NULL)
+{
+    // Check if faces are valid
+    forAll (faces_, faceI)
+    {
+        const face& curFace = faces_[faceI];
+
+        if (min(curFace) < 0 || max(curFace) > points_.size())
+        {
+            FatalErrorIn
+            (
+                "polyMesh::polyMesh\n"
+                "(\n"
+                "    const IOobject&,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<cellList>&\n"
+                ")\n"
+            )   << "Face " << faceI << "contains vertex labels out of range: "
+                << curFace << " Max point index = " << points_.size()
+                << abort(FatalError);
+        }
+    }
+
+    const cellList& cLst = cells();
+
+    // Check if cells are valid
+    forAll (cLst, cellI)
+    {
+        const cell& curCell = cLst[cellI];
+
+        if (min(curCell) < 0 || max(curCell) > faces_.size())
+        {
+            FatalErrorIn
+            (
+                "polyMesh::polyMesh\n"
+                "(\n"
+                "    const IOobject&,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<cellList>&\n"
+                ")\n"
+            )   << "Cell " << cellI << "contains face labels out of range: "
+                << curCell << " Max face index = " << faces_.size()
+                << abort(FatalError);
+        }
+    }
+
+    // Set the primitive mesh
+    initMesh(cells);
+}
+
+
 void Foam::polyMesh::resetPrimitives
 (
     const label nUsedFaces,
@@ -709,6 +1044,111 @@ void Foam::polyMesh::resetPrimitives
                 "    const faceList& faces,\n"
                 "    const labelList& owner,\n"
                 "    const labelList& neighbour,\n"
+                "    const labelList& patchSizes,\n"
+                "    const labelList& patchStarts\n"
+                ")\n"
+            )
+                << "no points or no cells in mesh" << endl;
+        }
+    }
+}
+
+
+void Foam::polyMesh::resetPrimitives
+(
+    const label nUsedFaces,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<labelList>& owner,
+    const xfer<labelList>& neighbour,
+    const labelList& patchSizes,
+    const labelList& patchStarts,
+    const bool validBoundary
+)
+{
+    // Clear addressing. Keep geometric props for mapping.
+    clearAddressing();
+
+    // Take over new primitive data.
+    points_.transfer(points());
+    bounds_ = boundBox(points_, validBoundary);
+
+    faces_.transfer(faces());
+    owner_.transfer(owner());
+    neighbour_.transfer(neighbour());
+
+    // Reset patch sizes and starts
+    forAll(boundary_, patchI)
+    {
+        boundary_[patchI] = polyPatch
+        (
+            boundary_[patchI].name(),
+            patchSizes[patchI],
+            patchStarts[patchI],
+            patchI,
+            boundary_
+        );
+    }
+
+
+    // Flags the mesh files as being changed
+    setInstance(time().timeName());
+
+    // Check if the faces and cells are valid
+    forAll (faces_, faceI)
+    {
+        const face& curFace = faces_[faceI];
+
+        if (min(curFace) < 0 || max(curFace) > points_.size())
+        {
+            FatalErrorIn
+            (
+                "polyMesh::polyMesh::resetPrimitives\n"
+                "(\n"
+                "    const label nUsedFaces,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<labelList>& owner,\n"
+                "    const xfer<labelList>& neighbour,\n"
+                "    const labelList& patchSizes,\n"
+                "    const labelList& patchStarts\n"
+                ")\n"
+            )   << "Face " << faceI << " contains vertex labels out of range: "
+                << curFace << " Max point index = " << points_.size()
+                << abort(FatalError);
+        }
+    }
+
+
+    // Set the primitive mesh from the owner_, neighbour_. Works
+    // out from patch end where the active faces stop.
+    initMesh();
+
+
+    if (validBoundary)
+    {
+        // Note that we assume that all the patches stay the same and are
+        // correct etc. so we can already use the patches to do
+        // processor-processor comms.
+
+        // Calculate topology for the patches (processor-processor comms etc.)
+        boundary_.updateMesh();
+
+        // Calculate the geometry for the patches (transformation tensors etc.)
+        boundary_.calcGeometry();
+
+        // Warn if global empty mesh (constructs globalData!)
+        if (globalData().nTotalPoints() == 0 || globalData().nTotalCells() == 0)
+        {
+            FatalErrorIn
+            (
+                "polyMesh::polyMesh::resetPrimitives\n"
+                "(\n"
+                "    const label nUsedFaces,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<labelList>& owner,\n"
+                "    const xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
                 ")\n"
