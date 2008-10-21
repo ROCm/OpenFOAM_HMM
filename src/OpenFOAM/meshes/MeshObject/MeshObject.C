@@ -106,6 +106,29 @@ const Type& Foam::MeshObject<Mesh, Type>::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class Mesh, class Type>
+bool Foam::MeshObject<Mesh, Type>::Delete(const Mesh& mesh)
+{
+    if (mesh.db().objectRegistry::foundObject<Type>(Type::typeName))
+    {
+        return mesh.db().objectRegistry::checkOut
+        (
+            const_cast<Type&>
+            (
+                mesh.db().objectRegistry::lookupObject<Type>
+                (
+                    Type::typeName
+                )
+            )
+        );
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+template<class Mesh, class Type>
 Foam::MeshObject<Mesh, Type>::~MeshObject()
 {
     release();
