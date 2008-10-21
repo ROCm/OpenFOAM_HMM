@@ -78,11 +78,6 @@ _foamMkDir $FOAM_USER_LIBBIN
 _foamMkDir $FOAM_USER_APPBIN
 
 
-# Compiler settings
-# ~~~~~~~~~~~~~~~~~
-set compilerBin=
-set compilerLib=
-
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compilerInstall = OpenFOAM | System
@@ -111,18 +106,12 @@ case OpenFOAM:
         echo
     endif
 
-    set compilerBin=$WM_COMPILER_DIR/bin
-    set compilerLib=$WM_COMPILER_DIR/lib${WM_COMPILER_LIB_ARCH}:$WM_COMPILER_DIR/lib
+    _foamAddPath ${WM_COMPILER_DIR}/bin
+    _foamAddLib  ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
+    _foamAddLib  ${WM_COMPILER_DIR}/lib
+
     breaksw
 endsw
-
-if ($?compilerBin) then
-    _foamAddPath $compilerBin
-    _foamAddLib  $compilerLib
-endif
-
-unset compilerBin
-unset compilerLib
 
 
 # Communications library
