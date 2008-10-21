@@ -220,7 +220,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
 
             if (oldFaceI >= nInternalFaces())
             {
-                FatalErrorIn("dynamicRefineFvMesh::refine")
+                FatalErrorIn("dynamicRefineFvMesh::refine(const labelList&)")
                     << "New internal face:" << faceI
                     << " fc:" << faceCentres()[faceI]
                     << " originates from boundary oldFace:" << oldFaceI
@@ -445,7 +445,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::unrefine
     }
 
 
-    // Change mesh and generate mesh.
+    // Change mesh and generate map.
     //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
 
