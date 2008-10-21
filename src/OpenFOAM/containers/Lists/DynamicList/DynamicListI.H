@@ -128,7 +128,7 @@ inline void
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer(List<T>& lst)
 {
     allocSize_ = lst.size();
-    List<T>::transfer(lst);   // take over storage, null lst
+    List<T>::transfer(lst);   // take over storage, clear addressing for lst.
 }
 
 
@@ -139,8 +139,11 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
     DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
 )
 {
-    allocSize_ = lst.allocSize();
-    List<T>::transfer(lst);       // take over storage, null lst.
+    // take over storage as-is (without shrink), clear addressing for lst.
+    allocSize_ = lst.allocSize_;
+    lst.allocSize_ = 0;
+
+    List<T>::transfer(static_cast<List<T>&>(lst));
 }
 
 
@@ -230,10 +233,13 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 (
-    const List<T>& l
+    const List<T>& lst
 )
 {
-    List<T>::operator=(l);
+    // make the entire storage available for the copy operation:
+    List<T>::size(allocSize_);
+
+    List<T>::operator=(lst);
     allocSize_ = List<T>::size();
 }
 

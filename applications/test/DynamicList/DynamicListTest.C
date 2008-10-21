@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     forAll(ldl, i)
     {
         Info<< " " << ldl[i].size() << "/" << ldl[i].allocSize();
-    }    
+    }
     Info<< endl;
 
     List<List<label> > ll(2);
@@ -64,10 +64,37 @@ int main(int argc, char *argv[])
     forAll(ldl, i)
     {
         Info<< " " << ldl[i].size() << "/" << ldl[i].allocSize();
-    }    
+    }
     Info<< endl;
 
     Info<< "<ll>" << ll << "</ll>" << nl << endl;
+
+
+    // test the transfer between DynamicLists
+    DynamicList<label, 1, 0> dlA;
+    DynamicList<label, 1, 0> dlB;
+
+    for (label i = 0; i < 5; i++)
+    {
+        dlA.append(i);
+    }
+    dlA.setSize(10);
+
+    Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
+        << " " << dlA.size() << "/" << dlA.allocSize() << endl;
+
+    dlB.transfer(dlA);
+
+    // provokes memory error if previous transfer did not maintain
+    // the correct allocated space
+    dlB[6] = 6;
+
+    Info<< "Transferred to dlB" << endl;
+    Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
+        << " " << dlA.size() << "/" << dlA.allocSize() << endl;
+    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
+        << " " << dlB.size() << "/" << dlB.allocSize() << endl;
+
 
     return 0;
 }
