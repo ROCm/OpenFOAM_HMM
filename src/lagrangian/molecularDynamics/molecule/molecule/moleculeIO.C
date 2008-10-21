@@ -85,22 +85,25 @@ void molecule::readFields(moleculeCloud& mC)
         return;
     }
 
-    IOField<label> id(mC.fieldIOobject("id"));
+    IOField<label> id(mC.fieldIOobject("id", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, id);
 
-    IOField<scalar> mass(mC.fieldIOobject("mass"));
+    IOField<scalar> mass(mC.fieldIOobject("mass", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, mass);
 
-    IOField<vector> U(mC.fieldIOobject("U"));
+    IOField<vector> U(mC.fieldIOobject("U", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, U);
 
-    IOField<vector> A(mC.fieldIOobject("A"));
+    IOField<vector> A(mC.fieldIOobject("A", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, A);
 
-    IOField<label> tethered(mC.fieldIOobject("tethered"));
+    IOField<label> tethered(mC.fieldIOobject("tethered", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, tethered);
 
-    IOField<vector> tetherPositions(mC.fieldIOobject("tetherPositions"));
+    IOField<vector> tetherPositions
+    (
+        mC.fieldIOobject("tetherPositions", IOobject::MUST_READ)
+    );
     mC.checkFieldIOobject(mC, tetherPositions);
 
     label i = 0;
@@ -127,12 +130,20 @@ void molecule::writeFields(const moleculeCloud& mC)
 
     label np =  mC.size();
 
-    IOField<label> id(mC.fieldIOobject("id"), np);
-    IOField<scalar> mass(mC.fieldIOobject("mass"), np);
-    IOField<vector> U(mC.fieldIOobject("U"), np);
-    IOField<vector> A(mC.fieldIOobject("A"), np);
-    IOField<label> tethered(mC.fieldIOobject("tethered"), np);
-    IOField<vector> tetherPositions(mC.fieldIOobject("tetherPositions"), np);
+    IOField<label> id(mC.fieldIOobject("id", IOobject::NO_READ), np);
+    IOField<scalar> mass(mC.fieldIOobject("mass", IOobject::NO_READ), np);
+    IOField<vector> U(mC.fieldIOobject("U", IOobject::NO_READ), np);
+    IOField<vector> A(mC.fieldIOobject("A", IOobject::NO_READ), np);
+    IOField<label> tethered
+    (
+        mC.fieldIOobject("tethered", IOobject::NO_READ),
+        np
+    );
+    IOField<vector> tetherPositions
+    (
+        mC.fieldIOobject("tetherPositions", IOobject::NO_READ),
+        np
+    );
 
     label i = 0;
     forAllConstIter(moleculeCloud, mC, iter)

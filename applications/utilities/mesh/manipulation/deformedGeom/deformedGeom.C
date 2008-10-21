@@ -52,8 +52,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    pointMesh pMesh(mesh);
-    volPointInterpolation pInterp(mesh, pMesh);
+    volPointInterpolation pInterp(mesh);
 
     // Get times list
     instantList Times = runTime.times();

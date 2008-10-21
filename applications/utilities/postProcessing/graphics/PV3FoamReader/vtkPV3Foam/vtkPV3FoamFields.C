@@ -107,8 +107,7 @@ void Foam::vtkPV3Foam::convertVolFields
     }
 
     // Construct interpolation on the raw mesh
-    pointMesh pMesh(mesh);
-    volPointInterpolation pInterp(mesh, pMesh);
+    volPointInterpolation pInterp(mesh);
 
     PtrList<PrimitivePatchInterpolation<primitivePatch> >
         ppInterpList(mesh.boundaryMesh().size());

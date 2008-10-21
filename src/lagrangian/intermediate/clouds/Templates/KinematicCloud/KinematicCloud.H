@@ -50,7 +50,6 @@ SourceFiles
 #include "Random.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "volPointInterpolation.H"
 #include "fvMatrices.H"
 #include "fvm.H"
 
@@ -109,9 +108,6 @@ private:
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
-
-        //- Reference to the interpolation for the carrier phase to the parcels
-        const volPointInterpolation& vpi_;
 
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
@@ -268,7 +264,6 @@ public:
         KinematicCloud
         (
             const word& cloudType,
-            const volPointInterpolation& vpi,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,
@@ -294,9 +289,6 @@ public:
 
                 //- Return refernce to the mesh
                 inline const fvMesh& mesh() const;
-
-                //- Retuen reference to the interpolation
-                inline const volPointInterpolation& vpi() const;
 
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;

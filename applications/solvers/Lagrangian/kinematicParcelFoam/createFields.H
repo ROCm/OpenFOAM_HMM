@@ -46,9 +46,6 @@
         )
     );
 
-    pointMesh pMesh(mesh);
-    volPointInterpolation vpi(mesh, pMesh);
-
     word kinematicCloudName("kinematicCloud");
 
     if (args.options().found("cloudName"))
@@ -60,7 +57,6 @@
     basicKinematicCloud kinematicCloud
     (
         kinematicCloudName,
-        vpi,
         rho,
         U,
         thermo().mu(),

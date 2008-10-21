@@ -41,6 +41,7 @@ Description
 #include "multivariateScheme.H"
 #include "Switch.H"
 #include "OFstream.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +76,10 @@ int main(int argc, char *argv[])
         Info<< "Crank angle = " << runTime.theta() << " CA-deg" << endl;
 
         mesh.move();
-        vpi.updateMesh();
+        const_cast<volPointInterpolation&>
+        (
+            volPointInterpolation::New(mesh)
+        ).updateMesh();
 
         dieselSpray.evolve();
 

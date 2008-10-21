@@ -39,14 +39,13 @@ namespace Foam
 Foam::basicKinematicCloud::basicKinematicCloud
 (
     const word& cloudType,
-    const volPointInterpolation& vpi,
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
     const dimensionedVector& g
 )
 :
-    KinematicCloud<basicKinematicParcel>(cloudType, vpi, rho, U, mu, g)
+    KinematicCloud<basicKinematicParcel>(cloudType, rho, U, mu, g)
 {
     basicKinematicParcel::readFields(*this);
 }

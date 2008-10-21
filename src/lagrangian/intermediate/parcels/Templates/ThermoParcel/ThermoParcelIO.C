@@ -82,10 +82,10 @@ void Foam::ThermoParcel<ParcelType>::readFields
 
     KinematicParcel<ParcelType>::readFields(c);
 
-    IOField<scalar> T(c.fieldIOobject("T"));
+    IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ));
     c.checkFieldIOobject(c, T);
 
-    IOField<scalar> cp(c.fieldIOobject("cp"));
+    IOField<scalar> cp(c.fieldIOobject("cp", IOobject::MUST_READ));
     c.checkFieldIOobject(c, cp);
 
 
@@ -111,8 +111,8 @@ void Foam::ThermoParcel<ParcelType>::writeFields
 
     label np =  c.size();
 
-    IOField<scalar> T(c.fieldIOobject("T"), np);
-    IOField<scalar> cp(c.fieldIOobject("cp"), np);
+    IOField<scalar> T(c.fieldIOobject("T", IOobject::NO_READ), np);
+    IOField<scalar> cp(c.fieldIOobject("cp", IOobject::NO_READ), np);
 
     label i = 0;
     forAllConstIter(typename Cloud<ParcelType>, c, iter)

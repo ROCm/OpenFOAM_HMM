@@ -680,7 +680,6 @@ void Foam::fvMeshSubset::setCellSubset
             newCells
         )
     );
-    pointMeshSubsetPtr_.clear();
 
 
     // Add old patches
@@ -1180,7 +1179,6 @@ void Foam::fvMeshSubset::setLargeCellSubset
             syncPar           // parallel synchronisation
         )
     );
-    pointMeshSubsetPtr_.clear();
 
     // Add old patches
     List<polyPatch*> newBoundary(nbSize);
@@ -1367,26 +1365,6 @@ fvMesh& Foam::fvMeshSubset::subMesh()
     checkCellSubset();
 
     return fvMeshSubsetPtr_();
-}
-
-
-const pointMesh& Foam::fvMeshSubset::subPointMesh() const
-{
-    if (!pointMeshSubsetPtr_.valid())
-    {
-        pointMeshSubsetPtr_.reset(new pointMesh(subMesh()));
-    }
-    return pointMeshSubsetPtr_();
-}
-
-
-pointMesh& Foam::fvMeshSubset::subPointMesh()
-{
-    if (!pointMeshSubsetPtr_.valid())
-    {
-        pointMeshSubsetPtr_.reset(new pointMesh(subMesh()));
-    }
-    return pointMeshSubsetPtr_();
 }
 
 

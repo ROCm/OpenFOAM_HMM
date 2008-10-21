@@ -3082,7 +3082,7 @@ void Foam::autoLayerDriver::doLayers
         Info<< "Constructing mesh displacer ..." << endl;
 
         {
-            pointMesh pMesh(mesh);
+            const pointMesh& pMesh = pointMesh::New(mesh);
 
             motionSmoother meshMover
             (

@@ -1992,7 +1992,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
     volRefLevel.write();
 
 
-    pointMesh pMesh(mesh_);
+    const pointMesh& pMesh = pointMesh::New(mesh_);
 
     pointScalarField pointRefLevel
     (

@@ -171,8 +171,6 @@ private:
         //- Subset mesh pointer
         autoPtr<fvMesh> fvMeshSubsetPtr_;
 
-        mutable autoPtr<pointMesh> pointMeshSubsetPtr_;
-
         //- Point mapping array
         labelList pointMap_;
 
@@ -277,11 +275,6 @@ public:
             const fvMesh& subMesh() const;
 
             fvMesh& subMesh();
-
-            //- Return reference to demand-driven subset pointMesh
-            const pointMesh& subPointMesh() const;
-
-            pointMesh& subPointMesh();
 
             //- Return point map
             const labelList& pointMap() const;
