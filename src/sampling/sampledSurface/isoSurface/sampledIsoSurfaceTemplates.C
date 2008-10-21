@@ -39,35 +39,8 @@ Foam::sampledIsoSurface::sampleField
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
-    const fvMesh& fvm = vField.mesh();
-
-    if (fvm.time().timeIndex() != storedTimeIndex_)
-    {
-        storedTimeIndex_ = fvm.time().timeIndex();
-
-        //- Clear any stored topo
-        facesPtr_.clear();
-
-        const volScalarField& cellFld =
-            fvm.lookupObject<volScalarField>(isoField_);
-
-        tmp<pointScalarField> pointFld
-        (
-            volPointInterpolation::New(fvm).interpolate(cellFld)
-        );
-
-        const isoSurface iso
-        (
-            fvm,
-            cellFld.internalField(),
-            pointFld().internalField(),
-            isoVal_
-        );
-
-        const_cast<sampledIsoSurface&>(*this).triSurface::operator=(iso);
-        meshCells_ = iso.meshCells();
-        triPointMergeMap_ = iso.triPointMergeMap();
-    }
+    // Recreate geometry if time has changed
+    createGeometry();
 
     return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
 }
@@ -80,36 +53,8 @@ Foam::sampledIsoSurface::interpolateField
     const interpolation<Type>& interpolator
 ) const
 {
-    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
-
-    if (fvm.time().timeIndex() != storedTimeIndex_)
-    {
-        //- Clear any stored topo
-        facesPtr_.clear();
-
-        storedTimeIndex_ = fvm.time().timeIndex();
-
-        const volScalarField& cellFld =
-            fvm.lookupObject<volScalarField>(isoField_);
-
-        tmp<pointScalarField> pointFld
-        (
-            volPointInterpolation::New(fvm).interpolate(cellFld)
-        );
-
-        const isoSurface iso
-        (
-            fvm,
-            cellFld.internalField(),
-            pointFld().internalField(),
-            isoVal_
-        );
-
-        const_cast<sampledIsoSurface&>(*this).triSurface::operator=(iso);
-        meshCells_ = iso.meshCells();
-        triPointMergeMap_ = iso.triPointMergeMap();
-    }
-
+    // Recreate geometry if time has changed
+    createGeometry();
 
     // One value per point
     tmp<Field<Type> > tvalues(new Field<Type>(points().size()));

@@ -41,6 +41,128 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::sampledIsoSurface::createGeometry() const
+{
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+
+    if (fvm.time().timeIndex() != storedTimeIndex_)
+    {
+        storedTimeIndex_ = fvm.time().timeIndex();
+
+        // Clear any stored topo
+        facesPtr_.clear();
+
+        // Optionally read volScalarField
+        autoPtr<volScalarField> readFieldPtr_;
+
+        // 1. see if field in database
+        // 2. see if field can be read
+        const volScalarField* cellFldPtr = NULL;
+        if (fvm.foundObject<volScalarField>(isoField_))
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::createGeometry() : lookup "
+                    << isoField_ << endl;
+            }
+
+            cellFldPtr = &fvm.lookupObject<volScalarField>(isoField_);
+        }
+        else
+        {
+            // Bit of a hack. Read field and store.
+
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::createGeometry() : reading "
+                    << isoField_ << " from time " <<fvm.time().timeName()
+                    << endl;
+            }
+
+            readFieldPtr_.reset
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        isoField_,
+                        fvm.time().timeName(),
+                        fvm,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    fvm
+                )
+            );
+
+            cellFldPtr = readFieldPtr_.operator->();
+        }
+        const volScalarField& cellFld = *cellFldPtr;
+
+        tmp<pointScalarField> pointFld
+        (
+            volPointInterpolation::New(fvm).interpolate(cellFld)
+        );
+
+        //- Direct from cell field and point field. Gives bad continuity.
+        //const isoSurface iso
+        //(
+        //    fvm,
+        //    cellFld.internalField(),
+        //    pointFld().internalField(),
+        //    isoVal_
+        //);
+
+        //- From point field and interpolated cell.
+        scalarField cellAvg(fvm.nCells(), scalar(0.0));
+        labelField nPointCells(fvm.nCells(), 0);
+        {
+            for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
+            {
+                const labelList& pCells = fvm.pointCells(pointI);
+
+                forAll(pCells, i)
+                {
+                    label cellI = pCells[i];
+
+                    cellAvg[cellI] += pointFld().internalField()[pointI];
+                    nPointCells[cellI]++;
+                }
+            }
+        }
+        forAll(cellAvg, cellI)
+        {
+            cellAvg[cellI] /= nPointCells[cellI];
+        }
+
+        const isoSurface iso
+        (
+            fvm,
+            cellAvg,
+            pointFld().internalField(),
+            isoVal_
+        );
+
+
+        const_cast<sampledIsoSurface&>(*this).triSurface::operator=(iso);
+        meshCells_ = iso.meshCells();
+        triPointMergeMap_ = iso.triPointMergeMap();
+
+        if (debug)
+        {
+            Pout<< "sampledIsoSurface::createGeometry() : constructed iso:"
+                << nl
+                << "    isoField       : " << isoField_ << nl
+                << "    isoValue       : " << isoVal_ << nl
+                << "    unmerged points: " << triPointMergeMap_.size() << nl
+                << "    points         : " << points().size() << nl
+                << "    tris           : " << triSurface::size() << nl
+                << "    cut cells      : " << meshCells_.size() << endl;
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
