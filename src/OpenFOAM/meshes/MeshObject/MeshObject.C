@@ -65,11 +65,11 @@ const Type& Foam::MeshObject<Mesh, Type>::New
 
 
 template<class Mesh, class Type>
-template<class Data>
+template<class Data1>
 const Type& Foam::MeshObject<Mesh, Type>::New
 (
     const Mesh& mesh,
-    const Data& d
+    const Data1& d
 )
 {
     if (!mesh.db().objectRegistry::foundObject<Type>(Type::typeName))
@@ -95,6 +95,49 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     if (!mesh.db().objectRegistry::foundObject<Type>(Type::typeName))
     {
         return store(new Type(mesh, d1, d2));
+    }
+    else
+    {
+        return mesh.db().objectRegistry::lookupObject<Type>(Type::typeName);
+    }
+}
+
+
+template<class Mesh, class Type>
+template<class Data1, class Data2, class Data3>
+const Type& Foam::MeshObject<Mesh, Type>::New
+(
+    const Mesh& mesh,
+    const Data1& d1,
+    const Data2& d2,
+    const Data3& d3
+)
+{
+    if (!mesh.db().objectRegistry::foundObject<Type>(Type::typeName))
+    {
+        return store(new Type(mesh, d1, d2, d3));
+    }
+    else
+    {
+        return mesh.db().objectRegistry::lookupObject<Type>(Type::typeName);
+    }
+}
+
+
+template<class Mesh, class Type>
+template<class Data1, class Data2, class Data3, class Data4>
+const Type& Foam::MeshObject<Mesh, Type>::New
+(
+    const Mesh& mesh,
+    const Data1& d1,
+    const Data2& d2,
+    const Data3& d3,
+    const Data4& d4
+)
+{
+    if (!mesh.db().objectRegistry::foundObject<Type>(Type::typeName))
+    {
+        return store(new Type(mesh, d3, d4));
     }
     else
     {

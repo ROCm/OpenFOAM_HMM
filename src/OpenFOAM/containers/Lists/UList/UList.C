@@ -45,7 +45,7 @@ void Foam::UList<T>::assign(const UList<T>& a)
 {
     if (a.size_ != this->size_)
     {
-        FatalErrorIn("UList<T>::operator=(const UList<T>&)")
+        FatalErrorIn("UList<T>::assign(const UList<T>&)")
             << "ULists have different sizes: "
             << this->size_ << " " << a.size_
             << abort(FatalError);

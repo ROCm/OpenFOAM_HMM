@@ -86,6 +86,25 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& map)
 }
 
 
+template<class T>
+Foam::IOMap<T>::IOMap(const IOobject& io, const xfer<Map<T> >& map)
+:
+    regIOobject(io)
+{
+    Map<T>::transfer(map());
+
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T>

@@ -87,6 +87,25 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
 }
 
 
+template<class Type>
+Foam::IOField<Type>::IOField(const IOobject& io, const xfer<Field<Type> >& f)
+:
+    regIOobject(io)
+{
+    Field<Type>::transfer(f());
+
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class Type>

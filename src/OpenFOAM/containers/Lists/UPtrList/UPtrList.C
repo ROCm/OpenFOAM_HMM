@@ -53,7 +53,7 @@ UPtrList<T>::UPtrList(const label s)
 template<class T>
 UPtrList<T>::UPtrList(const xfer<UPtrList<T> >& lst)
 {
-    transfer(*lst);
+    transfer(lst());
 }
 
 

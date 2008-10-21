@@ -69,11 +69,39 @@ public:
 
         static const Type& New(const Mesh& mesh);
 
-        template<class Data>
-        static const Type& New(const Mesh& mesh, const Data& d);
+        template<class Data1>
+        static const Type& New
+        (
+            const Mesh& mesh,
+            const Data1& d
+        );
 
         template<class Data1, class Data2>
-        static const Type& New(const Mesh& mesh, const Data1&, const Data2&);
+        static const Type& New
+        (
+            const Mesh& mesh,
+            const Data1&,
+            const Data2&
+        );
+
+        template<class Data1, class Data2, class Data3>
+        static const Type& New
+        (
+            const Mesh& mesh,
+            const Data1&,
+            const Data2&,
+            const Data3&
+        );
+
+        template<class Data1, class Data2, class Data3, class Data4>
+        static const Type& New
+        (
+            const Mesh& mesh,
+            const Data1&,
+            const Data2&,
+            const Data3&,
+            const Data4&
+        );
 
 
     // Destructor

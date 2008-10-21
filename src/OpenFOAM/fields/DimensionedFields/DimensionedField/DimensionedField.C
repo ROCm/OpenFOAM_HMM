@@ -138,6 +138,19 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 {}
 
 
+template<class Type, class GeoMesh>
+DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const xfer<DimensionedField<Type, GeoMesh> >& df
+)
+:
+    regIOobject(df(), true),
+    Field<Type>(df),
+    mesh_(df->mesh_),
+    dimensions_(df->dimensions_)
+{}
+
+
 #ifdef ConstructFromTmp
 template<class Type, class GeoMesh>
 DimensionedField<Type, GeoMesh>::DimensionedField
@@ -202,6 +215,20 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 {}
 
 
+template<class Type, class GeoMesh>
+DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const word& newName,
+    const xfer<DimensionedField<Type, GeoMesh> >& df
+)
+:
+    regIOobject(IOobject(newName, df->time().timeName(), df->db())),
+    Field<Type>(df),
+    mesh_(df->mesh_),
+    dimensions_(df->dimensions_)
+{}
+
+
 #ifdef ConstructFromTmp
 template<class Type, class GeoMesh>
 DimensionedField<Type, GeoMesh>::DimensionedField
@@ -248,7 +275,7 @@ DimensionedField<Type, GeoMesh>::~DimensionedField()
 template<class Type, class GeoMesh>
 const DimensionedField<Type, GeoMesh>& DimensionedField<Type, GeoMesh>::null()
 {
-    DimensionedField<Type, GeoMesh>* nullPtr = 
+    DimensionedField<Type, GeoMesh>* nullPtr =
         reinterpret_cast<DimensionedField<Type, GeoMesh>*>(NULL);
     return *nullPtr;
 }
@@ -258,8 +285,8 @@ template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh> 
-> 
+        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+>
 DimensionedField<Type, GeoMesh>::component
 (
     const direction d
@@ -315,7 +342,7 @@ void DimensionedField<Type, GeoMesh>::replace
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<Type, GeoMesh> > 
+tmp<DimensionedField<Type, GeoMesh> >
 DimensionedField<Type, GeoMesh>::T() const
 {
     tmp<DimensionedField<Type, GeoMesh> > result

@@ -87,6 +87,25 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
 }
 
 
+template<class T>
+Foam::IOList<T>::IOList(const IOobject& io, const xfer<List<T> >& list)
+:
+    regIOobject(io)
+{
+    List<T>::transfer(list());
+
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T>

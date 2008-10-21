@@ -155,4 +155,10 @@ void Foam::polyMesh::initMesh(cellList& c)
 }
 
 
+void Foam::polyMesh::initMesh(const xfer<cellList>& clst)
+{
+    initMesh(clst());
+}
+
+
 // ************************************************************************* //

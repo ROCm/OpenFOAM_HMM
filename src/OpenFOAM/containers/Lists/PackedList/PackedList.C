@@ -57,7 +57,7 @@ PackedList<nBits>::PackedList(const PackedList<nBits>& PList)
 template<int nBits>
 PackedList<nBits>::PackedList(const xfer<PackedList<nBits> >& lst)
 {
-    transfer(*lst);
+    transfer(lst());
 }
 
 

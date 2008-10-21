@@ -49,7 +49,7 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
- 
+
 template<class Type, class GeoMesh> class DimensionedField;
 
 template<class Type, class GeoMesh> Ostream& operator<<
@@ -156,6 +156,12 @@ public:
             bool reUse
         );
 
+        //- Construct by transferring the DimensionedField
+        DimensionedField
+        (
+            const xfer<DimensionedField<Type, GeoMesh> >&
+        );
+
         //- Construct as copy of tmp<DimensionedField> deleting argument
 #       ifdef ConstructFromTmp
         DimensionedField
@@ -184,6 +190,13 @@ public:
             const word& newName,
             DimensionedField<Type, GeoMesh>&,
             bool reUse
+        );
+
+        //- Construct by transferring the DimensionedField with a new name
+        DimensionedField
+        (
+            const word& newName,
+            const xfer<DimensionedField<Type, GeoMesh> >&
         );
 
         //- Construct as copy resetting name

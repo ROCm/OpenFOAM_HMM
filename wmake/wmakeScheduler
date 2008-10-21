@@ -163,18 +163,6 @@ colourPipe()
 }
 
 
-#
-# prefix message with [HOSTNAME]
-#
-prefixPipe()
-{
-   while read line
-   do
-      echo "[$@] $line"
-   done
-}
-
-
 colourIndex=0
 
 while :
@@ -202,19 +190,15 @@ do
 
                if [ "$host" = "$HOST" ]; then
                   eval $* 2>&1 | colourPipe "$colour"
-               elif [ -n "$JOB_ID" ]; then
-                  qrsh -inherit -v PWD $host "$rcmd"
                else
                   ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | colourPipe "$colour"
                fi
                retval=$?
             else
                if [ "$host" = "$HOST" ]; then
-                  eval $* 2>&1 | prefixPipe "$host"
-               elif [ -n "$JOB_ID" ]; then
-                  qrsh -inherit -v PWD $host "$rcmd" | prefixPipe "$host"
+                  eval $* 2>&1
                else
-                  ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | prefixPipe "$host"
+                  ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1
                fi
                retval=$?
             fi

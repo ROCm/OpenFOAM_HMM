@@ -98,16 +98,16 @@ inline void Foam::xfer<T>::operator=(const xfer<T>& t)
 
 
 template<class T>
-inline const Foam::xfer<T>& Foam::xfer<T>::operator()() const
+inline T& Foam::xfer<T>::operator()() const
 {
-    return *this;
+    return *ptr_;
 }
 
 
 template<class T>
-inline T& Foam::xfer<T>::operator*() const
+inline T* Foam::xfer<T>::operator->() const
 {
-    return *ptr_;
+    return ptr_;
 }
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFitData
+    Foam::quadraticFitData
 
 Description
     Data for the quadratic fit correction interpolation scheme
@@ -56,13 +56,18 @@ class quadraticFitData
 {
     // Private data
 
-        //- weights for central stencil
+        //- Factor the fit is allowed to deviate from linear.
+        //  This limits the amount of high-order correction and increases
+        //  stability on bad meshes
+        const scalar linearLimitFactor_;
+
+        //- Weights for central stencil
         const scalar centralWeight_;
 
-        //- dimensionality of the geometry
+        //- Dimensionality of the geometry
         const label dim_;
 
-        //- minimum stencil size
+        //- Minimum stencil size
         const label minSize_;
 
         //- For each cell in the mesh store the values which multiply the
@@ -96,18 +101,17 @@ public:
         (
             const fvMesh& mesh,
             const extendedCentredStencil& stencil,
-            scalar cWeightDim
+            const scalar linearLimitFactor,
+            const scalar centralWeight
         );
 
 
-    // Destructor
-
-        virtual ~quadraticFitData()
-        {}
+    //- Destructor
+    virtual ~quadraticFitData()
+    {}
 
 
     // Member functions
-
 
         //- Return reference to fit coefficients
         const List<scalarList>& fit() const

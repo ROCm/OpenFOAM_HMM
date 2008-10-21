@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    quadraticFit
+    Foam::quadraticFit
 
 Description
     Quadratic fit interpolation scheme which applies an explicit correction to
@@ -56,7 +56,15 @@ class quadraticFit
     public linear<Type>
 {
     // Private Data
+
+        //- Factor the fit is allowed to deviate from linear.
+        //  This limits the amount of high-order correction and increases
+        //  stability on bad meshes
+        const scalar linearLimitFactor_;
+
+        //- Weights for central stencil
         const scalar centralWeight_;
+
 
     // Private Member Functions
 
@@ -79,6 +87,7 @@ public:
         quadraticFit(const fvMesh& mesh, Istream& is)
         :
             linear<Type>(mesh),
+            linearLimitFactor_(readScalar(is)),
             centralWeight_(readScalar(is))
         {}
 
@@ -92,6 +101,7 @@ public:
         )
         :
             linear<Type>(mesh),
+            linearLimitFactor_(readScalar(is)),
             centralWeight_(readScalar(is))
         {}
 
@@ -123,6 +133,7 @@ public:
             (
                 mesh,
                 stencil,
+                linearLimitFactor_,
                 centralWeight_
             );
 

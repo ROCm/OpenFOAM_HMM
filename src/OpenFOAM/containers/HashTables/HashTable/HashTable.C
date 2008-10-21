@@ -93,7 +93,7 @@ HashTable<T, Key, Hash>::HashTable(const xfer<HashTable<T, Key, Hash> >& ht)
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
-    transfer(*ht);
+    transfer(ht());
 }
 
 

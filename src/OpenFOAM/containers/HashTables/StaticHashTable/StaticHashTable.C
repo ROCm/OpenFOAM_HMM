@@ -90,7 +90,7 @@ StaticHashTable<T, Key, Hash>::StaticHashTable
     endIter_(*this, 0, 0),
     endConstIter_(*this, 0, 0)
 {
-    transfer(*ht);
+    transfer(ht());
 }
 
 

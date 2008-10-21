@@ -52,34 +52,48 @@ int main(int argc, char *argv[])
     Info<< "lstA: " << lstA << endl;
     Info<< "lstC: " << lstC << endl;
 
-    xfer<List<label> > xA(lstA, true);
+    xfer<List<label> > xA = xferMove(lstA);
     xfer<List<label> > xB;
 
-//    List<label> lstB( xferTmp(List<label>, lstC) );
-//    List<label> lstB( xfer<List<label> >(lstC) );
     List<label> lstB( xA );
 
-    Info<< "xA: " << *xA << endl;
-    Info<< "xB: " << *xB << endl;
+    Info<< "xA: " << xA() << endl;
+    Info<< "xB: " << xB() << endl;
     Info<< "lstA: " << lstA << endl;
     Info<< "lstB: " << lstB << endl;
     Info<< "lstC: " << lstC << endl;
 
     xA = lstB;
 
-    Info<< "xA: " << *xA << endl;
-    Info<< "xB: " << *xB << endl;
+    Info<< "xA: " << xA() << endl;
+    Info<< "xB: " << xB() << endl;
     Info<< "lstA: " << lstA << endl;
     Info<< "lstB: " << lstB << endl;
     Info<< "lstC: " << lstC << endl;
 
     xB = xA;
+    
+    List<label> lstD(xferCopy(lstC));
+    List<label> lstE(xferMove(lstC));
+    
+    // this must be empty
+    List<label> lstF = xferCopy(lstC);
 
-    Info<< "xA: " << *xA << endl;
-    Info<< "xB: " << *xB << endl;
+    Info<< "xA: " << xA() << endl;
+    Info<< "xB: " << xB() << endl;
     Info<< "lstA: " << lstA << endl;
     Info<< "lstB: " << lstB << endl;
     Info<< "lstC: " << lstC << endl;
+    Info<< "lstD: " << lstD << endl;
+    Info<< "lstE: " << lstE << endl;
+    Info<< "lstF: " << lstF << endl;
+
+    Info<< "xB size: " << xB->size() << endl;
+
+    // clear the underlying List
+    xB->clear();
+
+    Info<< "xB size: " << xB->size() << endl;
 
     return 0;
 }
