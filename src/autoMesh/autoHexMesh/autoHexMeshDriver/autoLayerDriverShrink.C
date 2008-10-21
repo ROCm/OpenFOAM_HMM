@@ -675,7 +675,6 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 
     const polyMesh& mesh = meshMover.mesh();
     const pointField& points = mesh.points();
-    const pointMesh& pMesh = meshMover.pMesh();
 
     const indirectPrimitivePatch& pp = meshMover.patch();
     const vectorField& faceNormals = pp.faceNormals();
@@ -788,7 +787,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         List<pointData> edgeWallDist(mesh.nEdges());
         PointEdgeWave<pointData> wallDistCalc
         (
-            pMesh,
+            mesh,
             meshPoints,
             wallInfo,
             pointWallDist,
@@ -892,7 +891,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         // Do all calculations
         PointEdgeWave<pointData> medialDistCalc
         (
-            pMesh,
+            mesh,
             maxPoints,
             maxInfo,
 
@@ -975,7 +974,6 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     Info<< "shrinkMeshMedialDistance : Smoothing using Medial Axis ..." << endl;
 
     const polyMesh& mesh = meshMover.mesh();
-    const pointMesh& pMesh = meshMover.pMesh();
 
     const indirectPrimitivePatch& pp = meshMover.patch();
     const labelList& meshPoints = pp.meshPoints();
@@ -1100,7 +1098,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         // Do all calculations
         PointEdgeWave<pointData> wallDistCalc
         (
-            pMesh,
+            mesh,
             wallPoints,
             wallInfo,
             pointWallDist,

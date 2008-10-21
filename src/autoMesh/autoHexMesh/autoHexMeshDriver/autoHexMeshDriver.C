@@ -34,7 +34,6 @@ License
 #include "cellSet.H"
 #include "syncTools.H"
 #include "motionSmoother.H"
-#include "pointMesh.H"
 #include "refinementParameters.H"
 #include "snapParameters.H"
 #include "layerParameters.H"

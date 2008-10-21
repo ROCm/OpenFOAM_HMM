@@ -177,12 +177,16 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
         }
         else
         {
+            regIOobject* object = iter();
+
+            bool hasErased = const_cast<objectRegistry&>(*this).erase(iter);
+
             if (io.ownedByRegistry())
             {
-                delete iter();
+                delete object;
             }
 
-            return const_cast<objectRegistry&>(*this).erase(iter);
+            return hasErased;
         }
     }
     else

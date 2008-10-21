@@ -37,7 +37,6 @@ SourceFiles
 #define Cloud_H
 
 #include "cloud.H"
-#include "pointMesh.H"
 #include "IDLList.H"
 #include "IOField.H"
 
@@ -231,21 +230,20 @@ public:
 
         // Read
 
-            //- Read and return a lagrangian data field
-            //  Checks that data is valid
+            //- Helper to construct IOobject for field and current time.
+            IOobject fieldIOobject
+            (
+                const word& fieldName,
+                const IOobject::readOption r
+            ) const;
+
+            //- Check lagrangian data field
             template<class DataType>
             void checkFieldIOobject
             (
                 const Cloud<ParticleType>& c,
                 const IOField<DataType>& data
             ) const;
-
-            //- Read and return a lagrangian data field
-            IOobject fieldIOobject(const word& fieldName) const;
-
-            //- Read and return a lagrangian data field
-            template<class Type>
-            tmp<IOField<Type> > readField(const word& fieldName) const;
 
             //- Read the field data for the cloud of particles
             void readFields();

@@ -52,7 +52,6 @@ meshToMesh::meshToMesh
     fromMesh_(meshFrom),
     toMesh_(meshTo),
     patchMap_(patchMap),
-    fromPointMesh_(meshFrom),
     cellAddressing_(toMesh_.nCells()),
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL)
@@ -123,7 +122,6 @@ meshToMesh::meshToMesh
 :
     fromMesh_(meshFrom),
     toMesh_(meshTo),
-    fromPointMesh_(meshFrom),
     cellAddressing_(toMesh_.nCells()),
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL)

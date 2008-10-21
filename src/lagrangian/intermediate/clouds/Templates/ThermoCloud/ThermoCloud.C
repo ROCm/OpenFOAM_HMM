@@ -36,7 +36,6 @@ template<class ParcelType>
 Foam::ThermoCloud<ParcelType>::ThermoCloud
 (
     const word& cloudType,
-    const volPointInterpolation& vpi,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -46,7 +45,6 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     KinematicCloud<ParcelType>
     (
         cloudType,
-        vpi,
         rho,
         U,
         thermo.mu(),
@@ -130,35 +128,30 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->rho()
     );
 
     autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->U()
     );
 
     autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->mu()
     );
 
     autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         T
     );
 
     autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         cp
     );
 

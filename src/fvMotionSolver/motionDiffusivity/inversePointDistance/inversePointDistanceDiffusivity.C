@@ -73,9 +73,6 @@ void Foam::inversePointDistanceDiffusivity::correct()
     const polyMesh& mesh = mSolver().mesh();
     const polyBoundaryMesh& bdry = mesh.boundaryMesh();
 
-    // Construct point mesh
-    const pointMesh pMesh(mesh);
-
     labelHashSet patchSet(bdry.size());
 
     label nPatchEdges = 0;
@@ -133,7 +130,7 @@ void Foam::inversePointDistanceDiffusivity::correct()
         // Do calculations
         PointEdgeWave<pointEdgePoint> waveInfo
         (
-            pMesh,
+            mesh,
             seedPoints,
             seedInfo,
         

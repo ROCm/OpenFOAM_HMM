@@ -52,7 +52,6 @@ namespace Foam
 class objectRegistry;
 class dictionary;
 class fvMesh;
-class volPointInterpolation;
 
 /*---------------------------------------------------------------------------*\
                       Class sampledSets Declaration
@@ -104,7 +103,6 @@ class sampledSets
             //- Construct interpolating field to the sampleSets
             volFieldSampler
             (
-                const volPointInterpolation&,
                 const word& interpolationScheme,
                 const GeometricField<Type, fvPatchField, volMesh>& field,
                 const PtrList<sampledSet>&
@@ -158,12 +156,6 @@ class sampledSets
 
         //- Mesh search engine
         meshSearch searchEngine_;
-
-        //- pointMesh for interpolation
-        autoPtr<pointMesh> pMeshPtr_;
-
-        //- volPointInterpolation for interpolation
-        autoPtr<volPointInterpolation> pInterpPtr_;
 
 
         // Read from dictonary

@@ -106,6 +106,8 @@ public:
 
     // Destructor
 
+        static bool Delete(const Mesh& mesh);
+
         virtual ~MeshObject();
 
 

@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 psf
@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pvf
@@ -509,7 +509,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pSpheretf
@@ -519,7 +519,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pSymmtf
@@ -529,7 +529,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 ptf
@@ -598,7 +598,7 @@ int main(int argc, char *argv[])
                 writer.write(ptf);
 
                 // Interpolated volFields
-                volPointInterpolation pInterp(mesh, vMesh.pMesh());
+                volPointInterpolation pInterp(mesh);
                 writer.write(pInterp, vsf);
                 writer.write(pInterp, vvf);
                 writer.write(pInterp, vSpheretf);

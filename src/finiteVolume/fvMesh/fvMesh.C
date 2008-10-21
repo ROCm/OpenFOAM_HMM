@@ -38,7 +38,23 @@ License
 #include "fvMeshMapper.H"
 #include "mapClouds.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "volPointInterpolation.H"
+#include "extendedLeastSquaresVectors.H"
+#include "extendedLeastSquaresVectors.H"
+#include "leastSquaresVectors.H"
+//#include "linearFitData.H"
+#include "quadraticFitData.H"
+//#include "quadraticFitSnGradData.H"
+#include "skewCorrectionVectors.H"
+
+#include "centredCECStencilObject.H"
+#include "centredCFCStencilObject.H"
+#include "centredCPCStencilObject.H"
+#include "centredFECStencilObject.H"
+#include "upwindCECStencilObject.H"
+#include "upwindCFCStencilObject.H"
+#include "upwindCPCStencilObject.H"
+#include "upwindFECStencilObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -72,12 +88,43 @@ void Foam::fvMesh::clearGeom()
 
     // Mesh motion flux cannot be deleted here because the old-time flux
     // needs to be saved.
+
+
+    // Things geometry dependent that are not updated.
+    volPointInterpolation::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    leastSquaresVectors::Delete(*this);
+    //linearFitData::Delete(*this);
+    quadraticFitData::Delete(*this);
+    //quadraticFitSnGradData::Delete(*this);
+    skewCorrectionVectors::Delete(*this);
 }
 
 
 void Foam::fvMesh::clearAddressing()
 {
     deleteDemandDrivenData(lduPtr_);
+
+    // Hack until proper callbacks. Below are all the fvMesh-MeshObjects.
+
+    volPointInterpolation::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    leastSquaresVectors::Delete(*this);
+    //linearFitData::Delete(*this);
+    quadraticFitData::Delete(*this);
+    //quadraticFitSnGradData::Delete(*this);
+    skewCorrectionVectors::Delete(*this);
+
+    centredCECStencilObject::Delete(*this);
+    centredCFCStencilObject::Delete(*this);
+    centredCPCStencilObject::Delete(*this);
+    centredFECStencilObject::Delete(*this);
+    upwindCECStencilObject::Delete(*this);
+    upwindCFCStencilObject::Delete(*this);
+    upwindCPCStencilObject::Delete(*this);
+    upwindFECStencilObject::Delete(*this);
 }
 
 
@@ -591,6 +638,137 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 
     boundary_.movePoints();
     surfaceInterpolation::movePoints();
+
+
+    // Hack until proper callbacks. Below are all the fvMesh MeshObjects with a
+    // movePoints function.
+
+    // volPointInterpolation
+    if
+    (
+        db().objectRegistry::foundObject<volPointInterpolation>
+        (
+            volPointInterpolation::typeName
+        )
+    )
+    {
+        const_cast<volPointInterpolation&>
+        (
+            db().objectRegistry::lookupObject<volPointInterpolation>
+            (
+                volPointInterpolation::typeName
+            )
+        ).movePoints();
+    }
+
+    // extendedLeastSquaresVectors
+    if
+    (
+        db().objectRegistry::foundObject<extendedLeastSquaresVectors>
+        (
+            extendedLeastSquaresVectors::typeName
+        )
+    )
+    {
+        const_cast<extendedLeastSquaresVectors&>
+        (
+            db().objectRegistry::lookupObject<extendedLeastSquaresVectors>
+            (
+                extendedLeastSquaresVectors::typeName
+            )
+        ).movePoints();
+    }
+
+    // leastSquaresVectors
+    if
+    (
+        db().objectRegistry::foundObject<leastSquaresVectors>
+        (
+            leastSquaresVectors::typeName
+        )
+    )
+    {
+        const_cast<leastSquaresVectors&>
+        (
+            db().objectRegistry::lookupObject<leastSquaresVectors>
+            (
+                leastSquaresVectors::typeName
+            )
+        ).movePoints();
+    }
+
+    //// linearFitData
+    //if
+    //(
+    //    db().objectRegistry::foundObject<linearFitData>
+    //    (
+    //        linearFitData::typeName
+    //    )
+    //)
+    //{
+    //    const_cast<linearFitData&>
+    //    (
+    //        db().objectRegistry::lookupObject<linearFitData>
+    //        (
+    //            linearFitData::typeName
+    //        )
+    //    ).movePoints();
+    //}
+
+    // quadraticFitData
+    if
+    (
+        db().objectRegistry::foundObject<quadraticFitData>
+        (
+            quadraticFitData::typeName
+        )
+    )
+    {
+        const_cast<quadraticFitData&>
+        (
+            db().objectRegistry::lookupObject<quadraticFitData>
+            (
+                quadraticFitData::typeName
+            )
+        ).movePoints();
+    }
+
+    //// quadraticFitSnGradData
+    //if
+    //(
+    //    db().objectRegistry::foundObject<quadraticFitSnGradData>
+    //    (
+    //        quadraticFitSnGradData::typeName
+    //    )
+    //)
+    //{
+    //    const_cast<quadraticFitSnGradData&>
+    //    (
+    //        db().objectRegistry::lookupObject<quadraticFitSnGradData>
+    //        (
+    //            quadraticFitSnGradData::typeName
+    //        )
+    //    ).movePoints();
+    //}
+
+    // skewCorrectionVectors
+    if
+    (
+        db().objectRegistry::foundObject<skewCorrectionVectors>
+        (
+            skewCorrectionVectors::typeName
+        )
+    )
+    {
+        const_cast<skewCorrectionVectors&>
+        (
+            db().objectRegistry::lookupObject<skewCorrectionVectors>
+            (
+                skewCorrectionVectors::typeName
+            )
+        ).movePoints();
+    }
+
 
     return tsweptVols;
 }

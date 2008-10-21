@@ -33,6 +33,7 @@ License
 #include "surfaceInterpolate.H"
 #include "fvcLaplacian.H"
 #include "mapPolyMesh.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -83,7 +84,7 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        pointMesh_
+        pointMesh::New(fvMesh_)
     ),
     cellDisplacement_
     (
@@ -123,7 +124,11 @@ Foam::displacementSBRStressFvMotionSolver::
 Foam::tmp<Foam::pointField>
 Foam::displacementSBRStressFvMotionSolver::curPoints() const
 {
-    vpi_.interpolate(cellDisplacement_, pointDisplacement_);
+    volPointInterpolation::New(fvMesh_).interpolate
+    (
+        cellDisplacement_,
+        pointDisplacement_
+    );
 
     tmp<pointField> tcurPoints
     (

@@ -74,7 +74,6 @@ public:
         basicKinematicCloud
         (
             const word& cloudType,
-            const volPointInterpolation& vpi,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,

@@ -35,6 +35,8 @@ License
 #include "OSspecific.H"
 #include "demandDrivenData.H"
 
+#include "pointMesh.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -1476,6 +1478,28 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     pointZones_.movePoints(points_);
     faceZones_.movePoints(points_);
     cellZones_.movePoints(points_);
+
+
+    // Hack until proper callbacks. Below are all the polyMeh MeshObjects with a
+    // movePoints function.
+
+    // pointMesh
+    if
+    (
+        db().objectRegistry::foundObject<pointMesh>
+        (
+            pointMesh::typeName
+        )
+    )
+    {
+        const_cast<pointMesh&>
+        (
+            db().objectRegistry::lookupObject<pointMesh>
+            (
+                pointMesh::typeName
+            )
+        ).movePoints(points_);
+    }
 
     return sweptVols;
 }
