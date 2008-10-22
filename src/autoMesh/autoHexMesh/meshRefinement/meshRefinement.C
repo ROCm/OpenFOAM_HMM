@@ -1776,6 +1776,13 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
                 faceMap,
                 pointMap
             );
+
+            if (faceMap.valid())
+            {
+                // (ab)use the instance() to signal current modification time
+                geometry[i].instance() = geometry[i].time().timeName();
+            }
+
             faceMap.clear();
             pointMap.clear();
         }
@@ -1914,6 +1921,34 @@ bool Foam::meshRefinement::write() const
      && meshCutter_.write()
      && surfaceIndex_.write();
 
+
+    // Make sure that any distributed surfaces (so ones which probably have
+    // been changed) get written as well.
+    // Note: should ideally have some 'modified' flag to say whether it
+    // has been changed or not.
+    searchableSurfaces& geometry =
+        const_cast<searchableSurfaces&>(surfaces_.geometry());
+
+    forAll(geometry, i)
+    {
+        searchableSurface& s = geometry[i];
+
+        // Check if instance() of surface is not constant or system.
+        // Is good hint that surface is distributed.
+        if
+        (
+            s.instance() != s.time().system()
+         && s.instance() != s.time().caseSystem()
+         && s.instance() != s.time().constant()
+         && s.instance() != s.time().caseConstant()
+        )
+        {
+            // Make sure it gets written to current time, not constant.
+            s.instance() = s.time().timeName();
+            writeOk = writeOk && s.write();
+        }
+    }
+
     return writeOk;
 }
 
@@ -1992,7 +2027,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
     volRefLevel.write();
 
 
-    pointMesh pMesh(mesh_);
+    const pointMesh& pMesh = pointMesh::New(mesh_);
 
     pointScalarField pointRefLevel
     (

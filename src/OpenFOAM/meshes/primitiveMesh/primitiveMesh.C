@@ -29,16 +29,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(primitiveMesh, 0);
+    defineTypeNameAndDebug(primitiveMesh, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-primitiveMesh::primitiveMesh()
+Foam::primitiveMesh::primitiveMesh()
 :
     nInternalPoints_(0),    // note: points are considered ordered on empty mesh
     nPoints_(0),
@@ -76,8 +75,8 @@ primitiveMesh::primitiveMesh()
 
 
 // Construct from components
-// WARNING: ASSUMES CORRECT ORDERING OF DATA. 
-primitiveMesh::primitiveMesh
+// WARNING: ASSUMES CORRECT ORDERING OF DATA.
+Foam::primitiveMesh::primitiveMesh
 (
     const label nPoints,
     const label nInternalFaces,
@@ -114,14 +113,12 @@ primitiveMesh::primitiveMesh
     faceCentresPtr_(NULL),
     cellVolumesPtr_(NULL),
     faceAreasPtr_(NULL)
-{
-    
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-primitiveMesh::~primitiveMesh()
+Foam::primitiveMesh::~primitiveMesh()
 {
     clearOut();
 }
@@ -129,7 +126,7 @@ primitiveMesh::~primitiveMesh()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool primitiveMesh::calcPointOrder
+bool Foam::primitiveMesh::calcPointOrder
 (
     label& nInternalPoints,
     labelList& oldToNew,
@@ -208,7 +205,7 @@ bool primitiveMesh::calcPointOrder
 }
 
 
-void primitiveMesh::reset
+void Foam::primitiveMesh::reset
 (
     const label nPoints,
     const label nInternalFaces,
@@ -264,13 +261,13 @@ void primitiveMesh::reset
 }
 
 
-void primitiveMesh::reset
+void Foam::primitiveMesh::reset
 (
     const label nPoints,
     const label nInternalFaces,
     const label nFaces,
     const label nCells,
-    cellList& c
+    cellList& clst
 )
 {
     reset
@@ -281,11 +278,32 @@ void primitiveMesh::reset
         nCells
     );
 
-    cfPtr_ = new cellList(c, true);
+    cfPtr_ = new cellList(clst, true);
 }
 
 
-tmp<scalarField> primitiveMesh::movePoints
+void Foam::primitiveMesh::reset
+(
+    const label nPoints,
+    const label nInternalFaces,
+    const label nFaces,
+    const label nCells,
+    const xfer<cellList>& clst
+)
+{
+    reset
+    (
+        nPoints,
+        nInternalFaces,
+        nFaces,
+        nCells
+    );
+
+    cfPtr_ = new cellList(clst);
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::primitiveMesh::movePoints
 (
     const pointField& newPoints,
     const pointField& oldPoints
@@ -320,7 +338,7 @@ tmp<scalarField> primitiveMesh::movePoints
 }
 
 
-const cellShapeList& primitiveMesh::cellShapes() const
+const Foam::cellShapeList& Foam::primitiveMesh::cellShapes() const
 {
     if (!cellShapesPtr_)
     {
@@ -330,9 +348,5 @@ const cellShapeList& primitiveMesh::cellShapes() const
     return *cellShapesPtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

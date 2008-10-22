@@ -29,10 +29,9 @@ License
 #include "DragModel.H"
 #include "InjectionModel.H"
 #include "WallInteractionModel.H"
-
 #include "IntegrationScheme.H"
+#include "interpolation.H"
 
-#include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -142,7 +141,6 @@ template<class ParcelType>
 Foam::KinematicCloud<ParcelType>::KinematicCloud
 (
     const word& cloudType,
-    const volPointInterpolation& vpi,
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
@@ -153,7 +151,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     kinematicCloud(),
     cloudType_(cloudType),
     mesh_(rho.mesh()),
-    vpi_(vpi),
     particleProperties_
     (
         IOobject
@@ -267,7 +264,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         FatalErrorIn
         (
             "Foam::KinematicCloud<ParcelType>::KinematicCloud"
-            "(const word&, const volPointInterpolation&, const volScalarField&"
+            "(const word&, const volScalarField&"
             ", const volVectorField&, const volScalarField&, const "
             "dimensionedVector&)"
         )<< "parcelBasisType must be either 'number' or 'mass'" << nl
@@ -300,7 +297,6 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         interpolation<scalar>::New
         (
             interpolationSchemes_,
-            vpi_,
             rho_
         );
 
@@ -308,7 +304,6 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         interpolation<vector>::New
         (
             interpolationSchemes_,
-            vpi_,
             U_
         );
 
@@ -316,7 +311,6 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         interpolation<scalar>::New
         (
             interpolationSchemes_,
-            vpi_,
             mu_
         );
 

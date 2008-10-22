@@ -57,14 +57,10 @@
     volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
-    pointMesh pMesh(mesh);
-    volPointInterpolation vpi(mesh, pMesh);
-
     Info<< "Constructing thermoCloud1" << endl;
     basicThermoCloud thermoCloud1
     (
         "thermoCloud1",
-        vpi,
         rho,
         U,
         g,
@@ -75,7 +71,6 @@
     basicKinematicCloud kinematicCloud1
     (
         "kinematicCloud1",
-        vpi,
         rho,
         U,
         thermo().mu(),

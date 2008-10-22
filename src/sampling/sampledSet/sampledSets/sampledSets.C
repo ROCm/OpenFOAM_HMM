@@ -30,7 +30,7 @@ License
 #include "volFields.H"
 #include "ListListOps.H"
 #include "SortableList.H"
-
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -236,8 +236,8 @@ Foam::sampledSets::sampledSets
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     searchEngine_(mesh_, true),
-    pMeshPtr_(NULL),
-    pInterpPtr_(NULL),
+//    pMeshPtr_(NULL),
+//    pInterpPtr_(NULL),
     fieldNames_(),
     interpolationScheme_(word::null),
     writeFormat_(word::null)
@@ -330,8 +330,10 @@ void Foam::sampledSets::read(const dictionary& dict)
 
 void Foam::sampledSets::correct()
 {
-    pMeshPtr_.clear();
-    pInterpPtr_.clear();
+    // reset interpolation
+    pointMesh::Delete(mesh_);
+    volPointInterpolation::Delete(mesh_);
+
     searchEngine_.correct();
 
     PtrList<sampledSet> newList

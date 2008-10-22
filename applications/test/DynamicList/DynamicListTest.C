@@ -43,20 +43,58 @@ int main(int argc, char *argv[])
     ldl[0](3) = 3;
     ldl[0](1) = 1;
 
-    ldl[1](0) = 1;
-    ldl[1](1) = 2;
+    ldl[0].setSize(5);     // increase allocated size
+    ldl[1].setSize(10);    // increase allocated size
+    ldl[1](2) = 2;
 
     ldl[1] = 3;
 
-    Info<< ldl[1];
+    Info<< "<ldl>" << ldl << "</ldl>" << nl << "sizes: ";
+    forAll(ldl, i)
+    {
+        Info<< " " << ldl[i].size() << "/" << ldl[i].allocSize();
+    }
+    Info<< endl;
 
     List<List<label> > ll(2);
-    ll[0].transfer(ldl[0].shrink());
+    ll[0].transfer(ldl[0]);
     ll[1].transfer(ldl[1].shrink());
 
-    Info<< ll << endl;
+    Info<< "<ldl>" << ldl << "</ldl>" << nl << "sizes: ";
+    forAll(ldl, i)
+    {
+        Info<< " " << ldl[i].size() << "/" << ldl[i].allocSize();
+    }
+    Info<< endl;
 
-    Info << "\nEnd\n" << endl;
+    Info<< "<ll>" << ll << "</ll>" << nl << endl;
+
+
+    // test the transfer between DynamicLists
+    DynamicList<label, 1, 0> dlA;
+    DynamicList<label, 1, 0> dlB;
+
+    for (label i = 0; i < 5; i++)
+    {
+        dlA.append(i);
+    }
+    dlA.setSize(10);
+
+    Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
+        << " " << dlA.size() << "/" << dlA.allocSize() << endl;
+
+    dlB.transfer(dlA);
+
+    // provokes memory error if previous transfer did not maintain
+    // the correct allocated space
+    dlB[6] = 6;
+
+    Info<< "Transferred to dlB" << endl;
+    Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
+        << " " << dlA.size() << "/" << dlA.allocSize() << endl;
+    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
+        << " " << dlB.size() << "/" << dlB.allocSize() << endl;
+
 
     return 0;
 }

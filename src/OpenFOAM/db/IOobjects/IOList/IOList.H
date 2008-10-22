@@ -72,6 +72,9 @@ public:
         //- Construct from IOobject and a List
         IOList(const IOobject&, const List<T>&);
 
+        //- Construct by transferring the List contents
+        IOList(const IOobject&, const xfer<List<T> >&);
+
 
     // Destructor
 

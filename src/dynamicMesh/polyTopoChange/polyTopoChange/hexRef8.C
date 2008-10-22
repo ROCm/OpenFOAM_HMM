@@ -4765,69 +4765,70 @@ void Foam::hexRef8::checkRefinementLevels
     }
 
 
-    // Hanging points
-    {
-        // Any patches with points having only two edges.
-
-        boolList isHangingPoint(mesh_.nPoints(), false);
-
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-        forAll(patches, patchI)
-        {
-            const polyPatch& pp = patches[patchI];
-
-            const labelList& meshPoints = pp.meshPoints();
-
-            forAll(meshPoints, i)
-            {
-                label pointI = meshPoints[i];
-
-                const labelList& pEdges = mesh_.pointEdges()[pointI];
-
-                if (pEdges.size() == 2)
-                {
-                    isHangingPoint[pointI] = true;
-                }
-            }
-        }
-
-        syncTools::syncPointList
-        (
-            mesh_,
-            isHangingPoint,
-            andEqOp<bool>(),        // only if all decide it is hanging point
-            true,                   // null
-            false                   // no separation
-        );
-
-        //OFstream str(mesh_.time().path()/"hangingPoints.obj");
-
-        label nHanging = 0;
-
-        forAll(isHangingPoint, pointI)
-        {
-            if (isHangingPoint[pointI])
-            {
-                nHanging++;
-
-                Pout<< "Hanging boundary point " << pointI
-                    << " at " << mesh_.points()[pointI]
-                    << endl;
-                //meshTools::writeOBJ(str, mesh_.points()[pointI]);
-            }
-        }
-
-        if (returnReduce(nHanging, sumOp<label>()) > 0)
-        {
-            FatalErrorIn
-            (
-                "hexRef8::checkRefinementLevels(const label)"
-            )   << "Detected a point used by two edges only (hanging point)"
-                << nl << "This is not allowed"
-                << abort(FatalError);
-        }
-    }
+    //- Gives problems after first splitting off inside mesher.
+    //// Hanging points
+    //{
+    //    // Any patches with points having only two edges.
+    //
+    //    boolList isHangingPoint(mesh_.nPoints(), false);
+    //
+    //    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    //
+    //    forAll(patches, patchI)
+    //    {
+    //        const polyPatch& pp = patches[patchI];
+    //
+    //        const labelList& meshPoints = pp.meshPoints();
+    //
+    //        forAll(meshPoints, i)
+    //        {
+    //            label pointI = meshPoints[i];
+    //
+    //            const labelList& pEdges = mesh_.pointEdges()[pointI];
+    //
+    //            if (pEdges.size() == 2)
+    //            {
+    //                isHangingPoint[pointI] = true;
+    //            }
+    //        }
+    //    }
+    //
+    //    syncTools::syncPointList
+    //    (
+    //        mesh_,
+    //        isHangingPoint,
+    //        andEqOp<bool>(),        // only if all decide it is hanging point
+    //        true,                   // null
+    //        false                   // no separation
+    //    );
+    //
+    //    //OFstream str(mesh_.time().path()/"hangingPoints.obj");
+    //
+    //    label nHanging = 0;
+    //
+    //    forAll(isHangingPoint, pointI)
+    //    {
+    //        if (isHangingPoint[pointI])
+    //        {
+    //            nHanging++;
+    //
+    //            Pout<< "Hanging boundary point " << pointI
+    //                << " at " << mesh_.points()[pointI]
+    //                << endl;
+    //            //meshTools::writeOBJ(str, mesh_.points()[pointI]);
+    //        }
+    //    }
+    //
+    //    if (returnReduce(nHanging, sumOp<label>()) > 0)
+    //    {
+    //        FatalErrorIn
+    //        (
+    //            "hexRef8::checkRefinementLevels(const label)"
+    //        )   << "Detected a point used by two edges only (hanging point)"
+    //            << nl << "This is not allowed"
+    //            << abort(FatalError);
+    //    }
+    //}
 }
 
 

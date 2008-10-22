@@ -60,30 +60,6 @@ Foam::label Foam::sampledSurfaces::grep
 
 
 template<class Type>
-Foam::autoPtr<Foam::interpolation<Type> >
-Foam::sampledSurfaces::setInterpolator
-(
-    const GeometricField<Type, fvPatchField, volMesh>& vField
-)
-{
-    if (!pMeshPtr_.valid() || !pInterpPtr_.valid())
-    {
-        // set up interpolation
-        pMeshPtr_.reset(new pointMesh(mesh_));
-        pInterpPtr_.reset(new volPointInterpolation(mesh_, pMeshPtr_()));
-    }
-
-    // interpolator for this field
-    return interpolation<Type>::New
-    (
-        interpolationScheme_,
-        pInterpPtr_(),
-        vField
-    );
-}
-
-
-template<class Type>
 void Foam::sampledSurfaces::sampleAndWrite
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField,
@@ -106,7 +82,11 @@ void Foam::sampledSurfaces::sampleAndWrite
         {
             if (!interpolator.valid())
             {
-                interpolator = setInterpolator(vField);
+                interpolator = interpolation<Type>::New
+                (
+                    interpolationScheme_,
+                    vField
+                );
             }
 
             values = s.interpolate(interpolator());

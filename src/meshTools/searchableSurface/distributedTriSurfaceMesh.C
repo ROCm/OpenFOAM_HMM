@@ -1904,6 +1904,7 @@ void Foam::distributedTriSurfaceMesh::distribute
         }
         else
         {
+            dict_.set("bounds", procBb_[Pstream::myProcNo()]);
             procBb_.transfer(newProcBb);
         }
     }
@@ -2188,6 +2189,9 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     IOstream::compressionType cmp
 ) const
 {
+    // Make sure dictionary goes to same directory as surface
+    const_cast<fileName&>(dict_.instance()) = searchableSurface::instance();
+
     return
         triSurfaceMesh::writeObject(fmt, ver, cmp)
      && dict_.writeObject(fmt, ver, cmp);

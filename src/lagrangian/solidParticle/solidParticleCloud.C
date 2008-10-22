@@ -28,7 +28,6 @@ License
 #include "fvMesh.H"
 #include "volFields.H"
 #include "interpolationCellPoint.H"
-#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -75,12 +74,9 @@ void Foam::solidParticleCloud::move(const dimensionedVector& g)
     const volVectorField& U = mesh_.lookupObject<const volVectorField>("U");
     const volScalarField& nu = mesh_.lookupObject<const volScalarField>("nu");
 
-    pointMesh pMesh(U.mesh());
-    volPointInterpolation vpi(U.mesh(), pMesh);
-
-    interpolationCellPoint<scalar> rhoInterp(vpi, rho);
-    interpolationCellPoint<vector> UInterp(vpi, U);
-    interpolationCellPoint<scalar> nuInterp(vpi, nu);
+    interpolationCellPoint<scalar> rhoInterp(rho);
+    interpolationCellPoint<vector> UInterp(U);
+    interpolationCellPoint<scalar> nuInterp(nu);
 
     solidParticle::trackData td(*this, rhoInterp, UInterp, nuInterp, g.value());
 

@@ -409,7 +409,7 @@ tmp<GeometricField<Type, pointPatchField, pointMesh> > fvMeshSubset::interpolate
     return interpolate
     (
         sf,
-        subPointMesh(),     // subsetted point mesh
+        pointMesh::New(subMesh()),     // subsetted point mesh
         subMesh(),          // registry (pointfields are stored on the polyMesh)
         patchMap(),
         pointMap()

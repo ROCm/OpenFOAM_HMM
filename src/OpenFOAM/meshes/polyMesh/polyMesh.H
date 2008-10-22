@@ -170,6 +170,9 @@ private:
         //- Initialise the polyMesh from the given set of cells
         void initMesh(cellList& c);
 
+        //- Initialise the polyMesh from the given set of cells
+        void initMesh(const xfer<cellList>& c);
+
         //- Calculate the valid directions in the mesh from the boundaries
         void calcDirections() const;
 
@@ -214,7 +217,7 @@ public:
         //- Construct from IOobject
         explicit polyMesh(const IOobject& io);
 
-        //- Construct from components without boundary.
+        //- Construct without boundary from components.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
@@ -226,8 +229,19 @@ public:
             const bool syncPar = true
         );
 
-        //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
+        //- Construct without boundary from components.
+        //  Boundary is added using addPatches() member function
+        polyMesh
+        (
+            const IOobject& io,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<labelList>& owner,
+            const xfer<labelList>& neighbour,
+            const bool syncPar = true
+        );
+
+        //- Construct without boundary with cells rather than owner/neighbour.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
@@ -235,6 +249,17 @@ public:
             const pointField& points,
             const faceList& faces,
             const cellList& cells,
+            const bool syncPar = true
+        );
+
+        //- Construct without boundary with cells rather than owner/neighbour.
+        //  Boundary is added using addPatches() member function
+        polyMesh
+        (
+            const IOobject& io,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -263,8 +288,7 @@ public:
 
         // Database
 
-            //- Over-ride the objectRegistry dbDir
-            //  if this is single-region case
+            //- Override the objectRegistry dbDir for a single-region case
             virtual const fileName& dbDir() const;
 
             //- Return the local mesh directory (dbDir()/meshSubDir)
@@ -311,17 +335,17 @@ public:
                 return bounds_;
             }
 
-            //- Return the vector of valid directions in mesh
-            //  defined according to the presence of empty patches.
+            //- Return the vector of valid directions in mesh.
+            //  Defined according to the presence of empty patches.
             //  1 indicates valid direction and -1 an invalid direction.
             const Vector<label>& directions() const;
 
-            //- Return the number of valid geoemtric dimensions in the mesh
+            //- Return the number of valid geometric dimensions in the mesh
             label nGeometricD() const;
 
-            //- Return the number of valid solution dimensions in the mesh
+            //- Return the number of valid solution dimensions in the mesh.
             //  For wedge cases this includes the circumferential direction
-            //  in case of swirl
+            //  in case of swirl.
             label nSolutionD() const;
 
             //- Return point zone mesh
@@ -441,6 +465,23 @@ public:
                 const faceList& faces,
                 const labelList& owner,
                 const labelList& neighbour,
+                const labelList& patchSizes,
+                const labelList& patchStarts,
+                const bool validBoundary = true
+            );
+
+            //- Reset mesh primitive data. Assumes all patch info correct
+            //  (so does e.g. parallel communication). If not use
+            //  validBoundary=false
+            //  (still assumes patchStarts[0] = nInternalFaces and last
+            //  patch ends at nActiveFaces) and change patches with addPatches.
+            void resetPrimitives
+            (
+                const label nUsedFaces,
+                const xfer<pointField>& points,
+                const xfer<faceList>& faces,
+                const xfer<labelList>& owner,
+                const xfer<labelList>& neighbour,
                 const labelList& patchSizes,
                 const labelList& patchStarts,
                 const bool validBoundary = true

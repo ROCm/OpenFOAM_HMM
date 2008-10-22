@@ -103,18 +103,20 @@ volPointInterpolation::interpolate
 {
     wordList types(patchFieldTypes);
 
+    const pointMesh& pMesh = pointMesh::New(vf.mesh());
+
     // If the last patch of the pointBoundaryMesh is the global patch
     // it must be added to the list of patchField types
     if
     (
         isType<globalPointPatch>
         (
-            pMesh().boundary()[pMesh().boundary().size() - 1]
+            pMesh.boundary()[pMesh.boundary().size() - 1]
         )
     )
     {
         types.setSize(types.size() + 1);
-        types[types.size()-1] = pMesh().boundary()[types.size()-1].type();
+        types[types.size()-1] = pMesh.boundary()[types.size()-1].type();
     }
 
     // Construct tmp<pointField>
@@ -128,7 +130,7 @@ volPointInterpolation::interpolate
                 vf.instance(),
                 vf.db()
             ),
-            pMesh(),
+            pMesh,
             vf.dimensions(),
             types
         )
@@ -176,7 +178,7 @@ volPointInterpolation::interpolate
                 vf.instance(),
                 vf.db()
             ),
-            pMesh(),
+            pointMesh::New(vf.mesh()),
             vf.dimensions()
         )
     );

@@ -242,6 +242,8 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
         // Only look at surface intersections (minLevel and surface curvature),
         // do not do internal refinement (refinementShells)
 
+        const PtrList<featureEdgeMesh> dummyFeatures;
+
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
@@ -249,8 +251,8 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
                 refineParams.keepPoints()[0],
                 refineParams.curvature(),
 
-                PtrList<featureEdgeMesh>(),     // dummy featureMeshes;
-                labelList(0),                   // dummy featureLevels;
+                dummyFeatures,      // dummy featureMeshes;
+                labelList(0),       // dummy featureLevels;
 
                 false,              // featureRefinement
                 false,              // internalRefinement
@@ -383,6 +385,8 @@ Foam::label Foam::autoRefineDriver::shellRefine
             << "----------------------------" << nl
             << endl;
 
+        const PtrList<featureEdgeMesh> dummyFeatures;
+
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
@@ -390,8 +394,8 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 refineParams.keepPoints()[0],
                 refineParams.curvature(),
 
-                PtrList<featureEdgeMesh>(),    // dummy featureMeshes;
-                labelList(0),                   // dummy featureLevels;
+                dummyFeatures,      // dummy featureMeshes;
+                labelList(0),       // dummy featureLevels;
 
                 false,              // featureRefinement
                 true,               // internalRefinement

@@ -51,6 +51,13 @@ UPtrList<T>::UPtrList(const label s)
 
 
 template<class T>
+UPtrList<T>::UPtrList(const xfer<UPtrList<T> >& lst)
+{
+    transfer(lst());
+}
+
+
+template<class T>
 UPtrList<T>::UPtrList(UPtrList<T>& a, bool reUse)
 :
     ptrs_(a.ptrs_, reUse)

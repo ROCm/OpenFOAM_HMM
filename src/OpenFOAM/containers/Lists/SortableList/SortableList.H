@@ -29,6 +29,8 @@ Description
     A list that is sorted upon construction or when explicitly requested
     with the sort() method.
 
+    Uses the Foam::stableSort() algorithm.
+
 SourceFiles
     SortableList.C
 
@@ -84,9 +86,13 @@ public:
 
     // Constructors
 
-        //- Construct from List, sorting the elements. Starts with indices set
-        //  to index in argument
+        //- Construct from List, sorting the elements.
+        //  Starts with indices set to index in argument
         explicit SortableList(const List<Type>&);
+
+        //- Construct from tranferred List, sorting the elements.
+        //  Starts with indices set to index in argument
+        explicit SortableList(const xfer<List<Type> >&);
 
         //- Construct given size. Sort later on.
         explicit SortableList(const label size);

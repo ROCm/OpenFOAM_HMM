@@ -38,18 +38,34 @@ License
 #include "fvMeshMapper.H"
 #include "mapClouds.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "volPointInterpolation.H"
+#include "extendedLeastSquaresVectors.H"
+#include "extendedLeastSquaresVectors.H"
+#include "leastSquaresVectors.H"
+//#include "linearFitData.H"
+#include "quadraticFitData.H"
+//#include "quadraticFitSnGradData.H"
+#include "skewCorrectionVectors.H"
 
-namespace Foam
-{
+#include "centredCECStencilObject.H"
+#include "centredCFCStencilObject.H"
+#include "centredCPCStencilObject.H"
+#include "centredFECStencilObject.H"
+#include "upwindCECStencilObject.H"
+#include "upwindCFCStencilObject.H"
+#include "upwindCPCStencilObject.H"
+#include "upwindFECStencilObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(fvMesh, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(fvMesh, 0);
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void fvMesh::clearGeomNotOldVol()
+void Foam::fvMesh::clearGeomNotOldVol()
 {
     slicedVolScalarField::DimensionedInternalField* VPtr =
         static_cast<slicedVolScalarField::DimensionedInternalField*>(VPtr_);
@@ -63,7 +79,7 @@ void fvMesh::clearGeomNotOldVol()
 }
 
 
-void fvMesh::clearGeom()
+void Foam::fvMesh::clearGeom()
 {
     clearGeomNotOldVol();
 
@@ -72,16 +88,47 @@ void fvMesh::clearGeom()
 
     // Mesh motion flux cannot be deleted here because the old-time flux
     // needs to be saved.
+
+
+    // Things geometry dependent that are not updated.
+    volPointInterpolation::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    leastSquaresVectors::Delete(*this);
+    //linearFitData::Delete(*this);
+    quadraticFitData::Delete(*this);
+    //quadraticFitSnGradData::Delete(*this);
+    skewCorrectionVectors::Delete(*this);
 }
 
 
-void fvMesh::clearAddressing()
+void Foam::fvMesh::clearAddressing()
 {
     deleteDemandDrivenData(lduPtr_);
+
+    // Hack until proper callbacks. Below are all the fvMesh-MeshObjects.
+
+    volPointInterpolation::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    extendedLeastSquaresVectors::Delete(*this);
+    leastSquaresVectors::Delete(*this);
+    //linearFitData::Delete(*this);
+    quadraticFitData::Delete(*this);
+    //quadraticFitSnGradData::Delete(*this);
+    skewCorrectionVectors::Delete(*this);
+
+    centredCECStencilObject::Delete(*this);
+    centredCFCStencilObject::Delete(*this);
+    centredCPCStencilObject::Delete(*this);
+    centredFECStencilObject::Delete(*this);
+    upwindCECStencilObject::Delete(*this);
+    upwindCFCStencilObject::Delete(*this);
+    upwindCPCStencilObject::Delete(*this);
+    upwindFECStencilObject::Delete(*this);
 }
 
 
-void fvMesh::clearOut()
+void Foam::fvMesh::clearOut()
 {
     clearGeom();
     surfaceInterpolation::clearOut();
@@ -97,7 +144,7 @@ void fvMesh::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvMesh::fvMesh(const IOobject& io)
+Foam::fvMesh::fvMesh(const IOobject& io)
 :
     polyMesh(io),
     surfaceInterpolation(*this),
@@ -139,7 +186,7 @@ fvMesh::fvMesh(const IOobject& io)
         V00();
     }
 
-    // Check the existance of the mesh fluxes, read if present and set the 
+    // Check the existance of the mesh fluxes, read if present and set the
     // mesh to be moving
     if (file(time().timePath()/"meshPhi"))
     {
@@ -181,7 +228,7 @@ fvMesh::fvMesh(const IOobject& io)
 }
 
 
-fvMesh::fvMesh
+Foam::fvMesh::fvMesh
 (
     const IOobject& io,
     const pointField& points,
@@ -213,7 +260,39 @@ fvMesh::fvMesh
 }
 
 
-fvMesh::fvMesh
+Foam::fvMesh::fvMesh
+(
+    const IOobject& io,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<labelList>& allOwner,
+    const xfer<labelList>& allNeighbour,
+    const bool syncPar
+)
+:
+    polyMesh(io, points, faces, allOwner, allNeighbour, syncPar),
+    surfaceInterpolation(*this),
+    boundary_(*this),
+    lduPtr_(NULL),
+    curTimeIndex_(time().timeIndex()),
+    VPtr_(NULL),
+    V0Ptr_(NULL),
+    V00Ptr_(NULL),
+    SfPtr_(NULL),
+    magSfPtr_(NULL),
+    CPtr_(NULL),
+    CfPtr_(NULL),
+    phiPtr_(NULL)
+{
+    if (debug)
+    {
+        Info<< "Constructing fvMesh from components"
+            << endl;
+    }
+}
+
+
+Foam::fvMesh::fvMesh
 (
     const IOobject& io,
     const pointField& points,
@@ -244,9 +323,40 @@ fvMesh::fvMesh
 }
 
 
+Foam::fvMesh::fvMesh
+(
+    const IOobject& io,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<cellList>& cells,
+    const bool syncPar
+)
+:
+    polyMesh(io, points, faces, cells, syncPar),
+    surfaceInterpolation(*this),
+    boundary_(*this),
+    lduPtr_(NULL),
+    curTimeIndex_(time().timeIndex()),
+    VPtr_(NULL),
+    V0Ptr_(NULL),
+    V00Ptr_(NULL),
+    SfPtr_(NULL),
+    magSfPtr_(NULL),
+    CPtr_(NULL),
+    CfPtr_(NULL),
+    phiPtr_(NULL)
+{
+    if (debug)
+    {
+        Info<< "Constructing fvMesh from components"
+            << endl;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-fvMesh::~fvMesh()
+Foam::fvMesh::~fvMesh()
 {
     clearOut();
 }
@@ -255,7 +365,11 @@ fvMesh::~fvMesh()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Helper function for construction from pieces
-void fvMesh::addFvPatches(const List<polyPatch*> & p, const bool validBoundary)
+void Foam::fvMesh::addFvPatches
+(
+    const List<polyPatch*> & p,
+    const bool validBoundary
+)
 {
     if (boundary().size() > 0)
     {
@@ -272,7 +386,7 @@ void fvMesh::addFvPatches(const List<polyPatch*> & p, const bool validBoundary)
 }
 
 
-void fvMesh::removeFvBoundary()
+void Foam::fvMesh::removeFvBoundary()
 {
     if (debug)
     {
@@ -290,7 +404,7 @@ void fvMesh::removeFvBoundary()
 }
 
 
-polyMesh::readUpdateState fvMesh::readUpdate()
+Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
 {
     if (debug)
     {
@@ -310,7 +424,7 @@ polyMesh::readUpdateState fvMesh::readUpdate()
         boundary_.readUpdate(boundaryMesh());
 
         clearOut();
-        
+
     }
     else if (state == polyMesh::TOPO_CHANGE)
     {
@@ -342,13 +456,13 @@ polyMesh::readUpdateState fvMesh::readUpdate()
 }
 
 
-const fvBoundaryMesh& fvMesh::boundary() const
+const Foam::fvBoundaryMesh& Foam::fvMesh::boundary() const
 {
     return boundary_;
 }
 
 
-const lduAddressing& fvMesh::lduAddr() const
+const Foam::lduAddressing& Foam::fvMesh::lduAddr() const
 {
     if (!lduPtr_)
     {
@@ -359,7 +473,7 @@ const lduAddressing& fvMesh::lduAddr() const
 }
 
 
-void fvMesh::mapFields(const mapPolyMesh& meshMap)
+void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 {
     // Create a mapper
     const fvMeshMapper mapper(*this, meshMap);
@@ -438,7 +552,7 @@ void fvMesh::mapFields(const mapPolyMesh& meshMap)
 }
 
 
-tmp<scalarField> fvMesh::movePoints(const pointField& p)
+Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 {
     // Grab old time volumes if the time has been incremented
     if (curTimeIndex_ < time().timeIndex())
@@ -525,11 +639,142 @@ tmp<scalarField> fvMesh::movePoints(const pointField& p)
     boundary_.movePoints();
     surfaceInterpolation::movePoints();
 
+
+    // Hack until proper callbacks. Below are all the fvMesh MeshObjects with a
+    // movePoints function.
+
+    // volPointInterpolation
+    if
+    (
+        db().objectRegistry::foundObject<volPointInterpolation>
+        (
+            volPointInterpolation::typeName
+        )
+    )
+    {
+        const_cast<volPointInterpolation&>
+        (
+            db().objectRegistry::lookupObject<volPointInterpolation>
+            (
+                volPointInterpolation::typeName
+            )
+        ).movePoints();
+    }
+
+    // extendedLeastSquaresVectors
+    if
+    (
+        db().objectRegistry::foundObject<extendedLeastSquaresVectors>
+        (
+            extendedLeastSquaresVectors::typeName
+        )
+    )
+    {
+        const_cast<extendedLeastSquaresVectors&>
+        (
+            db().objectRegistry::lookupObject<extendedLeastSquaresVectors>
+            (
+                extendedLeastSquaresVectors::typeName
+            )
+        ).movePoints();
+    }
+
+    // leastSquaresVectors
+    if
+    (
+        db().objectRegistry::foundObject<leastSquaresVectors>
+        (
+            leastSquaresVectors::typeName
+        )
+    )
+    {
+        const_cast<leastSquaresVectors&>
+        (
+            db().objectRegistry::lookupObject<leastSquaresVectors>
+            (
+                leastSquaresVectors::typeName
+            )
+        ).movePoints();
+    }
+
+    //// linearFitData
+    //if
+    //(
+    //    db().objectRegistry::foundObject<linearFitData>
+    //    (
+    //        linearFitData::typeName
+    //    )
+    //)
+    //{
+    //    const_cast<linearFitData&>
+    //    (
+    //        db().objectRegistry::lookupObject<linearFitData>
+    //        (
+    //            linearFitData::typeName
+    //        )
+    //    ).movePoints();
+    //}
+
+    // quadraticFitData
+    if
+    (
+        db().objectRegistry::foundObject<quadraticFitData>
+        (
+            quadraticFitData::typeName
+        )
+    )
+    {
+        const_cast<quadraticFitData&>
+        (
+            db().objectRegistry::lookupObject<quadraticFitData>
+            (
+                quadraticFitData::typeName
+            )
+        ).movePoints();
+    }
+
+    //// quadraticFitSnGradData
+    //if
+    //(
+    //    db().objectRegistry::foundObject<quadraticFitSnGradData>
+    //    (
+    //        quadraticFitSnGradData::typeName
+    //    )
+    //)
+    //{
+    //    const_cast<quadraticFitSnGradData&>
+    //    (
+    //        db().objectRegistry::lookupObject<quadraticFitSnGradData>
+    //        (
+    //            quadraticFitSnGradData::typeName
+    //        )
+    //    ).movePoints();
+    //}
+
+    // skewCorrectionVectors
+    if
+    (
+        db().objectRegistry::foundObject<skewCorrectionVectors>
+        (
+            skewCorrectionVectors::typeName
+        )
+    )
+    {
+        const_cast<skewCorrectionVectors&>
+        (
+            db().objectRegistry::lookupObject<skewCorrectionVectors>
+            (
+                skewCorrectionVectors::typeName
+            )
+        ).movePoints();
+    }
+
+
     return tsweptVols;
 }
 
 
-void fvMesh::updateMesh(const mapPolyMesh& mpm)
+void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 {
     // Update polyMesh. This needs to keep volume existent!
     polyMesh::updateMesh(mpm);
@@ -551,7 +796,7 @@ void fvMesh::updateMesh(const mapPolyMesh& mpm)
 }
 
 
-bool fvMesh::writeObjects
+bool Foam::fvMesh::writeObjects
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
@@ -563,7 +808,7 @@ bool fvMesh::writeObjects
 
 
 //- Write mesh using IO settings from the time
-bool fvMesh::write() const
+bool Foam::fvMesh::write() const
 {
     return polyMesh::write();
 }
@@ -571,20 +816,16 @@ bool fvMesh::write() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool fvMesh::operator!=(const fvMesh& bm) const
+bool Foam::fvMesh::operator!=(const fvMesh& bm) const
 {
     return &bm != this;
 }
 
 
-bool fvMesh::operator==(const fvMesh& bm) const
+bool Foam::fvMesh::operator==(const fvMesh& bm) const
 {
     return &bm == this;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

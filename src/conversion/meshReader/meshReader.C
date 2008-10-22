@@ -142,7 +142,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
                 "constant",
                 registry
             ),
-            points(),
+            points_,
             meshFaces_,
             cellPolys_
         )

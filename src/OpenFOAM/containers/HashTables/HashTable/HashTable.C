@@ -83,6 +83,19 @@ HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
     }
 }
 
+template<class T, class Key, class Hash>
+HashTable<T, Key, Hash>::HashTable(const xfer<HashTable<T, Key, Hash> >& ht)
+:
+    HashTableName(),
+    tableSize_(0),
+    table_(NULL),
+    nElmts_(0),
+    endIter_(*this, NULL, 0),
+    endConstIter_(*this, NULL, 0)
+{
+    transfer(ht());
+}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

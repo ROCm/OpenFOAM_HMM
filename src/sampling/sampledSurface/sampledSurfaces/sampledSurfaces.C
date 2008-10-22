@@ -31,6 +31,7 @@ License
 #include "IOmanip.H"
 #include "ListListOps.H"
 #include "mergePoints.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -270,8 +271,6 @@ Foam::sampledSurfaces::sampledSurfaces
     mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
-    pMeshPtr_(NULL),
-    pInterpPtr_(NULL),
     fieldNames_(),
     interpolationScheme_(word::null),
     writeFormat_(word::null),
@@ -369,9 +368,9 @@ void Foam::sampledSurfaces::correct()
         operator[](surfI).correct(true);
     }
 
-    // reset interpolation for later
-    pMeshPtr_.clear();
-    pInterpPtr_.clear();
+    // reset interpolation
+    pointMesh::Delete(mesh_);
+    volPointInterpolation::Delete(mesh_);
 
     mergeSurfaces();
 }

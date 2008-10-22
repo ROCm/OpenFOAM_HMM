@@ -232,9 +232,9 @@ void Foam::searchableSurfaceWithGaps::findLine
         // do we accept the hit.
 
         List<pointIndexHit> plusInfo;
-        surface().findLine(start+offset0, end+offset0, plusInfo);
+        surface().findLine(compactStart+offset0, compactEnd+offset0, plusInfo);
         List<pointIndexHit> minInfo;
-        surface().findLine(start-offset0, end-offset0, minInfo);
+        surface().findLine(compactStart-offset0, compactEnd-offset0, minInfo);
 
         // Extract any hits
         forAll(plusInfo, i)
@@ -257,14 +257,28 @@ void Foam::searchableSurfaceWithGaps::findLine
                 compactStart[i] = compactStart[mapI];
                 compactEnd[i] = compactEnd[mapI];
                 compactMap[i] = compactMap[mapI];
+                offset0[i] = offset0[mapI];
+                offset1[i] = offset1[mapI];
             }
             compactStart.setSize(plusMissMap.size());
             compactEnd.setSize(plusMissMap.size());
             compactMap.setSize(plusMissMap.size());
+            offset0.setSize(plusMissMap.size());
+            offset1.setSize(plusMissMap.size());
 
 
-            surface().findLine(start+offset1, end+offset1, plusInfo);
-            surface().findLine(start-offset1, end-offset1, minInfo);
+            surface().findLine
+            (
+                compactStart+offset1,
+                compactEnd+offset1,
+                plusInfo
+            );
+            surface().findLine
+            (
+                compactStart-offset1,
+                compactEnd-offset1,
+                minInfo
+            );
 
             // Extract any hits
             forAll(plusInfo, i)

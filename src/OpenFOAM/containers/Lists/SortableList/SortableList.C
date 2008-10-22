@@ -40,6 +40,17 @@ Foam::SortableList<Type>::SortableList(const List<Type>& values)
     sort();
 }
 
+// Construct from List by transferring
+template <class Type>
+Foam::SortableList<Type>::SortableList(const xfer<List<Type> >& values)
+:
+    List<Type>(),
+    indices_(values->size())
+{
+    List<Type>::transfer(values());
+    sort();
+}
+
 
 // Construct given size. Sort later on.
 template <class Type>
@@ -86,7 +97,7 @@ void Foam::SortableList<Type>::sort()
         indices_[i] = i;
     }
 
-    //Foam::sort(indices_, less(*this));
+    // Foam::sort(indices_, less(*this));
     Foam::stableSort(indices_, less(*this));
 
     List<Type> tmpValues(this->size());

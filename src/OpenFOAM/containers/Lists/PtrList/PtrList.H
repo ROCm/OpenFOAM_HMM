@@ -129,6 +129,9 @@ public:
         template<class CloneArg>
         PtrList(const PtrList<T>&, const CloneArg&);
 
+        //- Construct by transferring the parameter contents
+        PtrList(const xfer<PtrList<T> >&);
+
         //- Construct as copy or re-use as specified.
         PtrList(PtrList<T>&, bool reUse);
 

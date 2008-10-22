@@ -31,6 +31,7 @@ Description
 #include "mapPolyMesh.H"
 #include "Time.H"
 #include "globalMeshData.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -65,6 +66,26 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
 
         // Map the list
         newMotionPoints.map(oldMotionPoints, mpm.pointMap());
+    }
+
+    // Hack until proper callbacks. Below are all the polyMesh-MeshObjects.
+
+    // pointMesh
+    if
+    (
+        db().objectRegistry::foundObject<pointMesh>
+        (
+            pointMesh::typeName
+        )
+    )
+    {
+        const_cast<pointMesh&>
+        (
+            db().objectRegistry::lookupObject<pointMesh>
+            (
+                pointMesh::typeName
+            )
+        ).updateMesh(mpm);
     }
 }
 

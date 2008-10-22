@@ -180,6 +180,18 @@ public:
             const bool syncPar = true
         );
 
+        //- Construct from components without boundary.
+        //  Boundary is added using addFvPatches() member function
+        fvMesh
+        (
+            const IOobject& io,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<labelList>& allOwner,
+            const xfer<labelList>& allNeighbour,
+            const bool syncPar = true
+        );
+
         //- Construct from components with cells rather than owner
         //  and neighbourwithout boundary.
         //  Boundary is added using addPatches() member function
@@ -189,6 +201,18 @@ public:
             const pointField& points,
             const faceList& faces,
             const cellList& cells,
+            const bool syncPar = true
+        );
+
+        //- Construct from components with cells rather than owner
+        //  and neighbourwithout boundary.
+        //  Boundary is added using addPatches() member function
+        fvMesh
+        (
+            const IOobject& io,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -295,7 +319,7 @@ public:
             virtual void updateMesh(const mapPolyMesh& mpm);
 
             //- Move points, returns volumes swept by faces in motion
-            virtual tmp<scalarField> movePoints(const vectorField&);
+            virtual tmp<scalarField> movePoints(const pointField&);
 
             //- Map all fields in time using given map.
             virtual void mapFields(const mapPolyMesh& mpm);

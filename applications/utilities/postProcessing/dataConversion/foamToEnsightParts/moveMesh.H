@@ -1,28 +1,18 @@
 {
-    IOobject ioPoints
+    IOobject io
     (
-        "points", 
+        "points",
         runTime.timeName(),
         polyMesh::meshSubDir,
         mesh
     );
- 
-    if (ioPoints.headerOk())
+
+    if (io.headerOk())
     {
-        // Reading new points
-        pointIOField newPoints
-        (
-            IOobject
-            (
-                "points",
-                mesh.time().timeName(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        );
-        
+        // Read new points
+        io.readOpt() = IOobject::MUST_READ;
+        pointIOField newPoints(io);
+
         mesh.movePoints(newPoints);
     }
 }

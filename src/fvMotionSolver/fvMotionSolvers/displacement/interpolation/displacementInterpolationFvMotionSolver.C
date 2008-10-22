@@ -334,7 +334,8 @@ displacementInterpolationFvMotionSolver
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::displacementInterpolationFvMotionSolver::~displacementInterpolationFvMotionSolver()
+Foam::displacementInterpolationFvMotionSolver::
+~displacementInterpolationFvMotionSolver()
 {}
 
 

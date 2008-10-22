@@ -37,6 +37,7 @@ SourceFiles
 #define FieldField_H
 
 #include "tmp.H"
+#include "xfer.H"
 #include "PtrList.H"
 #include "scalar.H"
 #include "direction.H"

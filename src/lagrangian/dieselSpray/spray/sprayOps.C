@@ -49,33 +49,13 @@ void spray::evolve()
         srhos_[i].setSize(rho_.size());
     }
 
-    UInterpolator_ = interpolation<vector>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        U_
-    );
+    UInterpolator_ = interpolation<vector>::New(interpolationSchemes_, U_);
 
-    rhoInterpolator_ = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        rho_
-    );
+    rhoInterpolator_ = interpolation<scalar>::New(interpolationSchemes_, rho_);
 
-    pInterpolator_ = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        p_
-    );
+    pInterpolator_ = interpolation<scalar>::New(interpolationSchemes_, p_);
 
-    TInterpolator_ = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        T_
-    );
+    TInterpolator_ = interpolation<scalar>::New(interpolationSchemes_, T_);
 
     calculateAmbientPressure();
     calculateAmbientTemperature();

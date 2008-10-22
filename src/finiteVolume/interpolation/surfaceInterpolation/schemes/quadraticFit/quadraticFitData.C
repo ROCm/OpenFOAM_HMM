@@ -29,7 +29,7 @@ License
 #include "volFields.H"
 #include "SVD.H"
 #include "syncTools.H"
-
+#include "extendedCentredStencil.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,15 +41,16 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-static int count = 0;
-
 Foam::quadraticFitData::quadraticFitData
 (
     const fvMesh& mesh,
+    const extendedCentredStencil& stencil,
+    const scalar linearLimitFactor,
     const scalar cWeight
 )
 :
     MeshObject<fvMesh, quadraticFitData>(mesh),
+    linearLimitFactor_(linearLimitFactor),
     centralWeight_(cWeight),
 #   ifdef SPHERICAL_GEOMETRY
     dim_(2),
@@ -60,9 +61,8 @@ Foam::quadraticFitData::quadraticFitData
     (
         dim_ == 1 ? 3 :
         dim_ == 2 ? 6 :
-        dim_ == 3 ? 9 : 0
+        dim_ == 3 ? 7 : 0
     ),
-    stencil_(mesh),
     fit_(mesh.nInternalFaces())
 {
     if (debug)
@@ -102,8 +102,8 @@ Foam::quadraticFitData::quadraticFitData
 
     // Get the cell/face centres in stencil order.
     // Centred face stencils no good for triangles of tets. Need bigger stencils
-    List<List<point> > stencilPoints(stencil_.stencil().size());
-    stencil_.collectData
+    List<List<point> > stencilPoints(mesh.nFaces());
+    stencil.collectData
     (
         mesh.C(),
         stencilPoints
@@ -115,8 +115,6 @@ Foam::quadraticFitData::quadraticFitData
     {
         interpPolySize[faci] = calcFit(stencilPoints[faci], faci);
     }
-
-    Pout<< "count = " << count << endl;
 
     if (debug)
     {
@@ -243,14 +241,14 @@ Foam::label Foam::quadraticFitData::calcFit
         {
             B[ip][is++] = wts[ip]*py;
             B[ip][is++] = wts[ip]*px*py;
-            B[ip][is++] = wts[ip]*sqr(py);
+            //B[ip][is++] = wts[ip]*sqr(py);
         }
         if (dim_ == 3)
         {
             B[ip][is++] = wts[ip]*pz;
             B[ip][is++] = wts[ip]*px*pz;
             //B[ip][is++] = wts[ip]*py*pz;
-            B[ip][is++] = wts[ip]*sqr(pz);
+            //B[ip][is++] = wts[ip]*sqr(pz);
         }
     }
 
@@ -274,15 +272,15 @@ Foam::label Foam::quadraticFitData::calcFit
         //goodFit = (fit0 > 0 && fit1 > 0);
 
         goodFit =
-            (mag(fit0 - w[faci])/w[faci] < 0.15)
-         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < 0.15);
+            (mag(fit0 - w[faci])/w[faci] < linearLimitFactor_)
+         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < linearLimitFactor_);
 
         //scalar w0Err = fit0/w[faci];
         //scalar w1Err = fit1/(1 - w[faci]);
 
         //goodFit =
-        //    (w0Err > 0.5 && w0Err < 1.5)
-        // && (w1Err > 0.5 && w1Err < 1.5);
+        //    (w0Err > linearLimitFactor_ && w0Err < (1 + linearLimitFactor_))
+        // && (w1Err > linearLimitFactor_ && w1Err < (1 + linearLimitFactor_));
 
         if (goodFit)
         {
@@ -324,13 +322,6 @@ Foam::label Foam::quadraticFitData::calcFit
 
     if (goodFit)
     {
-         if ((mag(fit_[faci][0] - w[faci])/w[faci] < 0.15)
-         && (mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]) < 0.15))
-         {
-             count++;
-             //Pout<< "fit " << mag(fit_[faci][0] - w[faci])/w[faci] << " " << mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]) << endl;
-         }
-
         // scalar limiter =
         // max
         // (
@@ -358,6 +349,7 @@ Foam::label Foam::quadraticFitData::calcFit
         Pout<< "Could not fit face " << faci
             << " " << fit_[faci][0] << " " << w[faci]
             << " " << fit_[faci][1] << " " << 1 - w[faci]<< endl;
+
         fit_[faci] = 0;
     }
 

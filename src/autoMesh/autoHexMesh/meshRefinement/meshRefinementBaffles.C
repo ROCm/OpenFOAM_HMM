@@ -1914,27 +1914,28 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
         if (debug)
         {
-            // Dump all these faces to a faceSet.
-            faceSet problemGeom(mesh_, "problemFacesGeom", 100);
-
-            const labelList facePatchGeom
-            (
-                markFacesOnProblemCellsGeometric
-                (
-                    motionDict,
-                    globalToPatch
-                )
-            );
-            forAll(facePatchGeom, faceI)
-            {
-                if (facePatchGeom[faceI] != -1)
-                {
-                    problemGeom.insert(faceI);
-                }
-            }
-            Pout<< "Dumping " << problemGeom.size()
-                << " problem faces to " << problemGeom.objectPath() << endl;
-            problemGeom.write();
+            //- Note: commented out since not properly parallel yet.
+            //// Dump all these faces to a faceSet.
+            //faceSet problemGeom(mesh_, "problemFacesGeom", 100);
+            //
+            //const labelList facePatchGeom
+            //(
+            //    markFacesOnProblemCellsGeometric
+            //    (
+            //        motionDict,
+            //        globalToPatch
+            //    )
+            //);
+            //forAll(facePatchGeom, faceI)
+            //{
+            //    if (facePatchGeom[faceI] != -1)
+            //    {
+            //        problemGeom.insert(faceI);
+            //    }
+            //}
+            //Pout<< "Dumping " << problemGeom.size()
+            //    << " problem faces to " << problemGeom.objectPath() << endl;
+            //problemGeom.write();
 
 
             faceSet problemTopo(mesh_, "problemFacesTopo", 100);
