@@ -24,13 +24,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "linearFit.H"
+#include "CentredFitScheme.H"
+#include "linearFitPolynomial.H"
+#include "centredCFCStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSurfaceInterpolationScheme(linearFit);
+    defineTemplateTypeNameAndDebug
+    (
+        CentredFitData<linearFitPolynomial>,
+        0
+    );
+
+    makeCentredFitSurfaceInterpolationScheme
+    (
+        linearFit,
+        linearFitPolynomial,
+        centredCFCStencilObject
+    );
 }
 
 // ************************************************************************* //
