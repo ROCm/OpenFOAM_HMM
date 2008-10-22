@@ -30,16 +30,23 @@
 #     as per wcleanAll, but retains "*~" backup files
 #
 #------------------------------------------------------------------------------
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
+    echo "Usage: ${0##*/}"
+    echo
+    echo "    Remove all object files and *.dep files"
+    exit 1
+fi
 
 [ -d bin -a -d src ] || {
-   echo "${0##*/}: not in the project top level directory"
-   exit 1
+    echo "${0##*/}: not in the project top level directory"
+    exit 1
 }
 
 for dir in lib applications/bin
 do
-   echo "Removing $dir/"
-   [ -d $dir ] && rm -rf $dir/*
+    echo "Removing $dir/"
+    [ -d $dir ] && rm -rf $dir/*
 done
 
 echo "Retaining *~ backup files"
@@ -49,7 +56,7 @@ echo "Removing .dep files"
 find . -name '*.dep' -exec rm {} \;
 
 echo "Cleaning Make subdirectories"
-find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` -depth \( -type d ! -name "*Make.[A-Za-z]*" ! -name "*Make" \) -exec rm -rf {} \;
+find `find . -depth \( -name "Make.[A-Za-z]*" -o -name Make \) -type d -print` -depth \( -type d ! -name "*Make.[A-Za-z]*" ! -name "*Make" \) -exec rm -rf {} \;
 
 echo "Removing lnInclude and intermediate directories"
 find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;

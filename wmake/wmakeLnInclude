@@ -41,8 +41,8 @@
 Script=${0##*/}
 
 usage() {
-   while [ "$#" -ge 1 ]; do echo "$1"; shift; done
-   cat<<USAGE
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 
 usage: $Script [-f] <dir> [-lnOption]
 
@@ -62,68 +62,68 @@ unset findOpt
 # simple parse options
 while [ "$#" -gt 0 ]
 do
-   case "$1" in
-   -h | -help)   # provide immediate help
-      usage
-      ;;
-   -f)
-      shift
-      forceUpdate=1
-      ;;
-   -*)
-      usage "unknown option/argument: '$*'"
-      ;;
-   *)
-      break
-      ;;
-   esac
+    case "$1" in
+    -h | -help)   # provide immediate help
+        usage
+        ;;
+    -f)
+        shift
+        forceUpdate=1
+        ;;
+    -*)
+        usage "unknown option/argument: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
 done
 
 baseDir=$1
 # convert incorrect path/dir/lnInclude to something sensible
 while [ "${baseDir##*/}" = lnInclude ]
 do
-   baseDir="${baseDir%/*}"
-   if [ "$baseDir" = lnInclude ]
-   then
-      baseDir="."
-   fi
+    baseDir="${baseDir%/*}"
+    if [ "$baseDir" = lnInclude ]
+    then
+        baseDir="."
+    fi
 done
 incDir=$baseDir/lnInclude
 
 
 if [ $# -eq 1 ]
 then
-   lnOpt="-s"
+    lnOpt="-s"
 elif [ $# -eq 2 ]
 then
-   lnOpt="$2"
+    lnOpt="$2"
 else
-   usage "ERROR: incorrect number of arguments"
+    usage "ERROR: incorrect number of arguments"
 fi
 
 
 if [ ! -d $baseDir ]
 then
-   echo $Script: Base directory $baseDir does not exist, exiting.
-   exit 2
+    echo "$Script error: base directory $baseDir does not exist" 1>&2
+    exit 2
 fi
 
 if [ -d $incDir ]
 then
-   if [ ! "$forceUpdate" ]
-   then
-      # echo $Script: include directory $incDir already exists, exiting.
-      exit 0
-   fi
+    if [ ! "$forceUpdate" ]
+    then
+       # echo "$Script error: include directory $incDir already exists" 1>&2
+       exit 0
+    fi
 else
-   mkdir $incDir
+    mkdir $incDir
 fi
 
 if [ ! -d $incDir ]
 then
-   echo $Script: failed to create include directory $incDir
-   exit 0
+    echo "$Script error: failed to create include directory $incDir" 1>&2
+    exit 0
 fi
 
 cd $incDir || exit 1
@@ -131,7 +131,7 @@ cd $incDir || exit 1
 
 # Link include files
 # ~~~~~~~~~~~~~~~~~~
-echo $Script: linking include files to $incDir
+echo "$Script: linking include files to $incDir"
 
 #
 # remove any broken links first (this helps when file locations have moved)
@@ -146,14 +146,14 @@ find .. $findOpt \
  -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
  -a ! -name ".#*" \
  -print | \
-   while read src
-   do
-      link=$(readlink ${src##*/})
-      if [ "$link" != "$src" ]
-      then
-         rm $link 2>/dev/null
-         ln $lnOpt $src .
-      fi
-   done
+    while read src
+    do
+        link=$(readlink ${src##*/})
+        if [ "$link" != "$src" ]
+        then
+            rm $link 2>/dev/null
+            ln $lnOpt $src .
+        fi
+    done
 
 #------------------------------------------------------------------------------
