@@ -588,22 +588,19 @@ Foam::vector Foam::face::normal(const pointField& p) const
 Foam::face Foam::face::reverseFace() const
 {
     // reverse the label list and return
-    // Changed to make sure that the starting point of the original
-    // and the reverse face is identical.
-    //
+    // The starting points of the original and reverse face are identical.
 
-    const labelList& myList = *this;
-
+    const labelList& f = *this;
     labelList newList(size());
 
-    newList[0] = myList[0];
+    newList[0] = f[0];
 
     for (label pointI = 1; pointI < newList.size(); pointI++)
     {
-        newList[pointI] = myList[size() - pointI];
+        newList[pointI] = f[size() - pointI];
     }
 
-    return face(newList);
+    return face(xferMove(newList));
 }
 
 
@@ -643,7 +640,6 @@ Foam::scalar Foam::face::sweptVol
     label nPoints = size();
 
     point nextOldPoint = centreOldPoint;
-
     point nextNewPoint = centreNewPoint;
 
     register label pI;

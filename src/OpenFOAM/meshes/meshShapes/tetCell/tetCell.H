@@ -32,6 +32,7 @@ Description
     class, a tetrahedron cell shape model and a tetCell
 
 SourceFiles
+    tetCell.C
     tetCellI.H
 
 \*---------------------------------------------------------------------------*/
@@ -76,6 +77,9 @@ public:
             const label c,
             const label d
         );
+
+        //- Construct from FixedList
+        inline tetCell(const FixedList<label, 4>&);
 
         //- Construct from Istream
         inline tetCell(Istream&);

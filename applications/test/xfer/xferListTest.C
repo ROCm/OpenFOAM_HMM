@@ -33,6 +33,8 @@ Description
 #include "IOstreams.H"
 #include "IStringStream.H"
 #include "labelList.H"
+#include "DynamicList.H"
+#include "face.H"
 
 using namespace Foam;
 
@@ -43,12 +45,12 @@ int main(int argc, char *argv[])
 {
     List<label> lstA(10);
     List<label> lstC(IStringStream("(1 2 3 4)")());
-    
+
     forAll(lstA, i)
     {
         lstA[i] = i;
     }
-        
+
     Info<< "lstA: " << lstA << endl;
     Info<< "lstC: " << lstC << endl;
 
@@ -72,10 +74,10 @@ int main(int argc, char *argv[])
     Info<< "lstC: " << lstC << endl;
 
     xB = xA;
-    
+
     List<label> lstD(xferCopy(lstC));
     List<label> lstE(xferMove(lstC));
-    
+
     // this must be empty
     List<label> lstF = xferCopy(lstC);
 
@@ -88,13 +90,35 @@ int main(int argc, char *argv[])
     Info<< "lstE: " << lstE << endl;
     Info<< "lstF: " << lstF << endl;
 
-    Info<< "xB size: " << xB->size() << endl;
+    Info<< "xB[" << xB->size() << "]\n";
 
     // clear the underlying List
     xB->clear();
 
-    Info<< "xB size: " << xB->size() << endl;
+    Info<< "xB[" << xB->size() << "]\n";
 
+    DynamicList<label> dl(10);
+    for (label i = 0; i < 5; i++)
+    {
+        dl.append(i);
+    }
+
+    face f1(dl);
+
+    Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
+    Info<< "f1: " << f1 << endl;
+
+    // note: the allocated size will be wrong, but we can at least avoid
+    // wasting memory by using a shrink
+
+    face f2(xferMove<labelList>(dl.shrink()));
+    Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
+    Info<< "f2: " << f2 << endl;
+
+    dl.clearStorage();
+
+    Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
+    
     return 0;
 }
 
