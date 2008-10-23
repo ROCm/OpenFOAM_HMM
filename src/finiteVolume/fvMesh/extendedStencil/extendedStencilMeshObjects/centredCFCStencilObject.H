@@ -70,10 +70,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~centredCFCStencilObject()
-        {}
+    //- Destructor
+    virtual ~centredCFCStencilObject()
+    {}
 };
 
 

@@ -131,7 +131,6 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const List<List<scalar> >& stencilWeights
         );
-
 };
 
 
