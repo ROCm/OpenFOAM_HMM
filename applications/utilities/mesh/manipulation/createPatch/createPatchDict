@@ -1,77 +1,74 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.0                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "system";
-    local           "";
-
-    class           dictionary;
-    object          createPatcheDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Tolerance used in matching faces. Absolute tolerance is span of
-// face times this factor.
-matchTolerance 1E-6;
+// face times this factor. To load incorrectly matches meshes set this
+// to a higher value.
+matchTolerance 1E-3;
 
-// Do a synchronisation of coupled points.
+// Do a synchronisation of coupled points after creation of any patches.
 pointSync true;
 
-
 // Patches to create.
-// If no patches does a coupled point and face synchronisation anyway.
 patches
 (
     {
         // Name of new patch
         name sidePatches;
 
-        // Dictionary for new patch
-        dictionary
-        {
+        // Type of new patch
+	dictionary
+	{
             type cyclic;
-            // Optional: used when matching and synchronising points.
+
+	    // Optional: explicitly set transformation tensor.
+            // Used when matching and synchronising points.
             //transform translational;
             //separationVector (-2289 0 0);
-        }
+	    transform rotational;
+	    rotationAxis (1 0 0);
+            rotationCentre (0 0 0);
+	}
 
-        // How to construct: either 'patches' or 'set'
+        // How to construct: either from 'patches' or 'set'
         constructFrom patches;
 
         // If constructFrom = patches : names of patches
-        //patches (periodic-1 periodic-2);
-        patches (outlet-side1 outlet-side2);
+        patches (periodic-1 periodic-2);
 
         // If constructFrom = set : name of faceSet
         set f0;
     }
 
-    //{
-    //    name bottom;
-    //    // Dictionary for new patch
-    //    dictionary
-    //    {
-    //        type patch;
-    //    }
-    //
-    //    constructFrom set;
-    //
-    //    patches (half0 half1);
-    //
-    //    set bottomFaces;
-    //}
+    {
+        name bottom;
+
+        // Type of new patch
+	dictionary
+	{
+            type wall;
+	}
+
+        constructFrom set;
+
+        patches ();
+
+        set bottomFaces;
+    }
 
 );
 
