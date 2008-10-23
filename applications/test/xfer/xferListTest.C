@@ -38,6 +38,8 @@ Description
 
 using namespace Foam;
 
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -104,21 +106,17 @@ int main(int argc, char *argv[])
     }
 
     face f1(dl);
+    face f2(xferCopy<labelList>(dl));
 
     Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
     Info<< "f1: " << f1 << endl;
-
-    // note: the allocated size will be wrong, but we can at least avoid
-    // wasting memory by using a shrink
-
-    face f2(xferMove<labelList>(dl.shrink()));
-    Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
     Info<< "f2: " << f2 << endl;
 
-    dl.clearStorage();
-
+    // note: using xferMoveTo to ensure the correct transfer() method is called
+    face f3( xferMoveTo<labelList>(dl) );
     Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
-    
+    Info<< "f3: " << f3 << endl;
+
     return 0;
 }
 

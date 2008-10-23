@@ -26,18 +26,32 @@ Class
     Foam::xfer
 
 Description
-    A simple container that can be used to copy or transfer the contents
-    of objects of type \<T\>.
-
-    Since it is decided upon construction of the xfer object whether the
-    parameter is to be copied or transferred, the contents of the resulting
-    object can be transferred unconditionally.
-
-    This greatly simplifies defining the constructors for other classes
-    with mixed transfer/copy semantics.
+    A simple container for copying or transferring objects of type \<T\>.
 
     The wrapped object of type \<T\> must implement a transfer() method and
     an operator=() copy method.
+
+    Since it is decided upon construction of the xfer object whether the
+    parameter is to be copied or transferred, the contents of the resulting
+    xfer object can be transferred unconditionally. This greatly simplifies
+    defining constructors or methods in other classes with mixed
+    transfer/copy semantics without requiring 2^N different versions.
+
+    When transferring between dissimilar types, the xferCopyTo() and
+    xferMoveTo() functions can prove useful. An example is transferring
+    from a DynamicList to a List.  Since the
+    List\<T\>::transfer(List\<T\>&) method could result in some allocated
+    memory becoming inaccessible, the xferMoveTo() function can be used to
+    invoke the correct List\<T\>::transfer(DynamicList\<T\>&) method.
+
+    @code
+        DynamicList<label> dynLst;
+        ...
+        labelList plainLst( xferMoveTo<labelList>(dynLst) );
+    @endcode
+
+SeeAlso
+    xferCopy, xferCopyTo, xferMove, xferMoveTo, xferTmp
 
 SourceFiles
     xferI.H
@@ -64,7 +78,7 @@ class xfer
 {
     // Private data
 
-        //- Pointer to temporary object
+        //- Pointer to underlying datatype
         mutable T* ptr_;
 
 public:
@@ -108,49 +122,56 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 /**
- * @fn template<class T> xferCopy(const T&)
  * Construct by copying the contents of the @a arg
  *
- * @sa xferMove, xferTmp and Foam::xfer
+ * @sa xferCopyTo, xferMove, xferMoveTo, xferTmp and Foam::xfer
 */
 template<class T>
-Foam::xfer<T> xferCopy(const T& t)
-{
-    return Foam::xfer<T>(t);
-}
+inline xfer<T> xferCopy(const T&);
+
+/**
+ * Construct by transferring the contents of the @a arg
+ *
+ * @sa xferCopy, xferCopyTo, xferMoveTo, xferTmp and Foam::xfer
+*/
+template<class T>
+inline xfer<T> xferMove(T&);
 
 
 /**
- * @fn template<class T> xferMove(T&)
  * Construct by transferring the contents of the @a arg
+ *
+ * @sa xferCopy, xferCopyTo, xferMove, xferMoveTo and Foam::xfer
+*/
+template<class T>
+inline xfer<T> xferTmp(Foam::tmp<T>&);
+
+
+/**
+ * Construct by copying the contents of the @a arg
+ * between dissimilar types
+ *
+ * @sa xferCopy, xferMove, xferMoveTo, xferTmp and Foam::xfer
+*/
+template<class To, class From>
+inline xfer<To> xferCopyTo(const From&);
+
+
+/**
+ * Construct by transferring the contents of the @a arg
+ * between dissimilar types
  *
  * @par Example Use
  * @code
- *     List<label> a;
+ *     DynamicList<label> dynLst;
  *     ...
- *     List<label> b(xferMove(a));
+ *     labelList plainLst( xferMoveTo<labelList>(dynLst) );
  * @endcode
  *
- * @sa xferCopy, xferTmp and Foam::xfer
+ * @sa xferCopy, xferCopyTo, xferMove, xferTmp and Foam::xfer
 */
-template<class T>
-Foam::xfer<T> xferMove(T& t)
-{
-    return Foam::xfer<T>(t, true);
-}
-
-
-/**
- * @fn template<class T> xferTmp(tmp<T>&)
- * Construct by transferring the contents of the @a arg
- *
- * @sa xferCopy, xferMove and Foam::xfer
-*/
-template<class T>
-Foam::xfer<T> xferTmp(Foam::tmp<T>& tt)
-{
-    return Foam::xfer<T>(tt(), tt.isTmp());
-}
+template<class To, class From>
+inline xfer<To> xferMoveTo(From&);
 
 
 } // End namespace Foam
