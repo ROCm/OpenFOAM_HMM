@@ -930,6 +930,7 @@ void Foam::autoSnapDriver::preSmoothPatch
         const_cast<Time&>(mesh.time())++;
         Pout<< "Writing patch smoothed mesh to time " << mesh.time().timeName()
             << endl;
+
         mesh.write();
     }
 
@@ -1220,6 +1221,11 @@ void Foam::autoSnapDriver::smoothDisplacement
         const_cast<Time&>(mesh.time())++;
         Pout<< "Writing smoothed mesh to time " << mesh.time().timeName()
             << endl;
+
+        // Moving mesh creates meshPhi. Can be cleared out by a mesh.clearOut
+        // but this will also delete all pointMesh but not pointFields which
+        // gives an illegal situation.
+
         mesh.write();
 
         Pout<< "Writing displacement field ..." << endl;
