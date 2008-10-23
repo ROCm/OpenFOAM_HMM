@@ -24,56 +24,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quadraticFitData.H"
+#include "CentredFitData.H"
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
 #include "syncTools.H"
 #include "extendedCentredStencil.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(quadraticFitData, 0);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-Foam::quadraticFitData::quadraticFitData
+template<class Polynomial>
+Foam::CentredFitData<Polynomial>::CentredFitData
 (
     const fvMesh& mesh,
     const extendedCentredStencil& stencil,
     const scalar linearLimitFactor,
-    const scalar cWeight
+    const scalar centralWeight
 )
 :
-    MeshObject<fvMesh, quadraticFitData>(mesh),
+    MeshObject<fvMesh, CentredFitData<Polynomial> >(mesh),
     linearLimitFactor_(linearLimitFactor),
-    centralWeight_(cWeight),
+    centralWeight_(centralWeight),
 #   ifdef SPHERICAL_GEOMETRY
     dim_(2),
 #   else
     dim_(mesh.nGeometricD()),
 #   endif
-    minSize_
-    (
-        dim_ == 1 ? 3 :
-        dim_ == 2 ? 6 :
-        dim_ == 3 ? 7 : 0
-    ),
-    fit_(mesh.nInternalFaces())
+    minSize_(Polynomial::nTerms(dim_)),
+    coeffs_(mesh.nInternalFaces())
 {
     if (debug)
     {
-        Info << "Contructing quadraticFitData" << endl;
+        Info<< "Contructing CentredFitData<Polynomial>" << endl;
     }
 
     // check input
     if (centralWeight_ < 1 - SMALL)
     {
-        FatalErrorIn("quadraticFitData::quadraticFitData")
+        FatalErrorIn("CentredFitData<Polynomial>::CentredFitData")
             << "centralWeight requested = " << centralWeight_
             << " should not be less than one"
             << exit(FatalError);
@@ -81,7 +69,7 @@ Foam::quadraticFitData::quadraticFitData
 
     if (minSize_ == 0)
     {
-        FatalErrorIn("quadraticFitSnGradData")
+        FatalErrorIn("CentredFitSnGradData")
             << " dimension must be 1,2 or 3, not" << dim_ << exit(FatalError);
     }
 
@@ -90,24 +78,20 @@ Foam::quadraticFitData::quadraticFitData
     (
         IOobject
         (
-            "quadraticFitInterpPolySize",
+            "CentredFitInterpPolySize",
             "constant",
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("quadraticFitInterpPolySize", dimless, scalar(0))
+        dimensionedScalar("CentredFitInterpPolySize", dimless, scalar(0))
     );
 
     // Get the cell/face centres in stencil order.
     // Centred face stencils no good for triangles of tets. Need bigger stencils
     List<List<point> > stencilPoints(mesh.nFaces());
-    stencil.collectData
-    (
-        mesh.C(),
-        stencilPoints
-    );
+    stencil.collectData(mesh.C(), stencilPoints);
 
     // find the fit coefficients for every face in the mesh
 
@@ -118,7 +102,7 @@ Foam::quadraticFitData::quadraticFitData
 
     if (debug)
     {
-        Info<< "quadraticFitData::quadraticFitData() :"
+        Info<< "CentredFitData<Polynomial>::CentredFitData() :"
             << "Finished constructing polynomialFit data"
             << endl;
 
@@ -129,7 +113,8 @@ Foam::quadraticFitData::quadraticFitData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::quadraticFitData::findFaceDirs
+template<class Polynomial>
+void Foam::CentredFitData<Polynomial>::findFaceDirs
 (
     vector& idir,        // value changed in return
     vector& jdir,        // value changed in return
@@ -139,6 +124,7 @@ void Foam::quadraticFitData::findFaceDirs
 )
 {
     idir = mesh.Sf()[faci];
+    //idir = mesh.C()[mesh.neighbour()[faci]] - mesh.C()[mesh.owner()[faci]];
     idir /= mag(idir);
 
 #   ifndef SPHERICAL_GEOMETRY
@@ -189,7 +175,8 @@ void Foam::quadraticFitData::findFaceDirs
 }
 
 
-Foam::label Foam::quadraticFitData::calcFit
+template<class Polynomial>
+Foam::label Foam::CentredFitData<Polynomial>::calcFit
 (
     const List<point>& C,
     const label faci
@@ -198,82 +185,74 @@ Foam::label Foam::quadraticFitData::calcFit
     vector idir(1,0,0);
     vector jdir(0,1,0);
     vector kdir(0,0,1);
-    findFaceDirs(idir, jdir, kdir, mesh(), faci);
+    findFaceDirs(idir, jdir, kdir, this->mesh(), faci);
 
+    // Setup the point weights
     scalarList wts(C.size(), scalar(1));
     wts[0] = centralWeight_;
     wts[1] = centralWeight_;
 
-    point p0 = mesh().faceCentres()[faci];
-    scalar scale = 0;
+    // Reference point
+    point p0 = this->mesh().faceCentres()[faci];
 
-    // calculate the matrix of the polynomial components
+    // p0 -> p vector in the face-local coordinate system
+    vector d;
+
+    // Local coordinate scaling
+    scalar scale = 1;
+
+    // Matrix of the polynomial components
     scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
     for(label ip = 0; ip < C.size(); ip++)
     {
         const point& p = C[ip];
 
-        scalar px = (p - p0)&idir;
-        scalar py = (p - p0)&jdir;
+        d.x() = (p - p0)&idir;
+        d.y() = (p - p0)&jdir;
 #       ifndef SPHERICAL_GEOMETRY
-        scalar pz = (p - p0)&kdir;
+        d.z() = (p - p0)&kdir;
 #       else
-        scalar pz = mag(p) - mag(p0);
+        d.z() = mag(p) - mag(p0);
 #       endif
 
         if (ip == 0)
         {
-            scale = max(max(mag(px), mag(py)), mag(pz));
+            scale = cmptMax(cmptMag((d)));
         }
 
-        px /= scale;
-        py /= scale;
-        pz /= scale;
+        // Scale the radius vector
+        d /= scale;
 
-        label is = 0;
-
-        B[ip][is++] = wts[0]*wts[ip];
-        B[ip][is++] = wts[0]*wts[ip]*px;
-        B[ip][is++] = wts[ip]*sqr(px);
-
-        if (dim_ >= 2)
-        {
-            B[ip][is++] = wts[ip]*py;
-            B[ip][is++] = wts[ip]*px*py;
-            //B[ip][is++] = wts[ip]*sqr(py);
-        }
-        if (dim_ == 3)
-        {
-            B[ip][is++] = wts[ip]*pz;
-            B[ip][is++] = wts[ip]*px*pz;
-            //B[ip][is++] = wts[ip]*py*pz;
-            //B[ip][is++] = wts[ip]*sqr(pz);
-        }
+        Polynomial::addCoeffs
+        (
+            B[ip],
+            d,
+            wts[ip],
+            dim_
+        );
     }
 
     // Set the fit
     label stencilSize = C.size();
-    fit_[faci].setSize(stencilSize);
+    coeffs_[faci].setSize(stencilSize);
     scalarList singVals(minSize_);
     label nSVDzeros = 0;
 
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& w =
-        mesh().surfaceInterpolation::weights();
+        this->mesh().surfaceInterpolation::weights();
 
     bool goodFit = false;
     for(int iIt = 0; iIt < 10 && !goodFit; iIt++)
     {
         SVD svd(B, SMALL);
 
-        scalar fit0 = wts[0]*wts[0]*svd.VSinvUt()[0][0];
-        scalar fit1 = wts[0]*wts[1]*svd.VSinvUt()[0][1];
-
-        //goodFit = (fit0 > 0 && fit1 > 0);
+        scalar fit0 = wts[0]*svd.VSinvUt()[0][0];
+        scalar fit1 = wts[1]*svd.VSinvUt()[0][1];
 
         goodFit =
-            (mag(fit0 - w[faci])/w[faci] < linearLimitFactor_)
-         && (mag(fit1 - (1 - w[faci]))/(1 - w[faci]) < linearLimitFactor_);
+            (mag(fit0 - w[faci]) < linearLimitFactor_*w[faci])
+         && (mag(fit1 - (1 - w[faci])) < linearLimitFactor_*(1 - w[faci]));
 
         //scalar w0Err = fit0/w[faci];
         //scalar w1Err = fit1/(1 - w[faci]);
@@ -284,12 +263,12 @@ Foam::label Foam::quadraticFitData::calcFit
 
         if (goodFit)
         {
-            fit_[faci][0] = fit0;
-            fit_[faci][1] = fit1;
+            coeffs_[faci][0] = fit0;
+            coeffs_[faci][1] = fit1;
 
             for(label i=2; i<stencilSize; i++)
             {
-                fit_[faci][i] = wts[0]*wts[i]*svd.VSinvUt()[0][i];
+                coeffs_[faci][i] = wts[i]*svd.VSinvUt()[0][i];
             }
 
             singVals = svd.S();
@@ -299,12 +278,6 @@ Foam::label Foam::quadraticFitData::calcFit
         {
             wts[0] *= 10;
             wts[1] *= 10;
-
-            for(label i = 0; i < B.n(); i++)
-            {
-                B[i][0] *= 10;
-                B[i][1] *= 10;
-            }
 
             for(label j = 0; j < B.m(); j++)
             {
@@ -327,39 +300,52 @@ Foam::label Foam::quadraticFitData::calcFit
         // (
         //     min
         //     (
-        //         min(alpha - beta*mag(fit_[faci][0] - w[faci])/w[faci], 1),
-        //         min(alpha - beta*mag(fit_[faci][1] - (1 - w[faci]))/(1 - w[faci]), 1)
+        //         min(alpha - beta*mag(coeffs_[faci][0] - w[faci])/w[faci], 1),
+        //         min(alpha - beta*mag(coeffs_[faci][1] - (1 - w[faci]))/(1 - w[faci]), 1)
         //     ), 0
         // );
 
+        //Info<< w[faci] << " " << coeffs_[faci][0] << " " << (1 - w[faci]) << " " << coeffs_[faci][1] << endl;
+
         // Remove the uncorrected linear coefficients
-        fit_[faci][0] -= w[faci];
-        fit_[faci][1] -= 1 - w[faci];
+        coeffs_[faci][0] -= w[faci];
+        coeffs_[faci][1] -= 1 - w[faci];
 
         // if (limiter < 0.99)
         // {
         //     for(label i = 0; i < stencilSize; i++)
         //     {
-        //         fit_[faci][i] *= limiter;
+        //         coeffs_[faci][i] *= limiter;
         //     }
         // }
     }
     else
     {
-        Pout<< "Could not fit face " << faci
-            << " " << fit_[faci][0] << " " << w[faci]
-            << " " << fit_[faci][1] << " " << 1 - w[faci]<< endl;
+        if (debug)
+        {
+            WarningIn
+            (
+                "CentredFitData<Polynomial>::calcFit"
+                "(const List<point>& C, const label faci"
+            )   << "Could not fit face " << faci
+                << ", reverting to linear." << nl
+                << "    Weights "
+                << coeffs_[faci][0] << " " << w[faci] << nl
+                << "    Linear weights "
+                << coeffs_[faci][1] << " " << 1 - w[faci] << endl;
+        }
 
-        fit_[faci] = 0;
+        coeffs_[faci] = 0;
     }
 
     return minSize_ - nSVDzeros;
 }
 
 
-bool Foam::quadraticFitData::movePoints()
+template<class Polynomial>
+bool Foam::CentredFitData<Polynomial>::movePoints()
 {
-    notImplemented("quadraticFitData::movePoints()");
+    notImplemented("CentredFitData<Polynomial>::movePoints()");
 
     return true;
 }

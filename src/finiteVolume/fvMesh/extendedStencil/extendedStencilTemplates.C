@@ -128,6 +128,7 @@ Foam::extendedStencil::weightedSum
 
     // Boundaries. Either constrained or calculated so assign value
     // directly (instead of nicely using operator==)
+    /*
     typename GeometricField<Type, fvsPatchField, surfaceMesh>::
         GeometricBoundaryField& bSfCorr = sf.boundaryField();
 
@@ -150,6 +151,7 @@ Foam::extendedStencil::weightedSum
             faceI++;
         }
     }
+    */
 
     return tsfCorr;
 }
