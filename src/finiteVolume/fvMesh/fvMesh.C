@@ -43,7 +43,7 @@ License
 #include "extendedLeastSquaresVectors.H"
 #include "leastSquaresVectors.H"
 //#include "linearFitData.H"
-#include "quadraticFitData.H"
+//#include "quadraticFitData.H"
 //#include "quadraticFitSnGradData.H"
 #include "skewCorrectionVectors.H"
 
@@ -96,7 +96,7 @@ void Foam::fvMesh::clearGeom()
     extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     //linearFitData::Delete(*this);
-    quadraticFitData::Delete(*this);
+    //quadraticFitData::Delete(*this);
     //quadraticFitSnGradData::Delete(*this);
     skewCorrectionVectors::Delete(*this);
 }
@@ -113,7 +113,7 @@ void Foam::fvMesh::clearAddressing()
     extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     //linearFitData::Delete(*this);
-    quadraticFitData::Delete(*this);
+    //quadraticFitData::Delete(*this);
     //quadraticFitSnGradData::Delete(*this);
     skewCorrectionVectors::Delete(*this);
 
@@ -715,23 +715,23 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     //    ).movePoints();
     //}
 
-    // quadraticFitData
-    if
-    (
-        db().objectRegistry::foundObject<quadraticFitData>
-        (
-            quadraticFitData::typeName
-        )
-    )
-    {
-        const_cast<quadraticFitData&>
-        (
-            db().objectRegistry::lookupObject<quadraticFitData>
-            (
-                quadraticFitData::typeName
-            )
-        ).movePoints();
-    }
+    //// quadraticFitData
+    //if
+    //(
+    //    db().objectRegistry::foundObject<quadraticFitData>
+    //    (
+    //        quadraticFitData::typeName
+    //    )
+    //)
+    //{
+    //    const_cast<quadraticFitData&>
+    //    (
+    //        db().objectRegistry::lookupObject<quadraticFitData>
+    //        (
+    //            quadraticFitData::typeName
+    //        )
+    //    ).movePoints();
+    //}
 
     //// quadraticFitSnGradData
     //if
