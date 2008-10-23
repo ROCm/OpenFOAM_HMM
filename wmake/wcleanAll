@@ -50,10 +50,7 @@ do
     [ -d $dir ] && rm -rf $dir/*
 done
 
-echo "Removing *~ backup files"
-find . -name '*~' -exec rm {} \;
-
-echo "Removing .dep files"
+echo "Removing *.dep files"
 find . -name '*.dep' -exec rm {} \;
 
 echo "Cleaning Make subdirectories"
