@@ -2988,12 +2988,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         mesh.resetPrimitives
         (
             nActiveFaces_,
-            renumberedMeshPoints,
-            faces_,
-            faceOwner_,
-            faceNeighbour_,
-            patchSizes,
-            patchStarts,
+            xferMove<pointField>(renumberedMeshPoints),
+            xferMove<faceList>(faces_),
+            xferMove<labelList>(faceOwner_),
+            xferMove<labelList>(faceNeighbour_),
+            xferMove<labelList>(patchSizes),
+            xferMove<labelList>(patchStarts),
             syncParallel
         );
 
@@ -3005,12 +3005,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         mesh.resetPrimitives
         (
             nActiveFaces_,
-            newPoints,
-            faces_,
-            faceOwner_,
-            faceNeighbour_,
-            patchSizes,
-            patchStarts,
+            xferMove<pointField>(newPoints),
+            xferMove<faceList>(faces_),
+            xferMove<labelList>(faceOwner_),
+            xferMove<labelList>(faceNeighbour_),
+            xferMove<labelList>(patchSizes),
+            xferMove<labelList>(patchStarts),
             syncParallel
         );
         // Invalidate new points to go into map.
@@ -3018,6 +3018,22 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
         mesh.changing(true);
     }
+
+    // Clear out primitives
+    {
+        retiredPoints_.clear();
+        retiredPoints_.resize(0);
+
+        faces_.clear();
+        faces_.setSize(0);
+        region_.clear();
+        region_.setSize(0);
+        faceOwner_.clear();
+        faceOwner_.setSize(0);
+        faceNeighbour_.clear();
+        faceNeighbour_.setSize(0);
+    }
+
 
     if (debug)
     {
@@ -3053,21 +3069,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     {
         Pout<< "New mesh:" << nl;
         writeMeshStats(mesh, Pout);
-    }
-
-    // Clear out primitives
-    {
-        retiredPoints_.clear();
-        retiredPoints_.resize(0);
-
-        faces_.clear();
-        faces_.setSize(0);
-        region_.clear();
-        region_.setSize(0);
-        faceOwner_.clear();
-        faceOwner_.setSize(0);
-        faceNeighbour_.clear();
-        faceNeighbour_.setSize(0);
     }
 
 
@@ -3250,13 +3251,29 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         new fvMesh
         (
             io,
-            newPoints,
-            faces_,
-            faceOwner_,
-            faceNeighbour_
+            xferMove<pointField>(newPoints),
+            xferMove<faceList>(faces_),
+            xferMove<labelList>(faceOwner_),
+            xferMove<labelList>(faceNeighbour_)
         )
     );
     fvMesh& newMesh = newMeshPtr();
+
+    // Clear out primitives
+    {
+        newPoints.clear();
+        retiredPoints_.clear();
+        retiredPoints_.resize(0);
+        faces_.clear();
+        faces_.setSize(0);
+        region_.clear();
+        region_.setSize(0);
+        faceOwner_.clear();
+        faceOwner_.setSize(0);
+        faceNeighbour_.clear();
+        faceNeighbour_.setSize(0);
+    }
+
 
     if (debug)
     {
@@ -3286,22 +3303,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
             << "  removed:" << nRemove
             << nl
             << endl;
-    }
-
-
-    // Clear out primitives
-    {
-        newPoints.clear();
-        retiredPoints_.clear();
-        retiredPoints_.resize(0);
-        faces_.clear();
-        faces_.setSize(0);
-        region_.clear();
-        region_.setSize(0);
-        faceOwner_.clear();
-        faceOwner_.setSize(0);
-        faceNeighbour_.clear();
-        faceNeighbour_.setSize(0);
     }
 
 

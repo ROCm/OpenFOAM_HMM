@@ -84,6 +84,9 @@ class sampledIsoSurface
 
     // Private Member Functions
 
+        //- Create iso surface (if time has changed)
+        void createGeometry() const;
+
         //- sample field on faces
         template <class Type>
         tmp<Field<Type> > sampleField
