@@ -23,23 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::quadraticFit
+    Foam::CentredFitScheme
 
 Description
-    Quadratic fit interpolation scheme which applies an explicit correction to
-    linear.
-
-SourceFiles
-    quadraticFit.C
+    Centred fit surface interpolation scheme which applies an explicit
+    correction to linear.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticFit_H
-#define quadraticFit_H
+#ifndef CentredFitScheme_H
+#define CentredFitScheme_H
 
-#include "quadraticFitData.H"
+#include "CentredFitData.H"
 #include "linear.H"
-#include "centredCFCStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,11 +43,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quadraticFit Declaration
+                           Class CentredFitScheme Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class quadraticFit
+template<class Type, class Polynomial, class Stencil>
+class CentredFitScheme
 :
     public linear<Type>
 {
@@ -69,31 +65,31 @@ class quadraticFit
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        quadraticFit(const quadraticFit&);
+        CentredFitScheme(const CentredFitScheme&);
 
         //- Disallow default bitwise assignment
-        void operator=(const quadraticFit&);
+        void operator=(const CentredFitScheme&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("quadraticFit");
+    TypeName("CentredFitScheme");
 
 
     // Constructors
 
         //- Construct from mesh and Istream
-        quadraticFit(const fvMesh& mesh, Istream& is)
+        CentredFitScheme(const fvMesh& mesh, Istream& is)
         :
             linear<Type>(mesh),
             linearLimitFactor_(readScalar(is)),
-            centralWeight_(readScalar(is))
+            centralWeight_(1000)
         {}
 
 
         //- Construct from mesh, faceFlux and Istream
-        quadraticFit
+        CentredFitScheme
         (
             const fvMesh& mesh,
             const surfaceScalarField& faceFlux,
@@ -102,7 +98,7 @@ public:
         :
             linear<Type>(mesh),
             linearLimitFactor_(readScalar(is)),
-            centralWeight_(readScalar(is))
+            centralWeight_(1000)
         {}
 
 
@@ -123,13 +119,13 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            const extendedCentredStencil& stencil =
-            centredCFCStencilObject::New
+            const extendedCentredStencil& stencil = Stencil::New
             (
                 mesh
             );
 
-            const quadraticFitData& cfd = quadraticFitData::New
+            const CentredFitData<Polynomial>& cfd =
+            CentredFitData<Polynomial>::New
             (
                 mesh,
                 stencil,
@@ -137,7 +133,7 @@ public:
                 centralWeight_
             );
 
-            const List<scalarList>& f = cfd.fit();
+            const List<scalarList>& f = cfd.coeffs();
 
             return stencil.weightedSum(vf, f);
         }
@@ -147,6 +143,34 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Add the patch constructor functions to the hash tables
+
+#define makeCentredFitSurfaceInterpolationTypeScheme(SS, POLYNOMIAL, STENCIL, TYPE) \
+                                                                              \
+typedef CentredFitScheme<TYPE, POLYNOMIAL, STENCIL>                           \
+    CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                           \
+defineTemplateTypeNameAndDebugWithName                                        \
+    (CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                 \
+                                                                              \
+surfaceInterpolationScheme<TYPE>::addMeshConstructorToTable                   \
+<CentredFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                \
+    add##SS##STENCIL##TYPE##MeshConstructorToTable_;                          \
+                                                                              \
+surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable               \
+<CentredFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                \
+    add##SS##STENCIL##TYPE##MeshFluxConstructorToTable_;
+
+#define makeCentredFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)     \
+                                                                              \
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)    \
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)    \
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,sphericalTensor) \
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor)\
+makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
