@@ -225,6 +225,8 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
             // Dump halves
             {
                 OFstream str(prefix+cycPatch.name()+"_half0.obj");
+                Pout<< "Dumping cycPatch.name() half0 faces to " << str.name()
+                    << endl;
                 meshTools::writeOBJ
                 (
                     str,
@@ -241,6 +243,8 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
             }
             {
                 OFstream str(prefix+cycPatch.name()+"_half1.obj");
+                Pout<< "Dumping cycPatch.name() half1 faces to " << str.name()
+                    << endl;
                 meshTools::writeOBJ
                 (
                     str,
@@ -261,6 +265,9 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
             // Lines between corresponding face centres
             OFstream str(prefix+cycPatch.name()+"_match.obj");
             label vertI = 0;
+
+            Pout<< "Dumping cyclic match as lines between face centres to "
+                << str.name() << endl;
 
             for (label faceI = 0; faceI < halfSize; faceI++)
             {
@@ -773,6 +780,8 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, true);
     mesh.movePoints(map().preMotionPoints());
 
+    dumpCyclicMatch("coupled_", mesh);
+
     // Synchronise points.
     if (!pointSync)
     {
@@ -889,6 +898,8 @@ int main(int argc, char *argv[])
     Info<< "Removing patches with no faces in them." << nl<< endl;
     filterPatches(mesh);
 
+
+    dumpCyclicMatch("final_", mesh);
 
 
     // Set the precision of the points data to 10

@@ -141,6 +141,7 @@ private:
                 const faceList& half0Faces,
                 const faceList& half1Faces,
 
+                pointField& ppPoints,
                 pointField& half0Ctrs,
                 pointField& half1Ctrs,
                 pointField& anchors0,
