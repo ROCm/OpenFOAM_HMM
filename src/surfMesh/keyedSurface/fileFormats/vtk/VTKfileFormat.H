@@ -23,109 +23,99 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::Keyed
+    Foam::fileFormats::VTKfileFormat
 
 Description
-    A container with an integer key attached to any item.
-
-    The key can useful for sorting.
+    Provide a means of writing VTK legacy format.
 
 SourceFiles
-    KeyedI.H
+    VTKfileFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Keyed_H
-#define Keyed_H
+#ifndef VTKfileFormat_H
+#define VTKfileFormat_H
 
-#include "List.H"
-#include "xfer.H"
+#include "Ostream.H"
+#include "OFstream.H"
+#include "keyedSurface.H"
+#include "meshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of friend functions and operators
-
-template<class T> class Keyed;
-template<class T> class xfer;
-
-template<class T> Istream& operator>>(Istream&, Keyed<T>&);
-template<class T> Ostream& operator<<(Ostream&, const Keyed<T>&);
+namespace fileFormats
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class Keyed Declaration
+                       Class VTKfileFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class Keyed
+class VTKfileFormat
 :
-    public T
+    public keyedSurface
 {
-    // Private data
 
-        label key_;
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        VTKfileFormat(const VTKfileFormat&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const VTKfileFormat&);
+
+        static void writeHead(Ostream&, const pointField&);
+        static void writeTail(Ostream&, const List<surfacePatch>&);
 
 public:
-
-    // Static Members
-
-        //- Add labels to a list of values
-        inline static List<Keyed<T> > createList
-        (
-            const List<T>&,
-            const label key=0
-        );
-
-        //- Add labels to a list of values
-        inline static List<Keyed<T> > createList
-        (
-            const List<T>&,
-            const List<label>& keys
-        );
-
 
     // Constructors
 
         //- Construct null
-        inline Keyed();
+        VTKfileFormat();
 
-        //- Construct as a copy of item, with a key
-        inline Keyed(const T& item, const label key=0);
+    // Selectors
 
-        //- Construct by transferring the item, with a key
-        inline Keyed(const xfer<T>& item, const label key=0);
-
-        //- Construct from Istream
-        inline Keyed(Istream&);
-
+    // Destructor
 
     // Member Functions
 
-        // Access
+        // Write
 
-            //- Return const access to the integer key
-            inline label key() const;
+        //- Write keyedSurface
+        static void write(Ostream&, const keyedSurface&);
 
-            //- Return non-const access to the integer key
-            inline label& key();
+        //- Write keyedSurface
+        static void write(const fileName& fName, const keyedSurface& surf)
+        {
+            write(OFstream(fName)(), surf);
+        }
 
+        //- Write meshedSurface
+        static void write(Ostream&, const meshedSurface&);
 
-    // IOstream Operators
+        //- Write meshedSurface
+        static void write(const fileName& fName, const meshedSurface& surf)
+        {
+            write(OFstream(fName)(), surf);
+        }
 
-        friend Istream& operator>> <T>(Istream&, Keyed<T>&);
-        friend Ostream& operator<< <T>(Ostream&, const Keyed<T>&);
+        //- Write object
+        virtual void write(Ostream& os) const
+        {
+            write(os, *this);
+        }
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "KeyedI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

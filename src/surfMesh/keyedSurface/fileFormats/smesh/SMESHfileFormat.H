@@ -23,109 +23,103 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::Keyed
+    Foam::fileFormats::SMESHfileFormat
 
 Description
-    A container with an integer key attached to any item.
+    Provide a means of writing tetgen SMESH format.
 
-    The key can useful for sorting.
+    Tetgen http://tetgen.berlios.de
+
+See Also
+    File format information:
+    http://tetgen.berlios.de/fformats.smesh.html
 
 SourceFiles
-    KeyedI.H
+    SMESHfileFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Keyed_H
-#define Keyed_H
+#ifndef SMESHfileFormat_H
+#define SMESHfileFormat_H
 
-#include "List.H"
-#include "xfer.H"
+#include "IFstream.H"
+#include "OFstream.H"
+#include "Ostream.H"
+#include "keyedSurface.H"
+#include "meshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of friend functions and operators
-
-template<class T> class Keyed;
-template<class T> class xfer;
-
-template<class T> Istream& operator>>(Istream&, Keyed<T>&);
-template<class T> Ostream& operator<<(Ostream&, const Keyed<T>&);
+namespace fileFormats
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class Keyed Declaration
+                      Class SMESHfileFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class Keyed
+class SMESHfileFormat
 :
-    public T
+    public keyedSurface
 {
     // Private data
 
-        label key_;
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        SMESHfileFormat(const SMESHfileFormat&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const SMESHfileFormat&);
 
 public:
-
-    // Static Members
-
-        //- Add labels to a list of values
-        inline static List<Keyed<T> > createList
-        (
-            const List<T>&,
-            const label key=0
-        );
-
-        //- Add labels to a list of values
-        inline static List<Keyed<T> > createList
-        (
-            const List<T>&,
-            const List<label>& keys
-        );
-
 
     // Constructors
 
         //- Construct null
-        inline Keyed();
+        SMESHfileFormat();
 
-        //- Construct as a copy of item, with a key
-        inline Keyed(const T& item, const label key=0);
+    // Selectors
 
-        //- Construct by transferring the item, with a key
-        inline Keyed(const xfer<T>& item, const label key=0);
-
-        //- Construct from Istream
-        inline Keyed(Istream&);
-
+    // Destructor
 
     // Member Functions
 
-        // Access
+        //- Write keyedSurface
+        static void write(Ostream&, const keyedSurface&);
 
-            //- Return const access to the integer key
-            inline label key() const;
+        //- Write meshedSurface
+        static void write(Ostream&, const meshedSurface&);
 
-            //- Return non-const access to the integer key
-            inline label& key();
+        //- Write keyedSurface
+        static void write(const fileName& fName, const keyedSurface& surf)
+        {
+            write(OFstream(fName)(), surf);
+        }
+
+        //- Write meshedSurface
+        static void write(const fileName& fName, const meshedSurface& surf)
+        {
+            write(OFstream(fName)(), surf);
+        }
 
 
-    // IOstream Operators
+        //- Write object
+        virtual void write(Ostream& os) const
+        {
+            write(os, *this);
+        }
 
-        friend Istream& operator>> <T>(Istream&, Keyed<T>&);
-        friend Ostream& operator<< <T>(Ostream&, const Keyed<T>&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "KeyedI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

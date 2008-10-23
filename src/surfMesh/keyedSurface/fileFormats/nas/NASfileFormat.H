@@ -23,109 +23,97 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::Keyed
+    Foam::fileFormats::NASfileFormat
 
 Description
-    A container with an integer key attached to any item.
+    Nastran surface reader.
 
-    The key can useful for sorting.
+    - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
+      to obtain patch names.
+    - Handles Nastran short and long formats, but not free format.
+    - Properly handles the Nastran compact floating point notation: \n
+    @verbatim
+        GRID          28        10.20269-.030265-2.358-8
+    @endverbatim
 
 SourceFiles
-    KeyedI.H
+    NASfileFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Keyed_H
-#define Keyed_H
+#ifndef NASfileFormat_H
+#define NASfileFormat_H
 
-#include "List.H"
-#include "xfer.H"
+#include "Ostream.H"
+#include "OFstream.H"
+#include "keyedSurface.H"
+#include "meshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of friend functions and operators
-
-template<class T> class Keyed;
-template<class T> class xfer;
-
-template<class T> Istream& operator>>(Istream&, Keyed<T>&);
-template<class T> Ostream& operator<<(Ostream&, const Keyed<T>&);
+namespace fileFormats
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class Keyed Declaration
+                       Class NASfileFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class Keyed
+class NASfileFormat
 :
-    public T
+    public keyedSurface
 {
-    // Private data
 
-        label key_;
+    // Private Member Functions
+
+        //- Do weird things to extract number
+        static scalar parseNASCoord(const string&);
+
+        //- Disallow default bitwise copy construct
+        NASfileFormat(const NASfileFormat&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const NASfileFormat&);
 
 public:
-
-    // Static Members
-
-        //- Add labels to a list of values
-        inline static List<Keyed<T> > createList
-        (
-            const List<T>&,
-            const label key=0
-        );
-
-        //- Add labels to a list of values
-        inline static List<Keyed<T> > createList
-        (
-            const List<T>&,
-            const List<label>& keys
-        );
-
 
     // Constructors
 
         //- Construct null
-        inline Keyed();
+        NASfileFormat();
 
-        //- Construct as a copy of item, with a key
-        inline Keyed(const T& item, const label key=0);
+        //- Construct from file name
+        NASfileFormat(const fileName&, const bool triangulate=false);
 
-        //- Construct by transferring the item, with a key
-        inline Keyed(const xfer<T>& item, const label key=0);
+    // Selectors
 
-        //- Construct from Istream
-        inline Keyed(Istream&);
+        //- Read file and return keyedSurface
+        static autoPtr<keyedSurface> New
+        (
+            const fileName& fName,
+            const bool triangulate=false
+        )
+        {
+            return autoPtr<keyedSurface>
+            (
+                new NASfileFormat(fName,triangulate)
+            );
+        }
 
+    // Destructor
 
     // Member Functions
 
-        // Access
-
-            //- Return const access to the integer key
-            inline label key() const;
-
-            //- Return non-const access to the integer key
-            inline label& key();
-
-
-    // IOstream Operators
-
-        friend Istream& operator>> <T>(Istream&, Keyed<T>&);
-        friend Ostream& operator<< <T>(Ostream&, const Keyed<T>&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "KeyedI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
