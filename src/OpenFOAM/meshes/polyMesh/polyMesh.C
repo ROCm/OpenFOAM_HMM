@@ -1059,7 +1059,6 @@ void Foam::polyMesh::resetPrimitives
 
 void Foam::polyMesh::resetPrimitives
 (
-    const label nUsedFaces,
     const xfer<pointField>& points,
     const xfer<faceList>& faces,
     const xfer<labelList>& owner,
@@ -1124,7 +1123,6 @@ void Foam::polyMesh::resetPrimitives
             (
                 "polyMesh::polyMesh::resetPrimitives\n"
                 "(\n"
-                "    const label nUsedFaces,\n"
                 "    const xfer<pointField>&,\n"
                 "    const xfer<faceList>&,\n"
                 "    const xfer<labelList>& owner,\n"
@@ -1163,7 +1161,6 @@ void Foam::polyMesh::resetPrimitives
             (
                 "polyMesh::polyMesh::resetPrimitives\n"
                 "(\n"
-                "    const label nUsedFaces,\n"
                 "    const xfer<pointField>&,\n"
                 "    const xfer<faceList>&,\n"
                 "    const xfer<labelList>& owner,\n"

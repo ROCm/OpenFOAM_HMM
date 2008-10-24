@@ -852,7 +852,7 @@ void Foam::polyTopoChange::compact
                                     << " at position " << faceI << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
-                            } 
+                            }
                             localPointMap[pointI] = newPointI++;
                         }
                     }
@@ -904,7 +904,7 @@ void Foam::polyTopoChange::compact
                                     << " at position " << faceI << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
-                            } 
+                            }
                             localPointMap[pointI] = newPointI++;
                         }
                     }
@@ -2987,13 +2987,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
         mesh.resetPrimitives
         (
-            nActiveFaces_,
-            xferMove<pointField>(renumberedMeshPoints),
-            xferMove<faceList>(faces_),
-            xferMove<labelList>(faceOwner_),
-            xferMove<labelList>(faceNeighbour_),
-            xferMove<labelList>(patchSizes),
-            xferMove<labelList>(patchStarts),
+            xferMove(renumberedMeshPoints),
+            xferMoveTo<faceList>(faces_),
+            xferMoveTo<labelList>(faceOwner_),
+            xferMoveTo<labelList>(faceNeighbour_),
+            patchSizes,
+            patchStarts,
             syncParallel
         );
 
@@ -3004,13 +3003,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         // Set new points.
         mesh.resetPrimitives
         (
-            nActiveFaces_,
-            xferMove<pointField>(newPoints),
-            xferMove<faceList>(faces_),
-            xferMove<labelList>(faceOwner_),
-            xferMove<labelList>(faceNeighbour_),
-            xferMove<labelList>(patchSizes),
-            xferMove<labelList>(patchStarts),
+            xferMove(newPoints),
+            xferMoveTo<faceList>(faces_),
+            xferMoveTo<labelList>(faceOwner_),
+            xferMoveTo<labelList>(faceNeighbour_),
+            patchSizes,
+            patchStarts,
             syncParallel
         );
         // Invalidate new points to go into map.
