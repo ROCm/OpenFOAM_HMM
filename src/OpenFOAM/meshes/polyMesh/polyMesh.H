@@ -116,8 +116,8 @@ private:
             //- Boundary mesh
             mutable polyBoundaryMesh boundary_;
 
-            //- Mesh bounding-box. created from points on construction
-            //  and updated when the mesh moves
+            //- Mesh bounding-box.
+            //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
 
             //- vector of valid directions in mesh
@@ -170,9 +170,6 @@ private:
         //- Initialise the polyMesh from the given set of cells
         void initMesh(cellList& c);
 
-        //- Initialise the polyMesh from the given set of cells
-        void initMesh(const xfer<cellList>& c);
-
         //- Calculate the valid directions in the mesh from the boundaries
         void calcDirections() const;
 
@@ -222,33 +219,10 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& owner,
-            const labelList& neighbour,
-            const bool syncPar = true
-        );
-
-        //- Construct without boundary from components.
-        //  Boundary is added using addPatches() member function
-        polyMesh
-        (
-            const IOobject& io,
             const xfer<pointField>& points,
             const xfer<faceList>& faces,
             const xfer<labelList>& owner,
             const xfer<labelList>& neighbour,
-            const bool syncPar = true
-        );
-
-        //- Construct without boundary with cells rather than owner/neighbour.
-        //  Boundary is added using addPatches() member function
-        polyMesh
-        (
-            const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const cellList& cells,
             const bool syncPar = true
         );
 
@@ -267,7 +241,7 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
+            const xfer<pointField>& points,
             const cellShapeList& shapes,
             const faceListList& boundaryFaces,
             const wordList& boundaryPatchNames,

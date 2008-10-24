@@ -230,7 +230,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     }
     else
     {
-        cellIOList c
+        cellIOList cLst
         (
             IOobject
             (
@@ -243,9 +243,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             )
         );
 
-
         // Set the primitive mesh
-        initMesh(c);
+        initMesh(cLst);
 
         owner_.write();
         neighbour_.write();
@@ -268,162 +267,6 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         WarningIn("polyMesh(const IOobject&)")
             << "no cells in mesh" << endl;
     }
-}
-
-
-Foam::polyMesh::polyMesh
-(
-    const IOobject& io,
-    const pointField& points,
-    const faceList& faces,
-    const labelList& owner,
-    const labelList& neighbour,
-    const bool syncPar
-)
-:
-    objectRegistry(io),
-    primitiveMesh(),
-    points_
-    (
-        IOobject
-        (
-            "points",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        points
-    ),
-    faces_
-    (
-        IOobject
-        (
-            "faces",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        faces
-    ),
-    owner_
-    (
-        IOobject
-        (
-            "owner",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        owner
-    ),
-    neighbour_
-    (
-        IOobject
-        (
-            "neighbour",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        neighbour
-    ),
-    clearedPrimitives_(false),
-    boundary_
-    (
-        IOobject
-        (
-            "boundary",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        *this,
-        0
-    ),
-    bounds_(points_, syncPar),
-    directions_(Vector<label>::zero),
-    pointZones_
-    (
-        IOobject
-        (
-            "pointZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    faceZones_
-    (
-        IOobject
-        (
-            "faceZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    cellZones_
-    (
-        IOobject
-        (
-            "cellZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    globalMeshDataPtr_(NULL),
-    moving_(false),
-    changing_(false),
-    curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(NULL)
-{
-    // Check if the faces and cells are valid
-    forAll (faces_, faceI)
-    {
-        const face& curFace = faces_[faceI];
-
-        if (min(curFace) < 0 || max(curFace) > points_.size())
-        {
-            FatalErrorIn
-            (
-                "polyMesh::polyMesh\n"
-                "(\n"
-                "    const IOobject& io,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const cellList& cells\n"
-                ")\n"
-            )   << "Face " << faceI << "contains vertex labels out of range: "
-                << curFace << " Max point index = " << points_.size()
-                << abort(FatalError);
-        }
-    }
-
-    // Set the primitive mesh
-    initMesh();
 }
 
 
@@ -580,183 +423,6 @@ Foam::polyMesh::polyMesh
 
     // Set the primitive mesh
     initMesh();
-}
-
-
-Foam::polyMesh::polyMesh
-(
-    const IOobject& io,
-    const pointField& points,
-    const faceList& faces,
-    const cellList& cells,
-    const bool syncPar
-)
-:
-    objectRegistry(io),
-    primitiveMesh(),
-    points_
-    (
-        IOobject
-        (
-            "points",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        points
-    ),
-    faces_
-    (
-        IOobject
-        (
-            "faces",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        faces
-    ),
-    owner_
-    (
-        IOobject
-        (
-            "owner",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        0
-    ),
-    neighbour_
-    (
-        IOobject
-        (
-            "neighbour",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        0
-    ),
-    clearedPrimitives_(false),
-    boundary_
-    (
-        IOobject
-        (
-            "boundary",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        *this,
-        0
-    ),
-    bounds_(points_, syncPar),
-    directions_(Vector<label>::zero),
-    pointZones_
-    (
-        IOobject
-        (
-            "pointZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    faceZones_
-    (
-        IOobject
-        (
-            "faceZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    cellZones_
-    (
-        IOobject
-        (
-            "cellZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    globalMeshDataPtr_(NULL),
-    moving_(false),
-    changing_(false),
-    curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(NULL)
-{
-    // Check if the faces and cells are valid
-    forAll (faces_, faceI)
-    {
-        const face& curFace = faces_[faceI];
-
-        if (min(curFace) < 0 || max(curFace) > points_.size())
-        {
-            FatalErrorIn
-            (
-                "polyMesh::polyMesh\n"
-                "(\n"
-                "    const IOobject& io,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const cellList& cells\n"
-                ")\n"
-            )   << "Face " << faceI << "contains vertex labels out of range: "
-                << curFace << " Max point index = " << points_.size()
-                << abort(FatalError);
-        }
-    }
-
-    // Check if the faces and cells are valid
-    forAll (cells, cellI)
-    {
-        const cell& curCell = cells[cellI];
-
-        if (min(curCell) < 0 || max(curCell) > faces_.size())
-        {
-            FatalErrorIn
-            (
-                "polyMesh::polyMesh\n"
-                "(\n"
-                "    const IOobject& io,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const cellList& cells\n"
-                ")\n"
-            )   << "Cell " << cellI << "contains face labels out of range: "
-                << curCell << " Max face index = " << faces_.size()
-                << abort(FatalError);
-        }
-    }
-
-    // Set the primitive mesh
-    initMesh(const_cast<cellList&>(cells));
 }
 
 
@@ -910,7 +576,8 @@ Foam::polyMesh::polyMesh
         }
     }
 
-    const cellList& cLst = cells();
+    // transfer in cell list
+    cellList cLst(cells);
 
     // Check if cells are valid
     forAll (cLst, cellI)
@@ -935,7 +602,7 @@ Foam::polyMesh::polyMesh
     }
 
     // Set the primitive mesh
-    initMesh(cells);
+    initMesh(cLst);
 }
 
 
@@ -1019,8 +686,8 @@ void Foam::polyMesh::resetPrimitives
     }
 
 
-    // Set the primitive mesh from the owner_, neighbour_. Works
-    // out from patch end where the active faces stop.
+    // Set the primitive mesh from the owner_, neighbour_.
+    // Works out from patch end where the active faces stop.
     initMesh();
 
 

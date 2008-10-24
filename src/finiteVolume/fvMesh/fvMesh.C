@@ -231,38 +231,6 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 Foam::fvMesh::fvMesh
 (
     const IOobject& io,
-    const pointField& points,
-    const faceList& faces,
-    const labelList& allOwner,
-    const labelList& allNeighbour,
-    const bool syncPar
-)
-:
-    polyMesh(io, points, faces, allOwner, allNeighbour, syncPar),
-    surfaceInterpolation(*this),
-    boundary_(*this),
-    lduPtr_(NULL),
-    curTimeIndex_(time().timeIndex()),
-    VPtr_(NULL),
-    V0Ptr_(NULL),
-    V00Ptr_(NULL),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CPtr_(NULL),
-    CfPtr_(NULL),
-    phiPtr_(NULL)
-{
-    if (debug)
-    {
-        Info<< "Constructing fvMesh from components"
-            << endl;
-    }
-}
-
-
-Foam::fvMesh::fvMesh
-(
-    const IOobject& io,
     const xfer<pointField>& points,
     const xfer<faceList>& faces,
     const xfer<labelList>& allOwner,
@@ -286,39 +254,7 @@ Foam::fvMesh::fvMesh
 {
     if (debug)
     {
-        Info<< "Constructing fvMesh from components"
-            << endl;
-    }
-}
-
-
-Foam::fvMesh::fvMesh
-(
-    const IOobject& io,
-    const pointField& points,
-    const faceList& faces,
-    const cellList& cells,
-    const bool syncPar
-)
-:
-    polyMesh(io, points, faces, cells, syncPar),
-    surfaceInterpolation(*this),
-    boundary_(*this),
-    lduPtr_(NULL),
-    curTimeIndex_(time().timeIndex()),
-    VPtr_(NULL),
-    V0Ptr_(NULL),
-    V00Ptr_(NULL),
-    SfPtr_(NULL),
-    magSfPtr_(NULL),
-    CPtr_(NULL),
-    CfPtr_(NULL),
-    phiPtr_(NULL)
-{
-    if (debug)
-    {
-        Info<< "Constructing fvMesh from components"
-            << endl;
+        Info<< "Constructing fvMesh from components" << endl;
     }
 }
 
@@ -348,8 +284,7 @@ Foam::fvMesh::fvMesh
 {
     if (debug)
     {
-        Info<< "Constructing fvMesh from components"
-            << endl;
+        Info<< "Constructing fvMesh from components" << endl;
     }
 }
 
