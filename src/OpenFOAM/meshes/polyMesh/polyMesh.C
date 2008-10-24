@@ -954,22 +954,23 @@ void Foam::polyMesh::resetPrimitives
     // Clear addressing. Keep geometric props for mapping.
     clearAddressing();
 
-    // Take over new primitive data. Note extra optimization to prevent
-    // assignment to self.
-    if (&points_ != &points)
+    // Take over new primitive data.
+    // Optimized to prevent self-assignment to self and
+    // to avoid overwriting data at all
+    if (&points && &points_ != &points)
     {
         points_ = points;
         bounds_ = boundBox(points_, validBoundary);
     }
-    if (&faces_ != &faces)
+    if (&faces && &faces_ != &faces)
     {
         faces_ = faces;
     }
-    if (&owner_ != &owner)
+    if (&owner && &owner_ != &owner)
     {
         owner_ = owner;
     }
-    if (&neighbour_ != &neighbour)
+    if (&neighbour && &neighbour_ != &neighbour)
     {
         neighbour_ = neighbour;
     }
@@ -1072,12 +1073,28 @@ void Foam::polyMesh::resetPrimitives
     clearAddressing();
 
     // Take over new primitive data.
-    points_.transfer(points());
-    bounds_ = boundBox(points_, validBoundary);
+    // Optimized to avoid overwriting data at all
+    if (&points)
+    {
+        points_.transfer(points());
+        bounds_ = boundBox(points_, validBoundary);
+    }
 
-    faces_.transfer(faces());
-    owner_.transfer(owner());
-    neighbour_.transfer(neighbour());
+    if (&faces)
+    {
+        faces_.transfer(faces());
+    }
+
+    if (&owner)
+    {
+        owner_.transfer(owner());
+    }
+
+    if (&neighbour)
+    {
+        neighbour_.transfer(neighbour());
+    }
+
 
     // Reset patch sizes and starts
     forAll(boundary_, patchI)
@@ -1306,9 +1323,9 @@ void Foam::polyMesh::addZones
         (
             "void addZones\n"
             "(\n"
-            "    const List<pointZone*>& pz,\n"
-            "    const List<faceZone*>& fz,\n"
-            "    const List<cellZone*>& cz\n"
+            "    const List<pointZone*>&,\n"
+            "    const List<faceZone*>&,\n"
+            "    const List<cellZone*>&\n"
             ")"
         )   << "point, face or cell zone already exists"
             << abort(FatalError);
