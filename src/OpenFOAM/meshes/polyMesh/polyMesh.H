@@ -460,23 +460,6 @@ public:
             //  patch ends at nActiveFaces) and change patches with addPatches.
             void resetPrimitives
             (
-                const label nUsedFaces,
-                const pointField& points,
-                const faceList& faces,
-                const labelList& owner,
-                const labelList& neighbour,
-                const labelList& patchSizes,
-                const labelList& patchStarts,
-                const bool validBoundary = true
-            );
-
-            //- Reset mesh primitive data. Assumes all patch info correct
-            //  (so does e.g. parallel communication). If not use
-            //  validBoundary=false
-            //  (still assumes patchStarts[0] = nInternalFaces and last
-            //  patch ends at nActiveFaces) and change patches with addPatches.
-            void resetPrimitives
-            (
                 const xfer<pointField>& points,
                 const xfer<faceList>& faces,
                 const xfer<labelList>& owner,
