@@ -77,6 +77,16 @@ inline Foam::xfer<T>::~xfer()
 }
 
 
+// * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
+
+template<class T>
+inline const Foam::xfer<T>& Foam::xfer<T>::null()
+{
+    xfer<T>* nullPtr = reinterpret_cast<xfer<T>*>(0);
+    return *nullPtr;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

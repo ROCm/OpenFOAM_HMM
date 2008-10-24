@@ -102,6 +102,11 @@ public:
 
         inline ~xfer();
 
+    // Member Functions
+
+        //- Return a null object reference
+        inline static const xfer<T>& null();
+
     // Member Operators
 
         //- Transfer the contents into the object
