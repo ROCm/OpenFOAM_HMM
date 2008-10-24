@@ -43,8 +43,8 @@ do
    [ -d $dir ] && rm -rf $dir/*
 done
 
-echo "Removing *~ backup files"
-find . -name '*~' -exec rm {} \;
+echo "Retaining *~ backup files"
+## find . -name '*~' -exec rm {} \;
 
 echo "Removing .dep files"
 find . -name '*.dep' -exec rm {} \;
@@ -57,8 +57,6 @@ find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB
 
 echo "Removing misc files"
 find . \( -name exe -o -name log -o -name so_locations \) -exec rm {} \;
-
-# rm -rf src/mpich-${MPICH_VERSION}/platforms
 
 ( cd tutorials && ./Allclean )
 

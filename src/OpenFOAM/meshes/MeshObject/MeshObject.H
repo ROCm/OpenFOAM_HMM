@@ -104,11 +104,11 @@ public:
         );
 
 
-    // Destructor
-
-        static bool Delete(const Mesh& mesh);
+    // Destructors
 
         virtual ~MeshObject();
+
+        static bool Delete(const Mesh& mesh);
 
 
     // Member Functions

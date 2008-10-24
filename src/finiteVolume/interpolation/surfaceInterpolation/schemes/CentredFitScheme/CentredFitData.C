@@ -43,6 +43,7 @@ Foam::CentredFitData<Polynomial>::CentredFitData
 )
 :
     MeshObject<fvMesh, CentredFitData<Polynomial> >(mesh),
+    stencil_(stencil),
     linearLimitFactor_(linearLimitFactor),
     centralWeight_(centralWeight),
 #   ifdef SPHERICAL_GEOMETRY
@@ -51,62 +52,29 @@ Foam::CentredFitData<Polynomial>::CentredFitData
     dim_(mesh.nGeometricD()),
 #   endif
     minSize_(Polynomial::nTerms(dim_)),
-    coeffs_(mesh.nInternalFaces())
+    coeffs_(mesh.nFaces())
 {
     if (debug)
     {
         Info<< "Contructing CentredFitData<Polynomial>" << endl;
     }
 
-    // check input
-    if (centralWeight_ < 1 - SMALL)
+    // Check input
+    if (linearLimitFactor > 1)
     {
         FatalErrorIn("CentredFitData<Polynomial>::CentredFitData")
-            << "centralWeight requested = " << centralWeight_
+            << "linearLimitFactor requested = " << linearLimitFactor
             << " should not be less than one"
             << exit(FatalError);
     }
 
-    if (minSize_ == 0)
-    {
-        FatalErrorIn("CentredFitSnGradData")
-            << " dimension must be 1,2 or 3, not" << dim_ << exit(FatalError);
-    }
-
-    // store the polynomial size for each cell to write out
-    surfaceScalarField interpPolySize
-    (
-        IOobject
-        (
-            "CentredFitInterpPolySize",
-            "constant",
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("CentredFitInterpPolySize", dimless, scalar(0))
-    );
-
-    // Get the cell/face centres in stencil order.
-    // Centred face stencils no good for triangles of tets. Need bigger stencils
-    List<List<point> > stencilPoints(mesh.nFaces());
-    stencil.collectData(mesh.C(), stencilPoints);
-
-    // find the fit coefficients for every face in the mesh
-
-    for(label faci = 0; faci < mesh.nInternalFaces(); faci++)
-    {
-        interpPolySize[faci] = calcFit(stencilPoints[faci], faci);
-    }
+    calcFit();
 
     if (debug)
     {
         Info<< "CentredFitData<Polynomial>::CentredFitData() :"
             << "Finished constructing polynomialFit data"
             << endl;
-
-        interpPolySize.write();
     }
 }
 
@@ -120,15 +88,14 @@ void Foam::CentredFitData<Polynomial>::findFaceDirs
     vector& jdir,        // value changed in return
     vector& kdir,        // value changed in return
     const fvMesh& mesh,
-    const label faci
+    const label facei
 )
 {
-    idir = mesh.Sf()[faci];
-    //idir = mesh.C()[mesh.neighbour()[faci]] - mesh.C()[mesh.owner()[faci]];
+    idir = mesh.faceAreas()[facei];
     idir /= mag(idir);
 
 #   ifndef SPHERICAL_GEOMETRY
-    if (mesh.nGeometricD() <= 2) // find the normal direcion
+    if (mesh.nGeometricD() <= 2) // find the normal direction
     {
         if (mesh.directions()[0] == -1)
         {
@@ -143,14 +110,14 @@ void Foam::CentredFitData<Polynomial>::findFaceDirs
             kdir = vector(0, 0, 1);
         }
     }
-    else // 3D so find a direction in the place of the face
+    else // 3D so find a direction in the plane of the face
     {
-        const face& f = mesh.faces()[faci];
-        kdir = mesh.points()[f[0]] - mesh.points()[f[1]];
+        const face& f = mesh.faces()[facei];
+        kdir = mesh.points()[f[0]] - mesh.faceCentres()[facei];
     }
 #   else
     // Spherical geometry so kdir is the radial direction
-    kdir = mesh.Cf()[faci];
+    kdir = mesh.faceCentres()[facei];
 #   endif
 
     if (mesh.nGeometricD() == 3)
@@ -176,16 +143,57 @@ void Foam::CentredFitData<Polynomial>::findFaceDirs
 
 
 template<class Polynomial>
+void Foam::CentredFitData<Polynomial>::calcFit()
+{
+    const fvMesh& mesh = this->mesh();
+
+    // Get the cell/face centres in stencil order.
+    // Centred face stencils no good for triangles of tets.
+    // Need bigger stencils
+    List<List<point> > stencilPoints(mesh.nFaces());
+    stencil_.collectData(mesh.C(), stencilPoints);
+
+    // find the fit coefficients for every face in the mesh
+
+    const surfaceScalarField& w = this->mesh().surfaceInterpolation::weights();
+
+    for(label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    {
+        calcFit(stencilPoints[facei], w[facei], facei);
+    }
+
+    const surfaceScalarField::GeometricBoundaryField& bw = w.boundaryField();
+
+    forAll(bw, patchi)
+    {
+        const fvsPatchScalarField& pw = bw[patchi];
+
+        if (pw.coupled())
+        {
+            label facei = pw.patch().patch().start();
+
+            forAll(pw, i)
+            {
+                calcFit(stencilPoints[facei], pw[i], facei);
+                facei++;
+            }
+        }
+    }
+}
+
+
+template<class Polynomial>
 Foam::label Foam::CentredFitData<Polynomial>::calcFit
 (
     const List<point>& C,
-    const label faci
+    const scalar wLin,
+    const label facei
 )
 {
     vector idir(1,0,0);
     vector jdir(0,1,0);
     vector kdir(0,0,1);
-    findFaceDirs(idir, jdir, kdir, this->mesh(), faci);
+    findFaceDirs(idir, jdir, kdir, this->mesh(), facei);
 
     // Setup the point weights
     scalarList wts(C.size(), scalar(1));
@@ -193,7 +201,7 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
     wts[1] = centralWeight_;
 
     // Reference point
-    point p0 = this->mesh().faceCentres()[faci];
+    point p0 = this->mesh().faceCentres()[facei];
 
     // p0 -> p vector in the face-local coordinate system
     vector d;
@@ -235,12 +243,9 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
 
     // Set the fit
     label stencilSize = C.size();
-    coeffs_[faci].setSize(stencilSize);
+    coeffs_[facei].setSize(stencilSize);
     scalarList singVals(minSize_);
     label nSVDzeros = 0;
-
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>& w =
-        this->mesh().surfaceInterpolation::weights();
 
     bool goodFit = false;
     for(int iIt = 0; iIt < 10 && !goodFit; iIt++)
@@ -251,11 +256,11 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
         scalar fit1 = wts[1]*svd.VSinvUt()[0][1];
 
         goodFit =
-            (mag(fit0 - w[faci]) < linearLimitFactor_*w[faci])
-         && (mag(fit1 - (1 - w[faci])) < linearLimitFactor_*(1 - w[faci]));
+            (mag(fit0 - wLin) < linearLimitFactor_*wLin)
+         && (mag(fit1 - (1 - wLin)) < linearLimitFactor_*(1 - wLin));
 
-        //scalar w0Err = fit0/w[faci];
-        //scalar w1Err = fit1/(1 - w[faci]);
+        //scalar w0Err = fit0/wLin;
+        //scalar w1Err = fit1/(1 - wLin);
 
         //goodFit =
         //    (w0Err > linearLimitFactor_ && w0Err < (1 + linearLimitFactor_))
@@ -263,12 +268,12 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
 
         if (goodFit)
         {
-            coeffs_[faci][0] = fit0;
-            coeffs_[faci][1] = fit1;
+            coeffs_[facei][0] = fit0;
+            coeffs_[facei][1] = fit1;
 
             for(label i=2; i<stencilSize; i++)
             {
-                coeffs_[faci][i] = wts[i]*svd.VSinvUt()[0][i];
+                coeffs_[facei][i] = wts[i]*svd.VSinvUt()[0][i];
             }
 
             singVals = svd.S();
@@ -300,22 +305,24 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
         // (
         //     min
         //     (
-        //         min(alpha - beta*mag(coeffs_[faci][0] - w[faci])/w[faci], 1),
-        //         min(alpha - beta*mag(coeffs_[faci][1] - (1 - w[faci]))/(1 - w[faci]), 1)
+        //         min(alpha - beta*mag(coeffs_[facei][0] - wLin)/wLin, 1),
+        //         min(alpha - beta*mag(coeffs_[facei][1] - (1 - wLin))
+        //       /(1 - wLin), 1)
         //     ), 0
         // );
 
-        //Info<< w[faci] << " " << coeffs_[faci][0] << " " << (1 - w[faci]) << " " << coeffs_[faci][1] << endl;
+        //Info<< wLin << " " << coeffs_[facei][0]
+        //    << " " << (1 - wLin) << " " << coeffs_[facei][1] << endl;
 
-        // Remove the uncorrected linear coefficients
-        coeffs_[faci][0] -= w[faci];
-        coeffs_[faci][1] -= 1 - w[faci];
+        // Remove the uncorrected linear ocefficients
+        coeffs_[facei][0] -= wLin;
+        coeffs_[facei][1] -= 1 - wLin;
 
         // if (limiter < 0.99)
         // {
         //     for(label i = 0; i < stencilSize; i++)
         //     {
-        //         coeffs_[faci][i] *= limiter;
+        //         coeffs_[facei][i] *= limiter;
         //     }
         // }
     }
@@ -326,16 +333,16 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
             WarningIn
             (
                 "CentredFitData<Polynomial>::calcFit"
-                "(const List<point>& C, const label faci"
-            )   << "Could not fit face " << faci
+                "(const List<point>& C, const label facei"
+            )   << "Could not fit face " << facei
                 << ", reverting to linear." << nl
                 << "    Weights "
-                << coeffs_[faci][0] << " " << w[faci] << nl
+                << coeffs_[facei][0] << " " << wLin << nl
                 << "    Linear weights "
-                << coeffs_[faci][1] << " " << 1 - w[faci] << endl;
+                << coeffs_[facei][1] << " " << 1 - wLin << endl;
         }
 
-        coeffs_[faci] = 0;
+        coeffs_[facei] = 0;
     }
 
     return minSize_ - nSVDzeros;
@@ -345,8 +352,7 @@ Foam::label Foam::CentredFitData<Polynomial>::calcFit
 template<class Polynomial>
 bool Foam::CentredFitData<Polynomial>::movePoints()
 {
-    notImplemented("CentredFitData<Polynomial>::movePoints()");
-
+    calcFit();
     return true;
 }
 

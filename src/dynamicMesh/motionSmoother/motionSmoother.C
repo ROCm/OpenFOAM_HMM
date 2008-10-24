@@ -780,9 +780,6 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
 
     tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints);
 
-    //!!! Workaround for movePoints bug
-    const_cast<polyBoundaryMesh&>(mesh_.boundaryMesh()).movePoints(newPoints);
-
     pp_.movePoints(mesh_.points());
 
     return tsweptVol;

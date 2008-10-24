@@ -57,6 +57,9 @@ class CentredFitData
 {
     // Private data
 
+        //- The stencil the fit is based on
+        const extendedCentredStencil& stencil_;
+
         //- Factor the fit is allowed to deviate from linear.
         //  This limits the amount of high-order correction and increases
         //  stability on bad meshes
@@ -88,7 +91,17 @@ class CentredFitData
             const label faci
         );
 
-        label calcFit(const List<point>&, const label faci);
+        //- Calculate the fit for the all the mesh faces
+        //  and set the coefficients
+        void calcFit();
+
+        //- Calculate the fit for the specified face and set the coefficients
+        label calcFit
+        (
+            const List<point>&,  // Stencil points
+            const scalar wLin,   // Linear weight
+            const label faci     // Current face index
+        );
 
 
 public:
