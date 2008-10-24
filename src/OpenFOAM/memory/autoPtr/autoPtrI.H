@@ -29,9 +29,9 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::autoPtr<T>::autoPtr(T* tPtr)
+inline Foam::autoPtr<T>::autoPtr(T* p)
 :
-    ptr_(tPtr)
+    ptr_(p)
 {}
 
 
@@ -40,7 +40,7 @@ inline Foam::autoPtr<T>::autoPtr(const autoPtr<T>& ap)
 :
     ptr_(ap.ptr_)
 {
-    ap.ptr_ = NULL;
+    ap.ptr_ = 0;
 }
 
 
@@ -64,7 +64,7 @@ template<class T>
 inline T* Foam::autoPtr<T>::ptr()
 {
     T* ptr = ptr_;
-    ptr_ = NULL;
+    ptr_ = 0;
     return ptr;
 }
 
@@ -74,7 +74,7 @@ inline void Foam::autoPtr<T>::set(T* p)
 {
     if (ptr_)
     {
-        FatalErrorIn("void autoPtr<T>::set(T* p)")
+        FatalErrorIn("void autoPtr<T>::set(T*)")
             << "object already allocated"
             << abort(FatalError);
     }
@@ -98,7 +98,7 @@ inline void Foam::autoPtr<T>::reset(T* p)
 template<class T>
 inline void Foam::autoPtr<T>::clear()
 {
-    reset(NULL);
+    reset(0);
 }
 
 

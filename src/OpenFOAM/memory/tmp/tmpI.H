@@ -26,15 +26,10 @@ License
 
 #include "error.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline tmp<T>::tmp(T* tPtr)
+inline Foam::tmp<T>::tmp(T* tPtr)
 :
     isTmp_(true),
     ptr_(tPtr),
@@ -43,16 +38,16 @@ inline tmp<T>::tmp(T* tPtr)
 
 
 template<class T>
-inline tmp<T>::tmp(const T& tRef)
+inline Foam::tmp<T>::tmp(const T& tRef)
 :
     isTmp_(false),
-    ptr_(NULL),
+    ptr_(0),
     ref_(tRef)
 {}
 
 
 template<class T>
-inline tmp<T>::tmp(const tmp<T>& t)
+inline Foam::tmp<T>::tmp(const tmp<T>& t)
 :
     isTmp_(t.isTmp_),
     ptr_(t.ptr_),
@@ -75,14 +70,14 @@ inline tmp<T>::tmp(const tmp<T>& t)
 
 
 template<class T>
-inline tmp<T>::~tmp()
+inline Foam::tmp<T>::~tmp()
 {
     if (isTmp_ && ptr_)
     {
         if (ptr_->okToDelete())
         {
             delete ptr_;
-            ptr_ = NULL;
+            ptr_ = 0;
         }
         else
         {
@@ -95,21 +90,21 @@ inline tmp<T>::~tmp()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool tmp<T>::isTmp() const
+inline bool Foam::tmp<T>::isTmp() const
 {
     return isTmp_;
 }
 
 
 template<class T>
-inline bool tmp<T>::valid() const
+inline bool Foam::tmp<T>::valid() const
 {
     return (!isTmp_ || (isTmp_ && ptr_));
 }
 
 
 template<class T>
-inline T* tmp<T>::ptr() const
+inline T* Foam::tmp<T>::ptr() const
 {
     if (isTmp_)
     {
@@ -121,7 +116,7 @@ inline T* tmp<T>::ptr() const
          }
 
          T* ptr = ptr_;
-         ptr_ = NULL;
+         ptr_ = 0;
 
          ptr->resetRefCount();
 
@@ -135,27 +130,20 @@ inline T* tmp<T>::ptr() const
 
 
 template<class T>
-inline void tmp<T>::clear()
+inline void Foam::tmp<T>::clear() const
 {
     if (isTmp_ && ptr_) // && ptr_->okToDelete())
     {
         delete ptr_;
-        ptr_ = NULL;
+        ptr_ = 0;
     }
-}
-
-
-template<class T>
-inline void tmp<T>::clear() const
-{
-    const_cast<tmp<T>&>(*this).clear();
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline T& tmp<T>::operator()()
+inline T& Foam::tmp<T>::operator()()
 {
     if (isTmp_)
     {
@@ -181,7 +169,7 @@ inline T& tmp<T>::operator()()
 
 
 template<class T>
-inline const T& tmp<T>::operator()() const
+inline const T& Foam::tmp<T>::operator()() const
 {
     if (isTmp_)
     {
@@ -202,14 +190,14 @@ inline const T& tmp<T>::operator()() const
 
 
 template<class T>
-inline tmp<T>::operator const T&() const
+inline Foam::tmp<T>::operator const T&() const
 {
     return operator()();
 }
 
 
 template<class T>
-inline T* tmp<T>::operator->()
+inline T* Foam::tmp<T>::operator->()
 {
     if (isTmp_)
     {
@@ -230,21 +218,21 @@ inline T* tmp<T>::operator->()
 
 
 template<class T>
-inline const T* tmp<T>::operator->() const
+inline const T* Foam::tmp<T>::operator->() const
 {
     return const_cast<tmp<T>&>(*this).operator->();
 }
 
 
 template<class T>
-inline void tmp<T>::operator=(const tmp<T>& t)
+inline void Foam::tmp<T>::operator=(const tmp<T>& t)
 {
     if (isTmp_ && ptr_)
     {
         if (ptr_->okToDelete())
         {
             delete ptr_;
-            ptr_ = NULL;
+            ptr_ = 0;
         }
         else
         {
@@ -276,9 +264,5 @@ inline void tmp<T>::operator=(const tmp<T>& t)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
