@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::cellFaceCellStencil
+    Foam::linearFitPolynomial
 
 Description
-
-SourceFiles
-    cellFaceCellStencil.C
+    Linear polynomial for interpolation fitting.
+    Can be used with the CentredFit scheme to crate a linear surface
+    interpolation scheme
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellFaceCellStencil_H
-#define cellFaceCellStencil_H
+#ifndef linearFitPolynomial_H
+#define linearFitPolynomial_H
 
-#include "faceStencil.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,31 +43,47 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cellFaceCellStencil Declaration
+                     Class linearFitPolynomial Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellFaceCellStencil
-:
-    public faceStencil
+class linearFitPolynomial
 {
-    // Private Member Functions
-
-        void calcFaceBoundaryData(labelList& neiGlobal) const;
-
-        void calcCellStencil(labelListList& globalCellCells) const;
-
-        //- Disallow default bitwise copy construct
-        cellFaceCellStencil(const cellFaceCellStencil&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const cellFaceCellStencil&);
-
 public:
 
-    // Constructors
+    // Member functions
 
-        //- Construct from mesh
-        explicit cellFaceCellStencil(const polyMesh& mesh);
+        static label nTerms(const direction dim)
+        {
+            return
+            (
+                dim == 1 ? 2 :
+                dim == 2 ? 3 :
+                dim == 3 ? 4 : 0
+            );
+        }
+
+        static void addCoeffs
+        (
+            scalar* coeffs,
+            const vector& d,
+            const scalar weight,
+            const direction dim
+        )
+        {
+            register label curIdx = 0;
+
+            coeffs[curIdx++] = weight;
+            coeffs[curIdx++] = weight*d.x();
+
+            if (dim >= 2)
+            {
+                coeffs[curIdx++] = weight*d.y();
+            }
+            if (dim == 3)
+            {
+                coeffs[curIdx++] = weight*d.z();
+            }
+        }
 };
 
 

@@ -135,19 +135,22 @@ Foam::extendedStencil::weightedSum
     {
         fvsPatchField<Type>& pSfCorr = bSfCorr[patchi];
 
-        label faceI = pSfCorr.patch().patch().start();
-
-        forAll(pSfCorr, i)
+        if (pSfCorr.coupled())
         {
-            const List<Type>& stField = stencilFld[faceI];
-            const List<scalar>& stWeight = stencilWeights[faceI];
+            label faceI = pSfCorr.patch().patch().start();
 
-            forAll(stField, j)
+            forAll(pSfCorr, i)
             {
-                pSfCorr[i] += stField[j]*stWeight[j];
-            }
+                const List<Type>& stField = stencilFld[faceI];
+                const List<scalar>& stWeight = stencilWeights[faceI];
 
-            faceI++;
+                forAll(stField, j)
+                {
+                    pSfCorr[i] += stField[j]*stWeight[j];
+                }
+
+                faceI++;
+            }
         }
     }
 

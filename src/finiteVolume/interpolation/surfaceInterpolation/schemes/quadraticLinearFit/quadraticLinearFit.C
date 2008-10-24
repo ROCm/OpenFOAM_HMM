@@ -24,13 +24,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quadraticFit.H"
+#include "CentredFitScheme.H"
+#include "quadraticLinearFitPolynomial.H"
+#include "centredCFCStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSurfaceInterpolationScheme(quadraticFit);
+    defineTemplateTypeNameAndDebug
+    (
+        CentredFitData<quadraticLinearFitPolynomial>,
+        0
+    );
+
+    makeCentredFitSurfaceInterpolationScheme
+    (
+        quadraticLinearFit,
+        quadraticLinearFitPolynomial,
+        centredCFCStencilObject
+    );
 }
 
 // ************************************************************************* //
