@@ -35,15 +35,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(Foam::triSurface, 0);
+    defineTypeNameAndDebug(Foam::triSurface, 0);
+}
 
 
-fileName triSurface::triSurfInstance(const Time& d)
+Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
 {
     fileName foamName(d.caseName() + ".ftr");
 
@@ -93,7 +92,7 @@ fileName triSurface::triSurfInstance(const Time& d)
 }
 
 
-List<labelledTri> triSurface::convertToTri
+Foam::List<Foam::labelledTri> Foam::triSurface::convertToTri
 (
     const faceList& faces,
     const label defaultRegion
@@ -128,7 +127,7 @@ List<labelledTri> triSurface::convertToTri
 }
 
 
-List<labelledTri> triSurface::convertToTri
+Foam::List<Foam::labelledTri> Foam::triSurface::convertToTri
 (
     const triFaceList& faces,
     const label defaultRegion
@@ -154,7 +153,7 @@ List<labelledTri> triSurface::convertToTri
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void triSurface::printTriangle
+void Foam::triSurface::printTriangle
 (
     Ostream& os,
     const string& pre,
@@ -172,7 +171,7 @@ void triSurface::printTriangle
 }
 
 
-string triSurface::getLineNoComment(IFstream& is)
+Foam::string Foam::triSurface::getLineNoComment(IFstream& is)
 {
     string line;
     do
@@ -186,7 +185,7 @@ string triSurface::getLineNoComment(IFstream& is)
 
 
 // Remove non-triangles, double triangles.
-void triSurface::checkTriangles(const bool verbose)
+void Foam::triSurface::checkTriangles(const bool verbose)
 {
     // Simple check on indices ok.
     const label maxPointI = points().size() - 1;
@@ -320,7 +319,7 @@ void triSurface::checkTriangles(const bool verbose)
 
 
 // Check/fix edges with more than two triangles
-void triSurface::checkEdges(const bool verbose)
+void Foam::triSurface::checkEdges(const bool verbose)
 {
     const labelListList& eFaces = edgeFaces();
 
@@ -349,7 +348,7 @@ void triSurface::checkEdges(const bool verbose)
 
 
 // Check normals and orientation
-boolList triSurface::checkOrientation(const bool verbose)
+Foam::boolList Foam::triSurface::checkOrientation(const bool verbose)
 {
     const edgeList& es = edges();
     const labelListList& faceEs = faceEdges();
@@ -470,7 +469,7 @@ boolList triSurface::checkOrientation(const bool verbose)
 
 
 // Read triangles, points from Istream
-bool triSurface::read(Istream& is)
+bool Foam::triSurface::read(Istream& is)
 {
     is  >> patches_ >> const_cast<pointField&>(points())
         >> static_cast<List<labelledTri>&>(*this);
@@ -480,7 +479,12 @@ bool triSurface::read(Istream& is)
 
 
 // Read from file in given format
-bool triSurface::read(const fileName& name, const word& ext, const bool check)
+bool Foam::triSurface::read
+(
+    const fileName& name,
+    const word& ext,
+    const bool check
+)
 {
     if (check && !exists(name))
     {
@@ -549,7 +553,7 @@ bool triSurface::read(const fileName& name, const word& ext, const bool check)
 
 
 // Write to file in given format
-void triSurface::write
+void Foam::triSurface::write
 (
     const fileName& name,
     const word& ext,
@@ -618,7 +622,7 @@ void triSurface::write
 
 // Returns patch info. Sets faceMap to the indexing according to patch
 // numbers. Patch numbers start at 0.
-surfacePatchList triSurface::calcPatches(labelList& faceMap) const
+Foam::surfacePatchList Foam::triSurface::calcPatches(labelList& faceMap) const
 {
     // Sort according to region numbers of labelledTri
     SortableList<label> sortedRegion(size());
@@ -698,7 +702,7 @@ surfacePatchList triSurface::calcPatches(labelList& faceMap) const
 }
 
 
-void triSurface::setDefaultPatches()
+void Foam::triSurface::setDefaultPatches()
 {
     labelList faceMap;
 
@@ -718,13 +722,9 @@ void triSurface::setDefaultPatches()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-triSurface::triSurface()
+Foam::triSurface::triSurface()
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>
-    (
-        List<labelledTri>(0),
-        pointField(0)
-    ),
+    MeshStorage(List<FaceType>(), pointField()),
     patches_(0),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -732,21 +732,21 @@ triSurface::triSurface()
 
 
 
-triSurface::triSurface
+Foam::triSurface::triSurface
 (
     const List<labelledTri>& triangles,
     const geometricSurfacePatchList& patches,
     const pointField& points
 )
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>(triangles, points),
+    MeshStorage(triangles, points),
     patches_(patches),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
 {}
 
 
-triSurface::triSurface
+Foam::triSurface::triSurface
 (
     List<labelledTri>& triangles,
     const geometricSurfacePatchList& patches,
@@ -754,25 +754,20 @@ triSurface::triSurface
     const bool reUse
 )
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>
-    (
-        triangles,
-        points,
-        reUse
-    ),
+    MeshStorage(triangles, points, reUse),
     patches_(patches),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
 {}
 
 
-triSurface::triSurface
+Foam::triSurface::triSurface
 (
     const List<labelledTri>& triangles,
     const pointField& points
 )
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>(triangles, points),
+    MeshStorage(triangles, points),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -781,17 +776,13 @@ triSurface::triSurface
 }
 
 
-triSurface::triSurface
+Foam::triSurface::triSurface
 (
     const triFaceList& triangles,
     const pointField& points
 )
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>
-    (
-        convertToTri(triangles, 0),
-        points
-    ),
+    MeshStorage(convertToTri(triangles, 0), points),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -800,13 +791,9 @@ triSurface::triSurface
 }
 
 
-triSurface::triSurface(const fileName& name)
+Foam::triSurface::triSurface(const fileName& name)
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>
-    (
-        List<labelledTri>(0),
-        pointField(0)
-    ),
+    MeshStorage(List<FaceType>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -819,13 +806,9 @@ triSurface::triSurface(const fileName& name)
 }
 
 
-triSurface::triSurface(Istream& is)
+Foam::triSurface::triSurface(Istream& is)
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>
-    (
-        List<labelledTri>(0),
-        pointField(0)
-    ),
+    MeshStorage(List<FaceType>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -836,13 +819,9 @@ triSurface::triSurface(Istream& is)
 }
 
 
-triSurface::triSurface(const Time& d)
+Foam::triSurface::triSurface(const Time& d)
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>
-    (
-        List<labelledTri>(0),
-        pointField(0)
-    ),
+    MeshStorage(List<FaceType>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -859,9 +838,9 @@ triSurface::triSurface(const Time& d)
 }
 
 
-triSurface::triSurface(const triSurface& ts)
+Foam::triSurface::triSurface(const triSurface& ts)
 :
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>(ts, ts.points()),
+    MeshStorage(ts, ts.points()),
     patches_(ts.patches()),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -870,7 +849,7 @@ triSurface::triSurface(const triSurface& ts)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-triSurface::~triSurface()
+Foam::triSurface::~triSurface()
 {
     clearOut();
 }
@@ -878,30 +857,30 @@ triSurface::~triSurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void triSurface::clearTopology()
+void Foam::triSurface::clearTopology()
 {
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>::clearTopology();
+    MeshStorage::clearTopology();
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
     deleteDemandDrivenData(edgeOwnerPtr_);
 }
 
 
-void triSurface::clearPatchMeshAddr()
+void Foam::triSurface::clearPatchMeshAddr()
 {
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>::clearPatchMeshAddr();
+    MeshStorage::clearPatchMeshAddr();
 }
 
 
-void triSurface::clearOut()
+void Foam::triSurface::clearOut()
 {
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>::clearOut();
+    MeshStorage::clearOut();
 
     clearTopology();
     clearPatchMeshAddr();
 }
 
 
-const labelListList& triSurface::sortedEdgeFaces() const
+const Foam::labelListList& Foam::triSurface::sortedEdgeFaces() const
 {
     if (!sortedEdgeFacesPtr_)
     {
@@ -912,7 +891,7 @@ const labelListList& triSurface::sortedEdgeFaces() const
 }
 
 
-const labelList& triSurface::edgeOwner() const
+const Foam::labelList& Foam::triSurface::edgeOwner() const
 {
     if (!edgeOwnerPtr_)
     {
@@ -924,21 +903,38 @@ const labelList& triSurface::edgeOwner() const
 
 
 //- Move points
-void triSurface::movePoints(const pointField& newPoints)
+void Foam::triSurface::movePoints(const pointField& newPoints)
 {
     // Remove all geometry dependent data
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
 
     // Adapt for new point position
-    PrimitivePatch<labelledTri, ::Foam::List, pointField>::movePoints(newPoints);
+    MeshStorage::movePoints(newPoints);
 
     // Copy new points
     const_cast<pointField&>(points()) = newPoints;
 }
 
 
+// scale points
+void Foam::triSurface::scalePoints(const scalar& scaleFactor)
+{
+    // avoid bad scaling
+    if (scaleFactor > 0 && scaleFactor != 1.0)
+    {
+        // Remove all geometry dependent data
+        clearTopology();
+
+        // Adapt for new point position
+        MeshStorage::movePoints(pointField());
+
+        const_cast<pointField&>(points()) *= scaleFactor;
+    }
+}
+
+
 // Remove non-triangles, double triangles.
-void triSurface::cleanup(const bool verbose)
+void Foam::triSurface::cleanup(const bool verbose)
 {
     // Merge points (already done for STL, TRI)
     stitchTriangles(pointField(points()), SMALL, verbose);
@@ -954,7 +950,7 @@ void triSurface::cleanup(const bool verbose)
 
 // Finds area, starting at faceI, delimited by borderEdge. Marks all visited
 // faces (from face-edge-face walk) with currentZone.
-void triSurface::markZone
+void Foam::triSurface::markZone
 (
     const boolList& borderEdge,
     const label faceI,
@@ -1016,15 +1012,14 @@ void triSurface::markZone
             break;
         }
 
-        changedFaces.transfer(newChangedFaces.shrink());
-        newChangedFaces.clear();
+        changedFaces.transfer(newChangedFaces);
     }
 }
 
 
 // Finds areas delimited by borderEdge (or 'real' edges).
 // Fills faceZone accordingly
-label triSurface::markZones
+Foam::label Foam::triSurface::markZones
 (
     const boolList& borderEdge,
     labelList& faceZone
@@ -1075,7 +1070,7 @@ label triSurface::markZones
 }
 
 
-void triSurface::subsetMeshMap
+void Foam::triSurface::subsetMeshMap
 (
     const boolList& include,
     labelList& pointMap,
@@ -1133,7 +1128,7 @@ void triSurface::subsetMeshMap
 }
 
 
-triSurface triSurface::subsetMesh
+Foam::triSurface Foam::triSurface::subsetMesh
 (
     const boolList& include,
     labelList& pointMap,
@@ -1175,13 +1170,17 @@ triSurface triSurface::subsetMesh
 }
 
 
-void triSurface::write(const fileName& name, const bool sortByRegion) const
+void Foam::triSurface::write
+(
+    const fileName& name,
+    const bool sortByRegion
+) const
 {
     write(name, name.ext(), sortByRegion);
 }
 
 
-void triSurface::write(Ostream& os) const
+void Foam::triSurface::write(Ostream& os) const
 {
     os  << patches() << endl;
 
@@ -1194,7 +1193,7 @@ void triSurface::write(Ostream& os) const
 }
 
 
-void triSurface::write(const Time& d) const
+void Foam::triSurface::write(const Time& d) const
 {
     fileName foamFile(d.caseName() + ".ftr");
 
@@ -1206,7 +1205,7 @@ void triSurface::write(const Time& d) const
 }
 
 
-void triSurface::writeStats(Ostream& os) const
+void Foam::triSurface::writeStats(Ostream& os) const
 {
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves.
@@ -1244,7 +1243,7 @@ void triSurface::writeStats(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void triSurface::operator=(const triSurface& ts)
+void Foam::triSurface::operator=(const triSurface& ts)
 {
     List<labelledTri>::operator=(ts);
     clearOut();
@@ -1255,15 +1254,11 @@ void triSurface::operator=(const triSurface& ts)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const triSurface& sm)
+Foam::Ostream& Foam::operator<<(Ostream& os, const triSurface& sm)
 {
     sm.write(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
