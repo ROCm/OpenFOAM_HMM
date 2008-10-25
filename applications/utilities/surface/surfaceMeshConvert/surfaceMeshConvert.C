@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("clean", "");
+    argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("triSurface", "");
 #   include "setRootCase.H"
     const stringList& params = args.additionalArgs();
@@ -77,6 +77,13 @@ int main(int argc, char *argv[])
     fileName importName(params[0]);
     fileName exportName(params[1]);
 
+    if (importName == exportName)
+    {
+        FatalErrorIn(args.executable())
+            << "Output file " << exportName << " would overwrite input file."
+            << exit(FatalError);
+    }
+
     if
     (
         !meshedSurface::canRead(importName.ext(), true)
@@ -88,10 +95,6 @@ int main(int argc, char *argv[])
 
     if (args.options().found("triSurface"))
     {
-// #       include "createTime.H"
-//         instantList timeDirs = timeSelector::select0(runTime, args);
-// #       include "createPolyMesh.H"
-
         triSurface surf(importName);
 
         if (args.options().found("clean"))
@@ -107,9 +110,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< " triSurface does not yet support scaling "
-                << scaleFactor << endl;
-            // surf.scalePoints(scaleFactor);
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
         }
         surf.write(exportName);
     }
@@ -123,8 +125,6 @@ int main(int argc, char *argv[])
             surf.checkOrientation(true);
         }
 
-        surf.scalePoints(scaleFactor);
-
         Info<< "writing " << exportName;
         if (scaleFactor <= 0)
         {
@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
         else
         {
             Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
         }
         surf.write(exportName);
     }
