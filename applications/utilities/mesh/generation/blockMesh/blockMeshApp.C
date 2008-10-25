@@ -72,11 +72,11 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-
-#   include "addOptions.H"
+    argList::validOptions.insert("blockTopology", "");
+    argList::validOptions.insert("dict", "dictionary");
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "checkOptions.H"
 
     word regionName;
     fileName polyMeshDir;
@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    bool writeTopo = args.options().found("blockTopology");
 
     IOobject meshDictIo
     (
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
     }
 
     Info<< nl << "Creating block mesh from\n    "
-        << meshDictIo.objectPath() << endl;
+        << meshDictIo.objectPath() << nl << endl;
 
     IOdictionary meshDict(meshDictIo);
 
@@ -242,7 +243,7 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        //#include "mergePatchPairs.H"
+        //// #include "mergePatchPairs.H"
     }
     else
     {
@@ -316,7 +317,7 @@ int main(int argc, char *argv[])
         {
             label zoneI = iter();
 
-            cz[zoneI]= new cellZone
+            cz[zoneI] = new cellZone
             (
                 iter.key(),
                 zoneCells[zoneI].shrink(),
@@ -339,7 +340,7 @@ int main(int argc, char *argv[])
     IOstream::defaultPrecision(10);
 
     Info << nl << "Writing polyMesh" << endl;
-    mesh.removeFiles(mesh.instance());
+    mesh.removeFiles();
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())

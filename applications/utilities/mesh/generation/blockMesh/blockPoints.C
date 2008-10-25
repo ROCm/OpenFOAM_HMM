@@ -28,17 +28,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "block.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void block::blockPoints()
+void Foam::block::blockPoints()
 {
     // set local variables for mesh specification
     label ni = blockDef_.n().x();
@@ -290,10 +284,5 @@ void block::blockPoints()
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
