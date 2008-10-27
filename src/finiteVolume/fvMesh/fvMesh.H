@@ -93,7 +93,7 @@ class fvMesh
         //- Current time index for cell volumes
         //  Note.  The whole mechanism will be replaced once the
         //  dimensionedField is created and the dimensionedField
-        //  will take care of the old-time levels.  
+        //  will take care of the old-time levels.
         mutable label curTimeIndex_;
 
         //- Cell volumes old time level
@@ -173,18 +173,6 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& allOwner,
-            const labelList& allNeighbour,
-            const bool syncPar = true
-        );
-
-        //- Construct from components without boundary.
-        //  Boundary is added using addFvPatches() member function
-        fvMesh
-        (
-            const IOobject& io,
             const xfer<pointField>& points,
             const xfer<faceList>& faces,
             const xfer<labelList>& allOwner,
@@ -192,20 +180,7 @@ public:
             const bool syncPar = true
         );
 
-        //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
-        //  Boundary is added using addPatches() member function
-        fvMesh
-        (
-            const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const cellList& cells,
-            const bool syncPar = true
-        );
-
-        //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
+        //- Construct without boundary from cells rather than owner/neighbour.
         //  Boundary is added using addPatches() member function
         fvMesh
         (
@@ -252,7 +227,7 @@ public:
                 return *this;
             }
 
-            //- Return reference to name 
+            //- Return reference to name
             //  Note: name() is currently ambiguous due to derivation from
             //  surfaceInterpolation
             const word& name() const

@@ -1,0 +1,185 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "SMESHfileFormat.H"
+#include "clock.H"
+#include "IStringStream.H"
+#include "addToRunTimeSelectionTable.H"
+#include "addToMemberFunctionSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+namespace Foam
+{
+namespace fileFormats
+{
+
+addNamedToMemberFunctionSelectionTable
+(
+    keyedSurface,
+    SMESHfileFormat,
+    write,
+    fileExtension,
+    smesh
+);
+
+addNamedToMemberFunctionSelectionTable
+(
+    meshedSurface,
+    SMESHfileFormat,
+    write,
+    fileExtension,
+    smesh
+);
+
+}
+}
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+Foam::fileFormats::SMESHfileFormat::SMESHfileFormat()
+:
+    keyedSurface()
+{}
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void
+Foam::fileFormats::SMESHfileFormat::write
+(
+    Ostream& os,
+    const keyedSurface& surf
+)
+{
+    const pointField& pointLst= surf.points();
+    const List<keyedFace>& faceLst = surf.faces();
+
+    labelList faceMap;
+    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+
+    os << "# tetgen .smesh file written " << clock::dateTime().c_str() << nl;
+    os << "# <points count=\"" << pointLst.size() << "\">" << endl;
+    os << pointLst.size() << " 3" << nl;    // 3: dimensions
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        os  << ptI
+            << ' ' << pointLst[ptI].x()
+            << ' ' << pointLst[ptI].y()
+            << ' ' << pointLst[ptI].z() << nl;
+    }
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+
+    os  << faceLst.size() << " 1" << endl;   // one attribute: region number
+
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        forAll(patchLst[patchI], patchFaceI)
+        {
+            const face& f = faceLst[faceMap[faceIndex++]];
+
+            os  << f.size();
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp];
+            }
+            os << ' ' << patchI << endl;
+        }
+    }
+
+    os  << "# </faces>" << nl
+        << nl
+        << "# no holes or regions:" << nl
+        << '0' << nl        // holes
+        << '0' << endl;     // regions
+}
+
+
+void
+Foam::fileFormats::SMESHfileFormat::write
+(
+    Ostream& os,
+    const meshedSurface& surf
+)
+{
+    const pointField& pointLst= surf.points();
+    const List<face>& faceLst = surf.faces();
+    const List<surfacePatch>& patchLst = surf.patches();
+
+    os << "# tetgen .smesh file written " << clock::dateTime().c_str() << nl;
+    os << "# <points count=\"" << pointLst.size() << "\">" << endl;
+    os << pointLst.size() << " 3" << nl;    // 3: dimensions
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        os  << ptI
+            << ' ' << pointLst[ptI].x()
+            << ' ' << pointLst[ptI].y()
+            << ' ' << pointLst[ptI].z() << nl;
+    }
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+
+    os  << faceLst.size() << " 1" << endl;   // one attribute: region number
+
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        forAll(patchLst[patchI], patchFaceI)
+        {
+            const face& f = faceLst[faceIndex++];
+
+            os  << f.size();
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp];
+            }
+            os << ' ' << patchI << endl;
+        }
+    }
+
+    os  << "# </faces>" << nl
+        << nl
+        << "# no holes or regions:" << nl
+        << '0' << nl        // holes
+        << '0' << endl;     // regions
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+// ************************************************************************* //

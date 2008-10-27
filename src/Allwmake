@@ -13,6 +13,7 @@ wmake libso lagrangian/basic
 
 wmake libso triSurface
 wmake libso edgeMesh
+wmake libso surfMesh
 wmake libso meshTools
 wmake libso finiteVolume
 

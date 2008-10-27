@@ -34,8 +34,8 @@
 Script=${0##*/}
 
 usage() {
-   while [ "$#" -ge 1 ]; do echo "$1"; shift; done
-   cat<<USAGE
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 usage: $Script [dir]
        $Script target [dir [MakeDir]]
 
@@ -56,7 +56,7 @@ USAGE
 # provide immediate help
 if [ "$1" = "-h" -o "$1" = "-help" ]
 then
-   usage
+    usage
 fi
 
 
@@ -70,35 +70,34 @@ MakeDir=Make
 if [ $# -ge 1 ]
 then
 
-   if [ -d "$1" ]
-   then
-      dir=$1
-   else
-      makeOption=$1
-   fi
+    if [ -d "$1" ]
+    then
+        dir=$1
+    else
+        makeOption=$1
+    fi
 
-   if [ $# -ge 2 ]
-   then
-      dir=$2
-   fi
+    if [ $# -ge 2 ]
+    then
+        dir=$2
+    fi
 
-   # alternative name for the Make sub-directory
-   if [ $# -ge 3 ]
-   then
-      MakeDir=$3
-   fi
+    # alternative name for the Make sub-directory
+    if [ $# -ge 3 ]
+    then
+        MakeDir=$3
+    fi
 
-   if [ "$dir" ]
-   then
-      cd $dir 2>/dev/null || {
-         echo "$Script error"
-         echo "    could not change to directory '$dir'"
-         exit 1
-      }
-   fi
+    if [ "$dir" ]
+    then
+        cd $dir 2>/dev/null || {
+            echo "$Script error: could not change to directory '$dir'" 1>&2
+            exit 1
+        }
+    fi
 
-   # provide some feedback
-   echo "$Script ${dir:-./}"
+    # provide some feedback
+    echo "$Script ${dir:-./}"
 fi
 
 #------------------------------------------------------------------------------
@@ -113,9 +112,9 @@ then
         exit $?
     elif [ ! -d $MakeDir ]
     then
-        for dir in `find . \( -type d -a -name "Make" \) -printf "%h "`
+        for dir in `find . \( -type d -a -name Make \) -printf "%h "`
         do
-           $0 $dir
+            $0 $dir
         done
         exit 0
     fi
@@ -131,9 +130,8 @@ fi
 
 if [ ! -d $MakeDir ]
 then
-   echo "$Script error"
-   echo "    '$MakeDir' directory does not exist"
-   exit 1
+    echo "$Script error: '$MakeDir' directory does not exist" 1>&2
+    exit 1
 fi
 
 # -----------------------------------------------------------------------------
@@ -144,8 +142,8 @@ find . -name "*.dep" -exec rm {} \;
 
 case "$makeOption" in
 lib | libso | libo )
-   rm -rf lnInclude 2>/dev/null
-   ;;
+    rm -rf lnInclude 2>/dev/null
+    ;;
 esac
 
 rm -rf ii_files Templates.DB 2>/dev/null

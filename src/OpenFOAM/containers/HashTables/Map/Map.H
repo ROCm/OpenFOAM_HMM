@@ -54,7 +54,6 @@ class Map
 {
 
 public:
-
     // Constructors
 
         //- Construct given initial map size
@@ -74,6 +73,15 @@ public:
         :
             HashTable<T, label, Hash<label> >(map)
         {}
+
+
+    //- Return a null Map
+    static const Map<T>& null()
+    {
+        Map<T>* nullPtr = reinterpret_cast<Map<T>*>(0);
+        return *nullPtr;
+    }
+
 };
 
 

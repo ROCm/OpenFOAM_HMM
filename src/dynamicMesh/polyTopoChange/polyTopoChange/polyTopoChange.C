@@ -852,7 +852,7 @@ void Foam::polyTopoChange::compact
                                     << " at position " << faceI << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
-                            } 
+                            }
                             localPointMap[pointI] = newPointI++;
                         }
                     }
@@ -904,7 +904,7 @@ void Foam::polyTopoChange::compact
                                     << " at position " << faceI << endl
                                     << "Probably face has not been adapted for"
                                     << " removed points." << abort(FatalError);
-                            } 
+                            }
                             localPointMap[pointI] = newPointI++;
                         }
                     }
@@ -2097,29 +2097,20 @@ Foam::polyTopoChange::polyTopoChange
 
 void Foam::polyTopoChange::clear()
 {
-    points_.clear();
-    points_.setSize(0);
-    pointMap_.clear();
-    pointMap_.setSize(0);
-    reversePointMap_.clear();
-    reversePointMap_.setSize(0);
+    points_.clearStorage();
+    pointMap_.clearStorage();
+    reversePointMap_.clearStorage();
     pointZone_.clear();
     pointZone_.resize(0);
     retiredPoints_.clear();
     retiredPoints_.resize(0);
 
-    faces_.clear();
-    faces_.setSize(0);
-    region_.clear();
-    region_.setSize(0);
-    faceOwner_.clear();
-    faceOwner_.setSize(0);
-    faceNeighbour_.clear();
-    faceNeighbour_.setSize(0);
-    faceMap_.clear();
-    faceMap_.setSize(0);
-    reverseFaceMap_.clear();
-    reverseFaceMap_.setSize(0);
+    faces_.clearStorage();
+    region_.clearStorage();
+    faceOwner_.clearStorage();
+    faceNeighbour_.clearStorage();
+    faceMap_.clearStorage();
+    reverseFaceMap_.clearStorage();
     faceFromPoint_.clear();
     faceFromPoint_.resize(0);
     faceFromEdge_.clear();
@@ -2132,12 +2123,9 @@ void Foam::polyTopoChange::clear()
     faceZoneFlip_.resize(0);
     nActiveFaces_ = 0;
 
-    cellMap_.clear();
-    cellMap_.setSize(0);
-    reverseCellMap_.clear();
-    reverseCellMap_.setSize(0);
-    cellZone_.clear();
-    cellZone_.setSize(0);
+    cellMap_.clearStorage();
+    reverseCellMap_.clearStorage();
+    cellZone_.clearStorage();
     cellFromPoint_.clear();
     cellFromPoint_.resize(0);
     cellFromEdge_.clear();
@@ -2987,13 +2975,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
         mesh.resetPrimitives
         (
-            nActiveFaces_,
-            xferMove<pointField>(renumberedMeshPoints),
-            xferMove<faceList>(faces_),
-            xferMove<labelList>(faceOwner_),
-            xferMove<labelList>(faceNeighbour_),
-            xferMove<labelList>(patchSizes),
-            xferMove<labelList>(patchStarts),
+            xferMove(renumberedMeshPoints),
+            xferMoveTo<faceList>(faces_),
+            xferMoveTo<labelList>(faceOwner_),
+            xferMoveTo<labelList>(faceNeighbour_),
+            patchSizes,
+            patchStarts,
             syncParallel
         );
 
@@ -3004,13 +2991,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         // Set new points.
         mesh.resetPrimitives
         (
-            nActiveFaces_,
-            xferMove<pointField>(newPoints),
-            xferMove<faceList>(faces_),
-            xferMove<labelList>(faceOwner_),
-            xferMove<labelList>(faceNeighbour_),
-            xferMove<labelList>(patchSizes),
-            xferMove<labelList>(patchStarts),
+            xferMove(newPoints),
+            xferMoveTo<faceList>(faces_),
+            xferMoveTo<labelList>(faceOwner_),
+            xferMoveTo<labelList>(faceNeighbour_),
+            patchSizes,
+            patchStarts,
             syncParallel
         );
         // Invalidate new points to go into map.

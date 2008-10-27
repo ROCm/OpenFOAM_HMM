@@ -1349,11 +1349,10 @@ void Foam::polyDualMesh::calcDual
     // Assign to mesh.
     resetPrimitives
     (
-        dualFaces.size(),
-        dualPoints,
-        dualFaces,
-        dualOwner,
-        dualNeighbour,
+        xferMove(dualPoints),
+        xferMove(dualFaces),
+        xferMove(dualOwner),
+        xferMove(dualNeighbour),
         patchSizes,
         patchStarts
     );

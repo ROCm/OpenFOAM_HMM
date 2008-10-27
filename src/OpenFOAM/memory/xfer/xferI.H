@@ -77,6 +77,16 @@ inline Foam::xfer<T>::~xfer()
 }
 
 
+// * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
+
+template<class T>
+inline const Foam::xfer<T>& Foam::xfer<T>::null()
+{
+    xfer<T>* nullPtr = reinterpret_cast<xfer<T>*>(0);
+    return *nullPtr;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
@@ -89,7 +99,7 @@ inline void Foam::xfer<T>::operator=(T& t)
 template<class T>
 inline void Foam::xfer<T>::operator=(const xfer<T>& t)
 {
-    // silently ignore copy to self
+    // silently ignore attempted copy to self
     if (this != &t)
     {
         ptr_->transfer(*(t.ptr_));
@@ -109,5 +119,47 @@ inline T* Foam::xfer<T>::operator->() const
 {
     return ptr_;
 }
+
+
+// * * * * * * * * * * * * *  Helper Functions * * * * * * * * * * * * * * * //
+
+
+template<class T>
+inline Foam::xfer<T> Foam::xferCopy(const T& t)
+{
+    return Foam::xfer<T>(t);
+}
+
+template<class T>
+inline Foam::xfer<T> Foam::xferMove(T& t)
+{
+    return Foam::xfer<T>(t, true);
+}
+
+
+template<class T>
+inline Foam::xfer<T> Foam::xferTmp(Foam::tmp<T>& tt)
+{
+    return Foam::xfer<T>(tt(), tt.isTmp());
+}
+
+
+template<class To, class From>
+inline Foam::xfer<To> Foam::xferCopyTo(const From& t)
+{
+    Foam::xfer<To> xf;
+    xf() = t;
+    return xf;
+}
+
+
+template<class To, class From>
+inline Foam::xfer<To> Foam::xferMoveTo(From& t)
+{
+    Foam::xfer<To> xf;
+    xf().transfer(t);
+    return xf;
+}
+
 
 // ************************************************************************* //
