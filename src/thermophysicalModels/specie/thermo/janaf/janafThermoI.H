@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "janafThermo.H"
+#include "specie.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -130,11 +131,40 @@ inline Foam::scalar Foam::janafThermo<equationOfState>::h
 ) const
 {
     const coeffArray& a = coeffs(T);
-    return
-    this->RR*
+    return this->RR*
     (
         ((((a[4]/5.0*T + a[3]/4.0)*T + a[2]/3.0)*T + a[1]/2.0)*T + a[0])*T
       + a[5]
+    );
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::janafThermo<equationOfState>::hs
+(
+    const scalar T
+) const
+{
+    const coeffArray& a = coeffs(T);
+    scalar Tr = T - specie::Tstd;
+    return this->RR*
+    (
+        ((((a[4]/5.0*Tr + a[3]/4.0)*Tr + a[2]/3.0)*Tr + a[1]/2.0)*Tr + a[0])*Tr
+    );
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::janafThermo<equationOfState>::hc() const
+{
+    const coeffArray& a = lowCpCoeffs_;
+    const scalar& Tstd = specie::Tstd;
+    return this->RR*
+    (
+        (
+            (((a[4]/5.0*Tstd + a[3]/4.0)*Tstd + a[2]/3.0)*Tstd + a[1]/2.0)*Tstd
+          + a[0]
+        )*Tstd
     );
 }
 

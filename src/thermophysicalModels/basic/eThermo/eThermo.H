@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::hThermo
+    Foam::eThermo
 
 Description
-    Enthalpy for a mixture
+    Internal energy for a mixture
 
 SourceFiles
-    hThermo.C
+    eThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hThermo_H
-#define hThermo_H
+#ifndef eThermo_H
+#define eThermo_H
 
 #include "basicThermo.H"
 #include "basicMixture.H"
@@ -45,18 +45,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class hThermo Declaration
+                           Class eThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class MixtureType>
-class hThermo
+class eThermo
 :
     public basicThermo,
     public MixtureType
 {
     // Private data
 
-        volScalarField h_;
+        volScalarField e_;
 
 
     // Private member functions
@@ -64,23 +64,23 @@ class hThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        hThermo(const hThermo<MixtureType>&);
+        eThermo(const eThermo<MixtureType>&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("hThermo");
+    TypeName("eThermo");
 
 
     // Constructors
 
-        //- Construct from mesh
-        hThermo(const fvMesh&);
+        //- Construct from mese
+        eThermo(const fvMesh&);
 
 
     //- Destructor
-    virtual ~hThermo();
+    virtual ~eThermo();
 
 
     // Member functions
@@ -103,31 +103,31 @@ public:
 
         // Access to thermodynamic state variables
 
-            //- Enthalpy [J/kg]
+            //- Internal energy [J/kg]
             //  Non-const access allowed for transport equations
-            virtual volScalarField& h()
+            virtual volScalarField& e()
             {
-                return h_;
+                return e_;
             }
 
-            //- Enthalpy [J/kg]
-            virtual const volScalarField& h() const
+            //- Internal energy [J/kg]
+            virtual const volScalarField& e() const
             {
-                return h_;
+                return e_;
             }
 
 
         // Fields derived from thermodynamic state variables
 
-            //- Enthalpy for cell-set [J/kg]
-            virtual tmp<scalarField> h
+            //- Internal energy for cell-set [J/kg]
+            virtual tmp<scalarField> e
             (
                 const scalarField& T,
                 const labelList& cells
             ) const;
 
-            //- Enthalpy for patch [J/kg]
-            virtual tmp<scalarField> h
+            //- Internal energy for patch [J/kg]
+            virtual tmp<scalarField> e
             (
                 const scalarField& T,
                 const label patchi
@@ -166,7 +166,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifdef NoRepository
-#   include "hThermo.C"
+#   include "eThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

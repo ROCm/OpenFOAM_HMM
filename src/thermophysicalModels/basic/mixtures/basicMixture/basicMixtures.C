@@ -22,39 +22,62 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::basicThermo
-
 Description
+    Selection function for internal energy based thermodynamics package.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeBasicThermo_H
-#define makeBasicThermo_H
+#include "error.H"
 
-#include "basicThermo.H"
+#include "basicMixture.H"
+#include "makeBasicMixture.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "perfectGas.H"
 
-#define makeBasicThermo(Cthermo,Mixture,Transport,Thermo,EqnOfState)          \
-                                                                              \
-typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
-    Cthermo##Mixture##Transport##Thermo##EqnOfState;                          \
-                                                                              \
-defineTemplateTypeNameAndDebugWithName                                        \
-    (Cthermo##Mixture##Transport##Thermo##EqnOfState,                         \
-    #Cthermo                                                                  \
-    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0)  \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    basicThermo,                                                              \
-    Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
-    fvMesh                                                                    \
-)
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "specieThermo.H"
+
+#include "constTransport.H"
+#include "sutherlandTransport.H"
+
+#include "pureMixture.H"
+
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+namespace Foam
+{
+
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

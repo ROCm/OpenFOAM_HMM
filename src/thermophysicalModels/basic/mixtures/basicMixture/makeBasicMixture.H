@@ -23,35 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::basicThermo
+    Foam::basicMixture
 
 Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeBasicThermo_H
-#define makeBasicThermo_H
+#ifndef makeBasicMixture_H
+#define makeBasicMixture_H
 
-#include "basicThermo.H"
+#include "basicMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBasicThermo(Cthermo,Mixture,Transport,Thermo,EqnOfState)          \
+#define makeBasicMixture(Mixture,Transport,Thermo,EqnOfState)                 \
                                                                               \
-typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
-    Cthermo##Mixture##Transport##Thermo##EqnOfState;                          \
+typedef Mixture<Transport<specieThermo<Thermo<EqnOfState> > > >               \
+    Mixture##Transport##Thermo##EqnOfState;                                   \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (Cthermo##Mixture##Transport##Thermo##EqnOfState,                         \
-    #Cthermo                                                                  \
-    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0)  \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    basicThermo,                                                              \
-    Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
-    fvMesh                                                                    \
-)
+    (Mixture##Transport##Thermo##EqnOfState,                                  \
+    #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>", 0)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

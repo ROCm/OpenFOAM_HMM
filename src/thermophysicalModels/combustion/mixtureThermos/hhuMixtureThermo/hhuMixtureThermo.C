@@ -173,6 +173,100 @@ void Foam::hhuMixtureThermo<MixtureType>::correct()
     }
 }
 
+
+template<class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::hs() const
+{
+    const fvMesh& mesh = T_.mesh();
+
+    tmp<volScalarField> ths
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "hs",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            h_.dimensions()
+        )
+    );
+
+    volScalarField& hsf = ths();
+
+    scalarField& hsCells = hsf.internalField();
+    const scalarField& TCells = T_.internalField();
+
+    forAll(TCells, celli)
+    {
+        hsCells[celli] = this->cellMixture(celli).Hs(TCells[celli]);
+    }
+
+    forAll(T_.boundaryField(), patchi)
+    {
+        scalarField& hsp = hsf.boundaryField()[patchi];
+        const scalarField& Tp = T_.boundaryField()[patchi];
+
+        forAll(Tp, facei)
+        {
+            hsp[facei] = this->patchFaceMixture(patchi, facei).Hs(Tp[facei]);
+        }
+    }
+
+    return ths;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::hc() const
+{
+    const fvMesh& mesh = T_.mesh();
+
+    tmp<volScalarField> thc
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "hc",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            h_.dimensions()
+        )
+    );
+
+    volScalarField& hcf = thc();
+    scalarField& hcCells = hcf.internalField();
+
+    forAll(hcCells, celli)
+    {
+        hcCells[celli] = this->cellMixture(celli).Hc();
+    }
+
+    forAll(hcf.boundaryField(), patchi)
+    {
+        scalarField& hcp = hcf.boundaryField()[patchi];
+
+        forAll(hcp, facei)
+        {
+            hcp[facei] = this->patchFaceMixture(patchi, facei).Hc();
+        }
+    }
+
+    return thc;
+}
+
+
 template<class MixtureType>
 Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::h
 (
@@ -232,7 +326,8 @@ Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::Cp
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Cp() const
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::Cp() const
 {
     const fvMesh& mesh = T_.mesh();
 
@@ -254,10 +349,12 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Cp() const
     );
 
     volScalarField& cp = tCp();
+    scalarField& cpCells = cp.internalField();
+    const scalarField& TCells = T_.internalField();
 
-    forAll(T_, celli)
+    forAll(TCells, celli)
     {
-        cp[celli] = this->cellMixture(celli).Cp(T_[celli]);
+        cpCells[celli] = this->cellMixture(celli).Cp(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -269,9 +366,9 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Cp() const
 }
 
 
-
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
+Foam::tmp<Foam::scalarField>
+Foam::hhuMixtureThermo<MixtureType>::hu
 (
     const scalarField& Tu,
     const labelList& cells
@@ -290,7 +387,8 @@ Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
+Foam::tmp<Foam::scalarField>
+Foam::hhuMixtureThermo<MixtureType>::hu
 (
     const scalarField& Tu,
     const label patchi
@@ -309,7 +407,8 @@ Foam::tmp<Foam::scalarField> Foam::hhuMixtureThermo<MixtureType>::hu
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Tb() const
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::Tb() const
 {
     tmp<volScalarField> tTb
     (
@@ -328,10 +427,14 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Tb() const
     );
 
     volScalarField& Tb_ = tTb();
+    scalarField& TbCells = Tb_.internalField();
+    const scalarField& TCells = T_.internalField();
+    const scalarField& hCells = h_.internalField();
 
-    forAll(Tb_, celli)
+    forAll(TbCells, celli)
     {
-        Tb_[celli] = this->cellProducts(celli).TH(h_[celli], T_[celli]);
+        TbCells[celli] =
+            this->cellProducts(celli).TH(hCells[celli], TCells[celli]);
     }
 
     forAll(Tb_.boundaryField(), patchi)
@@ -344,7 +447,8 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::Tb() const
         forAll(pTb, facei)
         {
             pTb[facei] =
-                this->patchFaceProducts(patchi, facei).TH(ph[facei], pT[facei]);
+                this->patchFaceProducts(patchi, facei)
+               .TH(ph[facei], pT[facei]);
         }
     }
 
@@ -374,10 +478,14 @@ Foam::hhuMixtureThermo<MixtureType>::psiu() const
     );
 
     volScalarField& psiu = tpsiu();
+    scalarField& psiuCells = psiu.internalField();
+    const scalarField& TuCells = Tu_.internalField();
+    const scalarField& pCells = p_.internalField();
 
-    forAll(psiu, celli)
+    forAll(psiuCells, celli)
     {
-        psiu[celli] = this->cellReactants(celli).psi(p_[celli], Tu_[celli]);
+        psiuCells[celli] =
+            this->cellReactants(celli).psi(pCells[celli], TuCells[celli]);
     }
 
     forAll(psiu.boundaryField(), patchi)
@@ -421,12 +529,15 @@ Foam::hhuMixtureThermo<MixtureType>::psib() const
     );
 
     volScalarField& psib = tpsib();
-
+    scalarField& psibCells = psib.internalField();
     volScalarField Tb_ = Tb();
+    const scalarField& TbCells = Tb_.internalField();
+    const scalarField& pCells = p_.internalField();
 
-    forAll(psib, celli)
+    forAll(psibCells, celli)
     {
-        psib[celli] = this->cellReactants(celli).psi(p_[celli], Tb_[celli]);
+        psibCells[celli] =
+            this->cellReactants(celli).psi(pCells[celli], TbCells[celli]);
     }
 
     forAll(psib.boundaryField(), patchi)
@@ -449,7 +560,8 @@ Foam::hhuMixtureThermo<MixtureType>::psib() const
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::muu() const
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::muu() const
 {
     tmp<volScalarField> tmuu
     (
@@ -469,10 +581,12 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::muu() const
     );
 
     volScalarField& muu_ = tmuu();
+    scalarField& muuCells = muu_.internalField();
+    const scalarField& TuCells = Tu_.internalField();
 
-    forAll(muu_, celli)
+    forAll(muuCells, celli)
     {
-        muu_[celli] = this->cellReactants(celli).mu(Tu_[celli]);
+        muuCells[celli] = this->cellReactants(celli).mu(TuCells[celli]);
     }
 
     forAll(muu_.boundaryField(), patchi)
@@ -492,7 +606,8 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::muu() const
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::mub() const
+Foam::tmp<Foam::volScalarField>
+Foam::hhuMixtureThermo<MixtureType>::mub() const
 {
     tmp<volScalarField> tmub
     (
@@ -512,11 +627,13 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::mub() const
     );
 
     volScalarField& mub_ = tmub();
+    scalarField& mubCells = mub_.internalField();
     volScalarField Tb_ = Tb();
+    const scalarField& TbCells = Tb_.internalField();
 
-    forAll(mub_, celli)
+    forAll(mubCells, celli)
     {
-        mub_[celli] = this->cellProducts(celli).mu(Tb_[celli]);
+        mubCells[celli] = this->cellProducts(celli).mu(TbCells[celli]);
     }
 
     forAll(mub_.boundaryField(), patchi)
@@ -526,7 +643,8 @@ Foam::tmp<Foam::volScalarField> Foam::hhuMixtureThermo<MixtureType>::mub() const
 
         forAll(pMub, facei)
         {
-            pMub[facei] = this->patchFaceProducts(patchi, facei).mu(pTb[facei]);
+            pMub[facei] =
+                this->patchFaceProducts(patchi, facei).mu(pTb[facei]);
         }
     }
 

@@ -73,21 +73,20 @@ public:
         hhuMixtureThermo(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~hhuMixtureThermo();
+    //- Destructor
+    virtual ~hhuMixtureThermo();
 
 
     // Member functions
 
         //- Return the compostion of the combustion mixture
-        combustionMixture& composition()
+        virtual combustionMixture& composition()
         {
             return *this;
         }
 
         //- Return the compostion of the combustion mixture
-        const combustionMixture& composition() const
+        virtual const combustionMixture& composition() const
         {
             return *this;
         }
@@ -95,38 +94,48 @@ public:
         //- Update properties
         virtual void correct();
 
+        //- Sensible enthalpy [J/kg]
+        virtual tmp<volScalarField> hs() const;
+
+        //- Chemical enthalpy [J/kg]
+        virtual tmp<volScalarField> hc() const;
+
 
         // Fields derived from thermodynamic state variables
 
             //- Enthalpy for cell-set [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const labelList& cells
             ) const;
 
             //- Enthalpy for patch [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const label patchi
             ) const;
 
             //- Heat capacity at constant pressure for patch [J/kg/K]
-            tmp<scalarField> Cp(const scalarField& T, const label patchi) const;
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& T,
+                const label patchi
+            ) const;
 
             //- Heat capacity at constant pressure [J/kg/K]
-            tmp<volScalarField> Cp() const;
+            virtual tmp<volScalarField> Cp() const;
 
             //- Unburnt gas enthalpy for cell-set [J/kg]
-            tmp<scalarField> hu
+            virtual tmp<scalarField> hu
             (
                 const scalarField& T,
                 const labelList& cells
             ) const;
 
             //- Unburnt gas enthalpy for patch [J/kg]
-            tmp<scalarField> hu
+            virtual tmp<scalarField> hu
             (
                 const scalarField& T,
                 const label patchi
@@ -134,22 +143,22 @@ public:
 
 
             //- Burnt gas temperature [K]
-            tmp<volScalarField> Tb() const;
+            virtual tmp<volScalarField> Tb() const;
 
             //- Unburnt gas compressibility [s^2/m^2]
-            tmp<volScalarField> psiu() const;
+            virtual tmp<volScalarField> psiu() const;
 
             //- Burnt gas compressibility [s^2/m^2]
-            tmp<volScalarField> psib() const;
+            virtual tmp<volScalarField> psib() const;
 
 
         // Access to transport variables
 
             //- Dynamic viscosity of unburnt gas [kg/ms]
-            tmp<volScalarField> muu() const;
+            virtual tmp<volScalarField> muu() const;
 
             //- Dynamic viscosity of burnt gas [kg/ms]
-            tmp<volScalarField> mub() const;
+            virtual tmp<volScalarField> mub() const;
 
 
         //- Read thermophysicalProperties dictionary
