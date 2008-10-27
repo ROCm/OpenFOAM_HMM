@@ -305,12 +305,6 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             pointZones_.set(czI, newPointZones[czI].clone(pointZones_));
         }
 
-        pointZones_.setSize(newPointZones.size());
-        forAll (pointZones_, pzI)
-        {
-            pointZones_[pzI] = newPointZones[pzI];
-        }
-
 
         faceZoneMesh newFaceZones
         (
