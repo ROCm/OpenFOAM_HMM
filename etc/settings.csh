@@ -130,6 +130,9 @@ case OPENMPI:
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
+    # before compiling, these directories may not exist:
+    _foamMkDir   $MPI_ARCH_PATH/bin
+    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -144,6 +147,9 @@ case LAM:
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
+    # before compiling, these directories may not exist:
+    _foamMkDir   $MPI_ARCH_PATH/bin
+    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -157,6 +163,9 @@ case MPICH:
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
+    # before compiling, these directories may not exist:
+    _foamMkDir   $MPI_ARCH_PATH/bin
+    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -171,6 +180,9 @@ case MPICH-GM:
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
     _foamAddLib  $GM_LIB_PATH
+    # before compiling, these directories may not exist:
+    _foamMkDir   $MPI_ARCH_PATH/bin
+    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
@@ -191,6 +203,8 @@ default:
 endsw
 
 _foamAddLib $FOAM_MPI_LIBBIN
+# before compiling, this directory may not exist:
+_foamMkDir  $FOAM_MPI_LIBBIN
 
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
