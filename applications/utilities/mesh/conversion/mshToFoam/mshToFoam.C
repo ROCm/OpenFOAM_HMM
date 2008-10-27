@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        points,
+        xferMove(points),
         cells,
         faceListList(0),
         wordList(0),
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     Info<< "Writing mesh ..." << endl;
 
     mesh.write();
-    
+
 
     Info<< "End\n" << endl;
 

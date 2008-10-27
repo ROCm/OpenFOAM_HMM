@@ -48,7 +48,7 @@ template
     template<class> class FaceList,
     class PointField
 >
-Foam::pointField Foam::extrudedMesh::extrudedPoints
+Foam::xfer<Foam::pointField> Foam::extrudedMesh::extrudedPoints
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
     const extrudeModel& model
@@ -76,12 +76,13 @@ Foam::pointField Foam::extrudedMesh::extrudedPoints
         }
     }
 
-    return ePoints;
+    // return points for transferring
+    return xferMove(ePoints);
 }
 
 
 template<class Face, template<class> class FaceList, class PointField>
-Foam::faceList Foam::extrudedMesh::extrudedFaces
+Foam::xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
     const extrudeModel& model
@@ -177,12 +178,13 @@ Foam::faceList Foam::extrudedMesh::extrudedFaces
             );
     }
 
-    return eFaces;
+    // return points for transferring
+    return xferMove(eFaces);
 }
 
 
 template<class Face, template<class> class FaceList, class PointField>
-Foam::cellList Foam::extrudedMesh::extrudedCells
+Foam::xfer<Foam::cellList> Foam::extrudedMesh::extrudedCells
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
     const extrudeModel& model
@@ -283,7 +285,8 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
         facei++;
     }
 
-    return eCells;
+    // return points for transferring
+    return xferMove(eCells);
 }
 
 

@@ -907,14 +907,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        polyPoints,
+        xferMove(polyPoints),
         cellVerts,
-        patchFaceVerts,             //boundaryFaces,
-        patchNames,                 //boundaryPatchNames,
-        wordList(patchNames.size(), polyPatch::typeName), //boundaryPatchTypes,
-        "defaultFaces",             //defaultFacesName
-        polyPatch::typeName,        //defaultFacesType,
-        wordList(0)                 //boundaryPatchPhysicalTypes
+        patchFaceVerts,             // boundaryFaces,
+        patchNames,                 // boundaryPatchNames,
+        wordList(patchNames.size(), polyPatch::typeName), // boundaryPatchTypes,
+        "defaultFaces",             // defaultFacesName
+        polyPatch::typeName,        // defaultFacesType,
+        wordList(0)                 // boundaryPatchPhysicalTypes
     );
 
     mesh.write();

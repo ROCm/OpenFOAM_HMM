@@ -272,9 +272,9 @@ bool domainDecomposition::writeDecomposition()
                 "constant",
                 processorDb
             ),
-            procPoints,
-            procFaces,
-            procCells
+            xferMove(procPoints),
+            xferMove(procFaces),
+            xferMove(procCells)
         );
 
         // Create processor boundary patches
