@@ -22,39 +22,67 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::basicThermo
-
 Description
+    Selection function for internal energy based thermodynamics package.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeBasicThermo_H
-#define makeBasicThermo_H
+#include "error.H"
 
 #include "basicThermo.H"
+#include "makeBasicThermo.H"
+
+#include "perfectGas.H"
+
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "specieThermo.H"
+
+#include "constTransport.H"
+#include "sutherlandTransport.H"
+
+#include "eThermo.H"
+#include "pureMixture.H"
+
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBasicThermo(Cthermo,Mixture,Transport,Thermo,EqnOfState)          \
-                                                                              \
-typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
-    Cthermo##Mixture##Transport##Thermo##EqnOfState;                          \
-                                                                              \
-defineTemplateTypeNameAndDebugWithName                                        \
-    (Cthermo##Mixture##Transport##Thermo##EqnOfState,                         \
-    #Cthermo                                                                  \
-    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0)  \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    basicThermo,                                                              \
-    Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
-    fvMesh                                                                    \
-)
+namespace Foam
+{
+
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+
+makeBasicThermo
+(
+    eThermo,
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicThermo
+(
+    eThermo,
+    pureMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicThermo
+(
+    eThermo,
+    pureMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+} // End namespace Foam
 
 // ************************************************************************* //

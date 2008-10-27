@@ -34,8 +34,8 @@ inline Foam::eConstThermo::eConstThermo
 )
 :
     specieThermo(st),
-    CV(cv),
-    Hf(hf)
+    Cv_(cv),
+    Hf_(hf)
 {}
 
 
@@ -48,8 +48,8 @@ inline Foam::eConstThermo::eConstThermo
 )
 :
     specieThermo(name, ct),
-    CV(ct.CV),
-    Hf(ct.Hf)
+    Cv_(ct.Cv_),
+    Hf_(ct.Hf_)
 {}
 
 
@@ -79,13 +79,26 @@ Foam::eConstThermo<equationOfState>::New(Istream& is)
 
 inline Foam::scalar Foam::eConstThermo::cp(const scalar) const
 {
-    return CV*W() + RR;
+    return Cv_*W() + RR;
 }
 
 
 inline Foam::scalar Foam::eConstThermo::h(const scalar T) const
 {
-    return cp(T)*T + Hf*W();
+    return cp(T)*T + Hf_*W();
+}
+
+
+inline Foam::scalar Foam::eConstThermo::hs(const scalar T) const
+{
+    return cp(T)*T;
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::eConstThermo<equationOfState>::hc() const
+{
+    return Hf_*this->W();
 }
 
 
@@ -102,7 +115,7 @@ inline Foam::scalar Foam::eConstThermo::TH
     const scalar T0
 ) const
 {
-    return (h - Hf)/Cp(T0);
+    return (h - Hf_)/Cp(T0);
 }
 
 
@@ -112,7 +125,7 @@ inline Foam::scalar Foam::eConstThermo::TE
     const scalar
 ) const
 {
-    return (e - Hf)/CV;
+    return (e - Hf_)/Cv_;
 }
 
 
@@ -125,8 +138,8 @@ inline Foam::eConstThermo& Foam::eConstThermo::operator=
 {
     specieThermo::operator=(ct);
 
-    CV = ct.CV;
-    Hf = ct.Hf;
+    Cv_ = ct.Cv_;
+    Hf_ = ct.Hf_;
 
     return *this;
 }
@@ -145,8 +158,8 @@ inline Foam::eConstThermo Foam::operator+
     return eConstThermo
     (
         st,
-        ct1.nMoles()/st.nMoles()*ct1.CV + ct2.nMoles()/st.nMoles()*ct2.CV,
-        ct1.nMoles()/st.nMoles()*ct1.Hf + ct2.nMoles()/st.nMoles()*ct2.Hf
+        ct1.nMoles()/st.nMoles()*ct1.Cv_ + ct2.nMoles()/st.nMoles()*ct2.Cv_,
+        ct1.nMoles()/st.nMoles()*ct1.Hf_ + ct2.nMoles()/st.nMoles()*ct2.Hf_
     );
 }
 
@@ -162,8 +175,8 @@ inline Foam::eConstThermo Foam::operator-
     return eConstThermo
     (
         st,
-        ct1.nMoles()/st.nMoles()*ct1.CV - ct2.nMoles()/st.nMoles()*ct2.CV,
-        ct1.nMoles()/st.nMoles()*ct1.Hf - ct2.nMoles()/st.nMoles()*ct2.Hf
+        ct1.nMoles()/st.nMoles()*ct1.Cv_ - ct2.nMoles()/st.nMoles()*ct2.Cv_,
+        ct1.nMoles()/st.nMoles()*ct1.Hf_ - ct2.nMoles()/st.nMoles()*ct2.Hf_
     );
 }
 
@@ -177,8 +190,8 @@ inline Foam::eConstThermo Foam::operator*
     return eConstThermo
     (
         s*((const specieThermo&)ct),
-        ct.CV,
-        ct.Hf
+        ct.Cv_,
+        ct.Hf_
     );
 }
 

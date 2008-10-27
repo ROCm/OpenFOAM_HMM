@@ -73,21 +73,20 @@ public:
         hMixtureThermo(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~hMixtureThermo();
+    //- Destructor
+    virtual ~hMixtureThermo();
 
 
     // Member functions
 
         //- Return the compostion of the combustion mixture
-        combustionMixture& composition()
+        virtual combustionMixture& composition()
         {
             return *this;
         }
 
         //- Return the compostion of the combustion mixture
-        const combustionMixture& composition() const
+        virtual const combustionMixture& composition() const
         {
             return *this;
         }
@@ -95,28 +94,37 @@ public:
         //- Update properties
         virtual void correct();
 
+        //- Sensible enthalpy [J/kg]
+        virtual tmp<volScalarField> hs() const;
+
+        //- Chemical enthalpy [J/kg]
+        virtual tmp<volScalarField> hc() const;
 
         // Fields derived from thermodynamic state variables
 
             //- Enthalpy for cell-set [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const labelList& cells
             ) const;
 
             //- Enthalpy for patch [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const label patchi
             ) const;
 
             //- Heat capacity at constant pressure for patch [J/kg/K]
-            tmp<scalarField> Cp(const scalarField& T, const label patchi) const;
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& T,
+                const label patchi
+            ) const;
 
             //- Heat capacity at constant pressure [J/kg/K]
-            tmp<volScalarField> Cp() const;
+            virtual tmp<volScalarField> Cp() const;
 
 
         //- Read thermophysicalProperties dictionary

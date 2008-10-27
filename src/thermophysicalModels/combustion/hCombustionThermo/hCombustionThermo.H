@@ -92,9 +92,8 @@ public:
         static autoPtr<hCombustionThermo> New(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~hCombustionThermo();
+    //- Destructor
+    virtual ~hCombustionThermo();
 
 
     // Member functions
@@ -110,17 +109,23 @@ public:
 
             //- Enthalpy [J/kg]
             //  Non-const access allowed for transport equations
-            volScalarField& h()
+            virtual volScalarField& h()
             {
                 return h_;
             }
 
             //- Enthalpy [J/kg]
-            const volScalarField& h() const
+            virtual const volScalarField& h() const
             {
                 return h_;
             }
 
+
+        //- Sensible enthalpy [J/kg]
+        virtual tmp<volScalarField> hs() const = 0;
+
+        //- Chemical enthalpy [J/kg]
+        virtual tmp<volScalarField> hc() const = 0;
 
         //- Update properties
         virtual void correct() = 0;

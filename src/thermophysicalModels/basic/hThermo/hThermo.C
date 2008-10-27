@@ -205,7 +205,6 @@ Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::h
     return th;
 }
 
-
 template<class MixtureType>
 Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::Cp
 (
@@ -223,7 +222,6 @@ Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::Cp
 
     return tCp;
 }
-
 
 template<class MixtureType>
 Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cp() const
@@ -243,7 +241,8 @@ Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cp() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionSet(0, 2, -2, -1, 0)
+            dimensionSet(0, 2, -2, -1, 0),
+            T_.boundaryField().types()
         )
     );
 
@@ -256,10 +255,35 @@ Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cp() const
 
     forAll(T_.boundaryField(), patchi)
     {
-        cp.boundaryField()[patchi] = Cp(T_.boundaryField()[patchi], patchi);
+        const fvPatchScalarField& pT = T_.boundaryField()[patchi];
+        fvPatchScalarField& pCp = cp.boundaryField()[patchi];
+
+        forAll(pT, facei)
+        {
+            pCp[facei] = this->patchFaceMixture(patchi, facei).Cp(pT[facei]);
+        }
     }
 
     return tCp;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::hThermo<MixtureType>::Cv
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCv(new scalarField(T.size()));
+    scalarField& cv = tCv();
+
+    forAll(T, facei)
+    {
+        cv[facei] = this->patchFaceMixture(patchi, facei).Cv(T[facei]);
+    }
+
+    return tCv;
 }
 
 
@@ -281,8 +305,7 @@ Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cv() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionSet(0, 2, -2, -1, 0),
-            T_.boundaryField().types()
+            dimensionSet(0, 2, -2, -1, 0)
         )
     );
 
@@ -295,18 +318,11 @@ Foam::tmp<Foam::volScalarField> Foam::hThermo<MixtureType>::Cv() const
 
     forAll(T_.boundaryField(), patchi)
     {
-        const fvPatchScalarField& pT = T_.boundaryField()[patchi];
-        fvPatchScalarField& pCv = cv.boundaryField()[patchi];
-
-        forAll(pT, facei)
-        {
-            pCv[facei] = this->patchFaceMixture(patchi, facei).Cv(pT[facei]);
-        }
+        cv.boundaryField()[patchi] = Cv(T_.boundaryField()[patchi], patchi);
     }
 
     return tCv;
 }
-
 
 template<class MixtureType>
 bool Foam::hThermo<MixtureType>::read()
