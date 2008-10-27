@@ -1904,8 +1904,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         }
         else
         {
-            dict_.set("bounds", procBb_[Pstream::myProcNo()]);
             procBb_.transfer(newProcBb);
+            dict_.set("bounds", procBb_[Pstream::myProcNo()]);
         }
     }
 
