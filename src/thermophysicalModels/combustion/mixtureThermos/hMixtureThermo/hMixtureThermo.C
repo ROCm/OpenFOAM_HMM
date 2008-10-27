@@ -134,7 +134,120 @@ void Foam::hMixtureThermo<MixtureType>::calculate()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::h
+void Foam::hMixtureThermo<MixtureType>::correct()
+{
+    if (debug)
+    {
+        Info<< "entering hMixtureThermo<MixtureType>::correct()" << endl;
+    }
+
+    // force the saving of the old-time values
+    psi_.oldTime();
+
+    calculate();
+
+    if (debug)
+    {
+        Info<< "exiting hMixtureThermo<MixtureType>::correct()" << endl;
+    }
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::hMixtureThermo<MixtureType>::hs() const
+{
+    const fvMesh& mesh = T_.mesh();
+
+    tmp<volScalarField> ths
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "hs",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            h_.dimensions()
+        )
+    );
+
+    volScalarField& hsf = ths();
+    scalarField& hsCells = hsf.internalField();
+    const scalarField& TCells = T_.internalField();
+
+    forAll(TCells, celli)
+    {
+        hsCells[celli] = this->cellMixture(celli).Hs(TCells[celli]);
+    }
+
+    forAll(T_.boundaryField(), patchi)
+    {
+        scalarField& hsp = hsf.boundaryField()[patchi];
+        const scalarField& Tp = T_.boundaryField()[patchi];
+
+        forAll(Tp, facei)
+        {
+            hsp[facei] = this->patchFaceMixture(patchi, facei).Hs(Tp[facei]);
+        }
+    }
+
+    return ths;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::hMixtureThermo<MixtureType>::hc() const
+{
+    const fvMesh& mesh = T_.mesh();
+
+    tmp<volScalarField> thc
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "hc",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            h_.dimensions()
+        )
+    );
+
+    volScalarField& hcf = thc();
+    scalarField& hcCells = hcf.internalField();
+
+    forAll(hcCells, celli)
+    {
+        hcCells[celli] = this->cellMixture(celli).Hc();
+    }
+
+    forAll(hcf.boundaryField(), patchi)
+    {
+        scalarField& hcp = hcf.boundaryField()[patchi];
+
+        forAll(hcp, facei)
+        {
+            hcp[facei] = this->patchFaceMixture(patchi, facei).Hc();
+        }
+    }
+
+    return thc;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::hMixtureThermo<MixtureType>::h
 (
     const scalarField& T,
     const labelList& cells
@@ -153,7 +266,8 @@ Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::h
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::h
+Foam::tmp<Foam::scalarField>
+Foam::hMixtureThermo<MixtureType>::h
 (
     const scalarField& T,
     const label patchi
@@ -172,7 +286,8 @@ Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::h
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::Cp
+Foam::tmp<Foam::scalarField>
+Foam::hMixtureThermo<MixtureType>::Cp
 (
     const scalarField& T,
     const label patchi
@@ -192,7 +307,8 @@ Foam::tmp<Foam::scalarField> Foam::hMixtureThermo<MixtureType>::Cp
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::hMixtureThermo<MixtureType>::Cp() const
+Foam::tmp<Foam::volScalarField>
+Foam::hMixtureThermo<MixtureType>::Cp() const
 {
     const fvMesh& mesh = T_.mesh();
 
@@ -215,9 +331,12 @@ Foam::tmp<Foam::volScalarField> Foam::hMixtureThermo<MixtureType>::Cp() const
 
     volScalarField& cp = tCp();
 
-    forAll(T_, celli)
+    scalarField& cpCells = cp.internalField();
+    const scalarField& TCells = T_.internalField();
+
+    forAll(TCells, celli)
     {
-        cp[celli] = this->cellMixture(celli).Cp(T_[celli]);
+        cpCells[celli] = this->cellMixture(celli).Cp(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -226,26 +345,6 @@ Foam::tmp<Foam::volScalarField> Foam::hMixtureThermo<MixtureType>::Cp() const
     }
 
     return tCp;
-}
-
-
-template<class MixtureType>
-void Foam::hMixtureThermo<MixtureType>::correct()
-{
-    if (debug)
-    {
-        Info<< "entering hMixtureThermo<MixtureType>::correct()" << endl;
-    }
-
-    // force the saving of the old-time values
-    psi_.oldTime();
-
-    calculate();
-
-    if (debug)
-    {
-        Info<< "exiting hMixtureThermo<MixtureType>::correct()" << endl;
-    }
 }
 
 
