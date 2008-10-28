@@ -123,7 +123,7 @@ Foam::fileFormats::TRIfileFormat::TRIfileFormat
 
     // uses similar structure as STL, just some points
     DynamicList<point> pointLst;
-    DynamicList<label> facetsLst;
+    DynamicList<label> regionLst;
     HashTable<label>   groupToPatch;
 
     // leave faces that didn't have a group in 0
@@ -193,46 +193,43 @@ Foam::fileFormats::TRIfileFormat::TRIfileFormat
         else
         {
             // special treatment if any initial faces were not in a group
-            if (maxGroupID == -1 && facetsLst.size())
+            if (maxGroupID == -1 && regionLst.size())
             {
                 groupToPatch.insert("patch0", 0);
-                nUngrouped = facetsLst.size();
+                nUngrouped = regionLst.size();
                 maxGroupID = 0;
             }
             groupID = ++maxGroupID;
             groupToPatch.insert(groupName, groupID);
         }
 
-        facetsLst.append(groupID);
+        regionLst.append(groupID);
     }
 
     // transfer to normal list
     points().transfer(pointLst);
+    regions().transfer(regionLst);
 
-    // make our triangles
-    facetsLst.shrink();
-    List<keyedFace> faceLst(facetsLst.size());
+    // make our triangles directly
+    List<face>& faceLst = faces();
+    faceLst.setSize(regions().size());
 
-    face fTri(3);
     label ptI = 0;
-    forAll(facetsLst, faceI)
+    forAll(faceLst, faceI)
     {
+        face& fTri = faceLst[faceI];
+        fTri.setSize(3);
+
         fTri[0] = ptI++;
         fTri[1] = ptI++;
         fTri[2] = ptI++;
-
-        faceLst[faceI] = keyedFace(fTri, facetsLst[faceI]);
     }
-    facetsLst.clearStorage();
 
-    faces().transfer(faceLst);
     setPatches(groupToPatch);
     stitchFaces(SMALL);
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::TRIfileFormat::write
@@ -242,7 +239,7 @@ void Foam::fileFormats::TRIfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst  = surf.faces();
 
     labelList faceMap;
     List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
@@ -266,7 +263,7 @@ void Foam::fileFormats::TRIfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<face>& faceLst = surf.faces();
+    const List<face>& faceLst  = surf.faces();
     const List<surfacePatch>& patchLst = surf.patches();
 
     label faceIndex = 0;
@@ -279,9 +276,5 @@ void Foam::fileFormats::TRIfileFormat::write
         }
     }
 }
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

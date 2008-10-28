@@ -60,29 +60,14 @@ addNamedToMemberFunctionSelectionTable
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-Foam::fileFormats::SMESHfileFormat::SMESHfileFormat()
-:
-    keyedSurface()
-{}
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void
-Foam::fileFormats::SMESHfileFormat::write
+void Foam::fileFormats::SMESHfileFormat::writeHead
 (
     Ostream& os,
-    const keyedSurface& surf
+    const pointField& pointLst,
+    const List<face>& faceLst
 )
 {
-    const pointField& pointLst= surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
-
-    labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
-
+    // Write header
     os << "# tetgen .smesh file written " << clock::dateTime().c_str() << nl;
     os << "# <points count=\"" << pointLst.size() << "\">" << endl;
     os << pointLst.size() << " 3" << nl;    // 3: dimensions
@@ -100,6 +85,41 @@ Foam::fileFormats::SMESHfileFormat::write
         << "# <faces count=\"" << faceLst.size() << "\">" << endl;
 
     os  << faceLst.size() << " 1" << endl;   // one attribute: region number
+}
+
+
+void Foam::fileFormats::SMESHfileFormat::writeTail(Ostream& os)
+{
+    os  << "# </faces>" << nl
+        << nl
+        << "# no holes or regions:" << nl
+        << '0' << nl        // holes
+        << '0' << endl;     // regions
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fileFormats::SMESHfileFormat::SMESHfileFormat()
+:
+    keyedSurface()
+{}
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void
+Foam::fileFormats::SMESHfileFormat::write
+(
+    Ostream& os,
+    const keyedSurface& surf
+)
+{
+    const List<face>& faceLst = surf.faces();
+
+    writeHead(os, surf.points(), faceLst);
+
+    labelList faceMap;
+    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -117,11 +137,7 @@ Foam::fileFormats::SMESHfileFormat::write
         }
     }
 
-    os  << "# </faces>" << nl
-        << nl
-        << "# no holes or regions:" << nl
-        << '0' << nl        // holes
-        << '0' << endl;     // regions
+    writeTail(os);
 }
 
 
@@ -132,27 +148,10 @@ Foam::fileFormats::SMESHfileFormat::write
     const meshedSurface& surf
 )
 {
-    const pointField& pointLst= surf.points();
     const List<face>& faceLst = surf.faces();
     const List<surfacePatch>& patchLst = surf.patches();
 
-    os << "# tetgen .smesh file written " << clock::dateTime().c_str() << nl;
-    os << "# <points count=\"" << pointLst.size() << "\">" << endl;
-    os << pointLst.size() << " 3" << nl;    // 3: dimensions
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << ptI
-            << ' ' << pointLst[ptI].x()
-            << ' ' << pointLst[ptI].y()
-            << ' ' << pointLst[ptI].z() << nl;
-    }
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
-
-    os  << faceLst.size() << " 1" << endl;   // one attribute: region number
+    writeHead(os, surf.points(), faceLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -170,16 +169,8 @@ Foam::fileFormats::SMESHfileFormat::write
         }
     }
 
-    os  << "# </faces>" << nl
-        << nl
-        << "# no holes or regions:" << nl
-        << '0' << nl        // holes
-        << '0' << endl;     // regions
+    writeTail(os);
 }
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

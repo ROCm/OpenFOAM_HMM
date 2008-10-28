@@ -240,12 +240,50 @@ void Foam::meshedSurface::checkPatches()
 }
 
 
-// Read triangles, points from Istream
+void Foam::meshedSurface::sortFacesByRegion
+(
+    const List<label>& regionIds,
+    const Map<word>& regionNames
+)
+{
+    const List<FaceType>& unsortedFaces = faces();
+
+    if (!&regionNames || !&regionIds || regionIds.size() == 0)
+    {
+        onePatch();
+    }
+    else if (regionIds.size() == unsortedFaces.size())
+    {
+        labelList faceMap;
+        surfacePatchList newPatches = keyedSurface::sortedRegions
+        (
+            regionIds,
+            regionNames,
+            faceMap
+        );
+        patches_.transfer(newPatches);
+
+        // this is somewhat like ListOps reorder and/or IndirectList
+        List<FaceType> newFaces(unsortedFaces.size());
+        forAll(newFaces, faceI)
+        {
+            newFaces[faceI] = unsortedFaces[faceMap[faceI]];
+        }
+        faceMap.clear();
+
+        faces().transfer(newFaces);
+    }
+}
+
+
+// Read points, faces, from Istream
 bool Foam::meshedSurface::read(Istream& is)
 {
-    is  >> patches_ >> points() >> faces();
+    notImplemented("Foam::meshedSurface::read(Istream&)");
+    return false;
 
-    return true;
+    //// is  >> patches_ >> points() >> faces();
+    //// return true;
 }
 
 #if 0
@@ -266,20 +304,7 @@ bool Foam::meshedSurface::read(const fileName& name, const word& ext)
 
 Foam::meshedSurface::meshedSurface()
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
-{}
-
-
-Foam::meshedSurface::meshedSurface
-(
-    const pointField& pointLst,
-    const List<FaceType>& faceLst,
-    const surfacePatchList& patchLst
-)
-:
-    MeshStorage(faceLst, pointLst),
-    patches_(patchLst)
+    MeshStorage(List<FaceType>(), pointField())
 {}
 
 
@@ -293,8 +318,8 @@ Foam::meshedSurface::meshedSurface
     MeshStorage(List<FaceType>(), pointField()),
     patches_(patchLst)
 {
-    faces().transfer(faceLst());
     points().transfer(pointLst());
+    faces().transfer(faceLst());
 }
 
 
@@ -307,8 +332,7 @@ Foam::meshedSurface::meshedSurface
     const List<word>& patchTypes
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     points().transfer(pointLst());
     faces().transfer(faceLst());
@@ -338,57 +362,38 @@ Foam::meshedSurface::meshedSurface
 (
     const xfer<pointField>& pointLst,
     const xfer<List<FaceType> >& faceLst,
-    const List<label>& regionLst,
+    const List<label>& regionIds,
     const Map<word>& regionNames
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     points().transfer(pointLst());
     faces().transfer(faceLst());
 
-    const List<FaceType>& unsortedFaces = faces();
-
-    if (regionLst.size() == 0)
-    {
-        onePatch();
-    }
-    else if (regionLst.size() != unsortedFaces.size())
+    if
+    (
+        &regionIds
+     && regionIds.size() != 0
+     && regionIds.size() != nFaces()
+    )
     {
         FatalErrorIn
         (
             "meshedSurface::meshedSurface(\n"
             "(\n"
-            "    const pointField&,\n"
-            "    const List<FaceType>&,\n"
-            "    const List<label>& regionLst,\n"
+            "    const xfer<pointField>&,\n"
+            "    const xfer<List<FaceType> >&,\n"
+            "    const List<label>& regionIds,\n"
             "    const Map<word>& regionNames\n"
             " )\n"
         )
-            << "size mismatch : regionLst.size() != faceLst.size()"
+            << "size mismatch : regionIds.size() != nFaces()"
             << exit(FatalError);
     }
     else
     {
-        labelList faceMap;
-        surfacePatchList newPatches = keyedSurface::sortedRegions
-        (
-            regionLst,
-            regionNames,
-            faceMap
-        );
-        patches_.transfer(newPatches);
-
-        // this is somewhat like ListOps reorder and/or IndirectList
-        List<FaceType> newFaces(unsortedFaces.size());
-        forAll(newFaces, faceI)
-        {
-            newFaces[faceI] = unsortedFaces[faceMap[faceI]];
-        }
-        faceMap.clear();
-
-        faces().transfer(newFaces);
+        sortFacesByRegion(regionIds, regionNames);
     }
 }
 
@@ -396,88 +401,41 @@ Foam::meshedSurface::meshedSurface
 Foam::meshedSurface::meshedSurface
 (
     const xfer<pointField>& pointLst,
-    const xfer<List<FaceType> >& faceLst
-)
-:
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
-{
-    faces().transfer(faceLst());
-    points().transfer(pointLst());
-
-    onePatch();
-}
-
-
-Foam::meshedSurface::meshedSurface
-(
-    const xfer<pointField>& pointLst,
-    const List<keyedFace>& faceLst,
-    const Map<word>& regionNames
-)
-:
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
-{
-    points().transfer(pointLst());
-
-    labelList faceMap;
-    surfacePatchList newPatches = keyedSurface::sortedRegions
-    (
-        faceLst,
-        regionNames,
-        faceMap
-    );
-    patches_.transfer(newPatches);
-
-    // this is somewhat like ListOps reorder and/or IndirectList
-    List<FaceType> newFaces(faceLst.size());
-    forAll(newFaces, faceI)
-    {
-        newFaces[faceI] = faceLst[faceMap[faceI]];
-    }
-
-    faces().transfer(newFaces);
-}
-
-
-Foam::meshedSurface::meshedSurface
-(
-    const xfer<pointField>& pointLst,
-    const List<keyedFace>& faceLst,
+    const xfer<List<FaceType> >& faceLst,
+    const List<label>& regionIds,
     const HashTable<label>& nameToRegionMapping
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     points().transfer(pointLst());
+    faces().transfer(faceLst());
 
-    Map<word> regionNames;
-    forAllConstIter(HashTable<label>, nameToRegionMapping, iter)
+    if (regionIds.size() != nFaces())
     {
-        regionNames.insert(iter(), iter.key());
+        FatalErrorIn
+        (
+            "meshedSurface::meshedSurface(\n"
+            "(\n"
+            "    const xfer<pointField>&,\n"
+            "    const xfer<List<FaceType> >&,\n"
+            "    const List<label>& regionIds,\n"
+            "    const HashTable<label>& nameToRegionMapping\n"
+            " )\n"
+        )
+            << "size mismatch : regionIds.size() != nFaces()"
+            << exit(FatalError);
     }
-
-
-    labelList faceMap;
-    surfacePatchList newPatches = keyedSurface::sortedRegions
-    (
-        faceLst,
-        regionNames,
-        faceMap
-    );
-    patches_.transfer(newPatches);
-
-    List<FaceType> newFaces(faceLst.size());
-
-    // this is somewhat like ListOps reorder and/or IndirectList
-    forAll(newFaces, faceI)
+    else
     {
-        newFaces[faceI] = faceLst[faceMap[faceI]];
-    }
+        Map<word> regionNames;
+        forAllConstIter(HashTable<label>, nameToRegionMapping, iter)
+        {
+            regionNames.insert(iter(), iter.key());
+        }
 
-    faces().transfer(newFaces);
+        sortFacesByRegion(regionIds, regionNames);
+    }
 }
 
 
@@ -487,8 +445,7 @@ Foam::meshedSurface::meshedSurface
     const bool useGlobalPoints
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     const polyMesh& mesh = bMesh.mesh();
     const polyPatchList& bPatches = bMesh;
@@ -550,8 +507,7 @@ Foam::meshedSurface::meshedSurface
     const surfMesh& sMesh
 )
 :
-    MeshStorage(List<FaceType>(sMesh.faces()), sMesh.points()),
-    patches_()
+    MeshStorage(List<FaceType>(sMesh.faces()), sMesh.points())
 {
     const surfPatchList& sPatches = sMesh.boundaryMesh();
 
@@ -585,14 +541,13 @@ Foam::meshedSurface::meshedSurface
     const keyedSurface& surf
 )
 :
-    MeshStorage(List<FaceType>(), surf.points()),
-    patches_()
+    MeshStorage(List<FaceType>(), surf.points())
 {
     labelList faceMap;
-    surfacePatchList newPatches = surf.sortedRegions(faceMap);
-    patches_.transfer(newPatches);
+    surfacePatchList patchLst = surf.sortedRegions(faceMap);
+    patches_.transfer(patchLst);
 
-    const List<keyedFace>& origFaces = surf.faces();
+    const List<FaceType>& origFaces = surf.faces();
     List<FaceType> newFaces(origFaces.size());
 
     // this is somewhat like ListOps reorder and/or IndirectList
@@ -612,8 +567,7 @@ Foam::meshedSurface::meshedSurface
     const bool triangulate
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     // use selector mechanism
     autoPtr<meshedSurface> surfPtr = New(fName, ext, triangulate);
@@ -626,8 +580,7 @@ Foam::meshedSurface::meshedSurface
     const bool triangulate
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     // use selector mechanism
     autoPtr<meshedSurface> surfPtr = New(fName, triangulate);
@@ -637,8 +590,7 @@ Foam::meshedSurface::meshedSurface
 
 Foam::meshedSurface::meshedSurface(Istream& is)
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     read(is);
     // setDefaultPatches();
@@ -647,8 +599,7 @@ Foam::meshedSurface::meshedSurface(Istream& is)
 
 Foam::meshedSurface::meshedSurface(const Time& d)
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     read(IFstream(triSurfName(d))());
     // setDefaultPatches();
@@ -664,8 +615,7 @@ Foam::meshedSurface::meshedSurface(const meshedSurface& surf)
 
 Foam::meshedSurface::meshedSurface(const xfer<keyedSurface>& surf)
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     transfer(surf());
 }
@@ -673,8 +623,7 @@ Foam::meshedSurface::meshedSurface(const xfer<keyedSurface>& surf)
 
 Foam::meshedSurface::meshedSurface(const xfer<meshedSurface>& surf)
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    patches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     transfer(surf());
 }
@@ -703,6 +652,7 @@ void Foam::meshedSurface::movePoints(const pointField& newPoints)
     points() = newPoints;
 }
 
+
 //- scale points
 void Foam::meshedSurface::scalePoints(const scalar& scaleFactor)
 {
@@ -718,7 +668,6 @@ void Foam::meshedSurface::scalePoints(const scalar& scaleFactor)
         points() *= scaleFactor;
     }
 }
-
 
 
 Foam::meshedSurface Foam::meshedSurface::subsetMesh
@@ -806,8 +755,8 @@ Foam::meshedSurface Foam::meshedSurface::subsetMesh
 void Foam::meshedSurface::transfer(meshedSurface& surf)
 {
     clearOut();
-    faces().transfer(surf.faces());
     points().transfer(surf.points());
+    faces().transfer(surf.faces());
     patches_.transfer(surf.patches_);
     surf.clearOut();
 }
@@ -817,18 +766,21 @@ void Foam::meshedSurface::transfer(keyedSurface& surf)
 {
     clearOut();
     points().transfer(surf.points());
+    faces().clear();
 
     labelList faceMap;
-    surfacePatchList newPatches = surf.sortedRegions(faceMap);
-    patches_.transfer(newPatches);
+    surfacePatchList patchLst = surf.sortedRegions(faceMap);
+    patches_.transfer(patchLst);
+    surf.regions().clear();
+    surf.geoPatches_.clear();
 
-    const List<keyedFace>& origFaces = surf.faces();
-    List<FaceType> newFaces(origFaces.size());
+    List<FaceType>& oldFaces = surf.faces();
+    List<FaceType> newFaces(oldFaces.size());
 
     // this is somewhat like ListOps reorder and/or IndirectList
     forAll(newFaces, faceI)
     {
-        newFaces[faceI] = origFaces[faceMap[faceI]];
+        newFaces[faceI] = oldFaces[faceMap[faceI]];
     }
 
     faces().transfer(newFaces);
@@ -932,15 +884,19 @@ void Foam::meshedSurface::write
 void Foam::meshedSurface::write(Ostream& os) const
 {
     // quick-hack
-    os << patches_.size() << nl << token::BEGIN_LIST;
+    os  << "\n// regions:\n"
+        << patches_.size() << nl << token::BEGIN_LIST;
     forAll(patches_, patchI)
     {
         patches_[patchI].writeDict(os);
     }
-    os << token::END_LIST;
+    os << token::END_LIST << endl;
 
     // Note: Write with global point numbering
-    os << points() << nl << faces() << endl;
+    os  << "\n// points:"
+        << points() << nl
+        << "\n// faces:"
+        << faces() << endl;
 
     // Check state of Ostream
     os.check("meshedSurface::write(Ostream&)");

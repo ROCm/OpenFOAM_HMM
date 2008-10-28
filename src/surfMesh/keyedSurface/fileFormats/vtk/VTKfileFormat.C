@@ -64,7 +64,8 @@ addNamedToMemberFunctionSelectionTable
 void Foam::fileFormats::VTKfileFormat::writeHead
 (
     Ostream& os,
-    const pointField& pointLst
+    const pointField& pointLst,
+    const List<face>& faceLst
 )
 {
     // Write header
@@ -82,6 +83,16 @@ void Foam::fileFormats::VTKfileFormat::writeHead
             << pointLst[ptI].y() << ' '
             << pointLst[ptI].z() << nl;
     }
+
+    label nNodes = 0;
+    forAll(faceLst, faceI)
+    {
+        nNodes += faceLst[faceI].size();
+    }
+
+    os  << nl
+        << "POLYGONS " << faceLst.size() << ' '
+        << faceLst.size() + nNodes << nl;
 }
 
 
@@ -134,8 +145,6 @@ Foam::fileFormats::VTKfileFormat::VTKfileFormat()
 {}
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::VTKfileFormat::write
@@ -144,23 +153,12 @@ void Foam::fileFormats::VTKfileFormat::write
     const keyedSurface& surf
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst = surf.faces();
+
+    writeHead(os, surf.points(), faceLst);
 
     labelList faceMap;
     List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
-
-    writeHead(os, pointLst);
-
-    label nNodes = 0;
-    forAll(faceLst, faceI)
-    {
-        nNodes += faceLst[faceI].size();
-    }
-
-    os  << nl
-        << "POLYGONS " << faceLst.size() << ' '
-        << faceLst.size() + nNodes << nl;
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -189,21 +187,10 @@ void Foam::fileFormats::VTKfileFormat::write
     const meshedSurface& surf
 )
 {
-    const pointField& pointLst = surf.points();
     const List<face>& faceLst = surf.faces();
     const List<surfacePatch>& patchLst = surf.patches();
 
-    writeHead(os, pointLst);
-
-    label nNodes = 0;
-    forAll(faceLst, faceI)
-    {
-        nNodes += faceLst[faceI].size();
-    }
-
-    os  << nl
-        << "POLYGONS " << faceLst.size() << ' '
-        << faceLst.size() + nNodes << nl;
+    writeHead(os, surf.points(), faceLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -224,10 +211,5 @@ void Foam::fileFormats::VTKfileFormat::write
     // Print region numbers
     writeTail(os, patchLst);
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

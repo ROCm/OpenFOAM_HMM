@@ -27,8 +27,6 @@ License
 #include "keyedSurface.H"
 #include "mergePoints.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Remove badly degenerate faces, double faces.
@@ -83,6 +81,7 @@ bool Foam::keyedSurface::stitchFaces(const scalar tol, const bool verbose)
             if (newFaceI != faceI)
             {
                 faceLst[newFaceI] = f;
+                regions_[newFaceI] = regions_[faceI];
             }
             newFaceI++;
         }
@@ -103,6 +102,7 @@ bool Foam::keyedSurface::stitchFaces(const scalar tol, const bool verbose)
                 << " faces" << endl;
         }
         faceLst.setSize(newFaceI);
+        regions_.setSize(newFaceI);
     }
 
     // Merging points might have changed geometric factors
@@ -138,9 +138,8 @@ void Foam::keyedSurface::checkFaces(const bool verbose)
         }
     }
 
-    // Two phase process
-    //   1. mark invalid faces
-    //   2. pack
+    // Phase 1: mark invalid faces
+    // Phase 1: pack
     // Done to keep numbering constant in phase 1
     const labelListList& fFaces = faceFaces();
     label newFaceI = 0;
@@ -197,6 +196,7 @@ void Foam::keyedSurface::checkFaces(const bool verbose)
                 if (newFaceI != faceI)
                 {
                     faceLst[newFaceI] = f;
+                    regions_[newFaceI] = regions_[faceI];
                 }
                 newFaceI++;
             }
@@ -223,13 +223,11 @@ void Foam::keyedSurface::checkFaces(const bool verbose)
                 << " illegal faces." << endl;
         }
         faceLst.setSize(newFaceI);
+        regions_.setSize(newFaceI);
 
         // Topology can change because of renumbering
         clearOut();
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

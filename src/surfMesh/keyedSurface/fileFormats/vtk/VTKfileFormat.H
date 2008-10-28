@@ -65,7 +65,7 @@ class VTKfileFormat
         //- Disallow default bitwise assignment
         void operator=(const VTKfileFormat&);
 
-        static void writeHead(Ostream&, const pointField&);
+        static void writeHead(Ostream&, const pointField&, const List<face>&);
         static void writeTail(Ostream&, const List<surfacePatch>&);
 
 public:

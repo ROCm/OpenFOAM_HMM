@@ -40,6 +40,9 @@ Usage
     @param -triSurface \n
     Use triSurface library for input/output
 
+    @param -keyed \n
+    Use keyedSurface for input/output
+
 Note
     The filename extensions are used to determine the file format type.
 
@@ -49,6 +52,7 @@ Note
 #include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "keyedSurface.H"
 #include "meshedSurface.H"
 #include "triSurface.H"
 
@@ -65,6 +69,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("clean", "");
     argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("triSurface", "");
+    argList::validOptions.insert("keyed", "");
 #   include "setRootCase.H"
     const stringList& params = args.additionalArgs();
 
@@ -113,6 +118,31 @@ int main(int argc, char *argv[])
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
         }
+
+        // write sorted by region
+        surf.write(exportName, true);
+    }
+    else if (args.options().found("keyed"))
+    {
+        keyedSurface surf(importName);
+
+        if (args.options().found("clean"))
+        {
+            surf.cleanup(true);
+            surf.checkOrientation(true);
+        }
+
+        Info << "writing " << exportName;
+        if (scaleFactor <= 0)
+        {
+            Info<< " without scaling" << endl;
+        }
+        else
+        {
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
+        }
+
         surf.write(exportName);
     }
     else

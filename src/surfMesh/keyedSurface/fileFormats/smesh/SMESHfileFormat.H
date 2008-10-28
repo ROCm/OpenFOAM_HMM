@@ -73,6 +73,9 @@ class SMESHfileFormat
         //- Disallow default bitwise assignment
         void operator=(const SMESHfileFormat&);
 
+        static void writeHead(Ostream&, const pointField&, const List<face>&);
+        static void writeTail(Ostream&);
+
 public:
 
     // Constructors

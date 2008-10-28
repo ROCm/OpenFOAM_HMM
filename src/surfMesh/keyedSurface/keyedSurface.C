@@ -199,12 +199,11 @@ void Foam::keyedSurface::setPatches(const label maxPatch)
 void Foam::keyedSurface::setPatches()
 {
     label maxPatch = 0;
-    const List<keyedFace>& faceLst = faces();
 
     // find the max region that occurs
-    forAll(faceLst, faceI)
+    forAll(regions_, faceI)
     {
-        const label regId = faceLst[faceI].key();
+        const label regId = regions_[faceI];
 
         if (maxPatch < regId)
         {
@@ -222,7 +221,7 @@ void Foam::keyedSurface::setPatches
     const Map<word>& regionNames,
     const label maxPatchHint
 )
-{    
+{
     label maxPatch = maxPatchHint;
 
     // determine max patch ID if required
@@ -288,13 +287,16 @@ void Foam::keyedSurface::setPatches
     setPatches(regionNames, maxPatch);
 }
 
-
 // Read triangles, points from Istream
+//
+//  FIXME: needs to handle labelledTri etc.
 bool Foam::keyedSurface::read(Istream& is)
 {
-    is  >> geoPatches_ >> points() >> faces();
+    notImplemented("Foam::keyedSurface::read(Istream&)");
+    return false;
 
-    return true;
+    //// is  >> geoPatches_ >> points() >> faces();
+    //// return true;
 }
 
 #if 0
@@ -309,91 +311,6 @@ bool Foam::keyedSurface::read(const fileName& name, const word& ext)
     }
 }
 #endif
-
-
-// Returns patch info.
-// Sets faceMap to the indexing according to patch numbers.
-// Patch numbers start at 0.
-Foam::surfacePatchList
-Foam::keyedSurface::sortedRegions
-(
-    const List<keyedFace>& faceLst,
-    const Map<word>& patchNames,
-    labelList& faceMap
-)
-{
-    // determine sort order according to region numbers
-
-    // std::sort() really seems to mix up the order.
-    // Assuming that we have relatively fewer regions compared to the
-    // number of items, just do it ourselves
-
-    // step 1: get region sizes and store (regionId => patchI)
-    Map<label> regionLookup;
-    forAll(faceLst, faceI)
-    {
-        const label regId = faceLst[faceI].key();
-
-        Map<label>::iterator iter = regionLookup.find(regId);
-        if (iter == regionLookup.end())
-        {
-            regionLookup.insert(regId, 1);
-        }
-        else
-        {
-            iter()++;
-        }
-    }
-
-    // step 2: assign start/size (and name) to the newPatches
-    // re-use the lookup to map (regionId => patchI)
-    surfacePatchList surfPatches(regionLookup.size());
-    label patchStart = 0;
-    label patchI = 0;
-    forAllIter(Map<label>, regionLookup, iter)
-    {
-        label regId = iter.key();
-
-        word patchName;
-        Map<word>::const_iterator iter2 = patchNames.find(regId);
-        if (iter2 == patchNames.end())
-        {
-            patchName = word("patch") + ::Foam::name(patchI);
-        }
-        else
-        {
-            patchName = iter2();
-        }
-
-        surfPatches[patchI] = surfacePatch
-        (
-            defaultGeometricType,
-            patchName,
-            0,           // initialize with zero size
-            patchStart,
-            patchI
-        );
-
-        // increment the start for the next patch
-        // and save the (regionId => patchI) mapping
-        patchStart += iter();
-        iter() = patchI++;
-    }
-
-    // step 3: build the re-ordering
-    faceMap.setSize(faceLst.size());
-
-    forAll(faceLst, faceI)
-    {
-        label patchI = regionLookup[faceLst[faceI].key()];
-
-        faceMap[faceI] =
-            surfPatches[patchI].start() + surfPatches[patchI].size()++;
-    }
-
-    // with reordered faces
-    return surfPatches;
-}
 
 
 // Returns patch info.
@@ -493,7 +410,7 @@ Foam::surfacePatchList Foam::keyedSurface::sortedRegions
         patchNames.insert(patchI, geoPatches_[patchI].name());
     }
 
-    return sortedRegions(faces(), patchNames, faceMap);
+    return sortedRegions(regions_, patchNames, faceMap);
 }
 
 
@@ -501,48 +418,37 @@ Foam::surfacePatchList Foam::keyedSurface::sortedRegions
 
 Foam::keyedSurface::keyedSurface()
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
-{}
-
-
-Foam::keyedSurface::keyedSurface
-(
-    const pointField& pointLst,
-    const List<keyedFace>& faceLst,
-    const geometricSurfacePatchList& patchLst
-)
-:
-    MeshStorage(faceLst, pointLst),
-    geoPatches_(patchLst)
+    MeshStorage(List<FaceType>(), pointField())
 {}
 
 
 Foam::keyedSurface::keyedSurface
 (
     const xfer<pointField>& pointLst,
-    const xfer<List<keyedFace> >& faceLst,
+    const xfer<List<face> >& faceLst,
+    const xfer<List<label> >& regionIds,
     const xfer<geometricSurfacePatchList>& patchLst
 )
 :
     MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    regions_(regionIds),
+    geoPatches_(patchLst)
 {
     points().transfer(pointLst());
     faces().transfer(faceLst());
-    geoPatches_.transfer(patchLst());
 }
 
 
 Foam::keyedSurface::keyedSurface
 (
     const xfer<pointField>& pointLst,
-    const xfer<List<keyedFace> >& faceLst,
+    const xfer<List<face> >& faceLst,
+    const xfer<List<label> >& regionIds,
     const Map<word>& regionNames
 )
 :
     MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    regions_(regionIds)
 {
     faces().transfer(faceLst());
     points().transfer(pointLst());
@@ -552,23 +458,24 @@ Foam::keyedSurface::keyedSurface
         // set patch names from (id => name) mapping
         setPatches(regionNames);
     }
-    else 
+    else
     {
         // find highest region ID and set patch names automatically
         setPatches();
-    }    
+    }
 }
 
 
 Foam::keyedSurface::keyedSurface
 (
     const xfer<pointField>& pointLst,
-    const xfer<List<keyedFace> >& faceLst,
+    const xfer<List<face> >& faceLst,
+    const xfer<List<label> >& regionIds,
     const HashTable<label>& labelToRegion
 )
 :
     MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    regions_(regionIds)
 {
     points().transfer(pointLst());
     faces().transfer(faceLst());
@@ -581,15 +488,16 @@ Foam::keyedSurface::keyedSurface
 Foam::keyedSurface::keyedSurface
 (
     const xfer<pointField>& pointLst,
-    const List<face>& faceLst
+    const xfer<List<face> >& faceLst
 )
 :
     MeshStorage(List<FaceType>(), pointField()),
+    regions_(faceLst().size(), 0),     // single default patch
     geoPatches_()
 {
     points().transfer(pointLst());
-    faces() = keyedFace::createList(faceLst, 0);
-    // single default patch
+    faces().transfer(faceLst());
+
     setPatches(0);
 }
 
@@ -601,8 +509,7 @@ Foam::keyedSurface::keyedSurface
     const bool useGlobalPoints
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     const polyMesh& mesh = bMesh.mesh();
     const polyPatchList& bPatches = bMesh;
@@ -622,7 +529,8 @@ Foam::keyedSurface::keyedSurface
         mesh.points()
     );
 
-    List<keyedFace> newFaces(allBoundary.size());
+    List<FaceType> newFaces(allBoundary.size());
+    List<label>    newRegions(allBoundary.size());
 
     if (useGlobalPoints)
     {
@@ -657,16 +565,14 @@ Foam::keyedSurface::keyedSurface
 
         forAll(p, patchFaceI)
         {
-            newFaces[faceIndex] = keyedFace
-            (
-                bfaces[faceIndex],
-                patchI
-            );
+            newFaces[faceIndex] = bfaces[faceIndex];
+            newRegions[faceIndex] = patchI;
             faceIndex++;
         }
     }
 
     faces().transfer(newFaces);
+    regions_.transfer(newRegions);
     geoPatches_.transfer(newPatches);
 }
 
@@ -676,13 +582,13 @@ Foam::keyedSurface::keyedSurface
     const meshedSurface& surf
 )
 :
-    MeshStorage(List<keyedFace>(), surf.points()),
-    geoPatches_()
+    MeshStorage(List<FaceType>(), surf.points())
 {
     const List<face>& origFaces = surf.faces();
     const surfacePatchList& patchLst = surf.patches();
 
-    List<keyedFace> newFaces(origFaces.size());
+    List<FaceType> newFaces(origFaces.size());
+    List<label>    newRegions(origFaces.size());
     geometricSurfacePatchList newPatches(patchLst.size());
 
     label faceIndex = 0;
@@ -691,12 +597,14 @@ Foam::keyedSurface::keyedSurface
         newPatches[patchI] = patchLst[patchI];
         forAll(patchLst[patchI], patchFaceI)
         {
-            newFaces[faceIndex] = keyedFace(origFaces[faceIndex], patchI);
+            newFaces[faceIndex] = origFaces[faceIndex];
+            newRegions[faceIndex] = patchI;
             faceIndex++;
         }
     }
 
     faces().transfer(newFaces);
+    regions_.transfer(newRegions);
     geoPatches_.transfer(newPatches);
 }
 
@@ -708,8 +616,7 @@ Foam::keyedSurface::keyedSurface
     const bool triangulate
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     // use selector mechanism
     autoPtr<keyedSurface> surfPtr = New(fName, ext, triangulate);
@@ -723,8 +630,7 @@ Foam::keyedSurface::keyedSurface
     const bool triangulate
 )
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     // use selector mechanism
     autoPtr<keyedSurface> surfPtr = New(fName, triangulate);
@@ -734,8 +640,7 @@ Foam::keyedSurface::keyedSurface
 
 Foam::keyedSurface::keyedSurface(Istream& is)
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     read(is);
     setPatches();
@@ -744,8 +649,7 @@ Foam::keyedSurface::keyedSurface(Istream& is)
 
 Foam::keyedSurface::keyedSurface(const Time& d)
 :
-    MeshStorage(List<FaceType>(), pointField()),
-    geoPatches_()
+    MeshStorage(List<FaceType>(), pointField())
 {
     read(IFstream(triSurfName(d))());
     setPatches();
@@ -755,6 +659,7 @@ Foam::keyedSurface::keyedSurface(const Time& d)
 Foam::keyedSurface::keyedSurface(const keyedSurface& surf)
 :
     MeshStorage(surf.faces(), surf.points()),
+    regions_(surf.regions_),
     geoPatches_(surf.geoPatches_)
 {}
 
@@ -762,6 +667,7 @@ Foam::keyedSurface::keyedSurface(const keyedSurface& surf)
 Foam::keyedSurface::keyedSurface(const xfer<keyedSurface>& surf)
 :
     MeshStorage(List<FaceType>(), pointField()),
+    regions_(),
     geoPatches_()
 {
     transfer(surf());
@@ -771,6 +677,7 @@ Foam::keyedSurface::keyedSurface(const xfer<keyedSurface>& surf)
 Foam::keyedSurface::keyedSurface(const xfer<meshedSurface>& surf)
 :
     MeshStorage(List<FaceType>(), pointField()),
+    regions_(),
     geoPatches_()
 {
     transfer(surf());
@@ -878,6 +785,7 @@ void Foam::keyedSurface::transfer(keyedSurface& surf)
     clearOut();
     faces().transfer(surf.faces());
     points().transfer(surf.points());
+    regions_.transfer(surf.regions_);
     geoPatches_.transfer(surf.geoPatches_);
     surf.clearOut();
 }
@@ -887,28 +795,24 @@ void Foam::keyedSurface::transfer(meshedSurface& surf)
 {
     clearOut();
     points().transfer(surf.points());
+    faces().transfer(surf.faces());
+    regions_.setSize(nFaces());
 
-    const List<face>& origFaces = surf.faces();
-    List<keyedFace> newFaces(origFaces.size());
-
-    const surfacePatchList& patchLst = surf.patches();
-    geometricSurfacePatchList newPatches(patchLst.size());
+    surfacePatchList& patchLst = surf.patches();
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
-        newPatches[patchI] = patchLst[patchI];
+        // copy info
+        geoPatches_[patchI] = patchLst[patchI];
 
         forAll(patchLst[patchI], patchFaceI)
         {
-            newFaces[faceIndex] = keyedFace(origFaces[faceIndex], patchI);
-            faceIndex++;
+            regions_[faceIndex++] = patchI;
         }
     }
 
-    faces().transfer(newFaces);
-    geoPatches_.transfer(newPatches);
-    surf.faces().clear();
+    patchLst.clear();
     surf.clearOut();
 }
 
@@ -1060,10 +964,16 @@ void Foam::keyedSurface::write
 
 void Foam::keyedSurface::write(Ostream& os) const
 {
-    os << geoPatches_ << endl;
+    os  << "\n// geometric regions:\n"
+        << geoPatches_ << endl;
 
     // Note: Write with global point numbering
-    os << points() << nl << faces() << endl;
+    os  << "\n// points:"
+        << points() << nl
+        << "\n// faces:"
+        << faces() << nl
+        << "\n// regions:"
+        << regions() << endl;
 
     // Check state of Ostream
     os.check("keyedSurface::write(Ostream&)");

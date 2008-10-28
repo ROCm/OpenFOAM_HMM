@@ -68,6 +68,51 @@ addNamedToMemberFunctionSelectionTable
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::fileFormats::OFFfileFormat::writeHead
+(
+    Ostream& os,
+    const pointField& pointLst,
+    const List<face>& faceLst,
+    const List<surfacePatch>& patchLst
+)
+{
+    // Write header
+    os  << "OFF" << endl
+        << "# Geomview OFF file written " << clock::dateTime().c_str() << nl
+        << nl
+        << "# points : " << pointLst.size() << nl
+        << "# faces  : " << faceLst.size() << nl
+        << "# patches: " << patchLst.size() << nl;
+
+    // Print patch names as comment
+    forAll(patchLst, patchI)
+    {
+        os  << "#   " << patchI << "  " << patchLst[patchI].name()
+            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
+    }
+
+    os  << nl
+        << "# nPoints  nFaces  nEdges" << nl
+        << pointLst.size() << ' ' << faceLst.size() << ' ' << 0 << nl;
+
+    os  << nl
+        << "# <points count=\"" << pointLst.size() << "\">" << endl;
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        os  << pointLst[ptI].x() << ' '
+            << pointLst[ptI].y() << ' '
+            << pointLst[ptI].z() << " #" << ptI << endl;
+    }
+
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::OFFfileFormat::OFFfileFormat()
@@ -128,7 +173,7 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
 
     // Read faces - ignore optional region information
     // use a DynamicList for possible on-the-fly triangulation
-    DynamicList<keyedFace> faceLst(nElems);
+    DynamicList<face>  faceLst(nElems);
 
     forAll(faceLst, faceI)
     {
@@ -160,24 +205,28 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
                     fTri[1] = f[fp1];
                     fTri[2] = f[fp2];
 
-                    faceLst.append(keyedFace(fTri, 0));
+                    faceLst.append(fTri);
                 }
             }
             else
             {
-                faceLst.append(keyedFace(f, 0));
+                faceLst.append(f);
             }
         }
     }
 
-    // no region information
+    // transfer to normal lists
     points().transfer(pointLst);
     faces().transfer(faceLst);
+
+    // no region information
+    regions().setSize(nFaces());
+    regions() = 0;
+
     setPatches(0);
 }
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
@@ -187,45 +236,12 @@ void Foam::fileFormats::OFFfileFormat::write
     const keyedSurface& surf
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst = surf.faces();
 
     labelList faceMap;
     List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
 
-    // Write header
-    os  << "OFF" << endl
-        << "# Geomview OFF file written " << clock::dateTime().c_str() << nl
-        << nl
-        << "# points : " << pointLst.size() << nl
-        << "# faces  : " << faceLst.size() << nl
-        << "# patches: " << patchLst.size() << nl;
-
-    // Print patch names as comment
-    forAll(patchLst, patchI)
-    {
-        os  << "#   " << patchI << "  " << patchLst[patchI].name()
-            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
-    }
-
-    os  << nl
-        << "# nPoints  nFaces  nEdges" << nl
-        << pointLst.size() << ' ' << faceLst.size() << ' ' << 0 << nl;
-
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << pointLst[ptI].x() << ' '
-            << pointLst[ptI].y() << ' '
-            << pointLst[ptI].z() << " #" << ptI << endl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+    writeHead(os, surf.points(), faceLst, patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -257,43 +273,10 @@ void Foam::fileFormats::OFFfileFormat::write
     const meshedSurface& surf
 )
 {
-    const pointField& pointLst = surf.points();
     const List<face>& faceLst = surf.faces();
     const List<surfacePatch>& patchLst = surf.patches();
 
-    // Write header
-    os  << "OFF" << endl
-        << "# Geomview OFF file written " << clock::dateTime().c_str() << nl
-        << nl
-        << "# points : " << pointLst.size() << nl
-        << "# faces  : " << faceLst.size() << nl
-        << "# patches: " << patchLst.size() << nl;
-
-    // Print patch names as comment
-    forAll(patchLst, patchI)
-    {
-        os  << "#   " << patchI << "  " << patchLst[patchI].name()
-            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
-    }
-
-    os  << nl
-        << "# nPoints  nFaces  nEdges" << nl
-        << pointLst.size() << ' ' << faceLst.size() << ' ' << 0 << nl;
-
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << pointLst[ptI].x() << ' '
-            << pointLst[ptI].y() << ' '
-            << pointLst[ptI].z() << " #" << ptI << endl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+    writeHead(os, surf.points(), faceLst, patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -317,10 +300,5 @@ void Foam::fileFormats::OFFfileFormat::write
     }
     os  << "# </faces>" << endl;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

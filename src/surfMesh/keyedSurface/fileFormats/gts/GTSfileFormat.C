@@ -70,6 +70,7 @@ addNamedToMemberFunctionSelectionTable
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::GTSfileFormat::GTSfileFormat()
@@ -111,7 +112,16 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
             >> nElems;
     }
 
-    pointField pointLst(nPoints);
+
+    // write directly into the lists:
+    pointField& pointLst = points();
+    List<face>& faceLst = faces();
+    List<label>& regionLst = regions();
+
+    pointLst.setSize(nPoints);
+    faceLst.setSize(nElems);
+    regionLst.setSize(nElems);
+
 
     // Read points
     forAll(pointLst, pointI)
@@ -143,14 +153,11 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
 
 
     // Read triangles. Convert references to edges into pointlabels
-    List<keyedFace> faceLst(nElems);
-
     label maxPatch = 0;
-
     forAll(faceLst, faceI)
     {
         label e0Label, e1Label, e2Label;
-        label region = 0;
+        label regionI = 0;
 
         line = getLineNoComment(is);
         {
@@ -165,10 +172,10 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
                 lineStream >> num;
                 if (!lineStream.bad())
                 {
-                    region = num;
-                    if (maxPatch < region)
+                    regionI = num;
+                    if (maxPatch < regionI)
                     {
-                        maxPatch = region;
+                        maxPatch = regionI;
                     }
                 }
             }
@@ -232,25 +239,21 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
                 << exit(FatalError);
         }
 
-        keyedFace lface(face(3), region);
+        face& fTri = faceLst[faceI];
+        fTri.setSize(3);
 
-        lface[0] = e0Far;
-        lface[1] = common01;
-        lface[2] = e1Far;
+        fTri[0] = e0Far;
+        fTri[1] = common01;
+        fTri[2] = e1Far;
 
-        faceLst[faceI] = lface;
+        regionLst[faceI] = regionI;
     }
 
-    // transfer to normal lists
-    points().transfer(pointLst);
-    faces().transfer(faceLst);
     setPatches(maxPatch);
     // stitchFaces(SMALL);
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::GTSfileFormat::write
@@ -260,7 +263,7 @@ void Foam::fileFormats::GTSfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst  = surf.faces();
 
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
@@ -353,8 +356,8 @@ void Foam::fileFormats::GTSfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
+    const List<face>& faceLst  = surf.faces();
     const List<surfacePatch>& patchLst = surf.patches();
-    const List<face>& faceLst = surf.faces();
 
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
@@ -376,7 +379,7 @@ void Foam::fileFormats::GTSfileFormat::write
         )
             << "Surface has " << nNonTris << "/" << faceLst.size()
             << " non-triangulated faces - not writing!" << endl;
-        
+
         return;
     }
 
@@ -415,7 +418,6 @@ void Foam::fileFormats::GTSfileFormat::write
         os  << meshPts[es[edgei].start()] + 1 << ' '
             << meshPts[es[edgei].end()] + 1 << endl;
     }
-
 
     // Write faces in terms of edges.
     const labelListList& faceEs = surf.faceEdges();

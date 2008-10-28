@@ -390,30 +390,25 @@ Foam::fileFormats::STLfileFormat::readASCII
     STLASCIILexer lexer(&ifs.stdStream(), fileSize/400);
     while (lexer.lex() != 0) {}
 
-    DynamicList<point>& pointLst = lexer.points();
-    DynamicList<label>& facetsLst = lexer.facets();
+    // transfer to normal lists
+    points().transfer(lexer.points());
+    regions().transfer(lexer.facets());
 
-    // transfer to normal list
-    points().transfer(pointLst);
+    // make our triangles directly
+    List<face>& faceLst = faces();
+    faceLst.setSize(regions().size());
 
-    // make our triangles
-    facetsLst.shrink();
-    List<keyedFace> faceLst(facetsLst.size());
-
-    face fTri(3);
     label ptI = 0;
-    forAll(facetsLst, faceI)
+    forAll(faceLst, faceI)
     {
+        face& fTri = faceLst[faceI];
+        fTri.setSize(3);
+
         fTri[0] = ptI++;
         fTri[1] = ptI++;
         fTri[2] = ptI++;
-
-        faceLst[faceI] = keyedFace(fTri, facetsLst[faceI]);
     }
-    facetsLst.clearStorage();
 
-    // transfer to normal list
-    faces().transfer(faceLst);
     setPatches(lexer.groupToPatch());
     stitchFaces(SMALL);
 

@@ -27,7 +27,7 @@ Class
 
 Description
     A surface geometry mesh, in which the patch information is conveyed by
-    the 'key' attached to each face.
+    the 'region' associated with each face.
 
     This form of surface description is particularly useful for reading in
     surface meshes from third-party formats (eg, obj, stl, gts, etc.). It
@@ -74,7 +74,7 @@ class polyBoundaryMesh;
 
 class keyedSurface
 :
-    public PrimitivePatchExtra<Keyed<face>, ::Foam::List, pointField, point>
+    public PrimitivePatchExtra<face, ::Foam::List, pointField, point>
 {
     friend class meshedSurface;
 
@@ -86,11 +86,9 @@ protected:
         typedef Keyed<face> keyedFace;
 
         //- Typedef for similar code in keyedSurface and meshedSurface
-        typedef keyedFace FaceType;
+        typedef face FaceType;
 
 private:
-
-    // Private Member Data
 
     // Private typedefs
 
@@ -103,7 +101,10 @@ private:
         >
         MeshStorage;
 
-    // Private data
+    // Private Member Data
+
+        //- The regions associated with the faces
+        labelList regions_;
 
         //- Patch information (face ordering nFaces/startFace only used
         //  during reading and writing)
@@ -159,6 +160,12 @@ protected:
             return static_cast<List<FaceType> &>(*this);
         }
 
+        //- Return non-const access to the region Ids
+        List<label>& regions()
+        {
+            return regions_;
+        }
+
 public:
 
         //- Runtime type information
@@ -181,47 +188,42 @@ public:
         //- Construct null
         keyedSurface();
 
-        //- Construct from components (points, labelled faces, patches).
-        keyedSurface
-        (
-            const pointField&,
-            const List<keyedFace>&,
-            const geometricSurfacePatchList&
-        );
-
         //- Construct by transferring components
-        //  (points, labelled faces, patches.
+        //  (points, faces, region ids, patches).
         keyedSurface
         (
             const xfer<pointField>&,
-            const xfer<List<keyedFace> >&,
+            const xfer<List<face> >&,
+            const xfer<List<label> >& regionIds,
             const xfer<geometricSurfacePatchList>&
         );
 
-        //- Construct by transferring points and labelled faces
-        //  With region names per map or set to default.
+        //- Construct by transferring points, faces and regionIds
+        //  with region names per map or set to default.
         keyedSurface
         (
             const xfer<pointField>&,
-            const xfer<List<keyedFace> >&,
+            const xfer<List<face> >&,
+            const xfer<List<label> >& regionIds,
             const Map<word>& regionNames = Map<word>::null()
         );
 
-        //- Construct by transferring points and labelled faces
+        //- Construct by transferring points, faces and regionIds
         //  with patch-names from hash
         keyedSurface
         (
             const xfer<pointField>&,
-            const xfer<List<keyedFace> >&,
+            const xfer<List<face> >&,
+            const xfer<List<label> >& regionIds,
             const HashTable<label>& labelToRegion
         );
 
-        //- Construct by transferring points, copying unlabelled faces.
+        //- Construct by transferring points, faces.
         //  Set single default patch.
         keyedSurface
         (
             const xfer<pointField>&,
-            const List<face>&
+            const xfer<List<face> >&
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -360,6 +362,12 @@ public:
                 return static_cast<const List<FaceType> &>(*this);
             }
 
+            //- Return const access to the regions
+            const List<label>& regions() const
+            {
+                return regions_;
+            }
+
             const geometricSurfacePatchList& geoPatches() const
             {
                 return geoPatches_;
@@ -369,15 +377,6 @@ public:
             {
                 return geoPatches_;
             }
-
-            //- Determine the sort order from the face regions.
-            //  Returns patch list and sets faceMap to index within faceLst
-            static surfacePatchList sortedRegions
-            (
-                const List<keyedFace>& faceLst,
-                const Map<word>& patchNames,
-                labelList& faceMap
-            );
 
             //- Determine the sort order from the region list.
             //  Returns patch list and sets faceMap to indices within faceLst

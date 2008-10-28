@@ -68,6 +68,46 @@ addNamedToMemberFunctionSelectionTable
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::fileFormats::OBJfileFormat::writeHead
+(
+    Ostream& os,
+    const pointField& pointLst,
+    const List<face>& faceLst,
+    const List<surfacePatch>& patchLst
+)
+{
+    os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
+        << "o " << os.name().lessExt().name() << nl
+        << nl
+        << "# points : " << pointLst.size() << nl
+        << "# faces  : " << faceLst.size() << nl
+        << "# patches: " << patchLst.size() << nl;
+
+    // Print patch names as comment
+    forAll(patchLst, patchI)
+    {
+        os  << "#   " << patchI << "  " << patchLst[patchI].name()
+            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
+    }
+
+    os  << nl
+        << "# <points count=\"" << pointLst.size() << "\">" << endl;
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        os  << "v " << pointLst[ptI].x()
+            << ' '  << pointLst[ptI].y()
+            << ' '  << pointLst[ptI].z() << nl;
+    }
+
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::OBJfileFormat::OBJfileFormat()
@@ -94,7 +134,8 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
     }
 
     DynamicList<point> pointLst;
-    DynamicList<keyedFace>  faceLst;
+    DynamicList<face>  faceLst;
+    DynamicList<label> regionLst;
     HashTable<label>   groupToPatch;
 
     // leave faces that didn't have a group in 0
@@ -156,7 +197,8 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
 
             while (true)
             {
-                string::size_type startNum = line.find_first_not_of(' ', endNum);
+                string::size_type startNum =
+                    line.find_first_not_of(' ', endNum);
 
                 if (startNum == string::size_type(string::npos))
                 {
@@ -208,19 +250,14 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
                     fTri[1] = verts[fp1];
                     fTri[2] = verts[fp2];
 
-                    faceLst.append(keyedFace(fTri, groupID));
+                    faceLst.append(fTri);
+                    regionLst.append(groupID);
                 }
             }
             else
             {
-                faceLst.append
-                (
-                    keyedFace
-                    (
-                        face( xferMoveTo<labelList>(verts) ),
-                        groupID
-                    )
-                );
+                faceLst.append(face(verts));
+                regionLst.append(groupID);
             }
         }
     }
@@ -228,12 +265,12 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
     // transfer to normal lists
     points().transfer(pointLst);
     faces().transfer(faceLst);
+    regions().transfer(regionLst);
+
     setPatches(groupToPatch);
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::OBJfileFormat::write
@@ -242,40 +279,12 @@ void Foam::fileFormats::OBJfileFormat::write
     const keyedSurface& surf
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst = surf.faces();
 
     labelList faceMap;
     List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
 
-    os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
-        << "o " << os.name().lessExt().name() << nl
-        << nl
-        << "# points : " << pointLst.size() << nl
-        << "# faces  : " << faceLst.size() << nl
-        << "# patches: " << patchLst.size() << nl;
-
-    // Print patch names as comment
-    forAll(patchLst, patchI)
-    {
-        os  << "#   " << patchI << "  " << patchLst[patchI].name()
-            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
-    }
-
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << "v " << pointLst[ptI].x()
-            << ' '  << pointLst[ptI].y()
-            << ' '  << pointLst[ptI].z() << nl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+    writeHead(os, surf.points(), faceLst, patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -308,38 +317,10 @@ void Foam::fileFormats::OBJfileFormat::write
     const meshedSurface& surf
 )
 {
-    const pointField& pointLst = surf.points();
     const List<face>& faceLst = surf.faces();
     const List<surfacePatch>& patchLst = surf.patches();
 
-    os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
-        << "o " << os.name().lessExt().name() << nl
-        << nl
-        << "# points : " << pointLst.size() << nl
-        << "# faces  : " << faceLst.size() << nl
-        << "# patches: " << patchLst.size() << nl;
-
-    // Print patch names as comment
-    forAll(patchLst, patchI)
-    {
-        os  << "#   " << patchI << "  " << patchLst[patchI].name()
-            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
-    }
-
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << "v " << pointLst[ptI].x()
-            << ' '  << pointLst[ptI].y()
-            << ' '  << pointLst[ptI].z() << nl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+    writeHead(os, surf.points(), faceLst, patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -362,10 +343,5 @@ void Foam::fileFormats::OBJfileFormat::write
     }
     os  << "# </faces>" << endl;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

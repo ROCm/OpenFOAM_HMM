@@ -74,6 +74,14 @@ class OFFfileFormat
         //- Disallow default bitwise assignment
         void operator=(const OFFfileFormat&);
 
+        static void writeHead
+        (
+            Ostream&, 
+            const pointField&, 
+            const List<face>&,
+            const List<surfacePatch>&
+        );
+
 public:
 
     // Constructors

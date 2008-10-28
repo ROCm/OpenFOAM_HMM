@@ -128,7 +128,8 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
     DynamicList<point> pointLst;
     // Nastran index of points
     DynamicList<label> pointId;
-    DynamicList<keyedFace>  faceLst;
+    DynamicList<face>  faceLst;
+    DynamicList<label> regionLst;
     HashTable<label>   groupToPatch;
 
     // From face groupId to patchId
@@ -283,7 +284,8 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
                 patchI = iter();
             }
 
-            faceLst.append(keyedFace(fTri, patchI));
+            faceLst.append(fTri);
+            regionLst.append(patchI);
         }
         else if (cmd == "CQUAD4")
         {
@@ -324,12 +326,14 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
                     fTri[1] = fQuad[fp1];
                     fTri[2] = fQuad[fp2];
 
-                    faceLst.append(keyedFace(fTri, patchI));
+                    faceLst.append(fTri);
+                    regionLst.append(patchI);
                 }
             }
             else
             {
-                faceLst.append(keyedFace(fQuad, patchI));
+                faceLst.append(fQuad);
+                regionLst.append(patchI);
             }
         }
         else if (cmd == "PSHELL")
@@ -401,6 +405,7 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
 
     // transfer to normal lists
     points().transfer(pointLst);
+    regions().transfer(regionLst);
 
     pointId.shrink();
     faceLst.shrink();
@@ -418,7 +423,7 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
         // Relabel faces
         forAll(faceLst, i)
         {
-            keyedFace& f = faceLst[i];
+            face& f = faceLst[i];
             forAll(f, fp)
             {
                 f[fp] = nasToFoamPoint[f[fp]];
@@ -441,21 +446,10 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
 
     // transfer to normal lists
     faces().transfer(faceLst);
+
     setPatches(regionNames);
 }
 
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-// ************************************************************************* //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

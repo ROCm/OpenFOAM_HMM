@@ -66,10 +66,10 @@ addNamedToMemberFunctionSelectionTable
 }
 }
 
-//! @cond localScope
+//! @cond localscope
 const int starcdShellShape = 3;
 const int starcdShellType  = 4;
-//! @endcond localScope
+//! @endcond localscope
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -226,7 +226,7 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
 
     //
     // read .vrt file
-    //
+    // ~~~~~~~~~~~~~~
     isPtr.reset(new IFstream(baseName + ".vrt"));
 
     if (!isPtr().good())
@@ -266,7 +266,8 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
     pointId.clear();
 
 
-    DynamicList<keyedFace> faceLst;
+    DynamicList<face>  faceLst;
+    DynamicList<label> regionLst;
 
     // From face cellTableId to patchId
     Map<label> cellTableToPatchId;
@@ -275,7 +276,7 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
 
     //
     // read .cel file
-    //
+    // ~~~~~~~~~~~~~~
     isPtr.reset(new IFstream(baseName + ".cel"));
 
     if (!isPtr().good())
@@ -351,26 +352,17 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
 
                 forAll(triFaces, faceI)
                 {
-                    faceLst.append
-                    (
-                        keyedFace
-                        (
-                            triFaces[faceI],
-                            patchI
-                        )
-                    );
+                    faceLst.append(triFaces[faceI]);
+                    regionLst.append(patchI);
                 }
             }
             else
             {
                 faceLst.append
                 (
-                    keyedFace
-                    (
-                        face(SubList<label>(starLabels, nLabels)),
-                        patchI
-                    )
+                    face(SubList<label>(starLabels, nLabels))
                 );
+                regionLst.append(patchI);
             }
         }
     }
@@ -390,14 +382,12 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
 
     // transfer to normal lists
     faces().transfer(faceLst);
+    regions().transfer(regionLst);
 
     setPatches(regionNames);
 }
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 void Foam::fileFormats::STARCDfileFormat::write
 (
@@ -405,7 +395,7 @@ void Foam::fileFormats::STARCDfileFormat::write
     const keyedSurface& surf
 )
 {
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst = surf.faces();
 
     fileName baseName = fName.lessExt();
     autoPtr<OFstream> osPtr;
@@ -434,7 +424,6 @@ void Foam::fileFormats::STARCDfileFormat::write
         }
     }
 }
-
 
 
 void Foam::fileFormats::STARCDfileFormat::write
@@ -469,10 +458,5 @@ void Foam::fileFormats::STARCDfileFormat::write
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

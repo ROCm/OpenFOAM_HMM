@@ -67,6 +67,14 @@ class OBJfileFormat
         //- Disallow default bitwise assignment
         void operator=(const OBJfileFormat&);
 
+        static void writeHead
+        (
+            Ostream&, 
+            const pointField&, 
+            const List<face>&,
+            const List<surfacePatch>&
+        );
+
 public:
 
     // Constructors

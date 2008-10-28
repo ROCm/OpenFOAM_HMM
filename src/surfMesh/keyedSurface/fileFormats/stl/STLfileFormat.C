@@ -93,7 +93,6 @@ addNamedToMemberFunctionSelectionTable
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
 // check binary by getting the header and number of facets
 // this seems to work better than the old token-based method
 // - some programs (eg, pro-STAR) have 'solid' as the first word in
@@ -197,29 +196,38 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
 #endif
 
 
-    pointField  pointLst(3*nTris);
-    List<keyedFace> faceLst(nTris);
+    // write directly into the lists:
+    pointField& pointLst = points();
+    List<face>& faceLst = faces();
+    List<label>& regionLst = regions();
+
+    pointLst.setSize(3*nTris);
+    faceLst.setSize(nTris);
+    regionLst.setSize(nTris);
 
     label maxRegionId = 0;
 
     label pointI = 0;
     forAll(faceLst, faceI)
     {
+        face& fTri = faceLst[faceI];
+        fTri.setSize(3);
+
+
         // Read an STL triangle
         STLtriangle stlTri(is);
 
         // Set the rawPoints to the vertices of the STL triangle
         // and set the point labels of the face
-        face f(3);
 
         pointLst[pointI] = stlTri.a();
-        f[0] = pointI++;
+        fTri[0] = pointI++;
 
         pointLst[pointI] = stlTri.b();
-        f[1] = pointI++;
+        fTri[1] = pointI++;
 
         pointLst[pointI] = stlTri.c();
-        f[2] = pointI++;
+        fTri[2] = pointI++;
 
         if (maxRegionId < stlTri.region())
         {
@@ -227,7 +235,7 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
         }
 
         // interprete colour as a region
-        faceLst[faceI] = keyedFace(f, stlTri.region());
+        regionLst[faceI] = stlTri.region();
 
 #ifdef DEBUG_STLBINARY
         if
@@ -257,8 +265,6 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
     Info<< "endsolid region" << prevRegion << nl;
 #endif
 
-    points().transfer(pointLst);
-    faces().transfer(faceLst);
     setPatches(maxRegionId);
     stitchFaces(SMALL);
 
@@ -340,7 +346,7 @@ void Foam::fileFormats::STLfileFormat::writeASCII
 )
 {
     const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>& faceLst  = surf.faces();
     const vectorField& normLst = surf.faceNormals();
 
     labelList faceMap;
@@ -406,7 +412,8 @@ void Foam::fileFormats::STLfileFormat::writeBINARY
 )
 {
     const pointField& pointLst = surf.points();
-    const List<keyedFace>& faceLst = surf.faces();
+    const List<face>&  faceLst = surf.faces();
+    const List<label>& regionLst = surf.regions();
     const vectorField& normLst = surf.faceNormals();
 
     // Write the STL header
@@ -428,6 +435,7 @@ void Foam::fileFormats::STLfileFormat::writeBINARY
 
     os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
 
+    // always write unsorted
     forAll(faceLst, faceI)
     {
         writeShell
@@ -436,7 +444,7 @@ void Foam::fileFormats::STLfileFormat::writeBINARY
             pointLst,
             faceLst[faceI],
             normLst[faceI],
-            faceLst[faceI].key()
+            regionLst[faceI]
         );
     }
 }
@@ -449,9 +457,9 @@ void Foam::fileFormats::STLfileFormat::writeBINARY
 )
 {
     const pointField& pointLst = surf.points();
-    const List<face>& faceLst = surf.faces();
-    const surfacePatchList& patchLst = surf.patches();
+    const List<face>& faceLst  = surf.faces();
     const vectorField& normLst = surf.faceNormals();
+    const surfacePatchList& patchLst = surf.patches();
 
     // Write the STL header
     string header("STL binary file", headerSize);
@@ -517,8 +525,6 @@ Foam::fileFormats::STLfileFormat::STLfileFormat
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
@@ -582,9 +588,5 @@ void Foam::fileFormats::STLfileFormat::write
         writeASCII(OFstream(fName)(), surf);
     }
 }
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

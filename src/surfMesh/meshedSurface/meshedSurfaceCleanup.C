@@ -27,8 +27,6 @@ License
 #include "meshedSurface.H"
 #include "mergePoints.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Remove badly degenerate faces, double faces.
@@ -323,8 +321,5 @@ Foam::label Foam::meshedSurface::triangulate()
 
     return nTri;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

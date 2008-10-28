@@ -232,7 +232,8 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
     label patchVertOffset = 0;
 
     DynamicList<point> pointLst;
-    DynamicList<keyedFace>  faceLst;
+    DynamicList<face>  faceLst;
+    DynamicList<label> regionLst;
 
     // patchId => patchName
     Map<word> regionNames;
@@ -339,7 +340,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
 
                     label nVert = parse<int>(args);
 
-                    List<label> verts(nVert);
+                    face verts(nVert);
                     forAll(verts, vertI)
                     {
                         is.getLine(line);
@@ -361,12 +362,14 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
                             fTri[1] = verts[fp1];
                             fTri[2] = verts[fp2];
 
-                            faceLst.append(keyedFace(fTri, patchI));
+                            faceLst.append(fTri);
+                            regionLst.append(patchI);
                         }
                     }
                     else
                     {
-                        faceLst.append(keyedFace(face(verts), patchI));
+                        faceLst.append(verts);
+                        regionLst.append(patchI);
                     }
                 }
 
@@ -402,13 +405,13 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
     // transfer to normal lists
     points().transfer(pointLst);
     faces().transfer(faceLst);
+    regions().transfer(regionLst);
+
     setPatches(regionNames);
     stitchFaces(SMALL);
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::AC3DfileFormat::writeHeader
@@ -508,7 +511,7 @@ void Foam::fileFormats::AC3DfileFormat::write
 
         forAll(patch.localFaces(), faceI)
         {
-            const keyedFace& f = patch.localFaces()[faceI];
+            const face& f = patch.localFaces()[faceI];
 
             os  << "SURF 0x20" << nl          // polygon
                 << "mat " << patchI << nl
@@ -569,7 +572,7 @@ void Foam::fileFormats::AC3DfileFormat::write
 
         forAll(patch.localFaces(), faceI)
         {
-            const keyedFace& f = patch.localFaces()[faceI];
+            const face& f = patch.localFaces()[faceI];
 
             os  << "SURF 0x20" << nl          // polygon
                 << "mat " << patchI << nl

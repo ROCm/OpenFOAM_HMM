@@ -108,6 +108,9 @@ private:
 
     // Private member functions
 
+        //- Sort faces by regionIds and set patches
+        void sortFacesByRegion(const List<label>&, const Map<word>&);
+
         //- set a single patch
         void onePatch();
 
@@ -162,16 +165,8 @@ public:
         //- Construct null
         meshedSurface();
 
-        //- Construct from components (points, faces and patches).
-        meshedSurface
-        (
-            const pointField&,
-            const List<face>&,
-            const surfacePatchList&
-        );
-
         //- Construct by transferring components
-        //- (points, faces and patches).
+        //  (points, faces and patches).
         meshedSurface
         (
             const xfer<pointField>&,
@@ -188,40 +183,25 @@ public:
             const List<word>& patchNames,
             const List<word>& patchTypes
         );
-   
-        //- Construct from points, faces, a list of (unsorted) region Ids
-        //  and with the names of the regions.
+
+        //- Construct by transferring points, faces.
+        //  Sort faces according to regionIds with the names of the regions,
+        //  or jsut set a single default patch.
+        meshedSurface
+        (
+            const xfer<pointField>&,
+            const xfer<List<face> >&,
+            const List<label>& regionIds = List<label>::null(),
+            const Map<word>& regionNames = Map<word>::null()
+        );
+
+        //- Construct by transferring points, faces.
+        //  Sort faces according to regionIds with patch-names from hash
         meshedSurface
         (
             const xfer<pointField>&,
             const xfer<List<face> >&,
             const List<label>& regionIds,
-            const Map<word>& regionNames
-        );
-
-        //- Construct by transferring points, faces
-        //  with a single default patch
-        meshedSurface
-        (
-            const xfer<pointField>&,
-            const xfer<List<face> >&
-        );
-
-        //- Construct by transferring points and copying labelled faces
-        //  With region names per map or set to default.
-        meshedSurface
-        (
-            const xfer<pointField>&,
-            const List<keyedFace>&,
-            const Map<word>& regionNames
-        );
-
-        //- Construct by transferring points and labelled faces
-        //- with patch-names from hash
-        meshedSurface
-        (
-            const xfer<pointField>&,
-            const List<keyedFace>&,
             const HashTable<label>& nameToRegionMapping
         );
 
