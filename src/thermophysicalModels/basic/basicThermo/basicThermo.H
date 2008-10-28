@@ -74,6 +74,9 @@ protected:
         wordList hBoundaryTypes();
         void hBoundaryCorrection(volScalarField& h);
 
+        wordList eBoundaryTypes();
+        void eBoundaryCorrection(volScalarField& e);
+
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
 
@@ -107,9 +110,8 @@ public:
         static autoPtr<basicThermo> New(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~basicThermo();
+    //- Destructor
+    virtual ~basicThermo();
 
 
     // Member functions
@@ -122,13 +124,13 @@ public:
 
             //- Pressure [Pa]
             //  Non-const access allowed for transport equations
-            volScalarField& p()
+            virtual volScalarField& p()
             {
                 return p_;
             }
 
             //- Pressure [Pa]
-            const volScalarField& p() const
+            virtual const volScalarField& p() const
             {
                 return p_;
             }
@@ -193,23 +195,52 @@ public:
                 return volScalarField::null();
             }
 
+            //- Internal energy for cell-set [J/kg]
+            virtual tmp<scalarField> e
+            (
+                const scalarField& T,
+                const labelList& cells
+            ) const
+            {
+                notImplemented
+                (
+                    "basicThermo::e"
+                    "(const scalarField& T, const labelList& cells) const"
+                );
+                return tmp<scalarField>(NULL);
+            }
+
+            //-Internal energy for patch [J/kg]
+            virtual tmp<scalarField> e
+            (
+                const scalarField& T,
+                const label patchi
+            ) const
+            {
+                notImplemented
+                (
+                    "basicThermo::e"
+                    "(const scalarField& T, const label patchi) const"
+                );
+                return tmp<scalarField>(NULL);
+            }
 
         // Fields derived from thermodynamic state variables
 
             //- Temperature [K]
-            const volScalarField& T() const
+            virtual const volScalarField& T() const
             {
                 return T_;
             }
 
             //- Density [kg/m^3]
-            tmp<volScalarField> rho() const
+            virtual tmp<volScalarField> rho() const
             {
                 return p_*psi();
             }
 
             //- Compressibility [s^2/m^2]
-            const volScalarField& psi() const
+            virtual const volScalarField& psi() const
             {
                 return psi_;
             }
@@ -236,6 +267,21 @@ public:
                 return volScalarField::null();
             }
 
+            //- Heat capacity at constant volume for patch [J/kg/K]
+            virtual tmp<scalarField> Cv
+            (
+                const scalarField& T,
+                const label patchi
+            ) const
+            {
+                notImplemented
+                (
+                    "basicThermo::Cv"
+                    "(const scalarField& T, const label patchi) const"
+                );
+                return tmp<scalarField>(NULL);
+            }
+
             //- Heat capacity at constant volume [J/kg/K]
             virtual tmp<volScalarField> Cv() const
             {
@@ -247,13 +293,13 @@ public:
         // Access to transport state variables
 
             //- Dynamic viscosity of mixture [kg/ms]
-            const volScalarField& mu() const
+            virtual const volScalarField& mu() const
             {
                 return mu_;
             }
 
             //- Thermal diffusivity for enthalpy of mixture [kg/ms]
-            const volScalarField& alpha() const
+            virtual const volScalarField& alpha() const
             {
                 return alpha_;
             }

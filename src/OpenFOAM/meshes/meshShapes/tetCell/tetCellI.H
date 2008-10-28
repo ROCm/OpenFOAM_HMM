@@ -56,6 +56,12 @@ inline tetCell::tetCell
 }
 
 
+inline tetCell::tetCell(const FixedList<label, 4>& lst)
+:
+    FixedList<label, 4>(lst)
+{}
+
+
 inline tetCell::tetCell(Istream& is)
 :
     FixedList<label, 4>(is)
@@ -130,7 +136,7 @@ inline label tetCell::edgeAdjacentFace
         {3, -1, -1, 0},
         {1, 0, -1, -1}
     };
-    
+
 #   ifdef FULLDEBUG
     if (facei >= 4)
     {
@@ -161,7 +167,7 @@ inline edge tetCell::tetEdge(const label edgei) const
 {
     // Warning. Ordering of edges needs to be the same for a tetrahedron
     // class, a tetrahedron cell shape model and a tetCell
-    // 
+    //
     static const label start[] = {0, 0, 0, 3, 1, 3};
     static const label end[] = {1, 2, 3, 1, 2, 2};
 

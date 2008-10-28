@@ -98,15 +98,10 @@ public:
             //  or a temporary that has been allocated
             inline bool valid() const;
 
-
         // Edit
 
             //- Return tmp pointer for reuse
             inline T* ptr() const;
-
-            //- If object pointer points to valid object:
-            //  delete object and set pointer to NULL
-            inline void clear();
 
             //- If object pointer points to valid object:
             //  delete object and set pointer to NULL

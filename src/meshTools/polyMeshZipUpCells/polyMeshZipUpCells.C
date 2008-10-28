@@ -237,7 +237,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
 
             // Go through the points and start from the point used twice
             // check all the edges to find the edges starting from this point
-            // add the 
+            // add the
 
             labelListList edgesToInsert(singleEdges.size());
             label nEdgesToInsert = 0;
@@ -438,7 +438,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                 // Warning: the ordering must be parametric, because in
                 // the case of multiple point insertion onto the same edge
                 // it is possible to get non-cyclic loops
-                // 
+                //
 
                 const labelList& unorderedEdge = edgesToInsert[edgeToInsertI];
 
@@ -678,7 +678,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                                 << oldFaces[currentFaceIndex] << nl
                                 << "newFace: " << newFace << endl;
 #                           endif
- 
+
                             // Check for duplicate points in the new face
                             forAll (newFace, checkI)
                             {
@@ -756,11 +756,10 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
         // (patches guaranteed to be in increasing order)
         mesh.resetPrimitives
         (
-            patchStarts[bMesh.size()-1] + patchSizes[bMesh.size()-1],
-            mesh.points(),
-            newFaces,
-            mesh.faceOwner(),
-            mesh.faceNeighbour(),
+            xfer<pointField>::null(),
+            xferMove(newFaces),
+            xfer<labelList>::null(),
+            xfer<labelList>::null(),
             patchSizes,
             patchStarts,
             true                // boundary forms valid boundary mesh.

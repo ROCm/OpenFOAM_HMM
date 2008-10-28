@@ -431,17 +431,17 @@ public:
                 return faces_;
             }
 
-            const DynamicList<label>& region()const
+            const DynamicList<label>& region() const
             {
                 return region_;
             }
 
-            const DynamicList<label>& faceOwner()const
+            const DynamicList<label>& faceOwner() const
             {
                 return faceOwner_;
             }
 
-            const DynamicList<label>& faceNeighbour()const
+            const DynamicList<label>& faceNeighbour() const
             {
                 return faceNeighbour_;
             }

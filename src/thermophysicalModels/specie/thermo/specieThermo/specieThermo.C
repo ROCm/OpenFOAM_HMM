@@ -22,34 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Basic thermodynamics type based on the use of fitting functions for
-    cp, h, s obtained from the template argument type thermo.  All other
-    properties are derived from these primitive functions.
-
 \*---------------------------------------------------------------------------*/
 
 #include "specieThermo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 template<class thermo>
-const scalar specieThermo<thermo>::tol_ = 1.0e-4;
+const Foam::scalar Foam::specieThermo<thermo>::tol_ = 1.0e-4;
 
 template<class thermo>
-const int specieThermo<thermo>::maxIter_ = 100;
+const int Foam::specieThermo<thermo>::maxIter_ = 100;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class thermo>
-specieThermo<thermo>::specieThermo(Istream& is)
+Foam::specieThermo<thermo>::specieThermo(Istream& is)
 :
     thermo(is)
 {
@@ -60,7 +50,7 @@ specieThermo<thermo>::specieThermo(Istream& is)
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class thermo>
-Ostream& operator<<(Ostream& os, const specieThermo<thermo>& st)
+Foam::Ostream& Foam::operator<<(Ostream& os, const specieThermo<thermo>& st)
 {
     os  << static_cast<const thermo&>(st);
 
@@ -68,9 +58,5 @@ Ostream& operator<<(Ostream& os, const specieThermo<thermo>& st)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

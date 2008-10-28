@@ -34,6 +34,7 @@ packDir=$WM_PROJECT-$WM_PROJECT_VERSION
 packTag=_Doxygen.gtgz
 
 usage() {
+    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
 cat <<USAGE 1>&2
 Usage: ${0##*/} [-prefix DIR] [-o outputDir]
 
@@ -47,38 +48,38 @@ unset prefix outputDir
 
 while [ "$#" -gt 0 ]
 do
-   case $1 in
-   -prefix | --prefix )
-      prefix=${2%%/}
-      shift 2
-      ;;
-   -o | -output )
-      outputDir=${2%%/}
-      shift 2
-      ;;
-   -h | -help )
-      usage
-      ;;
-   -*)
-      usage "unknown option: '$*'"
-      ;;
-   esac
+    case $1 in
+    -prefix | --prefix )
+        prefix=${2%%/}
+        shift 2
+        ;;
+    -o | -output )
+        outputDir=${2%%/}
+        shift 2
+        ;;
+    -h | -help )
+        usage
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    esac
 done
 
 # if packing from within the directory, use -prefix form
 if [ "${PWD##*/}" = "$packDir" ]
 then
-   : ${prefix:=$packDir}
+    : ${prefix:=$packDir}
 fi
 
 # pack the directories directly and add prefix afterwards
 if [ -n "$prefix" ]
 then
-   packDir="$prefix"
+    packDir="$prefix"
 elif [ ! -d $packDir ]
 then
-   echo "Error: directory $packDir does not exist"
-   exit 1
+    echo "Error: directory $packDir does not exist" 1>&2
+    exit 1
 fi
 
 #

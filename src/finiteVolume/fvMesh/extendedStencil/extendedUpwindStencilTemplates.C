@@ -102,32 +102,35 @@ Foam::extendedUpwindStencil::weightedSum
     {
         fvsPatchField<Type>& pSfCorr = bSfCorr[patchi];
 
-        label faceI = pSfCorr.patch().patch().start();
-
-        forAll(pSfCorr, i)
+        if (pSfCorr.coupled())
         {
-            if (phi[faceI] > 0)
-            {
-                // Flux out of owner. Use upwind (= owner side) stencil.
-                const List<Type>& stField = ownFld[faceI];
-                const List<scalar>& stWeight = ownWeights[faceI];
+            label faceI = pSfCorr.patch().patch().start();
 
-                forAll(stField, j)
-                {
-                    pSfCorr[i] += stField[j]*stWeight[j];
-                }
-            }
-            else
+            forAll(pSfCorr, i)
             {
-                const List<Type>& stField = neiFld[faceI];
-                const List<scalar>& stWeight = neiWeights[faceI];
-
-                forAll(stField, j)
+                if (phi[faceI] > 0)
                 {
-                    pSfCorr[i] += stField[j]*stWeight[j];
+                    // Flux out of owner. Use upwind (= owner side) stencil.
+                    const List<Type>& stField = ownFld[faceI];
+                    const List<scalar>& stWeight = ownWeights[faceI];
+
+                    forAll(stField, j)
+                    {
+                        pSfCorr[i] += stField[j]*stWeight[j];
+                    }
                 }
+                else
+                {
+                    const List<Type>& stField = neiFld[faceI];
+                    const List<scalar>& stWeight = neiWeights[faceI];
+
+                    forAll(stField, j)
+                    {
+                        pSfCorr[i] += stField[j]*stWeight[j];
+                    }
+                }
+                faceI++;
             }
-            faceI++;
         }
     }
 

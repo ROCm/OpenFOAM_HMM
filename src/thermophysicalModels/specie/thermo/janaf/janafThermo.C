@@ -22,23 +22,15 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    JANAF tables based thermodynamics package templated ito the equationOfState.
-
 \*---------------------------------------------------------------------------*/
 
 #include "janafThermo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class equationOfState>
-janafThermo<equationOfState>::janafThermo(Istream& is)
+Foam::janafThermo<equationOfState>::janafThermo(Istream& is)
 :
     equationOfState(is),
     Tlow_(readScalar(is)),
@@ -103,7 +95,11 @@ janafThermo<equationOfState>::janafThermo(Istream& is)
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class equationOfState>
-Ostream& operator<<(Ostream& os, const janafThermo<equationOfState>& jt)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const janafThermo<equationOfState>& jt
+)
 {
     os  << static_cast<const equationOfState&>(jt) << nl
         << "    " << jt.Tlow_
@@ -144,9 +140,5 @@ Ostream& operator<<(Ostream& os, const janafThermo<equationOfState>& jt)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

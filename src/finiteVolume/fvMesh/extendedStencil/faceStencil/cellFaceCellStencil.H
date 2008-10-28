@@ -68,7 +68,6 @@ public:
 
         //- Construct from mesh
         explicit cellFaceCellStencil(const polyMesh& mesh);
-
 };
 
 

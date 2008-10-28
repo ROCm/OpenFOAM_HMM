@@ -34,14 +34,14 @@
 
 if [ ! -d "$WM_OPTIONS" ]
 then
-    echo "The $WM_OPTIONS directory does not exist, exiting"
+    echo "The $WM_OPTIONS directory does not exist, exiting" 1>&2
     exit 1
 fi
 
 # change to the $WM_OPTIONS directory
 cd $WM_OPTIONS 2>/dev/null || {
-   echo "Could not change to directory '$WM_OPTIONS'"
-   exit 1
+    echo "Could not change to directory '$WM_OPTIONS'" 1>&2
+    exit 1
 }
 
 # Find and keep macro definitions in files list
