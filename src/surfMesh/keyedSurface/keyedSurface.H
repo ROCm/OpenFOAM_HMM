@@ -118,6 +118,10 @@ private:
         //- Generic read routine. Chooses reader based on extension.
         //? bool read(const fileName&, const word& ext);
 
+  
+        //- Disable setSize with value
+        void setSize(const label, const FaceType&);
+
 protected:
 
     // Static protected functions
@@ -341,14 +345,17 @@ public:
             //- Return the number of faces
             label nFaces() const
             {
-                return faces().size();
+                return MeshStorage::size();
             }
 
             //- The surface size is the number of faces
             label size() const
             {
-                return nFaces();
+                return MeshStorage::size();
             }
+
+            //- Reset size of face and region list
+            void setSize(const label);
 
             //- Return const access to global points
             const pointField& points() const

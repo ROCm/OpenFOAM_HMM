@@ -120,7 +120,6 @@ private:
         //- Read in Foam format
         bool read(Istream&);
 
-
     // Static private functions
 
 public:
@@ -309,13 +308,13 @@ public:
         //- Return the number of faces
         label nFaces() const
         {
-            return faces().size();
+            return MeshStorage::size();
         }
 
         //- The surface size is the number of faces
         label size() const
         {
-            return nFaces();
+            return MeshStorage::size();
         }
 
         //- Return const access to global points

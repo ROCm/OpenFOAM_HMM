@@ -694,6 +694,13 @@ Foam::keyedSurface::~keyedSurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::keyedSurface::setSize(const label s)
+{
+    MeshStorage::setSize(s);
+    regions_.setSize(s);
+}
+
+
 //- Move points
 void Foam::keyedSurface::movePoints(const pointField& newPoints)
 {
@@ -796,7 +803,7 @@ void Foam::keyedSurface::transfer(meshedSurface& surf)
     clearOut();
     points().transfer(surf.points());
     faces().transfer(surf.faces());
-    regions_.setSize(nFaces());
+    regions_.setSize(size());
 
     surfacePatchList& patchLst = surf.patches();
 
@@ -968,11 +975,11 @@ void Foam::keyedSurface::write(Ostream& os) const
         << geoPatches_ << endl;
 
     // Note: Write with global point numbering
-    os  << "\n// points:"
+    os  << "\n// points:\n"
         << points() << nl
-        << "\n// faces:"
+        << "\n// faces:\n"
         << faces() << nl
-        << "\n// regions:"
+        << "\n// regions:\n"
         << regions() << endl;
 
     // Check state of Ostream

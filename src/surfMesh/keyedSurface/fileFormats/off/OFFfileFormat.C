@@ -220,7 +220,7 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
     faces().transfer(faceLst);
 
     // no region information
-    regions().setSize(nFaces());
+    regions().setSize(size());
     regions() = 0;
 
     setPatches(0);

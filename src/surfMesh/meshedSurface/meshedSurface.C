@@ -893,9 +893,9 @@ void Foam::meshedSurface::write(Ostream& os) const
     os << token::END_LIST << endl;
 
     // Note: Write with global point numbering
-    os  << "\n// points:"
+    os  << "\n// points:\n"
         << points() << nl
-        << "\n// faces:"
+        << "\n// faces:\n"
         << faces() << endl;
 
     // Check state of Ostream
