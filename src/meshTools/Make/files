@@ -107,6 +107,7 @@ $(pointSources)/faceToPoint/faceToPoint.C
 $(pointSources)/boxToPoint/boxToPoint.C
 $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
+$(pointSources)/nearestToPoint/nearestToPoint.C
 
 surfaceSets/surfaceSets.C
 
