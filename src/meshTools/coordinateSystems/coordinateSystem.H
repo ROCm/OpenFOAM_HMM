@@ -132,6 +132,9 @@ class coordinateSystem
         //- Name of coordinate system
         mutable word name_;
 
+        //- Optional note
+        mutable string note_;
+
         //- Origin
         mutable point origin_;
 
@@ -308,6 +311,19 @@ public:
         {
             return name_;
         }
+
+        //- Return non-constant access to the optional note
+        string& note()
+        {
+            return note_;
+        }
+
+        //- Return the optional note
+        const string& note() const
+        {
+            return note_;
+        }
+
 
         //- Return origin
         const point& origin() const

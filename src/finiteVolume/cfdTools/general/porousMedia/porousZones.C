@@ -35,6 +35,10 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<porousZone>, 0);
 }
 
+//! @cond localscope
+const Foam::word typeName("porousZones");
+//! @endcond localscope
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::porousZones::porousZones
@@ -47,7 +51,7 @@ Foam::porousZones::porousZones
     (
         IOobject
         (
-            "porousZones",
+            typeName,
             mesh.time().constant(),
             mesh,
             IOobject::READ_IF_PRESENT,
@@ -69,7 +73,7 @@ Foam::porousZones::porousZones
     (
         IOobject
         (
-            "porousZones",
+            typeName,
             mesh.time().constant(),
             mesh,
             IOobject::NO_READ,
@@ -138,7 +142,7 @@ bool Foam::porousZones::readData(Istream& is)
     (
         IOobject
         (
-            "porousZones",
+            typeName,
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,

@@ -34,7 +34,11 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<coordinateSystem>, 0);
 }
 
-const Foam::word Foam::coordinateSystems::dataType("coordinateSystem");
+//! @cond localscope
+const Foam::word typeName("coordinateSystems");
+const Foam::word dataType("coordinateSystem");
+//! @endcond localscope
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -44,17 +48,25 @@ Foam::coordinateSystems::coordinateSystems()
 
 Foam::coordinateSystems::coordinateSystems
 (
-    const objectRegistry& registry,
-    const word& name,
-    const fileName& instance
+    const IOobject& io
+)
+{
+    IOPtrList<coordinateSystem> newList(io);
+    transfer(newList);
+}
+
+
+Foam::coordinateSystems::coordinateSystems
+(
+    const objectRegistry& registry
 )
 {
     IOPtrList<coordinateSystem> newList
     (
         IOobject
         (
-            name,
-            instance,
+            typeName,
+            "constant",
             registry,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
@@ -62,16 +74,6 @@ Foam::coordinateSystems::coordinateSystems
         )
     );
 
-    transfer(newList);
-}
-
-
-Foam::coordinateSystems::coordinateSystems
-(
-    const IOobject& io
-)
-{
-    IOPtrList<coordinateSystem> newList(io);
     transfer(newList);
 }
 

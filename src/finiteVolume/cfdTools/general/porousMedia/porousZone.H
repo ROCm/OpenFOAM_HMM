@@ -92,11 +92,11 @@ class porousZone
 {
     // Private data
 
-        //- Reference to the finite volume mesh this zone is part of
-        const fvMesh& mesh_;
-
         //- Name of this zone
         word name_;
+
+        //- Reference to the finite volume mesh this zone is part of
+        const fvMesh& mesh_;
 
         //- Dictionary containing the parameters
         dictionary dict_;
@@ -189,7 +189,7 @@ public:
     // Constructors
 
         //- Construct from components
-        porousZone(const fvMesh&, const word& name, const dictionary&);
+        porousZone(const word&, const fvMesh&, const dictionary&);
 
         //- Return clone
         autoPtr<porousZone> clone() const
@@ -229,7 +229,7 @@ public:
                 dictionary dict(is);
                 rewriteDict(dict, true);
 
-                return autoPtr<porousZone>(new porousZone(mesh_, name, dict));
+                return autoPtr<porousZone>(new porousZone(name, mesh_, dict));
             }
         };
 

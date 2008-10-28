@@ -59,11 +59,6 @@ class coordinateSystems
 
 public:
 
-    // Static data members
-
-        //- Type name of list contents
-        static const word dataType;
-
     // Public Member Functions
 
 
@@ -72,16 +67,11 @@ public:
         //- Construct null
         coordinateSystems();
 
-        //- Read construct from registry, name. instance
-        coordinateSystems
-        (
-            const objectRegistry& registry,
-            const word& name = "coordinateSystems",
-            const fileName& instance = "constant"
-        );
-
         //- Read construct from IOobject
-        coordinateSystems(const IOobject&);
+        explicit coordinateSystems(const IOobject&);
+
+        //- Read construct from registry from "constant" instance
+        coordinateSystems(const objectRegistry&);
 
     // Member Functions
 
@@ -132,10 +122,10 @@ public:
         //  @endverbatim
         //  When this form of re-writing is used, the coordinateRotation is
         //  reduced to the axes specification.
-        bool rewriteDict(dictionary& dict, bool noType = false) const;
+        bool rewriteDict(dictionary&, bool noType=false) const;
 
         //- write data
-        bool writeData(Ostream&, bool subDict = true) const;
+        bool writeData(Ostream&, bool subDict=true) const;
 };
 
 

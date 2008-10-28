@@ -63,13 +63,13 @@ void Foam::porousZone::adjustNegativeResistance(dimensionedVector& resist)
 
 Foam::porousZone::porousZone
 (
-    const fvMesh& mesh,
     const word& name,
+    const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    mesh_(mesh),
     name_(name),
+    mesh_(mesh),
     dict_(dict),
     cellZoneID_(mesh_.cellZones().findZoneID(name)),
     coordSys_(dict),

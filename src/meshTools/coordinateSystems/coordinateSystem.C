@@ -43,6 +43,7 @@ namespace Foam
 Foam::coordinateSystem::coordinateSystem()
 :
     name_(type()),
+    note_(),
     origin_(point::zero),
     R_(),
     Rtr_(sphericalTensor::I)
@@ -58,6 +59,7 @@ Foam::coordinateSystem::coordinateSystem
 )
 :
     name_(name),
+    note_(),
     origin_(origin),
     R_(axis, dir),
     Rtr_(R_.T())
@@ -72,6 +74,7 @@ Foam::coordinateSystem::coordinateSystem
 )
 :
     name_(name),
+    note_(),
     origin_(origin),
     R_(cr),
     Rtr_(R_.T())
@@ -84,6 +87,7 @@ Foam::coordinateSystem::coordinateSystem
 )
 :
     name_(type()),
+    note_(),
     origin_(point::zero),
     R_(),
     Rtr_(sphericalTensor::I)
@@ -99,6 +103,7 @@ Foam::coordinateSystem::coordinateSystem
 )
 :
     name_(name),
+    note_(),
     origin_(point::zero),
     R_(),
     Rtr_(sphericalTensor::I)
@@ -110,6 +115,7 @@ Foam::coordinateSystem::coordinateSystem
 Foam::coordinateSystem::coordinateSystem(Istream& is)
 :
     name_(is),
+    note_(),
     origin_(point::zero),
     R_(),
     Rtr_(sphericalTensor::I)
@@ -138,6 +144,12 @@ Foam::dictionary Foam::coordinateSystem::dict(bool ignoreType) const
     if (!ignoreType && type() != typeName_())
     {
         dict.add("type", type());
+    }
+
+    // The note entry is optional
+    if (note_.size())
+    {
+        dict.add("note", note_);
     }
 
     dict.add("origin", origin_);
@@ -238,6 +250,12 @@ void Foam::coordinateSystem::writeDict(Ostream& os, bool subDict) const
         os.writeKeyword("type")  << type()      << token::END_STATEMENT << nl;
     }
 
+    // The note entry is optional
+    if (note_.size())
+    {
+        os.writeKeyword("note") << note_ << token::END_STATEMENT << nl;
+    }
+
     os.writeKeyword("origin") << origin_  << token::END_STATEMENT << nl;
     os.writeKeyword("e1")     << e1()     << token::END_STATEMENT << nl;
     os.writeKeyword("e3")     << e3()     << token::END_STATEMENT << nl;
@@ -267,8 +285,12 @@ void Foam::coordinateSystem::operator=(const dictionary& rhs)
     );
 
     // unspecified origin is (0 0 0)
-    origin_ = vector::zero;
+    origin_ = point::zero;
     dict.readIfPresent("origin", origin_);
+
+    // The note entry is optional
+    note_.clear();
+    rhs.readIfPresent("note", note_);
 
     // specify via coordinateRotation
     if (dict.found("coordinateRotation"))
