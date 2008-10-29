@@ -35,34 +35,7 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<porousZone>, 0);
 }
 
-//! @cond localscope
-const Foam::word typeName("porousZones");
-//! @endcond localscope
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::porousZones::porousZones
-(
-    const fvMesh& mesh,
-    const coordinateSystems& cs
-)
-:
-    IOPtrList<porousZone>
-    (
-        IOobject
-        (
-            typeName,
-            mesh.time().constant(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
-        porousZone::iNew(mesh)
-    ),
-    mesh_(mesh),
-    csList_(cs)
-{}
-
 
 Foam::porousZones::porousZones
 (
@@ -73,35 +46,17 @@ Foam::porousZones::porousZones
     (
         IOobject
         (
-            typeName,
+            "porousZones",
             mesh.time().constant(),
             mesh,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
         porousZone::iNew(mesh)
     ),
-    mesh_(mesh),
-    csList_(mesh)
-{
-    clear();
+    mesh_(mesh)
+{}
 
-    IOPtrList<porousZone> newList
-    (
-        IOobject
-        (
-            "porousZones",
-            mesh_.time().constant(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false     // Don't register new zones with objectRegistry
-        ),
-        porousZone::iNew(mesh_, csList_)
-    );
-
-    transfer(newList);
-}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -138,21 +93,21 @@ bool Foam::porousZones::readData(Istream& is)
 {
     clear();
 
-    IOPtrList<porousZone> newList
+    IOPtrList<porousZone> newLst
     (
         IOobject
         (
-            typeName,
+            "porousZones",
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false     // Don't register new zones with objectRegistry
+            false     // Don't re-register new zones with objectRegistry
         ),
-        porousZone::iNew(mesh_, csList_)
+        porousZone::iNew(mesh_)
     );
 
-    transfer(newList);
+    transfer(newLst);
 
     return is.good();
 }

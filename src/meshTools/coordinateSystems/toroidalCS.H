@@ -106,12 +106,12 @@ public:
         (
             const word& name,
             const point& origin,
-            const coordinateRotation& cr,
+            const coordinateRotation&,
             const scalar radius
         );
 
         //- Construct from dictionary
-        toroidalCS(const word& name, const dictionary& dict);
+        toroidalCS(const word& name, const dictionary&);
 
 
     // Member Functions
@@ -126,7 +126,7 @@ public:
         virtual void write(Ostream&) const;
 
         //- Write dictionary
-        virtual void writeDict(Ostream&, bool subDict = true) const;
+        virtual void writeDict(Ostream&, bool subDict=true) const;
 };
 
 

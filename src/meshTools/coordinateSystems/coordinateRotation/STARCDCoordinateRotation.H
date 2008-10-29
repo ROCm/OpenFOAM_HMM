@@ -71,7 +71,7 @@ class STARCDCoordinateRotation
             const scalar rotZ,
             const scalar rotX,
             const scalar rotY,
-            const bool inDegrees = true
+            const bool inDegrees=true
         );
 
 
@@ -90,7 +90,7 @@ public:
         STARCDCoordinateRotation
         (
             const vector& rotZrotXrotY,
-            const bool inDegrees = true
+            const bool inDegrees=true
         );
 
         //- Construct from components of rotation vector
@@ -99,7 +99,7 @@ public:
             const scalar rotZ,
             const scalar rotX,
             const scalar rotY,
-            const bool inDegrees = true
+            const bool inDegrees=true
         );
 
         //- Construct from dictionary

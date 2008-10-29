@@ -72,7 +72,7 @@ Foam::porousZone::porousZone
     mesh_(mesh),
     dict_(dict),
     cellZoneID_(mesh_.cellZones().findZoneID(name)),
-    coordSys_(dict),
+    coordSys_(dict, mesh),
     porosity_(1),
     C0_(0),
     C1_(0),
@@ -372,25 +372,21 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
 
     if (dict_.found("porosity"))
     {
-        os.writeKeyword("porosity")
-            << porosity()
-            << token::END_STATEMENT << nl;
+        os.writeKeyword("porosity") << porosity() << token::END_STATEMENT << nl;
     }
 
-    if (dict_.found("powerLaw"))
+    // powerLaw coefficients
+    if (const dictionary* dictPtr = dict_.subDictPtr("powerLaw"))
     {
-        const dictionary& subDict = dict_.subDict("powerLaw");
-
         os << indent << "powerLaw";
-        subDict.write(os);
+        dictPtr->write(os);
     }
 
-    if (dict_.found("Darcy"))
+    // Darcy-Forchheimer coefficients
+    if (const dictionary* dictPtr = dict_.subDictPtr("Darcy"))
     {
-        const dictionary& subDict = dict_.subDict("Darcy");
-
         os << indent << "Darcy";
-        subDict.write(os);
+        dictPtr->write(os);
     }
 
     os << decrIndent << indent << token::END_BLOCK << endl;

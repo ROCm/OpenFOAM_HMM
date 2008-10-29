@@ -136,8 +136,8 @@ Foam::sampledSurface::New
     {
         FatalErrorIn
         (
-            "sampledSurface::New(const word&, "
-            "const polyMesh&, const dictionary&)"
+            "sampledSurface::New"
+            "(const word&, const polyMesh&, const dictionary&)"
         )   << "Unknown sample type " << sampleType
             << endl << endl
             << "Valid sample types : " << endl
@@ -145,10 +145,7 @@ Foam::sampledSurface::New
             << exit(FatalError);
     }
 
-    return autoPtr<sampledSurface>
-    (
-        cstrIter()(name, mesh, dict)
-    );
+    return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

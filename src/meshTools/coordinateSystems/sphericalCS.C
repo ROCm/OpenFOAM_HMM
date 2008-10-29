@@ -45,6 +45,7 @@ Foam::sphericalCS::sphericalCS()
     coordinateSystem()
 {}
 
+
 Foam::sphericalCS::sphericalCS
 (
     const word& name,
@@ -95,6 +96,7 @@ Foam::vector Foam::sphericalCS::localToGlobal
         translate
     );
 }
+
 
 Foam::tmp<Foam::vectorField> Foam::sphericalCS::localToGlobal
 (
@@ -173,6 +175,5 @@ Foam::tmp<Foam::vectorField> Foam::sphericalCS::globalToLocal
 
     return tresult;
 }
-
 
 // ************************************************************************* //
