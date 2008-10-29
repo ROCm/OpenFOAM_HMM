@@ -36,7 +36,7 @@ usage() {
 
 usage: ${0##*/} <type> {args}
 
-* create a new standard OpenFOAM source file
+* create a new standard OpenFOAM source or template file
 
 type: (source|template)
 
@@ -46,25 +46,24 @@ USAGE
 
 if [ "$#" -lt 2 ]
 then
-   usage "wrong number of arguments, expected 2 (or more)"
+    usage "wrong number of arguments, expected 2 (or more)"
 fi
 
 case "$1" in
 -h | -help)
-   usage
-   ;;
+    usage
+    ;;
 source)
-   shift
-   $WM_PROJECT_DIR/bin/foamTemplates/source/newSource $*
-   ;;
+    shift
+    $WM_PROJECT_DIR/bin/foamTemplates/source/newSource $*
+    ;;
 template)
-   shift
-   $WM_PROJECT_DIR/bin/foamTemplates/sourceTemplate/newSourceTemplate $*
-   ;;
+    shift
+    $WM_PROJECT_DIR/bin/foamTemplates/sourceTemplate/newSourceTemplate $*
+    ;;
 *)
-   usage "unknown type"
-   ;;
+    usage "unknown type"
+    ;;
 esac
-
 
 #------------------------------------------------------------------------------

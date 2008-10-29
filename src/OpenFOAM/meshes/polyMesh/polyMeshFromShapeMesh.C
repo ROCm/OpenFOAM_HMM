@@ -39,7 +39,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
     const cellShapeList& c
 ) const
 {
-    List<DynamicList<label, primitiveMesh::cellsPerPoint_> > 
+    List<DynamicList<label, primitiveMesh::cellsPerPoint_> >
         pc(points().size());
 
     // For each cell
@@ -136,7 +136,7 @@ Foam::labelList Foam::polyMesh::facePatchFaceCells
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const pointField& points,
+    const xfer<pointField>& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
@@ -311,7 +311,7 @@ Foam::polyMesh::polyMesh
         // Insertion cannot be done in one go as the faces need to be
         // added into the list in the increasing order of neighbour
         // cells.  Therefore, all neighbours will be detected first
-        // and then added in the correct order.  
+        // and then added in the correct order.
 
         const faceList& curFaces = cellsFaceShapes[cellI];
 
@@ -414,8 +414,8 @@ Foam::polyMesh::polyMesh
                 (
                     "polyMesh::polyMesh\n"
                     "(\n"
-                    "    const IOobject& io,\n"
-                    "    const pointField& points,\n"
+                    "    const IOobject&,\n"
+                    "    const xfer<pointField>&,\n"
                     "    const cellShapeList& cellsAsShapes,\n"
                     "    const faceListList& boundaryFaces,\n"
                     "    const wordList& boundaryPatchTypes,\n"
@@ -472,8 +472,8 @@ Foam::polyMesh::polyMesh
                         (
                             "polyMesh::polyMesh\n"
                             "(\n"
-                            "    const IOobject& io,\n"
-                            "    const pointField& points,\n"
+                            "    const IOobject&,\n"
+                            "    const xfer<pointField>&,\n"
                             "    const cellShapeList& cellsAsShapes,\n"
                             "    const faceListList& boundaryFaces,\n"
                             "    const wordList& boundaryPatchTypes,\n"

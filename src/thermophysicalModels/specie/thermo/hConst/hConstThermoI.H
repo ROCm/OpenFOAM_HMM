@@ -35,8 +35,8 @@ inline Foam::hConstThermo<equationOfState>::hConstThermo
 )
 :
     equationOfState(st),
-    CP(cp),
-    Hf(hf)
+    Cp_(cp),
+    Hf_(hf)
 {}
 
 
@@ -50,8 +50,8 @@ inline Foam::hConstThermo<equationOfState>::hConstThermo
 )
 :
     equationOfState(name, ct),
-    CP(ct.CP),
-    Hf(ct.Hf)
+    Cp_(ct.Cp_),
+    Hf_(ct.Hf_)
 {}
 
 
@@ -80,21 +80,47 @@ Foam::hConstThermo<equationOfState>::New(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class equationOfState>
-inline Foam::scalar Foam::hConstThermo<equationOfState>::cp(const scalar) const
+inline Foam::scalar Foam::hConstThermo<equationOfState>::cp
+(
+    const scalar
+) const
 {
-    return CP*this->W();
+    return Cp_*this->W();
 }
 
 
 template<class equationOfState>
-inline Foam::scalar Foam::hConstThermo<equationOfState>::h(const scalar T) const
+inline Foam::scalar Foam::hConstThermo<equationOfState>::h
+(
+    const scalar T
+) const
 {
-    return (CP*T + Hf)*this->W();
+    return (Cp_*T + Hf_)*this->W();
 }
 
 
 template<class equationOfState>
-inline Foam::scalar Foam::hConstThermo<equationOfState>::s(const scalar T) const
+inline Foam::scalar Foam::hConstThermo<equationOfState>::hs
+(
+    const scalar T
+) const
+{
+    return Cp_*T*this->W();
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::hConstThermo<equationOfState>::hc() const
+{
+    return Hf_*this->W();
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::hConstThermo<equationOfState>::s
+(
+    const scalar T
+) const
 {
     notImplemented
     (
@@ -119,8 +145,8 @@ inline void Foam::hConstThermo<equationOfState>::operator+=
     molr1 /= this->nMoles();
     scalar molr2 = ct.nMoles()/this->nMoles();
 
-    CP = molr1*CP + molr2*ct.CP;
-    Hf = molr1*Hf + molr2*ct.Hf;
+    Cp_ = molr1*Cp_ + molr2*ct.Cp_;
+    Hf_ = molr1*Hf_ + molr2*ct.Hf_;
 }
 
 
@@ -137,8 +163,8 @@ inline void Foam::hConstThermo<equationOfState>::operator-=
     molr1 /= this->nMoles();
     scalar molr2 = ct.nMoles()/this->nMoles();
 
-    CP = molr1*CP - molr2*ct.CP;
-    Hf = molr1*Hf - molr2*ct.Hf;
+    Cp_ = molr1*Cp_ - molr2*ct.Cp_;
+    Hf_ = molr1*Hf_ - molr2*ct.Hf_;
 }
 
 
@@ -160,8 +186,10 @@ inline Foam::hConstThermo<equationOfState> Foam::operator+
     return hConstThermo<equationOfState>
     (
         eofs,
-        ct1.nMoles()/eofs.nMoles()*ct1.CP + ct2.nMoles()/eofs.nMoles()*ct2.CP,
-        ct1.nMoles()/eofs.nMoles()*ct1.Hf + ct2.nMoles()/eofs.nMoles()*ct2.Hf
+        ct1.nMoles()/eofs.nMoles()*ct1.Cp_
+      + ct2.nMoles()/eofs.nMoles()*ct2.Cp_,
+        ct1.nMoles()/eofs.nMoles()*ct1.Hf_
+      + ct2.nMoles()/eofs.nMoles()*ct2.Hf_
     );
 }
 
@@ -182,8 +210,10 @@ inline Foam::hConstThermo<equationOfState> Foam::operator-
     return hConstThermo<equationOfState>
     (
         eofs,
-        ct1.nMoles()/eofs.nMoles()*ct1.CP - ct2.nMoles()/eofs.nMoles()*ct2.CP,
-        ct1.nMoles()/eofs.nMoles()*ct1.Hf - ct2.nMoles()/eofs.nMoles()*ct2.Hf
+        ct1.nMoles()/eofs.nMoles()*ct1.Cp_
+      - ct2.nMoles()/eofs.nMoles()*ct2.Cp_,
+        ct1.nMoles()/eofs.nMoles()*ct1.Hf_
+      - ct2.nMoles()/eofs.nMoles()*ct2.Hf_
     );
 }
 
@@ -198,8 +228,8 @@ inline Foam::hConstThermo<equationOfState> Foam::operator*
     return hConstThermo<equationOfState>
     (
         s*static_cast<const equationOfState&>(ct),
-        ct.CP,
-        ct.Hf
+        ct.Cp_,
+        ct.Hf_
     );
 }
 

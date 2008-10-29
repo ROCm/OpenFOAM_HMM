@@ -154,11 +154,4 @@ void Foam::polyMesh::initMesh(cellList& c)
     neighbour_.note() = meshInfo;
 }
 
-
-void Foam::polyMesh::initMesh(const xfer<cellList>& clst)
-{
-    initMesh(clst());
-}
-
-
 // ************************************************************************* //

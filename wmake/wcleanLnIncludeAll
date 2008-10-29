@@ -31,6 +31,28 @@
 #
 #------------------------------------------------------------------------------
 
-find . -depth -type d -name lnInclude -exec rm -rf {} \;
+# default is pwd
+if [ "$#" -eq 0 ]
+then
+    set -- .
+elif [ "$1" = "-h" -o "$1" = "-help" ]
+then
+    echo "Usage: ${0##*/} [dir1] .. [dirN]"
+    echo
+    echo "    Delete all the lnInclude directories in the tree"
+    exit 1
+fi
+
+
+for i
+do
+    if [ -d "$i" ]
+    then
+        echo "removing lnInclude directories: $i"
+        find $i -depth -type d -name lnInclude -exec rm -rf {} \;
+    else
+        echo "no directory: $i" 1>&2
+    fi
+done
 
 #------------------------------------------------------------------------------

@@ -1,0 +1,23 @@
+keyedSurface/keyedSurface.C
+keyedSurface/keyedSurfaceCleanup.C
+keyedSurface/newKeyedSurface.C
+
+meshedSurface/meshedSurface.C
+meshedSurface/meshedSurfaceCleanup.C
+meshedSurface/newMeshedSurface.C
+
+fileFormats = keyedSurface/fileFormats
+$(fileFormats)/ac3d/AC3DfileFormat.C
+$(fileFormats)/gts/GTSfileFormat.C
+$(fileFormats)/nas/NASfileFormat.C
+$(fileFormats)/obj/OBJfileFormat.C
+$(fileFormats)/off/OFFfileFormat.C
+$(fileFormats)/smesh/SMESHfileFormat.C
+$(fileFormats)/starcd/STARCDfileFormat.C
+$(fileFormats)/stl/STLfileFormat.C
+$(fileFormats)/stl/STLfileFormatASCII.L
+$(fileFormats)/tri/TRIfileFormat.C
+$(fileFormats)/vtk/VTKfileFormat.C
+
+LIB = $(FOAM_LIBBIN)/libsurfMesh
+

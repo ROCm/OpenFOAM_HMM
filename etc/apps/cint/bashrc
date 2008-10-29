@@ -31,7 +31,7 @@
 #
 #------------------------------------------------------------------------------
 
-export CINTSYSDIR=~/pub/CINT/cint
+export CINTSYSDIR=~/pub/CINT/cint7
 export PATH=$PATH:$CINTSYSDIR
 export MANPATH=$MANPATH:$CINTSYSDIR/doc
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$CINTSYSDIR

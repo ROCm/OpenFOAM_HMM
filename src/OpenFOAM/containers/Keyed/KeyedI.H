@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 template<class T>
 inline Foam::Keyed<T>::Keyed()
 :
@@ -38,9 +37,16 @@ inline Foam::Keyed<T>::Keyed()
 {}
 
 
-//- Construct from components
 template<class T>
 inline Foam::Keyed<T>::Keyed(const T& item, const label key)
+:
+    T(item),
+    key_(key)
+{}
+
+
+template<class T>
+inline Foam::Keyed<T>::Keyed(const xfer<T>& item, const label key)
 :
     T(item),
     key_(key)
