@@ -284,11 +284,27 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
-        pointZones_.setSize(newPointZones.size());
-        forAll (pointZones_, pzI)
+        label oldSize = pointZones_.size();
+
+        if (newPointZones.size() <= pointZones_.size())
         {
-            pointZones_[pzI] = newPointZones[pzI];
+            pointZones_.setSize(newPointZones.size());
         }
+
+        // Reset existing ones
+        forAll (pointZones_, czI)
+        {
+            pointZones_[czI] = newPointZones[czI];
+        }
+
+        // Extend with extra ones
+        pointZones_.setSize(newPointZones.size());
+
+        for (label czI = oldSize; czI < newPointZones.size(); czI++)
+        {
+            pointZones_.set(czI, newPointZones[czI].clone(pointZones_));
+        }
+
 
         faceZoneMesh newFaceZones
         (
@@ -305,7 +321,14 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
-        faceZones_.setSize(newFaceZones.size());
+        oldSize = faceZones_.size();
+
+        if (newFaceZones.size() <= faceZones_.size())
+        {
+            faceZones_.setSize(newFaceZones.size());
+        }
+
+        // Reset existing ones
         forAll (faceZones_, fzI)
         {
             faceZones_[fzI].resetAddressing
@@ -314,6 +337,15 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 newFaceZones[fzI].flipMap()
             );
         }
+
+        // Extend with extra ones
+        faceZones_.setSize(newFaceZones.size());
+
+        for (label fzI = oldSize; fzI < newFaceZones.size(); fzI++)
+        {
+            faceZones_.set(fzI, newFaceZones[fzI].clone(faceZones_));
+        }
+
 
         cellZoneMesh newCellZones
         (
@@ -330,11 +362,27 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
-        cellZones_.setSize(newCellZones.size());
+        oldSize = cellZones_.size();
+
+        if (newCellZones.size() <= cellZones_.size())
+        {
+            cellZones_.setSize(newCellZones.size());
+        }
+
+        // Reset existing ones
         forAll (cellZones_, czI)
         {
             cellZones_[czI] = newCellZones[czI];
         }
+
+        // Extend with extra ones
+        cellZones_.setSize(newCellZones.size());
+
+        for (label czI = oldSize; czI < newCellZones.size(); czI++)
+        {
+            cellZones_.set(czI, newCellZones[czI].clone(cellZones_));
+        }
+
 
         if (boundaryChanged)
         {
