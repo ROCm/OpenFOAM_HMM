@@ -27,6 +27,7 @@ dynMixedSmagorinsky/dynMixedSmagorinsky.C
 
 /*Smagorinsky2/Smagorinsky2.C*/
 
+kOmegaSSTSAS/kOmegaSSTSAS.C
 
 /* Wall functions */
 wallFunctions=derivedFvPatchFields/wallFunctions
