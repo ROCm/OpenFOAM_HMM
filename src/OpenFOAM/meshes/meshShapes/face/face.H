@@ -138,6 +138,9 @@ public:
         //- Construct from labelList
         explicit inline face(const labelList&);
 
+        //- Construct by transferring the parameter contents
+        explicit inline face(const xfer<labelList>&);
+
         //- Construct from Istream
         inline face(Istream&);
 

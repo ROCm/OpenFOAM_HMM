@@ -22,27 +22,18 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Constant properties thermodynamics package derived from the basic
-    thermo package data type specieThermo.
-
 \*---------------------------------------------------------------------------*/
 
 #include "eConstThermo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-eConstThermo::eConstThermo(Istream& is)
+Foam::eConstThermo::eConstThermo(Istream& is)
 :
     specieThermo(is),
-    CV(readScalar(is)),
-    Hf(readScalar(is))
+    Cv_(readScalar(is)),
+    Hf_(readScalar(is))
 {
     is.check("eConstThermo::eConstThermo(Istream& is)");
 }
@@ -50,17 +41,13 @@ eConstThermo::eConstThermo(Istream& is)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const eConstThermo& ct)
+Foam::Ostream& Foam::operator<<(Ostream& os, const eConstThermo& ct)
 {
-    os << (const specieThermo&)ct << tab << ct.CV << tab << ct.Hf;
+    os << (const specieThermo&)ct << tab << ct.Cv_ << tab << ct.Hf_;
 
     os.check("Ostream& operator<<(Ostream& os, const eConstThermo& ct)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

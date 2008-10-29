@@ -96,9 +96,8 @@ public:
         static autoPtr<hhuCombustionThermo> New(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~hhuCombustionThermo();
+    //- Destructor
+    virtual ~hhuCombustionThermo();
 
 
     // Member functions
@@ -111,13 +110,13 @@ public:
 
             //- Unburnt gas enthalpy [J/kg]
             //  Non-const access allowed for transport equations
-            volScalarField& hu()
+            virtual volScalarField& hu()
             {
                 return hu_;
             }
 
             //- Unburnt gas enthalpy [J/kg]
-            const volScalarField& hu() const
+            virtual const volScalarField& hu() const
             {
                 return hu_;
             }
@@ -140,7 +139,7 @@ public:
             ) const = 0;
 
             //- Unburnt gas temperature [K]
-            const volScalarField& Tu() const
+            virtual const volScalarField& Tu() const
             {
                 return Tu_;
             }

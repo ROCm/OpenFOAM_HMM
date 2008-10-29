@@ -79,40 +79,39 @@ public:
         hThermo(const fvMesh&);
 
 
-    // Destructor
-
-        ~hThermo();
+    //- Destructor
+    virtual ~hThermo();
 
 
     // Member functions
 
         //- Return the compostion of the combustion mixture
-        basicMixture& composition()
+        virtual basicMixture& composition()
         {
             return *this;
         }
 
         //- Return the compostion of the combustion mixture
-        const basicMixture& composition() const
+        virtual const basicMixture& composition() const
         {
             return *this;
         }
 
         //- Update properties
-        void correct();
+        virtual void correct();
 
 
         // Access to thermodynamic state variables
 
             //- Enthalpy [J/kg]
             //  Non-const access allowed for transport equations
-            volScalarField& h()
+            virtual volScalarField& h()
             {
                 return h_;
             }
 
             //- Enthalpy [J/kg]
-            const volScalarField& h() const
+            virtual const volScalarField& h() const
             {
                 return h_;
             }
@@ -121,31 +120,42 @@ public:
         // Fields derived from thermodynamic state variables
 
             //- Enthalpy for cell-set [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const labelList& cells
             ) const;
 
             //- Enthalpy for patch [J/kg]
-            tmp<scalarField> h
+            virtual tmp<scalarField> h
             (
                 const scalarField& T,
                 const label patchi
             ) const;
 
             //- Heat capacity at constant pressure for patch [J/kg/K]
-            tmp<scalarField> Cp(const scalarField& T, const label patchi) const;
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& T,
+                const label patchi
+            ) const;
 
             //- Heat capacity at constant pressure [J/kg/K]
-            tmp<volScalarField> Cp() const;
+            virtual tmp<volScalarField> Cp() const;
+
+            //- Heat capacity at constant volume for patch [J/kg/K]
+            virtual tmp<scalarField> Cv
+            (
+                const scalarField& T,
+                const label patchi
+            ) const;
 
             //- Heat capacity at constant volume [J/kg/K]
-            tmp<volScalarField> Cv() const;
+            virtual tmp<volScalarField> Cv() const;
 
 
         //- Read thermophysicalProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

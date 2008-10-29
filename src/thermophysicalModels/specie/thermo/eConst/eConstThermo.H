@@ -95,19 +95,20 @@ class eConstThermo
 {
     // Private data
 
-        scalar CV;
-        scalar Hf;
+        scalar Cv_;
+        scalar Hf_;
 
 
     // Private member functions
 
-        //- construct from components
+        //- Construct from components
         inline eConstThermo
         (
             const specieThermo& st,
             const scalar cv,
             const scalar hf
         );
+
 
 public:
 
@@ -135,6 +136,12 @@ public:
 
             //- Enthalpy [J/kmol]
             inline scalar h(const scalar T) const;
+
+            //- Sensible Enthalpy [J/kmol]
+            inline scalar hs(const scalar T) const;
+
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
 
             //- Entropy [J/(kmol K)]
             inline scalar s(const scalar T) const;

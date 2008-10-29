@@ -2,18 +2,18 @@
 
 if [ "$1" = "-h" -o "$1" = "-help" -o "$#" -gt 1 ]
 then
-   echo "Usage: ${0##*/}         : remove all .dep files"
-   echo "       ${0##*/} <file>  : remove all .dep files referring to <file>"
-   exit 1
+    echo "Usage: ${0##*/}         : remove all .dep files"
+    echo "       ${0##*/} <file>  : remove all .dep files referring to <file>"
+    exit 1
 fi
 
 if [ "$#" -eq 0 ]
 then
-   echo "removing all .dep files"
-   find . -name '*.dep' -print | xargs -t rm
+    echo "removing all .dep files"
+    find . -name '*.dep' -print | xargs -t rm 2>/dev/null
 else
-   echo "removing all .dep files containing $1..."
-   find . -name '*.dep' -exec grep "$1" '{}' \; -exec rm '{}' \;
+    echo "removing all .dep files containing $1..."
+    find . -name '*.dep' -exec grep "$1" '{}' \; -exec rm '{}' \;
 fi
 
 #------------------------------------------------------------------------------

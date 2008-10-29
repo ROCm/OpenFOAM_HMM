@@ -38,13 +38,6 @@ Description
 
 #define makeBasicThermo(Cthermo,Mixture,Transport,Thermo,EqnOfState)          \
                                                                               \
-typedef Mixture<Transport<specieThermo<Thermo<EqnOfState> > > >               \
-    Mixture##Transport##Thermo##EqnOfState;                                   \
-                                                                              \
-defineTemplateTypeNameAndDebugWithName                                        \
-    (Mixture##Transport##Thermo##EqnOfState,                                  \
-    #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>", 0)      \
-                                                                              \
 typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
     Cthermo##Mixture##Transport##Thermo##EqnOfState;                          \
                                                                               \
@@ -59,7 +52,6 @@ addToRunTimeSelectionTable                                                    \
     Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
     fvMesh                                                                    \
 )
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

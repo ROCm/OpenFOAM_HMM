@@ -36,26 +36,25 @@
 foamVersion=$WM_PROJECT_VERSION
 
 usage() {
-   cat<<USAGE
+    cat<<USAGE
 
 usage: ${0##*/} [OPTION] <file1> ... <fileN>
 
 options:
-  -v "<version>"  specifies the version to be written in the header
-  -h              help
+  -v VER  specifies the version to be written in the header
+  -h      help
 
-  Updates the header of application files.
+  Updates the header of application files and removes consecutive blank lines.
   By default, writes current version in the header.
-  Alternatively version can be specified with -v option.
-  Also removes consecutive blank lines from file.
+  An alternative version can be specified with -v option.
 
 USAGE
-   exit 1
+    exit 1
 }
 
 
 printHeader() {
-   cat<<HEADER
+    cat<<HEADER
 /*--------------------------------*- C++ -*----------------------------------*\\
 | =========                 |                                                 |
 | \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
@@ -78,7 +77,7 @@ HEADER
 # extract attribute '$1' from file '$2'
 #
 FoamFileAttribute() {
-   sed -n -e 's/[ ;]*$//' -e "s/^ *$1 *//p" $2
+    sed -n -e 's/[ ;]*$//' -e "s/^ *$1 *//p" $2
 }
 
 
@@ -88,22 +87,22 @@ FoamFileAttribute() {
 OPTS=`getopt hv: $*`
 if [ $? -ne 0 ]
 then
-   echo "Aborting due to invalid option"
-   usage
+    echo "Aborting due to invalid option"
+    usage
 fi
 eval set -- '$OPTS'
 while [ "$1" != "--" ]
 do
-   case $1 in
-   -v)
-      foamVersion=$2
-      shift
-      ;;
-   -h)
-      usage
-      ;;
-   esac
-   shift
+    case $1 in
+    -v)
+        foamVersion=$2
+        shift
+        ;;
+    -h)
+        usage
+        ;;
+    esac
+    shift
 done
 shift
 
@@ -118,24 +117,24 @@ foamVersion=`printf %-36s $foamVersion`
 #
 for caseFile
 do
-   if grep FoamFile $caseFile >/dev/null 2>&1
-   then
-      echo "Updating case file: $caseFile"
-      sed -n '/FoamFile/,/}/p' $caseFile > FoamFile.tmp
+    if grep FoamFile $caseFile >/dev/null 2>&1
+    then
+        echo "Updating case file: $caseFile"
+        sed -n '/FoamFile/,/}/p' $caseFile > FoamFile.tmp
 
-      CLASS=`FoamFileAttribute class FoamFile.tmp`
-      OBJECT=`FoamFileAttribute object FoamFile.tmp`
-      FORMAT=`FoamFileAttribute format FoamFile.tmp`
+        CLASS=`FoamFileAttribute class FoamFile.tmp`
+        OBJECT=`FoamFileAttribute object FoamFile.tmp`
+        FORMAT=`FoamFileAttribute format FoamFile.tmp`
 
-      printHeader $FORMAT $CLASS $OBJECT $NOTE > FoamFile.tmp
-      sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> FoamFile.tmp
+        printHeader $FORMAT $CLASS $OBJECT $NOTE > FoamFile.tmp
+        sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> FoamFile.tmp
 
-      # use cat to avoid removing/replace soft-links
-      [ -s FoamFile.tmp ] && cat FoamFile.tmp >| $caseFile
-      rm FoamFile.tmp
-   else
-      echo " Invalid case file: $caseFile"
-   fi
+        # use cat to avoid removing/replace soft-links
+        [ -s FoamFile.tmp ] && cat FoamFile.tmp >| $caseFile
+        rm FoamFile.tmp
+    else
+        echo " Invalid case file: $caseFile" 1>&2
+    fi
 done
 
 #------------------------------------------------------------------------------

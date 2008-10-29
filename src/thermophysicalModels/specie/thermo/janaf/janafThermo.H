@@ -150,6 +150,12 @@ public:
         //- Enthalpy [J/kmol]
         inline scalar h(const scalar T) const;
 
+        //- Sensible enthalpy [J/kmol]
+        inline scalar hs(const scalar T) const;
+
+        //- Chemical enthalpy [J/kmol]
+        inline scalar hc() const;
+
         //- Entropy [J/(kmol K)]
         inline scalar s(const scalar T) const;
 

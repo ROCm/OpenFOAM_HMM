@@ -714,9 +714,11 @@ commandStatus parseAction(const word& actionName)
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
+#   include "addTimeOptions.H"
+
     argList::validOptions.insert("noVTK", "");
     argList::validOptions.insert("batch", "file");
-#   include "addTimeOptions.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -730,7 +732,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createPolyMesh.H"
+#   include "createNamedPolyMesh.H"
 
     // Print some mesh info
     printMesh(runTime, mesh);

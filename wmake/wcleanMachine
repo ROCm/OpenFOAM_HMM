@@ -33,32 +33,40 @@
 #     Usage: wcleanMachine <machineType> [ .. <machineTypeN> ]
 #
 #------------------------------------------------------------------------------
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+usage: ${0##*/} machineType [... machineTypeN]
 
-if [ $# -eq 0 ]
+  Searches the directories below the current directory for the object file
+  directories of the specified machine type(s) and deletes them
+
+USAGE
+    exit 1
+}
+
+# needs some machine types ... or provide immediate help
+if [ "$#" -lt 1 -o "$1" = "-h" -o "$1" = "-help" ]
 then
-   echo "${0##*/}: Machine type(s) expected, exiting !"
-   exit 1
+    usage
 fi
 
-[ -d lib -a -d src ] || {
-   echo "${0##*/}: not in the project top level directory !"
-   exit 1
-}
+[ -d lib -a -d src ] || usage "not in the project top level directory"
 
 
 for machType
 do
-   echo "Cleaning machine type: $machType"
+    echo "Cleaning machine type: $machType"
 
-   find `find . -depth \( -name "Make.[A-Za-z]*" -o -name "Make" \) -type d -print` \
-       -depth \( -type d -name "*$machType" -o -name "*$machType$WM_MPLIB" \) -exec rm -r {} \;
+    find `find . -depth \( -name "Make.[A-Za-z]*" -o -name Make \) -type d -print` \
+        -depth \( -type d -name "*$machType" -o -name "*$machType$WM_MPLIB" \) -exec rm -r {} \;
 
-   # find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
+    # find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 
-   for dir in lib/$machType applications/bin/$machType
-   do
-      [ -d $dir ] && rm -r $dir
-   done
+    for dir in lib/$machType applications/bin/$machType
+    do
+        [ -d $dir ] && rm -rf $dir
+    done
 
 done
 

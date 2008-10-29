@@ -193,9 +193,17 @@ endsw
 _foamAddLib $FOAM_MPI_LIBBIN
 
 
-# Set the MPI buffer size (used by all platforms except SGI MPI)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-setenv MPI_BUFFER_SIZE 20000000
+# Set the minimum MPI buffer size (used by all platforms except SGI MPI)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set minBufferSize=20000000
+
+if ( $?MPI_BUFFER_SIZE ) then
+    if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
+        setenv MPI_BUFFER_SIZE $minBufferSize
+    endif
+else
+    setenv MPI_BUFFER_SIZE $minBufferSize
+endif
 
 
 # CGAL library if available
@@ -217,5 +225,6 @@ endif
 unalias _foamAddPath
 unalias _foamAddLib
 unalias _foamMkDir
+unset minBufferSize
 
 # -----------------------------------------------------------------------------

@@ -76,7 +76,10 @@ public:
         explicit inline cell(label);
 
         //- Construct from components
-        explicit inline cell(const labelList& f);
+        explicit inline cell(const labelList&);
+
+        //- Construct by transferring the parameter contents
+        explicit inline cell(const xfer<labelList>&);
 
         //- Construct from Istream
         inline cell(Istream&);
