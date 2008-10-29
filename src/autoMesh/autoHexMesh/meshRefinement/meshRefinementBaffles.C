@@ -47,6 +47,7 @@ License
 #include "motionSmoother.H"
 #include "polyMeshGeometry.H"
 #include "IOmanip.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -1490,7 +1491,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 void Foam::meshRefinement::findCellZoneGeometric
 (
     const labelList& closedNamedSurfaces,   // indices of closed surfaces
-    const labelList& namedSurfaceIndex,     // per face index of named surface
+    labelList& namedSurfaceIndex,           // per face index of named surface
     const labelList& surfaceToCellZone,     // cell zone index per surface
 
     labelList& cellToZone
@@ -1627,6 +1628,76 @@ void Foam::meshRefinement::findCellZoneGeometric
             }
         }
     }
+
+
+    // Adapt the namedSurfaceIndex
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // for if any cells were not completely covered.
+
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    {
+        label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
+        label neiZone = cellToZone[mesh_.faceNeighbour()[faceI]];
+
+        if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
+        {
+            // Give face the zone of the owner
+            namedSurfaceIndex[faceI] = findIndex
+            (
+                surfaceToCellZone,
+                max(ownZone, neiZone)
+            );
+        }
+    }
+
+    labelList neiCellZone(mesh_.nFaces()-mesh_.nInternalFaces());
+    for
+    (
+        label faceI = mesh_.nInternalFaces();
+        faceI < mesh_.nFaces();
+        faceI++
+    )
+    {
+        label own = mesh_.faceOwner()[faceI];
+        neiCellZone[faceI-mesh_.nInternalFaces()] = cellToZone[own];
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
+                label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+
+                if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
+                {
+                    // Give face the zone of the owner
+                    namedSurfaceIndex[faceI] = findIndex
+                    (
+                        surfaceToCellZone,
+                        max(ownZone, neiZone)
+                    );
+                }
+            }
+        }
+    }
+
+    // Sync
+    syncTools::syncFaceList
+    (
+        mesh_,
+        namedSurfaceIndex,
+        maxEqOp<label>(),
+        false
+    );
 }
 
 
@@ -1656,7 +1727,7 @@ void Foam::meshRefinement::findCellZoneTopo
             blockedFace[faceI] = true;
         }
     }
-    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>(), false);
+    // No need to sync since namedSurfaceIndex already is synced
 
     // Set region per cell based on walking
     regionSplit cellRegion(mesh_, blockedFace);
@@ -2149,8 +2220,8 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
     {
         FatalErrorIn
         (
-            "meshRefinement::findCellZoneTopo"
-            "(const point&, const labelList&, const labelList&, labelList&)"
+            "meshRefinement::splitMesh"
+            "(const label, const labelList&, const point&)"
         )   << "Point " << keepPoint
             << " is not inside the mesh." << nl
             << "Bounding box of the mesh:" << mesh_.globalData().bb()
@@ -2703,6 +2774,79 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
 
 
+    // Put the cells into the correct zone
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Closed surfaces with cellZone specified.
+    labelList closedNamedSurfaces(surfaces_.getClosedNamedSurfaces());
+
+    // Zone per cell:
+    // -2 : unset
+    // -1 : not in any zone
+    // >=0: zoneID
+    labelList cellToZone(mesh_.nCells(), -2);
+
+
+    // Set using geometric test
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if (closedNamedSurfaces.size() > 0)
+    {
+        findCellZoneGeometric
+        (
+            closedNamedSurfaces,   // indices of closed surfaces
+            namedSurfaceIndex,     // per face index of named surface
+            surfaceToCellZone,     // cell zone index per surface
+            cellToZone
+        );
+    }
+
+    //{
+    //    Pout<< "** finding out blocked faces." << endl;
+    //
+    //    cellSet zonedCellsGeom(mesh_, "zonedCellsGeom", 100);
+    //    forAll(cellToZone, cellI)
+    //    {
+    //        if (cellToZone[cellI] >= 0)
+    //        {
+    //            zonedCellsGeom.insert(cellI);
+    //        }
+    //    }
+    //    Pout<< "Writing zoned cells to " << zonedCellsGeom.objectPath()
+    //        << endl;
+    //    zonedCellsGeom.write();
+    //
+    //
+    //    faceSet zonedFaces(mesh_, "zonedFaces", 100);
+    //    forAll(namedSurfaceIndex, faceI)
+    //    {
+    //        label surfI = namedSurfaceIndex[faceI];
+    //
+    //        if (surfI != -1)
+    //        {
+    //            zonedFaces.insert(faceI);
+    //        }
+    //    }
+    //    Pout<< "Writing zoned faces to " << zonedFaces.objectPath() << endl;
+    //    zonedFaces.write();
+    //}
+
+    // Set using walking
+    // ~~~~~~~~~~~~~~~~~
+
+    //if (returnReduce(nSet, sumOp<label>()) < mesh_.globalData().nTotalCells())
+    {
+        // Topological walk
+        findCellZoneTopo
+        (
+            keepPoint,
+            namedSurfaceIndex,
+            surfaceToCellZone,
+            cellToZone
+        );
+    }
+
+
     // Topochange container
     polyTopoChange meshMod(mesh_);
 
@@ -2769,50 +2913,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
     // Put the cells into the correct zone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Closed surfaces with cellZone specified.
-    labelList closedNamedSurfaces(surfaces_.getClosedNamedSurfaces());
-
-    // Zone per cell:
-    // -2 : unset
-    // -1 : not in any zone
-    // >=0: zoneID
-    labelList cellToZone(mesh_.nCells(), -2);
-
-
-    // Set using geometric test
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    if (closedNamedSurfaces.size() > 0)
-    {
-        findCellZoneGeometric
-        (
-            closedNamedSurfaces,   // indices of closed surfaces
-            namedSurfaceIndex,     // per face index of named surface
-            surfaceToCellZone,     // cell zone index per surface
-            cellToZone
-        );
-    }
-
-
-    // Set using walking
-    // ~~~~~~~~~~~~~~~~~
-
-    //if (returnReduce(nSet, sumOp<label>()) < mesh_.globalData().nTotalCells())
-    {
-        // Topological walk
-        findCellZoneTopo
-        (
-            keepPoint,
-            namedSurfaceIndex,
-            surfaceToCellZone,
-            cellToZone
-        );
-    }
-
-
-    // Actually move the cells to their zone
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     forAll(cellToZone, cellI)
     {
