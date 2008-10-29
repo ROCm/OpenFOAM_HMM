@@ -251,14 +251,61 @@ void Foam::CV3D::insertGrid()
 
     Info<< nVert << " vertices inserted" << nl << endl;
 
+    // std::vector<Point> initialPoints;
+
+    // for (int i=0; i<ni; i++)
+    // {
+    //     for (int j=0; j<nj; j++)
+    //     {
+    //         for (int k=0; k<nk; k++)
+    //         {
+    //             point p1
+    //             (
+    //                 x0 + i*delta.x(),
+    //                 y0 + j*delta.y(),
+    //                 z0 + k*delta.z()
+    //             );
+
+    //             point p2 = p1 + 0.5*delta;
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p1.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p1.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p1.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p1, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p1.x(), p1.y(), p1.z()));
+    //             }
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p2.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p2.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p2.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p2, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p2.x(), p2.y(), p2.z()));
+    //             }
+    //         }
+    //     }
+    // }
+
+    // Info<< initialPoints.size() << " vertices inserted" << nl << endl;
+
+    // // using the range insert (it is faster than inserting points one by one)
+    // insert(initialPoints.begin(), initialPoints.end());
+
     if (controls_.writeInitialTriangulation)
     {
-//         Checking validity of triangulation
         assert(is_valid());
 
         writePoints("initial_points.obj", true);
         writeTriangles("initial_triangles.obj", true);
-//         writeFaces("initial_faces.obj", true);
     }
 }
 
