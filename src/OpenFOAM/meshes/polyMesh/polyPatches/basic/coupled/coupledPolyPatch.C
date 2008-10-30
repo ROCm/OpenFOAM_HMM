@@ -320,9 +320,9 @@ void Foam::coupledPolyPatch::calcTransformTensors
 
                 if (debug)
                 {
-                    Pout<< "    rotation " << sum(mag(forwardT_ - forwardT_[0]))
-                        << " more than local tolerance " << error
-                        << ". Assuming uniform rotation." << endl;
+                    Pout<< "    difference in rotation less than"
+                        << " local tolerance "
+                        << error << ". Assuming uniform rotation." << endl;
                 }
             }
         }

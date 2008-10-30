@@ -43,6 +43,7 @@ SourceFiles
 #define Field_H
 
 #include "tmp.H"
+#include "xfer.H"
 #include "direction.H"
 #include "VectorSpace.H"
 #include "scalarList.H"
@@ -163,6 +164,9 @@ public:
 
         //- Construct as copy or re-use as specified.
         Field(Field<Type>&, bool reUse);
+
+        //- Construct by transferring the Field contents
+        Field(const xfer<Field<Type> >&);
 
         //- Construct as copy of subField
         Field(const typename Field<Type>::subField&);
@@ -292,6 +296,12 @@ public:
 
         //- Replace a component field of the field
         void replace(const direction, const cmptType&);
+
+        //- Transfer the contents of the argument Field into this Field
+        void transfer(Field<Type>&);
+
+        //- Transfer the contents of the argument List into this Field
+        void transfer(List<Type>&);
 
         //- Return the field transpose (only defined for second rank tensors)
         tmp<Field<Type> > T() const;

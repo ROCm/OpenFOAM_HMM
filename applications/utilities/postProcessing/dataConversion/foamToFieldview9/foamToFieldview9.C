@@ -642,8 +642,7 @@ int main(int argc, char *argv[])
 
         //Info<< "Writing variables data ..." << endl;
 
-        pointMesh pMesh(mesh);
-        volPointInterpolation pInterp(mesh, pMesh);
+        volPointInterpolation pInterp(mesh);
 
         writeInt(fvFile, FV_VARIABLES);
 

@@ -31,6 +31,7 @@ License
 #include "OFstream.H"
 #include "meshTools.H"
 #include "mapPolyMesh.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -82,7 +83,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        pointMesh_
+        pointMesh::New(fvMesh_)
     ),
     cellDisplacement_
     (
@@ -139,7 +140,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
             new pointVectorField
             (
                 io,
-                pointMesh_
+                pointMesh::New(fvMesh_)
             )
         );
 
@@ -168,7 +169,11 @@ Foam::displacementLaplacianFvMotionSolver::
 Foam::tmp<Foam::pointField> 
 Foam::displacementLaplacianFvMotionSolver::curPoints() const
 {
-    vpi_.interpolate(cellDisplacement_, pointDisplacement_);
+    volPointInterpolation::New(fvMesh_).interpolate
+    (
+        cellDisplacement_,
+        pointDisplacement_
+    );
 
     if (pointLocation_.valid())
     {

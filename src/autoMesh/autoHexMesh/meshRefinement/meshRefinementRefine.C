@@ -835,7 +835,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     // minLevel) and cache per cell the max surface level and the local normal
     // on that surface.
     labelList cellMaxLevel(mesh_.nCells(), -1);
-    vectorField cellMaxNormal(mesh_.nCells());
+    vectorField cellMaxNormal(mesh_.nCells(), vector::zero);
 
     {
         // Per segment the normals of the surfaces
@@ -1225,6 +1225,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
+    }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
     }
 
     // Update intersection info

@@ -41,6 +41,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "className.H"
+#include "xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -154,6 +155,9 @@ public:
 
         //- Construct as copy
         HashTable(const HashTable<T, Key, Hash>&);
+
+        //- Construct by transferring the parameter contents
+        HashTable(const xfer<HashTable<T, Key, Hash> >&);
 
 
     // Destructor

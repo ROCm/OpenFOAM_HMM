@@ -29,15 +29,12 @@ License
 #include "MassTransferModel.H"
 #include "SurfaceReactionModel.H"
 
-#include "interpolationCellPoint.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
 Foam::ReactingCloud<ParcelType>::ReactingCloud
 (
     const word& cloudType,
-    const volPointInterpolation& vpi,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -45,7 +42,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     PtrList<specieReactingProperties>& gases
 )
 :
-    ThermoCloud<ParcelType>(cloudType, vpi, rho, U, g, thermo),
+    ThermoCloud<ParcelType>(cloudType, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
     carrierThermo_(thermo),
@@ -131,42 +128,36 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->rho()
     );
 
     autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->U()
     );
 
     autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->mu()
     );
 
     autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         T
     );
 
     autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         cp
     );
 
     autoPtr<interpolation<scalar> > pInterpolator = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         p
     );
 

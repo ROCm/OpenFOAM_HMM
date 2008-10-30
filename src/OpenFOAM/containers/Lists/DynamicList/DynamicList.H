@@ -84,6 +84,10 @@ class DynamicList
         //- Allocated size for underlying List.
         label allocSize_;
 
+    // Private Member Functions
+
+        // Disabled, since the usefulness and semantics are not quite clear
+        void setSize(const label, const T&);
 
 public:
 
@@ -111,37 +115,36 @@ public:
 
         // Access
 
-            //- Size of the underlying storage.
-            inline label allocSize() const;
+        //- Size of the underlying storage.
+        inline label allocSize() const;
 
 
         // Edit
 
-            //- Reset size of List.
-            inline void setSize(const label);
+        //- Alter the list size.
+        //  When the new size is greater than the addressed list size, the
+        //  allocated list sizes is adjusted and the
+        //  addressed size does not change.
+        //  Otherwise the addressed list size is just reduced and the
+        //  allocated size does not change.
+        inline void setSize(const label);
 
-            //- Reset size of List and value for new elements.
-            inline void setSize(const label, const T&);
+        //- Clear the list, i.e. set the size to zero.
+        //  Allocated size does not change
+        inline void clear();
 
-            //- Clear the list, i.e. set the size to zero.
-            //  Allocated size does not change
-            inline void clear();
+        //- Clear the list and delete storage.
+        inline void clearStorage();
 
-            //- Clear the list and delete storage.
-            inline void clearStorage();
+        //- Shrink the allocated space to the number of elements used.
+        //  Returns a reference to the DynamicList.
+        inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
 
-            //- Shrink the List<T> to the number of elements used
-            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
+        //- Transfer contents of the argument List into this DynamicList
+        inline void transfer(List<T>&);
 
-            //- Transfer the contents of the argument List into this List
-            //  and annull the argument list. Is same as List::transfer except
-            //  checks that you're not changing the underlying list to something
-            //  smaller than allocSize_.
-            inline void transfer(List<T>&);
-
-            //- Transfer the contents of the argument DynamicList into this
-            //  DynamicList and annull the argument list.
-            inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
+        //- Transfer contents of the argument DynamicList into this DynamicList
+        inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
 
     // Member Operators
@@ -152,11 +155,10 @@ public:
         //- Remove and return the top element
         inline T remove();
 
-        //- Return non-const access to an element,
-        //  resizing the list if necessary
+        //- Return non-const access to an element, resizing list if necessary
         inline T& operator()(const label);
 
-        //- Assignment of all entries to the given value
+        //- Assignment of all addressed entries to the given value
         inline void operator=(const T&);
 
         //- Assignment from List<T>. Also handles assignment from DynamicList.

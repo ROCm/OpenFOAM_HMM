@@ -32,154 +32,83 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Calculates per face a list of global cell/face indices.
-void Foam::extendedStencil::calcFaceStencils
+void Foam::extendedStencil::calcFaceStencil
 (
-    const polyMesh& mesh,
-    const globalIndex& globalNumbering
+    const labelListList& globalCellCells,
+    labelListList& faceStencil
 )
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-    const label nBnd = mesh.nFaces()-mesh.nInternalFaces();
-    const labelList& own = mesh.faceOwner();
-    const labelList& nei = mesh.faceNeighbour();
-
-
-    // Determine neighbouring global cell or boundary face
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelList neiGlobal(nBnd);
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-        label faceI = pp.start();
-
-        if (pp.coupled())
-        {
-            // For coupled faces get the cell on the other side
-            forAll(pp, i)
-            {
-                label bFaceI = faceI-mesh.nInternalFaces();
-                neiGlobal[bFaceI] = globalNumbering.toGlobal(own[faceI]);
-                faceI++;
-            }
-        }
-        else if (isA<emptyPolyPatch>(pp))
-        {
-            forAll(pp, i)
-            {
-                label bFaceI = faceI-mesh.nInternalFaces();
-                neiGlobal[bFaceI] = -1;
-                faceI++;
-            }
-        }
-        else
-        {
-            // For noncoupled faces get the boundary face.
-            forAll(pp, i)
-            {
-                label bFaceI = faceI-mesh.nInternalFaces();
-                neiGlobal[bFaceI] =
-                    globalNumbering.toGlobal(mesh.nCells()+bFaceI);
-                faceI++;
-            }
-        }
-    }
-    syncTools::swapBoundaryFaceList(mesh, neiGlobal, false);
-
-
-    // Determine cellCells in global numbering
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList globalCellCells(mesh.nCells());
-    forAll(globalCellCells, cellI)
-    {
-        const cell& cFaces = mesh.cells()[cellI];
-
-        labelList& cCells = globalCellCells[cellI];
-
-        cCells.setSize(cFaces.size());
-
-        // Collect neighbouring cells/faces
-        label nNbr = 0;
-        forAll(cFaces, i)
-        {
-            label faceI = cFaces[i];
-
-            if (mesh.isInternalFace(faceI))
-            {
-                label nbrCellI = own[faceI];
-                if (nbrCellI == cellI)
-                {
-                    nbrCellI = nei[faceI];
-                }
-                cCells[nNbr++] = globalNumbering.toGlobal(nbrCellI);
-            }
-            else
-            {
-                label nbrCellI = neiGlobal[faceI-mesh.nInternalFaces()];
-                if (nbrCellI != -1)
-                {
-                    cCells[nNbr++] = nbrCellI;
-                }
-            }
-        }
-        cCells.setSize(nNbr);
-    }
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+    const labelList& own = mesh_.faceOwner();
+    const labelList& nei = mesh_.faceNeighbour();
 
 
     // Determine neighbouring global cell Cells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelListList neiGlobalCellCells(nBnd);
-    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
+    forAll(patches, patchI)
     {
-        neiGlobalCellCells[faceI-mesh.nInternalFaces()] =
-            globalCellCells[own[faceI]];
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            label faceI = pp.start();
+
+            forAll(pp, i)
+            {
+                neiGlobalCellCells[faceI-mesh_.nInternalFaces()] =
+                    globalCellCells[own[faceI]];
+                faceI++;
+            }
+        }
     }
-    syncTools::swapBoundaryFaceList(mesh, neiGlobalCellCells, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiGlobalCellCells, false);
 
 
 
     // Construct stencil in global numbering
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    stencil_.setSize(mesh.nFaces());
+    faceStencil.setSize(mesh_.nFaces());
 
-    labelHashSet faceStencil;
+    labelHashSet faceStencilSet;
 
-    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
     {
-        faceStencil.clear();
-        label globalOwn = globalNumbering.toGlobal(own[faceI]);
-        faceStencil.insert(globalOwn);
+        faceStencilSet.clear();
+
         const labelList& ownCCells = globalCellCells[own[faceI]];
+        label globalOwn = ownCCells[0];
+        // Insert cellCells
         forAll(ownCCells, i)
         {
-            faceStencil.insert(ownCCells[i]);
+            faceStencilSet.insert(ownCCells[i]);
         }
 
-        label globalNei = globalNumbering.toGlobal(nei[faceI]);
-        faceStencil.insert(globalNei);
         const labelList& neiCCells = globalCellCells[nei[faceI]];
+        label globalNei = neiCCells[0];
+        // Insert cellCells
         forAll(neiCCells, i)
         {
-            faceStencil.insert(neiCCells[i]);
+            faceStencilSet.insert(neiCCells[i]);
         }
 
         // Guarantee owner first, neighbour second.
-        stencil_[faceI].setSize(faceStencil.size());
+        faceStencil[faceI].setSize(faceStencilSet.size());
         label n = 0;
-        stencil_[faceI][n++] = globalOwn;
-        stencil_[faceI][n++] = globalNei;
-        forAllConstIter(labelHashSet, faceStencil, iter)
+        faceStencil[faceI][n++] = globalOwn;
+        faceStencil[faceI][n++] = globalNei;
+        forAllConstIter(labelHashSet, faceStencilSet, iter)
         {
             if (iter.key() != globalOwn && iter.key() != globalNei)
             {
-                stencil_[faceI][n++] = iter.key();
+                faceStencil[faceI][n++] = iter.key();
             }
         }
-        //Pout<< "internalface:" << faceI << " toc:" << faceStencil.toc()
-        //    << " stencil:" << stencil_[faceI] << endl;
+        //Pout<< "internalface:" << faceI << " toc:" << faceStencilSet.toc()
+        //    << " faceStencil:" << faceStencil[faceI] << endl;
     }
     forAll(patches, patchI)
     {
@@ -190,41 +119,40 @@ void Foam::extendedStencil::calcFaceStencils
         {
             forAll(pp, i)
             {
-                faceStencil.clear();
-                label globalOwn = globalNumbering.toGlobal(own[faceI]);
-                faceStencil.insert(globalOwn);
+                faceStencilSet.clear();
+
                 const labelList& ownCCells = globalCellCells[own[faceI]];
+                label globalOwn = ownCCells[0];
                 forAll(ownCCells, i)
                 {
-                    faceStencil.insert(ownCCells[i]);
+                    faceStencilSet.insert(ownCCells[i]);
                 }
-                // Get the coupled cell
-                label globalNei = neiGlobal[faceI-mesh.nInternalFaces()];
-                faceStencil.insert(globalNei);
+
                 // And the neighbours of the coupled cell
                 const labelList& neiCCells =
-                    neiGlobalCellCells[faceI-mesh.nInternalFaces()];
+                    neiGlobalCellCells[faceI-mesh_.nInternalFaces()];
+                label globalNei = neiCCells[0];
                 forAll(neiCCells, i)
                 {
-                    faceStencil.insert(neiCCells[i]);
+                    faceStencilSet.insert(neiCCells[i]);
                 }
 
                 // Guarantee owner first, neighbour second.
-                stencil_[faceI].setSize(faceStencil.size());
+                faceStencil[faceI].setSize(faceStencilSet.size());
                 label n = 0;
-                stencil_[faceI][n++] = globalOwn;
-                stencil_[faceI][n++] = globalNei;
-                forAllConstIter(labelHashSet, faceStencil, iter)
+                faceStencil[faceI][n++] = globalOwn;
+                faceStencil[faceI][n++] = globalNei;
+                forAllConstIter(labelHashSet, faceStencilSet, iter)
                 {
                     if (iter.key() != globalOwn && iter.key() != globalNei)
                     {
-                        stencil_[faceI][n++] = iter.key();
+                        faceStencil[faceI][n++] = iter.key();
                     }
                 }
 
                 //Pout<< "coupledface:" << faceI
-                //    << " toc:" << faceStencil.toc()
-                //    << " stencil:" << stencil_[faceI] << endl;
+                //    << " toc:" << faceStencilSet.toc()
+                //    << " faceStencil:" << faceStencil[faceI] << endl;
 
                 faceI++;
             }
@@ -233,31 +161,30 @@ void Foam::extendedStencil::calcFaceStencils
         {
             forAll(pp, i)
             {
-                faceStencil.clear();
-                label globalOwn = globalNumbering.toGlobal(own[faceI]);
-                faceStencil.insert(globalOwn);
+                faceStencilSet.clear();
+
                 const labelList& ownCCells = globalCellCells[own[faceI]];
+                label globalOwn = ownCCells[0];
                 forAll(ownCCells, i)
                 {
-                    faceStencil.insert(ownCCells[i]);
+                    faceStencilSet.insert(ownCCells[i]);
                 }
 
-
                 // Guarantee owner first, neighbour second.
-                stencil_[faceI].setSize(faceStencil.size());
+                faceStencil[faceI].setSize(faceStencilSet.size());
                 label n = 0;
-                stencil_[faceI][n++] = globalOwn;
-                forAllConstIter(labelHashSet, faceStencil, iter)
+                faceStencil[faceI][n++] = globalOwn;
+                forAllConstIter(labelHashSet, faceStencilSet, iter)
                 {
                     if (iter.key() != globalOwn)
                     {
-                        stencil_[faceI][n++] = iter.key();
+                        faceStencil[faceI][n++] = iter.key();
                     }
                 }
 
                 //Pout<< "boundaryface:" << faceI
-                //    << " toc:" << faceStencil.toc()
-                //    << " stencil:" << stencil_[faceI] << endl;
+                //    << " toc:" << faceStencilSet.toc()
+                //    << " faceStencil:" << faceStencil[faceI] << endl;
 
                 faceI++;
             }
@@ -266,34 +193,13 @@ void Foam::extendedStencil::calcFaceStencils
 }
 
 
-// Calculates extended stencil. This is per face
-// - owner
-// - cellCells of owner
-// - neighbour
-// - cellCells of neighbour
-// It comes in two parts:
-// - a map which collects/distributes all necessary data in a compact array
-// - the stencil (a labelList per face) which is a set of indices into this
-//   compact array.
-// The compact array is laid out as follows:
-// - first data for current processor (Pstream::myProcNo())
-//      - all cells
-//      - all boundary faces
-// - then per processor
-//      - all used cells and boundary faces
-void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
+Foam::autoPtr<Foam::mapDistribute> Foam::extendedStencil::calcDistributeMap
+(
+    const globalIndex& globalNumbering,
+    labelListList& faceStencil
+)
 {
-    const label nBnd = mesh.nFaces()-mesh.nInternalFaces();
-
-    // Global numbering for cells and boundary faces
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    globalIndex globalNumbering(mesh.nCells()+nBnd);
-
-
-    // Calculate stencil in global cell indices
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    calcFaceStencils(mesh, globalNumbering);
+    const label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
 
 
     // Convert stencil to schedule
@@ -309,8 +215,8 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
     //    these are always all needed.
     List<Map<label> > globalToProc(Pstream::nProcs());
     {
-        const labelList& procPatchMap = mesh.globalData().procPatchMap();
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        const labelList& procPatchMap = mesh_.globalData().procPatchMap();
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
         // Presize with (as estimate) size of patch to neighbour.
         forAll(procPatchMap, procI)
@@ -325,9 +231,9 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
         }
 
         // Collect all (non-local) globalcells/faces needed.
-        forAll(stencil_, faceI)
+        forAll(faceStencil, faceI)
         {
-            const labelList& stencilCells = stencil_[faceI];
+            const labelList& stencilCells = faceStencil[faceI];
 
             forAll(stencilCells, i)
             {
@@ -359,17 +265,17 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
         }
 
 
-        // forAll(globalToProc, procI)
-        // {
-        //     Pout<< "From processor:" << procI << " want cells/faces:" << endl;
-        //     forAllConstIter(Map<label>, globalToProc[procI], iter)
-        //     {
-        //         Pout<< "    global:" << iter.key()
-        //             << " local:" << globalNumbering.toLocal(procI, iter.key())
-        //             << endl;
-        //     }
-        //     Pout<< endl;
-        // }
+        //forAll(globalToProc, procI)
+        //{
+        //    Pout<< "From processor:" << procI << " want cells/faces:" << endl;
+        //    forAllConstIter(Map<label>, globalToProc[procI], iter)
+        //    {
+        //        Pout<< "    global:" << iter.key()
+        //            << " local:" << globalNumbering.toLocal(procI, iter.key())
+        //            << endl;
+        //    }
+        //    Pout<< endl;
+        //}
     }
 
 
@@ -379,19 +285,15 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
 
     labelList compactStart(Pstream::nProcs());
     compactStart[Pstream::myProcNo()] = 0;
-    label nCompact = mesh.nCells()+nBnd;
+    label nCompact = mesh_.nCells()+nBnd;
     forAll(compactStart, procI)
     {
         if (procI != Pstream::myProcNo())
         {
             compactStart[procI] = nCompact;
             nCompact += globalToProc[procI].size();
-
-            // Pout<< "Data wanted from " << procI << " starts at "
-            //     << compactStart[procI] << endl;
         }
     }
-    // Pout<< "Overall cells needed:" << nCompact << endl;
 
 
     // 3. Find out what to receive/send in compact addressing.
@@ -411,11 +313,6 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
                 i++;
             }
 
-            // Pout<< "From proc:" << procI
-            //     << " I need (globalcells):" << wantedGlobals
-            //     << " which are my compact:" << recvCompact[procI]
-            //     << endl;
-
             // Send the global cell numbers I need from procI
             OPstream str(Pstream::blocking, procI);
             str << wantedGlobals;
@@ -424,7 +321,7 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
         {
             recvCompact[procI] =
                 compactStart[procI]
-              + identity(mesh.nCells()+nBnd);
+              + identity(mesh_.nCells()+nBnd);
         }
     }
     labelListList sendCompact(Pstream::nProcs());
@@ -455,9 +352,9 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
     }
 
     // Convert stencil to compact numbering
-    forAll(stencil_, faceI)
+    forAll(faceStencil, faceI)
     {
-        labelList& stencilCells = stencil_[faceI];
+        labelList& stencilCells = faceStencil[faceI];
 
         forAll(stencilCells, i)
         {
@@ -476,10 +373,9 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
 
         }
     }
-    // Pout<< "***stencil_:" << stencil_ << endl;
 
     // Constuct map for distribution of compact data.
-    mapPtr_.reset
+    return autoPtr<mapDistribute>
     (
         new mapDistribute
         (
@@ -494,32 +390,10 @@ void Foam::extendedStencil::calcExtendedFaceStencil(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::extendedStencil::extendedStencil
-(
-    const mapDistribute& map,
-    const labelListList& stencil
-)
-:
-    mapPtr_
-    (
-        autoPtr<mapDistribute>
-        (
-            new mapDistribute
-            (
-                map.constructSize(),
-                map.subMap(),
-                map.constructMap()
-            )
-        )
-    ),
-    stencil_(stencil)
-{}
-
-
 Foam::extendedStencil::extendedStencil(const polyMesh& mesh)
-{
-    calcExtendedFaceStencil(mesh);
-}
+:
+    mesh_(mesh)
+{}
 
 
 // ************************************************************************* //

@@ -31,6 +31,9 @@ License
 #include "fixedEnthalpyFvPatchScalarField.H"
 #include "gradientEnthalpyFvPatchScalarField.H"
 #include "mixedEnthalpyFvPatchScalarField.H"
+#include "fixedInternalEnergyFvPatchScalarField.H"
+#include "gradientInternalEnergyFvPatchScalarField.H"
+#include "mixedInternalEnergyFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,9 +77,9 @@ wordList basicThermo::hBoundaryTypes()
     return hbt;
 }
 
-void basicThermo::hBoundaryCorrection(volScalarField& h_)
+void basicThermo::hBoundaryCorrection(volScalarField& h)
 {
-    volScalarField::GeometricBoundaryField& hbf = h_.boundaryField();
+    volScalarField::GeometricBoundaryField& hbf = h.boundaryField();
 
     forAll(hbf, patchi)
     {
@@ -93,6 +96,53 @@ void basicThermo::hBoundaryCorrection(volScalarField& h_)
     }
 }
 
+wordList basicThermo::eBoundaryTypes()
+{
+    const volScalarField::GeometricBoundaryField& tbf = T_.boundaryField();
+
+    wordList ebt = tbf.types();
+
+    forAll(tbf, patchi)
+    {
+        if (isA<fixedValueFvPatchScalarField>(tbf[patchi]))
+        {
+            ebt[patchi] = fixedInternalEnergyFvPatchScalarField::typeName;
+        }
+        else if
+        (
+            isA<zeroGradientFvPatchScalarField>(tbf[patchi])
+         || isA<fixedGradientFvPatchScalarField>(tbf[patchi])
+        )
+        {
+            ebt[patchi] = gradientInternalEnergyFvPatchScalarField::typeName;
+        }
+        else if (isA<mixedFvPatchScalarField>(tbf[patchi]))
+        {
+            ebt[patchi] = mixedInternalEnergyFvPatchScalarField::typeName;
+        }
+    }
+
+    return ebt;
+}
+
+void basicThermo::eBoundaryCorrection(volScalarField& e)
+{
+    volScalarField::GeometricBoundaryField& ebf = e.boundaryField();
+
+    forAll(ebf, patchi)
+    {
+        if (isA<gradientInternalEnergyFvPatchScalarField>(ebf[patchi]))
+        {
+            refCast<gradientInternalEnergyFvPatchScalarField>(ebf[patchi])
+                .gradient() = ebf[patchi].fvPatchField::snGrad();
+        }
+        else if (isA<mixedInternalEnergyFvPatchScalarField>(ebf[patchi]))
+        {
+            refCast<mixedInternalEnergyFvPatchScalarField>(ebf[patchi])
+                .refGrad() = ebf[patchi].fvPatchField::snGrad();
+        }
+    }
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

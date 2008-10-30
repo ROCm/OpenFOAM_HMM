@@ -2,13 +2,20 @@ basicMixture = mixtures/basicMixture
 basicThermo = basicThermo
 
 $(basicMixture)/basicMixture.C
+$(basicMixture)/basicMixtures.C
 $(basicThermo)/basicThermo.C
 $(basicThermo)/newBasicThermo.C
-$(basicThermo)/basicThermos.C
+
+hThermo/hThermos.C
+eThermo/eThermos.C
 
 derivedFvPatchFields/fixedEnthalpy/fixedEnthalpyFvPatchScalarField.C
 derivedFvPatchFields/gradientEnthalpy/gradientEnthalpyFvPatchScalarField.C
 derivedFvPatchFields/mixedEnthalpy/mixedEnthalpyFvPatchScalarField.C
+
+derivedFvPatchFields/fixedInternalEnergy/fixedInternalEnergyFvPatchScalarField.C
+derivedFvPatchFields/gradientInternalEnergy/gradientInternalEnergyFvPatchScalarField.C
+derivedFvPatchFields/mixedInternalEnergy/mixedInternalEnergyFvPatchScalarField.C
 
 derivedFvPatchFields/wallHeatTransfer/wallHeatTransferFvPatchScalarField.C
 

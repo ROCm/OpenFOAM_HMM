@@ -152,6 +152,11 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
         {
             mesh.movePoints(map().preMotionPoints());
         }
+        else
+        {
+            // Delete mesh volumes.
+            mesh.clearOut();
+        }
 
         faceCombiner.updateMesh(map);
 
@@ -301,6 +306,11 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             {
                 mesh.movePoints(map().preMotionPoints());
             }
+            else
+            {
+                // Delete mesh volumes.
+                mesh.clearOut();
+            }
 
             faceCombiner.updateMesh(map);
 
@@ -363,6 +373,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRemovePoints
     {
         mesh.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh.clearOut();
+    }
 
     pointRemover.updateMesh(map);
     meshRefiner_.updateMesh(map, labelList(0));
@@ -410,6 +425,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRestorePoints
     if (map().hasMotionPoints())
     {
         mesh.movePoints(map().preMotionPoints());
+    }
+    else
+    {
+        // Delete mesh volumes.
+        mesh.clearOut();
     }
 
     pointRemover.updateMesh(map);
@@ -2782,6 +2802,10 @@ void Foam::autoLayerDriver::addLayers
 
             const_cast<Time&>(mesh.time())++;
             Info<< "Writing shrunk mesh to " << mesh.time().timeName() << endl;
+
+            // See comment in autoSnapDriver why we should not remove meshPhi
+            // using mesh.clearPout().
+
             mesh.write();
         }
 
@@ -2970,6 +2994,11 @@ void Foam::autoLayerDriver::addLayers
     {
         mesh.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh.clearOut();
+    }
 
     meshRefiner_.updateMesh(map, labelList(0));
 
@@ -3082,7 +3111,7 @@ void Foam::autoLayerDriver::doLayers
         Info<< "Constructing mesh displacer ..." << endl;
 
         {
-            pointMesh pMesh(mesh);
+            const pointMesh& pMesh = pointMesh::New(mesh);
 
             motionSmoother meshMover
             (

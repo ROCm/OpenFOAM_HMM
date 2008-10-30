@@ -52,7 +52,8 @@ class interpolationCellPoint
 {
     // Private data
 
-        GeometricField<Type, pointPatchField, pointMesh> psip_;
+        //- Interpolated volfield
+        const GeometricField<Type, pointPatchField, pointMesh> psip_;
 
 
 public:
@@ -66,7 +67,6 @@ public:
         //- Construct from components
         interpolationCellPoint
         (
-            const volPointInterpolation& pInterp,
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );
 

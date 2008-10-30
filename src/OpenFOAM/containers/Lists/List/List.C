@@ -125,6 +125,14 @@ Foam::List<T>::List(const List<T>& a)
 }
 
 
+// Construct by transferring the parameter contents
+template<class T>
+Foam::List<T>::List(const xfer<List<T> >& lst)
+{
+    transfer(lst());
+}
+
+
 // Construct as copy or re-use as specified.
 template<class T>
 Foam::List<T>::List(List<T>& a, bool reUse)
@@ -422,6 +430,9 @@ template<class T>
 template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
 {
+    // shrink the allocated space to the number of elements used
+    a.shrink();
+
     if (this->v_) delete[] this->v_;
     this->size_ = a.size_;
     this->v_ = a.v_;

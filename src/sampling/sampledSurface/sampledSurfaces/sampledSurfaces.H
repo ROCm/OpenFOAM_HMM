@@ -41,7 +41,6 @@ SourceFiles
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
 #include "volFieldsFwd.H"
-#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,22 +129,16 @@ class sampledSurfaces
 
         //- Name of this set of surfaces,
         //  Also used as the name of the sampledSurfaces directory.
-        word name_;
+        const word name_;
 
         //- Const reference to fvMesh
         const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
-        bool loadFromFiles_;
+        const bool loadFromFiles_;
 
         //- output path
         fileName outputPath_;
-
-        //- pointMesh for interpolation
-        autoPtr<pointMesh> pMeshPtr_;
-
-        //- volPointInterpolation for interpolation
-        autoPtr<volPointInterpolation> pInterpPtr_;
 
 
         // Read from dictonary
@@ -191,13 +184,6 @@ class sampledSurfaces
             fieldGroup<Type>& fieldList,
             const wordList& fieldTypes
         ) const;
-
-        //- Set interpolator for the field
-        template<class Type>
-        autoPtr<interpolation<Type> > setInterpolator
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
 
         //- Sample and write a particular volume field
         template<class Type>

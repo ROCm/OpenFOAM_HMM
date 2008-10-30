@@ -76,7 +76,6 @@ public:
         basicThermoCloud
         (
             const word& cloudType,
-            const volPointInterpolation& vpi,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,

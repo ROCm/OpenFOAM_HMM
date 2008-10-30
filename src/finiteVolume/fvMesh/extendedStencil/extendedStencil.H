@@ -42,6 +42,7 @@ Description
 
 SourceFiles
     extendedStencil.C
+    extendedStencilTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,22 +66,33 @@ class globalIndex;
 
 class extendedStencil
 {
-    // Private data
+protected:
 
-        //- Swap map for getting neigbouring data
-        autoPtr<mapDistribute> mapPtr_;
+    // Protected data
 
-        //- Per face the stencil.
-        labelListList stencil_;
+        const polyMesh& mesh_;
 
+
+    // Protected Member Functions
+
+        //- Collect cell neighbours into extended stencil
+        void calcFaceStencil
+        (
+            const labelListList& globalCellCells,
+            labelListList& faceStencil
+        );
+
+        //- Calculate distribute map
+        autoPtr<mapDistribute> calcDistributeMap
+        (
+            const globalIndex& globalNumbering,
+            labelListList& faceStencil
+        );
+
+
+private:
 
     // Private Member Functions
-
-        void calcFaceStencils(const polyMesh&, const globalIndex&);
-
-        //- Calculate the stencil (but not weights)
-        void calcExtendedFaceStencil(const polyMesh&);
-
 
         //- Disallow default bitwise copy construct
         extendedStencil(const extendedStencil&);
@@ -93,44 +105,32 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        extendedStencil(const mapDistribute& map, const labelListList&);
-
-        //- Construct from all cells and boundary faces
-        extendedStencil(const polyMesh&);
-
+        //- Construct from mesh
+        explicit extendedStencil(const polyMesh&);
 
 
     // Member Functions
 
-        //- Return reference to the parallel distribution map
-        const mapDistribute& map() const
-        {
-            return mapPtr_();
-        }
-
-        //- Return reference to the stencil
-        const labelListList& stencil() const
-        {
-            return stencil_;
-        }
-
         //- Use map to get the data into stencil order
         template<class T>
-        void collectData
+        static void collectData
         (
+            const mapDistribute& map,
+            const labelListList& stencil,
             const GeometricField<T, fvPatchField, volMesh>& fld,
             List<List<T> >& stencilFld
-        ) const;
+        );
 
-        //- Calculate weighted sum of vol field
+        //- Sum vol field contributions to create face values
         template<class Type>
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > weightedSum
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        weightedSum
         (
+            const mapDistribute& map,
+            const labelListList& stencil,
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const List<List<scalar> >& stencilWeights
-        ) const;
-
+        );
 };
 
 

@@ -48,14 +48,6 @@ inline const Foam::fvMesh& Foam::KinematicCloud<ParcelType>::mesh() const
 
 
 template<class ParcelType>
-inline const Foam::volPointInterpolation&
-Foam::KinematicCloud<ParcelType>::vpi() const
-{
-    return vpi_;
-}
-
-
-template<class ParcelType>
 inline const Foam::IOdictionary&
 Foam::KinematicCloud<ParcelType>::particleProperties() const
 {

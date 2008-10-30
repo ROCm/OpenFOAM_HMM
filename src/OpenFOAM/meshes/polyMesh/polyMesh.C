@@ -35,6 +35,8 @@ License
 #include "OSspecific.H"
 #include "demandDrivenData.H"
 
+#include "pointMesh.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -228,7 +230,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     }
     else
     {
-        cellIOList c
+        cellIOList cLst
         (
             IOobject
             (
@@ -241,9 +243,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
             )
         );
 
-
         // Set the primitive mesh
-        initMesh(c);
+        initMesh(cLst);
 
         owner_.write();
         neighbour_.write();
@@ -272,10 +273,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const pointField& points,
-    const faceList& faces,
-    const labelList& owner,
-    const labelList& neighbour,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<labelList>& owner,
+    const xfer<labelList>& neighbour,
     const bool syncPar
 )
 :
@@ -428,9 +429,9 @@ Foam::polyMesh::polyMesh
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const pointField& points,
-    const faceList& faces,
-    const cellList& cells,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<cellList>& cells,
     const bool syncPar
 )
 :
@@ -553,7 +554,7 @@ Foam::polyMesh::polyMesh
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(NULL)
 {
-    // Check if the faces and cells are valid
+    // Check if faces are valid
     forAll (faces_, faceI)
     {
         const face& curFace = faces_[faceI];
@@ -564,10 +565,10 @@ Foam::polyMesh::polyMesh
             (
                 "polyMesh::polyMesh\n"
                 "(\n"
-                "    const IOobject& io,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const cellList& cells\n"
+                "    const IOobject&,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<cellList>&\n"
                 ")\n"
             )   << "Face " << faceI << "contains vertex labels out of range: "
                 << curFace << " Max point index = " << points_.size()
@@ -575,10 +576,13 @@ Foam::polyMesh::polyMesh
         }
     }
 
-    // Check if the faces and cells are valid
-    forAll (cells, cellI)
+    // transfer in cell list
+    cellList cLst(cells);
+
+    // Check if cells are valid
+    forAll (cLst, cellI)
     {
-        const cell& curCell = cells[cellI];
+        const cell& curCell = cLst[cellI];
 
         if (min(curCell) < 0 || max(curCell) > faces_.size())
         {
@@ -586,10 +590,10 @@ Foam::polyMesh::polyMesh
             (
                 "polyMesh::polyMesh\n"
                 "(\n"
-                "    const IOobject& io,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const cellList& cells\n"
+                "    const IOobject&,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<cellList>&\n"
                 ")\n"
             )   << "Cell " << cellI << "contains face labels out of range: "
                 << curCell << " Max face index = " << faces_.size()
@@ -598,17 +602,16 @@ Foam::polyMesh::polyMesh
     }
 
     // Set the primitive mesh
-    initMesh(const_cast<cellList&>(cells));
+    initMesh(cLst);
 }
 
 
 void Foam::polyMesh::resetPrimitives
 (
-    const label nUsedFaces,
-    const pointField& points,
-    const faceList& faces,
-    const labelList& owner,
-    const labelList& neighbour,
+    const xfer<pointField>& points,
+    const xfer<faceList>& faces,
+    const xfer<labelList>& owner,
+    const xfer<labelList>& neighbour,
     const labelList& patchSizes,
     const labelList& patchStarts,
     const bool validBoundary
@@ -617,25 +620,29 @@ void Foam::polyMesh::resetPrimitives
     // Clear addressing. Keep geometric props for mapping.
     clearAddressing();
 
-    // Take over new primitive data. Note extra optimization to prevent
-    // assignment to self.
-    if (&points_ != &points)
+    // Take over new primitive data.
+    // Optimized to avoid overwriting data at all
+    if (&points)
     {
-        points_ = points;
+        points_.transfer(points());
         bounds_ = boundBox(points_, validBoundary);
     }
-    if (&faces_ != &faces)
+
+    if (&faces)
     {
-        faces_ = faces;
+        faces_.transfer(faces());
     }
-    if (&owner_ != &owner)
+
+    if (&owner)
     {
-        owner_ = owner;
+        owner_.transfer(owner());
     }
-    if (&neighbour_ != &neighbour)
+
+    if (&neighbour)
     {
-        neighbour_ = neighbour;
+        neighbour_.transfer(neighbour());
     }
+
 
     // Reset patch sizes and starts
     forAll(boundary_, patchI)
@@ -665,11 +672,10 @@ void Foam::polyMesh::resetPrimitives
             (
                 "polyMesh::polyMesh::resetPrimitives\n"
                 "(\n"
-                "    const label nUsedFaces,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const labelList& owner,\n"
-                "    const labelList& neighbour,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<labelList>& owner,\n"
+                "    const xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
                 ")\n"
@@ -680,8 +686,8 @@ void Foam::polyMesh::resetPrimitives
     }
 
 
-    // Set the primitive mesh from the owner_, neighbour_. Works
-    // out from patch end where the active faces stop.
+    // Set the primitive mesh from the owner_, neighbour_.
+    // Works out from patch end where the active faces stop.
     initMesh();
 
 
@@ -704,11 +710,10 @@ void Foam::polyMesh::resetPrimitives
             (
                 "polyMesh::polyMesh::resetPrimitives\n"
                 "(\n"
-                "    const label nUsedFaces,\n"
-                "    const pointField& points,\n"
-                "    const faceList& faces,\n"
-                "    const labelList& owner,\n"
-                "    const labelList& neighbour,\n"
+                "    const xfer<pointField>&,\n"
+                "    const xfer<faceList>&,\n"
+                "    const xfer<labelList>& owner,\n"
+                "    const xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
                 ")\n"
@@ -864,9 +869,9 @@ void Foam::polyMesh::addZones
         (
             "void addZones\n"
             "(\n"
-            "    const List<pointZone*>& pz,\n"
-            "    const List<faceZone*>& fz,\n"
-            "    const List<cellZone*>& cz\n"
+            "    const List<pointZone*>&,\n"
+            "    const List<faceZone*>&,\n"
+            "    const List<cellZone*>&\n"
             ")"
         )   << "point, face or cell zone already exists"
             << abort(FatalError);
@@ -1036,6 +1041,28 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     pointZones_.movePoints(points_);
     faceZones_.movePoints(points_);
     cellZones_.movePoints(points_);
+
+
+    // Hack until proper callbacks. Below are all the polyMeh MeshObjects with a
+    // movePoints function.
+
+    // pointMesh
+    if
+    (
+        db().objectRegistry::foundObject<pointMesh>
+        (
+            pointMesh::typeName
+        )
+    )
+    {
+        const_cast<pointMesh&>
+        (
+            db().objectRegistry::lookupObject<pointMesh>
+            (
+                pointMesh::typeName
+            )
+        ).movePoints(points_);
+    }
 
     return sweptVols;
 }

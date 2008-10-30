@@ -28,6 +28,8 @@ License
 #include "primitiveMesh.H"
 #include "globalMeshData.H"
 #include "demandDrivenData.H"
+#include "pointMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -65,6 +67,8 @@ void Foam::polyMesh::clearGeom()
     {
         boundary_[patchI].clearGeom();
     }
+
+    pointMesh::Delete(*this);
 }
 
 
@@ -82,6 +86,8 @@ void Foam::polyMesh::clearAddressing()
     // parallelData depends on the processorPatch ordering so force
     // recalculation
     deleteDemandDrivenData(globalMeshDataPtr_);
+
+    pointMesh::Delete(*this);
 }
 
 

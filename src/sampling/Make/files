@@ -22,6 +22,8 @@ cuttingPlane/cuttingPlane.C
 
 sampledSurface/patch/sampledPatch.C
 sampledSurface/plane/sampledPlane.C
+sampledSurface/isoSurface/isoSurface.C
+sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C

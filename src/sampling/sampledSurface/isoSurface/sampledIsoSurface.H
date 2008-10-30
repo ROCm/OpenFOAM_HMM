@@ -1,0 +1,235 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::sampledIsoSurface
+
+Description
+    A sampledSurface defined by a surface of iso value. Always triangulated.
+    To be used in sampleSurfaces / functionObjects. Recalculates iso surface
+    only if time changes.
+
+SourceFiles
+    sampledIsoSurface.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef sampledIsoSurface_H
+#define sampledIsoSurface_H
+
+#include "sampledSurface.H"
+#include "triSurface.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                       Class sampledIsoSurface Declaration
+\*---------------------------------------------------------------------------*/
+
+class sampledIsoSurface
+:
+    public sampledSurface,
+    public triSurface
+{
+    // Private data
+
+        //- Field to get isoSurface of
+        word isoField_;
+
+        //- iso value
+        scalar isoVal_;
+
+        //- zone name (if restricted to zones)
+        word zoneName_;
+
+        //- triangles converted to faceList
+        mutable autoPtr<faceList> facesPtr_;
+
+
+        // Recreated for every isoSurface
+
+            //- Time at last call
+            mutable label storedTimeIndex_;
+
+            //- For every triangle the original cell in mesh
+            mutable labelList meshCells_;
+
+            //- For every unmerged triangle point the point in the triSurface
+            mutable labelList triPointMergeMap_;
+
+
+    // Private Member Functions
+
+        //- Create iso surface (if time has changed)
+        void createGeometry() const;
+
+        //- sample field on faces
+        template <class Type>
+        tmp<Field<Type> > sampleField
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vField
+        ) const;
+
+
+        template <class Type>
+        tmp<Field<Type> >
+        interpolateField(const interpolation<Type>&) const;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("sampledIsoSurface");
+
+
+    // Constructors
+
+        //- Construct from dictionary
+        sampledIsoSurface
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const dictionary& dict
+        );
+
+
+    // Destructor
+
+        virtual ~sampledIsoSurface();
+
+
+    // Member Functions
+
+        //- Points of surface
+        virtual const pointField& points() const
+        {
+            return triSurface::points();
+        }
+
+        //- Faces of surface
+        virtual const faceList& faces() const
+        {
+            if (!facesPtr_.valid())
+            {
+                const triSurface& s = *this;
+
+                facesPtr_.reset(new faceList(s.size()));
+
+                forAll(s, i)
+                {
+                    facesPtr_()[i] = s[i].triFaceFace();
+                }
+            }
+            return facesPtr_;
+        }
+
+
+        //- Correct for mesh movement and/or field changes
+        virtual void correct(const bool meshChanged);
+
+
+        //- sample field on surface
+        virtual tmp<scalarField> sample
+        (
+            const volScalarField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<vectorField> sample
+        (
+            const volVectorField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<sphericalTensorField> sample
+        (
+            const volSphericalTensorField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<symmTensorField> sample
+        (
+            const volSymmTensorField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<tensorField> sample
+        (
+            const volTensorField&
+        ) const;
+
+
+        //- interpolate field on surface
+        virtual tmp<scalarField> interpolate
+        (
+            const interpolation<scalar>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<vectorField> interpolate
+        (
+            const interpolation<vector>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<sphericalTensorField> interpolate
+        (
+            const interpolation<sphericalTensor>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<symmTensorField> interpolate
+        (
+            const interpolation<symmTensor>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<tensorField> interpolate
+        (
+            const interpolation<tensor>&
+        ) const;
+
+        //- Write
+        virtual void print(Ostream&) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "sampledIsoSurfaceTemplates.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

@@ -103,7 +103,7 @@ void Foam::ReactingParcel<ParcelType>::readFields
 
     ThermoParcel<ParcelType>::readFields(c);
 
-    IOField<scalar> mass0(c.fieldIOobject("mass0"));
+    IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::MUST_READ));
     c.checkFieldIOobject(c, mass0);
 
     label i = 0;
@@ -136,7 +136,10 @@ void Foam::ReactingParcel<ParcelType>::readFields
     // Populate YMixture for each parcel
     forAll(compositionNames, j)
     {
-        IOField<scalar> YMixture(c.fieldIOobject("Y" + compositionNames[j]));
+        IOField<scalar> YMixture
+        (
+            c.fieldIOobject("Y" + compositionNames[j], IOobject::MUST_READ)
+        );
 
         label i = 0;
         forAllIter(typename Cloud<ParcelType>, c, iter)
@@ -148,7 +151,10 @@ void Foam::ReactingParcel<ParcelType>::readFields
     // Populate YGas for each parcel
     forAll(gasNames, j)
     {
-        IOField<scalar> YGas(c.fieldIOobject("Y" + gasNames[j]));
+        IOField<scalar> YGas
+        (
+            c.fieldIOobject("Y" + gasNames[j], IOobject::MUST_READ)
+        );
 
         label i = 0;
         forAllIter(typename Cloud<ParcelType>, c, iter)
@@ -160,7 +166,10 @@ void Foam::ReactingParcel<ParcelType>::readFields
     // Populate YLiquid for each parcel
     forAll(liquidNames, j)
     {
-        IOField<scalar> YLiquid(c.fieldIOobject("Y" + liquidNames[j]));
+        IOField<scalar> YLiquid
+        (
+            c.fieldIOobject("Y" + liquidNames[j], IOobject::MUST_READ)
+        );
 
         label i = 0;
         forAllIter(typename Cloud<ParcelType>, c, iter)
@@ -172,7 +181,10 @@ void Foam::ReactingParcel<ParcelType>::readFields
     // Populate YSolid for each parcel
     forAll(solidNames, j)
     {
-        IOField<scalar> YSolid(c.fieldIOobject("Y" + solidNames[j]));
+        IOField<scalar> YSolid
+        (
+            c.fieldIOobject("Y" + solidNames[j], IOobject::MUST_READ)
+        );
 
         label i = 0;
         forAllIter(typename Cloud<ParcelType>, c, iter)
@@ -194,7 +206,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
 
     label np =  c.size();
 
-    IOField<scalar> mass0(c.fieldIOobject("mass0"), np);
+    IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
 
     label i = 0;
     forAllConstIter(typename Cloud<ParcelType>, c, iter)
@@ -213,7 +225,8 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         {
             IOField<scalar> YMixture
             (
-                c.fieldIOobject("Y" + compositionNames[j]), np
+                c.fieldIOobject("Y" + compositionNames[j], IOobject::NO_READ),
+                np
             );
 
             label i = 0;
@@ -228,7 +241,11 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         const wordList& gasNames = c.composition().gasNames();
         forAll(gasNames, j)
         {
-            IOField<scalar> YGas(c.fieldIOobject("Y" + gasNames[j]), np);
+            IOField<scalar> YGas
+            (
+                c.fieldIOobject("Y" + gasNames[j], IOobject::NO_READ),
+                np
+            );
 
             label i = 0;
             forAllConstIter(typename Cloud<ParcelType>, c, iter)
@@ -242,7 +259,11 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         const wordList& liquidNames = c.composition().liquidNames();
         forAll(liquidNames, j)
         {
-            IOField<scalar> YLiquid(c.fieldIOobject("Y" + liquidNames[j]), np);
+            IOField<scalar> YLiquid
+            (
+                c.fieldIOobject("Y" + liquidNames[j], IOobject::NO_READ),
+                np
+            );
 
             label i = 0;
             forAllConstIter(typename Cloud<ParcelType>, c, iter)
@@ -256,7 +277,11 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         const wordList& solidNames = c.composition().solidNames();
         forAll(solidNames, j)
         {
-            IOField<scalar> YSolid(c.fieldIOobject("Y" + solidNames[j]), np);
+            IOField<scalar> YSolid
+            (
+                c.fieldIOobject("Y" + solidNames[j], IOobject::NO_READ),
+                np
+            );
 
             label i = 0;
             forAllConstIter(typename Cloud<ParcelType>, c, iter)

@@ -26,7 +26,6 @@ License
 
 #include "searchableSurfaceWithGaps.H"
 #include "addToRunTimeSelectionTable.H"
-#include "SortableList.H"
 #include "Time.H"
 #include "ListOps.H"
 
@@ -82,7 +81,7 @@ Foam::Pair<Foam::vector> Foam::searchableSurfaceWithGaps::offsetVecs
 
         // Do second offset vector perp to original edge and first offset vector
         offsets[1] = n ^ offsets[0];
-        offsets[1] *= gap_/mag(offsets[1]);
+        offsets[1] *= gap_;
     }
 
     return offsets;    
@@ -207,6 +206,10 @@ void Foam::searchableSurfaceWithGaps::findLine
     List<pointIndexHit>& info
 ) const
 {
+
+    // Test with unperturbed vectors
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     surface().findLine(start, end, info);
 
     // Count number of misses. Determine map
@@ -215,6 +218,10 @@ void Foam::searchableSurfaceWithGaps::findLine
 
     if (returnReduce(nMiss, sumOp<label>()) > 0)
     {
+        //Pout<< "** retesting with offset0 " << nMiss << " misses out of "
+        //    << start.size() << endl;
+
+        // extract segments according to map
         pointField compactStart(start, compactMap);
         pointField compactEnd(end, compactMap);
 
@@ -228,20 +235,36 @@ void Foam::searchableSurfaceWithGaps::findLine
             offset1
         );
 
+        // Test with offset0 perturbed vectors
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         // test in pairs: only if both perturbations hit something
         // do we accept the hit.
 
+        const vectorField smallVec(SMALL*(compactEnd-compactStart));
+
         List<pointIndexHit> plusInfo;
-        surface().findLine(start+offset0, end+offset0, plusInfo);
+        surface().findLine
+        (
+            compactStart+offset0-smallVec,
+            compactEnd+offset0+smallVec,
+            plusInfo
+        );
         List<pointIndexHit> minInfo;
-        surface().findLine(start-offset0, end-offset0, minInfo);
+        surface().findLine
+        (
+            compactStart-offset0-smallVec,
+            compactEnd-offset0+smallVec,
+            minInfo
+        );
 
         // Extract any hits
         forAll(plusInfo, i)
         {
             if (plusInfo[i].hit() && minInfo[i].hit())
             {
-                info[compactMap[i]] = plusInfo[i].hitPoint()-offset0[i];
+                info[compactMap[i]] = plusInfo[i];
+                info[compactMap[i]].rawPoint() -= offset0[i];
             }
         }
 
@@ -250,6 +273,12 @@ void Foam::searchableSurfaceWithGaps::findLine
 
         if (returnReduce(nMiss, sumOp<label>()) > 0)
         {
+            //Pout<< "** retesting with offset1 " << nMiss << " misses out of "
+            //    << start.size() << endl;
+
+            // Test with offset1 perturbed vectors
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
             // Extract (inplace possible because of order)
             forAll(plusMissMap, i)
             {
@@ -257,21 +286,37 @@ void Foam::searchableSurfaceWithGaps::findLine
                 compactStart[i] = compactStart[mapI];
                 compactEnd[i] = compactEnd[mapI];
                 compactMap[i] = compactMap[mapI];
+                offset0[i] = offset0[mapI];
+                offset1[i] = offset1[mapI];
             }
             compactStart.setSize(plusMissMap.size());
             compactEnd.setSize(plusMissMap.size());
             compactMap.setSize(plusMissMap.size());
+            offset0.setSize(plusMissMap.size());
+            offset1.setSize(plusMissMap.size());
 
+            const vectorField smallVec(SMALL*(compactEnd-compactStart));
 
-            surface().findLine(start+offset1, end+offset1, plusInfo);
-            surface().findLine(start-offset1, end-offset1, minInfo);
+            surface().findLine
+            (
+                compactStart+offset1-smallVec,
+                compactEnd+offset1+smallVec,
+                plusInfo
+            );
+            surface().findLine
+            (
+                compactStart-offset1-smallVec,
+                compactEnd-offset1+smallVec,
+                minInfo
+            );
 
             // Extract any hits
             forAll(plusInfo, i)
             {
                 if (plusInfo[i].hit() && minInfo[i].hit())
                 {
-                    info[compactMap[i]] = plusInfo[i].hitPoint()-offset1[i];
+                    info[compactMap[i]] = plusInfo[i];
+                    info[compactMap[i]].rawPoint() -= offset1[i];
                 }
             }
         }

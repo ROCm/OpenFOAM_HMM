@@ -57,6 +57,10 @@ functions
         // Type of functionObject
         type probes;
 
+        // Output every
+        outputControl timeStep;
+        outputInterval 1;
+
         // Name of the directory for the probe data
         name probes;
 
@@ -82,8 +86,9 @@ functions
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libsampling.so");
 
-		// Output every 10th time step
-        interval 10;
+        // Output every
+        outputControl timeStep;
+        outputInterval 10;
 
         surfaceFormat raw;
 

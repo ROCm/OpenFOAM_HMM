@@ -116,8 +116,8 @@ private:
             //- Boundary mesh
             mutable polyBoundaryMesh boundary_;
 
-            //- Mesh bounding-box. created from points on construction
-            //  and updated when the mesh moves
+            //- Mesh bounding-box.
+            //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
 
             //- vector of valid directions in mesh
@@ -214,27 +214,26 @@ public:
         //- Construct from IOobject
         explicit polyMesh(const IOobject& io);
 
-        //- Construct from components without boundary.
+        //- Construct without boundary from components.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& owner,
-            const labelList& neighbour,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<labelList>& owner,
+            const xfer<labelList>& neighbour,
             const bool syncPar = true
         );
 
-        //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
+        //- Construct without boundary with cells rather than owner/neighbour.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const cellList& cells,
+            const xfer<pointField>& points,
+            const xfer<faceList>& faces,
+            const xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -242,7 +241,7 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
+            const xfer<pointField>& points,
             const cellShapeList& shapes,
             const faceListList& boundaryFaces,
             const wordList& boundaryPatchNames,
@@ -263,8 +262,7 @@ public:
 
         // Database
 
-            //- Over-ride the objectRegistry dbDir
-            //  if this is single-region case
+            //- Override the objectRegistry dbDir for a single-region case
             virtual const fileName& dbDir() const;
 
             //- Return the local mesh directory (dbDir()/meshSubDir)
@@ -311,17 +309,17 @@ public:
                 return bounds_;
             }
 
-            //- Return the vector of valid directions in mesh
-            //  defined according to the presence of empty patches.
+            //- Return the vector of valid directions in mesh.
+            //  Defined according to the presence of empty patches.
             //  1 indicates valid direction and -1 an invalid direction.
             const Vector<label>& directions() const;
 
-            //- Return the number of valid geoemtric dimensions in the mesh
+            //- Return the number of valid geometric dimensions in the mesh
             label nGeometricD() const;
 
-            //- Return the number of valid solution dimensions in the mesh
+            //- Return the number of valid solution dimensions in the mesh.
             //  For wedge cases this includes the circumferential direction
-            //  in case of swirl
+            //  in case of swirl.
             label nSolutionD() const;
 
             //- Return point zone mesh
@@ -436,11 +434,10 @@ public:
             //  patch ends at nActiveFaces) and change patches with addPatches.
             void resetPrimitives
             (
-                const label nUsedFaces,
-                const pointField& points,
-                const faceList& faces,
-                const labelList& owner,
-                const labelList& neighbour,
+                const xfer<pointField>& points,
+                const xfer<faceList>& faces,
+                const xfer<labelList>& owner,
+                const xfer<labelList>& neighbour,
                 const labelList& patchSizes,
                 const labelList& patchStarts,
                 const bool validBoundary = true

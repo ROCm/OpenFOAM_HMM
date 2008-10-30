@@ -156,6 +156,13 @@ Field<Type>::Field(Field<Type>& f, bool reUse)
 
 
 template<class Type>
+Field<Type>::Field(const xfer<Field<Type> >& f)
+:
+    List<Type>(f)
+{}
+
+
+template<class Type>
 Field<Type>::Field(const typename Field<Type>::subField& sf)
 :
     List<Type>(sf)
@@ -565,6 +572,20 @@ void Field<Type>::replace
 {
     TFOR_ALL_F_OP_FUNC_S_S(Type, *this, ., replace, const direction, d,
         cmptType, c)
+}
+
+
+template<class Type>
+void Field<Type>::transfer(Field<Type>& f)
+{
+    List<Type>::transfer(f);
+}
+
+
+template<class Type>
+void Field<Type>::transfer(List<Type>& lst)
+{
+    List<Type>::transfer(lst);
 }
 
 

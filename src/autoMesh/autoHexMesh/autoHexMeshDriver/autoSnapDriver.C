@@ -218,7 +218,8 @@ Foam::label Foam::autoSnapDriver::getCollocatedPoints
 // Calculate displacement as average of patch points.
 Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 (
-    const motionSmoother& meshMover
+    const motionSmoother& meshMover,
+    const List<labelPair>& baffles
 ) const
 {
     const indirectPrimitivePatch& pp = meshMover.patch();
@@ -253,6 +254,34 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
     const pointField& points = pp.points();
     const polyMesh& mesh = meshMover.mesh();
 
+    // Get labels of faces to count (master of coupled faces and baffle pairs)
+    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh));
+
+    {
+        forAll(baffles, i)
+        {
+            label f0 = baffles[i].first();
+            label f1 = baffles[i].second();
+
+            if (isMasterFace.get(f0) == 1)
+            {
+                // Make f1 a slave
+                isMasterFace.set(f1, 0);
+            }
+            else if (isMasterFace.get(f1) == 1)
+            {
+                isMasterFace.set(f0, 0);
+            }
+            else
+            {
+                FatalErrorIn("autoSnapDriver::smoothPatchDisplacement(..)")
+                    << "Both sides of baffle consisting of faces " << f0
+                    << " and " << f1 << " are already slave faces."
+                    << abort(FatalError);
+            }
+        }
+    }
+
 
     // Get average position of boundary face centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -266,9 +295,14 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 
         forAll(pFaces, pfI)
         {
-            avgBoundary[patchPointI] += pp[pFaces[pfI]].centre(points);
+            label faceI = pFaces[pfI];
+
+            if (isMasterFace.get(pp.addressing()[faceI]) == 1)
+            {
+                avgBoundary[patchPointI] += pp[faceI].centre(points);
+                nBoundary[patchPointI]++;
+            }
         }
-        nBoundary[patchPointI] = pFaces.size();
     }
 
     syncTools::syncPointList
@@ -527,7 +561,7 @@ Foam::tmp<Foam::scalarField> Foam::autoSnapDriver::edgePatchDist
 
     PointEdgeWave<pointEdgePoint> wallCalc
     (
-        pMesh,
+        mesh,
         pp.meshPoints(),
         wallInfo,
 
@@ -886,7 +920,7 @@ void Foam::autoSnapDriver::preSmoothPatch
             checkFaces[faceI] = faceI;
         }
 
-        pointField patchDisp(smoothPatchDisplacement(meshMover));
+        pointField patchDisp(smoothPatchDisplacement(meshMover, baffles));
 
         // The current mesh is the starting mesh to smooth from.
         meshMover.setDisplacement(patchDisp);
@@ -930,6 +964,7 @@ void Foam::autoSnapDriver::preSmoothPatch
         const_cast<Time&>(mesh.time())++;
         Pout<< "Writing patch smoothed mesh to time " << mesh.time().timeName()
             << endl;
+
         mesh.write();
     }
 
@@ -1007,9 +1042,11 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
     // Displacement per patch point
     vectorField patchDisp(localPoints.size(), vector::zero);
 
-
     if (returnReduce(localPoints.size(), sumOp<label>()) > 0)
     {
+        // Current surface snapped to
+        labelList snapSurf(localPoints.size(), -1);
+
         // Divide surfaces into zoned and unzoned
         labelList zonedSurfaces;
         labelList unzonedSurfaces;
@@ -1038,16 +1075,9 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                     patchDisp[pointI] =
                         hitInfo[pointI].hitPoint()
                       - localPoints[pointI];
+
+                    snapSurf[pointI] = hitSurface[pointI];
                 }
-                //else
-                //{
-                //   WarningIn("autoSnapDriver::calcNearestSurface(..)")
-                //        << "For point:" << pointI
-                //        << " coordinate:" << localPoints[pointI]
-                //        << " did not find any surface within:"
-                //        << 4*snapDist[pointI]
-                //        << " meter." << endl;
-                //}
             }
         }
 
@@ -1059,6 +1089,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         // Surfaces with zone information
         const wordList& faceZoneNames = surfaces.faceZoneNames();
 
+        // Current best snap distance
         scalarField minSnapDist(snapDist);
 
         forAll(zonedSurfaces, i)
@@ -1104,19 +1135,25 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                         minSnapDist[pointI],
                         mag(patchDisp[pointI])
                     );
-                }
-                else
-                {
-                    WarningIn("autoSnapDriver::calcNearestSurface(..)")
-                        << "For point:" << pointI
-                        << " coordinate:" << localPoints[pointI]
-                        << " did not find any surface within:"
-                        << 4*minSnapDist[pointI]
-                        << " meter." << endl;
+
+                    snapSurf[pointI] = zoneSurfI;
                 }
             }
         }
 
+        // Check if all points are being snapped
+        forAll(snapSurf, pointI)
+        {
+            if (snapSurf[pointI] == -1)
+            {
+                WarningIn("autoSnapDriver::calcNearestSurface(..)")
+                    << "For point:" << pointI
+                    << " coordinate:" << localPoints[pointI]
+                    << " did not find any surface within:"
+                    << minSnapDist[pointI]
+                    << " meter." << endl;
+            }
+        }
 
         {
             scalarField magDisp(mag(patchDisp));
@@ -1220,6 +1257,11 @@ void Foam::autoSnapDriver::smoothDisplacement
         const_cast<Time&>(mesh.time())++;
         Pout<< "Writing smoothed mesh to time " << mesh.time().timeName()
             << endl;
+
+        // Moving mesh creates meshPhi. Can be cleared out by a mesh.clearOut
+        // but this will also delete all pointMesh but not pointFields which
+        // gives an illegal situation.
+
         mesh.write();
 
         Pout<< "Writing displacement field ..." << endl;
@@ -1504,7 +1546,7 @@ void Foam::autoSnapDriver::doSnap
         Info<< "Constructing mesh displacer ..." << endl;
         Info<< "Using mesh parameters " << motionDict << nl << endl;
 
-        pointMesh pMesh(mesh);
+        const pointMesh& pMesh = pointMesh::New(mesh);
 
         motionSmoother meshMover
         (

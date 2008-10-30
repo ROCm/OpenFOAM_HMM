@@ -26,6 +26,8 @@ License
 
 #include "KinematicParcel.H"
 #include "IOstreams.H"
+#include "IOField.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -97,25 +99,25 @@ void Foam::KinematicParcel<ParcelType>::readFields
         return;
     }
 
-    IOField<label> typeId(c.fieldIOobject("typeId"));
+    IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
     c.checkFieldIOobject(c, typeId);
 
-    IOField<scalar> d(c.fieldIOobject("d"));
+    IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
 
-    IOField<vector> U(c.fieldIOobject("U"));
+    IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
 
-    IOField<scalar> nParticle(c.fieldIOobject("nParticle"));
+    IOField<scalar> nParticle(c.fieldIOobject("nParticle", IOobject::MUST_READ));
     c.checkFieldIOobject(c, nParticle);
 
-    IOField<scalar> rho(c.fieldIOobject("rho"));
+    IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
 
-    IOField<scalar> tTurb(c.fieldIOobject("tTurb"));
+    IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, tTurb);
 
-    IOField<vector> UTurb(c.fieldIOobject("UTurb"));
+    IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, UTurb);
 
     label i = 0;
@@ -145,13 +147,17 @@ void Foam::KinematicParcel<ParcelType>::writeFields
 
     label np =  c.size();
 
-    IOField<label> typeId(c.fieldIOobject("typeId"), np);
-    IOField<scalar> d(c.fieldIOobject("d"), np);
-    IOField<vector> U(c.fieldIOobject("U"), np);
-    IOField<scalar> nParticle(c.fieldIOobject("nParticle"), np);
-    IOField<scalar> rho(c.fieldIOobject("rho"), np);
-    IOField<scalar> tTurb(c.fieldIOobject("tTurb"), np);
-    IOField<vector> UTurb(c.fieldIOobject("UTurb"), np);
+    IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
+    IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
+    IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
+    IOField<scalar> nParticle
+    (
+        c.fieldIOobject("nParticle", IOobject::NO_READ),
+        np
+    );
+    IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
+    IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
+    IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
     label i = 0;
     forAllConstIter(typename Cloud<ParcelType>, c, iter)

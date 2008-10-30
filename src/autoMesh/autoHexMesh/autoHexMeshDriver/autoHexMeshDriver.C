@@ -34,7 +34,6 @@ License
 #include "cellSet.H"
 #include "syncTools.H"
 #include "motionSmoother.H"
-#include "pointMesh.H"
 #include "refinementParameters.H"
 #include "snapParameters.H"
 #include "layerParameters.H"
@@ -231,7 +230,7 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
                 IOobject
                 (
                     "abc",                      // dummy name
-                    mesh_.time().constant(),    // directory
+                    mesh_.time().timeName(),    // directory
                     "triSurface",               // instance
                     mesh_.time(),               // registry
                     IOobject::MUST_READ,

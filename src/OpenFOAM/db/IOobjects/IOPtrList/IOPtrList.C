@@ -84,11 +84,39 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& list)
 }
 
 
+template<class T>
+Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const xfer<PtrList<T> >& list)
+:
+    regIOobject(io)
+{
+    PtrList<T>::transfer(list());
+
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        PtrList<T>::read(readStream(typeName), INew<T>());
+        close();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T>
 Foam::IOPtrList<T>::~IOPtrList()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+bool Foam::IOPtrList<T>::writeData(Ostream& os) const
+{
+    return (os << *this).good();
+}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -98,13 +126,5 @@ void Foam::IOPtrList<T>::operator=(const IOPtrList<T>& rhs)
 {
     PtrList<T>::operator=(rhs);
 }
-
-
-template<class T>
-bool Foam::IOPtrList<T>::writeData(Ostream& os) const
-{
-    return (os << *this).good();
-}
-
 
 // ************************************************************************* //

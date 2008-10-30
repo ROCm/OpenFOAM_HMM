@@ -94,13 +94,13 @@ class hConstThermo
 {
     // Private data
 
-        scalar CP;
-        scalar Hf;
+        scalar Cp_;
+        scalar Hf_;
 
 
     // Private member functions
 
-        //- construct from components
+        //- Construct from components
         inline hConstThermo
         (
             const equationOfState& st,
@@ -135,6 +135,12 @@ public:
 
             //- Enthalpy [J/kmol]
             inline scalar h(const scalar T) const;
+
+            //- Sensible enthalpy [J/kmol]
+            inline scalar hs(const scalar T) const;
+
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
 
             //- Entropy [J/(kmol K)]
             inline scalar s(const scalar T) const;
