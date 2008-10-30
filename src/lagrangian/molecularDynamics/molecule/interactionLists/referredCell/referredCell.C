@@ -369,6 +369,8 @@ void referredCell::referInMols(const List<referredMolecule>& incomingMols)
             )
         );
     }
+
+    shrink();
 }
 
 
