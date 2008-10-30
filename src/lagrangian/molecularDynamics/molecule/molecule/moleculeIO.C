@@ -107,28 +107,31 @@ void Foam::molecule::readFields(moleculeCloud& mC)
         return;
     }
 
-    IOField<tensor> R(mC.fieldIOobject("R"));
+    IOField<tensor> R(mC.fieldIOobject("R", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, R);
 
-    IOField<vector> v(mC.fieldIOobject("v"));
+    IOField<vector> v(mC.fieldIOobject("v", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, v);
 
-    IOField<vector> a(mC.fieldIOobject("a"));
+    IOField<vector> a(mC.fieldIOobject("a", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, a);
 
-    IOField<vector> omega(mC.fieldIOobject("omega"));
+    IOField<vector> omega(mC.fieldIOobject("omega", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, omega);
 
-    IOField<vector> alpha(mC.fieldIOobject("alpha"));
+    IOField<vector> alpha(mC.fieldIOobject("alpha", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, alpha);
 
-    IOField<vector> specialPosition(mC.fieldIOobject("specialPosition"));
+    IOField<vector> specialPosition
+    (
+        mC.fieldIOobject("specialPosition", IOobject::MUST_READ)
+    );
     mC.checkFieldIOobject(mC, specialPosition);
 
-    IOField<label> special(mC.fieldIOobject("special"));
+    IOField<label> special(mC.fieldIOobject("special", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, special);
 
-    IOField<label> id(mC.fieldIOobject("id"));
+    IOField<label> id(mC.fieldIOobject("id", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, id);
 
     label i = 0;
@@ -153,17 +156,20 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
 {
     Particle<molecule>::writeFields(mC);
 
-    label nM = mC.size();
+    label np = mC.size();
 
-
-    IOField<tensor> R(mC.fieldIOobject("R"), nM);
-    IOField<vector> v(mC.fieldIOobject("v"), nM);
-    IOField<vector> a(mC.fieldIOobject("a"), nM);
-    IOField<vector> omega(mC.fieldIOobject("omega"), nM);
-    IOField<vector> alpha(mC.fieldIOobject("alpha"), nM);
-    IOField<vector> specialPosition(mC.fieldIOobject("specialPosition"), nM);
-    IOField<label> special(mC.fieldIOobject("special"), nM);
-    IOField<label> id(mC.fieldIOobject("id"), nM);
+    IOField<tensor> R(mC.fieldIOobject("R", IOobject::NO_READ), np);
+    IOField<vector> v(mC.fieldIOobject("v", IOobject::NO_READ), np);
+    IOField<vector> a(mC.fieldIOobject("a", IOobject::NO_READ), np);
+    IOField<vector> omega(mC.fieldIOobject("omega", IOobject::NO_READ), np);
+    IOField<vector> alpha(mC.fieldIOobject("alpha", IOobject::NO_READ), np);
+    IOField<vector> specialPosition
+    (
+        mC.fieldIOobject("specialPosition", IOobject::NO_READ),
+        np
+    );
+    IOField<label> special(mC.fieldIOobject("special", IOobject::NO_READ), np);
+    IOField<label> id(mC.fieldIOobject("id", IOobject::NO_READ), np);
 
     label i = 0;
     forAllConstIter(moleculeCloud, mC, iter)
