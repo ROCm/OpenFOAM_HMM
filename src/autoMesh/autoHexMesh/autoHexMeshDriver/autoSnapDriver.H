@@ -100,7 +100,11 @@ class autoSnapDriver
 
             //- Calculate displacement per patch point to smooth out patch.
             //  Quite complicated in determining which points to move where.
-            pointField smoothPatchDisplacement(const motionSmoother&) const;
+            pointField smoothPatchDisplacement
+            (
+                const motionSmoother&,
+                const List<labelPair>&
+            ) const;
 
             //- Check that face zones are synced
             void checkCoupledFaceZones() const;

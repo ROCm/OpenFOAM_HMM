@@ -382,10 +382,12 @@ private:
 
             //- Finds zone per cell for cells inside closed named surfaces.
             //  (uses geometric test for insideness)
+            //  Adapts namedSurfaceIndex so all faces on boundary of cellZone
+            //  have corresponding faceZone.
             void findCellZoneGeometric
             (
                 const labelList& closedNamedSurfaces,
-                const labelList& namedSurfaceIndex,
+                labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
             ) const;
