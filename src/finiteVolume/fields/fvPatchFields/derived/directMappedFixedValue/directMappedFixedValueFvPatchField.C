@@ -234,6 +234,16 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                  (
                     mpp.samplePatch()
                  );
+            if (patchID < 0)
+            {
+                FatalErrorIn
+                (
+                    "void directMappedFixedValueFvPatchField<Type>::"
+                    "updateCoeffs()"
+                )<< "Unable to find sample patch " << mpp.samplePatch()
+                 << " for patch " << this->patch().name() << nl
+                 << abort(FatalError);
+            }
             typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
             const word& fieldName = this->dimensionedInternalField().name();
             const fieldType& sendField =

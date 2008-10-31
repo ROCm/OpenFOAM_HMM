@@ -483,7 +483,7 @@ void Foam::fvMatrix<Type>::setReference
 {
     if (psi_.needReference() || forceReference)
     {
-        if (Pstream::master())
+        if (cell >= 0)
         {
             source()[cell] += diag()[cell]*value;
             diag()[cell] += diag()[cell];
