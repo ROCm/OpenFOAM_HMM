@@ -42,4 +42,7 @@ surface
 // Extend selection with edge neighbours
 addFaceNeighbours no;
 
+// Invert selection
+invertSelection false;
+
 // ************************************************************************* //
