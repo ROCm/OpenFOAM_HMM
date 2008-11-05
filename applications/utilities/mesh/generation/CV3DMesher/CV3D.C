@@ -202,7 +202,7 @@ void Foam::CV3D::insertGrid()
 
     vector delta(xR/ni, yR/nj, zR/nk);
 
-    delta *= pow((1.0/2.0),-(1.0/3.0));
+    delta *= pow((1.0),-(1.0/3.0));
 
     Random rndGen(1321);
     scalar pert = controls_.randomPerturbation*cmptMin(delta);
@@ -213,37 +213,23 @@ void Foam::CV3D::insertGrid()
         {
             for (int k=0; k<nk; k++)
             {
-                point p1
+                point p
                 (
                     x0 + i*delta.x(),
                     y0 + j*delta.y(),
                     z0 + k*delta.z()
                 );
 
-                point p2 = p1 + 0.5*delta;
-
                 if (controls_.randomiseInitialGrid)
                 {
-                    p1.x() += pert*(rndGen.scalar01() - 0.5);
-                    p1.y() += pert*(rndGen.scalar01() - 0.5);
-                    p1.z() += pert*(rndGen.scalar01() - 0.5);
+                    p.x() += pert*(rndGen.scalar01() - 0.5);
+                    p.y() += pert*(rndGen.scalar01() - 0.5);
+                    p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
-                if (qSurf_.wellInside(p1, 0.5*controls_.minCellSize2))
+                if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
                 {
-                    insert(Point(p1.x(), p1.y(), p1.z()))->index() = nVert++;
-                }
-
-                if (controls_.randomiseInitialGrid)
-                {
-                    p2.x() += pert*(rndGen.scalar01() - 0.5);
-                    p2.y() += pert*(rndGen.scalar01() - 0.5);
-                    p2.z() += pert*(rndGen.scalar01() - 0.5);
-                }
-
-                if (qSurf_.wellInside(p2, 0.5*controls_.minCellSize2))
-                {
-                    insert(Point(p2.x(), p2.y(), p2.z()))->index() = nVert++;
+                    insert(Point(p.x(), p.y(), p.z()))->index() = nVert++;
                 }
             }
         }
