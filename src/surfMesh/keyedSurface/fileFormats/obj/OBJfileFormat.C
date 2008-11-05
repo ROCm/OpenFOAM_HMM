@@ -73,7 +73,7 @@ void Foam::fileFormats::OBJfileFormat::writeHead
     Ostream& os,
     const pointField& pointLst,
     const List<face>& faceLst,
-    const List<surfacePatch>& patchLst
+    const List<surfGroup>& patchLst
 )
 {
     os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
@@ -128,7 +128,10 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
 
     if (!is.good())
     {
-        FatalErrorIn("fileFormats::OBJfileFormat::OBJfileFormat(const fileName&)")
+        FatalErrorIn
+        (
+            "fileFormats::OBJfileFormat::OBJfileFormat(const fileName&)"
+        )
             << "Cannot read file " << fName
             << exit(FatalError);
     }
@@ -282,7 +285,7 @@ void Foam::fileFormats::OBJfileFormat::write
     const List<face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     writeHead(os, surf.points(), faceLst, patchLst);
 
@@ -290,7 +293,7 @@ void Foam::fileFormats::OBJfileFormat::write
     forAll(patchLst, patchI)
     {
         // Print all faces belonging to this region
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         os << "g " << patch.name() << endl;
 
@@ -318,14 +321,14 @@ void Foam::fileFormats::OBJfileFormat::write
 )
 {
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     writeHead(os, surf.points(), faceLst, patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         os << "g " << patch.name() << endl;
 

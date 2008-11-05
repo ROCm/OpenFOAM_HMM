@@ -74,12 +74,12 @@ bool Foam::meshedSurface::stitchFaces(const scalar tol, const bool verbose)
     label newFaceI = 0;
     forAll (patches_, patchI)
     {
-        surfacePatch& surfPatch = patches_[patchI];
+        surfGroup& p = patches_[patchI];
 
         // adjust patch start
-        surfPatch.start() = newFaceI;
+        p.start() = newFaceI;
 
-        label patchEnd = oldFaceI + surfPatch.size();
+        label patchEnd = oldFaceI + p.size();
         for (; oldFaceI < patchEnd; ++oldFaceI)
         {
             FaceType& f = faceLst[oldFaceI];
@@ -105,7 +105,7 @@ bool Foam::meshedSurface::stitchFaces(const scalar tol, const bool verbose)
         }
 
         // adjust patch size
-        surfPatch.size() = newFaceI - surfPatch.size();
+        p.size() = newFaceI - p.size();
     }
 
     if (newFaceI != faceLst.size())
@@ -165,12 +165,12 @@ void Foam::meshedSurface::checkFaces(const bool verbose)
     label newFaceI = 0;
     forAll (patches_, patchI)
     {
-        surfacePatch& surfPatch = patches_[patchI];
+        surfGroup& p = patches_[patchI];
 
         // correct the patch start
-        surfPatch.start() = newFaceI;
+        p.start() = newFaceI;
 
-        label patchEnd = oldFaceI + surfPatch.size();
+        label patchEnd = oldFaceI + p.size();
         for (; oldFaceI < patchEnd; ++oldFaceI)
         {
             FaceType& f = faceLst[oldFaceI];
@@ -239,7 +239,7 @@ void Foam::meshedSurface::checkFaces(const bool verbose)
         }
 
         // adjust patch size
-        surfPatch.size() = newFaceI - surfPatch.start();
+        p.size() = newFaceI - p.start();
     }
 
     if (newFaceI < faceLst.size())
@@ -288,12 +288,12 @@ Foam::label Foam::meshedSurface::triangulate()
     label newFaceI = 0;
     forAll (patches_, patchI)
     {
-        surfacePatch& surfPatch = patches_[patchI];
+        surfGroup& p = patches_[patchI];
 
         // adjust patch start
-        surfPatch.start() = newFaceI;
+        p.start() = newFaceI;
 
-        label patchEnd = oldFaceI + surfPatch.size();
+        label patchEnd = oldFaceI + p.size();
         for (; oldFaceI < patchEnd; ++oldFaceI)
         {
             const FaceType& f = faceLst[oldFaceI];
@@ -314,7 +314,7 @@ Foam::label Foam::meshedSurface::triangulate()
         }
 
         // adjust patch size
-        surfPatch.size() = newFaceI - surfPatch.start();
+        p.size() = newFaceI - p.start();
     }
 
     faceLst.transfer(newFaces);

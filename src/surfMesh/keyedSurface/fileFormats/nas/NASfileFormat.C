@@ -120,7 +120,10 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
 
     if (!is.good())
     {
-        FatalErrorIn("fileFormats::NASfileFormat::NASfileFormat(const fileName&)")
+        FatalErrorIn
+        (
+            "fileFormats::NASfileFormat::NASfileFormat(const fileName&)"
+        )
             << "Cannot read file " << fName
             << exit(FatalError);
     }
@@ -373,10 +376,10 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
             if (line[0] != '*')
             {
                 FatalErrorIn
-                    (
-                        "fileFormats::NASfileFormat::NASfileFormat"
-                        "(const fileName&)"
-                    )
+                (
+                    "fileFormats::NASfileFormat::NASfileFormat"
+                    "(const fileName&)"
+                )
                     << "Expected continuation symbol '*' when reading GRID*"
                     << " (double precision coordinate) output" << nl
                     << "Read:" << line << nl

@@ -87,7 +87,7 @@ class AC3DfileFormat
         );
 
         //- Write header with materials
-        static void writeHeader(Ostream&, const List<surfacePatch>&);
+        static void writeHeader(Ostream&, const List<surfGroup>&);
 
         //- Disallow default bitwise copy construct
         AC3DfileFormat(const AC3DfileFormat&);

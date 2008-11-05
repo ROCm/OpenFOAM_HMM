@@ -119,7 +119,7 @@ Foam::fileFormats::SMESHfileFormat::write
     writeHead(os, surf.points(), faceLst);
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -149,7 +149,7 @@ Foam::fileFormats::SMESHfileFormat::write
 )
 {
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     writeHead(os, surf.points(), faceLst);
 

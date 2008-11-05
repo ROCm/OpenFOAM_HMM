@@ -72,7 +72,7 @@ class OBJfileFormat
             Ostream&, 
             const pointField&, 
             const List<face>&,
-            const List<surfacePatch>&
+            const List<surfGroup>&
         );
 
 public:

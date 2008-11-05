@@ -50,8 +50,8 @@ SourceFiles
 #include "pointField.H"
 #include "PrimitivePatchExtra.H"
 #include "boolList.H"
-#include "geometricSurfacePatchList.H"
-#include "surfacePatchList.H"
+#include "surfPatchIdentifierList.H"
+#include "surfGroupList.H"
 #include "face.H"
 #include "Keyed.H"
 #include "xfer.H"
@@ -63,10 +63,17 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
 class Time;
 class IFstream;
+class keyedSurface;
 class meshedSurface;
 class polyBoundaryMesh;
+
+Istream& operator>>(Istream&, keyedSurface&);
+Ostream& operator<<(Ostream&, const keyedSurface&);
+
 
 /*---------------------------------------------------------------------------*\
                       Class keyedSurface Declaration
@@ -88,6 +95,9 @@ protected:
         //- Typedef for similar code in keyedSurface and meshedSurface
         typedef face FaceType;
 
+        //- Typedef for type holding the region (patch) informationm
+        typedef surfPatchIdentifier PatchRegionType;
+
 private:
 
     // Private typedefs
@@ -108,17 +118,13 @@ private:
 
         //- Patch information (face ordering nFaces/startFace only used
         //  during reading and writing)
-        geometricSurfacePatchList geoPatches_;
+        List<PatchRegionType> patches_;
 
     // Private member functions
 
-        //- Read in Foam format
+        //- Read OpenFOAM Surface format
         bool read(Istream&);
 
-        //- Generic read routine. Chooses reader based on extension.
-        //? bool read(const fileName&, const word& ext);
-
-  
         //- Disable setSize with value
         void setSize(const label, const FaceType&);
 
@@ -175,9 +181,6 @@ public:
         //- Runtime type information
         ClassName("keyedSurface");
 
-        //- Return the default geometric patch type (usually "empty")
-        static word defaultGeometricType;
-
     // Static
 
         //- Name of keyedSurface directory to use.
@@ -199,7 +202,7 @@ public:
             const xfer<pointField>&,
             const xfer<List<face> >&,
             const xfer<List<label> >& regionIds,
-            const xfer<geometricSurfacePatchList>&
+            const xfer<surfPatchIdentifierList>&
         );
 
         //- Construct by transferring points, faces and regionIds
@@ -240,6 +243,13 @@ public:
         //- Construct from a meshedSurface
         keyedSurface(const meshedSurface&);
 
+        //- Construct by transferring the contents from a keyedSurface
+        keyedSurface(const xfer<keyedSurface>&);
+
+        //- Construct by transferring the contents from a meshedSurface
+        keyedSurface(const xfer<meshedSurface>&);
+
+
         //- Construct from file name (uses extension to determine type)
         keyedSurface
         (
@@ -263,12 +273,6 @@ public:
 
         //- Construct as copy
         keyedSurface(const keyedSurface&);
-
-        //- Construct by transferring the contents from a keyedSurface
-        keyedSurface(const xfer<keyedSurface>&);
-
-        //- Construct by transferring the contents from a meshedSurface
-        keyedSurface(const xfer<meshedSurface>&);
 
 
     // Declare run-time constructor selection table
@@ -334,116 +338,126 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the number of points
-            label nPoints() const
-            {
-                return points().size();
-            }
+        //- Return the number of points
+        label nPoints() const
+        {
+            return points().size();
+        }
 
-            //- Return the number of faces
-            label nFaces() const
-            {
-                return MeshStorage::size();
-            }
+        //- Return the number of faces
+        label nFaces() const
+        {
+            return MeshStorage::size();
+        }
 
-            //- The surface size is the number of faces
-            label size() const
-            {
-                return MeshStorage::size();
-            }
+        //- The surface size is the number of faces
+        label size() const
+        {
+            return MeshStorage::size();
+        }
 
-            //- Reset size of face and region list
-            void setSize(const label);
+        //- Reset size of face and region list
+        void setSize(const label);
 
-            //- Return const access to global points
-            const pointField& points() const
-            {
-                return MeshStorage::points();
-            }
+        //- Return const access to global points
+        const pointField& points() const
+        {
+            return MeshStorage::points();
+        }
 
-            //- Return const access to the faces
-            const List<FaceType>& faces() const
-            {
-                return static_cast<const List<FaceType> &>(*this);
-            }
+        //- Return const access to the faces
+        const List<FaceType>& faces() const
+        {
+            return static_cast<const List<FaceType> &>(*this);
+        }
 
-            //- Return const access to the regions
-            const List<label>& regions() const
-            {
-                return regions_;
-            }
+        //- Return const access to the regions
+        const List<label>& regions() const
+        {
+            return regions_;
+        }
 
-            const geometricSurfacePatchList& geoPatches() const
-            {
-                return geoPatches_;
-            }
+        const surfPatchIdentifierList& patches() const
+        {
+            return patches_;
+        }
 
-            geometricSurfacePatchList& geoPatches()
-            {
-                return geoPatches_;
-            }
+        surfPatchIdentifierList& patches()
+        {
+            return patches_;
+        }
 
-            //- Determine the sort order from the region list.
-            //  Returns patch list and sets faceMap to indices within faceLst
-            static surfacePatchList sortedRegions
-            (
-                const List<label>& regionLst,
-                const Map<word>& patchNames,
-                labelList& faceMap
-            );
+        //- Determine the sort order from the region list.
+        //  Returns patch list and sets faceMap to indices within faceLst
+        static surfGroupList sortedRegions
+        (
+            const List<label>& regionLst,
+            const Map<word>& patchNames,
+            labelList& faceMap
+        );
 
-            //- Sort faces according to region.
-            //  Returns patch list and sets faceMap to index within faces()
-            surfacePatchList sortedRegions(labelList& faceMap) const;
+        //- Sort faces according to region.
+        //  Returns patch list and sets faceMap to index within faces()
+        surfGroupList sortedRegions(labelList& faceMap) const;
 
-        // Edit
+    // Edit
 
-            //- Move points
-            virtual void movePoints(const pointField&);
+        //- Move points
+        virtual void movePoints(const pointField&);
 
-            //- Scale points. A non-positive factor is ignored
-            virtual void scalePoints(const scalar&);
+        //- Scale points. A non-positive factor is ignored
+        virtual void scalePoints(const scalar&);
 
-            void checkFaces(const bool verbose);
+        void checkFaces(const bool verbose);
 
-            //- Remove invalid faces
-            void cleanup(const bool verbose);
+        //- Remove invalid faces
+        void cleanup(const bool verbose);
 
-            //- Return new surface. Returns pointMap, faceMap from
-            //  subsetMeshMap
-            keyedSurface subsetMesh
-            (
-                const boolList& include,
-                labelList& pointMap,
-                labelList& faceMap
-            ) const;
+        //- Return new surface. Returns pointMap, faceMap from
+        //  subsetMeshMap
+        keyedSurface subsetMesh
+        (
+            const boolList& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
 
-            //- Transfer the contents of the argument and annull the argument
-            void transfer(keyedSurface&);
+        //- Transfer the contents of the argument and annull the argument
+        void transfer(keyedSurface&);
 
-            //- Transfer the contents of the argument and annull the argument
-            void transfer(meshedSurface&);
+        //- Transfer the contents of the argument and annull the argument
+        void transfer(meshedSurface&);
 
-        // Write
+    // Read
 
-            //- Write to Ostream in simple FOAM format
-            virtual void write(Ostream&) const;
+        //- Read from file. Chooses reader based on extension
+        bool read
+        (
+            const fileName&,
+            const word& ext,
+            const bool triangulate=false
+        );
 
-            //- Generic write routine. Chooses writer based on extension.
-            virtual void write(const fileName& fName) const
-            {
-                write(fName, *this);
-            }
 
-            //- Write to database
-            void write(const Time&) const;
+    // Write
 
-            //- Write some statistics
-            void writeStats(Ostream&) const;
+        //- Write to Ostream in simple FOAM format
+        virtual void write(Ostream&) const;
 
-    // Friend Functions
+        //- Generic write routine. Chooses writer based on extension.
+        virtual void write(const fileName& fName) const
+        {
+            write(fName, *this);
+        }
+
+        //- Write to database
+        void write(const Time&) const;
+
+        //- Write some statistics
+        void writeStats(Ostream&) const;
+
 
     // Member operators
 
@@ -452,6 +466,7 @@ public:
 
     // Ostream Operator
 
+        // friend Istream& operator>>(Istream&, keyedSurface&);
         friend Ostream& operator<<(Ostream&, const keyedSurface&);
 };
 

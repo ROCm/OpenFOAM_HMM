@@ -73,7 +73,7 @@ void Foam::fileFormats::OFFfileFormat::writeHead
     Ostream& os,
     const pointField& pointLst,
     const List<face>& faceLst,
-    const List<surfacePatch>& patchLst
+    const List<surfGroup>& patchLst
 )
 {
     // Write header
@@ -133,7 +133,10 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
 
     if (!is.good())
     {
-        FatalErrorIn("fileFormats::OFFfileFormat(const fileName&)")
+        FatalErrorIn
+        (
+            "fileFormats::OFFfileFormat(const fileName&)"
+        )
             << "Cannot read file " << fName
             << exit(FatalError);
     }
@@ -142,9 +145,11 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
     string hdr = getLineNoComment(is);
     if (hdr != "OFF")
     {
-        FatalErrorIn("fileFormats::OFFfileFormat(const fileName&)")
-            << "OFF file " << fName
-            << " does not start with 'OFF'"
+        FatalErrorIn
+        (
+            "fileFormats::OFFfileFormat(const fileName&)"
+        )
+            << "OFF file " << fName << " does not start with 'OFF'"
             << exit(FatalError);
     }
 
@@ -239,7 +244,7 @@ void Foam::fileFormats::OFFfileFormat::write
     const List<face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     writeHead(os, surf.points(), faceLst, patchLst);
 
@@ -274,7 +279,7 @@ void Foam::fileFormats::OFFfileFormat::write
 )
 {
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     writeHead(os, surf.points(), faceLst, patchLst);
 

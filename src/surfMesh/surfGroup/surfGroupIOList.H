@@ -23,99 +23,92 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::VTKfileFormat
+    Foam::surfGroupIOList
 
 Description
-    Provide a means of writing VTK legacy format.
+    IOobject for a surfGroupList
 
 SourceFiles
-    VTKfileFormat.C
+    surfGroupIOList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VTKfileFormat_H
-#define VTKfileFormat_H
+#ifndef surfGroupIOList_H
+#define surfGroupIOList_H
 
-#include "Ostream.H"
-#include "OFstream.H"
-#include "keyedSurface.H"
-#include "meshedSurface.H"
+#include "surfGroupList.H"
+#include "regIOobject.H"
+#include "faceList.H"
+#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
+
+// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
-                       Class VTKfileFormat Declaration
+                           Class surfGroupIOList Declaration
 \*---------------------------------------------------------------------------*/
 
-class VTKfileFormat
+class surfGroupIOList
 :
-    public keyedSurface
+    public surfGroupList,
+    public regIOobject
 {
+    // Private data
+
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        VTKfileFormat(const VTKfileFormat&);
+        surfGroupIOList(const surfGroupIOList&);
 
         //- Disallow default bitwise assignment
-        void operator=(const VTKfileFormat&);
+        void operator=(const surfGroupIOList&);
 
-        static void writeHead(Ostream&, const pointField&, const List<face>&);
-        static void writeTail(Ostream&, const List<surfGroup>&);
 
 public:
 
+    //- Runtime type information
+    TypeName("surfGroupIOList");
+
+
     // Constructors
 
-        //- Construct null
-        VTKfileFormat();
+        //- Construct from IOobject
+        explicit surfGroupIOList(const IOobject& io);
 
-    // Selectors
+        //- Construct from IOobject
+        surfGroupIOList(const IOobject& io, const surfGroupList&);
 
     // Destructor
 
+        ~surfGroupIOList();
+
+
     // Member Functions
 
-        // Write
+        //- writeData member function required by regIOobject
+        bool writeData(Ostream&) const;
 
-        //- Write keyedSurface
-        static void write(Ostream&, const keyedSurface&);
 
-        //- Write keyedSurface
-        static void write(const fileName& fName, const keyedSurface& surf)
-        {
-            write(OFstream(fName)(), surf);
-        }
+    // Member Operators
 
-        //- Write meshedSurface
-        static void write(Ostream&, const meshedSurface&);
+    // Friend Functions
 
-        //- Write meshedSurface
-        static void write(const fileName& fName, const meshedSurface& surf)
-        {
-            write(OFstream(fName)(), surf);
-        }
+    // Friend Operators
 
-        //- Write object
-        virtual void write(Ostream& os) const
-        {
-            write(os, *this);
-        }
+    // IOstream Operators
 
+        friend Ostream& operator<<(Ostream&, const surfGroupIOList&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

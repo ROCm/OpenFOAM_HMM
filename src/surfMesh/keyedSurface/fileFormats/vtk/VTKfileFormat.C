@@ -99,7 +99,7 @@ void Foam::fileFormats::VTKfileFormat::writeHead
 void Foam::fileFormats::VTKfileFormat::writeTail
 (
     Ostream& os,
-    const List<surfacePatch>& patchLst
+    const List<surfGroup>& patchLst
 )
 {
     label nFaces = 0;
@@ -158,7 +158,7 @@ void Foam::fileFormats::VTKfileFormat::write
     writeHead(os, surf.points(), faceLst);
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -188,7 +188,7 @@ void Foam::fileFormats::VTKfileFormat::write
 )
 {
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     writeHead(os, surf.points(), faceLst);
 

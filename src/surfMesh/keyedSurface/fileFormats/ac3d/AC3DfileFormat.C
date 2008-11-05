@@ -257,10 +257,10 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
             if (!readCmd(is, cmd, args))
             {
                 FatalErrorIn
-                    (
-                        "fileFormats::AC3DfileFormat::AC3DfileFormat"
-                        "(const fileName&)"
-                    )
+                (
+                    "fileFormats::AC3DfileFormat::AC3DfileFormat"
+                    "(const fileName&)"
+                )
                     << "Did not read up to \"kids 0\" while reading patch "
                     << patchI << " from file " << fName
                     << exit(FatalError);
@@ -417,7 +417,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
 void Foam::fileFormats::AC3DfileFormat::writeHeader
 (
     Ostream& os,
-    const List<surfacePatch>& patchLst
+    const List<surfGroup>& patchLst
 )
 {
     // Write with patches as separate objects under "world" object.
@@ -467,22 +467,22 @@ void Foam::fileFormats::AC3DfileFormat::write
 )
 {
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     writeHeader(os, patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
-        const surfacePatch& sp = patchLst[patchI];
+        const surfGroup& p = patchLst[patchI];
 
         os  << "OBJECT poly" << nl
-            << "name \"" << sp.name() << '"' << endl;
+            << "name \"" << p.name() << '"' << endl;
 
         // Create patch with only patch faces included for ease of addressing
         boolList include(surf.size(), false);
 
-        forAll(sp, patchFaceI)
+        forAll(p, patchFaceI)
         {
             const label faceI = faceMap[faceIndex++];
 
@@ -536,16 +536,16 @@ void Foam::fileFormats::AC3DfileFormat::write
 {
     const pointField& pointLst = surf.points();
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     writeHeader(os, patchLst);
 
     forAll(patchLst, patchI)
     {
-        const surfacePatch& sp = patchLst[patchI];
+        const surfGroup& p = patchLst[patchI];
 
         os  << "OBJECT poly" << nl
-            << "name \"" << sp.name() << '"' << endl;
+            << "name \"" << p.name() << '"' << endl;
 
         // Temporary primitivePatch to calculate compact points & faces
         primitivePatch patch
@@ -553,8 +553,8 @@ void Foam::fileFormats::AC3DfileFormat::write
             SubList<face>
             (
                 faceLst,
-                sp.start(),
-                sp.size()
+                p.start(),
+                p.size()
             ),
             pointLst
         );

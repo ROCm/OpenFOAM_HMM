@@ -47,8 +47,7 @@ SourceFiles
 #include "pointField.H"
 #include "PrimitivePatchExtra.H"
 #include "boolList.H"
-#include "geometricSurfacePatchList.H"
-#include "surfacePatchList.H"
+#include "surfGroupList.H"
 #include "face.H"
 #include "Keyed.H"
 #include "xfer.H"
@@ -60,10 +59,16 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
 class Time;
 class keyedSurface;
+class meshedSurface;
 class polyBoundaryMesh;
 class surfMesh;
+
+Istream& operator>>(Istream&, meshedSurface&);
+Ostream& operator<<(Ostream&, const meshedSurface&);
 
 /*---------------------------------------------------------------------------*\
                       Class meshedSurface Declaration
@@ -100,11 +105,11 @@ private:
         >
         MeshStorage;
 
-    // Private data
+    // Private Member Data
 
         //- Patch information (face ordering nFaces/startFace only used
         //  during reading and writing)
-        surfacePatchList patches_;
+        List<surfGroup> patches_;
 
     // Private member functions
 
@@ -117,14 +122,11 @@ private:
         //- basic sanity check on patches
         void checkPatches();
 
-        //- Read in Foam format
+        //- Read OpenFOAM Surface format
         bool read(Istream&);
 
-    // Static private functions
 
-public:
-
-    // Protected Member Data
+protected:
 
     // Protected Member functions
 
@@ -145,10 +147,6 @@ public:
         //- Runtime type information
         ClassName("meshedSurface");
 
-        //- Return the default geometric patch type (usually "empty")
-        static word defaultGeometricType;
-
-
     // Static
 
         //- Name of meshedSurface directory to use.
@@ -156,7 +154,6 @@ public:
 
         //- Name of meshedSurface directory to use.
         static fileName triSurfName(const Time&);
-
 
 
     // Constructors
@@ -170,7 +167,7 @@ public:
         (
             const xfer<pointField>&,
             const xfer<List<face> >&,
-            const xfer<surfacePatchList>&
+            const xfer<surfGroupList>&
         );
 
         //- Construct from points, faces, and patch information
@@ -235,7 +232,7 @@ public:
         meshedSurface
         (
             const fileName&,
-            const word&,
+            const word& ext,
             const bool triangulate=false
         );
 
@@ -295,6 +292,7 @@ public:
         //- Can we write this file format?
         static bool canWrite(const word& ext, const bool verbose=false);
 
+
     // Member Functions
 
     // Access
@@ -329,12 +327,12 @@ public:
             return static_cast<const List<FaceType> &>(*this);
         }
 
-        const surfacePatchList& patches() const
+        const surfGroupList& patches() const
         {
             return patches_;
         }
 
-        surfacePatchList& patches()
+        surfGroupList& patches()
         {
             return patches_;
         }
@@ -377,6 +375,17 @@ public:
         void transfer(keyedSurface&);
 
 
+    // Read
+
+        //- Read from file. Chooses reader based on extension
+        bool read
+        (
+            const fileName&,
+            const word& ext,
+            const bool triangulate=false
+        );
+
+
     // Write
 
         //- Write to Ostream in simple FOAM format
@@ -401,6 +410,7 @@ public:
 
     // Ostream Operator
 
+        // friend Istream& operator>>(Istream&, meshedSurface&);
         friend Ostream& operator<<(Ostream&, const meshedSurface&);
 };
 

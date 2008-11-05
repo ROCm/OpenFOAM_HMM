@@ -289,7 +289,7 @@ void Foam::fileFormats::GTSfileFormat::write
     }
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
 
     // Write header, print patch names as comment
@@ -357,7 +357,7 @@ void Foam::fileFormats::GTSfileFormat::write
 {
     const pointField& pointLst = surf.points();
     const List<face>& faceLst  = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
@@ -425,7 +425,7 @@ void Foam::fileFormats::GTSfileFormat::write
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         forAll(patch, patchFaceI)
         {

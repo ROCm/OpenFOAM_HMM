@@ -1,3 +1,7 @@
+surfGroup/surfGroup.C
+surfGroup/surfGroupIOList.C
+surfPatchIdentifier/surfPatchIdentifier.C
+
 keyedSurface/keyedSurface.C
 keyedSurface/keyedSurfaceCleanup.C
 keyedSurface/newKeyedSurface.C
@@ -8,6 +12,7 @@ meshedSurface/newMeshedSurface.C
 
 fileFormats = keyedSurface/fileFormats
 $(fileFormats)/ac3d/AC3DfileFormat.C
+$(fileFormats)/ftr/FTRfileFormat.C
 $(fileFormats)/gts/GTSfileFormat.C
 $(fileFormats)/nas/NASfileFormat.C
 $(fileFormats)/obj/OBJfileFormat.C

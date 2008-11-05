@@ -116,7 +116,10 @@ Foam::fileFormats::TRIfileFormat::TRIfileFormat
 
     if (!is.good())
     {
-        FatalErrorIn("fileFormats::TRIfileFormat(const fileName&)")
+        FatalErrorIn
+        (
+            "fileFormats::TRIfileFormat(const fileName&)"
+        )
             << "Cannot read file " << fName
             << exit(FatalError);
     }
@@ -242,7 +245,7 @@ void Foam::fileFormats::TRIfileFormat::write
     const List<face>& faceLst  = surf.faces();
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -264,7 +267,7 @@ void Foam::fileFormats::TRIfileFormat::write
 {
     const pointField& pointLst = surf.points();
     const List<face>& faceLst  = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     label faceIndex = 0;
     forAll(patchLst, patchI)

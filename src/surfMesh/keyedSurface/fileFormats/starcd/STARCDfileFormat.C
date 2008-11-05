@@ -82,7 +82,10 @@ bool Foam::fileFormats::STARCDfileFormat::readHeader
 {
     if (!is.good())
     {
-        FatalErrorIn("fileFormats::STARCDfileFormat::readHeader()")
+        FatalErrorIn
+        (
+            "fileFormats::STARCDfileFormat::readHeader()"
+        )
             << "cannot read " << signature  << "  " << is.name()
             << abort(FatalError);
     }
@@ -405,7 +408,7 @@ void Foam::fileFormats::STARCDfileFormat::write
 
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
 
     osPtr.reset(new OFstream(baseName + ".cel"));
@@ -414,7 +417,7 @@ void Foam::fileFormats::STARCDfileFormat::write
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         forAll(patch, patchFaceI)
         {
@@ -433,7 +436,7 @@ void Foam::fileFormats::STARCDfileFormat::write
 )
 {
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
 
     fileName baseName = fName.lessExt();
@@ -449,7 +452,7 @@ void Foam::fileFormats::STARCDfileFormat::write
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         forAll(patch, patchFaceI)
         {

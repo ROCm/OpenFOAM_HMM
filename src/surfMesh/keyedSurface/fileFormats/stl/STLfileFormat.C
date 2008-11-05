@@ -162,7 +162,10 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
     // Check that stream is OK, if not this may be an ASCII file
     if (!is.good())
     {
-        FatalErrorIn("fileFormats::STLfileFormat::readBINARY(Istream&)")
+        FatalErrorIn
+        (
+            "fileFormats::STLfileFormat::readBINARY(Istream&)"
+        )
             << "problem reading header, perhaps file is not binary "
             << exit(FatalError);
     }
@@ -185,7 +188,10 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
      || nTris > (fileSize - headerSize)/25
     )
     {
-        FatalErrorIn("fileFormats::STLfileFormat::readBINARY(Istream&)")
+        FatalErrorIn
+        (
+            "fileFormats::STLfileFormat::readBINARY(Istream&)"
+        )
             << "problem reading number of triangles, perhaps file is not binary"
             << exit(FatalError);
     }
@@ -350,13 +356,13 @@ void Foam::fileFormats::STLfileFormat::writeASCII
     const vectorField& normLst = surf.faceNormals();
 
     labelList faceMap;
-    List<surfacePatch> patchLst = surf.sortedRegions(faceMap);
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
         // Print all faces belonging to this region
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         os << "solid " << patch.name() << endl;
 
@@ -381,7 +387,7 @@ void Foam::fileFormats::STLfileFormat::writeASCII
 {
     const pointField& pointLst = surf.points();
     const List<face>& faceLst = surf.faces();
-    const List<surfacePatch>& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
     const vectorField& normLst = surf.faceNormals();
 
     // force triangulation, but just do the cheapest form possible
@@ -389,7 +395,7 @@ void Foam::fileFormats::STLfileFormat::writeASCII
     forAll(patchLst, patchI)
     {
         // Print all faces belonging to this region
-        const surfacePatch& patch = patchLst[patchI];
+        const surfGroup& patch = patchLst[patchI];
 
         os << "solid " << patch.name() << endl;
 
@@ -459,7 +465,7 @@ void Foam::fileFormats::STLfileFormat::writeBINARY
     const pointField& pointLst = surf.points();
     const List<face>& faceLst  = surf.faces();
     const vectorField& normLst = surf.faceNormals();
-    const surfacePatchList& patchLst = surf.patches();
+    const List<surfGroup>& patchLst = surf.patches();
 
     // Write the STL header
     string header("STL binary file", headerSize);
