@@ -422,7 +422,12 @@ public:
             void writeTriangles(const fileName& fName, bool internalOnly) const;
 
             //- Write dual points and faces as .obj file
-            void writeDual(const fileName& fName) const;
+            void writeDual
+            (
+                const pointField& points,
+                const faceList& faces,
+                const fileName& fName
+            ) const;
 
             //- Write polyMesh
             void writeMesh(bool writeToTimestep = false);

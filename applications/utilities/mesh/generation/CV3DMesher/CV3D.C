@@ -527,7 +527,6 @@ void Foam::CV3D::write()
         writePoints("points.obj", true);
         writeTriangles("allTriangles.obj", false);
         writeTriangles("triangles.obj", true);
-        writeDual("dualMesh.obj");
     }
 
     writeMesh();

@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         << "Read surface with " << surf.size() << " triangles from file "
         << args.args()[1] << nl << endl;
 
-    // Read and triangulation
+   // Read and triangulation
     // ~~~~~~~~~~~~~~~~~~~~~~
 
     CV3D mesh(runTime, surf);

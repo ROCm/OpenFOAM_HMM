@@ -278,11 +278,20 @@ void Foam::CV3D::calcDualMesh
 
     // ~~~~~~~~~~~~ dual face and owner neighbour construction ~~~~~~~~~~~~~~~~~
 
-    label nPatches = 1;
+    label nPatches = qSurf_.patches().size() + 1;
+
+    label defaultPatchIndex = qSurf_.patches().size();
 
     patchNames.setSize(nPatches);
 
-    patchNames[0] = "CV3D_default_patch";
+    const geometricSurfacePatchList& surfacePatches = qSurf_.patches();
+
+    forAll(surfacePatches, sP)
+    {
+        patchNames[sP] = surfacePatches[sP].name();
+    }
+
+    patchNames[defaultPatchIndex] = "CV3D_default_patch";
 
     patchSizes.setSize(nPatches);
 
@@ -399,8 +408,28 @@ void Foam::CV3D::calcDualMesh
                         dcOwn = dcA;
                     }
 
-                    // find which patch this face is on;  Hardcoded for now.
-                    label patchIndex = 0;
+                    // Find which patch this face is on by finding the
+                    // intersection with the surface of the Delaunay edge
+                    // generating the face and identify the region of the
+                    // intersection.
+
+                    point ptA = topoint(vA->point());
+
+                    point ptB = topoint(vB->point());
+
+                    pointIndexHit pHit = qSurf_.tree().findLineAny(ptA, ptB);
+
+                    label patchIndex = qSurf_[pHit.index()].region();
+
+                    if (patchIndex == -1)
+                    {
+                        patchIndex = defaultPatchIndex;
+
+                        WarningIn("Foam::CV3D::calcDualMesh.C")
+                            << "Dual face found that is not on a surface "
+                            << "patch. Adding to CV3D_default_patch."
+                            << endl;
+                    }
 
                     patchFaces[patchIndex].append(newDualFace);
                     patchOwners[patchIndex].append(dcOwn);
@@ -432,11 +461,11 @@ void Foam::CV3D::calcDualMesh
                     dualFacei++;
                 }
             }
-            else
-            {
-                Info<< verticesOnFace.size()
-                    << " size face not created." << endl;
-            }
+            // else
+            // {
+            //     Info<< verticesOnFace.size()
+            //         << " size face not created." << endl;
+            // }
         }
     }
 

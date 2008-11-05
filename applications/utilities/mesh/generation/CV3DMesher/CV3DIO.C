@@ -31,7 +31,7 @@ License
 
 void Foam::CV3D::writePoints(const fileName& fName, bool internalOnly) const
 {
-    Info << "Writing points to " << fName << nl << endl;
+    Info<< nl << "Writing points to " << fName << nl << endl;
     OFstream str(fName);
 
     for
@@ -49,86 +49,41 @@ void Foam::CV3D::writePoints(const fileName& fName, bool internalOnly) const
 }
 
 
-void Foam::CV3D::writeDual(const fileName& fName) const
+void Foam::CV3D::writeDual
+(
+    const pointField& points,
+    const faceList& faces,
+    const fileName& fName
+) const
 {
-    Info << "Writing dual points and faces to " << fName << nl << endl;
+    Info<< nl << "Writing dual points and faces to " << fName << nl << endl;
+
     OFstream str(fName);
 
-    label dualVerti = 0;
-
-    for
-    (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
+    forAll(points, p)
     {
-        cit->cellIndex() = -1;
-
-        if
-        (
-            cit->vertex(0)->internalOrBoundaryPoint()
-         || cit->vertex(1)->internalOrBoundaryPoint()
-         || cit->vertex(2)->internalOrBoundaryPoint()
-         || cit->vertex(3)->internalOrBoundaryPoint()
-        )
-        {
-            cit->cellIndex() = dualVerti;
-            meshTools::writeOBJ(str, topoint(dual(cit)));
-            dualVerti++;
-        }
-        // else
-        // {
-        //     cit->cellIndex() = -1;
-        // }
+        meshTools::writeOBJ(str, points[p]);
     }
 
-    for
-    (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
+    forAll (faces, f)
     {
-        if
-        (
-            eit->first->vertex(eit->second)->internalOrBoundaryPoint()
-         || eit->first->vertex(eit->third)->internalOrBoundaryPoint()
-        )
+        str<< 'f';
+
+        const face& fP = faces[f];
+
+        forAll(fP, p)
         {
-            Cell_circulator ccStart = incident_cells(*eit);
-            Cell_circulator cc = ccStart;
-
-            str<< 'f';
-
-            do
-            {
-                if (!is_infinite(cc))
-                {
-                    if (cc->cellIndex() < 0)
-                    {
-                        FatalErrorIn
-                        (
-                            "Foam::CV3D::writeDual(const fileName& fName)"
-                        )
-                        << "Dual face uses circumcenter defined by a Delaunay "
-                        "tetrahedron with no internal or boundary points."
-                        << exit(FatalError);
-                    }
-
-                    str<< ' ' << cc->cellIndex() + 1;
-                }
-            } while (++cc != ccStart);
-
-            str<< nl;
+            str<< ' ' << fP[p] + 1;
         }
+
+        str<< nl;
     }
 }
 
 
 void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
 {
-    Info << "Writing triangles to " << fName << nl << endl;
+    Info<< nl << "Writing triangles to " << fName << nl << endl;
     OFstream str(fName);
 
     labelList vertexMap(number_of_vertices());
@@ -271,6 +226,8 @@ void Foam::CV3D::writeMesh(bool writeToTimestep)
             << "Failed writing polyMesh."
             << exit(FatalError);
     }
+
+    writeDual(points, faces, "dualMesh.obj");
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
