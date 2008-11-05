@@ -31,7 +31,7 @@ License
 
 void Foam::CV3D::writePoints(const fileName& fName, bool internalOnly) const
 {
-    Info<< nl << "Writing points to " << fName << nl << endl;
+    Info<< nl << "Writing points to " << fName << endl;
     OFstream str(fName);
 
     for
@@ -56,7 +56,7 @@ void Foam::CV3D::writeDual
     const fileName& fName
 ) const
 {
-    Info<< nl << "Writing dual points and faces to " << fName << nl << endl;
+    Info<< nl << "Writing dual points and faces to " << fName << endl;
 
     OFstream str(fName);
 
@@ -83,7 +83,7 @@ void Foam::CV3D::writeDual
 
 void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
 {
-    Info<< nl << "Writing triangles to " << fName << nl << endl;
+    Info<< nl << "Writing triangles to " << fName << endl;
     OFstream str(fName);
 
     labelList vertexMap(number_of_vertices());
