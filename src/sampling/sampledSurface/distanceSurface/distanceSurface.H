@@ -23,23 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sampledIsoSurface
+    Foam::distanceSurface
 
 Description
-    A sampledSurface defined by a surface of iso value. Always triangulated.
-    To be used in sampleSurfaces / functionObjects. Recalculates iso surface
-    only if time changes.
+    A sampledSurface defined by a distance to a surface.
 
 SourceFiles
-    sampledIsoSurface.C
+    distanceSurface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledIsoSurface_H
-#define sampledIsoSurface_H
+#ifndef distanceSurface_H
+#define distanceSurface_H
 
 #include "sampledSurface.H"
 #include "triSurface.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,23 +46,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledIsoSurface Declaration
+                       Class distanceSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledIsoSurface
+class distanceSurface
 :
     public sampledSurface,
     public triSurface
 {
     // Private data
 
-        //- Field to get isoSurface of
-        const word isoField_;
+        //- Surface
+        const autoPtr<searchableSurface> surfPtr_;
 
-        //- iso value
-        const scalar isoVal_;
+        //- distance value
+        const scalar distance_;
 
-        //- Whether to coarse
+        //- Whether to coarsen
         const Switch regularise_;
 
         //- zone name (if restricted to zones)
@@ -103,13 +102,13 @@ class sampledIsoSurface
 public:
 
     //- Runtime type information
-    TypeName("sampledIsoSurface");
+    TypeName("distanceSurface");
 
 
     // Constructors
 
         //- Construct from dictionary
-        sampledIsoSurface
+        distanceSurface
         (
             const word& name,
             const polyMesh& mesh,
@@ -119,7 +118,7 @@ public:
 
     // Destructor
 
-        virtual ~sampledIsoSurface();
+        virtual ~distanceSurface();
 
 
     // Member Functions
@@ -225,7 +224,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "sampledIsoSurfaceTemplates.C"
+#   include "distanceSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
