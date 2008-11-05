@@ -123,7 +123,7 @@ private:
         void checkPatches();
 
         //- Read OpenFOAM Surface format
-        bool read(Istream&);
+        bool read(Istream&, const bool triangulate=false);
 
 
 protected:
@@ -237,7 +237,7 @@ public:
         );
 
         //- Construct from Istream
-        meshedSurface(Istream&);
+        meshedSurface(Istream&, const bool triangulate=false);
 
         //- Construct from objectRegistry
         meshedSurface(const Time&);
@@ -265,7 +265,7 @@ public:
 
     // Destructor
 
-        ~meshedSurface();
+        virtual ~meshedSurface();
 
 
     // Member Function Selectors

@@ -275,7 +275,7 @@ void Foam::meshedSurface::sortFacesByRegion
 
 
 // Read surf grouping, points, faces directly from Istream
-bool Foam::meshedSurface::read(Istream& is)
+bool Foam::meshedSurface::read(Istream& is, const bool doTriangulate)
 {
     List<surfGroup> patchLst(is);
     is >> points() >> faces();
@@ -289,6 +289,11 @@ bool Foam::meshedSurface::read(Istream& is)
             patchLst[patchI],
             patchI
         );
+    }
+
+    if (doTriangulate)
+    {
+        triangulate();
     }
 
     return is.good();
@@ -576,11 +581,11 @@ Foam::meshedSurface::meshedSurface
 }
 
 
-Foam::meshedSurface::meshedSurface(Istream& is)
+Foam::meshedSurface::meshedSurface(Istream& is, const bool triangulate)
 :
     MeshStorage(List<FaceType>(), pointField())
 {
-    read(is);
+    read(is, triangulate);
 }
 
 
@@ -840,7 +845,7 @@ bool Foam::meshedSurface::read
     // handle 'native' format directly
     if (ext == nativeExt)
     {
-        return read(IFstream(fName)());
+        return read(IFstream(fName)(), triangulate);
     }
     else
     {

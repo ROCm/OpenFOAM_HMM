@@ -230,4 +230,58 @@ void Foam::keyedSurface::checkFaces(const bool verbose)
     }
 }
 
+
+Foam::label Foam::keyedSurface::triangulate()
+{
+    label nTri = 0;
+    List<FaceType>& faceLst = faces();
+
+    // determine how many triangles are needed
+    forAll (faceLst, faceI)
+    {
+        nTri += faceLst[faceI].size() - 2;
+    }
+
+    // nothing to do
+    if (nTri <= faceLst.size())
+    {
+        return 0;
+    }
+
+    List<FaceType> newFaces(nTri);
+    List<label>    newRegions(nTri);
+
+    // note the number of *additional* faces
+    nTri -= faceLst.size();
+
+    // Reset the point labels to the unique points array
+    label newFaceI = 0;
+    forAll (faceLst, faceI)
+    {
+        const FaceType& f = faceLst[faceI];
+
+        FaceType fTri(3);
+
+        // Do simple face triangulation around f[0].
+        // we could also use face::triangulation
+        fTri[0] = f[0];
+        for (label fp = 1; fp < f.size() - 1; ++fp)
+        {
+            label fp1 = (fp + 1) % f.size();
+
+            fTri[1] = f[fp];
+            fTri[2] = f[fp1];
+
+            newFaces[newFaceI] = fTri;
+            newRegions[newFaceI] = regions_[faceI];
+            newFaceI++;
+        }
+    }
+
+    faceLst.transfer(newFaces);
+    regions_.transfer(newRegions);
+
+    return nTri;
+}
+
 // ************************************************************************* //

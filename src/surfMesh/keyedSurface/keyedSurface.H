@@ -71,7 +71,7 @@ class keyedSurface;
 class meshedSurface;
 class polyBoundaryMesh;
 
-Istream& operator>>(Istream&, keyedSurface&);
+// Istream& operator>>(Istream&, keyedSurface&);
 Ostream& operator<<(Ostream&, const keyedSurface&);
 
 
@@ -123,7 +123,7 @@ private:
     // Private member functions
 
         //- Read OpenFOAM Surface format
-        bool read(Istream&);
+        bool read(Istream&, const bool triangulate=false);
 
         //- Disable setSize with value
         void setSize(const label, const FaceType&);
@@ -152,11 +152,6 @@ protected:
 
         //- Sets patch names from hashed values (name -> id)
         void setPatches(const HashTable<label>& groupToPatch);
-
-        //- Join the faces by removing duplicate points.
-        //  Returns true if any points merged
-        bool stitchFaces(const scalar tol=SMALL, const bool verbose=false);
-
 
         //- Return non-const access to global points
         pointField& points()
@@ -266,8 +261,7 @@ public:
         );
 
         //- Construct from Istream
-        keyedSurface(Istream&);
-
+        keyedSurface(Istream&, const bool triangulate=false);
         //- Construct from objectRegistry
         keyedSurface(const Time&);
 
@@ -308,7 +302,7 @@ public:
 
     // Destructor
 
-        ~keyedSurface();
+        virtual ~keyedSurface();
 
 
     // Member Function Selectors
@@ -410,6 +404,14 @@ public:
         //- Scale points. A non-positive factor is ignored
         virtual void scalePoints(const scalar&);
 
+        //- Triangulate the surface, return the number of added faces.
+        label triangulate();
+
+        //- Join the faces by removing duplicate points.
+        //  Returns true if any points merged
+        bool stitchFaces(const scalar tol=SMALL, const bool verbose=false);
+
+        //- Check/fix duplicate/degenerate faces
         void checkFaces(const bool verbose);
 
         //- Remove invalid faces
@@ -468,6 +470,7 @@ public:
 
         // friend Istream& operator>>(Istream&, keyedSurface&);
         friend Ostream& operator<<(Ostream&, const keyedSurface&);
+
 };
 
 

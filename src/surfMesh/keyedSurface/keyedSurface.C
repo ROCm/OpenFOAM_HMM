@@ -287,7 +287,7 @@ void Foam::keyedSurface::setPatches
 
 
 // Read surf grouping, points, faces directly from Istream
-bool Foam::keyedSurface::read(Istream& is)
+bool Foam::keyedSurface::read(Istream& is, const bool doTriangulate)
 {
     List<surfGroup> patchLst(is);
     is >> points() >> faces();
@@ -309,6 +309,11 @@ bool Foam::keyedSurface::read(Istream& is)
         {
             regions_[faceIndex++] = patchI;
         }
+    }
+
+    if (doTriangulate)
+    {
+        triangulate();
     }
 
     return is.good();
@@ -633,11 +638,11 @@ Foam::keyedSurface::keyedSurface
 }
 
 
-Foam::keyedSurface::keyedSurface(Istream& is)
+Foam::keyedSurface::keyedSurface(Istream& is, const bool triangulate)
 :
     MeshStorage(List<FaceType>(), pointField())
 {
-    read(is);
+    read(is, triangulate);
 }
 
 
@@ -924,7 +929,7 @@ bool Foam::keyedSurface::read
     // handle 'native' format directly
     if (ext == nativeExt)
     {
-        return read(IFstream(fName)());
+        return read(IFstream(fName)(), triangulate);
     }
     else
     {

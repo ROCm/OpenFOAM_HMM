@@ -263,10 +263,9 @@ void Foam::meshedSurface::checkFaces(const bool verbose)
 Foam::label Foam::meshedSurface::triangulate()
 {
     label nTri = 0;
-
     List<FaceType>& faceLst = faces();
 
-    // estimate how may triangles are needed
+    // determine how many triangles are needed
     forAll (faceLst, faceI)
     {
         nTri += faceLst[faceI].size() - 2;
