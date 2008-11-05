@@ -32,7 +32,7 @@ License
 
 // Construct from List
 template <class Type>
-Foam::SortableList<Type>::SortableList(const List<Type>& values)
+Foam::SortableList<Type>::SortableList(const UList<Type>& values)
 :
     List<Type>(values),
     indices_(values.size())

@@ -164,7 +164,7 @@ inline Foam::scalar Foam::janafThermo<equationOfState>::hc() const
         (
             (((a[4]/5.0*Tstd + a[3]/4.0)*Tstd + a[2]/3.0)*Tstd + a[1]/2.0)*Tstd
           + a[0]
-        )*Tstd
+        )*Tstd + a[5]
     );
 }
 

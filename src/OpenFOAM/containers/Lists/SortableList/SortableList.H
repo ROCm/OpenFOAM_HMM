@@ -88,7 +88,7 @@ public:
 
         //- Construct from List, sorting the elements.
         //  Starts with indices set to index in argument
-        explicit SortableList(const List<Type>&);
+        explicit SortableList(const UList<Type>&);
 
         //- Construct from tranferred List, sorting the elements.
         //  Starts with indices set to index in argument
