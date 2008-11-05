@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake all solvers
-wmake all utilities
+wmake libso potential
+wmake libso molecule
 
 # ----------------------------------------------------------------- end-of-file

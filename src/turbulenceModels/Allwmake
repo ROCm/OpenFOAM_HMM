@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-( cd RAS && ./Allwmake )
-( cd LES && ./Allwmake )
+RAS/Allwmake
+LES/Allwmake
 
 # ----------------------------------------------------------------- end-of-file
