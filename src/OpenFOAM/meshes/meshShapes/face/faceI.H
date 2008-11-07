@@ -42,32 +42,34 @@ inline Foam::label Foam::face::left(const label i) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct NULL
 inline Foam::face::face()
 {}
 
 
-// Construct given size
 inline Foam::face::face(label s)
 :
     labelList(s, -1)
 {}
 
 
-// Construct from components
+inline Foam::face::face(const UList<label>& lst)
+:
+    labelList(lst)
+{}
+
+
 inline Foam::face::face(const labelList& lst)
 :
     labelList(lst)
 {}
 
-// Construct from components
+
 inline Foam::face::face(const xfer<labelList>& lst)
 :
     labelList(lst)
 {}
 
 
-// Construct from Istream
 inline Foam::face::face(Istream& is)
 {
     is >> *this;

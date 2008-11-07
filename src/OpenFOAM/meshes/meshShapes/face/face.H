@@ -56,6 +56,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class face;
+class triFace;
 inline bool operator==(const face& a, const face& b);
 inline bool operator!=(const face& a, const face& b);
 inline Istream& operator>>(Istream&, face&);
@@ -135,11 +136,17 @@ public:
         //- Construct given size
         explicit inline face(label);
 
-        //- Construct from labelList
+        //- Construct from list of labels
+        explicit inline face(const UList<label>&);
+
+        //- Construct from list of labels
         explicit inline face(const labelList&);
 
         //- Construct by transferring the parameter contents
         explicit inline face(const xfer<labelList>&);
+
+        //- Copy construct from triFace
+        face(const triFace&);
 
         //- Construct from Istream
         inline face(Istream&);
