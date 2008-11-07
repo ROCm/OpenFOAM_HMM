@@ -24,15 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Field.H"
 #include "isoSurface.H"
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "mergePoints.H"
 #include "tetMatcher.H"
 #include "syncTools.H"
-
 #include "addToRunTimeSelectionTable.H"
+#include "faceTriangulation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1867,7 +1866,128 @@ Foam::isoSurface::isoSurface
     }
 
     orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
+
+    //combineCellTriangles();
 }
 
+
+//XXXXXXX
+// Experimental retriangulation of triangles per cell. Problem is that
+// -it is very expensive   -only gets rid of internal points, not of boundary
+// ones so limited benefit (e.g. 60 v.s. 88 triangles)
+void Foam::isoSurface::combineCellTriangles()
+{
+    if (size() > 0)
+    {
+        DynamicList<labelledTri> newTris(size());
+        DynamicList<label> newTriToCell(size());
+
+        label startTriI = 0;
+
+        DynamicList<labelledTri> tris;
+
+        for (label triI = 1; triI <= meshCells_.size(); triI++)
+        {
+            if
+            (
+                triI == meshCells_.size()
+             || meshCells_[triI] != meshCells_[startTriI]
+            )
+            {
+                label nTris = triI-startTriI;
+
+                if (nTris == 1)
+                {
+                    newTris.append(operator[](startTriI));
+                    newTriToCell.append(meshCells_[startTriI]);
+                }
+                else
+                {
+                    // Collect from startTriI to triI in a triSurface
+                    tris.clear();
+                    for (label i = startTriI; i < triI; i++)
+                    {
+                        tris.append(operator[](i));
+                    }
+                    triSurface cellTris(tris, patches(), points());
+                    tris.clear();
+
+                    // Get outside
+                    const labelListList& loops = cellTris.edgeLoops();
+
+                    forAll(loops, i)
+                    {
+                        // Do proper triangulation of loop
+                        face loop(renumber(cellTris.meshPoints(), loops[i]));
+
+                        faceTriangulation faceTris
+                        (
+                            points(),
+                            loop,
+                            true
+                        );
+
+                        // Copy into newTris
+                        forAll(faceTris, faceTriI)
+                        {
+                            const triFace& tri = faceTris[faceTriI];
+
+                            newTris.append
+                            (
+                                labelledTri
+                                (
+                                    tri[0],
+                                    tri[1],
+                                    tri[2],
+                                    operator[](startTriI).region()
+                                )
+                            );
+                            newTriToCell.append(meshCells_[startTriI]);
+                        }
+                    }
+                }
+
+                startTriI = triI;
+            }
+        }
+        newTris.shrink();
+        newTriToCell.shrink();
+
+        // Compact
+        pointField newPoints(points().size());
+        label newPointI = 0;
+        labelList oldToNewPoint(points().size(), -1);
+
+        forAll(newTris, i)
+        {
+            labelledTri& tri = newTris[i];
+            forAll(tri, j)
+            {
+                label pointI = tri[j];
+
+                if (oldToNewPoint[pointI] == -1)
+                {
+                    oldToNewPoint[pointI] = newPointI;
+                    newPoints[newPointI++] = points()[pointI];
+                }
+                tri[j] = oldToNewPoint[pointI];
+            }
+        }
+        newPoints.setSize(newPointI);
+
+        triSurface::operator=
+        (
+            triSurface
+            (
+                newTris,
+                patches(),
+                newPoints,
+                true
+            )
+        );
+        meshCells_.transfer(newTriToCell);
+    }
+}
+//XXXXXXX
 
 // ************************************************************************* //

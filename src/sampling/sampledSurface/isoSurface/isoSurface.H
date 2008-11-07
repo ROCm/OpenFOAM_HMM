@@ -279,6 +279,8 @@ class isoSurface
             labelList& newToOldPoints
         );
 
+        //- Combine all triangles inside a cell into a minimal triangulation
+        void combineCellTriangles();
 
 public:
 
