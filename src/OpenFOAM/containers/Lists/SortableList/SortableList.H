@@ -118,7 +118,6 @@ public:
         //- (stable) sort the list (if changed after construction time)
         void sort();
 
-
     // Member Operators
 
         void operator=(const SortableList<Type>&);
