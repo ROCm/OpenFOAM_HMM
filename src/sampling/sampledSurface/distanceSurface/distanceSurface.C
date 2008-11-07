@@ -56,13 +56,36 @@ void Foam::distanceSurface::createGeometry() const
             scalarField(mesh().nCells(), GREAT),
             nearest
         );
-        forAll(cellDistance, cellI)
+
+        if (signed_)
         {
-            cellDistance[cellI] = Foam::mag
-            (
-                nearest[cellI].hitPoint()
-              - mesh().cellCentres()[cellI]
-            );
+            vectorField normal;
+            surfPtr_().getNormal(nearest, normal);
+
+            forAll(cellDistance, cellI)
+            {
+                vector d(mesh().cellCentres()[cellI]-nearest[cellI].hitPoint());
+
+                if ((d&normal[cellI]) > 0)
+                {
+                    cellDistance[cellI] = Foam::mag(d);
+                }
+                else
+                {
+                    cellDistance[cellI] = -Foam::mag(d);
+                }
+            }
+        }
+        else
+        {
+            forAll(cellDistance, cellI)
+            {
+                cellDistance[cellI] = Foam::mag
+                (
+                    nearest[cellI].hitPoint()
+                  - mesh().cellCentres()[cellI]
+                );
+            }
         }
     }
 
@@ -166,6 +189,7 @@ Foam::distanceSurface::distanceSurface
         )
     ),
     distance_(readScalar(dict.lookup("distance"))),
+    signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     zoneName_(word::null),
     facesPtr_(NULL),

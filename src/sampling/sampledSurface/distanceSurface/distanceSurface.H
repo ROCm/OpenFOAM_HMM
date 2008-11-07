@@ -62,6 +62,9 @@ class distanceSurface
         //- distance value
         const scalar distance_;
 
+        //- signed distance
+        const bool signed_;
+
         //- Whether to coarsen
         const Switch regularise_;
 
