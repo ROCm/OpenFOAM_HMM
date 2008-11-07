@@ -69,9 +69,9 @@ class OBJfileFormat
 
         static void writeHead
         (
-            Ostream&, 
-            const pointField&, 
-            const List<face>&,
+            Ostream&,
+            const pointField&,
+            const List<FaceType>&,
             const List<surfGroup>&
         );
 

@@ -26,6 +26,7 @@ License
 
 #include "keyedSurface.H"
 #include "mergePoints.H"
+#include "triFace.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -259,8 +260,7 @@ Foam::label Foam::keyedSurface::triangulate()
     forAll (faceLst, faceI)
     {
         const FaceType& f = faceLst[faceI];
-
-        FaceType fTri(3);
+        triFace fTri;
 
         // Do simple face triangulation around f[0].
         // we could also use face::triangulation

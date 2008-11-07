@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OFFfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
@@ -72,7 +73,7 @@ void Foam::fileFormats::OFFfileFormat::writeHead
 (
     Ostream& os,
     const pointField& pointLst,
-    const List<face>& faceLst,
+    const List<FaceType>& faceLst,
     const List<surfGroup>& patchLst
 )
 {
@@ -178,7 +179,7 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
 
     // Read faces - ignore optional region information
     // use a DynamicList for possible on-the-fly triangulation
-    DynamicList<face>  faceLst(nElems);
+    DynamicList<FaceType>  faceLst(nElems);
 
     forAll(faceLst, faceI)
     {
@@ -198,7 +199,7 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
 
             if (triangulate && f.size() > 3)
             {
-                face fTri(3);
+                triFace fTri;
 
                 // simple face triangulation about f[0].
                 // cannot use face::triangulation since points are incomplete
@@ -241,7 +242,7 @@ void Foam::fileFormats::OFFfileFormat::write
     const keyedSurface& surf
 )
 {
-    const List<face>& faceLst = surf.faces();
+    const List<FaceType>& faceLst = surf.faces();
 
     labelList faceMap;
     List<surfGroup> patchLst = surf.sortedRegions(faceMap);
@@ -278,7 +279,7 @@ void Foam::fileFormats::OFFfileFormat::write
     const meshedSurface& surf
 )
 {
-    const List<face>& faceLst = surf.faces();
+    const List<FaceType>& faceLst = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
 
     writeHead(os, surf.points(), faceLst, patchLst);

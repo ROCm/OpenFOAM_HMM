@@ -78,7 +78,7 @@ class OFFfileFormat
         (
             Ostream&, 
             const pointField&, 
-            const List<face>&,
+            const List<FaceType>&,
             const List<surfGroup>&
         );
 

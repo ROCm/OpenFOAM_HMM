@@ -88,7 +88,7 @@ Foam::surfGroup::surfGroup
 {}
 
 
-Foam::surfGroup::surfGroup(const Foam::surfGroup& p)
+Foam::surfGroup::surfGroup(const surfGroup& p)
 :
     surfPatchIdentifier(p, p.index()),
     size_(p.size()),
@@ -96,7 +96,7 @@ Foam::surfGroup::surfGroup(const Foam::surfGroup& p)
 {}
 
 
-Foam::surfGroup::surfGroup(const Foam::surfGroup& p, const label index)
+Foam::surfGroup::surfGroup(const surfGroup& p, const label index)
 :
     surfPatchIdentifier(p, index),
     size_(p.size()),

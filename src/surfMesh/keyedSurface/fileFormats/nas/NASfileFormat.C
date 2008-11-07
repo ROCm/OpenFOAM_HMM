@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
@@ -128,12 +129,12 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
             << exit(FatalError);
     }
 
-    DynamicList<point> pointLst;
+    DynamicList<point>    pointLst;
     // Nastran index of points
-    DynamicList<label> pointId;
-    DynamicList<face>  faceLst;
-    DynamicList<label> regionLst;
-    HashTable<label>   groupToPatch;
+    DynamicList<label>    pointId;
+    DynamicList<FaceType> faceLst;
+    DynamicList<label>    regionLst;
+    HashTable<label>      groupToPatch;
 
     // From face groupId to patchId
     Map<label> groupIdToPatchId;
@@ -265,7 +266,7 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
 
         if (cmd == "CTRIA3")
         {
-            face fTri(3);
+            triFace fTri;
 
             label groupId = readLabel(IStringStream(line.substr(16,8))());
             fTri[0] = readLabel(IStringStream(line.substr(24,8))());
@@ -317,7 +318,7 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
 
             if (triangulate)
             {
-                face fTri(3);
+                triFace fTri;
 
                 // simple face triangulation about f[0].
                 // cannot use face::triangulation since points are incomplete

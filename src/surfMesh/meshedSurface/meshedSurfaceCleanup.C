@@ -26,6 +26,7 @@ License
 
 #include "meshedSurface.H"
 #include "mergePoints.H"
+#include "triFace.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -296,7 +297,7 @@ Foam::label Foam::meshedSurface::triangulate()
         for (; oldFaceI < patchEnd; ++oldFaceI)
         {
             const FaceType& f = faceLst[oldFaceI];
-            FaceType fTri(3);
+            triFace fTri;
 
             // Do simple face triangulation around f[0].
             // we could also use face::triangulation

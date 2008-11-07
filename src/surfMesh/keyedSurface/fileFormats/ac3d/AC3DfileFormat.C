@@ -25,10 +25,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AC3DfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
 #include "tensor.H"
+#include "triFace.H"
 #include "primitivePatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
@@ -231,9 +233,9 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
     // Start of vertices for object/patch
     label patchVertOffset = 0;
 
-    DynamicList<point> pointLst;
-    DynamicList<face>  faceLst;
-    DynamicList<label> regionLst;
+    DynamicList<point>    pointLst;
+    DynamicList<FaceType> faceLst;
+    DynamicList<label>    regionLst;
 
     // patchId => patchName
     Map<word> regionNames;
@@ -349,7 +351,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
 
                     if (triangulate && verts.size() > 3)
                     {
-                        face fTri(3);
+                        triFace fTri;
 
                         // simple face triangulation about f[0].
                         // cannot use face::triangulation
@@ -535,7 +537,7 @@ void Foam::fileFormats::AC3DfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<face>& faceLst = surf.faces();
+    const List<FaceType>& faceLst = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
 
     writeHeader(os, patchLst);

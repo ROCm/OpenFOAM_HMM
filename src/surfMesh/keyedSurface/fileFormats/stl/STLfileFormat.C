@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "OSspecific.H"
 #include "addToRunTimeSelectionTable.H"
@@ -216,9 +217,7 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
     label pointI = 0;
     forAll(faceLst, faceI)
     {
-        face& fTri = faceLst[faceI];
-        fTri.setSize(3);
-
+        triFace fTri;
 
         // Read an STL triangle
         STLtriangle stlTri(is);
@@ -235,13 +234,15 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
         pointLst[pointI] = stlTri.c();
         fTri[2] = pointI++;
 
+        faceLst[faceI] = fTri;
+
+        // interprete colour as a region
+        regionLst[faceI] = stlTri.region();
+
         if (maxRegionId < stlTri.region())
         {
             maxRegionId = stlTri.region();
         }
-
-        // interprete colour as a region
-        regionLst[faceI] = stlTri.region();
 
 #ifdef DEBUG_STLBINARY
         if

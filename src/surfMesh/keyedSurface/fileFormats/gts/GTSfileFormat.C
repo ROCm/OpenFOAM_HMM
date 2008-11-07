@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GTSfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
@@ -115,7 +116,7 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
 
     // write directly into the lists:
     pointField& pointLst = points();
-    List<face>& faceLst = faces();
+    List<FaceType>& faceLst = faces();
     List<label>& regionLst = regions();
 
     pointLst.setSize(nPoints);
@@ -239,13 +240,7 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
                 << exit(FatalError);
         }
 
-        face& fTri = faceLst[faceI];
-        fTri.setSize(3);
-
-        fTri[0] = e0Far;
-        fTri[1] = common01;
-        fTri[2] = e1Far;
-
+        faceLst[faceI] = triFace(e0Far, common01, e1Far);
         regionLst[faceI] = regionI;
     }
 
@@ -263,7 +258,7 @@ void Foam::fileFormats::GTSfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<face>& faceLst  = surf.faces();
+    const List<FaceType>& faceLst  = surf.faces();
 
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
@@ -356,7 +351,7 @@ void Foam::fileFormats::GTSfileFormat::write
 )
 {
     const pointField& pointLst = surf.points();
-    const List<face>& faceLst  = surf.faces();
+    const List<FaceType>& faceLst  = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
 
     // It is too annoying to triangulate on-the-fly

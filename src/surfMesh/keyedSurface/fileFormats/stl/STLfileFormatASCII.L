@@ -33,6 +33,7 @@ License
  \* ------------------------------------------------------------------------ */
 
 #include "STLfileFormat.H"
+#include "triFace.H"
 
 using namespace Foam;
 
@@ -395,18 +396,19 @@ Foam::fileFormats::STLfileFormat::readASCII
     regions().transfer(lexer.facets());
 
     // make our triangles directly
-    List<face>& faceLst = faces();
+    List<FaceType>& faceLst = faces();
     faceLst.setSize(regions().size());
 
     label ptI = 0;
     forAll(faceLst, faceI)
     {
-        face& fTri = faceLst[faceI];
-        fTri.setSize(3);
+        triFace fTri;
 
         fTri[0] = ptI++;
         fTri[1] = ptI++;
         fTri[2] = ptI++;
+
+        faceLst[faceI] = fTri;
     }
 
     setPatches(lexer.groupToPatch());

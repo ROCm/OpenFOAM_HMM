@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OBJfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
@@ -72,7 +73,7 @@ void Foam::fileFormats::OBJfileFormat::writeHead
 (
     Ostream& os,
     const pointField& pointLst,
-    const List<face>& faceLst,
+    const List<FaceType>& faceLst,
     const List<surfGroup>& patchLst
 )
 {
@@ -136,10 +137,10 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
             << exit(FatalError);
     }
 
-    DynamicList<point> pointLst;
-    DynamicList<face>  faceLst;
-    DynamicList<label> regionLst;
-    HashTable<label>   groupToPatch;
+    DynamicList<point>    pointLst;
+    DynamicList<FaceType> faceLst;
+    DynamicList<label>    regionLst;
+    HashTable<label>      groupToPatch;
 
     // leave faces that didn't have a group in 0
     label groupID = 0;
@@ -193,7 +194,7 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
         }
         else if (cmd == "f")
         {
-            DynamicList<label> verts;
+            DynamicList<label> dynVertices;
 
             // Assume 'f' is followed by space.
             string::size_type endNum = 1;
@@ -235,23 +236,25 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
 
                     intStream >> vertI;
                 }
-                verts.append(vertI - 1);
+                dynVertices.append(vertI - 1);
             }
-            verts.shrink();
+            dynVertices.shrink();
 
-            if (triangulate && verts.size() > 3)
+            FaceType f(SubList<label>(dynVertices, dynVertices.size()));
+
+            if (triangulate && f.size() > 3)
             {
-                face fTri(3);
+                triFace fTri;
 
                 // simple face triangulation about f[0].
                 // Cannot use face::triangulation since points are incomplete
-                fTri[0] = verts[0];
-                for (label fp1 = 1; fp1 < verts.size() - 1; fp1++)
+                fTri[0] = f[0];
+                for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {
-                    label fp2 = (fp1 + 1) % verts.size();
+                    label fp2 = (fp1 + 1) % f.size();
 
-                    fTri[1] = verts[fp1];
-                    fTri[2] = verts[fp2];
+                    fTri[1] = f[fp1];
+                    fTri[2] = f[fp2];
 
                     faceLst.append(fTri);
                     regionLst.append(groupID);
@@ -259,7 +262,7 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
             }
             else
             {
-                faceLst.append(face(verts));
+                faceLst.append(f);
                 regionLst.append(groupID);
             }
         }
@@ -282,7 +285,7 @@ void Foam::fileFormats::OBJfileFormat::write
     const keyedSurface& surf
 )
 {
-    const List<face>& faceLst = surf.faces();
+    const List<FaceType>& faceLst = surf.faces();
 
     labelList faceMap;
     List<surfGroup> patchLst = surf.sortedRegions(faceMap);
@@ -320,7 +323,7 @@ void Foam::fileFormats::OBJfileFormat::write
     const meshedSurface& surf
 )
 {
-    const List<face>& faceLst = surf.faces();
+    const List<FaceType>& faceLst = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
 
     writeHead(os, surf.points(), faceLst, patchLst);

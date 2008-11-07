@@ -107,11 +107,7 @@ public:
         surfGroup(const surfGroup&);
 
         //- Construct from another patch, resetting the index
-        surfGroup
-        (
-            const surfGroup&,
-            const label index
-        );
+        surfGroup(const surfGroup&, const label index);
 
         //- Return clone
         autoPtr<surfGroup> clone() const

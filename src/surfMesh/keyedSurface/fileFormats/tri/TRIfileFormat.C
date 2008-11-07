@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIfileFormat.H"
+#include "triFace.H"
 #include "clock.H"
 #include "IFstream.H"
 #include "IOmanip.H"
@@ -214,18 +215,19 @@ Foam::fileFormats::TRIfileFormat::TRIfileFormat
     regions().transfer(regionLst);
 
     // make our triangles directly
-    List<face>& faceLst = faces();
+    List<FaceType>& faceLst = faces();
     faceLst.setSize(regions().size());
 
     label ptI = 0;
     forAll(faceLst, faceI)
     {
-        face& fTri = faceLst[faceI];
-        fTri.setSize(3);
+        triFace fTri;
 
         fTri[0] = ptI++;
         fTri[1] = ptI++;
         fTri[2] = ptI++;
+
+        faceLst[faceI] = fTri;
     }
 
     setPatches(groupToPatch);
