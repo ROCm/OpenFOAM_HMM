@@ -53,6 +53,13 @@ Description
     baseType::add##argNames##ConstructorToTable<thisType<Targ> >              \
         add##thisType##Targ##argNames##ConstructorTo##baseType##Table_
 
+#define addNamedTemplateToRunTimeSelectionTable\
+(baseType,thisType,Targ,argNames,lookup)                                      \
+                                                                              \
+    /* Add the thisType constructor function to the table */                  \
+    baseType::add##argNames##ConstructorToTable<thisType<Targ> >              \
+        add_##lookup##_##thisType##Targ##argNames##ConstructorTo##baseType##Table_(#lookup)
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

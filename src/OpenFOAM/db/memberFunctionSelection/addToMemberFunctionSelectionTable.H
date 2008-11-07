@@ -56,6 +56,13 @@ Description
     baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
     add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Table_
 
+#define addNamedTemplateToMemberFunctionSelectionTable\
+(baseType,thisType,Targ,memberFunction,argNames,lookup)                       \
+                                                                              \
+    /* Add the thisType constructor function to the table */                  \
+    baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
+    add_##lookup##_##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Table_(#lookup)
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
