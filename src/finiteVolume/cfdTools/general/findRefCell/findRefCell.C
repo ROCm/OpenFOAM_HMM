@@ -33,15 +33,68 @@ void Foam::setRefCell
     const volScalarField& field,
     const dictionary& dict,
     label& refCelli,
-    scalar& refValue
+    scalar& refValue,
+    bool forceReference
 )
 {
-    if (field.needReference())
+    if (field.needReference() || forceReference)
     {
         word refCellName = field.name() + "RefCell";
+        word refPointName = field.name() + "RefPoint";
+
         word refValueName = field.name() + "RefValue";
 
-        refCelli = readLabel(dict.lookup(refCellName));
+        if (dict.found(refCellName))
+        {
+            if (Pstream::master())
+            {
+                refCelli = readLabel(dict.lookup(refCellName));
+            }
+            else
+            {
+                refCelli = -1;
+            }
+        }
+        else if (dict.found(refPointName))
+        {
+            point refPointi(dict.lookup(refPointName));
+            refCelli = field.mesh().findCell(refPointi);
+            label hasRef = (refCelli >= 0 ? 1 : 0);
+            label sumHasRef = returnReduce<label>(hasRef, sumOp<label>());
+            if (sumHasRef != 1)
+            {
+                FatalErrorIn
+                (
+                    "void Foam::setRefCell"
+                     "("
+                     "    const volScalarField&,"
+                     "    const dictionary&,"
+                     "    label& scalar&,"
+                     "    bool"
+                     ")"
+                )
+                  << "Unable to set reference cell for field " << field.name()
+                  << nl << "    Reference point " << refPointName
+                  << " found on multiple domains" << nl << abort(FatalError);
+            }
+        }
+        else
+        {
+            FatalErrorIn
+            (
+                "void Foam::setRefCell"
+                 "("
+                 "    const volScalarField&,"
+                 "    const dictionary&,"
+                 "    label& scalar&,"
+                 "    bool"
+                 ")"
+            )
+              << "Unable to set reference cell for field" << field.name() << nl
+              << "    Please supply either " << refCellName
+              << " or " << refPointName << nl << abort(FatalError);
+        }
+
         refValue = readScalar(dict.lookup(refValueName));
     }
 }

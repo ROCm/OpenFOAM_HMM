@@ -24,36 +24,60 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "primitiveMesh.H"
-#include "ListOps.H"
+#include "distanceSurface.H"
+#include "isoSurface.H"
+#include "volFieldsFwd.H"
+#include "pointFields.H"
+#include "volPointInterpolation.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
+template <class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::distanceSurface::sampleField
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vField
+) const
 {
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const labelListList& primitiveMesh::pointFaces() const
-{
-    if (!pfPtr_)
-    {
-        if (debug)
-        {
-            Pout<< "primitiveMesh::pointFaces() : "
-                << "calculating pointFaces" << endl;
-        }
-        // Invert faces()
-        pfPtr_ = new labelListList(nPoints());
-        invertManyToMany(nPoints(), faces(), *pfPtr_);
-    }
-
-    return *pfPtr_;
+    return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template <class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::distanceSurface::interpolateField
+(
+    const interpolation<Type>& interpolator
+) const
+{
+    // One value per point
+    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
+    Field<Type>& values = tvalues();
 
-} // End namespace Foam
+    boolList pointDone(points().size(), false);
+
+    forAll(faces(), cutFaceI)
+    {
+        const face& f = faces()[cutFaceI];
+
+        forAll(f, faceVertI)
+        {
+            label pointI = f[faceVertI];
+
+            if (!pointDone[pointI])
+            {
+                values[pointI] = interpolator.interpolate
+                (
+                    points()[pointI],
+                    meshCells_[cutFaceI]
+                );
+                pointDone[pointI] = true;
+            }
+        }
+    }
+
+    return tvalues;
+}
+
 
 // ************************************************************************* //
