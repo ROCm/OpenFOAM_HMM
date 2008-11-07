@@ -105,55 +105,65 @@ void Foam::sampledIsoSurface::createGeometry() const
             volPointInterpolation::New(fvm).interpolate(cellFld)
         );
 
-        //- Direct from cell field and point field. Gives bad continuity.
-        const isoSurface iso
-        (
-            fvm,
-            cellFld.internalField(),
-            pointFld().internalField(),
-            isoVal_,
-            regularise_
-        );
+        if (average_)
+        {
+            //- From point field and interpolated cell.
+            scalarField cellAvg(fvm.nCells(), scalar(0.0));
+            labelField nPointCells(fvm.nCells(), 0);
+            {
+                for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
+                {
+                    const labelList& pCells = fvm.pointCells(pointI);
 
-        ////- From point field and interpolated cell.
-        //scalarField cellAvg(fvm.nCells(), scalar(0.0));
-        //labelField nPointCells(fvm.nCells(), 0);
-        //{
-        //    for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
-        //    {
-        //        const labelList& pCells = fvm.pointCells(pointI);
-        //
-        //        forAll(pCells, i)
-        //        {
-        //            label cellI = pCells[i];
-        //
-        //            cellAvg[cellI] += pointFld().internalField()[pointI];
-        //            nPointCells[cellI]++;
-        //        }
-        //    }
-        //}
-        //forAll(cellAvg, cellI)
-        //{
-        //    cellAvg[cellI] /= nPointCells[cellI];
-        //}
-        //
-        //const isoSurface iso
-        //(
-        //    fvm,
-        //    cellAvg,
-        //    pointFld().internalField(),
-        //    isoVal_,
-        //    regularise_
-        //);
+                    forAll(pCells, i)
+                    {
+                        label cellI = pCells[i];
 
+                        cellAvg[cellI] += pointFld().internalField()[pointI];
+                        nPointCells[cellI]++;
+                    }
+                }
+            }
+            forAll(cellAvg, cellI)
+            {
+                cellAvg[cellI] /= nPointCells[cellI];
+            }
 
-        const_cast<sampledIsoSurface&>(*this).triSurface::operator=(iso);
-        meshCells_ = iso.meshCells();
+            const isoSurface iso
+            (
+                fvm,
+                cellAvg,
+                pointFld().internalField(),
+                isoVal_,
+                regularise_
+            );
+
+            const_cast<sampledIsoSurface&>(*this).triSurface::operator=(iso);
+            meshCells_ = iso.meshCells();
+        }
+        else
+        {
+            //- Direct from cell field and point field. Gives bad continuity.
+            const isoSurface iso
+            (
+                fvm,
+                cellFld.internalField(),
+                pointFld().internalField(),
+                isoVal_,
+                regularise_
+            );
+
+            const_cast<sampledIsoSurface&>(*this).triSurface::operator=(iso);
+            meshCells_ = iso.meshCells();
+        }
+
 
         if (debug)
         {
             Pout<< "sampledIsoSurface::createGeometry() : constructed iso:"
                 << nl
+                << "    regularise     : " << regularise_ << nl
+                << "    average        : " << average_ << nl
                 << "    isoField       : " << isoField_ << nl
                 << "    isoValue       : " << isoVal_ << nl
                 << "    points         : " << points().size() << nl
@@ -177,6 +187,7 @@ Foam::sampledIsoSurface::sampledIsoSurface
     isoField_(dict.lookup("isoField")),
     isoVal_(readScalar(dict.lookup("isoValue"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
+    average_(dict.lookupOrDefault("average", true)),
     zoneName_(word::null),
     facesPtr_(NULL),
     storedTimeIndex_(-1),
