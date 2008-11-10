@@ -111,6 +111,12 @@ private:
             referredMolecule* molRef
         ) const;
 
+        void calculateElectrostaticForce();
+
+        void assignChargesToMesh();
+
+        void calculateElectrostaticForceField();
+
         void calculateTetherForce();
 
         void calculateExternalForce();

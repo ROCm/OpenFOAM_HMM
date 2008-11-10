@@ -205,6 +205,27 @@ void Foam::moleculeCloud::calculatePairForce()
 }
 
 
+void Foam::moleculeCloud::calculateElectrostaticForce()
+{
+    Info<< "Electrostatic forces" << endl;
+
+    // Particle-Particle part.
+    // Specialised version of the normal pair force calculation
+
+    // Particle Mesh part.
+
+    // Assign charges from the molecules to the charge density field of the
+    // mesh.
+    assignChargesToMesh();
+
+    // Solve Poisson's equation for the electrostatic field.  Take the gradient
+    // of it to calculate the force field.
+    calculateElectrostaticForceField();
+
+    // Interpolate forces from the force field to
+}
+
+
 void Foam::moleculeCloud::calculateTetherForce()
 {
     const tetherPotentialList& tetherPot(pot_.tetherPotentials());
@@ -577,6 +598,8 @@ void Foam::moleculeCloud::calculateForce()
     }
 
     calculatePairForce();
+
+    calculateElectrostaticForce();
 
     calculateTetherForce();
 
