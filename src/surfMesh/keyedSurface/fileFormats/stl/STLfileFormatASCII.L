@@ -360,7 +360,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
         yy_pop_state();
         FatalErrorIn
         (
-            "fileFormats::STLfileFormat::readASCII(const fileName& STLfileName)"
+            "fileFormats::STLfileFormat::readASCII(const fileName&)"
         )   << "while " << stateNames[YY_START] << " on line " << lineNo_ << nl
             << "    expected " << stateExpects[YY_START]
             << " but found '" << startError_.c_str() << YYText() << "'"
@@ -386,6 +386,8 @@ Foam::fileFormats::STLfileFormat::readASCII
     const off_t fileSize
 )
 {
+    clear();
+
     // Create the lexer with the approximate number of vertices in the STL
     // from the file size
     STLASCIILexer lexer(&ifs.stdStream(), fileSize/400);

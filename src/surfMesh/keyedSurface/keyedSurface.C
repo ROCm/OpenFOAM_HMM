@@ -37,8 +37,6 @@ License
 #include "primitivePatch.H"
 #include "SortableList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -59,7 +57,20 @@ defineMemberFunctionSelectionTable
 const char * const nativeExt = "ofs";
 //! @endcond localscope
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::string Foam::keyedSurface::getLineNoComment(IFstream& is)
+{
+    string line;
+    do
+    {
+        is.getLine(line);
+    }
+    while ((line.size() == 0 || line[0] == '#') && is.good());
+
+    return line;
+}
+
 
 Foam::fileName Foam::keyedSurface::triSurfInstance(const Time& d)
 {
@@ -165,158 +176,136 @@ Foam::fileName Foam::keyedSurface::triSurfName(const Time& d)
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::string Foam::keyedSurface::getLineNoComment(IFstream& is)
+bool Foam::keyedSurface::canRead(const word& ext, const bool verbose)
 {
-    string line;
-    do
+    // perhaps sent an entire name
+    word fExt(ext);
+
+    string::size_type dot = fExt.find_last_of(".");
+    if (dot != string::npos)
     {
-        is.getLine(line);
+        fExt = fExt.substr(dot+1);
     }
-    while ((line.size() == 0 || line[0] == '#') && is.good());
 
-    return line;
-}
-
-
-void Foam::keyedSurface::setPatches(const label maxPatch)
-{
-    patches_.setSize(maxPatch+1);
-
-    forAll(patches_, patchI)
+    // handle 'native' format directly
+    if (fExt == nativeExt)
     {
-        patches_[patchI] = PatchRegionType
-        (
-            "patch" + ::Foam::name(patchI),
-            patchI
-        );
+        return true;
     }
-}
 
+    fileExtensionConstructorTable::iterator cstrIter =
+        fileExtensionConstructorTablePtr_->find(fExt);
 
-void Foam::keyedSurface::setPatches()
-{
-    label maxPatch = 0;
-
-    // find the max region that occurs
-    forAll(regions_, faceI)
+    // would be nice to have information about which format this actually is
+    if (cstrIter == fileExtensionConstructorTablePtr_->end())
     {
-        const label regId = regions_[faceI];
-
-        if (maxPatch < regId)
+        if (verbose)
         {
-            maxPatch = regId;
-        }
-    }
+            SortableList<word> known
+            (
+                fileExtensionConstructorTablePtr_->toc()
+            );
 
-    setPatches(maxPatch);
-}
-
-
-
-void Foam::keyedSurface::setPatches
-(
-    const Map<word>& regionNames,
-    const label maxPatchHint
-)
-{
-    label maxPatch = maxPatchHint;
-
-    // determine max patch ID if required
-    if (maxPatchHint < 0)
-    {
-        maxPatch = 0;
-        forAllConstIter(Map<word>, regionNames, iter)
-        {
-            if (maxPatch < iter.key())
+            Info<<"Unknown file extension for reading: " << fExt << nl;
+            // compact output:
+            Info<<"Valid types: ( " << nativeExt;
+            forAll(known, i)
             {
-                maxPatch = iter.key();
+                Info<<" " << known[i];
             }
+            Info<<" )" << endl;
         }
+        return false;
     }
 
-
-    // Info<< "setPatches with maxPatch: " << maxPatch << endl;
-
-    patches_.setSize(maxPatch+1);
-
-    forAll(patches_, patchI)
-    {
-        Map<word>::const_iterator findPatch = regionNames.find(patchI);
-        word patchName;
-
-        if (findPatch != regionNames.end())
-        {
-            patchName = findPatch();
-        }
-        else
-        {
-            patchName = "patch" + ::Foam::name(patchI);
-        }
-
-        patches_[patchI] = PatchRegionType
-        (
-            patchName,
-            patchI
-        );
-    }
+    return true;
 }
 
 
-void Foam::keyedSurface::setPatches
+bool Foam::keyedSurface::canWrite(const word& ext, const bool verbose)
+{
+    // perhaps sent an entire name
+    word fExt(ext);
+
+    string::size_type dot = ext.find_last_of(".");
+    if (dot != string::npos)
+    {
+        fExt = ext.substr(dot+1);
+    }
+
+    // handle 'native' format directly
+    if (fExt == nativeExt)
+    {
+        return true;
+    }
+
+    writefileExtensionMemberFunctionTable::iterator mfIter =
+        writefileExtensionMemberFunctionTablePtr_->find(fExt);
+
+    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    {
+        if (verbose)
+        {
+            SortableList<word> known
+            (
+                writefileExtensionMemberFunctionTablePtr_->toc()
+            );
+
+            Info<<"Unknown file extension for writing: " << fExt << nl;
+            // compact output:
+            Info<<"Valid types: ( " << nativeExt;
+            forAll(known, i)
+            {
+                Info<<" " << known[i];
+            }
+            Info<<" )" << endl;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+
+void Foam::keyedSurface::write
 (
-    const HashTable<label>& groupToPatch
+    const fileName& fName,
+    const keyedSurface& surf
 )
 {
-    // determine max patch Id
-    label maxPatch = 0;
-    Map<word> regionNames;
-
-    forAllConstIter(HashTable<label>, groupToPatch, iter)
+    if (debug)
     {
-        regionNames.insert(iter(), iter.key());
-        if (maxPatch < iter())
+        Info<< "keyedSurface::write(const fileName&, const keyedSurface&) : "
+               "writing keyedSurface to " << fName
+            << endl;
+    }
+
+    const word ext = fName.ext();
+
+    // handle 'native' format directly
+    if (ext == nativeExt)
+    {
+        surf.write(OFstream(fName)());
+    }
+    else
+    {
+        writefileExtensionMemberFunctionTable::iterator mfIter =
+            writefileExtensionMemberFunctionTablePtr_->find(ext);
+
+        if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
         {
-            maxPatch = iter();
+            FatalErrorIn
+            (
+                "keyedSurface::write(const fileName&, const keyedSurface&)"
+            )   << "Unknown file extension " << ext << nl << nl
+                << "Valid types are :" << endl
+                << writefileExtensionMemberFunctionTablePtr_->toc()
+                << exit(FatalError);
         }
+
+        mfIter()(fName, surf);
     }
-
-    setPatches(regionNames, maxPatch);
-}
-
-
-// Read surf grouping, points, faces directly from Istream
-bool Foam::keyedSurface::read(Istream& is, const bool doTriangulate)
-{
-    List<surfGroup> patchLst(is);
-    is >> points() >> faces();
-
-    patches_.setSize(patchLst.size());
-    regions_.setSize(size());
-
-    // copy patch info and set regions:
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        patches_[patchI] = PatchRegionType
-        (
-            patchLst[patchI],
-            patchI
-        );
-
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            regions_[faceIndex++] = patchI;
-        }
-    }
-
-    if (doTriangulate)
-    {
-        triangulate();
-    }
-
-    return is.good();
 }
 
 
@@ -325,7 +314,7 @@ bool Foam::keyedSurface::read(Istream& is, const bool doTriangulate)
 // Patch numbers start at 0.
 Foam::surfGroupList Foam::keyedSurface::sortedRegions
 (
-    const List<label>& regionLst,
+    const UList<label>& regionLst,
     const Map<word>& patchNames,
     labelList& faceMap
 )
@@ -333,6 +322,8 @@ Foam::surfGroupList Foam::keyedSurface::sortedRegions
     // determine sort order according to region numbers
 
     // std::sort() really seems to mix up the order.
+    // and std::stable_sort() might take too long / too much memory
+
     // Assuming that we have relatively fewer regions compared to the
     // number of items, just do it ourselves
 
@@ -400,22 +391,6 @@ Foam::surfGroupList Foam::keyedSurface::sortedRegions
 
     // with reordered faces registered in faceMap
     return patchLst;
-}
-
-
-Foam::surfGroupList Foam::keyedSurface::sortedRegions
-(
-    labelList& faceMap
-) const
-{
-    // supply some patch names
-    Map<word> patchNames;
-    forAll(patches_, patchI)
-    {
-        patchNames.insert(patchI, patches_[patchI].name());
-    }
-
-    return sortedRegions(regions_, patchNames, faceMap);
 }
 
 
@@ -685,8 +660,151 @@ Foam::keyedSurface::keyedSurface(const xfer<meshedSurface>& surf)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::keyedSurface::~keyedSurface()
+{}
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+// Read surf grouping, points, faces directly from Istream
+bool Foam::keyedSurface::read(Istream& is, const bool doTriangulate)
 {
-    // Info<<"~keyedSurface()" << endl;
+    clear();
+
+    List<surfGroup> patchLst(is);
+    is >> points() >> faces();
+
+    patches_.setSize(patchLst.size());
+    regions_.setSize(size());
+
+    // copy patch info and set regions:
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        patches_[patchI] = PatchRegionType
+        (
+            patchLst[patchI],
+            patchI
+        );
+
+        forAll(patchLst[patchI], patchFaceI)
+        {
+            regions_[faceIndex++] = patchI;
+        }
+    }
+
+    if (doTriangulate)
+    {
+        triangulate();
+    }
+
+    return is.good();
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::keyedSurface::setPatches(const label maxPatch)
+{
+    patches_.setSize(maxPatch+1);
+
+    forAll(patches_, patchI)
+    {
+        patches_[patchI] = PatchRegionType
+        (
+            "patch" + ::Foam::name(patchI),
+            patchI
+        );
+    }
+}
+
+
+void Foam::keyedSurface::setPatches()
+{
+    label maxPatch = 0;
+
+    // find the max region that occurs
+    forAll(regions_, faceI)
+    {
+        const label regId = regions_[faceI];
+
+        if (maxPatch < regId)
+        {
+            maxPatch = regId;
+        }
+    }
+
+    setPatches(maxPatch);
+}
+
+
+
+void Foam::keyedSurface::setPatches
+(
+    const Map<word>& regionNames,
+    const label maxPatchHint
+)
+{
+    label maxPatch = maxPatchHint;
+
+    // determine max patch ID if required
+    if (maxPatchHint < 0)
+    {
+        maxPatch = 0;
+        forAllConstIter(Map<word>, regionNames, iter)
+        {
+            if (maxPatch < iter.key())
+            {
+                maxPatch = iter.key();
+            }
+        }
+    }
+
+
+    // Info<< "setPatches with maxPatch: " << maxPatch << endl;
+
+    patches_.setSize(maxPatch+1);
+
+    forAll(patches_, patchI)
+    {
+        Map<word>::const_iterator findPatch = regionNames.find(patchI);
+        word patchName;
+
+        if (findPatch != regionNames.end())
+        {
+            patchName = findPatch();
+        }
+        else
+        {
+            patchName = "patch" + ::Foam::name(patchI);
+        }
+
+        patches_[patchI] = PatchRegionType
+        (
+            patchName,
+            patchI
+        );
+    }
+}
+
+
+void Foam::keyedSurface::setPatches
+(
+    const HashTable<label>& groupToPatch
+)
+{
+    // determine max patch Id
+    label maxPatch = 0;
+    Map<word> regionNames;
+
+    forAllConstIter(HashTable<label>, groupToPatch, iter)
+    {
+        regionNames.insert(iter(), iter.key());
+        if (maxPatch < iter())
+        {
+            maxPatch = iter();
+        }
+    }
+
+    setPatches(regionNames, maxPatch);
 }
 
 
@@ -699,11 +817,37 @@ void Foam::keyedSurface::setSize(const label s)
 }
 
 
-//- Move points
+void Foam::keyedSurface::clear()
+{
+    MeshStorage::clearOut();
+
+    points().clear();
+    faces().clear();
+    regions_.clear();
+    patches_.clear();
+}
+
+
+Foam::surfGroupList Foam::keyedSurface::sortedRegions
+(
+    labelList& faceMap
+) const
+{
+    // supply some patch names
+    Map<word> patchNames;
+    forAll(patches_, patchI)
+    {
+        patchNames.insert(patchI, patches_[patchI].name());
+    }
+
+    return sortedRegions(regions_, patchNames, faceMap);
+}
+
+
 void Foam::keyedSurface::movePoints(const pointField& newPoints)
 {
     // Remove all geometry dependent data
-    clearTopology();
+    MeshStorage::clearTopology();
 
     // Adapt for new point position
     MeshStorage::movePoints(newPoints);
@@ -713,14 +857,13 @@ void Foam::keyedSurface::movePoints(const pointField& newPoints)
 }
 
 
-//- scale points
 void Foam::keyedSurface::scalePoints(const scalar& scaleFactor)
 {
     // avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
         // Remove all geometry dependent data
-        clearTopology();
+        MeshStorage::clearTopology();
 
         // Adapt for new point position
         MeshStorage::movePoints(pointField());
@@ -733,7 +876,7 @@ void Foam::keyedSurface::scalePoints(const scalar& scaleFactor)
 
 Foam::keyedSurface Foam::keyedSurface::subsetMesh
 (
-    const boolList& include,
+    const UList<bool>& include,
     labelList& pointMap,
     labelList& faceMap
 ) const
@@ -771,15 +914,13 @@ Foam::keyedSurface Foam::keyedSurface::subsetMesh
         }
     }
 
-    // Construct an empty subsurface and fill
+    // construct a sub-surface
     keyedSurface subSurf;
-
-    // transfer
-    subSurf.points().transfer(newPoints);
-    subSurf.faces().transfer(newFaces);
-
-    // copy
-    subSurf.patches_ = patches_;
+    (
+        xferMove(newPoints),
+        xferMove(newFaces),
+        xferCopy(patches_)
+    );
 
     return subSurf;
 }
@@ -787,12 +928,14 @@ Foam::keyedSurface Foam::keyedSurface::subsetMesh
 
 void Foam::keyedSurface::transfer(keyedSurface& surf)
 {
-    clearOut();
+    clear();
+
     faces().transfer(surf.faces());
     points().transfer(surf.points());
     regions_.transfer(surf.regions_);
     patches_.transfer(surf.patches_);
-    surf.clearOut();
+
+    surf.clear();
 }
 
 
@@ -800,7 +943,8 @@ void Foam::keyedSurface::transfer(meshedSurface& surf)
 {
     surfGroupList& patchLst = surf.patches();
 
-    clearOut();
+    clear();
+
     points().transfer(surf.points());
     faces().transfer(surf.faces());
     regions_.setSize(size());
@@ -819,102 +963,7 @@ void Foam::keyedSurface::transfer(meshedSurface& surf)
     }
 
     patchLst.clear();
-    surf.clearOut();
-}
-
-
-bool Foam::keyedSurface::canRead(const word& ext, const bool verbose)
-{
-    // FIXME: this looks horrible, but I don't have my STL docs here
-
-    // perhaps we got sent an entire name
-    word fExt(ext);
-
-    string::size_type dot = fExt.find_last_of(".");
-    if (dot != string::npos)
-    {
-        fExt = fExt.substr(dot+1);
-    }
-
-    // handle 'native' format directly
-    if (fExt == nativeExt)
-    {
-        return true;
-    }
-
-    fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(fExt);
-
-    // would be nice to have information about which format this actually is
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
-    {
-        if (verbose)
-        {
-            SortableList<word> known
-            (
-                fileExtensionConstructorTablePtr_->toc()
-            );
-
-            Info<<"Unknown file extension for reading: " << fExt << nl;
-            // compact output:
-            Info<<"Valid types: ( " << nativeExt;
-            forAll(known, i)
-            {
-                Info<<" " << known[i];
-            }
-            Info<<" )" << endl;
-        }
-        return false;
-    }
-
-    return true;
-}
-
-
-bool Foam::keyedSurface::canWrite(const word& ext, const bool verbose)
-{
-    // perhaps we got sent an entire name
-    word fExt(ext);
-
-    // FIXME: this looks horrible, but I don't have STL docs here
-    string::size_type dot = ext.find_last_of(".");
-    if (dot != string::npos)
-    {
-        fExt = ext.substr(dot+1);
-    }
-
-    // handle 'native' format directly
-    if (fExt == nativeExt)
-    {
-        return true;
-    }
-
-    writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(fExt);
-
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
-    {
-        if (verbose)
-        {
-            SortableList<word> known
-            (
-                writefileExtensionMemberFunctionTablePtr_->toc()
-            );
-
-            Info<<"Unknown file extension for writing: " << fExt << nl;
-            // compact output:
-            Info<<"Valid types: ( " << nativeExt;
-            forAll(known, i)
-            {
-                Info<<" " << known[i];
-            }
-            Info<<" )" << endl;
-        }
-
-        return false;
-    }
-
-    return true;
+    surf.clear();
 }
 
 
@@ -922,10 +971,12 @@ bool Foam::keyedSurface::canWrite(const word& ext, const bool verbose)
 bool Foam::keyedSurface::read
 (
     const fileName& fName,
-    const word& ext,
     const bool triangulate
 )
 {
+    clear();
+    const word ext = fName.ext();
+
     // handle 'native' format directly
     if (ext == nativeExt)
     {
@@ -940,48 +991,31 @@ bool Foam::keyedSurface::read
 }
 
 
-void Foam::keyedSurface::write
+// Read from file in given format
+bool Foam::keyedSurface::read
 (
     const fileName& fName,
-    const keyedSurface& surf
+    const word& ext,
+    const bool triangulate
 )
 {
-    if (debug)
-    {
-        Info<< "keyedSurface::write(const fileName&, const keyedSurface&) : "
-               "writing keyedSurface to " << fName
-            << endl;
-    }
-
-    const word ext = fName.ext();
+    clear();
 
     // handle 'native' format directly
     if (ext == nativeExt)
     {
-        surf.write(OFstream(fName)());
+        return read(IFstream(fName)(), triangulate);
     }
     else
     {
-        writefileExtensionMemberFunctionTable::iterator mfIter =
-            writefileExtensionMemberFunctionTablePtr_->find(ext);
-
-        if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
-        {
-            FatalErrorIn
-            (
-                "keyedSurface::write(const fileName&)"
-            )   << "Unknown file extension " << ext << nl << nl
-                << "Valid types are :" << endl
-                << writefileExtensionMemberFunctionTablePtr_->toc()
-                << exit(FatalError);
-        }
-
-        mfIter()(fName, surf);
+        // use selector mechanism
+        transfer(New(fName, ext, triangulate)());
+        return true;
     }
 }
 
 
-// write sorted
+// write (sorted)
 void Foam::keyedSurface::write(Ostream& os) const
 {
     const List<face>& faceLst = faces();
@@ -1051,9 +1085,10 @@ void Foam::keyedSurface::writeStats(Ostream& os) const
 
 void Foam::keyedSurface::operator=(const keyedSurface& surf)
 {
-    clearOut();
+    clear();
     faces()  = surf.faces();
     points() = surf.points();
+    regions_ = surf.regions_;
     patches_ = surf.patches_;
 }
 

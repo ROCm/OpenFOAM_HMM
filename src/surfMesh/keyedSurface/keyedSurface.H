@@ -53,7 +53,6 @@ SourceFiles
 #include "surfPatchIdentifierList.H"
 #include "surfGroupList.H"
 #include "face.H"
-#include "Keyed.H"
 #include "xfer.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -71,7 +70,6 @@ class keyedSurface;
 class meshedSurface;
 class polyBoundaryMesh;
 
-// Istream& operator>>(Istream&, keyedSurface&);
 Ostream& operator<<(Ostream&, const keyedSurface&);
 
 
@@ -88,9 +86,6 @@ class keyedSurface
 protected:
 
     // Protected Member Data
-
-        //- Typedef if this type has not already been defined
-        typedef Keyed<face> keyedFace;
 
         //- Typedef for similar code in keyedSurface and meshedSurface
         typedef face FaceType;
@@ -122,11 +117,11 @@ private:
 
     // Private member functions
 
-        //- Read OpenFOAM Surface format
-        bool read(Istream&, const bool triangulate=false);
-
         //- Disable setSize with value
         void setSize(const label, const FaceType&);
+
+        //- Read OpenFOAM Surface format
+        bool read(Istream&, const bool triangulate=false);
 
 protected:
 
@@ -184,6 +179,20 @@ public:
         //- Name of keyedSurface directory to use.
         static fileName triSurfName(const Time&);
 
+        //- Can we read this file format?
+        static bool canRead(const word& ext, const bool verbose=false);
+
+        //- Can we write this file format?
+        static bool canWrite(const word& ext, const bool verbose=false);
+
+        //- Determine the sort order from the region list.
+        //  Returns patch list and sets faceMap to indices within faceLst
+        static surfGroupList sortedRegions
+        (
+            const UList<label>& regionLst,
+            const Map<word>& patchNames,
+            labelList& faceMap
+        );
 
     // Constructors
 
@@ -244,7 +253,6 @@ public:
         //- Construct by transferring the contents from a meshedSurface
         keyedSurface(const xfer<meshedSurface>&);
 
-
         //- Construct from file name (uses extension to determine type)
         keyedSurface
         (
@@ -262,12 +270,12 @@ public:
 
         //- Construct from Istream
         keyedSurface(Istream&, const bool triangulate=false);
+
         //- Construct from objectRegistry
         keyedSurface(const Time&);
 
         //- Construct as copy
         keyedSurface(const keyedSurface&);
-
 
     // Declare run-time constructor selection table
 
@@ -323,12 +331,6 @@ public:
         //- Write to file
         static void write(const fileName&, const keyedSurface&);
 
-        //- Can we read this file format?
-        static bool canRead(const word& ext, const bool verbose=false);
-
-        //- Can we write this file format?
-        static bool canWrite(const word& ext, const bool verbose=false);
-
 
     // Member Functions
 
@@ -383,20 +385,14 @@ public:
             return patches_;
         }
 
-        //- Determine the sort order from the region list.
-        //  Returns patch list and sets faceMap to indices within faceLst
-        static surfGroupList sortedRegions
-        (
-            const List<label>& regionLst,
-            const Map<word>& patchNames,
-            labelList& faceMap
-        );
-
         //- Sort faces according to region.
         //  Returns patch list and sets faceMap to index within faces()
         surfGroupList sortedRegions(labelList& faceMap) const;
 
     // Edit
+
+        //- Clear all storage
+        virtual void clear();
 
         //- Move points
         virtual void movePoints(const pointField&);
@@ -404,24 +400,24 @@ public:
         //- Scale points. A non-positive factor is ignored
         virtual void scalePoints(const scalar&);
 
-        //- Triangulate the surface, return the number of added faces.
-        label triangulate();
+        //- Remove invalid faces
+        void cleanup(const bool verbose);
+
+        //- Check/fix duplicate/degenerate faces
+        void checkFaces(const bool verbose);
 
         //- Join the faces by removing duplicate points.
         //  Returns true if any points merged
         bool stitchFaces(const scalar tol=SMALL, const bool verbose=false);
 
-        //- Check/fix duplicate/degenerate faces
-        void checkFaces(const bool verbose);
-
-        //- Remove invalid faces
-        void cleanup(const bool verbose);
+        //- Triangulate the surface, return the number of added faces.
+        label triangulate();
 
         //- Return new surface. Returns pointMap, faceMap from
         //  subsetMeshMap
         keyedSurface subsetMesh
         (
-            const boolList& include,
+            const UList<bool>& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
@@ -434,14 +430,20 @@ public:
 
     // Read
 
-        //- Read from file. Chooses reader based on extension
+        //- Read from file. Chooses reader based on explicit extension
         bool read
         (
             const fileName&,
             const word& ext,
-            const bool triangulate=false
+            const bool triangulate
         );
 
+        //- Read from file. Chooses reader based on detected extension
+        virtual bool read
+        (
+            const fileName&,
+            const bool triangulate=false
+        );
 
     // Write
 

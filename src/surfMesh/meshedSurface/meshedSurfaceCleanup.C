@@ -122,7 +122,7 @@ bool Foam::meshedSurface::stitchFaces(const scalar tol, const bool verbose)
 
 
     // Merging points might have changed geometric factors
-    clearOut();
+    MeshStorage::clearOut();
 
     return true;
 }
@@ -256,7 +256,7 @@ void Foam::meshedSurface::checkFaces(const bool verbose)
         faceLst.setSize(newFaceI);
 
         // Topology can change because of renumbering
-        clearOut();
+        MeshStorage::clearOut();
     }
 }
 

@@ -154,6 +154,8 @@ bool Foam::fileFormats::STLfileFormat::readBINARY
     const off_t fileSize
 )
 {
+    clear();
+
     istream& is = ifs.stdStream();
 
     // Read the STL header
@@ -518,21 +520,31 @@ Foam::fileFormats::STLfileFormat::STLfileFormat
 :
     Foam::keyedSurface()
 {
+    read(fName, true);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+bool Foam::fileFormats::STLfileFormat::read
+(
+    const fileName& fName,
+    const bool
+)
+{
     off_t fileSize = Foam::size(fName);
 
     // auto-detect ascii/binary
     if (detectBINARY(fName))
     {
-        readBINARY(IFstream(fName, IOstream::BINARY)(), fileSize);
+        return readBINARY(IFstream(fName, IOstream::BINARY)(), fileSize);
     }
     else
     {
-        readASCII(IFstream(fName)(), fileSize);
+        return readASCII(IFstream(fName)(), fileSize);
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 void Foam::fileFormats::STLfileFormat::write

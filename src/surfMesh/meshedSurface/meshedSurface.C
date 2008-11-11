@@ -43,16 +43,13 @@ License
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(meshedSurface, 0);
-
 defineMemberFunctionSelectionTable
 (
     meshedSurface,
     write,
     fileExtension
 );
-
 }
 
 //  File extension for 'native' raw format
@@ -60,7 +57,7 @@ defineMemberFunctionSelectionTable
 const char * const nativeExt = "ofs";
 //! @endcond localscope
 
-// * * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::fileName Foam::meshedSurface::triSurfInstance(const Time& d)
 {
@@ -165,139 +162,98 @@ Foam::fileName Foam::meshedSurface::triSurfName(const Time& d)
     return d.path()/"constant"/typeName/foamName;
 }
 
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::meshedSurface::onePatch()
+bool Foam::meshedSurface::canRead(const word& ext, const bool verbose)
 {
-    // set single default patch
-    patches_.setSize(1);
-    patches_[0] = surfGroup
-    (
-        "patch0",
-        size(),         // patch size
-        0,              // patch start
-        0               // patch index
-    );
+    return keyedSurface::canRead(ext, verbose);
 }
 
 
-void Foam::meshedSurface::checkPatches()
+bool Foam::meshedSurface::canWrite(const word& ext, const bool verbose)
 {
-    // extra safety, ensure we have at some patches,
-    // and they cover all the faces
-    // fix start silently
-    if (patches_.size() > 1)
+    // perhaps sent an entire name
+    word fExt(ext);
+
+    string::size_type dot = ext.find_last_of(".");
+    if (dot != string::npos)
     {
-        label count = 0;
-        forAll(patches_, patchI)
-        {
-            patches_[patchI].start() = count;
-            count += patches_[patchI].size();
-        }
-
-        if (count < size())
-        {
-            WarningIn
-            (
-                "meshedSurface::checkPatches()\n"
-            )
-                << "more nFaces " << size()
-                << " than patches " << count
-                << " ... extending final patch"
-                << endl;
-
-            patches_[patches_.size()-1].size() += count - size();
-        }
-        else if (count > size())
-        {
-            FatalErrorIn
-            (
-                "meshedSurface::checkPatches()\n"
-            )
-                << "more patches " << count
-                << " than nFaces " << size()
-                << exit(FatalError);
-        }
+        fExt = ext.substr(dot+1);
     }
-    else if (patches_.size() == 1)
+
+    // handle 'native' format directly
+    if (fExt == nativeExt)
     {
-        // like onePatch, but preserve the name
-        patches_[0].start() = 0;
-        patches_[0].size() = size();
-        if (!patches_[0].name().size())
+        return true;
+    }
+
+    writefileExtensionMemberFunctionTable::iterator mfIter =
+        writefileExtensionMemberFunctionTablePtr_->find(fExt);
+
+    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    {
+        if (verbose)
         {
-            patches_[0].name() = "patch0";
+            SortableList<word> known
+            (
+                writefileExtensionMemberFunctionTablePtr_->toc()
+            );
+
+            Info<<"Unknown file extension for writing: " << fExt << nl;
+            // compact output:
+            Info<<"Valid types: ( " << nativeExt;
+            forAll(known, i)
+            {
+                Info<<" " << known[i];
+            }
+            Info<<" )" << endl;
         }
+
+        return false;
+    }
+
+    return true;
+}
+
+
+void Foam::meshedSurface::write
+(
+    const fileName& fName,
+    const meshedSurface& surf
+)
+{
+    if (debug)
+    {
+        Info<< "meshedSurface::write(const fileName&, const meshedSurface&) : "
+               "writing meshedSurface to " << fName
+            << endl;
+    }
+
+    const word ext = fName.ext();
+
+    // handle 'native' format directly
+    if (ext == nativeExt)
+    {
+        surf.write(OFstream(fName)());
     }
     else
     {
-        onePatch();
-    }
-}
+        writefileExtensionMemberFunctionTable::iterator mfIter =
+            writefileExtensionMemberFunctionTablePtr_->find(ext);
 
-
-void Foam::meshedSurface::sortFacesByRegion
-(
-    const List<label>& regionIds,
-    const Map<word>& regionNames
-)
-{
-    const List<FaceType>& unsortedFaces = faces();
-
-    if (!&regionNames || !&regionIds || regionIds.size() == 0)
-    {
-        onePatch();
-    }
-    else if (regionIds.size() == unsortedFaces.size())
-    {
-        labelList faceMap;
-        surfGroupList newPatches = keyedSurface::sortedRegions
-        (
-            regionIds,
-            regionNames,
-            faceMap
-        );
-        patches_.transfer(newPatches);
-
-        // this is somewhat like ListOps reorder and/or IndirectList
-        List<FaceType> newFaces(unsortedFaces.size());
-        forAll(newFaces, faceI)
+        if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
         {
-            newFaces[faceI] = unsortedFaces[faceMap[faceI]];
+            FatalErrorIn
+            (
+                "meshedSurface::write(const fileName&)"
+            )   << "Unknown file extension " << ext << nl << nl
+                << "Valid types are :" << endl
+                << writefileExtensionMemberFunctionTablePtr_->toc()
+                << exit(FatalError);
         }
-        faceMap.clear();
 
-        faces().transfer(newFaces);
+        mfIter()(fName, surf);
     }
 }
 
-
-// Read surf grouping, points, faces directly from Istream
-bool Foam::meshedSurface::read(Istream& is, const bool doTriangulate)
-{
-    List<surfGroup> patchLst(is);
-    is >> points() >> faces();
-
-    // copy patch info:
-    patches_.setSize(patchLst.size());
-    forAll(patchLst, patchI)
-    {
-        patches_[patchI] = surfGroup
-        (
-            patchLst[patchI],
-            patchI
-        );
-    }
-
-    if (doTriangulate)
-    {
-        triangulate();
-    }
-
-    return is.good();
-}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -326,9 +282,9 @@ Foam::meshedSurface::meshedSurface
 (
     const xfer<pointField>& pointLst,
     const xfer<List<FaceType> >& faceLst,
-    const List<label>& patchSizes,
-    const List<word>& patchNames,
-    const List<word>& patchTypes
+    const UList<label>& patchSizes,
+    const UList<word>& patchNames,
+    const UList<word>& patchTypes
 )
 :
     MeshStorage(List<FaceType>(), pointField())
@@ -360,7 +316,7 @@ Foam::meshedSurface::meshedSurface
 (
     const xfer<pointField>& pointLst,
     const xfer<List<FaceType> >& faceLst,
-    const List<label>& regionIds,
+    const UList<label>& regionIds,
     const Map<word>& regionNames
 )
 :
@@ -382,7 +338,7 @@ Foam::meshedSurface::meshedSurface
             "(\n"
             "    const xfer<pointField>&,\n"
             "    const xfer<List<FaceType> >&,\n"
-            "    const List<label>& regionIds,\n"
+            "    const UList<label>& regionIds,\n"
             "    const Map<word>& regionNames\n"
             " )\n"
         )
@@ -400,7 +356,7 @@ Foam::meshedSurface::meshedSurface
 (
     const xfer<pointField>& pointLst,
     const xfer<List<FaceType> >& faceLst,
-    const List<label>& regionIds,
+    const UList<label>& regionIds,
     const HashTable<label>& nameToRegionMapping
 )
 :
@@ -417,7 +373,7 @@ Foam::meshedSurface::meshedSurface
             "(\n"
             "    const xfer<pointField>&,\n"
             "    const xfer<List<FaceType> >&,\n"
-            "    const List<label>& regionIds,\n"
+            "    const UList<label>& regionIds,\n"
             "    const HashTable<label>& nameToRegionMapping\n"
             " )\n"
         )
@@ -628,14 +584,158 @@ Foam::meshedSurface::~meshedSurface()
 {}
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::meshedSurface::onePatch()
+{
+    // set single default patch
+    patches_.setSize(1);
+    patches_[0] = surfGroup
+    (
+        "patch0",
+        size(),         // patch size
+        0,              // patch start
+        0               // patch index
+    );
+}
+
+
+void Foam::meshedSurface::checkPatches()
+{
+    // extra safety, ensure we have at some patches,
+    // and they cover all the faces
+    // fix start silently
+    if (patches_.size() > 1)
+    {
+        label count = 0;
+        forAll(patches_, patchI)
+        {
+            patches_[patchI].start() = count;
+            count += patches_[patchI].size();
+        }
+
+        if (count < size())
+        {
+            WarningIn
+            (
+                "meshedSurface::checkPatches()\n"
+            )
+                << "more nFaces " << size()
+                << " than patches " << count
+                << " ... extending final patch"
+                << endl;
+
+            patches_[patches_.size()-1].size() += count - size();
+        }
+        else if (count > size())
+        {
+            FatalErrorIn
+            (
+                "meshedSurface::checkPatches()\n"
+            )
+                << "more patches " << count
+                << " than nFaces " << size()
+                << exit(FatalError);
+        }
+    }
+    else if (patches_.size() == 1)
+    {
+        // like onePatch, but preserve the name
+        patches_[0].start() = 0;
+        patches_[0].size() = size();
+        if (!patches_[0].name().size())
+        {
+            patches_[0].name() = "patch0";
+        }
+    }
+    else
+    {
+        onePatch();
+    }
+}
+
+
+void Foam::meshedSurface::sortFacesByRegion
+(
+    const UList<label>& regionIds,
+    const Map<word>& regionNames
+)
+{
+    const List<FaceType>& unsortedFaces = faces();
+
+    if (!&regionNames || !&regionIds || regionIds.size() == 0)
+    {
+        onePatch();
+    }
+    else if (regionIds.size() == unsortedFaces.size())
+    {
+        labelList faceMap;
+        surfGroupList newPatches = keyedSurface::sortedRegions
+        (
+            regionIds,
+            regionNames,
+            faceMap
+        );
+        patches_.transfer(newPatches);
+
+        // this is somewhat like ListOps reorder and/or IndirectList
+        List<FaceType> newFaces(unsortedFaces.size());
+        forAll(newFaces, faceI)
+        {
+            newFaces[faceI] = unsortedFaces[faceMap[faceI]];
+        }
+        faceMap.clear();
+
+        faces().transfer(newFaces);
+    }
+}
+
+
+// Read surf grouping, points, faces directly from Istream
+bool Foam::meshedSurface::read(Istream& is, const bool doTriangulate)
+{
+    List<surfGroup> patchLst(is);
+    is >> points() >> faces();
+
+    // copy patch info:
+    patches_.setSize(patchLst.size());
+    forAll(patchLst, patchI)
+    {
+        patches_[patchI] = surfGroup
+        (
+            patchLst[patchI],
+            patchI
+        );
+    }
+
+    if (doTriangulate)
+    {
+        triangulate();
+    }
+
+    return is.good();
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::meshedSurface::clear()
+{
+    MeshStorage::clearOut();
 
-//- Move points
+    points().clear();
+    faces().clear();
+    patches_.clear();
+}
+
+
 void Foam::meshedSurface::movePoints(const pointField& newPoints)
 {
     // Remove all geometry dependent data
-    clearTopology();
+    MeshStorage::clearTopology();
 
     // Adapt for new point position
     MeshStorage::movePoints(newPoints);
@@ -645,14 +745,13 @@ void Foam::meshedSurface::movePoints(const pointField& newPoints)
 }
 
 
-//- scale points
 void Foam::meshedSurface::scalePoints(const scalar& scaleFactor)
 {
     // avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
         // Remove all geometry dependent data
-        clearTopology();
+        MeshStorage::clearTopology();
 
         // Adapt for new point position
         MeshStorage::movePoints(pointField());
@@ -664,7 +763,7 @@ void Foam::meshedSurface::scalePoints(const scalar& scaleFactor)
 
 Foam::meshedSurface Foam::meshedSurface::subsetMesh
 (
-    const boolList& include,
+    const UList<bool>& include,
     labelList& pointMap,
     labelList& faceMap
 ) const
@@ -725,6 +824,8 @@ Foam::meshedSurface Foam::meshedSurface::subsetMesh
         }
     }
 
+    oldToNew.clear();
+
     // adjust patch start
     label startFaceI = 0;
     forAll(newPatches, patchI)
@@ -733,12 +834,13 @@ Foam::meshedSurface Foam::meshedSurface::subsetMesh
         startFaceI += newPatches[patchI].size();
     }
 
-    // Construct an empty subsurface and fill
-    meshedSurface subSurf;
-
-    subSurf.patches_.transfer(newPatches);
-    subSurf.points().transfer(newPoints);
-    subSurf.faces().transfer(newFaces);
+    // construct a sub-surface
+    meshedSurface subSurf
+    (
+        xferMove(newPoints),
+        xferMove(newFaces),
+        xferMove(newPatches)
+    );
 
     return subSurf;
 }
@@ -746,28 +848,30 @@ Foam::meshedSurface Foam::meshedSurface::subsetMesh
 
 void Foam::meshedSurface::transfer(meshedSurface& surf)
 {
-    clearOut();
+    clear();
+
     points().transfer(surf.points());
     faces().transfer(surf.faces());
     patches_.transfer(surf.patches_);
-    surf.clearOut();
+
+    surf.clear();
 }
 
 
 void Foam::meshedSurface::transfer(keyedSurface& surf)
 {
-    clearOut();
+    clear();
     points().transfer(surf.points());
-    faces().clear();
 
     labelList faceMap;
     surfGroupList patchLst = surf.sortedRegions(faceMap);
     patches_.transfer(patchLst);
-    surf.regions().clear();
+
+    surf.regions_.clear();
     surf.patches_.clear();
 
     List<FaceType>& oldFaces = surf.faces();
-    List<FaceType> newFaces(oldFaces.size());
+    List<FaceType>  newFaces(oldFaces.size());
 
     // this is somewhat like ListOps reorder and/or IndirectList
     forAll(newFaces, faceI)
@@ -776,61 +880,8 @@ void Foam::meshedSurface::transfer(keyedSurface& surf)
     }
 
     faces().transfer(newFaces);
-    surf.faces().clear();
-    surf.clearOut();
-}
 
-
-bool Foam::meshedSurface::canRead(const word& ext, const bool verbose)
-{
-    return keyedSurface::canRead(ext, verbose);
-}
-
-
-bool Foam::meshedSurface::canWrite(const word& ext, const bool verbose)
-{
-    // perhaps we got sent an entire name
-    word fExt(ext);
-
-    // FIXME: this looks horrible, but I don't have STL docs here
-    string::size_type dot = ext.find_last_of(".");
-    if (dot != string::npos)
-    {
-        fExt = ext.substr(dot+1);
-    }
-
-    // handle 'native' format directly
-    if (fExt == nativeExt)
-    {
-        return true;
-    }
-
-    writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(fExt);
-
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
-    {
-        if (verbose)
-        {
-            SortableList<word> known
-            (
-                writefileExtensionMemberFunctionTablePtr_->toc()
-            );
-
-            Info<<"Unknown file extension for writing: " << fExt << nl;
-            // compact output:
-            Info<<"Valid types: ( " << nativeExt;
-            forAll(known, i)
-            {
-                Info<<" " << known[i];
-            }
-            Info<<" )" << endl;
-        }
-
-        return false;
-    }
-
-    return true;
+    surf.clear();
 }
 
 
@@ -838,10 +889,12 @@ bool Foam::meshedSurface::canWrite(const word& ext, const bool verbose)
 bool Foam::meshedSurface::read
 (
     const fileName& fName,
-    const word& ext,
     const bool triangulate
 )
 {
+    clear();
+    const word ext = fName.ext();
+
     // handle 'native' format directly
     if (ext == nativeExt)
     {
@@ -856,43 +909,26 @@ bool Foam::meshedSurface::read
 }
 
 
-void Foam::meshedSurface::write
+// Read from file in given format
+bool Foam::meshedSurface::read
 (
     const fileName& fName,
-    const meshedSurface& surf
+    const word& ext,
+    const bool triangulate
 )
 {
-    if (debug)
-    {
-        Info<< "meshedSurface::write(const fileName&, const meshedSurface&) : "
-               "writing meshedSurface to " << fName
-            << endl;
-    }
-
-    const word ext = fName.ext();
+    clear();
 
     // handle 'native' format directly
     if (ext == nativeExt)
     {
-        surf.write(OFstream(fName)());
+        return read(IFstream(fName)(), triangulate);
     }
     else
     {
-        writefileExtensionMemberFunctionTable::iterator mfIter =
-            writefileExtensionMemberFunctionTablePtr_->find(ext);
-
-        if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
-        {
-            FatalErrorIn
-            (
-                "meshedSurface::write(const fileName&)"
-            )   << "Unknown file extension " << ext << nl << nl
-                << "Valid types are :" << endl
-                << writefileExtensionMemberFunctionTablePtr_->toc()
-                << exit(FatalError);
-        }
-
-        mfIter()(fName, surf);
+        // use selector mechanism
+        transfer(New(fName, ext, triangulate)());
+        return true;
     }
 }
 
@@ -946,7 +982,8 @@ void Foam::meshedSurface::writeStats(Ostream& os) const
 
 void Foam::meshedSurface::operator=(const meshedSurface& surf)
 {
-    clearOut();
+    clear();
+
     faces()  = surf.faces();
     points() = surf.points();
     patches_ = surf.patches_;

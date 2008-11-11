@@ -91,12 +91,12 @@ public:
         static autoPtr<keyedSurface> New
         (
             const fileName& fName,
-            const bool triangulate = false
+            const bool triangulate=false
         )
         {
             return autoPtr<keyedSurface>
             (
-                new OBJfileFormat(fName, triangulate)
+                new OBJfileFormat(fName,triangulate)
             );
         }
 
@@ -104,7 +104,8 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
         //- Write keyedSurface
         static void write(Ostream&, const keyedSurface&);

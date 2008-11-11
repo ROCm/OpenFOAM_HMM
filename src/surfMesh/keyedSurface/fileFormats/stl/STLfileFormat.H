@@ -72,10 +72,10 @@ class STLfileFormat
         //- Disallow default bitwise assignment
         void operator=(const STLfileFormat&);
 
-        bool detectBINARY(const fileName&);
-
         bool readASCII(IFstream&, const off_t);
         bool readBINARY(IFstream&, const off_t);
+
+        static bool detectBINARY(const fileName&);
 
         //- write face in ASCII
         static inline void writeShell
@@ -130,7 +130,7 @@ public:
         {
             return autoPtr<keyedSurface>
             (
-                new STLfileFormat(fName,triangulate)
+                new STLfileFormat(fName,true)
             );
         }
 
@@ -138,7 +138,8 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
         //- Write keyedSurface
         //  The ASCII output is sorted by patch, the binary output is unsorted

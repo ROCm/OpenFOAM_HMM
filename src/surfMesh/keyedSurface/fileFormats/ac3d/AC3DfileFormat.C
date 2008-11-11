@@ -152,8 +152,7 @@ Foam::string Foam::fileFormats::AC3DfileFormat::cueToOrDie
     {
         FatalErrorIn
         (
-            "fileFormats::AC3DfileFormat::AC3DfileFormat"
-            "(const fileName&)"
+            "fileFormats::AC3DfileFormat::read(const fileName&)"
         )
             << "Cannot find command " << cmd
             << " " << errorMsg
@@ -163,6 +162,51 @@ Foam::string Foam::fileFormats::AC3DfileFormat::cueToOrDie
     return args;
 }
 
+
+void Foam::fileFormats::AC3DfileFormat::writeHeader
+(
+    Ostream& os,
+    const List<surfGroup>& patchLst
+)
+{
+    // Write with patches as separate objects under "world" object.
+    // Header is taken over from sample file.
+    // Defines separate materials for all patches. Recycle colours.
+
+    // Define 8 standard colours as r,g,b components
+    static scalar colourMap[] =
+    {
+        1, 1, 1,
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1,
+        1, 1, 0,
+        0, 1, 1,
+        1, 0, 1,
+        0.5, 0.5, 1
+    };
+
+    // Write header. Define materials.
+    os  << "AC3Db" << nl;
+
+    forAll(patchLst, patchI)
+    {
+        const word& pName = patchLst[patchI].name();
+
+        label colourI = patchI % 8;
+        label colourCompI = 3 * colourI;
+
+        os  << "MATERIAL \"" << pName << "Mat\" rgb "
+            << colourMap[colourCompI] << ' ' << colourMap[colourCompI+1]
+            << ' ' << colourMap[colourCompI+2]
+            << "  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10"
+            << "  trans 0"
+            << nl;
+    }
+
+    os  << "OBJECT world" << nl
+        << "kids " << patchLst.size() << endl;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -181,14 +225,25 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
 :
     Foam::keyedSurface()
 {
+    read(fName,triangulate);
+}
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::AC3DfileFormat::read
+(
+    const fileName& fName,
+    const bool triangulate
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::AC3DfileFormat::AC3DfileFormat"
-            "(const fileName&)"
+            "fileFormats::AC3DfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -219,8 +274,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
     {
         FatalErrorIn
         (
-            "fileFormats::AC3DfileFormat::AC3DfileFormat"
-            "(const fileName&)"
+            "fileFormats::AC3DfileFormat::read(const fileName&)"
         )
             << "Cannot find \"OBJECT world\" in file " << fName
             << exit(FatalError);
@@ -260,8 +314,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
             {
                 FatalErrorIn
                 (
-                    "fileFormats::AC3DfileFormat::AC3DfileFormat"
-                    "(const fileName&)"
+                    "fileFormats::AC3DfileFormat::read(const fileName&)"
                 )
                     << "Did not read up to \"kids 0\" while reading patch "
                     << patchI << " from file " << fName
@@ -289,7 +342,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
 
                 WarningIn
                 (
-                    "fileFormats::AC3DfileFormat::AC3DfileFormat"
+                    "fileFormats::AC3DfileFormat::read"
                     "(const fileName&)"
                 )
                     << "rot (rotation tensor) command not implemented"
@@ -388,8 +441,7 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
                 {
                     FatalErrorIn
                     (
-                        "fileFormats::AC3DfileFormat::AC3DfileFormat"
-                        "(const fileName&)"
+                        "fileFormats::AC3DfileFormat::read(const fileName&)"
                     )
                         << "Can only read objects without kids."
                         << " Encountered " << nKids << " kids when"
@@ -411,54 +463,8 @@ Foam::fileFormats::AC3DfileFormat::AC3DfileFormat
 
     setPatches(regionNames);
     stitchFaces(SMALL);
-}
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::fileFormats::AC3DfileFormat::writeHeader
-(
-    Ostream& os,
-    const List<surfGroup>& patchLst
-)
-{
-    // Write with patches as separate objects under "world" object.
-    // Header is taken over from sample file.
-    // Defines separate materials for all patches. Recycle colours.
-
-    // Define 8 standard colours as r,g,b components
-    static scalar colourMap[] =
-    {
-        1, 1, 1,
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1,
-        1, 1, 0,
-        0, 1, 1,
-        1, 0, 1,
-        0.5, 0.5, 1
-    };
-
-    // Write header. Define materials.
-    os  << "AC3Db" << nl;
-
-    forAll(patchLst, patchI)
-    {
-        const word& pName = patchLst[patchI].name();
-
-        label colourI = patchI % 8;
-        label colourCompI = 3 * colourI;
-
-        os  << "MATERIAL \"" << pName << "Mat\" rgb "
-            << colourMap[colourCompI] << ' ' << colourMap[colourCompI+1]
-            << ' ' << colourMap[colourCompI+2]
-            << "  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10"
-            << "  trans 0"
-            << nl;
-    }
-
-    os  << "OBJECT world" << nl
-        << "kids " << patchLst.size() << endl;
+    return true;
 }
 
 

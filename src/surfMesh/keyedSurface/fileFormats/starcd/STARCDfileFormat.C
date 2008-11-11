@@ -84,7 +84,7 @@ bool Foam::fileFormats::STARCDfileFormat::readHeader
     {
         FatalErrorIn
         (
-            "fileFormats::STARCDfileFormat::readHeader()"
+            "fileFormats::STARCDfileFormat::readHeader(...)"
         )
             << "cannot read " << signature  << "  " << is.name()
             << abort(FatalError);
@@ -214,11 +214,25 @@ Body:
 Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
 (
     const fileName& fName,
-    const bool triangulation
+    const bool triangulate
 )
 :
     Foam::keyedSurface()
 {
+    read(fName, triangulate);
+}
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+bool Foam::fileFormats::STARCDfileFormat::read
+(
+    const fileName& fName,
+    const bool triangulate
+)
+{
+    clear();
+
     fileName baseName = fName.lessExt();
     autoPtr<IFstream> isPtr;
 
@@ -236,7 +250,7 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
     {
         FatalErrorIn
         (
-            "fileFormats::STARCDfileFormat::STARCDfileFormat(const fileName&)"
+            "fileFormats::STARCDfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << (baseName + ".vrt")
             << exit(FatalError);
@@ -286,7 +300,7 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
     {
         FatalErrorIn
         (
-            "fileFormats::STARCDfileFormat::STARCDfileFormat(const fileName&)"
+            "fileFormats::STARCDfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << (baseName + ".cel")
             << exit(FatalError);
@@ -342,7 +356,7 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
                 starLabels[i] = mapToFoamPointId[starLabels[i]];
             }
 
-            if (triangulation && nLabels > 3)
+            if (triangulate && nLabels > 3)
             {
                 face f
                 (
@@ -388,9 +402,10 @@ Foam::fileFormats::STARCDfileFormat::STARCDfileFormat
     regions().transfer(regionLst);
 
     setPatches(regionNames);
+
+    return true;
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::STARCDfileFormat::write
 (

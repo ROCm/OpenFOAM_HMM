@@ -88,7 +88,7 @@ public:
         {
             return autoPtr<keyedSurface>
             (
-                new GTSfileFormat(fName, triangulate)
+                new GTSfileFormat(fName,true)
             );
         }
 
@@ -96,7 +96,8 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
         //- Write keyedSurface
         static void write(Ostream&, const keyedSurface&);

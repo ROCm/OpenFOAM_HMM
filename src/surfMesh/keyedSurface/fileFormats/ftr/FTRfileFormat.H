@@ -84,7 +84,6 @@ class FTRfileFormat
         friend Istream& operator>>(Istream& is, ftrPatch& p)
         {
             is >> p.name_ >> p.type_;
-
             return is;
         }
     };
@@ -110,9 +109,14 @@ public:
         {
             return autoPtr<keyedSurface>
             (
-                new FTRfileFormat(fName, triangulate)
+                new FTRfileFormat(fName,true)
             );
         }
+
+    // Member Functions
+
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
 };
 

@@ -25,7 +25,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FTRfileFormat.H"
-#include "clock.H"
+#include "Keyed.H"
+#include "triFace.H"
 #include "IFstream.H"
 #include "IStringStream.H"
 #include "addToRunTimeSelectionTable.H"
@@ -64,13 +65,26 @@ Foam::fileFormats::FTRfileFormat::FTRfileFormat
 :
     Foam::keyedSurface()
 {
+    read(fName,true);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::FTRfileFormat::read
+(
+    const fileName& fName,
+    const bool
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::FTRfileFormat::FTRfileFormat(const fileName&)"
+            "fileFormats::FTRfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -82,16 +96,17 @@ Foam::fileFormats::FTRfileFormat::FTRfileFormat
     // transfer to normal list
     points().transfer(pointLst);
 
-    // read face with keys
-    List<keyedFace> readFaces(is);
+    // read faces with keys
+    List<Keyed<triFace> > readFaces(is);
 
-    List<face>  faceLst(readFaces.size());
-    List<label> regionLst(readFaces.size());
+    List<FaceType>  faceLst(readFaces.size());
+    List<label>     regionLst(readFaces.size());
 
     // disentangle faces/keys - already triangulated
     forAll(readFaces, faceI)
     {
-        faceLst[faceI].transfer(readFaces[faceI]);
+        // unfortunately cannot transfer to save memory
+        faceLst[faceI]   = readFaces[faceI];
         regionLst[faceI] = readFaces[faceI].key();
     }
 
@@ -105,6 +120,8 @@ Foam::fileFormats::FTRfileFormat::FTRfileFormat
     }
 
     setPatches(regionNames, readPatches.size() - 1);
+
+    return true;
 }
 
 // ************************************************************************* //

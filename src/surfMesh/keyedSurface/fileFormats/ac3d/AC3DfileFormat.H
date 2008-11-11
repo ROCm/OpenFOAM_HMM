@@ -116,7 +116,7 @@ public:
         {
             return autoPtr<keyedSurface>
             (
-                new AC3DfileFormat(fName, triangulate)
+                new AC3DfileFormat(fName,triangulate)
             );
         }
 
@@ -124,7 +124,8 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
         //- Write keyedSurface
         static void write(Ostream&, const keyedSurface&);

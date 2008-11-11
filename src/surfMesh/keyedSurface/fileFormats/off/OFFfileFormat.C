@@ -130,13 +130,26 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
 :
     keyedSurface()
 {
+    read(fName,triangulate);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::OFFfileFormat::read
+(
+    const fileName& fName,
+    const bool triangulate
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::OFFfileFormat(const fileName&)"
+            "fileFormats::OFFfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -148,7 +161,7 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
     {
         FatalErrorIn
         (
-            "fileFormats::OFFfileFormat(const fileName&)"
+            "fileFormats::OFFfileFormat::read(const fileName&)"
         )
             << "OFF file " << fName << " does not start with 'OFF'"
             << exit(FatalError);
@@ -230,10 +243,8 @@ Foam::fileFormats::OFFfileFormat::OFFfileFormat
     regions() = 0;
 
     setPatches(0);
+    return true;
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 void Foam::fileFormats::OFFfileFormat::write

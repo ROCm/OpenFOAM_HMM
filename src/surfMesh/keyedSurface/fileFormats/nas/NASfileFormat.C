@@ -117,13 +117,26 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
 :
     Foam::keyedSurface()
 {
+    read(fName,triangulate);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::NASfileFormat::read
+(
+    const fileName& fName,
+    const bool triangulate
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::NASfileFormat::NASfileFormat(const fileName&)"
+            "fileFormats::NASfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -378,8 +391,7 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
             {
                 FatalErrorIn
                 (
-                    "fileFormats::NASfileFormat::NASfileFormat"
-                    "(const fileName&)"
+                    "fileFormats::NASfileFormat::read(const fileName&)"
                 )
                     << "Expected continuation symbol '*' when reading GRID*"
                     << " (double precision coordinate) output" << nl
@@ -452,8 +464,8 @@ Foam::fileFormats::NASfileFormat::NASfileFormat
     faces().transfer(faceLst);
 
     setPatches(regionNames);
-}
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+    return true;
+}
 
 // ************************************************************************* //

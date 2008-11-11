@@ -79,23 +79,34 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat()
     Foam::keyedSurface()
 {}
 
-
 Foam::fileFormats::GTSfileFormat::GTSfileFormat
 (
     const fileName& fName,
-    const bool triangulate
+    const bool
 )
 :
     Foam::keyedSurface()
 {
+    read(fName,true);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::GTSfileFormat::read
+(
+    const fileName& fName,
+    const bool
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::GTSfileFormat::GTSfileFormat"
-            "(const fileName&)"
+            "fileFormats::GTSfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -195,8 +206,7 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
         {
             FatalErrorIn
             (
-                "fileFormats::GTSfileFormat::GTSfileFormat"
-                "(const fileName&)"
+                "fileFormats::GTSfileFormat::read(const fileName&)"
             )
                 << "Edges 0 and 1 of triangle " << faceI
                 << " do not share a point.\n"
@@ -213,8 +223,7 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
         {
             FatalErrorIn
             (
-                "fileFormats::GTSfileFormat::GTSfileFormat"
-                "(const fileName&)"
+                "fileFormats::GTSfileFormat::read(const fileName&)"
             )
                 << "Edges 1 and 2 of triangle " << faceI
                 << " do not share a point.\n"
@@ -229,8 +238,7 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
         {
             FatalErrorIn
             (
-                "fileFormats::GTSfileFormat::GTSfileFormat"
-                "(const fileName&)"
+                "fileFormats::GTSfileFormat::read(const fileName&)"
             )
                 << "Edges of triangle " << faceI
                 << " reference more than three points.\n"
@@ -246,10 +254,10 @@ Foam::fileFormats::GTSfileFormat::GTSfileFormat
 
     setPatches(maxPatch);
     // stitchFaces(SMALL);
+
+    return true;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::GTSfileFormat::write
 (

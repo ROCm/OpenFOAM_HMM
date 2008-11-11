@@ -94,7 +94,7 @@ public:
         {
             return autoPtr<keyedSurface>
             (
-                new TRIfileFormat(fName, triangulate)
+                new TRIfileFormat(fName,true)
             );
         }
 
@@ -102,7 +102,8 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
         //- Write keyedSurface
         static void write(Ostream&, const keyedSurface&);

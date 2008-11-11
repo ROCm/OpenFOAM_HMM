@@ -49,7 +49,6 @@ SourceFiles
 #include "boolList.H"
 #include "surfGroupList.H"
 #include "face.H"
-#include "Keyed.H"
 #include "xfer.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -67,7 +66,6 @@ class meshedSurface;
 class polyBoundaryMesh;
 class surfMesh;
 
-Istream& operator>>(Istream&, meshedSurface&);
 Ostream& operator<<(Ostream&, const meshedSurface&);
 
 /*---------------------------------------------------------------------------*\
@@ -83,9 +81,6 @@ class meshedSurface
 protected:
 
     // Protected Member Data
-
-        //- Typedef if this type has not already been defined
-        typedef Keyed<face> keyedFace;
 
         //- Typedef for similar code in keyedSurface and meshedSurface
         typedef face FaceType;
@@ -113,14 +108,14 @@ private:
 
     // Private member functions
 
-        //- Sort faces by regionIds and set patches
-        void sortFacesByRegion(const List<label>&, const Map<word>&);
-
         //- set a single patch
         void onePatch();
 
         //- basic sanity check on patches
         void checkPatches();
+
+        //- Sort faces by regionIds and set patches
+        void sortFacesByRegion(const UList<label>&, const Map<word>&);
 
         //- Read OpenFOAM Surface format
         bool read(Istream&, const bool triangulate=false);
@@ -155,6 +150,12 @@ public:
         //- Name of meshedSurface directory to use.
         static fileName triSurfName(const Time&);
 
+        //- Can we read this file format?
+        static bool canRead(const word& ext, const bool verbose=false);
+
+        //- Can we write this file format?
+        static bool canWrite(const word& ext, const bool verbose=false);
+
 
     // Constructors
 
@@ -175,9 +176,9 @@ public:
         (
             const xfer<pointField>&,
             const xfer<List<face> >&,
-            const List<label>& patchSizes,
-            const List<word>& patchNames,
-            const List<word>& patchTypes
+            const UList<label>& patchSizes,
+            const UList<word>& patchNames,
+            const UList<word>& patchTypes
         );
 
         //- Construct by transferring points, faces.
@@ -187,7 +188,7 @@ public:
         (
             const xfer<pointField>&,
             const xfer<List<face> >&,
-            const List<label>& regionIds = List<label>::null(),
+            const UList<label>& regionIds = UList<label>::null(),
             const Map<word>& regionNames = Map<word>::null()
         );
 
@@ -197,7 +198,7 @@ public:
         (
             const xfer<pointField>&,
             const xfer<List<face> >&,
-            const List<label>& regionIds,
+            const UList<label>& regionIds,
             const HashTable<label>& nameToRegionMapping
         );
 
@@ -219,7 +220,6 @@ public:
 
         //- Construct by transferring the contents from a meshedSurface
         meshedSurface(const xfer<meshedSurface>&);
-
 
         //- Construct from file name (uses extension to determine type)
         meshedSurface
@@ -286,12 +286,6 @@ public:
         //- Write to file
         static void write(const fileName&, const meshedSurface&);
 
-        //- Can we read this file format?
-        static bool canRead(const word& ext, const bool verbose=false);
-
-        //- Can we write this file format?
-        static bool canWrite(const word& ext, const bool verbose=false);
-
 
     // Member Functions
 
@@ -339,6 +333,9 @@ public:
 
     // Edit
 
+        //- Clear all storage
+        virtual void clear();
+
         //- Move points
         virtual void movePoints(const pointField&);
 
@@ -363,7 +360,7 @@ public:
         // Returns pointMap, faceMap from subsetMeshMap
         meshedSurface subsetMesh
         (
-            const boolList& include,
+            const UList<bool>& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
@@ -377,11 +374,19 @@ public:
 
     // Read
 
-        //- Read from file. Chooses reader based on extension
+        //- Read from file. Chooses reader based on explicit extension
         bool read
         (
             const fileName&,
             const word& ext,
+            const bool triangulate=false
+        );
+
+
+        //- Read from file. Chooses reader based on detected extension
+        virtual bool read
+        (
+            const fileName&,
             const bool triangulate=false
         );
 
@@ -410,7 +415,6 @@ public:
 
     // Ostream Operator
 
-        // friend Istream& operator>>(Istream&, meshedSurface&);
         friend Ostream& operator<<(Ostream&, const meshedSurface&);
 };
 

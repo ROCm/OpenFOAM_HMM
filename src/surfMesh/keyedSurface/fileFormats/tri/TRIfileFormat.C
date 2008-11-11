@@ -108,18 +108,31 @@ Foam::fileFormats::TRIfileFormat::TRIfileFormat()
 Foam::fileFormats::TRIfileFormat::TRIfileFormat
 (
     const fileName& fName,
-    const bool triangulate
+    const bool
 )
 :
     Foam::keyedSurface()
 {
+    read(fName, true);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::TRIfileFormat::read
+(
+    const fileName& fName,
+    const bool
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::TRIfileFormat(const fileName&)"
+            "fileFormats::TRIfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -232,10 +245,10 @@ Foam::fileFormats::TRIfileFormat::TRIfileFormat
 
     setPatches(groupToPatch);
     stitchFaces(SMALL);
+
+    return true;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::TRIfileFormat::write
 (

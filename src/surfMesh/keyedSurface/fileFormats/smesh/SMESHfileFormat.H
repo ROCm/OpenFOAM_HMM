@@ -107,7 +107,6 @@ public:
             write(OFstream(fName)(), surf);
         }
 
-
         //- Write object
         virtual void write(Ostream& os) const
         {

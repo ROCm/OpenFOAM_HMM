@@ -125,13 +125,26 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
 :
     Foam::keyedSurface()
 {
+    read(fName,triangulate);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::OBJfileFormat::read
+(
+    const fileName& fName,
+    const bool triangulate
+)
+{
+    clear();
     IFstream is(fName);
 
     if (!is.good())
     {
         FatalErrorIn
         (
-            "fileFormats::OBJfileFormat::OBJfileFormat(const fileName&)"
+            "fileFormats::OBJfileFormat::read(const fileName&)"
         )
             << "Cannot read file " << fName
             << exit(FatalError);
@@ -274,10 +287,10 @@ Foam::fileFormats::OBJfileFormat::OBJfileFormat
     regions().transfer(regionLst);
 
     setPatches(groupToPatch);
+
+    return true;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fileFormats::OBJfileFormat::write
 (

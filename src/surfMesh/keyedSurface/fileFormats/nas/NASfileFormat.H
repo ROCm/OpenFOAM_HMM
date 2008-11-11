@@ -105,6 +105,9 @@ public:
 
     // Member Functions
 
+        //- Read from a file
+        virtual bool read(const fileName&, const bool triangulate);
+
 };
 
 

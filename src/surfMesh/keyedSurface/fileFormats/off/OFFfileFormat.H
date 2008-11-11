@@ -76,8 +76,8 @@ class OFFfileFormat
 
         static void writeHead
         (
-            Ostream&, 
-            const pointField&, 
+            Ostream&,
+            const pointField&,
             const List<FaceType>&,
             const List<surfGroup>&
         );
@@ -111,7 +111,8 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Read from file
+        virtual bool read(const fileName&, const bool triangulate);
 
         //- Write keyedSurface
         static void write(Ostream&, const keyedSurface&);
