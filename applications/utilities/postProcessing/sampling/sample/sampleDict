@@ -155,19 +155,23 @@ surfaces
         // Optional: whether to leave as faces (=default) or triangulate
     }
 
-    constantIso
-    {
-        name            isoSurface;
-        isoField        rho;
-        isoValue        0.5;
-        interpolate     false
-    }
     interpolatedIso
     {
-        name            isoSurface;
+        // Iso surface for interpolated values only
+        type            isoSurface;
         isoField        rho;
         isoValue        0.5;
         interpolate     true;
+        //regularise      false;    //optional: do not simplify
+    }
+    constantIso
+    {
+        // Iso surface for constant values. Guarantees triangles to not
+        // cross cells.
+        type            isoSurfaceCell;
+        isoField        rho;
+        isoValue        0.5;
+        interpolate     false;
         //regularise      false;    //optional: do not simplify
     }
 );

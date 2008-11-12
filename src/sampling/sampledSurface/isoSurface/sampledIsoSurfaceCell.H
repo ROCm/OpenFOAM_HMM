@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sampledIsoSurface
+    Foam::sampledIsoSurfaceCell
 
 Description
     A sampledSurface defined by a surface of iso value. Always triangulated.
@@ -31,15 +31,15 @@ Description
     only if time changes.
 
 SourceFiles
-    sampledIsoSurface.C
+    sampledIsoSurfaceCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledIsoSurface_H
-#define sampledIsoSurface_H
+#ifndef sampledIsoSurfaceCell_H
+#define sampledIsoSurfaceCell_H
 
 #include "sampledSurface.H"
-#include "isoSurface.H"
+#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,12 +47,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledIsoSurface Declaration
+                       Class sampledIsoSurfaceCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledIsoSurface
+class sampledIsoSurfaceCell
 :
-    public sampledSurface
+    public sampledSurface,
+    public triSurface
 {
     // Private data
 
@@ -71,8 +72,6 @@ class sampledIsoSurface
         //- zone name (if restricted to zones)
         word zoneName_;
 
-        mutable autoPtr<isoSurface> surfPtr_;
-
         //- triangles converted to faceList
         mutable autoPtr<faceList> facesPtr_;
 
@@ -82,20 +81,11 @@ class sampledIsoSurface
             //- Time at last call
             mutable label storedTimeIndex_;
 
-            //- Cached volfield
-            mutable autoPtr<volScalarField> storedVolFieldPtr_;
-            mutable const volScalarField* volFieldPtr_;
-
-            //- Cached pointfield
-            mutable autoPtr<pointScalarField> storedPointFieldPtr_;
-            mutable const pointScalarField* pointFieldPtr_;
-
+            //- For every triangle the original cell in mesh
+            mutable labelList meshCells_;
 
 
     // Private Member Functions
-
-        //- Get fields needed to recreate iso surface.
-        void getIsoFields() const;
 
         //- Create iso surface (if time has changed)
         void createGeometry() const;
@@ -116,13 +106,13 @@ class sampledIsoSurface
 public:
 
     //- Runtime type information
-    TypeName("sampledIsoSurface");
+    TypeName("sampledIsoSurfaceCell");
 
 
     // Constructors
 
         //- Construct from dictionary
-        sampledIsoSurface
+        sampledIsoSurfaceCell
         (
             const word& name,
             const polyMesh& mesh,
@@ -132,7 +122,7 @@ public:
 
     // Destructor
 
-        virtual ~sampledIsoSurface();
+        virtual ~sampledIsoSurfaceCell();
 
 
     // Member Functions
@@ -140,7 +130,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return surface().points();
+            return triSurface::points();
         }
 
         //- Faces of surface
@@ -148,7 +138,7 @@ public:
         {
             if (!facesPtr_.valid())
             {
-                const triSurface& s = surface();
+                const triSurface& s = *this;
 
                 facesPtr_.reset(new faceList(s.size()));
 
@@ -160,17 +150,9 @@ public:
             return facesPtr_;
         }
 
+
         //- Correct for mesh movement and/or field changes
         virtual void correct(const bool meshChanged);
-
-
-        const isoSurface& surface() const
-        {
-            return surfPtr_();
-        }
-
-        //- Lookup or read isoField. Sets volFieldPtr_ and pointFieldPtr_.
-        void getIsoField();
 
 
         //- sample field on surface
@@ -246,7 +228,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "sampledIsoSurfaceTemplates.C"
+#   include "sampledIsoSurfaceCellTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

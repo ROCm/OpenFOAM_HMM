@@ -24,7 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sampledIsoSurface.H"
+#include "sampledIsoSurfaceCell.H"
+#include "isoSurface.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
@@ -33,46 +34,55 @@ License
 
 template <class Type>
 Foam::tmp<Foam::Field<Type> >
-Foam::sampledIsoSurface::sampleField
+Foam::sampledIsoSurfaceCell::sampleField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
     // Recreate geometry if time has changed
     createGeometry();
-    return tmp<Field<Type> >(new Field<Type>(vField, surface().meshCells()));
+
+    return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
 }
 
 
 template <class Type>
 Foam::tmp<Foam::Field<Type> >
-Foam::sampledIsoSurface::interpolateField
+Foam::sampledIsoSurfaceCell::interpolateField
 (
     const interpolation<Type>& interpolator
 ) const
 {
-    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
-
-    // Get fields to sample. Assume volPointInterpolation!
-    const GeometricField<Type, fvPatchField, volMesh>& volFld =
-        interpolator.psi();
-
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > pointFld
-    (
-        volPointInterpolation::New(fvm).interpolate(volFld)
-    );
-
     // Recreate geometry if time has changed
     createGeometry();
 
-    // Sample.
-    return surface().interpolate
-    (
-        *volFieldPtr_,
-        *pointFieldPtr_,
-        volFld,
-        pointFld()
-    );
+    // One value per point
+    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
+    Field<Type>& values = tvalues();
+
+    boolList pointDone(points().size(), false);
+
+    forAll(faces(), cutFaceI)
+    {
+        const face& f = faces()[cutFaceI];
+
+        forAll(f, faceVertI)
+        {
+            label pointI = f[faceVertI];
+
+            if (!pointDone[pointI])
+            {
+                values[pointI] = interpolator.interpolate
+                (
+                    points()[pointI],
+                    meshCells_[cutFaceI]
+                );
+                pointDone[pointI] = true;
+            }
+        }
+    }
+
+    return tvalues;
 }
 
 
