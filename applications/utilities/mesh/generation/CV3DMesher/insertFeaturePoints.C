@@ -614,7 +614,7 @@ void Foam::CV3D::reinsertFeaturePoints()
             if (nVert == number_of_vertices())
             {
                 FatalErrorIn("Foam::CV3D::reinsertFeaturePoints")
-                << "Failed to reinsert feature point " << topoint(fPt)
+                    << "Failed to reinsert feature point " << topoint(fPt)
                     << endl;
             }
 

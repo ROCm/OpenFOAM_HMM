@@ -135,6 +135,10 @@ public:
         return type_;
     }
 
+    inline bool uninitialised() const
+    {
+        return type_ == INTERNAL_POINT && index_ == INTERNAL_POINT;
+    }
 
     //- Is point a far-point
     inline bool farPoint() const

@@ -814,7 +814,7 @@ void Foam::CV3D::insertEdgePointGroups
 
 void Foam::CV3D::insertSurfaceNearestPointPairs()
 {
-    Info<< "insertSurfaceNearestPointPairs: " << nl << endl;
+    Info<< nl << "insertSurfaceNearestPointPairs: " << endl;
 
     label nSurfacePointsEst = number_of_vertices();
 

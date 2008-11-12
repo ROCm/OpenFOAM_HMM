@@ -136,8 +136,8 @@ void Foam::CV3D::writeTriangles(const fileName& fName, bool internalOnly) const
 
         if(writeFacet)
         {
-                str << "f "
-                       << vertexMap[c->vertex(facetIndices[0])->index()] + 1
+            str << "f "
+                << vertexMap[c->vertex(facetIndices[0])->index()] + 1
                 << ' ' << vertexMap[c->vertex(facetIndices[1])->index()] + 1
                 << ' ' << vertexMap[c->vertex(facetIndices[2])->index()] + 1
                 << nl;

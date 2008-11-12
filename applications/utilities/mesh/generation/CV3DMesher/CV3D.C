@@ -58,7 +58,7 @@ void Foam::CV3D::reinsertPoints(const pointField& points)
     {
         const point& p = points[i];
 
-            insert(toPoint(p))->index() = nVert++;
+        insert(toPoint(p))->index() = nVert++;
     }
 
     Info<< nVert << " vertices reinserted" << endl;
@@ -158,7 +158,6 @@ void Foam::CV3D::insertPoints
         assert(is_valid());
 
         writeTriangles("initial_triangles.obj", true);
-//         writeFaces("initial_faces.obj", true);
     }
 }
 
@@ -183,10 +182,12 @@ void Foam::CV3D::insertPoints(const fileName& pointFileName)
 
 void Foam::CV3D::insertGrid()
 {
-    Info<< "insertInitialGrid: ";
+    Info<< nl << "Inserting initial grid." << endl;
 
     startOfInternalPoints_ = number_of_vertices();
     label nVert = startOfInternalPoints_;
+
+    Info<< nl << nVert << " existing vertices." << endl;
 
     scalar x0 = qSurf_.bb().min().x();
     scalar xR = qSurf_.bb().max().x() - x0;
@@ -206,6 +207,38 @@ void Foam::CV3D::insertGrid()
 
     Random rndGen(1321);
     scalar pert = controls_.randomPerturbation*cmptMin(delta);
+
+    // for (int i=0; i<ni; i++)
+    // {
+    //     for (int j=0; j<nj; j++)
+    //     {
+    //         for (int k=0; k<nk; k++)
+    //         {
+    //             point p
+    //             (
+    //                 x0 + i*delta.x(),
+    //                 y0 + j*delta.y(),
+    //                 z0 + k*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 insert(Point(p.x(), p.y(), p.z()))->index() = nVert++;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // Info<< nVert -  startOfInternalPoints_ << " vertices inserted" << endl;
+
+    std::vector<Point> initialPoints;
 
     for (int i=0; i<ni; i++)
     {
@@ -229,62 +262,32 @@ void Foam::CV3D::insertGrid()
 
                 if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
                 {
-                    insert(Point(p.x(), p.y(), p.z()))->index() = nVert++;
+                    initialPoints.push_back(Point(p.x(), p.y(), p.z()));
                 }
             }
         }
     }
 
-    Info<< nVert << " vertices inserted" << nl << endl;
+    Info<< nl << initialPoints.size() << " vertices to insert." << endl;
 
-    // std::vector<Point> initialPoints;
+    // using the range insert (it is faster than inserting points one by one)
+    insert(initialPoints.begin(), initialPoints.end());
 
-    // for (int i=0; i<ni; i++)
-    // {
-    //     for (int j=0; j<nj; j++)
-    //     {
-    //         for (int k=0; k<nk; k++)
-    //         {
-    //             point p1
-    //             (
-    //                 x0 + i*delta.x(),
-    //                 y0 + j*delta.y(),
-    //                 z0 + k*delta.z()
-    //             );
+    Info<< nl << number_of_vertices() - startOfInternalPoints_
+        << " vertices inserted." << endl;
 
-    //             point p2 = p1 + 0.5*delta;
-
-    //             if (controls_.randomiseInitialGrid)
-    //             {
-    //                 p1.x() += pert*(rndGen.scalar01() - 0.5);
-    //                 p1.y() += pert*(rndGen.scalar01() - 0.5);
-    //                 p1.z() += pert*(rndGen.scalar01() - 0.5);
-    //             }
-
-    //             if (qSurf_.wellInside(p1, 0.5*controls_.minCellSize2))
-    //             {
-    //                 initialPoints.push_back(Point(p1.x(), p1.y(), p1.z()));
-    //             }
-
-    //             if (controls_.randomiseInitialGrid)
-    //             {
-    //                 p2.x() += pert*(rndGen.scalar01() - 0.5);
-    //                 p2.y() += pert*(rndGen.scalar01() - 0.5);
-    //                 p2.z() += pert*(rndGen.scalar01() - 0.5);
-    //             }
-
-    //             if (qSurf_.wellInside(p2, 0.5*controls_.minCellSize2))
-    //             {
-    //                 initialPoints.push_back(Point(p2.x(), p2.y(), p2.z()));
-    //             }
-    //         }
-    //     }
-    // }
-
-    // Info<< initialPoints.size() << " vertices inserted" << nl << endl;
-
-    // // using the range insert (it is faster than inserting points one by one)
-    // insert(initialPoints.begin(), initialPoints.end());
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->uninitialised())
+        {
+            vit->index() = nVert++;
+        }
+    }
 
     if (controls_.writeInitialTriangulation)
     {
