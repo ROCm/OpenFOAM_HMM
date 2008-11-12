@@ -60,6 +60,7 @@ SourceFiles
 #include "plane.H"
 #include "triSurfaceTools.H"
 #include "mathematicalConstants.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
