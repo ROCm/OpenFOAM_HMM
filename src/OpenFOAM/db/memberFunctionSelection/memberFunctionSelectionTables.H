@@ -79,7 +79,7 @@ Description
         }                                                                     \
     };                                                                        \
                                                                               \
-    /* Table MemberFunction called from the table add function */             \
+    /* Table memberFunction called from the table add function */             \
     static void construct##memberFunction##argNames##MemberFunctionTables();  \
                                                                               \
     /* Table destructor called from the table add function destructor */      \
@@ -89,7 +89,7 @@ Description
 #define defineMemberFunctionSelectionTableMemberFunction\
 (baseType,memberFunction,argNames)                                            \
                                                                               \
-    /* Table MemberFunction called from the table add function */             \
+    /* Table memberFunction called from the table add function */             \
     void baseType::construct##memberFunction##argNames##MemberFunctionTables()\
     {                                                                         \
         static bool constructed = false;                                      \
@@ -119,14 +119,14 @@ Description
 #define defineMemberFunctionSelectionTablePtr\
 (baseType,memberFunction,argNames)                                            \
                                                                               \
-    /* Define the constructor function table */                               \
+    /* Define the memberFunction table */                                     \
     baseType::memberFunction##argNames##MemberFunctionTable*                  \
         baseType::memberFunction##argNames##MemberFunctionTablePtr_ = NULL
 
 #define defineTemplateMemberFunctionSelectionTablePtr\
 (baseType,memberFunction,argNames)                                            \
                                                                               \
-    /* Define the constructor function table */                               \
+    /* Define the memberFunction table */                                     \
     typename baseType::memberFunction##argNames##MemberFunctionTable*         \
         baseType::memberFunction##argNames##MemberFunctionTablePtr_ = NULL
 

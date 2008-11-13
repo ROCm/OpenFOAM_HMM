@@ -41,104 +41,104 @@ Description
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define declareRunTimeSelectionTable\
-(autoPtr,baseType,argNames,argList,parList)                             \
-                                                                        \
-    /* Construct from argList function pointer type */                  \
-    typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;       \
-                                                                        \
-    /* Construct from argList function table type */                    \
-    typedef HashTable<argNames##ConstructorPtr, word, string::hash>     \
-        argNames##ConstructorTable;                                     \
-                                                                        \
-    /* Construct from argList function pointer table pointer */         \
-    static argNames##ConstructorTable* argNames##ConstructorTablePtr_;  \
-                                                                        \
-    /* Class to add constructor from argList to table */                \
-    template<class baseType##Type>                                      \
-    class add##argNames##ConstructorToTable                             \
-    {                                                                   \
-    public:                                                             \
-                                                                        \
-        static autoPtr<baseType> New argList                            \
-        {                                                               \
-            return autoPtr<baseType>(new baseType##Type parList);       \
-        }                                                               \
-                                                                        \
-        add##argNames##ConstructorToTable                               \
-        (                                                               \
-            const word& lookup = baseType##Type::typeName               \
-        )                                                               \
-        {                                                               \
-            construct##argNames##ConstructorTables();                   \
-            argNames##ConstructorTablePtr_->insert(lookup, New);        \
-        }                                                               \
-                                                                        \
-        ~add##argNames##ConstructorToTable()                            \
-        {                                                               \
-            destroy##argNames##ConstructorTables();                     \
-        }                                                               \
-    };                                                                  \
-                                                                        \
-    /* Table Constructor called from the table add function */          \
-    static void construct##argNames##ConstructorTables();               \
-                                                                        \
-    /* Table destructor called from the table add function destructor */\
+(autoPtr,baseType,argNames,argList,parList)                                   \
+                                                                              \
+    /* Construct from argList function pointer type */                        \
+    typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;             \
+                                                                              \
+    /* Construct from argList function table type */                          \
+    typedef HashTable<argNames##ConstructorPtr, word, string::hash>           \
+        argNames##ConstructorTable;                                           \
+                                                                              \
+    /* Construct from argList function pointer table pointer */               \
+    static argNames##ConstructorTable* argNames##ConstructorTablePtr_;        \
+                                                                              \
+    /* Class to add constructor from argList to table */                      \
+    template<class baseType##Type>                                            \
+    class add##argNames##ConstructorToTable                                   \
+    {                                                                         \
+    public:                                                                   \
+                                                                              \
+        static autoPtr<baseType> New argList                                  \
+        {                                                                     \
+            return autoPtr<baseType>(new baseType##Type parList);             \
+        }                                                                     \
+                                                                              \
+        add##argNames##ConstructorToTable                                     \
+        (                                                                     \
+            const word& lookup = baseType##Type::typeName                     \
+        )                                                                     \
+        {                                                                     \
+            construct##argNames##ConstructorTables();                         \
+            argNames##ConstructorTablePtr_->insert(lookup, New);              \
+        }                                                                     \
+                                                                              \
+        ~add##argNames##ConstructorToTable()                                  \
+        {                                                                     \
+            destroy##argNames##ConstructorTables();                           \
+        }                                                                     \
+    };                                                                        \
+                                                                              \
+    /* Table constructor called from the table add function */                \
+    static void construct##argNames##ConstructorTables();                     \
+                                                                              \
+    /* Table destructor called from the table add function destructor */      \
     static void destroy##argNames##ConstructorTables()
 
 
-#define defineRunTimeSelectionTableConstructor(baseType,argNames)       \
-                                                                        \
-    /* Table Constructor called from the table add function */          \
-    void baseType::construct##argNames##ConstructorTables()             \
-    {                                                                   \
-        static bool constructed = false;                                \
-                                                                        \
-        if (!constructed)                                               \
-        {                                                               \
-            baseType::argNames##ConstructorTablePtr_                    \
-                = new baseType::argNames##ConstructorTable;             \
-                                                                        \
-            constructed = true;                                         \
-        }                                                               \
+#define defineRunTimeSelectionTableConstructor(baseType,argNames)             \
+                                                                              \
+    /* Table constructor called from the table add function */                \
+    void baseType::construct##argNames##ConstructorTables()                   \
+    {                                                                         \
+        static bool constructed = false;                                      \
+                                                                              \
+        if (!constructed)                                                     \
+        {                                                                     \
+            baseType::argNames##ConstructorTablePtr_                          \
+                = new baseType::argNames##ConstructorTable;                   \
+                                                                              \
+            constructed = true;                                               \
+        }                                                                     \
     }
 
-#define defineRunTimeSelectionTableDestructor(baseType,argNames)        \
-                                                                        \
-    /* Table destructor called from the table add function destructor */\
-    void baseType::destroy##argNames##ConstructorTables()               \
-    {                                                                   \
-        if (baseType::argNames##ConstructorTablePtr_)                   \
-        {                                                               \
-            delete baseType::argNames##ConstructorTablePtr_;            \
-            baseType::argNames##ConstructorTablePtr_ = NULL;            \
-        }                                                               \
+#define defineRunTimeSelectionTableDestructor(baseType,argNames)              \
+                                                                              \
+    /* Table destructor called from the table add function destructor */      \
+    void baseType::destroy##argNames##ConstructorTables()                     \
+    {                                                                         \
+        if (baseType::argNames##ConstructorTablePtr_)                         \
+        {                                                                     \
+            delete baseType::argNames##ConstructorTablePtr_;                  \
+            baseType::argNames##ConstructorTablePtr_ = NULL;                  \
+        }                                                                     \
     }
 
-#define defineRunTimeSelectionTablePtr(baseType,argNames)               \
-                                                                        \
-    /* Define the constructor function table */                         \
-    baseType::argNames##ConstructorTable*                               \
+#define defineRunTimeSelectionTablePtr(baseType,argNames)                     \
+                                                                              \
+    /* Define the constructor function table */                               \
+    baseType::argNames##ConstructorTable*                                     \
         baseType::argNames##ConstructorTablePtr_ = NULL
 
-#define defineTemplateRunTimeSelectionTablePtr(baseType,argNames)       \
-                                                                        \
-    /* Define the constructor function table */                         \
-    typename baseType::argNames##ConstructorTable*                      \
+#define defineTemplateRunTimeSelectionTablePtr(baseType,argNames)             \
+                                                                              \
+    /* Define the constructor function table */                               \
+    typename baseType::argNames##ConstructorTable*                            \
         baseType::argNames##ConstructorTablePtr_ = NULL
 
-#define defineRunTimeSelectionTable(baseType,argNames)                  \
-                                                                        \
-    defineRunTimeSelectionTablePtr(baseType,argNames);                  \
-    defineRunTimeSelectionTableConstructor(baseType,argNames)           \
+#define defineRunTimeSelectionTable(baseType,argNames)                        \
+                                                                              \
+    defineRunTimeSelectionTablePtr(baseType,argNames);                        \
+    defineRunTimeSelectionTableConstructor(baseType,argNames)                 \
     defineRunTimeSelectionTableDestructor(baseType,argNames)
 
-#define defineTemplateRunTimeSelectionTable(baseType,argNames)          \
-                                                                        \
-    template<>                                                          \
-    defineRunTimeSelectionTablePtr(baseType,argNames);                  \
-    template<>                                                          \
-    defineRunTimeSelectionTableConstructor(baseType,argNames)           \
-    template<>                                                          \
+#define defineTemplateRunTimeSelectionTable(baseType,argNames)                \
+                                                                              \
+    template<>                                                                \
+    defineRunTimeSelectionTablePtr(baseType,argNames);                        \
+    template<>                                                                \
+    defineRunTimeSelectionTableConstructor(baseType,argNames)                 \
+    template<>                                                                \
     defineRunTimeSelectionTableDestructor(baseType,argNames)
 
 
