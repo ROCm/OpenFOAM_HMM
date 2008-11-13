@@ -52,9 +52,10 @@ Note
 #include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "keyedSurface.H"
-#include "meshedSurface.H"
 #include "triSurface.H"
+
+#include "MeshedSurfaces.H"
+#include "UnsortedMeshedSurfaces.H"
 
 using namespace Foam;
 
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("clean", "");
     argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("triSurface", "");
-    argList::validOptions.insert("keyed", "");
+    argList::validOptions.insert("unsorted", "");
 #   include "setRootCase.H"
     const stringList& params = args.additionalArgs();
 
@@ -122,9 +123,9 @@ int main(int argc, char *argv[])
         // write sorted by region
         surf.write(exportName, true);
     }
-    else if (args.options().found("keyed"))
+    else if (args.options().found("unsorted"))
     {
-        keyedSurface surf(importName);
+        unsortedMeshedSurface surf(importName);
 
         if (args.options().found("clean"))
         {
