@@ -28,6 +28,12 @@ Class
 Description
     Macros to enable the easy declaration of run-time selection tables.
 
+    declareRunTimeSelectionTable is used to create a run-time selection table
+    for a base-class which holds constructor pointers on the table.
+
+    declareRunTimeNewSelectionTable is used to create a run-time selection
+    table for a derived-class which holds "New" pointers on the table.
+
 \*---------------------------------------------------------------------------*/
 
 #include "token.H"
@@ -75,6 +81,59 @@ Description
         {                                                                     \
             construct##argNames##ConstructorTables();                         \
             argNames##ConstructorTablePtr_->insert(lookup, New);              \
+        }                                                                     \
+                                                                              \
+        ~add##argNames##ConstructorToTable()                                  \
+        {                                                                     \
+            destroy##argNames##ConstructorTables();                           \
+        }                                                                     \
+    };                                                                        \
+                                                                              \
+    /* Table constructor called from the table add function */                \
+    static void construct##argNames##ConstructorTables();                     \
+                                                                              \
+    /* Table destructor called from the table add function destructor */      \
+    static void destroy##argNames##ConstructorTables()
+
+
+// external use:
+// ~~~~~~~~~~~~~
+// declare a run-time selection for derived classes:
+#define declareRunTimeNewSelectionTable\
+(autoPtr,baseType,argNames,argList,parList)                                   \
+                                                                              \
+    /* Construct from argList function pointer type */                        \
+    typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;             \
+                                                                              \
+    /* Construct from argList function table type */                          \
+    typedef HashTable<argNames##ConstructorPtr, word, string::hash>           \
+        argNames##ConstructorTable;                                           \
+                                                                              \
+    /* Construct from argList function pointer table pointer */               \
+    static argNames##ConstructorTable* argNames##ConstructorTablePtr_;        \
+                                                                              \
+    /* Class to add constructor from argList to table */                      \
+    template<class baseType##Type>                                            \
+    class add##argNames##ConstructorToTable                                   \
+    {                                                                         \
+    public:                                                                   \
+                                                                              \
+        static autoPtr<baseType> New##baseType argList                        \
+        {                                                                     \
+            return autoPtr<baseType>(baseType##Type::New parList.ptr());      \
+        }                                                                     \
+                                                                              \
+        add##argNames##ConstructorToTable                                     \
+        (                                                                     \
+            const word& lookup = baseType##Type::typeName                     \
+        )                                                                     \
+        {                                                                     \
+            construct##argNames##ConstructorTables();                         \
+            argNames##ConstructorTablePtr_->insert                            \
+            (                                                                 \
+                lookup,                                                       \
+                New##baseType                                                 \
+            );                                                                \
         }                                                                     \
                                                                               \
         ~add##argNames##ConstructorToTable()                                  \
@@ -151,7 +210,7 @@ Description
 // ~~~~~~~~~~~~~
 // define run-time selection table
 #define defineRunTimeSelectionTable\
-(baseType,argNames)                        \
+(baseType,argNames)                                                           \
                                                                               \
     defineRunTimeSelectionTablePtr(baseType,argNames);                        \
     defineRunTimeSelectionTableConstructor(baseType,argNames)                 \
@@ -162,7 +221,8 @@ Description
 // ~~~~~~~~~~~~~
 // define run-time selection table for template classes
 // use when baseType doesn't need a template argument (eg, is a typedef)
-#define defineTemplateRunTimeSelectionTable(baseType,argNames)                \
+#define defineTemplateRunTimeSelectionTable\
+(baseType,argNames)                                                           \
                                                                               \
     template<>                                                                \
     defineRunTimeSelectionTablePtr(baseType,argNames);                        \
