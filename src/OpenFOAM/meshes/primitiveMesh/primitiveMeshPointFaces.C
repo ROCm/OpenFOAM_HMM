@@ -38,6 +38,11 @@ const labelListList& primitiveMesh::pointFaces() const
 {
     if (!pfPtr_)
     {
+        if (debug)
+        {
+            Pout<< "primitiveMesh::pointFaces() : "
+                << "calculating pointFaces" << endl;
+        }
         // Invert faces()
         pfPtr_ = new labelListList(nPoints());
         invertManyToMany(nPoints(), faces(), *pfPtr_);
