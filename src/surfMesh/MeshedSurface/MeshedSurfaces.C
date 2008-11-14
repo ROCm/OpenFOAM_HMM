@@ -33,13 +33,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#define makeMeshedSurface(surfaceType)                                        \
-defineNamedTemplateTypeNameAndDebug(surfaceType, 0);                          \
-defineTemplateMemberFunctionSelectionTable(surfaceType,write,fileExtension);  \
-defineTemplateRunTimeSelectionTable(surfaceType, fileExtension);
+#define makeMeshedSurface(faceType)                                           \
+    defineNamedTemplateTypeNameAndDebug                                       \
+        (MeshedSurface<faceType>, 0);                                         \
+    defineTemplatedRunTimeSelectionTable                                      \
+        (MeshedSurface, fileExtension,faceType);                              \
+    defineTemplatedMemberFunctionSelectionTable                               \
+        (MeshedSurface, write,fileExtension,faceType);
 
-makeMeshedSurface(meshedSurface)
-makeMeshedSurface(triMeshedSurface)
+
+makeMeshedSurface(face)
+makeMeshedSurface(triFace)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
