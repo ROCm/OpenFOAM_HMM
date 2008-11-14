@@ -33,52 +33,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Face>
-void Foam::fileFormats::OFFsurfaceFormat<Face>::writeHead
-(
-    Ostream& os,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfGroup>& patchLst
-)
-{
-    // Write header
-    os  << "OFF" << endl
-        << "# Geomview OFF file written " << clock::dateTime().c_str() << nl
-        << nl
-        << "# points : " << pointLst.size() << nl
-        << "# faces  : " << faceLst.size() << nl
-        << "# patches: " << patchLst.size() << nl;
-
-    // Print patch names as comment
-    forAll(patchLst, patchI)
-    {
-        os  << "#   " << patchI << "  " << patchLst[patchI].name()
-            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
-    }
-
-    os  << nl
-        << "# nPoints  nFaces  nEdges" << nl
-        << pointLst.size() << ' ' << faceLst.size() << ' ' << 0 << nl;
-
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << pointLst[ptI].x() << ' '
-            << pointLst[ptI].y() << ' '
-            << pointLst[ptI].z() << " #" << ptI << endl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
-}
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -188,7 +142,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
             UList<label>& f = static_cast<UList<label>&>(verts);
 
-            if (mustTriangulate)
+            if (mustTriangulate && f.size() > 3)
             {
                 triFace fTri;
 
@@ -237,7 +191,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     labelList faceMap;
     List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
-    writeHead(os, surf.points(), faceLst, patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -273,7 +227,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
 
-    writeHead(os, surf.points(), faceLst, patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), patchLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)

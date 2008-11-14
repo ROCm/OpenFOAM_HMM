@@ -23,24 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::VTKsurfaceFormat
+    Foam::fileFormats::OBJsurfaceFormatCore
 
 Description
-    Provide a means of writing VTK legacy format.
+    Internal class used by the OBJsurfaceFormat
 
 SourceFiles
-    VTKsurfaceFormat.C
+    OBJsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VTKsurfaceFormat_H
-#define VTKsurfaceFormat_H
+#ifndef OBJsurfaceFormatCore_H
+#define OBJsurfaceFormatCore_H
 
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
-#include "VTKsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,88 +49,37 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class VTKsurfaceFormat Declaration
+                      Class AC3DfileFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Face>
-class VTKsurfaceFormat
-:
-    public UnsortedMeshedSurface<Face>,
-    public VTKsurfaceFormatCore
+class OBJsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef VTKsurfaceFormat<Face>      ThisType;
-    typedef UnsortedMeshedSurface<Face> ParentType;
+protected:
+        // Protected Member Functions
 
-    // Private Member Functions
-
-        //- Write header information about number of polygon points
-        static void writeHeaderPolygons(Ostream&, const List<Face>&);
-
-
-        //- Disallow default bitwise copy construct
-        VTKsurfaceFormat(const VTKsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const VTKsurfaceFormat<Face>&);
+        //- Write header information with points
+        static void writeHeader
+        (
+            Ostream&,
+            const pointField&,
+            const label nFaces,
+            const List<surfGroup>&
+        );
 
 public:
 
     // Constructors
 
         //- Construct null
-        VTKsurfaceFormat();
-
-    // Selectors
+        OBJsurfaceFormatCore()
+        {}
 
     // Destructor
 
-        virtual ~VTKsurfaceFormat()
+        ~OBJsurfaceFormatCore()
         {}
 
     // Member Functions
-
-        // Write
-
-        //- Write UnsortedMeshedSurface
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        static void write
-        (
-            const fileName& fName,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(fName)(), surf);
-        }
-
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& fName,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(fName)(), surf);
-        }
-
-        //- Write object
-        virtual void write(Ostream& os) const
-        {
-            write(os, *this);
-        }
 
 };
 
@@ -140,12 +88,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "VTKsurfaceFormat.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

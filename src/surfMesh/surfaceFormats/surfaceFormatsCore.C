@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// File extension for 'native' raw format
+Foam::word Foam::fileFormats::surfaceFormatsCore::meshSubDir("meshedSurface");
 Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -63,13 +63,13 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
 
 
 Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::triSurfInstance
+Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 (
     const Time& d,
     const word& subdirName
 )
 {
-    fileName foamName(d.caseName() + ".ofs");
+    fileName foamName(d.caseName() + "." + nativeExt);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
@@ -104,13 +104,13 @@ Foam::fileFormats::surfaceFormatsCore::triSurfInstance
 
 
 Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::triSurfName
+Foam::fileFormats::surfaceFormatsCore::findMeshName
 (
     const Time& d,
     const word& subdirName
 )
 {
-    fileName foamName(d.caseName() + ".ofs");
+    fileName foamName(d.caseName() + "." + nativeExt);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
@@ -145,6 +145,25 @@ Foam::fileFormats::surfaceFormatsCore::triSurfName
     return d.path()/"constant"/subdirName/foamName;
 }
 
+
+Foam::fileName
+Foam::fileFormats::surfaceFormatsCore::findMeshInstance
+(
+    const Time& d
+)
+{
+    return findMeshInstance(d, meshSubDir);
+}
+
+
+Foam::fileName
+Foam::fileFormats::surfaceFormatsCore::findMeshName
+(
+    const Time& d
+)
+{
+    return findMeshName(d, meshSubDir);
+}
 
 // Returns patch info.
 // Sets faceMap to the indexing according to patch numbers.

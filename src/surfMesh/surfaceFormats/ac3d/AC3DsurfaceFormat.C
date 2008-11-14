@@ -241,7 +241,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
                     UList<label>& f = static_cast<UList<label>&>(verts);
 
-                    if (mustTriangulate)
+                    if (mustTriangulate && f.size() > 3)
                     {
                         triFace fTri;
 
@@ -298,7 +298,6 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     // transfer to normal lists
     ParentType::points().transfer(pointLst);
     ParentType::faces().transfer(faceLst);
-
     ParentType::regions().transfer(regionLst);
 
     ParentType::setPatches(regionNames);
@@ -359,7 +358,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 
         forAll(patch.localFaces(), faceI)
         {
-            const face& f = patch.localFaces()[faceI];
+            const Face& f = patch.localFaces()[faceI];
 
             os  << "SURF 0x20" << nl          // polygon
                 << "mat " << patchI << nl
@@ -417,7 +416,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 
         forAll(patch.localFaces(), faceI)
         {
-            const face& f = patch.localFaces()[faceI];
+            const Face& f = patch.localFaces()[faceI];
 
             os  << "SURF 0x20" << nl          // polygon
                 << "mat " << patchI << nl

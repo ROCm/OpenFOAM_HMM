@@ -23,31 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::SMESHsurfaceFormat
+    Foam::fileFormats::SMESHsurfaceFormatCore
 
 Description
-    Provide a means of writing tetgen SMESH format.
-
-    Tetgen http://tetgen.berlios.de
-
-See Also
-    File format information:
-    http://tetgen.berlios.de/fformats.smesh.html
+    Internal class used by the SMESHsurfaceFormat
 
 SourceFiles
-    SMESHsurfaceFormat.C
+    SMESHsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SMESHsurfaceFormat_H
-#define SMESHsurfaceFormat_H
+#ifndef SMESHsurfaceFormatCore_H
+#define SMESHsurfaceFormatCore_H
 
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Ostream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
-#include "SMESHsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,83 +50,39 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class SMESHsurfaceFormat Declaration
+                  Class SMESHsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Face>
-class SMESHsurfaceFormat
-:
-    public UnsortedMeshedSurface<Face>,
-    public SMESHsurfaceFormatCore
+class SMESHsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef SMESHsurfaceFormat<Face>    ThisType;
-    typedef UnsortedMeshedSurface<Face> ParentType;
+protected:
+    // Protected Member Functions
 
-    // Private Member Functions
+        //- Write header information with points
+        static void writeHeader
+        (
+            Ostream&,
+            const pointField&,
+            const label nFaces
+        );
 
-        //- Disallow default bitwise copy construct
-        SMESHsurfaceFormat(const SMESHsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const SMESHsurfaceFormat<Face>&);
+        //- Write tail information
+        static void writeTail(Ostream&);
 
 public:
 
     // Constructors
 
         //- Construct null
-        SMESHsurfaceFormat();
-
-    // Selectors
+        SMESHsurfaceFormatCore()
+        {}
 
     // Destructor
 
-        virtual ~SMESHsurfaceFormat()
+        ~SMESHsurfaceFormatCore()
         {}
 
-
     // Member Functions
-
-        //- Write UnsortedMeshedSurface
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        static void write
-        (
-            const fileName& fName,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(fName)(), surf);
-        }
-
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& fName,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(fName)(), surf);
-        }
-
-        //- Write object
-        virtual void write(Ostream& os) const
-        {
-            write(os, *this);
-        }
 
 };
 
@@ -142,12 +91,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "SMESHsurfaceFormat.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

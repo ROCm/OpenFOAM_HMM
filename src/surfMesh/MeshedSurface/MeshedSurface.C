@@ -45,20 +45,6 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileName Foam::MeshedSurface<Face>::triSurfInstance(const Time& d)
-{
-    return triSurfInstance(d, typeName);
-}
-
-
-template<class Face>
-Foam::fileName Foam::MeshedSurface<Face>::triSurfName(const Time& d)
-{
-    return triSurfName(d, typeName);
-}
-
-
-template<class Face>
 bool Foam::MeshedSurface<Face>::canRead(const word& ext, const bool verbose)
 {
     // handle 'native' format directly
@@ -462,7 +448,7 @@ Foam::MeshedSurface<Face>::MeshedSurface(const Time& d)
 :
     ParentType(List<Face>(), pointField())
 {
-    read(IFstream(triSurfName(d))());
+    read(IFstream(findMeshName(d))());
     // setDefaultPatches();
 }
 
@@ -845,7 +831,7 @@ bool Foam::MeshedSurface<Face>::read
 template<class Face>
 void Foam::MeshedSurface<Face>::write(const Time& d) const
 {
-    write(OFstream(triSurfName(d))());
+    write(OFstream(findMeshName(d))());
 }
 
 

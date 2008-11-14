@@ -33,17 +33,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Type>
-Type Foam::fileFormats::AC3DsurfaceFormatCore::parse(const string& str)
-{
-    IStringStream ss(str);
-
-    Type t;
-    ss >> t;
-    return t;
-}
-
-
 bool Foam::fileFormats::AC3DsurfaceFormatCore::readCmd
 (
     IFstream& is,

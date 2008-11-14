@@ -50,7 +50,7 @@ namespace Foam
 
 class IFstream;
 class Time;
-   
+
 namespace fileFormats
 {
 
@@ -64,8 +64,11 @@ public:
 
     // Static Data
 
-        //- The file extension corresponding to 'native' surface format
-        static word nativeExt;
+    //- Return the mesh sub-directory name (usually "meshedSurface")
+    static word meshSubDir;
+
+    //- The file extension corresponding to 'native' surface format
+    static word nativeExt;
 
     // Static Member Functions
 
@@ -76,10 +79,16 @@ public:
         static string getLineNoComment(IFstream&);
 
         //- Name of UnsortedMeshedSurface directory to use.
-        static fileName triSurfInstance(const Time&, const word& subdirName);
+        static fileName findMeshInstance(const Time&, const word& subdirName);
 
         //- Name of UnsortedMeshedSurface directory to use.
-        static fileName triSurfName(const Time&, const word& subdirName);
+        static fileName findMeshName(const Time&, const word& subdirName);
+
+        //- Name of UnsortedMeshedSurface directory to use.
+        static fileName findMeshInstance(const Time&);
+
+        //- Name of UnsortedMeshedSurface directory to use.
+        static fileName findMeshName(const Time&);
 
         //- Determine the sort order from the region list.
         //  Returns patch list and sets faceMap to indices within faceLst

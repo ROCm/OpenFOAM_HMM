@@ -31,99 +31,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//! @cond localscope
-const int starcdShellShape = 3;
-const int starcdShellType  = 4;
-//! @endcond localscope
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class Face>
-bool Foam::fileFormats::STARCDsurfaceFormat<Face>::readHeader
-(
-    IFstream& is,
-    const word& signature
-)
-{
-    if (!is.good())
-    {
-        FatalErrorIn
-        (
-            "fileFormats::STARCDsurfaceFormat::readHeader(...)"
-        )
-            << "cannot read " << signature  << "  " << is.name()
-            << abort(FatalError);
-    }
-
-    word header;
-    label majorVersion;
-
-    string line;
-
-    is.getLine(line);
-    IStringStream(line)() >> header;
-
-    is.getLine(line);
-    IStringStream(line)() >> majorVersion;
-
-    // add other checks ...
-    if (header != signature)
-    {
-        Info<< "header mismatch " << signature << "  " << is.name()
-            << endl;
-    }
-
-    return true;
-}
-
-
-template<class Face>
-void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeHeader
-(
-    Ostream& os,
-    const char* filetype
-)
-{
-    os  << "PROSTAR_" << filetype << nl
-        << 4000
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << endl;
-}
-
-
-template<class Face>
-void Foam::fileFormats::STARCDsurfaceFormat<Face>::writePoints
-(
-    Ostream& os,
-    const pointField& pointLst
-)
-{
-    writeHeader(os, "VERTEX");
-
-    // Set the precision of the points data to 10
-    os.precision(10);
-
-    // force decimal point for Fortran input
-    os.setf(std::ios::showpoint);
-
-    forAll(pointLst, ptI)
-    {
-        os
-            << ptI + 1 << " "
-            << pointLst[ptI].x() << " "
-            << pointLst[ptI].y() << " "
-            << pointLst[ptI].z() << nl;
-    }
-    os.flush();
-}
-
 
 template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
@@ -135,11 +43,11 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
 )
 {
     os
-        << cellId                // includes 1 offset
-        << " " << starcdShellShape  // 3(shell)
+        << cellId                    // includes 1 offset
+        << " " << starcdShellShape_  // 3(shell) shape
         << " " << f.size()
         << " " << cellTableId
-        << " " << starcdShellType;  // 4(shell)
+        << " " << starcdShellType_;  // 4(shell)
 
     // primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
@@ -189,7 +97,7 @@ Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 :
     ParentType()
 {
-    ThisType::read(fName);
+    read(fName);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -312,7 +220,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             isPtr() >> starLabels[i];
         }
 
-        if (typeId == starcdShellType)
+        if (typeId == starcdShellType_)
         {
             // Convert groupID into patchID
             Map<label>::const_iterator iter =

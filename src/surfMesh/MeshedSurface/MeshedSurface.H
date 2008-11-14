@@ -141,12 +141,6 @@ public:
 
     // Static
 
-        //- Name of MeshedSurface directory to use.
-        static fileName triSurfInstance(const Time&);
-
-        //- Name of MeshedSurface directory to use.
-        static fileName triSurfName(const Time&);
-
         //- Can we read this file format?
         static bool canRead(const word& ext, const bool verbose=false);
 

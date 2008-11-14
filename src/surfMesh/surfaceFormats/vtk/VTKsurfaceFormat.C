@@ -33,30 +33,14 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 template<class Face>
-void Foam::fileFormats::VTKsurfaceFormat<Face>::writeHead
+void Foam::fileFormats::VTKsurfaceFormat<Face>::writeHeaderPolygons
 (
     Ostream& os,
-    const pointField& pointLst,
     const List<Face>& faceLst
 )
 {
-    // Write header
-    os  << "# vtk DataFile Version 2.0" << nl
-        << "surface written " << clock::dateTime().c_str() << nl
-        << "ASCII" << nl
-        << nl
-        << "DATASET POLYDATA" << nl;
-
-    // Write vertex coords
-    os  << "POINTS " << pointLst.size() << " float" << nl;
-    forAll(pointLst, ptI)
-    {
-        os  << pointLst[ptI].x() << ' '
-            << pointLst[ptI].y() << ' '
-            << pointLst[ptI].z() << nl;
-    }
-
     label nNodes = 0;
+
     forAll(faceLst, faceI)
     {
         nNodes += faceLst[faceI].size();
@@ -65,48 +49,6 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::writeHead
     os  << nl
         << "POLYGONS " << faceLst.size() << ' '
         << faceLst.size() + nNodes << nl;
-}
-
-
-template<class Face>
-void Foam::fileFormats::VTKsurfaceFormat<Face>::writeTail
-(
-    Ostream& os,
-    const List<surfGroup>& patchLst
-)
-{
-    label nFaces = 0;
-    forAll(patchLst, patchI)
-    {
-        nFaces += patchLst[patchI].size();
-    }
-
-    // Print region numbers
-    os  << nl
-        << "CELL_DATA " << nFaces << nl
-        << "FIELD attributes 1" << nl
-        << "region 1 " << nFaces << " float" << nl;
-
-
-    forAll(patchLst, patchI)
-    {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            if (patchFaceI)
-            {
-                if ((patchFaceI % 20) == 0)
-                {
-                    os  << nl;
-                }
-                else
-                {
-                    os  << ' ';
-                }
-            }
-            os  << patchI + 1;
-        }
-        os  << nl;
-    }
 }
 
 
@@ -130,7 +72,8 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 {
     const List<Face>& faceLst = surf.faces();
 
-    writeHead(os, surf.points(), faceLst);
+    writeHeader(os, surf.points());
+    writeHeaderPolygons(os, faceLst);
 
     labelList faceMap;
     List<surfGroup> patchLst = surf.sortedRegions(faceMap);
@@ -140,7 +83,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     {
         forAll(patchLst[patchI], patchFaceI)
         {
-            const face& f = faceLst[faceMap[faceIndex++]];
+            const Face& f = faceLst[faceMap[faceIndex++]];
 
             os  << f.size();
             forAll(f, fp)
@@ -166,14 +109,15 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
 
-    writeHead(os, surf.points(), faceLst);
+    writeHeader(os, surf.points());
+    writeHeaderPolygons(os, faceLst);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
         forAll(patchLst[patchI], patchFaceI)
         {
-            const face& f = faceLst[faceIndex++];
+            const Face& f = faceLst[faceIndex++];
 
             os  << f.size();
             forAll(f, fp)

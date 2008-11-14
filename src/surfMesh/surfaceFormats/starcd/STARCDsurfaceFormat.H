@@ -47,6 +47,7 @@ SourceFiles
 #include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
+#include "STARCDsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,17 +57,25 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class STARCDsurfaceFormat Declaration
+                    Class STARCDsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
 class STARCDsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>
+    public UnsortedMeshedSurface<Face>,
+    public STARCDsurfaceFormatCore
 {
     //- Private typedefs for convenience
     typedef STARCDsurfaceFormat<Face>   ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
+
+    // Private Data
+    //- STAR-CD identifier for shell shapes (2d elements)
+    static const int starcdShellShape_ = 3;
+
+    //- STAR-CD identifier for shell type (shells vs. baffles)
+    static const int starcdShellType_  = 4;
 
     // Private Member Functions
 
@@ -75,13 +84,6 @@ class STARCDsurfaceFormat
 
         //- Disallow default bitwise assignment
         void operator=(const STARCDsurfaceFormat<Face>&);
-
-
-        static bool readHeader(IFstream&, const word&);
-
-        static void writeHeader(Ostream&, const char* filetype);
-
-        static void writePoints(Ostream&, const pointField&);
 
         static inline void writeShell
         (

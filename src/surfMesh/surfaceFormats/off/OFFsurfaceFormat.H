@@ -50,6 +50,7 @@ SourceFiles
 #include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
+#include "OFFsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +66,8 @@ namespace fileFormats
 template<class Face>
 class OFFsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>
+    public UnsortedMeshedSurface<Face>,
+    public OFFsurfaceFormatCore
 {
     //- Private typedefs for convenience
     typedef OFFsurfaceFormat<Face>      ThisType;

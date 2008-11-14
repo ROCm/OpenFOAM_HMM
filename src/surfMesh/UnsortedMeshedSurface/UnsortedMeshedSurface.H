@@ -85,7 +85,7 @@ template<class Face>
 class UnsortedMeshedSurface
 :
     public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>,
-    public fileFormats::surfaceFormatsCore      
+    public fileFormats::surfaceFormatsCore
 {
     friend class MeshedSurface<Face>;
 
@@ -172,12 +172,6 @@ public:
         TypeName("UnsortedMeshedSurface");
 
     // Static
-
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName triSurfInstance(const Time&);
-
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName triSurfName(const Time&);
 
         //- Can we read this file format?
         static bool canRead(const word& ext, const bool verbose=false);

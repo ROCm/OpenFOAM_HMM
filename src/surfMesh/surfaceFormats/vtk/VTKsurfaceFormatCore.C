@@ -24,87 +24,80 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SMESHsurfaceFormat.H"
+#include "VTKsurfaceFormatCore.H"
 #include "clock.H"
+#include "IFstream.H"
 #include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
+(
+    Ostream& os,
+    const pointField& pointLst
+)
+{
+    // Write header
+    os  << "# vtk DataFile Version 2.0" << nl
+        << "surface written " << clock::dateTime().c_str() << nl
+        << "ASCII" << nl
+        << nl
+        << "DATASET POLYDATA" << nl;
 
-template<class Face>
-Foam::fileFormats::SMESHsurfaceFormat<Face>::SMESHsurfaceFormat()
-:
-    ParentType()
-{}
+    // Write vertex coords
+    os  << "POINTS " << pointLst.size() << " float" << nl;
+    forAll(pointLst, ptI)
+    {
+        os  << pointLst[ptI].x() << ' '
+            << pointLst[ptI].y() << ' '
+            << pointLst[ptI].z() << nl;
+    }
+}
+
+
+void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
+(
+    Ostream& os,
+    const List<surfGroup>& patchLst
+)
+{
+    label nFaces = 0;
+    forAll(patchLst, patchI)
+    {
+        nFaces += patchLst[patchI].size();
+    }
+
+    // Print region numbers
+    os  << nl
+        << "CELL_DATA " << nFaces << nl
+        << "FIELD attributes 1" << nl
+        << "region 1 " << nFaces << " float" << nl;
+
+
+    forAll(patchLst, patchI)
+    {
+        forAll(patchLst[patchI], patchFaceI)
+        {
+            if (patchFaceI)
+            {
+                if ((patchFaceI % 20) == 0)
+                {
+                    os  << nl;
+                }
+                else
+                {
+                    os  << ' ';
+                }
+            }
+            os  << patchI + 1;
+        }
+        os  << nl;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Face>
-void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-
-    writeHeader(os, surf.points(), faceLst.size());
-
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-
-            os  << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-            os << ' ' << patchI << endl;
-        }
-    }
-
-    writeTail(os);
-}
-
-
-template<class Face>
-void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, surf.points(), faceLst.size());
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-
-            os  << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-            os << ' ' << patchI << endl;
-        }
-    }
-
-    writeTail(os);
-}
 
 // ************************************************************************* //
