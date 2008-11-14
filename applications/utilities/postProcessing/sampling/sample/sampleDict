@@ -40,7 +40,7 @@ surfaceFormat vtk;
 // 1] vertex values determined from neighbouring cell-centre values
 // 2] face values determined using the current face interpolation scheme
 //    for the field (linear, gamma, etc.)
-interpolationScheme cellPointFace;
+interpolationScheme cellPoint;
 
 // Fields to sample.
 fields
@@ -155,21 +155,25 @@ surfaces
         // Optional: whether to leave as faces (=default) or triangulate
     }
 
-/* not yet (re)implemented --
+    interpolatedIso
+    {
+        // Iso surface for interpolated values only
+        type            isoSurface;
+        isoField        rho;
+        isoValue        0.5;
+        interpolate     true;
+        //regularise      false;    //optional: do not simplify
+    }
     constantIso
     {
-        name            iso;
-        field           rho;
-        value           0.5;
+        // Iso surface for constant values. Guarantees triangles to not
+        // cross cells.
+        type            isoSurfaceCell;
+        isoField        rho;
+        isoValue        0.5;
+        interpolate     false;
+        //regularise      false;    //optional: do not simplify
     }
-    someIso
-    {
-        type            iso;
-        field           rho;
-        value           0.5;
-        interpolate     true;
-    }
- */
 );
 
 

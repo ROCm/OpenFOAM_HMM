@@ -46,6 +46,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, twoSymm)
 UNARY_FUNCTION(symmTensor, symmTensor, dev)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
+UNARY_FUNCTION(symmTensor, symmTensor, cof)
 
 void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
 {

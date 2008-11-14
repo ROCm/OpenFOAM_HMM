@@ -24,22 +24,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "isoSurface.H"
-#include "fvMesh.H"
+#include "isoSurfaceCell.H"
+#include "dictionary.H"
+#include "polyMesh.H"
 #include "mergePoints.H"
+#include "tetMatcher.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
+#include "faceTriangulation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(isoSurface, 0);
+    defineTypeNameAndDebug(isoSurfaceCell, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::scalar Foam::isoSurface::isoFraction
+Foam::scalar Foam::isoSurfaceCell::isoFraction
 (
     const scalar s0,
     const scalar s1
@@ -58,133 +61,148 @@ Foam::scalar Foam::isoSurface::isoFraction
 }
 
 
-// Determine for every face/cell whether it (possibly) generates triangles.
-void Foam::isoSurface::calcCutTypes
+//Foam::List<Foam::triFace> Foam::isoSurfaceCell::triangulate(const face& f)
+// const
+//{
+//    faceList triFaces(f.nTriangles(mesh_.points()));
+//    label triFaceI = 0;
+//    f.triangles(mesh_.points(), triFaceI, triFaces);
+//
+//    List<triFace> tris(triFaces.size());
+//    forAll(triFaces, i)
+//    {
+//        tris[i][0] = triFaces[i][0];
+//        tris[i][1] = triFaces[i][1];
+//        tris[i][2] = triFaces[i][2];
+//    }
+//    return tris;
+//}
+
+
+Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 (
-    const volScalarField& cVals,
-    const scalarField& pVals
-)
+    const PackedList<1>& isTet,
+    const scalarField& cellValues,
+    const scalarField& pointValues,
+    const label cellI
+) const
 {
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const labelList& own = mesh_.faceOwner();
-    const labelList& nei = mesh_.faceNeighbour();
+    const cell& cFaces = mesh_.cells()[cellI];
 
-    faceCutType_.setSize(mesh_.nFaces());
-    faceCutType_ = NOTCUT;
-
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    if (isTet.get(cellI) == 1)
     {
-        // CC edge.
-        bool ownLower = (cVals[own[faceI]] < iso_);
-        bool neiLower = (cVals[nei[faceI]] < iso_);
-
-        if (ownLower != neiLower)
+        forAll(cFaces, cFaceI)
         {
-            faceCutType_[faceI] = CUT;
+            const face& f = mesh_.faces()[cFaces[cFaceI]];
+
+            for (label fp = 1; fp < f.size() - 1; fp++)
+            {
+                triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
+
+                bool aLower = (pointValues[tri[0]] < iso_);
+                bool bLower = (pointValues[tri[1]] < iso_);
+                bool cLower = (pointValues[tri[2]] < iso_);
+
+                if (aLower == bLower && aLower == cLower)
+                {}
+                else
+                {
+                    return CUT;
+                }
+            }
         }
-        else
-        {
-            // Mesh edge.
-            const face f = mesh_.faces()[faceI];
+        return NOTCUT;
+    }
+    else
+    {
+        bool cellLower = (cellValues[cellI] < iso_);
 
+        // First check if there is any cut in cell
+        bool edgeCut = false;
+
+        forAll(cFaces, cFaceI)
+        {
+            const face& f = mesh_.faces()[cFaces[cFaceI]];
+
+            // Check pyramids cut
             forAll(f, fp)
             {
-                bool fpLower = (pVals[f[fp]] < iso_);
-                if
-                (
-                    (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                 || (fpLower != ownLower)
-                 || (fpLower != neiLower)
-                )
+                if ((pointValues[f[fp]] < iso_) != cellLower)
                 {
-                    faceCutType_[faceI] = CUT;
+                    edgeCut = true;
                     break;
                 }
             }
-        }
-    }
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
 
-        label faceI = pp.start();
-        forAll(pp, i)
-        {
-            bool ownLower = (cVals[own[faceI]] < iso_);
-            bool neiLower = (cVals.boundaryField()[patchI][i] < iso_);
-
-            if (ownLower != neiLower)
+            if (edgeCut)
             {
-                faceCutType_[faceI] = CUT;
+                break;
+            }
+
+            for (label fp = 1; fp < f.size() - 1; fp++)
+            {
+                triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
+            //List<triFace> tris(triangulate(f));
+            //forAll(tris, i)
+            //{
+            //    const triFace& tri = tris[i];
+
+                bool aLower = (pointValues[tri[0]] < iso_);
+                bool bLower = (pointValues[tri[1]] < iso_);
+                bool cLower = (pointValues[tri[2]] < iso_);
+
+                if (aLower == bLower && aLower == cLower)
+                {}
+                else
+                {
+                    edgeCut = true;
+                    break;
+                }
+            }
+
+            if (edgeCut)
+            {
+                break;
+            }
+        }
+
+        if (edgeCut)
+        {
+            // Count actual cuts (expensive since addressing needed)
+            // Note: not needed if you don't want to preserve maxima/minima
+            // centred around cellcentre. In that case just always return CUT
+
+            const labelList& cPoints = mesh_.cellPoints(cellI);
+
+            label nPyrCuts = 0;
+
+            forAll(cPoints, i)
+            {
+                if ((pointValues[cPoints[i]] < iso_) != cellLower)
+                {
+                    nPyrCuts++;
+                }
+            }
+
+            if (nPyrCuts == cPoints.size())
+            {
+                return SPHERE;
             }
             else
             {
-                // Mesh edge.
-                const face f = mesh_.faces()[faceI];
-
-                forAll(f, fp)
-                {
-                    bool fpLower = (pVals[f[fp]] < iso_);
-                    if
-                    (
-                        (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                     || (fpLower != ownLower)
-                     || (fpLower != neiLower)
-                    )
-                    {
-                        faceCutType_[faceI] = CUT;
-                        break;
-                    }
-                }
+                return CUT;
             }
-            faceI++;
         }
-    }
-
-
-
-    nCutCells_ = 0;
-    cellCutType_.setSize(mesh_.nCells());
-    cellCutType_ = NOTCUT;
-
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
-    {
-        if (faceCutType_[faceI] != NOTCUT)
+        else
         {
-            if (cellCutType_[own[faceI]] == NOTCUT)
-            {
-                cellCutType_[own[faceI]] = CUT;
-                nCutCells_++;
-            }
-            if (cellCutType_[nei[faceI]] == NOTCUT)
-            {
-                cellCutType_[nei[faceI]] = CUT;
-                nCutCells_++;
-            }
+            return NOTCUT;
         }
-    }
-    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
-    {
-        if (faceCutType_[faceI] != NOTCUT)
-        {
-            if (cellCutType_[own[faceI]] == NOTCUT)
-            {
-                cellCutType_[own[faceI]] = CUT;
-                nCutCells_++;
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "isoSurface : detected " << nCutCells_
-            << " candidate cut cells." << endl;
     }
 }
 
 
 // Return the two common points between two triangles
-Foam::labelPair Foam::isoSurface::findCommonPoints
+Foam::labelPair Foam::isoSurfaceCell::findCommonPoints
 (
     const labelledTri& tri0,
     const labelledTri& tri1
@@ -221,7 +239,7 @@ Foam::labelPair Foam::isoSurface::findCommonPoints
 
 
 // Caculate centre of surface.
-Foam::point Foam::isoSurface::calcCentre(const triSurface& s)
+Foam::point Foam::isoSurfaceCell::calcCentre(const triSurface& s)
 {
     vector sum = vector::zero;
 
@@ -235,7 +253,7 @@ Foam::point Foam::isoSurface::calcCentre(const triSurface& s)
 
 // Replace surface (localPoints, localTris) with single point. Returns
 // point. Destructs arguments.
-Foam::pointIndexHit Foam::isoSurface::collapseSurface
+Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 (
     pointField& localPoints,
     DynamicList<labelledTri, 64>& localTris
@@ -302,195 +320,151 @@ Foam::pointIndexHit Foam::isoSurface::collapseSurface
 }
 
 
-// Get neighbour value and position.
-void Foam::isoSurface::getNeighbour
+void Foam::isoSurfaceCell::calcSnappedCc
 (
-    const labelList& boundaryRegion,
-    const volScalarField& cVals,
-    const label cellI,
-    const label faceI,
-    scalar& nbrValue,
-    point& nbrPoint
-) const
-{
-    const labelList& own = mesh_.faceOwner();
-    const labelList& nei = mesh_.faceNeighbour();
-
-    if (mesh_.isInternalFace(faceI))
-    {
-        label nbr = (own[faceI] == cellI ? nei[faceI] : own[faceI]);
-        nbrValue = cVals[nbr];
-        nbrPoint = mesh_.C()[nbr];
-    }
-    else
-    {
-        label bFaceI = faceI-mesh_.nInternalFaces();
-        label patchI = boundaryRegion[bFaceI];
-        label patchFaceI = faceI-mesh_.boundaryMesh()[patchI].start();
-
-        nbrValue = cVals.boundaryField()[patchI][patchFaceI];
-        nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
-    }
-}
-
-
-// Determine per cell centre whether all the intersections get collapsed
-// to a single point
-void Foam::isoSurface::calcSnappedCc
-(
-    const labelList& boundaryRegion,
-    const volScalarField& cVals,
+    const PackedList<1>& isTet,
+    const scalarField& cVals,
     const scalarField& pVals,
+    const List<cellCutType>& cellCutType,
 
     DynamicList<point>& snappedPoints,
     labelList& snappedCc
 ) const
 {
+    const pointField& cc = mesh_.cellCentres();
     const pointField& pts = mesh_.points();
 
     snappedCc.setSize(mesh_.nCells());
     snappedCc = -1;
 
     // Work arrays
-    DynamicList<point, 64> localTriPoints(64);
+    DynamicList<point, 64> localPoints(64);
+    DynamicList<labelledTri, 64> localTris(64);
+    Map<label> pointToLocal(64);
 
     forAll(mesh_.cells(), cellI)
     {
-        if (cellCutType_[cellI] == CUT)
+        if (cellCutType[cellI] == CUT && isTet.get(cellI) == 0)
         {
             scalar cVal = cVals[cellI];
 
             const cell& cFaces = mesh_.cells()[cellI];
 
-            localTriPoints.clear();
-            label nOther = 0;
-            point otherPointSum = vector::zero;
+            localPoints.clear();
+            localTris.clear();
+            pointToLocal.clear();
 
             // Create points for all intersections close to cell centre
             // (i.e. from pyramid edges)
 
             forAll(cFaces, cFaceI)
             {
-                label faceI = cFaces[cFaceI];
-
-                scalar nbrValue;
-                point nbrPoint;
-                getNeighbour
-                (
-                    boundaryRegion,
-                    cVals,
-                    cellI,
-                    faceI,
-                    nbrValue,
-                    nbrPoint
-                );
-
-                // Calculate intersection points of edges to cell centre
-                FixedList<scalar, 3> s;
-                FixedList<point, 3> pt;
-
-                // From cc to neighbour cc.
-                s[2] = isoFraction(cVal, nbrValue);
-                pt[2] = (1.0-s[2])*mesh_.C()[cellI] + s[2]*nbrPoint;
-
                 const face& f = mesh_.faces()[cFaces[cFaceI]];
 
                 forAll(f, fp)
                 {
-                    // From cc to fp
-                    label p0 = f[fp];
-                    s[0] = isoFraction(cVal, pVals[p0]);
-                    pt[0] = (1.0-s[0])*mesh_.C()[cellI] + s[0]*pts[p0];
+                    label pointI = f[fp];
 
-                    // From cc to fp+1
-                    label p1 = f[f.fcIndex(fp)];
-                    s[1] = isoFraction(cVal, pVals[p1]);
-                    pt[1] = (1.0-s[1])*mesh_.C()[cellI] + s[1]*pts[p1];
+                    scalar s = isoFraction(cVal, pVals[pointI]);
 
-                    if
-                    (
-                        (s[0] >= 0.0 && s[0] <= 0.5)
-                     && (s[1] >= 0.0 && s[1] <= 0.5)
-                     && (s[2] >= 0.0 && s[2] <= 0.5)
-                    )
+                    if (s >= 0.0 && s <= 0.5)
                     {
-                        localTriPoints.append(pt[0]);
-                        localTriPoints.append(pt[1]);
-                        localTriPoints.append(pt[2]);
-                    }
-                    else
-                    {
-                        // Get average of all other points
-                        forAll(s, i)
+                        if (pointToLocal.insert(pointI, localPoints.size()))
                         {
-                            if (s[i] >= 0.0 && s[i] <= 0.5)
-                            {
-                                otherPointSum += pt[i];
-                                nOther++;
-                            }
+                            localPoints.append((1.0-s)*cc[cellI]+s*pts[pointI]);
                         }
                     }
                 }
             }
 
-            if (localTriPoints.size() == 0)
+            if (localPoints.size() == 0)
             {
-                // No complete triangles. Get average of all intersection
-                // points.
-                if (nOther > 0)
-                {
-                    snappedCc[cellI] = snappedPoints.size();
-                    snappedPoints.append(otherPointSum/nOther);
-
-                    //Pout<< "    point:" << pointI
-                    //    << " replacing coord:" << mesh_.points()[pointI]
-                    //    << " by average:" << collapsedPoint[pointI] << endl;
-                }
+                // No near intersections
             }
-            else if (localTriPoints.size() == 3)
+            else if (localPoints.size() == 1)
             {
-                // Single triangle. No need for any analysis. Average points.
-                pointField points;
-                points.transfer(localTriPoints);
+                // No need for any analysis.
                 snappedCc[cellI] = snappedPoints.size();
-                snappedPoints.append(sum(points)/points.size());
+                snappedPoints.append(localPoints[0]);
 
-                //Pout<< "    point:" << pointI
-                //    << " replacing coord:" << mesh_.points()[pointI]
-                //    << " by average:" << collapsedPoint[pointI] << endl;
+                //Pout<< "cell:" << cellI
+                //    << " at " << mesh_.cellCentres()[cellI]
+                //    << " collapsing " << localPoints
+                //    << " intersections down to "
+                //    << snappedPoints[snappedCc[cellI]] << endl;
+            }
+            else if (localPoints.size() == 2)
+            {
+                //? No need for any analysis.???
+                snappedCc[cellI] = snappedPoints.size();
+                snappedPoints.append(0.5*(localPoints[0]+localPoints[1]));
+
+                //Pout<< "cell:" << cellI
+                //    << " at " << mesh_.cellCentres()[cellI]
+                //    << " collapsing " << localPoints
+                //    << " intersections down to "
+                //    << snappedPoints[snappedCc[cellI]] << endl;
             }
             else
             {
-                // Convert points into triSurface.
+                // Need to analyse 
+                forAll(cFaces, cFaceI)
+                {
+                    const face& f = mesh_.faces()[cFaces[cFaceI]];
 
-                // Merge points and compact out non-valid triangles
-                labelList triMap;               // merged to unmerged triangle
-                labelList triPointReverseMap;   // unmerged to merged point
-                triSurface surf
-                (
-                    stitchTriPoints
-                    (
-                        false,              // do not check for duplicate tris
-                        localTriPoints,
-                        triPointReverseMap,  
-                        triMap
-                    )
-                );
+                    // Do a tetrahedrisation. Each face to cc becomes pyr.
+                    // Each pyr gets split into tets by diagonalisation
+                    // of face.
 
-                labelList faceZone;
-                label nZones = surf.markZones
-                (
-                    boolList(surf.nEdges(), false),
-                    faceZone
-                );
+                    for (label fp = 1; fp < f.size() - 1; fp++)
+                    {
+                        triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
+                    //List<triFace> tris(triangulate(f));
+                    //forAll(tris, i)
+                    //{
+                    //    const triFace& tri = tris[i];
 
-                if (nZones == 1)
+                        // Get fractions for the three edges to cell centre
+                        FixedList<scalar, 3> s(3);
+                        s[0] = isoFraction(cVal, pVals[tri[0]]);
+                        s[1] = isoFraction(cVal, pVals[tri[1]]);
+                        s[2] = isoFraction(cVal, pVals[tri[2]]);
+
+                        if
+                        (
+                            (s[0] >= 0.0 && s[0] <= 0.5)
+                         && (s[1] >= 0.0 && s[1] <= 0.5)
+                         && (s[2] >= 0.0 && s[2] <= 0.5)
+                        )
+                        {
+                            localTris.append
+                            (
+                                labelledTri
+                                (
+                                    pointToLocal[tri[0]],
+                                    pointToLocal[tri[1]],
+                                    pointToLocal[tri[2]],
+                                    0
+                                )
+                            );
+                        }
+                    }
+                }
+
+                pointField surfPoints;
+                surfPoints.transfer(localPoints);
+                pointIndexHit info = collapseSurface(surfPoints, localTris);
+
+                if (info.hit())
                 {
                     snappedCc[cellI] = snappedPoints.size();
-                    snappedPoints.append(calcCentre(surf));
-                    //Pout<< "    point:" << pointI << " nZones:" << nZones
-                    //    << " replacing coord:" << mesh_.points()[pointI]
-                    //    << " by average:" << collapsedPoint[pointI] << endl;
+                    snappedPoints.append(info.hitPoint());
+
+                    //Pout<< "cell:" << cellI
+                    //    << " at " << mesh_.cellCentres()[cellI]
+                    //    << " collapsing " << surfPoints
+                    //    << " intersections down to "
+                    //    << snappedPoints[snappedCc[cellI]] << endl;
                 }
             }
         }
@@ -498,28 +472,151 @@ void Foam::isoSurface::calcSnappedCc
 }
 
 
-// Determine per meshpoint whether all the intersections get collapsed
-// to a single point
-void Foam::isoSurface::calcSnappedPoint
+// Generate triangles for face connected to pointI
+void Foam::isoSurfaceCell::genPointTris
+(
+    const scalarField& cellValues,
+    const scalarField& pointValues,
+    const label pointI,
+    const face& f,
+    const label cellI,
+    DynamicList<point, 64>& localTriPoints
+) const
+{
+    const pointField& cc = mesh_.cellCentres();
+    const pointField& pts = mesh_.points();
+
+    for (label fp = 1; fp < f.size() - 1; fp++)
+    {
+        triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
+    //List<triFace> tris(triangulate(f));
+    //forAll(tris, i)
+    //{
+    //    const triFace& tri = tris[i];
+
+        label index = findIndex(tri, pointI);
+
+        if (index == -1)
+        {
+            continue;
+        }
+
+        // Tet between index..index-1, index..index+1, index..cc
+        label b = tri[tri.fcIndex(index)];
+        label c = tri[tri.rcIndex(index)];
+
+        // Get fractions for the three edges emanating from point
+        FixedList<scalar, 3> s(3);
+        s[0] = isoFraction(pointValues[pointI], pointValues[b]);
+        s[1] = isoFraction(pointValues[pointI], pointValues[c]);
+        s[2] = isoFraction(pointValues[pointI], cellValues[cellI]);
+
+        if
+        (
+            (s[0] >= 0.0 && s[0] <= 0.5)
+         && (s[1] >= 0.0 && s[1] <= 0.5)
+         && (s[2] >= 0.0 && s[2] <= 0.5)
+        )
+        {
+            localTriPoints.append((1.0-s[0])*pts[pointI] + s[0]*pts[b]);
+            localTriPoints.append((1.0-s[1])*pts[pointI] + s[1]*pts[c]);
+            localTriPoints.append((1.0-s[2])*pts[pointI] + s[2]*cc[cellI]);
+        }
+    }
+}
+
+
+// Generate triangle for tet connected to pointI
+void Foam::isoSurfaceCell::genPointTris
+(
+    const scalarField& pointValues,
+    const label pointI,
+    const label cellI,
+    DynamicList<point, 64>& localTriPoints
+) const
+{
+    const pointField& pts = mesh_.points();
+    const cell& cFaces = mesh_.cells()[cellI];
+
+    FixedList<label, 4> tet;
+
+    label face0 = cFaces[0];
+    const face& f0 = mesh_.faces()[face0];
+
+    if (mesh_.faceOwner()[face0] != cellI)
+    {
+        tet[0] = f0[0];
+        tet[1] = f0[1];
+        tet[2] = f0[2];
+    }
+    else
+    {
+        tet[0] = f0[0];
+        tet[1] = f0[2];
+        tet[2] = f0[1];
+    }
+
+    // Find the point on the next face that is not on f0
+    const face& f1 = mesh_.faces()[cFaces[1]];
+
+    forAll(f1, fp)
+    {
+        label p1 = f1[fp];
+
+        if (p1 != tet[0] && p1 != tet[1] && p1 != tet[2])
+        {
+            tet[3] = p1;
+            break;
+        }
+    }
+
+
+    // Get the index of pointI
+
+    label i0 = findIndex(tet, pointI);
+    label i1 = tet.fcIndex(i0);
+    label i2 = tet.fcIndex(i1);
+    label i3 = tet.fcIndex(i2);
+
+    // Get fractions for the three edges emanating from point
+    FixedList<scalar, 3> s(3);
+    s[0] = isoFraction(pointValues[pointI], pointValues[tet[i1]]);
+    s[1] = isoFraction(pointValues[pointI], pointValues[tet[i2]]);
+    s[2] = isoFraction(pointValues[pointI], pointValues[tet[i3]]);
+
+    if
+    (
+        (s[0] >= 0.0 && s[0] <= 0.5)
+     && (s[1] >= 0.0 && s[1] <= 0.5)
+     && (s[2] >= 0.0 && s[2] <= 0.5)
+    )
+    {
+        localTriPoints.append((1.0-s[0])*pts[pointI] + s[0]*pts[tet[i1]]);
+        localTriPoints.append((1.0-s[1])*pts[pointI] + s[1]*pts[tet[i2]]);
+        localTriPoints.append((1.0-s[2])*pts[pointI] + s[2]*pts[tet[i3]]);
+    }
+}
+
+
+void Foam::isoSurfaceCell::calcSnappedPoint
 (
     const PackedList<1>& isBoundaryPoint,
-    const labelList& boundaryRegion,
-    const volScalarField& cVals,
+    const PackedList<1>& isTet,
+    const scalarField& cVals,
     const scalarField& pVals,
+    const List<cellCutType>& cellCutType,
 
     DynamicList<point>& snappedPoints,
     labelList& snappedPoint
 ) const
 {
-    const pointField& pts = mesh_.points();
-
-
     const point greatPoint(VGREAT, VGREAT, VGREAT);
     pointField collapsedPoint(mesh_.nPoints(), greatPoint);
 
 
     // Work arrays
     DynamicList<point, 64> localTriPoints(100);
+    labelHashSet localPointCells(100);
 
     forAll(mesh_.pointFaces(), pointI)
     {
@@ -536,7 +633,14 @@ void Foam::isoSurface::calcSnappedPoint
         {
             label faceI = pFaces[i];
 
-            if (faceCutType_[faceI] == CUT)
+            if
+            (
+                cellCutType[mesh_.faceOwner()[faceI]] == CUT
+             || (
+                    mesh_.isInternalFace(faceI)
+                 && cellCutType[mesh_.faceNeighbour()[faceI]] == CUT
+                )
+            )
             {
                 anyCut = true;
                 break;
@@ -549,9 +653,8 @@ void Foam::isoSurface::calcSnappedPoint
         }
 
 
+        localPointCells.clear();
         localTriPoints.clear();
-        label nOther = 0;
-        point otherPointSum = vector::zero;
 
         forAll(pFaces, pFaceI)
         {
@@ -559,82 +662,40 @@ void Foam::isoSurface::calcSnappedPoint
             const face& f = mesh_.faces()[faceI];
             label own = mesh_.faceOwner()[faceI];
 
-            // Create points for all intersections close to point
-            // (i.e. from pyramid edges)
-
-            scalar nbrValue;
-            point nbrPoint;
-            getNeighbour
-            (
-                boundaryRegion,
-                cVals,
-                own,
-                faceI,
-                nbrValue,
-                nbrPoint
-            );
-
-            // Calculate intersection points of edges emanating from point
-            FixedList<scalar, 4> s;
-            FixedList<point, 4> pt;
-
-            label fp = findIndex(f, pointI);
-            s[0] = isoFraction(pVals[pointI], cVals[own]);
-            pt[0] = (1.0-s[0])*pts[pointI] + s[0]*mesh_.C()[own];
-
-            s[1] = isoFraction(pVals[pointI], nbrValue);
-            pt[1] = (1.0-s[1])*pts[pointI] + s[1]*nbrPoint;
-
-            label nextPointI = f[f.fcIndex(fp)];
-            s[2] = isoFraction(pVals[pointI], pVals[nextPointI]);
-            pt[2] = (1.0-s[2])*pts[pointI] + s[2]*pts[nextPointI];
-
-            label prevPointI = f[f.rcIndex(fp)];
-            s[3] = isoFraction(pVals[pointI], pVals[prevPointI]);
-            pt[3] = (1.0-s[3])*pts[pointI] + s[3]*pts[prevPointI];
-
-            if
-            (
-                (s[0] >= 0.0 && s[0] <= 0.5)
-             && (s[1] >= 0.0 && s[1] <= 0.5)
-             && (s[2] >= 0.0 && s[2] <= 0.5)
-            )
+            // Triangulate around f[0] on owner side
+            if (isTet.get(own) == 1)
             {
-                localTriPoints.append(pt[0]);
-                localTriPoints.append(pt[1]);
-                localTriPoints.append(pt[2]);
-            }
-            if
-            (
-                (s[0] >= 0.0 && s[0] <= 0.5)
-             && (s[1] >= 0.0 && s[1] <= 0.5)
-             && (s[3] >= 0.0 && s[3] <= 0.5)
-            )
-            {
-                localTriPoints.append(pt[3]);
-                localTriPoints.append(pt[0]);
-                localTriPoints.append(pt[1]);
-            }
-
-            // Get average of points as fallback
-            forAll(s, i)
-            {
-                if (s[i] >= 0.0 && s[i] <= 0.5)
+                if (localPointCells.insert(own))
                 {
-                    otherPointSum += pt[i];
-                    nOther++;
+                    genPointTris(pVals, pointI, own, localTriPoints);
+                }
+            }
+            else
+            {
+                genPointTris(cVals, pVals, pointI, f, own, localTriPoints);
+            }
+
+            if (mesh_.isInternalFace(faceI))
+            {
+                label nei = mesh_.faceNeighbour()[faceI];
+
+                if (isTet.get(nei) == 1)
+                {
+                    if (localPointCells.insert(nei))
+                    {
+                        genPointTris(pVals, pointI, nei, localTriPoints);
+                    }
+                }
+                else
+                {
+                    genPointTris(cVals, pVals, pointI, f, nei, localTriPoints);
                 }
             }
         }
 
         if (localTriPoints.size() == 0)
         {
-            // No complete triangles. Get average of all intersection
-            // points.
-            if (nOther > 0)
-            {
-                collapsedPoint[pointI] = otherPointSum/nOther;
-            }
+            // No near intersections
         }
         else if (localTriPoints.size() == 3)
         {
@@ -642,6 +703,10 @@ void Foam::isoSurface::calcSnappedPoint
             pointField points;
             points.transfer(localTriPoints);
             collapsedPoint[pointI] = sum(points)/points.size();
+
+            //Pout<< "    point:" << pointI
+            //    << " replacing coord:" << mesh_.points()[pointI]
+            //    << " by average:" << collapsedPoint[pointI] << endl;
         }
         else
         {
@@ -671,6 +736,9 @@ void Foam::isoSurface::calcSnappedPoint
             if (nZones == 1)
             {
                 collapsedPoint[pointI] = calcCentre(surf);
+                //Pout<< "    point:" << pointI << " nZones:" << nZones
+                //    << " replacing coord:" << mesh_.points()[pointI]
+                //    << " by average:" << collapsedPoint[pointI] << endl;
             }
         }
     }
@@ -698,7 +766,174 @@ void Foam::isoSurface::calcSnappedPoint
 }
 
 
-Foam::triSurface Foam::isoSurface::stitchTriPoints
+Foam::point Foam::isoSurfaceCell::generatePoint
+(
+    const DynamicList<point>& snappedPoints,
+
+    const scalar s0,
+    const point& p0,
+    const label p0Index,
+
+    const scalar s1,
+    const point& p1,
+    const label p1Index
+) const
+{
+    scalar d = s1-s0;
+
+    if (mag(d) > VSMALL)
+    {
+        scalar s = (iso_-s0)/d;
+
+        if (s >= 0.5 && s <= 1 && p1Index != -1)
+        {
+            return snappedPoints[p1Index];
+        }
+        else if (s >= 0.0 && s <= 0.5 && p0Index != -1)
+        {
+            return snappedPoints[p0Index];
+        }
+        else
+        {
+            return s*p1 + (1.0-s)*p0;
+        }
+    }
+    else
+    {
+        scalar s = 0.4999;
+
+        return s*p1 + (1.0-s)*p0;
+    }
+}
+
+
+void Foam::isoSurfaceCell::generateTriPoints
+(
+    const DynamicList<point>& snapped,
+
+    const scalar s0,
+    const point& p0,
+    const label p0Index,
+
+    const scalar s1,
+    const point& p1,
+    const label p1Index,
+
+    const scalar s2,
+    const point& p2,
+    const label p2Index,
+
+    const scalar s3,
+    const point& p3,
+    const label p3Index,
+
+    DynamicList<point>& points
+) const
+{
+    int triIndex = 0;
+    if (s0 < iso_)
+    {
+        triIndex |= 1;
+    }
+    if (s1 < iso_)
+    {
+        triIndex |= 2;
+    }
+    if (s2 < iso_)
+    {
+        triIndex |= 4;
+    }
+    if (s3 < iso_)
+    {
+        triIndex |= 8;
+    }
+
+    /* Form the vertices of the triangles for each case */
+    switch (triIndex)
+    {
+        case 0x00:
+        case 0x0F:
+        break;
+
+        case 0x0E:
+        case 0x01:
+            points.append(generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+        break;
+
+        case 0x0D:
+        case 0x02:
+            points.append(generatePoint(snapped,s1,p1,p1Index,s0,p0,p0Index));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+        break;
+
+        case 0x0C:
+        case 0x03:
+        {
+            point tp1 = generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index);
+            point tp2 = generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index);
+
+            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+            points.append(tp1);
+            points.append(tp2);
+            points.append(tp2);
+            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+            points.append(tp1);
+        }
+        break;
+
+        case 0x0B:
+        case 0x04:
+        {
+            points.append(generatePoint(snapped,s2,p2,p2Index,s0,p0,p0Index));
+            points.append(generatePoint(snapped,s2,p2,p2Index,s1,p1,p1Index));
+            points.append(generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index));
+        }
+        break;
+
+        case 0x0A:
+        case 0x05:
+        {
+            point tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
+            point tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
+
+            points.append(tp0);
+            points.append(tp1);
+            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+            points.append(tp0);
+            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+            points.append(tp1);
+        }
+        break;
+
+        case 0x09:
+        case 0x06:
+        {
+            point tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
+            point tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
+
+            points.append(tp0);
+            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+            points.append(tp1);
+            points.append(tp0);
+            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+            points.append(tp1);
+        }
+        break;
+
+        case 0x07:
+        case 0x08:
+            points.append(generatePoint(snapped,s3,p3,p3Index,s0,p0,p0Index));
+            points.append(generatePoint(snapped,s3,p3,p3Index,s2,p2,p2Index));
+            points.append(generatePoint(snapped,s3,p3,p3Index,s1,p1,p1Index));
+        break;
+    }
+}
+
+
+Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
 (
     const bool checkDuplicates,
     const List<point>& triPoints,
@@ -710,7 +945,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
     if ((triPoints.size() % 3) != 0)
     {
-        FatalErrorIn("isoSurface::stitchTriPoints(..)")
+        FatalErrorIn("isoSurfaceCell::stitchTriPoints(..)")
             << "Problem: number of points " << triPoints.size()
             << " not a multiple of 3." << abort(FatalError);
     }
@@ -741,7 +976,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
         if (hasMerged)
         {
-            FatalErrorIn("isoSurface::stitchTriPoints(..)")
+            FatalErrorIn("isoSurfaceCell::stitchTriPoints(..)")
                 << "Merged points contain duplicates"
                 << " when merging with distance " << mergeDistance_ << endl
                 << "merged:" << newPoints.size() << " re-merged:"
@@ -780,7 +1015,6 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
     }
 
 
-
     // Use face centres to determine 'flat hole' situation (see RMT paper).
     // Two unconnected triangles get connected because (some of) the edges
     // separating them get collapsed. Below only checks for duplicate triangles,
@@ -789,7 +1023,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
     {
         if (debug)
         {
-            Pout<< "isoSurface : merged from " << nTris
+            Pout<< "isoSurfaceCell : merged from " << nTris
                 << " down to " << tris.size() << " triangles." << endl;
         }
 
@@ -812,7 +1046,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
         if (debug)
         {
-            Pout<< "isoSurface : detected "
+            Pout<< "isoSurfaceCell : detected "
                 << centres.size()-mergedCentres.size()
                 << " duplicate triangles." << endl;
         }
@@ -845,7 +1079,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
 
 // Does face use valid vertices?
-bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
+bool Foam::isoSurfaceCell::validTri(const triSurface& surf, const label faceI)
 {
     // Simple check on indices ok.
 
@@ -902,10 +1136,8 @@ bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
         {
             WarningIn("validTri(const triSurface&, const label)")
                 << "triangle " << faceI << " vertices " << f
-                << " fc:" << f.centre(surf.points())
                 << " has the same vertices as triangle " << nbrFaceI
                 << " vertices " << nbrF
-                << " fc:" << nbrF.centre(surf.points())
                 << endl;
 
             return false;
@@ -915,7 +1147,7 @@ bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
 }
 
 
-void Foam::isoSurface::calcAddressing
+void Foam::isoSurfaceCell::calcAddressing
 (
     const triSurface& surf,
     List<FixedList<label, 3> >& faceEdges,
@@ -949,7 +1181,7 @@ void Foam::isoSurface::calcAddressing
 
     if (debug)
     {
-        Pout<< "isoSurface : detected "
+        Pout<< "isoSurfaceCell : detected "
             << mergedCentres.size()
             << " edges on " << surf.size() << " triangles." << endl;
     }
@@ -969,7 +1201,7 @@ void Foam::isoSurface::calcAddressing
         faceEdges[triI][1] = oldToMerged[edgeI++];
         faceEdges[triI][2] = oldToMerged[edgeI++];
     }
-
+    
 
     // Determine edgeFaces
     edgeFace0.setSize(mergedCentres.size());
@@ -1016,7 +1248,7 @@ void Foam::isoSurface::calcAddressing
 }
 
 
-void Foam::isoSurface::walkOrientation
+void Foam::isoSurfaceCell::walkOrientation
 (
     const triSurface& surf,
     const List<FixedList<label, 3> >& faceEdges,
@@ -1084,7 +1316,7 @@ void Foam::isoSurface::walkOrientation
 }    
 
 
-void Foam::isoSurface::orientSurface
+void Foam::isoSurfaceCell::orientSurface
 (
     triSurface& surf,
     const List<FixedList<label, 3> >& faceEdges,
@@ -1147,7 +1379,7 @@ void Foam::isoSurface::orientSurface
         {
             FatalErrorIn
             (
-                "isoSurface::orientSurface(triSurface&, const label)"
+                "isoSurfaceCell::orientSurface(triSurface&, const label)"
             )   << "problem" << abort(FatalError);
         }
     }
@@ -1155,7 +1387,7 @@ void Foam::isoSurface::orientSurface
 
 
 // Checks if triangle is connected through edgeI only.
-bool Foam::isoSurface::danglingTriangle
+bool Foam::isoSurfaceCell::danglingTriangle
 (
     const FixedList<label, 3>& fEdges,
     const labelList& edgeFace1
@@ -1182,7 +1414,7 @@ bool Foam::isoSurface::danglingTriangle
 
 
 // Mark triangles to keep. Returns number of dangling triangles.
-Foam::label Foam::isoSurface::markDanglingTriangles
+Foam::label Foam::isoSurfaceCell::markDanglingTriangles
 (
     const List<FixedList<label, 3> >& faceEdges,
     const labelList& edgeFace0,
@@ -1230,7 +1462,7 @@ Foam::label Foam::isoSurface::markDanglingTriangles
 }
 
 
-Foam::triSurface Foam::isoSurface::subsetMesh
+Foam::triSurface Foam::isoSurfaceCell::subsetMesh
 (
     const triSurface& s,
     const labelList& newToOldFaces,
@@ -1304,31 +1536,38 @@ Foam::triSurface Foam::isoSurface::subsetMesh
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::isoSurface::isoSurface
+Foam::isoSurfaceCell::isoSurfaceCell
 (
-    const volScalarField& cVals,
+    const polyMesh& mesh,
+    const scalarField& cVals,
     const scalarField& pVals,
     const scalar iso,
     const bool regularise,
     const scalar mergeTol
 )
 :
-    mesh_(cVals.mesh()),
+    mesh_(mesh),
     iso_(iso),
-    mergeDistance_(mergeTol*mag(mesh_.bounds().max()-mesh_.bounds().min()))
+    mergeDistance_(mergeTol*mag(mesh.bounds().max()-mesh.bounds().min()))
 {
-    // Determine if any cut through face/cell
-    calcCutTypes(cVals, pVals);
+    // Determine if cell is tet
+    PackedList<1> isTet(mesh_.nCells());
+    {
+        tetMatcher tet;
 
+        forAll(isTet, cellI)
+        {
+            if (tet.isA(mesh_, cellI))
+            {
+                isTet.set(cellI, 1);
+            }
+        }
+    }
 
     // Determine if point is on boundary. Points on boundaries are never
     // snapped. Coupled boundaries are handled explicitly so not marked here.
     PackedList<1> isBoundaryPoint(mesh_.nPoints());
-
-    labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const labelList& own = mesh_.faceOwner();
-
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -1336,11 +1575,8 @@ Foam::isoSurface::isoSurface
         if (!pp.coupled())
         {
             label faceI = pp.start();
-
             forAll(pp, i)
             {
-                boundaryRegion[faceI-mesh_.nInternalFaces()] = patchI;
-
                 const face& f = mesh_.faces()[faceI++];
 
                 forAll(f, fp)
@@ -1352,7 +1588,27 @@ Foam::isoSurface::isoSurface
     }
 
 
-    DynamicList<point> snappedPoints(nCutCells_);
+    // Determine if any cut through cell
+
+    List<cellCutType> cellCutType(mesh_.nCells());
+    label nCutCells = 0;
+    forAll(mesh_.cells(), cellI)
+    {
+        cellCutType[cellI] = calcCutType(isTet, cVals, pVals, cellI);
+
+        if (cellCutType[cellI] == CUT)
+        {
+            nCutCells++;
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "isoSurfaceCell : detected " << nCutCells
+            << " candidate cut cells." << endl;
+    }
+
+    DynamicList<point> snappedPoints(nCutCells);
 
     // Per cc -1 or a point inside snappedPoints.
     labelList snappedCc;
@@ -1360,10 +1616,10 @@ Foam::isoSurface::isoSurface
     {
         calcSnappedCc
         (
-            boundaryRegion,
+            isTet,
             cVals,
             pVals,
-
+            cellCutType,
             snappedPoints,
             snappedCc
         );
@@ -1374,29 +1630,9 @@ Foam::isoSurface::isoSurface
         snappedCc = -1;
     }
 
-    // Determine neighbouring snap status
-    labelList neiSnappedCc(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if (pp.coupled())
-        {
-            label faceI = pp.start();
-            forAll(pp, i)
-            {
-                neiSnappedCc[faceI-mesh_.nInternalFaces()] =
-                    snappedCc[own[faceI]];
-                faceI++;
-            }
-        }
-    }
-    syncTools::swapBoundaryFaceList(mesh_, neiSnappedCc, false);
-
-
     if (debug)
     {
-        Pout<< "isoSurface : shifted " << snappedPoints.size()
+        Pout<< "isoSurfaceCell : shifted " << snappedPoints.size()
             << " cell centres to intersection." << endl;
     }
 
@@ -1409,10 +1645,10 @@ Foam::isoSurface::isoSurface
         calcSnappedPoint
         (
             isBoundaryPoint,
-            boundaryRegion,
+            isTet,
             cVals,
             pVals,
-
+            cellCutType,
             snappedPoints,
             snappedPoint
         );
@@ -1425,36 +1661,127 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : shifted " << snappedPoints.size()-nCellSnaps
+        Pout<< "isoSurfaceCell : shifted " << snappedPoints.size()-nCellSnaps
             << " vertices to intersection." << endl;
     }
 
 
-    DynamicList<point> triPoints(nCutCells_);
-    DynamicList<label> triMeshCells(nCutCells_);
 
-    generateTriPoints
-    (
-        cVals,
-        pVals,
+    DynamicList<point> triPoints(nCutCells);
+    DynamicList<label> triMeshCells(nCutCells);
 
-        mesh_.C(),
-        mesh_.points(),
+    forAll(mesh_.cells(), cellI)
+    {
+        if (cellCutType[cellI] != NOTCUT)
+        {
+            label oldNPoints = triPoints.size();
 
-        snappedPoints,
-        snappedCc,
-        snappedPoint,
+            const cell& cFaces = mesh_.cells()[cellI];
 
-        triPoints,
-        triMeshCells
-    );
+            if (isTet.get(cellI) == 1)
+            {
+                // For tets don't do cell-centre decomposition, just use the
+                // tet points and values
+
+                const face& f0 = mesh_.faces()[cFaces[0]];
+
+                // Get the other point
+                const face& f1 = mesh_.faces()[cFaces[1]];
+                label oppositeI = -1;
+                forAll(f1, fp)
+                {
+                    oppositeI = f1[fp];
+
+                    if (findIndex(f0, oppositeI) == -1)
+                    {
+                        break;
+                    }
+                }
+
+                generateTriPoints
+                (
+                    snappedPoints,
+                    pVals[f0[0]],
+                    mesh_.points()[f0[0]],
+                    snappedPoint[f0[0]],
+
+                    pVals[f0[1]],
+                    mesh_.points()[f0[1]],
+                    snappedPoint[f0[1]],
+
+                    pVals[f0[2]],
+                    mesh_.points()[f0[2]],
+                    snappedPoint[f0[2]],
+
+                    pVals[oppositeI],
+                    mesh_.points()[oppositeI],
+                    snappedPoint[oppositeI],
+
+                    triPoints
+                );
+            }
+            else
+            {
+                const cell& cFaces = mesh_.cells()[cellI];
+
+                forAll(cFaces, cFaceI)
+                {
+                    label faceI = cFaces[cFaceI];
+                    const face& f = mesh_.faces()[faceI];
+
+                    for (label fp = 1; fp < f.size() - 1; fp++)
+                    {
+                        triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
+                    //List<triFace> tris(triangulate(f));
+                    //forAll(tris, i)
+                    //{
+                    //    const triFace& tri = tris[i];
+
+
+                        generateTriPoints
+                        (
+                            snappedPoints,
+
+                            pVals[tri[0]],
+                            mesh_.points()[tri[0]],
+                            snappedPoint[tri[0]],
+
+                            pVals[tri[1]],
+                            mesh_.points()[tri[1]],
+                            snappedPoint[tri[1]],
+
+                            pVals[tri[2]],
+                            mesh_.points()[tri[2]],
+                            snappedPoint[tri[2]],
+
+                            cVals[cellI],
+                            mesh_.cellCentres()[cellI],
+                            snappedCc[cellI],
+
+                            triPoints
+                        );
+                    }
+                }
+            }
+
+
+            // Every three triPoints is a cell
+            label nCells = (triPoints.size()-oldNPoints)/3;
+            for (label i = 0; i < nCells; i++)
+            {
+                triMeshCells.append(cellI);
+            }
+        }
+    }
+
+    triPoints.shrink();
+    triMeshCells.shrink();
 
     if (debug)
     {
-        Pout<< "isoSurface : generated " << triMeshCells.size()
+        Pout<< "isoSurfaceCell : generated " << triMeshCells.size()
             << " unmerged triangles." << endl;
     }
-
 
     // Merge points and compact out non-valid triangles
     labelList triMap;           // merged to unmerged triangle
@@ -1471,7 +1798,7 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : generated " << triMap.size()
+        Pout<< "isoSurfaceCell : generated " << triMap.size()
             << " merged triangles." << endl;
     }
 
@@ -1483,7 +1810,7 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : checking " << size()
+        Pout<< "isoSurfaceCell : checking " << size()
             << " triangles for validity." << endl;
 
         forAll(*this, triI)
@@ -1494,8 +1821,6 @@ Foam::isoSurface::isoSurface
     }
 
 
-    //if (false)
-    //{
     List<FixedList<label, 3> > faceEdges;
     labelList edgeFace0, edgeFace1;
     Map<labelList> edgeFacesRest;
@@ -1519,7 +1844,7 @@ Foam::isoSurface::isoSurface
 
         if (debug)
         {
-            Pout<< "isoSurface : detected " << nDangling
+            Pout<< "isoSurfaceCell : detected " << nDangling
                 << " dangling triangles." << endl;
         }
 
@@ -1548,8 +1873,128 @@ Foam::isoSurface::isoSurface
     }
 
     orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
-    //}
+
+    //combineCellTriangles();
 }
 
+
+//XXXXXXX
+// Experimental retriangulation of triangles per cell. Problem is that
+// -it is very expensive   -only gets rid of internal points, not of boundary
+// ones so limited benefit (e.g. 60 v.s. 88 triangles)
+void Foam::isoSurfaceCell::combineCellTriangles()
+{
+    if (size() > 0)
+    {
+        DynamicList<labelledTri> newTris(size());
+        DynamicList<label> newTriToCell(size());
+
+        label startTriI = 0;
+
+        DynamicList<labelledTri> tris;
+
+        for (label triI = 1; triI <= meshCells_.size(); triI++)
+        {
+            if
+            (
+                triI == meshCells_.size()
+             || meshCells_[triI] != meshCells_[startTriI]
+            )
+            {
+                label nTris = triI-startTriI;
+
+                if (nTris == 1)
+                {
+                    newTris.append(operator[](startTriI));
+                    newTriToCell.append(meshCells_[startTriI]);
+                }
+                else
+                {
+                    // Collect from startTriI to triI in a triSurface
+                    tris.clear();
+                    for (label i = startTriI; i < triI; i++)
+                    {
+                        tris.append(operator[](i));
+                    }
+                    triSurface cellTris(tris, patches(), points());
+                    tris.clear();
+
+                    // Get outside
+                    const labelListList& loops = cellTris.edgeLoops();
+
+                    forAll(loops, i)
+                    {
+                        // Do proper triangulation of loop
+                        face loop(renumber(cellTris.meshPoints(), loops[i]));
+
+                        faceTriangulation faceTris
+                        (
+                            points(),
+                            loop,
+                            true
+                        );
+
+                        // Copy into newTris
+                        forAll(faceTris, faceTriI)
+                        {
+                            const triFace& tri = faceTris[faceTriI];
+
+                            newTris.append
+                            (
+                                labelledTri
+                                (
+                                    tri[0],
+                                    tri[1],
+                                    tri[2],
+                                    operator[](startTriI).region()
+                                )
+                            );
+                            newTriToCell.append(meshCells_[startTriI]);
+                        }
+                    }
+                }
+
+                startTriI = triI;
+            }
+        }
+        newTris.shrink();
+        newTriToCell.shrink();
+
+        // Compact
+        pointField newPoints(points().size());
+        label newPointI = 0;
+        labelList oldToNewPoint(points().size(), -1);
+
+        forAll(newTris, i)
+        {
+            labelledTri& tri = newTris[i];
+            forAll(tri, j)
+            {
+                label pointI = tri[j];
+
+                if (oldToNewPoint[pointI] == -1)
+                {
+                    oldToNewPoint[pointI] = newPointI;
+                    newPoints[newPointI++] = points()[pointI];
+                }
+                tri[j] = oldToNewPoint[pointI];
+            }
+        }
+        newPoints.setSize(newPointI);
+
+        triSurface::operator=
+        (
+            triSurface
+            (
+                newTris,
+                patches(),
+                newPoints,
+                true
+            )
+        );
+        meshCells_.transfer(newTriToCell);
+    }
+}
+//XXXXXXX
 
 // ************************************************************************* //
