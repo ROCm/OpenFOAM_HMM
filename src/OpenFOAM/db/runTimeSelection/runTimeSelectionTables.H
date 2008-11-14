@@ -40,6 +40,10 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
+// external use:
+// ~~~~~~~~~~~~~
+// declare a run-time selection:
 #define declareRunTimeSelectionTable\
 (autoPtr,baseType,argNames,argList,parList)                                   \
                                                                               \
@@ -86,7 +90,10 @@ Description
     static void destroy##argNames##ConstructorTables()
 
 
-#define defineRunTimeSelectionTableConstructor(baseType,argNames)             \
+// internal use:
+// constructor aid
+#define defineRunTimeSelectionTableConstructor\
+(baseType,argNames)                                                           \
                                                                               \
     /* Table constructor called from the table add function */                \
     void baseType::construct##argNames##ConstructorTables()                   \
@@ -102,7 +109,11 @@ Description
         }                                                                     \
     }
 
-#define defineRunTimeSelectionTableDestructor(baseType,argNames)              \
+
+// internal use:
+// destructor aid
+#define defineRunTimeSelectionTableDestructor\
+(baseType,argNames)                                                           \
                                                                               \
     /* Table destructor called from the table add function destructor */      \
     void baseType::destroy##argNames##ConstructorTables()                     \
@@ -114,24 +125,43 @@ Description
         }                                                                     \
     }
 
-#define defineRunTimeSelectionTablePtr(baseType,argNames)                     \
+
+// internal use:
+// create pointer to hash-table of functions
+#define defineRunTimeSelectionTablePtr\
+(baseType,argNames)                                                           \
                                                                               \
     /* Define the constructor function table */                               \
     baseType::argNames##ConstructorTable*                                     \
         baseType::argNames##ConstructorTablePtr_ = NULL
 
+
+// not much in use:
 #define defineTemplateRunTimeSelectionTablePtr(baseType,argNames)             \
                                                                               \
     /* Define the constructor function table */                               \
     typename baseType::argNames##ConstructorTable*                            \
         baseType::argNames##ConstructorTablePtr_ = NULL
 
-#define defineRunTimeSelectionTable(baseType,argNames)                        \
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+// external use:
+// ~~~~~~~~~~~~~
+// define run-time selection table
+#define defineRunTimeSelectionTable\
+(baseType,argNames)                        \
                                                                               \
     defineRunTimeSelectionTablePtr(baseType,argNames);                        \
     defineRunTimeSelectionTableConstructor(baseType,argNames)                 \
     defineRunTimeSelectionTableDestructor(baseType,argNames)
 
+
+// external use:
+// ~~~~~~~~~~~~~
+// define run-time selection table for template classes
+// use when baseType doesn't need a template argument (eg, is a typedef)
 #define defineTemplateRunTimeSelectionTable(baseType,argNames)                \
                                                                               \
     template<>                                                                \
@@ -140,6 +170,73 @@ Description
     defineRunTimeSelectionTableConstructor(baseType,argNames)                 \
     template<>                                                                \
     defineRunTimeSelectionTableDestructor(baseType,argNames)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+// internal use:
+// constructor aid
+// use when baseType requires the Targ template argument
+#define defineTemplatedRunTimeSelectionTableConstructor\
+(baseType,argNames,Targ)                                                      \
+                                                                              \
+    /* Table constructor called from the table add function */                \
+    void baseType<Targ>::construct##argNames##ConstructorTables()             \
+    {                                                                         \
+        static bool constructed = false;                                      \
+                                                                              \
+        if (!constructed)                                                     \
+        {                                                                     \
+            baseType<Targ>::argNames##ConstructorTablePtr_                    \
+                = new baseType<Targ>::argNames##ConstructorTable;             \
+                                                                              \
+            constructed = true;                                               \
+        }                                                                     \
+    }
+
+
+// internal use:
+// destructor aid
+// use when baseType requires the Targ template argument
+#define defineTemplatedRunTimeSelectionTableDestructor\
+(baseType,argNames,Targ)                                                      \
+                                                                              \
+    /* Table destructor called from the table add function destructor */      \
+    void baseType<Targ>::destroy##argNames##ConstructorTables()               \
+    {                                                                         \
+        if (baseType<Targ>::argNames##ConstructorTablePtr_)                   \
+        {                                                                     \
+            delete baseType<Targ>::argNames##ConstructorTablePtr_;            \
+            baseType<Targ>::argNames##ConstructorTablePtr_ = NULL;            \
+        }                                                                     \
+    }
+
+
+// internal use:
+// create pointer to hash-table of functions
+// use when baseType requires the Targ template argument
+#define defineTemplatedRunTimeSelectionTablePtr\
+(baseType,argNames,Targ)                                                      \
+                                                                              \
+    /* Define the constructor function table */                               \
+    baseType<Targ>::argNames##ConstructorTable*                               \
+        baseType<Targ>::argNames##ConstructorTablePtr_ = NULL
+
+
+// external use:
+// ~~~~~~~~~~~~~
+// define run-time selection table for template classes
+// use when baseType requires the Targ template argument
+#define defineTemplatedRunTimeSelectionTable\
+(baseType,argNames,Targ)                                                      \
+                                                                              \
+    template<>                                                                \
+    defineTemplatedRunTimeSelectionTablePtr(baseType,argNames,Targ);          \
+    template<>                                                                \
+    defineTemplatedRunTimeSelectionTableConstructor(baseType,argNames,Targ)   \
+    template<>                                                                \
+    defineTemplatedRunTimeSelectionTableDestructor(baseType,argNames,Targ)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
