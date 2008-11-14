@@ -26,69 +26,90 @@ License
 
 #include "isoSurface.H"
 #include "polyMesh.H"
-#include "tetMatcher.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Type Foam::isoSurface::vertexInterp
+Type Foam::isoSurface::generatePoint
 (
-    const scalar iso,
-    const Type& p0,
-    const Type& p1,
+    const DynamicList<Type>& snappedPoints,
+
     const scalar s0,
-    const scalar s1
-)
+    const Type& p0,
+    const label p0Index,
+
+    const scalar s1,
+    const Type& p1,
+    const label p1Index
+) const
 {
     scalar d = s1-s0;
 
     if (mag(d) > VSMALL)
     {
-        return (iso-s0)/d*p1 + (s1-iso)/d*p0;
+        scalar s = (iso_-s0)/d;
+
+        if (s >= 0.5 && s <= 1 && p1Index != -1)
+        {
+            return snappedPoints[p1Index];
+        }
+        else if (s >= 0.0 && s <= 0.5 && p0Index != -1)
+        {
+            return snappedPoints[p0Index];
+        }
+        else
+        {
+            return s*p1 + (1.0-s)*p0;
+        }
     }
     else
     {
-        return 0.5*(p0+p1);
+        scalar s = 0.4999;
+
+        return s*p1 + (1.0-s)*p0;
     }
 }
 
 
-// After "Polygonising A Scalar Field Using Tetrahedrons"
-// by Paul Bourke
-// Get value consistent with uncompacted triangle points.
-// Given tet corner sample values s0..s3 interpolate the corresponding
-// values p0..p3 to construct the surface corresponding to sample value iso.
 template<class Type>
-void Foam::isoSurface::vertexInterp
+void Foam::isoSurface::generateTriPoints
 (
-    const scalar iso,
-    const scalar s0,
-    const scalar s1,
-    const scalar s2,
-    const scalar s3,
+    const DynamicList<Type>& snapped,
 
+    const scalar s0,
     const Type& p0,
+    const label p0Index,
+
+    const scalar s1,
     const Type& p1,
+    const label p1Index,
+
+    const scalar s2,
     const Type& p2,
+    const label p2Index,
+
+    const scalar s3,
     const Type& p3,
+    const label p3Index,
 
     DynamicList<Type>& points
-)
+) const
 {
     int triIndex = 0;
-    if (s0 < iso)
+    if (s0 < iso_)
     {
         triIndex |= 1;
     }
-    if (s1 < iso)
+    if (s1 < iso_)
     {
         triIndex |= 2;
     }
-    if (s2 < iso)
+    if (s2 < iso_)
     {
         triIndex |= 4;
     }
-    if (s3 < iso)
+    if (s3 < iso_)
     {
         triIndex |= 8;
     }
@@ -102,29 +123,29 @@ void Foam::isoSurface::vertexInterp
 
         case 0x0E:
         case 0x01:
-            points.append(vertexInterp(iso,p0,p1,s0,s1));
-            points.append(vertexInterp(iso,p0,p2,s0,s2));
-            points.append(vertexInterp(iso,p0,p3,s0,s3));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
         break;
 
         case 0x0D:
         case 0x02:
-            points.append(vertexInterp(iso,p1,p0,s1,s0));
-            points.append(vertexInterp(iso,p1,p3,s1,s3));
-            points.append(vertexInterp(iso,p1,p2,s1,s2));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s0,p0,p0Index));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
         break;
 
         case 0x0C:
         case 0x03:
         {
-            const Type tp1 = vertexInterp(iso,p0,p2,s0,s2);
-            const Type tp2 = vertexInterp(iso,p1,p3,s1,s3);
+            Type tp1 = generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index);
+            Type tp2 = generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index);
 
-            points.append(vertexInterp(iso,p0,p3,s0,s3));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
             points.append(tp1);
             points.append(tp2);
             points.append(tp2);
-            points.append(vertexInterp(iso,p1,p2,s1,s2));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
             points.append(tp1);
         }
         break;
@@ -132,23 +153,23 @@ void Foam::isoSurface::vertexInterp
         case 0x0B:
         case 0x04:
         {
-            points.append(vertexInterp(iso,p2,p0,s2,s0));
-            points.append(vertexInterp(iso,p2,p1,s2,s1));
-            points.append(vertexInterp(iso,p2,p3,s2,s3));
+            points.append(generatePoint(snapped,s2,p2,p2Index,s0,p0,p0Index));
+            points.append(generatePoint(snapped,s2,p2,p2Index,s1,p1,p1Index));
+            points.append(generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index));
         }
         break;
 
         case 0x0A:
         case 0x05:
         {
-            const Type tp0 = vertexInterp(iso,p0,p1,s0,s1);
-            const Type tp1 = vertexInterp(iso,p2,p3,s2,s3);
+            Type tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
+            Type tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
 
             points.append(tp0);
             points.append(tp1);
-            points.append(vertexInterp(iso,p0,p3,s0,s3));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
             points.append(tp0);
-            points.append(vertexInterp(iso,p1,p2,s1,s2));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
             points.append(tp1);
         }
         break;
@@ -156,133 +177,305 @@ void Foam::isoSurface::vertexInterp
         case 0x09:
         case 0x06:
         {
-            const Type tp0 = vertexInterp(iso,p0,p1,s0,s1);
-            const Type tp1 = vertexInterp(iso,p2,p3,s2,s3);
+            Type tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
+            Type tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
 
             points.append(tp0);
-            points.append(vertexInterp(iso,p1,p3,s1,s3));
+            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
             points.append(tp1);
             points.append(tp0);
-            points.append(vertexInterp(iso,p0,p2,s0,s2));
+            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
             points.append(tp1);
         }
         break;
 
         case 0x07:
         case 0x08:
-            points.append(vertexInterp(iso,p3,p0,s3,s0));
-            points.append(vertexInterp(iso,p3,p2,s3,s2));
-            points.append(vertexInterp(iso,p3,p1,s3,s1));
+            points.append(generatePoint(snapped,s3,p3,p3Index,s0,p0,p0Index));
+            points.append(generatePoint(snapped,s3,p3,p3Index,s2,p2,p2Index));
+            points.append(generatePoint(snapped,s3,p3,p3Index,s1,p1,p1Index));
         break;
     }
 }
 
 
-template <class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::isoSurface::sample(const Field<Type>& vField) const
+template<class Type>
+Foam::label Foam::isoSurface::generateTriPoints
+(
+    const volScalarField& cVals,
+    const scalarField& pVals,
+
+    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const Field<Type>& pCoords,
+
+    const DynamicList<Type>& snappedPoints,
+    const labelList& snappedCc,
+    const labelList& snappedPoint,
+    const label faceI,
+
+    const scalar neiVal,
+    const Type& neiPt,
+    const label neiSnap,
+
+    DynamicList<Type>& triPoints,
+    DynamicList<label>& triMeshCells
+) const
 {
-    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
+    label own = mesh_.faceOwner()[faceI];
+
+    label oldNPoints = triPoints.size();
+
+    const face& f = mesh_.faces()[faceI];
+
+    forAll(f, fp)
+    {
+        label pointI = f[fp];
+        label nextPointI = f[f.fcIndex(fp)];
+
+        generateTriPoints
+        (
+            snappedPoints,
+
+            pVals[pointI],
+            pCoords[pointI],
+            snappedPoint[pointI],
+
+            pVals[nextPointI],
+            pCoords[nextPointI],
+            snappedPoint[nextPointI],
+
+            cVals[own],
+            cCoords[own],
+            snappedCc[own],
+
+            neiVal,
+            neiPt,
+            neiSnap,
+
+            triPoints
+        );
+    }
+
+    // Every three triPoints is a triangle
+    label nTris = (triPoints.size()-oldNPoints)/3;
+    for (label i = 0; i < nTris; i++)
+    {
+        triMeshCells.append(own);
+    }
+
+    return nTris;
 }
 
 
+template<class Type>
+void Foam::isoSurface::generateTriPoints
+(
+    const volScalarField& cVals,
+    const scalarField& pVals,
+
+    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const Field<Type>& pCoords,
+
+    const DynamicList<Type>& snappedPoints,
+    const labelList& snappedCc,
+    const labelList& snappedPoint,
+
+    DynamicList<Type>& triPoints,
+    DynamicList<label>& triMeshCells
+) const
+{
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const labelList& own = mesh_.faceOwner();
+    const labelList& nei = mesh_.faceNeighbour();
+
+
+    // Determine neighbouring snap status
+    labelList neiSnappedCc(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            label faceI = pp.start();
+            forAll(pp, i)
+            {
+                neiSnappedCc[faceI-mesh_.nInternalFaces()] =
+                    snappedCc[own[faceI]];
+                faceI++;
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiSnappedCc, false);
+
+
+
+    // Generate triangle points
+
+    triPoints.clear();
+    triMeshCells.clear();
+
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    {
+        if (faceCutType_[faceI] != NOTCUT)
+        {
+            generateTriPoints
+            (
+                cVals,
+                pVals,
+
+                cCoords,
+                pCoords,
+
+                snappedPoints,
+                snappedCc,
+                snappedPoint,
+                faceI,
+
+                cVals[nei[faceI]],
+                cCoords[nei[faceI]],
+                snappedCc[nei[faceI]],
+
+                triPoints,
+                triMeshCells
+            );
+        }
+    }
+
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            if (refCast<const processorPolyPatch>(pp).owner())
+            {
+                label faceI = pp.start();
+
+                forAll(pp, i)
+                {
+                    if (faceCutType_[faceI] != NOTCUT)
+                    {
+                        generateTriPoints
+                        (
+                            cVals,
+                            pVals,
+
+                            cCoords,
+                            pCoords,
+
+                            snappedPoints,
+                            snappedCc,
+                            snappedPoint,
+                            faceI,
+
+                            cVals.boundaryField()[patchI][i],
+                            cCoords.boundaryField()[patchI][i],
+                            neiSnappedCc[faceI-mesh_.nInternalFaces()],
+
+                            triPoints,
+                            triMeshCells
+                        );
+                    }
+                    faceI++;
+                }
+            }
+        }
+        else
+        {
+            label faceI = pp.start();
+
+            forAll(pp, i)
+            {
+                if (faceCutType_[faceI] != NOTCUT)
+                {
+                    generateTriPoints
+                    (
+                        cVals,
+                        pVals,
+
+                        cCoords,
+                        pCoords,
+
+                        snappedPoints,
+                        snappedCc,
+                        snappedPoint,
+                        faceI,
+
+                        cVals.boundaryField()[patchI][i],
+                        cCoords.boundaryField()[patchI][i],
+                        -1, // fc not snapped
+
+                        triPoints,
+                        triMeshCells
+                    );
+                }
+                faceI++;
+            }
+        }
+    }
+
+    triPoints.shrink();
+    triMeshCells.shrink();
+}
+
+
+//template <class Type>
+//Foam::tmp<Foam::Field<Type> >
+//Foam::isoSurface::sample(const Field<Type>& vField) const
+//{
+//    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
+//}
+//
+//
 template <class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurface::interpolate
 (
-    const Field<Type>& sampleCellValues,
-    const Field<Type>& samplePointValues
+    const volScalarField& cVals,
+    const scalarField& pVals,
+    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const Field<Type>& pCoords
 ) const
 {
-    tetMatcher tet;
+    DynamicList<Type> triPoints(nCutCells_);
+    DynamicList<label> triMeshCells(nCutCells_);
 
-    DynamicList<Type> triValues;
+    // Dummy snap data
+    DynamicList<Type> snappedPoints;
+    labelList snappedCc(mesh_.nCells(), -1);
+    labelList snappedPoint(mesh_.nPoints(), -1);
 
-    // Note: in same order as construction of triSurface
-    label oldCellI = -1;
-    forAll(meshCells_, triI)
-    {
-        label cellI = meshCells_[triI];
+    generateTriPoints
+    (
+        cVals,
+        pVals,
 
-        if (cellI != oldCellI)
-        {
-            oldCellI = cellI;
+        cCoords,
+        pCoords,
 
-            const cell& cFaces = mesh_.cells()[cellI];
+        snappedPoints,
+        snappedCc,
+        snappedPoint,
 
-            if (tet.isA(mesh_, cellI))
-            {
-                // For tets don't do cell-centre decomposition, just use the
-                // tet points and values
+        triPoints,
+        triMeshCells
+    );
 
-                const face& f0 = mesh_.faces()[cFaces[0]];
-
-                // Get the other point
-                const face& f1 = mesh_.faces()[cFaces[1]];
-                label oppositeI = -1;
-                forAll(f1, fp)
-                {
-                    oppositeI = f1[fp];
-
-                    if (findIndex(f0, oppositeI) == -1)
-                    {
-                        break;
-                    }
-                }
-
-                vertexInterp
-                (
-                    iso_,
-                    pointValues_[f0[0]],
-                    pointValues_[f0[1]],
-                    pointValues_[f0[2]],
-                    pointValues_[oppositeI],
-
-                    samplePointValues[f0[0]],
-                    samplePointValues[f0[1]],
-                    samplePointValues[f0[2]],
-                    samplePointValues[oppositeI],
-
-                    triValues
-                );
-            }
-            else
-            {
-                forAll(cFaces, cFaceI)
-                {
-                    label faceI = cFaces[cFaceI];
-                    const face& f = mesh_.faces()[faceI];
-
-                    for(label fp = 1; fp < f.size() - 1; fp++)
-                    {
-                        vertexInterp
-                        (
-                            iso_,
-                            pointValues_[f[0]],
-                            pointValues_[f[fp]],
-                            pointValues_[f[f.fcIndex(fp)]],
-                            cellValues_[cellI],
-
-                            samplePointValues[f[0]],
-                            samplePointValues[f[fp]],
-                            samplePointValues[f[f.fcIndex(fp)]],
-                            sampleCellValues[cellI],
-
-                            triValues
-                        );
-                    }
-                }
-            }
-        }
-    }
 
     // One value per point
     tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
     Field<Type>& values = tvalues();
 
-    forAll(triValues, i)
+    forAll(triPoints, i)
     {
-        values[triPointMergeMap_[i]] = triValues[i];
+        label mergedPointI = triPointMergeMap_[i];
+
+        if (mergedPointI >= 0)
+        {
+            values[mergedPointI] = triPoints[i];
+        }
     }
 
     return tvalues;
