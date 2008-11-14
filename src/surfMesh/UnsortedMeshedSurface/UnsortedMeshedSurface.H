@@ -128,8 +128,6 @@ private:
 
 protected:
 
-    // Static protected functions
-
     // Protected Member functions
 
         //- Sets default patch names based on the maximum patch number
@@ -147,24 +145,6 @@ protected:
 
         //- Sets patch names from hashed values (name -> id)
         void setPatches(const HashTable<label>& groupToPatch);
-
-        //- Return non-const access to global points
-        pointField& points()
-        {
-            return const_cast<pointField&>(ParentType::points());
-        }
-
-        //- Return non-const access to the faces
-        List<Face>& faces()
-        {
-            return static_cast<List<Face> &>(*this);
-        }
-
-        //- Return non-const access to the region Ids
-        List<label>& regions()
-        {
-            return regions_;
-        }
 
 public:
 
@@ -338,10 +318,22 @@ public:
             return ParentType::points();
         }
 
+        //- Return non-const access to global points
+        pointField& points()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
         //- Return const access to the faces
         const List<Face>& faces() const
         {
             return static_cast<const List<Face> &>(*this);
+        }
+
+        //- Return non-const access to the faces
+        List<Face>& faces()
+        {
+            return static_cast<List<Face> &>(*this);
         }
 
         //- Return const access to the regions
@@ -350,11 +342,19 @@ public:
             return regions_;
         }
 
+        //- Return non-const access to the region Ids
+        List<label>& regions()
+        {
+            return regions_;
+        }
+
+        //- Return const access to the patches
         const surfPatchIdentifierList& patches() const
         {
             return patches_;
         }
 
+        //- Return non-const access to the patches
         surfPatchIdentifierList& patches()
         {
             return patches_;

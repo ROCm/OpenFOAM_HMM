@@ -117,23 +117,6 @@ private:
         //- Read OpenFOAM Surface format
         bool read(Istream&);
 
-
-protected:
-
-    // Protected Member functions
-
-        //- Return non-const access to global points
-        pointField& points()
-        {
-            return const_cast<pointField&>(ParentType::points());
-        }
-
-        //- Return non-const access to the faces
-        List<Face>& faces()
-        {
-            return static_cast<List<Face> &>(*this);
-        }
-
 public:
 
         //- Runtime type information
@@ -308,10 +291,22 @@ public:
             return ParentType::points();
         }
 
+        //- Return non-const access to global points
+        pointField& points()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
         //- Return const access to the faces
         const List<Face>& faces() const
         {
             return static_cast<const List<Face> &>(*this);
+        }
+
+        //- Return non-const access to the faces
+        List<Face>& faces()
+        {
+            return static_cast<List<Face> &>(*this);
         }
 
         const surfGroupList& patches() const
