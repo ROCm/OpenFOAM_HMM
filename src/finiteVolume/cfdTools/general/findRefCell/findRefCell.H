@@ -52,7 +52,8 @@ void setRefCell
     const volScalarField& field,
     const dictionary& dict,
     label& refCelli,
-    scalar& refValue
+    scalar& refValue,
+    bool forceReference = false
 );
 
 }

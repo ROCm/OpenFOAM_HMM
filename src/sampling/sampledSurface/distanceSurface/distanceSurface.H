@@ -23,23 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sampledIsoSurface
+    Foam::distanceSurface
 
 Description
-    A sampledSurface defined by a surface of iso value. Always triangulated.
-    To be used in sampleSurfaces / functionObjects. Recalculates iso surface
-    only if time changes.
+    A sampledSurface defined by a distance to a surface.
 
 SourceFiles
-    sampledIsoSurface.C
+    distanceSurface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledIsoSurface_H
-#define sampledIsoSurface_H
+#ifndef distanceSurface_H
+#define distanceSurface_H
 
 #include "sampledSurface.H"
-#include "isoSurface.H"
+#include "triSurface.H"
+#include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,31 +46,30 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledIsoSurface Declaration
+                       Class distanceSurface Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledIsoSurface
+class distanceSurface
 :
-    public sampledSurface
+    public sampledSurface,
+    public triSurface
 {
     // Private data
 
-        //- Field to get isoSurface of
-        const word isoField_;
+        //- Surface
+        const autoPtr<searchableSurface> surfPtr_;
 
-        //- iso value
-        const scalar isoVal_;
+        //- distance value
+        const scalar distance_;
 
-        //- Whether to coarse
+        //- signed distance
+        const bool signed_;
+
+        //- Whether to coarsen
         const Switch regularise_;
-
-        //- Whether to recalculate cell values as average of point values
-        const Switch average_;
 
         //- zone name (if restricted to zones)
         word zoneName_;
-
-        mutable autoPtr<isoSurface> surfPtr_;
 
         //- triangles converted to faceList
         mutable autoPtr<faceList> facesPtr_;
@@ -82,20 +80,11 @@ class sampledIsoSurface
             //- Time at last call
             mutable label storedTimeIndex_;
 
-            //- Cached volfield
-            mutable autoPtr<volScalarField> storedVolFieldPtr_;
-            mutable const volScalarField* volFieldPtr_;
-
-            //- Cached pointfield
-            mutable autoPtr<pointScalarField> storedPointFieldPtr_;
-            mutable const pointScalarField* pointFieldPtr_;
-
+            //- For every triangle the original cell in mesh
+            mutable labelList meshCells_;
 
 
     // Private Member Functions
-
-        //- Get fields needed to recreate iso surface.
-        void getIsoFields() const;
 
         //- Create iso surface (if time has changed)
         void createGeometry() const;
@@ -116,13 +105,13 @@ class sampledIsoSurface
 public:
 
     //- Runtime type information
-    TypeName("sampledIsoSurface");
+    TypeName("distanceSurface");
 
 
     // Constructors
 
         //- Construct from dictionary
-        sampledIsoSurface
+        distanceSurface
         (
             const word& name,
             const polyMesh& mesh,
@@ -132,7 +121,7 @@ public:
 
     // Destructor
 
-        virtual ~sampledIsoSurface();
+        virtual ~distanceSurface();
 
 
     // Member Functions
@@ -140,7 +129,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return surface().points();
+            return triSurface::points();
         }
 
         //- Faces of surface
@@ -148,7 +137,7 @@ public:
         {
             if (!facesPtr_.valid())
             {
-                const triSurface& s = surface();
+                const triSurface& s = *this;
 
                 facesPtr_.reset(new faceList(s.size()));
 
@@ -160,17 +149,9 @@ public:
             return facesPtr_;
         }
 
+
         //- Correct for mesh movement and/or field changes
         virtual void correct(const bool meshChanged);
-
-
-        const isoSurface& surface() const
-        {
-            return surfPtr_();
-        }
-
-        //- Lookup or read isoField. Sets volFieldPtr_ and pointFieldPtr_.
-        void getIsoField();
 
 
         //- sample field on surface
@@ -246,7 +227,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "sampledIsoSurfaceTemplates.C"
+#   include "distanceSurfaceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

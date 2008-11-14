@@ -297,12 +297,6 @@ public:
         //- Replace a component field of the field
         void replace(const direction, const cmptType&);
 
-        //- Transfer the contents of the argument Field into this Field
-        void transfer(Field<Type>&);
-
-        //- Transfer the contents of the argument List into this Field
-        void transfer(List<Type>&);
-
         //- Return the field transpose (only defined for second rank tensors)
         tmp<Field<Type> > T() const;
 
