@@ -35,7 +35,7 @@ Note
    optimized for this, but at expense of losing a common reading approach.
 
 SourceFiles
-    AC3DfileFormat.C
+    AC3DsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,7 @@ SourceFiles
 #include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
+#include "AC3DsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,35 +62,14 @@ namespace fileFormats
 template<class Face>
 class AC3DsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>
+    public UnsortedMeshedSurface<Face>,
+    public AC3DsurfaceFormatCore
 {
     //- Private typedefs for convenience
     typedef AC3DsurfaceFormat<Face>     ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
-
-        //- Read a type via IStringStream
-        template<class Type>
-        static Type parse(const string&);
-
-        //- Read cmd, args from IFstream
-        static bool readCmd(IFstream&, string& cmd, string& args);
-
-        //- Cue up to cmd, reading args
-        static bool cueTo(IFstream&, const string& cmd, string& args);
-
-        //- Cue up to cmd, reading args or exit with a FatalError
-        //  returns the command args
-        static string cueToOrDie
-        (
-            IFstream&,
-            const string& cmd,
-            const string& errorMsg=string::null
-        );
-
-        //- Write header with materials
-        static void writeHeader(Ostream&, const List<surfGroup>&);
 
         //- Disallow default bitwise copy construct
         AC3DsurfaceFormat(const AC3DsurfaceFormat<Face>&);

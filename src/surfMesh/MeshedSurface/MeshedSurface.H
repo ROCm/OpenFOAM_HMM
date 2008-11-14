@@ -48,6 +48,7 @@ SourceFiles
 #include "PrimitivePatchExtra.H"
 #include "boolList.H"
 #include "surfGroupList.H"
+#include "surfaceFormatsCore.H"
 #include "xfer.H"
 #include "face.H"
 #include "triFace.H"
@@ -78,7 +79,8 @@ template<class Face>
 template<class Face>
 class MeshedSurface
 :
-    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>
+    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>,
+    public fileFormats::surfaceFormatsCore
 {
     friend class UnsortedMeshedSurface<Face>;
 

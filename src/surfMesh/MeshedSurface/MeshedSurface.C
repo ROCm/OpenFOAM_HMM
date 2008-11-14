@@ -41,122 +41,28 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// File extension for 'native' raw format
-#undef  nativeSurfaceExt
-#define nativeSurfaceExt "ofs"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
 Foam::fileName Foam::MeshedSurface<Face>::triSurfInstance(const Time& d)
 {
-    fileName foamName(d.caseName() + "." + nativeSurfaceExt);
-
-    // Search back through the time directories list to find the time
-    // closest to and lower than current time
-
-    instantList ts = d.times();
-    label i;
-
-    for (i=ts.size()-1; i>=0; i--)
-    {
-        if (ts[i].value() <= d.timeOutputValue())
-        {
-            break;
-        }
-    }
-
-    // Noting that the current directory has already been searched
-    // for mesh data, start searching from the previously stored time directory
-
-    if (i>=0)
-    {
-        for (label j=i; j>=0; j--)
-        {
-            if (file(d.path()/ts[j].name()/typeName/foamName))
-            {
-                if (debug)
-                {
-                    Pout<< " MeshedSurface::triSurfInstance(const Time& d)"
-                        << "reading " << foamName
-                        << " from " << ts[j].name()/typeName
-                        << endl;
-                }
-
-                return ts[j].name();
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< " MeshedSurface::triSurfInstance(const Time& d)"
-            << "reading " << foamName
-            << " from constant/" << endl;
-    }
-
-    return "constant";
+    return triSurfInstance(d, typeName);
 }
 
 
 template<class Face>
 Foam::fileName Foam::MeshedSurface<Face>::triSurfName(const Time& d)
 {
-    fileName foamName(d.caseName() + "." + nativeSurfaceExt);
-
-    // Search back through the time directories list to find the time
-    // closest to and lower than current time
-
-    instantList ts = d.times();
-    label i;
-
-    for (i=ts.size()-1; i>=0; i--)
-    {
-        if (ts[i].value() <= d.timeOutputValue())
-        {
-            break;
-        }
-    }
-
-    // Noting that the current directory has already been searched
-    // for mesh data, start searching from the previously stored time directory
-
-    if (i>=0)
-    {
-        for (label j=i; j>=0; j--)
-        {
-            fileName testName(d.path()/ts[j].name()/typeName/foamName);
-
-            if (file(testName))
-            {
-                if (debug)
-                {
-                    Pout<< " MeshedSurface::triSurfName(const Time& d)"
-                        << "reading " << foamName
-                        << " from " << ts[j].name()/typeName
-                        << endl;
-                }
-
-                return testName;
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< " MeshedSurface::triSurfName(const Time& d)"
-            << "reading " << foamName
-            << " from constant/" << endl;
-    }
-
-    return d.path()/"constant"/typeName/foamName;
+    return triSurfName(d, typeName);
 }
+
 
 template<class Face>
 bool Foam::MeshedSurface<Face>::canRead(const word& ext, const bool verbose)
 {
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         return true;
     }
@@ -178,7 +84,7 @@ bool Foam::MeshedSurface<Face>::canWrite(const word& ext, const bool verbose)
     }
 
     // handle 'native' format directly
-    if (fExt == nativeSurfaceExt)
+    if (isNative(fExt))
     {
         return true;
     }
@@ -197,7 +103,7 @@ bool Foam::MeshedSurface<Face>::canWrite(const word& ext, const bool verbose)
 
             Info<<"Unknown file extension for writing: " << fExt << nl;
             // compact output:
-            Info<<"Valid types: ( " << nativeSurfaceExt;
+            Info<<"Valid types: ( " << nativeExt;
             forAll(known, i)
             {
                 Info<<" " << known[i];
@@ -229,7 +135,7 @@ void Foam::MeshedSurface<Face>::write
     const word ext = fName.ext();
 
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         surf.write(OFstream(fName)());
         return;
@@ -899,7 +805,7 @@ bool Foam::MeshedSurface<Face>::read
     const word ext = fName.ext();
 
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         return read(IFstream(fName)());
     }
@@ -923,7 +829,7 @@ bool Foam::MeshedSurface<Face>::read
     clear();
 
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         return read(IFstream(fName)());
     }
@@ -974,7 +880,5 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
 #include "MeshedSurfaceCleanup.C"
 #include "MeshedSurfaceIO.C"
 #include "MeshedSurfaceNew.C"
-
-#undef  nativeSurfaceExt
 
 // ************************************************************************* //

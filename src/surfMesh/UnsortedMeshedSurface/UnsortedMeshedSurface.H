@@ -52,6 +52,7 @@ SourceFiles
 #include "boolList.H"
 #include "surfPatchIdentifierList.H"
 #include "surfGroupList.H"
+#include "surfaceFormatsCore.H"
 #include "xfer.H"
 #include "face.H"
 #include "triFace.H"
@@ -83,7 +84,8 @@ template<class Face>
 template<class Face>
 class UnsortedMeshedSurface
 :
-    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>
+    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>,
+    public fileFormats::surfaceFormatsCore      
 {
     friend class MeshedSurface<Face>;
 
@@ -127,10 +129,6 @@ private:
 protected:
 
     // Static protected functions
-
-        //- Read non-comment line
-        static string getLineNoComment(IFstream&);
-
 
     // Protected Member functions
 
@@ -186,15 +184,6 @@ public:
 
         //- Can we write this file format?
         static bool canWrite(const word& ext, const bool verbose=false);
-
-        //- Determine the sort order from the region list.
-        //  Returns patch list and sets faceMap to indices within faceLst
-        static surfGroupList sortedRegions
-        (
-            const UList<label>& regionLst,
-            const Map<word>& patchNames,
-            labelList& faceMap
-        );
 
     // Constructors
 

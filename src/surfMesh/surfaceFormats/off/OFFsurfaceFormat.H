@@ -39,7 +39,7 @@ Note
     When writing, it is set to the region number (integer).
 
 SourceFiles
-    OFFfileFormat.C
+    OFFsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 

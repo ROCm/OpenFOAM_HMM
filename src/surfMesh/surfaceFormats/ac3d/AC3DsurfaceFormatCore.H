@@ -23,32 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::NASsurfaceFormat
+    Foam::fileFormats::AC3DsurfaceFormatCore
 
 Description
-    Nastran surface reader.
-
-    - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
-      to obtain patch names.
-    - Handles Nastran short and long formats, but not free format.
-    - Properly handles the Nastran compact floating point notation: \n
-    @verbatim
-        GRID          28        10.20269-.030265-2.358-8
-    @endverbatim
+    Internal class used by the AC3DsurfaceFormat
 
 SourceFiles
-    NASsurfaceFormat.C
+    AC3DsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NASsurfaceFormat_H
-#define NASsurfaceFormat_H
+#ifndef AC3DsurfaceFormatCore_H
+#define AC3DsurfaceFormatCore_H
 
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
-#include "NASsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,60 +49,50 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class NASsurfaceFormat Declaration
+                      Class AC3DfileFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Face>
-class NASsurfaceFormat
-:
-    public UnsortedMeshedSurface<Face>,
-    public NASsurfaceFormatCore
+class AC3DsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef NASsurfaceFormat<Face>      ThisType;
-    typedef UnsortedMeshedSurface<Face> ParentType;
+protected:
+        // Protected Member Functions
 
-    // Private Member Functions
+        //- Read a type via IStringStream
+        template<class Type>
+        static Type parse(const string&);
 
-        //- Disallow default bitwise copy construct
-        NASsurfaceFormat(const NASsurfaceFormat<Face>&);
+        //- Read cmd, args from IFstream
+        static bool readCmd(IFstream&, string& cmd, string& args);
 
-        //- Disallow default bitwise assignment
-        void operator=(const NASsurfaceFormat<Face>&);
+        //- Cue up to cmd, reading args
+        static bool cueTo(IFstream&, const string& cmd, string& args);
+
+        //- Cue up to cmd, reading args or exit with a FatalError
+        //  returns the command args
+        static string cueToOrDie
+        (
+            IFstream&,
+            const string& cmd,
+            const string& errorMsg=string::null
+        );
+
+        //- Write header with materials
+        static void writeHeader(Ostream&, const List<surfGroup>&);
 
 public:
 
     // Constructors
 
         //- Construct null
-        NASsurfaceFormat();
-
-        //- Construct from file name
-        NASsurfaceFormat(const fileName&);
-
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
-        {
-            return autoPtr<UnsortedMeshedSurface<Face> >
-            (
-                new NASsurfaceFormat<Face>(fName)
-            );
-        }
+        AC3DsurfaceFormatCore()
+        {}
 
     // Destructor
 
-        virtual ~NASsurfaceFormat()
+        ~AC3DsurfaceFormatCore()
         {}
 
     // Member Functions
-
-        //- Read from a file
-        virtual bool read(const fileName&);
 
 };
 
@@ -122,10 +103,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "NASsurfaceFormat.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

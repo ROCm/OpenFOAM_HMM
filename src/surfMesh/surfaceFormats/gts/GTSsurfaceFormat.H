@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class GTSsurfaceFormat Declaration
+                     Class GTSsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>

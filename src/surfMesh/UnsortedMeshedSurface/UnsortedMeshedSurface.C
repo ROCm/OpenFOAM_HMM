@@ -37,128 +37,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// File extension for 'native' raw format
-#undef  nativeSurfaceExt
-#define nativeSurfaceExt "ofs"
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-template<class Face>
-Foam::string Foam::UnsortedMeshedSurface<Face>::getLineNoComment(IFstream& is)
-{
-    string line;
-    do
-    {
-        is.getLine(line);
-    }
-    while ((line.size() == 0 || line[0] == '#') && is.good());
-
-    return line;
-}
 
 template<class Face>
 Foam::fileName Foam::UnsortedMeshedSurface<Face>::triSurfInstance(const Time& d)
 {
-    fileName foamName(d.caseName() + "." + nativeSurfaceExt);
-
-    // Search back through the time directories list to find the time
-    // closest to and lower than current time
-
-    instantList ts = d.times();
-    label i;
-
-    for (i=ts.size()-1; i>=0; i--)
-    {
-        if (ts[i].value() <= d.timeOutputValue())
-        {
-            break;
-        }
-    }
-
-    // Noting that the current directory has already been searched
-    // for mesh data, start searching from the previously stored time directory
-
-    if (i>=0)
-    {
-        for (label j=i; j>=0; j--)
-        {
-            if (file(d.path()/ts[j].name()/typeName/foamName))
-            {
-                if (debug)
-                {
-                    Pout<< " UnsortedMeshedSurface::triSurfInstance(const Time& d)"
-                        << "reading " << foamName
-                        << " from " << ts[j].name()/typeName
-                        << endl;
-                }
-
-                return ts[j].name();
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< " UnsortedMeshedSurface::triSurfInstance(const Time& d)"
-            << "reading " << foamName
-            << " from constant/" << endl;
-    }
-
-    return "constant";
+    return triSurfInstance(d, typeName);
 }
 
 
 template<class Face>
 Foam::fileName Foam::UnsortedMeshedSurface<Face>::triSurfName(const Time& d)
 {
-    fileName foamName(d.caseName() + "." + nativeSurfaceExt);
-
-    // Search back through the time directories list to find the time
-    // closest to and lower than current time
-
-    instantList ts = d.times();
-    label i;
-
-    for (i=ts.size()-1; i>=0; i--)
-    {
-        if (ts[i].value() <= d.timeOutputValue())
-        {
-            break;
-        }
-    }
-
-    // Noting that the current directory has already been searched
-    // for mesh data, start searching from the previously stored time directory
-
-    if (i>=0)
-    {
-        for (label j=i; j>=0; j--)
-        {
-            fileName testName(d.path()/ts[j].name()/typeName/foamName);
-
-            if (file(testName))
-            {
-                if (debug)
-                {
-                    Pout<< " UnsortedMeshedSurface::triSurfName(const Time& d)"
-                        << "reading " << foamName
-                        << " from " << ts[j].name()/typeName
-                        << endl;
-                }
-
-                return testName;
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< " UnsortedMeshedSurface::triSurfName(const Time& d)"
-            << "reading " << foamName
-            << " from constant/" << endl;
-    }
-
-    return d.path()/"constant"/typeName/foamName;
+    return triSurfName(d, typeName);
 }
 
 
@@ -179,7 +70,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canRead
     }
 
     // handle 'native' format directly
-    if (fExt == nativeSurfaceExt)
+    if (isNative(fExt))
     {
         return true;
     }
@@ -199,7 +90,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canRead
 
             Info<<"Unknown file extension for reading: " << fExt << nl;
             // compact output:
-            Info<<"Valid types: ( " << nativeSurfaceExt;
+            Info<<"Valid types: ( " << nativeExt;
             forAll(known, i)
             {
                 Info<<" " << known[i];
@@ -230,7 +121,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canWrite
     }
 
     // handle 'native' format directly
-    if (fExt == nativeSurfaceExt)
+    if (isNative(fExt))
     {
         return true;
     }
@@ -249,7 +140,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canWrite
 
             Info<<"Unknown file extension for writing: " << fExt << nl;
             // compact output:
-            Info<<"Valid types: ( " << nativeSurfaceExt;
+            Info<<"Valid types: ( " << nativeExt;
             forAll(known, i)
             {
                 Info<<" " << known[i];
@@ -281,7 +172,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
     const word ext = fName.ext();
 
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         surf.write(OFstream(fName)());
         return;
@@ -303,92 +194,6 @@ void Foam::UnsortedMeshedSurface<Face>::write
     }
 
     mfIter()(fName, surf);
-}
-
-
-// Returns patch info.
-// Sets faceMap to the indexing according to patch numbers.
-// Patch numbers start at 0.
-template<class Face>
-Foam::surfGroupList Foam::UnsortedMeshedSurface<Face>::sortedRegions
-(
-    const UList<label>& regionLst,
-    const Map<word>& patchNames,
-    labelList& faceMap
-)
-{
-    // determine sort order according to region numbers
-
-    // std::sort() really seems to mix up the order.
-    // and std::stable_sort() might take too long / too much memory
-
-    // Assuming that we have relatively fewer regions compared to the
-    // number of items, just do it ourselves
-
-    // step 1: get region sizes and store (regionId => patchI)
-    Map<label> regionLookup;
-    forAll(regionLst, faceI)
-    {
-        const label regId = regionLst[faceI];
-
-        Map<label>::iterator iter = regionLookup.find(regId);
-        if (iter == regionLookup.end())
-        {
-            regionLookup.insert(regId, 1);
-        }
-        else
-        {
-            iter()++;
-        }
-    }
-
-    // step 2: assign start/size (and name) to the newPatches
-    // re-use the lookup to map (regionId => patchI)
-    surfGroupList patchLst(regionLookup.size());
-    label patchStart = 0;
-    label patchI = 0;
-    forAllIter(Map<label>, regionLookup, iter)
-    {
-        label regId = iter.key();
-
-        word patchName;
-        Map<word>::const_iterator iter2 = patchNames.find(regId);
-        if (iter2 == patchNames.end())
-        {
-            patchName = word("patch") + ::Foam::name(patchI);
-        }
-        else
-        {
-            patchName = iter2();
-        }
-
-        patchLst[patchI] = surfGroup
-        (
-            patchName,
-            0,           // initialize with zero size
-            patchStart,
-            patchI
-        );
-
-        // increment the start for the next patch
-        // and save the (regionId => patchI) mapping
-        patchStart += iter();
-        iter() = patchI++;
-    }
-
-
-    // step 3: build the re-ordering
-    faceMap.setSize(regionLst.size());
-
-    forAll(regionLst, faceI)
-    {
-        label patchI = regionLookup[regionLst[faceI]];
-
-        faceMap[faceI] = patchLst[patchI].start() + patchLst[patchI].size()++;
-    }
-
-    // with reordered faces registered in faceMap
-    return patchLst;
 }
 
 
@@ -835,7 +640,7 @@ Foam::surfGroupList Foam::UnsortedMeshedSurface<Face>::sortedRegions
         patchNames.insert(patchI, patches_[patchI].name());
     }
 
-    return sortedRegions(regions_, patchNames, faceMap);
+    return sortedPatchRegions(regions_, patchNames, faceMap);
 }
 
 
@@ -985,7 +790,7 @@ bool Foam::UnsortedMeshedSurface<Face>::read
     const word ext = fName.ext();
 
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         return read(IFstream(fName)());
     }
@@ -1009,7 +814,7 @@ bool Foam::UnsortedMeshedSurface<Face>::read
     clear();
 
     // handle 'native' format directly
-    if (ext == nativeSurfaceExt)
+    if (isNative(ext))
     {
         return read(IFstream(fName)());
     }
@@ -1064,7 +869,5 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
 #include "UnsortedMeshedSurfaceCleanup.C"
 #include "UnsortedMeshedSurfaceIO.C"
 #include "UnsortedMeshedSurfaceNew.C"
-
-#undef nativeSurfaceExt
 
 // ************************************************************************* //

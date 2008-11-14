@@ -6,6 +6,7 @@ MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 
 surfaceFormats = surfaceFormats
+$(surfaceFormats)/surfaceFormatsCore.C
 $(surfaceFormats)/ac3d/AC3DsurfaceFormatRunTime.C
 $(surfaceFormats)/ftr/FTRsurfaceFormatRunTime.C
 $(surfaceFormats)/gts/GTSsurfaceFormatRunTime.C

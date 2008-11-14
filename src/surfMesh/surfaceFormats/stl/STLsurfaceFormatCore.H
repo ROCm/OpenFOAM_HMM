@@ -108,6 +108,7 @@ public:
         );
 
     // Destructor
+
         ~STLsurfaceFormatCore();
 
     // Member Functions
