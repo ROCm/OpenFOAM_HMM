@@ -39,13 +39,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat()
-:
-    ParentType()
-{}
-
-
-template<class Face>
 Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 (
     const fileName& fName
@@ -65,16 +58,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 )
 {
     ParentType::clear();
-
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
+    const bool mustTriangulate = ParentType::isTri();
 
     IFstream is(fName);
     if (!is.good())
@@ -296,9 +280,9 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::points().transfer(pointLst);
-    ParentType::faces().transfer(faceLst);
-    ParentType::regions().transfer(regionLst);
+    ParentType::storedPoints().transfer(pointLst);
+    ParentType::storedFaces().transfer(faceLst);
+    ParentType::storedRegions().transfer(regionLst);
 
     ParentType::setPatches(regionNames);
     ParentType::stitchFaces(SMALL);
@@ -339,10 +323,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
         labelList pMap;
         labelList fMap;
 
-        ParentType patch = surf.subsetMesh
-        (
-            include, pMap, fMap
-        );
+        ParentType patch = surf.subsetMesh(include, pMap, fMap);
 
         // Now we have triSurface for this patch alone. Write it.
         os << "numvert " << patch.nPoints() << endl;

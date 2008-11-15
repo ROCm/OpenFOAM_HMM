@@ -58,7 +58,6 @@ class STLsurfaceFormat
     public UnsortedMeshedSurface<Face>
 {
     //- Private typedefs for convenience
-    typedef STLsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private data
@@ -107,9 +106,6 @@ public:
 
     // Constructors
 
-        //- Construct null
-        STLsurfaceFormat();
-
         //- Construct from file name
         STLsurfaceFormat(const fileName&);
 
@@ -137,7 +133,7 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write UnsortedMeshedSurface (as ASCII)
+        //- Write UnsortedMeshedSurface (as ASCII) sorted by region
         static void write
         (
             Ostream&,
@@ -152,7 +148,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The ASCII output is sorted by patch, the binary output is unsorted
+        //  ASCII output is sorted by region; binary output is unsorted
         static void write
         (
             const fileName&,
@@ -160,7 +156,6 @@ public:
         );
 
         //- Write MeshedSurface
-        //  The ASCII output is sorted by patch, the binary output is unsorted
         static void write
         (
             const fileName&,

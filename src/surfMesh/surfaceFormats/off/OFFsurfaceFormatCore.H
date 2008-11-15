@@ -55,30 +55,16 @@ namespace fileFormats
 class OFFsurfaceFormatCore
 {
 protected:
-        // Protected Member Functions
+    // Protected Member Functions
 
-        //- Write header information with points
-        static void writeHeader
-        (
-            Ostream&,
-            const pointField&,
-            const label nFaces,
-            const List<surfGroup>&
-        );
-
-public:
-
-    // Constructors
-
-        //- Construct null
-        OFFsurfaceFormatCore()
-        {}
-
-    // Destructor
-        ~OFFsurfaceFormatCore()
-        {}
-
-    // Member Functions
+    //- Write header information with points
+    static void writeHeader
+    (
+        Ostream&,
+        const pointField&,
+        const label nFaces,
+        const List<surfGroup>&
+    );
 
 };
 

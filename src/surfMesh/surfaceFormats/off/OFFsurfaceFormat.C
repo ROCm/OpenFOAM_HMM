@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OFFsurfaceFormat.H"
-#include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
 
@@ -36,13 +35,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileFormats::OFFsurfaceFormat<Face>::OFFsurfaceFormat()
-:
-    ParentType()
-{}
-
-
-template<class Face>
 Foam::fileFormats::OFFsurfaceFormat<Face>::OFFsurfaceFormat
 (
     const fileName& fName
@@ -50,7 +42,7 @@ Foam::fileFormats::OFFsurfaceFormat<Face>::OFFsurfaceFormat
 :
     ParentType()
 {
-    ThisType::read(fName);
+    read(fName);
 }
 
 
@@ -63,16 +55,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 )
 {
     ParentType::clear();
-
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
+    const bool mustTriangulate = ParentType::isTri();
 
     IFstream is(fName);
     if (!is.good())
@@ -167,12 +150,12 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::points().transfer(pointLst);
-    ParentType::faces().transfer(faceLst);
+    ParentType::storedPoints().transfer(pointLst);
+    ParentType::storedFaces().transfer(faceLst);
 
     // no region information
-    ParentType::regions().setSize(ThisType::size());
-    ParentType::regions() = 0;
+    ParentType::storedRegions().setSize(ParentType::size());
+    ParentType::storedRegions() = 0;
 
     ParentType::setPatches(0);
     return true;
@@ -202,7 +185,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
-            os  << f.size();
+            os << f.size();
             forAll(f, fp)
             {
                 os << ' ' << f[fp];
@@ -213,7 +196,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
         }
         os << "# </patch>" << endl;
     }
-    os  << "# </faces>" << endl;
+    os << "# </faces>" << endl;
 }
 
 
@@ -238,7 +221,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceIndex++];
 
-            os  << f.size();
+            os << f.size();
             forAll(f, fp)
             {
                 os << ' ' << f[fp];
@@ -249,7 +232,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
         }
         os << "# </patch>" << endl;
     }
-    os  << "# </faces>" << endl;
+    os << "# </faces>" << endl;
 }
 
 // ************************************************************************* //

@@ -89,17 +89,9 @@ class UnsortedMeshedSurface
 {
     friend class MeshedSurface<Face>;
 
-protected:
-
-    // Protected Member Data
-
-        //- Typedef for type holding the region (patch) informationm
-        typedef surfPatchIdentifier PatchRegionType;
-
 private:
 
     //- Private typedefs for convenience
-        typedef UnsortedMeshedSurface<Face> ThisType;
         typedef PrimitivePatchExtra
         <
             Face,
@@ -108,6 +100,9 @@ private:
             point
         >
         ParentType;
+
+        //- Typedef for type holding the region (patch) informationm
+        typedef surfPatchIdentifier PatchRegionType;
 
     // Private Member Data
 
@@ -146,12 +141,34 @@ protected:
         //- Sets patch names from hashed values (name -> id)
         void setPatches(const HashTable<label>& groupToPatch);
 
+
+        //- Return non-const access to global points
+        pointField& storedPoints()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
+        //- Return non-const access to the faces
+        List<Face>& storedFaces()
+        {
+            return static_cast<List<Face> &>(*this);
+        }
+
+        //- Return non-const access to the faces
+        List<label>& storedRegions()
+        {
+            return regions_;
+        }
+
 public:
 
         //- Runtime type information
         TypeName("UnsortedMeshedSurface");
 
     // Static
+
+        //- Only handles triangulated faces
+        inline static bool isTri();
 
         //- Can we read this file format?
         static bool canRead(const word& ext, const bool verbose=false);
@@ -294,7 +311,7 @@ public:
         //- Return the number of points
         label nPoints() const
         {
-            return points().size();
+            return ParentType::points().size();
         }
 
         //- Return the number of faces
@@ -318,22 +335,10 @@ public:
             return ParentType::points();
         }
 
-        //- Return non-const access to global points
-        pointField& points()
-        {
-            return const_cast<pointField&>(ParentType::points());
-        }
-
         //- Return const access to the faces
         const List<Face>& faces() const
         {
             return static_cast<const List<Face> &>(*this);
-        }
-
-        //- Return non-const access to the faces
-        List<Face>& faces()
-        {
-            return static_cast<List<Face> &>(*this);
         }
 
         //- Return const access to the regions
@@ -342,27 +347,15 @@ public:
             return regions_;
         }
 
-        //- Return non-const access to the region Ids
-        List<label>& regions()
-        {
-            return regions_;
-        }
-
         //- Return const access to the patches
-        const surfPatchIdentifierList& patches() const
-        {
-            return patches_;
-        }
-
-        //- Return non-const access to the patches
-        surfPatchIdentifierList& patches()
+        const List<surfPatchIdentifier>& patches() const
         {
             return patches_;
         }
 
         //- Sort faces according to region.
         //  Returns patch list and sets faceMap to index within faces()
-        surfGroupList sortedRegions(labelList& faceMap) const;
+        List<surfGroup> sortedRegions(labelList& faceMap) const;
 
     // Edit
 
@@ -445,6 +438,22 @@ public:
 
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Specialization for holding triangulated information
+template<>
+inline bool UnsortedMeshedSurface<triFace>::isTri()
+{
+    return true;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label UnsortedMeshedSurface<triFace>::triangulate()
+{
+    return 0;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

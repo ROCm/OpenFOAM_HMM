@@ -48,7 +48,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     const bool verbose
 )
 {
-    pointField& pointLst = points();
+    pointField& pointLst = storedPoints();
 
     // Merge points
     labelList pointMap(pointLst.size());
@@ -70,7 +70,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     // Set the coordinates to the merged ones
     pointLst.transfer(newPoints);
 
-    List<Face>& faceLst = faces();
+    List<Face>& faceLst = storedFaces();
 
     // ensure we have at some patches, and they cover all the faces
     checkPatches();
@@ -78,7 +78,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     // Reset the point labels to the unique points array
     label oldFaceI = 0;
     label newFaceI = 0;
-    forAll (patches_, patchI)
+    forAll(patches_, patchI)
     {
         surfGroup& p = patches_[patchI];
 
@@ -89,7 +89,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
         for (; oldFaceI < patchEnd; ++oldFaceI)
         {
             Face& f = faceLst[oldFaceI];
-            forAll (f, fp)
+            forAll(f, fp)
             {
                 f[fp] = pointMap[f[fp]];
             }
@@ -141,14 +141,14 @@ void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
     // Simple check on indices ok.
     const label maxPointI = points().size() - 1;
 
-    List<Face>& faceLst = faces();
+    List<Face>& faceLst = storedFaces();
 
     // Phase 0: detect badly labelled faces
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         const Face& f = faceLst[faceI];
 
-        forAll (f, fp)
+        forAll(f, fp)
         {
             if (f[fp] < 0 || f[fp] > maxPointI)
             {
@@ -170,7 +170,7 @@ void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
 
     label oldFaceI = 0;
     label newFaceI = 0;
-    forAll (patches_, patchI)
+    forAll(patches_, patchI)
     {
         surfGroup& p = patches_[patchI];
 
@@ -191,7 +191,7 @@ void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
 
                 // Check if faceNeighbours use same points as this face.
                 // Note: discards normal information - sides of baffle are merged.
-                forAll (neighbours, neighI)
+                forAll(neighbours, neighI)
                 {
                     if (neighbours[neighI] <= oldFaceI)
                     {
@@ -199,7 +199,7 @@ void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
                         continue;
                     }
 
-                    const face& nei = faceLst[neighbours[neighI]];
+                    const Face& nei = faceLst[neighbours[neighI]];
 
                     if (f == nei)
                     {
@@ -271,10 +271,10 @@ template<class Face>
 Foam::label Foam::MeshedSurface<Face>::triangulate()
 {
     label nTri = 0;
-    List<Face>& faceLst = faces();
+    List<Face>& faceLst = storedFaces();
 
     // determine how many triangles are needed
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         nTri += faceLst[faceI].size() - 2;
     }
@@ -293,7 +293,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate()
     // Reset the point labels to the unique points array
     label oldFaceI = 0;
     label newFaceI = 0;
-    forAll (patches_, patchI)
+    forAll(patches_, patchI)
     {
         surfGroup& p = patches_[patchI];
 

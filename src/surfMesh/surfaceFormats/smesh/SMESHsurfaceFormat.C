@@ -25,8 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SMESHsurfaceFormat.H"
-#include "clock.H"
-#include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -63,7 +61,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
-            os  << f.size();
+            os << f.size();
             forAll(f, fp)
             {
                 os << ' ' << f[fp];
@@ -95,7 +93,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceIndex++];
 
-            os  << f.size();
+            os << f.size();
             forAll(f, fp)
             {
                 os << ' ' << f[fp];

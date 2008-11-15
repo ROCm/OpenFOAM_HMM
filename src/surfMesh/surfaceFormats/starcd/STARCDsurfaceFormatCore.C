@@ -26,16 +26,9 @@ License
 
 #include "STARCDsurfaceFormatCore.H"
 #include "clock.H"
-#include "OSspecific.H"
 #include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond localscope
-const int starcdShellShape = 3;
-const int starcdShellType  = 4;
-//! @endcond localscope
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -121,6 +114,43 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writePoints
     os.flush();
 }
 
+
+void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
+(
+    Ostream& os,
+    const pointField& pointLst,
+    const label nFaces,
+    const List<surfGroup>& patchLst
+)
+{
+    word caseName = os.name().lessExt().name();
+
+    os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
+        << "! " << pointLst.size() << " points, " << nFaces << " faces" << nl
+        << "! case " << caseName << nl
+        << "! ------------------------------" << nl;
+
+    forAll(patchLst, patchI)
+    {
+        os  << "ctable " << patchI + 1 << " shell" << nl
+            << "ctname " << patchI + 1 << " " << patchLst[patchI].name() << nl;
+    }
+
+    os  << "! ------------------------------" << nl
+        << "*set icvo mxv - 1" << nl
+        << "vread " << caseName << ".vrt icvo,,,coded" << nl
+        << "cread " << caseName << ".cel icvo,,,add,coded" << nl
+        << "*set icvo" << nl
+        << "! end" << nl;
+
+    os.flush();
+}
+
+#if 0
+
+#endif
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //
+

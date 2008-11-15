@@ -61,17 +61,17 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
     }
 
     // read points:
-    is >> points();
+    is >> storedPoints();
 
     // read faces:
     // TODO - specialization to triangulate on-the-fly
     if (mustTriangulate)
     {
-        is >> faces();
+        is >> storedFaces();
     }
     else
     {
-        is >> faces();
+        is >> storedFaces();
     }
 
     return is.good();

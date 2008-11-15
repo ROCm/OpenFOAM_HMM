@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("triSurface", "");
     argList::validOptions.insert("unsorted", "");
+    argList::validOptions.insert("triFace", "");
 #   include "setRootCase.H"
     const stringList& params = args.additionalArgs();
 
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
     }
     else if (args.options().found("unsorted"))
     {
-        unsortedMeshedSurface surf(importName);
+        UnsortedMeshedSurface<face> surf(importName);
 
         if (args.options().found("clean"))
         {
@@ -146,9 +147,33 @@ int main(int argc, char *argv[])
 
         surf.write(exportName);
     }
+#if 1
+    else if (args.options().found("triFace"))
+    {
+        MeshedSurface<triFace> surf(importName);
+
+        if (args.options().found("clean"))
+        {
+            surf.cleanup(true);
+            surf.checkOrientation(true);
+        }
+
+        Info<< "writing " << exportName;
+        if (scaleFactor <= 0)
+        {
+            Info<< " without scaling" << endl;
+        }
+        else
+        {
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
+        }
+        surf.write(exportName);
+    }
+#endif
     else
     {
-        meshedSurface surf(importName);
+        MeshedSurface<face> surf(importName);
 
         if (args.options().found("clean"))
         {

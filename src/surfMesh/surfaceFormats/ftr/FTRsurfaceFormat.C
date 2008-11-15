@@ -31,12 +31,6 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-template<class Face>
-Foam::fileFormats::FTRsurfaceFormat<Face>::FTRsurfaceFormat()
-:
-    ParentType()
-{}
-
 
 template<class Face>
 Foam::fileFormats::FTRsurfaceFormat<Face>::FTRsurfaceFormat
@@ -46,7 +40,7 @@ Foam::fileFormats::FTRsurfaceFormat<Face>::FTRsurfaceFormat
 :
     ParentType()
 {
-    ThisType::read(fName);
+    read(fName);
 }
 
 
@@ -75,13 +69,13 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     List<point> pointLst(is);
 
     // transfer to normal list
-    ParentType::points().transfer(pointLst);
+    ParentType::storedPoints().transfer(pointLst);
 
     // read faces with keys
     List<Keyed<triFace> > readFaces(is);
 
-    List<Face>    faceLst(readFaces.size());
-    List<label>   regionLst(readFaces.size());
+    List<Face>  faceLst(readFaces.size());
+    List<label> regionLst(readFaces.size());
 
     // disentangle faces/keys - already triangulated
     forAll(readFaces, faceI)
@@ -91,8 +85,8 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
         regionLst[faceI] = readFaces[faceI].key();
     }
 
-    ParentType::faces().transfer(faceLst);
-    ParentType::regions().transfer(regionLst);
+    ParentType::storedFaces().transfer(faceLst);
+    ParentType::storedRegions().transfer(regionLst);
 
     Map<word> regionNames;
     forAll(readPatches, patchI)

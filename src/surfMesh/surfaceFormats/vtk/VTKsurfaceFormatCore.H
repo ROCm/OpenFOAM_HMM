@@ -57,30 +57,18 @@ class VTKsurfaceFormatCore
 protected:
     // Protected Member Functions
 
-        //- Write header information with points
-        static void writeHeader
-        (
-            Ostream&,
-            const pointField&
-        );
+    //- Write header information with points
+    static void writeHeader
+    (
+        Ostream&,
+        const pointField&
+    );
 
-        //- Write header information with patch informattion
-        static void writeTail(Ostream&, const List<surfGroup>&);
+    //- Write trailing information with patch information
+    static void writeTail(Ostream&, const List<surfGroup>&);
 
-public:
-
-    // Constructors
-
-        //- Construct null
-        VTKsurfaceFormatCore()
-        {}
-
-    // Destructor
-
-        virtual ~VTKsurfaceFormatCore()
-        {}
-
-    // Member Functions
+    //- Write trailing information with region information
+    static void writeTail(Ostream&, const List<label>& regionLst);
 
 };
 

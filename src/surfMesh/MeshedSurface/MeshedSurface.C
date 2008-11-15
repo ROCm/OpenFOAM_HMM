@@ -45,6 +45,13 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
+inline bool Foam::MeshedSurface<Face>::isTri()
+{
+    return false;
+}
+
+
+template<class Face>
 bool Foam::MeshedSurface<Face>::canRead(const word& ext, const bool verbose)
 {
     // handle 'native' format directly
@@ -165,8 +172,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
     ParentType(List<Face>(), pointField()),
     patches_(patchLst)
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 }
 
 
@@ -182,8 +189,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 :
     ParentType(List<Face>(), pointField())
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 
     surfGroupList newPatches(patchSizes.size());
 
@@ -216,8 +223,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 :
     ParentType(List<Face>(), pointField())
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 
     if
     (
@@ -257,8 +264,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 :
     ParentType(List<Face>(), pointField())
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 
     if (regionIds.size() != nFaces())
     {
@@ -316,14 +323,14 @@ Foam::MeshedSurface<Face>::MeshedSurface
     if (useGlobalPoints)
     {
         // copy in the global points and the global face addressing
-        points() = mesh.points();
-        faces() = allBoundary;
+        storedPoints() = mesh.points();
+        storedFaces() = allBoundary;
     }
     else
     {
         // copy in the local points and the local face addressing
-        points() = allBoundary.localPoints();
-        faces() = allBoundary.localFaces();
+        storedPoints() = allBoundary.localPoints();
+        storedFaces() = allBoundary.localFaces();
     }
 
     // create patch list
@@ -405,7 +412,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
         newFaces[faceI] = origFaces[faceMap[faceI]];
     }
 
-    faces().transfer(newFaces);
+    storedFaces().transfer(newFaces);
 }
 
 
@@ -595,7 +602,7 @@ void Foam::MeshedSurface<Face>::sortFacesByRegion
         }
         faceMap.clear();
 
-        faces().transfer(newFaces);
+        storedFaces().transfer(newFaces);
     }
 }
 
@@ -610,8 +617,8 @@ void Foam::MeshedSurface<Face>::clear()
 {
     ParentType::clearOut();
 
-    points().clear();
-    faces().clear();
+    storedPoints().clear();
+    storedFaces().clear();
     patches_.clear();
 }
 
@@ -626,7 +633,7 @@ void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
     ParentType::movePoints(newPoints);
 
     // Copy new points
-    points() = newPoints;
+    storedPoints() = newPoints;
 }
 
 
@@ -642,7 +649,7 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
         // Adapt for new point position
         ParentType::movePoints(pointField());
 
-        points() *= scaleFactor;
+        storedPoints() *= scaleFactor;
     }
 }
 
@@ -741,8 +748,8 @@ void Foam::MeshedSurface<Face>::transfer
 {
     clear();
 
-    points().transfer(surf.points());
-    faces().transfer(surf.faces());
+    storedPoints().transfer(surf.storedPoints());
+    storedFaces().transfer(surf.storedFaces());
     patches_.transfer(surf.patches_);
 
     surf.clear();
@@ -756,7 +763,7 @@ void Foam::MeshedSurface<Face>::transfer
 )
 {
     clear();
-    points().transfer(surf.points());
+    storedPoints().transfer(surf.storedPoints());
 
     labelList faceMap;
     surfGroupList patchLst = surf.sortedRegions(faceMap);
@@ -765,7 +772,7 @@ void Foam::MeshedSurface<Face>::transfer
     surf.regions_.clear();
     surf.patches_.clear();
 
-    List<Face>& oldFaces = surf.faces();
+    const List<Face>& oldFaces = surf.faces();
     List<Face>  newFaces(oldFaces.size());
 
     // this is somewhat like ListOps reorder and/or IndirectList
@@ -774,7 +781,7 @@ void Foam::MeshedSurface<Face>::transfer
         newFaces[faceI] = oldFaces[faceMap[faceI]];
     }
 
-    faces().transfer(newFaces);
+    storedFaces().transfer(newFaces);
 
     surf.clear();
 }
@@ -852,8 +859,8 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
 {
     clear();
 
-    faces()  = surf.faces();
-    points() = surf.points();
+    storedPoints() = surf.points();
+    storedFaces()  = surf.faces();
     patches_ = surf.patches_;
 }
 

@@ -68,7 +68,6 @@ class NASsurfaceFormat
     public NASsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef NASsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -82,9 +81,6 @@ class NASsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        NASsurfaceFormat();
 
         //- Construct from file name
         NASsurfaceFormat(const fileName&);

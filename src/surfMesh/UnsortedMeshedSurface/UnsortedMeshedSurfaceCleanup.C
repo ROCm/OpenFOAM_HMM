@@ -48,7 +48,7 @@ bool Foam::UnsortedMeshedSurface<Face>::stitchFaces
     const bool verbose
 )
 {
-    pointField& pointLst = points();
+    pointField& pointLst = storedPoints();
 
     // Merge points
     labelList  pointMap(pointLst.size());
@@ -70,14 +70,14 @@ bool Foam::UnsortedMeshedSurface<Face>::stitchFaces
     // Set the coordinates to the merged ones
     pointLst.transfer(newPoints);
 
-    List<Face>& faceLst = faces();
+    List<Face>& faceLst = storedFaces();
 
     // Reset the point labels to the unique points array
     label newFaceI = 0;
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         Face& f = faceLst[faceI];
-        forAll (f, fp)
+        forAll(f, fp)
         {
             f[fp] = pointMap[f[fp]];
         }
@@ -125,14 +125,14 @@ void Foam::UnsortedMeshedSurface<Face>::checkFaces(const bool verbose)
     // Simple check on indices ok.
     const label maxPointI = points().size() - 1;
 
-    List<Face>& faceLst = faces();
+    List<Face>& faceLst = storedFaces();
 
     // Phase 0: detect badly labelled faces
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         const Face& f = faceLst[faceI];
 
-        forAll (f, fp)
+        forAll(f, fp)
         {
             if (f[fp] < 0 || f[fp] > maxPointI)
             {
@@ -151,7 +151,7 @@ void Foam::UnsortedMeshedSurface<Face>::checkFaces(const bool verbose)
     const labelListList& fFaces = ParentType::faceFaces();
     label newFaceI = 0;
 
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         Face& f = faceLst[faceI];
 
@@ -164,7 +164,7 @@ void Foam::UnsortedMeshedSurface<Face>::checkFaces(const bool verbose)
 
             // Check if faceNeighbours use same points as this face.
             // Note: discards normal information - sides of baffle are merged.
-            forAll (neighbours, neighI)
+            forAll(neighbours, neighI)
             {
                 if (neighbours[neighI] <= faceI)
                 {
@@ -172,7 +172,7 @@ void Foam::UnsortedMeshedSurface<Face>::checkFaces(const bool verbose)
                     continue;
                 }
 
-                const face& nei = faceLst[neighbours[neighI]];
+                const Face& nei = faceLst[neighbours[neighI]];
 
                 if (f == nei)
                 {
@@ -242,10 +242,10 @@ template<class Face>
 Foam::label Foam::UnsortedMeshedSurface<Face>::triangulate()
 {
     label nTri = 0;
-    List<Face>& faceLst = faces();
+    List<Face>& faceLst = storedFaces();
 
     // determine how many triangles are needed
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         nTri += faceLst[faceI].size() - 2;
     }
@@ -264,7 +264,7 @@ Foam::label Foam::UnsortedMeshedSurface<Face>::triangulate()
 
     // Reset the point labels to the unique points array
     label newFaceI = 0;
-    forAll (faceLst, faceI)
+    forAll(faceLst, faceI)
     {
         const Face& f = faceLst[faceI];
         triFace fTri;

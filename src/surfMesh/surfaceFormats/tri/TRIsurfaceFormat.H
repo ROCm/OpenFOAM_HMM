@@ -58,7 +58,6 @@ class TRIsurfaceFormat
     public UnsortedMeshedSurface<Face>
 {
     //- Private typedefs for convenience
-    typedef TRIsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -80,9 +79,6 @@ class TRIsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        TRIsurfaceFormat();
 
         //- Construct from file name
         TRIsurfaceFormat(const fileName&);
@@ -111,6 +107,7 @@ public:
         virtual bool read(const fileName&);
 
         //- Write UnsortedMeshedSurface
+        //  By default, the output is not sorted by regions
         static void write
         (
             Ostream&,
@@ -118,6 +115,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  By default, the output is not sorted by regions
         static void write
         (
             const fileName& fName,
@@ -145,6 +143,7 @@ public:
         }
 
         //- Write object
+        //  By default, the output is not sorted by regions
         virtual void write(Ostream& os) const
         {
             write(os, *this);

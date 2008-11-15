@@ -62,7 +62,6 @@ class OBJsurfaceFormat
     public OBJsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef OBJsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -84,9 +83,6 @@ class OBJsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        OBJsurfaceFormat();
 
         //- Construct from file name
         OBJsurfaceFormat(const fileName&);
@@ -117,6 +113,7 @@ public:
         virtual bool read(const fileName&);
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by regions
         static void write
         (
             Ostream&,
@@ -124,6 +121,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by regions
         static void write
         (
             const fileName& fName,

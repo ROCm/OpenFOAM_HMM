@@ -49,18 +49,18 @@ bool Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
 
     List<surfGroup> patchLst(is);
     // read points:
-    is >> points();
-    
-    
+    is >> storedPoints();
+
+
     // read faces:
     // TODO - specialization to triangulate on-the-fly
     if (mustTriangulate)
     {
-        is >> faces();
+        is >> storedFaces();
     }
     else
     {
-        is >> faces();
+        is >> storedFaces();
     }
 
     patches_.setSize(patchLst.size());

@@ -34,6 +34,8 @@ Note
    Since the faces are already organized as patches, the reader could be
    optimized for this, but at expense of losing a common reading approach.
 
+   The output is always sorted by regions.
+
 SourceFiles
     AC3DsurfaceFormat.C
 
@@ -66,7 +68,6 @@ class AC3DsurfaceFormat
     public AC3DsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef AC3DsurfaceFormat<Face>     ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -80,9 +81,6 @@ class AC3DsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        AC3DsurfaceFormat();
 
         //- Construct from file name
         AC3DsurfaceFormat(const fileName&);
@@ -113,6 +111,7 @@ public:
         virtual bool read(const fileName&);
 
         //- Write UnsortedMeshedSurface
+        //  The output is always sorted by regions.
         static void write
         (
             Ostream&,
@@ -120,6 +119,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  The output is always sorted by regions.
         static void write
         (
             const fileName& fName,

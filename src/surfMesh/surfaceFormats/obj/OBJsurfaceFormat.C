@@ -25,20 +25,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OBJsurfaceFormat.H"
-#include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::fileFormats::OBJsurfaceFormat<Face>::OBJsurfaceFormat()
-:
-    ParentType()
-{}
-
 
 template<class Face>
 Foam::fileFormats::OBJsurfaceFormat<Face>::OBJsurfaceFormat
@@ -48,7 +40,7 @@ Foam::fileFormats::OBJsurfaceFormat<Face>::OBJsurfaceFormat
 :
     ParentType()
 {
-    ThisType::read(fName);
+    read(fName);
 }
 
 
@@ -61,16 +53,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 )
 {
     ParentType::clear();
-
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
+    const bool mustTriangulate = ParentType::isTri();
 
     IFstream is(fName);
     if (!is.good())
@@ -215,9 +198,9 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::points().transfer(pointLst);
-    ParentType::faces().transfer(faceLst);
-    ParentType::regions().transfer(regionLst);
+    ParentType::storedPoints().transfer(pointLst);
+    ParentType::storedFaces().transfer(faceLst);
+    ParentType::storedRegions().transfer(regionLst);
 
     ParentType::setPatches(groupToPatch);
     return true;
@@ -250,7 +233,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
-            os  << 'f';
+            os << 'f';
             forAll(f, fp)
             {
                 os << ' ' << f[fp] + 1;
@@ -259,7 +242,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
         }
     }
 
-    os  << "# </faces>" << endl;
+    os << "# </faces>" << endl;
 }
 
 
@@ -286,7 +269,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceIndex++];
 
-            os  << 'f';
+            os << 'f';
             forAll(f, fp)
             {
                 os << ' ' << f[fp] + 1;
@@ -294,7 +277,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
             os << endl;
         }
     }
-    os  << "# </faces>" << endl;
+    os << "# </faces>" << endl;
 }
 
 // ************************************************************************* //

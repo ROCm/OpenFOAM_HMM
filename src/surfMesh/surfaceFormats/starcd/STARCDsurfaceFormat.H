@@ -42,7 +42,6 @@ SourceFiles
 #ifndef STARCDsurfaceFormat_H
 #define STARCDsurfaceFormat_H
 
-#include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
@@ -67,7 +66,6 @@ class STARCDsurfaceFormat
     public STARCDsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef STARCDsurfaceFormat<Face>   ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Data
@@ -79,12 +77,6 @@ class STARCDsurfaceFormat
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        STARCDsurfaceFormat(const STARCDsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const STARCDsurfaceFormat<Face>&);
-
         static inline void writeShell
         (
             Ostream&,
@@ -93,12 +85,15 @@ class STARCDsurfaceFormat
             const label cellTableId
         );
 
+        //- Disallow default bitwise copy construct
+        STARCDsurfaceFormat(const STARCDsurfaceFormat<Face>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const STARCDsurfaceFormat<Face>&);
+
 public:
 
     // Constructors
-
-        //- Construct null
-        STARCDsurfaceFormat();
 
         //- Construct from file name
         STARCDsurfaceFormat(const fileName&);
@@ -128,10 +123,19 @@ public:
         virtual bool read(const fileName&);
 
         //- Write UnsortedMeshedSurface
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+        //  The output is sorted by regions
+        static void write
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&
+        );
 
         //- Write MeshedSurface
-        static void write(const fileName&, const MeshedSurface<Face>&);
+        static void write
+        (
+            const fileName&,
+            const MeshedSurface<Face>&
+        );
 
         //- Write to Ostream as one large file - not really useful
         virtual void write(Ostream&) const

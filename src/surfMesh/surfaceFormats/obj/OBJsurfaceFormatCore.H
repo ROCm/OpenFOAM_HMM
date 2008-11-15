@@ -49,37 +49,22 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class AC3DfileFormat Declaration
+                   Class OBJsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class OBJsurfaceFormatCore
 {
 protected:
-        // Protected Member Functions
+    // Protected Member Functions
 
-        //- Write header information with points
-        static void writeHeader
-        (
-            Ostream&,
-            const pointField&,
-            const label nFaces,
-            const List<surfGroup>&
-        );
-
-public:
-
-    // Constructors
-
-        //- Construct null
-        OBJsurfaceFormatCore()
-        {}
-
-    // Destructor
-
-        ~OBJsurfaceFormatCore()
-        {}
-
-    // Member Functions
+    //- Write header information with points
+    static void writeHeader
+    (
+        Ostream&,
+        const pointField&,
+        const label nFaces,
+        const List<surfGroup>&
+    );
 
 };
 

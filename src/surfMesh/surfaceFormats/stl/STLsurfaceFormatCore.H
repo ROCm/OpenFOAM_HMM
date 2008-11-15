@@ -96,16 +96,13 @@ public:
 
     // Static Member Functions
 
-        //- Write "STL binary file" to stream
-        static void writeHeaderBINARY(ostream&);
+        //- Write "STL binary file" and number of triangles to stream
+        static void writeHeaderBINARY(ostream&, unsigned int);
 
     // Constructors
 
         //- Read from file, filling in the information
-        STLsurfaceFormatCore
-        (
-            const fileName&
-        );
+        STLsurfaceFormatCore(const fileName&);
 
     // Destructor
 

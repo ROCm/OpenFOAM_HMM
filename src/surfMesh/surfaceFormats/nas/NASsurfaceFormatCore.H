@@ -53,24 +53,10 @@ namespace fileFormats
 class NASsurfaceFormatCore
 {
 protected:
-
     // Protected Member Functions
 
-        //- Do weird things to extract number
-        static scalar parseNASCoord(const string&);
-
-public:
-
-    // Constructors
-
-        //- Construct null
-        NASsurfaceFormatCore()
-        {}
-
-    // Destructor
-
-        ~NASsurfaceFormatCore()
-        {}
+    //- Do weird things to extract number
+    static scalar parseNASCoord(const string&);
 
 };
 

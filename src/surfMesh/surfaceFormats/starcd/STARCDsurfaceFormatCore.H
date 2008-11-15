@@ -38,7 +38,6 @@ SourceFiles
 
 #include "IFstream.H"
 #include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
 
@@ -58,25 +57,19 @@ class STARCDsurfaceFormatCore
 protected:
     // Protected Member Functions
 
-        static bool readHeader(IFstream&, const word&);
+    static bool readHeader(IFstream&, const word&);
 
-        static void writeHeader(Ostream&, const char* filetype);
+    static void writeHeader(Ostream&, const char* filetype);
 
-        static void writePoints(Ostream&, const pointField&);
+    static void writePoints(Ostream&, const pointField&);
 
-public:
-
-    // Constructors
-
-        //- Construct null
-        STARCDsurfaceFormatCore()
-        {}
-
-    // Destructor
-        ~STARCDsurfaceFormatCore()
-        {}
-
-    // Member Functions
+    static void writeCase
+    (
+        Ostream&,
+        const pointField&,
+        const label nFaces,
+        const List<surfGroup>&
+    );
 
 };
 

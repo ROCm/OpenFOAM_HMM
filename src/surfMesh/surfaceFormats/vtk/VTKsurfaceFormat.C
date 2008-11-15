@@ -25,9 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "VTKsurfaceFormat.H"
-#include "clock.H"
-#include "IFstream.H"
-#include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -75,27 +72,57 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     writeHeader(os, surf.points());
     writeHeaderPolygons(os, faceLst);
 
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
+    bool doSort = false;
+    // a single region needs no sorting
+    if (surf.patches().size() == 1)
     {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-
-            os  << f.size();
-            forAll(f, fp)
-            {
-                os  << ' ' << f[fp];
-            }
-            os  << ' ' << nl;
-        }
+        doSort = false;
     }
 
-    // Print region numbers
-    writeTail(os, patchLst);
+    if (doSort)
+    {
+        labelList faceMap;
+        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+
+        label faceIndex = 0;
+        forAll(patchLst, patchI)
+        {
+            forAll(patchLst[patchI], patchFaceI)
+            {
+                const Face& f = faceLst[faceMap[faceIndex++]];
+
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+                os << ' ' << nl;
+            }
+        }
+
+        // Print region numbers
+        writeTail(os, patchLst);
+    }
+    else
+    {
+        labelList faceMap;
+        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+
+        forAll(faceLst, faceI)
+        {
+            const Face& f = faceLst[faceI];
+
+            os << f.size();
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp];
+            }
+            os << ' ' << nl;
+        }
+
+        // Print region numbers
+        writeTail(os, surf.regions());
+    }
 }
 
 
@@ -119,12 +146,12 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
         {
             const Face& f = faceLst[faceIndex++];
 
-            os  << f.size();
+            os << f.size();
             forAll(f, fp)
             {
-                os  << ' ' << f[fp];
+                os << ' ' << f[fp];
             }
-            os  << ' ' << nl;
+            os << ' ' << nl;
         }
     }
 

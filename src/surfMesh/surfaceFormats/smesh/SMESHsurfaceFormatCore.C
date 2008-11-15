@@ -26,7 +26,6 @@ License
 
 #include "SMESHsurfaceFormatCore.H"
 #include "clock.H"
-#include "IStringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

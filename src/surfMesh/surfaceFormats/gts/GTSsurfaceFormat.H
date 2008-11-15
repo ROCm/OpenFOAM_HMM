@@ -58,7 +58,6 @@ class GTSsurfaceFormat
     public UnsortedMeshedSurface<Face>
 {
     //- Private typedefs for convenience
-    typedef GTSsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -72,9 +71,6 @@ class GTSsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        GTSsurfaceFormat();
 
         //- Construct from file name
         GTSsurfaceFormat(const fileName&);
@@ -103,6 +99,7 @@ public:
         virtual bool read(const fileName&);
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by regions
         static void write
         (
             Ostream&,
@@ -110,6 +107,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by regions
         static void write
         (
             const fileName& fName,

@@ -149,7 +149,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
         // Read an STL triangle
         STLtriangle stlTri(is);
 
-        // transcript the vertices of the STL triangle -> points
+        // transcribe the vertices of the STL triangle -> points
         points_[ptI++] = stlTri.a();
         points_[ptI++] = stlTri.b();
         points_[ptI++] = stlTri.c();
@@ -173,13 +173,13 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
             Info<< "solid region" << prevRegion << nl;
         }
 
-        Info<< "  facet normal " << stlTri.normal() << nl;
-        Info<< "    outer loop" << nl;
-        Info<< "      vertex " << stlTri.a() << nl;
-        Info<< "      vertex " << stlTri.b() << nl;
-        Info<< "      vertex " << stlTri.c() << nl;
-        Info<< "    outer loop" << nl;
-        Info<< "  endfacet" << endl;
+        Info<< " facet normal " << stlTri.normal() << nl
+            << "  outer loop" << nl
+            << "   vertex " << stlTri.a() << nl
+            << "   vertex " << stlTri.b() << nl
+            << "   vertex " << stlTri.c() << nl
+            << "  outer loop" << nl
+            << " endfacet" << endl;
 #endif
     }
 
@@ -222,7 +222,11 @@ Foam::fileFormats::STLsurfaceFormatCore::~STLsurfaceFormatCore()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fileFormats::STLsurfaceFormatCore::writeHeaderBINARY(ostream& os)
+void Foam::fileFormats::STLsurfaceFormatCore::writeHeaderBINARY
+(
+    ostream& os,
+    unsigned int nTris
+)
 {
     // Write the STL header, avoid possible trailing junk
     string header("STL binary file", headerSize);
@@ -231,6 +235,9 @@ void Foam::fileFormats::STLsurfaceFormatCore::writeHeaderBINARY(ostream& os)
         header[i] = 0;
     }
     os.write(header.c_str(), headerSize);
+
+    os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+
 }
 
 // ************************************************************************* //

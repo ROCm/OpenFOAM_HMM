@@ -25,16 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDsurfaceFormat.H"
-#include "clock.H"
-#include "OSspecific.H"
-#include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Face>
-void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
+inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
 (
     Ostream& os,
     const Face& f,
@@ -70,26 +67,6 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat()
-:
-    ParentType()
-{}
-
-
-// .vrt file format:
-/*---------------------------------------------------------------------------*\
-Line 1:
-  PROSTAR_VERTEX [newline]
-
-Line 2:
-  <version> 0 0 0 0 0 0 0 [newline]
-
-Body:
-  <vertexId>  <x>  <y>  <z> [newline]
-
-\*---------------------------------------------------------------------------*/
-
-template<class Face>
 Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 (
     const fileName& fName
@@ -102,7 +79,6 @@ Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 template<class Face>
 bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 (
@@ -110,17 +86,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 )
 {
     ParentType::clear();
-
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
-
+    const bool mustTriangulate = ParentType::isTri();
 
     fileName baseName = fName.lessExt();
     autoPtr<IFstream> isPtr;
@@ -160,7 +126,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::points().transfer(pointLst);
+    ParentType::storedPoints().transfer(pointLst);
 
     // Build inverse mapping (index to point)
     pointId.shrink();
@@ -294,8 +260,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::faces().transfer(faceLst);
-    ParentType::regions().transfer(regionLst);
+    ParentType::storedFaces().transfer(faceLst);
+    ParentType::storedRegions().transfer(regionLst);
 
     ParentType::setPatches(regionNames);
 
@@ -310,21 +276,15 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    const List<Face>& faceLst = surf.faces();
-
     fileName baseName = fName.lessExt();
-    autoPtr<OFstream> osPtr;
 
-    osPtr.reset(new OFstream(baseName + ".vrt"));
-    writePoints(osPtr(), surf.points());
+    writePoints(OFstream(baseName + ".vrt")(), surf.points());
+    OFstream os(baseName + ".cel");
+    writeHeader(os, "CELL");
 
-
+    const List<Face>& faceLst = surf.faces();
     labelList faceMap;
     List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-
-    osPtr.reset(new OFstream(baseName + ".cel"));
-    writeHeader(osPtr(), "CELL");
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -334,10 +294,18 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         forAll(patch, patchFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
-
-            writeShell(osPtr(), f, faceIndex, patchI + 1);
+            writeShell(os, f, faceIndex, patchI + 1);
         }
     }
+
+    // write simple .inp file
+    writeCase
+    (
+        OFstream(baseName + ".inp")(),
+        surf.points(),
+        surf.nFaces(),
+        patchLst
+    );
 }
 
 
@@ -348,19 +316,14 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     const MeshedSurface<Face>& surf
 )
 {
+    fileName baseName = fName.lessExt();
+
+    writePoints(OFstream(baseName + ".vrt")(), surf.points());
+    OFstream os(baseName + ".cel");
+    writeHeader(os, "CELL");
+
     const List<Face>& faceLst = surf.faces();
     const List<surfGroup>& patchLst = surf.patches();
-
-
-    fileName baseName = fName.lessExt();
-    autoPtr<OFstream> osPtr;
-
-    osPtr.reset(new OFstream(baseName + ".vrt"));
-    writePoints(osPtr(), surf.points());
-
-
-    osPtr.reset(new OFstream(baseName + ".cel"));
-    writeHeader(osPtr(), "CELL");
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -370,9 +333,18 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         forAll(patch, patchFaceI)
         {
             const Face& f = faceLst[faceIndex++];
-            writeShell(osPtr(), f, faceIndex, patchI + 1);
+            writeShell(os, f, faceIndex, patchI + 1);
         }
     }
+
+    // write simple .inp file
+    writeCase
+    (
+        OFstream(baseName + ".inp")(),
+        surf.points(),
+        surf.nFaces(),
+        patchLst
+    );
 }
 
 // ************************************************************************* //

@@ -40,6 +40,13 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
+inline bool Foam::UnsortedMeshedSurface<Face>::isTri()
+{
+    return false;
+}
+
+
+template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canRead
 (
     const word& ext,
@@ -205,8 +212,8 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     regions_(regionIds),
     patches_(patchLst)
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 }
 
 
@@ -222,8 +229,8 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     ParentType(List<Face>(), pointField()),
     regions_(regionIds)
 {
-    faces().transfer(faceLst());
-    points().transfer(pointLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 
     if (&regionNames)
     {
@@ -250,8 +257,8 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     ParentType(List<Face>(), pointField()),
     regions_(regionIds)
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 
     // set patch names from (name => id) mapping
     setPatches(labelToRegion);
@@ -269,8 +276,8 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     regions_(faceLst().size(), 0),     // single default patch
     patches_()
 {
-    points().transfer(pointLst());
-    faces().transfer(faceLst());
+    storedPoints().transfer(pointLst());
+    storedFaces().transfer(faceLst());
 
     setPatches(0);
 }
@@ -310,12 +317,12 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     if (useGlobalPoints)
     {
         // copy in the global points
-        points() = mesh.points();
+        storedPoints() = mesh.points();
     }
     else
     {
         // copy in the local points
-        points() = allBoundary.localPoints();
+        storedPoints() = allBoundary.localPoints();
     }
 
     // global or local face addressing
@@ -345,7 +352,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
         }
     }
 
-    faces().transfer(newFaces);
+    storedFaces().transfer(newFaces);
     regions_.transfer(newRegions);
     patches_.transfer(newPatches);
 }
@@ -380,7 +387,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
         }
     }
 
-    faces().transfer(newFaces);
+    storedFaces().transfer(newFaces);
     regions_.transfer(newRegions);
     patches_.transfer(newPatches);
 }
@@ -606,8 +613,8 @@ void Foam::UnsortedMeshedSurface<Face>::clear()
 {
     ParentType::clearOut();
 
-    points().clear();
-    faces().clear();
+    storedPoints().clear();
+    storedFaces().clear();
     regions_.clear();
     patches_.clear();
 }
@@ -640,7 +647,7 @@ void Foam::UnsortedMeshedSurface<Face>::movePoints(const pointField& newPoints)
     ParentType::movePoints(newPoints);
 
     // Copy new points
-    points() = newPoints;
+    storedPoints() = newPoints;
 }
 
 
@@ -656,7 +663,7 @@ void Foam::UnsortedMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
         // Adapt for new point position
         ParentType::movePoints(pointField());
 
-        points() *= scaleFactor;
+        storedPoints() *= scaleFactor;
     }
 }
 
@@ -722,8 +729,8 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
 {
     clear();
 
-    faces().transfer(surf.faces());
-    points().transfer(surf.points());
+    storedPoints().transfer(surf.storedPoints());
+    storedFaces().transfer(surf.storedFaces());
     regions_.transfer(surf.regions_);
     patches_.transfer(surf.patches_);
 
@@ -742,8 +749,8 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
 
     clear();
 
-    points().transfer(surf.points());
-    faces().transfer(surf.faces());
+    storedPoints().transfer(surf.storedPoints());
+    storedFaces().transfer(surf.storedFaces());
     regions_.setSize(size());
     patches_.setSize(patchLst.size());
 
@@ -839,8 +846,8 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
 )
 {
     clear();
-    faces()  = surf.faces();
-    points() = surf.points();
+    storedPoints() = surf.points();
+    storedFaces()  = surf.faces();
     regions_ = surf.regions_;
     patches_ = surf.patches_;
 }

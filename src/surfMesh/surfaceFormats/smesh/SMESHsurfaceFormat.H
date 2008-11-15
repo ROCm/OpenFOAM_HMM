@@ -67,7 +67,6 @@ class SMESHsurfaceFormat
     public SMESHsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef SMESHsurfaceFormat<Face>    ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -96,6 +95,7 @@ public:
     // Member Functions
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by region.
         static void write
         (
             Ostream&,
@@ -103,6 +103,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by region.
         static void write
         (
             const fileName& fName,

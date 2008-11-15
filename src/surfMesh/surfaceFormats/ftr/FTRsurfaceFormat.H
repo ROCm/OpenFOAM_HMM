@@ -26,7 +26,7 @@ Class
     Foam::fileFormats::FTRsurfaceFormat
 
 Description
-    Reading of Foam Trisurface Format
+    Reading of the (now deprecated) Foam Trisurface Format.
 
 SourceFiles
     FTRsurfaceFormat.C
@@ -57,7 +57,6 @@ class FTRsurfaceFormat
     public UnsortedMeshedSurface<Face>
 {
     //- Private typedefs for convenience
-    typedef FTRsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -69,13 +68,13 @@ class FTRsurfaceFormat
         void operator=(const FTRsurfaceFormat<Face>&);
 
 
-    //- read compatibility for ftr format
+    //- read compatibility for ftr patch definitions
     class ftrPatch
     {
         //- Name of patch
         word name_;
 
-        //- Type of patch
+        //- Type of patch (ignored since it is usually "empty")
         word type_;
 
     public:
@@ -95,9 +94,6 @@ class FTRsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        FTRsurfaceFormat();
 
         //- Construct from file name
         FTRsurfaceFormat(const fileName&);

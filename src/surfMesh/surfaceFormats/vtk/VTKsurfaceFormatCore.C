@@ -26,8 +26,6 @@ License
 
 #include "VTKsurfaceFormatCore.H"
 #include "clock.H"
-#include "IFstream.H"
-#include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -84,17 +82,49 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
             {
                 if ((patchFaceI % 20) == 0)
                 {
-                    os  << nl;
+                    os << nl;
                 }
                 else
                 {
-                    os  << ' ';
+                    os << ' ';
                 }
             }
             os  << patchI + 1;
         }
         os  << nl;
     }
+}
+
+
+void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
+(
+    Ostream& os,
+    const List<label>& regionLst
+)
+{
+    // Print region numbers
+    os  << nl
+        << "CELL_DATA " << regionLst.size() << nl
+        << "FIELD attributes 1" << nl
+        << "region 1 " << regionLst.size() << " float" << nl;
+
+
+    forAll(regionLst, faceI)
+    {
+        if (faceI)
+        {
+            if ((faceI % 20) == 0)
+            {
+                os << nl;
+            }
+            else
+            {
+                os << ' ';
+            }
+        }
+        os  << regionLst[faceI] + 1;
+    }
+    os  << nl;
 }
 
 

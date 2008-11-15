@@ -60,7 +60,6 @@ class VTKsurfaceFormat
     public VTKsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef VTKsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -94,6 +93,7 @@ public:
         // Write
 
         //- Write UnsortedMeshedSurface
+        //  By default, the output is not sorted by regions.
         static void write
         (
             Ostream&,
@@ -101,6 +101,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  By default, the output is not sorted by regions.
         static void write
         (
             const fileName& fName,

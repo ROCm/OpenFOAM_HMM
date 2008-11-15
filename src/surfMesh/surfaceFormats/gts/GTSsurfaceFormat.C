@@ -36,13 +36,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileFormats::GTSsurfaceFormat<Face>::GTSsurfaceFormat()
-:
-    ParentType()
-{}
-
-
-template<class Face>
 Foam::fileFormats::GTSsurfaceFormat<Face>::GTSsurfaceFormat
 (
     const fileName& fName
@@ -89,14 +82,13 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
 
 
     // write directly into the lists:
-    pointField& pointLst = ParentType::points();
-    List<Face>& faceLst  = ParentType::faces();
-    List<label>& regionLst = ParentType::regions();
+    pointField& pointLst = ParentType::storedPoints();
+    List<Face>& faceLst  = ParentType::storedFaces();
+    List<label>& regionLst = ParentType::storedRegions();
 
     pointLst.setSize(nPoints);
     faceLst.setSize(nElems);
     regionLst.setSize(nElems);
-
 
     // Read points
     forAll(pointLst, pointI)
@@ -234,8 +226,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     // check if output triangulation would be required
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
-    //
-    if (faceLst.size() && faceLst[0].max_size() != 3)
+    if (!surf.isTri())
     {
         label nNonTris = 0;
         forAll(faceLst, faceI)
@@ -337,7 +328,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
     //
-    if (faceLst.size() && faceLst[0].max_size() != 3)
+    if (!surf.isTri())
     {
         label nNonTris = 0;
         forAll(faceLst, faceI)

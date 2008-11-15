@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIsurfaceFormat.H"
-#include "clock.H"
 #include "IFstream.H"
 #include "IOmanip.H"
 #include "IStringStream.H"
@@ -63,13 +62,6 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat()
-:
-    ParentType()
-{}
-
 
 template<class Face>
 Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat
@@ -190,11 +182,11 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     }
 
     // transfer to normal list
-    ParentType::points().transfer(pointLst);
-    ParentType::regions().transfer(regionLst);
+    ParentType::storedPoints().transfer(pointLst);
+    ParentType::storedRegions().transfer(regionLst);
 
     // make our triangles directly
-    List<Face>& faceLst = ParentType::faces();
+    List<Face>& faceLst = ParentType::storedFaces();
     faceLst.setSize(ParentType::regions().size());
 
     label ptI = 0;
@@ -225,16 +217,35 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
     const pointField& pointLst = surf.points();
     const List<Face>& faceLst  = surf.faces();
 
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
+    bool doSort = false;
+    // a single region needs no sorting
+    if (surf.patches().size() == 1)
     {
-        forAll(patchLst[patchI], patchFaceI)
+        doSort = false;
+    }
+
+    if (doSort)
+    {
+        labelList faceMap;
+        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+
+        label faceIndex = 0;
+        forAll(patchLst, patchI)
         {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-            writeShell(os, pointLst, f, patchI);
+            forAll(patchLst[patchI], patchFaceI)
+            {
+                const Face& f = faceLst[faceMap[faceIndex++]];
+                writeShell(os, pointLst, f, patchI);
+            }
+        }
+    }
+    else
+    {
+        const List<label>& regionLst  = surf.regions();
+
+        forAll(faceLst, faceI)
+        {
+            writeShell(os, pointLst, faceLst[faceI], regionLst[faceI]);
         }
     }
 }

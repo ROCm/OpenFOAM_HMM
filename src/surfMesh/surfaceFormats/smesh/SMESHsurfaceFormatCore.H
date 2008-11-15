@@ -36,8 +36,6 @@ SourceFiles
 #ifndef SMESHsurfaceFormatCore_H
 #define SMESHsurfaceFormatCore_H
 
-#include "IFstream.H"
-#include "OFstream.H"
 #include "Ostream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
@@ -58,31 +56,16 @@ class SMESHsurfaceFormatCore
 protected:
     // Protected Member Functions
 
-        //- Write header information with points
-        static void writeHeader
-        (
-            Ostream&,
-            const pointField&,
-            const label nFaces
-        );
+    //- Write header information with points
+    static void writeHeader
+    (
+        Ostream&,
+        const pointField&,
+        const label nFaces
+    );
 
-        //- Write tail information
-        static void writeTail(Ostream&);
-
-public:
-
-    // Constructors
-
-        //- Construct null
-        SMESHsurfaceFormatCore()
-        {}
-
-    // Destructor
-
-        ~SMESHsurfaceFormatCore()
-        {}
-
-    // Member Functions
+    //- Write tail information
+    static void writeTail(Ostream&);
 
 };
 

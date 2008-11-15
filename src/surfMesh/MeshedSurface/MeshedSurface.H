@@ -87,7 +87,6 @@ class MeshedSurface
 private:
 
     //- Private typedefs for convenience
-        typedef MeshedSurface<Face> ThisType;
         typedef PrimitivePatchExtra
         <
             Face,
@@ -117,12 +116,31 @@ private:
         //- Read OpenFOAM Surface format
         bool read(Istream&);
 
+protected:
+
+    // Protected member functions
+
+        //- Return non-const access to global points
+        pointField& storedPoints()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
+        //- Return non-const access to the faces
+        List<Face>& storedFaces()
+        {
+            return static_cast<List<Face> &>(*this);
+        }
+
 public:
 
         //- Runtime type information
         ClassName("MeshedSurface");
 
     // Static
+
+        //- Only handles triangulated faces
+        inline static bool isTri();
 
         //- Can we read this file format?
         static bool canRead(const word& ext, const bool verbose=false);
@@ -270,7 +288,7 @@ public:
         //- Return the number of points
         label nPoints() const
         {
-            return points().size();
+            return ParentType::points().size();
         }
 
         //- Return the number of faces
@@ -291,30 +309,13 @@ public:
             return ParentType::points();
         }
 
-        //- Return non-const access to global points
-        pointField& points()
-        {
-            return const_cast<pointField&>(ParentType::points());
-        }
-
         //- Return const access to the faces
         const List<Face>& faces() const
         {
             return static_cast<const List<Face> &>(*this);
         }
 
-        //- Return non-const access to the faces
-        List<Face>& faces()
-        {
-            return static_cast<List<Face> &>(*this);
-        }
-
-        const surfGroupList& patches() const
-        {
-            return patches_;
-        }
-
-        surfGroupList& patches()
+        const List<surfGroup>& patches() const
         {
             return patches_;
         }
@@ -402,6 +403,22 @@ public:
         );
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Specialization for holding triangulated information
+template<>
+inline bool MeshedSurface<triFace>::isTri()
+{
+    return true;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label MeshedSurface<triFace>::triangulate()
+{
+    return 0;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

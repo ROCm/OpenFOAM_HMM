@@ -50,17 +50,14 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
         const point& p2 = pointLst[f[fp2]];
 
         // write STL triangle
-        os  << "  facet normal "
+        os  << " facet normal "
             << norm.x() << ' ' << norm.y() << ' ' << norm.z() << nl
-            << "    outer loop\n"
-            << "       vertex "
-            << p0.x() << ' ' << p0.y() << ' ' << p0.z() << nl
-            << "       vertex "
-            << p1.x() << ' ' << p1.y() << ' ' << p1.z() << nl
-            << "       vertex "
-            << p2.x() << ' ' << p2.y() << ' ' << p2.z() << nl
-            << "    endloop\n"
-            << "  endfacet" << endl;
+            << "  outer loop\n"
+            << "   vertex " << p0.x() << ' ' << p0.y() << ' ' << p0.z() << nl
+            << "   vertex " << p1.x() << ' ' << p1.y() << ' ' << p1.z() << nl
+            << "   vertex " << p2.x() << ' ' << p2.y() << ' ' << p2.z() << nl
+            << "  endloop\n"
+            << " endfacet" << endl;
     }
 }
 
@@ -108,24 +105,37 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
     const List<Face>& faceLst  = surf.faces();
     const vectorField& normLst = surf.faceNormals();
 
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
+    if (surf.patches().size() == 1)
     {
-        // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
-
-        os  << "solid " << patch.name() << endl;
-        forAll(patch, patchFaceI)
+        // a single region - we can skip sorting
+        os << "solid " << surf.patches()[0].name() << endl;
+        forAll(faceLst, faceI)
         {
-            const label faceI = faceMap[faceIndex++];
             writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
         }
-
-        os  << "endsolid " << patch.name() << endl;
+        os << "endsolid " << surf.patches()[0].name() << endl;
     }
+   else
+   {
+        labelList faceMap;
+        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+
+        label faceIndex = 0;
+        forAll(patchLst, patchI)
+        {
+            // Print all faces belonging to this region
+            const surfGroup& patch = patchLst[patchI];
+
+            os << "solid " << patch.name() << endl;
+            forAll(patch, patchFaceI)
+            {
+                const label faceI = faceMap[faceIndex++];
+                writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
+            }
+            os << "endsolid " << patch.name() << endl;
+        }
+   }
+
 }
 
 
@@ -143,7 +153,6 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
     const List<surfGroup>& patchLst = surf.patches();
     const vectorField& normLst = surf.faceNormals();
 
-    // force triangulation, but just do the cheapest form possible
     label faceIndex = 0;
     forAll(patchLst, patchI)
     {
@@ -151,13 +160,11 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
         const surfGroup& patch = patchLst[patchI];
 
         os << "solid " << patch.name() << endl;
-
         forAll(patch, patchFaceI)
         {
             const label faceI = faceIndex++;
             writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
         }
-
         os << "endsolid " << patch.name() << endl;
     }
 }
@@ -176,17 +183,22 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     const List<label>& regionLst = surf.regions();
     const vectorField& normLst = surf.faceNormals();
 
-    // Write the STL header
-    STLsurfaceFormatCore::writeHeaderBINARY(os);
-
-    // force triangulation, but just do the cheapest form possible
     unsigned int nTris = 0;
-    forAll(faceLst, faceI)
+    if (surf.isTri())
     {
-        nTris += faceLst[faceI].size() - 2;
+        nTris = faceLst.size();
+    }
+    else
+    {
+        // count triangles for on-the-fly triangulation
+        forAll(faceLst, faceI)
+        {
+            nTris += faceLst[faceI].size() - 2;
+        }
     }
 
-    os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+    // Write the STL header
+    STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
 
     // always write unsorted
     forAll(faceLst, faceI)
@@ -215,17 +227,22 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     const vectorField& normLst = surf.faceNormals();
     const List<surfGroup>& patchLst = surf.patches();
 
-    // Write the STL header
-    STLsurfaceFormatCore::writeHeaderBINARY(os);
-
-    // force triangulation, but just do the cheapest form possible
     unsigned int nTris = 0;
-    forAll(faceLst, faceI)
+    if (surf.isTri())
     {
-        nTris += faceLst[faceI].size() - 2;
+        nTris = faceLst.size();
+    }
+    else
+    {
+        // count triangles for on-the-fly triangulation
+        forAll(faceLst, faceI)
+        {
+            nTris += faceLst[faceI].size() - 2;
+        }
     }
 
-    os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+    // Write the STL header
+    STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -250,13 +267,6 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat()
-:
-    ParentType()
-{}
-
-
-template<class Face>
 Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 (
     const fileName& fName
@@ -264,7 +274,7 @@ Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 :
     ParentType()
 {
-    ThisType::read(fName);
+    read(fName);
 }
 
 
@@ -281,16 +291,13 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     // read in the values
     STLsurfaceFormatCore reader(fName);
 
-    pointField&  pointLst  = ParentType::points();
-    List<Face>&  faceLst   = ParentType::faces();
-    List<label>& regionLst = ParentType::regions();
-
     // transfer
-    pointLst.transfer(reader.points());
-    regionLst.transfer(reader.regions());
+    ParentType::storedPoints().transfer(reader.points());
+    ParentType::storedRegions().transfer(reader.regions());
 
-    // assemble the faces:
-    faceLst.setSize(regionLst.size());
+    // generate the faces:
+    List<Face>&  faceLst = ParentType::storedFaces();
+    faceLst.setSize(ParentType::regions().size());
 
     label ptI = 0;
     forAll(faceLst, faceI)

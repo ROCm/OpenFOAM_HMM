@@ -70,7 +70,6 @@ class OFFsurfaceFormat
     public OFFsurfaceFormatCore
 {
     //- Private typedefs for convenience
-    typedef OFFsurfaceFormat<Face>      ThisType;
     typedef UnsortedMeshedSurface<Face> ParentType;
 
     // Private Member Functions
@@ -92,9 +91,6 @@ class OFFsurfaceFormat
 public:
 
     // Constructors
-
-        //- Construct null
-        OFFsurfaceFormat();
 
         //- Construct from file name
         OFFsurfaceFormat(const fileName&);
@@ -123,6 +119,7 @@ public:
         virtual bool read(const fileName&);
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by region.
         static void write
         (
             Ostream&,
@@ -130,6 +127,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
+        //  The output is sorted by region.
         static void write
         (
             const fileName& fName,

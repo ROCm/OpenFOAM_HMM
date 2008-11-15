@@ -36,13 +36,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::fileFormats::NASsurfaceFormat<Face>::NASsurfaceFormat()
-:
-    ParentType()
-{}
-
-
-template<class Face>
 Foam::fileFormats::NASsurfaceFormat<Face>::NASsurfaceFormat
 (
     const fileName& fName
@@ -50,7 +43,7 @@ Foam::fileFormats::NASsurfaceFormat<Face>::NASsurfaceFormat
 :
     ParentType()
 {
-    ThisType::read(fName);
+    read(fName);
 }
 
 
@@ -63,16 +56,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 )
 {
     ParentType::clear();
-
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
+    const bool mustTriangulate = ParentType::isTri();
 
     IFstream is(fName);
     if (!is.good())
@@ -364,8 +348,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
 
     // transfer to normal lists
-    ParentType::points().transfer(pointLst);
-    ParentType::regions().transfer(regionLst);
+    ParentType::storedPoints().transfer(pointLst);
+    ParentType::storedRegions().transfer(regionLst);
 
     pointId.shrink();
     faceLst.shrink();
@@ -405,7 +389,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::faces().transfer(faceLst);
+    ParentType::storedFaces().transfer(faceLst);
 
     ParentType::setPatches(regionNames);
     return true;

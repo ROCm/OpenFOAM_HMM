@@ -59,21 +59,34 @@ public:
     // Constructors
 
         //- Construct null
-        inline STLpoint();
+        inline STLpoint()
+        {}
 
         //- Construct from components
-        inline STLpoint(float x, float y, float z);
+        inline STLpoint(float x, float y, float z)
+        :
+            Vector<float>(x, y, z)
+        {}
 
         //- Construct from point
-        inline STLpoint(const point&);
+        inline STLpoint(const point& pt)
+        :
+            Vector<float>(float(pt.x()), float(pt.y()), float(pt.z()))
+        {}
 
         //- Construct from istream
-        inline STLpoint(Istream&);
+        inline STLpoint(Istream& is)
+        :
+            Vector<float>(is)
+        {}
 
 
     // Member Operators
 
-        inline operator point() const;
+        inline operator point() const
+        {
+            return point(x(), y(), z());
+        }
 
 };
 
@@ -81,10 +94,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "STLpointI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
