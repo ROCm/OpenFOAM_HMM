@@ -33,13 +33,13 @@ License
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::markZone
 (
-    const boolList& borderEdge,
+    const UList<bool>& borderEdge,
     const label faceI,
     const label currentZone,
     labelList& faceZone
@@ -62,9 +62,9 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
 
             const labelList& fEdges = faceEs[faceI];
 
-            forAll(fEdges, i)
+            forAll(fEdges, fEdgeI)
             {
-                label edgeI = fEdges[i];
+                label edgeI = fEdges[fEdgeI];
 
                 if (!borderEdge[edgeI])
                 {
@@ -83,7 +83,7 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
                         {
                             FatalErrorIn
                             (
-                                "PrimitivePatchExtra<Face, ListType, PointField>::markZone"
+                                "PrimitivePatchExtra<Face, FaceList, PointField>::markZone"
                                 "(const boolList&, const label, const label, labelList&) const"
                             )
                                 << "Zones " << faceZone[nbrFaceI]
@@ -113,28 +113,25 @@ void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::markZone
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-Foam::label Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::label Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 markZones
 (
-    const boolList& borderEdge,
+    const UList<bool>& borderEdge,
     labelList& faceZone
 ) const
 {
     const label numEdges = TemplateType::nEdges();
     const label numFaces = TemplateType::size();
 
-    faceZone.setSize(numFaces);
-    faceZone = -1;
-
     if (borderEdge.size() != numEdges)
     {
         FatalErrorIn
         (
-            "PrimitivePatchExtra<Face, ListType, PointField>::markZones"
+            "PrimitivePatchExtra<Face, FaceList, PointField>::markZones"
             "(const boolList&, labelList&)"
         )
             << "borderEdge boolList not same size as number of edges" << endl
@@ -143,28 +140,32 @@ markZones
             << exit(FatalError);
     }
 
+    faceZone.setSize(numFaces);
+    faceZone = -1;
+
     label zoneI = 0;
     label startFaceI = 0;
 
-    for (;;zoneI++)
+    while (true)
     {
-        // Find first non-coloured face
+        // Find first non-visited face
         for (; startFaceI < numFaces; startFaceI++)
         {
             if (faceZone[startFaceI] == -1)
             {
+                faceZone[startFaceI] = zoneI;
+                markZone(borderEdge, startFaceI, zoneI, faceZone);
                 break;
             }
         }
 
         if (startFaceI >= numFaces)
         {
+            // Finished
             break;
         }
 
-        faceZone[startFaceI] = zoneI;
-
-        markZone(borderEdge, startFaceI, zoneI, faceZone);
+        zoneI++;
     }
 
     return zoneI;
@@ -177,19 +178,19 @@ markZones
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 subsetMap
 (
-    const boolList& include,
+    const UList<bool>& include,
     labelList& pointMap,
     labelList& faceMap
 ) const
 {
-    const List<FaceType>& locFaces = TemplateType::localFaces();
+    const List<Face>& locFaces = TemplateType::localFaces();
     const label numPoints = TemplateType::nPoints();
 
     label faceI = 0;
@@ -208,7 +209,7 @@ subsetMap
             faceMap[faceI++] = oldFaceI;
 
             // Renumber labels for face
-            const FaceType& f = locFaces[oldFaceI];
+            const Face& f = locFaces[oldFaceI];
 
             forAll(f, fp)
             {

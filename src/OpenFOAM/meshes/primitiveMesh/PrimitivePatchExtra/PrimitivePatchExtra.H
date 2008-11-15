@@ -50,13 +50,13 @@ namespace Foam
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType=point
 >
 class PrimitivePatchExtra
 :
-    public PrimitivePatch<Face, ListType, PointField, PointType>
+    public PrimitivePatch<Face, FaceList, PointField, PointType>
 {
 
 public:
@@ -64,13 +64,13 @@ public:
     // Public typedefs
 
         typedef Face FaceType;
-        typedef ListType<Face> FaceListType;
+        typedef FaceList<Face> FaceListType;
         typedef PointField PointFieldType;
 
 private:
 
     // Private typedefs
-    typedef PrimitivePatch<Face, ListType, PointField, PointType> TemplateType;
+    typedef PrimitivePatch<Face, FaceList, PointField, PointType> TemplateType;
 
     // Private data
 
@@ -99,14 +99,14 @@ public:
         //- Construct from components
         PrimitivePatchExtra
         (
-            const ListType<Face>& faces,
-            const pointField& points
+            const FaceList<Face>& faces,
+            const Field<PointType>& points
         );
 
         //- Construct as copy
         PrimitivePatchExtra
         (
-            const PrimitivePatchExtra<Face, ListType, PointField, PointType>&
+            const PrimitivePatchExtra<Face, FaceList, PointField, PointType>&
         );
 
 
@@ -161,7 +161,7 @@ public:
         //  Note: faceZone has to be sized nFaces before calling.
         void markZone
         (
-            const boolList& borderEdge,
+            const UList<bool>& borderEdge,
             const label faceI,
             const label currentZone,
             labelList& faceZone
@@ -172,17 +172,17 @@ public:
         //  (bool for every edge in surface). Returns number of zones.
         label markZones
         (
-            const boolList& borderEdge,
+            const UList<bool>& borderEdge,
             labelList& faceZone
         ) const;
 
         //- Determine the mapping for a sub-mesh.
-        //  Only include faces for which boolList entry is true
+        //  Only include faces for which bool List entry is true
         //  @param[out] pointMap mapping new to old localPoints
         //  @param[out] faceMap  mapping new to old faces
         void subsetMap
         (
-            const boolList& include,
+            const UList<bool>& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;

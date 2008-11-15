@@ -34,11 +34,11 @@ License
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 checkEdges
 (
     const bool verbose
@@ -77,18 +77,18 @@ checkEdges
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
 Foam::boolList
-Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 checkOrientation
 (
     const bool verbose
 ) const
 {
-    const ListType<FaceType>& faceLst = *this;
+    const FaceList<Face>& faceLst = *this;
     const edgeList& edgeLst = TemplateType::edges();
     const labelListList& faceEs = TemplateType::faceEdges();
     const label numEdges = TemplateType::nEdges();
@@ -133,7 +133,7 @@ checkOrientation
         //
         //- Compute normal from 3 points, use the first as the origin
         // minor warpage should not be a problem
-        const FaceType& f = faceLst[faceI];
+        const Face& f = faceLst[faceI];
         const point p0(pointLst[f[0]]);
         const point p1(pointLst[f[1]]);
         const point p2(pointLst[f[f.size()-1]]);
@@ -156,8 +156,8 @@ checkOrientation
     const labelListList& eFaces = TemplateType::edgeFaces();
     const pointField& locPointsLst = TemplateType::localPoints();
 
-    // Storage for holding status of edge. True if normal flips across this
-    // edge
+    // Storage for holding status of edge.
+    // True if normal flips across this edge
     boolList borderEdge(numEdges, false);
 
     forAll(edgeLst, edgeI)
@@ -167,8 +167,8 @@ checkOrientation
 
         if (neighbours.size() == 2)
         {
-            const FaceType& faceA = faceLst[neighbours[0]];
-            const FaceType& faceB = faceLst[neighbours[1]];
+            const Face& faceA = faceLst[neighbours[0]];
+            const Face& faceB = faceLst[neighbours[1]];
 
             // The edge cannot be going in the same direction if both faces
             // are oriented counterclockwise.

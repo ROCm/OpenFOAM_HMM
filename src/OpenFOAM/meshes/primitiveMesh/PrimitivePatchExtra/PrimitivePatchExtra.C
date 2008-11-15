@@ -38,18 +38,18 @@ License
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 PrimitivePatchExtra
 (
-    const ListType<Face>& faces,
-    const pointField& points
+    const FaceList<Face>& faces,
+    const Field<PointType>& points
 )
 :
-    PrimitivePatch<Face, ListType, PointField, PointType>(faces, points),
+    PrimitivePatch<Face, FaceList, PointField, PointType>(faces, points),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
 {}
@@ -59,17 +59,17 @@ PrimitivePatchExtra
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 PrimitivePatchExtra
 (
-    const PrimitivePatchExtra<Face, ListType, PointField, PointType>& pp
+    const PrimitivePatchExtra<Face, FaceList, PointField, PointType>& pp
 )
 :
-    PrimitivePatch<Face, ListType, PointField, PointType>(pp),
+    PrimitivePatch<Face, FaceList, PointField, PointType>(pp),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
 {}
@@ -80,11 +80,11 @@ PrimitivePatchExtra
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 ~PrimitivePatchExtra()
 {
     clearOut();
@@ -95,14 +95,14 @@ Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 clearOut()
 {
-    PrimitivePatch<Face, ListType, PointField, PointType>::clearOut();
+    PrimitivePatch<Face, FaceList, PointField, PointType>::clearOut();
     clearTopology();
 }
 
@@ -110,14 +110,14 @@ clearOut()
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 clearTopology()
 {
-    PrimitivePatch<Face, ListType, PointField, PointType>::clearTopology();
+    PrimitivePatch<Face, FaceList, PointField, PointType>::clearTopology();
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
     deleteDemandDrivenData(edgeOwnerPtr_);
 }
@@ -126,12 +126,12 @@ clearTopology()
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
 const Foam::labelListList&
-Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 sortedEdgeFaces() const
 {
     if (!sortedEdgeFacesPtr_)
@@ -146,12 +146,12 @@ sortedEdgeFaces() const
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
 const Foam::labelList&
-Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 edgeOwner() const
 {
     if (!edgeOwnerPtr_)
