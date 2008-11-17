@@ -125,6 +125,17 @@ dimensionedScalar det(const dimensionedSymmTensor& dt)
 }
 
 
+dimensionedSymmTensor cof(const dimensionedSymmTensor& dt)
+{
+    return dimensionedSymmTensor
+    (
+        "cof("+dt.name()+')',
+        dt.dimensions(),
+        cof(dt.value())
+    );
+}
+
+
 dimensionedSymmTensor inv(const dimensionedSymmTensor& dt)
 {
     return dimensionedSymmTensor

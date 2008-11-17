@@ -45,6 +45,7 @@ UNARY_FUNCTION(tensor, tensor, skew)
 UNARY_FUNCTION(tensor, tensor, dev)
 UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
+UNARY_FUNCTION(tensor, tensor, cof)
 
 void inv(Field<tensor>& tf, const UList<tensor>& tf1)
 {

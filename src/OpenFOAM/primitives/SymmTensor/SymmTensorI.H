@@ -33,13 +33,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor()
 {}
 
 
-//- Construct given VectorSpace
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor
 (
@@ -50,7 +48,6 @@ inline SymmTensor<Cmpt>::SymmTensor
 {}
 
 
-//- Construct given SphericalTensor
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 {
@@ -60,7 +57,6 @@ inline SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Construct from components
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor
 (
@@ -75,7 +71,6 @@ inline SymmTensor<Cmpt>::SymmTensor
 }
 
 
-//- Construct from Istream
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor(Istream& is)
 :
@@ -159,7 +154,6 @@ inline Cmpt& SymmTensor<Cmpt>::zz()
 }
 
 
-//- Return symmetric tensor transpose
 template <class Cmpt>
 inline const SymmTensor<Cmpt>& SymmTensor<Cmpt>::T() const
 {
@@ -323,22 +317,19 @@ inline Cmpt det(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the cofactor tensor of a symmetric tensor
+//- Return the cofactor symmetric tensor of a symmetric tensor
 template <class Cmpt>
-inline SymmTensor<Cmpt> cofactors(const SymmTensor<Cmpt>& st)
+inline SymmTensor<Cmpt> cof(const SymmTensor<Cmpt>& st)
 {
     return SymmTensor<Cmpt>
     (
         st.yy()*st.zz() - st.yz()*st.yz(),
         st.xz()*st.yz() - st.xy()*st.zz(),
-        st.xy()*st.yz() - st.yy()*st.xz(),
+        st.xy()*st.yz() - st.xz()*st.yy(),
 
-        st.xz()*st.yz() - st.xy()*st.zz(),
         st.xx()*st.zz() - st.xz()*st.xz(),
         st.xy()*st.xz() - st.xx()*st.yz(),
 
-        st.xy()*st.yz() - st.xz()*st.yy(),
-        st.xy()*st.xz() - st.xx()*st.yz(),
         st.xx()*st.yy() - st.xy()*st.xy()
     );
 }

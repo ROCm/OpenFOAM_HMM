@@ -92,6 +92,17 @@ dimensionedScalar det(const dimensionedTensor& dt)
 }
 
 
+dimensionedTensor cof(const dimensionedTensor& dt)
+{
+    return dimensionedTensor
+    (
+        "cof("+dt.name()+')',
+        dt.dimensions(),
+        cof(dt.value())
+    );
+}
+
+
 dimensionedTensor inv(const dimensionedTensor& dt)
 {
     return dimensionedTensor
