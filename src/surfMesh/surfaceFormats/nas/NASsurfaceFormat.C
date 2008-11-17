@@ -40,8 +40,6 @@ Foam::fileFormats::NASsurfaceFormat<Face>::NASsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -55,8 +53,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
-    const bool mustTriangulate = ParentType::isTri();
+    const bool mustTriangulate = this->isTri();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -348,8 +346,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
 
     // transfer to normal lists
-    ParentType::storedPoints().transfer(pointLst);
-    ParentType::storedRegions().transfer(regionLst);
+    this->storedPoints().transfer(pointLst);
+    this->storedRegions().transfer(regionLst);
 
     pointId.shrink();
     faceLst.shrink();
@@ -389,9 +387,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::storedFaces().transfer(faceLst);
+    this->storedFaces().transfer(faceLst);
 
-    ParentType::setPatches(regionNames);
+    this->setPatches(regionNames);
     return true;
 }
 

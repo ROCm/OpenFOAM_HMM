@@ -37,8 +37,6 @@ Foam::fileFormats::OBJsurfaceFormat<Face>::OBJsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -52,8 +50,8 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
-    const bool mustTriangulate = ParentType::isTri();
+    const bool mustTriangulate = this->isTri();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -77,13 +75,13 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
     while (is.good())
     {
-        string line = ParentType::getLineNoComment(is);
+        string line = this->getLineNoComment(is);
 
         // handle continuations
         if (line[line.size()-1] == '\\')
         {
             line.substr(0, line.size()-1);
-            line += ParentType::getLineNoComment(is);
+            line += this->getLineNoComment(is);
         }
 
         // Read first word
@@ -198,11 +196,11 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::storedPoints().transfer(pointLst);
-    ParentType::storedFaces().transfer(faceLst);
-    ParentType::storedRegions().transfer(regionLst);
+    this->storedPoints().transfer(pointLst);
+    this->storedFaces().transfer(faceLst);
+    this->storedRegions().transfer(regionLst);
 
-    ParentType::setPatches(groupToPatch);
+    this->setPatches(groupToPatch);
     return true;
 }
 

@@ -47,15 +47,10 @@ SourceFiles
 #ifndef UnsortedMeshedSurface_H
 #define UnsortedMeshedSurface_H
 
-#include "pointField.H"
-#include "PrimitivePatchExtra.H"
-#include "boolList.H"
+#include "PrimitiveMeshedSurface.H"
 #include "surfPatchIdentifierList.H"
 #include "surfGroupList.H"
 #include "surfaceFormatsCore.H"
-#include "xfer.H"
-#include "face.H"
-#include "triFace.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
 
@@ -84,22 +79,15 @@ template<class Face>
 template<class Face>
 class UnsortedMeshedSurface
 :
-    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>,
+    public PrimitiveMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
     friend class MeshedSurface<Face>;
 
 private:
 
-    //- Private typedefs for convenience
-        typedef PrimitivePatchExtra
-        <
-            Face,
-            ::Foam::List,
-            pointField,
-            point
-        >
-        ParentType;
+    //- Typedefs for convenience
+        typedef PrimitiveMeshedSurface<Face> ParentType;
 
         //- Typedef for type holding the region (patch) informationm
         typedef surfPatchIdentifier PatchRegionType;
@@ -125,6 +113,9 @@ protected:
 
     // Protected Member functions
 
+        //- Set a single patch
+        void onePatch();
+
         //- Sets default patch names based on the maximum patch number
         void setPatches(const label maxPatch);
 
@@ -141,19 +132,6 @@ protected:
         //- Sets patch names from hashed values (name -> id)
         void setPatches(const HashTable<label>& groupToPatch);
 
-
-        //- Return non-const access to global points
-        pointField& storedPoints()
-        {
-            return const_cast<pointField&>(ParentType::points());
-        }
-
-        //- Return non-const access to the faces
-        List<Face>& storedFaces()
-        {
-            return static_cast<List<Face> &>(*this);
-        }
-
         //- Return non-const access to the faces
         List<label>& storedRegions()
         {
@@ -167,14 +145,14 @@ public:
 
     // Static
 
-        //- Only handles triangulated faces
-        inline static bool isTri();
+        //- Can we read this file format?
+        static bool canReadType(const word& ext, const bool verbose=false);
 
         //- Can we read this file format?
-        static bool canRead(const word& ext, const bool verbose=false);
+        static bool canRead(const fileName&, const bool verbose=false);
 
         //- Can we write this file format?
-        static bool canWrite(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& ext, const bool verbose=false);
 
     // Constructors
 
@@ -219,14 +197,12 @@ public:
             const xfer<List<Face> >&
         );
 
-#if 0
         //- Construct from a boundary mesh with local points/faces
         UnsortedMeshedSurface
         (
             const polyBoundaryMesh&,
             const bool globalPoints=false
         );
-#endif
 
         //- Construct from a meshedSurface
         UnsortedMeshedSurface(const MeshedSurface<Face>&);
@@ -267,18 +243,15 @@ public:
 
     // Selectors
 
-        //- Select constructed from filename (implicit extension)
-        static autoPtr<UnsortedMeshedSurface> New
-        (
-            const fileName&
-        );
-
         //- Select constructed from filename (explicit extension)
         static autoPtr<UnsortedMeshedSurface> New
         (
             const fileName&,
             const word& ext
         );
+
+        //- Select constructed from filename (implicit extension)
+        static autoPtr<UnsortedMeshedSurface> New(const fileName&);
 
     // Destructor
 
@@ -308,18 +281,6 @@ public:
 
     // Access
 
-        //- Return the number of points
-        label nPoints() const
-        {
-            return ParentType::points().size();
-        }
-
-        //- Return the number of faces
-        label nFaces() const
-        {
-            return ParentType::size();
-        }
-
         //- The surface size is the number of faces
         label size() const
         {
@@ -328,18 +289,6 @@ public:
 
         //- Reset size of face and region list
         void setSize(const label);
-
-        //- Return const access to global points
-        const pointField& points() const
-        {
-            return ParentType::points();
-        }
-
-        //- Return const access to the faces
-        const List<Face>& faces() const
-        {
-            return static_cast<const List<Face> &>(*this);
-        }
 
         //- Return const access to the regions
         const List<label>& regions() const
@@ -357,16 +306,11 @@ public:
         //  Returns patch list and sets faceMap to index within faces()
         List<surfGroup> sortedRegions(labelList& faceMap) const;
 
+
     // Edit
 
         //- Clear all storage
         virtual void clear();
-
-        //- Move points
-        virtual void movePoints(const pointField&);
-
-        //- Scale points. A non-positive factor is ignored
-        virtual void scalePoints(const scalar&);
 
         //- Remove invalid faces
         void cleanup(const bool verbose);
@@ -379,10 +323,10 @@ public:
         bool stitchFaces(const scalar tol=SMALL, const bool verbose=false);
 
         //- Triangulate the surface, return the number of added faces.
-        label triangulate();
+        virtual label triangulate();
 
-        //- Return new surface. Returns pointMap, faceMap from
-        //  subsetMeshMap
+        //- Return new surface.
+        //  Returns return pointMap, faceMap from subsetMeshMap
         UnsortedMeshedSurface subsetMesh
         (
             const UList<bool>& include,
@@ -390,11 +334,26 @@ public:
             labelList& faceMap
         ) const;
 
+        //- Return new surface.
+        UnsortedMeshedSurface subsetMesh
+        (
+            const UList<bool>& include
+        ) const;
+
+        //- Transfer components (points, faces, region ids).
+        virtual void reset
+        (
+            const xfer<pointField>&,
+            const xfer<List<Face> >&,
+            const xfer<List<label> >& regionIds = xfer<List<label> >::null()
+        );
+
         //- Transfer the contents of the argument and annull the argument
         void transfer(UnsortedMeshedSurface<Face>&);
 
         //- Transfer the contents of the argument and annull the argument
         void transfer(MeshedSurface<Face>&);
+
 
     // Read
 
@@ -403,6 +362,7 @@ public:
 
         //- Read from file. Chooses reader based on detected extension
         virtual bool read(const fileName&);
+
 
     // Write
 
@@ -417,9 +377,6 @@ public:
 
         //- Write to database
         void write(const Time&) const;
-
-        //- Write some statistics
-        void writeStats(Ostream&) const;
 
 
     // Member operators
@@ -440,13 +397,6 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Specialization for holding triangulated information
-template<>
-inline bool UnsortedMeshedSurface<triFace>::isTri()
-{
-    return true;
-}
 
 //- Specialization for holding triangulated information
 template<>

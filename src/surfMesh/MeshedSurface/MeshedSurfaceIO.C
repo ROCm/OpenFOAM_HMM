@@ -37,16 +37,6 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
 {
     clear();
 
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
-
     List<surfGroup> patchLst(is);
 
     // copy and set the indices
@@ -61,17 +51,45 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
     }
 
     // read points:
-    is >> storedPoints();
+    is >> this->storedPoints();
 
-    // read faces:
-    // TODO - specialization to triangulate on-the-fly
-    if (mustTriangulate)
+#if 1
+    // must triangulate?
+    if (this->isTri())
     {
-        is >> storedFaces();
+        List<face> faceLst(is);
+
+        MeshedSurface<face> surf;
+        surf.reset
+        (
+            xfer<pointField>::null(),
+            xferMove(faceLst)
+        );
+        surf.addPatches(patches_);
+
+        // this will break if the triangulation uses points
+        surf.triangulate();
+        patches_ = surf.patches();
+
+        // transcribe from face -> triFace (Face)
+        const List<face>& origFaces = surf.faces();
+        List<Face>  newFaces(origFaces.size());
+        forAll(origFaces, faceI)
+        {
+            newFaces[faceI] = Face
+            (
+                static_cast<const UList<label>&>(origFaces[faceI])
+            );
+        }
+        surf.clear();
+
+        this->storedFaces().transfer(newFaces);
     }
     else
+#endif
     {
-        is >> storedFaces();
+        // read faces:
+        is >> this->storedFaces();
     }
 
     return is.good();
@@ -83,7 +101,7 @@ void Foam::MeshedSurface<Face>::write(Ostream& os) const
 {
     // just emit some information until we get a nice IOobject
     IOobject::writeBanner(os);
-    os  << "// OpenFOAM Surface format" << nl
+    os  << "// OpenFOAM Surface Format" << nl
         << "// ~~~~~~~~~~~~~~~~~~~~~~~" << nl
         << "// regions:" << nl
         << patches_.size() << nl << token::BEGIN_LIST << incrIndent << nl;
@@ -97,10 +115,10 @@ void Foam::MeshedSurface<Face>::write(Ostream& os) const
     IOobject::writeDivider(os);
 
     // Note: Write with global point numbering
-    os  << "\n// points:" << nl << points() << nl;
+    os  << "\n// points:" << nl << this->points() << nl;
 
     IOobject::writeDivider(os);
-    os  << "\n// faces:"  << nl << faces() << nl;
+    os  << "\n// faces:"  << nl << this->faces() << nl;
 
     IOobject::writeDivider(os);
 

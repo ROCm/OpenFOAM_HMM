@@ -271,8 +271,6 @@ Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -286,18 +284,18 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
+    this->clear();
 
     // read in the values
     STLsurfaceFormatCore reader(fName);
 
-    // transfer
-    ParentType::storedPoints().transfer(reader.points());
-    ParentType::storedRegions().transfer(reader.regions());
-
     // generate the faces:
-    List<Face>&  faceLst = ParentType::storedFaces();
-    faceLst.setSize(ParentType::regions().size());
+    List<Face>&  faceLst = this->storedFaces();
+    faceLst.setSize(reader.regions().size());
+
+    // transfer
+    this->storedPoints().transfer(reader.points());
+    this->storedRegions().transfer(reader.regions());
 
     label ptI = 0;
     forAll(faceLst, faceI)
@@ -313,14 +311,14 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
 
     if (reader.binary())
     {
-        ParentType::setPatches(reader.maxRegionId());
+        this->setPatches(reader.maxRegionId());
     }
     else
     {
-        ParentType::setPatches(reader.groupToPatch());
+        this->setPatches(reader.groupToPatch());
     }
 
-    ParentType::stitchFaces(SMALL);
+    this->stitchFaces(SMALL);
     return true;
 }
 
@@ -354,7 +352,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    const word ext = fName.ext();
+    word ext = fName.ext();
 
     // handle 'stlb' as binary directly
     if (ext == "stlb")

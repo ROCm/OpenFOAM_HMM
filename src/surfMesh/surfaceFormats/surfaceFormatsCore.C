@@ -242,7 +242,6 @@ Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
     forAll(regionLst, faceI)
     {
         label patchI = regionLookup[regionLst[faceI]];
-
         faceMap[faceI] = patchLst[patchI].start() + patchLst[patchI].size()++;
     }
 

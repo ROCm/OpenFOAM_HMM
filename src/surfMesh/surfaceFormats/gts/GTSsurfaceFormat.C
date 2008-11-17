@@ -40,8 +40,6 @@ Foam::fileFormats::GTSsurfaceFormat<Face>::GTSsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -55,7 +53,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -69,7 +67,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     }
 
     // Read header
-    string line = ParentType::getLineNoComment(is);
+    string line = this->getLineNoComment(is);
 
     label nPoints, nEdges, nElems;
     {
@@ -82,9 +80,9 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
 
 
     // write directly into the lists:
-    pointField& pointLst = ParentType::storedPoints();
-    List<Face>& faceLst  = ParentType::storedFaces();
-    List<label>& regionLst = ParentType::storedRegions();
+    pointField& pointLst = this->storedPoints();
+    List<Face>& faceLst  = this->storedFaces();
+    List<label>& regionLst = this->storedRegions();
 
     pointLst.setSize(nPoints);
     faceLst.setSize(nElems);
@@ -94,7 +92,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     forAll(pointLst, pointI)
     {
         scalar x, y, z;
-        line = ParentType::getLineNoComment(is);
+        line = this->getLineNoComment(is);
         {
             IStringStream lineStream(line);
             lineStream
@@ -109,7 +107,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
     forAll(edges, edgei)
     {
         label beg, end;
-        line = ParentType::getLineNoComment(is);
+        line = this->getLineNoComment(is);
         {
             IStringStream lineStream(line);
             lineStream
@@ -126,7 +124,7 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
         label e0Label, e1Label, e2Label;
         label regionI = 0;
 
-        line = ParentType::getLineNoComment(is);
+        line = this->getLineNoComment(is);
         {
             IStringStream lineStream(line);
             lineStream
@@ -207,8 +205,8 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
         regionLst[faceI] = regionI;
     }
 
-    ParentType::setPatches(maxPatch);
-    // ParentType::stitchFaces(SMALL);
+    this->setPatches(maxPatch);
+    // this->stitchFaces(SMALL);
     return true;
 }
 

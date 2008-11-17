@@ -39,6 +39,7 @@ SourceFiles
 
 #include "STLtriangle.H"
 #include "triFace.H"
+#include "gzstream.h"
 #include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"

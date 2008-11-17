@@ -56,8 +56,30 @@ class FTRsurfaceFormat
 :
     public UnsortedMeshedSurface<Face>
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
+    // Private classes
+
+        //- read compatibility for ftr patch definitions
+        class ftrPatch
+        {
+            //- Name of patch
+            word name_;
+
+            //- Type of patch (ignored since it is usually "empty")
+            word type_;
+
+        public:
+
+            const word& name() const
+            {
+                return name_;
+            }
+
+            friend Istream& operator>>(Istream& is, ftrPatch& p)
+            {
+                is >> p.name_ >> p.type_;
+                return is;
+            }
+        };
 
     // Private Member Functions
 
@@ -66,30 +88,6 @@ class FTRsurfaceFormat
 
         //- Disallow default bitwise assignment
         void operator=(const FTRsurfaceFormat<Face>&);
-
-
-    //- read compatibility for ftr patch definitions
-    class ftrPatch
-    {
-        //- Name of patch
-        word name_;
-
-        //- Type of patch (ignored since it is usually "empty")
-        word type_;
-
-    public:
-
-        const word& name() const
-        {
-            return name_;
-        }
-
-        friend Istream& operator>>(Istream& is, ftrPatch& p)
-        {
-            is >> p.name_ >> p.type_;
-            return is;
-        }
-    };
 
 public:
 

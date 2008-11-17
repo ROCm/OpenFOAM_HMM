@@ -57,16 +57,7 @@ class TRIsurfaceFormat
 :
     public UnsortedMeshedSurface<Face>
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        TRIsurfaceFormat(const TRIsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const TRIsurfaceFormat<Face>&);
 
         static inline void writeShell
         (
@@ -75,6 +66,12 @@ class TRIsurfaceFormat
             const Face&,
             const label patchI
         );
+
+        //- Disallow default bitwise copy construct
+        TRIsurfaceFormat(const TRIsurfaceFormat<Face>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const TRIsurfaceFormat<Face>&);
 
 public:
 

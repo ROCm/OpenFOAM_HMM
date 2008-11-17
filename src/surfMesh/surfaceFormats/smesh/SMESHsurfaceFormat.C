@@ -34,8 +34,6 @@ License
 
 template<class Face>
 Foam::fileFormats::SMESHsurfaceFormat<Face>::SMESHsurfaceFormat()
-:
-    ParentType()
 {}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

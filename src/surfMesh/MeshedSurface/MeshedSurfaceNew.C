@@ -52,6 +52,7 @@ Foam::MeshedSurface<Face>::New
     return surf;
 }
 
+
 template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face> >
 Foam::MeshedSurface<Face>::New
@@ -59,14 +60,12 @@ Foam::MeshedSurface<Face>::New
     const fileName& fName
 )
 {
-    if (debug)
+    word ext = fName.ext();
+    if (ext == "gz")
     {
-        Info<< "MeshedSurface::New(const fileName&) : "
-            "constructing MeshedSurface"
-            << endl;
+        ext = fName.lessExt().ext();
     }
-
-    return New(fName, fName.ext());
+    return New(fName, ext);
 }
 
 // ************************************************************************* //

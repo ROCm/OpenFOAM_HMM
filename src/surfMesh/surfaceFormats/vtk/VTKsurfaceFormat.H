@@ -59,14 +59,10 @@ class VTKsurfaceFormat
     public UnsortedMeshedSurface<Face>,
     public VTKsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
 
         //- Write header information about number of polygon points
         static void writeHeaderPolygons(Ostream&, const List<Face>&);
-
 
         //- Disallow default bitwise copy construct
         VTKsurfaceFormat(const VTKsurfaceFormat<Face>&);

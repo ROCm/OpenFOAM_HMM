@@ -35,53 +35,9 @@ License
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
 {
-    clear();
+    MeshedSurface<Face> surf(is);
 
-    // triangulation required?
-    bool mustTriangulate = false;
-    {
-        Face f;
-        if (f.max_size() == 3)
-        {
-            mustTriangulate = true;
-        }
-    }
-
-    List<surfGroup> patchLst(is);
-    // read points:
-    is >> storedPoints();
-
-
-    // read faces:
-    // TODO - specialization to triangulate on-the-fly
-    if (mustTriangulate)
-    {
-        is >> storedFaces();
-    }
-    else
-    {
-        is >> storedFaces();
-    }
-
-    patches_.setSize(patchLst.size());
-    regions_.setSize(size());
-
-    // copy patch info and set regions:
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        patches_[patchI] = PatchRegionType
-        (
-            patchLst[patchI],
-            patchI
-        );
-
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            regions_[faceIndex++] = patchI;
-        }
-    }
-
+    transfer(surf);
     return is.good();
 }
 
@@ -90,13 +46,14 @@ bool Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
 {
-    const List<Face>& faceLst = faces();
+    const List<Face>& faceLst = this->faces();
+
     labelList faceMap;
     List<surfGroup> patchLst = sortedRegions(faceMap);
 
     // just emit some information until we get a nice IOobject
     IOobject::writeBanner(os);
-    os  << "// OpenFOAM Surface format" << nl
+    os  << "// OpenFOAM Surface Format" << nl
         << "// ~~~~~~~~~~~~~~~~~~~~~~~" << nl
         << "// regions:" << nl
         << patchLst.size() << nl << token::BEGIN_LIST << incrIndent << nl;
@@ -110,13 +67,13 @@ void Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
     IOobject::writeDivider(os);
 
     // Note: Write with global point numbering
-    os  << "\n// points:" << nl << points() << nl;
+    os  << "\n// points:" << nl << this->points() << nl;
 
     IOobject::writeDivider(os);
     os  << "\n// faces:"  << nl;
     os  << faceLst.size() << nl << token::BEGIN_LIST << nl;
 
-    label faceIndex = 0;
+    label faceI = 0;
     forAll(patchLst, patchI)
     {
         // Print all faces belonging to this region
@@ -124,9 +81,7 @@ void Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
 
         forAll(patch, patchFaceI)
         {
-            const face& f = faceLst[faceMap[faceIndex++]];
-
-            os  << f << nl;
+            os << faceLst[faceMap[faceI++]] << nl;
         }
     }
     os << token::END_LIST << nl;
@@ -134,7 +89,7 @@ void Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
     IOobject::writeDivider(os);
 
     // Check state of Ostream
-    os.check("meshedSurface::write(Ostream&)");
+    os.check("UnsortedMeshedSurface::write(Ostream&)");
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

@@ -57,9 +57,6 @@ class GTSsurfaceFormat
 :
     public UnsortedMeshedSurface<Face>
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

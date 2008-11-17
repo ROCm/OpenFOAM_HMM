@@ -39,8 +39,6 @@ Foam::fileFormats::OFFsurfaceFormat<Face>::OFFsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -54,8 +52,8 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
-    const bool mustTriangulate = ParentType::isTri();
+    const bool mustTriangulate = this->isTri();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -69,7 +67,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // Read header
-    string hdr = ParentType::getLineNoComment(is);
+    string hdr = this->getLineNoComment(is);
     if (hdr != "OFF")
     {
         FatalErrorIn
@@ -84,7 +82,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     // get dimensions
     label nPoints, nEdges, nElems;
 
-    string line = ParentType::getLineNoComment(is);
+    string line = this->getLineNoComment(is);
     {
         IStringStream lineStream(line);
         lineStream >> nPoints >> nElems >> nEdges;
@@ -95,7 +93,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     forAll(pointLst, pointI)
     {
         scalar x, y, z;
-        line = ParentType::getLineNoComment(is);
+        line = this->getLineNoComment(is);
         {
             IStringStream lineStream(line);
             lineStream >> x >> y >> z;
@@ -109,7 +107,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
     forAll(faceLst, faceI)
     {
-        line = ParentType::getLineNoComment(is);
+        line = this->getLineNoComment(is);
         {
             IStringStream lineStream(line);
 
@@ -150,14 +148,14 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::storedPoints().transfer(pointLst);
-    ParentType::storedFaces().transfer(faceLst);
+    reset
+    (
+        xferMove(pointLst),
+        xferMoveTo<List<Face> >(faceLst)
+    );
 
     // no region information
-    ParentType::storedRegions().setSize(ParentType::size());
-    ParentType::storedRegions() = 0;
-
-    ParentType::setPatches(0);
+    this->onePatch();
     return true;
 }
 

@@ -57,18 +57,7 @@ class STLsurfaceFormat
 :
     public UnsortedMeshedSurface<Face>
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
-    // Private data
-
     // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        STLsurfaceFormat(const STLsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const STLsurfaceFormat<Face>&);
 
         //- Write Face in ASCII
         static inline void writeShell
@@ -102,6 +91,12 @@ class STLsurfaceFormat
         //- Write MeshedSurface
         static void writeBINARY(ostream&, const MeshedSurface<Face>&);
 
+
+        //- Disallow default bitwise copy construct
+        STLsurfaceFormat(const STLsurfaceFormat<Face>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const STLsurfaceFormat<Face>&);
 public:
 
     // Constructors

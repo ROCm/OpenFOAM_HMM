@@ -67,9 +67,6 @@ class NASsurfaceFormat
     public UnsortedMeshedSurface<Face>,
     public NASsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

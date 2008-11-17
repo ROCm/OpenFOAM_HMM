@@ -68,8 +68,6 @@ Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -83,7 +81,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -108,13 +106,13 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 
     while (is.good())
     {
-        string line = ParentType::getLineNoComment(is);
+        string line = this->getLineNoComment(is);
 
         // handle continuations ?
         //          if (line[line.size()-1] == '\\')
         //          {
         //              line.substr(0, line.size()-1);
-        //              line += ParentType::getLineNoComment(is);
+        //              line += this->getLineNoComment(is);
         //          }
 
         IStringStream lineStream(line);
@@ -181,13 +179,13 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         regionLst.append(groupID);
     }
 
-    // transfer to normal list
-    ParentType::storedPoints().transfer(pointLst);
-    ParentType::storedRegions().transfer(regionLst);
-
     // make our triangles directly
-    List<Face>& faceLst = ParentType::storedFaces();
-    faceLst.setSize(ParentType::regions().size());
+    List<Face>& faceLst = this->storedFaces();
+    faceLst.setSize(regionLst.size());
+
+    // transfer to normal list
+    this->storedPoints().transfer(pointLst);
+    this->storedRegions().transfer(regionLst);
 
     label ptI = 0;
     forAll(faceLst, faceI)
@@ -201,8 +199,8 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         faceLst[faceI] = fTri;
     }
 
-    ParentType::setPatches(groupToPatch);
-    ParentType::stitchFaces(SMALL);
+    this->setPatches(groupToPatch);
+    this->stitchFaces(SMALL);
     return true;
 }
 

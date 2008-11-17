@@ -66,9 +66,6 @@ class SMESHsurfaceFormat
     public UnsortedMeshedSurface<Face>,
     public SMESHsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

@@ -43,8 +43,6 @@ Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -57,8 +55,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
-    const bool mustTriangulate = ParentType::isTri();
+    const bool mustTriangulate = this->isTri();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -280,12 +278,12 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::storedPoints().transfer(pointLst);
-    ParentType::storedFaces().transfer(faceLst);
-    ParentType::storedRegions().transfer(regionLst);
+    this->storedPoints().transfer(pointLst);
+    this->storedFaces().transfer(faceLst);
+    this->storedRegions().transfer(regionLst);
 
-    ParentType::setPatches(regionNames);
-    ParentType::stitchFaces(SMALL);
+    this->setPatches(regionNames);
+    this->stitchFaces(SMALL);
     return true;
 }
 
@@ -316,30 +314,26 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
         forAll(p, patchFaceI)
         {
             const label faceI = faceMap[faceIndex++];
-
             include[faceI] = true;
         }
 
-        labelList pMap;
-        labelList fMap;
+        UnsortedMeshedSurface<Face> subm = surf.subsetMesh(include);
 
-        ParentType patch = surf.subsetMesh(include, pMap, fMap);
+        // Now we have isolated surface for this patch alone. Write it.
+        os << "numvert " << subm.nPoints() << endl;
 
-        // Now we have triSurface for this patch alone. Write it.
-        os << "numvert " << patch.nPoints() << endl;
-
-        forAll(patch.localPoints(), ptI)
+        forAll(subm.localPoints(), ptI)
         {
-            const point& pt = patch.localPoints()[ptI];
+            const point& pt = subm.localPoints()[ptI];
 
             os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
         }
 
-        os << "numsurf " << patch.localFaces().size() << endl;
+        os << "numsurf " << subm.localFaces().size() << endl;
 
-        forAll(patch.localFaces(), faceI)
+        forAll(subm.localFaces(), faceI)
         {
-            const Face& f = patch.localFaces()[faceI];
+            const Face& f = subm.localFaces()[faceI];
 
             os  << "SURF 0x20" << nl          // polygon
                 << "mat " << patchI << nl

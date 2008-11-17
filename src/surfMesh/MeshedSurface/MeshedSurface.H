@@ -44,14 +44,9 @@ SourceFiles
 #ifndef MeshedSurface_H
 #define MeshedSurface_H
 
-#include "pointField.H"
-#include "PrimitivePatchExtra.H"
-#include "boolList.H"
+#include "PrimitiveMeshedSurface.H"
 #include "surfGroupList.H"
 #include "surfaceFormatsCore.H"
-#include "xfer.H"
-#include "face.H"
-#include "triFace.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
 
@@ -79,7 +74,7 @@ template<class Face>
 template<class Face>
 class MeshedSurface
 :
-    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>,
+    public PrimitiveMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
     friend class UnsortedMeshedSurface<Face>;
@@ -87,14 +82,7 @@ class MeshedSurface
 private:
 
     //- Private typedefs for convenience
-        typedef PrimitivePatchExtra
-        <
-            Face,
-            ::Foam::List,
-            pointField,
-            point
-        >
-        ParentType;
+        typedef PrimitiveMeshedSurface<Face> ParentType;
 
     // Private Member Data
 
@@ -116,22 +104,6 @@ private:
         //- Read OpenFOAM Surface format
         bool read(Istream&);
 
-protected:
-
-    // Protected member functions
-
-        //- Return non-const access to global points
-        pointField& storedPoints()
-        {
-            return const_cast<pointField&>(ParentType::points());
-        }
-
-        //- Return non-const access to the faces
-        List<Face>& storedFaces()
-        {
-            return static_cast<List<Face> &>(*this);
-        }
-
 public:
 
         //- Runtime type information
@@ -139,14 +111,14 @@ public:
 
     // Static
 
-        //- Only handles triangulated faces
-        inline static bool isTri();
+        //- Can we read this file format?
+        static bool canRead(const fileName&, const bool verbose=false);
 
         //- Can we read this file format?
-        static bool canRead(const word& ext, const bool verbose=false);
+        static bool canReadType(const word& ext, const bool verbose=false);
 
         //- Can we write this file format?
-        static bool canWrite(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& ext, const bool verbose=false);
 
 
     // Constructors
@@ -243,12 +215,6 @@ public:
 
     // Selectors
 
-        //- Select constructed from filename (implicit extension)
-        static autoPtr<MeshedSurface> New
-        (
-            const fileName&
-        );
-
         //- Select constructed from filename (explicit extension)
         static autoPtr<MeshedSurface> New
         (
@@ -256,6 +222,8 @@ public:
             const word& ext
         );
 
+        //- Select constructed from filename (implicit extension)
+        static autoPtr<MeshedSurface> New(const fileName&);
 
     // Destructor
 
@@ -285,34 +253,10 @@ public:
 
     // Access
 
-        //- Return the number of points
-        label nPoints() const
-        {
-            return ParentType::points().size();
-        }
-
-        //- Return the number of faces
-        label nFaces() const
-        {
-            return ParentType::size();
-        }
-
         //- The surface size is the number of faces
         label size() const
         {
             return ParentType::size();
-        }
-
-        //- Return const access to global points
-        const pointField& points() const
-        {
-            return ParentType::points();
-        }
-
-        //- Return const access to the faces
-        const List<Face>& faces() const
-        {
-            return static_cast<const List<Face> &>(*this);
         }
 
         const List<surfGroup>& patches() const
@@ -320,38 +264,41 @@ public:
             return patches_;
         }
 
+        void addPatches(const UList<surfGroup>&);
+
+
     // Edit
 
         //- Clear all storage
         virtual void clear();
 
-        //- Move points
-        virtual void movePoints(const pointField&);
+        //- Remove invalid faces
+        void cleanup(const bool verbose);
 
-        //- Scale points. A non-positive factor is ignored
-        virtual void scalePoints(const scalar&);
-
-        //- Triangulate the surface, return the number of added faces.
-        //  The patch list will be adjusted accordingly.
-        label triangulate();
+        //- Check/fix duplicate/degenerate faces
+        void checkFaces(const bool verbose);
 
         //- Join the faces by removing duplicate points.
         //  Returns true if any points merged
         bool stitchFaces(const scalar tol=SMALL, const bool verbose=false);
 
-        //- Check/fix duplicate/degenerate faces
-        void checkFaces(const bool verbose);
-
-        //- Remove invalid faces
-        void cleanup(const bool verbose);
+        //- Triangulate the surface, return the number of added faces.
+        //  The patch list will be adjusted accordingly.
+        virtual label triangulate();
 
         //- Return new surface.
-        // Returns pointMap, faceMap from subsetMeshMap
+        //  Returns return pointMap, faceMap from subsetMeshMap
         MeshedSurface subsetMesh
         (
             const UList<bool>& include,
             labelList& pointMap,
             labelList& faceMap
+        ) const;
+
+        //- Return new surface.
+        MeshedSurface subsetMesh
+        (
+            const UList<bool>& include
         ) const;
 
         //- Transfer the contents of the argument and annull the argument
@@ -365,7 +312,6 @@ public:
 
         //- Read from file. Chooses reader based on explicit extension
         bool read(const fileName&, const word& ext);
-
 
         //- Read from file. Chooses reader based on detected extension
         virtual bool read(const fileName&);
@@ -385,9 +331,6 @@ public:
         //- Write to database
         void write(const Time&) const;
 
-        //- Write some statistics
-        void writeStats(Ostream&) const;
-
 
     // Member operators
 
@@ -405,13 +348,6 @@ public:
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Specialization for holding triangulated information
-template<>
-inline bool MeshedSurface<triFace>::isTri()
-{
-    return true;
-}
 
 //- Specialization for holding triangulated information
 template<>

@@ -75,23 +75,11 @@ Foam::UnsortedMeshedSurface<Face>::New
     const fileName& fName
 )
 {
-    const word ext = fName.ext();
-
-    if (debug)
+    word ext = fName.ext();
+    if (ext == "gz")
     {
-        Info<< "UnsortedMeshedSurface<Face>::New"
-            "(const fileName&) : "
-            "constructing UnsortedMeshedSurface"
-            << endl;
+        ext = fName.lessExt().ext();
     }
-
-    // TODO:
-    // if (ext == "gz")
-    // {
-    //    fileName unzipName = fName.lessExt();
-    //
-    //    return New(unzipName, unzipName.ext(), ext);
-    // }
 
     return New(fName, ext);
 }

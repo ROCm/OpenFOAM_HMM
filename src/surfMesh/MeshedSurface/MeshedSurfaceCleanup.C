@@ -48,7 +48,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     const bool verbose
 )
 {
-    pointField& pointLst = storedPoints();
+    pointField& pointLst = this->storedPoints();
 
     // Merge points
     labelList pointMap(pointLst.size());
@@ -70,7 +70,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     // Set the coordinates to the merged ones
     pointLst.transfer(newPoints);
 
-    List<Face>& faceLst = storedFaces();
+    List<Face>& faceLst = this->storedFaces();
 
     // ensure we have at some patches, and they cover all the faces
     checkPatches();
@@ -111,7 +111,7 @@ bool Foam::MeshedSurface<Face>::stitchFaces
         }
 
         // adjust patch size
-        p.size() = newFaceI - p.size();
+        p.size() = newFaceI - p.start();
     }
 
     if (newFaceI != faceLst.size())
@@ -139,9 +139,9 @@ template<class Face>
 void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
 {
     // Simple check on indices ok.
-    const label maxPointI = points().size() - 1;
+    const label maxPointI = this->points().size() - 1;
 
-    List<Face>& faceLst = storedFaces();
+    List<Face>& faceLst = this->storedFaces();
 
     // Phase 0: detect badly labelled faces
     forAll(faceLst, faceI)
@@ -166,7 +166,7 @@ void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
 
     // Phase 1: find and skip over invalid faces
     // Phase 2: pack
-    const labelListList& fFaces = ParentType::faceFaces();
+    const labelListList& fFaces = this->faceFaces();
 
     label oldFaceI = 0;
     label newFaceI = 0;
@@ -271,7 +271,7 @@ template<class Face>
 Foam::label Foam::MeshedSurface<Face>::triangulate()
 {
     label nTri = 0;
-    List<Face>& faceLst = storedFaces();
+    List<Face>& faceLst = this->storedFaces();
 
     // determine how many triangles are needed
     forAll(faceLst, faceI)

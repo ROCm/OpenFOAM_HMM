@@ -40,36 +40,20 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
-inline bool Foam::UnsortedMeshedSurface<Face>::isTri()
-{
-    return false;
-}
-
-
-template<class Face>
-bool Foam::UnsortedMeshedSurface<Face>::canRead
+bool Foam::UnsortedMeshedSurface<Face>::canReadType
 (
     const word& ext,
     const bool verbose
 )
 {
-    // perhaps sent an entire name
-    word fExt(ext);
-
-    string::size_type dot = fExt.find_last_of(".");
-    if (dot != string::npos)
-    {
-        fExt = fExt.substr(dot+1);
-    }
-
     // handle 'native' format directly
-    if (isNative(fExt))
+    if (isNative(ext))
     {
         return true;
     }
 
     typename fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(fExt);
+        fileExtensionConstructorTablePtr_->find(ext);
 
     // would be nice to have information about which format this actually is
     if (cstrIter == fileExtensionConstructorTablePtr_->end())
@@ -81,7 +65,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canRead
                 fileExtensionConstructorTablePtr_->toc()
             );
 
-            Info<<"Unknown file extension for reading: " << fExt << nl;
+            Info<<"Unknown file extension for reading: " << ext << nl;
             // compact output:
             Info<<"Valid types: ( " << nativeExt;
             forAll(known, i)
@@ -98,29 +82,20 @@ bool Foam::UnsortedMeshedSurface<Face>::canRead
 
 
 template<class Face>
-bool Foam::UnsortedMeshedSurface<Face>::canWrite
+bool Foam::UnsortedMeshedSurface<Face>::canWriteType
 (
     const word& ext,
     const bool verbose
 )
 {
-    // perhaps sent an entire name
-    word fExt(ext);
-
-    string::size_type dot = ext.find_last_of(".");
-    if (dot != string::npos)
-    {
-        fExt = ext.substr(dot+1);
-    }
-
     // handle 'native' format directly
-    if (isNative(fExt))
+    if (isNative(ext))
     {
         return true;
     }
 
     typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(fExt);
+        writefileExtensionMemberFunctionTablePtr_->find(ext);
 
     if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
     {
@@ -131,7 +106,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canWrite
                 writefileExtensionMemberFunctionTablePtr_->toc()
             );
 
-            Info<<"Unknown file extension for writing: " << fExt << nl;
+            Info<<"Unknown file extension for writing: " << ext << nl;
             // compact output:
             Info<<"Valid types: ( " << nativeExt;
             forAll(known, i)
@@ -145,6 +120,22 @@ bool Foam::UnsortedMeshedSurface<Face>::canWrite
     }
 
     return true;
+}
+
+
+template<class Face>
+bool Foam::UnsortedMeshedSurface<Face>::canRead
+(
+    const fileName& fName,
+    const bool verbose
+)
+{
+    word ext = fName.ext();
+    if (ext == "gz")
+    {
+        ext = fName.lessExt().ext();
+    }
+    return canReadType(ext, verbose);
 }
 
 
@@ -194,8 +185,6 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface()
-:
-    ParentType(List<Face>(), pointField())
 {}
 
 
@@ -208,13 +197,10 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const xfer<surfPatchIdentifierList>& patchLst
 )
 :
-    ParentType(List<Face>(), pointField()),
+    ParentType(pointLst, faceLst),
     regions_(regionIds),
     patches_(patchLst)
-{
-    storedPoints().transfer(pointLst());
-    storedFaces().transfer(faceLst());
-}
+{}
 
 
 template<class Face>
@@ -226,12 +212,9 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const Map<word>& regionNames
 )
 :
-    ParentType(List<Face>(), pointField()),
+    ParentType(pointLst, faceLst),
     regions_(regionIds)
 {
-    storedPoints().transfer(pointLst());
-    storedFaces().transfer(faceLst());
-
     if (&regionNames)
     {
         // set patch names from (id => name) mapping
@@ -254,12 +237,9 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const HashTable<label>& labelToRegion
 )
 :
-    ParentType(List<Face>(), pointField()),
+    ParentType(pointLst, faceLst),
     regions_(regionIds)
 {
-    storedPoints().transfer(pointLst());
-    storedFaces().transfer(faceLst());
-
     // set patch names from (name => id) mapping
     setPatches(labelToRegion);
 }
@@ -272,126 +252,50 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const xfer<List<Face> >& faceLst
 )
 :
-    ParentType(List<Face>(), pointField()),
-    regions_(faceLst().size(), 0),     // single default patch
-    patches_()
+    ParentType(pointLst, faceLst)
 {
-    storedPoints().transfer(pointLst());
-    storedFaces().transfer(faceLst());
-
-    setPatches(0);
+    onePatch();
 }
 
 
-#if 0
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
     const polyBoundaryMesh& bMesh,
     const bool useGlobalPoints
 )
-:
-    ParentType(List<Face>(), pointField())
 {
-    const polyMesh& mesh = bMesh.mesh();
-    const polyPatchList& bPatches = bMesh;
-    const label nIntFaces = mesh.nInternalFaces();
-
-    List<PatchRegionType> newPatches(bPatches.size());
-
-    // Get patch for all of outside
-    primitivePatch allBoundary
-    (
-        SubList<Face>
-        (
-            mesh.faces(),
-            mesh.nFaces() - nIntFaces,
-            nIntFaces
-        ),
-        mesh.points()
-    );
-
-    List<Face>  newFaces(allBoundary.size());
-    List<label> newRegions(allBoundary.size());
-
-    if (useGlobalPoints)
-    {
-        // copy in the global points
-        storedPoints() = mesh.points();
-    }
-    else
-    {
-        // copy in the local points
-        storedPoints() = allBoundary.localPoints();
-    }
-
-    // global or local face addressing
-    const List<Face>& bfaces =
-    (
-        useGlobalPoints
-      ? allBoundary
-      : allBoundary.localFaces()
-    );
-
-    label faceIndex = 0;
-    forAll(bPatches, patchI)
-    {
-        const polyPatch& p = bPatches[patchI];
-
-        newPatches[patchI] = PatchRegionType
-        (
-            bPatches[patchI].name(),
-            patchI
-        );
-
-        forAll(p, patchFaceI)
-        {
-            newFaces[faceIndex] = bfaces[faceIndex];
-            newRegions[faceIndex] = patchI;
-            faceIndex++;
-        }
-    }
-
-    storedFaces().transfer(newFaces);
-    regions_.transfer(newRegions);
-    patches_.transfer(newPatches);
+    // creating via MeshedSurface is the easiest
+    MeshedSurface<Face> surf(bMesh, useGlobalPoints);
+    transfer(surf);
 }
-#endif
 
 
-#if 0
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
     const MeshedSurface<Face>& surf
 )
 :
-    ParentType(List<Face>(), surf.points())
+    ParentType(xferCopy(surf.points()), xferCopy(surf.faces()))
 {
-    const List<Face>&   origFaces = surf.faces();
     const surfGroupList& patchLst = surf.patches();
 
-    List<Face>   newFaces(origFaces.size());
-    List<label>  newRegions(origFaces.size());
-    List<PatchRegionType> newPatches(patchLst.size());
+    regions_.setSize(size());
+    patches_.setSize(patchLst.size());
 
-    label faceIndex = 0;
+    label faceI = 0;
     forAll(patchLst, patchI)
     {
-        newPatches[patchI] = patchLst[patchI];
+        patches_[patchI] = patchLst[patchI];
+
         forAll(patchLst[patchI], patchFaceI)
         {
-            newFaces[faceIndex] = origFaces[faceIndex];
-            newRegions[faceIndex] = patchI;
-            faceIndex++;
+            regions_[faceI++] = patchI;
         }
     }
-
-    storedFaces().transfer(newFaces);
-    regions_.transfer(newRegions);
-    patches_.transfer(newPatches);
 }
-#endif
+
 
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
@@ -399,32 +303,20 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const fileName& fName,
     const word& ext
 )
-:
-    ParentType(List<Face>(), pointField())
 {
     read(fName, ext);
 }
 
 
 template<class Face>
-Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
-(
-    const fileName& fName
-)
-:
-    ParentType(List<Face>(), pointField())
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(const fileName& fName)
 {
-    read(fName, fName.ext());
+    read(fName);
 }
 
 
 template<class Face>
-Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
-(
-    Istream& is
-)
-:
-    ParentType(List<Face>(), pointField())
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(Istream& is)
 {
     read(is);
 }
@@ -432,8 +324,6 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(const Time& d)
-:
-    ParentType(List<Face>(), pointField())
 {
     read(IFstream(findMeshName(d))());
 }
@@ -445,7 +335,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const UnsortedMeshedSurface<Face>& surf
 )
 :
-    ParentType(surf.faces(), surf.points()),
+    ParentType(xferCopy(surf.points()), xferCopy(surf.faces())),
     regions_(surf.regions_),
     patches_(surf.patches_)
 {}
@@ -456,28 +346,19 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
     const xfer<UnsortedMeshedSurface<Face> >& surf
 )
-:
-    ParentType(List<Face>(), pointField()),
-    regions_(),
-    patches_()
 {
     transfer(surf());
 }
 
-#if 0
+
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
     const xfer<MeshedSurface<Face> >& surf
 )
-:
-    ParentType(List<Face>(), pointField()),
-    regions_(),
-    patches_()
 {
     transfer(surf());
 }
-#endif
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -488,6 +369,18 @@ Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Face>
+void Foam::UnsortedMeshedSurface<Face>::onePatch()
+{
+    regions_.setSize(size());
+    regions_ = 0;
+
+    // set single default patch
+    patches_.setSize(1);
+    patches_[0] = PatchRegionType("patch0", 0);
+}
+
 
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setPatches(const label maxPatch)
@@ -604,17 +497,15 @@ template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setSize(const label s)
 {
     ParentType::setSize(s);
-    regions_.setSize(s);
+    // if regions extend: set with last patchId
+    regions_.setSize(s, patches_.size() - 1);
 }
 
 
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::clear()
 {
-    ParentType::clearOut();
-
-    storedPoints().clear();
-    storedFaces().clear();
+    ParentType::clear();
     regions_.clear();
     patches_.clear();
 }
@@ -638,37 +529,6 @@ Foam::surfGroupList Foam::UnsortedMeshedSurface<Face>::sortedRegions
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::movePoints(const pointField& newPoints)
-{
-    // Remove all geometry dependent data
-    ParentType::clearTopology();
-
-    // Adapt for new point position
-    ParentType::movePoints(newPoints);
-
-    // Copy new points
-    storedPoints() = newPoints;
-}
-
-
-template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
-{
-    // avoid bad scaling
-    if (scaleFactor > 0 && scaleFactor != 1.0)
-    {
-        // Remove all geometry dependent data
-        ParentType::clearTopology();
-
-        // Adapt for new point position
-        ParentType::movePoints(pointField());
-
-        storedPoints() *= scaleFactor;
-    }
-}
-
-
-template<class Face>
 Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
 (
     const UList<bool>& include,
@@ -676,15 +536,15 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
     labelList& faceMap
 ) const
 {
-    const pointField& locPoints = ParentType::localPoints();
-    const List<Face>& locFaces  = ParentType::localFaces();
+    const pointField&  locPoints = this->localPoints();
+    const List<Face>&  locFaces  = this->localFaces();
 
     // Fill pointMap, faceMap
-    ParentType::subsetMap(include, pointMap, faceMap);
+    this->subsetMap(include, pointMap, faceMap);
 
     // Create compact coordinate list and forward mapping array
     pointField newPoints(pointMap.size());
-    labelList oldToNew(locPoints.size());
+    labelList  oldToNew(locPoints.size());
     forAll(pointMap, pointI)
     {
         newPoints[pointI] = locPoints[pointMap[pointI]];
@@ -692,12 +552,13 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
     }
 
     // Renumber face node labels and compact
-    List<Face> newFaces(faceMap.size());
+    List<Face>  newFaces(faceMap.size());
+    List<label> newRegions(faceMap.size());
 
     forAll(faceMap, faceI)
     {
-        // Get old vertex labels
-        const Face& oldFace = locFaces[faceMap[faceI]];
+        const label origFaceI = faceMap[faceI];
+        const Face& oldFace = locFaces[origFaceI];
 
         newFaces[faceI] = Face(oldFace);
 
@@ -707,17 +568,47 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
         {
             f[fp] = oldToNew[oldFace[fp]];
         }
+
+        newRegions[faceI] = regions_[origFaceI];
     }
+    oldToNew.clear();
 
     // construct a sub-surface
-    UnsortedMeshedSurface<Face> subSurf;
+    return UnsortedMeshedSurface
     (
         xferMove(newPoints),
         xferMove(newFaces),
+        xferMove(newRegions),
         xferCopy(patches_)
     );
+}
 
-    return subSurf;
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
+(
+    const UList<bool>& include
+) const
+{
+    labelList pointMap, faceMap;
+    return subsetMesh(include, pointMap, faceMap);
+}
+
+
+template<class Face>
+void Foam::UnsortedMeshedSurface<Face>::reset
+(
+    const xfer<pointField>& pointLst,
+    const xfer<List<Face> >& faceLst,
+    const xfer<List<label> >& regionIds
+)
+{
+    ParentType::reset(pointLst, faceLst);
+
+    if (&regionIds)
+    {
+        regions_.transfer(regionIds());
+    }
 }
 
 
@@ -727,30 +618,28 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
     UnsortedMeshedSurface<Face>& surf
 )
 {
-    clear();
-
-    storedPoints().transfer(surf.storedPoints());
-    storedFaces().transfer(surf.storedFaces());
-    regions_.transfer(surf.regions_);
+    reset
+    (
+        xferMove(surf.storedPoints()),
+        xferMove(surf.storedFaces()),
+        xferMove(surf.regions_)
+    );
     patches_.transfer(surf.patches_);
 
     surf.clear();
 }
 
 
-#if 0
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::transfer
 (
     MeshedSurface<Face>& surf
 )
 {
-    surfGroupList& patchLst = surf.patches();
+    surfGroupList& patchLst = surf.patches_;
 
-    clear();
+    reset(xferMove(surf.storedPoints()), xferMove(surf.storedFaces()));
 
-    storedPoints().transfer(surf.storedPoints());
-    storedFaces().transfer(surf.storedFaces());
     regions_.setSize(size());
     patches_.setSize(patchLst.size());
 
@@ -769,29 +658,21 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
     patchLst.clear();
     surf.clear();
 }
-#endif
 
 
-// Read from file in given format
+// Read from file, determine format from extension
 template<class Face>
-bool Foam::UnsortedMeshedSurface<Face>::read
-(
-    const fileName& fName
-)
+bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& fName)
 {
-    clear();
-    const word ext = fName.ext();
-
-    // handle 'native' format directly
-    if (isNative(ext))
+    word ext = fName.ext();
+    if (ext == "gz")
     {
-        return read(IFstream(fName)());
+        fileName unzipName = fName.lessExt();
+        return read(unzipName, unzipName.ext());
     }
     else
     {
-        // use selector mechanism
-        transfer(New(fName, ext)());
-        return true;
+        return read(fName, ext);
     }
 }
 
@@ -804,8 +685,6 @@ bool Foam::UnsortedMeshedSurface<Face>::read
     const word& ext
 )
 {
-    clear();
-
     // handle 'native' format directly
     if (isNative(ext))
     {
@@ -827,16 +706,6 @@ void Foam::UnsortedMeshedSurface<Face>::write(const Time& d) const
 }
 
 
-template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::writeStats(Ostream& os) const
-{
-//    os  << "Faces        : " << size() << endl
-//        << "Edges        : " << nEdges() << endl
-//        << "Vertices     : " << nPoints() << endl
-//        << "Bounding Box : " << boundBox(localPoints(), false) << endl;
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Face>
@@ -846,8 +715,9 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
 )
 {
     clear();
-    storedPoints() = surf.points();
-    storedFaces()  = surf.faces();
+
+    this->storedPoints() = surf.points();
+    this->storedFaces()  = surf.faces();
     regions_ = surf.regions_;
     patches_ = surf.patches_;
 }

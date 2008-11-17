@@ -53,8 +53,6 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::writeHeaderPolygons
 
 template<class Face>
 Foam::fileFormats::VTKsurfaceFormat<Face>::VTKsurfaceFormat()
-:
-    ParentType()
 {}
 
 

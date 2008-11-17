@@ -61,16 +61,7 @@ class OBJsurfaceFormat
     public UnsortedMeshedSurface<Face>,
     public OBJsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        OBJsurfaceFormat(const OBJsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const OBJsurfaceFormat<Face>&);
 
         static void writeHead
         (
@@ -79,6 +70,12 @@ class OBJsurfaceFormat
             const List<Face>&,
             const List<surfGroup>&
         );
+
+        //- Disallow default bitwise copy construct
+        OBJsurfaceFormat(const OBJsurfaceFormat<Face>&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const OBJsurfaceFormat<Face>&);
 
 public:
 

@@ -71,8 +71,6 @@ Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -85,8 +83,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
-    const bool mustTriangulate = ParentType::isTri();
+    const bool mustTriangulate = this->isTri();
+    this->clear();
 
     fileName baseName = fName.lessExt();
     autoPtr<IFstream> isPtr;
@@ -126,7 +124,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::storedPoints().transfer(pointLst);
+    this->storedPoints().transfer(pointLst);
 
     // Build inverse mapping (index to point)
     pointId.shrink();
@@ -218,9 +216,9 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                     SubList<label>(starLabels, nLabels)
                 );
 
-                faceList triFaces(f.nTriangles(ParentType::points()));
+                faceList triFaces(f.nTriangles(this->points()));
                 label nTri = 0;
-                f.triangles(ParentType::points(), nTri, triFaces);
+                f.triangles(this->points(), nTri, triFaces);
 
                 forAll(triFaces, faceI)
                 {
@@ -260,10 +258,10 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    ParentType::storedFaces().transfer(faceLst);
-    ParentType::storedRegions().transfer(regionLst);
+    this->storedFaces().transfer(faceLst);
+    this->storedRegions().transfer(regionLst);
 
-    ParentType::setPatches(regionNames);
+    this->setPatches(regionNames);
 
     return true;
 }
@@ -303,7 +301,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     (
         OFstream(baseName + ".inp")(),
         surf.points(),
-        surf.nFaces(),
+        surf.size(),
         patchLst
     );
 }
@@ -342,7 +340,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     (
         OFstream(baseName + ".inp")(),
         surf.points(),
-        surf.nFaces(),
+        surf.size(),
         patchLst
     );
 }

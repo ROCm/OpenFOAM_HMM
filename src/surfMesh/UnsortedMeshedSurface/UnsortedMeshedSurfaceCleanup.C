@@ -48,7 +48,7 @@ bool Foam::UnsortedMeshedSurface<Face>::stitchFaces
     const bool verbose
 )
 {
-    pointField& pointLst = storedPoints();
+    pointField& pointLst = this->storedPoints();
 
     // Merge points
     labelList  pointMap(pointLst.size());
@@ -70,7 +70,7 @@ bool Foam::UnsortedMeshedSurface<Face>::stitchFaces
     // Set the coordinates to the merged ones
     pointLst.transfer(newPoints);
 
-    List<Face>& faceLst = storedFaces();
+    List<Face>& faceLst = this->storedFaces();
 
     // Reset the point labels to the unique points array
     label newFaceI = 0;
@@ -123,9 +123,9 @@ template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::checkFaces(const bool verbose)
 {
     // Simple check on indices ok.
-    const label maxPointI = points().size() - 1;
+    const label maxPointI = this->points().size() - 1;
 
-    List<Face>& faceLst = storedFaces();
+    List<Face>& faceLst = this->storedFaces();
 
     // Phase 0: detect badly labelled faces
     forAll(faceLst, faceI)
@@ -242,7 +242,7 @@ template<class Face>
 Foam::label Foam::UnsortedMeshedSurface<Face>::triangulate()
 {
     label nTri = 0;
-    List<Face>& faceLst = storedFaces();
+    List<Face>& faceLst = this->storedFaces();
 
     // determine how many triangles are needed
     forAll(faceLst, faceI)

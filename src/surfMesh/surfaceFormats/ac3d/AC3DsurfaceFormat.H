@@ -67,9 +67,6 @@ class AC3DsurfaceFormat
     public UnsortedMeshedSurface<Face>,
     public AC3DsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

@@ -37,8 +37,6 @@ Foam::fileFormats::FTRsurfaceFormat<Face>::FTRsurfaceFormat
 (
     const fileName& fName
 )
-:
-    ParentType()
 {
     read(fName);
 }
@@ -52,7 +50,7 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     const fileName& fName
 )
 {
-    ParentType::clear();
+    this->clear();
 
     IFstream is(fName);
     if (!is.good())
@@ -66,10 +64,9 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     }
 
     List<ftrPatch> readPatches(is);
-    List<point> pointLst(is);
 
-    // transfer to normal list
-    ParentType::storedPoints().transfer(pointLst);
+    // read points directly
+    is >> this->storedPoints();
 
     // read faces with keys
     List<Keyed<triFace> > readFaces(is);
@@ -85,8 +82,8 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
         regionLst[faceI] = readFaces[faceI].key();
     }
 
-    ParentType::storedFaces().transfer(faceLst);
-    ParentType::storedRegions().transfer(regionLst);
+    this->storedFaces().transfer(faceLst);
+    this->storedRegions().transfer(regionLst);
 
     Map<word> regionNames;
     forAll(readPatches, patchI)
@@ -94,7 +91,7 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
         regionNames.insert(patchI, readPatches[patchI].name());
     }
 
-    ParentType::setPatches(regionNames, readPatches.size() - 1);
+    this->setPatches(regionNames, readPatches.size() - 1);
     return true;
 }
 

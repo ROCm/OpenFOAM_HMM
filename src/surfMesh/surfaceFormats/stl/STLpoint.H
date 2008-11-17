@@ -83,6 +83,7 @@ public:
 
     // Member Operators
 
+        //- Return point
         inline operator point() const
         {
             return point(x(), y(), z());

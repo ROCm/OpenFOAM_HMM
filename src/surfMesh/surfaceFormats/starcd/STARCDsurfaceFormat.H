@@ -65,15 +65,12 @@ class STARCDsurfaceFormat
     public UnsortedMeshedSurface<Face>,
     public STARCDsurfaceFormatCore
 {
-    //- Private typedefs for convenience
-    typedef UnsortedMeshedSurface<Face> ParentType;
-
     // Private Data
-    //- STAR-CD identifier for shell shapes (2d elements)
-    static const int starcdShellShape_ = 3;
+        //- STAR-CD identifier for shell shapes (2d elements)
+        static const int starcdShellShape_ = 3;
 
-    //- STAR-CD identifier for shell type (shells vs. baffles)
-    static const int starcdShellType_  = 4;
+        //- STAR-CD identifier for shell type (shells vs. baffles)
+        static const int starcdShellType_  = 4;
 
     // Private Member Functions
 
