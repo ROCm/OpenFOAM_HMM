@@ -23,25 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::potential
+    Foam::pairPotentials::electrostaticPotential
 
 Description
 
+
 SourceFiles
-    potentialI.H
-    potential.C
+    electrostaticPotential.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef potential_H
-#define potential_H
+#ifndef electrostaticPotential_H
+#define electrostaticPotential_H
 
-#include "polyMesh.H"
-#include "IOdictionary.H"
-#include "Time.H"
-#include "pairPotentialList.H"
-#include "electrostaticPotential.H"
-#include "tetherPotentialList.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,83 +44,41 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class potential Declaration
+                           Class electrostaticPotential Declaration
 \*---------------------------------------------------------------------------*/
 
-class potential
+class electrostaticPotential
 {
     // Private data
 
-        const polyMesh& mesh_;
-
-        List<word> idList_;
-
-        List<word> allSiteIdNames_;
-
-        scalar potentialEnergyLimit_;
-
-        labelList removalOrder_;
-
-        pairPotentialList pairPotentials_;
-
-        tetherPotentialList tetherPotentials_;
-
-        vector gravity_;
-
-    // Private Member Functions
-
-        void readPotentialDict();
-
-        //- Disallow default bitwise copy construct
-        potential(const potential&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const potential&);
+    scalar prefactor;
 
 
 public:
 
     // Constructors
 
-        //- Construct from mesh reference
-        potential(const polyMesh& mesh);
+        //- Construct and set prefactor
+        electrostaticPotential();
+
 
     // Destructor
 
-        ~potential();
+        ~electrostaticPotential()
+        {}
 
 
     // Member Functions
 
-        // Access
+        scalar energy(const scalar rSqr) const;
 
-            inline label nIds() const;
-
-            inline const List<word>& idList() const;
-
-            inline const List<word>& allSiteIdNames() const;
-
-            inline scalar potentialEnergyLimit() const;;
-
-            inline label nPairPotentials() const;
-
-            inline const labelList& removalOrder() const;
-
-            inline const pairPotentialList& pairPotentials() const;
-
-            inline const tetherPotentialList& tetherPotentials() const;
-
-            inline const vector& gravity() const;
+        scalar force(const scalar rSqr) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "potentialI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

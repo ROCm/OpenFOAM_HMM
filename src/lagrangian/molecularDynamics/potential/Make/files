@@ -39,4 +39,8 @@ $(tetherPotential)/derived/harmonicSpring/harmonicSpring.C
 $(tetherPotential)/derived/restrainedHarmonicSpring/restrainedHarmonicSpring.C
 $(tetherPotential)/derived/pitchForkRing/pitchForkRing.C
 
+electrostaticPotential = electrostaticPotential
+
+$(electrostaticPotential)/electrostaticPotential.C
+
 LIB = $(FOAM_LIBBIN)/libpotential
