@@ -49,7 +49,7 @@ PrimitivePatchExtra
     const Field<PointType>& points
 )
 :
-    PrimitivePatch<Face, FaceList, PointField, PointType>(faces, points),
+    ParentType(faces, points),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
 {}
@@ -69,7 +69,7 @@ PrimitivePatchExtra
     const PrimitivePatchExtra<Face, FaceList, PointField, PointType>& pp
 )
 :
-    PrimitivePatch<Face, FaceList, PointField, PointType>(pp),
+    ParentType(pp),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
 {}
@@ -102,7 +102,7 @@ template
 void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 clearOut()
 {
-    PrimitivePatch<Face, FaceList, PointField, PointType>::clearOut();
+    ParentType::clearOut();
     clearTopology();
 }
 
@@ -117,7 +117,7 @@ template
 void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 clearTopology()
 {
-    PrimitivePatch<Face, FaceList, PointField, PointType>::clearTopology();
+    ParentType::clearTopology();
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
     deleteDemandDrivenData(edgeOwnerPtr_);
 }

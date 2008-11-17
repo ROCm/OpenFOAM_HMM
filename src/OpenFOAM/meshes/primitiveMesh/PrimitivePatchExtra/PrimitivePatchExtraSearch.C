@@ -48,8 +48,8 @@ void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::markZone
     // List of faces whose faceZone has been set.
     labelList changedFaces(1, faceI);
 
-    const labelListList& faceEs = TemplateType::faceEdges();
-    const labelListList& eFaces = TemplateType::edgeFaces();
+    const labelListList& faceEs = this->faceEdges();
+    const labelListList& eFaces = this->edgeFaces();
 
     while (true)
     {
@@ -124,8 +124,8 @@ markZones
     labelList& faceZone
 ) const
 {
-    const label numEdges = TemplateType::nEdges();
-    const label numFaces = TemplateType::size();
+    const label numEdges = this->nEdges();
+    const label numFaces = this->size();
 
     if (borderEdge.size() != numEdges)
     {
@@ -190,8 +190,8 @@ subsetMap
     labelList& faceMap
 ) const
 {
-    const List<Face>& locFaces = TemplateType::localFaces();
-    const label numPoints = TemplateType::nPoints();
+    const List<Face>& locFaces = this->localFaces();
+    const label numPoints = this->nPoints();
 
     label faceI = 0;
     label pointI = 0;

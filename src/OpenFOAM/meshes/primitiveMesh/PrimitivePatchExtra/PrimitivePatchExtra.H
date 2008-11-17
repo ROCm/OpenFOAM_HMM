@@ -70,7 +70,7 @@ public:
 private:
 
     // Private typedefs
-    typedef PrimitivePatch<Face, FaceList, PointField, PointType> TemplateType;
+    typedef PrimitivePatch<Face, FaceList, PointField, PointType> ParentType;
 
     // Private data
 

@@ -49,15 +49,19 @@ calcSortedEdgeFaces() const
 {
     if (sortedEdgeFacesPtr_)
     {
-        FatalErrorIn("PrimitivePatchExtra<Face, FaceList, PointField>::calcSortedEdgeFaces()")
+        FatalErrorIn
+        (
+            "PrimitivePatchExtra<Face, FaceList, PointField>::"
+            "calcSortedEdgeFaces()"
+        )
             << "sortedEdgeFacesPtr_ already set"
             << abort(FatalError);
     }
 
-    const labelListList& eFaces = TemplateType::edgeFaces();
-    const edgeList& edgeLst = TemplateType::edges();
-    const pointField& locPointLst = TemplateType::localPoints();
-    const List<Face>& locFaceLst  = TemplateType::localFaces();
+    const labelListList& eFaces = this->edgeFaces();
+    const edgeList& edgeLst = this->edges();
+    const Field<PointType>& locPointLst = this->localPoints();
+    const List<Face>& locFaceLst  = this->localFaces();
 
     // create the lists for the various results. (resized on completion)
     sortedEdgeFacesPtr_ = new labelListList(eFaces.size());
@@ -146,21 +150,22 @@ calcEdgeOwner() const
 {
     if (edgeOwnerPtr_)
     {
-        FatalErrorIn("PrimitivePatchExtra<Face, FaceList, PointField>::calcEdgeOwner()")
+        FatalErrorIn
+        (
+            "PrimitivePatchExtra<Face, FaceList, PointField>::"
+            "calcEdgeOwner()"
+        )
             << "edgeOwnerPtr_ already set"
             << abort(FatalError);
     }
 
     // create the owner list
-    edgeOwnerPtr_ = new labelList
-    (
-        TemplateType::nEdges()
-    );
+    edgeOwnerPtr_ = new labelList(this->nEdges());
     labelList& edgeOwner = *edgeOwnerPtr_;
 
-    const edgeList& edgeLst = TemplateType::edges();
-    const labelListList& eFaces = TemplateType::edgeFaces();
-    const List<Face>& locFaceLst = TemplateType::localFaces();
+    const edgeList& edgeLst = this->edges();
+    const labelListList& eFaces = this->edgeFaces();
+    const List<Face>& locFaceLst = this->localFaces();
 
 
     forAll(edgeLst, edgeI)
@@ -192,7 +197,11 @@ calcEdgeOwner() const
 
             if (edgeOwner[edgeI] == -1)
             {
-                FatalErrorIn("PrimitivePatchExtra<Face, FaceList, PointField>::calcEdgeOwner()")
+                FatalErrorIn
+                (
+                    "PrimitivePatchExtra<Face, FaceList, PointField>::"
+                    "calcEdgeOwner()"
+                )
                     << "Edge " << edgeI << " vertices:" << e
                     << " is used by faces " << myFaces
                     << " vertices:"

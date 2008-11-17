@@ -44,8 +44,8 @@ checkEdges
     const bool verbose
 ) const
 {
-    const labelListList& eFaces = TemplateType::edgeFaces();
-    const edgeList& edgeLst = TemplateType::edges();
+    const labelListList& eFaces = this->edgeFaces();
+    const edgeList& edgeLst = this->edges();
 
     forAll(eFaces, edgeI)
     {
@@ -55,7 +55,10 @@ checkEdges
         // interior edges have two faces
         if (myFaces.size() == 0)
         {
-            FatalErrorIn("PrimitivePatchExtra::checkEdges(bool verbose)")
+            FatalErrorIn
+            (
+                "PrimitivePatchExtra::checkEdges(bool verbose)"
+            )
                 << "Edge " << edgeI << " with vertices " << edgeLst[edgeI]
                 << " has no edgeFaces"
                 << exit(FatalError);
@@ -65,7 +68,8 @@ checkEdges
             WarningIn
             (
                 "PrimitivePatchExtra::checkEdges(bool verbose)"
-            )   << "Edge " << edgeI << " with vertices " << edgeLst[edgeI]
+            )
+                << "Edge " << edgeI << " with vertices " << edgeLst[edgeI]
                 << " has more than 2 faces connected to it : " << myFaces
                 << endl;
         }
@@ -89,11 +93,11 @@ checkOrientation
 ) const
 {
     const FaceList<Face>& faceLst = *this;
-    const edgeList& edgeLst = TemplateType::edges();
-    const labelListList& faceEs = TemplateType::faceEdges();
-    const label numEdges = TemplateType::nEdges();
-    const pointField& pointLst = TemplateType::points();
-    const vectorField& normLst = TemplateType::faceNormals();
+    const edgeList& edgeLst = this->edges();
+    const labelListList& faceEs = this->faceEdges();
+    const label numEdges = this->nEdges();
+    const Field<PointType>& pointLst = this->points();
+    const vectorField& normLst = this->faceNormals();
 
     // Check edge normals, face normals, point normals.
     forAll(faceEs, faceI)
@@ -102,7 +106,10 @@ checkOrientation
 
         if (edgeLabels.size() < 3)
         {
-            FatalErrorIn("PrimitivePatchExtra::checkOrientation(bool)")
+            FatalErrorIn
+            (
+                "PrimitivePatchExtra::checkOrientation(bool)"
+            )
                 << "face " << faceLst[faceI]
                 << " has fewer than 3 edges. Edges:" << edgeLabels
                 << exit(FatalError);
@@ -116,9 +123,10 @@ checkOrientation
                 WarningIn
                 (
                     "PrimitivePatchExtra::checkOrientation(bool)"
-                )   << "edge number " << edgeLabels[i] << " on face " << faceI
+                )
+                    << "edge number " << edgeLabels[i] << " on face " << faceI
                     << " out-of-range\n"
-                    << "This usually means that the input surface has "
+                    << "This usually means the input surface has "
                     << "edges with more than 2 faces connected.\n"
                     << endl;
                 valid = false;
@@ -141,20 +149,23 @@ checkOrientation
         const vector pointNormal((p1 - p0) ^ (p2 - p0));
         if ((pointNormal & normLst[faceI]) < 0)
         {
-            FatalErrorIn("PrimitivePatchExtra::checkOrientation(bool)")
-                << "Normal calculated from points not consistent with"
-                " faceNormal" << endl
-                << "face: " << f << endl
-                << "points: " << p0 << ' ' << p1 << ' ' << p2 << endl
-                << "pointNormal:" << pointNormal << endl
+            FatalErrorIn
+            (
+                "PrimitivePatchExtra::checkOrientation(bool)"
+            )
+                << "Normal calculated from points not consistent with "
+                << "faceNormal" << nl
+                << "face: " << f << nl
+                << "points: " << p0 << ' ' << p1 << ' ' << p2 << nl
+                << "pointNormal:" << pointNormal << nl
                 << "faceNormal:" << normLst[faceI]
                 << exit(FatalError);
         }
     }
 
 
-    const labelListList& eFaces = TemplateType::edgeFaces();
-    const pointField& locPointsLst = TemplateType::localPoints();
+    const labelListList& eFaces    = this->edgeFaces();
+    const pointField& locPointsLst = this->localPoints();
 
     // Storage for holding status of edge.
     // True if normal flips across this edge
@@ -182,7 +193,10 @@ checkOrientation
                 borderEdge[edgeI] = true;
                 if (verbose)
                 {
-                    WarningIn("PrimitivePatchExtra::checkOrientation(bool)")
+                    WarningIn
+                    (
+                        "PrimitivePatchExtra::checkOrientation(bool)"
+                    )
                         << "face orientation incorrect." << nl
                         << "edge[" << edgeI << "] " << e
                         << " between faces " << neighbours << ":" << nl
@@ -195,10 +209,13 @@ checkOrientation
         {
             if (verbose)
             {
-                WarningIn("PrimitivePatchExtra::checkOrientation(bool)")
-                    << "Wrong number of edge neighbours." << endl
+                WarningIn
+                (
+                    "PrimitivePatchExtra::checkOrientation(bool)"
+                )
+                    << "Wrong number of edge neighbours." << nl
                     << "edge[" << edgeI << "] " << e
-                    << "with points:" << locPointsLst[e.start()]
+                    << " with points:" << locPointsLst[e.start()]
                     << ' ' << locPointsLst[e.end()]
                     << " has neighbours:" << neighbours << endl;
             }
