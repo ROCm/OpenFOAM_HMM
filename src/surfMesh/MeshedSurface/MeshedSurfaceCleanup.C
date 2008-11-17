@@ -48,284 +48,34 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     const bool verbose
 )
 {
-    pointField& pointLst = this->storedPoints();
+    List<label> faceMap;
+    bool hasMerged = ParentType::stitchFaces(faceMap, tol, verbose);
 
-    // Merge points
-    labelList pointMap(pointLst.size());
-    pointField newPoints(pointLst.size());
-
-    bool hasMerged = mergePoints(pointLst, tol, verbose, pointMap, newPoints);
-
-    if (!hasMerged)
-    {
-        return false;
-    }
-
-    if (verbose)
-    {
-        Info<< "MeshedSurface::stitchFaces : Renumbering all faces"
-            << endl;
-    }
-
-    // Set the coordinates to the merged ones
-    pointLst.transfer(newPoints);
-
-    List<Face>& faceLst = this->storedFaces();
-
-    // ensure we have at some patches, and they cover all the faces
-    checkPatches();
-
-    // Reset the point labels to the unique points array
-    label oldFaceI = 0;
-    label newFaceI = 0;
-    forAll(patches_, patchI)
-    {
-        surfGroup& p = patches_[patchI];
-
-        // adjust patch start
-        p.start() = newFaceI;
-
-        label patchEnd = oldFaceI + p.size();
-        for (; oldFaceI < patchEnd; ++oldFaceI)
-        {
-            Face& f = faceLst[oldFaceI];
-            forAll(f, fp)
-            {
-                f[fp] = pointMap[f[fp]];
-            }
-
-            if (f.collapse() >= 3)
-            {
-                if (newFaceI != oldFaceI)
-                {
-                    faceLst[newFaceI] = f;
-                }
-                newFaceI++;
-            }
-            else if (verbose)
-            {
-                Pout<< "MeshedSurface::stitchFaces : "
-                    << "Removing collapsed face " << oldFaceI << endl
-                    << "    vertices   :" << f << endl;
-            }
-        }
-
-        // adjust patch size
-        p.size() = newFaceI - p.start();
-    }
-
-    if (newFaceI != faceLst.size())
-    {
-        if (verbose)
-        {
-            Pout<< "MeshedSurface::stitchFaces : "
-                << "Removed " << faceLst.size() - newFaceI
-                << " faces" << endl;
-        }
-        faceLst.setSize(newFaceI);
-    }
-
-
-    // Merging points might have changed geometric factors
-    ParentType::clearOut();
-
-    return true;
+    remapRegions(faceMap);
+    return hasMerged;
 }
 
 
 
 // Remove badly degenerate faces and double faces.
 template<class Face>
-void Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
+bool Foam::MeshedSurface<Face>::checkFaces(const bool verbose)
 {
-    // Simple check on indices ok.
-    const label maxPointI = this->points().size() - 1;
+    List<label> faceMap;
+    bool changed = ParentType::checkFaces(faceMap, verbose);
 
-    List<Face>& faceLst = this->storedFaces();
-
-    // Phase 0: detect badly labelled faces
-    forAll(faceLst, faceI)
-    {
-        const Face& f = faceLst[faceI];
-
-        forAll(f, fp)
-        {
-            if (f[fp] < 0 || f[fp] > maxPointI)
-            {
-                FatalErrorIn("MeshedSurface::checkFaces(bool)")
-                    << "face " << f
-                    << " uses point indices outside point range 0.."
-                    << maxPointI
-                    << exit(FatalError);
-            }
-        }
-    }
-
-    // ensure we have patches, and they cover all the faces
-    checkPatches();
-
-    // Phase 1: find and skip over invalid faces
-    // Phase 2: pack
-    const labelListList& fFaces = this->faceFaces();
-
-    label oldFaceI = 0;
-    label newFaceI = 0;
-    forAll(patches_, patchI)
-    {
-        surfGroup& p = patches_[patchI];
-
-        // correct the patch start
-        p.start() = newFaceI;
-
-        label patchEnd = oldFaceI + p.size();
-        for (; oldFaceI < patchEnd; ++oldFaceI)
-        {
-            Face& f = faceLst[oldFaceI];
-
-            // 'degenerate' face check
-            if (f.collapse() >= 3)
-            {
-                // duplicate face check
-                bool okay = true;
-                const labelList& neighbours = fFaces[oldFaceI];
-
-                // Check if faceNeighbours use same points as this face.
-                // Note: discards normal information - sides of baffle are merged.
-                forAll(neighbours, neighI)
-                {
-                    if (neighbours[neighI] <= oldFaceI)
-                    {
-                        // lower numbered faces already checked
-                        continue;
-                    }
-
-                    const Face& nei = faceLst[neighbours[neighI]];
-
-                    if (f == nei)
-                    {
-                        okay = false;
-
-                        if (verbose)
-                        {
-                            WarningIn
-                            (
-                                "MeshedSurface::checkFaces(bool verbose)"
-                            )   << "faces share the same vertices:\n"
-                                << "    face 1 :" << oldFaceI << endl;
-                            // printFace(Warning, "    ", f, points());
-
-                            Warning
-                                << endl
-                                << "    face 2 :"
-                                << neighbours[neighI] << endl;
-                            // printFace(Warning, "    ", nei, points());
-                        }
-
-                        break;
-                    }
-                }
-
-                if (okay)
-                {
-                    if (newFaceI != oldFaceI)
-                    {
-                        faceLst[newFaceI] = f;
-                    }
-                    newFaceI++;
-                }
-            }
-            else if (verbose)
-            {
-                WarningIn
-                (
-                    "MeshedSurface::checkFaces(bool verbose)"
-                )   << "face " << oldFaceI
-                    << " has fewer than three unique vertices:\n";
-                // printTriangle(Warning, "    ", f, points());
-            }
-        }
-
-        // adjust patch size
-        p.size() = newFaceI - p.start();
-    }
-
-    if (newFaceI < faceLst.size())
-    {
-        if (verbose)
-        {
-            WarningIn
-            (
-                "MeshedSurface::checkFaces(bool verbose)"
-            )   << "Removed " << faceLst.size() - newFaceI
-                << " illegal faces." << endl;
-        }
-        faceLst.setSize(newFaceI);
-
-        // Topology can change because of renumbering
-        ParentType::clearOut();
-    }
+    remapRegions(faceMap);
+    return changed;
 }
 
 
 template<class Face>
 Foam::label Foam::MeshedSurface<Face>::triangulate()
 {
-    label nTri = 0;
-    List<Face>& faceLst = this->storedFaces();
+    List<label> faceMap;
+    label nTri = ParentType::triangulate(this->storedFaces(), faceMap);
 
-    // determine how many triangles are needed
-    forAll(faceLst, faceI)
-    {
-        nTri += faceLst[faceI].size() - 2;
-    }
-
-    // nothing to do
-    if (nTri <= faceLst.size())
-    {
-        return 0;
-    }
-
-    List<Face> newFaces(nTri);
-
-    // note the number of *additional* faces
-    nTri -= faceLst.size();
-
-    // Reset the point labels to the unique points array
-    label oldFaceI = 0;
-    label newFaceI = 0;
-    forAll(patches_, patchI)
-    {
-        surfGroup& p = patches_[patchI];
-
-        // adjust patch start
-        p.start() = newFaceI;
-
-        label patchEnd = oldFaceI + p.size();
-        for (; oldFaceI < patchEnd; ++oldFaceI)
-        {
-            const Face& f = faceLst[oldFaceI];
-            triFace fTri;
-
-            // Do simple face triangulation around f[0].
-            // we could also use face::triangulation
-            fTri[0] = f[0];
-            for (label fp = 1; fp < f.size() - 1; ++fp)
-            {
-                label fp1 = (fp + 1) % f.size();
-
-                fTri[1] = f[fp];
-                fTri[2] = f[fp1];
-
-                newFaces[newFaceI++] = fTri;
-            }
-        }
-
-        // adjust patch size
-        p.size() = newFaceI - p.start();
-    }
-
-    faceLst.transfer(newFaces);
-
+    remapRegions(faceMap);
     return nTri;
 }
 

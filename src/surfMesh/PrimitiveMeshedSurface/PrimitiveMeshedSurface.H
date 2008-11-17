@@ -91,6 +91,15 @@ public:
         //- Face storage only handles triangulated faces
         inline static bool isTri();
 
+        //- Triangulate faceLst in-place
+        //  Returning the number of triangles added and a map to the
+        //  the original face Ids
+        static label triangulate
+        (
+            List<Face>& faceLst,
+            List<label>& faceMap=const_cast<List<label>&>(List<label>::null())
+        );
+
     // Constructors
 
         //- Construct null
@@ -133,6 +142,19 @@ public:
         (
             const xfer<pointField>&,
             const xfer<List<Face> >&
+        );
+
+        virtual bool stitchFaces
+        (
+            List<label>& faceMap=const_cast<List<label>&>(List<label>::null()),
+            const scalar tol=SMALL,
+            const bool verbose=false
+        );
+
+        virtual bool checkFaces
+        (
+            List<label>& faceMap=const_cast<List<label>&>(List<label>::null()),
+            const bool verbose=false
         );
 
 };

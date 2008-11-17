@@ -53,7 +53,6 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
     // read points:
     is >> this->storedPoints();
 
-#if 1
     // must triangulate?
     if (this->isTri())
     {
@@ -67,7 +66,7 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
         );
         surf.addPatches(patches_);
 
-        // this will break if the triangulation uses points
+        // this will break if the triangulation needed points
         surf.triangulate();
         patches_ = surf.patches();
 
@@ -86,7 +85,6 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
         this->storedFaces().transfer(newFaces);
     }
     else
-#endif
     {
         // read faces:
         is >> this->storedFaces();

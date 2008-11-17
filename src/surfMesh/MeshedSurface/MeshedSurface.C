@@ -55,7 +55,7 @@ bool Foam::MeshedSurface<Face>::canReadType
         return true;
     }
 
-    return UnsortedMeshedSurface<Face>::canRead(ext, verbose);
+    return UnsortedMeshedSurface<Face>::canReadType(ext, verbose);
 }
 
 
@@ -607,6 +607,41 @@ void Foam::MeshedSurface<Face>::sortFacesByRegion
 }
 
 
+template<class Face>
+void Foam::MeshedSurface<Face>::remapRegions(List<label>& faceMap)
+{
+    // recalculate the patch start/size
+    if (faceMap.size())
+    {
+        label newFaceI = 0;
+        label oldPatchEnd = 0;
+        forAll(patches_, patchI)
+        {
+            surfGroup& p = patches_[patchI];
+
+            // adjust patch start
+            p.start() = newFaceI;
+            oldPatchEnd += p.size();
+
+            for (label faceI = newFaceI; faceI < faceMap.size(); ++faceI)
+            {
+                if (faceMap[faceI] < oldPatchEnd)
+                {
+                    ++newFaceI;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // adjust patch size
+            p.size() = newFaceI - p.start();
+        }
+        faceMap.clear();
+    }
+}
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 
@@ -650,46 +685,51 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
         newPatches[patchI].size() = 0;
     }
 
-    // Renumber face node labels and compact
+    // Renumber face node labels
     List<Face> newFaces(faceMap.size());
-
     forAll(faceMap, faceI)
     {
         const label origFaceI = faceMap[faceI];
-        const Face& oldFace = locFaces[origFaceI];
-
-        newFaces[faceI] = Face(oldFace);
+        newFaces[faceI] = Face(locFaces[origFaceI]);
 
         // Renumber labels for face
         Face& f = newFaces[faceI];
         forAll(f, fp)
         {
-            f[fp] = oldToNew[oldFace[fp]];
-        }
-
-        // adjust patch sizes
-        forAllReverse(newPatches, patchI)
-        {
-            if
-            (
-                origFaceI >= patches_[patchI].start()
-             && patches_[patchI].size()
-            )
-            {
-                newPatches[patchI].size()++;
-                break;
-            }
+            f[fp] = oldToNew[f[fp]];
         }
     }
     oldToNew.clear();
 
-    // adjust patch start
-    label startFaceI = 0;
+    // recalculate the patch start/size
+    label newFaceI = 0;
+    label oldPatchEnd = 0;
+
+    // adjust patch sizes
     forAll(newPatches, patchI)
     {
-        newPatches[patchI].start() = startFaceI;
-        startFaceI += newPatches[patchI].size();
+        surfGroup& p = newPatches[patchI];
+
+        // adjust patch start
+        p.start() = newFaceI;
+        oldPatchEnd += p.size();
+
+        for (label faceI = newFaceI; faceI < faceMap.size(); ++faceI)
+        {
+            if (faceMap[faceI] < oldPatchEnd)
+            {
+                ++newFaceI;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        // adjust patch size
+        p.size() = newFaceI - p.start();
     }
+
 
     // construct a sub-surface
     return MeshedSurface

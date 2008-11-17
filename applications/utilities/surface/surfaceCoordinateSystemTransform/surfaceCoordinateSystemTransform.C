@@ -185,8 +185,8 @@ int main(int argc, char *argv[])
 
     if
     (
-        !meshedSurface::canRead(importName.ext(), true)
-     || !meshedSurface::canWrite(exportName.ext(), true)
+        !meshedSurface::canRead(importName, true)
+     || !meshedSurface::canWriteType(exportName.ext(), true)
     )
     {
         return 1;
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 
 
     {
-        meshedSurface surf(importName);
+        MeshedSurface<face> surf(importName);
 
         if (args.options().found("clean"))
         {

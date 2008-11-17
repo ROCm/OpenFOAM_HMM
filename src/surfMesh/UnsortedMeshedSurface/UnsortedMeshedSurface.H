@@ -109,6 +109,9 @@ private:
         //- Read OpenFOAM Surface format
         bool read(Istream&);
 
+        //- Set new regions from faceMap
+        void remapRegions(List<label>& faceMap);
+
 protected:
 
     // Protected Member functions
@@ -316,11 +319,15 @@ public:
         void cleanup(const bool verbose);
 
         //- Check/fix duplicate/degenerate faces
-        void checkFaces(const bool verbose);
+        virtual bool checkFaces(const bool verbose);
 
         //- Join the faces by removing duplicate points.
         //  Returns true if any points merged
-        bool stitchFaces(const scalar tol=SMALL, const bool verbose=false);
+        virtual bool stitchFaces
+        (
+            const scalar tol=SMALL, 
+            const bool verbose=false
+        );
 
         //- Triangulate the surface, return the number of added faces.
         virtual label triangulate();

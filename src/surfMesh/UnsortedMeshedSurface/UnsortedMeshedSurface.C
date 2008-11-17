@@ -491,6 +491,22 @@ void Foam::UnsortedMeshedSurface<Face>::setPatches
 }
 
 
+template<class Face>
+void Foam::UnsortedMeshedSurface<Face>::remapRegions(List<label>& faceMap)
+{
+    // re-assign the region Ids
+    if (faceMap.size())
+    {
+        forAll(faceMap, faceI)
+        {
+            faceMap[faceI] = regions_[faceMap[faceI]];
+        }
+        regions_.transfer(faceMap);
+    }
+}
+
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
@@ -558,15 +574,13 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
     forAll(faceMap, faceI)
     {
         const label origFaceI = faceMap[faceI];
-        const Face& oldFace = locFaces[origFaceI];
-
-        newFaces[faceI] = Face(oldFace);
+        newFaces[faceI] = Face(locFaces[origFaceI]);
 
         // Renumber labels for face
         Face& f = newFaces[faceI];
         forAll(f, fp)
         {
-            f[fp] = oldToNew[oldFace[fp]];
+            f[fp] = oldToNew[f[fp]];
         }
 
         newRegions[faceI] = regions_[origFaceI];

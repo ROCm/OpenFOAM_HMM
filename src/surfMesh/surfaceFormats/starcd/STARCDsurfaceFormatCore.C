@@ -146,10 +146,6 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     os.flush();
 }
 
-#if 0
-
-#endif
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //
