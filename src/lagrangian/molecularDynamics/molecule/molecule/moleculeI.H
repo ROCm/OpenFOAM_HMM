@@ -133,8 +133,6 @@ inline void Foam::molecule::constantProperties::setInteracionSiteBools
 
         electrostaticSites_[i] = (mag(siteCharges_[i]) > VSMALL);
     }
-
-    Info<< pairPotentialSites_ << nl << electrostaticSites_ << endl;
 }
 
 

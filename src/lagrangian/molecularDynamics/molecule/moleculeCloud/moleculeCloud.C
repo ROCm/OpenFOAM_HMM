@@ -96,8 +96,6 @@ void Foam::moleculeCloud::buildConstProps()
         constProp = molecule::constantProperties(molDict);
 
         constProp.siteIds() = siteIds;
-
-        Info<< "sites " << constProp.siteIds() << endl;
     }
 }
 
