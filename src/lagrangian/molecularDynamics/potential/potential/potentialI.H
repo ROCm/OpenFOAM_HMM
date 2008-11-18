@@ -40,9 +40,9 @@ inline const Foam::List<Foam::word>& Foam::potential::idList() const
 }
 
 
-inline const Foam::List<Foam::word>& Foam::potential::allSiteIdNames() const
+inline const Foam::List<Foam::word>& Foam::potential::siteIdList() const
 {
-    return allSiteIdNames_;
+    return siteIdList_;
 }
 
 
@@ -64,15 +64,21 @@ inline const Foam::labelList& Foam::potential::removalOrder() const
 }
 
 
-inline const Foam::pairPotentialList&
-    Foam::potential::pairPotentials() const
+inline const Foam::pairPotentialList& Foam::potential::pairPotentials() const
 {
     return pairPotentials_;
 }
 
 
+inline const Foam::electrostaticPotential&
+Foam::potential::electrostatic() const
+{
+    return electrostaticPotential_;
+}
+
+
 inline const Foam::tetherPotentialList&
-    Foam::potential::tetherPotentials() const
+Foam::potential::tetherPotentials() const
 {
     return tetherPotentials_;
 }

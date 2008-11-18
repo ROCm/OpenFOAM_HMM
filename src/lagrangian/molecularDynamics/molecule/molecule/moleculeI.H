@@ -31,28 +31,11 @@ inline Foam::molecule::constantProperties::constantProperties()
     siteReferencePositions_(List<vector>(0)),
     siteCharges_(List<scalar>(0)),
     siteIds_(List<label>(0)),
+    pairPotentialSites_(List<bool>(false)),
+    electrostaticSites_(List<bool>(false)),
     momentOfInertia_(diagTensor(0, 0, 0)),
     mass_(0)
 {}
-
-
-inline Foam::molecule::constantProperties::constantProperties
-(
-    const List<vector>& siteReferencePositions,
-    const List<scalar>& siteCharges,
-    const List<label>& siteIds,
-    const diagTensor& momentOfInertia,
-    scalar mass
-)
-:
-    siteReferencePositions_(siteReferencePositions),
-    siteCharges_(siteCharges),
-    siteIds_(siteIds),
-    momentOfInertia_(momentOfInertia),
-    mass_(mass)
-{
-    checkSiteListSizes();
-}
 
 
 inline Foam::molecule::constantProperties::constantProperties
@@ -63,10 +46,18 @@ inline Foam::molecule::constantProperties::constantProperties
     siteReferencePositions_(dict.lookup("siteReferencePositions")),
     siteCharges_(dict.lookup("siteCharges")),
     siteIds_(List<word>(dict.lookup("siteIds")).size(), -1),
+    pairPotentialSites_(),
+    electrostaticSites_(),
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass")))
 {
     checkSiteListSizes();
+
+    setInteracionSiteBools
+    (
+        List<word>(dict.lookup("siteIds")),
+        List<word>(dict.lookup("pairPotentialSiteIds"))
+    );
 }
 
 
@@ -124,38 +115,75 @@ inline void Foam::molecule::constantProperties::checkSiteListSizes() const
 }
 
 
+inline void Foam::molecule::constantProperties::setInteracionSiteBools
+(
+    const List<word>& siteIds,
+    const List<word>& pairPotSiteIds
+)
+{
+    pairPotentialSites_.setSize(siteIds_.size());
+
+    electrostaticSites_.setSize(siteIds_.size());
+
+    forAll(siteIds_, i)
+    {
+        const word& id(siteIds[i]);
+
+        pairPotentialSites_[i] = (findIndex(pairPotSiteIds, id) > -1);
+
+        electrostaticSites_[i] = (mag(siteCharges_[i]) > VSMALL);
+    }
+
+    Info<< pairPotentialSites_ << nl << electrostaticSites_ << endl;
+}
+
+
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
 
 inline const Foam::List<Foam::vector>&
-    Foam::molecule::constantProperties::siteReferencePositions() const
+Foam::molecule::constantProperties::siteReferencePositions() const
 {
     return siteReferencePositions_;
 }
 
 
 inline const Foam::List<Foam::scalar>&
-    Foam::molecule::constantProperties::siteCharges() const
+Foam::molecule::constantProperties::siteCharges() const
 {
     return siteCharges_;
 }
 
 
 inline const Foam::List<Foam::label>&
-    Foam::molecule::constantProperties::siteIds() const
+Foam::molecule::constantProperties::siteIds() const
 {
     return siteIds_;
 }
 
 
 inline Foam::List<Foam::label>&
-    Foam::molecule::constantProperties::siteIds()
+Foam::molecule::constantProperties::siteIds()
 {
     return siteIds_;
 }
 
 
+inline const Foam::List<bool>&
+Foam::molecule::constantProperties::pairPotentialSites() const
+{
+    return pairPotentialSites_;
+}
+
+
+inline const Foam::List<bool>&
+Foam::molecule::constantProperties::electrostaticSites() const
+{
+    return electrostaticSites_;
+}
+
+
 inline const Foam::diagTensor&
-    Foam::molecule::constantProperties::momentOfInertia() const
+Foam::molecule::constantProperties::momentOfInertia() const
 {
     return momentOfInertia_;
 }

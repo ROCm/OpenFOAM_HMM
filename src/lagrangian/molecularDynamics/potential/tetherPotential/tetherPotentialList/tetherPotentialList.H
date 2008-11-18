@@ -66,9 +66,9 @@ class tetherPotentialList
 
         void readTetherPotentialDict
         (
-            const List<word>& idList,
+            const List<word>& siteIdList,
             const dictionary& tetherPotentialDict,
-            const List<word>& tetherIdList
+            const List<word>& tetherSiteIdList
         );
 
         //- Disallow default bitwise assignment
@@ -84,12 +84,12 @@ public:
 
         tetherPotentialList();
 
-        //- Construct from idList and potental dictionaries
+        //- Construct from siteIdList and potental dictionaries
         tetherPotentialList
         (
-            const List<word>& idList,
+            const List<word>& siteIdList,
             const dictionary& tetherPotentialDict,
-            const List<word>& tetherIdList
+            const List<word>& tetherSiteIdList
         );
 
     // Destructor
@@ -100,9 +100,9 @@ public:
 
         void buildPotentials
         (
-            const List<word>& idList,
+            const List<word>& siteIdList,
             const dictionary& tetherPotentialDict,
-            const List<word>& tetherIdList
+            const List<word>& tetherSiteIdList
         );
 
         // Access

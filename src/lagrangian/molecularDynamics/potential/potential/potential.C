@@ -59,7 +59,9 @@ void Foam::potential::potential::readPotentialDict()
         )
     );
 
-    DynamicList<word> allSiteIdNames;
+    DynamicList<word> siteIdList;
+
+    DynamicList<word> pairPotentialSiteIdList;
 
     forAll(idList_, i)
     {
@@ -80,22 +82,58 @@ void Foam::potential::potential::readPotentialDict()
         {
             const word& siteId = siteIdNames[sI];
 
-            if(findIndex(allSiteIdNames, siteId) == -1)
+            if(findIndex(siteIdList, siteId) == -1)
             {
-                allSiteIdNames.append(siteId);
+                siteIdList.append(siteId);
+            }
+        }
+
+        List<word> pairPotSiteIds = molDict.lookup("pairPotentialSiteIds");
+
+        forAll(pairPotSiteIds, sI)
+        {
+            const word& siteId = pairPotSiteIds[sI];
+
+            if(findIndex(siteIdNames, siteId) == -1)
+            {
+                FatalErrorIn("potential.C") << nl
+                    << siteId << " in pairPotentialSiteIds is not in siteIds: "
+                    << siteIdNames << nl << abort(FatalError);
+            }
+
+            if(findIndex(pairPotentialSiteIdList, siteId) == -1)
+            {
+                pairPotentialSiteIdList.append(siteId);
             }
         }
     }
 
-    allSiteIdNames_.transfer(allSiteIdNames.shrink());
+    label nPairPotIds_ = pairPotentialSiteIdList.size();
 
-    Info<< nl << "Unique site ids found: " << allSiteIdNames_ << endl;
-
-    List<word> tetherIdList(0);
-
-    if (idListDict.found("tetherIdList"))
+    forAll(siteIdList, aSIN)
     {
-        tetherIdList = List<word>(idListDict.lookup("tetherIdList"));
+        const word& siteId = siteIdList[aSIN];
+
+        if(findIndex(pairPotentialSiteIdList, siteId) == -1)
+        {
+            pairPotentialSiteIdList.append(siteId);
+        }
+    }
+
+    siteIdList_.transfer(pairPotentialSiteIdList.shrink());
+
+    pairPotentialSiteIdList = SubList<word>(siteIdList_, nPairPotIds_);
+
+    Info<< nl << "Unique site ids found: " << siteIdList_
+        << nl << "Site Ids requiring a pair potential: "
+        << pairPotentialSiteIdList
+        << endl;
+
+    List<word> tetherSiteIdList(0);
+
+    if (idListDict.found("tetherSiteIdList"))
+    {
+        tetherSiteIdList = List<word>(idListDict.lookup("tetherSiteIdList"));
     }
 
     IOdictionary potentialDict
@@ -149,7 +187,7 @@ void Foam::potential::potential::readPotentialDict()
 
     pairPotentials_.buildPotentials
     (
-        allSiteIdNames_,
+        pairPotentialSiteIdList,
         pairDict,
         mesh_
     );
@@ -157,7 +195,7 @@ void Foam::potential::potential::readPotentialDict()
     // *************************************************************************
     // Tether potentials
 
-    if (tetherIdList.size())
+    if (tetherSiteIdList.size())
     {
         if (!potentialDict.found("tether"))
         {
@@ -170,9 +208,9 @@ void Foam::potential::potential::readPotentialDict()
 
         tetherPotentials_.buildPotentials
         (
-            allSiteIdNames_,
+            siteIdList_,
             tetherDict,
-            tetherIdList
+            tetherSiteIdList
         );
     }
 
@@ -205,7 +243,8 @@ void Foam::potential::potential::readPotentialDict()
 
 Foam::potential::potential(const polyMesh& mesh)
 :
-    mesh_(mesh)
+    mesh_(mesh),
+    electrostaticPotential_()
 {
     readPotentialDict();
 }

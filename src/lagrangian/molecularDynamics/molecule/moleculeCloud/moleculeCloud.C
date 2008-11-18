@@ -52,7 +52,7 @@ void Foam::moleculeCloud::buildConstProps()
 
     constPropList_.setSize(idList.size());
 
-    const List<word>& allSiteIdNames(pot_.allSiteIdNames());
+    const List<word>& siteIdList(pot_.siteIdList());
 
     IOdictionary moleculePropertiesDict
     (
@@ -81,7 +81,7 @@ void Foam::moleculeCloud::buildConstProps()
         {
             const word& siteId = siteIdNames[sI];
 
-            siteIds[sI] = findIndex(allSiteIdNames, siteId);
+            siteIds[sI] = findIndex(siteIdList, siteId);
 
             if (siteIds[sI] == -1)
             {
@@ -96,6 +96,8 @@ void Foam::moleculeCloud::buildConstProps()
         constProp = molecule::constantProperties(molDict);
 
         constProp.siteIds() = siteIds;
+
+        Info<< "sites " << constProp.siteIds() << endl;
     }
 }
 

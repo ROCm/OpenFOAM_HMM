@@ -30,28 +30,28 @@ License
 
 void Foam::tetherPotentialList::readTetherPotentialDict
 (
-    const List<word>& idList,
+    const List<word>& siteIdList,
     const dictionary& tetherPotentialDict,
-    const List<word>& tetherIdList
+    const List<word>& tetherSiteIdList
 )
 {
 
     Info<< nl << "Building tether potentials." << endl;
 
-    idMap_ = List<label>(idList.size(), -1);
+    idMap_ = List<label>(siteIdList.size(), -1);
 
     label tetherMapIndex = 0;
 
-    forAll(tetherIdList, t)
+    forAll(tetherSiteIdList, t)
     {
-        word tetherPotentialName = tetherIdList[t];
+        word tetherPotentialName = tetherSiteIdList[t];
 
-        label tetherId = findIndex(idList, tetherPotentialName);
+        label tetherId = findIndex(siteIdList, tetherPotentialName);
 
         if (tetherId == -1)
         {
             FatalErrorIn("tetherPotentialList::readTetherPotentialDict")
-                << nl << "No matching entry found in idList for tether name "
+                << nl << "No matching entry found in siteIdList for tether name "
                 << tetherPotentialName
                 << abort(FatalError);
         }
@@ -93,15 +93,15 @@ Foam::tetherPotentialList::tetherPotentialList()
 
 Foam::tetherPotentialList::tetherPotentialList
 (
-    const List<word>& idList,
+    const List<word>& siteIdList,
     const dictionary& tetherPotentialDict,
-    const List<word>& tetherIdList
+    const List<word>& tetherSiteIdList
 )
 :
     PtrList<tetherPotential>(),
     idMap_()
 {
-    buildPotentials(idList, tetherPotentialDict, tetherIdList);
+    buildPotentials(siteIdList, tetherPotentialDict, tetherSiteIdList);
 }
 
 
@@ -115,14 +115,14 @@ Foam::tetherPotentialList::~tetherPotentialList()
 
 void Foam::tetherPotentialList::buildPotentials
 (
-    const List<word>& idList,
+    const List<word>& siteIdList,
     const dictionary& tetherPotentialDict,
-    const List<word>& tetherIdList
+    const List<word>& tetherSiteIdList
 )
 {
-    setSize(tetherIdList.size());
+    setSize(tetherSiteIdList.size());
 
-    readTetherPotentialDict(idList, tetherPotentialDict, tetherIdList);
+    readTetherPotentialDict(siteIdList, tetherPotentialDict, tetherSiteIdList);
 }
 
 

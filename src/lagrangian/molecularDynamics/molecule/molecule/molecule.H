@@ -86,6 +86,10 @@ public:
 
             List<label> siteIds_;
 
+            List<bool> pairPotentialSites_;
+
+            List<bool> electrostaticSites_;
+
             diagTensor momentOfInertia_;
 
             scalar mass_;
@@ -94,21 +98,17 @@ public:
 
             void checkSiteListSizes() const;
 
+            void setInteracionSiteBools
+            (
+                const List<word>& siteIds,
+                const List<word>& pairPotSiteIds
+            );
+
     public:
 
         inline constantProperties();
 
-        //- Constructor
-        inline constantProperties
-        (
-            const List<vector>& siteReferencePositions,
-            const List<scalar>& siteCharges,
-            const List<label>& siteIds,
-            const diagTensor& momentOfInertia,
-            scalar mass
-        );
-
-        //- Constructor
+        //- Construct from dictionary
         inline constantProperties(const dictionary& dict);
 
         // Member functions
@@ -119,6 +119,10 @@ public:
 
         inline const List<label>& siteIds() const;
         inline List<label>& siteIds();
+
+        inline const List<bool>& pairPotentialSites() const;
+
+        inline const List<bool>& electrostaticSites() const;
 
         inline const diagTensor& momentOfInertia() const;
 

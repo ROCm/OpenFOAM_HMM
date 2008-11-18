@@ -60,13 +60,17 @@ class potential
 
         List<word> idList_;
 
-        List<word> allSiteIdNames_;
+        List<word> siteIdList_;
+
+        label nPairPotIds_;
 
         scalar potentialEnergyLimit_;
 
         labelList removalOrder_;
 
         pairPotentialList pairPotentials_;
+
+        electrostaticPotential electrostaticPotential_;
 
         tetherPotentialList tetherPotentials_;
 
@@ -103,7 +107,7 @@ public:
 
             inline const List<word>& idList() const;
 
-            inline const List<word>& allSiteIdNames() const;
+            inline const List<word>& siteIdList() const;
 
             inline scalar potentialEnergyLimit() const;;
 
@@ -112,6 +116,8 @@ public:
             inline const labelList& removalOrder() const;
 
             inline const pairPotentialList& pairPotentials() const;
+
+            inline const electrostaticPotential& electrostatic() const;
 
             inline const tetherPotentialList& tetherPotentials() const;
 
