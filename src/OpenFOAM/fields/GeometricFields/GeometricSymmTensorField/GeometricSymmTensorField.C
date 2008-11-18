@@ -46,6 +46,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, twoSymm, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2, transform)
 UNARY_FUNCTION(scalar, symmTensor, det, transform)
+UNARY_FUNCTION(symmTensor, symmTensor, cof, cof)
 UNARY_FUNCTION(symmTensor, symmTensor, inv, inv)
 
 
