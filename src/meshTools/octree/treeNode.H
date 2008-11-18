@@ -50,7 +50,7 @@ SourceFiles
 #include "treeBoundBoxList.H"
 #include "treeElem.H"
 #include "linePointRef.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

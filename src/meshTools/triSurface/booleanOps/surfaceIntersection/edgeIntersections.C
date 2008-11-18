@@ -31,7 +31,6 @@ Description
 #include "labelPairLookup.H"
 #include "OFstream.H"
 #include "HashSet.H"
-#include "labelHashSet.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
 #include "treeDataTriSurface.H"

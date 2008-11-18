@@ -57,7 +57,7 @@ SourceFiles
 #include "edgeList.H"
 #include "point.H"
 #include "intersection.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

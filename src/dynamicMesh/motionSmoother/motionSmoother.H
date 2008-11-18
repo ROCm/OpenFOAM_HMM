@@ -75,7 +75,7 @@ SourceFiles
 #define motionSmoother_H
 
 #include "pointFields.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "PackedList.H"
 #include "indirectPrimitivePatch.H"
 #include "className.H"

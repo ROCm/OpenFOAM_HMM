@@ -29,61 +29,80 @@ License
 
 #include "HashSet.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-bool HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& ht) const
+bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 {
-    const HashTable<empty, Key, Hash>& a = *this;
-
-    // Are all my elements in ht?
-    for
-    (
-        typename HashTable<empty, Key, Hash>::const_iterator iter = a.begin();
-        iter != a.end();
-        ++iter
-    )
+    // Are all lhs elements in rhs?
+    for (const_iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        if (!ht.found(iter.key()))
+        if (!rhs.found(iter.key()))
         {
             return false;
         }
     }
 
-    // Are all ht elements in me?
-    for
-    (
-        typename HashTable<empty, Key, Hash>::const_iterator iter = ht.begin();
-        iter != ht.end();
-        ++iter
-    )
+    // Are all rhs elements in lhs?
+    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
         if (!found(iter.key()))
         {
             return false;
         }
     }
+
     return true;
 }
 
 
 template<class Key, class Hash>
-bool HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& ht) const
+bool Foam::HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& rhs) const
 {
-    return !(operator==(ht));
+    return !(operator==(rhs));
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator+=(const HashSet<Key, Hash>& rhs)
+{
+    // Add in rhs elements into lhs
+    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    {
+        insert(iter.key());
+    }
+}
 
-} // End namespace Foam
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
+{
+    // Remove rhs elements from lhs
+    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    {
+        erase(iter.key());
+    }
+}
+
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
+{
+    // Remove elements not found in rhs as well
+    for (iterator iter = this->begin(); iter != this->end(); ++iter)
+    {
+        if (!rhs.found(iter.key()))
+        {
+            erase(iter);
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
