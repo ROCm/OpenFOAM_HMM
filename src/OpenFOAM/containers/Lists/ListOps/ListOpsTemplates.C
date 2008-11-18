@@ -31,7 +31,7 @@ License
 template<class List>
 List Foam::renumber
 (
-    const labelList& oldToNew,
+    const UList<label>& oldToNew,
     const List& lst
 )
 {
@@ -53,7 +53,7 @@ List Foam::renumber
 template<class List>
 void Foam::inplaceRenumber
 (
-    const labelList& oldToNew,
+    const UList<label>& oldToNew,
     List& lst
 )
 {
@@ -70,7 +70,7 @@ void Foam::inplaceRenumber
 template<class List>
 List Foam::reorder
 (
-    const labelList& oldToNew,
+    const UList<label>& oldToNew,
     const List& lst
 )
 {
@@ -95,7 +95,7 @@ List Foam::reorder
 template<class List>
 void Foam::inplaceReorder
 (
-    const labelList& oldToNew,
+    const UList<label>& oldToNew,
     List& lst
 )
 {
@@ -121,7 +121,7 @@ void Foam::inplaceReorder
 template<class Container>
 void Foam::inplaceMapValue
 (
-    const labelList& oldToNew,
+    const UList<label>& oldToNew,
     Container& lst
 )
 {
@@ -143,7 +143,7 @@ void Foam::inplaceMapValue
 template<class Container>
 void Foam::inplaceMapKey
 (
-    const labelList& oldToNew,
+    const UList<label>& oldToNew,
     Container& lst
 )
 {
@@ -161,7 +161,7 @@ void Foam::inplaceMapKey
             newLst.insert(oldToNew[iter.key()], iter());
         }
     }
-    
+
     lst.transfer(newLst);
 }
 
@@ -330,7 +330,7 @@ template<class List>
 void Foam::setValues
 (
     List& l,
-    const labelList& indices,
+    const UList<label>& indices,
     typename List::const_reference t
 )
 {
@@ -346,7 +346,7 @@ List Foam::createWithValues
 (
     const label sz,
     const typename List::const_reference initValue,
-    const labelList& indices,
+    const UList<label>& indices,
     typename List::const_reference setValue
 )
 {
@@ -489,31 +489,31 @@ Foam::label Foam::findLower
 template<class Container, class T, int nRows>
 Foam::List<Container> Foam::initList(const T elems[nRows])
 {
-    List<Container> faces(nRows);
+    List<Container> lst(nRows);
 
-    forAll(faces, faceI)
+    forAll(lst, rowI)
     {
-        faces[faceI] = Container(elems[faceI]);
+        lst[rowI] = Container(elems[rowI]);
     }
-    return faces;
+    return lst;
 }
 
 
 template<class Container, class T, int nRows, int nColumns>
 Foam::List<Container> Foam::initListList(const T elems[nRows][nColumns])
 {
-    List<Container> faces(nRows);
+    List<Container> lst(nRows);
 
-    Container f(nColumns);
-    forAll(faces, faceI)
+    Container cols(nColumns);
+    forAll(lst, rowI)
     {
-        forAll(f, i)
+        forAll(cols, colI)
         {
-            f[i] = elems[faceI][i];
+            cols[colI] = elems[rowI][colI];
         }
-        faces[faceI] = f;
+        lst[rowI] = cols;
     }
-    return faces;
+    return lst;
 }
 
 

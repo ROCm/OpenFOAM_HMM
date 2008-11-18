@@ -44,42 +44,42 @@ SourceFiles
 namespace Foam
 {
 
-//- Renumber the values (not the indices) of a list. List elements <= 0 are
-//  left as is.
+//- Renumber the values (not the indices) of a list.
+//  List elements < 0 are left as is.
 template<class List>
-List renumber(const labelList& oldToNew, const List&);
+List renumber(const UList<label>& oldToNew, const List&);
 
-//- Inplace renumber the values of a list. List elements <= 0 are
-//  left as is.
+//- Inplace renumber the values of a list.
+//  List elements < 0 are left as is.
 template<class List>
-void inplaceRenumber(const labelList& oldToNew, List&);
+void inplaceRenumber(const UList<label>& oldToNew, List&);
 
 
 //- Reorder the elements (indices, not values) of a list.
-//  List elements <= 0 are left as is.
+//  List elements < 0 are left as is.
 template<class List>
-List reorder(const labelList& oldToNew, const List&);
+List reorder(const UList<label>& oldToNew, const List&);
 
 //- Inplace reorder the elements of a list.
-//  List elements <= 0 are left as is.
+//  List elements < 0 are left as is.
 template<class List>
-void inplaceReorder(const labelList& oldToNew, List&);
+void inplaceReorder(const UList<label>& oldToNew, List&);
 
 
-// Variants to work with iterators and sparse tables. Need to have iterators
-// and insert()
+// Variants to work with iterators and sparse tables.
+// Need to have iterators and insert()
 
 //- Map values. Do not map negative values.
 template<class Container>
-void inplaceMapValue(const labelList& oldToNew, Container&);
+void inplaceMapValue(const UList<label>& oldToNew, Container&);
 //- Recreate with mapped keys. Remove elements with negative key.
 template<class Container>
-void inplaceMapKey(const labelList& oldToNew, Container&);
+void inplaceMapKey(const UList<label>& oldToNew, Container&);
 
 
-//- Extract elements of List whose region is certain value. Use e.g.
-//  to extract all selected elements:
-//  subset<boolList, labelList>(selectedElems, true, lst);
+//- Extract elements of List whose region is certain value.
+//  Use e.g. to extract all selected elements:
+//    subset<boolList, labelList>(selectedElems, true, lst);
 template<class T, class List>
 List subset(const UList<T>& regions, const T& region, const List&);
 
@@ -90,10 +90,10 @@ template<class T, class List>
 void inplaceSubset(const UList<T>& regions, const T& region, List&);
 
 //- Invert one-to-one map. Unmapped elements will be -1.
-labelList invert(const label len, const labelList& oldToNew);
+labelList invert(const label len, const UList<label>&);
 
 //- Invert one-to-many map. Unmapped elements will be size 0.
-labelListList invertOneToMany(const label len, const labelList&);
+labelListList invertOneToMany(const label len, const UList<label>&);
 
 //- Invert many-to-many. Input and output types need to be inherited
 //  from List. E.g. faces to pointFaces.
@@ -135,7 +135,7 @@ template<class List>
 void setValues
 (
     List&,
-    const labelList& indices,
+    const UList<label>& indices,
     typename List::const_reference
 );
 
@@ -145,7 +145,7 @@ List createWithValues
 (
     const label sz,
     const typename List::const_reference initValue,
-    const labelList& indices,
+    const UList<label>& indices,
     typename List::const_reference setValue
 );
 
