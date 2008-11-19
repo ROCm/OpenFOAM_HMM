@@ -40,6 +40,44 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
+Foam::wordHashSet Foam::UnsortedMeshedSurface<Face>::readTypes()
+{
+    wordHashSet supported(2*fileExtensionConstructorTablePtr_->size());
+
+    forAllIter
+    (
+        typename fileExtensionConstructorTable::iterator,
+        *fileExtensionConstructorTablePtr_,
+        iter
+    )
+    {
+        supported.insert(iter.key());
+    }
+
+    return supported;
+}
+
+
+template<class Face>
+Foam::wordHashSet Foam::UnsortedMeshedSurface<Face>::writeTypes()
+{
+    wordHashSet supported(2*writefileExtensionMemberFunctionTablePtr_->size());
+
+    forAllIter
+    (
+        typename writefileExtensionMemberFunctionTable::iterator,
+        *writefileExtensionMemberFunctionTablePtr_,
+        iter
+    )
+    {
+        supported.insert(iter.key());
+    }
+
+    return supported;
+}
+
+
+template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canReadType
 (
     const word& ext,
@@ -52,32 +90,10 @@ bool Foam::UnsortedMeshedSurface<Face>::canReadType
         return true;
     }
 
-    typename fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(ext);
+    wordHashSet available = readTypes();
+    available += SiblingType::readTypes();;
 
-    // would be nice to have information about which format this actually is
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
-    {
-        if (verbose)
-        {
-            SortableList<word> known
-            (
-                fileExtensionConstructorTablePtr_->toc()
-            );
-
-            Info<<"Unknown file extension for reading: " << ext << nl;
-            // compact output:
-            Info<<"Valid types: ( " << nativeExt;
-            forAll(known, i)
-            {
-                Info<<" " << known[i];
-            }
-            Info<<" )" << endl;
-        }
-        return false;
-    }
-
-    return true;
+    return checkSupport(available, ext, verbose, "reading");
 }
 
 
@@ -94,32 +110,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canWriteType
         return true;
     }
 
-    typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
-
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
-    {
-        if (verbose)
-        {
-            SortableList<word> known
-            (
-                writefileExtensionMemberFunctionTablePtr_->toc()
-            );
-
-            Info<<"Unknown file extension for writing: " << ext << nl;
-            // compact output:
-            Info<<"Valid types: ( " << nativeExt;
-            forAll(known, i)
-            {
-                Info<<" " << known[i];
-            }
-            Info<<" )" << endl;
-        }
-
-        return false;
-    }
-
-    return true;
+    return checkSupport(writeTypes(), ext, verbose, "writing");
 }
 
 
@@ -173,7 +164,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
             "(const fileName&, const UnsortedMeshedSurface&)"
         )   << "Unknown file extension " << ext << nl << nl
             << "Valid types are :" << endl
-            << writefileExtensionMemberFunctionTablePtr_->toc()
+            << writeTypes()
             << exit(FatalError);
     }
 

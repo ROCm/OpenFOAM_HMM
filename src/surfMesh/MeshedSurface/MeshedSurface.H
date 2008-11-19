@@ -49,6 +49,7 @@ SourceFiles
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,6 +84,7 @@ private:
 
     //- Private typedefs for convenience
         typedef PrimitiveMeshedSurface<Face> ParentType;
+        typedef UnsortedMeshedSurface<Face>  SiblingType;
 
     // Private Member Data
 
@@ -92,12 +94,6 @@ private:
 
     // Private member functions
 
-        //- set a single patch
-        void onePatch();
-
-        //- basic sanity check on patches
-        void checkPatches();
-
         //- Sort faces by regionIds and set patches
         void sortFacesByRegion(const UList<label>&, const Map<word>&);
 
@@ -106,6 +102,16 @@ private:
 
         //- Read OpenFOAM Surface format
         bool read(Istream&);
+
+protected:
+
+    // Protected Member functions
+
+        //- set a single patch
+        void onePatch();
+
+        //- basic sanity check on patches
+        void checkPatches();
 
 public:
 
@@ -123,6 +129,8 @@ public:
         //- Can we write this file format?
         static bool canWriteType(const word& ext, const bool verbose=false);
 
+        static wordHashSet readTypes();
+        static wordHashSet writeTypes();
 
     // Constructors
 

@@ -257,21 +257,10 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
             if (mustTriangulate)
             {
-                triFace fTri;
-
-                // simple face triangulation about f[0].
-                // cannot use face::triangulation since points are incomplete
-                fTri[0] = f[0];
-                for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
-                {
-                    label fp2 = (fp1 + 1) % f.size();
-
-                    fTri[1] = f[fp1];
-                    fTri[2] = f[fp2];
-
-                    faceLst.append(fTri);
-                    regionLst.append(patchI);
-                }
+                faceLst.append(triFace(f[0], f[1], f[2]));
+                faceLst.append(triFace(f[0], f[2], f[3]));
+                regionLst.append(patchI);
+                regionLst.append(patchI);
             }
             else
             {

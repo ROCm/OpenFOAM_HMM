@@ -39,6 +39,43 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+template<class Face>
+Foam::wordHashSet Foam::MeshedSurface<Face>::readTypes()
+{
+    wordHashSet known(2*fileExtensionConstructorTablePtr_->size());
+
+    forAllIter
+    (
+        typename fileExtensionConstructorTable::iterator,
+        *fileExtensionConstructorTablePtr_,
+        iter
+    )
+    {
+        known.insert(iter.key());
+    }
+
+    return known;
+}
+
+
+template<class Face>
+Foam::wordHashSet Foam::MeshedSurface<Face>::writeTypes()
+{
+    wordHashSet supported(2*writefileExtensionMemberFunctionTablePtr_->size());
+
+    forAllIter
+    (
+        typename writefileExtensionMemberFunctionTable::iterator,
+        *writefileExtensionMemberFunctionTablePtr_,
+        iter
+    )
+    {
+        supported.insert(iter.key());
+    }
+
+    return supported;
+}
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -55,7 +92,10 @@ bool Foam::MeshedSurface<Face>::canReadType
         return true;
     }
 
-    return UnsortedMeshedSurface<Face>::canReadType(ext, verbose);
+    wordHashSet available = readTypes();
+    available += SiblingType::readTypes();
+
+    return checkSupport(available, ext, verbose, "reading");
 }
 
 
@@ -72,32 +112,7 @@ bool Foam::MeshedSurface<Face>::canWriteType
         return true;
     }
 
-    typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
-
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
-    {
-        if (verbose)
-        {
-            SortableList<word> known
-            (
-                writefileExtensionMemberFunctionTablePtr_->toc()
-            );
-
-            Info<<"Unknown file extension for writing: " << ext << nl;
-            // compact output:
-            Info<<"Valid types: ( " << nativeExt;
-            forAll(known, i)
-            {
-                Info<<" " << known[i];
-            }
-            Info<<" )" << endl;
-        }
-
-        return false;
-    }
-
-    return true;
+    return checkSupport(writeTypes(), ext, verbose, "writing");
 }
 
 
@@ -150,7 +165,7 @@ void Foam::MeshedSurface<Face>::write
             "MeshedSurface::write(const fileName&)"
         )   << "Unknown file extension " << ext << nl << nl
             << "Valid types are :" << endl
-            << writefileExtensionMemberFunctionTablePtr_->toc()
+            << writeTypes()
             << exit(FatalError);
     }
 

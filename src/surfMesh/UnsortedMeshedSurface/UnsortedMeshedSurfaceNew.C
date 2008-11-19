@@ -50,6 +50,24 @@ Foam::UnsortedMeshedSurface<Face>::New
 
     if (cstrIter == fileExtensionConstructorTablePtr_->end())
     {
+        // no direct reader, delegate if possible
+        wordHashSet supported = SiblingType::readTypes();
+        if (supported.found(ext))
+        {
+            // create indirectly
+            autoPtr<UnsortedMeshedSurface<Face> > surf
+            (
+                new UnsortedMeshedSurface<Face>
+            );
+            surf().transfer(SiblingType::New(fName, ext)());
+
+            return surf;
+        }
+
+        // nothing left but to issue an error
+        supported += readTypes();
+        supported.insert(nativeExt);
+
         FatalErrorIn
         (
             "UnsortedMeshedSurface<Face>::New"
@@ -57,14 +75,11 @@ Foam::UnsortedMeshedSurface<Face>::New
             "constructing UnsortedMeshedSurface"
         )   << "Unknown file extension " << ext << nl << nl
             << "Valid types are :" << nl
-            << fileExtensionConstructorTablePtr_->toc()
+            << supported
             << exit(FatalError);
     }
 
-    return autoPtr<UnsortedMeshedSurface<Face> >
-    (
-        cstrIter()(fName)
-    );
+    return autoPtr<UnsortedMeshedSurface<Face> >(cstrIter()(fName));
 }
 
 

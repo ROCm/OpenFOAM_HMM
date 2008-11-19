@@ -45,11 +45,38 @@ Foam::MeshedSurface<Face>::New
             << endl;
     }
 
-    // created indirectly via UnsortedMeshedSurface
-    autoPtr<MeshedSurface<Face> > surf(new MeshedSurface<Face>);
-    surf().transfer( UnsortedMeshedSurface<Face>::New(fName,ext)() );
+    typename fileExtensionConstructorTable::iterator cstrIter =
+        fileExtensionConstructorTablePtr_->find(ext);
 
-    return surf;
+    if (cstrIter == fileExtensionConstructorTablePtr_->end())
+    {
+        // no direct reader, delegate if possible
+        wordHashSet supported = SiblingType::readTypes();
+        if (supported.found(ext))
+        {
+            // create indirectly
+            autoPtr<MeshedSurface<Face> > surf(new MeshedSurface<Face>);
+            surf().transfer(SiblingType::New(fName, ext)());
+
+            return surf;
+        }
+
+        // nothing left to try, issue error
+        supported += readTypes();
+        supported.insert(nativeExt);
+
+        FatalErrorIn
+        (
+            "MeshedSurface<Face>::New"
+            "(const fileName&, const word&) : "
+            "constructing UnsortedMeshedSurface"
+        )   << "Unknown file extension " << ext << nl << nl
+            << "Valid types are :" << nl
+            << supported
+            << exit(FatalError);
+    }
+
+    return autoPtr<MeshedSurface<Face> >(cstrIter()(fName));
 }
 
 
