@@ -205,6 +205,32 @@ MPICH-GM)
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
     ;;
 
+HPMPI)
+    export MPI_HOME=/opt/hpmpi
+    export MPI_ARCH_PATH=$MPI_HOME
+    export MPICH_ROOT=$MPI_ARCH_PATH
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+
+    case `uname -m` in
+    i686)
+        _foamAddLib $MPI_ARCH_PATH/lib/linux_ia32
+        ;;
+
+    x86_64)
+        _foamAddLib $MPI_ARCH_PATH/lib/linux_amd64
+        ;;
+    ia64)
+        _foamAddLib $MPI_ARCH_PATH/lib/linux_ia64
+        ;;
+    *)
+        echo Unknown processor type `uname -m` for Linux
+        ;;
+    esac
+
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/hpmpi
+    ;;
+
 GAMMA)
     export MPI_ARCH_PATH=/usr
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/gamma
