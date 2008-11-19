@@ -28,15 +28,15 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-template<class List>
-List Foam::renumber
+template<class ListType>
+ListType Foam::renumber
 (
     const UList<label>& oldToNew,
-    const List& lst
+    const ListType& lst
 )
 {
     // Create copy
-    List newLst(lst.size());
+    ListType newLst(lst.size());
 
     forAll(lst, elemI)
     {
@@ -50,11 +50,11 @@ List Foam::renumber
 }
 
 
-template<class List>
+template<class ListType>
 void Foam::inplaceRenumber
 (
     const UList<label>& oldToNew,
-    List& lst
+    ListType& lst
 )
 {
     forAll(lst, elemI)
@@ -67,15 +67,15 @@ void Foam::inplaceRenumber
 }
 
 
-template<class List>
-List Foam::reorder
+template<class ListType>
+ListType Foam::reorder
 (
     const UList<label>& oldToNew,
-    const List& lst
+    const ListType& lst
 )
 {
     // Create copy
-    List newLst(lst.size());
+    ListType newLst(lst.size());
 
     forAll(lst, elemI)
     {
@@ -92,15 +92,15 @@ List Foam::reorder
 }
 
 
-template<class List>
+template<class ListType>
 void Foam::inplaceReorder
 (
     const UList<label>& oldToNew,
-    List& lst
+    ListType& lst
 )
 {
     // Create copy
-    List newLst(lst.size());
+    ListType newLst(lst.size());
 
     forAll(lst, elemI)
     {
@@ -166,18 +166,41 @@ void Foam::inplaceMapKey
 }
 
 
-template<class T, class List>
-List Foam::subset(const UList<T>& regions, const T& region, const List& lst)
+template<class T>
+void Foam::sortedOrder
+(
+    const UList<T>& lst,
+    labelList& order
+)
+{
+    order.setSize(lst.size());
+
+    forAll(order, elemI)
+    {
+        order[elemI] = elemI;
+    }
+
+    Foam::stableSort(order, typename UList<T>::less(lst));
+}
+
+
+template<class T, class ListType>
+ListType Foam::subset
+(
+    const UList<T>& regions,
+    const T& region,
+    const ListType& lst
+)
 {
     if (regions.size() < lst.size())
     {
-        FatalErrorIn("subset(const UList<T>&, const T&, const List&)")
+        FatalErrorIn("subset(const UList<T>&, const T&, const ListType&)")
             << "Regions is of size " << regions.size()
             << "; list it is supposed to index is of size " << lst.size()
             << abort(FatalError);
     }
 
-    List newLst(lst.size());
+    ListType newLst(lst.size());
 
     label nElem = 0;
     forAll(lst, elemI)
@@ -193,12 +216,17 @@ List Foam::subset(const UList<T>& regions, const T& region, const List& lst)
 }
 
 
-template<class T, class List>
-void Foam::inplaceSubset(const UList<T>& regions, const T& region, List& lst)
+template<class T, class ListType>
+void Foam::inplaceSubset
+(
+    const UList<T>& regions,
+    const T& region,
+    ListType& lst
+)
 {
     if (regions.size() < lst.size())
     {
-        FatalErrorIn("inplaceSubset(const UList<T>&, const T&, List&)")
+        FatalErrorIn("inplaceSubset(const UList<T>&, const T&, ListType&)")
             << "Regions is of size " << regions.size()
             << "; list it is supposed to index is of size " << lst.size()
             << abort(FatalError);
@@ -221,8 +249,8 @@ void Foam::inplaceSubset(const UList<T>& regions, const T& region, List& lst)
 }
 
 
-// As clarification coded as inversion from pointEdges to edges but completely
-// general.
+// As clarification:
+// coded as inversion from pointEdges to edges but completely general.
 template<class InList, class OutList>
 void Foam::invertManyToMany
 (
@@ -268,11 +296,11 @@ void Foam::invertManyToMany
 }
 
 
-template<class List>
+template<class ListType>
 Foam::label Foam::findIndex
 (
-    const List& l,
-    typename List::const_reference t,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start
 )
 {
@@ -291,11 +319,11 @@ Foam::label Foam::findIndex
 }
 
 
-template<class List>
+template<class ListType>
 Foam::labelList Foam::findIndices
 (
-    const List& l,
-    typename List::const_reference t,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start
 )
 {
@@ -326,12 +354,12 @@ Foam::labelList Foam::findIndices
 }
 
 
-template<class List>
+template<class ListType>
 void Foam::setValues
 (
-    List& l,
+    ListType& l,
     const UList<label>& indices,
-    typename List::const_reference t
+    typename ListType::const_reference t
 )
 {
     forAll(indices, i)
@@ -341,23 +369,23 @@ void Foam::setValues
 }
 
 
-template<class List>
-List Foam::createWithValues
+template<class ListType>
+ListType Foam::createWithValues
 (
     const label sz,
-    const typename List::const_reference initValue,
+    const typename ListType::const_reference initValue,
     const UList<label>& indices,
-    typename List::const_reference setValue
+    typename ListType::const_reference setValue
 )
 {
-    List l(sz, initValue);
+    ListType l(sz, initValue);
     setValues(l, indices, setValue);
     return l;
 }
 
 
-template<class List>
-Foam::label Foam::findMax(const List& l, const label start)
+template<class ListType>
+Foam::label Foam::findMax(const ListType& l, const label start)
 {
     if (start >= l.size())
     {
@@ -378,8 +406,8 @@ Foam::label Foam::findMax(const List& l, const label start)
 }
 
 
-template<class List>
-Foam::label Foam::findMin(const List& l, const label start)
+template<class ListType>
+Foam::label Foam::findMin(const ListType& l, const label start)
 {
     if (start >= l.size())
     {
@@ -400,11 +428,11 @@ Foam::label Foam::findMin(const List& l, const label start)
 }
 
 
-template<class List>
+template<class ListType>
 Foam::label Foam::findSortedIndex
 (
-    const List& l,
-    typename List::const_reference t,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start
 )
 {
@@ -438,11 +466,11 @@ Foam::label Foam::findSortedIndex
 }
 
 
-template<class List>
+template<class ListType>
 Foam::label Foam::findLower
 (
-    const List& l,
-    typename List::const_reference t,
+    const ListType& l,
+    typename ListType::const_reference t,
     const label start
 )
 {

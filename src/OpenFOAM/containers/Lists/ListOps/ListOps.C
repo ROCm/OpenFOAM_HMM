@@ -28,7 +28,11 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::invert(const label len, const UList<label>& map)
+Foam::labelList Foam::invert
+(
+    const label len,
+    const UList<label>& map
+)
 {
     labelList inverse(len, -1);
 
