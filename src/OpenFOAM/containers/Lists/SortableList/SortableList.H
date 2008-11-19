@@ -64,6 +64,9 @@ public:
 
     // Constructors
 
+        //- Null constructor, sort later (eg, after assignment or transfer)
+        SortableList();
+
         //- Construct from UList, sorting immediately.
         explicit SortableList(const UList<Type>&);
 
@@ -102,12 +105,19 @@ public:
         //- Clear the list and the indices
         void clear();
 
+        //- Clear the indices and return a reference to the underlying List
+        List<Type>& shrink();
+
         //- (stable) sort the list (if changed after construction time)
-        //  also resizes the indices if required
+        //  also resizes the indices as required
         void sort();
 
     // Member Operators
 
+        //- Assignment from UList operator. Takes linear time.
+        void operator=(const UList<Type>&);
+
+        //- Assignment operator. Takes linear time.
         void operator=(const SortableList<Type>&);
 
 };

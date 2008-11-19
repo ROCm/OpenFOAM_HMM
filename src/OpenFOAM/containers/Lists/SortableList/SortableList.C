@@ -27,12 +27,18 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class Type>
+Foam::SortableList<Type>::SortableList()
+{}
+
+
+template <class Type>
 Foam::SortableList<Type>::SortableList(const UList<Type>& values)
 :
     List<Type>(values)
 {
     sort();
 }
+
 
 template <class Type>
 Foam::SortableList<Type>::SortableList(const xfer<List<Type> >& values)
@@ -84,6 +90,14 @@ void Foam::SortableList<Type>::clear()
 
 
 template <class Type>
+Foam::List<Type>& Foam::SortableList<Type>::shrink()
+{
+    indices_.clear();
+    return static_cast<List<Type>&>(*this);
+}
+
+
+template <class Type>
 void Foam::SortableList<Type>::sort()
 {
     // list lengths must be identical
@@ -107,6 +121,14 @@ void Foam::SortableList<Type>::sort()
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template <class Type>
+void Foam::SortableList<Type>::operator=(const UList<Type>& rhs)
+{
+    List<Type>::operator=(rhs);
+    indices_.clear();
+}
+
 
 template <class Type>
 void Foam::SortableList<Type>::operator=(const SortableList<Type>& rhs)

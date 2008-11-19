@@ -26,7 +26,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
+#include "SortableList.H"
 
 using namespace Foam;
 
@@ -35,16 +35,40 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    labelList a(5);
-    a[0] = 7;
-    a[1] = 4;
-    a[2] = 1;
-    a[3] = 2;
-    a[4] = 9;
+    labelList orig(5);
+    orig[0] = 7;
+    orig[1] = 4;
+    orig[2] = 1;
+    orig[3] = 2;
+    orig[4] = 9;
 
+    labelList a(orig);
     Info << "before: " << a << endl;
     sort(a);
-    Info << "after: " << a << endl;
+    Info << "after:  " << a << endl;
+
+    SortableList<label> b(orig);
+    Info << "sorted:  " << b << endl;
+    Info << "indices: " << b.indices() << endl;
+
+    Info << "shrunk:  " << b.shrink() << endl;
+    Info << "indices: " << b.indices() << endl;
+
+    // repeat by assignment
+    b = orig;
+    Info << "unsorted: " << b << endl;
+    b.sort();
+
+    Info << "sorted:   " << b << endl;
+    Info << "indices:  " << b.indices() << endl;
+
+    // transfer assignment
+    b.transfer(orig);
+    Info << "unsorted: " << b << endl;
+    b.sort();
+
+    Info << "sorted:   " << b << endl;
+    Info << "indices:  " << b.indices() << endl;
 
     Info << "End\n" << endl;
 
