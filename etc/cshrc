@@ -148,7 +148,7 @@ case Linux:
 default:
     echo
     echo "Your '$WM_ARCH' operating system is not supported by this release"
-    echo "of OpenFOAM. For further assistance, please contact www.openfoam.org"
+    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.org"
     echo
     breaksw
 
