@@ -156,12 +156,11 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         word rawName(lineStream);
         word groupName("patch" + rawName(1, rawName.size()-1));
 
-        HashTable<label>::const_iterator findGroup =
-            groupToPatch.find(groupName);
+        HashTable<label>::const_iterator fnd = groupToPatch.find(groupName);
 
-        if (findGroup != groupToPatch.end())
+        if (fnd != groupToPatch.end())
         {
-            groupID = findGroup();
+            groupID = fnd();
         }
         else
         {
@@ -187,7 +186,6 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     this->storedPoints().transfer(pointLst);
     this->storedRegions().transfer(regionLst);
 
-    label ptI = 0;
     forAll(faceLst, faceI)
     {
         const label startPt = 3 * faceI;

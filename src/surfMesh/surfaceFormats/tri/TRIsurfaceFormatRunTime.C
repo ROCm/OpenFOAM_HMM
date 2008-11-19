@@ -56,7 +56,7 @@ addNamedTemplatedToRunTimeSelectionTable
 
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     TRIsurfaceFormat,
     face,
     write,
@@ -65,7 +65,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     TRIsurfaceFormat,
     triFace,
     write,
@@ -73,10 +73,9 @@ addNamedTemplatedToMemberFunctionSelectionTable
     tri
 );
 
-
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    UnsortedMeshedSurface,
     TRIsurfaceFormat,
     face,
     write,
@@ -85,7 +84,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    UnsortedMeshedSurface,
     TRIsurfaceFormat,
     triFace,
     write,

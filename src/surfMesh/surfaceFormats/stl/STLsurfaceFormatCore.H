@@ -67,9 +67,8 @@ class STLsurfaceFormatCore
         //- The regions associated with the faces
         List<label> regions_;
 
-        label maxRegionId_;
-
-        HashTable<label> groupToPatch_;
+        //- The solid names, in the order of their first appearance
+        List<word> names_;
 
     // Private Member Functions
 
@@ -93,7 +92,7 @@ public:
     // Static Data
 
         //- The number of bytes in the STL binary header
-        static const int headerSize = 80;
+        static const unsigned int headerSize = 80;
 
     // Static Member Functions
 
@@ -128,7 +127,7 @@ public:
         {
             points_.clear();
             regions_.clear();
-            groupToPatch_.clear();
+            names_.clear();
         }
 
         //- Return full access to the faces
@@ -143,16 +142,10 @@ public:
             return regions_;
         }
 
-        //- The max regionId when reading binary files
-        label maxRegionId() const
+        //- The list of solid names in the order of their first appearance
+        List<word>& names()
         {
-            return maxRegionId_;
-        }
-
-        //- The group/patch information when reading ASCII files
-        const HashTable<label>& groupToPatch() const
-        {
-            return groupToPatch_;
+            return names_;
         }
 
 };

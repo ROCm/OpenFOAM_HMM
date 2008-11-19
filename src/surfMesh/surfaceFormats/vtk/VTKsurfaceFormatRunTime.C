@@ -38,6 +38,25 @@ namespace fileFormats
 
 addNamedTemplatedToMemberFunctionSelectionTable
 (
+    MeshedSurface,
+    VTKsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    vtk
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurface,
+    VTKsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
+    vtk
+);
+
+addNamedTemplatedToMemberFunctionSelectionTable
+(
     UnsortedMeshedSurface,
     VTKsurfaceFormat,
     face,
@@ -55,25 +74,6 @@ addNamedTemplatedToMemberFunctionSelectionTable
     vtk
 );
 
-
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    MeshedSurface,
-    VTKsurfaceFormat,
-    face,
-    write,
-    fileExtension,
-    vtk
-);
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    MeshedSurface,
-    VTKsurfaceFormat,
-    triFace,
-    write,
-    fileExtension,
-    vtk
-);
 
 }
 }

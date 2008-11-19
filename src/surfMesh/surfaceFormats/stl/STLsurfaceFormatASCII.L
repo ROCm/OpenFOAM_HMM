@@ -72,14 +72,14 @@ class STLASCIILexer
 {
     // Private data
 
-        short groupID_;      // current region
-        short maxGroupID_;   // max region
+        label groupID_;      // current region
         label lineNo_;
         word  startError_;
 
         DynamicList<point> points_;
         DynamicList<label> facets_;
-        HashTable<label> groupToPatch_;
+        DynamicList<word>  names_;
+        HashTable<label>   nameIndex_;
 
 public:
 
@@ -110,11 +110,10 @@ public:
         }
 
         //- region names
-        HashTable<label>& groupToPatch()
+        DynamicList<word>& names()
         {
-            return groupToPatch_;
+            return names_;
         }
-
 };
 
 
@@ -122,7 +121,6 @@ STLASCIILexer::STLASCIILexer(istream* is, const label approxNpoints)
 :
     yyFlexLexer(is),
     groupID_(-1),
-    maxGroupID_(-1),
     lineNo_(1),
     points_(approxNpoints),
     facets_(approxNpoints)
@@ -237,37 +235,35 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
     }
 
 <readSolidName>{string} {
-        word group(Foam::string::validate<word>(YYText()));
+        word name(Foam::string::validate<word>(YYText()));
 
-        HashTable<label>::const_iterator findGroup =
-            groupToPatch_.find(group);
-
-        if (findGroup != groupToPatch_.end())
+        HashTable<label>::const_iterator fnd = nameIndex_.find(name);
+        if (fnd != nameIndex_.end())
         {
-            groupID_ = findGroup();
+            groupID_ = fnd();
         }
         else
         {
-            groupID_ = ++maxGroupID_;
-            groupToPatch_.insert(group, groupID_);
+            groupID_ = names_.size();
+            names_.append(name);
+            nameIndex_.insert(name, groupID_);
         }
         BEGIN(INITIAL);
     }
 
 <readSolidName>{space}\n {
-        word group("solid");
+        word name("solid");
 
-        HashTable<label>::const_iterator findGroup =
-            groupToPatch_.find(group);
-
-        if (findGroup != groupToPatch_.end())
+        HashTable<label>::const_iterator fnd = nameIndex_.find(name);
+        if (fnd != nameIndex_.end())
         {
-            groupID_ = findGroup();
+            groupID_ = fnd();
         }
         else
         {
-            groupID_ = ++maxGroupID_;
-            groupToPatch_.insert(group, groupID_);
+            groupID_ = names_.size();
+            names_.append(name);
+            nameIndex_.insert(name, groupID_);
         }
 
         lineNo_++;
@@ -394,7 +390,8 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
     // transfer to normal lists
     points_.transfer(lexer.points());
     regions_.transfer(lexer.facets());
-    groupToPatch_.transfer(lexer.groupToPatch());
+    names_.transfer(lexer.names());
+
     return true;
 }
 

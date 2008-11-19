@@ -69,7 +69,7 @@ Foam::MeshedSurface<Face>::New
         (
             "MeshedSurface<Face>::New"
             "(const fileName&, const word&) : "
-            "constructing UnsortedMeshedSurface"
+            "constructing MeshedSurface"
         )   << "Unknown file extension " << ext << nl << nl
             << "Valid types are :" << nl
             << supported

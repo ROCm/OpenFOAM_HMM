@@ -38,7 +38,7 @@ namespace fileFormats
 
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     STLsurfaceFormat,
     face,
     fileExtension,
@@ -46,7 +46,7 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     STLsurfaceFormat,
     triFace,
     fileExtension,
@@ -55,7 +55,7 @@ addNamedTemplatedToRunTimeSelectionTable
 
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     STLsurfaceFormat,
     face,
     fileExtension,
@@ -63,48 +63,9 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     STLsurfaceFormat,
     triFace,
-    fileExtension,
-    stlb
-);
-
-
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    STLsurfaceFormat,
-    face,
-    write,
-    fileExtension,
-    stl
-);
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    STLsurfaceFormat,
-    triFace,
-    write,
-    fileExtension,
-    stl
-);
-
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    STLsurfaceFormat,
-    face,
-    write,
-    fileExtension,
-    stlb
-);
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    STLsurfaceFormat,
-    triFace,
-    write,
     fileExtension,
     stlb
 );
@@ -141,6 +102,44 @@ addNamedTemplatedToMemberFunctionSelectionTable
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     MeshedSurface,
+    STLsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
+    stlb
+);
+
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    UnsortedMeshedSurface,
+    STLsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    stl
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    UnsortedMeshedSurface,
+    STLsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
+    stl
+);
+
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    UnsortedMeshedSurface,
+    STLsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    stlb
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    UnsortedMeshedSurface,
     STLsurfaceFormat,
     triFace,
     write,

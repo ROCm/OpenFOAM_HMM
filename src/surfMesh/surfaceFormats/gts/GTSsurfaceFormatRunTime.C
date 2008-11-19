@@ -55,7 +55,7 @@ addNamedTemplatedToRunTimeSelectionTable
 
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     GTSsurfaceFormat,
     face,
     write,
@@ -64,7 +64,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     GTSsurfaceFormat,
     triFace,
     write,
@@ -72,10 +72,9 @@ addNamedTemplatedToMemberFunctionSelectionTable
     gts
 );
 
-
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    UnsortedMeshedSurface,
     GTSsurfaceFormat,
     face,
     write,
@@ -84,7 +83,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    UnsortedMeshedSurface,
     GTSsurfaceFormat,
     triFace,
     write,

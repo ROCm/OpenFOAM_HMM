@@ -119,19 +119,19 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
+        //- Write MeshedSurface
+        static void write
+        (
+            const fileName&,
+            const MeshedSurface<Face>&
+        );
+
         //- Write UnsortedMeshedSurface
         //  The output is sorted by regions
         static void write
         (
             const fileName&,
             const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName&,
-            const MeshedSurface<Face>&
         );
 
         //- Write to Ostream as one large file - not really useful

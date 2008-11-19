@@ -29,11 +29,8 @@ License
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Time.H"
-#include "boundBox.H"
 #include "polyBoundaryMesh.H"
 #include "polyMesh.H"
-#include "primitivePatch.H"
-#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -42,38 +39,14 @@ License
 template<class Face>
 Foam::wordHashSet Foam::UnsortedMeshedSurface<Face>::readTypes()
 {
-    wordHashSet supported(2*fileExtensionConstructorTablePtr_->size());
-
-    forAllIter
-    (
-        typename fileExtensionConstructorTable::iterator,
-        *fileExtensionConstructorTablePtr_,
-        iter
-    )
-    {
-        supported.insert(iter.key());
-    }
-
-    return supported;
+    return wordHashSet(*fileExtensionConstructorTablePtr_);
 }
 
 
 template<class Face>
 Foam::wordHashSet Foam::UnsortedMeshedSurface<Face>::writeTypes()
 {
-    wordHashSet supported(2*writefileExtensionMemberFunctionTablePtr_->size());
-
-    forAllIter
-    (
-        typename writefileExtensionMemberFunctionTable::iterator,
-        *writefileExtensionMemberFunctionTablePtr_,
-        iter
-    )
-    {
-        supported.insert(iter.key());
-    }
-
-    return supported;
+    return wordHashSet(*writefileExtensionMemberFunctionTablePtr_);
 }
 
 
@@ -89,11 +62,16 @@ bool Foam::UnsortedMeshedSurface<Face>::canReadType
     {
         return true;
     }
-
-    wordHashSet available = readTypes();
-    available += SiblingType::readTypes();;
-
-    return checkSupport(available, ext, verbose, "reading");
+    else
+    {
+        return checkSupport
+        (
+            readTypes() | SiblingType::readTypes(),
+            ext,
+            verbose,
+            "reading"
+        );
+    }
 }
 
 
@@ -139,8 +117,9 @@ void Foam::UnsortedMeshedSurface<Face>::write
 {
     if (debug)
     {
-        Info<< "UnsortedMeshedSurface::write(const fileName&, const UnsortedMeshedSurface&) : "
-               "writing UnsortedMeshedSurface to " << fName
+        Info<< "UnsortedMeshedSurface::write"
+            "(const fileName&, const UnsortedMeshedSurface&) : "
+            "writing to " << fName
             << endl;
     }
 

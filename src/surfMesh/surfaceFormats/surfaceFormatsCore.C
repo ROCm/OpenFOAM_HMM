@@ -165,6 +165,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
     return findMeshName(d, meshSubDir);
 }
 
+
 // Returns patch info.
 // Sets faceMap to the indexing according to patch numbers.
 // Patch numbers start at 0.

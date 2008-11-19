@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLsurfaceFormat.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -289,35 +290,70 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     // read in the values
     STLsurfaceFormatCore reader(fName);
 
-    // generate the faces:
-    List<Face>&  faceLst = this->storedFaces();
-    faceLst.setSize(reader.regions().size());
-
-    // transfer
+    // transfer points
     this->storedPoints().transfer(reader.points());
-    this->storedRegions().transfer(reader.regions());
 
-    label ptI = 0;
-    forAll(faceLst, faceI)
+    // get the original region information
+    List<word>  names(xferMove(reader.names()));
+    List<label> unsortedRegions(xferMove(reader.regions()));
+
+    // and determine the sorted order:
+    // avoid SortableList since we discard the main list anyhow
+    List<label> faceMap;
+    sortedOrder(unsortedRegions, faceMap);
+
+    // generate the sorted faces and sorted regions:
+    List<Face> faceLst(faceMap.size());
+
+    DynamicList<label> dynPatchSizes;
+    label prevRegion = -1;
+    label regionSize = 0;
+
+    forAll(faceMap, faceI)
     {
-        triFace fTri;
+        const label startPt = 3*faceMap[faceI];
+        const label regionI = unsortedRegions[faceMap[faceI]];
 
-        fTri[0] = ptI++;
-        fTri[1] = ptI++;
-        fTri[2] = ptI++;
+        faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
 
-        faceLst[faceI] = fTri;
+        if (prevRegion != regionI)
+        {
+            if (regionSize)
+            {
+                dynPatchSizes.append(regionSize);
+            }
+            prevRegion = regionI;
+            regionSize = 0;
+        }
+        regionSize++;
     }
 
-    if (reader.binary())
+    if (regionSize)
     {
-        this->setPatches(reader.maxRegionId());
-    }
-    else
-    {
-        this->setPatches(reader.groupToPatch());
+        dynPatchSizes.append(regionSize);
     }
 
+    // transfer:
+    this->storedFaces().transfer(faceLst);
+    unsortedRegions.clear();
+    faceMap.clear();
+
+    label start = 0;
+    surfGroupList newPatches(dynPatchSizes.size());
+    forAll(newPatches, patchI)
+    {
+        newPatches[patchI] = surfGroup
+        (
+            names[patchI],
+            dynPatchSizes[patchI],
+            start,
+            patchI
+        );
+
+        start += dynPatchSizes[patchI];
+    }
+
+    this->addPatches(newPatches);
     this->stitchFaces(SMALL);
     return true;
 }

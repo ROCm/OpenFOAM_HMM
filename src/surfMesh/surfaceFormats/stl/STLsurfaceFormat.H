@@ -28,6 +28,10 @@ Class
 Description
     Provide a means of reading/writing STL files (ASCII and binary).
 
+Note
+    For efficiency, the regions are sorted before creating the faces.
+    The class is thus derived from MeshedSurface.
+
 SourceFiles
     STLsurfaceFormat.C
     STLsurfaceFormatASCII.L
@@ -49,13 +53,13 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class STLsurfaceFormat Declaration
+                     Class STLsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
 class STLsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>
+    public MeshedSurface<Face>
 {
     // Private Member Functions
 
@@ -106,14 +110,13 @@ public:
 
     // Selectors
 
-        //- Read file and return keyedSurface
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
+        static autoPtr<MeshedSurface<Face> > New
         (
             const fileName& fName
         )
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
                 new STLsurfaceFormat<Face>(fName)
             );
@@ -128,18 +131,25 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write UnsortedMeshedSurface (as ASCII) sorted by region
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
         //- Write MeshedSurface (as ASCII)
         static void write
         (
             Ostream&,
             const MeshedSurface<Face>&
+        );
+
+        //- Write MeshedSurface
+        static void write
+        (
+            const fileName&,
+            const MeshedSurface<Face>&
+        );
+
+        //- Write UnsortedMeshedSurface (as ASCII) sorted by region
+        static void write
+        (
+            Ostream&,
+            const UnsortedMeshedSurface<Face>&
         );
 
         //- Write UnsortedMeshedSurface
@@ -148,13 +158,6 @@ public:
         (
             const fileName&,
             const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName&,
-            const MeshedSurface<Face>&
         );
 
         //- Write object (only ASCII output)

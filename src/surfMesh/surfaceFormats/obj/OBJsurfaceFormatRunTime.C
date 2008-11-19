@@ -56,6 +56,25 @@ addNamedTemplatedToRunTimeSelectionTable
 
 addNamedTemplatedToMemberFunctionSelectionTable
 (
+    MeshedSurface,
+    OBJsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    obj
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurface,
+    OBJsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
+    obj
+);
+
+addNamedTemplatedToMemberFunctionSelectionTable
+(
     UnsortedMeshedSurface,
     OBJsurfaceFormat,
     face,
@@ -73,25 +92,6 @@ addNamedTemplatedToMemberFunctionSelectionTable
     obj
 );
 
-
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    MeshedSurface,
-    OBJsurfaceFormat,
-    face,
-    write,
-    fileExtension,
-    obj
-);
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    MeshedSurface,
-    OBJsurfaceFormat,
-    triFace,
-    write,
-    fileExtension,
-    obj
-);
 
 }
 }

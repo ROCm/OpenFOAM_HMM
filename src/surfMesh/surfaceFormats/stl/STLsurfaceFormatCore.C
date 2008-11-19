@@ -26,6 +26,7 @@ License
 
 #include "STLsurfaceFormatCore.H"
 #include "OSspecific.H"
+#include "Map.H"
 
 #undef DEBUG_STLBINARY
 
@@ -143,6 +144,9 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
     points_.setSize(3*nTris);
     regions_.setSize(nTris);
 
+    Map<label> regionToPatch;
+    DynamicList<word> dynNames;
+
     label ptI = 0;
     forAll(regions_, faceI)
     {
@@ -155,20 +159,31 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
         points_[ptI++] = stlTri.c();
 
         // interprete colour as a region
-        regions_[faceI] = stlTri.region();
-        if (maxRegionId_ < stlTri.region())
+        const label stlRegion = stlTri.region();
+
+        Map<label>::const_iterator fnd = regionToPatch.find(stlRegion);
+        label regionI;
+        if (fnd != regionToPatch.end())
         {
-            maxRegionId_ = stlTri.region();
+            regionI = fnd();
+        }
+        else
+        {
+            regionI = dynNames.size();
+            dynNames.append(word("patch") + ::Foam::name(regionI));
+            regionToPatch.insert(stlRegion, regionI);
         }
 
+        regions_[faceI] = regionI;
+
 #ifdef DEBUG_STLBINARY
-        if (prevRegion != stlTri.region())
+        if (prevRegion != regionI)
         {
             if (prevRegion != -1)
             {
                 Info<< "endsolid region" << prevRegion << nl;
             }
-            prevRegion = stlTri.region();
+            prevRegion = regionI;
 
             Info<< "solid region" << prevRegion << nl;
         }
@@ -182,6 +197,8 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
             << " endfacet" << endl;
 #endif
     }
+
+    names_.transfer(dynNames);
 
     return true;
 }
@@ -197,8 +214,7 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
     binary_(false),
     points_(0),
     regions_(0),
-    maxRegionId_(0),
-    groupToPatch_(0)
+    names_(0)
 {
     off_t fileSize = Foam::size(fName);
 
@@ -228,14 +244,17 @@ void Foam::fileFormats::STLsurfaceFormatCore::writeHeaderBINARY
     unsigned int nTris
 )
 {
-    // Write the STL header, avoid possible trailing junk
-    string header("STL binary file", headerSize);
-    for (label i = header.size(); i < headerSize; ++i)
+    // STL header with extra information about nTris
+    char header[headerSize];
+    sprintf(header, "STL binary file %u facets", nTris);
+
+    // avoid trailing junk
+    for (size_t i = strlen(header); i < headerSize; ++i)
     {
         header[i] = 0;
     }
-    os.write(header.c_str(), headerSize);
 
+    os.write(header, headerSize);
     os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
 
 }

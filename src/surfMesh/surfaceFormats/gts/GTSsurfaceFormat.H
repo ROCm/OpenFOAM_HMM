@@ -95,6 +95,23 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
+        //- Write MeshedSurface
+        static void write
+        (
+            Ostream&,
+            const MeshedSurface<Face>&
+        );
+
+        //- Write MeshedSurface
+        static void write
+        (
+            const fileName& fName,
+            const MeshedSurface<Face>& surf
+        )
+        {
+            write(OFstream(fName)(), surf);
+        }
+
         //- Write UnsortedMeshedSurface
         //  The output is sorted by regions
         static void write
@@ -109,23 +126,6 @@ public:
         (
             const fileName& fName,
             const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(fName)(), surf);
-        }
-
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& fName,
-            const MeshedSurface<Face>& surf
         )
         {
             write(OFstream(fName)(), surf);

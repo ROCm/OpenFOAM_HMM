@@ -29,7 +29,6 @@ License
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Time.H"
-#include "SortableList.H"
 #include "ListOps.H"
 #include "polyBoundaryMesh.H"
 #include "polyMesh.H"
@@ -42,38 +41,14 @@ License
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::readTypes()
 {
-    wordHashSet known(2*fileExtensionConstructorTablePtr_->size());
-
-    forAllIter
-    (
-        typename fileExtensionConstructorTable::iterator,
-        *fileExtensionConstructorTablePtr_,
-        iter
-    )
-    {
-        known.insert(iter.key());
-    }
-
-    return known;
+    return wordHashSet(*fileExtensionConstructorTablePtr_);
 }
 
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::writeTypes()
 {
-    wordHashSet supported(2*writefileExtensionMemberFunctionTablePtr_->size());
-
-    forAllIter
-    (
-        typename writefileExtensionMemberFunctionTable::iterator,
-        *writefileExtensionMemberFunctionTablePtr_,
-        iter
-    )
-    {
-        supported.insert(iter.key());
-    }
-
-    return supported;
+    return wordHashSet(*writefileExtensionMemberFunctionTablePtr_);
 }
 
 
@@ -91,11 +66,16 @@ bool Foam::MeshedSurface<Face>::canReadType
     {
         return true;
     }
-
-    wordHashSet available = readTypes();
-    available += SiblingType::readTypes();
-
-    return checkSupport(available, ext, verbose, "reading");
+    else
+    {
+        return checkSupport
+        (
+            readTypes() | SiblingType::readTypes(),
+            ext,
+            verbose,
+            "reading"
+        );
+    }
 }
 
 
@@ -141,8 +121,9 @@ void Foam::MeshedSurface<Face>::write
 {
     if (debug)
     {
-        Info<< "MeshedSurface::write(const fileName&, const MeshedSurface&) : "
-               "writing MeshedSurface to " << fName
+        Info<< "MeshedSurface::write"
+            "(const fileName&, const MeshedSurface&) : "
+            "writing to " << fName
             << endl;
     }
 

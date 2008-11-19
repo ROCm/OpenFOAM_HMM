@@ -38,7 +38,7 @@ namespace fileFormats
 
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     SMESHsurfaceFormat,
     face,
     write,
@@ -47,7 +47,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     SMESHsurfaceFormat,
     triFace,
     write,
@@ -55,10 +55,9 @@ addNamedTemplatedToMemberFunctionSelectionTable
     smesh
 );
 
-
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    UnsortedMeshedSurface,
     SMESHsurfaceFormat,
     face,
     write,
@@ -67,7 +66,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    UnsortedMeshedSurface,
     SMESHsurfaceFormat,
     triFace,
     write,
