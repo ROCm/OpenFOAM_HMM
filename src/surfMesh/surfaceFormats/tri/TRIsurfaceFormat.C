@@ -190,13 +190,8 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     label ptI = 0;
     forAll(faceLst, faceI)
     {
-        triFace fTri;
-
-        fTri[0] = ptI++;
-        fTri[1] = ptI++;
-        fTri[2] = ptI++;
-
-        faceLst[faceI] = fTri;
+        const label startPt = 3 * faceI;
+        faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
     }
 
     this->setPatches(groupToPatch);

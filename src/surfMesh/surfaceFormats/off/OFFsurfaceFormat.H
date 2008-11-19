@@ -66,7 +66,7 @@ namespace fileFormats
 template<class Face>
 class OFFsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public OFFsurfaceFormatCore
 {
     // Private Member Functions
@@ -95,12 +95,12 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
+        static autoPtr<MeshedSurface<Face> > New
         (
             const fileName& fName
         )
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
                 new OFFsurfaceFormat(fName)
             );
@@ -114,6 +114,23 @@ public:
 
         //- Read from file
         virtual bool read(const fileName&);
+
+        //- Write MeshedSurface
+        static void write
+        (
+            Ostream&,
+            const MeshedSurface<Face>&
+        );
+
+        //- Write MeshedSurface
+        static void write
+        (
+            const fileName& fName,
+            const MeshedSurface<Face>& surf
+        )
+        {
+            write(OFstream(fName)(), surf);
+        }
 
         //- Write UnsortedMeshedSurface
         //  The output is sorted by region.
@@ -129,23 +146,6 @@ public:
         (
             const fileName& fName,
             const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(fName)(), surf);
-        }
-
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& fName,
-            const MeshedSurface<Face>& surf
         )
         {
             write(OFstream(fName)(), surf);

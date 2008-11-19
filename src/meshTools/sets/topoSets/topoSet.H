@@ -39,7 +39,7 @@ SourceFiles
 #ifndef topoSet_H
 #define topoSet_H
 
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "regIOobject.H"
 #include "labelList.H"
 #include "typeInfo.H"

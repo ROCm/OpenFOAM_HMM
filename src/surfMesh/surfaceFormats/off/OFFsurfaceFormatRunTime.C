@@ -38,7 +38,7 @@ namespace fileFormats
 
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     OFFsurfaceFormat,
     face,
     fileExtension,
@@ -46,29 +46,9 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     OFFsurfaceFormat,
     triFace,
-    fileExtension,
-    off
-);
-
-
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    OFFsurfaceFormat,
-    face,
-    write,
-    fileExtension,
-    off
-);
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    OFFsurfaceFormat,
-    triFace,
-    write,
     fileExtension,
     off
 );
@@ -86,6 +66,26 @@ addNamedTemplatedToMemberFunctionSelectionTable
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     MeshedSurface,
+    OFFsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
+    off
+);
+
+
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    UnsortedMeshedSurface,
+    OFFsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    off
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    UnsortedMeshedSurface,
     OFFsurfaceFormat,
     triFace,
     write,

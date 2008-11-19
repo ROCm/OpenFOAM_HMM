@@ -46,7 +46,7 @@ SourceFiles
 
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "Tuple2.H"
 #include "OFstream.H"
 #include "Switch.H"

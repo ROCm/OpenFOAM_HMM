@@ -53,6 +53,7 @@ SourceFiles
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +74,7 @@ template<class Face>
 
 
 /*---------------------------------------------------------------------------*\
-                      Class UnsortedMeshedSurface Declaration
+                   Class UnsortedMeshedSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -88,6 +89,7 @@ private:
 
     //- Typedefs for convenience
         typedef PrimitiveMeshedSurface<Face> ParentType;
+        typedef MeshedSurface<Face> SiblingType;
 
         //- Typedef for type holding the region (patch) informationm
         typedef surfPatchIdentifier PatchRegionType;
@@ -156,6 +158,9 @@ public:
 
         //- Can we write this file format?
         static bool canWriteType(const word& ext, const bool verbose=false);
+
+        static wordHashSet readTypes();
+        static wordHashSet writeTypes();
 
     // Constructors
 
@@ -325,7 +330,7 @@ public:
         //  Returns true if any points merged
         virtual bool stitchFaces
         (
-            const scalar tol=SMALL, 
+            const scalar tol=SMALL,
             const bool verbose=false
         );
 

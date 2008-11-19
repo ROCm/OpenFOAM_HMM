@@ -80,7 +80,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
 
     // get dimensions
-    label nPoints, nEdges, nElems;
+    label nPoints, nElems, nEdges;
 
     string line = this->getLineNoComment(is);
     {
@@ -105,9 +105,10 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     // use a DynamicList for possible on-the-fly triangulation
     DynamicList<Face>  faceLst(nElems);
 
-    forAll(faceLst, faceI)
+    for (label faceI = 0; faceI < nElems; ++faceI)
     {
         line = this->getLineNoComment(is);
+
         {
             IStringStream lineStream(line);
 
@@ -128,7 +129,6 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
                 triFace fTri;
 
                 // simple face triangulation about f[0].
-                // cannot use face::triangulation since points are incomplete
                 fTri[0] = f[0];
                 for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {

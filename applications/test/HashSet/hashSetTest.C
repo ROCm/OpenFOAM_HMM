@@ -26,7 +26,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelHashSet.H"
+#include "HashSet.H"
 
 using namespace Foam;
 
@@ -35,19 +35,45 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    HashSet<Foam::string> testSet(0);
+    HashSet<string> setA(0);
 
-    testSet.insert("kjhk");
-    testSet.insert("kjhk2");
+    setA.insert("kjhk");
+    setA.insert("kjhk2");
 
-    Info<< testSet << endl;
+    Info<< setA << endl;
 
-    labelHashSet testLabelHashSet(1);
+    labelHashSet setB(1);
+    setB.insert(11);
+    setB.insert(42);
 
-    testLabelHashSet.insert(11);
-    testLabelHashSet.insert(42);
+    Info<< "setB : " << setB << endl;
 
-    Info<< testLabelHashSet << endl;
+    labelHashSet setC(1);
+    setC.insert(2008);
+    setC.insert(1984);
+
+    Info<< "setC : " << setC << endl;
+
+    labelHashSet setD(1);
+    setD.insert(11);
+    setD.insert(100);
+    setD.insert(2008);
+
+    Info<< "setD : " << setD << endl;
+
+    Info<< "setB == setC: " << (setB == setC) << endl;
+    Info<< "setC != setD: " << (setC != setD) << endl;
+
+    // test operations
+    setB += setC;
+    Info<< "setB += setC : " << setB << endl;
+
+    setB &= setD;
+    Info<< "setB &= setD : " << setB << endl;
+
+    setB += setC;
+    setB -= setD;
+    Info<< "setB += setC -= setD : " << setB << endl;
 
     return 0;
 }

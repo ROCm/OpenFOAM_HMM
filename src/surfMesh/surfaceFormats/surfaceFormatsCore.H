@@ -40,6 +40,7 @@ SourceFiles
 #include "surfGroupList.H"
 #include "labelList.H"
 #include "Map.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +98,14 @@ public:
             const UList<label>& regionLst,
             const Map<word>& patchNames,
             labelList& faceMap
+        );
+
+        static bool checkSupport
+        (
+            const wordHashSet& available,
+            const word& ext,
+            const bool verbose,
+            const word& functionName
         );
 
     // Constructors

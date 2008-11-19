@@ -30,7 +30,7 @@ Description
 #include "treeNode.H"
 #include "treeBoundBox.H"
 #include "octree.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

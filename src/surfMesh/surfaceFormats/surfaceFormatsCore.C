@@ -250,6 +250,40 @@ Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
 }
 
 
+bool
+Foam::fileFormats::surfaceFormatsCore::checkSupport
+(
+    const wordHashSet& available,
+    const word& ext,
+    const bool verbose,
+    const word& functionName
+)
+{
+
+    if (available.found(ext))
+    {
+        return true;
+    }
+    else if (verbose)
+    {
+        wordList toc = available.toc();
+        SortableList<word> known(xferMove(toc));
+
+        Info<<"Unknown file extension for " << functionName
+            << " : " << ext << nl
+            <<"Valid types: ( " << nativeExt;
+        // compact output:
+        forAll(known, i)
+        {
+            Info<<" " << known[i];
+        }
+        Info<<" )" << endl;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::surfaceFormatsCore::surfaceFormatsCore()
