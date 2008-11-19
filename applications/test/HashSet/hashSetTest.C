@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "HashSet.H"
+#include "Map.H"
 
 using namespace Foam;
 
@@ -35,12 +36,46 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    HashSet<string> setA(0);
+    wordHashSet setA(0);
+    HashTable<label, word> tableA;
+
+    HashTable<empty> tableB;
+    Map<label> mapA;
 
     setA.insert("kjhk");
     setA.insert("kjhk2");
 
+    tableA.insert("value1", 1);
+    tableA.insert("value2", 2);
+    tableA.insert("value3", 3);
+
+    tableB.insert("value4", empty());
+    tableB.insert("value5", empty());
+    tableB.insert("value6", empty());
+
+    mapA.set(1, 1);
+    mapA.set(2, 2);
+    mapA.set(3, 3);
+    mapA.set(4, 4);
+
     Info<< setA << endl;
+    Info<< tableA << endl;
+    Info<< mapA << endl;
+
+    Info<< "create from HashSet: ";
+    Info<< wordHashSet(setA) << endl;
+    Info<< "create from HashTable<T>: ";
+    Info<< wordHashSet(tableA) << endl;
+    Info<< "create from HashTable<empty>: ";
+    Info<< wordHashSet(tableB) << endl;
+
+    Info<< "create from Map<label>: ";
+    Info<< labelHashSet(mapA) << endl;
+
+    Info<<"combined toc: "
+        << (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB))
+        << nl;
+
 
     labelHashSet setB(1);
     setB.insert(11);
@@ -71,9 +106,10 @@ int main(int argc, char *argv[])
     setB &= setD;
     Info<< "setB &= setD : " << setB << endl;
 
-    setB += setC;
-    setB -= setD;
-    Info<< "setB += setC -= setD : " << setB << endl;
+    Info<< "setB : " << setB << endl;
+    Info<< "setC : " << setC << endl;
+    Info<< "setD : " << setD << endl;
+    Info<< "setB ^ setC ^ setD : " << (setB ^ setC ^ setD) << endl;
 
     return 0;
 }

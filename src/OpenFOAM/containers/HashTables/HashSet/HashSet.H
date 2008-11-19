@@ -106,22 +106,25 @@ public:
             HashTable<empty, Key, Hash>(hs)
         {}
 
+        //- Construct from table of contents of the HashTable
+        template<class T>
+        HashSet(const HashTable<T, Key, Hash>& ht);
 
     // Member Functions
 
         // Edit
 
-            //- Insert a new entry
-            bool insert(const Key& key)
-            {
-                return HashTable<empty, Key, Hash>::insert(key, empty());
-            }
+        //- Insert a new entry
+        bool insert(const Key& key)
+        {
+            return HashTable<empty, Key, Hash>::insert(key, empty());
+        }
 
-            //- Same as insert (cannot overwrite empty content)
-            bool set(const Key& key)
-            {
-                return HashTable<empty, Key, Hash>::insert(key, empty());
-            }
+        //- Same as insert (cannot overwrite empty content)
+        bool set(const Key& key)
+        {
+            return HashTable<empty, Key, Hash>::insert(key, empty());
+        }
 
 
     // Member Operators
@@ -134,16 +137,54 @@ public:
         bool operator!=(const HashSet<Key, Hash>&) const;
 
 
-        //- Add entries listed in the given HashSet to this HashSet
-        void operator+=(const HashSet<Key, Hash>&);
-
-        //- Remove entries listed in the given HashSet from this HashSet
-        void operator-=(const HashSet<Key, Hash>&);
+        //- Combine entries from HashSets
+        void operator|=(const HashSet<Key, Hash>&);
 
         //- Only retain entries found in both HashSets
         void operator&=(const HashSet<Key, Hash>&);
 
+        //- Only retain unique entries (xor)
+        void operator^=(const HashSet<Key, Hash>&);
+
+        //- Add entries listed in the given HashSet to this HashSet
+        inline void operator+=(const HashSet<Key, Hash>& rhs)
+        {
+            this->operator|=(rhs);
+        }
+
+        //- Remove entries listed in the given HashSet from this HashSet
+        void operator-=(const HashSet<Key, Hash>&);
+
 };
+
+
+// Global Operators
+
+//- Combine entries from HashSets
+template<class Key, class Hash>
+HashSet<Key,Hash> operator|
+(
+    const HashSet<Key,Hash>& hash1,
+    const HashSet<Key,Hash>& hash2
+);
+
+
+//- Create a HashSet that only contains entries found in both HashSets
+template<class Key, class Hash>
+HashSet<Key,Hash> operator&
+(
+    const HashSet<Key,Hash>& hash1,
+    const HashSet<Key,Hash>& hash2
+);
+
+
+//- Create a HashSet that only contains unique entries (xor)
+template<class Key, class Hash>
+HashSet<Key,Hash> operator^
+(
+    const HashSet<Key,Hash>& hash1,
+    const HashSet<Key,Hash>& hash2
+);
 
 
 //- A HashSet with word keys.
