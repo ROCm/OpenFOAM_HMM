@@ -47,9 +47,9 @@ PISO
     momentumPredictor no;
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
-    nGammaCorr      1;
-    nGammaSubCycles 2;
-    cGamma          1;
+    nAlphaCorr      1;
+    nAlphaSubCycles 2;
+    cAlpha          1;
 }
 
 // ************************************************************************* //
