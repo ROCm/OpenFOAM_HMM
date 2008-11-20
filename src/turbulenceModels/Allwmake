@@ -2,13 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-<<<<<<< HEAD:src/turbulenceModels/Allwmake
 (cd LES && ./Allwmake )
 (cd incompressible && ./Allwmake )
 (cd compressible && ./Allwmake )
-=======
-RAS/Allwmake
-LES/Allwmake
->>>>>>> dbb23a5af6a26197f9e6ead5c920b2c94cff4832:src/turbulenceModels/Allwmake
 
 # ----------------------------------------------------------------- end-of-file
