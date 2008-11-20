@@ -1,0 +1,5 @@
+turbulenceModel.C
+newTurbulenceModel.C
+laminar/laminar.C
+
+LIB = $(FOAM_LIBBIN)/libincompressibleTurbulenceModel
