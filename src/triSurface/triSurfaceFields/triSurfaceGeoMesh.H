@@ -44,31 +44,54 @@ namespace Foam
 
 class triSurfaceGeoMesh
 {
-    const triSurface& s_;
+
+protected:
+
+    // Protected data
+
+        //- Reference to Mesh
+        const triSurface& mesh_;
+
 
 public:
 
-    typedef triSurface Mesh;
+    // Public typedefs
 
-    triSurfaceGeoMesh(const triSurface& s)
-    :
-        s_(s)
-    {}
+        typedef triSurface Mesh;
 
-    //- Return size
-    label size() const
-    {
-        return size(s_);
-    }
 
-    //- Return size
-    static label size(const Mesh& mesh)
-    {
-        return mesh.size();
-    }
+    // Constructors
+
+        //- Construct from Mesh
+        explicit triSurfaceGeoMesh(const triSurface& mesh)
+        :
+            mesh_(mesh)
+        {}
+
+
+    // Member Functions
+
+        //- Return size
+        label size() const
+        {
+            return size(mesh_);
+        }
+
+        //- Return size
+        static label size(const triSurface& mesh)
+        {
+            return mesh.size();
+        }
+
+    // Member Operators
+
+        //- Return reference to triSurface
+        const triSurface& operator()() const
+        {
+            return mesh_;
+        }
 
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

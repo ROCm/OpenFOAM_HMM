@@ -41,7 +41,7 @@ inline Foam::cell::cell(label s)
 
 
 // Construct from components
-inline Foam::cell::cell(const labelList& lst)
+inline Foam::cell::cell(const UList<label>& lst)
 :
     labelList(lst)
 {}

@@ -181,10 +181,7 @@ inline void Foam::autoPtr<T>::operator=(const autoPtr<T>& ap)
 {
     if (this != &ap)
     {
-        const_cast<autoPtr<T>&>(*this).reset
-        (
-            const_cast<autoPtr<T>&>(ap).ptr()
-        );
+        reset(const_cast<autoPtr<T>&>(ap).ptr());
     }
 }
 

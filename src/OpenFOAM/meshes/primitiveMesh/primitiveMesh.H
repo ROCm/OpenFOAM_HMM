@@ -64,7 +64,7 @@ SourceFiles
 #include "cellShapeList.H"
 #include "labelList.H"
 #include "boolList.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "Map.H"
 #include "EdgeMap.H"
 

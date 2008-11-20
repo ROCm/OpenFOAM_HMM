@@ -133,7 +133,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
     sort
     (
         pointIndices,
-        SortableList<scalar>::less(rotatedPoints.component(vector::X))
+        UList<scalar>::less(rotatedPoints.component(vector::X))
     );
 
     assignToProcessorGroup(processorGroups, n_.x());
@@ -149,7 +149,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
     sort
     (
         pointIndices,
-        SortableList<scalar>::less(rotatedPoints.component(vector::Y))
+        UList<scalar>::less(rotatedPoints.component(vector::Y))
     );
 
     assignToProcessorGroup(processorGroups, n_.y());
@@ -165,7 +165,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
     sort
     (
         pointIndices,
-        SortableList<scalar>::less(rotatedPoints.component(vector::Z))
+        UList<scalar>::less(rotatedPoints.component(vector::Z))
     );
 
     assignToProcessorGroup(processorGroups, n_.z());

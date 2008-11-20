@@ -40,24 +40,28 @@ Description
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 calcSortedEdgeFaces() const
 {
     if (sortedEdgeFacesPtr_)
     {
-        FatalErrorIn("PrimitivePatchExtra<Face, ListType, PointField>::calcSortedEdgeFaces()")
+        FatalErrorIn
+        (
+            "PrimitivePatchExtra<Face, FaceList, PointField>::"
+            "calcSortedEdgeFaces()"
+        )
             << "sortedEdgeFacesPtr_ already set"
             << abort(FatalError);
     }
 
-    const labelListList& eFaces = TemplateType::edgeFaces();
-    const edgeList& edgeLst = TemplateType::edges();
-    const pointField& locPointLst = TemplateType::localPoints();
-    const List<FaceType>& locFaceLst = TemplateType::localFaces();
+    const labelListList& eFaces = this->edgeFaces();
+    const edgeList& edgeLst = this->edges();
+    const Field<PointType>& locPointLst = this->localPoints();
+    const List<Face>& locFaceLst  = this->localFaces();
 
     // create the lists for the various results. (resized on completion)
     sortedEdgeFacesPtr_ = new labelListList(eFaces.size());
@@ -101,7 +105,7 @@ calcSortedEdgeFaces() const
             for (label nbI = 1; nbI < myFaceNbs.size(); nbI++)
             {
                 // Get opposite vertex
-                const FaceType& f = locFaceLst[myFaceNbs[nbI]];
+                const Face& f = locFaceLst[myFaceNbs[nbI]];
                 label fp0 = findIndex(f, e[0]);
                 label fp1 = f.fcIndex(fp0);
                 label vertI = (f[fp1] != e[1] ? f[fp1] : f.fcIndex(fp1));
@@ -137,30 +141,31 @@ calcSortedEdgeFaces() const
 template
 <
     class Face,
-    template<class> class ListType,
+    template<class> class FaceList,
     class PointField,
     class PointType
 >
-void Foam::PrimitivePatchExtra<Face, ListType, PointField, PointType>::
+void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::
 calcEdgeOwner() const
 {
     if (edgeOwnerPtr_)
     {
-        FatalErrorIn("PrimitivePatchExtra<Face, ListType, PointField>::calcEdgeOwner()")
+        FatalErrorIn
+        (
+            "PrimitivePatchExtra<Face, FaceList, PointField>::"
+            "calcEdgeOwner()"
+        )
             << "edgeOwnerPtr_ already set"
             << abort(FatalError);
     }
 
     // create the owner list
-    edgeOwnerPtr_ = new labelList
-    (
-        TemplateType::nEdges()
-    );
+    edgeOwnerPtr_ = new labelList(this->nEdges());
     labelList& edgeOwner = *edgeOwnerPtr_;
 
-    const edgeList& edgeLst = TemplateType::edges();
-    const labelListList& eFaces = TemplateType::edgeFaces();
-    const List<FaceType>& locFaceLst = TemplateType::localFaces();
+    const edgeList& edgeLst = this->edges();
+    const labelListList& eFaces = this->edgeFaces();
+    const List<Face>& locFaceLst = this->localFaces();
 
 
     forAll(edgeLst, edgeI)
@@ -181,7 +186,7 @@ calcEdgeOwner() const
 
             forAll(myFaces, i)
             {
-                const FaceType& f = locFaceLst[myFaces[i]];
+                const Face& f = locFaceLst[myFaces[i]];
 
                 if (f.findEdge(e) > 0)
                 {
@@ -192,11 +197,15 @@ calcEdgeOwner() const
 
             if (edgeOwner[edgeI] == -1)
             {
-                FatalErrorIn("PrimitivePatchExtra<Face, ListType, PointField>::calcEdgeOwner()")
+                FatalErrorIn
+                (
+                    "PrimitivePatchExtra<Face, FaceList, PointField>::"
+                    "calcEdgeOwner()"
+                )
                     << "Edge " << edgeI << " vertices:" << e
                     << " is used by faces " << myFaces
                     << " vertices:"
-                    << IndirectList<FaceType>(locFaceLst, myFaces)()
+                    << IndirectList<Face>(locFaceLst, myFaces)()
                     << " none of which use the edge vertices in the same order"
                     << nl << "I give up" << abort(FatalError);
             }

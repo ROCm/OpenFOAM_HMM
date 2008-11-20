@@ -33,7 +33,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-#export WM_PROJECT_VERSION=1.5.x
+# export WM_PROJECT_VERSION=1.5.x
 : ${WM_PROJECT_VERSION:=dev}; export WM_PROJECT_VERSION
 
 
@@ -152,7 +152,7 @@ Linux)
     cat <<USAGE
 
     Your "$WM_ARCH" operating system is not supported by this release
-    of OpenFOAM. For further assistance, please contact www.openfoam.org
+    of OpenFOAM. For further assistance, please contact www.OpenFOAM.org
 
 USAGE
     ;;
@@ -198,7 +198,7 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.sh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # _foamSource $WM_PROJECT_DIR/etc/apps/paraview/bashrc
 _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
-# _foamSource $WM_PROJECT_DIR/etc/apps/ensightFoam/bashrc
+_foamSource $WM_PROJECT_DIR/etc/apps/ensight/bashrc
 _foamSource $WM_PROJECT_DIR/etc/apps/cint/bashrc
 
 

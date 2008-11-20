@@ -22,9 +22,26 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    surfaceConvert
+
 Description
-    Converts to and from Foam surface format. Optionally orders triangles
-    by region.
+    Converts from one surface mesh format to another
+
+Usage
+    - surfaceConvert inputFile outputFile [OPTION]
+
+    @param -clean \n
+    Perform some surface checking/cleanup on the input surface
+
+    @param -scale \<scale\> \n
+    Specify a scaling factor for writing the files
+
+    @param -group \n
+    Orders faces by region
+
+Note
+    The filename extensions are used to determine the file format type.
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,34 +61,41 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validOptions.insert("cleanup", "");
+    argList::validArgs.append("inputFile");
+    argList::validArgs.append("outputFile");
+    argList::validOptions.insert("clean", "");
+    argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("group", "");
-    argList::validArgs.append("input surface file");
-    argList::validArgs.append("output surface file");
+
     argList args(argc, argv);
+    const stringList& params = args.additionalArgs();
 
-    fileName inFileName(args.additionalArgs()[0]);
-    fileName outFileName(args.additionalArgs()[1]);
+    scalar scaleFactor = 0;
+    if (args.options().found("scale"))
+    {
+        IStringStream(args.options()["scale"])() >> scaleFactor;
+    }
 
-    if (outFileName == inFileName)
+    fileName importName(params[0]);
+    fileName exportName(params[1]);
+
+    if (importName == exportName)
     {
         FatalErrorIn(args.executable())
-            << "Output file " << outFileName
-            << " would overwrite input file."
+            << "Output file " << exportName << " would overwrite input file."
             << exit(FatalError);
     }
 
-    Info << "Reading : " << inFileName << endl;
-    triSurface surf(inFileName);
+    Info<< "Reading : " << importName << endl;
+    triSurface surf(importName);
 
     Info<< "Read surface:" << endl;
     surf.writeStats(Info);
     Info<< endl;
-    
 
-    if (args.options().found("cleanup"))
+    if (args.options().found("clean"))
     {
-        Info << "Cleaning up surface" << endl;
+        Info<< "Cleaning up surface" << endl;
         surf.cleanup(true);
 
         Info<< "After cleaning up surface:" << endl;
@@ -83,20 +107,28 @@ int main(int argc, char *argv[])
 
     if (sortByRegion)
     {
-        Info << "Reordering faces into groups; one per region." << endl;
+        Info<< "Reordering faces into groups; one per region." << endl;
     }
     else
     {
-        Info << "Maintaining face ordering" << endl;
+        Info<< "Maintaining face ordering" << endl;
     }
 
-    Info << "Writing : " << outFileName << endl;
-    surf.write(outFileName, sortByRegion);
+    Info<< "writing " << exportName;
+    if (scaleFactor > 0)
+    {
+        Info<< " without scaling" << endl;
+    }
+    else
+    {
+        Info<< " with scaling " << scaleFactor << endl;
+        surf.scalePoints(scaleFactor);
+    }
+    surf.write(exportName, sortByRegion);
 
-    Info << "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }
-
 
 // ************************************************************************* //

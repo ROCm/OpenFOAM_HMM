@@ -675,9 +675,9 @@ void Foam::fvMeshSubset::setCellSubset
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            newPoints,
-            newFaces,
-            newCells
+            xferMove(newPoints),
+            xferMove(newFaces),
+            xferMove(newCells)
         )
     );
 
@@ -1173,9 +1173,9 @@ void Foam::fvMeshSubset::setLargeCellSubset
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            newPoints,
-            newFaces,
-            newCells,
+            xferMove(newPoints),
+            xferMove(newFaces),
+            xferMove(newCells),
             syncPar           // parallel synchronisation
         )
     );

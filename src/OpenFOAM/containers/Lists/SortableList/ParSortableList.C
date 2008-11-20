@@ -125,7 +125,7 @@ void Foam::ParSortableList<Type>::checkAndSend
 
 // Construct from List, sorting the elements
 template <class Type>
-Foam::ParSortableList<Type>::ParSortableList(const List<Type>& values)
+Foam::ParSortableList<Type>::ParSortableList(const UList<Type>& values)
 :
     List<Type>(values),
     indices_(0),

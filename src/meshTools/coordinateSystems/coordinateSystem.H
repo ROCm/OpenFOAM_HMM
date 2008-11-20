@@ -26,8 +26,8 @@ Class
     Foam::coordinateSystem
 
 Description
-    A cartesian coordinate system and the base class for
-    other coordinate system specifications
+    A cartesian coordinate system and the base class for other coordinate
+    system specifications
 
     All systems are defined by an origin point and a coordinateRotation.
     For convenience, the dictionary constructor forms allow a few shortcuts:
@@ -99,6 +99,29 @@ Description
         )
     @endverbatim
 
+    - additionally, if the coordinateSystem points to a plain entry,
+      it can be used to reference one of the global coordinateSystems
+    @verbatim
+        1
+        (
+        cat1
+        {
+            coordinateSystem  system_10;
+            porosity        0.781;
+            Darcy
+            {
+                d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
+                f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
+            }
+        }
+        )
+    @endverbatim
+    For this to work correctly, the coordinateSystem constructor must be
+    supplied with both a dictionary and an objectRegistry.
+
+See Also
+    coordinateSystems and coordinateSystems::New
+
 SourceFiles
     coordinateSystem.C
     newCoordinateSystem.C
@@ -131,6 +154,9 @@ class coordinateSystem
 
         //- Name of coordinate system
         mutable word name_;
+
+        //- Optional note
+        mutable string note_;
 
         //- Origin
         mutable point origin_;
@@ -177,7 +203,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null. This is equivalent to an identity coordinateSystem
         coordinateSystem();
 
         //- Construct from origin and 2 axes
@@ -197,11 +223,15 @@ public:
             const coordinateRotation&
         );
 
+        //- Construct from dictionary with a given name
+        coordinateSystem(const word& name, const dictionary&);
+
         //- Construct from dictionary with default name
         coordinateSystem(const dictionary&);
 
-        //- Construct from dictionary
-        coordinateSystem(const word& name, const dictionary&);
+        //- Construct from dictionary (default name)
+        //  With the ability to reference global coordinateSystems
+        coordinateSystem(const dictionary&, const objectRegistry&);
 
         //- Construct from Istream
         //  The Istream contains a word followed by a dictionary
@@ -281,14 +311,14 @@ public:
             const word& coordType,
             const word& name,
             const point& origin,
-            const coordinateRotation& cr
+            const coordinateRotation&
         );
 
         //- Select constructed from dictionary
         static autoPtr<coordinateSystem> New
         (
             const word& name,
-            const dictionary& dict
+            const dictionary&
         );
 
         //- Select constructed from Istream
@@ -307,6 +337,18 @@ public:
         const word& name() const
         {
             return name_;
+        }
+
+        //- Return non-constant access to the optional note
+        string& note()
+        {
+            return note_;
+        }
+
+        //- Return the optional note
+        const string& note() const
+        {
+            return note_;
         }
 
         //- Return origin
@@ -362,7 +404,7 @@ public:
         //- Return as dictionary of entries
         //  @param [in] ignoreType drop type (cartesian, cylindrical, etc)
         //  when generating the dictionary
-        virtual dictionary dict(bool ignoreType = false) const;
+        virtual dictionary dict(bool ignoreType=false) const;
 
 
       // Edit
@@ -385,7 +427,7 @@ public:
         virtual void write(Ostream&) const;
 
         //- Write dictionary
-        virtual void writeDict(Ostream&, bool subDict = true) const;
+        virtual void writeDict(Ostream&, bool subDict=true) const;
 
       // Transformations
 
@@ -446,7 +488,11 @@ public:
 
     // friend Operators
 
-        friend bool operator!=(const coordinateSystem&, const coordinateSystem&);
+        friend bool operator!=
+        (
+            const coordinateSystem&, 
+            const coordinateSystem&
+        );
 
     // IOstream Operators
 

@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-#setenv WM_PROJECT_VERSION 1.5.x
+# setenv WM_PROJECT_VERSION 1.5.x
 if ( ! $?WM_PROJECT_VERSION ) setenv WM_PROJECT_VERSION dev
 
 #!!User:
@@ -148,7 +148,7 @@ case Linux:
 default:
     echo
     echo "Your '$WM_ARCH' operating system is not supported by this release"
-    echo "of OpenFOAM. For further assistance, please contact www.openfoam.org"
+    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.org"
     echo
     breaksw
 
@@ -194,7 +194,7 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.csh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # _foamSource $WM_PROJECT_DIR/etc/apps/paraview/cshrc
 _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
-# _foamSource $WM_PROJECT_DIR/etc/apps/ensightFoam/cshrc
+# _foamSource $WM_PROJECT_DIR/etc/apps/ensight/cshrc
 
 
 # Again clean environment (path, PATH, MANPATH, LD_LIBRARY_PATH)

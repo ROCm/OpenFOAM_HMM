@@ -40,7 +40,7 @@ SourceFiles
 #include "pointIndexHit.H"
 #include "FixedList.H"
 #include "Ostream.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "labelBits.H"
 #include "PackedList.H"
 

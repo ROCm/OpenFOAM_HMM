@@ -374,9 +374,9 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     mirrorMeshPtr_ = new fvMesh
     (
         io,
-        newPoints,
-        newFaces,
-        newCells
+        xferMove(newPoints),
+        xferMove(newFaces),
+        xferMove(newCells)
     );
 
     fvMesh& pMesh = *mirrorMeshPtr_;
