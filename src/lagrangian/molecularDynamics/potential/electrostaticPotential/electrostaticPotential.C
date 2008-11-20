@@ -38,15 +38,15 @@ Foam::electrostaticPotential::electrostaticPotential()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::electrostaticPotential::energy(const scalar rSqr) const
+Foam::scalar Foam::electrostaticPotential::energy(const scalar r) const
 {
-    return prefactor/sqrt(rSqr);
+    return prefactor/r;
 }
 
 
-Foam::scalar Foam::electrostaticPotential::force(const scalar rSqr) const
+Foam::scalar Foam::electrostaticPotential::force(const scalar r) const
 {
-    return prefactor/(rSqr);
+    return prefactor/(r*r);
 }
 
 

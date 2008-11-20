@@ -34,44 +34,150 @@ inline void Foam::moleculeCloud::evaluatePair
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
+    const electrostaticPotential& electrostatic(pot_.electrostatic());
+
     label idI = molI->id();
 
     label idJ = molJ->id();
 
-    vector rIJ = molI->position() - molJ->position();
+    List<label> siteIdsI = constProps(idI).siteIds();
 
-    scalar rIJMagSq = magSqr(rIJ);
+    List<label> siteIdsJ = constProps(idJ).siteIds();
 
-    if(pairPot.rCutSqr(idI, idJ, rIJMagSq))
+    List<bool> pairPotentialSitesI = constProps(idI).pairPotentialSites();
+
+    List<bool> electrostaticSitesI = constProps(idI).electrostaticSites();
+
+    List<bool> pairPotentialSitesJ = constProps(idJ).pairPotentialSites();
+
+    List<bool> electrostaticSitesJ = constProps(idJ).electrostaticSites();
+
+    forAll(siteIdsI, sI)
     {
-        scalar rIJMag = mag(rIJ);
+        label idsI(siteIdsI[sI]);
 
-        vector fIJ = (rIJ/rIJMag)*pairPot.force(idI, idJ, rIJMag);
+        forAll(siteIdsJ, sJ)
+        {
+            label idsJ(siteIdsJ[sJ]);
 
-        scalar massI = constProps(idI).mass();
+            if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
+            {
+                Info<< "Pair potential " << idsI << ' ' << idsJ << endl;
 
-        scalar massJ = constProps(idJ).mass();
+                vector rsIsJ =
+                molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
-        // Acceleration increment for molI
-        molI->a() += fIJ/massI;
+                scalar rsIsJMagSq = magSqr(rsIsJ);
 
-        // Acceleration increment for molJ
-        molJ->a() += -fIJ/massJ;
+                if(pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
+                {
+                    scalar rsIsJMag = mag(rsIsJ);
 
-        scalar potentialEnergy
-        (
-            pairPot.energy(idI, idJ, rIJMag)
-        );
+                    vector fsIsJ = (rsIsJ/rsIsJMag)
+                    *pairPot.force(idsI, idsJ, rsIsJMag);
 
-        molI->potentialEnergy() += 0.5*potentialEnergy;
+                    molI->siteForces()[sI] += fsIsJ;
 
-        molJ->potentialEnergy() += 0.5*potentialEnergy;
+                    molJ->siteForces()[sJ] += -fsIsJ;
 
-        molI->rf() += rIJ * fIJ;
+                    scalar potentialEnergy
+                    (
+                        pairPot.energy(idsI, idsJ, rsIsJMag)
+                    );
 
-        molJ->rf() += rIJ * fIJ;
+                    molI->potentialEnergy() += 0.5*potentialEnergy;
+
+                    molJ->potentialEnergy() += 0.5*potentialEnergy;
+
+                    // What to do here?
+
+                    // molI->rf() += rIJ * fIJ;
+
+                    // molJ->rf() += rIJ * fIJ;
+                }
+            }
+
+            if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
+            {
+                Info<< "Electrostatic " << idsI << ' ' << idsJ << endl;
+
+                vector rsIsJ =
+                molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+
+                scalar rsIsJMag = mag(rsIsJ);
+
+                vector fsIsJ = (rsIsJ/rsIsJMag)
+                *constProps(idI).siteCharges()[sI]
+                *constProps(idJ).siteCharges()[sJ]
+                *electrostatic.force(rsIsJMag);
+
+                molI->siteForces()[sI] += fsIsJ;
+
+                molJ->siteForces()[sJ] += -fsIsJ;
+
+                scalar potentialEnergy(electrostatic.energy(rsIsJMag));
+
+                molI->potentialEnergy() += 0.5*potentialEnergy;
+
+                molJ->potentialEnergy() += 0.5*potentialEnergy;
+
+                // What to do here?
+
+                // molI->rf() += rIJ * fIJ;
+
+                // molJ->rf() += rIJ * fIJ;
+            }
+        }
     }
 }
+
+
+// inline void Foam::moleculeCloud::evaluatePair
+// (
+//     molecule* molI,
+//     molecule* molJ
+// )
+// {
+//     const pairPotentialList& pairPot(pot_.pairPotentials());
+
+//     label idI = molI->id();
+
+//     label idJ = molJ->id();
+
+//     vector rIJ = molI->position() - molJ->position();
+
+//     scalar rIJMagSq = magSqr(rIJ);
+
+//     if(pairPot.rCutSqr(idI, idJ, rIJMagSq))
+//     {
+//         scalar rIJMag = mag(rIJ);
+
+//         vector fIJ = (rIJ/rIJMag)*pairPot.force(idI, idJ, rIJMag);
+
+//         scalar massI = constProps(idI).mass();
+
+//         scalar massJ = constProps(idJ).mass();
+
+//         // Acceleration increment for molI
+//         molI->a() += fIJ/massI;
+
+//         // Acceleration increment for molJ
+//         molJ->a() += -fIJ/massJ;
+
+//         scalar potentialEnergy
+//         (
+//             pairPot.energy(idI, idJ, rIJMag)
+//         );
+
+//         molI->potentialEnergy() += 0.5*potentialEnergy;
+
+//         molJ->potentialEnergy() += 0.5*potentialEnergy;
+
+//         molI->rf() += rIJ * fIJ;
+
+//         molJ->rf() += rIJ * fIJ;
+//     }
+// }
 
 inline void Foam::moleculeCloud::evaluatePair
 (

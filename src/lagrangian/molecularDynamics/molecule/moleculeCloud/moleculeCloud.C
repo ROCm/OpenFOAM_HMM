@@ -205,14 +205,6 @@ void Foam::moleculeCloud::calculatePairForce()
 }
 
 
-void Foam::moleculeCloud::calculateElectrostaticForce()
-{
-    Info<< "Electrostatic forces" << endl;
-
-
-}
-
-
 void Foam::moleculeCloud::calculateTetherForce()
 {
     const tetherPotentialList& tetherPot(pot_.tetherPotentials());
@@ -488,6 +480,49 @@ Foam::moleculeCloud::moleculeCloud
 
     buildConstProps();
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const Cloud<molecule>& cloud = *this;
+
+    addParticle
+    (
+        new molecule
+        (
+            cloud,
+            vector(0,0,0.5e-9),
+            13,
+            tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
+            vector::zero,
+            vector::zero,
+            vector(2e10, -3e11, 1e10),
+            vector::zero,
+            vector::zero,
+            constProps(0),
+            0,
+            0
+        )
+    );
+
+    addParticle
+    (
+        new molecule
+        (
+            cloud,
+            vector(0,0,0),
+            13,
+            tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
+            vector::zero,
+            vector::zero,
+            vector(4e11, 1.5e10, 2e-10),
+            vector::zero,
+            vector::zero,
+            constProps(1),
+            0,
+            1
+        )
+    );
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
     buildCellOccupancy();
 
     removeHighEnergyOverlaps();
@@ -585,8 +620,6 @@ void Foam::moleculeCloud::calculateForce()
     }
 
     calculatePairForce();
-
-    calculateElectrostaticForce();
 
     calculateTetherForce();
 

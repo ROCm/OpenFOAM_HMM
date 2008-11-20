@@ -51,6 +51,12 @@ int main(int argc, char *argv[])
     {
         runTime++;
 
+        Info << "Time = " << runTime.timeName() << endl;
+
+        molecules.evolve();
+
+        runTime.write();
+
         Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;

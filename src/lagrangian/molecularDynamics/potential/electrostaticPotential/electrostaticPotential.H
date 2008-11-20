@@ -70,9 +70,9 @@ public:
 
     // Member Functions
 
-        scalar energy(const scalar rSqr) const;
+        scalar energy(const scalar r) const;
 
-        scalar force(const scalar rSqr) const;
+        scalar force(const scalar r) const;
 };
 
 
