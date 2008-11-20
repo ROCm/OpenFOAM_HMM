@@ -928,7 +928,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                if (!ignoreFaceGroups.found(groupName[faceGroupZoneID[fgi]]))
+                if (!ignoreFaceGroups.found(groupName[faceGroupZoneID[fgi] ]))
                 {
                     faceZoneIDs.append(fgi);
                 }
