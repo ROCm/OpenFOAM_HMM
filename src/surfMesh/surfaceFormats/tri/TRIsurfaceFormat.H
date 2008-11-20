@@ -28,6 +28,10 @@ Class
 Description
     Provide a means of reading/writing .tri format.
 
+Note
+    For efficiency, the regions are sorted before creating the faces.
+    The class is thus derived from MeshedSurface.
+
 SourceFiles
     TRIsurfaceFormat.C
 
@@ -36,6 +40,7 @@ SourceFiles
 #ifndef TRIsurfaceFormat_H
 #define TRIsurfaceFormat_H
 
+#include "TRIsurfaceFormatCore.H"
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
@@ -49,13 +54,13 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class TRIsurfaceFormat Declaration
+                     Class TRIsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
 class TRIsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>
+    public MeshedSurface<Face>
 {
     // Private Member Functions
 
@@ -83,12 +88,12 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
+        static autoPtr<MeshedSurface<Face> > New
         (
             const fileName& fName
         )
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
                 new TRIsurfaceFormat<Face>(fName)
             );
@@ -140,7 +145,6 @@ public:
         }
 
         //- Write object
-        //  By default, the output is not sorted by regions
         virtual void write(Ostream& os) const
         {
             write(os, *this);

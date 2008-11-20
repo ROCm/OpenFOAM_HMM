@@ -276,6 +276,9 @@ public:
         }
 
         void addPatches(const UList<surfGroup>&);
+    
+        void addPatches(const UList<word>& names, const UList<label>& sizes);
+        void addPatches(const UList<label>& sizes);
 
 
     // Edit

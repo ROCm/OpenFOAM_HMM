@@ -759,6 +759,54 @@ void Foam::MeshedSurface<Face>::addPatches
 
 
 template<class Face>
+void Foam::MeshedSurface<Face>::addPatches
+(
+    const UList<word>& names,
+    const UList<label>& sizes
+)
+{
+    patches_.setSize(sizes.size());
+
+    label start = 0;
+    forAll(patches_, patchI)
+    {
+        patches_[patchI] = surfGroup
+        (
+            names[patchI],
+            sizes[patchI],
+            start,
+            patchI
+        );
+
+        start += sizes[patchI];
+    }
+}
+
+template<class Face>
+void Foam::MeshedSurface<Face>::addPatches
+(
+    const UList<label>& sizes
+)
+{
+    patches_.setSize(sizes.size());
+
+    label start = 0;
+    forAll(patches_, patchI)
+    {
+        patches_[patchI] = surfGroup
+        (
+            word("patch") + ::Foam::name(patchI),
+            sizes[patchI],
+            start,
+            patchI
+        );
+
+        start += sizes[patchI];
+    }
+}
+
+
+template<class Face>
 void Foam::MeshedSurface<Face>::transfer
 (
     MeshedSurface<Face>& surf

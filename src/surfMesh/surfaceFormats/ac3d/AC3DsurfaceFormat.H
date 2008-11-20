@@ -31,9 +31,7 @@ Description
     http://www.inivis.com/ac3d/man/ac3dfileformat.html
 
 Note
-   Since the faces are already organized as patches, the reader could be
-   optimized for this, but at expense of losing a common reading approach.
-
+   The faces are already organized as patches.
    The output is always sorted by regions.
 
 SourceFiles
@@ -64,7 +62,7 @@ namespace fileFormats
 template<class Face>
 class AC3DsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public AC3DsurfaceFormatCore
 {
     // Private Member Functions
@@ -85,12 +83,12 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
+        static autoPtr<MeshedSurface<Face> > New
         (
             const fileName& fName
         )
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
                 new AC3DsurfaceFormat<Face>(fName)
             );

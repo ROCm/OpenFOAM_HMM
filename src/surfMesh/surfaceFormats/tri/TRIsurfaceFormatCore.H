@@ -23,23 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::STLsurfaceFormatCore
+    Foam::fileFormats::TRIsurfaceFormatCore
 
 Description
-    Internal class used by the STLsurfaceFormat
+    Internal class used by the TRIsurfaceFormat
 
 SourceFiles
-    STLsurfaceFormatCore.C
-    STLsurfaceFormatASCII.L
+    TRIsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STLsurfaceFormatCore_H
-#define STLsurfaceFormatCore_H
+#ifndef TRIsurfaceFormatCore_H
+#define TRIsurfaceFormatCore_H
 
-#include "STLtriangle.H"
+#include "surfaceFormatsCore.H"
 #include "triFace.H"
-#include "gzstream.h"
 #include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
@@ -52,10 +50,12 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STLsurfaceFormatCore Declaration
+                   Class TRIsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class STLsurfaceFormatCore
+class TRIsurfaceFormatCore
+:
+    public surfaceFormatsCore
 {
     // Private Data
 
@@ -67,49 +67,29 @@ class STLsurfaceFormatCore
         //- The regions associated with the faces
         List<label> regions_;
 
-        //- The solid names, in the order of their first appearance
-        List<word> names_;
-
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        STLsurfaceFormatCore(const STLsurfaceFormatCore&);
+        TRIsurfaceFormatCore(const TRIsurfaceFormatCore&);
 
         //- Disallow default bitwise assignment
-        void operator=(const STLsurfaceFormatCore&);
+        void operator=(const TRIsurfaceFormatCore&);
 
-        //- Determine the file type
-        static int detectBINARY(const fileName&);
-
-        //- Read ASCII
-        bool readASCII(IFstream&, const off_t);
-
-        //- Read BINARY
-        bool readBINARY(IFstream&, const off_t);
+        bool read(const fileName&);
 
 public:
-
-    // Static Data
-
-        //- The number of bytes in the STL binary header
-        static const unsigned int headerSize = 80;
-
-    // Static Member Functions
-
-        //- Write "STL binary file" and number of triangles to stream
-        static void writeHeaderBINARY(ostream&, unsigned int);
 
     // Constructors
 
         //- Read from file, filling in the information
-        STLsurfaceFormatCore(const fileName&);
+        TRIsurfaceFormatCore(const fileName&);
 
     // Destructor
 
-        ~STLsurfaceFormatCore();
+        ~TRIsurfaceFormatCore();
 
     // Member Functions
 
@@ -125,7 +105,6 @@ public:
             sorted_ = true;
             points_.clear();
             regions_.clear();
-            names_.clear();
             sizes_.clear();
         }
 
@@ -141,13 +120,7 @@ public:
             return regions_;
         }
 
-        //- The list of solid names in the order of their first appearance
-        List<word>& names()
-        {
-            return names_;
-        }
-
-        //- The list of solid sizes in the order of their first appearance
+        //- The list of region sizes in the order of their first appearance
         List<label>& sizes()
         {
             return sizes_;

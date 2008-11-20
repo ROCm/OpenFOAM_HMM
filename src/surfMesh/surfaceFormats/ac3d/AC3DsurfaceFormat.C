@@ -106,12 +106,9 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     // Start of vertices for object/patch
     label patchVertOffset = 0;
 
-    DynamicList<point> pointLst;
-    DynamicList<Face>  faceLst;
-    DynamicList<label> regionLst;
-
-    // patchId => patchName
-    Map<word> regionNames;
+    DynamicList<point> dynPoints;
+    DynamicList<Face>  dynFaces;
+    List<label> sizes(nPatches, 0);
 
     for (label patchI = 0; patchI < nPatches; ++patchI)
     {
@@ -193,7 +190,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         >> pt.x() >> pt.y() >> pt.z();
 
                     // Offset with current translation vector
-                    pointLst.append(location + pt);
+                    dynPoints.append(location + pt);
                 }
             }
             else if (cmd == "numsurf")
@@ -238,14 +235,14 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                             fTri[1] = verts[fp1];
                             fTri[2] = verts[fp2];
 
-                            faceLst.append(fTri);
-                            regionLst.append(patchI);
+                            dynFaces.append(fTri);
+                            sizes[patchI]++;
                         }
                     }
                     else
                     {
-                        faceLst.append(Face(f));
-                        regionLst.append(patchI);
+                        dynFaces.append(Face(f));
+                        sizes[patchI]++;
                     }
                 }
 
@@ -271,20 +268,76 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 }
 
                 // Done reading current patch
-                regionNames.insert(patchI, patchName);
                 break;
             }
         }
     }
 
     // transfer to normal lists
-    this->storedPoints().transfer(pointLst);
-    this->storedFaces().transfer(faceLst);
-    this->storedRegions().transfer(regionLst);
+    this->storedPoints().transfer(dynPoints);
+    this->storedFaces().transfer(dynFaces);
 
-    this->setPatches(regionNames);
+    this->addPatches(sizes);
     this->stitchFaces(SMALL);
     return true;
+}
+
+
+template<class Face>
+void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    const pointField& pointLst = surf.points();
+    const List<Face>& faceLst = surf.faces();
+    const List<surfGroup>& patchLst = surf.patches();
+
+    writeHeader(os, patchLst);
+
+    forAll(patchLst, patchI)
+    {
+        const surfGroup& p = patchLst[patchI];
+
+        os  << "OBJECT poly" << nl
+            << "name \"" << p.name() << '"' << endl;
+
+        // Temporary PrimitivePatch to calculate compact points & faces
+        // use 'UList' to avoid allocations!
+        PrimitivePatch<Face, UList, const pointField&> patch
+        (
+            faceLst,
+            pointLst
+        );
+
+        os << "numvert " << patch.nPoints() << endl;
+
+        forAll(patch.localPoints(), ptI)
+        {
+            const point& pt = patch.localPoints()[ptI];
+
+            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+        }
+
+        os << "numsurf " << patch.localFaces().size() << endl;
+
+        forAll(patch.localFaces(), faceI)
+        {
+            const Face& f = patch.localFaces()[faceI];
+
+            os  << "SURF 0x20" << nl          // polygon
+                << "mat " << patchI << nl
+                << "refs " << f.size() << nl;
+
+            forAll(f, fp)
+            {
+                os << f[fp] << " 0 0" << nl;
+            }
+        }
+
+        os << "kids 0" << endl;
+    }
 }
 
 
@@ -349,62 +402,5 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     }
 }
 
-
-template<class Face>
-void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, patchLst);
-
-    forAll(patchLst, patchI)
-    {
-        const surfGroup& p = patchLst[patchI];
-
-        os  << "OBJECT poly" << nl
-            << "name \"" << p.name() << '"' << endl;
-
-        // Temporary PrimitivePatch to calculate compact points & faces
-        // use 'UList' to avoid allocations!
-        PrimitivePatch<Face, UList, const pointField&> patch
-        (
-            faceLst,
-            pointLst
-        );
-
-        os << "numvert " << patch.nPoints() << endl;
-
-        forAll(patch.localPoints(), ptI)
-        {
-            const point& pt = patch.localPoints()[ptI];
-
-            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-        }
-
-        os << "numsurf " << patch.localFaces().size() << endl;
-
-        forAll(patch.localFaces(), faceI)
-        {
-            const Face& f = patch.localFaces()[faceI];
-
-            os  << "SURF 0x20" << nl          // polygon
-                << "mat " << patchI << nl
-                << "refs " << f.size() << nl;
-
-            forAll(f, fp)
-            {
-                os << f[fp] << " 0 0" << nl;
-            }
-        }
-
-        os << "kids 0" << endl;
-    }
-}
 
 // ************************************************************************* //

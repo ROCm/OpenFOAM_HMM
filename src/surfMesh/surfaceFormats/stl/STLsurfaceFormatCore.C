@@ -92,7 +92,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
     const off_t fileSize
 )
 {
-    binary_ = true;
+    sorted_ = true;
     istream& is = ifs.stdStream();
 
     // Read the STL header
@@ -144,10 +144,11 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
     points_.setSize(3*nTris);
     regions_.setSize(nTris);
 
-    Map<label> regionToPatch;
-    DynamicList<word> dynNames;
+    Map<label> lookup;
+    DynamicList<label> dynSizes;
 
     label ptI = 0;
+    label regionI = -1;
     forAll(regions_, faceI)
     {
         // Read an STL triangle
@@ -161,20 +162,25 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
         // interprete colour as a region
         const label stlRegion = stlTri.region();
 
-        Map<label>::const_iterator fnd = regionToPatch.find(stlRegion);
-        label regionI;
-        if (fnd != regionToPatch.end())
+        Map<label>::const_iterator fnd = lookup.find(stlRegion);
+        if (fnd != lookup.end())
         {
+            if (regionI != fnd())
+            {
+                // group appeared out of order
+                sorted_ = false;
+            }
             regionI = fnd();
         }
         else
         {
-            regionI = dynNames.size();
-            dynNames.append(word("patch") + ::Foam::name(regionI));
-            regionToPatch.insert(stlRegion, regionI);
+            regionI = dynSizes.size();
+            lookup.insert(stlRegion, regionI);
+            dynSizes.append(0);
         }
 
         regions_[faceI] = regionI;
+        dynSizes[regionI]++;
 
 #ifdef DEBUG_STLBINARY
         if (prevRegion != regionI)
@@ -198,7 +204,8 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 #endif
     }
 
-    names_.transfer(dynNames);
+    names_.clear();
+    sizes_.transfer(dynSizes);
 
     return true;
 }
@@ -211,10 +218,11 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
     const fileName& fName
 )
 :
-    binary_(false),
+    sorted_(true),
     points_(0),
     regions_(0),
-    names_(0)
+    names_(0),
+    sizes_(0)
 {
     off_t fileSize = Foam::size(fName);
 
