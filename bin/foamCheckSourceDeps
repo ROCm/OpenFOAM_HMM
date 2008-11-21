@@ -31,40 +31,80 @@
 #
 #     Search for *.dep files that are without a corresponding .C or .L file.
 #     These could indicate a directory that has been moved.
-#         - print questionable directory  and dep file
+#         - print questionable directory and the *.dep file
 #------------------------------------------------------------------------------
-if [ "$1" = "-h" -o "$1" = "-help" ]
-then
-   cat <<USAGE 1>&2
-Usage: ${0##*/} [dir1 .. dirN]
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE 1>&2
+Usage: ${0##*/} [OPTION] [dir1 .. dirN]
+options:
+  -rm | -remove    remove the offending .dep file
+  -rmdir           find and remove empty directories (recursively)
 
-    Search for .dep files that are without a corresponding .C or .L file.
-    This could indicate a directory that has been moved.
-        - print questionable directory and file
+* Search for .dep files that are without a corresponding .C or .L file.
+  This could indicate a directory that has been moved.
+  - print questionable directory and file
+
 USAGE
-   exit 1
-fi
+    exit 1
+}
+
+unset optRemove optrmDir
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -rm | -remove)
+        optRemove=true
+        shift
+        ;;
+    -rmdir)
+        optrmDir=true
+        shift
+        ;;
+    -*)
+       usage "unknown option: '$*'"
+       ;;
+    *)
+       break
+       ;;
+    esac
+done
 
 if [ "$#" -eq 0 ]
 then
-   set -- .
+    set -- .
 fi
 
 for checkDir
 do
-   if [ -d $checkDir ]
-   then
-      find $checkDir -name '*.dep' -print | while read depFile;
-      do
-         Cfile=$(echo $depFile | sed -e 's/\.dep$/.C/')
-         # also check flex files
-         Lfile=$(echo $depFile | sed -e 's/\.C$/.L/')
-         if [ ! -f $Cfile -a ! -f $Lfile ]
-         then
-            echo "$(dirname $Cfile)  ${depFile##*/}"
-         fi
-      done
-   fi
+    if [ -d $checkDir ]
+    then
+        find $checkDir -name '*.dep' -print | while read depFile
+        do
+            # check C++ and Flex files
+            if [ ! -r "${depFile%dep}C" -a ! -r "${depFile%dep}L" ];
+            then
+                echo "${depFile%/[^/]*}  ${depFile##*/}"
+                [ "$optRemove" ] && rm -f $depFile
+            fi
+        done
+    fi
 done
 
+if [ "$optrmDir" ]
+then
+    for checkDir
+    do
+        if [ -d $checkDir ]
+        then
+           echo "scan directory: $checkDir"
+           find $checkDir -depth -type d -empty -print -exec rmdir \{\} \;
+        fi
+    done
+fi
 # -----------------------------------------------------------------------------
