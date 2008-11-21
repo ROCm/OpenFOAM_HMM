@@ -26,7 +26,8 @@ Class
     Foam::PackedList
 
 Description
-    List of packed unsigned ints. Gets given the number of bits per item.
+    List of packed unsigned ints.
+    Gets given the number of bits per item.
 
 SourceFiles
     PackedListI.H
@@ -47,14 +48,14 @@ namespace Foam
 
 
 /*---------------------------------------------------------------------------*\
-                        Class PackedListName Declaration
+                      Class PackedListName Declaration
 \*---------------------------------------------------------------------------*/
 
 TemplateName(PackedList);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class PackedList Declaration
+                        Class PackedList Declaration
 \*---------------------------------------------------------------------------*/
 
 //- For PackedList
@@ -137,8 +138,8 @@ public:
         //- Construct by transferring the parameter contents
         PackedList(const xfer<PackedList<nBits> >&);
 
-        //- Construct from labelList.
-        PackedList(const labelList&);
+        //- Construct from a list of labels
+        PackedList(const UList<label>&);
 
         //- Clone
         inline autoPtr<PackedList<nBits> > clone() const;

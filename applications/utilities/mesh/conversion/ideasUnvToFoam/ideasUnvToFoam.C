@@ -572,6 +572,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".unv file");
+    argList::validOptions.insert("dump", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -806,7 +807,7 @@ int main(int argc, char *argv[])
 
         forAll(dynPatchFaces, patchI)
         {
-            patchFaceVerts[patchI].transfer(dynPatchFaces[patchI].shrink());
+            patchFaceVerts[patchI].transfer(dynPatchFaces[patchI]);
         }
     }
     else
@@ -845,13 +846,13 @@ int main(int argc, char *argv[])
 
     pointField polyPoints;
     polyPoints.transfer(points);
-    points.clear();
 
     // Length scaling factor
     polyPoints /= lengthScale;
 
 
     // For debugging: dump boundary faces as triSurface
+    if (args.options().found("dump"))
     {
         DynamicList<labelledTri> triangles(boundaryFaces.size());
 
@@ -887,7 +888,6 @@ int main(int argc, char *argv[])
     }
 
 
-
     Info<< "Constructing mesh with non-default patches of size:" << nl;
     forAll(patchNames, patchI)
     {
@@ -907,14 +907,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        polyPoints,
+        xferMove(polyPoints),
         cellVerts,
-        patchFaceVerts,             //boundaryFaces,
-        patchNames,                 //boundaryPatchNames,
-        wordList(patchNames.size(), polyPatch::typeName), //boundaryPatchTypes,
-        "defaultFaces",             //defaultFacesName
-        polyPatch::typeName,        //defaultFacesType,
-        wordList(0)                 //boundaryPatchPhysicalTypes
+        patchFaceVerts,             // boundaryFaces,
+        patchNames,                 // boundaryPatchNames,
+        wordList(patchNames.size(), polyPatch::typeName), // boundaryPatchTypes,
+        "defaultFaces",             // defaultFacesName
+        polyPatch::typeName,        // defaultFacesType,
+        wordList(0)                 // boundaryPatchPhysicalTypes
     );
 
     mesh.write();

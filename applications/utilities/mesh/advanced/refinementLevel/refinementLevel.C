@@ -206,9 +206,9 @@ int main(int argc, char *argv[])
             runTime.timeName(),
             runTime
         ),
-        mesh.points(),
-        mesh.faces(),
-        mesh.cells()
+        xferCopy(mesh.points()),   // could we safely re-use the data?
+        xferCopy(mesh.faces()),
+        xferCopy(mesh.cells())
     );
 
     // Add the boundary patches

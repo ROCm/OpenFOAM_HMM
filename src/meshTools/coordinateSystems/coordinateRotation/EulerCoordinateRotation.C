@@ -120,7 +120,7 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 :
     coordinateRotation()
 {
-    calcTransform( phiAngle, thetaAngle, psiAngle, inDegrees );
+    calcTransform(phiAngle, thetaAngle, psiAngle, inDegrees);
 }
 
 

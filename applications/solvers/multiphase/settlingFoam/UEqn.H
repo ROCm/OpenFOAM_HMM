@@ -1,29 +1,31 @@
-// Solve the Momentum equation
+    // Solve the Momentum equation
 
-fvVectorMatrix UEqn
-(
-    fvm::ddt(rho, U)
-  + fvm::div(phi, U)
-  + fvc::div
+    fvVectorMatrix UEqn
     (
-        (Alpha/(scalar(1.001) - Alpha))*(sqr(rhoc)/rho)*Vdj*Vdj,
-        "div(phiVdj,Vdj)"
-    )
-  - fvm::laplacian(mu, U, "laplacian(muEff,U)")
-);
-
-if (momentumPredictor)
-{
-    solve
-    (
-        UEqn
-     ==
-        fvc::reconstruct
+        fvm::ddt(rho, U)
+      + fvm::div(phi, U)
+      + fvc::div
         (
-            (
-              - ghf*fvc::snGrad(rho)
-              - fvc::snGrad(p)
-            )*mesh.magSf()
+            (Alpha/(scalar(1.001) - Alpha))*(sqr(rhoc)/rho)*Vdj*Vdj,
+            "div(phiVdj,Vdj)"
         )
+      - fvm::laplacian(mu, U, "laplacian(muEff,U)")
     );
-}
+
+    UEqn.relax();
+
+    if (momentumPredictor)
+    {
+        solve
+        (
+            UEqn
+          ==
+            fvc::reconstruct
+            (
+                (
+                  - ghf*fvc::snGrad(rho)
+                  - fvc::snGrad(p)
+                )*mesh.magSf()
+            )
+        );
+    }

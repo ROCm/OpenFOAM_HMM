@@ -70,10 +70,10 @@ autoPtr<fvMesh> createMesh
             runTime,
             IOobject::MUST_READ
         ),
-        pointField(0),
-        faceList(0),
-        labelList(0),
-        labelList(0)
+        xferCopy(pointField()),
+        xferCopy(faceList()),
+        xferCopy(labelList()),
+        xferCopy(labelList())
     );
 
     if (!haveMesh)

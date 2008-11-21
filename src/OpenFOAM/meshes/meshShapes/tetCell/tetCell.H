@@ -89,21 +89,21 @@ public:
 
         // Access
 
-            //- Return ith face
-            inline triFace face(const label facei) const;
+            //- Return i-th face
+            inline triFace face(const label faceI) const;
 
-            //- Return fisrt face adjacent to the given edge
-            inline label edgeFace(const label edgei) const;
+            //- Return first face adjacent to the given edge
+            inline label edgeFace(const label edgeI) const;
 
             //- Return face adjacent to the given face sharing the same edge
             inline label edgeAdjacentFace
             (
-                const label edgei,
-                const label facei
+                const label edgeI,
+                const label faceI
             ) const;
 
-            //- Return ith edge
-            inline edge tetEdge(const label edgei) const;
+            //- Return i-th edge
+            inline edge tetEdge(const label edgeI) const;
 
 
         // Operations

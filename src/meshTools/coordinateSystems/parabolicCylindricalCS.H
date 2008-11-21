@@ -107,18 +107,11 @@ public:
         (
             const word& name,
             const point& origin,
-            const coordinateRotation& cr
+            const coordinateRotation&
         );
 
         //- Construct from dictionary
-        parabolicCylindricalCS
-        (
-            const word& name,
-            const dictionary& dict
-        );
-
-
-    // Member Functions
+        parabolicCylindricalCS(const word&, const dictionary&);
 
 };
 

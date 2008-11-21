@@ -322,11 +322,11 @@ int main(int argc, char *argv[])
                 runTime.constant(),
                 runTime
             ),
-            points,
+            xferCopy(points),
             cells,
             faceListList(0),
-            wordList(0),    //boundaryPatchNames
-            wordList(0),    //boundaryPatchTypes
+            wordList(0),    // boundaryPatchNames
+            wordList(0),    // boundaryPatchTypes
             "defaultFaces",
             polyPatch::typeName,
             wordList(0)
@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
                     runTime.constant(),
                     runTime
                 ),
-                points,
+                xferMove(points),
                 cells,
                 patchFaces,
                 patchNames,

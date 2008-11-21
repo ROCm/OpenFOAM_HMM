@@ -38,7 +38,7 @@ SourceFiles
 
 #include "globalIndex.H"
 #include "boolList.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -143,9 +143,10 @@ Foam::sampledPlane::sampledPlane
 {
 
     // make plane relative to the coordinateSystem (Cartesian)
+    // allow lookup from global coordinate systems
     if (dict.found("coordinateSystem"))
     {
-        coordinateSystem cs(dict.subDict("coordinateSystem"));
+        coordinateSystem cs(dict, mesh);
 
         point  base = cs.globalPosition(planeDesc().refPoint());
         vector norm = cs.globalVector(planeDesc().normal());

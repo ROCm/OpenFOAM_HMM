@@ -67,7 +67,7 @@ public:
         (
             const UList<T>& posList,
             const UList<T>& negList,
-            const List<label>&
+            const UList<label>&
         );
 
 

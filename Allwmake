@@ -5,15 +5,15 @@ set -x
 # wmake is required for subsequent targets
 ( cd wmake/src && make )
 
+# build ThirdParty sources
 ( cd $WM_THIRD_PARTY_DIR && ./Allwmake )
 
-( cd src && ./Allwmake )
-
-( cd applications && ./Allwmake )
+src/Allwmake
+applications/Allwmake
 
 if [ "$1" = doc ]
 then
-   ( cd doc && ./Allwmake )
+    doc/Allwmake
 fi
 
 # ----------------------------------------------------------------- end-of-file

@@ -75,8 +75,8 @@ public:
         //- Construct given size
         explicit inline cell(label);
 
-        //- Construct from components
-        explicit inline cell(const labelList&);
+        //- Construct from list of labels
+        explicit inline cell(const UList<label>&);
 
         //- Construct by transferring the parameter contents
         explicit inline cell(const xfer<labelList>&);

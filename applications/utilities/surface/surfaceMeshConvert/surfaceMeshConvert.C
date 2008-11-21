@@ -40,6 +40,9 @@ Usage
     @param -triSurface \n
     Use triSurface library for input/output
 
+    @param -keyed \n
+    Use keyedSurface for input/output
+
 Note
     The filename extensions are used to determine the file format type.
 
@@ -49,8 +52,10 @@ Note
 #include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "meshedSurface.H"
 #include "triSurface.H"
+
+#include "MeshedSurfaces.H"
+#include "UnsortedMeshedSurfaces.H"
 
 using namespace Foam;
 
@@ -62,9 +67,11 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("clean", "");
+    argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("triSurface", "");
+    argList::validOptions.insert("unsorted", "");
+    argList::validOptions.insert("triFace", "");
 #   include "setRootCase.H"
     const stringList& params = args.additionalArgs();
 
@@ -77,10 +84,17 @@ int main(int argc, char *argv[])
     fileName importName(params[0]);
     fileName exportName(params[1]);
 
+    if (importName == exportName)
+    {
+        FatalErrorIn(args.executable())
+            << "Output file " << exportName << " would overwrite input file."
+            << exit(FatalError);
+    }
+
     if
     (
-        !meshedSurface::canRead(importName.ext(), true)
-     || !meshedSurface::canWrite(exportName.ext(), true)
+        !meshedSurface::canRead(importName, true)
+     || !meshedSurface::canWriteType(exportName.ext(), true)
     )
     {
         return 1;
@@ -88,10 +102,6 @@ int main(int argc, char *argv[])
 
     if (args.options().found("triSurface"))
     {
-// #       include "createTime.H"
-//         instantList timeDirs = timeSelector::select0(runTime, args);
-// #       include "createPolyMesh.H"
-
         triSurface surf(importName);
 
         if (args.options().found("clean"))
@@ -107,15 +117,16 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< " triSurface does not yet support scaling "
-                << scaleFactor << endl;
-            // surf.scalePoints(scaleFactor);
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
         }
-        surf.write(exportName);
+
+        // write sorted by region
+        surf.write(exportName, true);
     }
-    else
+    else if (args.options().found("unsorted"))
     {
-        meshedSurface surf(importName);
+        UnsortedMeshedSurface<face> surf(importName);
 
         if (args.options().found("clean"))
         {
@@ -123,7 +134,29 @@ int main(int argc, char *argv[])
             surf.checkOrientation(true);
         }
 
-        surf.scalePoints(scaleFactor);
+        Info << "writing " << exportName;
+        if (scaleFactor <= 0)
+        {
+            Info<< " without scaling" << endl;
+        }
+        else
+        {
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
+        }
+
+        surf.write(exportName);
+    }
+#if 1
+    else if (args.options().found("triFace"))
+    {
+        MeshedSurface<triFace> surf(importName);
+
+        if (args.options().found("clean"))
+        {
+            surf.cleanup(true);
+            surf.checkOrientation(true);
+        }
 
         Info<< "writing " << exportName;
         if (scaleFactor <= 0)
@@ -133,6 +166,30 @@ int main(int argc, char *argv[])
         else
         {
             Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
+        }
+        surf.write(exportName);
+    }
+#endif
+    else
+    {
+        MeshedSurface<face> surf(importName);
+
+        if (args.options().found("clean"))
+        {
+            surf.cleanup(true);
+            surf.checkOrientation(true);
+        }
+
+        Info<< "writing " << exportName;
+        if (scaleFactor <= 0)
+        {
+            Info<< " without scaling" << endl;
+        }
+        else
+        {
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
         }
         surf.write(exportName);
     }

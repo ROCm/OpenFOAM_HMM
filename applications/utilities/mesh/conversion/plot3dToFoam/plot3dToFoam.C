@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        newPoints,
+        xferMove(newPoints),
         cellShapes,
         boundary,
         patchNames,

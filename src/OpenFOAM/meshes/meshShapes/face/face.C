@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "face.H"
+#include "triFace.H"
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
 
@@ -281,6 +282,14 @@ void Foam::face::split
         face2.split(mode, points, triI, quadI, triFaces, quadFaces);
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::face::face(const triFace& f)
+:
+    labelList(f)
+{}
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

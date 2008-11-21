@@ -58,7 +58,7 @@ inline bool operator!=(const triFace&, const triFace&);
 
 
 /*---------------------------------------------------------------------------*\
-                           class triFace Declaration
+                          class triFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class triFace

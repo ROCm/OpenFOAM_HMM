@@ -31,9 +31,21 @@
 #
 #------------------------------------------------------------------------------
 
-export CINTSYSDIR=~/pub/CINT/cint7
-export PATH=$PATH:$CINTSYSDIR
-export MANPATH=$MANPATH:$CINTSYSDIR/doc
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$CINTSYSDIR
+for CINTSYSDIR in \
+    $HOME/pub/CINT/cint7 \
+    $WM_THIRD_PARTY_DIR/cint-svn/platforms/$WM_OPTIONS \
+    ;
+do
+    if [ -r $CINTSYSDIR ]
+    then
+        export CINTSYSDIR
+        export PATH=$PATH:$CINTSYSDIR/bin
+        export MANPATH=$MANPATH:$CINTSYSDIR/doc
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$CINTSYSDIR/lib
+        break
+    fi
+done
+
+[ -r "$CINTSYSDIR" ] || unset CINTSYSDIR
 
 # -----------------------------------------------------------------------------

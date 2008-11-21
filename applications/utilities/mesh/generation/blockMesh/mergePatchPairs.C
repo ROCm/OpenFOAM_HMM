@@ -1,4 +1,4 @@
-        Info<< nl << "Creating merge patch pairs" << nl << endl;
+        Info<< "Creating merge patch pairs" << nl << endl;
 
         if (mergePatchPairs.size() > 0)
         {
