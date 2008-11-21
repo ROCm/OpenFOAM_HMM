@@ -24,26 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceWriters.H"
+#include "nullSurfaceWriter.H"
+#include "fileName.H"
+#include "OFstream.H"
+#include "faceList.H"
+#include "OSspecific.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
-{
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-#define defineSurfaceWriterType(dataType)                                     \
-    defineNamedTemplateTypeNameAndDebug(surfaceWriter<dataType >, 0);         \
-    defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType);
+template<class Type>
+Foam::nullSurfaceWriter<Type>::nullSurfaceWriter()
+:
+    surfaceWriter<Type>()
+{}
 
-defineSurfaceWriterType(scalar);
-defineSurfaceWriterType(vector);
-defineSurfaceWriterType(sphericalTensor);
-defineSurfaceWriterType(symmTensor);
-defineSurfaceWriterType(tensor);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+template<class Type>
+Foam::nullSurfaceWriter<Type>::~nullSurfaceWriter()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::nullSurfaceWriter<Type>::write
+(
+    const fileName& samplePath,
+    const fileName& timeDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const fileName& fieldName,
+    const Field<Type>& values,
+    const bool verbose
+) const
+{}
+
 
 // ************************************************************************* //

@@ -23,24 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfaceWriter
+    Foam::dxSurfaceWriter
 
 Description
 
 SourceFiles
-    surfaceWriter.C
+    dxSurfaceWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriter_H
-#define surfaceWriter_H
+#ifndef dxSurfaceWriter_H
+#define dxSurfaceWriter_H
 
-#include "Field.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "autoPtr.H"
-#include "pointField.H"
-#include "faceList.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,62 +43,94 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class surfaceWriter Declaration
+                      Class dxSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class surfaceWriter
+class dxSurfaceWriter
+:
+    public surfaceWriter<Type>
 {
+
+    // Private Member Functions
+
+        void writeDXGeometry
+        (
+            const pointField& points,
+            const faceList& faces,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const scalarField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const vectorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const sphericalTensorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const symmTensorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXData
+        (
+            const pointField& points,
+            const tensorField& values,
+            Ostream& os
+        ) const;
+
+        void writeDXTrailer(Ostream& os) const;
 
 public:
 
     //- Runtime type information
-    TypeName("surfaceWriter");
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            surfaceWriter,
-            word,
-            (),
-            ()
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected surfaceWriter
-        static autoPtr<surfaceWriter> New(const word& writeFormat);
+    TypeName("dx");
 
 
     // Constructors
 
         //- Construct null
-        surfaceWriter();
+        dxSurfaceWriter();
 
 
     // Destructor
 
-        virtual ~surfaceWriter();
+        virtual ~dxSurfaceWriter();
 
 
     // Member Functions
 
-        //- Writes single surface to file. Either one value per vertex or
-        //  one value per face (detected by values.size()==faces.size())
+        // Write
+
+        //- Writes single surface to file.
         virtual void write
         (
-            const fileName& samplePath,     // <root>/<case>/sampleSurfaces
-            const fileName& timeDir,        // time directory
-            const fileName& surfaceName,    // name of surface
+            const fileName& samplePath,
+            const fileName& timeDir,
+            const fileName& surfaceName,
             const pointField& points,
             const faceList& faces,
-            const fileName& fieldName,      // name of field
+            const fileName& fieldName,
             const Field<Type>& values,
             const bool verbose = false
-        ) const = 0;
+        ) const;
 };
 
 
@@ -114,7 +141,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "surfaceWriter.C"
+#   include "dxSurfaceWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

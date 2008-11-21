@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceWriters.H"
+#include "writers.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,15 +32,16 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-#define defineSurfaceWriterType(dataType)                                     \
-    defineNamedTemplateTypeNameAndDebug(surfaceWriter<dataType >, 0);         \
-    defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType);
 
-defineSurfaceWriterType(scalar);
-defineSurfaceWriterType(vector);
-defineSurfaceWriterType(sphericalTensor);
-defineSurfaceWriterType(symmTensor);
-defineSurfaceWriterType(tensor);
+#define defineSetWriterType(dataType)                                         \
+    defineNamedTemplateTypeNameAndDebug(writer<dataType >, 0);                \
+    defineTemplatedRunTimeSelectionTable(writer, word, dataType);
+
+defineSetWriterType(scalar);
+defineSetWriterType(vector);
+defineSetWriterType(sphericalTensor);
+defineSetWriterType(symmTensor);
+defineSetWriterType(tensor);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
