@@ -23,24 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfaceWriter
+    Foam::rawSetWriter
 
 Description
 
 SourceFiles
-    surfaceWriter.C
+    rawSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriter_H
-#define surfaceWriter_H
+#ifndef rawSetWriter_H
+#define rawSetWriter_H
 
-#include "Field.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "autoPtr.H"
-#include "pointField.H"
-#include "faceList.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,62 +43,46 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class surfaceWriter Declaration
+                       Class rawSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class surfaceWriter
+class rawSetWriter
+:
+    public writer<Type>
 {
 
 public:
 
     //- Runtime type information
-    TypeName("surfaceWriter");
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            surfaceWriter,
-            word,
-            (),
-            ()
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected surfaceWriter
-        static autoPtr<surfaceWriter> New(const word& writeFormat);
+    TypeName("raw");
 
 
     // Constructors
 
         //- Construct null
-        surfaceWriter();
+        rawSetWriter();
 
 
-    // Destructor
-
-        virtual ~surfaceWriter();
+    //- Destructor
+    virtual ~rawSetWriter();
 
 
     // Member Functions
 
-        //- Writes single surface to file. Either one value per vertex or
-        //  one value per face (detected by values.size()==faces.size())
+        virtual fileName getFileName
+        (
+            const coordSet&,
+            const wordList&
+        ) const;
+
         virtual void write
         (
-            const fileName& samplePath,     // <root>/<case>/sampleSurfaces
-            const fileName& timeDir,        // time directory
-            const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
-            const fileName& fieldName,      // name of field
-            const Field<Type>& values,
-            const bool verbose = false
-        ) const = 0;
+            const coordSet&,
+            const wordList&,
+            const List<const Field<Type>*>&,
+            Ostream& os
+        ) const;
 };
 
 
@@ -114,7 +93,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "surfaceWriter.C"
+#   include "rawSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

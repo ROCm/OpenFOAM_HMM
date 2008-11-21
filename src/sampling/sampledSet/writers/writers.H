@@ -23,51 +23,54 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::surfaceWriters
+    Foam::writer
 
-Description
+SourceFiles
+    writers.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriters_H
-#define surfaceWriters_H
+#ifndef writers_H
+#define writers_H
 
-#include "surfaceWriter.H"
+#include "writer.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Only used internally
-#define makeTypeSurfaceWritersTypeName(typeWriter, dataType)                 \
+#define makeTypeSetWritersTypeName(typeWriter, dataType)                     \
                                                                              \
     defineNamedTemplateTypeNameAndDebug(typeWriter<dataType >, 0);
 
 // Sometimes used externally
-#define makeSurfaceWritersTypeName(typeWriter)                               \
+#define makeSetWritersTypeName(typeWriter)                                   \
                                                                              \
-    makeTypeSurfaceWritersTypeName(typeWriter, scalar);                      \
-    makeTypeSurfaceWritersTypeName(typeWriter, vector);                      \
-    makeTypeSurfaceWritersTypeName(typeWriter, sphericalTensor);             \
-    makeTypeSurfaceWritersTypeName(typeWriter, symmTensor);                  \
-    makeTypeSurfaceWritersTypeName(typeWriter, tensor);
+    makeTypeSetWritersTypeName(typeWriter, scalar);                          \
+    makeTypeSetWritersTypeName(typeWriter, vector);                          \
+    makeTypeSetWritersTypeName(typeWriter, sphericalTensor);                 \
+    makeTypeSetWritersTypeName(typeWriter, symmTensor);                      \
+    makeTypeSetWritersTypeName(typeWriter, tensor);
 
 // Define type info for single dataType template instantiation (eg, vector)
-#define makeSurfaceWriterType(typeWriter, dataType)                          \
+#define makeSetWriterType(typeWriter, dataType)                              \
                                                                              \
     defineNamedTemplateTypeNameAndDebug(typeWriter<dataType >, 0);           \
     addTemplatedToRunTimeSelectionTable                                      \
     (                                                                        \
-        surfaceWriter, typeWriter, dataType, word                            \
+        writer, typeWriter, dataType, word                                   \
     );
 
 
 // Define type info for scalar, vector etc. instantiations
-#define makeSurfaceWriters(typeWriter)                                       \
-                                                                             \
-    makeSurfaceWriterType(typeWriter, scalar);                               \
-    makeSurfaceWriterType(typeWriter, vector);                               \
-    makeSurfaceWriterType(typeWriter, sphericalTensor);                      \
-    makeSurfaceWriterType(typeWriter, symmTensor);                           \
-    makeSurfaceWriterType(typeWriter, tensor);
+#define makeSetWriters(typeWriter)                                            \
+                                                                              \
+    makeSetWriterType(typeWriter, scalar);                                    \
+    makeSetWriterType(typeWriter, vector);                                    \
+    makeSetWriterType(typeWriter, sphericalTensor);                           \
+    makeSetWriterType(typeWriter, symmTensor);                                \
+    makeSetWriterType(typeWriter, tensor);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

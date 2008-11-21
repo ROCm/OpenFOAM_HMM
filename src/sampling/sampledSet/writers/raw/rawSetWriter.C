@@ -24,26 +24,59 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceWriters.H"
+#include "rawSetWriter.H"
+#include "coordSet.H"
+#include "fileName.H"
+#include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::rawSetWriter<Type>::rawSetWriter()
+:
+    writer<Type>()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::rawSetWriter<Type>::~rawSetWriter()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::fileName Foam::rawSetWriter<Type>::getFileName
+(
+    const coordSet& points,
+    const wordList& valueSetNames
+) const
 {
+    return this->getBaseName(points, valueSetNames) + ".xy";
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-#define defineSurfaceWriterType(dataType)                                     \
-    defineNamedTemplateTypeNameAndDebug(surfaceWriter<dataType >, 0);         \
-    defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType);
 
-defineSurfaceWriterType(scalar);
-defineSurfaceWriterType(vector);
-defineSurfaceWriterType(sphericalTensor);
-defineSurfaceWriterType(symmTensor);
-defineSurfaceWriterType(tensor);
+template<class Type>
+void Foam::rawSetWriter<Type>::write
+(
+    const coordSet& points,
+    const wordList& valueSetNames,
+    const List<const Field<Type>*>& valueSets,
+    Ostream& os
+) const
+{
+    // Collect sets into columns
+    List<const List<Type>*> columns(valueSets.size());
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    forAll(valueSets, i)
+    {
+        columns[i] = valueSets[i];
+    }
 
-} // End namespace Foam
+    writeTable(points, columns, os);
+}
+
 
 // ************************************************************************* //

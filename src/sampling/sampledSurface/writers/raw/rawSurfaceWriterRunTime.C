@@ -24,7 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "rawSurfaceWriter.H"
 #include "surfaceWriters.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,15 +34,8 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-#define defineSurfaceWriterType(dataType)                                     \
-    defineNamedTemplateTypeNameAndDebug(surfaceWriter<dataType >, 0);         \
-    defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType);
 
-defineSurfaceWriterType(scalar);
-defineSurfaceWriterType(vector);
-defineSurfaceWriterType(sphericalTensor);
-defineSurfaceWriterType(symmTensor);
-defineSurfaceWriterType(tensor);
+makeSurfaceWriters(rawSurfaceWriter);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

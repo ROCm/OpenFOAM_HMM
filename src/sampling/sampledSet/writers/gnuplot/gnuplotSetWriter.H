@@ -23,24 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfaceWriter
+    Foam::gnuplotSetWriter
 
 Description
 
 SourceFiles
-    surfaceWriter.C
+    gnuplotSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriter_H
-#define surfaceWriter_H
+#ifndef gnuplotSetWriter_H
+#define gnuplotSetWriter_H
 
-#include "Field.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "autoPtr.H"
-#include "pointField.H"
-#include "faceList.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,62 +43,46 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class surfaceWriter Declaration
+                     Class gnuplotSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class surfaceWriter
+class gnuplotSetWriter
+:
+    public writer<Type>
 {
 
 public:
 
     //- Runtime type information
-    TypeName("surfaceWriter");
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            surfaceWriter,
-            word,
-            (),
-            ()
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected surfaceWriter
-        static autoPtr<surfaceWriter> New(const word& writeFormat);
+    TypeName("gnuplot");
 
 
     // Constructors
 
         //- Construct null
-        surfaceWriter();
+        gnuplotSetWriter();
 
 
-    // Destructor
-
-        virtual ~surfaceWriter();
+    //- Destructor
+    virtual ~gnuplotSetWriter();
 
 
     // Member Functions
 
-        //- Writes single surface to file. Either one value per vertex or
-        //  one value per face (detected by values.size()==faces.size())
-        virtual void write
+        virtual fileName getFileName
         (
-            const fileName& samplePath,     // <root>/<case>/sampleSurfaces
-            const fileName& timeDir,        // time directory
-            const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
-            const fileName& fieldName,      // name of field
-            const Field<Type>& values,
-            const bool verbose = false
-        ) const = 0;
+            const coordSet&,
+            const wordList&
+        ) const;
+
+        void write
+        (
+            const coordSet&,
+            const wordList&,
+            const List<const Field<Type>*>&,
+            Ostream& os
+        ) const;
 };
 
 
@@ -114,7 +93,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "surfaceWriter.C"
+#   include "gnuplotSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
