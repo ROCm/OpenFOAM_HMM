@@ -124,6 +124,9 @@ public:
             //- Return vector normal
             inline vector normal(const pointField&) const;
 
+            //- Return face with reverse direction
+            inline triFace reverseFace() const;
+
             //- Return swept-volume
             inline scalar sweptVol
             (
