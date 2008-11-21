@@ -41,10 +41,10 @@ License
 template<class Face>
 Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -52,20 +52,20 @@ Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     const bool mustTriangulate = this->isTri();
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
@@ -81,7 +81,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
         (
             "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
         )
-            << "When reading AC3D file " << fName
+            << "When reading AC3D file " << filename
             << " read header " << line << " with version "
             << version << endl
             << "Only tested reading with version 'b'."
@@ -95,7 +95,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
         (
             "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot find \"OBJECT world\" in file " << fName
+            << "Cannot find \"OBJECT world\" in file " << filename
             << exit(FatalError);
     }
 
@@ -108,13 +108,14 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
     DynamicList<point> dynPoints;
     DynamicList<Face>  dynFaces;
-    List<label> sizes(nPatches, 0);
+    List<word>         names(nPatches);
+    List<label>        sizes(nPatches, 0);
 
     for (label patchI = 0; patchI < nPatches; ++patchI)
     {
-        word patchName = word("patch") + Foam::name(patchI);
-
-        args = cueToOrDie(is, "OBJECT", "while reading " + patchName);
+        names[patchI] = word("patch") + Foam::name(patchI);
+        
+        args = cueToOrDie(is, "OBJECT", "while reading " + names[patchI]);
 
         // number of vertices for this patch
         label  nPatchPoints = 0;
@@ -133,7 +134,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                     "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
                 )
                     << "Did not read up to \"kids 0\" while reading patch "
-                    << patchI << " from file " << fName
+                    << patchI << " from file " << filename
                     << exit(FatalError);
             }
 
@@ -143,7 +144,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 string str = parse<string>(args);
                 string::stripInvalid<word>(str);
 
-                patchName = str;
+                names[patchI] = str;
             }
             else if (cmd == "rot")
             {
@@ -203,7 +204,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         string(" while reading face ")
                             + Foam::name(faceI) + " on patch "
                             + Foam::name(patchI)
-                            + " from file " + fName;
+                            + " from file " + filename;
 
                     cueToOrDie(is, "SURF", errorMsg);
                     cueToOrDie(is, "mat", errorMsg);
@@ -277,7 +278,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     this->storedPoints().transfer(dynPoints);
     this->storedFaces().transfer(dynFaces);
 
-    this->addPatches(sizes);
+    // add patches, culling empty groups
+    this->addPatches(sizes, names, true);
     this->stitchFaces(SMALL);
     return true;
 }

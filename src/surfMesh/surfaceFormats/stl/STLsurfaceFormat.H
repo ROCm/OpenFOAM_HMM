@@ -111,14 +111,11 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<MeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
         {
             return autoPtr<MeshedSurface<Face> >
             (
-                new STLsurfaceFormat<Face>(fName)
+                new STLsurfaceFormat<Face>(name)
             );
         }
 

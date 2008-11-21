@@ -38,7 +38,7 @@ namespace fileFormats
 
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     OBJsurfaceFormat,
     face,
     fileExtension,
@@ -46,7 +46,7 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     OBJsurfaceFormat,
     triFace,
     fileExtension,

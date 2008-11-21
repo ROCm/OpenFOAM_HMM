@@ -31,16 +31,11 @@ License
 
 template<class Face>
 Foam::autoPtr<Foam::UnsortedMeshedSurface<Face> >
-Foam::UnsortedMeshedSurface<Face>::New
-(
-    const fileName& fName,
-    const word& ext
-)
+Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
 {
     if (debug)
     {
-        Info<< "UnsortedMeshedSurface<Face>::New"
-            "(const fileName&, const word&) : "
+        Info<< "UnsortedMeshedSurface::New(const fileName&, const word&) : "
             "constructing UnsortedMeshedSurface"
             << endl;
     }
@@ -59,7 +54,7 @@ Foam::UnsortedMeshedSurface<Face>::New
             (
                 new UnsortedMeshedSurface<Face>
             );
-            surf().transfer(SiblingType::New(fName, ext)());
+            surf().transfer(SiblingType::New(name, ext)());
 
             return surf;
         }
@@ -79,24 +74,21 @@ Foam::UnsortedMeshedSurface<Face>::New
             << exit(FatalError);
     }
 
-    return autoPtr<UnsortedMeshedSurface<Face> >(cstrIter()(fName));
+    return autoPtr<UnsortedMeshedSurface<Face> >(cstrIter()(name));
 }
 
 
 template<class Face>
 Foam::autoPtr<Foam::UnsortedMeshedSurface<Face> >
-Foam::UnsortedMeshedSurface<Face>::New
-(
-    const fileName& fName
-)
+Foam::UnsortedMeshedSurface<Face>::New(const fileName& name)
 {
-    word ext = fName.ext();
+    word ext = name.ext();
     if (ext == "gz")
     {
-        ext = fName.lessExt().ext();
+        ext = name.lessExt().ext();
     }
 
-    return New(fName, ext);
+    return New(name, ext);
 }
 
 // ************************************************************************* //

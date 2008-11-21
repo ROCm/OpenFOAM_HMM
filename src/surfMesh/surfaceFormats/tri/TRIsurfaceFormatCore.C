@@ -38,7 +38,7 @@ License
 
 Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
 (
-    const fileName& fName
+    const fileName& filename
 )
 :
     sorted_(true),
@@ -46,7 +46,7 @@ Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
     regions_(0),
     sizes_(0)
 {
-    read(fName);
+    read(filename);
 }
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
@@ -59,20 +59,20 @@ Foam::fileFormats::TRIsurfaceFormatCore::~TRIsurfaceFormatCore()
 
 bool Foam::fileFormats::TRIsurfaceFormatCore::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
     sorted_ = true;
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::TRIsurfaceFormatCore::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
@@ -161,19 +161,25 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
         dynSizes[regionI]++;
     }
 
+    // skip empty groups
+    label nPatch = 0;
+    forAll(dynSizes, patchI)
+    {
+        if (dynSizes[patchI])
+        {
+            if (nPatch != patchI)
+            {
+                dynSizes[nPatch] = dynSizes[patchI];
+            }
+            nPatch++;
+        }
+    }
+    dynSizes.setSize(nPatch);
+
     // transfer to normal lists
     points_.transfer(dynPoints);
     regions_.transfer(dynRegions);
-
-    if (dynSizes[0] == 0)
-    {
-        // no ungrouped patches, copy sub-list
-        sizes_ = SubList<label>(dynSizes, dynSizes.size()-1, 1);
-    }
-    else
-    {
-        sizes_.transfer(dynSizes);
-    }
+    sizes_.transfer(dynSizes);
 
     return true;
 }

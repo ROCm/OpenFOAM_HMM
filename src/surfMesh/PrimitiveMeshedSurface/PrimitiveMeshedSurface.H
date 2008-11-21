@@ -84,21 +84,15 @@ protected:
             return static_cast<List<Face> &>(*this);
         }
 
+        //- Set new regions/patches from faceMap
+        virtual void remapRegions(List<label>& faceMap);
+
 public:
 
     // Static
 
         //- Face storage only handles triangulated faces
         inline static bool isTri();
-
-        //- Triangulate faceLst in-place
-        //  Returning the number of triangles added and a map to the
-        //  the original face Ids
-        static label triangulate
-        (
-            List<Face>& faceLst,
-            List<label>& faceMap=const_cast<List<label>&>(List<label>::null())
-        );
 
     // Constructors
 
@@ -144,18 +138,23 @@ public:
             const xfer<List<Face> >&
         );
 
+        //- Remove invalid faces
+        virtual void cleanup(const bool verbose);
+
         virtual bool stitchFaces
         (
-            List<label>& faceMap=const_cast<List<label>&>(List<label>::null()),
             const scalar tol=SMALL,
             const bool verbose=false
         );
 
         virtual bool checkFaces
         (
-            List<label>& faceMap=const_cast<List<label>&>(List<label>::null()),
             const bool verbose=false
         );
+
+        //- Triangulate in-place
+        //  Returning the number of triangles added
+        virtual label triangulate();
 
 };
 
@@ -167,6 +166,13 @@ template<>
 inline bool PrimitiveMeshedSurface<triFace>::isTri()
 {
     return true;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label PrimitiveMeshedSurface<triFace>::triangulate()
+{
+    return 0;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

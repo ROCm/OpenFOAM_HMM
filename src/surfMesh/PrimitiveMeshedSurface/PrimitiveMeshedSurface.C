@@ -36,75 +36,6 @@ inline bool Foam::PrimitiveMeshedSurface<Face>::isTri()
 }
 
 
-template<class Face>
-Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate
-(
-    List<Face>& faceLst,
-    List<label>& faceMap
-)
-{
-    label nTri = 0;
-
-    // determine how many triangles are needed
-    forAll(faceLst, faceI)
-    {
-        nTri += faceLst[faceI].size() - 2;
-    }
-
-    // nothing to do
-    if (nTri <= faceLst.size())
-    {
-        if (&faceMap)
-        {
-            faceMap.clear();
-        }
-        return 0;
-    }
-
-    List<Face>  newFaces(nTri);
-    List<label> fMap(nTri);
-
-    // remember the number of *additional* faces
-    nTri -= faceLst.size();
-
-    label newFaceI = 0;
-    forAll(faceLst, faceI)
-    {
-        const Face& f = faceLst[faceI];
-        triFace fTri;
-
-        // Do simple face triangulation around f[0].
-        // we could also use face::triangulation, but that requires points
-        // and doesn't currently template nicely
-        fTri[0] = f[0];
-        for (label fp = 1; fp < f.size() - 1; ++fp)
-        {
-            label fp1 = (fp + 1) % f.size();
-
-            fTri[1] = f[fp];
-            fTri[2] = f[fp1];
-
-            newFaces[newFaceI] = fTri;
-            fMap[newFaceI] = faceI;
-            newFaceI++;
-        }
-    }
-
-    faceLst.transfer(newFaces);
-    if (&faceMap)
-    {
-        faceMap.transfer(fMap);
-    }
-    else
-    {
-        fMap.clear();
-    }
-
-    return nTri;
-}
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -200,10 +131,21 @@ void Foam::PrimitiveMeshedSurface<Face>::reset
 }
 
 
+// Remove badly degenerate faces, double faces.
+template<class Face>
+void Foam::PrimitiveMeshedSurface<Face>::cleanup(const bool verbose)
+{
+    // merge points (already done for STL, TRI)
+    stitchFaces(SMALL, verbose);
+
+    checkFaces(verbose);
+    this->checkEdges(verbose);
+}
+
+
 template<class Face>
 bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
 (
-    List<label>& faceMap,
     const scalar tol,
     const bool verbose
 )
@@ -218,10 +160,6 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
 
     if (!hasMerged)
     {
-        if (&faceMap)
-        {
-            faceMap.clear();
-        }
         return false;
     }
 
@@ -236,13 +174,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
 
     List<Face>& faceLst = this->storedFaces();
 
-    // local copy
-    List<label> fMap;
-    if (&faceMap)
-    {
-        fMap.transfer(faceMap);
-    }
-    fMap.setSize(faceLst.size());
+    List<label> faceMap(faceLst.size());
 
     // Reset the point labels to the unique points array
     label newFaceI = 0;
@@ -261,7 +193,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
             {
                 faceLst[newFaceI] = f;
             }
-            fMap[newFaceI] = faceI;
+            faceMap[newFaceI] = faceI;
             newFaceI++;
         }
         else if (verbose)
@@ -282,18 +214,12 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
                 << " faces" << endl;
         }
         faceLst.setSize(newFaceI);
-        if (&faceMap)
-        {
-            faceMap.transfer(fMap);
-            faceMap.setSize(newFaceI);
-        }
+        remapRegions(faceMap);
     }
-    fMap.clear();
-
+    faceMap.clear();
 
     // Merging points might have changed geometric factors
     ParentType::clearOut();
-
     return true;
 }
 
@@ -302,20 +228,13 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
 template<class Face>
 bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
 (
-    List<label>& faceMap,
     const bool verbose
 )
 {
     bool changed = false;
     List<Face>& faceLst = this->storedFaces();
 
-    // local copy
-    List<label> fMap;
-    if (&faceMap)
-    {
-        fMap.transfer(faceMap);
-    }
-    fMap.setSize(faceLst.size());
+    List<label> faceMap(faceLst.size());
 
     label newFaceI = 0;
     // Detect badly labelled faces and mark degenerate faces
@@ -339,13 +258,13 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
                 }
             }
 
-            fMap[faceI] = faceI;
+            faceMap[faceI] = faceI;
             newFaceI++;
         }
         else
         {
             // mark as bad face
-            fMap[faceI] = -1;
+            faceMap[faceI] = -1;
 
             changed = true;
             if (verbose)
@@ -366,7 +285,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
     forAll(faceLst, faceI)
     {
         // skip already collapsed faces:
-        if (fMap[faceI] < 0)
+        if (faceMap[faceI] < 0)
         {
             continue;
         }
@@ -383,7 +302,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
         {
             const label neiFaceI = neighbours[neighI];
 
-            if (neiFaceI <= faceI || fMap[neiFaceI] < 0)
+            if (neiFaceI <= faceI || faceMap[neiFaceI] < 0)
             {
                 // lower numbered faces already checked
                 // skip neighbours that are themselves collapsed
@@ -414,12 +333,12 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
 
         if (okay)
         {
-            fMap[faceI] = faceI;
+            faceMap[faceI] = faceI;
             newFaceI++;
         }
         else
         {
-            fMap[faceI] = -1;
+            faceMap[faceI] = -1;
         }
     }
 
@@ -443,31 +362,92 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
         newFaceI = 0;
         forAll(faceLst, faceI)
         {
-            if (fMap[faceI] >= 0)
+            if (faceMap[faceI] >= 0)
             {
                 if (newFaceI != faceI)
                 {
                     faceLst[newFaceI] = faceLst[faceI];
                 }
-                fMap[newFaceI] = faceI;
+                faceMap[newFaceI] = faceI;
                 newFaceI++;
             }
         }
 
         faceLst.setSize(newFaceI);
-        if (&faceMap)
-        {
-            faceMap.transfer(fMap);
-            faceMap.setSize(newFaceI);
-        }
+        remapRegions(faceMap);
     }
-    fMap.clear();
+    faceMap.clear();
 
     // Topology can change because of renumbering
     ParentType::clearOut();
-
     return changed;
 }
+
+
+template<class Face>
+Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate()
+{
+    label nTri = 0;
+    List<Face>& faceLst = this->storedFaces();
+
+    // determine how many triangles are needed
+    forAll(faceLst, faceI)
+    {
+        nTri += faceLst[faceI].size() - 2;
+    }
+
+    // nothing to do
+    if (nTri <= faceLst.size())
+    {
+        return 0;
+    }
+
+    List<Face>  newFaces(nTri);
+    List<label> faceMap(nTri);
+
+    // remember the number of *additional* faces
+    nTri -= faceLst.size();
+
+    label newFaceI = 0;
+    forAll(faceLst, faceI)
+    {
+        const Face& f = faceLst[faceI];
+        triFace fTri;
+
+        // Do simple face triangulation around f[0].
+        // we could also use face::triangulation, but that requires points
+        // and doesn't currently template nicely
+        fTri[0] = f[0];
+        for (label fp = 1; fp < f.size() - 1; ++fp)
+        {
+            label fp1 = (fp + 1) % f.size();
+
+            fTri[1] = f[fp];
+            fTri[2] = f[fp1];
+
+            newFaces[newFaceI] = fTri;
+            faceMap[newFaceI] = faceI;
+            newFaceI++;
+        }
+    }
+
+    faceLst.transfer(newFaces);
+    remapRegions(faceMap);
+    faceMap.clear();
+
+    // Topology can change because of renumbering
+    ParentType::clearOut();
+    return nTri;
+}
+
+
+// dummy implementation to avoid a pure virtual class
+template<class Face>
+void Foam::PrimitiveMeshedSurface<Face>::remapRegions(List<label>& faceMap)
+{
+    faceMap.clear();
+}
+
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

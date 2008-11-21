@@ -269,10 +269,10 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
 template<class Face>
 Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -281,13 +281,13 @@ Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::STLsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
 
     // read in the values
-    STLsurfaceFormatCore reader(fName);
+    STLsurfaceFormatCore reader(filename);
 
     // transfer points
     this->storedPoints().transfer(reader.points());
@@ -330,11 +330,11 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
 
     if (names.size())
     {
-        this->addPatches(names, sizes);
+        this->addPatches(sizes, names);
     }
     else
     {
-        this->addPatches(names, sizes);
+        this->addPatches(sizes);
     }
 
     this->stitchFaces(SMALL);
@@ -367,21 +367,21 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
-    const fileName& fName,
+    const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    word ext = fName.ext();
+    word ext = filename.ext();
 
     // handle 'stlb' as binary directly
     if (ext == "stlb")
     {
-        std::ofstream ofs(fName.c_str(), std::ios::binary);
+        std::ofstream ofs(filename.c_str(), std::ios::binary);
         writeBINARY(ofs, surf);
     }
     else
     {
-        writeASCII(OFstream(fName)(), surf);
+        writeASCII(OFstream(filename)(), surf);
     }
 }
 
@@ -389,21 +389,21 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
-    const fileName& fName,
+    const fileName& filename,
     const MeshedSurface<Face>& surf
 )
 {
-    const word ext = fName.ext();
+    const word ext = filename.ext();
 
     // handle 'stlb' as binary directly
     if (ext == "stlb")
     {
-        std::ofstream ofs(fName.c_str(), std::ios::binary);
+        std::ofstream ofs(filename.c_str(), std::ios::binary);
         writeBINARY(ofs, surf);
     }
     else
     {
-        writeASCII(OFstream(fName)(), surf);
+        writeASCII(OFstream(filename)(), surf);
     }
 }
 

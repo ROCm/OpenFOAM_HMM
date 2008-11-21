@@ -42,12 +42,12 @@ License
 //   is detected ... this is not exactly what we want.
 int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    off_t fileSize = Foam::size(fName);
+    off_t fileSize = Foam::size(filename);
 
-    IFstream ifs(fName, IOstream::BINARY);
+    IFstream ifs(filename, IOstream::BINARY);
     istream& is = ifs.stdStream();
 
     // Read the STL header
@@ -215,7 +215,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 
 Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
 (
-    const fileName& fName
+    const fileName& filename
 )
 :
     sorted_(true),
@@ -224,16 +224,16 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
     names_(0),
     sizes_(0)
 {
-    off_t fileSize = Foam::size(fName);
+    off_t fileSize = Foam::size(filename);
 
     // auto-detect ascii/binary
-    if (detectBINARY(fName))
+    if (detectBINARY(filename))
     {
-        readBINARY(IFstream(fName, IOstream::BINARY)(), fileSize);
+        readBINARY(IFstream(filename, IOstream::BINARY)(), fileSize);
     }
     else
     {
-        readASCII(IFstream(fName)(), fileSize);
+        readASCII(IFstream(filename)(), fileSize);
     }
 }
 

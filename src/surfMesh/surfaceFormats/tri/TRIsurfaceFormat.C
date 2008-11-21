@@ -64,10 +64,10 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
 template<class Face>
 Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -76,13 +76,13 @@ Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
 
     // read in the values
-    TRIsurfaceFormatCore reader(fName);
+    TRIsurfaceFormatCore reader(filename);
 
     // transfer points
     this->storedPoints().transfer(reader.points());

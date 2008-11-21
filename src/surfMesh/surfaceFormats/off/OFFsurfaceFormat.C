@@ -37,10 +37,10 @@ License
 template<class Face>
 Foam::fileFormats::OFFsurfaceFormat<Face>::OFFsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -49,20 +49,20 @@ Foam::fileFormats::OFFsurfaceFormat<Face>::OFFsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     const bool mustTriangulate = this->isTri();
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::OFFsurfaceFormat<Face>::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
@@ -74,7 +74,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
         (
             "fileFormats::OFFsurfaceFormat<Face>::read(const fileName&)"
         )
-            << "OFF file " << fName << " does not start with 'OFF'"
+            << "OFF file " << filename << " does not start with 'OFF'"
             << exit(FatalError);
     }
 
@@ -103,7 +103,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
     // Read faces - ignore optional region information
     // use a DynamicList for possible on-the-fly triangulation
-    DynamicList<Face>  faceLst(nElems);
+    DynamicList<Face>  dynFaces(nElems);
 
     for (label faceI = 0; faceI < nElems; ++faceI)
     {
@@ -137,12 +137,12 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
                     fTri[1] = f[fp1];
                     fTri[2] = f[fp2];
 
-                    faceLst.append(fTri);
+                    dynFaces.append(fTri);
                 }
             }
             else
             {
-                faceLst.append(Face(f));
+                dynFaces.append(Face(f));
             }
         }
     }
@@ -151,7 +151,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     reset
     (
         xferMove(pointLst),
-        xferMoveTo<List<Face> >(faceLst)
+        xferMoveTo<List<Face> >(dynFaces)
     );
 
     // no region information
