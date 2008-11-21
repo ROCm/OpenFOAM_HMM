@@ -2,7 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-RAS/Allwmake
-LES/Allwmake
+(cd LES && ./Allwmake )
+(cd incompressible && ./Allwmake )
+(cd compressible && ./Allwmake )
 
 # ----------------------------------------------------------------- end-of-file

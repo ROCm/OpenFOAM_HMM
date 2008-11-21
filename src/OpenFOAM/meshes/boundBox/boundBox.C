@@ -42,15 +42,6 @@ Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
             min_ = point(VGREAT, VGREAT, VGREAT);
             max_ = point(-VGREAT, -VGREAT, -VGREAT);
         }
-        else
-        {
-            WarningIn("boundBox::boundBox(const pointField& points)")
-                << "Cannot find bounding box for zero sized pointField, "
-                   "returning zero"
-                << endl;
-
-            return;
-        }
     }
     else
     {

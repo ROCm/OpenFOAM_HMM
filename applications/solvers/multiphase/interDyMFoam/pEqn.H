@@ -7,7 +7,7 @@
 
     phi = phiU +
     (
-        fvc::interpolate(interface.sigmaK())*fvc::snGrad(gamma)
+        fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
       - ghf*fvc::snGrad(rho)
     )*rAUf*mesh.magSf();
 

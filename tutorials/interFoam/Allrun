@@ -37,7 +37,7 @@ cloneCase damBreak damBreakFine
 cd damBreakFine
     # Modify case
     setDamBreakFine
-    cp ../damBreak/0/gamma.org 0/gamma
+    cp ../damBreak/0/alpha1.org 0/alpha1
     # And execute
     runApplication blockMesh
     runApplication setFields
@@ -45,4 +45,8 @@ cd damBreakFine
     hostname > system/machines
     runParallel $application 4 system/machines
     runApplication reconstructPar
+cd ..
+
+cd nozzleFlow2D
+    ./Allrun
 cd ..

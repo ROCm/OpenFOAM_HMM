@@ -107,10 +107,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~LESfilter()
-        {}
+    //- Destructor
+    virtual ~LESfilter()
+    {}
 
 
     // Member Functions
