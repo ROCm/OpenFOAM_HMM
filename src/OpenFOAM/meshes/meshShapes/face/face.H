@@ -57,10 +57,13 @@ namespace Foam
 
 class face;
 class triFace;
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+class DynamicList;
+
 inline bool operator==(const face& a, const face& b);
 inline bool operator!=(const face& a, const face& b);
 inline Istream& operator>>(Istream&, face&);
-
 
 /*---------------------------------------------------------------------------*\
                            Class face Declaration
@@ -108,9 +111,10 @@ class face
             SPLITQUAD       // split into triangles&quads
         };
 
-        //- Split face into triangles or triangles&quads. Stores results
-        //  quadFaces[quadI], triFaces[triI]
-        void split
+        //- Split face into triangles or triangles&quads.
+        //  Stores results quadFaces[quadI], triFaces[triI]
+        //  Returns number of new faces created
+        label split
         (
             const splitMode mode,
             const pointField& points,
@@ -271,29 +275,46 @@ public:
         // Face splitting utilities
 
             //- Number of triangles after splitting
+            inline label nTriangles() const;
+
+            //- Number of triangles after splitting
             label nTriangles(const pointField& points) const;
 
-            //- Split into triangles using existing points. Result in
-            //  triFaces[triI..triI+nTri]. Splits intelligently to maximize
-            //  triangle quality.
-            void triangles
+            //- Split into triangles using existing points.
+            //  Result in triFaces[triI..triI+nTri].
+            //  Splits intelligently to maximize triangle quality.
+            //  Returns number of faces created.
+            label triangles
             (
                 const pointField& points,
                 label& triI,
                 faceList& triFaces
             ) const;
 
+            //- Split into triangles using existing points.
+            //  Append to DynamicList.
+            //  Returns number of faces created.
+            template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+            label triangles
+            (
+                const pointField& points,
+                DynamicList<face, SizeInc,SizeMult, SizeDiv>& triFaces
+            ) const;
+
             //- Number of triangles and quads after splitting
-            void nTrianglesQuads
+            //  Returns the sum of both
+            label nTrianglesQuads
             (
                 const pointField& points,
                 label& nTris,
                 label& nQuads
             ) const;
 
-            //- Split into triangles and quads. Result in triFaces (starting at
-            //  triI and quadFaces (starting at quadI)
-            void trianglesQuads
+            //- Split into triangles and quads.
+            //  Results in triFaces (starting at triI) and quadFaces
+            //  (starting at quadI).
+            //  Returns number of new faces created.
+            label trianglesQuads
             (
                 const pointField& points,
                 label& triI,

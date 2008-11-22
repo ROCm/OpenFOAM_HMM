@@ -127,6 +127,11 @@ inline Foam::label Foam::face::prevLabel(const label i) const
     return operator[](rcIndex(i));
 }
 
+// Number of triangles directly known from number of vertices
+inline Foam::label Foam::face::nTriangles() const
+{
+    return size() - 2;
+}
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 

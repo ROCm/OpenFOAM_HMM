@@ -124,6 +124,9 @@ public:
             //- Return vector normal
             inline vector normal(const pointField&) const;
 
+            //- Number of triangles after splitting
+            inline label nTriangles() const;
+
             //- Return face with reverse direction
             inline triFace reverseFace() const;
 

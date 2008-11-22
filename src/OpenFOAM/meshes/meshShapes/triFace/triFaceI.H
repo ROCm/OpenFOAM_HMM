@@ -224,6 +224,12 @@ inline Foam::vector Foam::triFace::normal(const pointField& points) const
 }
 
 
+inline Foam::label Foam::triFace::nTriangles() const
+{
+    return 1;
+}
+
+
 inline Foam::triFace Foam::triFace::reverseFace() const
 {
     // The starting points of the original and reverse face are identical.
