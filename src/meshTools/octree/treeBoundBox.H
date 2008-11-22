@@ -87,6 +87,7 @@ public:
 
     // Static data members
 
+        //- As per boundBox::greatBox, but with GREAT instead of VGREAT
         static const treeBoundBox greatBox;
 
         //- Bits used for octant/point coding. Every octant/corner point
@@ -171,7 +172,7 @@ public:
         treeBoundBox(const UList<point>& points);
 
         //- Construct as subset of points
-        treeBoundBox(const UList<point>&, const labelList& meshPoints);
+        treeBoundBox(const UList<point>&, const UList<label>& meshPoints);
 
         //- Construct from Istream
         treeBoundBox(Istream&);

@@ -27,24 +27,40 @@ License
 #include "boundBox.H"
 #include "PstreamReduceOps.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::boundBox Foam::boundBox::greatBox
+(
+    point(-VGREAT, -VGREAT, -VGREAT),
+    point(VGREAT, VGREAT, VGREAT)
+);
+
+
+const Foam::boundBox Foam::boundBox::invertedBox
+(
+    point(VGREAT, VGREAT, VGREAT),
+    point(-VGREAT, -VGREAT, -VGREAT)
+);
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
 :
-    min_(vector::zero),
-    max_(vector::zero)
+    min_(point::zero),
+    max_(point::zero)
 {
     if (points.size() == 0)
     {
         if (Pstream::parRun() && doReduce)
         {
-            // Use values which get overwritten by reduce minOp,maxOp below
+            // Use values that get overwritten by reduce minOp, maxOp below
             min_ = point(VGREAT, VGREAT, VGREAT);
             max_ = point(-VGREAT, -VGREAT, -VGREAT);
         }
         else
         {
-            WarningIn("boundBox::boundBox(const pointField& points)")
+            WarningIn("boundBox::boundBox(const pointField&)")
                 << "Cannot find bounding box for zero sized pointField, "
                    "returning zero"
                 << endl;
@@ -98,7 +114,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
 
     // Check state of Ostream
     os.check("Ostream& operator<<(Ostream&, const boundBox&)");
-
     return os;
 }
 
@@ -120,7 +135,6 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, boundBox&)");
-
     return is;
 }
 
