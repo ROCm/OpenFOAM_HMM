@@ -113,7 +113,7 @@ protected:
         );
 
         //- Set new regions from faceMap
-        virtual void remapRegions(List<label>& faceMap);
+        virtual void remapFaces(const UList<label>& faceMap);
 
 public:
 
@@ -255,8 +255,8 @@ public:
             return patches_;
         }
 
-        //- set a single patch
-        void onePatch();
+        //- set a single patch, optionally with a specific name
+        void onePatch(const word& name = word::null);
 
         //- add patches
         void addPatches

@@ -25,8 +25,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PrimitiveMeshedSurface.H"
+#include "boundBox.H"
 #include "mergePoints.H"
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
@@ -214,7 +214,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
                 << " faces" << endl;
         }
         faceLst.setSize(newFaceI);
-        remapRegions(faceMap);
+        remapFaces(faceMap);
     }
     faceMap.clear();
 
@@ -374,7 +374,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
         }
 
         faceLst.setSize(newFaceI);
-        remapRegions(faceMap);
+        remapFaces(faceMap);
     }
     faceMap.clear();
 
@@ -387,52 +387,109 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
 template<class Face>
 Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate()
 {
+    return triangulate
+    (
+        const_cast<List<label>&>(List<label>::null())
+    );
+}
+
+
+template<class Face>
+Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate
+(
+    List<label>& faceMapOut
+)
+{
     label nTri = 0;
+    label maxTri = 0;  // the maximum number of triangles for any single face
     List<Face>& faceLst = this->storedFaces();
 
-    // determine how many triangles are needed
+    // determine how many triangles will be needed
     forAll(faceLst, faceI)
     {
-        nTri += faceLst[faceI].size() - 2;
+        const label n = faceLst[faceI].nTriangles();
+        if (maxTri < n)
+        {
+            maxTri = n;
+        }
+        nTri += n;
     }
 
     // nothing to do
     if (nTri <= faceLst.size())
     {
+        if (&faceMapOut)
+        {
+            faceMapOut.clear();
+        }
         return 0;
     }
 
     List<Face>  newFaces(nTri);
-    List<label> faceMap(nTri);
+    List<label> faceMap;
+
+    // reuse storage from optional faceMap
+    if (&faceMapOut)
+    {
+        faceMap.transfer(faceMapOut);
+    }
+    faceMap.setSize(nTri);
 
     // remember the number of *additional* faces
     nTri -= faceLst.size();
 
-    label newFaceI = 0;
-    forAll(faceLst, faceI)
+    if (this->points().size() == 0)
     {
-        const Face& f = faceLst[faceI];
-        triFace fTri;
-
-        // Do simple face triangulation around f[0].
-        // we could also use face::triangulation, but that requires points
-        // and doesn't currently template nicely
-        fTri[0] = f[0];
-        for (label fp = 1; fp < f.size() - 1; ++fp)
+        // triangulate without points
+        // simple face triangulation around f[0]
+        label newFaceI = 0;
+        forAll(faceLst, faceI)
         {
-            label fp1 = (fp + 1) % f.size();
+            const Face& f = faceLst[faceI];
 
-            fTri[1] = f[fp];
-            fTri[2] = f[fp1];
+            for (label fp = 1; fp < f.size() - 1; ++fp)
+            {
+                label fp1 = (fp + 1) % f.size();
 
-            newFaces[newFaceI] = fTri;
-            faceMap[newFaceI] = faceI;
-            newFaceI++;
+                newFaces[newFaceI] = triFace(f[0], f[fp], f[fp1]);
+                faceMap[newFaceI] = faceI;
+                newFaceI++;
+            }
+        }
+    }
+    else
+    {
+        // triangulate with points
+        List<face> tmpTri(maxTri);
+
+        label newFaceI = 0;
+        forAll(faceLst, faceI)
+        {
+            // 'face' not '<Face>'
+            const face& f = faceLst[faceI];
+
+            label nTmp;
+            f.triangles(this->points(), nTmp, tmpTri);
+            for (label triI = 0; triI < nTmp; triI++)
+            {
+                newFaces[newFaceI] = Face
+                (
+                    static_cast<UList<label>&>(tmpTri[triI])
+                );
+                faceMap[newFaceI] = faceI;
+                newFaceI++;
+            }
         }
     }
 
     faceLst.transfer(newFaces);
-    remapRegions(faceMap);
+    remapFaces(faceMap);
+
+    // optionally return the faceMap
+    if (&faceMapOut)
+    {
+        faceMapOut.transfer(faceMap);
+    }
     faceMap.clear();
 
     // Topology can change because of renumbering
@@ -443,12 +500,19 @@ Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate()
 
 // dummy implementation to avoid a pure virtual class
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::remapRegions(List<label>& faceMap)
+void Foam::PrimitiveMeshedSurface<Face>::remapFaces(const UList<label>&)
 {
-    faceMap.clear();
 }
 
 
+template<class Face>
+void Foam::PrimitiveMeshedSurface<Face>::writeStats(Ostream& os) const
+{
+    os  << "points      : " << this->points().size() << nl
+        << (this->isTri() ? "triangles   : " : "faces       : ")
+        << this->size() << nl
+        << "boundingBox : " << boundBox(this->points()) << endl;
+}
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

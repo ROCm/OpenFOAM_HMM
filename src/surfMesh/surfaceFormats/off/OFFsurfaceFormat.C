@@ -126,18 +126,13 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 
             if (mustTriangulate && f.size() > 3)
             {
-                triFace fTri;
-
-                // simple face triangulation about f[0].
-                fTri[0] = f[0];
+                // simple face triangulation about f[0]
+                // cannot use face::triangulation (points may be incomplete)
                 for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {
                     label fp2 = (fp1 + 1) % f.size();
 
-                    fTri[1] = f[fp1];
-                    fTri[2] = f[fp2];
-
-                    dynFaces.append(fTri);
+                    dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
                 }
             }
             else

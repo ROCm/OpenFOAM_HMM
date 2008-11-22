@@ -85,7 +85,7 @@ protected:
         }
 
         //- Set new regions/patches from faceMap
-        virtual void remapRegions(List<label>& faceMap);
+        virtual void remapFaces(const UList<label>& faceMap);
 
 public:
 
@@ -93,6 +93,7 @@ public:
 
         //- Face storage only handles triangulated faces
         inline static bool isTri();
+
 
     // Constructors
 
@@ -154,7 +155,18 @@ public:
 
         //- Triangulate in-place
         //  Returning the number of triangles added
+        //  Optionally returning a map of original face Ids (zero-sized when
+        //  no triangulation was done)
         virtual label triangulate();
+
+        //- Triangulate in-place, setting a map of original face Ids
+        //  faceMap is zero-sized when no triangulation was done
+        virtual label triangulate(List<label>& faceMap);
+
+
+    // Write
+
+        void writeStats(Ostream& os) const;
 
 };
 
@@ -172,6 +184,18 @@ inline bool PrimitiveMeshedSurface<triFace>::isTri()
 template<>
 inline label PrimitiveMeshedSurface<triFace>::triangulate()
 {
+    return 0;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label PrimitiveMeshedSurface<triFace>::triangulate(List<label>& faceMap)
+{
+    if (&faceMap)
+    {
+        faceMap.clear();
+    }
+
     return 0;
 }
 
