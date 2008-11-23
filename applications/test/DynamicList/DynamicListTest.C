@@ -100,6 +100,15 @@ int main(int argc, char *argv[])
     Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
         << " " << dlB.size() << "/" << dlB.allocSize() << endl;
 
+    // try with a normal list:
+    List<label> lstA;
+    lstA.transfer(dlB);
+    Info<< "Transferred to normal list" << endl;
+    Info<< "<lstA>" << lstA << "</lstA>" << nl << "sizes: "
+        << " " << lstA.size() << endl;
+    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
+        << " " << dlB.size() << "/" << dlB.allocSize() << endl;
+
     return 0;
 }
 
