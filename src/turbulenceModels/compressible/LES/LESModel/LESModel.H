@@ -49,7 +49,7 @@ SourceFiles
 #ifndef compressibleLESModel_H
 #define compressibleLESModel_H
 
-#include "turbulenceModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 #include "LESdelta.H"
 #include "fvm.H"
 #include "fvc.H"

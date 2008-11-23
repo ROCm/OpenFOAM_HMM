@@ -45,7 +45,7 @@ SourceFiles
 #ifndef compressibleRASModel_H
 #define compressibleRASModel_H
 
-#include "turbulenceModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "nearWallDist.H"

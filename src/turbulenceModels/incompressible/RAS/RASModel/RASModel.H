@@ -42,7 +42,7 @@ SourceFiles
 #ifndef RASModel_H
 #define RASModel_H
 
-#include "turbulenceModel.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "nearWallDist.H"

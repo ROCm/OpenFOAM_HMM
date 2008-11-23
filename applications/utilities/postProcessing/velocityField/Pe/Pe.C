@@ -37,11 +37,11 @@ Description
 #include "fvc.H"
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASModel/RASModel.H"
-#include "incompressible/LESModel/LESModel.H"
+#include "incompressible/RAS/RASModel/RASModel.H"
+#include "incompressible/LES/LESModel/LESModel.H"
 #include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "compressible/LESModel/LESModel.H"
+#include "compressible/RAS/RASModel/RASModel.H"
+#include "compressible/LES/LESModel/LESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
