@@ -23,29 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RASModels::laminar
+    Foam::compressible::laminar
 
 Description
-    Dummy turbulence model for laminar compressible flow.
+    Turbulence model for laminar compressible flow.
 
 SourceFiles
     laminar.C
-    laminarCorrect.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleLaminar_H
-#define compressibleLaminar_H
+#ifndef laminar_H
+#define laminar_H
 
-#include "RASModel.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -54,7 +51,7 @@ namespace RASModels
 
 class laminar
 :
-    public RASModel
+    public turbulenceModel
 {
 
 public:
@@ -70,7 +67,19 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel
+            const basicThermo& thermoPhysicalModel
+        );
+
+
+    // Selectors
+
+        //- Return a reference to the selected turbulence model
+        static autoPtr<laminar> New
+        (
+            const volScalarField& rho,
+            const volVectorField& U,
+            const surfaceScalarField& phi,
+            const basicThermo& thermoPhysicalModel
         );
 
 
@@ -82,49 +91,41 @@ public:
     // Member Functions
 
         //- Return the turbulence viscosity, i.e. 0 for laminar flow
-        tmp<volScalarField> mut() const;
+        virtual tmp<volScalarField> mut() const;
 
         //- Return the effective viscosity, i.e. the laminar viscosity
-        tmp<volScalarField> muEff() const
-        {
-            return tmp<volScalarField>(new volScalarField("muEff", mu()));
-        }
+        virtual tmp<volScalarField> muEff() const;
 
-        //- Return the effective turbulent thermal diffusivity,
-        //  i.e. the laminar thermal diffusivity
-        tmp<volScalarField> alphaEff() const
-        {
-            return tmp<volScalarField>(new volScalarField("alphaEff", alpha()));
-        }
+        //- Return the effective turbulent thermal diffusivity
+        virtual tmp<volScalarField> alphaEff() const;
 
         //- Return the turbulence kinetic energy, i.e. 0 for laminar flow
-        tmp<volScalarField> k() const;
+        virtual tmp<volScalarField> k() const;
 
         //- Return the turbulence kinetic energy dissipation rate,
         //  i.e. 0 for laminar flow
-        tmp<volScalarField> epsilon() const;
+        virtual tmp<volScalarField> epsilon() const;
 
         //- Return the Reynolds stress tensor, i.e. 0 for laminar flow
-        tmp<volSymmTensorField> R() const;
+        virtual tmp<volSymmTensorField> R() const;
 
-        //- Return the effective stress tensor, i.e. the laminar stress
-        tmp<volSymmTensorField> devRhoReff() const;
+        //- Return the effective stress tensor including the laminar stress
+        virtual tmp<volSymmTensorField> devRhoReff() const;
 
         //- Return the source term for the momentum equation
-        tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
+        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
 
         //- Correct the laminar viscosity
-        void correct();
+        virtual void correct();
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

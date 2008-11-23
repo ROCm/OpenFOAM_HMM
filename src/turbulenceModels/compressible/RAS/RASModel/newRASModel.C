@@ -40,7 +40,7 @@ autoPtr<RASModel> RASModel::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel
 )
 {
     word RASModelTypeName;

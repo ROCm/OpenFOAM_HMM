@@ -157,18 +157,6 @@ public:
 
     // Member Functions
 
-        //- Access function to velocity field
-        inline const volVectorField& U() const
-        {
-            return U_;
-        }
-
-        //- Access function to flux field
-        inline const surfaceScalarField& phi() const
-        {
-            return phi_;
-        }
-
         //- Access the dictionary which provides info. about choice of
         //  models, and all related data (particularly model coefficients).
         inline dictionary& coeffDict()

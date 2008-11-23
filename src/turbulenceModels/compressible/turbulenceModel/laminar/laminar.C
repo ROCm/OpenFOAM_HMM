@@ -25,7 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "laminar.H"
+#include "Time.H"
+#include "volFields.H"
+#include "fvcGrad.H"
+#include "fvcDiv.H"
+#include "fvmLaplacian.H"
 #include "addToRunTimeSelectionTable.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -33,13 +39,11 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RASModels
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(RASModel, laminar, dictionary);
+addToRunTimeSelectionTable(turbulenceModel, laminar, turbulenceModel);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -48,11 +52,25 @@ laminar::laminar
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermoPhysicalModel
 )
 :
-    RASModel(typeName, rho, U, phi, thermophysicalModel)
+    turbulenceModel(rho, U, phi, thermoPhysicalModel)
 {}
+
+
+// * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
+
+autoPtr<laminar> laminar::New
+(
+    const volScalarField& rho,
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    const basicThermo& thermoPhysicalModel
+)
+{
+    return autoPtr<laminar>(new laminar(rho, U, phi, thermoPhysicalModel));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -75,6 +93,18 @@ tmp<volScalarField> laminar::mut() const
             dimensionedScalar("mut", mu().dimensions(), 0.0)
         )
     );
+}
+
+
+tmp<volScalarField> laminar::muEff() const
+{
+    return tmp<volScalarField>(new volScalarField("muEff", mu()));
+}
+
+
+tmp<volScalarField> laminar::alphaEff() const
+{
+    return tmp<volScalarField>(new volScalarField("alphaEff", alpha()));
 }
 
 
@@ -179,18 +209,19 @@ tmp<fvVectorMatrix> laminar::divDevRhoReff(volVectorField& U) const
 
 bool laminar::read()
 {
-    return RASModel::read();
+    return true;
 }
 
 
 void laminar::correct()
-{}
+{
+    turbulenceModel::correct();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

@@ -23,32 +23,33 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::incompressible::turbulenceModels
+    Foam::compressible::turbulenceModels
 
 Description
-    Namespace for incompressible turbulence turbulence models.
+    Namespace for compressible turbulence turbulence models.
+
 
 Class
-    Foam::incompressible::turbulenceModel
+    Foam::compressible::turbulenceModel
 
 Description
-    Abstract base class for incompressible turbulence models
+    Abstract base class for compressible turbulence models
     (RAS, LES and laminar).
+
 
 SourceFiles
     turbulenceModel.C
-    newTurbulenceModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulenceModel_H
-#define turbulenceModel_H
+#ifndef compressibleturbulenceModel_H
+#define compressibleturbulenceModel_H
 
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
-#include "incompressible/transportModel/transportModel.H"
+#include "basicThermo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
@@ -60,7 +61,7 @@ namespace Foam
 // Forward declarations
 class fvMesh;
 
-namespace incompressible
+namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
@@ -77,10 +78,11 @@ protected:
         const Time& runTime_;
         const fvMesh& mesh_;
 
+        const volScalarField& rho_;
         const volVectorField& U_;
         const surfaceScalarField& phi_;
 
-        transportModel& transportModel_;
+        const basicThermo& thermophysicalModel_;
 
 
 private:
@@ -100,7 +102,7 @@ public:
     TypeName("turbulenceModel");
 
 
-    // Declare run-time New selection table
+    // Declare run-time constructor selection table
 
         declareRunTimeNewSelectionTable
         (
@@ -108,11 +110,12 @@ public:
             turbulenceModel,
             turbulenceModel,
             (
+                const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                transportModel& lamTransportModel
+                const basicThermo& thermoPhysicalModel
             ),
-            (U, phi, lamTransportModel)
+            (rho, U, phi, thermoPhysicalModel)
         );
 
 
@@ -121,9 +124,10 @@ public:
         //- Construct from components
         turbulenceModel
         (
+            const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            const basicThermo& thermoPhysicalModel
         );
 
 
@@ -132,9 +136,10 @@ public:
         //- Return a reference to the selected turbulence model
         static autoPtr<turbulenceModel> New
         (
+            const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            const basicThermo& thermoPhysicalModel
         );
 
 
@@ -144,35 +149,50 @@ public:
 
     // Member Functions
 
+        //- Access function to density field
+        const volScalarField& rho() const
+        {
+            return rho_;
+        }
+
         //- Access function to velocity field
-        inline const volVectorField& U() const
+        const volVectorField& U() const
         {
             return U_;
         }
 
         //- Access function to flux field
-        inline const surfaceScalarField& phi() const
+        const surfaceScalarField& phi() const
         {
             return phi_;
         }
 
-        //- Access function to incompressible transport model
-        inline transportModel& transport() const
+        //- Access function to thermophysical model
+        const basicThermo& thermo() const
         {
-            return transportModel_;
+             return thermophysicalModel_;
         }
 
         //- Return the laminar viscosity
-        const volScalarField& nu() const
+        const volScalarField& mu() const
         {
-            return transportModel_.nu();
+            return thermophysicalModel_.mu();
+        }
+
+        //- Return the laminar thermal conductivity
+        const volScalarField& alpha() const
+        {
+            return thermophysicalModel_.alpha();
         }
 
         //- Return the turbulence viscosity
-        virtual tmp<volScalarField> nut() const = 0;
+        virtual tmp<volScalarField> mut() const = 0;
 
         //- Return the effective viscosity
-        virtual tmp<volScalarField> nuEff() const = 0;
+        virtual tmp<volScalarField> muEff() const = 0;
+
+        //- Return the effective turbulent thermal diffusivity
+        virtual tmp<volScalarField> alphaEff() const = 0;
 
         //- Return the turbulence kinetic energy
         virtual tmp<volScalarField> k() const = 0;
@@ -184,10 +204,10 @@ public:
         virtual tmp<volSymmTensorField> R() const = 0;
 
         //- Return the effective stress tensor including the laminar stress
-        virtual tmp<volSymmTensorField> devReff() const = 0;
+        virtual tmp<volSymmTensorField> devRhoReff() const = 0;
 
         //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const = 0;
+        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const = 0;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;
@@ -199,7 +219,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

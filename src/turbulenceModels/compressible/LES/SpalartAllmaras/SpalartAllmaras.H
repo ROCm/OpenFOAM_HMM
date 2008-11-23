@@ -106,36 +106,35 @@ public:
         );
 
 
-    // Destructor
-
-        ~SpalartAllmaras()
-        {}
+    //- Destructor
+    virtual ~SpalartAllmaras()
+    {}
 
 
     // Member Functions
-
-        //- Return SGS kinetic energy
-        tmp<volScalarField> k() const
-        {
-            return sqr(muSgs()/rho()/ck_/dTilda_);
-        }
-
-        //- Return sub-grid disipation rate
-        tmp<volScalarField> epsilon() const;
 
         tmp<volScalarField> nuTilda() const
         {
             return nuTilda_;
         }
 
+        //- Return SGS kinetic energy
+        virtual tmp<volScalarField> k() const
+        {
+            return sqr(muSgs()/rho()/ck_/dTilda_);
+        }
+
+        //- Return sub-grid disipation rate
+        virtual tmp<volScalarField> epsilon() const;
+
         //- Return SGS viscosity
-        tmp<volScalarField> muSgs() const
+        virtual tmp<volScalarField> muSgs() const
         {
             return muSgs_;
         }
 
         //- Return thermal conductivity
-        tmp<volScalarField> alphaEff() const
+        virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>
             (
@@ -152,13 +151,13 @@ public:
 
         //- Returns div(rho*dev(B)).
         // This is the additional term due to the filtering of the NSE.
-        tmp<fvVectorMatrix> divDevRhoBeff(volVectorField& U) const;
+        virtual tmp<fvVectorMatrix> divDevRhoBeff(volVectorField& U) const;
 
         //- Correct nuTilda and related properties
-        void correct(const tmp<volTensorField>& gradU);
+        virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

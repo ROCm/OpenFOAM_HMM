@@ -90,7 +90,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LienCubicKE
         (
             const volVectorField& U,

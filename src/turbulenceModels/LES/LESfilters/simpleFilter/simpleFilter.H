@@ -69,10 +69,10 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         simpleFilter(const fvMesh& mesh);
 
-        //- from IOdictionary
+        //- Construct from IOdictionary
         simpleFilter(const fvMesh& mesh, const dictionary&);
 
 

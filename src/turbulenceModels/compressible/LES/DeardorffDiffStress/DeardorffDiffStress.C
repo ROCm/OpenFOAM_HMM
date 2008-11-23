@@ -43,7 +43,6 @@ addToRunTimeSelectionTable(LESModel, DeardorffDiffStress, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 DeardorffDiffStress::DeardorffDiffStress
 (
     const volScalarField& rho,

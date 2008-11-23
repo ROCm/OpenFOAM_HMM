@@ -115,7 +115,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LienCubicKELowRe
         (
             const volVectorField& U,

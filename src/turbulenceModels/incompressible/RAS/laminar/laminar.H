@@ -63,7 +63,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         laminar
         (
             const volVectorField& U,

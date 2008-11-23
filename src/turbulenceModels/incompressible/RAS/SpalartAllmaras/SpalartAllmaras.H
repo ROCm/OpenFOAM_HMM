@@ -130,7 +130,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         SpalartAllmaras
         (
             const volVectorField& U,

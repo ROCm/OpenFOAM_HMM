@@ -43,13 +43,13 @@ Description
 
 SourceFiles
     LESModel.C
-    newLESModel.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef compressibleLESModel_H
 #define compressibleLESModel_H
 
+#include "turbulenceModel.H"
 #include "LESdelta.H"
 #include "fvm.H"
 #include "fvc.H"
@@ -72,26 +72,13 @@ namespace compressible
 
 class LESModel
 :
+    public turbulenceModel,
     public IOdictionary
 {
 
 protected:
 
     // Protected data
-
-        const Time& runTime_;
-        const fvMesh& mesh_;
-
-
-private:
-
-    // Private data
-
-        const volScalarField& rho_;
-        const volVectorField& U_;
-        const surfaceScalarField& phi_;
-
-        const basicThermo& thermoPhysicalModel_;
 
         Switch printCoeffs_;
         dictionary coeffDict_;
@@ -101,19 +88,21 @@ private:
         autoPtr<LESdelta> delta_;
 
 
-    // Private Member Functions
-
-        // Disallow default bitwise copy construct and assignment
-        LESModel(const LESModel&);
-        LESModel& operator=(const LESModel&);
-
-
-protected:
-
     // Protected Member Functions
 
         //- Print model coefficients
         virtual void printCoeffs();
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        LESModel(const LESModel&);
+
+        //- Disallow default bitwise assignment
+        LESModel& operator=(const LESModel&);
 
 
 public:
@@ -164,76 +153,37 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~LESModel()
-        {}
+    //- Destructor
+    virtual ~LESModel()
+    {}
 
 
     // Member Functions
 
-        // Access
+        //- Access the dictionary which provides info. about choice of
+        //  models, and all related data (particularly model coefficients).
+        inline dictionary& coeffDict()
+        {
+            return coeffDict_;
+        }
 
-            //- Access function to the density field
-            inline const volScalarField& rho() const
-            {
-                return rho_;
-            }
+        //- Access function to filter width
+        inline const volScalarField& delta() const
+        {
+            return delta_();
+        }
 
-            //- Access function to velocity field
-            inline const volVectorField& U() const
-            {
-                return U_;
-            }
+        //- Return the value of k0 which k is not allowed to be less than
+        const dimensionedScalar& k0() const
+        {
+            return k0_;
+        }
 
-            //- Access function to flux field
-            inline const surfaceScalarField& phi() const
-            {
-                return phi_;
-            }
-
-            //- Access function to the thermophysical properties model
-            inline const basicThermo& thermo() const
-            {
-                return thermoPhysicalModel_;
-            }
-
-            //- Access the dictionary which provides info. about choice of
-            //  models, and all related data (particularly model coefficients).
-            inline dictionary& coeffDict()
-            {
-                return coeffDict_;
-            }
-
-            //- Access function to filter width
-            inline const volScalarField& delta() const
-            {
-                return delta_();
-            }
-
-            //- Return the value of k0 which k is not allowed to be less than
-            const dimensionedScalar& k0() const
-            {
-                return k0_;
-            }
-
-            //- Allow k0 to be changed
-            dimensionedScalar& k0()
-            {
-                return k0_;
-            }
-
-            //- Access function to laminar viscosity
-            tmp<volScalarField> mu() const
-            {
-                return thermoPhysicalModel_.mu();
-            }
-
-            //- Access function to laminar thermal conductivity
-            tmp<volScalarField> alpha() const
-            {
-                return thermoPhysicalModel_.alpha();
-            }
+        //- Allow k0 to be changed
+        dimensionedScalar& k0()
+        {
+            return k0_;
+        }
 
 
         //- Return the SGS turbulent kinetic energy.
@@ -267,6 +217,34 @@ public:
         //- Returns div(rho*dev(B)).
         // This is the additional term due to the filtering of the NSE.
         virtual tmp<fvVectorMatrix> divDevRhoBeff(volVectorField& U) const = 0;
+
+
+        // RAS compatibility functions for the turbulenceModel base class
+
+            //- Return the turbulence viscosity
+            virtual tmp<volScalarField> mut() const
+            {
+                return muSgs();
+            }
+
+            //- Return the Reynolds stress tensor
+            virtual tmp<volSymmTensorField> R() const
+            {
+                return B();
+            }
+
+            //- Return the effective stress tensor including the laminar stress
+            virtual tmp<volSymmTensorField> devRhoReff() const
+            {
+                return devRhoBeff();
+            }
+
+            //- Return the source term for the momentum equation
+            virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const
+            {
+                return divDevRhoBeff(U);
+            }
+
 
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying

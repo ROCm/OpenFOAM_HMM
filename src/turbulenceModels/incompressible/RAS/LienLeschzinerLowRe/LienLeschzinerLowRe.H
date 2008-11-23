@@ -85,7 +85,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LienLeschzinerLowRe
         (
             const volVectorField& U,

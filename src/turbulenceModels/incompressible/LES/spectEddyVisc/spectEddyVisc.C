@@ -43,7 +43,6 @@ addToRunTimeSelectionTable(LESModel, spectEddyVisc, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 spectEddyVisc::spectEddyVisc
 (
     const volVectorField& U,

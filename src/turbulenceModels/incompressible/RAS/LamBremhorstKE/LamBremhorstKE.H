@@ -82,7 +82,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LamBremhorstKE
         (
             const volVectorField& U,

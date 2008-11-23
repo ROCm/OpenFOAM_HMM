@@ -93,7 +93,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         RNGkEpsilon
         (
             const volVectorField& U,

@@ -25,9 +25,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "RASModel.H"
-#include "wallDist.H"
 #include "wallFvPatch.H"
-#include "fixedValueFvPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,9 +60,11 @@ RASModel::RASModel
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel
 )
 :
+    turbulenceModel(rho, U, phi, thermophysicalModel),
+
     IOdictionary
     (
         IOobject
@@ -75,14 +76,6 @@ RASModel::RASModel
             IOobject::NO_WRITE
         )
     ),
-
-    runTime_(U.time()),
-    mesh_(U.mesh()),
-
-    rho_(rho),
-    U_(U),
-    phi_(phi),
-    thermophysicalModel_(thermophysicalModel),
 
     turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),

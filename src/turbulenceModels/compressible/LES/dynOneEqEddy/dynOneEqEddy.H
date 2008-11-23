@@ -110,8 +110,8 @@ public:
 
 
     // Destructor
-
-        ~dynOneEqEddy();
+    virtual ~dynOneEqEddy()
+    {}
 
 
     // Member Functions
@@ -119,17 +119,17 @@ public:
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
         {
-            return tmp<volScalarField> 
+            return tmp<volScalarField>
             (
                 new volScalarField("DkEff", muSgs_ + mu())
             );
         }
 
         //- Correct Eddy-Viscosity and related properties
-        void correct(const tmp<volTensorField>& gradU);
+        virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 
