@@ -43,9 +43,14 @@ int main(int argc, char *argv[])
     ldl[0](3) = 3;
     ldl[0](1) = 1;
 
-    ldl[0].setSize(5);     // increase allocated size
-    ldl[1].setSize(10);    // increase allocated size
-    ldl[1](2) = 2;
+    ldl[0].allocSize(5);   // increase allocated size
+    ldl[1].allocSize(10);  // increase allocated size
+    ldl[0].reserve(15);    // should increase allocated size
+    ldl[1].reserve(5);     // should not decrease allocated size
+    ldl[1](3) = 2;         // allocates space and sets value
+
+    // this works without a segfault, but doesn't change the list size
+    ldl[0][4] = 4;
 
     ldl[1] = 3;
 
@@ -78,7 +83,7 @@ int main(int argc, char *argv[])
     {
         dlA.append(i);
     }
-    dlA.setSize(10);
+    dlA.allocSize(10);
 
     Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
         << " " << dlA.size() << "/" << dlA.allocSize() << endl;
@@ -94,7 +99,6 @@ int main(int argc, char *argv[])
         << " " << dlA.size() << "/" << dlA.allocSize() << endl;
     Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
         << " " << dlB.size() << "/" << dlB.allocSize() << endl;
-
 
     return 0;
 }

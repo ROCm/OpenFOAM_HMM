@@ -118,18 +118,30 @@ public:
         //- Size of the underlying storage.
         inline label allocSize() const;
 
-
         // Edit
 
-        //- Alter the list size.
-        //  When the new size is greater than the addressed list size, the
+        //- Alter the size of the underlying storage.
+        //  The addressed size will be truncated if needed to fit, but will
+        //  otherwise remain untouched.
+        inline void allocSize(const label);
+
+        // CURRENT BEHAVIOUR
+        //- When the new size is greater than the addressed list size, the
         //  allocated list sizes is adjusted and the
         //  addressed size does not change.
         //  Otherwise the addressed list size is just reduced and the
         //  allocated size does not change.
+        //
+        // PROPOSED BEHAVIOUR
+        //- Alter the addressed list size.
+        //  New space will be allocated if required.
         inline void setSize(const label);
 
-        //- Clear the list, i.e. set the size to zero.
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use allocSize() for that.
+        inline void reserve(const label);
+
+        //- Clear the addressed list, i.e. set the size to zero.
         //  Allocated size does not change
         inline void clear();
 

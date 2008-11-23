@@ -71,11 +71,60 @@ const
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::allocSize
+(
+    const label s
+)
+{
+    label nextFree = List<T>::size();
+    allocSize_ = s;
+
+    // truncate addressed size too?
+    if (nextFree > allocSize_)
+    {
+        nextFree = allocSize_;
+    }
+
+    // adjust allocated size, and addressed size if necessary
+    List<T>::setSize(allocSize_);
+    List<T>::size(nextFree);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::reserve
+(
+    const label s
+)
+{
+    if (s > allocSize_)
+    {
+        allocSize_ = max
+        (
+            s,
+            label(SizeMult*allocSize_/SizeDiv + SizeInc)
+        );
+
+        // adjust allocated size, leave addressed size untouched
+        label nextFree = List<T>::size();
+        List<T>::setSize(allocSize_);
+        List<T>::size(nextFree);
+    }
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 (
     const label s
 )
 {
+#if 1
+    // CURRENT BEHAVIOUR:
+    // slightly ambiguous about what size the list will actually get
+    // cannot increase the size of the addressed list (for compatibility
+    // with List), without automatically adjusting the allocated space!
+
     label nextFree = List<T>::size();
     if (s <= nextFree)
     {
@@ -89,6 +138,22 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
         List<T>::setSize(allocSize_);
     }
     List<T>::size(nextFree);
+#else
+    // allocate more space?
+    if (s > allocSize_)
+    {
+        allocSize_ = max
+        (
+            s,
+            label(SizeMult*allocSize_/SizeDiv + SizeInc)
+        );
+
+        List<T>::setSize(allocSize_);
+    }
+
+    // adjust addressed size
+    List<T>::size(s);
+#endif
 }
 
 
@@ -153,21 +218,10 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append(const T& e)
     // Work on copy free index since gets overwritten by setSize
     label nextFree = List<T>::size();
 
-    nextFree++;
+    reserve(nextFree+1);
+    List<T>::size(nextFree+1);
 
-    if (nextFree > allocSize_)
-    {
-        allocSize_ = max
-        (
-            nextFree,
-            label(SizeMult*allocSize_/SizeDiv + SizeInc)
-        );
-        List<T>::setSize(allocSize_);
-    }
-
-    List<T>::size(nextFree);
-
-    this->operator[](nextFree - 1) = e;
+    this->operator[](nextFree) = e;
 }
 
 
@@ -201,19 +255,9 @@ inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 )
 {
     label nextFree = List<T>::size();
-
     nextFree = max(nextFree, i + 1);
 
-    if (nextFree > allocSize_)
-    {
-        allocSize_ = max
-        (
-            nextFree,
-            label(SizeMult*allocSize_/SizeDiv + SizeInc)
-        );
-        List<T>::setSize(allocSize_);
-    }
-
+    reserve(nextFree);
     List<T>::size(nextFree);
 
     return this->operator[](i);
