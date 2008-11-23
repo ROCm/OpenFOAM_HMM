@@ -153,13 +153,11 @@ Foam::sampledSurface::New
 Foam::sampledSurface::sampledSurface
 (
     const word& name,
-    const polyMesh& mesh,
-    const bool triangulate
+    const polyMesh& mesh
 )
 :
     name_(name),
     mesh_(mesh),
-    triangulate_(triangulate),
     interpolate_(false),
     SfPtr_(NULL),
     magSfPtr_(NULL),
@@ -178,7 +176,6 @@ Foam::sampledSurface::sampledSurface
 :
     name_(name),
     mesh_(mesh),
-    triangulate_(dict.lookupOrDefault("triangulate", true)),
     interpolate_(dict.lookupOrDefault("interpolate", false)),
     SfPtr_(NULL),
     magSfPtr_(NULL),

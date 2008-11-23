@@ -37,6 +37,7 @@ SourceFiles
 #define sampledPatch_H
 
 #include "sampledSurface.H"
+#include "MeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,8 +50,12 @@ namespace Foam
 
 class sampledPatch
 :
+    public PrimitiveMeshedSurface<face>,
     public sampledSurface
 {
+    //- Private typedefs for convenience
+        typedef PrimitiveMeshedSurface<face> MeshStorage;
+
     // Private data
 
         //- Name of patch
@@ -59,11 +64,8 @@ class sampledPatch
         //- Index of patch in boundaryMesh
         const label patchIndex_;
 
-        //- Zero size or copy of patch.localPoints()
-        pointField points_;
-
-        //- Faces (triangulated or non-triangulated)
-        faceList faces_;
+        //- Triangulated faces or keep faces as is
+        bool triangulate_;
 
         //- Local patch face labels
         labelList patchFaceLabels_;
@@ -85,6 +87,9 @@ class sampledPatch
         tmp<Field<Type> >
         interpolateField(const interpolation<Type>&) const;
 
+
+        //- remap action on triangulation or cleanup 
+        virtual void remapFaces(const UList<label>& faceMap);
 
 public:
 
@@ -137,13 +142,13 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return points_;
+            return MeshStorage::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return faces_;
+            return MeshStorage::faces();
         }
 
 

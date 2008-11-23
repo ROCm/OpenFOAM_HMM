@@ -39,7 +39,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cuttingPlane::sample
     const Field<Type>& sf
 ) const
 {
-    return tmp<Field<Type> >(new Field<Type>(sf, cells()));
+    return tmp<Field<Type> >(new Field<Type>(sf, cutCells()));
 }
 
 
