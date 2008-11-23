@@ -26,8 +26,8 @@ Application
     rhoPimpleFoam
 
 Description
-    Transient solver for turbulent flow of compressible fluids for
-    ventilation and heat-transfer.
+    Transient solver for laminar or turbulent flow of compressible fluids
+    for HVAC and similar applications.
 
     Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
     pseudo-transient simulations.
@@ -36,8 +36,8 @@ Description
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "fixedGradientFvPatchFields.H"
+#include "turbulenceModel.H"
+#include "bound.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

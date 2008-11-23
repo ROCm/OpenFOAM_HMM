@@ -23,32 +23,31 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    rhoTurbFoam
+    rhoPisoFoam
 
 Description
-    Transient solver for compressible, turbulent flow.
+    Transient PISO solver for compressible, laminar or turbulent flow.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "readPISOControls.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,23 +56,23 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "hEqn.H"
-#           include "pEqn.H"
+            #include "hEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();

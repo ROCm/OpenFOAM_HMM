@@ -44,9 +44,9 @@
     );
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::RASModel> turbulence
+    autoPtr<compressible::turbulenceModel> turbulence
     (
-        compressible::RASModel::New
+        compressible::turbulenceModel::New
         (
             rho,
             U,
@@ -59,5 +59,5 @@
 
 
     Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt = 
+    volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

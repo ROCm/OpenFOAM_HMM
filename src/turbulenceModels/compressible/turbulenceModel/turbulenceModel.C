@@ -125,6 +125,12 @@ turbulenceModel::~turbulenceModel()
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void turbulenceModel::correct()
+{}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace compressible
