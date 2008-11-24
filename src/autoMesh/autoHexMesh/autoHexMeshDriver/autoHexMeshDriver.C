@@ -96,11 +96,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 //)
 //{
 //    // Determine outside point.
-//    boundBox overallBb
-//    (
-//        point(GREAT, GREAT, GREAT),
-//        point(-GREAT, -GREAT, -GREAT)
-//    );
+//    boundBox overallBb = boundBox::invertedBox;
 //
 //    bool hasSurface = false;
 //

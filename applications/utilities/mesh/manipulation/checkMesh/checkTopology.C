@@ -109,7 +109,7 @@ Foam::label Foam::checkTopology
         {
             Info<< "    Number of regions: " << rs.nRegions() << " (OK)."
                 << endl;
-        
+
         }
         else
         {
@@ -214,7 +214,7 @@ Foam::label Foam::checkTopology
                 const pointField& pts = pp.points();
                 const labelList& mp = pp.meshPoints();
 
-                boundBox bb(vector::zero, vector::zero);
+                boundBox bb;   // zero-sized
                 if (returnReduce(mp.size(), sumOp<label>()) > 0)
                 {
                     bb.min() = pts[mp[0]];

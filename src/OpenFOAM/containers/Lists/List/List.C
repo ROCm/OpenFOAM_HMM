@@ -432,14 +432,20 @@ void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
 {
     // shrink the allocated space to the number of elements used
     a.shrink();
-
-    if (this->v_) delete[] this->v_;
-    this->size_ = a.size_;
-    this->v_ = a.v_;
-
-    a.size_ = 0;
-    a.v_ = 0;
     a.allocSize_ = 0;
+
+    transfer(static_cast<List<T>&>(a));
+}
+
+
+// Transfer the contents of the argument SortableList into this List
+// and anull the argument list
+template<class T>
+void Foam::List<T>::transfer(SortableList<T>& a)
+{
+    // shrink away the sort indices
+    a.shrink();
+    transfer(static_cast<List<T>&>(a));
 }
 
 

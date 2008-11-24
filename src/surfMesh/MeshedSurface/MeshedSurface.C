@@ -420,13 +420,26 @@ Foam::MeshedSurface<Face>::~MeshedSurface()
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Face>
-void Foam::MeshedSurface<Face>::onePatch()
+void Foam::MeshedSurface<Face>::onePatch(const word& name)
 {
+    word patchName(name);
+    if (!patchName.size())
+    {
+        if (patches_.size() >= 1)
+        {
+            patchName = patches_[0].name();
+        }
+        if (!patchName.size())
+        {
+            patchName = "patch0";
+        }
+    }
+
     // set single default patch
     patches_.setSize(1);
     patches_[0] = surfGroup
     (
-        "patch0",
+        patchName,
         size(),         // patch size
         0,              // patch start
         0               // patch index
@@ -438,9 +451,12 @@ template<class Face>
 void Foam::MeshedSurface<Face>::checkPatches()
 {
     // extra safety, ensure we have at some patches,
-    // and they cover all the faces
-    // fix start silently
-    if (patches_.size() > 1)
+    // and they cover all the faces - fix start silently
+    if (patches_.size() <= 1)
+    {
+        onePatch();
+    }
+    else
     {
         label count = 0;
         forAll(patches_, patchI)
@@ -455,8 +471,7 @@ void Foam::MeshedSurface<Face>::checkPatches()
             (
                 "MeshedSurface::checkPatches()\n"
             )
-                << "more nFaces " << size()
-                << " than patches " << count
+                << "more face " << size() << " than patches " << count
                 << " ... extending final patch"
                 << endl;
 
@@ -468,24 +483,9 @@ void Foam::MeshedSurface<Face>::checkPatches()
             (
                 "MeshedSurface::checkPatches()\n"
             )
-                << "more patches " << count
-                << " than nFaces " << size()
+                << "more patches " << count << " than faces " << size()
                 << exit(FatalError);
         }
-    }
-    else if (patches_.size() == 1)
-    {
-        // like onePatch, but preserve the name
-        patches_[0].size() = size();
-        patches_[0].start() = 0;
-        if (!patches_[0].name().size())
-        {
-            patches_[0].name() = "patch0";
-        }
-    }
-    else
-    {
-        onePatch();
     }
 }
 
@@ -529,38 +529,52 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::remapRegions(List<label>& faceMap)
+void Foam::MeshedSurface<Face>::remapFaces
+(
+    const UList<label>& faceMap
+)
 {
     // recalculate the patch start/size
-    if (faceMap.size())
+    if (&faceMap && faceMap.size())
     {
-        label newFaceI = 0;
-        label oldPatchEnd = 0;
-        forAll(patches_, patchI)
+        if (patches_.size() == 0)
         {
-            surfGroup& p = patches_[patchI];
-
-            // adjust patch start
-            p.start() = newFaceI;
-            oldPatchEnd += p.size();
-
-            for (label faceI = newFaceI; faceI < faceMap.size(); ++faceI)
+            onePatch();
+        }
+        else if (patches_.size() == 1)
+        {
+            // optimized for one-patch case
+            patches_[0].size() = faceMap.size();
+        }
+        else
+        {
+            label newFaceI = 0;
+            label oldPatchEnd = 0;
+            forAll(patches_, patchI)
             {
-                if (faceMap[faceI] < oldPatchEnd)
-                {
-                    ++newFaceI;
-                }
-                else
-                {
-                    break;
-                }
-            }
+                surfGroup& p = patches_[patchI];
 
-            // adjust patch size
-            p.size() = newFaceI - p.start();
+                // adjust patch start
+                p.start() = newFaceI;
+                oldPatchEnd += p.size();
+
+                for (label faceI = newFaceI; faceI < faceMap.size(); ++faceI)
+                {
+                    if (faceMap[faceI] < oldPatchEnd)
+                    {
+                        ++newFaceI;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                // adjust patch size
+                p.size() = newFaceI - p.start();
+            }
         }
     }
-    faceMap.clear();
 }
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

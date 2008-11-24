@@ -776,8 +776,7 @@ void Foam::distributedTriSurfaceMesh::calcBounds
     pointIsUsed = 0U;
 
     nPoints = 0;
-    bb.min() = point(VGREAT, VGREAT, VGREAT);
-    bb.max() = point(-VGREAT, -VGREAT, -VGREAT);
+    bb = boundBox::invertedBox;
 
     const triSurface& s = static_cast<const triSurface&>(*this);
 
@@ -2123,7 +2122,7 @@ void Foam::distributedTriSurfaceMesh::distribute
            }
         }
     }
-    
+
 
     faceMap.reset
     (

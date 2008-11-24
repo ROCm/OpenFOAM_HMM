@@ -48,7 +48,7 @@ Ostream& operator<<(Ostream& os, const boundBox& b);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class boundBox Declaration
+                         Class boundBox Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundBox
@@ -61,13 +61,22 @@ class boundBox
 
 public:
 
+    // Static data members
+
+        //- A very large boundBox: min/max == -/+ VGREAT
+        static const boundBox greatBox;
+
+        //- A very large inverted boundBox: min/max == +/- VGREAT
+        static const boundBox invertedBox;
+
+
     // Constructors
 
-        //- Construct null setting points to zero
+        //- Construct null, setting points to zero
         boundBox()
         :
-            min_(vector::zero),
-            max_(vector::zero)
+            min_(point::zero),
+            max_(point::zero)
         {}
 
         //- Construct from components
@@ -77,8 +86,8 @@ public:
             max_(max)
         {}
 
-        //- Construct as the bounding box of the given pointField. Does
-        //  parallel communication (doReduce = true)
+        //- Construct as the bounding box of the given pointField.
+        //  Does parallel communication (doReduce = true)
         boundBox(const pointField& points, const bool doReduce = true);
 
         //- Construct from Istream
@@ -117,39 +126,26 @@ public:
 
         // Query
 
-            //- Intersects other boundingbox?
+            //- Intersects other boundingBox?
             bool overlaps(const boundBox& bb) const
             {
-                if
+                return
                 (
-                    (min_.x() <= bb.max().x()) &&
-                    (min_.y() <= bb.max().y()) &&
-                    (min_.z() <= bb.max().z()) &&
-
-                    (max_.x() >= bb.min().x()) &&
-                    (max_.y() >= bb.min().y()) &&
-                    (max_.z() >= bb.min().z())
-                )
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                    min_.x() <= bb.max().x() && max_.x() >= bb.min().x()
+                 && min_.y() <= bb.max().y() && max_.y() >= bb.min().y()
+                 && min_.z() <= bb.max().z() && max_.z() >= bb.min().z()
+                );
             }
-
 
             //- Contains a point?
             bool contains(const point& pt) const
             {
                 return
-                    pt.x() >= min().x()
-                 && pt.y() >= min().y()
-                 && pt.z() >= min().z()
-                 && pt.x() <= max().x()
-                 && pt.y() <= max().y()
-                 && pt.z() <= max().z();
+                (
+                    pt.x() >= min().x() && pt.x() <= max().x()
+                 && pt.y() >= min().y() && pt.y() <= max().y()
+                 && pt.z() >= min().z() && pt.z() <= max().z()
+                );
             }
 
 
@@ -173,7 +169,7 @@ public:
 };
 
 
-//- Specify data associated with boundBox type is contiguous
+//- Specify data associated with boundBox type are contiguous
 template<>
 inline bool contiguous<boundBox>() {return contiguous<point>();}
 

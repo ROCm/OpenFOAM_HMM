@@ -199,7 +199,6 @@ int main(int argc, char *argv[])
         if (args.options().found("clean"))
         {
             surf.cleanup(true);
-            surf.checkOrientation(true);
         }
 
         if (fromCsys.valid())

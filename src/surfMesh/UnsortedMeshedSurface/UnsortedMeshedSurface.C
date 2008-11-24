@@ -301,14 +301,27 @@ Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::onePatch()
+void Foam::UnsortedMeshedSurface<Face>::onePatch(const word& name)
 {
     regions_.setSize(size());
     regions_ = 0;
 
+    word patchName(name);
+    if (!patchName.size())
+    {
+        if (patches_.size() >= 1)
+        {
+            patchName = patches_[0].name();
+        }
+        if (!patchName.size())
+        {
+            patchName = "patch0";
+        }
+    }
+
     // set single default patch
     patches_.setSize(1);
-    patches_[0] = surfPatchIdentifier("patch0", 0);
+    patches_[0] = surfPatchIdentifier(patchName, 0);
 }
 
 
@@ -383,18 +396,34 @@ void Foam::UnsortedMeshedSurface<Face>::setPatches
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::remapRegions(List<label>& faceMap)
+void Foam::UnsortedMeshedSurface<Face>::remapFaces
+(
+    const UList<label>& faceMap
+)
 {
     // re-assign the region Ids
-    if (faceMap.size())
+    if (&faceMap && faceMap.size())
     {
-        forAll(faceMap, faceI)
+        if (patches_.size() == 0)
         {
-            faceMap[faceI] = regions_[faceMap[faceI]];
+            onePatch();
         }
-        regions_.transfer(faceMap);
+        else if (patches_.size() == 1)
+        {
+            // optimized for one-patch case
+            regions_ = 0;
+        }
+        else
+        {
+            List<label> newRegions(faceMap.size());
+
+            forAll(faceMap, faceI)
+            {
+                newRegions[faceI] = regions_[faceMap[faceI]];
+            }
+            regions_.transfer(newRegions);
+        }
     }
-    faceMap.clear();
 }
 
 

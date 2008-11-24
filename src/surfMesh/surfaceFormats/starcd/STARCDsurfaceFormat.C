@@ -190,7 +190,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             {
                 face f(vertices);
 
-                faceList triFaces(f.nTriangles(this->points()));
+                faceList triFaces(f.nTriangles());
                 label nTri = 0;
                 f.triangles(this->points(), nTri, triFaces);
 

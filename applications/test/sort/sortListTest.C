@@ -70,6 +70,13 @@ int main(int argc, char *argv[])
     Info << "sorted:   " << b << endl;
     Info << "indices:  " << b.indices() << endl;
 
+    labelList flatten;
+    flatten.transfer(b);
+    
+    Info << "flatten:  " << flatten << endl;
+    Info << "sorted:   " << b << endl;
+    Info << "indices:  " << b.indices() << endl;
+
     Info << "End\n" << endl;
 
     return 0;

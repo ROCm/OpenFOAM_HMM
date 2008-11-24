@@ -114,7 +114,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     for (label patchI = 0; patchI < nPatches; ++patchI)
     {
         names[patchI] = word("patch") + Foam::name(patchI);
-        
+
         args = cueToOrDie(is, "OBJECT", "while reading " + names[patchI]);
 
         // number of vertices for this patch
@@ -223,20 +223,13 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
                     if (mustTriangulate && f.size() > 3)
                     {
-                        triFace fTri;
-
-                        // simple face triangulation about f[0].
-                        // cannot use face::triangulation
-                        // since points are incomplete
-                        fTri[0] = verts[0];
-                        for (label fp1 = 1; fp1 < verts.size() - 1; ++fp1)
+                        // simple face triangulation about f[0]
+                        // points may be incomplete
+                        for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
                         {
-                            label fp2 = (fp1 + 1) % verts.size();
+                            label fp2 = (fp1 + 1) % f.size();
 
-                            fTri[1] = verts[fp1];
-                            fTri[2] = verts[fp2];
-
-                            dynFaces.append(fTri);
+                            dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
                             sizes[patchI]++;
                         }
                     }

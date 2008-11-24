@@ -125,7 +125,7 @@ protected:
         }
 
         //- Set new regions from faceMap
-        virtual void remapRegions(List<label>& faceMap);
+        virtual void remapFaces(const UList<label>& faceMap);
 
 public:
 
@@ -281,7 +281,8 @@ public:
         List<surfGroup> sortedRegions(labelList& faceMap) const;
 
         //- Set regions to 0 and set a single patch
-        void onePatch();
+        //  Optionally with a specific name
+        void onePatch(const word& name = word::null);
 
         //- Set regions and patches
         void setPatches(const surfGroupList&);
