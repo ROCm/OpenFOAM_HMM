@@ -7,10 +7,11 @@ EXE_INC = \
     -IderivedFvPatchFields/solidWallHeatFluxTemperatureCoupled \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/turbulenceModels/RAS
+    -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel
 
 EXE_LIBS = \
-    -lfiniteVolume \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASModels
+    -lcompressibleRASModels \
+    -lcompressibleLESModels \
+    -lfiniteVolume

@@ -76,7 +76,6 @@ dimensionedScalar dynOneEqEddy::ce_(const volSymmTensorField& D) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 dynOneEqEddy::dynOneEqEddy
 (
     const volScalarField& rho,
@@ -93,12 +92,6 @@ dynOneEqEddy::dynOneEqEddy
 {
     printCoeffs();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-dynOneEqEddy::~dynOneEqEddy()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

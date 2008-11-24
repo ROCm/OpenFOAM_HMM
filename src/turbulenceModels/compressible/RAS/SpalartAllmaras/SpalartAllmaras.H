@@ -132,29 +132,22 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         SpalartAllmaras
         (
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermophysicalModel
+            const basicThermo& thermophysicalModel
         );
 
 
-    // Destructor
-
-        ~SpalartAllmaras()
-        {}
+    //- Destructor
+    virtual ~SpalartAllmaras()
+    {}
 
 
     // Member Functions
-
-        //- Return the turbulence viscosity
-        tmp<volScalarField> mut() const
-        {
-            return mut_;
-        }
 
         //- Return the effective diffusivity for nuTilda
         tmp<volScalarField> DnuTildaEff() const
@@ -168,8 +161,15 @@ public:
                 )
             );
         }
-	      //- Return the effective turbulent thermal diffusivity
-        tmp<volScalarField> alphaEff() const
+
+        //- Return the turbulence viscosity
+        virtual tmp<volScalarField> mut() const
+        {
+            return mut_;
+        }
+
+        //- Return the effective turbulent thermal diffusivity
+        virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>
             (
@@ -178,7 +178,7 @@ public:
         }
 
         //- Return the turbulence kinetic energy
-        tmp<volScalarField> k() const
+        virtual tmp<volScalarField> k() const
         {
             return tmp<volScalarField>
             (
@@ -197,7 +197,7 @@ public:
         }
 
         //- Return the turbulence kinetic energy dissipation rate
-        tmp<volScalarField> epsilon() const
+        virtual tmp<volScalarField> epsilon() const
         {
             return tmp<volScalarField>
             (
@@ -216,19 +216,19 @@ public:
         }
 
         //- Return the Reynolds stress tensor
-        tmp<volSymmTensorField> R() const;
+        virtual tmp<volSymmTensorField> R() const;
 
         //- Return the effective stress tensor including the laminar stress
-        tmp<volSymmTensorField> devRhoReff() const;
+        virtual tmp<volSymmTensorField> devRhoReff() const;
 
         //- Return the source term for the momentum equation
-        tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
+        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
-        void correct();
+        virtual void correct();
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

@@ -96,7 +96,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LaunderSharmaKE
         (
             const volVectorField& U,

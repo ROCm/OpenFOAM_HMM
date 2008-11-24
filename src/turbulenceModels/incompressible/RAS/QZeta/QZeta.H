@@ -86,7 +86,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         QZeta
         (
             const volVectorField& U,

@@ -89,10 +89,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~GenSGSStress()
-        {}
+    //- Destructor
+    virtual ~GenSGSStress()
+    {}
 
 
     // Member Functions
@@ -143,7 +142,7 @@ public:
         virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

@@ -32,7 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
+#include "RASModel.H"
 #include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

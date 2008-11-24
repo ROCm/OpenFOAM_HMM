@@ -110,7 +110,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         realizableKE
         (
             const volVectorField& U,

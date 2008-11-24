@@ -27,7 +27,6 @@ License
 #include "turbulenceModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +57,62 @@ turbulenceModel::turbulenceModel
     transportModel_(lamTransportModel)
 {}
 
+
+// * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
+
+autoPtr<turbulenceModel> turbulenceModel::New
+(
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    transportModel& transport
+)
+{
+    word turbulenceModelTypeName;
+
+    // Enclose the creation of the turbulencePropertiesDict to ensure it is
+    // deleted before the turbulenceModel is created otherwise the dictionary
+    // is entered in the database twice
+    {
+        IOdictionary turbulencePropertiesDict
+        (
+            IOobject
+            (
+                "turbulenceProperties",
+                U.time().constant(),
+                U.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        turbulencePropertiesDict.lookup("simulationType")
+            >> turbulenceModelTypeName;
+    }
+
+    Info<< "Selecting turbulence model type "
+        << turbulenceModelTypeName << endl;
+
+    turbulenceModelConstructorTable::iterator cstrIter =
+        turbulenceModelConstructorTablePtr_->find(turbulenceModelTypeName);
+
+    if (cstrIter == turbulenceModelConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "turbulenceModel::New(const volVectorField&, "
+            "const surfaceScalarField&, transportModel&)"
+        )   << "Unknown turbulenceModel type " << turbulenceModelTypeName
+            << endl << endl
+            << "Valid turbulenceModel types are :" << endl
+            << turbulenceModelConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<turbulenceModel>(cstrIter()(U, phi, transport));
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 turbulenceModel::~turbulenceModel()
 {}

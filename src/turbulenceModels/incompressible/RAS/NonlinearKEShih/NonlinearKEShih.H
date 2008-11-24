@@ -89,7 +89,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         NonlinearKEShih
         (
             const volVectorField& U,

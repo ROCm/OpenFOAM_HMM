@@ -45,6 +45,7 @@ SourceFiles
 #ifndef compressibleRASModel_H
 #define compressibleRASModel_H
 
+#include "compressible/turbulenceModel/turbulenceModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "nearWallDist.H"
@@ -71,21 +72,13 @@ namespace compressible
 
 class RASModel
 :
+    public turbulenceModel,
     public IOdictionary
 {
 
 protected:
 
     // Protected data
-
-        const Time& runTime_;
-        const fvMesh& mesh_;
-
-        const volScalarField& rho_;
-        const volVectorField& U_;
-        const surfaceScalarField& phi_;
-
-        basicThermo& thermophysicalModel_;
 
         Switch turbulence_;
         Switch printCoeffs_;
@@ -110,12 +103,6 @@ protected:
 
         //- Print model coefficients
         virtual void printCoeffs();
-
-        //- Return the laminar thermal conductivity
-        const volScalarField& alpha() const
-        {
-            return thermophysicalModel_.alpha();
-        }
 
 
 private:
@@ -146,7 +133,7 @@ public:
                 const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                basicThermo& thermoPhysicalModel
+                const basicThermo& thermoPhysicalModel
             ),
             (rho, U, phi, thermoPhysicalModel)
         );
@@ -161,7 +148,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermoPhysicalModel
+            const basicThermo& thermoPhysicalModel
         );
 
 
@@ -173,14 +160,13 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermoPhysicalModel
+            const basicThermo& thermoPhysicalModel
         );
 
 
-    // Destructor
-
-        virtual ~RASModel()
-        {}
+    //- Destructor
+    virtual ~RASModel()
+    {}
 
 
     // Member Functions
@@ -279,12 +265,6 @@ public:
                 return wallFunctionDict_;
             }
 
-
-        //- Return the laminar viscosity
-        const volScalarField& mu() const
-        {
-            return thermophysicalModel_.mu();
-        }
 
         //- Return the turbulence viscosity
         virtual tmp<volScalarField> mut() const = 0;

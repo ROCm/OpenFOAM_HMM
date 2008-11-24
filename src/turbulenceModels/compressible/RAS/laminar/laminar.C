@@ -48,7 +48,7 @@ laminar::laminar
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel
 )
 :
     RASModel(typeName, rho, U, phi, thermophysicalModel)
@@ -171,7 +171,8 @@ tmp<fvVectorMatrix> laminar::divDevRhoReff(volVectorField& U) const
 {
     return
     (
-      - fvm::laplacian(muEff(), U) - fvc::div(muEff()*dev2(fvc::grad(U)().T()))
+      - fvm::laplacian(muEff(), U)
+      - fvc::div(muEff()*dev2(fvc::grad(U)().T()))
     );
 }
 
