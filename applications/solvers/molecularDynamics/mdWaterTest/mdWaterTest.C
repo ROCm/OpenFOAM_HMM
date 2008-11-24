@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     (
         mSites[2] * pSites[2].y() * pSites[2].y()
           + 2.0 * mSites[0] * pSites[0].y() * pSites[0].y(),
-        2.0 * mSites[0] + pSites[0].x() * pSites[0].x(),
+        2.0 * mSites[0] * pSites[0].x() * pSites[0].x(),
         mSites[2] * pSites[2].y() * pSites[2].y()
           + 2.0 * mSites[0] * (pSites[0].y() * pSites[0].y() + pSites[0].x() * pSites[0].x())
     );
