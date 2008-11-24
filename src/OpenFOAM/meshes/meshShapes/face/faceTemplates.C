@@ -40,8 +40,8 @@ Foam::label Foam::face::triangles
     label quadI = 0;
     faceList quadFaces;
 
-    // adjusts the addressable size (and allocate space if needed)
-    triFaces(triI + nTriangles());
+    // adjust the addressable size (and allocate space if needed)
+    triFaces.setSize(triI + nTriangles());
 
     return split(SPLITTRIANGLE, points, triI, quadI, triFaces, quadFaces);
 }

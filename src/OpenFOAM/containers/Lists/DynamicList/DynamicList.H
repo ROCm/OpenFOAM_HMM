@@ -86,9 +86,6 @@ class DynamicList
 
     // Private Member Functions
 
-        // Disabled, since the usefulness and semantics are not quite clear
-        void setSize(const label, const T&);
-
 public:
 
     // Related types
@@ -116,29 +113,27 @@ public:
         // Access
 
         //- Size of the underlying storage.
-        inline label allocSize() const;
+        inline label capacity() const;
 
         // Edit
 
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
-        //  otherwise remain untouched.
-        inline void allocSize(const label);
+        //  remain otherwise untouched.
+        //  Use this or reserve() in combination with append().
+        inline void setCapacity(const label);
 
-        // CURRENT BEHAVIOUR
-        //- When the new size is greater than the addressed list size, the
-        //  allocated list sizes is adjusted and the
-        //  addressed size does not change.
-        //  Otherwise the addressed list size is just reduced and the
-        //  allocated size does not change.
-        //
-        // PROPOSED BEHAVIOUR
         //- Alter the addressed list size.
         //  New space will be allocated if required.
+        //  Use this to resize the list prior to using the operator[] for
+        //  setting values (as per List usage).
         inline void setSize(const label);
 
+        //- Alter the addressed list size and fill new space with a constant.
+        inline void setSize(const label, const T&);
+
         //- Reserve allocation space for at least this size.
-        //  Never shrinks the allocated size, use allocSize() for that.
+        //  Never shrinks the allocated size, use setCapacity() for that.
         inline void reserve(const label);
 
         //- Clear the addressed list, i.e. set the size to zero.
@@ -164,6 +159,9 @@ public:
         //- Append an element at the end of the list
         inline void append(const T& e);
 
+        //- Append a List at the end of this list
+        inline void append(const UList<T>&);
+
         //- Remove and return the top element
         inline T remove();
 
@@ -174,7 +172,7 @@ public:
         inline void operator=(const T&);
 
         //- Assignment from List<T>. Also handles assignment from DynamicList.
-        inline void operator=(const List<T>&);
+        inline void operator=(const UList<T>&);
 
 
     // IOstream operators
