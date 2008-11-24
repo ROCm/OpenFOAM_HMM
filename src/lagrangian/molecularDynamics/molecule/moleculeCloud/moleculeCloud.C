@@ -250,14 +250,16 @@ void Foam::moleculeCloud::calculateExternalForce()
 
 void Foam::moleculeCloud::removeHighEnergyOverlaps()
 {
-    Info << nl << "Removing high energy overlaps, removal order:";
+    Info<< nl << "Removing high energy overlaps, limit = "
+        << pot_.potentialEnergyLimit()
+        << nl << "Removal order:";
 
     forAll(pot_.removalOrder(), rO)
     {
-        Info << ' ' << pot_.idList()[pot_.removalOrder()[rO]];
+        Info<< ' ' << pot_.idList()[pot_.removalOrder()[rO]];
     }
 
-    Info << nl ;
+    Info<< nl ;
 
     label initialSize = this->size();
 
@@ -457,7 +459,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
         reduce(molsRemoved, sumOp<label>());
     }
 
-    Info << tab << molsRemoved << " molecules removed" << endl;
+    Info<< tab << molsRemoved << " molecules removed" << endl;
 }
 
 
@@ -483,17 +485,19 @@ Foam::moleculeCloud::moleculeCloud
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const Cloud<molecule>& cloud = *this;
 
+    vector position1 = vector(0,0,1.5e-9);
+
     addParticle
     (
         new molecule
         (
             cloud,
-            vector(0,0,0.5e-9),
-            13,
+            position1,
+            mesh_.findCell(position1),
             tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
-            vector(234, 102, -365),
+            vector(34, 12, -65),
             vector::zero,
-            vector(2e10, -3e11, 1e10),
+            vector(0.2, -0.012, 0.32),
             vector::zero,
             vector::zero,
             constProps(0),
@@ -502,17 +506,19 @@ Foam::moleculeCloud::moleculeCloud
         )
     );
 
+    vector position2 = vector(0,0,0);
+
     addParticle
     (
         new molecule
         (
             cloud,
-            vector(0,0,0),
-            13,
+            position2,
+            mesh_.findCell(position2),
             tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
             vector::zero,
             vector::zero,
-            vector(4e11, 1.5e10, 2e-10),
+            vector(-0.4, 0.015, -0.2),
             vector::zero,
             vector::zero,
             constProps(1),

@@ -66,8 +66,6 @@ inline void Foam::moleculeCloud::evaluatePair
 
             if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
             {
-                Info<< "Pair potential " << idsI << ' ' << idsJ << endl;
-
                 vector rsIsJ =
                 molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
@@ -103,8 +101,6 @@ inline void Foam::moleculeCloud::evaluatePair
 
             if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
             {
-                Info<< "Electrostatic " << idsI << ' ' << idsJ << endl;
-
                 vector rsIsJ =
                 molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
@@ -178,10 +174,6 @@ inline void Foam::moleculeCloud::evaluatePair
 
             if (pairPotentialSitesReal[sReal] && pairPotentialSitesRef[sRef])
             {
-                Info<< "Ref Pair potential "
-                    << idsReal << ' '
-                    << idsRef << endl;
-
                 vector rsRealsRef =
                 molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
 
@@ -212,10 +204,6 @@ inline void Foam::moleculeCloud::evaluatePair
 
             if (electrostaticSitesReal[sReal] && electrostaticSitesRef[sRef])
             {
-                Info<< "Ref Electrostatic "
-                    << idsReal << ' '
-                    << idsRef << endl;
-
                 vector rsRealsRef =
                 molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
 

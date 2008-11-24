@@ -32,13 +32,17 @@ Description
 \*---------------------------------------------------------------------------*/
 
 
-vector singleStepTotalMomentum(vector::zero);
+vector singleStepTotalLinearMomentum(vector::zero);
+
+vector singleStepTotalAngularMomentum(vector::zero);
 
 scalar singleStepMaxVelocityMag = 0.0;
 
 scalar singleStepTotalMass = 0.0;
 
-scalar singleStepTotalKE = 0.0;
+scalar singleStepTotalLinearKE = 0.0;
+
+scalar singleStepTotalAngularKE = 0.0;
 
 scalar singleStepTotalPE = 0.0;
 
@@ -54,20 +58,30 @@ scalar singleStepTotalrDotf = 0.0;
         ++mol
     )
     {
-        const scalar molM(mol().mass());
+        label molId = mol().id();
 
-        const vector& molU(mol().U());
+        scalar molMass(molecules.constProps(molId).mass());
 
-        singleStepTotalMomentum += molU * molM;
+        const diagTensor& molMoI(molecules.constProps(molId).momentOfInertia());
 
-        singleStepTotalMass += molM;
+        const vector& molV(mol().v());
 
-        if(mag(molU) > singleStepMaxVelocityMag)
+        const vector& molOmega(mol().omega());
+
+        singleStepTotalLinearMomentum += molV * molMass;
+
+        singleStepTotalAngularMomentum += (molMoI & molOmega);
+
+        singleStepTotalMass += molMass;
+
+        if(mag(molV) > singleStepMaxVelocityMag)
         {
-            singleStepMaxVelocityMag = mag(molU);
+            singleStepMaxVelocityMag = mag(molV);
         }
 
-        singleStepTotalKE += 0.5*molM*magSqr(molU);
+        singleStepTotalLinearKE += 0.5*molMass*magSqr(molV);
+
+        singleStepTotalAngularKE += 0.5*(molOmega & molMoI & molOmega);
 
         singleStepTotalPE += mol().potentialEnergy();
 
@@ -79,13 +93,17 @@ label singleStepNMols = molecules.size();
 
 if (Pstream::parRun())
 {
-    reduce(singleStepTotalMomentum, sumOp<vector>());
+    reduce(singleStepTotalLinearMomentum, sumOp<vector>());
+
+    reduce(singleStepTotalAngularMomentum, sumOp<vector>());
 
     reduce(singleStepMaxVelocityMag, maxOp<scalar>());
 
     reduce(singleStepTotalMass, sumOp<scalar>());
 
-    reduce(singleStepTotalKE, sumOp<scalar>());
+    reduce(singleStepTotalLinearKE, sumOp<scalar>());
+
+    reduce(singleStepTotalAngularKE, sumOp<scalar>());
 
     reduce(singleStepTotalPE, sumOp<scalar>());
 
@@ -96,22 +114,32 @@ if (Pstream::parRun())
 
 if (singleStepNMols)
 {
-    Info << "Number of mols in system = "
-            << singleStepNMols << nl
+    Info<< "Number of mols in system = "
+        << singleStepNMols << nl
         << "Overall number density = "
-            << singleStepNMols/meshVolume << " m^-3" << nl
+        << singleStepNMols/meshVolume << nl
         << "Overall mass density = "
-            << singleStepTotalMass/meshVolume << " kg/m^3" << nl
-        << "Average velocity per mol = "
-            << singleStepTotalMomentum/singleStepTotalMass << " m/s" << nl
+        << singleStepTotalMass/meshVolume << nl
+        << "Average linear momentum per mol = "
+        << singleStepTotalLinearMomentum/singleStepNMols << nl
+        << "Average angular momentum per mol = "
+        << singleStepTotalAngularMomentum/singleStepNMols << nl
         << "Maximum |velocity| = "
-            << singleStepMaxVelocityMag << " m/s" << nl
-        << "Average KE per mol = "
-            << singleStepTotalKE/singleStepNMols << " J" << nl
+        << singleStepMaxVelocityMag << nl
+        << "Average linear KE per mol = "
+        << singleStepTotalLinearKE/singleStepNMols << nl
+        << "Average angular KE per mol = "
+        << singleStepTotalAngularKE/singleStepNMols << nl
         << "Average PE per mol = "
-            << singleStepTotalPE/singleStepNMols << " J" << nl
+        << singleStepTotalPE/singleStepNMols << nl
         << "Average TE per mol = "
-            << (singleStepTotalKE + singleStepTotalPE)/singleStepNMols << " J"
+        <<
+        (
+            singleStepTotalLinearKE
+            + singleStepTotalAngularKE
+            + singleStepTotalPE
+        )
+        /singleStepNMols
         << endl;
 
 //     Info << singleStepNMols << " "

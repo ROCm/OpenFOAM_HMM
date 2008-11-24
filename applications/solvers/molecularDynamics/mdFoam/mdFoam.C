@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
 
     moleculeCloud molecules(mesh, pot);
 
+#   include "temperatureAndPressureVariables.H"
+
     Info << "\nStarting time loop\n" << endl;
 
     while (runTime.run())
@@ -54,6 +56,8 @@ int main(int argc, char *argv[])
         Info << "Time = " << runTime.timeName() << endl;
 
         molecules.evolve();
+
+#       include "meanMomentumEnergyAndNMols.H"
 
         runTime.write();
 
