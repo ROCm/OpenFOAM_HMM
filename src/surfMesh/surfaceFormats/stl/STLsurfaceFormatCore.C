@@ -1,0 +1,262 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "STLsurfaceFormatCore.H"
+#include "OSspecific.H"
+#include "Map.H"
+
+#undef DEBUG_STLBINARY
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// check binary by getting the header and number of facets
+// this seems to work better than the old token-based method
+// - some programs (eg, pro-STAR) have 'solid' as the first word in
+//   the binary header.
+// - using wordToken can cause an abort if non-word (binary) content
+//   is detected ... this is not exactly what we want.
+int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
+(
+    const fileName& fName
+)
+{
+    off_t fileSize = Foam::size(fName);
+
+    IFstream ifs(fName, IOstream::BINARY);
+    istream& is = ifs.stdStream();
+
+    // Read the STL header
+    char header[headerSize];
+    is.read(header, headerSize);
+
+    // Check that stream is OK, if not this may be an ASCII file
+    if (!is.good())
+    {
+        return 0;
+    }
+
+    // Read the number of triangles in the STl file
+    // (note: read as int so we can check whether >2^31)
+    int nTris;
+    is.read(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+
+    // Check that stream is OK and number of triangles is positive,
+    // if not this may be an ASCII file
+    //
+    // Also compare the file size with that expected from the number of tris
+    // If the comparison is not sensible then it may be an ASCII file
+    if
+    (
+        !is
+     || nTris < 0
+     || nTris < (fileSize - headerSize)/50
+     || nTris > (fileSize - headerSize)/25
+    )
+    {
+        return 0;
+    }
+
+    // looks like it might be BINARY, return number of triangles
+    return nTris;
+}
+
+
+bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
+(
+    IFstream& ifs,
+    const off_t fileSize
+)
+{
+    binary_ = true;
+    istream& is = ifs.stdStream();
+
+    // Read the STL header
+    char header[headerSize];
+    is.read(header, headerSize);
+
+    // Check that stream is OK, if not this may be an ASCII file
+    if (!is.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::STLsurfaceFormatCore::readBINARY(IFstream&)"
+        )
+            << "problem reading header, perhaps file is not binary "
+            << exit(FatalError);
+    }
+
+    // Read the number of triangles in the STl file
+    // (note: read as int so we can check whether >2^31)
+    int nTris;
+    is.read(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+
+    // Check that stream is OK and number of triangles is positive,
+    // if not this maybe an ASCII file
+    //
+    // Also compare the file size with that expected from the number of tris
+    // If the comparison is not sensible then it may be an ASCII file
+    if
+    (
+        !is
+     || nTris < 0
+     || nTris < (fileSize - headerSize)/50
+     || nTris > (fileSize - headerSize)/25
+    )
+    {
+        FatalErrorIn
+        (
+            "fileFormats::STLsurfaceFormatCore::readBINARY(IFstream&)"
+        )
+            << "problem reading number of triangles, perhaps file is not binary"
+            << exit(FatalError);
+    }
+
+#ifdef DEBUG_STLBINARY
+    Info<< "# " << nTris << " facets" << endl;
+    label prevRegion = -1;
+#endif
+
+    points_.setSize(3*nTris);
+    regions_.setSize(nTris);
+
+    Map<label> regionToPatch;
+    DynamicList<word> dynNames;
+
+    label ptI = 0;
+    forAll(regions_, faceI)
+    {
+        // Read an STL triangle
+        STLtriangle stlTri(is);
+
+        // transcribe the vertices of the STL triangle -> points
+        points_[ptI++] = stlTri.a();
+        points_[ptI++] = stlTri.b();
+        points_[ptI++] = stlTri.c();
+
+        // interprete colour as a region
+        const label stlRegion = stlTri.region();
+
+        Map<label>::const_iterator fnd = regionToPatch.find(stlRegion);
+        label regionI;
+        if (fnd != regionToPatch.end())
+        {
+            regionI = fnd();
+        }
+        else
+        {
+            regionI = dynNames.size();
+            dynNames.append(word("patch") + ::Foam::name(regionI));
+            regionToPatch.insert(stlRegion, regionI);
+        }
+
+        regions_[faceI] = regionI;
+
+#ifdef DEBUG_STLBINARY
+        if (prevRegion != regionI)
+        {
+            if (prevRegion != -1)
+            {
+                Info<< "endsolid region" << prevRegion << nl;
+            }
+            prevRegion = regionI;
+
+            Info<< "solid region" << prevRegion << nl;
+        }
+
+        Info<< " facet normal " << stlTri.normal() << nl
+            << "  outer loop" << nl
+            << "   vertex " << stlTri.a() << nl
+            << "   vertex " << stlTri.b() << nl
+            << "   vertex " << stlTri.c() << nl
+            << "  outer loop" << nl
+            << " endfacet" << endl;
+#endif
+    }
+
+    names_.transfer(dynNames);
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
+(
+    const fileName& fName
+)
+:
+    binary_(false),
+    points_(0),
+    regions_(0),
+    names_(0)
+{
+    off_t fileSize = Foam::size(fName);
+
+    // auto-detect ascii/binary
+    if (detectBINARY(fName))
+    {
+        readBINARY(IFstream(fName, IOstream::BINARY)(), fileSize);
+    }
+    else
+    {
+        readASCII(IFstream(fName)(), fileSize);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+
+Foam::fileFormats::STLsurfaceFormatCore::~STLsurfaceFormatCore()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::fileFormats::STLsurfaceFormatCore::writeHeaderBINARY
+(
+    ostream& os,
+    unsigned int nTris
+)
+{
+    // STL header with extra information about nTris
+    char header[headerSize];
+    sprintf(header, "STL binary file %u facets", nTris);
+
+    // avoid trailing junk
+    for (size_t i = strlen(header); i < headerSize; ++i)
+    {
+        header[i] = 0;
+    }
+
+    os.write(header, headerSize);
+    os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+
+}
+
+// ************************************************************************* //

@@ -34,7 +34,7 @@ Description
 #include "engineTime.H"
 #include "engineMesh.H"
 #include "basicThermo.H"
-#include "RASModel.H"
+#include "turbulenceModel.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

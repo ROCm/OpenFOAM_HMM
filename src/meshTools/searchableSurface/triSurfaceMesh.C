@@ -188,7 +188,16 @@ Foam::triSurfaceMesh::triSurfaceMesh
         )
     ),
     surfaceClosed_(-1)
-{}
+{
+    scalar scaleFactor = 0;
+
+    // allow rescaling of the surface points
+    // eg, CAD geometries are often done in millimeters
+    if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
+    {
+        triSurface::scalePoints(scaleFactor);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

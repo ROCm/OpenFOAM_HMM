@@ -38,7 +38,7 @@ Description
     fluentMeshWithInternalFaces).
 
     A use of the cell zone information, is for field initialization with the
-    "setFields" utility. see the classes:  topoSetSource, zoneToCell.  
+    "setFields" utility. see the classes:  topoSetSource, zoneToCell.
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -166,7 +166,7 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
         if (nMatched == meshF.size())
         {
             return faceI;
-        }        
+        }
     }
     return -1;
 }
@@ -835,7 +835,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        points,
+        xferMove(points),
         cells,
         boundaryFaces,
         boundaryPatchNames,
@@ -951,7 +951,7 @@ int main(int argc, char *argv[])
                 {
                     zoneName = iter();
                 }
-    
+
                 Info<< "Writing zone " << zoneI << " to cellZone "
                     << zoneName << " and cellSet"
                     << endl;

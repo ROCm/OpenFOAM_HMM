@@ -28,7 +28,7 @@ Description
 
 #include "cellFeatures.H"
 #include "primitiveMesh.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "Map.H"
 #include "demandDrivenData.H"
 #include "ListOps.H"

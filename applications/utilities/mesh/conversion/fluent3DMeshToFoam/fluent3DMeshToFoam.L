@@ -883,10 +883,10 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        pointField(0),
-        faceList(0),
-        labelList(0),
-        labelList(0)
+        xferCopy(pointField()),
+        xferCopy(faceList()),
+        xferCopy(labelList()),
+        xferCopy(labelList())
     );
 
 
@@ -928,7 +928,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                if (!ignoreFaceGroups.found(groupName[faceGroupZoneID[fgi]]))
+                if (!ignoreFaceGroups.found(groupName[faceGroupZoneID[fgi] ]))
                 {
                     faceZoneIDs.append(fgi);
                 }

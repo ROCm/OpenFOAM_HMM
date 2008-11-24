@@ -54,9 +54,15 @@ class Map
 {
 
 public:
+
+    typedef typename HashTable<T, label, Hash<label> >::iterator iterator;
+
+    typedef typename HashTable<T, label, Hash<label> >::const_iterator
+        const_iterator;
+
     // Constructors
 
-        //- Construct given initial map size
+        //- Construct given initial size
         Map(label size = 100)
         :
             HashTable<T, label, Hash<label> >(size)
@@ -70,6 +76,12 @@ public:
 
         //- Construct as copy
         Map(const Map<T>& map)
+        :
+            HashTable<T, label, Hash<label> >(map)
+        {}
+
+        //- Construct by transferring the parameter contents
+        Map(const xfer<Map<T> >& map)
         :
             HashTable<T, label, Hash<label> >(map)
         {}

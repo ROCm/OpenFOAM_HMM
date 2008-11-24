@@ -113,10 +113,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~LESdelta()
-        {}
+    //- Destructor
+    virtual ~LESdelta()
+    {}
 
 
     // Member Functions

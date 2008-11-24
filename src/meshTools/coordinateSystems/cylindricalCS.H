@@ -106,14 +106,11 @@ public:
         (
             const word& name,
             const point& origin,
-            const coordinateRotation& cr
+            const coordinateRotation&
         );
 
         //- Construct from dictionary
-        cylindricalCS(const word& name, const dictionary& dict);
-
-
-    // Member Functions
+        cylindricalCS(const word& name, const dictionary&);
 
 };
 

@@ -40,7 +40,6 @@ namespace Foam
     );
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::parabolicCylindricalCS::parabolicCylindricalCS()
@@ -113,6 +112,7 @@ Foam::vector Foam::parabolicCylindricalCS::localToGlobal
     );
 }
 
+
 Foam::tmp<Foam::vectorField> Foam::parabolicCylindricalCS::localToGlobal
 (
     const vectorField& local,
@@ -123,7 +123,8 @@ Foam::tmp<Foam::vectorField> Foam::parabolicCylindricalCS::localToGlobal
     {
         FatalErrorIn
         (
-            "parabolicCylindricalCS::localToGlobal(const vectorField&, bool) const"
+            "parabolicCylindricalCS::localToGlobal"
+            "(const vectorField&, bool) const"
         )   << "parabolic cylindrical coordinates v < 0"
             << abort(FatalError);
     }

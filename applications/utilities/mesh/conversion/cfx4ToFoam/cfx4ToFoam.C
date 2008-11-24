@@ -727,7 +727,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        points,
+        xferMove(points),
         cellShapes,
         boundary,
         patchNames,

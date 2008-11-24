@@ -33,7 +33,8 @@
 
 export CMAKE_HOME=$WM_THIRD_PARTY_DIR/cmake-2.4.6/platforms/$WM_ARCH
 
-if [ -r $CMAKE_HOME ]; then
+if [ -r $CMAKE_HOME ]
+then
     export PATH=$CMAKE_HOME/bin:$PATH
 fi
 
@@ -42,14 +43,16 @@ export ParaView_VERSION=2.4.4
 export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/ParaView$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/lib/paraview-2.4
 
-if [ -r $ParaView_INST_DIR ]; then
+if [ -r $ParaView_INST_DIR ]
+then
     export PV_INTERFACE_PATH=$FOAM_UTILITIES/postProcessing/graphics/PVFoamReader/PVFoamReader/Make
 
     export PATH=$ParaView_INST_DIR/bin:$PATH
     export LD_LIBRARY_PATH=${ParaView_INST_DIR}/lib:${ParaView_INST_DIR}/lib/vtk:${LD_LIBRARY_PATH}
 fi
 
-if [ -r $ParaView_DIR ]; then
+if [ -r $ParaView_DIR ]
+then
     export VTK_DIR=$ParaView_DIR/VTK
 fi
 
