@@ -114,30 +114,22 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LaunderGibsonRSTM
         (
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermophysicalModel
+            const basicThermo& thermophysicalModel
         );
 
 
-    // Destructor
-
-        ~LaunderGibsonRSTM(){}
+    //- Destructor
+    virtual ~LaunderGibsonRSTM()
+    {}
 
 
     // Member Functions
-
-        // Access
-
-        //- Return the turbulence viscosity
-        tmp<volScalarField> mut() const
-        {
-            return mut_;
-        }
 
         //- Return the effective diffusivity for R
         tmp<volScalarField> DREff() const
@@ -157,8 +149,14 @@ public:
             );
         }
 
+        //- Return the turbulence viscosity
+        virtual tmp<volScalarField> mut() const
+        {
+            return mut_;
+        }
+
         //- Return the effective turbulent thermal diffusivity
-        tmp<volScalarField> alphaEff() const
+        virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>
             (
@@ -167,34 +165,34 @@ public:
         }
 
         //- Return the turbulence kinetic energy
-        tmp<volScalarField> k() const
+        virtual tmp<volScalarField> k() const
         {
             return k_;
         }
 
         //- Return the turbulence kinetic energy dissipation rate
-        tmp<volScalarField> epsilon() const
+        virtual tmp<volScalarField> epsilon() const
         {
             return epsilon_;
         }
 
         //- Return the Reynolds stress tensor
-        tmp<volSymmTensorField> R() const
+        virtual tmp<volSymmTensorField> R() const
         {
             return R_;
         }
 
         //- Return the effective stress tensor including the laminar stress
-        tmp<volSymmTensorField> devRhoReff() const;
+        virtual tmp<volSymmTensorField> devRhoReff() const;
 
         //- Return the source term for the momentum equation
-        tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
+        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
-        void correct();
+        virtual void correct();
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

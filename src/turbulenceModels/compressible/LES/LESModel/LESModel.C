@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LESModel.H"
-#include "wallDist.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +61,8 @@ LESModel::LESModel
     const basicThermo& thermoPhysicalModel
 )
 :
+    turbulenceModel(rho, U, phi, thermoPhysicalModel),
+
     IOdictionary
     (
         IOobject
@@ -72,14 +74,6 @@ LESModel::LESModel
             IOobject::NO_WRITE
         )
     ),
-
-    runTime_(U.time()),
-    mesh_(U.mesh()),
-
-    rho_(rho),
-    U_(U),
-    phi_(phi),
-    thermoPhysicalModel_(thermoPhysicalModel),
 
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDict(type + "Coeffs")),

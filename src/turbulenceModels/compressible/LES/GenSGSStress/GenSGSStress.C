@@ -37,7 +37,6 @@ namespace LESModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 GenSGSStress::GenSGSStress
 (
     const volScalarField& rho,
@@ -90,9 +89,7 @@ GenSGSStress::GenSGSStress
         ),
         mesh_
     )
-{
-//    printCoeffs();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

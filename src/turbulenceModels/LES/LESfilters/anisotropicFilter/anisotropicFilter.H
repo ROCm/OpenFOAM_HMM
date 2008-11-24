@@ -79,10 +79,10 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         anisotropicFilter(const fvMesh& mesh, scalar widthCoeff);
 
-        //- from IOdictionary
+        //- Construct from IOdictionary
         anisotropicFilter(const fvMesh& mesh, const dictionary&);
 
 

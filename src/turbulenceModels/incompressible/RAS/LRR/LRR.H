@@ -102,7 +102,7 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         LRR
         (
             const volVectorField& U,

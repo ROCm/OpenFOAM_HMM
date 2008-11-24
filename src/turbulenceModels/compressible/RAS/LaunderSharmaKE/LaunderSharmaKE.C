@@ -60,13 +60,12 @@ tmp<volScalarField> LaunderSharmaKE::f2() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 LaunderSharmaKE::LaunderSharmaKE
 (
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel
 )
 :
     RASModel(typeName, rho, U, phi, thermophysicalModel),

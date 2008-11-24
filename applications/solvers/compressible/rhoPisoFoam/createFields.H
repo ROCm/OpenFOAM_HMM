@@ -40,11 +40,18 @@
 
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::LESModel> turbulence
+    autoPtr<compressible::turbulenceModel> turbulence
     (
-        compressible::LESModel::New(rho, U, phi, thermo())
+        compressible::turbulenceModel::New
+        (
+            rho,
+            U,
+            phi,
+            thermo()
+        )
     );
 
+
     Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt = 
+    volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

@@ -92,7 +92,7 @@ realizableKE::realizableKE
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel
 )
 :
     RASModel(typeName, rho, U, phi, thermophysicalModel),

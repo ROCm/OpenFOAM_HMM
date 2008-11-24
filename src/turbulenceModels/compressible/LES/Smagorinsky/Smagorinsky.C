@@ -43,7 +43,6 @@ addToRunTimeSelectionTable(LESModel, Smagorinsky, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 Smagorinsky::Smagorinsky
 (
     const volScalarField& rho,

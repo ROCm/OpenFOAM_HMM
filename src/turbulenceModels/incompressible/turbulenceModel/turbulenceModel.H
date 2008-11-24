@@ -144,6 +144,18 @@ public:
 
     // Member Functions
 
+        //- Access function to velocity field
+        inline const volVectorField& U() const
+        {
+            return U_;
+        }
+
+        //- Access function to flux field
+        inline const surfaceScalarField& phi() const
+        {
+            return phi_;
+        }
+
         //- Access function to incompressible transport model
         inline transportModel& transport() const
         {

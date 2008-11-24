@@ -37,7 +37,6 @@ namespace LESModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 GenEddyVisc::GenEddyVisc
 (
     const volScalarField& rho,
@@ -86,9 +85,7 @@ GenEddyVisc::GenEddyVisc
         ),
         mesh_
     )
-{
-//    printCoeffs();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -88,10 +88,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~GenEddyVisc()
-        {}
+    //- Destructor
+    virtual ~GenEddyVisc()
+    {}
 
 
     // Member Functions
@@ -138,7 +137,7 @@ public:
         virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

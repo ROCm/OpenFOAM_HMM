@@ -64,20 +64,19 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         laminar
         (
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermophysicalModel
+            const basicThermo& thermophysicalModel
         );
 
 
-    // Destructor
-
-        ~laminar()
-        {}
+    //- Destructor
+    virtual ~laminar()
+    {}
 
 
     // Member Functions

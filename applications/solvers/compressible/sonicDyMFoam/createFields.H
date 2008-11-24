@@ -15,14 +15,12 @@
         (
             "rho",
             runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            mesh
         ),
         thermo->rho()
     );
 
-    Info<< "\nReading field U\n" << endl;
+    Info<< "Reading field U\n" << endl;
     volVectorField U
     (
         IOobject
@@ -40,18 +38,17 @@
 
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::RASModel> turbulence
+    autoPtr<compressible::turbulenceModel> turbulence
     (
-        compressible::RASModel::New
+        compressible::turbulenceModel::New
         (
             rho,
             U,
             phi,
             thermo()
         )
-    );    
-    
+    );
 
     Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt = 
+    volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

@@ -80,10 +80,10 @@ public:
 
     // Constructors
 
-        //- from components
+        //- Construct from components
         laplaceFilter(const fvMesh& mesh, scalar widthCoeff);
 
-        //- from IOdictionary
+        //- Construct from IOdictionary
         laplaceFilter(const fvMesh& mesh, const dictionary&);
 
 

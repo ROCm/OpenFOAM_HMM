@@ -26,21 +26,48 @@ License
 
 #include "turbulenceModel.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(turbulenceModel, 0);
+defineRunTimeSelectionTable(turbulenceModel, turbulenceModel);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+turbulenceModel::turbulenceModel
+(
+    const volScalarField& rho,
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    const basicThermo& thermophysicalModel
+)
+:
+    runTime_(U.time()),
+    mesh_(U.mesh()),
+
+    rho_(rho),
+    U_(U),
+    phi_(phi),
+    thermophysicalModel_(thermophysicalModel)
+{}
+
+
+// * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 autoPtr<turbulenceModel> turbulenceModel::New
 (
+    const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    const basicThermo& thermophysicalModel
 )
 {
     word turbulenceModelTypeName;
@@ -61,7 +88,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
             )
         );
 
-        turbulencePropertiesDict.lookup("simulationType")
+        turbulencePropertiesDict.lookup("turbulenceModel")
             >> turbulenceModelTypeName;
     }
 
@@ -75,8 +102,9 @@ autoPtr<turbulenceModel> turbulenceModel::New
     {
         FatalErrorIn
         (
-            "turbulenceModel::New(const volVectorField&, "
-            "const surfaceScalarField&, transportModel&)"
+            "turbulenceModel::New(const volScalarField&, "
+            "const volVectorField&, const surfaceScalarField&, "
+            "basicThermo&)"
         )   << "Unknown turbulenceModel type " << turbulenceModelTypeName
             << endl << endl
             << "Valid turbulenceModel types are :" << endl
@@ -84,13 +112,28 @@ autoPtr<turbulenceModel> turbulenceModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<turbulenceModel>(cstrIter()(U, phi, transport));
+    return autoPtr<turbulenceModel>
+    (
+        cstrIter()(rho, U, phi, thermophysicalModel)
+    );
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+turbulenceModel::~turbulenceModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void turbulenceModel::correct()
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //

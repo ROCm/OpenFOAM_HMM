@@ -100,10 +100,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~lowReOneEqEddy()
-        {}
+    //- Destructor
+    virtual ~lowReOneEqEddy()
+    {}
 
 
     // Member Functions
@@ -118,10 +117,10 @@ public:
         }
 
         //- Correct Eddy-Viscosity and related properties
-        void correct(const tmp<volTensorField>& gradU);
+        virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 
