@@ -37,14 +37,17 @@ namespace Foam
 
 void ignitionSite::findIgnitionCells(const fvMesh& mesh)
 {
+    // Bit tricky: generate C and V before shortcutting if cannot find
+    // cell locally. mesh.C generation uses parallel communication.
+    const volVectorField& centres = mesh.C();
+    const scalarField& vols = mesh.V();
+
     label ignCell = mesh.findCell(location_);
     if (ignCell == -1)
     {
         return;
     }
 
-    const volVectorField& centres = mesh.C();
-    const scalarField& vols = mesh.V();
     scalar radius = diameter_/2.0;
 
     cells_.setSize(1);
