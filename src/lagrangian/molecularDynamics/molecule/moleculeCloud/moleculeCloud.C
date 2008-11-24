@@ -254,7 +254,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
     forAll(pot_.removalOrder(), rO)
     {
-        Info << " " << pot_.idList()[pot_.removalOrder()[rO]];
+        Info << ' ' << pot_.idList()[pot_.removalOrder()[rO]];
     }
 
     Info << nl ;
@@ -302,7 +302,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
                             (
                                 idI == idJ
                              || findIndex(pot_.removalOrder(), idJ)
-                                    < findIndex(pot_.removalOrder(), idI)
+                                < findIndex(pot_.removalOrder(), idI)
                             )
                             {
                                 if (findIndex(molsToDelete, molJ) == -1)
@@ -335,7 +335,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
                         (
                             idI == idJ
                          || findIndex(pot_.removalOrder(), idJ)
-                                < findIndex(pot_.removalOrder(), idI)
+                            < findIndex(pot_.removalOrder(), idI)
                         )
                         {
                             if (findIndex(molsToDelete, molJ) == -1)
@@ -491,7 +491,7 @@ Foam::moleculeCloud::moleculeCloud
             vector(0,0,0.5e-9),
             13,
             tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
-            vector::zero,
+            vector(234, 102, -365),
             vector::zero,
             vector(2e10, -3e11, 1e10),
             vector::zero,

@@ -26,41 +26,40 @@ License
 
 #include "referredMolecule.H"
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-referredMolecule::referredMolecule()
+Foam::referredMolecule::referredMolecule()
 {}
 
 
-referredMolecule::referredMolecule
+Foam::referredMolecule::referredMolecule
 (
     const label id,
-    const vector& position
+    const vector& position,
+    const List<vector>& sitePositions
 )
 :
     id_(id),
-    position_(position)
+    position_(position),
+    sitePositions_(sitePositions)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-referredMolecule::~referredMolecule()
+Foam::referredMolecule::~referredMolecule()
 {}
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Istream& operator>>
+Foam::Istream& Foam::operator>>
 (
     Istream& is,
     referredMolecule& rM
 )
 {
-    is >> rM.id_ >> rM.position_;
+    is >> rM.id_ >> rM.position_ >> rM.sitePositions_;
 
     is.check("Istream& operator<<(Istream& f, const referredMolecule& sRL");
 
@@ -68,13 +67,15 @@ Istream& operator>>
 }
 
 
-Ostream& operator<<
+Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const referredMolecule& rM
 )
 {
-    os << rM.id() << token::SPACE << rM.position();
+    os  << rM.id()
+        << token::SPACE << rM.position()
+        << token::SPACE << rM.sitePositions();
 
     os.check("Ostream& operator<<(Ostream& f, const referredMolecule& rM");
 
@@ -83,7 +84,5 @@ Ostream& operator<<
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

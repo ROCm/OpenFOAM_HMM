@@ -118,11 +118,16 @@ public:
         inline const List<scalar>& siteCharges() const;
 
         inline const List<label>& siteIds() const;
+
         inline List<label>& siteIds();
 
         inline const List<bool>& pairPotentialSites() const;
 
+        inline bool pairPotentialSite(label sId) const;
+
         inline const List<bool>& electrostaticSites() const;
+
+        inline bool electrostaticSite(label sId) const;
 
         inline const diagTensor& momentOfInertia() const;
 

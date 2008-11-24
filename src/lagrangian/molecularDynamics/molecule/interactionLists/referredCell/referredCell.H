@@ -186,7 +186,7 @@ public:
 
         //- Use internal transformatation values to transform the given
         //  list of postions to their new locations.
-        vectorList referPositions(const vectorList& positionsToRefer) const;
+        vectorList referPosition(const vectorList& positionsToRefer) const;
 
         //- Use internal transformatation values to rotate the given vector
         vector rotateVector(const vector& vectorToRotate) const;

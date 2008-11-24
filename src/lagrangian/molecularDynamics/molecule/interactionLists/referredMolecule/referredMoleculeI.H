@@ -24,29 +24,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline label referredMolecule::id() const
+inline Foam::label Foam::referredMolecule::id() const
 {
     return id_;
 }
 
 
-inline const vector& referredMolecule::position() const
+inline const Foam::vector& Foam::referredMolecule::position() const
 {
     return position_;
 }
 
 
+inline const Foam::List<Foam::vector>&
+Foam::referredMolecule::sitePositions() const
+{
+    return sitePositions_;
+}
+
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline bool operator==
+inline bool Foam::operator==
 (
-    const referredMolecule& a,
-    const referredMolecule& b
+    const Foam::referredMolecule& a,
+    const Foam::referredMolecule& b
 )
 {
     return
@@ -57,10 +61,10 @@ inline bool operator==
 }
 
 
-inline bool operator!=
+inline bool Foam::operator!=
 (
-    const referredMolecule& a,
-    const referredMolecule& b
+    const Foam::referredMolecule& a,
+    const Foam::referredMolecule& b
 )
 {
     return !(a == b);
@@ -68,8 +72,5 @@ inline bool operator!=
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 
 // ************************************************************************* //

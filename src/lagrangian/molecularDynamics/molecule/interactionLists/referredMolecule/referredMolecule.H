@@ -37,11 +37,13 @@ SourceFiles
 #define referredMolecule_H
 
 #include "vector.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
                            Class referredMolecule Declaration
 \*---------------------------------------------------------------------------*/
@@ -53,6 +55,8 @@ class referredMolecule
         label id_;
 
         vector position_;
+
+        List<vector> sitePositions_;
 
 
 public:
@@ -66,7 +70,8 @@ public:
         referredMolecule
         (
             const label id,
-            const vector& position
+            const vector& position,
+            const List<vector>& sitePositions
         );
 
 
@@ -82,6 +87,8 @@ public:
             inline label id() const;
 
             inline const vector& position() const;
+
+            inline const List<vector>& sitePositions() const;
 
 
     // Friend Operators

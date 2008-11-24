@@ -173,10 +173,45 @@ Foam::molecule::constantProperties::pairPotentialSites() const
 }
 
 
+inline bool Foam::molecule::constantProperties::pairPotentialSite
+(
+    label sId
+) const
+{
+    label s = findIndex(siteIds_, sId);
+
+    if(s == -1)
+    {
+        FatalErrorIn("moleculeI.H") << nl
+            << sId << " site not found."
+            << nl << abort(FatalError);
+    }
+
+    return pairPotentialSites_[s];
+}
+
+
 inline const Foam::List<bool>&
 Foam::molecule::constantProperties::electrostaticSites() const
 {
     return electrostaticSites_;
+}
+
+inline bool Foam::molecule::constantProperties::electrostaticSite
+(
+    label sId
+) const
+{
+    label s = findIndex(siteIds_, sId);
+
+    if(s == -1)
+    {
+        FatalErrorIn("moleculeI.H") << nl
+            << sId << " site not found."
+            << nl << abort(FatalError);
+    }
+
+    return electrostaticSites_[s];
 }
 
 

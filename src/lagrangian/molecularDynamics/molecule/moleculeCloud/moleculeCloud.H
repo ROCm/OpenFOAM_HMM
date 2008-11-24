@@ -94,13 +94,6 @@ private:
 
         inline bool evaluatePotentialLimit
         (
-            label idI,
-            label idJ,
-            scalar rIJMagSq
-        ) const;
-
-        inline bool evaluatePotentialLimit
-        (
             molecule* molI,
             molecule* molJ
         ) const;

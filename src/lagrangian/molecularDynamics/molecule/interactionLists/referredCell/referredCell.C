@@ -330,7 +330,7 @@ vector referredCell::referPosition(const vector& positionToRefer) const
 }
 
 
-vectorList referredCell::referPositions
+vectorList referredCell::referPosition
 (
     const vectorList& positionsToRefer
 ) const
@@ -365,6 +365,10 @@ void referredCell::referInMols(const List<referredMolecule>& incomingMols)
                 referPosition
                 (
                     incomingMols[iM].position()
+                ),
+                referPosition
+                (
+                    incomingMols[iM].sitePositions()
                 )
             )
         );
