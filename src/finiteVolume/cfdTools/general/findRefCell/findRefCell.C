@@ -49,6 +49,22 @@ void Foam::setRefCell
             if (Pstream::master())
             {
                 refCelli = readLabel(dict.lookup(refCellName));
+
+                if (refCelli < 0 || refCelli >= field.mesh().nCells())
+                {
+                    FatalErrorIn
+                    (
+                        "void Foam::setRefCell"
+                         "("
+                         "    const volScalarField&,"
+                         "    const dictionary&,"
+                         "    label& scalar&,"
+                         "    bool"
+                         ")"
+                    )   << "Illegal master cellID " << refCelli
+                        << ". Should be 0.." << field.mesh().nCells()
+                        << exit(FatalError);
+                }
             }
             else
             {
@@ -75,7 +91,7 @@ void Foam::setRefCell
                 )
                   << "Unable to set reference cell for field " << field.name()
                   << nl << "    Reference point " << refPointName
-                  << " found on multiple domains" << nl << abort(FatalError);
+                  << " found on multiple domains" << nl << exit(FatalError);
             }
         }
         else
@@ -92,7 +108,7 @@ void Foam::setRefCell
             )
               << "Unable to set reference cell for field" << field.name() << nl
               << "    Please supply either " << refCellName
-              << " or " << refPointName << nl << abort(FatalError);
+              << " or " << refPointName << nl << exit(FatalError);
         }
 
         refValue = readScalar(dict.lookup(refValueName));
