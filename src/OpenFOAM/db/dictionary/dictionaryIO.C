@@ -27,6 +27,7 @@ License
 #include "dictionary.H"
 #include "IFstream.H"
 #include "inputModeEntry.H"
+#include "regularExpression.H"
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * //
 

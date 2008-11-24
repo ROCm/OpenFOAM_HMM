@@ -37,6 +37,8 @@ SourceFiles
 
 #include <sys/types.h>
 #include <regex.h>
+#include "string.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +75,7 @@ public:
         {
             preg_ = new regex_t;
 
-            if (regcomp(preg_, s.c_str(), REG_EXTENDED|REG_NOSUB) != 0)
+            if (regcomp(preg_, s.c_str(), REG_EXTENDED) != 0)
             {
                 FatalErrorIn
                 (
@@ -102,10 +104,12 @@ public:
         //- Matches?
         inline bool matches(const string& s) const
         {
-            size_t nmatch = 0;
-            regmatch_t *pmatch = NULL;
+            size_t nmatch = 1;
+            regmatch_t pmatch[1];
 
-            return regexec(preg_, s.c_str(), nmatch, pmatch, 0) == 0;
+            int errVal = regexec(preg_, s.c_str(), nmatch, pmatch, 0);
+
+            return (errVal == 0 && pmatch[0].rm_eo == label(s.size()));
         }
 };
 
