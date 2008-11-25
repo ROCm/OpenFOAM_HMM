@@ -39,7 +39,7 @@ SourceFiles
 #include "boolList.H"
 #include "pointField.H"
 #include "DynamicList.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "FixedList.H"
 #include "vector2D.H"
 #include "triPointRef.H"

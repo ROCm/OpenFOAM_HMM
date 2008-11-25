@@ -297,15 +297,4 @@ cfdTools/general/SRF/SRFModel/SRFModel/newSRFModel.C
 cfdTools/general/SRF/SRFModel/rpm/rpm.C
 cfdTools/general/SRF/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 
-fvMeshCutSurface = fvMesh/fvMeshCutSurface
-
-meshCut = $(fvMeshCutSurface)/meshCut
-$(meshCut)/meshCutSurface.C
-$(meshCut)/cellAddressing.C
-
-edgeCuts = $(fvMeshCutSurface)/edgeCuts
-$(edgeCuts)/meshEdgeCuts.C
-$(edgeCuts)/faceDecompIsoSurfaceCuts.C
-$(edgeCuts)/cellDecompIsoSurfaceCuts.C
-
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

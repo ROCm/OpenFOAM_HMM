@@ -36,7 +36,7 @@ License
 using namespace Foam;
 
 // Does face use valid vertices?
-bool validTri(const triSurface& surf, const label faceI)
+bool validTri(const bool verbose, const triSurface& surf, const label faceI)
 {
     // Simple check on indices ok.
 
@@ -49,20 +49,21 @@ bool validTri(const triSurface& surf, const label faceI)
      || (f[2] < 0) || (f[2] >= surf.points().size())
     )
     {
-        //WarningIn("validTri(const triSurface&, const label)")
-        //    << "triangle " << faceI << " vertices " << f
-        //    << " uses point indices outside point range 0.."
-        //    << surf.points().size()-1 << endl;
+        WarningIn("validTri(const triSurface&, const label)")
+            << "triangle " << faceI << " vertices " << f
+            << " uses point indices outside point range 0.."
+            << surf.points().size()-1 << endl;
 
         return false;
     }
 
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
     {
-        //WarningIn("validTri(const triSurface&, const label)")
-        //    << "triangle " << faceI
-        //    << " uses non-unique vertices " << f
-        //    << endl;
+        WarningIn("validTri(const triSurface&, const label)")
+            << "triangle " << faceI
+            << " uses non-unique vertices " << f
+            << " coords:" << f.points(surf.points())
+            << endl;
         return false;
     }
 
@@ -91,11 +92,12 @@ bool validTri(const triSurface& surf, const label faceI)
          && ((f[2] == nbrF[0]) || (f[2] == nbrF[1]) || (f[2] == nbrF[2]))
         )
         {
-            //WarningIn("validTri(const triSurface&, const label)")
-            //    << "triangle " << faceI << " vertices " << f
-            //    << " has the same vertices as triangle " << nbrFaceI
-            //    << " vertices " << nbrF
-            //    << endl;
+            WarningIn("validTri(const triSurface&, const label)")
+                << "triangle " << faceI << " vertices " << f
+                << " has the same vertices as triangle " << nbrFaceI
+                << " vertices " << nbrF
+                << " coords:" << f.points(surf.points())
+                << endl;
 
             return false;
         }
@@ -170,9 +172,11 @@ int main(int argc, char *argv[])
     argList::validArgs.clear();
     argList::validArgs.append("surface file");
     argList::validOptions.insert("noSelfIntersection", "");
+    argList::validOptions.insert("verbose", "");
     argList args(argc, argv);
 
     bool checkSelfIntersection = !args.options().found("noSelfIntersection");
+    bool verbose = args.options().found("verbose");
 
     fileName surfFileName(args.additionalArgs()[0]);
     Pout<< "Reading surface from " << surfFileName << " ..." << nl << endl;
@@ -232,7 +236,7 @@ int main(int argc, char *argv[])
 
         forAll(surf, faceI)
         {
-            if (!validTri(surf, faceI))
+            if (!validTri(verbose, surf, faceI))
             {
                 illegalFaces.append(faceI);
             }

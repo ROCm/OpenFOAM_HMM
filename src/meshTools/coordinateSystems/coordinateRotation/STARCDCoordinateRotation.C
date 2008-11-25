@@ -121,7 +121,7 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 :
     coordinateRotation()
 {
-    calcTransform( rotZ, rotX, rotY, inDegrees );
+    calcTransform(rotZ, rotX, rotY, inDegrees);
 }
 
 

@@ -31,6 +31,8 @@ Description
     The momentum and other fluid properties are of the "mixture" and a single
     momentum equation is solved.
 
+    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+
     For a two-fluid approach see twoPhaseEulerFoam.
 
 \*---------------------------------------------------------------------------*/
@@ -40,6 +42,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +60,7 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -74,7 +77,7 @@ int main(int argc, char *argv[])
 
         twoPhaseProperties.correct();
 
-        #include "gammaEqnSubCycle.H"
+        #include "alphaEqnSubCycle.H"
 
         #include "UEqn.H"
 
@@ -87,6 +90,8 @@ int main(int argc, char *argv[])
         #include "continuityErrs.H"
 
         p = pd + rho*gh;
+
+        turbulence->correct();
 
         runTime.write();
 

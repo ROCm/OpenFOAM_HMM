@@ -58,14 +58,34 @@ class IFstream;
 
 class triSurface
 :
-    public PrimitivePatch<labelledTri, List, pointField>
+    public PrimitivePatch<labelledTri, List, pointField, point>
 {
+protected:
+
+    // Protected Member Data
+
+        //- Typedef for similar code in keyedSurface and meshedSurface
+        typedef labelledTri FaceType;
+
+private:
+
+    // Private typedefs
+
+        typedef PrimitivePatch
+        <
+            FaceType,
+            ::Foam::List,
+            pointField,
+            point
+        >
+        MeshStorage;
+
     // Private data
 
         //- The number of bytes in the STL header
         static const int STLheaderSize = 80;
 
-        //- Patch information (face ordering nFaces/startFace only used 
+        //- Patch information (face ordering nFaces/startFace only used
         //  during reading and writing)
         geometricSurfacePatchList patches_;
 
@@ -131,7 +151,7 @@ class triSurface
         void writeSTLBINARY(std::ostream&) const;
 
         //- Write to Ostream in GTS (Gnu Tri Surface library)
-        //  format. 
+        //  format.
         void writeGTS(const bool writeSorted, Ostream&) const;
 
         //- Write to Ostream in OBJ (Lightwave) format.
@@ -287,6 +307,9 @@ public:
             //- Move points
             virtual void movePoints(const pointField&);
 
+            //- Scale points. A non-positive factor is ignored
+            virtual void scalePoints(const scalar&);
+
             //- Check/fix duplicate/degenerate triangles
             void checkTriangles(const bool verbose);
 
@@ -332,7 +355,7 @@ public:
                 labelList& faceMap
             ) const;
 
-            //- Return new surface. Returns pointMap, faceMap from 
+            //- Return new surface. Returns pointMap, faceMap from
             //  subsetMeshMap
             triSurface subsetMesh
             (

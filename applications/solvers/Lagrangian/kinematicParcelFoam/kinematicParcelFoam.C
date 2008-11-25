@@ -26,14 +26,14 @@ Application
     kinematicParcelFoam
 
 Description
-    Transient solver for a single kinematicCloud. Uses precalculated velocity
+    Transient solver for a single kinematicCloud. Uses pre-calculated velocity
     field to evolve a cloud.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
+#include "turbulenceModel.H"
 #include "basicKinematicCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "compressibleCourantNo.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 

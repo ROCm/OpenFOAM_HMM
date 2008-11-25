@@ -109,6 +109,7 @@ public:
         triSurfaceMesh(const IOobject& io);
 
         //- Construct from dictionary (used by searchableSurface)
+        //  Dictionary may contain a 'scale' entry (eg, 0.001: mm -> m)
         triSurfaceMesh
         (
             const IOobject& io,

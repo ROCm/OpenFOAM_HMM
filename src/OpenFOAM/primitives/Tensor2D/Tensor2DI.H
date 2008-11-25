@@ -31,13 +31,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 template <class Cmpt>
 inline Tensor2D<Cmpt>::Tensor2D()
 {}
 
 
-//- Construct given VectorSpace
 template <class Cmpt>
 inline Tensor2D<Cmpt>::Tensor2D(const VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>& vs)
 :
@@ -45,7 +43,6 @@ inline Tensor2D<Cmpt>::Tensor2D(const VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>& vs)
 {}
 
 
-//- Construct given SphericalTensor2D
 template <class Cmpt>
 inline Tensor2D<Cmpt>::Tensor2D(const SphericalTensor2D<Cmpt>& st)
 {
@@ -54,7 +51,6 @@ inline Tensor2D<Cmpt>::Tensor2D(const SphericalTensor2D<Cmpt>& st)
 }
 
 
-//- Construct from components
 template <class Cmpt>
 inline Tensor2D<Cmpt>::Tensor2D
 (
@@ -67,7 +63,6 @@ inline Tensor2D<Cmpt>::Tensor2D
 }
 
 
-//- Construct from Istream
 template <class Cmpt>
 inline Tensor2D<Cmpt>::Tensor2D(Istream& is)
 :
@@ -153,7 +148,6 @@ inline Cmpt& Tensor2D<Cmpt>::yy()
 }
 
 
-//- Return tensor transpose
 template <class Cmpt>
 inline Tensor2D<Cmpt> Tensor2D<Cmpt>::T() const
 {
@@ -303,16 +297,26 @@ inline Cmpt det(const Tensor2D<Cmpt>& t)
     return(t.xx()*t.yy() - t.xy()*t.yx());
 }
 
-//- Return the inverse of a tensor give the determinant
+
+//- Return the cofactor tensor of a tensor
 template <class Cmpt>
-inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt dett)
+inline Tensor2D<Cmpt> cof(const Tensor2D<Cmpt>& t)
 {
     return Tensor2D<Cmpt>
     (
         t.yy(), -t.xy(),
        -t.yx(),  t.xx()
-    )/dett;
+    );
 }
+
+
+//- Return the inverse of a tensor given the determinant
+template <class Cmpt>
+inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt dett)
+{
+    return cof(t)/dett;
+}
+
 
 //- Return the inverse of a tensor
 template <class Cmpt>

@@ -39,7 +39,7 @@ SourceFiles
 #define sampledIsoSurface_H
 
 #include "sampledSurface.H"
-#include "triSurface.H"
+#include "isoSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,19 +52,26 @@ namespace Foam
 
 class sampledIsoSurface
 :
-    public sampledSurface,
-    public triSurface
+    public sampledSurface
 {
     // Private data
 
         //- Field to get isoSurface of
-        word isoField_;
+        const word isoField_;
 
         //- iso value
-        scalar isoVal_;
+        const scalar isoVal_;
+
+        //- Whether to coarse
+        const Switch regularise_;
+
+        //- Whether to recalculate cell values as average of point values
+        const Switch average_;
 
         //- zone name (if restricted to zones)
         word zoneName_;
+
+        mutable autoPtr<isoSurface> surfPtr_;
 
         //- triangles converted to faceList
         mutable autoPtr<faceList> facesPtr_;
@@ -75,14 +82,20 @@ class sampledIsoSurface
             //- Time at last call
             mutable label storedTimeIndex_;
 
-            //- For every triangle the original cell in mesh
-            mutable labelList meshCells_;
+            //- Cached volfield
+            mutable autoPtr<volScalarField> storedVolFieldPtr_;
+            mutable const volScalarField* volFieldPtr_;
 
-            //- For every unmerged triangle point the point in the triSurface
-            mutable labelList triPointMergeMap_;
+            //- Cached pointfield
+            mutable autoPtr<pointScalarField> storedPointFieldPtr_;
+            mutable const pointScalarField* pointFieldPtr_;
+
 
 
     // Private Member Functions
+
+        //- Get fields needed to recreate iso surface.
+        void getIsoFields() const;
 
         //- Create iso surface (if time has changed)
         void createGeometry() const;
@@ -127,7 +140,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return triSurface::points();
+            return surface().points();
         }
 
         //- Faces of surface
@@ -135,7 +148,7 @@ public:
         {
             if (!facesPtr_.valid())
             {
-                const triSurface& s = *this;
+                const triSurface& s = surface();
 
                 facesPtr_.reset(new faceList(s.size()));
 
@@ -147,9 +160,17 @@ public:
             return facesPtr_;
         }
 
-
         //- Correct for mesh movement and/or field changes
         virtual void correct(const bool meshChanged);
+
+
+        const isoSurface& surface() const
+        {
+            return surfPtr_();
+        }
+
+        //- Lookup or read isoField. Sets volFieldPtr_ and pointFieldPtr_.
+        void getIsoField();
 
 
         //- sample field on surface

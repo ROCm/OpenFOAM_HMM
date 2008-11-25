@@ -1259,10 +1259,10 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
                 runTime,
                 IOobject::NO_READ
             ),
-            domainPoints,
-            domainFaces,
-            domainAllOwner,
-            domainAllNeighbour,
+            xferMove(domainPoints),
+            xferMove(domainFaces),
+            xferMove(domainAllOwner),
+            xferMove(domainAllNeighbour),
             false                   // no parallel comms
         )
     );

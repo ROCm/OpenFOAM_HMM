@@ -140,9 +140,10 @@ find -L . -type l -exec rm \{\} \;
 
 #
 # create links, avoid recreating links unless necessary
+# things placed in the 'noLink' directory are skipped
 #
 find .. $findOpt \
-    \( -name lnInclude -o -name Make -o -name config \) -prune \
+    \( -name lnInclude -o -name Make -o -name config -o -name noLink \) -prune \
  -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
  -a ! -name ".#*" \
  -print | \

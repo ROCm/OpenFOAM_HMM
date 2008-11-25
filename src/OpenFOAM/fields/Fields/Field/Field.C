@@ -576,20 +576,6 @@ void Field<Type>::replace
 
 
 template<class Type>
-void Field<Type>::transfer(Field<Type>& f)
-{
-    List<Type>::transfer(f);
-}
-
-
-template<class Type>
-void Field<Type>::transfer(List<Type>& lst)
-{
-    List<Type>::transfer(lst);
-}
-
-
-template<class Type>
 tmp<Field<Type> > Field<Type>::T() const
 {
     tmp<Field<Type> > transpose(new Field<Type>(this->size()));

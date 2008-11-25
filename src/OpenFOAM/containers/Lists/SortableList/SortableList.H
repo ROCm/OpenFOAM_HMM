@@ -60,44 +60,25 @@ class SortableList
         //- Original indices
         labelList indices_;
 
-
 public:
-
-    // Public classes
-
-        //- Less function class used by the sort function
-        class less
-        {
-            const UList<Type>& values_;
-
-        public:
-
-            less(const UList<Type>& values)
-            :
-                values_(values)
-            {}
-
-            bool operator()(const label a, const label b)
-            {
-                return values_[a] < values_[b];
-            }
-        };
-
 
     // Constructors
 
-        //- Construct from List, sorting the elements.
-        //  Starts with indices set to index in argument
-        explicit SortableList(const List<Type>&);
+        //- Null constructor, sort later (eg, after assignment or transfer)
+        SortableList();
 
-        //- Construct from tranferred List, sorting the elements.
-        //  Starts with indices set to index in argument
+        //- Construct from UList, sorting immediately.
+        explicit SortableList(const UList<Type>&);
+
+        //- Construct from transferred List, sorting immediately.
         explicit SortableList(const xfer<List<Type> >&);
 
         //- Construct given size. Sort later on.
+        //  The indices remain empty until the list is sorted
         explicit SortableList(const label size);
 
         //- Construct given size and initial value. Sort later on.
+        //  The indices remain empty until the list is sorted
         SortableList(const label size, const Type&);
 
         //- Construct as copy.
@@ -112,15 +93,31 @@ public:
             return indices_;
         }
 
-        //- Size the list. If grow can cause undefined indices (until next sort)
+        //- Return non-const access to the sorted indices. Updated every sort.
+        labelList& indices()
+        {
+            return indices_;
+        }
+
+        //- Size the list. Growing can cause undefined indices (until next sort)
         void setSize(const label);
 
-        //- (stable) sort the list (if changed after construction time)
-        void sort();
+        //- Clear the list and the indices
+        void clear();
 
+        //- Clear the indices and return a reference to the underlying List
+        List<Type>& shrink();
+
+        //- (stable) sort the list (if changed after construction time)
+        //  also resizes the indices as required
+        void sort();
 
     // Member Operators
 
+        //- Assignment from UList operator. Takes linear time.
+        void operator=(const UList<Type>&);
+
+        //- Assignment operator. Takes linear time.
         void operator=(const SortableList<Type>&);
 
 };

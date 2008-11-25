@@ -33,7 +33,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicThermo.H"
-#include "compressible/RASModel/RASModel.H"
+#include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"
 

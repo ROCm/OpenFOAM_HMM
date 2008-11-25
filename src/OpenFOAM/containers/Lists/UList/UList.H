@@ -92,6 +92,26 @@ public:
         //- Declare friendship with the SubList class
         friend class SubList<T>;
 
+    // Public classes
+
+        //- Less function class that can be used for sorting
+        class less
+        {
+            const UList<T>& values_;
+
+        public:
+
+            less(const UList<T>& values)
+            :
+                values_(values)
+            {}
+
+            bool operator()(const label a, const label b)
+            {
+                return values_[a] < values_[b];
+            }
+        };
+
 
     // Constructors
 

@@ -35,6 +35,8 @@ Description
     but other mechanisms of phase-change are supported within this solver
     framework.
 
+    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
@@ -42,7 +44,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "phaseChangeTwoPhaseMixture.H"
-#include "incompressible/LESModel/LESModel.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +62,7 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -75,9 +77,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        twoPhaseProperties->correct();
-
-        #include "gammaEqnSubCycle.H"
+        #include "alphaEqnSubCycle.H"
 
         turbulence->correct();
 
@@ -94,6 +94,8 @@ int main(int argc, char *argv[])
 
             #include "continuityErrs.H"
         }
+
+        twoPhaseProperties->correct();
 
         runTime.write();
 

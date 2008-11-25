@@ -12,12 +12,12 @@
         mesh
     );
 
-    Info<< "Reading field gamma\n" << endl;
-    volScalarField gamma
+    Info<< "Reading field alpha1\n" << endl;
+    volScalarField alpha1
     (
         IOobject
         (
-            "gamma",
+            "alpha1",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -44,7 +44,7 @@
 
     Info<< "Creating phaseChangeTwoPhaseMixture\n" << endl;
     autoPtr<phaseChangeTwoPhaseMixture> twoPhaseProperties =
-        phaseChangeTwoPhaseMixture::New(U, phi, "gamma");
+        phaseChangeTwoPhaseMixture::New(U, phi);
 
     const dimensionedScalar& rho1 = twoPhaseProperties->rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties->rho2();
@@ -60,8 +60,8 @@
             mesh,
             IOobject::READ_IF_PRESENT
         ),
-        gamma*rho1 + (scalar(1) - gamma)*rho2,
-        gamma.boundaryField().types()
+        alpha1*rho1 + (scalar(1) - alpha1)*rho2,
+        alpha1.boundaryField().types()
     );
     rho.oldTime();
 
@@ -88,11 +88,11 @@
     );
 
 
-    // Construct interface from gamma distribution
-    interfaceProperties interface(gamma, U, twoPhaseProperties());
+    // Construct interface from alpha1 distribution
+    interfaceProperties interface(alpha1, U, twoPhaseProperties());
 
-    // Construct LES model
-    autoPtr<incompressible::LESModel> turbulence
+    // Construct incompressible turbulence model
+    autoPtr<incompressible::turbulenceModel> turbulence
     (
-        incompressible::LESModel::New(U, phi, twoPhaseProperties())
+        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties())
     );

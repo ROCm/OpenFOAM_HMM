@@ -36,7 +36,6 @@ namespace Foam
     addToRunTimeSelectionTable(coordinateSystem, toroidalCS, dictionary);
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::toroidalCS::toroidalCS
@@ -105,6 +104,7 @@ Foam::vector Foam::toroidalCS::localToGlobal
     );
 }
 
+
 Foam::tmp<Foam::vectorField> Foam::toroidalCS::localToGlobal
 (
     const vectorField& local,
@@ -129,6 +129,7 @@ Foam::tmp<Foam::vectorField> Foam::toroidalCS::localToGlobal
     return coordinateSystem::localToGlobal(lc, translate);
 }
 
+
 Foam::vector Foam::toroidalCS::globalToLocal
 (
     const vector& global,
@@ -142,6 +143,7 @@ Foam::vector Foam::toroidalCS::globalToLocal
 
     return vector::zero;
 }
+
 
 Foam::tmp<Foam::vectorField> Foam::toroidalCS::globalToLocal
 (
@@ -181,6 +183,5 @@ void Foam::toroidalCS::writeDict(Ostream& os, bool subDict) const
 	os << decrIndent << indent << token::END_BLOCK << endl;
     }
 }
-
 
 // ************************************************************************* //

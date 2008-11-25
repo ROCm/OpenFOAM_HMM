@@ -1,0 +1,237 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::distanceSurface
+
+Description
+    A sampledSurface defined by a distance to a surface.
+
+SourceFiles
+    distanceSurface.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef distanceSurface_H
+#define distanceSurface_H
+
+#include "sampledSurface.H"
+#include "triSurface.H"
+#include "searchableSurface.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                       Class distanceSurface Declaration
+\*---------------------------------------------------------------------------*/
+
+class distanceSurface
+:
+    public sampledSurface,
+    public triSurface
+{
+    // Private data
+
+        //- Surface
+        const autoPtr<searchableSurface> surfPtr_;
+
+        //- distance value
+        const scalar distance_;
+
+        //- signed distance
+        const bool signed_;
+
+        //- Whether to coarsen
+        const Switch regularise_;
+
+        //- zone name (if restricted to zones)
+        word zoneName_;
+
+        //- triangles converted to faceList
+        mutable autoPtr<faceList> facesPtr_;
+
+
+        // Recreated for every isoSurface
+
+            //- Time at last call
+            mutable label storedTimeIndex_;
+
+            //- For every triangle the original cell in mesh
+            mutable labelList meshCells_;
+
+
+    // Private Member Functions
+
+        //- Create iso surface (if time has changed)
+        void createGeometry() const;
+
+        //- sample field on faces
+        template <class Type>
+        tmp<Field<Type> > sampleField
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vField
+        ) const;
+
+
+        template <class Type>
+        tmp<Field<Type> >
+        interpolateField(const interpolation<Type>&) const;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("distanceSurface");
+
+
+    // Constructors
+
+        //- Construct from dictionary
+        distanceSurface
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const dictionary& dict
+        );
+
+
+    // Destructor
+
+        virtual ~distanceSurface();
+
+
+    // Member Functions
+
+        //- Points of surface
+        virtual const pointField& points() const
+        {
+            return triSurface::points();
+        }
+
+        //- Faces of surface
+        virtual const faceList& faces() const
+        {
+            if (!facesPtr_.valid())
+            {
+                const triSurface& s = *this;
+
+                facesPtr_.reset(new faceList(s.size()));
+
+                forAll(s, i)
+                {
+                    facesPtr_()[i] = s[i].triFaceFace();
+                }
+            }
+            return facesPtr_;
+        }
+
+
+        //- Correct for mesh movement and/or field changes
+        virtual void correct(const bool meshChanged);
+
+
+        //- sample field on surface
+        virtual tmp<scalarField> sample
+        (
+            const volScalarField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<vectorField> sample
+        (
+            const volVectorField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<sphericalTensorField> sample
+        (
+            const volSphericalTensorField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<symmTensorField> sample
+        (
+            const volSymmTensorField&
+        ) const;
+
+        //- sample field on surface
+        virtual tmp<tensorField> sample
+        (
+            const volTensorField&
+        ) const;
+
+
+        //- interpolate field on surface
+        virtual tmp<scalarField> interpolate
+        (
+            const interpolation<scalar>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<vectorField> interpolate
+        (
+            const interpolation<vector>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<sphericalTensorField> interpolate
+        (
+            const interpolation<sphericalTensor>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<symmTensorField> interpolate
+        (
+            const interpolation<symmTensor>&
+        ) const;
+
+        //- interpolate field on surface
+        virtual tmp<tensorField> interpolate
+        (
+            const interpolation<tensor>&
+        ) const;
+
+        //- Write
+        virtual void print(Ostream&) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "distanceSurfaceTemplates.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

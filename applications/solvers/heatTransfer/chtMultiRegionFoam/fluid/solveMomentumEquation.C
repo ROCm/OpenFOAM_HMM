@@ -35,7 +35,7 @@ tmp<fvVectorMatrix> solveMomentumEquation
     const surfaceScalarField& phi,
     const volScalarField& pd,
     const volScalarField& gh,
-    const compressible::RASModel& turb
+    const compressible::turbulenceModel& turb
 )
 {
     // Solve the Momentum equation

@@ -28,10 +28,13 @@ Application
 Description
     Solver for mixing 2 incompressible fluids.
 
+    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +61,7 @@ int main(int argc, char *argv[])
 
         twoPhaseProperties.correct();
 
-#       include "gammaEqn.H"
+#       include "alphaEqn.H"
 
 #       include "UEqn.H"
 
@@ -69,6 +72,10 @@ int main(int argc, char *argv[])
         }
 
 #       include "continuityErrs.H"
+
+        p = pd + rho*gh;
+
+        turbulence->correct();
 
         runTime.write();
 
