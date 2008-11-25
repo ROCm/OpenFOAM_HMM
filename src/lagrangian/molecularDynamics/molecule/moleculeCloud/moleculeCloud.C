@@ -485,7 +485,7 @@ Foam::moleculeCloud::moleculeCloud
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const Cloud<molecule>& cloud = *this;
 
-    vector position1 = vector(0,0,1.5e-9);
+    vector position1 = vector(0,0,4e-9);
 
     addParticle
     (
@@ -495,9 +495,9 @@ Foam::moleculeCloud::moleculeCloud
             position1,
             mesh_.findCell(position1),
             tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
-            vector(34, 12, -65),
+            vector(0,0,-150),
             vector::zero,
-            vector(0.2, -0.012, 0.32),
+            vector(1e-35, 2e-35, 3e-35),
             vector::zero,
             vector::zero,
             constProps(0),
@@ -506,7 +506,7 @@ Foam::moleculeCloud::moleculeCloud
         )
     );
 
-    vector position2 = vector(0,0,0);
+    vector position2 = vector(0,0,-4e-9);
 
     addParticle
     (
@@ -516,9 +516,9 @@ Foam::moleculeCloud::moleculeCloud
             position2,
             mesh_.findCell(position2),
             tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
+            vector(0,0,150),
             vector::zero,
-            vector::zero,
-            vector(-0.4, 0.015, -0.2),
+            vector(1e-35, 2e-35, 3e-35),
             vector::zero,
             vector::zero,
             constProps(1),

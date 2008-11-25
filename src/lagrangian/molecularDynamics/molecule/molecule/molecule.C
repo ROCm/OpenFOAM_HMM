@@ -31,45 +31,36 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::tensor Foam::molecule::rotationTensor(scalar deltaT) const
+Foam::tensor Foam::molecule::rotationTensorX(scalar phi) const
 {
-    scalar phi1 = 0.5*deltaT*omega_.x();
-
-    tensor U1
+    return tensor
     (
-        tensor
-        (
-            1, 0, 0,
-            0, Foam::cos(phi1), -Foam::sin(phi1),
-            0, Foam::sin(phi1), Foam::cos(phi1)
-        )
+        1, 0, 0,
+        0, Foam::cos(phi), -Foam::sin(phi),
+        0, Foam::sin(phi), Foam::cos(phi)
     );
+}
 
-    scalar phi2 = 0.5*deltaT*omega_.y();
 
-    tensor U2
+Foam::tensor Foam::molecule::rotationTensorY(scalar phi) const
+{
+    return tensor
     (
-        tensor
-        (
-            Foam::cos(phi2), 0, Foam::sin(phi2),
-            0, 1, 0,
-            -Foam::sin(phi2), 0, Foam::cos(phi2)
-        )
+        Foam::cos(phi), 0, Foam::sin(phi),
+        0, 1, 0,
+        -Foam::sin(phi), 0, Foam::cos(phi)
     );
+}
 
-    scalar phi3 = deltaT*omega_.z();
 
-    tensor U3
+Foam::tensor Foam::molecule::rotationTensorZ(scalar phi) const
+{
+    return tensor
     (
-        tensor
-        (
-            Foam::cos(phi3), -Foam::sin(phi3), 0,
-            Foam::sin(phi3), Foam::cos(phi3), 0,
-            0, 0, 1
-        )
+        Foam::cos(phi), -Foam::sin(phi), 0,
+        Foam::sin(phi), Foam::cos(phi), 0,
+        0, 0, 1
     );
-
-    return (U1 & U2 & U3 & U2 & U1);
 }
 
 
@@ -89,14 +80,17 @@ Foam::molecule::trackData::trackData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+
 bool Foam::molecule::move(molecule::trackData& td)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
+    const constantProperties& constProps(td.molCloud().constProps(id_));
+
+    const diagTensor& momentOfInertia(constProps.momentOfInertia());
+
     scalar deltaT = cloud().pMesh().time().deltaT().value();
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
-    scalar dtMax = tEnd;
 
     if (td.part() == 0)
     {
@@ -105,11 +99,14 @@ bool Foam::molecule::move(molecule::trackData& td)
 
         v_ += 0.5*deltaT*a_;
 
-        omega_ += 0.5*deltaT*alpha_;
+        pi_ += 0.5*deltaT*tau_;
     }
     else if (td.part() == 1)
     {
         // Leapfrog tracking part
+
+        scalar tEnd = (1.0 - stepFraction())*deltaT;
+        scalar dtMax = tEnd;
 
         while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
         {
@@ -128,22 +125,40 @@ bool Foam::molecule::move(molecule::trackData& td)
         // but after tracking stage, i.e. rotation carried once linear motion
         // complete.
 
-        R_ = R_ & rotationTensor(deltaT);
+        tensor R;
 
-        setSitePositions(td.molCloud().constProps(id_));
+        R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
+        pi_ = R & pi_;
+        Q_ = Q_ & R.T();
+
+        R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
+        pi_ = R & pi_;
+        Q_ = Q_ & R.T();
+
+        R = rotationTensorZ(deltaT*pi_.z()/momentOfInertia.zz());
+        pi_ = R & pi_;
+        Q_ = Q_ & R.T();
+
+        R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
+        pi_ = R & pi_;
+        Q_ = Q_ & R.T();
+
+        R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
+        pi_ = R & pi_;
+        Q_ = Q_ & R.T();
+
+        setSitePositions(constProps);
     }
     else if (td.part() == 3)
     {
         // Second leapfrog velocity adjust part, required after tracking+force
         // part
 
-        const diagTensor& I(td.molCloud().constProps(id_).momentOfInertia());
-
-        scalar m = td.molCloud().constProps(id_).mass();
+        scalar m = constProps.mass();
 
         a_ = vector::zero;
 
-        vector tau(vector::zero);
+        tau_ = vector::zero;
 
         forAll(siteForces_, s)
         {
@@ -151,14 +166,12 @@ bool Foam::molecule::move(molecule::trackData& td)
 
             a_ += f/m;
 
-            tau += (sitePositions_[s] - position_) ^ f;
+            tau_ += ((Q_.T() & f) ^ constProps.siteReferencePositions()[s]);
         }
-
-        alpha_ = R_ & inv(I) & R_.T() & tau;
 
         v_ += 0.5*deltaT*a_;
 
-        omega_ += 0.5*deltaT*alpha_;
+        pi_ += 0.5*deltaT*tau_;
     }
     else
     {
@@ -170,6 +183,88 @@ bool Foam::molecule::move(molecule::trackData& td)
 
     return td.keepParticle;
 }
+
+// bool Foam::molecule::move(molecule::trackData& td)
+// {
+//     td.switchProcessor = false;
+//     td.keepParticle = true;
+
+//     scalar deltaT = cloud().pMesh().time().deltaT().value();
+//     scalar tEnd = (1.0 - stepFraction())*deltaT;
+//     scalar dtMax = tEnd;
+
+//     if (td.part() == 0)
+//     {
+//         // First leapfrog velocity adjust part, required before tracking+force
+//         // part
+
+//         v_ += 0.5*deltaT*a_;
+
+//         omega_ += 0.5*deltaT*alpha_;
+//     }
+//     else if (td.part() == 1)
+//     {
+//         // Leapfrog tracking part
+
+//         while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+//         {
+//             // set the lagrangian time-step
+//             scalar dt = min(dtMax, tEnd);
+
+//             dt *= trackToFace(position() + dt*v_, td);
+
+//             tEnd -= dt;
+//             stepFraction() = 1.0 - tEnd/deltaT;
+//         }
+//     }
+//     else if (td.part() == 2)
+//     {
+//         // Leapfrog orientation adjustment, carried out before force calculation
+//         // but after tracking stage, i.e. rotation carried once linear motion
+//         // complete.
+
+//         R_ = R_ & rotationTensor(deltaT);
+
+//         setSitePositions(td.molCloud().constProps(id_));
+//     }
+//     else if (td.part() == 3)
+//     {
+//         // Second leapfrog velocity adjust part, required after tracking+force
+//         // part
+
+//         const diagTensor& I(td.molCloud().constProps(id_).momentOfInertia());
+
+//         scalar m = td.molCloud().constProps(id_).mass();
+
+//         a_ = vector::zero;
+
+//         vector tau(vector::zero);
+
+//         forAll(siteForces_, s)
+//         {
+//             const vector& f = siteForces_[s];
+
+//             a_ += f/m;
+
+//             tau += (sitePositions_[s] - position_) ^ f;
+//         }
+
+//         alpha_ = R_ & inv(I) & R_.T() & tau;
+
+//         v_ += 0.5*deltaT*a_;
+
+//         omega_ += 0.5*deltaT*alpha_;
+//     }
+//     else
+//     {
+//         FatalErrorIn("molecule::move(molecule::trackData& td)") << nl
+//             << td.part()
+//             << " is an invalid part of the integration method."
+//             << abort(FatalError);
+//     }
+
+//     return td.keepParticle;
+// }
 
 
 void Foam::molecule::transformProperties(const tensor& T)
@@ -187,7 +282,7 @@ void Foam::molecule::transformProperties(const vector& separation)
 
 void Foam::molecule::setSitePositions(const constantProperties& constProps)
 {
-    sitePositions_ = position_ + (R_ & constProps.siteReferencePositions());
+    sitePositions_ = position_ + (Q_ & constProps.siteReferencePositions());
 }
 
 

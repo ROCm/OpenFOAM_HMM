@@ -38,11 +38,11 @@ Foam::molecule::molecule
 )
 :
     Particle<molecule>(cloud, is),
-    R_(tensor::zero),
+    Q_(tensor::zero),
     v_(vector::zero),
     a_(vector::zero),
-    omega_(vector::zero),
-    alpha_(vector::zero),
+    pi_(vector::zero),
+    tau_(vector::zero),
     siteForces_(List<vector>(0,vector::zero)),
     sitePositions_(List<vector>(0,vector::zero)),
     specialPosition_(vector::zero),
@@ -58,11 +58,11 @@ Foam::molecule::molecule
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> R_;
+            is >> Q_;
             is >> v_;
             is >> a_;
-            is >> omega_;
-            is >> alpha_;
+            is >> pi_;
+            is >> tau_;
             is >> siteForces_;
             is >> sitePositions_;
             is >> specialPosition_;
@@ -75,12 +75,12 @@ Foam::molecule::molecule
         {
             is.read
             (
-                reinterpret_cast<char*>(&R_),
-                sizeof(R_)
+                reinterpret_cast<char*>(&Q_),
+                sizeof(Q_)
                 + sizeof(v_)
                 + sizeof(a_)
-                + sizeof(omega_)
-                + sizeof(alpha_)
+                + sizeof(pi_)
+                + sizeof(tau_)
                 + sizeof(siteForces_)
                 + sizeof(sitePositions_)
                 + sizeof(specialPosition_)
@@ -107,8 +107,8 @@ void Foam::molecule::readFields(moleculeCloud& mC)
         return;
     }
 
-    IOField<tensor> R(mC.fieldIOobject("R", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, R);
+    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, Q);
 
     IOField<vector> v(mC.fieldIOobject("v", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, v);
@@ -116,11 +116,11 @@ void Foam::molecule::readFields(moleculeCloud& mC)
     IOField<vector> a(mC.fieldIOobject("a", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, a);
 
-    IOField<vector> omega(mC.fieldIOobject("omega", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, omega);
+    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, pi);
 
-    IOField<vector> alpha(mC.fieldIOobject("alpha", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, alpha);
+    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, tau);
 
     IOField<vector> specialPosition
     (
@@ -139,11 +139,11 @@ void Foam::molecule::readFields(moleculeCloud& mC)
     {
         molecule& mol = iter();
 
-        mol.R_ = R[i];
+        mol.Q_ = Q[i];
         mol.v_ = v[i];
         mol.a_ = a[i];
-        mol.omega_ = omega[i];
-        mol.alpha_ = alpha[i];
+        mol.pi_ = pi[i];
+        mol.tau_ = tau[i];
         mol.specialPosition_ = specialPosition[i];
         mol.special_ = special[i];
         mol.id_ = id[i];
@@ -158,11 +158,11 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
 
     label np = mC.size();
 
-    IOField<tensor> R(mC.fieldIOobject("R", IOobject::NO_READ), np);
+    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::NO_READ), np);
     IOField<vector> v(mC.fieldIOobject("v", IOobject::NO_READ), np);
     IOField<vector> a(mC.fieldIOobject("a", IOobject::NO_READ), np);
-    IOField<vector> omega(mC.fieldIOobject("omega", IOobject::NO_READ), np);
-    IOField<vector> alpha(mC.fieldIOobject("alpha", IOobject::NO_READ), np);
+    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::NO_READ), np);
+    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::NO_READ), np);
     IOField<vector> specialPosition
     (
         mC.fieldIOobject("specialPosition", IOobject::NO_READ),
@@ -176,22 +176,22 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
     {
         const molecule& mol = iter();
 
-        R[i] = mol.R_;
+        Q[i] = mol.Q_;
         v[i] = mol.v_;
         a[i] = mol.a_;
-        omega[i] = mol.omega_;
-        alpha[i] = mol.alpha_;
+        pi[i] = mol.pi_;
+        tau[i] = mol.tau_;
         specialPosition[i] = mol.specialPosition_;
         special[i] = mol.special_;
         id[i] = mol.id_;
         i++;
     }
 
-    R.write();
+    Q.write();
     v.write();
     a.write();
-    omega.write();
-    alpha.write();
+    pi.write();
+    tau.write();
     specialPosition.write();
     special.write();
     id.write();
@@ -207,11 +207,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
         os  << token::SPACE << static_cast<const Particle<molecule>&>(mol)
             << token::SPACE << mol.face()
             << token::SPACE << mol.stepFraction()
-            << token::SPACE << mol.R_
+            << token::SPACE << mol.Q_
             << token::SPACE << mol.v_
             << token::SPACE << mol.a_
-            << token::SPACE << mol.omega_
-            << token::SPACE << mol.alpha_
+            << token::SPACE << mol.pi_
+            << token::SPACE << mol.tau_
             << token::SPACE << mol.siteForces_
             << token::SPACE << mol.sitePositions_
             << token::SPACE << mol.specialPosition_
@@ -225,12 +225,12 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
         os  << static_cast<const Particle<molecule>&>(mol);
         os.write
         (
-            reinterpret_cast<const char*>(&mol.R_),
-            sizeof(mol.R_)
+            reinterpret_cast<const char*>(&mol.Q_),
+            sizeof(mol.Q_)
             + sizeof(mol.v_)
             + sizeof(mol.a_)
-            + sizeof(mol.omega_)
-            + sizeof(mol.alpha_)
+            + sizeof(mol.pi_)
+            + sizeof(mol.tau_)
             + sizeof(mol.siteForces_)
             + sizeof(mol.sitePositions_)
             + sizeof(mol.specialPosition_)

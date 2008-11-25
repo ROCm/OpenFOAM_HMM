@@ -177,15 +177,15 @@ private:
         //    -# Don't go scalar-label, scalar-label, because in 64bit mode,
         //       the labels will be padded by 4bytes.
 
-        tensor R_;
+        tensor Q_;
 
         vector v_;
 
         vector a_;
 
-        vector omega_;
+        vector pi_;
 
-        vector alpha_;
+        vector tau_;
 
         List<vector> siteForces_;
 
@@ -204,7 +204,11 @@ private:
 
     // Private Member Functions
 
-        tensor rotationTensor(scalar deltaT) const;
+        tensor rotationTensorX(scalar deltaT) const;
+
+        tensor rotationTensorY(scalar deltaT) const;
+
+        tensor rotationTensorZ(scalar deltaT) const;
 
 public:
 
@@ -218,11 +222,11 @@ public:
             const Cloud<molecule>& c,
             const vector& position,
             const label celli,
-            const tensor& R,
+            const tensor& Q,
             const vector& v,
             const vector& a,
-            const vector& omega,
-            const vector& alpha,
+            const vector& pi,
+            const vector& tau,
             const vector& specialPosition,
             const constantProperties& constProps,
             const label special,
@@ -257,8 +261,8 @@ public:
 
         // Access
 
-            inline const tensor& R() const;
-            inline tensor& R();
+            inline const tensor& Q() const;
+            inline tensor& Q();
 
             inline const vector& v() const;
             inline vector& v();
@@ -266,11 +270,11 @@ public:
             inline const vector& a() const;
             inline vector& a();
 
-            inline const vector& omega() const;
-            inline vector& omega();
+            inline const vector& pi() const;
+            inline vector& pi();
 
-            inline const vector& alpha() const;
-            inline vector& alpha();
+            inline const vector& tau() const;
+            inline vector& tau();
 
             inline const List<vector>& siteForces() const;
             inline List<vector>& siteForces();

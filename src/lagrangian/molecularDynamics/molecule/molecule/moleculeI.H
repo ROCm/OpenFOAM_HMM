@@ -66,11 +66,11 @@ inline Foam::molecule::molecule
     const Cloud<molecule>& c,
     const vector& position,
     const label celli,
-    const tensor& R,
+    const tensor& Q,
     const vector& v,
     const vector& a,
-    const vector& omega,
-    const vector& alpha,
+    const vector& pi,
+    const vector& tau,
     const vector& specialPosition,
     const constantProperties& constProps,
     const label special,
@@ -79,11 +79,11 @@ inline Foam::molecule::molecule
 )
 :
     Particle<molecule>(c, position, celli),
-    R_(R),
+    Q_(Q),
     v_(v),
     a_(a),
-    omega_(omega),
-    alpha_(alpha),
+    pi_(pi),
+    tau_(tau),
     siteForces_(constProps.nSites(), vector::zero),
     sitePositions_(constProps.nSites()),
     specialPosition_(specialPosition),
@@ -250,15 +250,15 @@ inline Foam::label Foam::molecule::trackData::part() const
 
 // * * * * * * * * * * * * molecule Member Functions * * * * * * * * * * * * //
 
-inline const Foam::tensor& Foam::molecule::R() const
+inline const Foam::tensor& Foam::molecule::Q() const
 {
-    return R_;
+    return Q_;
 }
 
 
-inline Foam::tensor& Foam::molecule::R()
+inline Foam::tensor& Foam::molecule::Q()
 {
-    return R_;
+    return Q_;
 }
 
 
@@ -286,27 +286,27 @@ inline Foam::vector& Foam::molecule::a()
 }
 
 
-inline const Foam::vector& Foam::molecule::omega() const
+inline const Foam::vector& Foam::molecule::pi() const
 {
-    return omega_;
+    return pi_;
 }
 
 
-inline Foam::vector& Foam::molecule::omega()
+inline Foam::vector& Foam::molecule::pi()
 {
-    return omega_;
+    return pi_;
 }
 
 
-inline const Foam::vector& Foam::molecule::alpha() const
+inline const Foam::vector& Foam::molecule::tau() const
 {
-    return alpha_;
+    return tau_;
 }
 
 
-inline Foam::vector& Foam::molecule::alpha()
+inline Foam::vector& Foam::molecule::tau()
 {
-    return alpha_;
+    return tau_;
 }
 
 

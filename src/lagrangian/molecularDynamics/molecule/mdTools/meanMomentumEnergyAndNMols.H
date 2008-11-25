@@ -48,8 +48,28 @@ scalar singleStepTotalPE = 0.0;
 
 scalar singleStepTotalrDotf = 0.0;
 
+vector singleStepCentreOfMass(vector::zero);
+
 {
     IDLList<molecule>::iterator mol(molecules.begin());
+
+    for
+    (
+        mol = molecules.begin();
+        mol != molecules.end();
+        ++mol
+    )
+    {
+        label molId = mol().id();
+
+        scalar molMass(molecules.constProps(molId).mass());
+
+        singleStepTotalMass += molMass;
+
+        singleStepCentreOfMass += mol().position()*molMass;
+    }
+
+    singleStepCentreOfMass /= singleStepTotalMass;
 
     for
     (
@@ -66,13 +86,19 @@ scalar singleStepTotalrDotf = 0.0;
 
         const vector& molV(mol().v());
 
-        const vector& molOmega(mol().omega());
+        const vector& molOmega(inv(molMoI) & mol().pi());
+
+        // Info<< mol().pi()
+        //     << nl << molOmega
+        //     << nl << (molOmega & mol().pi())/(mag(molOmega) * mag(mol().pi()))
+        //     << endl;
+
+        vector molPiGlobal = mol().Q() & mol().pi();
 
         singleStepTotalLinearMomentum += molV * molMass;
 
-        singleStepTotalAngularMomentum += (molMoI & molOmega);
-
-        singleStepTotalMass += molMass;
+        singleStepTotalAngularMomentum += molPiGlobal
+        +((mol().position() - singleStepCentreOfMass) ^ (molV * molMass));
 
         if(mag(molV) > singleStepMaxVelocityMag)
         {
@@ -123,7 +149,8 @@ if (singleStepNMols)
         << "Average linear momentum per mol = "
         << singleStepTotalLinearMomentum/singleStepNMols << nl
         << "Average angular momentum per mol = "
-        << singleStepTotalAngularMomentum/singleStepNMols << nl
+        << singleStepTotalAngularMomentum << ' '
+        << mag(singleStepTotalAngularMomentum)/singleStepNMols << nl
         << "Maximum |velocity| = "
         << singleStepMaxVelocityMag << nl
         << "Average linear KE per mol = "
