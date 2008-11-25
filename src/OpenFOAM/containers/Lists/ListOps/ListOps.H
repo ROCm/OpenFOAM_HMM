@@ -82,6 +82,13 @@ void inplaceMapKey(const UList<label>& oldToNew, Container&);
 template<class T>
 void sortedOrder(const UList<T>&, labelList& order);
 
+//- Generate (sorted) indices corresponding to duplicate list values
+template<class T>
+void duplicateOrder(const UList<T>&, labelList& order);
+
+//- Generate (sorted) indices corresponding to unique list values
+template<class T>
+void uniqueOrder(const UList<T>&, labelList& order);
 
 //- Extract elements of List whose region is certain value.
 //  Use e.g. to extract all selected elements:
