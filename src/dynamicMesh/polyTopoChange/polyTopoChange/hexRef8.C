@@ -2875,6 +2875,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     }
 
     // 2. Extend to 2:1. I don't understand yet why this is not done
+    // 2. Extend to 2:1. For non-cube cells the scalar distance does not work
+    // so make sure it at least provides 2:1.
     PackedList<1> refineCell(mesh_.nCells(), 0);
     forAll(allCellInfo, cellI)
     {
@@ -2886,6 +2888,25 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         }
     }
     faceConsistentRefinement(true, refineCell);
+
+    while (true)
+    {
+        label nChanged = faceConsistentRefinement(true, refineCell);
+
+        reduce(nChanged, sumOp<label>());
+
+        if (debug)
+        {
+            Pout<< "hexRef8::consistentSlowRefinement2 : Changed " << nChanged
+                << " refinement levels due to 2:1 conflicts."
+                << endl;
+        }
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+    }
 
     // 3. Convert back to labelList.
     label nRefined = 0;

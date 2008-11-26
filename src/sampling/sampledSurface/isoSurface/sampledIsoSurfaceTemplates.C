@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sampledIsoSurface.H"
-#include "isoSurface.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
@@ -41,8 +40,7 @@ Foam::sampledIsoSurface::sampleField
 {
     // Recreate geometry if time has changed
     createGeometry();
-
-    return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
+    return tmp<Field<Type> >(new Field<Type>(vField, surface().meshCells()));
 }
 
 
@@ -53,36 +51,28 @@ Foam::sampledIsoSurface::interpolateField
     const interpolation<Type>& interpolator
 ) const
 {
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+
+    // Get fields to sample. Assume volPointInterpolation!
+    const GeometricField<Type, fvPatchField, volMesh>& volFld =
+        interpolator.psi();
+
+    tmp<GeometricField<Type, pointPatchField, pointMesh> > pointFld
+    (
+        volPointInterpolation::New(fvm).interpolate(volFld)
+    );
+
     // Recreate geometry if time has changed
     createGeometry();
 
-    // One value per point
-    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
-    Field<Type>& values = tvalues();
-
-    boolList pointDone(points().size(), false);
-
-    forAll(faces(), cutFaceI)
-    {
-        const face& f = faces()[cutFaceI];
-
-        forAll(f, faceVertI)
-        {
-            label pointI = f[faceVertI];
-
-            if (!pointDone[pointI])
-            {
-                values[pointI] = interpolator.interpolate
-                (
-                    points()[pointI],
-                    meshCells_[cutFaceI]
-                );
-                pointDone[pointI] = true;
-            }
-        }
-    }
-
-    return tvalues;
+    // Sample.
+    return surface().interpolate
+    (
+        *volFieldPtr_,
+        *pointFieldPtr_,
+        volFld,
+        pointFld()
+    );
 }
 
 

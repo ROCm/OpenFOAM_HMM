@@ -26,13 +26,19 @@ Class
     Foam::HashSet
 
 Description
-    A HashTable with word keys but without contents.
+    A HashTable with keys but without contents.
 
 Typedef
     Foam::wordHashSet
 
 Description
     A HashSet with (the default) word keys.
+
+Typedef
+    Foam::labelHashSet
+
+Description
+    A HashSet with label keys.
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,7 +54,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class HashSet Declaration
+                          Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Key=word, class Hash=string::hash>
@@ -59,9 +65,13 @@ class HashSet
 
 public:
 
+    typedef typename HashTable<empty, Key, Hash>::iterator iterator;
+    typedef typename HashTable<empty, Key, Hash>::const_iterator const_iterator;
+
+
     // Constructors
 
-        //- Construct given initial map size
+        //- Construct given initial size
         HashSet(label size = 100)
         :
             HashTable<empty, Key, Hash>(size)
@@ -74,13 +84,13 @@ public:
         {}
 
         //- Construct from UList of Key
-        HashSet(const UList<Key>& ul)
+        HashSet(const UList<Key>& lst)
         :
-            HashTable<empty, Key, Hash>(2*ul.size())
+            HashTable<empty, Key, Hash>(2*lst.size())
         {
-            forAll (ul, i)
+            forAll(lst, i)
             {
-                insert(ul[i]);
+                insert(lst[i]);
             }
         }
 
@@ -90,31 +100,98 @@ public:
             HashTable<empty, Key, Hash>(hs)
         {}
 
+        //- Construct by transferring the parameter contents
+        HashSet(const xfer<HashSet<Key, Hash> >& hs)
+        :
+            HashTable<empty, Key, Hash>(hs)
+        {}
+
+        //- Construct from table of contents of the HashTable
+        template<class T>
+        HashSet(const HashTable<T, Key, Hash>& ht);
 
     // Member Functions
 
         // Edit
 
-            //- Insert a new hashedEntry
-            bool insert(const Key& key)
-            {
-                return HashTable<empty, Key, Hash>::insert(key, empty());
-            }
+        //- Insert a new entry
+        bool insert(const Key& key)
+        {
+            return HashTable<empty, Key, Hash>::insert(key, empty());
+        }
+
+        //- Same as insert (cannot overwrite empty content)
+        bool set(const Key& key)
+        {
+            return HashTable<empty, Key, Hash>::insert(key, empty());
+        }
 
 
     // Member Operators
 
-        //- Equality. Two hashtables are equal if all contents of first are
-        //  also in second and vice versa. So does not depend on table size or
-        //  order!
+        //- Equality. Two hashtables are equal when their contents are equal.
+        //  Independent of table size or order.
         bool operator==(const HashSet<Key, Hash>&) const;
 
         //- The opposite of the equality operation.
         bool operator!=(const HashSet<Key, Hash>&) const;
+
+
+        //- Combine entries from HashSets
+        void operator|=(const HashSet<Key, Hash>&);
+
+        //- Only retain entries found in both HashSets
+        void operator&=(const HashSet<Key, Hash>&);
+
+        //- Only retain unique entries (xor)
+        void operator^=(const HashSet<Key, Hash>&);
+
+        //- Add entries listed in the given HashSet to this HashSet
+        inline void operator+=(const HashSet<Key, Hash>& rhs)
+        {
+            this->operator|=(rhs);
+        }
+
+        //- Remove entries listed in the given HashSet from this HashSet
+        void operator-=(const HashSet<Key, Hash>&);
+
 };
 
 
+// Global Operators
+
+//- Combine entries from HashSets
+template<class Key, class Hash>
+HashSet<Key,Hash> operator|
+(
+    const HashSet<Key,Hash>& hash1,
+    const HashSet<Key,Hash>& hash2
+);
+
+
+//- Create a HashSet that only contains entries found in both HashSets
+template<class Key, class Hash>
+HashSet<Key,Hash> operator&
+(
+    const HashSet<Key,Hash>& hash1,
+    const HashSet<Key,Hash>& hash2
+);
+
+
+//- Create a HashSet that only contains unique entries (xor)
+template<class Key, class Hash>
+HashSet<Key,Hash> operator^
+(
+    const HashSet<Key,Hash>& hash1,
+    const HashSet<Key,Hash>& hash2
+);
+
+
+//- A HashSet with word keys.
 typedef HashSet<> wordHashSet;
+
+//- A HashSet with label keys.
+typedef HashSet<label, Hash<label> > labelHashSet;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

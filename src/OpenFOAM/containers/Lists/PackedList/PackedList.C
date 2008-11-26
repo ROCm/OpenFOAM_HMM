@@ -26,16 +26,10 @@ License
 
 #include "PackedList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct with given size and value for all elements.
 template<int nBits>
-PackedList<nBits>::PackedList(const label size, const unsigned int val)
+Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
 :
     List<unsigned int>(intSize(size)),
     size_(size)
@@ -44,26 +38,23 @@ PackedList<nBits>::PackedList(const label size, const unsigned int val)
 }
 
 
-
-//- Copy constructor.
 template<int nBits>
-PackedList<nBits>::PackedList(const PackedList<nBits>& PList)
+Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 :
-    List<unsigned int>(PList),
-    size_(PList.size())
+    List<unsigned int>(lst),
+    size_(lst.size())
 {}
 
 
 template<int nBits>
-PackedList<nBits>::PackedList(const xfer<PackedList<nBits> >& lst)
+Foam::PackedList<nBits>::PackedList(const xfer<PackedList<nBits> >& lst)
 {
     transfer(lst());
 }
 
 
-//- Construct from labelList
 template<int nBits>
-PackedList<nBits>::PackedList(const labelList& lst)
+Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 :
     List<unsigned int>(intSize(lst.size()), 0),
     size_(lst.size())
@@ -76,7 +67,7 @@ PackedList<nBits>::PackedList(const labelList& lst)
 
 
 template<int nBits>
-autoPtr<PackedList<nBits> > PackedList<nBits>::clone() const
+Foam::autoPtr<Foam::PackedList<nBits> > Foam::PackedList<nBits>::clone() const
 {
     return autoPtr<PackedList<nBits> >(new PackedList<nBits>(*this));
 }
@@ -84,24 +75,24 @@ autoPtr<PackedList<nBits> > PackedList<nBits>::clone() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <int nBits>
-void PackedList<nBits>::setSize(const label size)
+template<int nBits>
+void Foam::PackedList<nBits>::setSize(const label size)
 {
     List<unsigned int>::setSize(intSize(size));
     size_ = size;
 }
 
 
-template <int nBits>
-void PackedList<nBits>::clear()
+template<int nBits>
+void Foam::PackedList<nBits>::clear()
 {
     List<unsigned int>::clear();
     size_ = 0;
 }
 
 
-template <int nBits>
-void PackedList<nBits>::transfer(PackedList<nBits>& lst)
+template<int nBits>
+void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
 {
     size_ = lst.size();
     List<unsigned int>::transfer(lst);
@@ -111,16 +102,16 @@ void PackedList<nBits>::transfer(PackedList<nBits>& lst)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 // Assignment.
-template <int nBits>
-void PackedList<nBits>::operator=(const PackedList<nBits>& pl)
+template<int nBits>
+void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {
-    setSize(pl.size());
-    List<unsigned int>::operator=(pl);
+    setSize(lst.size());
+    List<unsigned int>::operator=(lst);
 }
 
 
-template <int nBits>
-labelList PackedList<nBits>::operator()() const
+template<int nBits>
+Foam::labelList Foam::PackedList<nBits>::operator()() const
 {
     labelList elems(size());
 
@@ -134,17 +125,14 @@ labelList PackedList<nBits>::operator()() const
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
-//template <int nBits>
-//Ostream& ::Foam::operator<<(Ostream& os, const PackedList<nBits>& PL)
+//template<int nBits>
+//Foam::Ostream& ::Foam::operator<<(Ostream& os, const PackedList<nBits>& lst)
 //{
-//    os << PL();
+//    os << lst();
 //    return os;
 //}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 
 // ************************************************************************* //

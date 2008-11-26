@@ -1,6 +1,6 @@
     surfaceScalarField muf =
         twoPhaseProperties->muf()
-      + fvc::interpolate(rho*turbulence->nuSgs());
+      + fvc::interpolate(rho*turbulence->nut());
 
     fvVectorMatrix UEqn
     (
@@ -23,7 +23,7 @@
             fvc::reconstruct
             (
                 (
-                    fvc::interpolate(interface.sigmaK())*fvc::snGrad(gamma)
+                    fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
                   - ghf*fvc::snGrad(rho)
                   - fvc::snGrad(pd)
                 ) * mesh.magSf()

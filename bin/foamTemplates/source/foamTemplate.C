@@ -31,7 +31,7 @@ License
 const dataType Foam::className::staticData();
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,10 +71,16 @@ Foam::className::~className()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 void Foam::className::operator=(const className& rhs)
 {
@@ -87,11 +93,10 @@ void Foam::className::operator=(const className& rhs)
     }
 }
 
+// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

@@ -26,27 +26,26 @@ Application
     sonicFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar flow of a 
-    compressible gas. 
+    Transient solver for trans-sonic/supersonic, laminar or turbulent flow
+    of a compressible gas.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "basicThermo.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -54,35 +53,25 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
         fvVectorMatrix UEqn
         (
             fvm::ddt(rho, U)
           + fvm::div(phi, U)
-          - fvm::laplacian(mu, U)
+          + turbulence->divDevRhoReff(U)
         );
 
         solve(UEqn == -fvc::grad(p));
 
-        solve
-        (
-            fvm::ddt(rho, e)
-          + fvm::div(phi, e)
-          - fvm::laplacian(mu, e)
-         ==
-          - p*fvc::div(phi/fvc::interpolate(rho))
-          + mu*magSqr(symm(fvc::grad(U)))
-        );
-
-        T = e/Cv;
-        psi = 1.0/(R*T);
+        #include "hEqn.H"
 
 
         // --- PISO loop
+
         for (int corr=0; corr<nCorr; corr++)
         {
             volScalarField rUA = 1.0/UEqn.A();
@@ -91,11 +80,11 @@ int main(int argc, char *argv[])
             surfaceScalarField phid
             (
                 "phid",
-                fvc::interpolate(psi)
+                fvc::interpolate(thermo->psi())
                *(
                    (fvc::interpolate(U) & mesh.Sf())
                  + fvc::ddtPhiCorr(rUA, rho, U, phi)
-                )
+               )
             );
 
             for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -109,14 +98,22 @@ int main(int argc, char *argv[])
 
                 pEqn.solve();
 
-                phi = pEqn.flux();
+                if (nonOrth == nNonOrthCorr)
+                {
+                    phi = pEqn.flux();
+                }
             }
 
-#           include "compressibleContinuityErrs.H"
+             #include "compressibleContinuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();
         }
+
+        DpDt =
+            fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+
+        turbulence->correct();
 
         rho = psi*p;
 

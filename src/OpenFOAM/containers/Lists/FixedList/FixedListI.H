@@ -33,6 +33,7 @@ template<class T, Foam::label Size>
 inline Foam::FixedList<T, Size>::FixedList()
 {}
 
+
 template<class T, Foam::label Size>
 inline Foam::FixedList<T, Size>::FixedList(const T v[Size])
 {
@@ -41,6 +42,7 @@ inline Foam::FixedList<T, Size>::FixedList(const T v[Size])
         v_[i] = v[i];
     }
 }
+
 
 template<class T, Foam::label Size>
 inline Foam::FixedList<T, Size>::FixedList(const T& t)
@@ -51,27 +53,29 @@ inline Foam::FixedList<T, Size>::FixedList(const T& t)
     }
 }
 
+
 template<class T, Foam::label Size>
-inline Foam::FixedList<T, Size>::FixedList(const UList<T>& ul)
+inline Foam::FixedList<T, Size>::FixedList(const UList<T>& lst)
 {
-    checkSize(ul.size());
+    checkSize(lst.size());
 
     for (register label i=0; i<Size; i++)
     {
-        v_[i] = ul[i];
+        v_[i] = lst[i];
     }
 }
 
+
 template<class T, Foam::label Size>
-inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& sll)
+inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
 {
-    checkSize(sll.size());
+    checkSize(lst.size());
 
     register label i = 0;
     for
     (
-        typename SLList<T>::const_iterator iter = sll.begin();
-        iter != sll.end();
+        typename SLList<T>::const_iterator iter = lst.begin();
+        iter != lst.end();
         ++iter
     )
     {
@@ -79,14 +83,16 @@ inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& sll)
     }
 }
 
+
 template<class T, Foam::label Size>
-inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& fl)
+inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
 {
     for (register label i=0; i<Size; i++)
     {
-        v_[i] = fl[i];
+        v_[i] = lst[i];
     }
 }
+
 
 template<class T, Foam::label Size>
 inline Foam::autoPtr<Foam::FixedList<T, Size> >
@@ -101,14 +107,14 @@ Foam::FixedList<T, Size>::clone() const
 template<class T, Foam::label Size>
 inline Foam::label Foam::FixedList<T, Size>::fcIndex(const label i) const
 {
-    return (i == Size-1 ? 0 : i+1); 
+    return (i == Size-1 ? 0 : i+1);
 }
 
 
 template<class T, Foam::label Size>
 inline Foam::label Foam::FixedList<T, Size>::rcIndex(const label i) const
 {
-    return (i == 0 ? Size-1 : i-1); 
+    return (i == 0 ? Size-1 : i-1);
 }
 
 
@@ -165,6 +171,14 @@ inline void Foam::FixedList<T, Size>::setSize(const label s)
 #   endif
 }
 
+template<class T, Foam::label Size>
+inline void Foam::FixedList<T, Size>::transfer(const FixedList<T, Size>& lst)
+{
+    for (register label i=0; i<Size; i++)
+    {
+        v_[i] = lst[i];
+    }
+}
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
@@ -191,35 +205,35 @@ inline const T& Foam::FixedList<T, Size>::operator[](const label i) const
 
 
 template<class T, Foam::label Size>
-inline void Foam::FixedList<T, Size>::operator=(const T v[Size])
+inline void Foam::FixedList<T, Size>::operator=(const T lst[Size])
 {
     for (register label i=0; i<Size; i++)
     {
-        v_[i] = v[i];
+        v_[i] = lst[i];
     }
 }
 
 template<class T, Foam::label Size>
-inline void Foam::FixedList<T, Size>::operator=(const UList<T>& ul)
+inline void Foam::FixedList<T, Size>::operator=(const UList<T>& lst)
 {
-    checkSize(ul.size());
+    checkSize(lst.size());
 
     for (register label i=0; i<Size; i++)
     {
-        v_[i] = ul[i];
+        v_[i] = lst[i];
     }
 }
 
 template<class T, Foam::label Size>
-inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& sll)
+inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& lst)
 {
-    checkSize(sll.size());
+    checkSize(lst.size());
 
     register label i = 0;
     for
     (
-        typename SLList<T>::const_iterator iter = sll.begin();
-        iter != sll.end();
+        typename SLList<T>::const_iterator iter = lst.begin();
+        iter != lst.end();
         ++iter
     )
     {
@@ -329,12 +343,12 @@ template<class HashT>
 inline Foam::FixedList<T, Size>::Hash<HashT>::Hash()
 {}
 
-//- Rotating Hash. From http://burtleburtle.net/bob/hash/doobs.html.
+//- Rotating Hash. From http://burtleburtle.net/bob/hash/doobs.html
 template<class T, Foam::label Size>
 template<class HashT>
 inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
-    const FixedList<T, Size>& fl
+    const FixedList<T, Size>& lst
 ) const
 {
     static const label farbit(8*sizeof(label)-4);
@@ -343,7 +357,7 @@ inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
 
     for (register int i=0; i<Size; i++)
     {
-        val = (val<<4)^(val>>farbit)^HashT()(fl[i]);
+        val = (val<<4)^(val>>farbit)^HashT()(lst[i]);
     }
 
     return val;
@@ -353,11 +367,11 @@ template<class T, Foam::label Size>
 template<class HashT>
 inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
-    const FixedList<T, Size>& fl,
+    const FixedList<T, Size>& lst,
     const label tableSize
 ) const
 {
-    return mag(operator()(fl)) % tableSize;
+    return mag(operator()(lst)) % tableSize;
 }
 #endif
 

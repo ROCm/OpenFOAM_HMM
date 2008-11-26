@@ -88,11 +88,11 @@ public:
         inline Hash();
 
         //- Rotating Hash. From http://burtleburtle.net/bob/hash/doobs.html.
-        label operator()(const FixedList<T, Size>& fl) const;
+        label operator()(const FixedList<T, Size>&) const;
 
         label operator()
         (
-            const FixedList<T, Size>& fl,
+            const FixedList<T, Size>&,
             const label tableSize
         ) const;
     };
@@ -160,6 +160,9 @@ public:
             //  needed to make FixedList consistent with List
             inline void setSize(const label);
 
+            //- Copy (not transfer) the argument contents
+            //  needed to make FixedList consistent with List
+            void transfer(const FixedList<T, Size>&);
 
         //- Write the FixedList as a dictionary entry
         void writeEntry(Ostream& os) const;

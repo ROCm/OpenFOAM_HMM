@@ -467,7 +467,7 @@ inline Cmpt det(const Tensor<Cmpt>& t)
 
 //- Return the cofactor tensor of a tensor
 template <class Cmpt>
-inline Tensor<Cmpt> cofactors(const Tensor<Cmpt>& t)
+inline Tensor<Cmpt> cof(const Tensor<Cmpt>& t)
 {
     return Tensor<Cmpt>
     (

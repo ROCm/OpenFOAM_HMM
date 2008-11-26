@@ -32,7 +32,7 @@ void solveEnthalpyEquation
     const volScalarField& rho,
     const volScalarField& DpDt,
     const surfaceScalarField& phi,
-    const compressible::RASModel& turb,
+    const compressible::turbulenceModel& turb,
     basicThermo& thermo
 )
 {

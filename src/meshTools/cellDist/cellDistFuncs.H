@@ -37,7 +37,7 @@ SourceFiles
 #define cellDistFuncs_H
 
 #include "scalarField.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "Map.H"
 #include "wordList.H"
 #include "scalarField.H"

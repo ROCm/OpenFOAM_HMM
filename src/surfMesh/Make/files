@@ -1,23 +1,33 @@
-keyedSurface/keyedSurface.C
-keyedSurface/keyedSurfaceCleanup.C
-keyedSurface/newKeyedSurface.C
+surfGroup/surfGroup.C
+surfGroup/surfGroupIOList.C
+surfPatchIdentifier/surfPatchIdentifier.C
 
-meshedSurface/meshedSurface.C
-meshedSurface/meshedSurfaceCleanup.C
-meshedSurface/newMeshedSurface.C
+MeshedSurface/MeshedSurfaces.C
+UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 
-fileFormats = keyedSurface/fileFormats
-$(fileFormats)/ac3d/AC3DfileFormat.C
-$(fileFormats)/gts/GTSfileFormat.C
-$(fileFormats)/nas/NASfileFormat.C
-$(fileFormats)/obj/OBJfileFormat.C
-$(fileFormats)/off/OFFfileFormat.C
-$(fileFormats)/smesh/SMESHfileFormat.C
-$(fileFormats)/starcd/STARCDfileFormat.C
-$(fileFormats)/stl/STLfileFormat.C
-$(fileFormats)/stl/STLfileFormatASCII.L
-$(fileFormats)/tri/TRIfileFormat.C
-$(fileFormats)/vtk/VTKfileFormat.C
+surfaceFormats = surfaceFormats
+$(surfaceFormats)/surfaceFormatsCore.C
+
+$(surfaceFormats)/ac3d/AC3DsurfaceFormatCore.C
+$(surfaceFormats)/ac3d/AC3DsurfaceFormatRunTime.C
+$(surfaceFormats)/ftr/FTRsurfaceFormatRunTime.C
+$(surfaceFormats)/gts/GTSsurfaceFormatRunTime.C
+$(surfaceFormats)/nas/NASsurfaceFormatCore.C
+$(surfaceFormats)/nas/NASsurfaceFormatRunTime.C
+$(surfaceFormats)/obj/OBJsurfaceFormatCore.C
+$(surfaceFormats)/obj/OBJsurfaceFormatRunTime.C
+$(surfaceFormats)/off/OFFsurfaceFormatCore.C
+$(surfaceFormats)/off/OFFsurfaceFormatRunTime.C
+$(surfaceFormats)/smesh/SMESHsurfaceFormatCore.C
+$(surfaceFormats)/smesh/SMESHsurfaceFormatRunTime.C
+$(surfaceFormats)/starcd/STARCDsurfaceFormatCore.C
+$(surfaceFormats)/starcd/STARCDsurfaceFormatRunTime.C
+$(surfaceFormats)/stl/STLsurfaceFormatCore.C
+$(surfaceFormats)/stl/STLsurfaceFormatRunTime.C
+$(surfaceFormats)/stl/STLsurfaceFormatASCII.L
+$(surfaceFormats)/tri/TRIsurfaceFormatRunTime.C
+$(surfaceFormats)/vtk/VTKsurfaceFormatCore.C
+$(surfaceFormats)/vtk/VTKsurfaceFormatRunTime.C
 
 LIB = $(FOAM_LIBBIN)/libsurfMesh
 

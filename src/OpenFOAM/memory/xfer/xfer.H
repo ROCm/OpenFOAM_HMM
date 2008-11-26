@@ -90,10 +90,10 @@ public:
         inline explicit xfer(T* = 0);
 
         //- Construct by copying or by transferring the parameter contents
-        inline xfer(T&, bool allowTransfer=false);
+        inline explicit xfer(T&, bool allowTransfer=false);
 
         //- Construct by copying the parameter contents
-        inline xfer(const T&);
+        inline explicit xfer(const T&);
 
         //- Construct by transferring the contents
         inline xfer(const xfer<T>&);

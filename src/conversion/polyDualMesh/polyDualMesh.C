@@ -1403,9 +1403,9 @@ Foam::polyDualMesh::polyDualMesh
     polyMesh
     (
         mesh,
-        pointField(0),
-        faceList(0),
-        cellList(0)
+        xferCopy(pointField()),   // to prevent any warnings "points not allocated"
+        xferCopy(faceList()),     // to prevent any warnings "faces  not allocated"
+        xferCopy(cellList())
     ),
     cellPoint_
     (
@@ -1448,9 +1448,9 @@ Foam::polyDualMesh::polyDualMesh
     polyMesh
     (
         mesh,
-        pointField(0),  // to prevent any warnings "points not allocated"
-        faceList(0),    //            ,,            faces ,,
-        cellList(0)
+        xferCopy(pointField()),   // to prevent any warnings "points not allocated"
+        xferCopy(faceList()),     // to prevent any warnings "faces  not allocated"
+        xferCopy(cellList())
     ),
     cellPoint_
     (
@@ -1482,7 +1482,6 @@ Foam::polyDualMesh::polyDualMesh
     labelList featureEdges, featurePoints;
 
     calcFeatures(mesh, featureCos, featureEdges, featurePoints);
-
     calcDual(mesh, featureEdges, featurePoints);
 }
 

@@ -2,11 +2,9 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmakeLnInclude -f incompressible
+wmakeLnInclude -f ../incompressible/LES
 
 wmake libso LESfilters
 wmake libso LESdeltas
-wmake libso incompressible
-wmake libso compressible
 
 # ----------------------------------------------------------------- end-of-file

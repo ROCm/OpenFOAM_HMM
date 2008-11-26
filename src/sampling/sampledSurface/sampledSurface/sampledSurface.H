@@ -161,10 +161,7 @@ public:
 
 
         //- Class used for the PtrLists read-construction
-        //  Has the ability to rewrite coordinate systems as required
         class iNew
-        :
-            public coordinateSystems
         {
             //- Reference to the volume mesh
             const polyMesh& mesh_;
@@ -173,17 +170,6 @@ public:
 
             iNew(const polyMesh& mesh)
             :
-                coordinateSystems(mesh),
-                mesh_(mesh)
-            {}
-
-            iNew
-            (
-                const polyMesh& mesh,
-                const coordinateSystems& cs
-            )
-            :
-                coordinateSystems(cs),
                 mesh_(mesh)
             {}
 
@@ -191,7 +177,6 @@ public:
             {
                 word name(is);
                 dictionary dict(is);
-                rewriteDict(dict, true);
 
                 return sampledSurface::New(name, mesh_, dict);
             }
@@ -204,16 +189,16 @@ public:
         sampledSurface
         (
             const word& name,
-            const polyMesh& mesh,
-            const bool triangulate = true
+            const polyMesh&,
+            const bool triangulate=true
         );
 
         //- Construct from dictionary
         sampledSurface
         (
             const word& name,
-            const polyMesh& mesh,
-            const dictionary& dict
+            const polyMesh&,
+            const dictionary&
         );
 
         //- Clone
@@ -229,9 +214,9 @@ public:
         //- Return a reference to the selected surface
         static autoPtr<sampledSurface> New
         (
-            const word& sampleType,
-            const polyMesh& mesh,
-            const dictionary& dict
+            const word& name,
+            const polyMesh&,
+            const dictionary&
         );
 
 

@@ -4,7 +4,7 @@ set -x
 
 wmakeLnInclude -f OpenFOAM
 wmakeLnInclude -f OSspecific/$WM_OS
-( cd Pstream && ./Allwmake )
+Pstream/Allwmake
 
 wmake libo  OSspecific/$WM_OS
 wmake libso OpenFOAM
@@ -17,7 +17,7 @@ wmake libso surfMesh
 wmake libso meshTools
 wmake libso finiteVolume
 
-( cd decompositionAgglomeration && ./Allwmake )
+decompositionAgglomeration/Allwmake
 
 wmake libso sampling
 
@@ -30,12 +30,12 @@ wmake libso engine
 wmake libso ODE
 wmake libso randomProcesses
 
-( cd thermophysicalModels && ./Allwmake )
-( cd transportModels && ./Allwmake )
-( cd turbulenceModels && ./Allwmake )
-( cd lagrangian && ./Allwmake )
-( cd postProcessing && ./Allwmake )
-( cd conversion && ./Allwmake )
+thermophysicalModels/Allwmake
+transportModels/Allwmake
+turbulenceModels/Allwmake
+lagrangian/Allwmake
+postProcessing/Allwmake
+conversion/Allwmake
 
 wmake libso autoMesh
 wmake libso errorEstimation

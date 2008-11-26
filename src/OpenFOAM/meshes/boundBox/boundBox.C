@@ -27,14 +27,9 @@ License
 #include "boundBox.H"
 #include "PstreamReduceOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-boundBox::boundBox(const pointField& points, const bool doReduce)
+Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
 :
     min_(vector::zero),
     max_(vector::zero)
@@ -46,15 +41,6 @@ boundBox::boundBox(const pointField& points, const bool doReduce)
             // Use values which get overwritten by reduce minOp,maxOp below
             min_ = point(VGREAT, VGREAT, VGREAT);
             max_ = point(-VGREAT, -VGREAT, -VGREAT);
-        }
-        else
-        {
-            WarningIn("boundBox::boundBox(const pointField& points)")
-                << "Cannot find bounding box for zero sized pointField, "
-                   "returning zero"
-                << endl;
-
-            return;
         }
     }
     else
@@ -78,7 +64,7 @@ boundBox::boundBox(const pointField& points, const bool doReduce)
 }
 
 
-boundBox::boundBox(Istream& is)
+Foam::boundBox::boundBox(Istream& is)
 {
     operator>>(is, *this);
 }
@@ -86,7 +72,7 @@ boundBox::boundBox(Istream& is)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const boundBox& bb)
+Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
 {
     if (os.format() == IOstream::ASCII)
     {
@@ -108,7 +94,7 @@ Ostream& operator<<(Ostream& os, const boundBox& bb)
 }
 
 
-Istream& operator>>(Istream& is, boundBox& bb)
+Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
 {
     if (is.format() == IOstream::ASCII)
     {
@@ -128,10 +114,5 @@ Istream& operator>>(Istream& is, boundBox& bb)
 
     return is;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

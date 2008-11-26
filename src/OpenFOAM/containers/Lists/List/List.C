@@ -206,7 +206,7 @@ Foam::List<T>::List(InputIterator first, InputIterator last)
 // Construct as copy of FixedList<T, Size>
 template<class T>
 template<Foam::label Size>
-Foam::List<T>::List(const FixedList<T, Size>& fl)
+Foam::List<T>::List(const FixedList<T, Size>& lst)
 :
     UList<T>(NULL, Size)
 {
@@ -216,7 +216,7 @@ Foam::List<T>::List(const FixedList<T, Size>& fl)
 
         forAll(*this, i)
         {
-            this->operator[](i) = fl[i];
+            this->operator[](i) = lst[i];
         }
     }
     else
@@ -228,9 +228,9 @@ Foam::List<T>::List(const FixedList<T, Size>& fl)
 
 // Construct as copy of PtrList<T>
 template<class T>
-Foam::List<T>::List(const PtrList<T>& sptrl)
+Foam::List<T>::List(const PtrList<T>& lst)
 :
-    UList<T>(NULL, sptrl.size())
+    UList<T>(NULL, lst.size())
 {
     if (this->size_)
     {
@@ -238,7 +238,7 @@ Foam::List<T>::List(const PtrList<T>& sptrl)
 
         forAll(*this, i)
         {
-            this->operator[](i) = sptrl[i];
+            this->operator[](i) = lst[i];
         }
     }
     else
@@ -250,9 +250,9 @@ Foam::List<T>::List(const PtrList<T>& sptrl)
 
 // Construct as copy of SLList<T>
 template<class T>
-Foam::List<T>::List(const SLList<T>& sll)
+Foam::List<T>::List(const SLList<T>& lst)
 :
-    UList<T>(NULL, sll.size())
+    UList<T>(NULL, lst.size())
 {
     if (this->size_)
     {
@@ -261,8 +261,8 @@ Foam::List<T>::List(const SLList<T>& sll)
         label i = 0;
         for
         (
-            typename SLList<T>::const_iterator iter = sll.begin();
-            iter != sll.end();
+            typename SLList<T>::const_iterator iter = lst.begin();
+            iter != lst.end();
             ++iter
         )
         {
@@ -278,9 +278,9 @@ Foam::List<T>::List(const SLList<T>& sll)
 
 // Construct as copy of IndirectList<T>
 template<class T>
-Foam::List<T>::List(const IndirectList<T>& idl)
+Foam::List<T>::List(const IndirectList<T>& lst)
 :
-    UList<T>(NULL, idl.size())
+    UList<T>(NULL, lst.size())
 {
     if (this->size_)
     {
@@ -288,7 +288,7 @@ Foam::List<T>::List(const IndirectList<T>& idl)
 
         forAll(*this, i)
         {
-            this->operator[](i) = idl[i];
+            this->operator[](i) = lst[i];
         }
     }
     else
@@ -300,9 +300,9 @@ Foam::List<T>::List(const IndirectList<T>& idl)
 
 // Construct as copy of BiIndirectList<T>
 template<class T>
-Foam::List<T>::List(const BiIndirectList<T>& idl)
+Foam::List<T>::List(const BiIndirectList<T>& lst)
 :
-    UList<T>(NULL, idl.size())
+    UList<T>(NULL, lst.size())
 {
     if (this->size_)
     {
@@ -310,7 +310,7 @@ Foam::List<T>::List(const BiIndirectList<T>& idl)
 
         forAll(*this, i)
         {
-            this->operator[](i) = idl[i];
+            this->operator[](i) = lst[i];
         }
     }
     else
@@ -522,13 +522,13 @@ void Foam::List<T>::operator=(const List<T>& a)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void Foam::List<T>::operator=(const SLList<T>& sll)
+void Foam::List<T>::operator=(const SLList<T>& lst)
 {
-    if (sll.size() != this->size_)
+    if (lst.size() != this->size_)
     {
         if (this->v_) delete[] this->v_;
         this->v_ = 0;
-        this->size_ = sll.size();
+        this->size_ = lst.size();
         if (this->size_) this->v_ = new T[this->size_];
     }
 
@@ -537,8 +537,8 @@ void Foam::List<T>::operator=(const SLList<T>& sll)
         label i = 0;
         for
         (
-            typename SLList<T>::const_iterator iter = sll.begin();
-            iter != sll.end();
+            typename SLList<T>::const_iterator iter = lst.begin();
+            iter != lst.end();
             ++iter
         )
         {
@@ -550,13 +550,13 @@ void Foam::List<T>::operator=(const SLList<T>& sll)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void Foam::List<T>::operator=(const IndirectList<T>& idl)
+void Foam::List<T>::operator=(const IndirectList<T>& lst)
 {
-    if (idl.size() != this->size_)
+    if (lst.size() != this->size_)
     {
         if (this->v_) delete[] this->v_;
         this->v_ = 0;
-        this->size_ = idl.size();
+        this->size_ = lst.size();
         if (this->size_) this->v_ = new T[this->size_];
     }
 
@@ -564,7 +564,7 @@ void Foam::List<T>::operator=(const IndirectList<T>& idl)
     {
         forAll(*this, i)
         {
-            this->operator[](i) = idl[i];
+            this->operator[](i) = lst[i];
         }
     }
 }
@@ -572,13 +572,13 @@ void Foam::List<T>::operator=(const IndirectList<T>& idl)
 
 // Assignment operator. Takes linear time.
 template<class T>
-void Foam::List<T>::operator=(const BiIndirectList<T>& idl)
+void Foam::List<T>::operator=(const BiIndirectList<T>& lst)
 {
-    if (idl.size() != this->size_)
+    if (lst.size() != this->size_)
     {
         if (this->v_) delete[] this->v_;
         this->v_ = 0;
-        this->size_ = idl.size();
+        this->size_ = lst.size();
         if (this->size_) this->v_ = new T[this->size_];
     }
 
@@ -586,7 +586,7 @@ void Foam::List<T>::operator=(const BiIndirectList<T>& idl)
     {
         forAll(*this, i)
         {
-            this->operator[](i) = idl[i];
+            this->operator[](i) = lst[i];
         }
     }
 }

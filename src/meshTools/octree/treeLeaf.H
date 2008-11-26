@@ -42,7 +42,7 @@ SourceFiles
 #include "treeElem.H"
 #include "boolList.H"
 #include "linePointRef.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -30,7 +30,7 @@ template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
     const UList<T>& completeList,
-    const List<label>& addr
+    const UList<label>& addr
 )
 :
     completeList_(const_cast<UList<T>&>(completeList)),
@@ -64,7 +64,7 @@ inline const Foam::List<Foam::label>& Foam::IndirectList<T>::addressing() const
 template<class T>
 inline void Foam::IndirectList<T>::resetAddressing
 (
-    const List<label>& addr
+    const UList<label>& addr
 )
 {
     addressing_ = addr;

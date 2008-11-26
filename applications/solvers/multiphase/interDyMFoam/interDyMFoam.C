@@ -39,7 +39,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/RASModel/RASModel.H"
+#include "turbulenceModel.H"
 #include "probes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,8 +58,7 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
@@ -106,7 +105,7 @@ int main(int argc, char *argv[])
 
         twoPhaseProperties.correct();
 
-        #include "gammaEqnSubCycle.H"
+        #include "alphaEqnSubCycle.H"
 
         #include "UEqn.H"
 

@@ -74,7 +74,7 @@ class EulerCoordinateRotation
             const scalar phiAngle,
             const scalar thetaAngle,
             const scalar psiAngle,
-            const bool inDegrees = true
+            const bool inDegrees=true
         );
 
 
@@ -93,7 +93,7 @@ public:
         EulerCoordinateRotation
         (
             const vector& phiThetaPsi,
-            const bool inDegrees = true
+            const bool inDegrees=true
         );
 
         //- Construct from components of rotation vector
@@ -102,7 +102,7 @@ public:
             const scalar phiAngle,
             const scalar thetaAngle,
             const scalar psiAngle,
-            const bool inDegrees = true
+            const bool inDegrees=true
         );
 
         //- Construct from dictionary
