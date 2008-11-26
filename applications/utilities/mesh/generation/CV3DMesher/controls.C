@@ -45,6 +45,7 @@ Foam::CV3D::controls::controls(const IOdictionary& controlDict)
         readScalar(controlDict.lookup("nearWallAlignedDist"))*minCellSize
     ),
     nearWallAlignedDist2(Foam::sqr(nearWallAlignedDist)),
+    globalAlignmentDirections(controlDict.lookup("globalAlignmentDirections")),
     relaxOrientation(controlDict.lookup("relaxOrientation")),
     insertSurfaceNearestPointPairs
     (
@@ -62,7 +63,17 @@ Foam::CV3D::controls::controls(const IOdictionary& controlDict)
     writeFinalTriangulation(controlDict.lookup("writeFinalTriangulation")),
     randomiseInitialGrid(controlDict.lookup("randomiseInitialGrid")),
     randomPerturbation(readScalar(controlDict.lookup("randomPerturbation")))
-{}
+{
+    if(globalAlignmentDirections.size() < 3)
+    {
+        FatalErrorIn("Foam::CV3D::controls::controls")
+            << "Too many alignment directions specified - 3 at maximum."
+            << exit(FatalError);
+
+    }
+
+    globalAlignmentDirections /= mag(globalAlignmentDirections);
+}
 
 
 // ************************************************************************* //

@@ -35,6 +35,8 @@ Description
 #define indexedVertex_H
 
 #include <CGAL/Triangulation_3.h>
+#include "List.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +65,8 @@ class indexedVertex
         //                        Lowest numbered is inside one (master).
         int type_;
 
+        Foam::List<Foam::vector> alignmentDirections_;
+
 
 public:
 
@@ -89,28 +93,32 @@ public:
     :
         Vb(),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        alignmentDirections_(0)
     {}
 
     indexedVertex(const Point& p)
     :
         Vb(p),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        alignmentDirections_(0)
     {}
 
     indexedVertex(const Point& p, Cell_handle f)
     :
         Vb(f, p),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        alignmentDirections_(0)
     {}
 
     indexedVertex(Cell_handle f)
     :
         Vb(f),
         index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT)
+        type_(INTERNAL_POINT),
+        alignmentDirections_(0)
     {}
 
 
@@ -133,6 +141,16 @@ public:
     int type() const
     {
         return type_;
+    }
+
+    Foam::List<Foam::vector>& alignmentDirections()
+    {
+        return alignmentDirections_;
+    }
+
+    const Foam::List<Foam::vector>& alignmentDirections() const
+    {
+        return alignmentDirections_;
     }
 
     inline bool uninitialised() const

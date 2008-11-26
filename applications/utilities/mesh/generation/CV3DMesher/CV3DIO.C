@@ -166,6 +166,7 @@ void Foam::CV3D::writeMesh(bool writeToTimestep)
         patchStarts
     );
 
+    writeDual(points, faces, "dualMesh.obj");
 
     IOobject io
     (
@@ -198,11 +199,19 @@ void Foam::CV3D::writeMesh(bool writeToTimestep)
     polyMesh pMesh
     (
         io,
-        points,
-        faces,
-        owner,
-        neighbour
+        xferMove(points),
+        xferMove(faces),
+        xferMove(owner),
+        xferMove(neighbour)
     );
+    // polyMesh pMesh
+    // (
+    //     io,
+    //     points,
+    //     faces,
+    //     owner,
+    //     neighbour
+    // );
 
     List<polyPatch*> patches(patchStarts.size());
 
@@ -227,7 +236,7 @@ void Foam::CV3D::writeMesh(bool writeToTimestep)
             << exit(FatalError);
     }
 
-    writeDual(points, faces, "dualMesh.obj");
+
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

@@ -113,6 +113,9 @@ public:
         //- Square of nearWallAlignedDist
         scalar nearWallAlignedDist2;
 
+        //- Alignment direction vectors
+        vectorField globalAlignmentDirections;
+
         //- Chose if the cell orientation should relax during the iterations
         //  or remain fixed to the x-y directions
         Switch relaxOrientation;
@@ -330,6 +333,10 @@ private:
             labelList& patchSizes,
             labelList& patchStarts
         );
+
+        void setVertexAlignmentDirections();
+
+        scalar alignmentDistanceWeight(scalar dist) const;
 
 
 public:
