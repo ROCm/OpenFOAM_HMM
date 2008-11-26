@@ -382,6 +382,39 @@ void Foam::isoSurface::generateTriPoints
                 }
             }
         }
+        else if (isA<emptyPolyPatch>(pp))
+        {
+            // Assume zero-gradient.
+            label faceI = pp.start();
+
+            forAll(pp, i)
+            {
+                if (faceCutType_[faceI] != NOTCUT)
+                {
+                    generateTriPoints
+                    (
+                        cVals,
+                        pVals,
+
+                        cCoords,
+                        pCoords,
+
+                        snappedPoints,
+                        snappedCc,
+                        snappedPoint,
+                        faceI,
+
+                        cVals[own[faceI]],
+                        cCoords.boundaryField()[patchI][i],
+                        -1, // fc not snapped
+
+                        triPoints,
+                        triMeshCells
+                    );
+                }
+                faceI++;
+            }
+        }
         else
         {
             label faceI = pp.start();
