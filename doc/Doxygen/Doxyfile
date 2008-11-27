@@ -487,12 +487,9 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT              = $(WM_PROJECT_DIR)/applications/solvers/combustion/PDRFoam
-
-#$(WM_PROJECT_DIR)/applications/solvers/combustion \
-#$(WM_PROJECT_DIR)/src/thermophysicalModels/laminarFlameSpeed
-#$(WM_PROJECT_DIR)/applications/utilities \
-#$(WM_PROJECT_DIR)/applications/solvers/combustion/PDRFoam
+INPUT              = $(WM_PROJECT_DIR)/src \
+                     $(WM_PROJECT_DIR)/applications/utilities \
+                     $(WM_PROJECT_DIR)/applications/solvers
 
 
 
