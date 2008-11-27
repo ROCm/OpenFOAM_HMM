@@ -187,7 +187,7 @@ case MPICH-GM:
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
 
-case MPICH-GM:
+case HPMPI:
     setenv MPI_HOME /opt/hpmpi
     setenv MPI_ARCH_PATH $MPI_HOME
     setenv MPICH_ROOT=$MPI_ARCH_PATH

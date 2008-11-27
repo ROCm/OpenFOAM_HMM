@@ -28,23 +28,31 @@ Class
 Description
     Laminar flame speed obtained from the SCOPE correlation.
 
-    Seven parameters are specified in terms of polynomial functions of stoichiometry. Two polynomials are fitted, covering different parts of the flammable range. If the mixture is outside the fitted range, linear interpolation is used between the extreme of the polynomio and the upper or lower flammable limit with the Markstein number constant.
+    Seven parameters are specified in terms of polynomial functions of
+    stoichiometry. Two polynomials are fitted, covering different parts of the
+    flammable range. If the mixture is outside the fitted range, linear
+    interpolation is used between the extreme of the polynomio and the upper or
+    lower flammable limit with the Markstein number constant.
 
-    Variations of pressure  and temperature from the reference values are taken into account through \f$ pexp \f$ and \f$ texp \f$
+    Variations of pressure and temperature from the reference values are taken
+    into account through \f$ pexp \f$ and \f$ texp \f$
 
-    The laminar burning velocity fitting polynomio is:
+    The laminar burning velocity fitting polynomial is:
 
-    \f$ Su = a_{0}(1+a_{1}x+K+..a_{i}x^{i}..+a_{6}x^{6}) (p/p_{ref})^{pexp} (T/T_{ref})^{texp} \f$
+    \f$ Su = a_{0}(1+a_{1}x+K+..a_{i}x^{i}..+a_{6}x^{6}) (p/p_{ref})^{pexp}
+    (T/T_{ref})^{texp} \f$
 
     where:
 
-          \f$ a_{i} \f$ are the polinomial coefficients.
+        \f$ a_{i} \f$ are the polinomial coefficients.
 
-          \f$ pexp \f$ and \f$ texp \f$ are the pressure and temperature factors respectively.
+        \f$ pexp \f$ and \f$ texp \f$ are the pressure and temperature factors
+        respectively.
 
-          \f$ x \f$ is the equivalence ratio.
+        \f$ x \f$ is the equivalence ratio.
 
-          \f$ T_{ref} \f$ and \f$ p_{ref} \f$ are the temperature and pressure references for the laminar burning  velocity.
+        \f$ T_{ref} \f$ and \f$ p_{ref} \f$ are the temperature and pressure
+        references for the laminar burning velocity.
 
 
 SourceFiles
