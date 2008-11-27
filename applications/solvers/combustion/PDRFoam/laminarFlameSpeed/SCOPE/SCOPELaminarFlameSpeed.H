@@ -28,6 +28,33 @@ Class
 Description
     Laminar flame speed obtained from the SCOPE correlation.
 
+    Seven parameters are specified in terms of polynomial functions of
+    stoichiometry. Two polynomials are fitted, covering different parts of the
+    flammable range. If the mixture is outside the fitted range, linear
+    interpolation is used between the extreme of the polynomio and the upper or
+    lower flammable limit with the Markstein number constant.
+
+    Variations of pressure and temperature from the reference values are taken
+    into account through \f$ pexp \f$ and \f$ texp \f$
+
+    The laminar burning velocity fitting polynomial is:
+
+    \f$ Su = a_{0}(1+a_{1}x+K+..a_{i}x^{i}..+a_{6}x^{6}) (p/p_{ref})^{pexp}
+    (T/T_{ref})^{texp} \f$
+
+    where:
+
+        \f$ a_{i} \f$ are the polinomial coefficients.
+
+        \f$ pexp \f$ and \f$ texp \f$ are the pressure and temperature factors
+        respectively.
+
+        \f$ x \f$ is the equivalence ratio.
+
+        \f$ T_{ref} \f$ and \f$ p_{ref} \f$ are the temperature and pressure
+        references for the laminar burning velocity.
+
+
 SourceFiles
     SCOPELaminarFlameSpeed.C
 
@@ -125,7 +152,7 @@ class SCOPE
         //  corrected for temperature and pressure dependence
         inline scalar Su0pTphi(scalar p, scalar Tu, scalar phi) const;
 
-        //- Laminar flame speed evaluated from the given uniform 
+        //- Laminar flame speed evaluated from the given uniform
         //  equivalence ratio corrected for temperature and pressure dependence
         tmp<volScalarField> Su0pTphi
         (
@@ -134,7 +161,7 @@ class SCOPE
             scalar phi
         ) const;
 
-        //- Laminar flame speed evaluated from the given equivalence ratio 
+        //- Laminar flame speed evaluated from the given equivalence ratio
         //  distribution corrected for temperature and pressure dependence
         tmp<volScalarField> Su0pTphi
         (
@@ -144,7 +171,7 @@ class SCOPE
         ) const;
 
         //- Return the Markstein number
-        //  evaluated from the given equivalence ratio 
+        //  evaluated from the given equivalence ratio
         tmp<volScalarField> Ma(const volScalarField& phi) const;
 
         //- Construct as copy (not implemented)

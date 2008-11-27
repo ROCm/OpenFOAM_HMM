@@ -25,9 +25,27 @@ License
 Class
     basicSubGrid
 
+
 Description
+
     Basic sub-grid obstacle flame-wrinking generation rate coefficient model.
     Details supplied by J Puttock 2/7/06.
+
+    \f$ G_{sub} \f$ denotes the generation coefficient and it is given by
+
+    \f[
+        G_{sub} = k_{1} /frac{\vert \dwea{\vec{U}} \vert}{L_{obs}}
+                 \frac{/Xi_{{sub}_{eq}}-1}{/Xi_{sub}}
+    \f]
+
+    and the removal:
+
+    \f[ - k_{1} /frac{\vert \dwea{\vec{U}} \vert}{L_{sub}}
+    \frac{\Xi_{sub}-1}{\Xi_{sub}} \f]
+
+    Finally, \f$ G_{sub} \f$ is added to generation rate \f$ G_{in} \f$
+    due to the turbulence.
+
 
 SourceFiles
     basicSubGrid.C
