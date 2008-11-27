@@ -498,8 +498,12 @@ Foam::isoSurface::interpolate
 
 
     // One value per point
-    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
+    tmp<Field<Type> > tvalues
+    (
+        new Field<Type>(points().size(), pTraits<Type>::zero)
+    );
     Field<Type>& values = tvalues();
+    labelList nValues(values.size(), 0);
 
     forAll(triPoints, i)
     {
@@ -507,8 +511,34 @@ Foam::isoSurface::interpolate
 
         if (mergedPointI >= 0)
         {
-            values[mergedPointI] = triPoints[i];
+            values[mergedPointI] += triPoints[i];
+            nValues[mergedPointI]++;
         }
+    }
+
+    if (debug)
+    {
+        Pout<< "nValues:" << values.size() << endl;
+        label nMult = 0;
+        forAll(nValues, i)
+        {
+            if (nValues[i] == 0)
+            {
+                FatalErrorIn("isoSurface::interpolate(..)")
+                    << "point:" << i << " nValues:" << nValues[i]
+                    << abort(FatalError);
+            }
+            else if (nValues[i] > 1)
+            {
+                nMult++;
+            }
+        }
+        Pout<< "Of which mult:" << nMult << endl;
+    }
+
+    forAll(values, i)
+    {
+        values[i] /= scalar(nValues[i]);
     }
 
     return tvalues;
