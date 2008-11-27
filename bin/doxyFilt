@@ -50,9 +50,9 @@ then
    */applications/solvers/*.C | */applications/utilities/*.C )
       awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-top.awk
       ;;
-   */applications/solvers/*.H | */applications/utilities/*.H )
-      awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-ignore.awk
-      ;;
+#   */applications/solvers/*.H | */applications/utilities/*.H )
+#      awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilt-ignore.awk
+#      ;;
    esac
 
    awk -f $awkScript $1 | \
