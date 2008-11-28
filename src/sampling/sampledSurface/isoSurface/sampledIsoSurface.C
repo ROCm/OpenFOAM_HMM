@@ -65,7 +65,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
         if (debug)
         {
             Info<< "sampledIsoSurface::getIsoField() : reading "
-                << isoField_ << " from time " <<fvm.time().timeName()
+                << isoField_ << " from time " << fvm.time().timeName()
                 << endl;
         }
 
@@ -124,10 +124,10 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
     if (debug)
     {
-        Info<< "sampledIsoSurface::getIsoField() : obtained volField "
+        Info<< "sampledIsoSurface::getIsoField() : volField "
             << volFieldPtr_->name() << " min:" << min(*volFieldPtr_).value()
             << " max:" << max(*volFieldPtr_).value() << endl;
-        Info<< "sampledIsoSurface::getIsoField() : obtained pointField "
+        Info<< "sampledIsoSurface::getIsoField() : pointField "
             << pointFieldPtr_->name()
             << " min:" << gMin(pointFieldPtr_->internalField())
             << " max:" << gMax(pointFieldPtr_->internalField()) << endl;

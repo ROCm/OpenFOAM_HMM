@@ -45,6 +45,27 @@ int main(int argc, char *argv[])
 
     Info<< testDict << endl;
 
+    {
+        dictionary someDict;
+        someDict.add(keyType("a.*", true), "subdictValue");
+
+        dictionary dict;
+        dict.add("someDict", someDict);
+        dict.add(keyType(".*", true), "parentValue");
+
+        Info<< "dict:" << dict << endl;
+
+        // Wildcard find.
+        Info<< "Wildcard find \"abc\" in top directory : "
+            << dict.lookup("abc") << endl;
+        Info<< "Wildcard find \"abc\" in sub directory : "
+            << dict.subDict("someDict").lookup("abc")
+            << endl;
+        Info<< "Recursive wildcard find \"def\" in sub directory : "
+            << dict.subDict("someDict").lookup("def", true)
+            << endl;
+    }
+
     return 0;
 }
 

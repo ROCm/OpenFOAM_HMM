@@ -60,7 +60,6 @@ SourceFiles
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
-#include "regularExpression.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +67,7 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-
+class regularExpression;
 class dictionary;
 Istream& operator>>(Istream&, dictionary&);
 Ostream& operator<<(Ostream&, const dictionary&);
