@@ -147,7 +147,8 @@ if (singleStepNMols)
         << "Overall mass density = "
         << singleStepTotalMass/meshVolume << nl
         << "Average linear momentum per mol = "
-        << singleStepTotalLinearMomentum/singleStepNMols << nl
+        << singleStepTotalLinearMomentum/singleStepNMols << ' '
+        << mag(singleStepTotalLinearMomentum)/singleStepNMols << nl
         << "Average angular momentum per mol = "
         << singleStepTotalAngularMomentum << ' '
         << mag(singleStepTotalAngularMomentum)/singleStepNMols << nl

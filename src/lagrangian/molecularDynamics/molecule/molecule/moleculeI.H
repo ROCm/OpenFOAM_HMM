@@ -28,7 +28,7 @@ License
 
 inline Foam::molecule::constantProperties::constantProperties()
 :
-    siteReferencePositions_(List<vector>(0)),
+    siteReferencePositions_(Field<vector>(0)),
     siteCharges_(List<scalar>(0)),
     siteIds_(List<label>(0)),
     pairPotentialSites_(List<bool>(false)),
@@ -48,8 +48,8 @@ inline Foam::molecule::constantProperties::constantProperties
     siteIds_(List<word>(dict.lookup("siteIds")).size(), -1),
     pairPotentialSites_(),
     electrostaticSites_(),
-    momentOfInertia_(dict.lookup("momentOfInertia")),
-    mass_(readScalar(dict.lookup("mass")))
+    momentOfInertia_(),
+    mass_()
 {
     checkSiteListSizes();
 
@@ -58,6 +58,97 @@ inline Foam::molecule::constantProperties::constantProperties
         List<word>(dict.lookup("siteIds")),
         List<word>(dict.lookup("pairPotentialSiteIds"))
     );
+
+    scalarList siteMasses(dict.lookup("siteMasses"));
+
+    mass_ = sum(siteMasses);
+
+    {
+        // Calculate the centre of mass of the body and subtract it from each
+        // position
+
+        vector centreOfMass(vector::zero);
+
+        forAll(siteReferencePositions_, i)
+        {
+            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+        }
+
+        centreOfMass /= mass_;
+
+        siteReferencePositions_ -= centreOfMass;
+
+        // Calculate the inertia tensor in the current orientation
+
+        tensor I(tensor::zero);
+
+        forAll(siteReferencePositions_, i)
+        {
+            const vector& p(siteReferencePositions_[i]);
+
+            I += siteMasses[i]*tensor
+            (
+                p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
+                -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
+                -p.z()*p.x(), -p.z()*p.y(), p.x()*p.x() + p.y()*p.y()
+            );
+        }
+
+        // Normalise the inertia tensor magnitude to avoid SMALL numbers in the
+        // components causing problems
+
+        I /= eigenValues(I).z();
+
+        tensor e = eigenVectors(I);
+
+        // Calculate the transformation between the principle axes to the global
+        // axes
+
+        tensor Q =
+        vector(1,0,0)*e.x() + vector(0,1,0)*e.y() + vector(0,0,1)*e.z();
+
+        // Transform the site positions
+
+        siteReferencePositions_ = (Q & siteReferencePositions_);
+    }
+
+    {
+        // Recalculating the moment of inertia with the new site positions
+
+        // The rotation was around the centre of mass but remove any components
+        // that have crept in due to floating point errors
+
+        vector centreOfMass(vector::zero);
+
+        forAll(siteReferencePositions_, i)
+        {
+            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+        }
+
+        centreOfMass /= mass_;
+
+        siteReferencePositions_ -= centreOfMass;
+
+        // Calculate the moment of inertia in the principle component reference
+        // frame
+
+        tensor I(tensor::zero);
+
+        forAll(siteReferencePositions_, i)
+        {
+            const vector& p(siteReferencePositions_[i]);
+
+            I += siteMasses[i]*tensor
+            (
+                p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
+                -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
+                -p.z()*p.x(), -p.z()*p.y(), p.x()*p.x() + p.y()*p.y()
+            );
+        }
+
+        momentOfInertia_ = diagTensor(I.xx(), I.yy(), I.zz());
+    }
+
 }
 
 
@@ -138,7 +229,7 @@ inline void Foam::molecule::constantProperties::setInteracionSiteBools
 
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
 
-inline const Foam::List<Foam::vector>&
+inline const Foam::Field<Foam::vector>&
 Foam::molecule::constantProperties::siteReferencePositions() const
 {
     return siteReferencePositions_;

@@ -80,7 +80,7 @@ public:
 
         // Private data
 
-            List<vector> siteReferencePositions_;
+            Field<vector> siteReferencePositions_;
 
             List<scalar> siteCharges_;
 
@@ -113,7 +113,7 @@ public:
 
         // Member functions
 
-        inline const List<vector>& siteReferencePositions() const;
+        inline const Field<vector>& siteReferencePositions() const;
 
         inline const List<scalar>& siteCharges() const;
 
