@@ -39,6 +39,7 @@ namespace compressible
 
 defineTypeNameAndDebug(RASModel, 0);
 defineRunTimeSelectionTable(RASModel, dictionary);
+addToRunTimeSelectionTable(turbulenceModel, RASModel, turbulenceModel);
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
