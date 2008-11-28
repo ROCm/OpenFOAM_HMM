@@ -27,6 +27,7 @@ License
 #include "dictionary.H"
 #include "primitiveEntry.H"
 #include "dictionaryEntry.H"
+#include "regularExpression.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 

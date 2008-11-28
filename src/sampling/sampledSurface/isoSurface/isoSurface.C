@@ -108,17 +108,15 @@ void Foam::isoSurface::calcCutTypes
         const polyPatch& pp = patches[patchI];
 
         label faceI = pp.start();
-        forAll(pp, i)
-        {
-            bool ownLower = (cVals[own[faceI]] < iso_);
-            bool neiLower = (cVals.boundaryField()[patchI][i] < iso_);
 
-            if (ownLower != neiLower)
+        if (isA<emptyPolyPatch>(pp))
+        {
+            // Assume zero gradient so owner and neighbour/boundary value equal
+
+            forAll(pp, i)
             {
-                faceCutType_[faceI] = CUT;
-            }
-            else
-            {
+                bool ownLower = (cVals[own[faceI]] < iso_);
+
                 // Mesh edge.
                 const face f = mesh_.faces()[faceI];
 
@@ -129,15 +127,48 @@ void Foam::isoSurface::calcCutTypes
                     (
                         (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
                      || (fpLower != ownLower)
-                     || (fpLower != neiLower)
                     )
                     {
                         faceCutType_[faceI] = CUT;
                         break;
                     }
                 }
+                faceI++;
             }
-            faceI++;
+        }
+        else
+        {
+            forAll(pp, i)
+            {
+                bool ownLower = (cVals[own[faceI]] < iso_);
+                bool neiLower = (cVals.boundaryField()[patchI][i] < iso_);
+
+                if (ownLower != neiLower)
+                {
+                    faceCutType_[faceI] = CUT;
+                }
+                else
+                {
+                    // Mesh edge.
+                    const face f = mesh_.faces()[faceI];
+
+                    forAll(f, fp)
+                    {
+                        bool fpLower = (pVals[f[fp]] < iso_);
+                        if
+                        (
+                            (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
+                         || (fpLower != ownLower)
+                         || (fpLower != neiLower)
+                        )
+                        {
+                            faceCutType_[faceI] = CUT;
+                            break;
+                        }
+                    }
+                }
+                faceI++;
+            }
         }
     }
 
@@ -328,8 +359,17 @@ void Foam::isoSurface::getNeighbour
         label patchI = boundaryRegion[bFaceI];
         label patchFaceI = faceI-mesh_.boundaryMesh()[patchI].start();
 
-        nbrValue = cVals.boundaryField()[patchI][patchFaceI];
-        nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
+        if (isA<emptyPolyPatch>(mesh_.boundaryMesh()[patchI]))
+        {
+            // Assume zero gradient
+            nbrValue = cVals[own[faceI]];
+            nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
+        }
+        else
+        {
+            nbrValue = cVals.boundaryField()[patchI][patchFaceI];
+            nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
+        }
     }
 }
 

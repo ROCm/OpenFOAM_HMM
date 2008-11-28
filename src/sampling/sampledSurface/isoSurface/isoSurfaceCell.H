@@ -91,6 +91,11 @@ class isoSurfaceCell
         //- When to merge points
         const scalar mergeDistance_;
 
+        //- Whether cell might be cut
+        List<cellCutType> cellCutType_;
+
+        //- Estimated number of cut cells
+        label nCutCells_;
 
         //- For every triangle the original cell in mesh
         labelList meshCells_;
@@ -119,6 +124,13 @@ class isoSurfaceCell
             const label
         ) const;
 
+        void calcCutTypes
+        (
+            const PackedList<1>&,
+            const scalarField& cellValues,
+            const scalarField& pointValues
+        );
+
         static labelPair findCommonPoints
         (
             const labelledTri&,
@@ -140,7 +152,6 @@ class isoSurfaceCell
             const PackedList<1>& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
-            const List<cellCutType>& cellCutType,
             DynamicList<point>& triPoints,
             labelList& snappedCc
         ) const;
@@ -173,39 +184,57 @@ class isoSurfaceCell
             const PackedList<1>& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
-            const List<cellCutType>& cellCutType,
             DynamicList<point>& triPoints,
             labelList& snappedPoint
         ) const;
 
         //- Generate single point by interpolation or snapping
-        point generatePoint
+        template<class Type>
+        Type generatePoint
         (
-            const DynamicList<point>& snappedPoints,
+            const DynamicList<Type>& snappedPoints,
             const scalar s0,
-            const point& p0,
+            const Type& p0,
             const label p0Index,
             const scalar s1,
-            const point& p1,
+            const Type& p1,
             const label p1Index
         ) const;
 
+        template<class Type>
         void generateTriPoints
         (
-            const DynamicList<point>& snapped,
+            const DynamicList<Type>& snapped,
             const scalar s0,
-            const point& p0,
+            const Type& p0,
             const label p0Index,
             const scalar s1,
-            const point& p1,
+            const Type& p1,
             const label p1Index,
             const scalar s2,
-            const point& p2,
+            const Type& p2,
             const label p2Index,
             const scalar s3,
-            const point& p3,
+            const Type& p3,
             const label p3Index,
-            DynamicList<point>& points
+            DynamicList<Type>& points
+        ) const;
+
+        template<class Type>
+        void generateTriPoints
+        (
+            const scalarField& cVals,
+            const scalarField& pVals,
+
+            const Field<Type>& cCoords,
+            const Field<Type>& pCoords,
+
+            const DynamicList<Type>& snappedPoints,
+            const labelList& snappedCc,
+            const labelList& snappedPoint,
+
+            DynamicList<Type>& triPoints,
+            DynamicList<label>& triMeshCells
         ) const;
 
         triSurface stitchTriPoints
@@ -311,12 +340,30 @@ public:
         {
             return triPointMergeMap_;
         }
+
+
+        //- Interpolates cCoords,pCoords. Takes the original fields
+        //  used to create the iso surface.
+        template <class Type>
+        tmp<Field<Type> > interpolate
+        (
+            const scalarField& cVals,
+            const scalarField& pVals,
+            const Field<Type>& cCoords,
+            const Field<Type>& pCoords
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "isoSurfaceCellTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
