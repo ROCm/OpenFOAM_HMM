@@ -432,9 +432,8 @@ void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
 {
     // shrink the allocated space to the number of elements used
     a.shrink();
-    a.allocSize_ = 0;
-
     transfer(static_cast<List<T>&>(a));
+    a.clearStorage();
 }
 
 

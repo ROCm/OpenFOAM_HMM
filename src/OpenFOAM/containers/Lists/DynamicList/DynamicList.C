@@ -28,12 +28,12 @@ License
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-// Construct from Istream
+
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList(Istream& is)
 :
     List<T>(is),
-    allocSize_(List<T>::size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -57,7 +57,7 @@ Foam::Istream& Foam::operator>>
 )
 {
     is >> static_cast<List<T>&>(lst);
-    lst.allocSize_ = lst.List<T>::size();
+    lst.capacity_ = lst.List<T>::size();
 
     return is;
 }

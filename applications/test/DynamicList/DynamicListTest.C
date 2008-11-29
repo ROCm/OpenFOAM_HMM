@@ -126,15 +126,24 @@ int main(int argc, char *argv[])
         << " " << dlB.size() << "/" << dlB.capacity() << endl;
 
 
-//    dlB.append(dlB);
-//    Info<< "appended to itself:" << endl;
-//    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
-//        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+    // Copy back and append a few time
+    for (label i=0; i < 3; i++)
+    {
+        dlB.append(lstA);
+    }
 
-//    dlB = dlB;
-//    Info<< "self assignment:" << endl;
-//    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
-//        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+
+    // check allocation granularity
+    DynamicList<label, 6, 0> dlC;
+
+    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
+        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+
+    dlC.reserve(dlB.size());
+    dlC = dlB;
+
+    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
+        << " " << dlC.size() << "/" << dlC.capacity() << endl;
 
     return 0;
 }

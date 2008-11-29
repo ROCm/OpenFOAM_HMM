@@ -32,7 +32,7 @@ Description
     Internal storage is a compact array and the list can be shrunk to compact
     storage. The increase of list size is controlled by three template
     parameters, which allows the list storage to either increase by the given
-    increment or the given multiplier and divider (allowing non-integer
+    increment or by the given multiplier and divider (allowing non-integer
     multiples).
 
 SourceFiles
@@ -81,8 +81,8 @@ class DynamicList
 {
     // Private data
 
-        //- Allocated size for underlying List.
-        label allocSize_;
+        //- The capacity (allocated size) of the underlying list.
+        label capacity_;
 
     // Private Member Functions
 

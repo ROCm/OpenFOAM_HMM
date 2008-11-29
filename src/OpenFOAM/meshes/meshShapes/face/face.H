@@ -298,7 +298,7 @@ public:
             label triangles
             (
                 const pointField& points,
-                DynamicList<face, SizeInc,SizeMult, SizeDiv>& triFaces
+                DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
             ) const;
 
             //- Number of triangles and quads after splitting
