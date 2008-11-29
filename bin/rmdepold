@@ -24,32 +24,33 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamCheckSourceDeps
+#     rmdepold
 #
 # Description
-#     Usage: foamCheckSourceDeps [dir1 .. dirN]
+#     Usage: rmdepold [dir1 .. dirN]
 #
-#     Search for *.dep files that are without a corresponding .C or .L file.
-#     These could indicate a directory that has been moved.
+#     Remove *.dep files that are without a corresponding .C or .L file.
+#     This often occurs when a directory has been moved.
 #         - print questionable directory and the *.dep file
+#         - optionally remove empty directories
 #------------------------------------------------------------------------------
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE 1>&2
 Usage: ${0##*/} [OPTION] [dir1 .. dirN]
 options:
-  -rm | -remove    remove the offending .dep file
-  -rmdir           find and remove empty directories (recursively)
+  -rmdir      find and remove empty directories (recursively)
 
-* Search for .dep files that are without a corresponding .C or .L file.
-  This could indicate a directory that has been moved.
+Remove *.dep files that are without a corresponding .C or .L file.
+This often occurs when a directory has been moved.
   - print questionable directory and file
+  - optionally remove empty directories
 
 USAGE
     exit 1
 }
 
-unset optRemove optrmDir
+unset optRmdir
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -58,12 +59,8 @@ do
     -h | -help)
         usage
         ;;
-    -rm | -remove)
-        optRemove=true
-        shift
-        ;;
     -rmdir)
-        optrmDir=true
+        optRmdir=true
         shift
         ;;
     -*)
@@ -75,36 +72,38 @@ do
     esac
 done
 
-if [ "$#" -eq 0 ]
-then
-    set -- .
-fi
+# default is the current directory
+[ "$#" -gt 0 ] || set -- .
 
 for checkDir
 do
     if [ -d $checkDir ]
     then
-        find $checkDir -name '*.dep' -print | while read depFile
+        echo "searching: $checkDir"
+    else
+        echo "skipping non-dir: $checkDir"
+        continue
+    fi
+
+    find $checkDir -name '*.dep' -print | while read depFile
+    do
+        # check C++ and Flex files
+        if [ ! -r "${depFile%dep}C" -a ! -r "${depFile%dep}L" ];
+        then
+            echo "rm $depFile"
+            rm -f $depFile 2>/dev/null
+        fi
+    done
+
+    # remove empty dirs
+    if [ "$optRmdir" ]
+    then
+        # get subdirs ourselves so we can avoid particular directories
+        for dir in $(find $checkDir -mindepth 1 -maxdepth 1 -type d \( -name .git -prune -o -print \) )
         do
-            # check C++ and Flex files
-            if [ ! -r "${depFile%dep}C" -a ! -r "${depFile%dep}L" ];
-            then
-                echo "${depFile%/[^/]*}  ${depFile##*/}"
-                [ "$optRemove" ] && rm -f $depFile
-            fi
+            echo "check dir: $dir"
+            find $dir -depth -type d -empty -exec rmdir {} \; -print
         done
     fi
 done
-
-if [ "$optrmDir" ]
-then
-    for checkDir
-    do
-        if [ -d $checkDir ]
-        then
-           echo "scan directory: $checkDir"
-           find $checkDir -depth -type d -empty -print -exec rmdir \{\} \;
-        fi
-    done
-fi
 # -----------------------------------------------------------------------------
