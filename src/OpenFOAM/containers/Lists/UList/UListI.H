@@ -50,14 +50,14 @@ inline Foam::UList<T>::UList(T* __restrict__ v, label size)
 template<class T>
 inline Foam::label Foam::UList<T>::fcIndex(const label i) const
 {
-    return (i == size()-1 ? 0 : i+1); 
+    return (i == size()-1 ? 0 : i+1);
 }
 
 
 template<class T>
 inline Foam::label Foam::UList<T>::rcIndex(const label i) const
 {
-    return (i == 0 ? size()-1 : i-1); 
+    return (i == 0 ? size()-1 : i-1);
 }
 
 

@@ -29,7 +29,7 @@ Description
     Basic sub-grid obstacle flame-wrinking enhancement factor model.
     Details supplied by J Puttock 2/7/06.
 
-    <b> Sub-grid flame area generation <\b>
+    <b> Sub-grid flame area generation </b>
 
     \f$ n = N - \hat{\dwea{\vec{U}}}.n_{s}.\hat{\dwea{\vec{U}}} \f$
     \f$ n_{r} = \sqrt{n} \f$

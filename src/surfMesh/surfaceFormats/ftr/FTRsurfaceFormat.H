@@ -99,14 +99,11 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        static autoPtr<UnsortedMeshedSurface<Face> > New(const fileName& name)
         {
             return autoPtr<UnsortedMeshedSurface<Face> >
             (
-                new FTRsurfaceFormat<Face>(fName)
+                new FTRsurfaceFormat<Face>(name)
             );
         }
 

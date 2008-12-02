@@ -38,10 +38,10 @@ License
 template<class Face>
 Foam::fileFormats::NASsurfaceFormat<Face>::NASsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -50,43 +50,44 @@ Foam::fileFormats::NASsurfaceFormat<Face>::NASsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     const bool mustTriangulate = this->isTri();
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::NASsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
-    DynamicList<point>  pointLst;
     // Nastran index of points
     DynamicList<label>  pointId;
-    DynamicList<Face>   faceLst;
-    DynamicList<label>  regionLst;
-    HashTable<label>    groupToPatch;
+    DynamicList<point>  dynPoints;
+    DynamicList<Face>   dynFaces;
+    DynamicList<label>  dynRegions;
+    DynamicList<label>  dynSizes;
+    Map<label>          lookup;
 
-    // From face groupId to patchId
-    Map<label> groupIdToPatchId;
-    label nPatches = 0;
+    // assume the types are not intermixed
+    bool sorted = true;
+    label regionI = 0;
 
     // Name for face group
-    Map<word> groupIdToName;
+    Map<word> nameLookup;
 
-    // Ansa tags. Denoted by $ANSA_NAME. These will appear just before the
-    // first use of a type. We read them and store the pshell types which
-    // are used to name the patches.
+    // Ansa tags. Denoted by $ANSA_NAME.
+    // These will appear just before the first use of a type.
+    // We read them and store the PSHELL types which are used to name
+    // the patches.
     label ansaId = -1;
-    word ansaType;
-    word ansaName;
+    word  ansaType, ansaName;
 
     // leave faces that didn't have a group in 0
     //    label groupID = 0;
@@ -134,7 +135,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 string::stripInvalid<word>(rawName);
                 ansaName = rawName;
 
-                // Info<< "ANSA tag for NastranID:" << ansaID
+                // Info<< "ANSA tag for NastranID:" << ansaId
                 //     << " of type " << ansaType
                 //     << " name " << ansaName << endl;
             }
@@ -161,9 +162,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             string::stripInvalid<word>(rawName);
 
             word groupName(rawName);
-            groupIdToName.insert(groupId, groupName);
+            nameLookup.insert(groupId, groupName);
 
-            Info<< "group " << groupId << " => " << groupName << endl;
+            // Info<< "group " << groupId << " => " << groupName << endl;
         }
 
 
@@ -172,7 +173,6 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         {
             continue;
         }
-
 
         // Check if character 72 is continuation
         if (line.size() > 72 && line[72] == '+')
@@ -212,22 +212,27 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             fTri[2] = readLabel(IStringStream(line.substr(40,8))());
 
             // Convert groupID into patchID
-            Map<label>::const_iterator iter = groupIdToPatchId.find(groupId);
-
-            label patchI;
-            if (iter == groupIdToPatchId.end())
+            Map<label>::const_iterator fnd = lookup.find(groupId);
+            if (fnd != lookup.end())
             {
-                patchI = nPatches++;
-                groupIdToPatchId.insert(groupId, patchI);
-                Info<< "patch " << patchI << " => group " << groupId << endl;
+                if (regionI != fnd())
+                {
+                    // pshell types are intermixed
+                    sorted = false;
+                }
+                regionI = fnd();
             }
             else
             {
-                patchI = iter();
+                regionI = dynSizes.size();
+                lookup.insert(groupId, regionI);
+                dynSizes.append(0);
+                // Info<< "patch" << regionI << " => group " << groupId <<endl;
             }
 
-            faceLst.append(fTri);
-            regionLst.append(patchI);
+            dynFaces.append(fTri);
+            dynRegions.append(regionI);
+            dynSizes[regionI]++;
         }
         else if (cmd == "CQUAD4")
         {
@@ -240,43 +245,39 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             fQuad[2] = readLabel(IStringStream(line.substr(40,8))());
             fQuad[3] = readLabel(IStringStream(line.substr(48,8))());
 
-            // Convert group into patch
-            Map<label>::const_iterator iter = groupIdToPatchId.find(groupId);
-
-            label patchI;
-            if (iter == groupIdToPatchId.end())
+            // Convert groupID into patchID
+            Map<label>::const_iterator fnd = lookup.find(groupId);
+            if (fnd != lookup.end())
             {
-                patchI = nPatches++;
-                groupIdToPatchId.insert(groupId, patchI);
-                Info<< "patch " << patchI << " => group " << groupId << endl;
+                if (regionI != fnd())
+                {
+                    // pshell types are intermixed
+                    sorted = false;
+                }
+                regionI = fnd();
             }
             else
             {
-                patchI = iter();
+                regionI = dynSizes.size();
+                lookup.insert(groupId, regionI);
+                dynSizes.append(0);
+                // Info<< "patch" << regionI << " => group " << groupId <<endl;
             }
+
 
             if (mustTriangulate)
             {
-                faceLst.append(triFace(f[0], f[1], f[2]));
-                faceLst.append(triFace(f[0], f[2], f[3]));
-                regionLst.append(patchI);
-                regionLst.append(patchI);
+                dynFaces.append(triFace(f[0], f[1], f[2]));
+                dynFaces.append(triFace(f[0], f[2], f[3]));
+                dynRegions.append(regionI);
+                dynRegions.append(regionI);
+                dynSizes[regionI] += 2;
             }
             else
             {
-                faceLst.append(Face(f));
-                regionLst.append(patchI);
-            }
-        }
-        else if (cmd == "PSHELL")
-        {
-            // Read shell type since group gives patchnames.
-            label groupId = readLabel(IStringStream(line.substr(8,8))());
-
-            if (groupId == ansaId && ansaType == "PSHELL")
-            {
-                groupIdToName.insert(groupId, ansaName);
-                Info<< "group " << groupId << " => " << ansaName << endl;
+                dynFaces.append(Face(f));
+                dynRegions.append(regionI);
+                dynSizes[regionI]++;
             }
         }
         else if (cmd == "GRID")
@@ -287,7 +288,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             scalar z = parseNASCoord(line.substr(40, 8));
 
             pointId.append(index);
-            pointLst.append(point(x, y, z));
+            dynPoints.append(point(x, y, z));
         }
         else if (cmd == "GRID*")
         {
@@ -309,76 +310,95 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                     "fileFormats::NASsurfaceFormat::read(const fileName&)"
                 )
                     << "Expected continuation symbol '*' when reading GRID*"
-                    << " (double precision coordinate) output" << nl
+                    << " (double precision coordinate) format" << nl
                     << "Read:" << line << nl
-                    << "File:" << is.name()
-                    << " line:" << is.lineNumber()
+                    << "File:" << is.name() << " line:" << is.lineNumber()
                     << exit(FatalError);
             }
             scalar z = parseNASCoord(line.substr(8, 16));
 
             pointId.append(index);
-            pointLst.append(point(x, y, z));
+            dynPoints.append(point(x, y, z));
+        }
+        else if (cmd == "PSHELL")
+        {
+            // pshell type for patch names with the Ansa extension
+            label groupId = readLabel(IStringStream(line.substr(8,8))());
+
+            if (groupId == ansaId && ansaType == "PSHELL")
+            {
+                nameLookup.insert(ansaId, ansaName);
+                // Info<< "group " << groupId << " => " << ansaName << endl;
+            }
         }
         else if (unhandledCmd.insert(cmd))
         {
             Info<< "Unhandled Nastran command " << line << nl
-                << "File:" << is.name()
-                << " line:" << is.lineNumber()
+                << "File:" << is.name() << " line:" << is.lineNumber()
                 << endl;
         }
     }
 
-    Info<< "Read faces:" << faceLst.size()
-        << " points:" << pointLst.size()
-        << endl;
-
+    //    Info<< "Read faces:" << dynFaces.size()
+    //        << " points:" << dynPoints.size()
+    //        << endl;
 
     // transfer to normal lists
-    this->storedPoints().transfer(pointLst);
-    this->storedRegions().transfer(regionLst);
+    this->storedPoints().transfer(dynPoints);
 
     pointId.shrink();
-    faceLst.shrink();
+    dynFaces.shrink();
 
+    // Build inverse mapping (NASTRAN pointId -> index)
+    Map<label> mapPointId(2*pointId.size());
+    forAll(pointId, i)
     {
-        // Build inverse mapping (index to point)
-        Map<label> nasToFoamPoint(2*pointId.size());
-        forAll(pointId, i)
+        mapPointId.insert(pointId[i], i);
+    }
+
+    // Relabel faces
+    // ~~~~~~~~~~~~~
+    forAll(dynFaces, i)
+    {
+        Face& f = dynFaces[i];
+        forAll(f, fp)
         {
-            nasToFoamPoint.insert(pointId[i], i);
+            f[fp] = mapPointId[f[fp]];
         }
-        pointId.clearStorage();
+    }
+    pointId.clearStorage();
+    mapPointId.clear();
 
 
-        // Relabel faces
-        forAll(faceLst, i)
+    // create default patch names, or from ANSA/Hypermesh information
+    List<word> names(dynSizes.size());
+    forAllConstIter(Map<label>, lookup, iter)
+    {
+        const label patchI = iter();
+        const label groupI = iter.key();
+
+        Map<word>::const_iterator fnd = nameLookup.find(groupI);
+        if (fnd != nameLookup.end())
         {
-            Face& f = faceLst[i];
-            forAll(f, fp)
-            {
-                f[fp] = nasToFoamPoint[f[fp]];
-            }
+            names[patchI] = fnd();
+        }
+        else
+        {
+            names[patchI] = word("patch") + ::Foam::name(patchI);
         }
     }
 
 
-    // convert Nastran groupId => name to patchId => name
-    Map<word> regionNames;
-    forAllConstIter(Map<word>, groupIdToName, iter)
-    {
-        Map<label>::const_iterator iter2 = groupIdToPatchId.find(iter.key());
+    sortFacesAndStore
+    (
+        xferMoveTo<List<Face> >(dynFaces),
+        xferMoveTo<List<label> >(dynRegions),
+        sorted
+    );
 
-        if (iter2 != groupIdToPatchId.end())
-        {
-            regionNames.insert(iter2.key(), iter());
-        }
-    }
+    // add patches, culling empty groups
+    this->addPatches(dynSizes, names, true);
 
-    // transfer to normal lists
-    this->storedFaces().transfer(faceLst);
-
-    this->setPatches(regionNames);
     return true;
 }
 

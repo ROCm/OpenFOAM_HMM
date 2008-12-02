@@ -186,53 +186,53 @@ Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
     // number of items, just do it ourselves
 
     // step 1: get region sizes and store (regionId => patchI)
-    Map<label> regionLookup;
+    Map<label> lookup;
     forAll(regionLst, faceI)
     {
         const label regId = regionLst[faceI];
 
-        Map<label>::iterator iter = regionLookup.find(regId);
-        if (iter == regionLookup.end())
+        Map<label>::iterator fnd = lookup.find(regId);
+        if (fnd != lookup.end())
         {
-            regionLookup.insert(regId, 1);
+            fnd()++;
         }
         else
         {
-            iter()++;
+            lookup.insert(regId, 1);
         }
     }
 
     // step 2: assign start/size (and name) to the newPatches
     // re-use the lookup to map (regionId => patchI)
-    surfGroupList patchLst(regionLookup.size());
-    label patchStart = 0;
+    surfGroupList patchLst(lookup.size());
+    label start = 0;
     label patchI = 0;
-    forAllIter(Map<label>, regionLookup, iter)
+    forAllIter(Map<label>, lookup, iter)
     {
         label regId = iter.key();
 
-        word patchName;
-        Map<word>::const_iterator iter2 = patchNames.find(regId);
-        if (iter2 == patchNames.end())
+        word name;
+        Map<word>::const_iterator fnd = patchNames.find(regId);
+        if (fnd != patchNames.end())
         {
-            patchName = word("patch") + ::Foam::name(patchI);
+            name = fnd();
         }
         else
         {
-            patchName = iter2();
+            name = word("patch") + ::Foam::name(patchI);
         }
 
         patchLst[patchI] = surfGroup
         (
-            patchName,
+            name,
             0,           // initialize with zero size
-            patchStart,
+            start,
             patchI
         );
 
         // increment the start for the next patch
         // and save the (regionId => patchI) mapping
-        patchStart += iter();
+        start += iter();
         iter() = patchI++;
     }
 
@@ -242,7 +242,7 @@ Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
 
     forAll(regionLst, faceI)
     {
-        label patchI = regionLookup[regionLst[faceI]];
+        label patchI = lookup[regionLst[faceI]];
         faceMap[faceI] = patchLst[patchI].start() + patchLst[patchI].size()++;
     }
 
@@ -260,7 +260,6 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
     const word& functionName
 )
 {
-
     if (available.found(ext))
     {
         return true;

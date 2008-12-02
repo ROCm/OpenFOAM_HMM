@@ -72,6 +72,7 @@ class STLASCIILexer
 {
     // Private data
 
+        bool  sorted_;
         label groupID_;      // current region
         label lineNo_;
         word  startError_;
@@ -79,7 +80,8 @@ class STLASCIILexer
         DynamicList<point> points_;
         DynamicList<label> facets_;
         DynamicList<word>  names_;
-        HashTable<label>   nameIndex_;
+        DynamicList<label> sizes_;
+        HashTable<label>   lookup_;
 
 public:
 
@@ -95,6 +97,12 @@ public:
         int lex();
 
     // Access
+
+        //- Do all the solid groups appear in order
+        bool sorted() const
+        {
+            return sorted_;
+        }
 
         //- A list of points corresponding to a pointField
         DynamicList<point>& points()
@@ -114,12 +122,19 @@ public:
         {
             return names_;
         }
+
+        //- region sizes
+        DynamicList<label>& sizes()
+        {
+            return sizes_;
+        }
 };
 
 
 STLASCIILexer::STLASCIILexer(istream* is, const label approxNpoints)
 :
     yyFlexLexer(is),
+    sorted_(true),
     groupID_(-1),
     lineNo_(1),
     points_(approxNpoints),
@@ -237,16 +252,22 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 <readSolidName>{string} {
         word name(Foam::string::validate<word>(YYText()));
 
-        HashTable<label>::const_iterator fnd = nameIndex_.find(name);
-        if (fnd != nameIndex_.end())
+        HashTable<label>::const_iterator fnd = lookup_.find(name);
+        if (fnd != lookup_.end())
         {
+            if (groupID_ != fnd())
+            {
+                // group appeared out of order
+                sorted_ = false;
+            }
             groupID_ = fnd();
         }
         else
         {
-            groupID_ = names_.size();
+            groupID_ = sizes_.size();
+            lookup_.insert(name, groupID_);
             names_.append(name);
-            nameIndex_.insert(name, groupID_);
+            sizes_.append(0);
         }
         BEGIN(INITIAL);
     }
@@ -254,16 +275,22 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 <readSolidName>{space}\n {
         word name("solid");
 
-        HashTable<label>::const_iterator fnd = nameIndex_.find(name);
-        if (fnd != nameIndex_.end())
+        HashTable<label>::const_iterator fnd = lookup_.find(name);
+        if (fnd != lookup_.end())
         {
+            if (groupID_ != fnd())
+            {
+                // group appeared out of order
+                sorted_ = false;
+            }
             groupID_ = fnd();
         }
         else
         {
-            groupID_ = names_.size();
+            groupID_ = sizes_.size();
+            lookup_.insert(name, groupID_);
             names_.append(name);
-            nameIndex_.insert(name, groupID_);
+            sizes_.append(0);
         }
 
         lineNo_++;
@@ -328,6 +355,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 
 <readFacet>{endfacet} {
         facets_.append(groupID_);
+        sizes_[groupID_]++;
         BEGIN(INITIAL);
     }
 
@@ -380,17 +408,18 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
     const off_t fileSize
 )
 {
-    binary_ = false;
-
     // Create the lexer with the approximate number of vertices in the STL
     // from the file size
     STLASCIILexer lexer(&ifs.stdStream(), fileSize/400);
     while (lexer.lex() != 0) {}
 
+    sorted_ = lexer.sorted();
+
     // transfer to normal lists
     points_.transfer(lexer.points());
     regions_.transfer(lexer.facets());
     names_.transfer(lexer.names());
+    sizes_.transfer(lexer.sizes());
 
     return true;
 }

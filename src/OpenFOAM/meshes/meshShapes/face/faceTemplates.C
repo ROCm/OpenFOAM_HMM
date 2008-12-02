@@ -25,8 +25,27 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "face.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+Foam::label Foam::face::triangles
+(
+    const pointField& points,
+    DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
+) const
+{
+    label triI = triFaces.size();
+    label quadI = 0;
+    faceList quadFaces;
+
+    // adjust the addressable size (and allocate space if needed)
+    triFaces.setSize(triI + nTriangles());
+
+    return split(SPLITTRIANGLE, points, triI, quadI, triFaces, quadFaces);
+}
+
 
 template<class Type>
 Type Foam::face::average

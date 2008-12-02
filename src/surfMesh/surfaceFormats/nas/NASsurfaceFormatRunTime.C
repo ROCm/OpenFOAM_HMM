@@ -37,9 +37,10 @@ namespace fileFormats
 {
 
 // .bdf (Bulk Data Format)
+// .nas (Nastran)
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
     NASsurfaceFormat,
     face,
     fileExtension,
@@ -47,25 +48,24 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
-    NASsurfaceFormat,
-    triFace,
-    fileExtension,
-    bdf
-);
-
-// .nas (Nastran)
-addNamedTemplatedToRunTimeSelectionTable
-(
-    UnsortedMeshedSurface,
+    MeshedSurface,
     NASsurfaceFormat,
     face,
     fileExtension,
     nas
 );
+
 addNamedTemplatedToRunTimeSelectionTable
 (
-    UnsortedMeshedSurface,
+    MeshedSurface,
+    NASsurfaceFormat,
+    triFace,
+    fileExtension,
+    bdf
+);
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
     NASsurfaceFormat,
     triFace,
     fileExtension,

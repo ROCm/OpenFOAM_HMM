@@ -44,55 +44,30 @@ namespace Foam
 
 void Foam::sampledPatch::createGeometry()
 {
-    clearGeom();
-    points_.clear();
-    faces_.clear();
+    sampledSurface::clearGeom();
+    MeshStorage::clear();
     patchFaceLabels_.clear();
 
-    if (patchIndex() != -1)
+    if (patchIndex_ != -1)
     {
-        const polyPatch& patch = mesh().boundaryMesh()[patchIndex()];
-        const faceList& localFaces = patch.localFaces();
+        const polyPatch& p = mesh().boundaryMesh()[patchIndex_];
+        this->storedPoints() = p.localPoints();
+        this->storedFaces()  = p.localFaces();
 
-        points_ = patch.localPoints();
-
-        if (triangulate())
+        // an identity map
+        patchFaceLabels_.setSize(faces().size());
+        forAll(patchFaceLabels_, i)
         {
-            // Count triangles
-            label nTri = 0;
-            forAll(localFaces, faceI)
-            {
-                const face& f = localFaces[faceI];
-
-                nTri += f.nTriangles(patch.localPoints());
-            }
-
-            faces_.setSize(nTri);
-            patchFaceLabels_.setSize(nTri);
-
-            // split and fill mesh face references
-            nTri = 0;
-            forAll(localFaces, faceI)
-            {
-                const face& f = localFaces[faceI];
-
-                label fillIndex = nTri;
-
-                f.triangles(patch.localPoints(), nTri, faces_);
-                while (fillIndex < nTri)
-                {
-                    patchFaceLabels_[fillIndex++] = faceI;
-                }
-            }
+            patchFaceLabels_[i] = i;
         }
-        else
+
+        // triangulate uses remapFaces()
+        // - this is somewhat less efficient since it recopies the faces
+        // that we just created, but we probably don't want to do this
+        // too often anyhow.
+        if (triangulate_)
         {
-            faces_  = localFaces;
-            patchFaceLabels_.setSize(faces_.size());
-            forAll(localFaces, i)
-            {
-                patchFaceLabels_[i] = i;
-            }
+            MeshStorage::triangulate();
         }
     }
 
@@ -114,11 +89,10 @@ Foam::sampledPatch::sampledPatch
     const bool triangulate
 )
 :
-    sampledSurface(name, mesh, triangulate),
+    sampledSurface(name, mesh),
     patchName_(patchName),
     patchIndex_(mesh.boundaryMesh().findPatchID(patchName_)),
-    points_(0),
-    faces_(0),
+    triangulate_(triangulate),
     patchFaceLabels_(0)
 {
     createGeometry();
@@ -135,12 +109,9 @@ Foam::sampledPatch::sampledPatch
     sampledSurface(name, mesh, dict),
     patchName_(dict.lookup("patchName")),
     patchIndex_(mesh.boundaryMesh().findPatchID(patchName_)),
-    points_(0),
-    faces_(0),
+    triangulate_(dict.lookupOrDefault("triangulate", false)),
     patchFaceLabels_(0)
 {
-    // default: non-triangulated
-    triangulate() = dict.lookupOrDefault("triangulate", false);
     createGeometry();
 }
 
@@ -160,6 +131,28 @@ void Foam::sampledPatch::correct(const bool meshChanged)
         createGeometry();
     }
 }
+
+
+// remap action on triangulation
+void Foam::sampledPatch::remapFaces
+(
+    const UList<label>& faceMap
+)
+{
+    // recalculate the cells cut
+    if (&faceMap && faceMap.size())
+    {
+        MeshStorage::remapFaces(faceMap);
+//
+//        List<label> newCutCells(faceMap.size());
+//        forAll(faceMap, faceI)
+//        {
+//            newCutCells[faceI] = cutCells_[faceMap[faceI]];
+//        }
+//        cutCells_.transfer(newCutCells);
+    }
+}
+
 
 
 Foam::tmp<Foam::scalarField>

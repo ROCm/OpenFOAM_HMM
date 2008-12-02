@@ -37,16 +37,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(topoCellLooper, 0);
-
-addToRunTimeSelectionTable(cellLooper, topoCellLooper, word);
-
-
+   defineTypeNameAndDebug(topoCellLooper, 0);
+   addToRunTimeSelectionTable(cellLooper, topoCellLooper, word);
 }
 
 // Angle for polys to be considered splitHexes.
@@ -67,7 +62,7 @@ void Foam::topoCellLooper::subsetList
 {
     if (startI == 0)
     {
-        // Truncate (setsize decides itself not to do anything if nothing
+        // Truncate (setSize decides itself not to do anything if nothing
         // changed)
         if (freeI < 0)
         {
@@ -228,7 +223,7 @@ Foam::labelList Foam::topoCellLooper::getSuperEdge
 
     do
     {
-        vertI = mesh().edges()[edgeI].otherVertex(vertI);    
+        vertI = mesh().edges()[edgeI].otherVertex(vertI);
 
         superVerts[superVertI++] = vertI;
 
@@ -237,7 +232,7 @@ Foam::labelList Foam::topoCellLooper::getSuperEdge
         edgeI = meshTools::otherEdge(mesh(), fEdges, edgeI, vertI);
     }
     while (!features.isFeaturePoint(prevEdgeI, edgeI));
-  
+
     superVerts.setSize(superVertI);
 
     return superVerts;
@@ -500,7 +495,7 @@ void Foam::topoCellLooper::walkSplitHex
                 nextEdgeI,
                 nextVertI
             );
-            
+
             edgeI = nextEdgeI;
             vertI = nextVertI;
         }
@@ -615,7 +610,7 @@ void Foam::topoCellLooper::walkSplitHex
                 labelList nextFaces =
                     getVertFacesNonEdge
                     (
-                        cellI, 
+                        cellI,
                         edgeI,
                         vertI
                     );
@@ -720,7 +715,7 @@ bool Foam::topoCellLooper::cut
     if (mesh().cellShapes()[cellI].model() == hex_)
     {
         // Let parent handle hex case.
-        return 
+        return
             hexCellLooper::cut
             (
                 refDir,
@@ -752,7 +747,7 @@ bool Foam::topoCellLooper::cut
 
             if (edgeI != -1)
             {
-                // Found non-feature edge. Start walking from vertex on edge. 
+                // Found non-feature edge. Start walking from vertex on edge.
                 vertI = mesh().edges()[edgeI].start();
             }
             else

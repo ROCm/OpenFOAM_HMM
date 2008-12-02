@@ -95,14 +95,11 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<MeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
         {
             return autoPtr<MeshedSurface<Face> >
             (
-                new OFFsurfaceFormat(fName)
+                new OFFsurfaceFormat(name)
             );
         }
 
@@ -125,11 +122,11 @@ public:
         //- Write MeshedSurface
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const MeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write UnsortedMeshedSurface
@@ -144,11 +141,11 @@ public:
         //  The output is sorted by region.
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const UnsortedMeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write object

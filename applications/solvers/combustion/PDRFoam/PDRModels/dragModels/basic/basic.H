@@ -29,7 +29,7 @@ Description
     Basic sub-grid obstacle drag model.
     Details supplied by J Puttock 2/7/06.
 
-    <b> Sub-grid drag term <\b>
+    <b> Sub-grid drag term </b>
 
     The resistance term (force per unit of volume) is given by:
 
@@ -43,7 +43,7 @@ Description
 
         This is term is treated implicitly in UEqn.H
 
-    <b> Sub-grid turbulence generation <\b>
+    <b> Sub-grid turbulence generation </b>
 
     The turbulence source term \f$ G_{R} \f$ occurring in the
     \f$ \kappa-\epsilon \f$ equations for the generation of turbulence due

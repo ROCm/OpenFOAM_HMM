@@ -61,6 +61,8 @@ protected:
 
     static void writeHeader(Ostream&, const char* filetype);
 
+    static bool readPoints(IFstream&, pointField&, labelList& ids);
+
     static void writePoints(Ostream&, const pointField&);
 
     static void writeCase
