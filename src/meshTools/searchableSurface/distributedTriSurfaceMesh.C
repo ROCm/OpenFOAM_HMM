@@ -97,7 +97,11 @@ void Foam::distributedTriSurfaceMesh::splitSegment
     point clipPt0, clipPt1;
 
 
-    // 1. Fully local already handled outside
+    // 1. Fully local already handled outside. Note: retest is cheap.
+    if (isLocal(procBb_[Pstream::myProcNo()], start, end))
+    {
+        return;
+    }
 
 
     // 2. Check if fully inside other processor. Rare occurrence
@@ -109,17 +113,14 @@ void Foam::distributedTriSurfaceMesh::splitSegment
         {
             const List<treeBoundBox>& bbs = procBb_[procI];
 
-            forAll(bbs, bbI)
+            if (isLocal(bbs, start, end))
             {
-                if (bbs[bbI].contains(start) && bbs[bbI].contains(end))
-                {
-                    //Pout<< "    Completely remote segment:"
-                    //    << start << end << " on proc:" << procI << endl;
-                    sendMap[procI].append(allSegments.size());
-                    allSegmentMap.append(segmentI);
-                    allSegments.append(segment(start, end));
-                    return;
-                }
+                //Pout<< "    Completely remote segment:"
+                //    << start << end << " on proc:" << procI << endl;
+                sendMap[procI].append(allSegments.size());
+                allSegmentMap.append(segmentI);
+                allSegments.append(segment(start, end));
+                return;
             }
         }
     }
