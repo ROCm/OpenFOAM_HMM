@@ -14,14 +14,6 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 
-
-#--------------------------------
-# PATH FOR OPEN CFD LATEX MACROS
-#-------------------------------
-
-@INLUDE_PATH = $(WM_PROJECT_DIR)/doc/Doxygen/Macros/
-
-
 # This tag specifies the encoding used for all characters in the config file that
 # follow. The default is UTF-8 which is also the encoding used for all text before
 # the first occurrence of this tag. Doxygen uses libiconv (or the iconv built into
@@ -485,11 +477,9 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT              = #$(WM_PROJECT_DIR)/src \
-                     #$(WM_PROJECT_DIR)/applications/utilities \
-                     #$(WM_PROJECT_DIR)/applications/solvers
-
-
+INPUT                  = $(WM_PROJECT_DIR)/src \
+                         $(WM_PROJECT_DIR)/applications/utilities \
+                         $(WM_PROJECT_DIR)/applications/solvers
 
 # This tag can be used to specify the character encoding of the source files that
 # doxygen parses. Internally doxygen uses the UTF-8 encoding, which is also the default
@@ -546,8 +536,8 @@ EXCLUDE_SYMBOLS        =
 # directories that contain example code fragments that are included (see
 # the \include command).
 
-EXAMPLE_PATH           = 
- 						
+EXAMPLE_PATH           =
+
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp
@@ -798,6 +788,10 @@ TREEVIEW_WIDTH         = 250
 # configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
 
+# Path for OpenCFD LaTeX macros
+
+@INCLUDE_PATH = $(WM_PROJECT_DIR)/doc/Doxygen/Macros/
+
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will
 # generate Latex output.
 
@@ -837,7 +831,6 @@ PAPER_TYPE             = a4wide
 
 EXTRA_PACKAGES         = $(WM_PROJECT_DIR)/doc/Doxygen/Macros/tensorOperator
 
-                          
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for
 # the generated latex document. The header should contain everything until
 # the first chapter. If it is left blank doxygen will generate a
