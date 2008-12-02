@@ -1,3 +1,35 @@
+%-----------------------------------------------------------------------------
+% =========                 |
+% \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+%  \\    /   O peration     |
+%   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+%    \\/     M anipulation  |
+%------------------------------------------------------------------------------
+% License
+%     This file is part of OpenFOAM.
+%
+%     OpenFOAM is free software; you can redistribute it and/or modify it
+%     under the terms of the GNU General Public License as published by the
+%     Free Software Foundation; either version 2 of the License, or (at your
+%     option) any later version.
+%
+%     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+%     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+%     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+%     for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with OpenFOAM; if not, write to the Free Software Foundation,
+%     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+%
+% LaTeX Style file
+%     tensorOperator.sty
+%
+% Description
+%     Standard OpenCFD LaTeX macros for typesetting tensor algebra.
+%
+%------------------------------------------------------------------------------
+
 % tensor style
 % ~~~~~~~~~~~~
 \renewcommand{\vec}[1] {\ensuremath{\mathbf #1}}
@@ -9,8 +41,7 @@
 \newcommand{\cprod} {\times}
 \newcommand{\dprod} {\,{\scriptscriptstyle \stackrel{\bullet}{{}}}\,}
 \newcommand{\ddprod} {\,{\scriptscriptstyle \stackrel{\bullet}{\bullet}}\,}
-\newcommand{\tdprod}%
-     {\,{\scriptscriptstyle \stackrel{3}{\bullet}}\,}
+\newcommand{\tdprod} {\,{\scriptscriptstyle \stackrel{3}{\bullet}}\,}
 \newcommand{\tprod} {\,{\scriptscriptstyle \stackrel{\otimes}{{}}}\,}
 
 % operations
@@ -30,7 +61,7 @@
 \newcommand{\tr} {\ensuremath{\operatorname{tr}}}
 \newcommand{\trans}[1] {\ensuremath{#1^{\operatorname{T}}}}
 
-% alternative tensor operators for hypersonics etc. 
+% alternative tensor operators for hypersonics etc.
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \newcommand{\devs}[1] {\overset{\scriptscriptstyle\circ}{#1}}
 %\newcommand{\trans}[1] {\ensuremath{#1^{\operatorname{T}}}}
@@ -90,7 +121,9 @@
 
 % unknown use
 % ~~~~~~~~~~~
-%\newcommand{\goesto} {\!\rightarrow\!}
 %\font\bigtenrm=cmr12 scaled 1200
 %\newcommand{\eexp}[1]{{\hbox{$\textfont1=\bigtenrm e$}}^{\raise3pt
 %\hbox{$#1$}}}
+
+
+% ------------------------------------------------------------------------------
