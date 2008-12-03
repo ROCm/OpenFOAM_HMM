@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         Info<< "\nWall heat fluxes [W]" << endl;
         forAll(patchHeatFlux, patchi)
         {
-            if (typeid(mesh.boundary()) == typeid(wallFvPatch))
+            if (typeid(mesh.boundary()[patchi]) == typeid(wallFvPatch))
             {
                 Info<< mesh.boundary()[patchi].name()
                     << " "
