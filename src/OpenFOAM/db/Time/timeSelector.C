@@ -56,22 +56,12 @@ Foam::List<bool> Foam::timeSelector::selected(const List<instant>& Times) const
 {
     List<bool> lst(Times.size(), false);
 
-    // check ranges
-    forAll(Times, i)
+    // check ranges, avoid false positive on constant/
+    forAll(Times, timeI)
     {
-        if (selected(Times[i]))
+        if (Times[timeI].name() != "constant" && selected(Times[timeI]))
         {
-            lst[i] = true;
-        }
-    }
-
-    // avoid false positive on "constant"
-    forAll(Times, i)
-    {
-        if (Times[i].name() == "constant")
-        {
-            lst[i] = false;
-            break;
+            lst[timeI] = true;
         }
     }
 
@@ -85,15 +75,15 @@ Foam::List<bool> Foam::timeSelector::selected(const List<instant>& Times) const
             int nearestIndex = -1;
             scalar nearestDiff = Foam::GREAT;
 
-            forAll(Times, timeIndex)
+            forAll(Times, timeI)
             {
-                if (Times[timeIndex].name() == "constant") continue;
+                if (Times[timeI].name() == "constant") continue;
 
-                scalar diff = fabs(Times[timeIndex].value() - target);
+                scalar diff = fabs(Times[timeI].value() - target);
                 if (diff < nearestDiff)
                 {
                     nearestDiff = diff;
-                    nearestIndex = timeIndex;
+                    nearestIndex = timeI;
                 }
             }
 
@@ -156,6 +146,27 @@ Foam::List<Foam::instant> Foam::timeSelector::select
     {
         List<bool> selectTimes(timeDirs.size(), true);
 
+        // determine locations of constant/ and 0/ directories
+        label constantIdx = -1;
+        label zeroIdx = -1;
+
+        forAll(timeDirs, timeI)
+        {
+            if (timeDirs[timeI].name() == "constant")
+            {
+                constantIdx = timeI;
+            }
+            else if (timeDirs[timeI].value() == 0)
+            {
+                zeroIdx = timeI;
+            }
+
+            if (constantIdx >= 0 && zeroIdx >= 0)
+            {
+                break;
+            }
+        }
+
         if (args.options().found("time"))
         {
             selectTimes = timeSelector
@@ -166,25 +177,31 @@ Foam::List<Foam::instant> Foam::timeSelector::select
         else if (args.options().found("latestTime"))
         {
             selectTimes = false;
+            const label latestIdx = timeDirs.size() - 1;
 
             // avoid false match on constant/ or 0/
-            if (timeDirs.size() > 2)
+            if (latestIdx != constantIdx && latestIdx != zeroIdx)
             {
-                selectTimes[timeDirs.size() - 1] = true;
+                selectTimes[latestIdx] = true;
             }
         }
 
-        if (timeDirs.size() > 1)
+        // special treatment for constant/
+        if (constantIdx >= 0)
         {
-            selectTimes[0] = args.options().found("constant");
+            selectTimes[constantIdx] = args.options().found("constant");
+        }
 
+        // special treatment for 0/
+        if (zeroIdx >= 0)
+        {
             if (args.options().found("noZero"))
             {
-                selectTimes[1] = false;
+                selectTimes[zeroIdx] = false;
             }
             else if (argList::validOptions.found("zeroTime"))
             {
-                selectTimes[1] = args.options().found("zeroTime");
+                selectTimes[zeroIdx] = args.options().found("zeroTime");
             }
         }
 
