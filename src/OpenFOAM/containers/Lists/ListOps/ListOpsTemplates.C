@@ -174,13 +174,62 @@ void Foam::sortedOrder
 )
 {
     order.setSize(lst.size());
-
     forAll(order, elemI)
     {
         order[elemI] = elemI;
     }
-
     Foam::stableSort(order, typename UList<T>::less(lst));
+}
+
+
+template<class T>
+void Foam::duplicateOrder
+(
+    const UList<T>& lst,
+    labelList& order
+)
+{
+    if (lst.size() < 2)
+    {
+        order.clear();
+        return;
+    }
+
+    sortedOrder(lst, order);
+
+    label n = 0;
+    for (label i = 0; i < order.size() - 1; ++i)
+    {
+        if (lst[order[i]] == lst[order[i+1]])
+        {
+            order[n++] = order[i];
+        }
+    }
+    order.setSize(n);
+}
+
+
+template<class T>
+void Foam::uniqueOrder
+(
+    const UList<T>& lst,
+    labelList& order
+)
+{
+    sortedOrder(lst, order);
+
+    if (order.size() > 1)
+    {
+        label n = 0;
+        for (label i = 0; i < order.size() - 1; ++i)
+        {
+            if (lst[order[i]] != lst[order[i+1]])
+            {
+                order[n++] = order[i];
+            }
+        }
+        order.setSize(n);
+    }
 }
 
 

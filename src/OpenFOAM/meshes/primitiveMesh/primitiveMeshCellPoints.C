@@ -27,14 +27,9 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::cellPoints() const
+const Foam::labelListList& Foam::primitiveMesh::cellPoints() const
 {
     if (!cpPtr_)
     {
@@ -56,12 +51,12 @@ const labelListList& primitiveMesh::cellPoints() const
         cpPtr_ = new labelListList(nCells());
         invertManyToMany(nCells(), pointCells(), *cpPtr_);
     }
-    
+
     return *cpPtr_;
 }
 
 
-const labelList& primitiveMesh::cellPoints
+const Foam::labelList& Foam::primitiveMesh::cellPoints
 (
     const label cellI,
     DynamicList<label>& storage
@@ -84,14 +79,14 @@ const labelList& primitiveMesh::cellPoints
 
             forAll(f, fp)
             {
-                labelSet_.insert(f[fp]);    
+                labelSet_.insert(f[fp]);
             }
         }
 
         storage.clear();
-        if (labelSet_.size() > storage.allocSize())
+        if (labelSet_.size() > storage.capacity())
         {
-            storage.setSize(labelSet_.size());
+            storage.setCapacity(labelSet_.size());
         }
 
         forAllConstIter(labelHashSet, labelSet_, iter)
@@ -104,14 +99,12 @@ const labelList& primitiveMesh::cellPoints
 }
 
 
-const labelList& primitiveMesh::cellPoints(const label cellI) const
+const Foam::labelList& Foam::primitiveMesh::cellPoints(const label cellI) const
 {
     return cellPoints(cellI, labels_);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -43,16 +43,21 @@ int main(int argc, char *argv[])
     ldl[0](3) = 3;
     ldl[0](1) = 1;
 
-    ldl[0].setSize(5);     // increase allocated size
-    ldl[1].setSize(10);    // increase allocated size
-    ldl[1](2) = 2;
+    ldl[0].setCapacity(5);    // increase allocated size
+    ldl[1].setCapacity(10);   // increase allocated size
+    ldl[0].reserve(15);       // should increase allocated size
+    ldl[1].reserve(5);        // should not decrease allocated size
+    ldl[1](3) = 2;            // allocates space and sets value
+
+    // this works without a segfault, but doesn't change the list size
+    ldl[0][4] = 4;
 
     ldl[1] = 3;
 
     Info<< "<ldl>" << ldl << "</ldl>" << nl << "sizes: ";
     forAll(ldl, i)
     {
-        Info<< " " << ldl[i].size() << "/" << ldl[i].allocSize();
+        Info<< " " << ldl[i].size() << "/" << ldl[i].capacity();
     }
     Info<< endl;
 
@@ -63,7 +68,7 @@ int main(int argc, char *argv[])
     Info<< "<ldl>" << ldl << "</ldl>" << nl << "sizes: ";
     forAll(ldl, i)
     {
-        Info<< " " << ldl[i].size() << "/" << ldl[i].allocSize();
+        Info<< " " << ldl[i].size() << "/" << ldl[i].capacity();
     }
     Info<< endl;
 
@@ -78,10 +83,10 @@ int main(int argc, char *argv[])
     {
         dlA.append(i);
     }
-    dlA.setSize(10);
+    dlA.setCapacity(10);
 
     Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
-        << " " << dlA.size() << "/" << dlA.allocSize() << endl;
+        << " " << dlA.size() << "/" << dlA.capacity() << endl;
 
     dlB.transfer(dlA);
 
@@ -91,10 +96,54 @@ int main(int argc, char *argv[])
 
     Info<< "Transferred to dlB" << endl;
     Info<< "<dlA>" << dlA << "</dlA>" << nl << "sizes: "
-        << " " << dlA.size() << "/" << dlA.allocSize() << endl;
+        << " " << dlA.size() << "/" << dlA.capacity() << endl;
     Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
-        << " " << dlB.size() << "/" << dlB.allocSize() << endl;
+        << " " << dlB.size() << "/" << dlB.capacity() << endl;
 
+    // try with a normal list:
+    List<label> lstA;
+    lstA.transfer(dlB);
+    Info<< "Transferred to normal list" << endl;
+    Info<< "<lstA>" << lstA << "</lstA>" << nl << "sizes: "
+        << " " << lstA.size() << endl;
+    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
+        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+
+    // Copy back and append a few time
+    for (label i=0; i < 3; i++)
+    {
+        dlB.append(lstA);
+    }
+
+    Info<< "appended list a few times" << endl;
+    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
+        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+
+    // assign the list (should maintain allocated space)
+    dlB = lstA;
+    Info<< "assigned list" << endl;
+    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
+        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+
+
+    // Copy back and append a few time
+    for (label i=0; i < 3; i++)
+    {
+        dlB.append(lstA);
+    }
+
+
+    // check allocation granularity
+    DynamicList<label, 6, 0> dlC;
+
+    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
+        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+
+    dlC.reserve(dlB.size());
+    dlC = dlB;
+
+    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
+        << " " << dlC.size() << "/" << dlC.capacity() << endl;
 
     return 0;
 }

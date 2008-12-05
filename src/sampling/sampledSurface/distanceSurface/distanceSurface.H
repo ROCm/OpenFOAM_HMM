@@ -37,8 +37,9 @@ SourceFiles
 #define distanceSurface_H
 
 #include "sampledSurface.H"
-#include "triSurface.H"
 #include "searchableSurface.H"
+//#include "isoSurfaceCell.H"
+#include "isoSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +52,7 @@ namespace Foam
 
 class distanceSurface
 :
-    public sampledSurface,
-    public triSurface
+    public sampledSurface
 {
     // Private data
 
@@ -71,23 +71,24 @@ class distanceSurface
         //- zone name (if restricted to zones)
         word zoneName_;
 
+
+        //- Distance to cell centres
+        autoPtr<volScalarField> cellDistancePtr_;
+
+        //- Distance to points
+        scalarField pointDistance_;
+
+        //- Constructed iso surface
+        autoPtr<isoSurface> isoSurfPtr_;
+
         //- triangles converted to faceList
         mutable autoPtr<faceList> facesPtr_;
 
 
-        // Recreated for every isoSurface
-
-            //- Time at last call
-            mutable label storedTimeIndex_;
-
-            //- For every triangle the original cell in mesh
-            mutable labelList meshCells_;
-
-
     // Private Member Functions
 
-        //- Create iso surface (if time has changed)
-        void createGeometry() const;
+        //- Create iso surface
+        void createGeometry();
 
         //- sample field on faces
         template <class Type>
@@ -129,7 +130,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return triSurface::points();
+            return surface().points();
         }
 
         //- Faces of surface
@@ -137,7 +138,7 @@ public:
         {
             if (!facesPtr_.valid())
             {
-                const triSurface& s = *this;
+                const triSurface& s = surface();
 
                 facesPtr_.reset(new faceList(s.size()));
 
@@ -153,6 +154,10 @@ public:
         //- Correct for mesh movement and/or field changes
         virtual void correct(const bool meshChanged);
 
+        const isoSurface& surface() const
+        {
+            return isoSurfPtr_();
+        }
 
         //- sample field on surface
         virtual tmp<scalarField> sample

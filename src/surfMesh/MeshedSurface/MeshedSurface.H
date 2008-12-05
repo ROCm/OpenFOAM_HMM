@@ -28,7 +28,7 @@ Class
 Description
     A surface geometry mesh with patch information, not to be confused
     with a similarily named surfaceMesh, which actually refers to
-    the cell faces of a volume mesh!
+    the cell faces of a volume mesh.
 
    The MeshedSurface is intended to surfaces from a variety of sources.
    - A set of points and faces without any patch information.
@@ -94,12 +94,6 @@ private:
 
     // Private member functions
 
-        //- Sort faces by regionIds and set patches
-        void sortFacesByRegion(const UList<label>&, const Map<word>&);
-
-        //- Set new regions from faceMap
-        void remapRegions(List<label>& faceMap);
-
         //- Read OpenFOAM Surface format
         bool read(Istream&);
 
@@ -107,11 +101,19 @@ protected:
 
     // Protected Member functions
 
-        //- set a single patch
-        void onePatch();
-
         //- basic sanity check on patches
         void checkPatches();
+
+        //- sort faces by regions and store sorted faces
+        void sortFacesAndStore
+        (
+            const xfer<List<Face> >& unsortedFaces,
+            const xfer<List<label> >& regionIds,
+            const bool sorted
+        );
+
+        //- Set new regions from faceMap
+        virtual void remapFaces(const UList<label>& faceMap);
 
 public:
 
@@ -137,8 +139,7 @@ public:
         //- Construct null
         MeshedSurface();
 
-        //- Construct by transferring components
-        //  (points, faces and patches).
+        //- Construct by transferring components (points, faces, patches).
         MeshedSurface
         (
             const xfer<pointField>&,
@@ -146,35 +147,14 @@ public:
             const xfer<surfGroupList>&
         );
 
-        //- Construct from points, faces, and patch information
-        MeshedSurface
-        (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
-            const UList<label>& patchSizes,
-            const UList<word>& patchNames,
-            const UList<word>& patchTypes
-        );
-
         //- Construct by transferring points, faces.
-        //  Sort faces according to regionIds with the names of the regions,
-        //  or jsut set a single default patch.
+        //  Use patch information, or set single default patch.
         MeshedSurface
         (
             const xfer<pointField>&,
             const xfer<List<Face> >&,
-            const UList<label>& regionIds = UList<label>::null(),
-            const Map<word>& regionNames = Map<word>::null()
-        );
-
-        //- Construct by transferring points, faces.
-        //  Sort faces according to regionIds with patch-names from hash
-        MeshedSurface
-        (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
-            const UList<label>& regionIds,
-            const HashTable<label>& nameToRegionMapping
+            const UList<label>& patchSizes = UList<label>::null(),
+            const UList<word>& patchNames = UList<word>::null()
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -219,9 +199,9 @@ public:
             MeshedSurface,
             fileExtension,
             (
-                const fileName& fName
+                const fileName& name
             ),
-            (fName)
+            (name)
         );
 
     // Selectors
@@ -250,10 +230,10 @@ public:
             write,
             fileExtension,
             (
-                const fileName& fName,
+                const fileName& name,
                 const MeshedSurface<Face>& surf
             ),
-            (fName, surf)
+            (name, surf)
         );
 
         //- Write to file
@@ -275,31 +255,35 @@ public:
             return patches_;
         }
 
-        void addPatches(const UList<surfGroup>&);
+        //- set a single patch, optionally with a specific name
+        void onePatch(const word& name = word::null);
 
+        //- add patches
+        void addPatches
+        (
+            const UList<surfGroup>&,
+            const bool cullEmpty=false
+        );
+
+        //- add patches
+        void addPatches
+        (
+            const UList<label>& sizes,
+            const UList<word>& names,
+            const bool cullEmpty=false
+        );
+
+        //- add patches
+        void addPatches
+        (
+            const UList<label>& sizes,
+            const bool cullEmpty=false
+        );
 
     // Edit
 
         //- Clear all storage
         virtual void clear();
-
-        //- Remove invalid faces
-        void cleanup(const bool verbose);
-
-        //- Check/fix duplicate/degenerate faces
-        virtual bool checkFaces(const bool verbose);
-
-        //- Join the faces by removing duplicate points.
-        //  Returns true if any points merged
-        virtual bool stitchFaces
-        (
-            const scalar tol=SMALL,
-            const bool verbose=false
-        );
-
-        //- Triangulate the surface, return the number of added faces.
-        //  The patch list will be adjusted accordingly.
-        virtual label triangulate();
 
         //- Return new surface.
         //  Returns return pointMap, faceMap from subsetMeshMap
@@ -338,9 +322,9 @@ public:
         virtual void write(Ostream&) const;
 
         //- Generic write routine. Chooses writer based on extension.
-        virtual void write(const fileName& fName) const
+        virtual void write(const fileName& name) const
         {
-            write(fName, *this);
+            write(name, *this);
         }
 
         //- Write to database
@@ -361,15 +345,6 @@ public:
         );
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Specialization for holding triangulated information
-template<>
-inline label MeshedSurface<triFace>::triangulate()
-{
-    return 0;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

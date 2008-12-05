@@ -26,7 +26,17 @@ Class
     PDRkEpsilon
 
 Description
-    Standard k-epsilon turbulence model.
+    Standard k-epsilon turbulence model with additional source terms
+    corresponding to PDR basic drag model (basic.H)
+
+    The turbulence source term \f$ G_{R} \f$ appears in the
+    \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
+    interaction with unresolved obstacles.
+
+    In the \f$ \epsilon  \f$ equation \f$ C_{1} G_{R} \f$ is added as a source
+    term.
+
+    In the \f$ \kappa \f$ equation \f$ G_{R} \f$ is added as a source term.
 
 SourceFiles
     PDRkEpsilon.C

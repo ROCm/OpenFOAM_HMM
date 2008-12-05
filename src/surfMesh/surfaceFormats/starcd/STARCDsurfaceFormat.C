@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDsurfaceFormat.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -69,10 +70,10 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
 template<class Face>
 Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -80,93 +81,65 @@ Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     const bool mustTriangulate = this->isTri();
     this->clear();
 
-    fileName baseName = fName.lessExt();
-    autoPtr<IFstream> isPtr;
+    fileName baseName = filename.lessExt();
 
-
-    DynamicList<point> pointLst;
     // STAR-CD index of points
-    DynamicList<label> pointId;
+    List<label> pointId;
 
-    //
-    // read .vrt file
-    // ~~~~~~~~~~~~~~
-    isPtr.reset(new IFstream(baseName + ".vrt"));
+    // read points from .vrt file
+    readPoints
+    (
+        IFstream(baseName + ".vrt")(),
+        this->storedPoints(),
+        pointId
+    );
 
-    if (!isPtr().good())
-    {
-        FatalErrorIn
-        (
-            "fileFormats::STARCDsurfaceFormat::read(const fileName&)"
-        )
-            << "Cannot read file " << (baseName + ".vrt")
-            << exit(FatalError);
-    }
-
-    readHeader(isPtr(), "PROSTAR_VERTEX");
-
-    label lineLabel;
-
-    while ((isPtr() >> lineLabel).good())
-    {
-        pointId.append(lineLabel);
-        scalar x, y, z;
-
-        isPtr() >> x >> y >> z;
-
-        pointLst.append(point(x, y, z));
-    }
-
-    // transfer to normal lists
-    this->storedPoints().transfer(pointLst);
-
-    // Build inverse mapping (index to point)
-    pointId.shrink();
-    Map<label> mapToFoamPointId(2*pointId.size());
+    // Build inverse mapping (STAR-CD pointId -> index)
+    Map<label> mapPointId(2*pointId.size());
     forAll(pointId, i)
     {
-        mapToFoamPointId.insert(pointId[i], i);
+        mapPointId.insert(pointId[i], i);
     }
     pointId.clear();
-
-
-    DynamicList<Face>  faceLst;
-    DynamicList<label> regionLst;
-
-    // From face cellTableId to patchId
-    Map<label> cellTableToPatchId;
-    label nPatches = 0;
-
 
     //
     // read .cel file
     // ~~~~~~~~~~~~~~
-    isPtr.reset(new IFstream(baseName + ".cel"));
-
-    if (!isPtr().good())
+    IFstream is(baseName + ".cel");
+    if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::STARCDsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << (baseName + ".cel")
+            << "Cannot read file " << is.name()
             << exit(FatalError);
     }
 
-    readHeader(isPtr(), "PROSTAR_CELL");
+    readHeader(is, "PROSTAR_CELL");
 
-    label shapeId, nLabels, cellTableId, typeId;
+    DynamicList<Face>  dynFaces;
+    DynamicList<label> dynRegions;
+    DynamicList<word>  dynNames;
+    DynamicList<label> dynSizes;
+    Map<label> lookup;
+
+    // assume the cellTableIds are not intermixed
+    bool sorted = true;
+    label regionI = 0;
+
+    label lineLabel, shapeId, nLabels, cellTableId, typeId;
     labelList starLabels(64);
 
-    while ((isPtr() >> lineLabel).good())
+    while ((is >> lineLabel).good())
     {
-        isPtr() >> shapeId >> nLabels >> cellTableId >> typeId;
+        is >> shapeId >> nLabels >> cellTableId >> typeId;
 
         if (nLabels > starLabels.size())
         {
@@ -179,90 +152,81 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
         {
             if ((i % 8) == 0)
             {
-               isPtr() >> lineLabel;
+               is >> lineLabel;
             }
-            isPtr() >> starLabels[i];
+            is >> starLabels[i];
         }
 
         if (typeId == starcdShellType_)
         {
             // Convert groupID into patchID
-            Map<label>::const_iterator iter =
-                cellTableToPatchId.find(cellTableId);
-
-            label patchI;
-            if (iter == cellTableToPatchId.end())
+            Map<label>::const_iterator fnd = lookup.find(cellTableId);
+            if (fnd != lookup.end())
             {
-                patchI = nPatches++;
-
-                cellTableToPatchId.insert(cellTableId, patchI);
+                if (regionI != fnd())
+                {
+                    // cellTableIds are intermixed
+                    sorted = false;
+                }
+                regionI = fnd();
             }
             else
             {
-                patchI = iter();
+                regionI = dynSizes.size();
+                lookup.insert(cellTableId, regionI);
+                dynNames.append(word("cellTable_") + ::Foam::name(regionI));
+                dynSizes.append(0);
             }
 
+            SubList<label> vertices(starLabels, nLabels);
 
             // convert orig vertex id to point label
-            for (label i=0; i < nLabels; ++i)
+            forAll(vertices, i)
             {
-                starLabels[i] = mapToFoamPointId[starLabels[i]];
+                vertices[i] = mapPointId[vertices[i]];
             }
 
             if (mustTriangulate && nLabels > 3)
             {
-                face f
-                (
-                    SubList<label>(starLabels, nLabels)
-                );
+                face f(vertices);
 
-                faceList triFaces(f.nTriangles(this->points()));
+                faceList triFaces(f.nTriangles());
                 label nTri = 0;
                 f.triangles(this->points(), nTri, triFaces);
 
                 forAll(triFaces, faceI)
                 {
-                    // a triangle, but not yet a triFace
-                    faceLst.append
+                    // a triangular face, but not yet a triFace
+                    dynFaces.append
                     (
                         triFace
                         (
                             static_cast<UList<label>&>(triFaces[faceI])
                         )
                     );
-                    regionLst.append(patchI);
+                    dynRegions.append(regionI);
+                    dynSizes[regionI]++;
                 }
             }
             else
             {
-                faceLst.append
-                (
-                    Face(SubList<label>(starLabels, nLabels))
-                );
-                regionLst.append(patchI);
+                dynFaces.append(Face(vertices));
+                dynRegions.append(regionI);
+                dynSizes[regionI]++;
             }
         }
     }
+    mapPointId.clear();
 
-    mapToFoamPointId.clear();
+    sortFacesAndStore
+    (
+        xferMoveTo<List<Face> >(dynFaces),
+        xferMoveTo<List<label> >(dynRegions),
+        sorted
+    );
 
-    // convert cellTable_N patchId => name
-    Map<word> regionNames;
-    forAllConstIter(Map<label>, cellTableToPatchId, iter)
-    {
-        regionNames.insert
-        (
-            iter(),
-            "cellTable_" + Foam::name(iter.key())
-        );
-    }
-
-    // transfer to normal lists
-    this->storedFaces().transfer(faceLst);
-    this->storedRegions().transfer(regionLst);
-
-    this->setPatches(regionNames);
-
+    // add patches, culling empty groups
+    this->addPatches(dynSizes, dynNames, true);
     return true;
 }
 
@@ -270,19 +234,18 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
-    const fileName& fName,
-    const UnsortedMeshedSurface<Face>& surf
+    const fileName& filename,
+    const MeshedSurface<Face>& surf
 )
 {
-    fileName baseName = fName.lessExt();
+    fileName baseName = filename.lessExt();
 
     writePoints(OFstream(baseName + ".vrt")(), surf.points());
     OFstream os(baseName + ".cel");
     writeHeader(os, "CELL");
 
     const List<Face>& faceLst = surf.faces();
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+    const List<surfGroup>& patchLst = surf.patches();
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -291,7 +254,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
         forAll(patch, patchFaceI)
         {
-            const Face& f = faceLst[faceMap[faceIndex++]];
+            const Face& f = faceLst[faceIndex++];
             writeShell(os, f, faceIndex, patchI + 1);
         }
     }
@@ -310,18 +273,20 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
-    const fileName& fName,
-    const MeshedSurface<Face>& surf
+    const fileName& filename,
+    const UnsortedMeshedSurface<Face>& surf
 )
 {
-    fileName baseName = fName.lessExt();
+    fileName baseName = filename.lessExt();
 
     writePoints(OFstream(baseName + ".vrt")(), surf.points());
+
     OFstream os(baseName + ".cel");
     writeHeader(os, "CELL");
 
     const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    labelList faceMap;
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
     forAll(patchLst, patchI)
@@ -330,7 +295,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
         forAll(patch, patchFaceI)
         {
-            const Face& f = faceLst[faceIndex++];
+            const Face& f = faceLst[faceMap[faceIndex++]];
             writeShell(os, f, faceIndex, patchI + 1);
         }
     }

@@ -117,41 +117,6 @@ public:
 #   include "surfaceWriter.C"
 #endif
 
-// Only used internally
-#define makeTypeSurfaceWritersTypeName(type)                                 \
-                                                                             \
-defineNamedTemplateTypeNameAndDebug(type, 0);
-
-// Used externally sometimes
-#define makeSurfaceWritersTypeName(typeWriter)                               \
-                                                                             \
-makeTypeSurfaceWritersTypeName(typeWriter##ScalarWriter);                    \
-makeTypeSurfaceWritersTypeName(typeWriter##VectorWriter);                    \
-makeTypeSurfaceWritersTypeName(typeWriter##SphericalTensorWriter);           \
-makeTypeSurfaceWritersTypeName(typeWriter##SymmTensorWriter);                \
-makeTypeSurfaceWritersTypeName(typeWriter##TensorWriter);
-
-// Define type info for single template instantiation (e.g. vector)
-#define makeSurfaceWriterTypes(WriterType, type)                             \
-                                                                             \
-defineNamedTemplateTypeNameAndDebug(type, 0);                                \
-                                                                             \
-addToRunTimeSelectionTable                                                   \
-(                                                                            \
-    WriterType, type, word                                                   \
-);
-
-
-// Define type info info for scalar, vector etc. instantiations
-#define makeSurfaceWriters(typeWriter)                                       \
-                                                                             \
-makeSurfaceWriterTypes(scalarWriter, typeWriter##ScalarWriter);              \
-makeSurfaceWriterTypes(vectorWriter, typeWriter##VectorWriter);              \
-makeSurfaceWriterTypes(sphericalTensorWriter, typeWriter##SphericalTensorWriter);\
-makeSurfaceWriterTypes(symmTensorWriter, typeWriter##SymmTensorWriter);      \
-makeSurfaceWriterTypes(tensorWriter, typeWriter##TensorWriter);
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

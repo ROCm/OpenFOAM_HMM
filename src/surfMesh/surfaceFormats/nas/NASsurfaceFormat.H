@@ -58,13 +58,13 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class NASsurfaceFormat Declaration
+                     Class NASsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
 class NASsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public NASsurfaceFormatCore
 {
     // Private Member Functions
@@ -85,14 +85,11 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
-                new NASsurfaceFormat<Face>(fName)
+                new NASsurfaceFormat<Face>(name)
             );
         }
 

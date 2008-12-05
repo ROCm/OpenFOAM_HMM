@@ -39,7 +39,7 @@ Foam::distanceSurface::sampleField
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
-    return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
+    return tmp<Field<Type> >(new Field<Type>(vField, surface().meshCells()));
 }
 
 
@@ -50,33 +50,25 @@ Foam::distanceSurface::interpolateField
     const interpolation<Type>& interpolator
 ) const
 {
-    // One value per point
-    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
-    Field<Type>& values = tvalues();
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
-    boolList pointDone(points().size(), false);
+    // Get fields to sample. Assume volPointInterpolation!
+    const GeometricField<Type, fvPatchField, volMesh>& volFld =
+        interpolator.psi();
 
-    forAll(faces(), cutFaceI)
-    {
-        const face& f = faces()[cutFaceI];
+    tmp<GeometricField<Type, pointPatchField, pointMesh> > pointFld
+    (
+        volPointInterpolation::New(fvm).interpolate(volFld)
+    );
 
-        forAll(f, faceVertI)
-        {
-            label pointI = f[faceVertI];
-
-            if (!pointDone[pointI])
-            {
-                values[pointI] = interpolator.interpolate
-                (
-                    points()[pointI],
-                    meshCells_[cutFaceI]
-                );
-                pointDone[pointI] = true;
-            }
-        }
-    }
-
-    return tvalues;
+    // Sample.
+    return surface().interpolate
+    (
+        cellDistancePtr_(),
+        pointDistance_,
+        volFld,
+        pointFld()
+    );
 }
 
 

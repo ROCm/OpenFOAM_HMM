@@ -1,0 +1,189 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "TRIsurfaceFormat.H"
+#include "IFstream.H"
+#include "IOmanip.H"
+#include "IStringStream.H"
+#include "Map.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
+(
+    const fileName& filename
+)
+:
+    sorted_(true),
+    points_(0),
+    regions_(0),
+    sizes_(0)
+{
+    read(filename);
+}
+
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+
+Foam::fileFormats::TRIsurfaceFormatCore::~TRIsurfaceFormatCore()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::TRIsurfaceFormatCore::read
+(
+    const fileName& filename
+)
+{
+    this->clear();
+    sorted_ = true;
+
+    IFstream is(filename);
+    if (!is.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::TRIsurfaceFormatCore::read(const fileName&)"
+        )
+            << "Cannot read file " << filename
+            << exit(FatalError);
+    }
+
+    // uses similar structure as STL, just some points
+    // the rest of the reader resembles the STL binary reader
+    DynamicList<point> dynPoints;
+    DynamicList<label> dynRegions;
+    DynamicList<label> dynSizes;
+    HashTable<label>   lookup;
+
+    // place faces without a group in patch0
+    label regionI = 0;
+    dynSizes.append(regionI);
+    lookup.insert("patch0", regionI);
+
+    while (is.good())
+    {
+        string line = this->getLineNoComment(is);
+
+        // handle continuations ?
+        //          if (line[line.size()-1] == '\\')
+        //          {
+        //              line.substr(0, line.size()-1);
+        //              line += this->getLineNoComment(is);
+        //          }
+
+        IStringStream lineStream(line);
+
+        point p
+        (
+            readScalar(lineStream),
+            readScalar(lineStream),
+            readScalar(lineStream)
+        );
+
+        if (!lineStream) break;
+
+        dynPoints.append(p);
+        dynPoints.append
+        (
+            point
+            (
+                readScalar(lineStream),
+                readScalar(lineStream),
+                readScalar(lineStream)
+            )
+        );
+        dynPoints.append
+        (
+            point
+            (
+                readScalar(lineStream),
+                readScalar(lineStream),
+                readScalar(lineStream)
+            )
+        );
+
+        // Region/colour in .tri file starts with 0x. Skip.
+        // ie, instead of having 0xFF, skip 0 and leave xFF to
+        // get read as a word and name it "patchFF"
+
+        char zero;
+        lineStream >> zero;
+
+        word rawName(lineStream);
+        word name("patch" + rawName(1, rawName.size()-1));
+
+        HashTable<label>::const_iterator fnd = lookup.find(name);
+        if (fnd != lookup.end())
+        {
+            if (regionI != fnd())
+            {
+                // group appeared out of order
+                sorted_ = false;
+            }
+            regionI = fnd();
+        }
+        else
+        {
+            regionI = dynSizes.size();
+            lookup.insert(name, regionI);
+            dynSizes.append(0);
+        }
+
+        dynRegions.append(regionI);
+        dynSizes[regionI]++;
+    }
+
+    // skip empty groups
+    label nPatch = 0;
+    forAll(dynSizes, patchI)
+    {
+        if (dynSizes[patchI])
+        {
+            if (nPatch != patchI)
+            {
+                dynSizes[nPatch] = dynSizes[patchI];
+            }
+            nPatch++;
+        }
+    }
+    // truncate addressed size
+    dynSizes.setSize(nPatch);
+
+    // transfer to normal lists
+    points_.transfer(dynPoints);
+    regions_.transfer(dynRegions);
+    sizes_.transfer(dynSizes);
+
+    return true;
+}
+
+
+// ************************************************************************* //

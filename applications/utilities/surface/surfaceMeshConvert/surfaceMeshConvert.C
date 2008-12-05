@@ -104,13 +104,19 @@ int main(int argc, char *argv[])
     {
         triSurface surf(importName);
 
+        Info<< "Read surface:" << endl;
+        surf.writeStats(Info);
+        Info<< endl;
+
         if (args.options().found("clean"))
         {
+            Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
-            surf.checkOrientation(true);
+            surf.writeStats(Info);
+            Info<< endl;
         }
 
-        Info << "writing " << exportName;
+        Info<< "writing " << exportName;
         if (scaleFactor <= 0)
         {
             Info<< " without scaling" << endl;
@@ -119,6 +125,8 @@ int main(int argc, char *argv[])
         {
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
+            surf.writeStats(Info);
+            Info<< endl;
         }
 
         // write sorted by region
@@ -128,34 +136,16 @@ int main(int argc, char *argv[])
     {
         UnsortedMeshedSurface<face> surf(importName);
 
-        if (args.options().found("clean"))
-        {
-            surf.cleanup(true);
-            surf.checkOrientation(true);
-        }
-
-        Info << "writing " << exportName;
-        if (scaleFactor <= 0)
-        {
-            Info<< " without scaling" << endl;
-        }
-        else
-        {
-            Info<< " with scaling " << scaleFactor << endl;
-            surf.scalePoints(scaleFactor);
-        }
-
-        surf.write(exportName);
-    }
-#if 1
-    else if (args.options().found("triFace"))
-    {
-        MeshedSurface<triFace> surf(importName);
+        Info<< "Read surface:" << endl;
+        surf.writeStats(Info);
+        Info<< endl;
 
         if (args.options().found("clean"))
         {
+            Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
-            surf.checkOrientation(true);
+            surf.writeStats(Info);
+            Info<< endl;
         }
 
         Info<< "writing " << exportName;
@@ -167,6 +157,39 @@ int main(int argc, char *argv[])
         {
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
+            surf.writeStats(Info);
+            Info<< endl;
+        }
+        surf.write(exportName);
+    }
+#if 1
+    else if (args.options().found("triFace"))
+    {
+        MeshedSurface<triFace> surf(importName);
+
+        Info<< "Read surface:" << endl;
+        surf.writeStats(Info);
+        Info<< endl;
+
+        if (args.options().found("clean"))
+        {
+            Info<< "Cleaning up surface" << endl;
+            surf.cleanup(true);
+            surf.writeStats(Info);
+            Info<< endl;
+        }
+
+        Info<< "writing " << exportName;
+        if (scaleFactor <= 0)
+        {
+            Info<< " without scaling" << endl;
+        }
+        else
+        {
+            Info<< " with scaling " << scaleFactor << endl;
+            surf.scalePoints(scaleFactor);
+            surf.writeStats(Info);
+            Info<< endl;
         }
         surf.write(exportName);
     }
@@ -175,10 +198,16 @@ int main(int argc, char *argv[])
     {
         MeshedSurface<face> surf(importName);
 
+        Info<< "Read surface:" << endl;
+        surf.writeStats(Info);
+        Info<< endl;
+
         if (args.options().found("clean"))
         {
+            Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
-            surf.checkOrientation(true);
+            surf.writeStats(Info);
+            Info<< endl;
         }
 
         Info<< "writing " << exportName;
@@ -190,6 +219,8 @@ int main(int argc, char *argv[])
         {
             Info<< " with scaling " << scaleFactor << endl;
             surf.scalePoints(scaleFactor);
+            surf.writeStats(Info);
+            Info<< endl;
         }
         surf.write(exportName);
     }

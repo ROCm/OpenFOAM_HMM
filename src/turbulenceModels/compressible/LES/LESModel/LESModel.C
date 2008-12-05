@@ -38,6 +38,7 @@ namespace compressible
 
 defineTypeNameAndDebug(LESModel, 0);
 defineRunTimeSelectionTable(LESModel, dictionary);
+addToRunTimeSelectionTable(turbulenceModel, LESModel, turbulenceModel);
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 

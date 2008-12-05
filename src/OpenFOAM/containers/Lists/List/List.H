@@ -63,7 +63,8 @@ template<class T, label Size> class FixedList;
 template<class T> class PtrList;
 template<class T> class SLList;
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
- class DynamicList;
+    class DynamicList;
+template<class T> class SortableList;
 template<class T> class IndirectList;
 template<class T> class BiIndirectList;
 
@@ -172,6 +173,10 @@ public:
             //  and annull the argument list.
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
+
+            //- Transfer the contents of the argument List into this List
+            //  and annull the argument list.
+            void transfer(SortableList<T>&);
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);

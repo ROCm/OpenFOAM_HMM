@@ -157,7 +157,7 @@ void indexedOctree<Type>::divide
     List<DynamicList<label> > subIndices(8);
     for (direction octant = 0; octant < subIndices.size(); octant++)
     {
-        subIndices[octant].setSize(indices.size()/8);
+        subIndices[octant].setCapacity(indices.size()/8);
     }
 
     // Precalculate bounding boxes.

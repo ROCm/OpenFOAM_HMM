@@ -58,7 +58,7 @@ namespace fileFormats
 template<class Face>
 class OBJsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public OBJsurfaceFormatCore
 {
     // Private Member Functions
@@ -87,14 +87,11 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
-                new OBJsurfaceFormat<Face>(fName)
+                new OBJsurfaceFormat<Face>(name)
             );
         }
 
@@ -119,11 +116,11 @@ public:
         //- Write MeshedSurface
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const MeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write UnsortedMeshedSurface
@@ -138,11 +135,11 @@ public:
         //  The output is sorted by regions
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const UnsortedMeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write object

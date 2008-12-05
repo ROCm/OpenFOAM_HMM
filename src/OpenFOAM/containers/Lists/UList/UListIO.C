@@ -45,7 +45,7 @@ void Foam::UList<T>::writeEntry(Ostream& os) const
     {
         os  << word("List<" + word(pTraits<T>::typeName) + '>') << " ";
     }
-    
+
     os << *this;
 }
 

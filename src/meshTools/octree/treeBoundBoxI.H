@@ -27,29 +27,21 @@ License
 #include "treeBoundBox.H"
 #include "Random.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null setting points to zero
-inline treeBoundBox::treeBoundBox()
+inline Foam::treeBoundBox::treeBoundBox()
 :
     boundBox()
 {}
 
 
-// Construct from components
-inline treeBoundBox::treeBoundBox(const point& min, const point& max)
+inline Foam::treeBoundBox::treeBoundBox(const point& min, const point& max)
 :
     boundBox(min, max)
 {}
 
 
-// Construct from components
-inline treeBoundBox::treeBoundBox(const boundBox& bb)
+inline Foam::treeBoundBox::treeBoundBox(const boundBox& bb)
 :
     boundBox(bb)
 {}
@@ -57,7 +49,7 @@ inline treeBoundBox::treeBoundBox(const boundBox& bb)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar treeBoundBox::minDim() const
+inline Foam::scalar Foam::treeBoundBox::minDim() const
 {
     return ::Foam::min
     (
@@ -71,7 +63,7 @@ inline scalar treeBoundBox::minDim() const
 }
 
 
-inline scalar treeBoundBox::maxDim() const
+inline Foam::scalar Foam::treeBoundBox::maxDim() const
 {
     return ::Foam::max
     (
@@ -85,7 +77,7 @@ inline scalar treeBoundBox::maxDim() const
 }
 
 
-inline scalar treeBoundBox::avgDim() const
+inline Foam::scalar Foam::treeBoundBox::avgDim() const
 {
     return
     (
@@ -96,19 +88,19 @@ inline scalar treeBoundBox::avgDim() const
 }
 
 
-inline scalar treeBoundBox::typDim() const
+inline Foam::scalar Foam::treeBoundBox::typDim() const
 {
     return avgDim();
 }
 
 
-inline point treeBoundBox::mid() const
+inline Foam::point Foam::treeBoundBox::mid() const
 {
     return 0.5*(min() + max());
 }
 
 
-inline point treeBoundBox::corner(const direction octant) const
+inline Foam::point Foam::treeBoundBox::corner(const direction octant) const
 {
     return point
     (
@@ -119,7 +111,7 @@ inline point treeBoundBox::corner(const direction octant) const
 }
 
 // Returns octant in which sample resides. Reverse of subBbox.
-inline direction treeBoundBox::subOctant(const point& sample) const
+inline Foam::direction Foam::treeBoundBox::subOctant(const point& sample) const
 {
     point mid = 0.5*(max() + min());
 
@@ -146,7 +138,7 @@ inline direction treeBoundBox::subOctant(const point& sample) const
 
 // Returns octant in which sample resides. Reverse of subBbox. Precalculated
 // midpoint
-inline direction treeBoundBox::subOctant
+inline Foam::direction Foam::treeBoundBox::subOctant
 (
     const point& mid,
     const point& sample
@@ -175,8 +167,11 @@ inline direction treeBoundBox::subOctant
 
 // Returns octant in which sample resides. Reverse of subBbox. Flags sample
 // exactly on edge.
-inline direction treeBoundBox::subOctant(const point& sample, bool& onEdge)
- const
+inline Foam::direction Foam::treeBoundBox::subOctant
+(
+    const point& sample,
+    bool& onEdge
+) const
 {
     point mid = 0.5*(max() + min());
 
@@ -216,7 +211,7 @@ inline direction treeBoundBox::subOctant(const point& sample, bool& onEdge)
 
 // Returns octant in which sample resides. Reverse of subBbox. Precalculated
 // midpoint
-inline direction treeBoundBox::subOctant
+inline Foam::direction Foam::treeBoundBox::subOctant
 (
     const point& mid,
     const point& sample,
@@ -261,7 +256,7 @@ inline direction treeBoundBox::subOctant
 // Precalculated midpoint. If the sample is on the dividing line between
 // the octants the direction vector determines which octant to use
 // (i.e. in which octant the sample would be if it were moved along dir)
-inline direction treeBoundBox::subOctant
+inline Foam::direction Foam::treeBoundBox::subOctant
 (
     const point& mid,
     const vector& dir,
@@ -319,9 +314,9 @@ inline direction treeBoundBox::subOctant
 }
 
 
-// Returns reference to octantOrder which defines the 
+// Returns reference to octantOrder which defines the
 // order to do the search.
-inline void treeBoundBox::searchOrder
+inline void Foam::treeBoundBox::searchOrder
 (
     const point& sample,
     FixedList<direction,8>& octantOrder
@@ -380,7 +375,7 @@ inline void treeBoundBox::searchOrder
 	{
 	    min = treeBoundBox::FRONTHALF;
 	    mid = treeBoundBox::TOPHALF;
-	    max = treeBoundBox::RIGHTHALF;	    
+	    max = treeBoundBox::RIGHTHALF;
 	}
 	else if( dist.x() < dist.z())
 	{
@@ -412,13 +407,13 @@ inline void treeBoundBox::searchOrder
 
 // true if bb's intersect or overlap.
 // Note: <= to make sure we catch all.
-inline bool treeBoundBox::overlaps(const treeBoundBox& bb) const
+inline bool Foam::treeBoundBox::overlaps(const treeBoundBox& bb) const
 {
     return boundBox::overlaps(bb);
 }
 
 
-inline bool treeBoundBox::contains(const point& sample) const
+inline bool Foam::treeBoundBox::contains(const point& sample) const
 {
     return
     (
@@ -433,7 +428,11 @@ inline bool treeBoundBox::contains(const point& sample) const
 
 
 //- Return slightly wider bounding box
-inline treeBoundBox treeBoundBox::extend(Random& rndGen, const scalar s) const
+inline Foam::treeBoundBox Foam::treeBoundBox::extend
+(
+    Random& rndGen,
+    const scalar s
+) const
 {
     treeBoundBox bb(*this);
 
@@ -455,7 +454,5 @@ inline treeBoundBox treeBoundBox::extend(Random& rndGen, const scalar s) const
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

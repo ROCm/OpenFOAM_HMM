@@ -27,6 +27,7 @@ License
 #include "OBJsurfaceFormat.H"
 #include "IFstream.H"
 #include "IStringStream.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -35,10 +36,10 @@ License
 template<class Face>
 Foam::fileFormats::OBJsurfaceFormat<Face>::OBJsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -47,31 +48,38 @@ Foam::fileFormats::OBJsurfaceFormat<Face>::OBJsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     const bool mustTriangulate = this->isTri();
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::OBJsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
-    DynamicList<point>    pointLst;
-    DynamicList<Face>     faceLst;
-    DynamicList<label>    regionLst;
-    HashTable<label>      groupToPatch;
+    // assume that the groups are not intermixed
+    bool sorted = true;
 
-    // leave faces that didn't have a group in 0
-    label groupID = 0;
-    label maxGroupID = -1;
+    DynamicList<point> dynPoints;
+    DynamicList<Face>  dynFaces;
+    DynamicList<label> dynRegions;
+    DynamicList<word>  dynNames;
+    DynamicList<label> dynSizes;
+    HashTable<label>   lookup;
+
+    // place faces without a group in patch0
+    label regionI = 0;
+    lookup.insert("patch0", regionI);
+    dynNames.append("patch0");
+    dynSizes.append(0);
 
     while (is.good())
     {
@@ -93,30 +101,29 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
         {
             scalar x, y, z;
             lineStream >> x >> y >> z;
-            pointLst.append(point(x, y, z));
+            dynPoints.append(point(x, y, z));
         }
         else if (cmd == "g")
         {
-            word groupName;
-            lineStream >> groupName;
+            word name;
+            lineStream >> name;
 
-            HashTable<label>::const_iterator findGroup =
-                groupToPatch.find(groupName);
-
-            if (findGroup != groupToPatch.end())
+            HashTable<label>::const_iterator fnd = lookup.find(name);
+            if (fnd != lookup.end())
             {
-                groupID = findGroup();
+                if (regionI != fnd())
+                {
+                    // group appeared out of order
+                    sorted = false;
+                }
+                regionI = fnd();
             }
             else
             {
-                // special treatment if any initial faces were not in a group
-                if (maxGroupID == -1 && faceLst.size())
-                {
-                    groupToPatch.insert("patch0", 0);
-                    maxGroupID = 0;
-                }
-                groupID = ++maxGroupID;
-                groupToPatch.insert(groupName, groupID);
+                regionI = dynSizes.size();
+                lookup.insert(name, regionI);
+                dynNames.append(name);
+                dynSizes.append(0);
             }
         }
         else if (cmd == "f")
@@ -171,37 +178,75 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
             if (mustTriangulate && f.size() > 3)
             {
-                triFace fTri;
-
-                // simple face triangulation about f[0].
-                // Cannot use face::triangulation since points are incomplete
-                fTri[0] = f[0];
+                // simple face triangulation about f[0]
+                // points may be incomplete
                 for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {
                     label fp2 = (fp1 + 1) % f.size();
 
-                    fTri[1] = f[fp1];
-                    fTri[2] = f[fp2];
-
-                    faceLst.append(fTri);
-                    regionLst.append(groupID);
+                    dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
+                    dynRegions.append(regionI);
+                    dynSizes[regionI]++;
                 }
             }
             else
             {
-                faceLst.append(Face(f));
-                regionLst.append(groupID);
+                dynFaces.append(Face(f));
+                dynRegions.append(regionI);
+                dynSizes[regionI]++;
             }
         }
     }
 
-    // transfer to normal lists
-    this->storedPoints().transfer(pointLst);
-    this->storedFaces().transfer(faceLst);
-    this->storedRegions().transfer(regionLst);
 
-    this->setPatches(groupToPatch);
+    // transfer to normal lists
+    this->storedPoints().transfer(dynPoints);
+
+    sortFacesAndStore
+    (
+        xferMoveTo<List<Face> >(dynFaces),
+        xferMoveTo<List<label> >(dynRegions),
+        sorted
+    );
+
+    // add patches, culling empty groups
+    this->addPatches(dynSizes, dynNames, true);
     return true;
+}
+
+
+template<class Face>
+void Foam::fileFormats::OBJsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    const List<Face>& faceLst = surf.faces();
+    const List<surfGroup>& patchLst = surf.patches();
+
+    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        const surfGroup& patch = patchLst[patchI];
+
+        os << "g " << patch.name() << endl;
+
+        forAll(patch, patchFaceI)
+        {
+            const Face& f = faceLst[faceIndex++];
+
+            os << 'f';
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp] + 1;
+            }
+            os << endl;
+        }
+    }
+    os << "# </faces>" << endl;
 }
 
 
@@ -240,41 +285,6 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
         }
     }
 
-    os << "# </faces>" << endl;
-}
-
-
-template<class Face>
-void Foam::fileFormats::OBJsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        const surfGroup& patch = patchLst[patchI];
-
-        os << "g " << patch.name() << endl;
-
-        forAll(patch, patchFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-
-            os << 'f';
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp] + 1;
-            }
-            os << endl;
-        }
-    }
     os << "# </faces>" << endl;
 }
 
