@@ -697,7 +697,7 @@ bool Foam::dictionary::changeKeyword
             IDLList<entry>::replace(iter2(), iter());
             delete iter2();
             hashedEntries_.erase(iter2);
-            
+
         }
         else
         {
