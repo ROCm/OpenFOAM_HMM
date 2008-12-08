@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    fixed
+    Foam::XiModels::fixed
 
 Description
-    Fixed value model for Xi.
+    Fixed value model for Xi. See \link XiModel.H \endlink for more details
+    on flame wrinkling modelling.
 
 SourceFiles
     fixed.C

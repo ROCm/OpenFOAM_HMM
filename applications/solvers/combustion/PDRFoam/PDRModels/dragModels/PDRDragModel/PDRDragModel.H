@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PDRDragModel
+    Foam::PDRDragModel
 
 Description
-    Base-class for sub-grid obstacle drag models.
+    Base-class for sub-grid obstacle drag models. The available drag model is at
+    \link basic.H \endlink.
 
 SourceFiles
     PDRDragModel.C

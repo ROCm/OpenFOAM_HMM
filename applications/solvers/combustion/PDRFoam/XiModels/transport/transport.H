@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    transport
+    Foam::XiModels::transport
 
 Description
     Simple transport model for Xi based on Gulders correlation
     with a linear correction function to give a plausible profile for Xi.
+    See report TR/HGW/10 for details on the Weller two equations model.
+    See \link XiModel.H \endlink for more details on flame wrinkling modelling.
 
 SourceFiles
     transport.C

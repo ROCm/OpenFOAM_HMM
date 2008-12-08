@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PDRkEpsilon
+    Foam::compressible::RASModels::PDRkEpsilon
 
 Description
     Standard k-epsilon turbulence model with additional source terms
-    corresponding to PDR basic drag model (basic.H)
+    corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
@@ -93,7 +93,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel
+            basicThermo& thermophysicalModel
         );
 
 
