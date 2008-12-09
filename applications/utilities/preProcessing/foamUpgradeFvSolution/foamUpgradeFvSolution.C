@@ -90,7 +90,12 @@ int main(int argc, char *argv[])
                 solutionDict.objectPath() + ".old"
             );
 
-            solutionDict.regIOobject::write();
+            solutionDict.writeObject
+            (
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                IOstream::UNCOMPRESSED
+            );
 
             Info<< "Backup to    " << (solutionDict.objectPath() + ".old") << nl
                 << "Write  to    " << solutionDict.objectPath() << nl << endl;

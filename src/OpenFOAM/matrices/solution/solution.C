@@ -27,12 +27,22 @@ License
 #include "solution.H"
 #include "Time.H"
 
-// these two are for old syntax compatibility:
+// these are for old syntax compatibility:
 #include "BICCG.H"
 #include "ICCG.H"
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "IStringStream.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 int Foam::solution::debug(::Foam::debug::debugSwitch("solution", 0));
+
+// list of sub-dictionaries to rewrite
+//! @cond localScope
+static const Foam::List<Foam::word> subDictNames
+(
+    Foam::IStringStream("(preconditioner smoother)")()
+);
+//! @endcond localScope
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -91,31 +101,32 @@ Foam::label Foam::solution::upgradeSolverDict
                 subdict.add("solver", name);
                 subdict <<= dictionary(is);
 
-                // preconditioner can be a primitiveEntry w/o settings,
-                // or a dictionaryEntry.
+                // preconditioner and smoother entries can be
+                // 1) primitiveEntry w/o settings,
+                // 2) or a dictionaryEntry.
                 // transform primitiveEntry with settings -> dictionaryEntry
-                entry* precond = subdict.lookupEntryPtr
-                (
-                    "preconditioner",
-                    false,
-                    false
-                );
-
-                if (precond && !precond->isDict())
+                forAll(subDictNames, dictI)
                 {
-                    Istream& is = precond->stream();
-                    is >> name;
+                    const word& dictName = subDictNames[dictI];
+                    entry* ePtr = subdict.lookupEntryPtr(dictName,false,false);
 
-                    if (!is.eof())
+                    if (ePtr && !ePtr->isDict())
                     {
-                        dictionary precondDict;
-                        precondDict.add("preconditioner", name);
-                        precondDict <<= dictionary(is);
+                        Istream& is = ePtr->stream();
+                        is >> name;
 
-                        subdict.set("preconditioner", precondDict);
+                        if (!is.eof())
+                        {
+                            dictionary newDict;
+                            newDict.add(dictName, name);
+                            newDict <<= dictionary(is);
+
+                            subdict.set(dictName, newDict);
+                        }
                     }
                 }
             }
+
 
             // write out information to help people adjust to the new syntax
             if (verbose)

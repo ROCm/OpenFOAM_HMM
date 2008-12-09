@@ -36,6 +36,29 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+Foam::word
+Foam::lduMatrix::smoother::getName
+(
+    const dictionary& solverControls
+)
+{
+    word name;
+
+    // handle primitive or dictionary entry
+    const entry& e = solverControls.lookupEntry("smoother", false, false);
+    if (e.isDict())
+    {
+        e.dict().lookup("smoother") >> name;
+    }
+    else
+    {
+        e.stream() >> name;
+    }
+
+    return name;
+}
+
+
 Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 (
     const word& fieldName,
