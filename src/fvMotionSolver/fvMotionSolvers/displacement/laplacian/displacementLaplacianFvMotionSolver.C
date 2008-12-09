@@ -53,7 +53,7 @@ namespace Foam
 Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream& msData
+    Istream&
 )
 :
     fvMotionSolver(mesh),

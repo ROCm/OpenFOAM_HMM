@@ -23,54 +23,78 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    dictionaryTest
+    foamUpgradeFvSolution
 
 Description
+    Simple tool to upgrade the syntax of system/fvSolution::solvers
+
+Usage
+
+    - foamUpgradeFvSolution [OPTION]
+
+    @param -test \n
+    Suppress writing the updated fvSolution file
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOstreams.H"
-#include "IOobject.H"
-#include "IFstream.H"
-#include "dictionary.H"
+#include "argList.H"
+#include "Time.H"
+#include "IOdictionary.H"
+#include "solution.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//  Main program:
+// Main program:
 
 int main(int argc, char *argv[])
 {
-    Info<< dictionary(IFstream("testDict")()) << endl;
+    argList::noParallel();
+    argList::validOptions.insert("test", "");
 
-    IOobject::writeDivider(Info);
+#   include "setRootCase.H"
+#   include "createTime.H"
 
+    IOdictionary solutionDict
+    (
+        IOobject
+        (
+            "fvSolution",
+            runTime.system(),
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    label nChanged = 0;
+    entry* e = solutionDict.lookupEntryPtr("solvers", false, false);
+    if (e && e->isDict())
     {
-        dictionary dict(IFstream("testDictRegex")());
+        nChanged = solution::upgradeSolverDict(e->dict(), true);
+    }
 
-        Info<< "dict:" << dict << endl;
+    Info<< nChanged << " solver settings changed" << nl << endl;
+    if (nChanged)
+    {
+        if (args.options().found("test"))
+        {
+            Info<< "-test option: no changes made" << nl << endl;
+        }
+        else
+        {
+            mv
+            (
+                solutionDict.objectPath(),
+                solutionDict.objectPath() + ".old"
+            );
 
-        // Wildcard find.
-        Info<< "Wildcard find \"abc\" in top directory : "
-            << dict.lookup("abc") << endl;
-        Info<< "Wildcard find \"abc\" in sub directory : "
-            << dict.subDict("someDict").lookup("abc")
-            << endl;
-        Info<< "Recursive wildcard find \"def\" in sub directory : "
-            << dict.subDict("someDict").lookup("def", true)
-            << endl;
-        Info<< "Recursive wildcard find \"foo\" in sub directory : "
-            << dict.subDict("someDict").lookup("foo", true)
-            << endl;
-        Info<< "Recursive wildcard find \"fooz\" in sub directory : "
-            << dict.subDict("someDict").lookup("fooz", true)
-            << endl;
-        Info<< "Recursive wildcard find \"bar\" in sub directory : "
-            << dict.subDict("someDict").lookup("bar", true)
-            << endl;
-        Info<< "Recursive wildcard find \"xxx\" in sub directory : "
-            << dict.subDict("someDict").lookup("xxx", true)
-            << endl;
+            solutionDict.regIOobject::write();
+
+            Info<< "Backup to    " << (solutionDict.objectPath() + ".old") << nl
+                << "Write  to    " << solutionDict.objectPath() << nl << endl;
+        }
     }
 
     return 0;

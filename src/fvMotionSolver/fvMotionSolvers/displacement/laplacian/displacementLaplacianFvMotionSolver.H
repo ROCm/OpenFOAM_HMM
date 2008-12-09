@@ -101,8 +101,8 @@ public:
         //- Construct from polyMesh and data stream
         displacementLaplacianFvMotionSolver
         (
-            const polyMesh& mesh,
-            Istream& msData
+            const polyMesh&,
+            Istream& msDataUnused
         );
 
 

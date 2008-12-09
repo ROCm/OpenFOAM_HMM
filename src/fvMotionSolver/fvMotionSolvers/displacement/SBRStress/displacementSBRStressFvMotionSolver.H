@@ -93,8 +93,8 @@ public:
         //- Construct from polyMesh and data stream
         displacementSBRStressFvMotionSolver
         (
-            const polyMesh& mesh,
-            Istream& msData
+            const polyMesh&,
+            Istream& msDataUnused
         );
 
 

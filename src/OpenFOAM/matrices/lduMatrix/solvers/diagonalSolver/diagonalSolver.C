@@ -43,7 +43,7 @@ Foam::diagonalSolver::diagonalSolver
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 :
     lduMatrix::solver
@@ -53,18 +53,12 @@ Foam::diagonalSolver::diagonalSolver
         interfaceBouCoeffs,
         interfaceIntCoeffs,
         interfaces,
-        solverData
+        solverControls
     )
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void Foam::diagonalSolver::read(Istream& solverData)
-{
-    word solverName(solverData);
-}
-
 
 Foam::lduMatrix::solverPerformance Foam::diagonalSolver::solve
 (
