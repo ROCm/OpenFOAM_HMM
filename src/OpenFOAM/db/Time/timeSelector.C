@@ -133,6 +133,7 @@ void Foam::timeSelector::addOptions
     argList::validOptions.insert("noZero", "");
     argList::validOptions.insert("time", "time");
     argList::validOptions.insert("latestTime", "");
+    argList::validOptions.insert("latestTime0", "");
 }
 
 
@@ -169,10 +170,22 @@ Foam::List<Foam::instant> Foam::timeSelector::select
 
         if (args.options().found("time"))
         {
+            // can match 0/, but never constant/
             selectTimes = timeSelector
             (
                 IStringStream(args.options()["time"])()
             ).selected(timeDirs);
+        }
+        else if (args.options().found("latestTime0"))
+        {
+            selectTimes = false;
+            const label latestIdx = timeDirs.size() - 1;
+
+            // avoid false match on constant/
+            if (latestIdx != constantIdx)
+            {
+                selectTimes[latestIdx] = true;
+            }
         }
         else if (args.options().found("latestTime"))
         {
@@ -186,9 +199,9 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             }
         }
 
-        // special treatment for constant/
         if (constantIdx >= 0)
         {
+            // only add constant/ if specifically requested
             selectTimes[constantIdx] = args.options().found("constant");
         }
 
@@ -197,11 +210,22 @@ Foam::List<Foam::instant> Foam::timeSelector::select
         {
             if (args.options().found("noZero"))
             {
+                // exclude 0/ if specifically requested
                 selectTimes[zeroIdx] = false;
             }
             else if (argList::validOptions.found("zeroTime"))
             {
-                selectTimes[zeroIdx] = args.options().found("zeroTime");
+                // with -zeroTime enabled
+                if (args.options().found("zeroTime"))
+                {
+                    // include 0/ if specifically requested
+                    selectTimes[zeroIdx] = true;
+                }
+                else
+                {
+                    // normally drop 0/, except with -latestTime0 option
+                    selectTimes[zeroIdx] = args.options().found("latestTime0");
+                }
             }
         }
 
