@@ -26,8 +26,14 @@ Class
     Foam::regExp
 
 Description
-    Wrapper around regular expressions.
-    The beginning-of-line and end-of-line anchors are added by default.
+    Wrapper around POSIX extended regular expressions.
+
+    The beginning-of-line (^) and the end-of-line ($) anchors are implicit
+    by default.
+
+SeeAlso
+    The manpage regex(7) for more information about POSIX regular expressions.
+    These differ somewhat from @c Perl and @c sed regular expressions.
 
 SourceFiles
     regExp.C
@@ -95,14 +101,14 @@ public:
         //- Return the number of (groups)
         int ngroups() const;
 
-        //- Return true if matches, partial matches are optional
+        //- Return true if it matches, partial matches are optional
         bool match
         (
             const string&,
             bool partialMatch=false
         ) const;
 
-        //- Return true if matches and sets sub-groups matched,
+        //- Return true if it matches and sets the sub-groups matched,
         //  partial matches are optional
         bool match
         (
