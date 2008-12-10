@@ -48,9 +48,6 @@ bool Foam::dictionary::findInWildcards
 {
     if (wildCardEntries_.size() > 0)
     {
-        //wcLink = wildCardEntries_.begin();
-        //reLink = wildCardRegexps_.end();
-
         while (wcLink != wildCardEntries_.end())
         {
             if (!wildCardMatch && wcLink()->keyword() == Keyword)
@@ -510,10 +507,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             wildCardEntries_.insert(entryPtr);
             wildCardRegexps_.insert
             (
-                autoPtr<regExp>
-                (
-                    new regExp(entryPtr->keyword())
-                )
+                autoPtr<regExp>(new regExp(entryPtr->keyword()))
             );
         }
 
@@ -776,6 +770,8 @@ void Foam::dictionary::clear()
 {
     IDLList<entry>::clear();
     hashedEntries_.clear();
+    wildCardEntries_.clear();
+    wildCardRegexps_.clear();
 }
 
 

@@ -137,9 +137,6 @@ Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)
     functionEntries::inputModeEntry::clear();
 
     dict.clear();
-    dict.hashedEntries_.clear();
-    dict.wildCardEntries_.clear();
-    dict.wildCardRegexps_.clear();
     dict.read(is);
 
     return is;
