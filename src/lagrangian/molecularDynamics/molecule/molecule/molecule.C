@@ -128,24 +128,24 @@ bool Foam::molecule::move(molecule::trackData& td)
         tensor R;
 
         R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
-        pi_ = R & pi_;
-        Q_ = Q_ & R.T();
+        pi_ = pi_ & R;
+        Q_ = Q_ & R;
 
         R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
-        pi_ = R & pi_;
-        Q_ = Q_ & R.T();
+        pi_ = pi_ & R;
+        Q_ = Q_ & R;
 
         R = rotationTensorZ(deltaT*pi_.z()/momentOfInertia.zz());
-        pi_ = R & pi_;
-        Q_ = Q_ & R.T();
+        pi_ = pi_ & R;
+        Q_ = Q_ & R;
 
         R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
-        pi_ = R & pi_;
-        Q_ = Q_ & R.T();
+        pi_ = pi_ & R;
+        Q_ = Q_ & R;
 
         R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
-        pi_ = R & pi_;
-        Q_ = Q_ & R.T();
+        pi_ = pi_ & R;
+        Q_ = Q_ & R;
 
         setSitePositions(constProps);
     }
@@ -166,8 +166,16 @@ bool Foam::molecule::move(molecule::trackData& td)
 
             a_ += f/m;
 
-            tau_ += ((Q_.T() & f) ^ constProps.siteReferencePositions()[s]);
+            tau_ += (constProps.siteReferencePositions()[s] ^ (Q_.T() & f));
         }
+
+        Info<< nl << "move " << id_
+            << nl << constProps.siteReferencePositions()
+            << nl << siteForces_
+            << nl << tau_
+            << nl << a_
+            << nl << m
+            << endl;
 
         v_ += 0.5*deltaT*a_;
 

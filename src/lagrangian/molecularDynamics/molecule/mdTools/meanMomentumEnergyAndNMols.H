@@ -88,11 +88,6 @@ vector singleStepCentreOfMass(vector::zero);
 
         const vector& molOmega(inv(molMoI) & mol().pi());
 
-        // Info<< mol().pi()
-        //     << nl << molOmega
-        //     << nl << (molOmega & mol().pi())/(mag(molOmega) * mag(mol().pi()))
-        //     << endl;
-
         vector molPiGlobal = mol().Q() & mol().pi();
 
         singleStepTotalLinearMomentum += molV * molMass;
