@@ -22,38 +22,49 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+InNamspace
+    Foam
+
 Description
+    Operations on lists of strings.
+
+SourceFiles
+    stringListOpsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "stringListOps.H"
-#include "IOstreams.H"
+#ifndef stringListOps_H
+#define stringListOps_H
 
-using namespace Foam;
+#include "labelList.H"
+#include "stringList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    stringList sl(3);
-    sl[0] = "hello";
-    sl[1] = "heello";
-    sl[2] = "heeello";
 
-    labelList matches = findStrings(".*ee.*", sl);
-
-    Info<< "matches found for regexp .*ee.* : ";
-    forAll(matches, i)
-    {
-        Info<< " " << sl[matches[i]];
-    }
-    Info<< endl;
-
-    Info << "End\n" << endl;
-
-    return 0;
+    //- Return the indices of the strings in the list
+    //  that match the given regular expression
+    //  partial matches are optional
+    template<class StringType>
+    labelList findStrings
+    (
+        const string& regexpPattern,
+        const UList<StringType>&,
+        bool partialMatch=false
+    );
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "stringListOpsTemplates.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "labelList.H"
-#include "regularExpression.H"
+#include "regExp.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,25 +34,28 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
+template<class StringType>
+labelList findStrings
+(
+    const string& pattern,
+    const UList<StringType>& lst,
+    bool  partialMatch
+)
 {
-    labelList matches(sl.size());
+    regExp re(pattern);
+    labelList matched(lst.size());
 
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
+    label matchI = 0;
+    forAll(lst, elemI)
     {
-        if (re.matches(sl[i]))
+        if (re.match(lst[elemI], partialMatch))
         {
-            matches[matchi++] = i;
+            matched[matchI++] = elemI;
         }
     }
+    matched.setSize(matchI);
 
-    matches.setSize(matchi);
-
-    return matches;
+    return matched;
 }
 
 

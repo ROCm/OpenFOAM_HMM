@@ -67,7 +67,7 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-class regularExpression;
+class regExp;
 class dictionary;
 Istream& operator>>(Istream&, dictionary&);
 Ostream& operator<<(Ostream&, const dictionary&);
@@ -95,8 +95,8 @@ class dictionary
         //- Wildcard entries
         DLList<entry*> wildCardEntries_;
 
-        //- Wildcard precompiled regex
-        DLList<autoPtr<regularExpression> > wildCardRegexps_;
+        //- Wildcard precompiled regular expressions
+        DLList<autoPtr<regExp> > wildCardRegexps_;
 
    // Private Member Functions
 
@@ -107,7 +107,7 @@ class dictionary
             const bool wildCardMatch,
             const word& Keyword,
             DLList<entry*>::const_iterator& wcLink,
-            DLList<autoPtr<regularExpression> >::const_iterator& reLink
+            DLList<autoPtr<regExp> >::const_iterator& reLink
         ) const;
 
         //- Search wildcard table either for exact match or for regular
@@ -117,7 +117,7 @@ class dictionary
             const bool wildCardMatch,
             const word& Keyword,
             DLList<entry*>::iterator& wcLink,
-            DLList<autoPtr<regularExpression> >::iterator& reLink
+            DLList<autoPtr<regExp> >::iterator& reLink
         );
 
 
