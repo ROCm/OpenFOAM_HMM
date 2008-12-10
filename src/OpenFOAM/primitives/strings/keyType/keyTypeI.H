@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 inline Foam::keyType::keyType()
 :
     word(),
@@ -38,15 +37,13 @@ inline Foam::keyType::keyType()
 {}
 
 
-//- Construct as copy
 inline Foam::keyType::keyType(const keyType& s)
 :
     word(s, false),
-    isWildCard_(s.isWildCard())
+    isWildCard_(s.isPattern())
 {}
 
 
-//- Construct as copy of word
 inline Foam::keyType::keyType(const word& s)
 :
     word(s, false),
@@ -54,7 +51,7 @@ inline Foam::keyType::keyType(const word& s)
 {}
 
 
-//- Construct as copy of string. Expect it to be regular expression
+// Construct as copy of string. Expect it to be regular expression
 inline Foam::keyType::keyType(const string& s)
 :
     word(s, false),
@@ -62,7 +59,7 @@ inline Foam::keyType::keyType(const string& s)
 {}
 
 
-//- Construct as copy of character array
+// Construct as copy of character array
 inline Foam::keyType::keyType(const char* s)
 :
     word(s, false),
@@ -74,11 +71,11 @@ inline Foam::keyType::keyType(const char* s)
 inline Foam::keyType::keyType
 (
     const std::string& s,
-    const bool isWildCard
+    const bool isPattern
 )
 :
     word(s, false),
-    isWildCard_(isWildCard)
+    isWildCard_(isPattern)
 {}
 
 
@@ -90,7 +87,7 @@ inline bool Foam::keyType::valid(char c)
 }
 
 
-bool Foam::keyType::isWildCard() const
+bool Foam::keyType::isPattern() const
 {
     return isWildCard_;
 }
@@ -102,7 +99,7 @@ inline void Foam::keyType::operator=(const keyType& s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = s.isWildCard();
+    isWildCard_ = s.isPattern();
 }
 
 

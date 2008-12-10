@@ -28,8 +28,8 @@ Class
 Description
     A class for handling keywords in dictionaries.
 
-    A keyType is the keyword of a dictionary. It differs from word in that
-    it accepts wildcards.
+    A keyType is the keyword of a dictionary.
+    It differs from word in that it accepts patterns (regular expressions).
 
 SourceFiles
     keyType.C
@@ -53,7 +53,7 @@ class Ostream;
 
 
 /*---------------------------------------------------------------------------*\
-                           Class keyType Declaration
+                          Class keyType Declaration
 \*---------------------------------------------------------------------------*/
 
 class keyType
@@ -78,22 +78,22 @@ public:
         inline keyType();
 
         //- Construct as copy
-        inline keyType(const keyType& s);
+        inline keyType(const keyType&);
 
         //- Construct as copy of word
-        inline keyType(const word& s);
+        inline keyType(const word&);
 
         //- Construct as copy of string. Expect it to be regular expression.
-        inline keyType(const string& s);
+        inline keyType(const string&);
 
         //- Construct as copy of character array
-        inline keyType(const char* s);
+        inline keyType(const char*);
 
         //- Construct as copy of std::string
-        inline keyType(const std::string& s, const bool isWildCard);
+        inline keyType(const std::string&, const bool isPattern);
 
         //- Construct from Istream
-        keyType(Istream& is);
+        keyType(Istream&);
 
 
     // Member functions
@@ -101,29 +101,25 @@ public:
         //- Is this character valid for a keyType
         inline static bool valid(char c);
 
-        //- Is the type a wildcard?
-        inline bool isWildCard() const;
-
+        //- Should be treated as a match rather than a literal string
+        inline bool isPattern() const;
 
     // Member operators
 
         // Assignment
 
-            inline void operator=(const keyType& s);
+            inline void operator=(const keyType&);
+            inline void operator=(const word&);
 
             //- Assign from regular expression.
-            inline void operator=(const string& s);
-
-            inline void operator=(const word& s);
-
+            inline void operator=(const string&);
             inline void operator=(const char*);
 
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream& is, keyType& w);
-
-        friend Ostream& operator<<(Ostream& os, const keyType& w);
+        friend Istream& operator>>(Istream&, keyType&);
+        friend Ostream& operator<<(Ostream&, const keyType&);
 };
 
 
