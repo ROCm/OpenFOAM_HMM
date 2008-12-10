@@ -38,14 +38,15 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    Foam::timeSelector::addOptions();
+    // timeSelector::addOptions();
+    timeSelector::addOptions(true, true);
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     Info<< "Times found:" << runTime.times() << endl;
 
-    instantList timeDirs = Foam::timeSelector::select0(runTime, args);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
     Info<< "Times selected:" << timeDirs << endl;
     Info<< "\nEnd\n" << endl;

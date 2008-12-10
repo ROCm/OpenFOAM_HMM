@@ -131,9 +131,8 @@ void Foam::timeSelector::addOptions
         argList::validOptions.insert("zeroTime", "");
     }
     argList::validOptions.insert("noZero", "");
-    argList::validOptions.insert("time", "time");
+    argList::validOptions.insert("time", "ranges");
     argList::validOptions.insert("latestTime", "");
-    argList::validOptions.insert("latestTime0", "");
 }
 
 
@@ -168,35 +167,35 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             }
         }
 
+        // determine latestTime selection (if any)
+        // this must appear before the -time option processing
+        label latestIdx = -1;
+        if (args.options().found("latestTime"))
+        {
+            selectTimes = false;
+            latestIdx = timeDirs.size() - 1;
+
+            // avoid false match on constant/
+            if (latestIdx == constantIdx)
+            {
+                latestIdx = -1;
+            }
+        }
+
         if (args.options().found("time"))
         {
-            // can match 0/, but never constant/
+            // can match 0/, but can never match constant/
             selectTimes = timeSelector
             (
                 IStringStream(args.options()["time"])()
             ).selected(timeDirs);
         }
-        else if (args.options().found("latestTime0"))
-        {
-            selectTimes = false;
-            const label latestIdx = timeDirs.size() - 1;
 
-            // avoid false match on constant/
-            if (latestIdx != constantIdx)
-            {
-                selectTimes[latestIdx] = true;
-            }
-        }
-        else if (args.options().found("latestTime"))
-        {
-            selectTimes = false;
-            const label latestIdx = timeDirs.size() - 1;
 
-            // avoid false match on constant/ or 0/
-            if (latestIdx != constantIdx && latestIdx != zeroIdx)
-            {
-                selectTimes[latestIdx] = true;
-            }
+        // add in latestTime (if selected)
+        if (latestIdx >= 0)
+        {
+            selectTimes[latestIdx] = true;
         }
 
         if (constantIdx >= 0)
@@ -215,17 +214,8 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             }
             else if (argList::validOptions.found("zeroTime"))
             {
-                // with -zeroTime enabled
-                if (args.options().found("zeroTime"))
-                {
-                    // include 0/ if specifically requested
-                    selectTimes[zeroIdx] = true;
-                }
-                else
-                {
-                    // normally drop 0/, except with -latestTime0 option
-                    selectTimes[zeroIdx] = args.options().found("latestTime0");
-                }
+                // with -zeroTime enabled, drop 0/ unless specifically requested
+                selectTimes[zeroIdx] = args.options().found("zeroTime");
             }
         }
 
