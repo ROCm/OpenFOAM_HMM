@@ -734,25 +734,21 @@ void Foam::polyTopoChange::reorderCompactFaces
 )
 {
     reorder(oldToNew, faces_);
-    faces_.setSize(newSize);
-    faces_.shrink();
+    faces_.setCapacity(newSize);
 
     reorder(oldToNew, region_);
-    region_.setSize(newSize);
-    region_.shrink();
+    region_.setCapacity(newSize);
 
     reorder(oldToNew, faceOwner_);
-    faceOwner_.setSize(newSize);
-    faceOwner_.shrink();
+    faceOwner_.setCapacity(newSize);
 
     reorder(oldToNew, faceNeighbour_);
-    faceNeighbour_.setSize(newSize);
-    faceNeighbour_.shrink();
+    faceNeighbour_.setCapacity(newSize);
 
     // Update faceMaps.
     reorder(oldToNew, faceMap_);
-    faceMap_.setSize(newSize);
-    faceMap_.shrink();
+    faceMap_.setCapacity(newSize);
+
     renumberReverseMap(oldToNew, reverseFaceMap_);
 
     renumberKey(oldToNew, faceFromPoint_);
@@ -932,13 +928,11 @@ void Foam::polyTopoChange::compact
         }
 
         reorder(localPointMap, points_);
-        points_.setSize(newPointI);
-        points_.shrink();
+        points_.setCapacity(newPointI);
 
         // Update pointMaps
         reorder(localPointMap, pointMap_);
-        pointMap_.setSize(newPointI);
-        pointMap_.shrink();
+        pointMap_.setCapacity(newPointI);
         renumberReverseMap(localPointMap, reversePointMap_);
 
         renumberKey(localPointMap, pointZone_);
@@ -1038,13 +1032,11 @@ void Foam::polyTopoChange::compact
         if (orderCells || (newCellI != cellMap_.size()))
         {
             reorder(localCellMap, cellMap_);
-            cellMap_.setSize(newCellI);
-            cellMap_.shrink();
+            cellMap_.setCapacity(newCellI);
             renumberReverseMap(localCellMap, reverseCellMap_);
 
             reorder(localCellMap, cellZone_);
-            cellZone_.setSize(newCellI);
-            cellZone_.shrink();
+            cellZone_.setCapacity(newCellI);
 
             renumberKey(localCellMap, cellFromPoint_);
             renumberKey(localCellMap, cellFromEdge_);
@@ -2157,9 +2149,9 @@ void Foam::polyTopoChange::addMesh
         const pointField& points = mesh.points();
         const pointZoneMesh& pointZones = mesh.pointZones();
 
-        // Resize
-        points_.setSize(points_.size() + points.size());
-        pointMap_.setSize(pointMap_.size() + points.size());
+        // Extend
+        points_.setCapacity(points_.size() + points.size());
+        pointMap_.setCapacity(pointMap_.size() + points.size());
         pointZone_.resize(pointZone_.size() + points.size()/100);
 
         // Precalc offset zones
@@ -2198,11 +2190,11 @@ void Foam::polyTopoChange::addMesh
         // always equals nCells
         label nAllCells = mesh.nCells();
 
-        cellMap_.setSize(cellMap_.size() + nAllCells);
+        cellMap_.setCapacity(cellMap_.size() + nAllCells);
         cellFromPoint_.resize(cellFromPoint_.size() + nAllCells/100);
         cellFromEdge_.resize(cellFromEdge_.size() + nAllCells/100);
         cellFromFace_.resize(cellFromFace_.size() + nAllCells/100);
-        cellZone_.setSize(cellZone_.size() + nAllCells);
+        cellZone_.setCapacity(cellZone_.size() + nAllCells);
 
 
         // Precalc offset zones
@@ -2258,11 +2250,11 @@ void Foam::polyTopoChange::addMesh
         // Resize
         label nAllFaces = mesh.faces().size();
 
-        faces_.setSize(faces_.size() + nAllFaces);
-        region_.setSize(region_.size() + nAllFaces);
-        faceOwner_.setSize(faceOwner_.size() + nAllFaces);
-        faceNeighbour_.setSize(faceNeighbour_.size() + nAllFaces);
-        faceMap_.setSize(faceMap_.size() + nAllFaces);
+        faces_.setCapacity(faces_.size() + nAllFaces);
+        region_.setCapacity(region_.size() + nAllFaces);
+        faceOwner_.setCapacity(faceOwner_.size() + nAllFaces);
+        faceNeighbour_.setCapacity(faceNeighbour_.size() + nAllFaces);
+        faceMap_.setCapacity(faceMap_.size() + nAllFaces);
         faceFromPoint_.resize(faceFromPoint_.size() + nAllFaces/100);
         faceFromEdge_.resize(faceFromEdge_.size() + nAllFaces/100);
         flipFaceFlux_.resize(flipFaceFlux_.size() + nAllFaces/100);
@@ -3006,9 +2998,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     {
         retiredPoints_.clear();
         retiredPoints_.resize(0);
-
-        region_.clear();
-        region_.setSize(0);
+        region_.clearStorage();
     }
 
 
@@ -3072,8 +3062,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         faceZoneFlip_.clear();
         faceZoneFlip_.resize(0);
 
-        cellZone_.clear();
-        cellZone_.setSize(0);
+        cellZone_.clearStorage();
     }
 
 
@@ -3240,8 +3229,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     {
         retiredPoints_.clear();
         retiredPoints_.resize(0);
-        region_.clear();
-        region_.setSize(0);
+        region_.clearStorage();
     }
 
 
@@ -3368,7 +3356,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         faceZoneFlip_.resize(0);
 
         cellZone_.clear();
-        cellZone_.setSize(0);
+        cellZone_.clearStorage();
     }
 
     // Patch point renumbering

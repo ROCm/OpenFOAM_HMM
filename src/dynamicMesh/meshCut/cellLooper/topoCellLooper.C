@@ -70,7 +70,7 @@ void Foam::topoCellLooper::subsetList
                 << "startI:" << startI << "  freeI:" << freeI
                 << "  lst:" << lst << abort(FatalError);
         }
-        lst.setSize(freeI);
+        lst.setCapacity(freeI);
     }
     else
     {
@@ -88,7 +88,7 @@ void Foam::topoCellLooper::subsetList
                 << "  lst:" << lst << abort(FatalError);
         }
 
-        lst.setSize(freeI - startI);
+        lst.setCapacity(freeI - startI);
     }
 }
 
