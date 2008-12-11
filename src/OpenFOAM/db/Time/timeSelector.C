@@ -131,7 +131,7 @@ void Foam::timeSelector::addOptions
         argList::validOptions.insert("zeroTime", "");
     }
     argList::validOptions.insert("noZero", "");
-    argList::validOptions.insert("time", "time");
+    argList::validOptions.insert("time", "ranges");
     argList::validOptions.insert("latestTime", "");
 }
 
@@ -167,28 +167,40 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             }
         }
 
+        // determine latestTime selection (if any)
+        // this must appear before the -time option processing
+        label latestIdx = -1;
+        if (args.options().found("latestTime"))
+        {
+            selectTimes = false;
+            latestIdx = timeDirs.size() - 1;
+
+            // avoid false match on constant/
+            if (latestIdx == constantIdx)
+            {
+                latestIdx = -1;
+            }
+        }
+
         if (args.options().found("time"))
         {
+            // can match 0/, but can never match constant/
             selectTimes = timeSelector
             (
                 IStringStream(args.options()["time"])()
             ).selected(timeDirs);
         }
-        else if (args.options().found("latestTime"))
-        {
-            selectTimes = false;
-            const label latestIdx = timeDirs.size() - 1;
 
-            // avoid false match on constant/ or 0/
-            if (latestIdx != constantIdx && latestIdx != zeroIdx)
-            {
-                selectTimes[latestIdx] = true;
-            }
+
+        // add in latestTime (if selected)
+        if (latestIdx >= 0)
+        {
+            selectTimes[latestIdx] = true;
         }
 
-        // special treatment for constant/
         if (constantIdx >= 0)
         {
+            // only add constant/ if specifically requested
             selectTimes[constantIdx] = args.options().found("constant");
         }
 
@@ -197,10 +209,12 @@ Foam::List<Foam::instant> Foam::timeSelector::select
         {
             if (args.options().found("noZero"))
             {
+                // exclude 0/ if specifically requested
                 selectTimes[zeroIdx] = false;
             }
             else if (argList::validOptions.found("zeroTime"))
             {
+                // with -zeroTime enabled, drop 0/ unless specifically requested
                 selectTimes[zeroIdx] = args.options().found("zeroTime");
             }
         }

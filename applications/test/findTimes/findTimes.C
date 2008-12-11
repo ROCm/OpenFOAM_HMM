@@ -28,6 +28,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
+#include "timeSelector.H"
 
 using namespace Foam;
 
@@ -36,13 +37,19 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::noParallel();
+    // timeSelector::addOptions();
+    timeSelector::addOptions(true, true);
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    Info<< runTime.times() << endl;
+    Info<< "Times found:" << runTime.times() << endl;
 
-    Info << "End\n" << endl;
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    Info<< "Times selected:" << timeDirs << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

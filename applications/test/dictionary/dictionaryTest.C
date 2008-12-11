@@ -30,6 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "IOstreams.H"
+#include "IOobject.H"
 #include "IFstream.H"
 #include "dictionary.H"
 
@@ -40,18 +41,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    IFstream dictStream("testDict");
-    dictionary testDict(dictStream);
+    Info<< dictionary(IFstream("testDict")()) << endl;
 
-    Info<< testDict << endl;
+    IOobject::writeDivider(Info);
 
     {
-        dictionary someDict;
-        someDict.add(keyType("a.*", true), "subdictValue");
-
-        dictionary dict;
-        dict.add("someDict", someDict);
-        dict.add(keyType(".*", true), "parentValue");
+        dictionary dict(IFstream("testDictRegex")());
 
         Info<< "dict:" << dict << endl;
 
@@ -63,6 +58,18 @@ int main(int argc, char *argv[])
             << endl;
         Info<< "Recursive wildcard find \"def\" in sub directory : "
             << dict.subDict("someDict").lookup("def", true)
+            << endl;
+        Info<< "Recursive wildcard find \"foo\" in sub directory : "
+            << dict.subDict("someDict").lookup("foo", true)
+            << endl;
+        Info<< "Recursive wildcard find \"fooz\" in sub directory : "
+            << dict.subDict("someDict").lookup("fooz", true)
+            << endl;
+        Info<< "Recursive wildcard find \"bar\" in sub directory : "
+            << dict.subDict("someDict").lookup("bar", true)
+            << endl;
+        Info<< "Recursive wildcard find \"xxx\" in sub directory : "
+            << dict.subDict("someDict").lookup("xxx", true)
             << endl;
     }
 

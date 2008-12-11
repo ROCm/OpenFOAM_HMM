@@ -28,6 +28,7 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "processorPolyPatch.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -420,13 +421,13 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 
     forAll(patchNames, i)
     {
-        // Treat the diven patch names as wild-cards and search the set
+        // Treat the given patch names as wild-cards and search the set
         // of all patch names for matches
         labelList patchIDs = findStrings(patchNames[i], allPatchNames);
 
         if (patchIDs.size() == 0)
         {
-            WarningIn("polyBoundaryMesh::patchSet(const wordList& patchNames)")
+            WarningIn("polyBoundaryMesh::patchSet(const wordList&)")
                 << "Cannot find any patch names matching " << patchNames[i]
                 << endl;
         }

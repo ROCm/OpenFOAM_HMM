@@ -55,7 +55,7 @@ namespace Foam
 Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream& msData
+    Istream&
 )
 :
     fvMotionSolver(mesh),

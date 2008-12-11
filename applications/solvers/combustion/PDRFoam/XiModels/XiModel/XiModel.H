@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    XiModel
+    Foam::XiModel
 
 Description
     Base-class for all Xi models used by the b-Xi combustion model.
@@ -101,8 +101,6 @@ namespace Foam
 /*---------------------------------------------------------------------------*\
                           Class XiModel Declaration
 \*---------------------------------------------------------------------------*/
-
-
 
 class XiModel
 {

@@ -47,7 +47,7 @@ namespace Foam
 Foam::noPreconditioner::noPreconditioner
 (
     const lduMatrix::solver& sol,
-    Istream&
+    const dictionary&
 )
 :
     lduMatrix::preconditioner(sol)
@@ -55,10 +55,6 @@ Foam::noPreconditioner::noPreconditioner
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::noPreconditioner::read(Istream&)
-{}
-
 
 void Foam::noPreconditioner::precondition
 (

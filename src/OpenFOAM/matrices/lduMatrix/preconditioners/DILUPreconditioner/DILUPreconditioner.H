@@ -67,11 +67,11 @@ public:
 
     // Constructors
 
-        //- Construct from matrix components and preconditioner data stream
+        //- Construct from matrix components and preconditioner solver controls
         DILUPreconditioner
         (
-            const lduMatrix::solver& sol,
-            Istream& preconditionerData
+            const lduMatrix::solver&,
+            const dictionary& solverControlsUnused
         );
 
 
@@ -94,8 +94,7 @@ public:
             const direction cmpt=0
         ) const;
 
-        //- Return wT the transpose-matrix preconditioned form of
-        //  residual rT.
+        //- Return wT the transpose-matrix preconditioned form of residual rT.
         virtual void preconditionT
         (
             scalarField& wT,
