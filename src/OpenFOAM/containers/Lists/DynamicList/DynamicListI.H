@@ -30,7 +30,7 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 :
     List<T>(SizeInc),
-    allocSize_(SizeInc)
+    capacity_(SizeInc)
 {
     List<T>::size(0);
 }
@@ -39,11 +39,11 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
-    const label s
+    const label nElem
 )
 :
-    List<T>(s),
-    allocSize_(s)
+    List<T>(nElem),
+    capacity_(nElem)
 {
     List<T>::size(0);
 }
@@ -56,39 +56,101 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 )
 :
     List<T>(lst),
-    allocSize_(lst.size())
+    capacity_(lst.size())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline Foam::label Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::allocSize()
+inline Foam::label Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::capacity()
 const
 {
-    return allocSize_;
+    return capacity_;
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setCapacity
+(
+    const label nElem
+)
+{
+    label nextFree = List<T>::size();
+    capacity_ = nElem;
+
+    if (nextFree > capacity_)
+    {
+        // truncate addressed sizes too
+        nextFree = capacity_;
+    }
+
+    List<T>::setSize(capacity_);
+    List<T>::size(nextFree);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::reserve
+(
+    const label nElem
+)
+{
+    // allocate more capacity?
+    if (nElem > capacity_)
+    {
+        capacity_ = max
+        (
+            nElem,
+            label(SizeInc + capacity_ * SizeMult / SizeDiv)
+        );
+
+        // adjust allocated size, leave addressed size untouched
+        label nextFree = List<T>::size();
+        List<T>::setSize(capacity_);
+        List<T>::size(nextFree);
+    }
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 (
-    const label s
+    const label nElem
+)
+{
+    // allocate more capacity?
+    if (nElem > capacity_)
+    {
+        capacity_ = max
+        (
+            nElem,
+            label(SizeInc + capacity_ * SizeMult / SizeDiv)
+        );
+
+        List<T>::setSize(capacity_);
+    }
+
+    // adjust addressed size
+    List<T>::size(nElem);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
+(
+    const label nElem,
+    const T& t
 )
 {
     label nextFree = List<T>::size();
-    if (s <= nextFree)
+    setSize(nElem);
+
+    // set new elements to constant value
+    while (nextFree < nElem)
     {
-        // adjust addressed size, leave allocated size untouched
-        nextFree = s;
+        this->operator[](nextFree++) = t;
     }
-    else
-    {
-        // adjust allocated size, leave addressed size untouched
-        allocSize_ = s;
-        List<T>::setSize(allocSize_);
-    }
-    List<T>::size(nextFree);
 }
 
 
@@ -103,7 +165,7 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clearStorage()
 {
     List<T>::clear();
-    allocSize_ = 0;
+    capacity_ = 0;
 }
 
 
@@ -111,13 +173,15 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::shrink()
 {
-    if (allocSize_ > List<T>::size())
+    label nextFree = List<T>::size();
+    if (capacity_ > nextFree)
     {
-        allocSize_ = List<T>::size();
-        // force re-allocation/copying in List<T>::setSize() by temporarily
-        // faking a larger list size that will be truncated
-        List<T>::size(allocSize_+1);
-        List<T>::setSize(allocSize_);
+        // use the full list when resizing
+        List<T>::size(capacity_);
+        // the new size
+        capacity_ = nextFree;
+        List<T>::setSize(capacity_);
+        List<T>::size(nextFree);
     }
     return *this;
 }
@@ -127,7 +191,7 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer(List<T>& lst)
 {
-    allocSize_ = lst.size();
+    capacity_ = lst.size();
     List<T>::transfer(lst);   // take over storage, clear addressing for lst.
 }
 
@@ -140,41 +204,58 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 )
 {
     // take over storage as-is (without shrink), clear addressing for lst.
-    allocSize_ = lst.allocSize_;
-    lst.allocSize_ = 0;
+    capacity_ = lst.capacity_;
+    lst.capacity_ = 0;
 
     List<T>::transfer(static_cast<List<T>&>(lst));
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append(const T& e)
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+(
+    const T& t
+)
 {
-    // Work on copy free index since gets overwritten by setSize
+    label elemI = List<T>::size();
+    setSize(elemI + 1);
+
+    this->operator[](elemI) = t;
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+(
+    const UList<T>& lst
+)
+{
     label nextFree = List<T>::size();
 
-    nextFree++;
-
-    if (nextFree > allocSize_)
+    if (this == &lst)
     {
-        allocSize_ = max
+        FatalErrorIn
         (
-            nextFree,
-            label(SizeMult*allocSize_/SizeDiv + SizeInc)
-        );
-        List<T>::setSize(allocSize_);
+            "DynamicList<T, SizeInc, SizeMult, SizeDiv>::append"
+            "(const UList<T>&)"
+        )   << "attempted appending to self" << abort(FatalError);
     }
 
-    List<T>::size(nextFree);
+    setSize(nextFree + lst.size());
 
-    this->operator[](nextFree - 1) = e;
+    forAll(lst, elemI)
+    {
+        this->operator[](nextFree++) = lst[elemI];
+    }
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 {
-    if (List<T>::size() == 0)
+    label elemI = List<T>::size() - 1;
+
+    if (elemI < 0)
     {
         FatalErrorIn
         (
@@ -182,11 +263,9 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
         )   << "List is empty" << abort(FatalError);
     }
 
-    label nextFree = List<T>::size()-1;
+    const T& val = List<T>::operator[](elemI);
 
-    const T& val = List<T>::operator[](nextFree);
-
-    List<T>::size(nextFree);
+    List<T>::size(elemI);
 
     return val;
 }
@@ -197,26 +276,15 @@ inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline T& Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator()
 (
-    const label i
+    const label elemI
 )
 {
-    label nextFree = List<T>::size();
-
-    nextFree = max(nextFree, i + 1);
-
-    if (nextFree > allocSize_)
+    if (elemI >= List<T>::size())
     {
-        allocSize_ = max
-        (
-            nextFree,
-            label(SizeMult*allocSize_/SizeDiv + SizeInc)
-        );
-        List<T>::setSize(allocSize_);
+        setSize(elemI + 1);
     }
 
-    List<T>::size(nextFree);
-
-    return this->operator[](i);
+    return this->operator[](elemI);
 }
 
 
@@ -226,21 +294,39 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
     const T& t
 )
 {
-    List<T>::operator=(t);
+    UList<T>::operator=(t);
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 (
-    const List<T>& lst
+    const UList<T>& lst
 )
 {
-    // make the entire storage available for the copy operation:
-    List<T>::size(allocSize_);
+    if (this == &lst)
+    {
+        FatalErrorIn
+        (
+            "DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator="
+            "(const UList<T>&)"
+        )   << "attempted assignment to self" << abort(FatalError);
+    }
 
-    List<T>::operator=(lst);
-    allocSize_ = List<T>::size();
+    if (capacity_ >= lst.size())
+    {
+        // can copy w/o reallocating, match initial size to avoid reallocation
+        List<T>::size(lst.size());
+        List<T>::operator=(lst);
+    }
+    else
+    {
+        // make everything available for the copy operation
+        List<T>::size(capacity_);
+
+        List<T>::operator=(lst);
+        capacity_ = List<T>::size();
+    }
 }
 
 

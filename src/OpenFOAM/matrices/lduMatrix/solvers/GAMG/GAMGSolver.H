@@ -212,7 +212,7 @@ public:
 
     // Constructors
 
-        //- Construct from lduMatrix
+        //- Construct from lduMatrix and solver controls
         GAMGSolver
         (
             const word& fieldName,
@@ -220,7 +220,7 @@ public:
             const FieldField<Field, scalar>& interfaceBouCoeffs,
             const FieldField<Field, scalar>& interfaceIntCoeffs,
             const lduInterfaceFieldPtrsList& interfaces,
-            Istream& solverData
+            const dictionary& solverControls
         );
 
 

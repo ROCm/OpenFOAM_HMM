@@ -59,7 +59,7 @@ class STLsurfaceFormatCore
 {
     // Private Data
 
-        bool binary_;
+        bool sorted_;
 
         //- The points supporting the facets
         pointField points_;
@@ -69,6 +69,9 @@ class STLsurfaceFormatCore
 
         //- The solid names, in the order of their first appearance
         List<word> names_;
+
+        //- The solid count, in the order of their first appearance
+        List<label> sizes_;
 
     // Private Member Functions
 
@@ -81,10 +84,10 @@ class STLsurfaceFormatCore
         //- Determine the file type
         static int detectBINARY(const fileName&);
 
-        //- Read ASCII, set groupToPatch
+        //- Read ASCII
         bool readASCII(IFstream&, const off_t);
 
-        //- Read BINARY, set maxRegionId
+        //- Read BINARY
         bool readBINARY(IFstream&, const off_t);
 
 public:
@@ -110,27 +113,23 @@ public:
 
     // Member Functions
 
-        //- File was detected to be STL binary
-        bool binary() const
+        //- File read was already sorted
+        bool sorted() const
         {
-            return binary_;
-        }
-
-        //- The number of facets is the number of regions
-        label size() const
-        {
-            return regions_.size();
+            return sorted_;
         }
 
         //- Flush all values
         void clear()
         {
+            sorted_ = true;
             points_.clear();
             regions_.clear();
             names_.clear();
+            sizes_.clear();
         }
 
-        //- Return full access to the faces
+        //- Return full access to the points
         pointField& points()
         {
             return points_;
@@ -146,6 +145,12 @@ public:
         List<word>& names()
         {
             return names_;
+        }
+
+        //- The list of solid sizes in the order of their first appearance
+        List<label>& sizes()
+        {
+            return sizes_;
         }
 
 };

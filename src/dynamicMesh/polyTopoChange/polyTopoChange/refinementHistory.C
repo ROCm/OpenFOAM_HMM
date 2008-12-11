@@ -411,7 +411,7 @@ Foam::refinementHistory::refinementHistory
     else
     {
         visibleCells_.setSize(nCells);
-        splitCells_.setSize(nCells);
+        splitCells_.setCapacity(nCells);
 
         for (label cellI = 0; cellI < nCells; cellI++)
         {

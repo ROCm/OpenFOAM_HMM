@@ -35,10 +35,10 @@ License
 template<class Face>
 Foam::fileFormats::FTRsurfaceFormat<Face>::FTRsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -47,19 +47,19 @@ Foam::fileFormats::FTRsurfaceFormat<Face>::FTRsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::FTRsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
@@ -85,13 +85,18 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     this->storedFaces().transfer(faceLst);
     this->storedRegions().transfer(regionLst);
 
-    Map<word> regionNames;
-    forAll(readPatches, patchI)
+    // cast ftrPatch into new form
+    List<surfPatchIdentifier> newPatches(readPatches.size());
+    forAll(newPatches, patchI)
     {
-        regionNames.insert(patchI, readPatches[patchI].name());
+        newPatches[patchI] = surfPatchIdentifier
+        (
+            readPatches[patchI].name(),
+            patchI
+        );
     }
 
-    this->setPatches(regionNames, readPatches.size() - 1);
+    this->storedPatches().transfer(newPatches);
     return true;
 }
 

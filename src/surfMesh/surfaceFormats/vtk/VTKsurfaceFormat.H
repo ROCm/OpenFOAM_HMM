@@ -27,6 +27,7 @@ Class
 
 Description
     Provide a means of writing VTK legacy format.
+    The output is never sorted by patch.
 
 SourceFiles
     VTKsurfaceFormat.C
@@ -56,7 +57,7 @@ namespace fileFormats
 template<class Face>
 class VTKsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public VTKsurfaceFormatCore
 {
     // Private Member Functions
@@ -98,15 +99,15 @@ public:
         //- Write MeshedSurface
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const MeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions.
+        //  The output remains unsorted
         static void write
         (
             Ostream&,
@@ -114,14 +115,14 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions.
+        //  The output remains unsorted
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const UnsortedMeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write object

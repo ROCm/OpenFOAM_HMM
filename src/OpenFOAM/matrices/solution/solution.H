@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class solution Declaration
+                          Class solution Declaration
 \*---------------------------------------------------------------------------*/
 
 class solution
@@ -59,7 +59,6 @@ class solution
         //- Dictionary of solver parameters for all the fields
         dictionary solvers_;
 
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
@@ -68,6 +67,11 @@ class solution
 
 
 public:
+
+    //- Update from older solver controls syntax
+    //  Usually verbose, since we want to know about the changes
+    //  Returns the number of settings changed
+    static label upgradeSolverDict(dictionary& dict, const bool verbose=true);
 
     //- Debug switch
     static int debug;
@@ -84,7 +88,7 @@ public:
         // Access
 
             //- Return the selected sub-dictionary of solvers if the "select"
-            //  keyword is given othewise return the complete dictionary
+            //  keyword is given, otherwise return the complete dictionary
             const dictionary& solutionDict() const;
 
             //- Return true if the relaxation factor is given for the field
@@ -93,13 +97,11 @@ public:
             //- Return the relaxation factor for the given field
             scalar relaxationFactor(const word& name) const;
 
-            //- Return the dictionary of solver parameters for the given field
+            //- Return the solver controls dictionary for the given field
             const dictionary& solverDict(const word& name) const;
 
-            //- Return the stream of solver parameters for the given field
-            //  @deprecated Backward compatibility only - should use solverDict
-            ITstream& solver(const word& name) const;
-
+            //- Return the solver controls dictionary for the given field
+            const dictionary& solver(const word& name) const;
 
         // Read
 

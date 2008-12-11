@@ -27,6 +27,7 @@ License
 #include "dictionary.H"
 #include "primitiveEntry.H"
 #include "dictionaryEntry.H"
+#include "regExp.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -42,21 +43,18 @@ bool Foam::dictionary::findInWildcards
     const bool wildCardMatch,
     const word& Keyword,
     DLList<entry*>::const_iterator& wcLink,
-    DLList<autoPtr<regularExpression> >::const_iterator& reLink
+    DLList<autoPtr<regExp> >::const_iterator& reLink
 ) const
 {
     if (wildCardEntries_.size() > 0)
     {
-        //wcLink = wildCardEntries_.begin();
-        //reLink = wildCardRegexps_.end();
-
         while (wcLink != wildCardEntries_.end())
         {
             if (!wildCardMatch && wcLink()->keyword() == Keyword)
             {
                 return true;
             }
-            else if (wildCardMatch && reLink()->matches(Keyword))
+            else if (wildCardMatch && reLink()->match(Keyword))
             {
                 return true;
             }
@@ -75,7 +73,7 @@ bool Foam::dictionary::findInWildcards
     const bool wildCardMatch,
     const word& Keyword,
     DLList<entry*>::iterator& wcLink,
-    DLList<autoPtr<regularExpression> >::iterator& reLink
+    DLList<autoPtr<regExp> >::iterator& reLink
 )
 {
     if (wildCardEntries_.size() > 0)
@@ -86,7 +84,7 @@ bool Foam::dictionary::findInWildcards
             {
                 return true;
             }
-            else if (wildCardMatch && reLink()->matches(Keyword))
+            else if (wildCardMatch && reLink()->match(Keyword))
             {
                 return true;
             }
@@ -132,10 +130,7 @@ Foam::dictionary::dictionary
             wildCardEntries_.insert(&iter());
             wildCardRegexps_.insert
             (
-                autoPtr<regularExpression>
-                (
-                    new regularExpression(iter().keyword())
-                )
+                autoPtr<regExp>(new regExp(iter().keyword()))
             );
         }
     }
@@ -165,10 +160,7 @@ Foam::dictionary::dictionary
             wildCardEntries_.insert(&iter());
             wildCardRegexps_.insert
             (
-                autoPtr<regularExpression>
-                (
-                    new regularExpression(iter().keyword())
-                )
+                autoPtr<regExp>(new regExp(iter().keyword()))
             );
         }
     }
@@ -228,7 +220,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
         if (wildCardEntries_.size() > 0)
         {
             DLList<entry*>::const_iterator wcLink = wildCardEntries_.begin();
-            DLList<autoPtr<regularExpression> >::const_iterator reLink =
+            DLList<autoPtr<regExp> >::const_iterator reLink =
                 wildCardRegexps_.begin();
 
             // Find in wildcards using regular expressions only
@@ -265,7 +257,7 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
         {
             DLList<entry*>::const_iterator wcLink =
                 wildCardEntries_.begin();
-            DLList<autoPtr<regularExpression> >::const_iterator reLink =
+            DLList<autoPtr<regExp> >::const_iterator reLink =
                 wildCardRegexps_.begin();
 
             // Find in wildcards using regular expressions only
@@ -304,7 +296,7 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
         {
             DLList<entry*>::iterator wcLink =
                 wildCardEntries_.begin();
-            DLList<autoPtr<regularExpression> >::iterator reLink =
+            DLList<autoPtr<regExp> >::iterator reLink =
                 wildCardRegexps_.begin();
             // Find in wildcards using regular expressions only
             if (findInWildcards(wildCardMatch, keyword, wcLink, reLink))
@@ -486,10 +478,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
                     wildCardEntries_.insert(entryPtr);
                     wildCardRegexps_.insert
                     (
-                        autoPtr<regularExpression>
-                        (
-                            new regularExpression(entryPtr->keyword())
-                        )
+                        autoPtr<regExp>(new regExp(entryPtr->keyword()))
                     );
                 }
 
@@ -518,10 +507,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             wildCardEntries_.insert(entryPtr);
             wildCardRegexps_.insert
             (
-                autoPtr<regularExpression>
-                (
-                    new regularExpression(entryPtr->keyword())
-                )
+                autoPtr<regExp>(new regExp(entryPtr->keyword()))
             );
         }
 
@@ -614,8 +600,7 @@ bool Foam::dictionary::remove(const word& Keyword)
         // Delete from wildcards first
         DLList<entry*>::iterator wcLink =
             wildCardEntries_.begin();
-        DLList<autoPtr<regularExpression> >::iterator reLink =
-            wildCardRegexps_.begin();
+        DLList<autoPtr<regExp> >::iterator reLink = wildCardRegexps_.begin();
 
         // Find in wildcards using exact match only
         if (findInWildcards(false, Keyword, wcLink, reLink))
@@ -682,7 +667,7 @@ bool Foam::dictionary::changeKeyword
                 // Delete from wildcards first
                 DLList<entry*>::iterator wcLink =
                     wildCardEntries_.begin();
-                DLList<autoPtr<regularExpression> >::iterator reLink =
+                DLList<autoPtr<regExp> >::iterator reLink =
                     wildCardRegexps_.begin();
 
                 // Find in wildcards using exact match only
@@ -696,7 +681,7 @@ bool Foam::dictionary::changeKeyword
             IDLList<entry>::replace(iter2(), iter());
             delete iter2();
             hashedEntries_.erase(iter2);
-            
+
         }
         else
         {
@@ -721,10 +706,7 @@ bool Foam::dictionary::changeKeyword
         wildCardEntries_.insert(iter());
         wildCardRegexps_.insert
         (
-            autoPtr<regularExpression>
-            (
-                new regularExpression(newKeyword)
-            )
+            autoPtr<regExp>(new regExp(newKeyword))
         );
     }
 
@@ -788,6 +770,8 @@ void Foam::dictionary::clear()
 {
     IDLList<entry>::clear();
     hashedEntries_.clear();
+    wildCardEntries_.clear();
+    wildCardRegexps_.clear();
 }
 
 

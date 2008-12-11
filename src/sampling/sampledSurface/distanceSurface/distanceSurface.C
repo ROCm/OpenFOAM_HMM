@@ -30,7 +30,8 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "isoSurfaceCell.H"
+#include "isoSurface.H"
+//#include "isoSurfaceCell.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -42,19 +43,46 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::distanceSurface::createGeometry() const
+void Foam::distanceSurface::createGeometry()
 {
     // Clear any stored topo
     facesPtr_.clear();
 
+
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+
     // Distance to cell centres
-    scalarField cellDistance(mesh().nCells());
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    cellDistancePtr_.reset
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "cellDistance",
+                fvm.time().timeName(),
+                fvm.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fvm,
+            dimensionedScalar("zero", dimless/dimTime, 0)
+        )
+    );
+    volScalarField& cellDistance = cellDistancePtr_();
+
+    // Internal field
     {
+        const pointField& cc = fvm.C();
+        scalarField& fld = cellDistance.internalField();
+
         List<pointIndexHit> nearest;
         surfPtr_().findNearest
         (
-            mesh().cellCentres(),
-            scalarField(mesh().nCells(), GREAT),
+            cc,
+            scalarField(cc.size(), GREAT),
             nearest
         );
 
@@ -63,97 +91,108 @@ void Foam::distanceSurface::createGeometry() const
             vectorField normal;
             surfPtr_().getNormal(nearest, normal);
 
-            forAll(cellDistance, cellI)
+            forAll(nearest, i)
             {
-                vector d(mesh().cellCentres()[cellI]-nearest[cellI].hitPoint());
+                vector d(cc[i]-nearest[i].hitPoint());
 
-                if ((d&normal[cellI]) > 0)
+                if ((d&normal[i]) > 0)
                 {
-                    cellDistance[cellI] = Foam::mag(d);
+                    fld[i] = Foam::mag(d);
                 }
                 else
                 {
-                    cellDistance[cellI] = -Foam::mag(d);
+                    fld[i] = -Foam::mag(d);
                 }
             }
         }
         else
         {
-            forAll(cellDistance, cellI)
+            forAll(nearest, i)
             {
-                cellDistance[cellI] = Foam::mag
-                (
-                    nearest[cellI].hitPoint()
-                  - mesh().cellCentres()[cellI]
-                );
+                fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
             }
         }
     }
 
+    // Patch fields
+    {
+        forAll(fvm.C().boundaryField(), patchI)
+        {
+            const pointField& cc = fvm.C().boundaryField()[patchI];
+            fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+
+            List<pointIndexHit> nearest;
+            surfPtr_().findNearest
+            (
+                cc,
+                scalarField(cc.size(), GREAT),
+                nearest
+            );
+
+            if (signed_)
+            {
+                vectorField normal;
+                surfPtr_().getNormal(nearest, normal);
+
+                forAll(nearest, i)
+                {
+                    vector d(cc[i]-nearest[i].hitPoint());
+
+                    if ((d&normal[i]) > 0)
+                    {
+                        fld[i] = Foam::mag(d);
+                    }
+                    else
+                    {
+                        fld[i] = -Foam::mag(d);
+                    }
+                }
+            }
+            else
+            {
+                forAll(nearest, i)
+                {
+                    fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
+                }
+            }
+        }
+    }
+
+    // On processor patches the mesh.C() will already be the cell centre
+    // on the opposite side so no need to swap cellDistance.
+
+
     // Distance to points
-    scalarField pointDistance(mesh().nPoints());
+    pointDistance_.setSize(fvm.nPoints());
     {
         List<pointIndexHit> nearest;
         surfPtr_().findNearest
         (
-            mesh().points(),
-            scalarField(mesh().nPoints(), GREAT),
+            fvm.points(),
+            scalarField(fvm.nPoints(), GREAT),
             nearest
         );
-        forAll(pointDistance, pointI)
+        forAll(pointDistance_, pointI)
         {
-            pointDistance[pointI] = Foam::mag
+            pointDistance_[pointI] = Foam::mag
             (
                 nearest[pointI].hitPoint()
-              - mesh().points()[pointI]
+              - fvm.points()[pointI]
             );
         }
     }
 
     //- Direct from cell field and point field.
-    const isoSurfaceCell iso
+    isoSurfPtr_.reset
     (
-        mesh(),
-        cellDistance,
-        pointDistance,
-        distance_,
-        regularise_
+        new isoSurface
+        (
+            cellDistance,
+            pointDistance_,
+            distance_,
+            regularise_
+        )
     );
-
-    ////- From point field and interpolated cell.
-    //scalarField cellAvg(mesh().nCells(), scalar(0.0));
-    //labelField nPointCells(mesh().nCells(), 0);
-    //{
-    //    for (label pointI = 0; pointI < mesh().nPoints(); pointI++)
-    //    {
-    //        const labelList& pCells = mesh().pointCells(pointI);
-    //
-    //        forAll(pCells, i)
-    //        {
-    //            label cellI = pCells[i];
-    //
-    //            cellAvg[cellI] += pointDistance[pointI];
-    //            nPointCells[cellI]++;
-    //        }
-    //    }
-    //}
-    //forAll(cellAvg, cellI)
-    //{
-    //    cellAvg[cellI] /= nPointCells[cellI];
-    //}
-    //
-    //const isoSurface iso
-    //(
-    //    mesh(),
-    //    cellAvg,
-    //    pointDistance,
-    //    distance_,
-    //    regularise_
-    //);
-
-
-    const_cast<distanceSurface&>(*this).triSurface::operator=(iso);
-    meshCells_ = iso.meshCells();
 
     if (debug)
     {
@@ -193,9 +232,8 @@ Foam::distanceSurface::distanceSurface
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     zoneName_(word::null),
-    facesPtr_(NULL),
-    storedTimeIndex_(-1),
-    meshCells_(0)
+    isoSurfPtr_(NULL),
+    facesPtr_(NULL)
 {
 //    label zoneId = -1;
 //    if (dict.readIfPresent("zone", zoneName_))

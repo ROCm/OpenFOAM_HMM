@@ -60,6 +60,9 @@ class SortableList
         //- Original indices
         labelList indices_;
 
+        //- Resize and sort the parameter according to the list values
+        void sortIndices(List<label>&) const;
+
 public:
 
     // Constructors
@@ -99,9 +102,6 @@ public:
             return indices_;
         }
 
-        //- Size the list. Growing can cause undefined indices (until next sort)
-        void setSize(const label);
-
         //- Clear the list and the indices
         void clear();
 
@@ -112,13 +112,19 @@ public:
         //  also resizes the indices as required
         void sort();
 
+        //- Reverse (stable) sort the list
+        void reverseSort();
+
     // Member Operators
 
+        //- Assignment of all entries to the given value
+        inline void operator=(const Type&);
+
         //- Assignment from UList operator. Takes linear time.
-        void operator=(const UList<Type>&);
+        inline void operator=(const UList<Type>&);
 
         //- Assignment operator. Takes linear time.
-        void operator=(const SortableList<Type>&);
+        inline void operator=(const SortableList<Type>&);
 
 };
 

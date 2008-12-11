@@ -42,6 +42,38 @@ template<class Face>
 void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 (
     Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    const List<Face>& faceLst = surf.faces();
+    const List<surfGroup>& patchLst = surf.patches();
+
+    writeHeader(os, surf.points(), faceLst.size());
+
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        forAll(patchLst[patchI], patchFaceI)
+        {
+            const Face& f = faceLst[faceIndex++];
+
+            os << f.size();
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp];
+            }
+            os << ' ' << patchI << endl;
+        }
+    }
+
+    writeTail(os);
+}
+
+
+template<class Face>
+void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
+(
+    Ostream& os,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
@@ -71,36 +103,5 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
     writeTail(os);
 }
 
-
-template<class Face>
-void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, surf.points(), faceLst.size());
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-
-            os << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-            os << ' ' << patchI << endl;
-        }
-    }
-
-    writeTail(os);
-}
 
 // ************************************************************************* //

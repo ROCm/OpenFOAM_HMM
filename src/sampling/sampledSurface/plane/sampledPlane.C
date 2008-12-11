@@ -41,41 +41,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::sampledPlane::createGeometry()
+void Foam::sampledPlane::createGeometry
+(
+    const polyMesh& mesh,
+    const label zoneId
+)
 {
-    clearGeom();
-    faces_.clear();
-    meshCells_.clear();
+    sampledSurface::clearGeom();
 
-    if (triangulate())
+    if (zoneId < 0)
     {
-        // Count triangles
-        label nTri = 0;
-        forAll(cuttingPlane::faces(), faceI)
-        {
-            const face& f = cuttingPlane::faces()[faceI];
-
-            nTri += f.nTriangles(points());
-        }
-
-        faces_.setSize(nTri);
-        meshCells_.setSize(nTri);
-
-        // split and fill mesh cell references
-        nTri = 0;
-        forAll(cuttingPlane::faces(), faceI)
-        {
-            const face& f = cuttingPlane::faces()[faceI];
-            label cellId  = cuttingPlane::cells()[faceI];
-
-            label fillIndex = nTri;
-
-            f.triangles(points(), nTri, faces_);
-            while (fillIndex < nTri)
-            {
-                meshCells_[fillIndex++] = cellId;
-            }
-        }
+        reCut(mesh);
+    }
+    else
+    {
+        reCut(mesh, mesh.cellZones()[zoneId]);
     }
 
     if (debug)
@@ -93,15 +73,12 @@ Foam::sampledPlane::sampledPlane
     const word& name,
     const polyMesh& mesh,
     const plane& planeDesc,
-    const word& zoneName,
-    const bool triangulate
+    const word& zoneName
 )
 :
-    sampledSurface(name, mesh, triangulate),
+    sampledSurface(name, mesh),
     cuttingPlane(planeDesc),
-    zoneName_(zoneName),
-    faces_(0),
-    meshCells_(0)
+    zoneName_(zoneName)
 {
     label zoneId = -1;
     if (zoneName_.size())
@@ -115,16 +92,7 @@ Foam::sampledPlane::sampledPlane
         }
     }
 
-    if (zoneId < 0)
-    {
-        reCut(mesh);
-    }
-    else
-    {
-        reCut(mesh, mesh.cellZones()[zoneId]);
-    }
-
-    createGeometry();
+    createGeometry(mesh, zoneId);
 }
 
 
@@ -137,9 +105,7 @@ Foam::sampledPlane::sampledPlane
 :
     sampledSurface(name, mesh, dict),
     cuttingPlane(plane(dict.lookup("basePoint"), dict.lookup("normalVector"))),
-    zoneName_(word::null),
-    faces_(0),
-    meshCells_(0)
+    zoneName_(word::null)
 {
 
     // make plane relative to the coordinateSystem (Cartesian)
@@ -169,16 +135,7 @@ Foam::sampledPlane::sampledPlane
     }
 
 
-    if (zoneId < 0)
-    {
-        reCut(mesh);
-    }
-    else
-    {
-        reCut(mesh, mesh.cellZones()[zoneId]);
-    }
-
-    createGeometry();
+    createGeometry(mesh, zoneId);
 }
 
 
@@ -201,16 +158,7 @@ void Foam::sampledPlane::correct(const bool meshChanged)
             zoneId = mesh().cellZones().findZoneID(zoneName_);
         }
 
-        if (zoneId < 0)
-        {
-            reCut(mesh());
-        }
-        else
-        {
-            reCut(mesh(), mesh().cellZones()[zoneId]);
-        }
-
-        createGeometry();
+        createGeometry(mesh(), zoneId);
     }
 }
 

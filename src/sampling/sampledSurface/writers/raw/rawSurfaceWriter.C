@@ -347,16 +347,15 @@ void Foam::rawSurfaceWriter<Type>::write
         mkDir(surfaceDir);
     }
 
-    fileName planeFName(surfaceDir/fieldName + '_' + surfaceName + ".raw");
+    fileName fName(surfaceDir/fieldName + '_' + surfaceName + ".raw");
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << planeFName << endl;
+        Info<< "Writing field " << fieldName << " to " << fName << endl;
     }
 
-    OFstream rawFile(planeFName);
-
-    writeData(fieldName, points, faces, values, rawFile);
+    OFstream os(fName);
+    writeData(fieldName, points, faces, values, os);
 }
 
 

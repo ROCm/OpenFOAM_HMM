@@ -726,7 +726,7 @@ void Foam::polyTopoChange::getFaceOrder
 }
 
 
-// Compact and reorder faces according to map.
+// Reorder and compact faces according to map.
 void Foam::polyTopoChange::reorderCompactFaces
 (
     const label newSize,
@@ -2999,9 +2999,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
             patchStarts,
             syncParallel
         );
-        // Invalidate new points to go into map.
-        newPoints.clear();
-
         mesh.changing(true);
     }
 
@@ -3010,14 +3007,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         retiredPoints_.clear();
         retiredPoints_.resize(0);
 
-        faces_.clear();
-        faces_.setSize(0);
         region_.clear();
         region_.setSize(0);
-        faceOwner_.clear();
-        faceOwner_.setSize(0);
-        faceNeighbour_.clear();
-        faceNeighbour_.setSize(0);
     }
 
 
@@ -3237,27 +3228,20 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         new fvMesh
         (
             io,
-            xferMove<pointField>(newPoints),
-            xferMove<faceList>(faces_),
-            xferMove<labelList>(faceOwner_),
-            xferMove<labelList>(faceNeighbour_)
+            xferMove(newPoints),
+            xferMoveTo<faceList>(faces_),
+            xferMoveTo<labelList>(faceOwner_),
+            xferMoveTo<labelList>(faceNeighbour_)
         )
     );
     fvMesh& newMesh = newMeshPtr();
 
     // Clear out primitives
     {
-        newPoints.clear();
         retiredPoints_.clear();
         retiredPoints_.resize(0);
-        faces_.clear();
-        faces_.setSize(0);
         region_.clear();
         region_.setSize(0);
-        faceOwner_.clear();
-        faceOwner_.setSize(0);
-        faceNeighbour_.clear();
-        faceNeighbour_.setSize(0);
     }
 
 

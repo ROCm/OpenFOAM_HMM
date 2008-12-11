@@ -25,6 +25,7 @@ $(surfaceFormats)/starcd/STARCDsurfaceFormatRunTime.C
 $(surfaceFormats)/stl/STLsurfaceFormatCore.C
 $(surfaceFormats)/stl/STLsurfaceFormatRunTime.C
 $(surfaceFormats)/stl/STLsurfaceFormatASCII.L
+$(surfaceFormats)/tri/TRIsurfaceFormatCore.C
 $(surfaceFormats)/tri/TRIsurfaceFormatRunTime.C
 $(surfaceFormats)/vtk/VTKsurfaceFormatCore.C
 $(surfaceFormats)/vtk/VTKsurfaceFormatRunTime.C

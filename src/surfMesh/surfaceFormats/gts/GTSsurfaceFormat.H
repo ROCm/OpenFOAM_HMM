@@ -27,6 +27,7 @@ Class
 
 Description
     Provide a means of reading/writing GTS format.
+    The output is never sorted by patch.
 
 SourceFiles
     GTSsurfaceFormat.C
@@ -75,14 +76,11 @@ public:
     // Selectors
 
         //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        static autoPtr<UnsortedMeshedSurface<Face> > New(const fileName& name)
         {
             return autoPtr<UnsortedMeshedSurface<Face> >
             (
-                new GTSsurfaceFormat<Face>(fName)
+                new GTSsurfaceFormat<Face>(name)
             );
         }
 
@@ -105,15 +103,15 @@ public:
         //- Write MeshedSurface
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const MeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by regions
+        //  The output remains unsorted
         static void write
         (
             Ostream&,
@@ -121,14 +119,14 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by regions
+        //  The output remains unsorted
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const UnsortedMeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write object

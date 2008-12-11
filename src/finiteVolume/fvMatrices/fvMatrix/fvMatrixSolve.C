@@ -53,12 +53,12 @@ void Foam::fvMatrix<Type>::setComponentReference
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
 (
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solve(Istream& solverControls) : "
+        Info<< "fvMatrix<Type>::solve(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
     }
@@ -108,7 +108,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
             internalCoeffs_.component(cmpt)
         );
 
-        lduInterfaceFieldPtrsList interfaces = 
+        lduInterfaceFieldPtrsList interfaces =
             psi_.boundaryField().interfaces();
 
         // Use the initMatrixInterfaces and updateMatrixInterfaces to correct
@@ -142,7 +142,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
             bouCoeffsCmpt,
             intCoeffsCmpt,
             interfaces,
-            solverControls.rewind()
+            solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
         solverPerf.print();
@@ -170,20 +170,20 @@ template<class Type>
 Foam::autoPtr<typename Foam::fvMatrix<Type>::fvSolver>
 Foam::fvMatrix<Type>::solver()
 {
-    return solver(psi_.mesh().solver(psi_.name()));
+    return solver(psi_.mesh().solverDict(psi_.name()));
 }
 
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 {
-    return solve(psi_.mesh().solver(psi_.name()));
+    return solve(psi_.mesh().solverDict(psi_.name()));
 }
 
 
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
 {
-    return solve(psi_.mesh().solver(psi_.name()));
+    return solve(psi_.mesh().solverDict(psi_.name()));
 }
 
 

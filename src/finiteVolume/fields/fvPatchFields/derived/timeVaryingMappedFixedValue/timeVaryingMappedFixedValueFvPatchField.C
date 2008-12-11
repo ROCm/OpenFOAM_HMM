@@ -207,8 +207,11 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::autoMap
 )
 {
     fixedValueFvPatchField<Type>::autoMap(m);
-    startSampledValues_.autoMap(m);
-    endSampledValues_.autoMap(m);
+    if (startSampledValues_.size() > 0)
+    {
+        startSampledValues_.autoMap(m);
+        endSampledValues_.autoMap(m);
+    }
 }
 
 

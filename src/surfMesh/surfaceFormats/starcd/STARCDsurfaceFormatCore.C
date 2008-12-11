@@ -89,6 +89,52 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeHeader
 }
 
 
+bool Foam::fileFormats::STARCDsurfaceFormatCore::readPoints
+(
+    IFstream& is,
+    pointField& points,
+    labelList& ids
+)
+{
+    //
+    // read .vrt file
+    // ~~~~~~~~~~~~~~
+
+    if (!is.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::STARCDsurfaceFormatCore::readPoints(const fileName&)"
+        )
+            << "Cannot read file " << is.name()
+            << exit(FatalError);
+    }
+
+    readHeader(is, "PROSTAR_VERTEX");
+
+    DynamicList<point> dynPoints;
+    // STAR-CD index of points
+    DynamicList<label> dynPointId;
+
+    label lineLabel;
+    while ((is >> lineLabel).good())
+    {
+        scalar x, y, z;
+
+        is >> x >> y >> z;
+
+        dynPoints.append(point(x, y, z));
+        dynPointId.append(lineLabel);
+    }
+
+    points.transfer(dynPoints);
+    ids.transfer(dynPointId);
+
+    return true;
+}
+
+
+
 void Foam::fileFormats::STARCDsurfaceFormatCore::writePoints
 (
     Ostream& os,

@@ -92,6 +92,7 @@ namespace Foam
 class argList
 {
     // Private data
+        static bool bannerEnabled;
 
         stringList args_;
         HashTable<string> options_;
@@ -212,6 +213,9 @@ public:
 
 
         // Edit
+
+            //- Disable emitting the banner information
+            static void noBanner();
 
             //- Remove the parallel options
             static void noParallel();

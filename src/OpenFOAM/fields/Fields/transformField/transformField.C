@@ -26,6 +26,7 @@ License
 
 #include "transformField.H"
 #include "FieldM.H"
+#include "diagTensor.H"
 
 // * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
 
@@ -75,7 +76,8 @@ void Foam::transform
 {
     vector T = tr.t();
 
-    if (mag(tr.r().w()) > SMALL)
+    // Check if any rotation
+    if (mag(tr.r().R() - I) > SMALL)
     {
         transform(rtf, tr.r(), tf);
 
@@ -89,6 +91,10 @@ void Foam::transform
         if (mag(T) > VSMALL)
         {
             TFOR_ALL_F_OP_S_OP_F(vector, rtf, =, vector, T, +, vector, tf);
+        }
+        else
+        {
+            rtf = vector::zero;
         }
     }
 }

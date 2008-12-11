@@ -37,29 +37,66 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+Foam::word
+Foam::lduMatrix::preconditioner::getName
+(
+    const dictionary& solverControls
+)
+{
+    word name;
+
+    // handle primitive or dictionary entry
+    const entry& e = solverControls.lookupEntry("preconditioner", false, false);
+    if (e.isDict())
+    {
+        e.dict().lookup("preconditioner") >> name;
+    }
+    else
+    {
+        e.stream() >> name;
+    }
+
+    return name;
+}
+
+
 Foam::autoPtr<Foam::lduMatrix::preconditioner>
 Foam::lduMatrix::preconditioner::New
 (
     const solver& sol,
-    Istream& preconditionerData
+    const dictionary& solverControls
 )
 {
-    word preconditionerName(preconditionerData);
+    word name;
+
+    // handle primitive or dictionary entry
+    const entry& e = solverControls.lookupEntry("preconditioner", false, false);
+    if (e.isDict())
+    {
+        e.dict().lookup("preconditioner") >> name;
+    }
+    else
+    {
+        e.stream() >> name;
+    }
+
+    const dictionary& controls = e.isDict() ? e.dict() : dictionary::null;
 
     if (sol.matrix().symmetric())
     {
         symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(preconditionerName);
+            symMatrixConstructorTablePtr_->find(name);
 
         if (constructorIter == symMatrixConstructorTablePtr_->end())
         {
             FatalIOErrorIn
             (
-                "lduMatrix::preconditioner::New(const solver&, Istream&)",
-                preconditionerData
+                "lduMatrix::preconditioner::New"
+                "(const solver&, const dictionary&)",
+                controls
             )   << "Unknown symmetric matrix preconditioner "
-                << preconditionerName << endl << endl
-                << "Valid symmetric matrix preconditioners are :" << endl
+                << name << nl << nl
+                << "Valid symmetric matrix preconditioners :" << endl
                 << symMatrixConstructorTablePtr_->toc()
                 << exit(FatalIOError);
         }
@@ -69,24 +106,25 @@ Foam::lduMatrix::preconditioner::New
             constructorIter()
             (
                 sol,
-                preconditionerData
+                controls
             )
         );
     }
     else if (sol.matrix().asymmetric())
     {
         asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(preconditionerName);
+            asymMatrixConstructorTablePtr_->find(name);
 
         if (constructorIter == asymMatrixConstructorTablePtr_->end())
         {
             FatalIOErrorIn
             (
-                "lduMatrix::preconditioner::New(const solver&, Istream&)",
-                preconditionerData
+                "lduMatrix::preconditioner::New"
+                "(const solver&, const dictionary&)",
+                controls
             )   << "Unknown asymmetric matrix preconditioner "
-                << preconditionerName << endl << endl
-                << "Valid asymmetric matrix preconditioners are :" << endl
+                << name << nl << nl
+                << "Valid asymmetric matrix preconditioners :" << endl
                 << asymMatrixConstructorTablePtr_->toc()
                 << exit(FatalIOError);
         }
@@ -96,7 +134,7 @@ Foam::lduMatrix::preconditioner::New
             constructorIter()
             (
                 sol,
-                preconditionerData
+                controls
             )
         );
     }
@@ -104,9 +142,10 @@ Foam::lduMatrix::preconditioner::New
     {
         FatalIOErrorIn
         (
-            "lduMatrix::preconditioner::New(const solver&, Istream&)",
-            preconditionerData
-        )   << "cannot preconditione incomplete matrix, "
+            "lduMatrix::preconditioner::New"
+            "(const solver&, const dictionary&)",
+            controls
+        )   << "cannot solve incomplete matrix, "
                "no diagonal or off-diagonal coefficient"
             << exit(FatalIOError);
 

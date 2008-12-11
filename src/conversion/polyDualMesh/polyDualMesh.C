@@ -236,13 +236,13 @@ Foam::labelList Foam::polyDualMesh::collectPatchSideFace
     if (pointToDualPoint[meshPointI] >= 0)
     {
         // Number of pFaces + 2 boundary edge + feature point
-        dualFace.setSize(pFaces.size()+2+1);
+        dualFace.setCapacity(pFaces.size()+2+1);
         // Store dualVertex for feature edge
         dualFace.append(pointToDualPoint[meshPointI]);
     }
     else
     {
-        dualFace.setSize(pFaces.size()+2);
+        dualFace.setCapacity(pFaces.size()+2);
     }
 
     // Store dual vertex for starting edge.
@@ -958,13 +958,13 @@ void Foam::polyDualMesh::calcDual
         if (edgeToDualPoint[edgeI] >= 0)
         {
             // Number of cells + 2 boundary faces + feature edge point
-            dualFace.setSize(mesh.edgeCells()[edgeI].size()+2+1);
+            dualFace.setCapacity(mesh.edgeCells()[edgeI].size()+2+1);
             // Store dualVertex for feature edge
             dualFace.append(edgeToDualPoint[edgeI]);
         }
         else
         {
-            dualFace.setSize(mesh.edgeCells()[edgeI].size()+2);
+            dualFace.setCapacity(mesh.edgeCells()[edgeI].size()+2);
         }
 
         // Store dual vertex for starting face.

@@ -99,6 +99,36 @@ template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
 (
     Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    const pointField& pointLst = surf.points();
+    const List<Face>& faceLst = surf.faces();
+    const List<surfGroup>& patchLst = surf.patches();
+    const vectorField& normLst = surf.faceNormals();
+
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        // Print all faces belonging to this region
+        const surfGroup& patch = patchLst[patchI];
+
+        os << "solid " << patch.name() << endl;
+        forAll(patch, patchFaceI)
+        {
+            const label faceI = faceIndex++;
+            writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
+        }
+        os << "endsolid " << patch.name() << endl;
+    }
+}
+
+
+// write sorted:
+template<class Face>
+void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
+(
+    Ostream& os,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
@@ -136,84 +166,8 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
             os << "endsolid " << patch.name() << endl;
         }
    }
-
 }
 
-
-
-// write sorted:
-template<class Face>
-void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-    const vectorField& normLst = surf.faceNormals();
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
-
-        os << "solid " << patch.name() << endl;
-        forAll(patch, patchFaceI)
-        {
-            const label faceI = faceIndex++;
-            writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
-        }
-        os << "endsolid " << patch.name() << endl;
-    }
-}
-
-
-// write unsorted:
-template<class Face>
-void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
-(
-    ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.faces();
-    const List<label>& regionLst = surf.regions();
-    const vectorField& normLst = surf.faceNormals();
-
-    unsigned int nTris = 0;
-    if (surf.isTri())
-    {
-        nTris = faceLst.size();
-    }
-    else
-    {
-        // count triangles for on-the-fly triangulation
-        forAll(faceLst, faceI)
-        {
-            nTris += faceLst[faceI].size() - 2;
-        }
-    }
-
-    // Write the STL header
-    STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
-
-    // always write unsorted
-    forAll(faceLst, faceI)
-    {
-        writeShell
-        (
-            os,
-            pointLst,
-            faceLst[faceI],
-            normLst[faceI],
-            regionLst[faceI]
-        );
-    }
-}
 
 
 template<class Face>
@@ -265,15 +219,60 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
 }
 
 
+// write unsorted:
+template<class Face>
+void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
+(
+    ostream& os,
+    const UnsortedMeshedSurface<Face>& surf
+)
+{
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& regionLst = surf.regions();
+    const vectorField& normLst = surf.faceNormals();
+
+    unsigned int nTris = 0;
+    if (surf.isTri())
+    {
+        nTris = faceLst.size();
+    }
+    else
+    {
+        // count triangles for on-the-fly triangulation
+        forAll(faceLst, faceI)
+        {
+            nTris += faceLst[faceI].size() - 2;
+        }
+    }
+
+    // Write the STL header
+    STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
+
+    // always write unsorted
+    forAll(faceLst, faceI)
+    {
+        writeShell
+        (
+            os,
+            pointLst,
+            faceLst[faceI],
+            normLst[faceI],
+            regionLst[faceI]
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
 Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -282,78 +281,62 @@ Foam::fileFormats::STLsurfaceFormat<Face>::STLsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::STLsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
 
     // read in the values
-    STLsurfaceFormatCore reader(fName);
+    STLsurfaceFormatCore reader(filename);
 
     // transfer points
     this->storedPoints().transfer(reader.points());
 
-    // get the original region information
+    // retrieve the original region information
     List<word>  names(xferMove(reader.names()));
-    List<label> unsortedRegions(xferMove(reader.regions()));
+    List<label> sizes(xferMove(reader.sizes()));
+    List<label> regions(xferMove(reader.regions()));
 
-    // and determine the sorted order:
-    // avoid SortableList since we discard the main list anyhow
-    List<label> faceMap;
-    sortedOrder(unsortedRegions, faceMap);
+    // generate the (sorted) faces
+    List<Face> faceLst(regions.size());
 
-    // generate the sorted faces and sorted regions:
-    List<Face> faceLst(faceMap.size());
-
-    DynamicList<label> dynPatchSizes;
-    label prevRegion = -1;
-    label regionSize = 0;
-
-    forAll(faceMap, faceI)
+    if (reader.sorted())
     {
-        const label startPt = 3*faceMap[faceI];
-        const label regionI = unsortedRegions[faceMap[faceI]];
-
-        faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
-
-        if (prevRegion != regionI)
+        // already sorted - generate directly
+        forAll(faceLst, faceI)
         {
-            if (regionSize)
-            {
-                dynPatchSizes.append(regionSize);
-            }
-            prevRegion = regionI;
-            regionSize = 0;
+            const label startPt = 3*faceI;
+            faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
         }
-        regionSize++;
     }
-
-    if (regionSize)
+    else
     {
-        dynPatchSizes.append(regionSize);
+        // unsorted - determine the sorted order:
+        // avoid SortableList since we discard the main list anyhow
+        List<label> faceMap;
+        sortedOrder(regions, faceMap);
+
+        // generate sorted faces
+        forAll(faceMap, faceI)
+        {
+            const label startPt = 3*faceMap[faceI];
+            faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
+        }
     }
+    regions.clear();
 
     // transfer:
     this->storedFaces().transfer(faceLst);
-    unsortedRegions.clear();
-    faceMap.clear();
 
-    label start = 0;
-    surfGroupList newPatches(dynPatchSizes.size());
-    forAll(newPatches, patchI)
+    if (names.size())
     {
-        newPatches[patchI] = surfGroup
-        (
-            names[patchI],
-            dynPatchSizes[patchI],
-            start,
-            patchI
-        );
-
-        start += dynPatchSizes[patchI];
+        this->addPatches(sizes, names);
+    }
+    else
+    {
+        this->addPatches(sizes);
     }
 
-    this->addPatches(newPatches);
     this->stitchFaces(SMALL);
     return true;
 }
@@ -384,21 +367,21 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
-    const fileName& fName,
+    const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    word ext = fName.ext();
+    word ext = filename.ext();
 
     // handle 'stlb' as binary directly
     if (ext == "stlb")
     {
-        std::ofstream ofs(fName.c_str(), std::ios::binary);
+        std::ofstream ofs(filename.c_str(), std::ios::binary);
         writeBINARY(ofs, surf);
     }
     else
     {
-        writeASCII(OFstream(fName)(), surf);
+        writeASCII(OFstream(filename)(), surf);
     }
 }
 
@@ -406,21 +389,21 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
-    const fileName& fName,
+    const fileName& filename,
     const MeshedSurface<Face>& surf
 )
 {
-    const word ext = fName.ext();
+    const word ext = filename.ext();
 
     // handle 'stlb' as binary directly
     if (ext == "stlb")
     {
-        std::ofstream ofs(fName.c_str(), std::ios::binary);
+        std::ofstream ofs(filename.c_str(), std::ios::binary);
         writeBINARY(ofs, surf);
     }
     else
     {
-        writeASCII(OFstream(fName)(), surf);
+        writeASCII(OFstream(filename)(), surf);
     }
 }
 

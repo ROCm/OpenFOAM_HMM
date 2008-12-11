@@ -62,72 +62,6 @@ template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-
-    writeHeader(os, surf.points());
-    writeHeaderPolygons(os, faceLst);
-
-    bool doSort = false;
-    // a single region needs no sorting
-    if (surf.patches().size() == 1)
-    {
-        doSort = false;
-    }
-
-    if (doSort)
-    {
-        labelList faceMap;
-        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-        label faceIndex = 0;
-        forAll(patchLst, patchI)
-        {
-            forAll(patchLst[patchI], patchFaceI)
-            {
-                const Face& f = faceLst[faceMap[faceIndex++]];
-
-                os << f.size();
-                forAll(f, fp)
-                {
-                    os << ' ' << f[fp];
-                }
-                os << ' ' << nl;
-            }
-        }
-
-        // Print region numbers
-        writeTail(os, patchLst);
-    }
-    else
-    {
-        labelList faceMap;
-        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-        forAll(faceLst, faceI)
-        {
-            const Face& f = faceLst[faceI];
-
-            os << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-            os << ' ' << nl;
-        }
-
-        // Print region numbers
-        writeTail(os, surf.regions());
-    }
-}
-
-
-template<class Face>
-void Foam::fileFormats::VTKsurfaceFormat<Face>::write
-(
-    Ostream& os,
     const MeshedSurface<Face>& surf
 )
 {
@@ -156,5 +90,35 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     // Print region numbers
     writeTail(os, patchLst);
 }
+
+
+template<class Face>
+void Foam::fileFormats::VTKsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const UnsortedMeshedSurface<Face>& surf
+)
+{
+    const List<Face>& faceLst = surf.faces();
+
+    writeHeader(os, surf.points());
+    writeHeaderPolygons(os, faceLst);
+
+    forAll(faceLst, faceI)
+    {
+        const Face& f = faceLst[faceI];
+
+        os << f.size();
+        forAll(f, fp)
+        {
+            os << ' ' << f[fp];
+        }
+        os << ' ' << nl;
+    }
+
+    // Print region numbers
+    writeTail(os, surf.regions());
+}
+
 
 // ************************************************************************* //

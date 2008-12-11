@@ -57,11 +57,16 @@ Foam::sampledIsoSurface::interpolateField
     const GeometricField<Type, fvPatchField, volMesh>& volFld =
         interpolator.psi();
 
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > pointFld
+    tmp<GeometricField<Type, pointPatchField, pointMesh> > tpointFld
     (
         volPointInterpolation::New(fvm).interpolate(volFld)
     );
 
+    const GeometricField<Type, pointPatchField, pointMesh>& pointFld =
+        tpointFld();
+
+    // Get pointers to sampling field (both original and interpolated one)
+    getIsoFields();
     // Recreate geometry if time has changed
     createGeometry();
 
@@ -71,7 +76,7 @@ Foam::sampledIsoSurface::interpolateField
         *volFieldPtr_,
         *pointFieldPtr_,
         volFld,
-        pointFld()
+        pointFld
     );
 }
 

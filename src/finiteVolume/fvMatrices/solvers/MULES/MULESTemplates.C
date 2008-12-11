@@ -142,8 +142,8 @@ void Foam::MULES::implicitSolve
 {
     const fvMesh& mesh = psi.mesh();
 
-    dictionary MULESSolver(mesh.solver(psi.name()));
-    const dictionary& MULEScontrols = MULESSolver.subDict("MULESImplicit");
+    const dictionary& MULEScontrols = 
+       mesh.solverDict(psi.name()).subDict("MULESImplicit");
 
     label maxIter
     (

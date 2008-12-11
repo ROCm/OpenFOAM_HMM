@@ -38,10 +38,10 @@ License
 template<class Face>
 Foam::fileFormats::GTSsurfaceFormat<Face>::GTSsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -50,19 +50,19 @@ Foam::fileFormats::GTSsurfaceFormat<Face>::GTSsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::GTSsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
@@ -205,108 +205,19 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
         regionLst[faceI] = regionI;
     }
 
-    this->setPatches(maxPatch);
-    // this->stitchFaces(SMALL);
+
+    List<surfPatchIdentifier> newPatches(maxPatch+1);
+    forAll(newPatches, patchI)
+    {
+        newPatches[patchI] = surfPatchIdentifier
+        (
+            "patch" + ::Foam::name(patchI),
+            patchI
+        );
+    }
+
+    this->storedPatches().transfer(newPatches);
     return true;
-}
-
-
-template<class Face>
-void Foam::fileFormats::GTSsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
-
-    // check if output triangulation would be required
-    // It is too annoying to triangulate on-the-fly
-    // just issue a warning and get out
-    if (!surf.isTri())
-    {
-        label nNonTris = 0;
-        forAll(faceLst, faceI)
-        {
-            if (faceLst[faceI].size() != 3)
-            {
-                ++nNonTris;
-            }
-        }
-
-        if (nNonTris)
-        {
-            FatalErrorIn
-            (
-                "fileFormats::GTSsurfaceFormat::write"
-                "(Ostream&, const UnsortedMeshedSurfaces<Face>&)"
-            )
-                << "Surface has " << nNonTris << "/" << faceLst.size()
-                << " non-triangulated faces - not writing!" << endl;
-            return;
-        }
-    }
-
-
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-
-    // Write header, print patch names as comment
-    os  << "# GTS file" << nl
-        << "# Regions:" << nl;
-
-    forAll(patchLst, patchI)
-    {
-        os  << "#     " << patchI << "    "
-            << patchLst[patchI].name() << nl;
-    }
-    os  << "#" << endl;
-
-
-    os  << "# nPoints  nEdges  nTriangles" << nl
-        << pointLst.size() << ' ' << surf.nEdges() << ' '
-        << surf.size() << endl;
-
-
-    // Write vertex coords
-    forAll(pointLst, pointI)
-    {
-        os  << pointLst[pointI].x() << ' '
-            << pointLst[pointI].y() << ' '
-            << pointLst[pointI].z() << endl;
-    }
-
-
-    // Write edges.
-    // Note: edges are in local point labels so convert
-    const edgeList& es = surf.edges();
-    const labelList& meshPts = surf.meshPoints();
-
-    forAll(es, edgeI)
-    {
-        os  << meshPts[es[edgeI].start()] + 1 << ' '
-            << meshPts[es[edgeI].end()] + 1 << endl;
-    }
-
-
-    // Write faces in terms of edges.
-    const labelListList& faceEs = surf.faceEdges();
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const labelList& fEdges = faceEs[faceMap[faceIndex++]];
-
-            os  << fEdges[0] + 1 << ' '
-                << fEdges[1] + 1 << ' '
-                << fEdges[2] + 1 << ' '
-                << patchI << endl;
-        }
-    }
 }
 
 
@@ -405,5 +316,102 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
         }
     }
 }
+
+
+template<class Face>
+void Foam::fileFormats::GTSsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const UnsortedMeshedSurface<Face>& surf
+)
+{
+    const pointField& pointLst   = surf.points();
+    const List<Face>& faceLst    = surf.faces();
+    const List<label>& regionLst = surf.regions();
+    const List<surfPatchIdentifier>& patchInfo = surf.patches();
+
+    // check if output triangulation would be required
+    // It is too annoying to triangulate on-the-fly
+    // just issue a warning and get out
+    if (!surf.isTri())
+    {
+        label nNonTris = 0;
+        forAll(faceLst, faceI)
+        {
+            if (faceLst[faceI].size() != 3)
+            {
+                ++nNonTris;
+            }
+        }
+
+        if (nNonTris)
+        {
+            FatalErrorIn
+            (
+                "fileFormats::GTSsurfaceFormat::write"
+                "(Ostream&, const UnsortedMeshedSurfaces<Face>&)"
+            )
+                << "Surface has " << nNonTris << "/" << faceLst.size()
+                << " non-triangulated faces - not writing!" << endl;
+            return;
+        }
+    }
+
+    labelList faceMap;
+    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+
+
+    // Write header, print patch names as comment
+    os  << "# GTS file" << nl
+        << "# Regions:" << nl;
+
+    forAll(patchInfo, patchI)
+    {
+        os  << "#     " << patchI << "    "
+            << patchInfo[patchI].name() << nl;
+    }
+    os  << "#" << endl;
+
+
+    os  << "# nPoints  nEdges  nTriangles" << nl
+        << pointLst.size() << ' ' << surf.nEdges() << ' '
+        << surf.size() << endl;
+
+
+    // Write vertex coords
+    forAll(pointLst, pointI)
+    {
+        os  << pointLst[pointI].x() << ' '
+            << pointLst[pointI].y() << ' '
+            << pointLst[pointI].z() << endl;
+    }
+
+
+    // Write edges.
+    // Note: edges are in local point labels so convert
+    const edgeList& es = surf.edges();
+    const labelList& meshPts = surf.meshPoints();
+
+    forAll(es, edgeI)
+    {
+        os  << meshPts[es[edgeI].start()] + 1 << ' '
+            << meshPts[es[edgeI].end()] + 1 << endl;
+    }
+
+
+    // Write faces in terms of edges.
+    const labelListList& faceEs = surf.faceEdges();
+
+    forAll(faceLst, faceI)
+    {
+        const labelList& fEdges = faceEs[faceI];
+
+        os  << fEdges[0] + 1 << ' '
+            << fEdges[1] + 1 << ' '
+            << fEdges[2] + 1 << ' '
+            << regionLst[faceI] << endl;
+    }
+}
+
 
 // ************************************************************************* //

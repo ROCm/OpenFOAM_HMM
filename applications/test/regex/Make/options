@@ -1,0 +1,3 @@
+EXE_LIBS = \
+    $(FOAM_LIBBIN)/libOSspecific.o
+

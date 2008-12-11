@@ -32,7 +32,7 @@ Description
     Internal storage is a compact array and the list can be shrunk to compact
     storage. The increase of list size is controlled by three template
     parameters, which allows the list storage to either increase by the given
-    increment or the given multiplier and divider (allowing non-integer
+    increment or by the given multiplier and divider (allowing non-integer
     multiples).
 
 SourceFiles
@@ -81,13 +81,10 @@ class DynamicList
 {
     // Private data
 
-        //- Allocated size for underlying List.
-        label allocSize_;
+        //- The capacity (allocated size) of the underlying list.
+        label capacity_;
 
     // Private Member Functions
-
-        // Disabled, since the usefulness and semantics are not quite clear
-        void setSize(const label, const T&);
 
 public:
 
@@ -116,20 +113,30 @@ public:
         // Access
 
         //- Size of the underlying storage.
-        inline label allocSize() const;
-
+        inline label capacity() const;
 
         // Edit
 
-        //- Alter the list size.
-        //  When the new size is greater than the addressed list size, the
-        //  allocated list sizes is adjusted and the
-        //  addressed size does not change.
-        //  Otherwise the addressed list size is just reduced and the
-        //  allocated size does not change.
+        //- Alter the size of the underlying storage.
+        //  The addressed size will be truncated if needed to fit, but will
+        //  remain otherwise untouched.
+        //  Use this or reserve() in combination with append().
+        inline void setCapacity(const label);
+
+        //- Alter the addressed list size.
+        //  New space will be allocated if required.
+        //  Use this to resize the list prior to using the operator[] for
+        //  setting values (as per List usage).
         inline void setSize(const label);
 
-        //- Clear the list, i.e. set the size to zero.
+        //- Alter the addressed list size and fill new space with a constant.
+        inline void setSize(const label, const T&);
+
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        inline void reserve(const label);
+
+        //- Clear the addressed list, i.e. set the size to zero.
         //  Allocated size does not change
         inline void clear();
 
@@ -152,6 +159,9 @@ public:
         //- Append an element at the end of the list
         inline void append(const T& e);
 
+        //- Append a List at the end of this list
+        inline void append(const UList<T>&);
+
         //- Remove and return the top element
         inline T remove();
 
@@ -162,7 +172,7 @@ public:
         inline void operator=(const T&);
 
         //- Assignment from List<T>. Also handles assignment from DynamicList.
-        inline void operator=(const List<T>&);
+        inline void operator=(const UList<T>&);
 
 
     // IOstream operators

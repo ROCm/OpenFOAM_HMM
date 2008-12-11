@@ -158,11 +158,7 @@ void Foam::shellSurfaces::setAndCheckLevels
 void Foam::shellSurfaces::orient()
 {
     // Determine outside point.
-    boundBox overallBb
-    (
-        point(GREAT, GREAT, GREAT),
-        point(-GREAT, -GREAT, -GREAT)
-    );
+    boundBox overallBb = boundBox::invertedBox;
 
     bool hasSurface = false;
 

@@ -68,9 +68,6 @@ class sampledSurface
         //- Reference to mesh
         const polyMesh& mesh_;
 
-        //- Triangulate faces or keep faces as it
-        bool triangulate_;
-
         //- Do we intend to interpolate the information?
         bool interpolate_;
 
@@ -132,12 +129,6 @@ protected:
 
         virtual void clearGeom() const;
 
-        //- Non-const access to triangulation
-        bool& triangulate()
-        {
-            return triangulate_;
-        }
-
 public:
 
     //- Runtime type information
@@ -189,8 +180,7 @@ public:
         sampledSurface
         (
             const word& name,
-            const polyMesh&,
-            const bool triangulate=true
+            const polyMesh&
         );
 
         //- Construct from dictionary
@@ -245,12 +235,6 @@ public:
         bool interpolate() const
         {
             return interpolate_;
-        }
-
-        //- triangulation requested for surface
-        bool triangulate() const
-        {
-            return triangulate_;
         }
 
         //- Points of surface

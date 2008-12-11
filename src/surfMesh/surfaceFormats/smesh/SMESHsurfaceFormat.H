@@ -63,7 +63,7 @@ namespace fileFormats
 template<class Face>
 class SMESHsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public SMESHsurfaceFormatCore
 {
     // Private Member Functions
@@ -101,11 +101,11 @@ public:
         //- Write MeshedSurface
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const MeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write UnsortedMeshedSurface
@@ -120,11 +120,11 @@ public:
         //  The output is sorted by region.
         static void write
         (
-            const fileName& fName,
+            const fileName& name,
             const UnsortedMeshedSurface<Face>& surf
         )
         {
-            write(OFstream(fName)(), surf);
+            write(OFstream(name)(), surf);
         }
 
         //- Write object

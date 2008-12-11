@@ -110,8 +110,10 @@ Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 {
     if (points.size() == 0)
     {
-        WarningIn("treeBoundBox::treeBoundBox(const UList<point>&)")
-            << "cannot find bounding box for zero sized pointField"
+        WarningIn
+        (
+            "treeBoundBox::treeBoundBox(const UList<point>&)"
+        )   << "cannot find bounding box for zero-sized pointField"
             << "returning zero" << endl;
 
         return;
@@ -132,17 +134,18 @@ Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 Foam::treeBoundBox::treeBoundBox
 (
     const UList<point>& points,
-    const labelList& meshPoints
+    const UList<label>& meshPoints
 )
 :
     boundBox()
 {
-    if (meshPoints.size() == 0)
+    if (points.size() == 0 || meshPoints.size() == 0)
     {
         WarningIn
         (
-            "treeBoundBox::treeBoundBox(const UList<point>&, const labelList)"
-        )   << "cannot find bounding box for zero sized pointField"
+            "treeBoundBox::treeBoundBox"
+            "(const UList<point>&, const UList<label>&)"
+        )   << "cannot find bounding box for zero-sized pointField"
             << "returning zero" << endl;
 
         return;
