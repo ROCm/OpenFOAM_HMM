@@ -113,9 +113,6 @@ public:
         //- Square of nearWallAlignedDist
         scalar nearWallAlignedDist2;
 
-        //- Alignment direction vectors
-        vectorField globalAlignmentDirections;
-
         //- Chose if the cell orientation should relax during the iterations
         //  or remain fixed to the x-y directions
         Switch relaxOrientation;
@@ -253,6 +250,8 @@ private:
             const vector& n
         );
 
+        inline void insertVb(const Vb& v);
+
         inline void movePoint(const Vertex_handle& vh, const point& p);
 
         //- Create the initial mesh from the bounding-box
@@ -337,6 +336,8 @@ private:
         void setVertexAlignmentDirections();
 
         scalar alignmentDistanceWeight(scalar dist) const;
+
+        scalar faceAreaWeight(scalar faceArea) const;
 
 
 public:

@@ -578,8 +578,6 @@ void Foam::CV3D::insertFeaturePoints()
         vit++
     )
     {
-        // featureConstrainingVertices_[featPtI] = vit;
-
         featureConstrainingVertices_[featPtI] = Vb(vit->point());
 
         featureConstrainingVertices_[featPtI].index() = vit->index();
@@ -602,24 +600,9 @@ void Foam::CV3D::reinsertFeaturePoints()
 {
     if (featureConstrainingVertices_.size())
     {
-
         forAll(featureConstrainingVertices_, f)
         {
-            const Point& fPt(featureConstrainingVertices_[f].point());
-
-            uint nVert = number_of_vertices();
-
-            Vertex_handle vh = insert(fPt);
-
-            if (nVert == number_of_vertices())
-            {
-                FatalErrorIn("Foam::CV3D::reinsertFeaturePoints")
-                    << "Failed to reinsert feature point " << topoint(fPt)
-                    << endl;
-            }
-
-            vh->index() = featureConstrainingVertices_[f].index();
-            vh->type() = featureConstrainingVertices_[f].type();
+            insertVb(featureConstrainingVertices_[f]);
         }
     }
     else

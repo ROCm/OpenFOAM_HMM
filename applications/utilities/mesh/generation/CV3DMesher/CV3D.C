@@ -202,28 +202,27 @@ void Foam::CV3D::setVertexAlignmentDirections()
 
                     alignmentDirections[2] = nt;
 
-                    Info<< "internal " << vit->internalPoint()
-                        << nl << alignmentDirections
-                        << nl << "v " << vert + alignmentDirections[0]
-                        << nl << "v " << vert + alignmentDirections[1]
-                        << nl << "v " << vert + alignmentDirections[2]
-                        << nl << "v " << vert
-                        << nl << "v " << pHit.hitPoint()
-                        << nl << "v " << closestSpokeHitPoint
-                        << nl << "f 4 1"
-                        << nl << "f 4 2"
-                        << nl << "f 4 3"
-                        << nl << endl;
+                    // Info<< "internal " << vit->internalPoint()
+                    //     << nl << alignmentDirections
+                    //     << nl << "v " << vert + alignmentDirections[0]
+                    //     << nl << "v " << vert + alignmentDirections[1]
+                    //     << nl << "v " << vert + alignmentDirections[2]
+                    //     << nl << "v " << vert
+                    //     << nl << "v " << pHit.hitPoint()
+                    //     << nl << "v " << closestSpokeHitPoint
+                    //     << nl << "f 4 1"
+                    //     << nl << "f 4 2"
+                    //     << nl << "f 4 3"
+                    //     << nl << endl;
                 }
                 else
                 {
-                    // Using on the primary alignment and the closest of the
-                    // globalAlignmentDirections
+                    // Using only the primary alignment
 
-                    alignmentDirections.setSize(0);
+                    alignmentDirections.setSize(1);
+
+                    alignmentDirections[0] = np;
                 }
-
-
             }
             else
             {
@@ -256,6 +255,30 @@ Foam::scalar Foam::CV3D::alignmentDistanceWeight(scalar dist) const
 
     return w;
 }
+
+
+Foam::scalar Foam::CV3D::faceAreaWeight(scalar faceArea) const
+{
+    scalar fl2 = 0.2;
+
+    scalar fu2 = 1.0;
+
+    scalar m2 = controls_.minCellSize2;
+
+    if (faceArea < fl2*m2)
+    {
+        return 0;
+    }
+    else if (faceArea < fu2*m2)
+    {
+        return faceArea/((fu2 - fl2)*m2) - 1/((fu2/fl2) - 1);
+    }
+    else
+    {
+        return 1;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -563,19 +586,31 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
             point dualFaceCentre(dualFace.centre(dualVertices));
 
-            scalar weight = 1.0;
+            vector rAB = dVA - dVB;
+
+            scalar rABMag = mag(rAB);
+
+            scalar faceArea = dualFace.mag(dualVertices);
+
+            scalar directStiffness = 2.0*relaxation;
+
+            scalar transverseStiffness = 0.0001*relaxation;
+
+            scalar r0 = 0.9*controls_.minCellSize;
+
+            vector dA = -directStiffness*(1 - r0/rABMag)
+            *faceAreaWeight(faceArea)*rAB;
+
+            vector dT = transverseStiffness*faceAreaWeight(faceArea)
+            *(dualFaceCentre - 0.5*(dVA - dVB));
 
             if (vA->internalPoint())
             {
-               //displacementAccumulator[vA->index()] = vA->index()*vector::one;
-                displacementAccumulator[vA->index()] +=
-                relaxation*weight*(dualFaceCentre - dVA);
+                displacementAccumulator[vA->index()] += dA + dT;
             }
             if (vB->internalPoint())
             {
-               //displacementAccumulator[vB->index()] = vB->index()*vector::one;
-                displacementAccumulator[vB->index()] +=
-                relaxation*weight*(dualFaceCentre - dVB);
+                displacementAccumulator[vB->index()] += -dA + dT;
             }
         }
     }

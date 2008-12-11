@@ -92,6 +92,26 @@ inline void Foam::CV3D::insertPointPair
 }
 
 
+inline void Foam::CV3D::insertVb(const Vb& v)
+{
+    const Point& Pt(v.point());
+
+    uint nVert = number_of_vertices();
+
+    Vertex_handle vh = insert(Pt);
+
+    if (nVert == number_of_vertices())
+    {
+        FatalErrorIn("Foam::CV3D::insert(const Vb& v")
+        << "Failed to reinsert Vb at " << topoint(Pt)
+            << endl;
+    }
+
+    vh->index() = v.index();
+    vh->type() = v.type();
+}
+
+
 void Foam::CV3D::movePoint(const Vertex_handle& vh, const point& p)
 {
     label vi = vh->index();
