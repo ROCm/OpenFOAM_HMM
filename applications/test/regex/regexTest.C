@@ -22,42 +22,64 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regularExpression.H"
+#include "IOstreams.H"
+#include "IOobject.H"
+#include "IFstream.H"
+#include "regExp.H"
+#include "List.H"
+#include "Tuple2.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    List<Tuple2<string, string> > rawList(IFstream("testRegexps")());
+    Info<< "input list:" << rawList << endl;
+    IOobject::writeDivider(Info);
+    Info<< endl;
 
-template<class StringList>
-labelList findStrings(const string& regexp, const StringList& sl)
-{
-    labelList matches(sl.size());
+    List<string> groups;
 
-    regularExpression re(regexp);
-
-    label matchi = 0;
-    forAll(sl, i)
+    // report matches:
+    forAll(rawList, elemI)
     {
-        if (re.matches(sl[i]))
+        const string& pat = rawList[elemI].first();
+        const string& str = rawList[elemI].second();
+        regExp re(pat);
+
+        Info<< str << " =~ m/" << pat.c_str() << "/ == ";
+
+        if (re.match(str, groups))
         {
-            matches[matchi++] = i;
+            Info<< "true";
+            if (re.ngroups())
+            {
+                Info<< groups;
+            }
         }
+        else
+        {
+            Info<< "false";
+            if (re.match(str, true))
+            {
+                Info<< " partial match";
+            }
+        }
+        Info << endl;
     }
 
-    matches.setSize(matchi);
+    Info<< endl;
 
-    return matches;
+    return 0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

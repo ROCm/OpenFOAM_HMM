@@ -2,6 +2,7 @@ signals/sigFpe.C
 signals/sigSegv.C
 signals/sigInt.C
 signals/sigQuit.C
+regExp.C
 timer.C
 fileStat.C
 Unix.C

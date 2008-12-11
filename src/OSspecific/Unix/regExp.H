@@ -23,94 +23,108 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::regularExpression
+    Foam::regExp
 
 Description
-    Wrapper around regular expressions.
+    Wrapper around POSIX extended regular expressions.
+
+    The beginning-of-line (^) and the end-of-line ($) anchors are implicit
+    by default.
+
+SeeAlso
+    The manpage regex(7) for more information about POSIX regular expressions.
+    These differ somewhat from @c Perl and @c sed regular expressions.
 
 SourceFiles
+    regExp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regularExpression_H
-#define regularExpression_H
+#ifndef regExp_H
+#define regExp_H
 
-#include <sys/types.h>
 #include <regex.h>
-#include "string.H"
-#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+class string;
+template<class T> class List;
+
 /*---------------------------------------------------------------------------*\
-                           Class regularExpression Declaration
+                          Class regExp Declaration
 \*---------------------------------------------------------------------------*/
 
-class regularExpression
+class regExp
 {
     // Private data
 
         //- Precompiled regular expression
-        regex_t* preg_;
-
+        mutable regex_t* preg_;
 
     // Private member functions
 
+        //- release allocated space
+        void clear() const;
+
+        //- compile into a regular expression
+        void compile(const char*) const;
+
         //- Disallow default bitwise copy construct
-        regularExpression(const regularExpression&);
+        regExp(const regExp&);
 
         //- Disallow default bitwise assignment
-        void operator=(const regularExpression&);
+        void operator=(const regExp&);
 
 public:
 
-
     // Constructors
 
+        //- Construct null
+        regExp();
+
         //- Construct from string
-        inline regularExpression(const string& s)
-        {
-            preg_ = new regex_t;
+        regExp(const string&);
 
-            if (regcomp(preg_, s.c_str(), REG_EXTENDED) != 0)
-            {
-                FatalErrorIn
-                (
-                    "regularExpression::regularExpression(const char*)"
-                )   << "Failed to compile regular expression " << s
-                    << exit(FatalError);
-            }
-        }
-
+        //- Construct from character array
+        regExp(const char*);
 
     // Destructor
 
-        //- Construct from string
-        inline ~regularExpression()
-        {
-            if (preg_)
-            {
-                regfree(preg_);
-                delete preg_;
-            }
-        }
-
+        ~regExp();
 
     // Member functions
 
-        //- Matches?
-        inline bool matches(const string& s) const
-        {
-            size_t nmatch = 1;
-            regmatch_t pmatch[1];
+        //- Return the number of (groups)
+        int ngroups() const;
 
-            int errVal = regexec(preg_, s.c_str(), nmatch, pmatch, 0);
+        //- Return true if it matches, partial matches are optional
+        bool match
+        (
+            const string&,
+            bool partialMatch=false
+        ) const;
 
-            return (errVal == 0 && pmatch[0].rm_eo == label(s.size()));
-        }
+        //- Return true if it matches and sets the sub-groups matched,
+        //  partial matches are optional
+        bool match
+        (
+            const string&,
+            List<string>& groups,
+            bool partialMatch=false
+        ) const;
+
+    // Member Operators
+
+        //- Assign from a string
+        void operator=(const string&);
+
+        //- Assign from a character array
+        void operator=(const char*);
+
 };
 
 

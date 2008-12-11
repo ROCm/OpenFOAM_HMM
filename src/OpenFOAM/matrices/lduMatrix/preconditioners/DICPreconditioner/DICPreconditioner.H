@@ -67,11 +67,11 @@ public:
 
     // Constructors
 
-        //- Construct from matrix components and preconditioner data stream
+        //- Construct from matrix components and preconditioner solver controls
         DICPreconditioner
         (
-            const lduMatrix::solver& sol,
-            Istream& preconditionerData
+            const lduMatrix::solver&,
+            const dictionary& solverControlsUnused
         );
 
 
