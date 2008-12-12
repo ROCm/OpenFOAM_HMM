@@ -34,7 +34,7 @@ if (transonic)
 }
 else
 {
-    phi = 
+    phi =
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())

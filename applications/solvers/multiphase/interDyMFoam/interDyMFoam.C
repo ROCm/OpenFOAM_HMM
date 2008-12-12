@@ -65,11 +65,10 @@ int main(int argc, char *argv[])
     {
         #include "readControls.H"
         #include "CourantNo.H"
+        #include "setDeltaT.H"
 
         // Make the fluxes absolute
         fvc::makeAbsolute(phi, U);
-
-        #include "setDeltaT.H"
 
         runTime++;
 

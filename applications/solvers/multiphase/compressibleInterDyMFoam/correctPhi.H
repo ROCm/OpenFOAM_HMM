@@ -27,6 +27,7 @@
             fvm::laplacian(rAUf, pcorr) == fvc::div(phi) - divU
         );
 
+        pcorrEqn.setReference(0, 0);
         pcorrEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
