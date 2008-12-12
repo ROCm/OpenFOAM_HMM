@@ -40,7 +40,7 @@ namespace Foam
 // PtrList of models
 PtrList<cellModel> cellModeller::models_
 (
-    (IFstream(dotFoam("cellModels"))())
+    IFstream(findEtcFile("cellModels", true))()
 );
 
 // List of model pointers
