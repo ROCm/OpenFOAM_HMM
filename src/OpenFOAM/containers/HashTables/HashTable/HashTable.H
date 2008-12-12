@@ -102,7 +102,7 @@ class HashTable
                 //- Construct given key, next pointer and object
                 inline hashedEntry
                 (
-                    const Key& key,
+                    const Key&,
                     hashedEntry* next,
                     const T& newEntry
                 );
@@ -127,7 +127,7 @@ class HashTable
     // Private Member Functions
 
         //- Assign a new hashedEntry to a possibly already existing key
-        bool set(const Key& key, const T& newElmt, bool protect);
+        bool set(const Key&, const T& newElmt, bool protect);
 
 public:
 
@@ -173,15 +173,15 @@ public:
             inline label size() const;
 
             //- Return true if hashedEntry is found in table
-            bool found(const Key& key) const;
+            bool found(const Key&) const;
 
             //- Find and return an iterator set at the hashedEntry
             //  If not found iterator = end()
-            iterator find(const Key& key);
+            iterator find(const Key&);
 
             //- Find and return an const_iterator set at the hashedEntry
             //  If not found iterator = end()
-            const_iterator find(const Key& key) const;
+            const_iterator find(const Key&) const;
 
             //- Return the table of contents
             List<Key> toc() const;
@@ -190,22 +190,26 @@ public:
         // Edit
 
             //- Insert a new hashedEntry
-            inline bool insert(const Key& key, const T& newElmt);
+            inline bool insert(const Key&, const T& newElmt);
 
             //- Assign a new hashedEntry, overwriting existing entries
-            inline bool set(const Key& key, const T& newElmt);
+            inline bool set(const Key&, const T& newElmt);
 
             //- Erase an hashedEntry specified by given iterator
-            bool erase(const iterator& it);
+            bool erase(const iterator&);
 
             //- Erase an hashedEntry specified by given key if in table
-            bool erase(const Key& key);
+            bool erase(const Key&);
 
             //- Resize the hash table for efficiency
             void resize(const label newSize);
 
             //- Clear all entries from table
             void clear();
+
+            //- Clear the table entries and the table itself.
+            //  Equivalent to clear() followed by resize(0)
+            void clearStorage();
 
             //- Transfer the contents of the argument table into this table
             //  and annull the argument table.
@@ -215,14 +219,14 @@ public:
     // Member Operators
 
         //- Find and return an hashedEntry
-        inline T& operator[](const Key& key);
+        inline T& operator[](const Key&);
 
         //- Find and return an hashedEntry
-        inline const T& operator[](const Key& key) const;
+        inline const T& operator[](const Key&) const;
 
         //- Find and return an hashedEntry and
         //  if it is not present create it null.
-        inline T& operator()(const Key& key);
+        inline T& operator()(const Key&);
 
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>&);
@@ -290,13 +294,13 @@ public:
 
             // Member operators
 
-                inline void operator=(const iterator& iter);
+                inline void operator=(const iterator&);
 
-                inline bool operator==(const iterator& iter) const;
-                inline bool operator!=(const iterator& iter) const;
+                inline bool operator==(const iterator&) const;
+                inline bool operator!=(const iterator&) const;
 
-                inline bool operator==(const const_iterator& iter) const;
-                inline bool operator!=(const const_iterator& iter) const;
+                inline bool operator==(const const_iterator&) const;
+                inline bool operator!=(const const_iterator&) const;
 
                 inline T& operator*();
                 inline T& operator()();
@@ -352,13 +356,13 @@ public:
 
             // Member operators
 
-                inline void operator=(const const_iterator& iter);
+                inline void operator=(const const_iterator&);
 
-                inline bool operator==(const const_iterator& iter) const;
-                inline bool operator!=(const const_iterator& iter) const;
+                inline bool operator==(const const_iterator&) const;
+                inline bool operator!=(const const_iterator&) const;
 
-                inline bool operator==(const iterator& iter) const;
-                inline bool operator!=(const iterator& iter) const;
+                inline bool operator==(const iterator&) const;
+                inline bool operator!=(const iterator&) const;
 
                 inline const T& operator*();
                 inline const T& operator()();
