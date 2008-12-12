@@ -93,10 +93,10 @@ class dictionary
         const dictionary& parent_;
 
         //- Entries of matching patterns
-        DLList<entry*> wildCardEntries_;
+        DLList<entry*> patternEntries_;
 
         //- Patterns as precompiled regular expressions
-        DLList<autoPtr<regExp> > wildCardRegexps_;
+        DLList<autoPtr<regExp> > patternRegexps_;
 
    // Private Member Functions
 

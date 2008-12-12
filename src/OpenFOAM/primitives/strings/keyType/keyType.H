@@ -62,7 +62,8 @@ class keyType
 {
     // Private member data
 
-        bool isWildCard_;
+        //- Is the keyType a pattern (regular expression)
+        bool isPattern_;
 
     // Private Member Functions
 

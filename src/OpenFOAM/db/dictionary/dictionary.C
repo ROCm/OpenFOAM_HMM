@@ -46,9 +46,9 @@ bool Foam::dictionary::findInPatterns
     DLList<autoPtr<regExp> >::const_iterator& reLink
 ) const
 {
-    if (wildCardEntries_.size() > 0)
+    if (patternEntries_.size() > 0)
     {
-        while (wcLink != wildCardEntries_.end())
+        while (wcLink != patternEntries_.end())
         {
             if
             (
@@ -76,9 +76,9 @@ bool Foam::dictionary::findInPatterns
     DLList<autoPtr<regExp> >::iterator& reLink
 )
 {
-    if (wildCardEntries_.size() > 0)
+    if (patternEntries_.size() > 0)
     {
-        while (wcLink != wildCardEntries_.end())
+        while (wcLink != patternEntries_.end())
         {
             if
             (
@@ -127,8 +127,8 @@ Foam::dictionary::dictionary
 
         if (iter().keyword().isPattern())
         {
-            wildCardEntries_.insert(&iter());
-            wildCardRegexps_.insert
+            patternEntries_.insert(&iter());
+            patternRegexps_.insert
             (
                 autoPtr<regExp>(new regExp(iter().keyword()))
             );
@@ -157,8 +157,8 @@ Foam::dictionary::dictionary
 
         if (iter().keyword().isPattern())
         {
-            wildCardEntries_.insert(&iter());
-            wildCardRegexps_.insert
+            patternEntries_.insert(&iter());
+            patternRegexps_.insert
             (
                 autoPtr<regExp>(new regExp(iter().keyword()))
             );
@@ -217,11 +217,11 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     }
     else
     {
-        if (wildCardEntries_.size() > 0)
+        if (patternEntries_.size() > 0)
         {
-            DLList<entry*>::const_iterator wcLink = wildCardEntries_.begin();
+            DLList<entry*>::const_iterator wcLink = patternEntries_.begin();
             DLList<autoPtr<regExp> >::const_iterator reLink =
-                wildCardRegexps_.begin();
+                patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
             if (findInPatterns(true, keyword, wcLink, reLink))
@@ -253,12 +253,12 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
 
     if (iter == hashedEntries_.end())
     {
-        if (patternMatch && wildCardEntries_.size() > 0)
+        if (patternMatch && patternEntries_.size() > 0)
         {
             DLList<entry*>::const_iterator wcLink =
-                wildCardEntries_.begin();
+                patternEntries_.begin();
             DLList<autoPtr<regExp> >::const_iterator reLink =
-                wildCardRegexps_.begin();
+                patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
             if (findInPatterns(patternMatch, keyword, wcLink, reLink))
@@ -292,12 +292,12 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
 
     if (iter == hashedEntries_.end())
     {
-        if (patternMatch && wildCardEntries_.size() > 0)
+        if (patternMatch && patternEntries_.size() > 0)
         {
             DLList<entry*>::iterator wcLink =
-                wildCardEntries_.begin();
+                patternEntries_.begin();
             DLList<autoPtr<regExp> >::iterator reLink =
-                wildCardRegexps_.begin();
+                patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
             if (findInPatterns(patternMatch, keyword, wcLink, reLink))
@@ -499,8 +499,8 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
                 if (entryPtr->keyword().isPattern())
                 {
-                    wildCardEntries_.insert(entryPtr);
-                    wildCardRegexps_.insert
+                    patternEntries_.insert(entryPtr);
+                    patternRegexps_.insert
                     (
                         autoPtr<regExp>(new regExp(entryPtr->keyword()))
                     );
@@ -528,8 +528,8 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
         if (entryPtr->keyword().isPattern())
         {
-            wildCardEntries_.insert(entryPtr);
-            wildCardRegexps_.insert
+            patternEntries_.insert(entryPtr);
+            patternRegexps_.insert
             (
                 autoPtr<regExp>(new regExp(entryPtr->keyword()))
             );
@@ -622,14 +622,14 @@ bool Foam::dictionary::remove(const word& Keyword)
     if (iter != hashedEntries_.end())
     {
         // Delete from patterns first
-        DLList<entry*>::iterator wcLink = wildCardEntries_.begin();
-        DLList<autoPtr<regExp> >::iterator reLink = wildCardRegexps_.begin();
+        DLList<entry*>::iterator wcLink = patternEntries_.begin();
+        DLList<autoPtr<regExp> >::iterator reLink = patternRegexps_.begin();
 
         // Find in pattern using exact match only
         if (findInPatterns(false, Keyword, wcLink, reLink))
         {
-            wildCardEntries_.remove(wcLink);
-            wildCardRegexps_.remove(reLink);
+            patternEntries_.remove(wcLink);
+            patternRegexps_.remove(reLink);
         }
 
         IDLList<entry>::remove(iter());
@@ -689,15 +689,15 @@ bool Foam::dictionary::changeKeyword
             {
                 // Delete from patterns first
                 DLList<entry*>::iterator wcLink =
-                    wildCardEntries_.begin();
+                    patternEntries_.begin();
                 DLList<autoPtr<regExp> >::iterator reLink =
-                    wildCardRegexps_.begin();
+                    patternRegexps_.begin();
 
                 // Find in patterns using exact match only
                 if (findInPatterns(false, iter2()->keyword(), wcLink, reLink))
                 {
-                    wildCardEntries_.remove(wcLink);
-                    wildCardRegexps_.remove(reLink);
+                    patternEntries_.remove(wcLink);
+                    patternRegexps_.remove(reLink);
                 }
             }
 
@@ -726,8 +726,8 @@ bool Foam::dictionary::changeKeyword
 
     if (newKeyword.isPattern())
     {
-        wildCardEntries_.insert(iter());
-        wildCardRegexps_.insert
+        patternEntries_.insert(iter());
+        patternRegexps_.insert
         (
             autoPtr<regExp>(new regExp(newKeyword))
         );
@@ -793,8 +793,8 @@ void Foam::dictionary::clear()
 {
     IDLList<entry>::clear();
     hashedEntries_.clear();
-    wildCardEntries_.clear();
-    wildCardRegexps_.clear();
+    patternEntries_.clear();
+    patternRegexps_.clear();
 }
 
 

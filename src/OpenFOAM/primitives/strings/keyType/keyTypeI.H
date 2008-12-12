@@ -33,21 +33,21 @@ License
 inline Foam::keyType::keyType()
 :
     word(),
-    isWildCard_(false)
+    isPattern_(false)
 {}
 
 
 inline Foam::keyType::keyType(const keyType& s)
 :
     word(s, false),
-    isWildCard_(s.isPattern())
+    isPattern_(s.isPattern())
 {}
 
 
 inline Foam::keyType::keyType(const word& s)
 :
     word(s, false),
-    isWildCard_(false)
+    isPattern_(false)
 {}
 
 
@@ -55,7 +55,7 @@ inline Foam::keyType::keyType(const word& s)
 inline Foam::keyType::keyType(const string& s)
 :
     word(s, false),
-    isWildCard_(true)
+    isPattern_(true)
 {}
 
 
@@ -63,7 +63,7 @@ inline Foam::keyType::keyType(const string& s)
 inline Foam::keyType::keyType(const char* s)
 :
     word(s, false),
-    isWildCard_(false)
+    isPattern_(false)
 {}
 
 
@@ -75,7 +75,7 @@ inline Foam::keyType::keyType
 )
 :
     word(s, false),
-    isWildCard_(isPattern)
+    isPattern_(isPattern)
 {}
 
 
@@ -89,7 +89,7 @@ inline bool Foam::keyType::valid(char c)
 
 bool Foam::keyType::isPattern() const
 {
-    return isWildCard_;
+    return isPattern_;
 }
 
 
@@ -99,14 +99,14 @@ inline void Foam::keyType::operator=(const keyType& s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = s.isPattern();
+    isPattern_ = s.isPattern_;
 }
 
 
 inline void Foam::keyType::operator=(const word& s)
 {
     word::operator=(s);
-    isWildCard_ = false;
+    isPattern_ = false;
 }
 
 
@@ -114,7 +114,7 @@ inline void Foam::keyType::operator=(const string& s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = true;
+    isPattern_ = true;
 }
 
 
@@ -122,7 +122,7 @@ inline void Foam::keyType::operator=(const char* s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = false;
+    isPattern_ = false;
 }
 
 
