@@ -12,9 +12,7 @@
     surfaceScalarField phic = mag(phi/mesh.magSf());
     phic = min(interface.cAlpha()*phic, max(phic));
 
-    fvc::makeAbsolute(phi, U);
     volScalarField divU = fvc::div(phi);
-    fvc::makeRelative(phi, U);
 
     if (nAlphaSubCycles > 1)
     {

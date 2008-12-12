@@ -21,7 +21,7 @@
     surfaceScalarField phiU
     (
         "phiU",
-        (fvc::interpolate(U) & mesh.Sf())
+        (fvc::interpolate(U) & mesh.Sf()) + fvc::ddtPhiCorr(rUA, rho, U, phi)
     );
 
     phi = phiU +
