@@ -617,8 +617,10 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         {
             const labelList& eFaces = edgeFaces[edgeI];
 
-            if (eFaces.size() != 2)
+            if (eFaces.size() == 1)
             {
+                // Note: could also do ones with > 2 faces but this gives
+                // too many zones for baffles
                 featEdge[edgeI] = true;
             }
             else if (mag(n[eFaces[0]] & n[eFaces[1]]) < 0.5)

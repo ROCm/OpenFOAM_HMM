@@ -26,7 +26,7 @@ Class
     Foam::sampledPlane
 
 Description
-    A sampledSurface defined by a cuttingPlane. Triangulated by default.
+    A sampledSurface defined by a cuttingPlane. Always triangulated.
 
 SourceFiles
     sampledPlane.C
@@ -58,17 +58,14 @@ class sampledPlane
         //- zone name (if restricted to zones)
         word zoneName_;
 
-        //- Triangulated faces in terms of intersection points.
-        //  Non-triangulated faces are obtained directly from cuttingPlane
-        faceList faces_;
-
-        //- For every triangulated face, the original cell in mesh
-        labelList meshCells_;
-
     // Private Member Functions
 
-        //- Do all to create geometry. Triangulate as required
-        void createGeometry();
+        //- Do all to create geometry.
+        void createGeometry
+        (
+            const polyMesh& mesh,
+            const label zoneId
+        );
 
         //- sample field on faces
         template <class Type>
@@ -97,8 +94,7 @@ public:
             const word& name,
             const polyMesh& mesh,
             const plane& planeDesc,
-            const word& zoneName = word::null,
-            const bool triangulate = true
+            const word& zoneName = word::null
         );
 
         //- Construct from dictionary
@@ -118,7 +114,7 @@ public:
     // Member Functions
 
         //- Points of surface
-        const pointField& points() const
+        virtual const pointField& points() const
         {
             return cuttingPlane::points();
         }
@@ -126,29 +122,14 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            if (triangulate())
-            {
-                return faces_;
-            }
-            else
-            {
-                return cuttingPlane::faces();
-            }
+            return cuttingPlane::faces();
         }
 
         //- For every face original cell in mesh
         const labelList& meshCells() const
         {
-            if (triangulate())
-            {
-                return meshCells_;
-            }
-            else
-            {
-                return cuttingPlane::cells();
-            }
+            return cuttingPlane::cutCells();
         }
-
 
         //- Correct for mesh movement and/or field changes
         virtual void correct(const bool meshChanged);

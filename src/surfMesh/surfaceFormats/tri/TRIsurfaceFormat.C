@@ -25,9 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIsurfaceFormat.H"
-#include "IFstream.H"
-#include "IOmanip.H"
-#include "IStringStream.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -66,10 +64,10 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
 template<class Face>
 Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 
@@ -78,123 +76,78 @@ Foam::fileFormats::TRIsurfaceFormat<Face>::TRIsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     this->clear();
 
-    IFstream is(fName);
-    if (!is.good())
+    // read in the values
+    TRIsurfaceFormatCore reader(filename);
+
+    // transfer points
+    this->storedPoints().transfer(reader.points());
+
+    // retrieve the original region information
+    List<label> sizes(xferMove(reader.sizes()));
+    List<label> regions(xferMove(reader.regions()));
+
+    // generate the (sorted) faces
+    List<Face> faceLst(regions.size());
+
+    if (reader.sorted())
     {
-        FatalErrorIn
-        (
-            "fileFormats::TRIsurfaceFormat::read(const fileName&)"
-        )
-            << "Cannot read file " << fName
-            << exit(FatalError);
-    }
-
-    // uses similar structure as STL, just some points
-    DynamicList<point> pointLst;
-    DynamicList<label> regionLst;
-    HashTable<label>   groupToPatch;
-
-    // leave faces that didn't have a group in 0
-    label nUngrouped = 0;
-    label groupID = 0;
-    label maxGroupID = -1;
-
-    while (is.good())
-    {
-        string line = this->getLineNoComment(is);
-
-        // handle continuations ?
-        //          if (line[line.size()-1] == '\\')
-        //          {
-        //              line.substr(0, line.size()-1);
-        //              line += this->getLineNoComment(is);
-        //          }
-
-        IStringStream lineStream(line);
-
-        point p
-        (
-            readScalar(lineStream),
-            readScalar(lineStream),
-            readScalar(lineStream)
-        );
-
-        if (!lineStream) break;
-
-        pointLst.append(p);
-        pointLst.append
-        (
-            point
-            (
-                readScalar(lineStream),
-                readScalar(lineStream),
-                readScalar(lineStream)
-            )
-        );
-        pointLst.append
-        (
-            point
-            (
-                readScalar(lineStream),
-                readScalar(lineStream),
-                readScalar(lineStream)
-            )
-        );
-
-        // Region/colour in .tri file starts with 0x. Skip.
-        // ie, instead of having 0xFF, skip 0 and leave xFF to
-        // get read as a word and name it "patchFF"
-
-        char zero;
-        lineStream >> zero;
-
-        word rawName(lineStream);
-        word groupName("patch" + rawName(1, rawName.size()-1));
-
-        HashTable<label>::const_iterator fnd = groupToPatch.find(groupName);
-
-        if (fnd != groupToPatch.end())
+        // already sorted - generate directly
+        forAll(faceLst, faceI)
         {
-            groupID = fnd();
+            const label startPt = 3*faceI;
+            faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
         }
-        else
-        {
-            // special treatment if any initial faces were not in a group
-            if (maxGroupID == -1 && regionLst.size())
-            {
-                groupToPatch.insert("patch0", 0);
-                nUngrouped = regionLst.size();
-                maxGroupID = 0;
-            }
-            groupID = ++maxGroupID;
-            groupToPatch.insert(groupName, groupID);
-        }
-
-        regionLst.append(groupID);
     }
-
-    // make our triangles directly
-    List<Face>& faceLst = this->storedFaces();
-    faceLst.setSize(regionLst.size());
-
-    // transfer to normal list
-    this->storedPoints().transfer(pointLst);
-    this->storedRegions().transfer(regionLst);
-
-    forAll(faceLst, faceI)
+    else
     {
-        const label startPt = 3 * faceI;
-        faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
-    }
+        // unsorted - determine the sorted order:
+        // avoid SortableList since we discard the main list anyhow
+        List<label> faceMap;
+        sortedOrder(regions, faceMap);
 
-    this->setPatches(groupToPatch);
+        // generate sorted faces
+        forAll(faceMap, faceI)
+        {
+            const label startPt = 3*faceMap[faceI];
+            faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
+        }
+    }
+    regions.clear();
+
+    // transfer:
+    this->storedFaces().transfer(faceLst);
+
+    this->addPatches(sizes);
     this->stitchFaces(SMALL);
     return true;
+}
+
+
+template<class Face>
+void Foam::fileFormats::TRIsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    const pointField& pointLst = surf.points();
+    const List<Face>& faceLst  = surf.faces();
+    const List<surfGroup>& patchLst = surf.patches();
+
+    label faceIndex = 0;
+    forAll(patchLst, patchI)
+    {
+        forAll(patchLst[patchI], patchFaceI)
+        {
+            const Face& f = faceLst[faceIndex++];
+            writeShell(os, pointLst, f, patchI);
+        }
+    }
 }
 
 
@@ -237,29 +190,6 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
         forAll(faceLst, faceI)
         {
             writeShell(os, pointLst, faceLst[faceI], regionLst[faceI]);
-        }
-    }
-}
-
-
-template<class Face>
-void Foam::fileFormats::TRIsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-            writeShell(os, pointLst, f, patchI);
         }
     }
 }

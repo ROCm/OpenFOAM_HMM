@@ -1,0 +1,34 @@
+/*-------------------------------*- C++ -*---------------------------------*\
+|    =========                                                              |
+|    \\      /     OpenFOAM                                                 |
+|     \\    /                                                               |
+|      \\  /       The Open Source CFD Toolbox                              |
+|       \\/                                        http://www.OpenFOAM.org  |
+\*-------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    object          testDictRegex;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#inputMode  merge
+
+".*"        parentValue1;
+"[n-z].*"   parentValue2;
+"f.*"       parentValue3;
+
+someDict
+{
+    foo         subdictValue0;
+    bar         $f.*;         // should this really match 'foo'?
+
+    // result is dependent on insert order!
+    "a.*c"      subdictValue3;
+    "ab.*"      subdictValue2;
+    "a.*"       subdictValue1;
+    abcd        subdictValue4;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

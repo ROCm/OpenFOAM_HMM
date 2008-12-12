@@ -2432,8 +2432,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
 
 
         // Transfer into seedFaces, seedFacesInfo
-        seedFaces.setSize(changedFacesInfo.size());
-        seedFacesInfo.setSize(changedFacesInfo.size());
+        seedFaces.setCapacity(changedFacesInfo.size());
+        seedFacesInfo.setCapacity(changedFacesInfo.size());
 
         forAllConstIter(Map<refinementData>, changedFacesInfo, iter)
         {

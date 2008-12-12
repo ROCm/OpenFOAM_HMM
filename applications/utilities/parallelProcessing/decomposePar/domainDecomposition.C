@@ -354,7 +354,7 @@ bool domainDecomposition::writeDecomposition()
             // Estimate size
             forAll(zonePoints, zoneI)
             {
-                zonePoints[zoneI].setSize(pz[zoneI].size() / nProcs_);
+                zonePoints[zoneI].setCapacity(pz[zoneI].size() / nProcs_);
             }
 
             // Use the pointToZone map to find out the single zone (if any),
@@ -423,8 +423,8 @@ bool domainDecomposition::writeDecomposition()
             {
                 label procSize = fz[zoneI].size() / nProcs_;
 
-                zoneFaces[zoneI].setSize(procSize);
-                zoneFaceFlips[zoneI].setSize(procSize);
+                zoneFaces[zoneI].setCapacity(procSize);
+                zoneFaceFlips[zoneI].setCapacity(procSize);
             }
 
             // Go through all the zoned faces and find out if they
@@ -514,7 +514,7 @@ bool domainDecomposition::writeDecomposition()
             // Estimate size
             forAll(zoneCells, zoneI)
             {
-                zoneCells[zoneI].setSize(cz[zoneI].size() / nProcs_);
+                zoneCells[zoneI].setCapacity(cz[zoneI].size() / nProcs_);
             }
 
             forAll (curCellLabels, celli)

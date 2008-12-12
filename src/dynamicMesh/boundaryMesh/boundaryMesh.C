@@ -1250,7 +1250,7 @@ void Foam::boundaryMesh::patchify
 
         forAll(patchFaces, newPatchI)
         {
-            patchFaces[newPatchI].setSize(nAvgFaces);
+            patchFaces[newPatchI].setCapacity(nAvgFaces);
         }
 
         //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    XiGModel
+    Foam::XiGModel
 
 Description
     Base-class for all Xi generation models used by the b-Xi combustion model.

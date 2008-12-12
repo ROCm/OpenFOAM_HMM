@@ -45,6 +45,8 @@ void Foam::sampledIsoSurface::getIsoFields() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
+    word pointFldName = "volPointInterpolate(" + isoField_ + ')';
+
     // Get volField
     // ~~~~~~~~~~~~
 
@@ -64,36 +66,62 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if (debug)
         {
-            Info<< "sampledIsoSurface::getIsoField() : reading "
-                << isoField_ << " from time " <<fvm.time().timeName()
+            Info<< "sampledIsoSurface::getIsoField() : checking "
+                << isoField_ << " for same time " << fvm.time().timeName()
                 << endl;
         }
 
-        storedVolFieldPtr_.reset
+        if
         (
-            new volScalarField
+           !storedVolFieldPtr_.valid()
+         || (fvm.time().timeName() != storedVolFieldPtr_().instance())
+        )
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : reading "
+                    << isoField_ << " from time " << fvm.time().timeName()
+                    << endl;
+            }
+
+            storedVolFieldPtr_.reset
             (
-                IOobject
+                new volScalarField
                 (
-                    isoField_,
-                    fvm.time().timeName(),
-                    fvm,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                fvm
-            )
-        );
-        volFieldPtr_ = storedVolFieldPtr_.operator->();
+                    IOobject
+                    (
+                        isoField_,
+                        fvm.time().timeName(),
+                        fvm,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    fvm
+                )
+            );
+            volFieldPtr_ = storedVolFieldPtr_.operator->();
+
+            // Interpolate to get pointField
+
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : interpolating "
+                    << pointFldName << endl;
+            }
+
+            storedPointFieldPtr_.reset
+            (
+                volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
+            );
+            pointFieldPtr_ = storedPointFieldPtr_.operator->();
+        }
     }
 
 
 
     // Get pointField
     // ~~~~~~~~~~~~~~
-
-    word pointFldName = "volPointInterpolate(" + isoField_ + ')';
 
     if (fvm.foundObject<pointScalarField>(pointFldName))
     {
@@ -102,7 +130,6 @@ void Foam::sampledIsoSurface::getIsoFields() const
             Info<< "sampledIsoSurface::getIsoField() : lookup "
                 << pointFldName << endl;
         }
-        storedPointFieldPtr_.clear();
         pointFieldPtr_ = &fvm.lookupObject<pointScalarField>(pointFldName);
     }
     else
@@ -111,23 +138,37 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if (debug)
         {
-            Info<< "sampledIsoSurface::getIsoField() : interpolating "
-                << pointFldName << endl;
+            Info<< "sampledIsoSurface::getIsoField() : checking interpolate "
+                << isoField_ << " for same time " << fvm.time().timeName()
+                << endl;
         }
 
-        storedPointFieldPtr_.reset
+        if
         (
-            volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
-        );
-        pointFieldPtr_ = storedPointFieldPtr_.operator->();
+           !storedPointFieldPtr_.valid()
+         || (fvm.time().timeName() != storedPointFieldPtr_().instance())
+        )
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : interpolating "
+                    << pointFldName << endl;
+            }
+
+            storedPointFieldPtr_.reset
+            (
+                volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
+            );
+            pointFieldPtr_ = storedPointFieldPtr_.operator->();
+        }
     }
 
     if (debug)
     {
-        Info<< "sampledIsoSurface::getIsoField() : obtained volField "
+        Info<< "sampledIsoSurface::getIsoField() : volField "
             << volFieldPtr_->name() << " min:" << min(*volFieldPtr_).value()
             << " max:" << max(*volFieldPtr_).value() << endl;
-        Info<< "sampledIsoSurface::getIsoField() : obtained pointField "
+        Info<< "sampledIsoSurface::getIsoField() : pointField "
             << pointFieldPtr_->name()
             << " min:" << gMin(pointFieldPtr_->internalField())
             << " max:" << gMax(pointFieldPtr_->internalField()) << endl;

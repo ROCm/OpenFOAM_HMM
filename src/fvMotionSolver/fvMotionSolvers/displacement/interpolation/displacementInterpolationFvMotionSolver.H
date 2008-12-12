@@ -115,10 +115,11 @@ public:
 
     // Constructors
 
+        //- Construct from polyMesh and data stream
         displacementInterpolationFvMotionSolver
         (
-            const polyMesh& mesh,
-            Istream& msData
+            const polyMesh&,
+            Istream& msDataUnused
         );
 
 

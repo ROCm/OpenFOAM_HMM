@@ -41,10 +41,10 @@ License
 template<class Face>
 Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
-    read(fName);
+    read(filename);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -52,20 +52,20 @@ Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 template<class Face>
 bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 (
-    const fileName& fName
+    const fileName& filename
 )
 {
     const bool mustTriangulate = this->isTri();
     this->clear();
 
-    IFstream is(fName);
+    IFstream is(filename);
     if (!is.good())
     {
         FatalErrorIn
         (
             "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot read file " << fName
+            << "Cannot read file " << filename
             << exit(FatalError);
     }
 
@@ -81,7 +81,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
         (
             "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
         )
-            << "When reading AC3D file " << fName
+            << "When reading AC3D file " << filename
             << " read header " << line << " with version "
             << version << endl
             << "Only tested reading with version 'b'."
@@ -95,7 +95,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
         (
             "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
         )
-            << "Cannot find \"OBJECT world\" in file " << fName
+            << "Cannot find \"OBJECT world\" in file " << filename
             << exit(FatalError);
     }
 
@@ -106,18 +106,16 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     // Start of vertices for object/patch
     label patchVertOffset = 0;
 
-    DynamicList<point> pointLst;
-    DynamicList<Face>  faceLst;
-    DynamicList<label> regionLst;
-
-    // patchId => patchName
-    Map<word> regionNames;
+    DynamicList<point> dynPoints;
+    DynamicList<Face>  dynFaces;
+    List<word>         names(nPatches);
+    List<label>        sizes(nPatches, 0);
 
     for (label patchI = 0; patchI < nPatches; ++patchI)
     {
-        word patchName = word("patch") + Foam::name(patchI);
+        names[patchI] = word("patch") + Foam::name(patchI);
 
-        args = cueToOrDie(is, "OBJECT", "while reading " + patchName);
+        args = cueToOrDie(is, "OBJECT", "while reading " + names[patchI]);
 
         // number of vertices for this patch
         label  nPatchPoints = 0;
@@ -136,7 +134,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                     "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
                 )
                     << "Did not read up to \"kids 0\" while reading patch "
-                    << patchI << " from file " << fName
+                    << patchI << " from file " << filename
                     << exit(FatalError);
             }
 
@@ -146,7 +144,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 string str = parse<string>(args);
                 string::stripInvalid<word>(str);
 
-                patchName = str;
+                names[patchI] = str;
             }
             else if (cmd == "rot")
             {
@@ -193,7 +191,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         >> pt.x() >> pt.y() >> pt.z();
 
                     // Offset with current translation vector
-                    pointLst.append(location + pt);
+                    dynPoints.append(location + pt);
                 }
             }
             else if (cmd == "numsurf")
@@ -206,7 +204,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         string(" while reading face ")
                             + Foam::name(faceI) + " on patch "
                             + Foam::name(patchI)
-                            + " from file " + fName;
+                            + " from file " + filename;
 
                     cueToOrDie(is, "SURF", errorMsg);
                     cueToOrDie(is, "mat", errorMsg);
@@ -225,27 +223,20 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
                     if (mustTriangulate && f.size() > 3)
                     {
-                        triFace fTri;
-
-                        // simple face triangulation about f[0].
-                        // cannot use face::triangulation
-                        // since points are incomplete
-                        fTri[0] = verts[0];
-                        for (label fp1 = 1; fp1 < verts.size() - 1; ++fp1)
+                        // simple face triangulation about f[0]
+                        // points may be incomplete
+                        for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
                         {
-                            label fp2 = (fp1 + 1) % verts.size();
+                            label fp2 = (fp1 + 1) % f.size();
 
-                            fTri[1] = verts[fp1];
-                            fTri[2] = verts[fp2];
-
-                            faceLst.append(fTri);
-                            regionLst.append(patchI);
+                            dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
+                            sizes[patchI]++;
                         }
                     }
                     else
                     {
-                        faceLst.append(Face(f));
-                        regionLst.append(patchI);
+                        dynFaces.append(Face(f));
+                        sizes[patchI]++;
                     }
                 }
 
@@ -271,20 +262,77 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 }
 
                 // Done reading current patch
-                regionNames.insert(patchI, patchName);
                 break;
             }
         }
     }
 
     // transfer to normal lists
-    this->storedPoints().transfer(pointLst);
-    this->storedFaces().transfer(faceLst);
-    this->storedRegions().transfer(regionLst);
+    this->storedPoints().transfer(dynPoints);
+    this->storedFaces().transfer(dynFaces);
 
-    this->setPatches(regionNames);
+    // add patches, culling empty groups
+    this->addPatches(sizes, names, true);
     this->stitchFaces(SMALL);
     return true;
+}
+
+
+template<class Face>
+void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    const pointField& pointLst = surf.points();
+    const List<Face>& faceLst = surf.faces();
+    const List<surfGroup>& patchLst = surf.patches();
+
+    writeHeader(os, patchLst);
+
+    forAll(patchLst, patchI)
+    {
+        const surfGroup& p = patchLst[patchI];
+
+        os  << "OBJECT poly" << nl
+            << "name \"" << p.name() << '"' << endl;
+
+        // Temporary PrimitivePatch to calculate compact points & faces
+        // use 'UList' to avoid allocations!
+        PrimitivePatch<Face, UList, const pointField&> patch
+        (
+            faceLst,
+            pointLst
+        );
+
+        os << "numvert " << patch.nPoints() << endl;
+
+        forAll(patch.localPoints(), ptI)
+        {
+            const point& pt = patch.localPoints()[ptI];
+
+            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+        }
+
+        os << "numsurf " << patch.localFaces().size() << endl;
+
+        forAll(patch.localFaces(), faceI)
+        {
+            const Face& f = patch.localFaces()[faceI];
+
+            os  << "SURF 0x20" << nl          // polygon
+                << "mat " << patchI << nl
+                << "refs " << f.size() << nl;
+
+            forAll(f, fp)
+            {
+                os << f[fp] << " 0 0" << nl;
+            }
+        }
+
+        os << "kids 0" << endl;
+    }
 }
 
 
@@ -349,62 +397,5 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     }
 }
 
-
-template<class Face>
-void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, patchLst);
-
-    forAll(patchLst, patchI)
-    {
-        const surfGroup& p = patchLst[patchI];
-
-        os  << "OBJECT poly" << nl
-            << "name \"" << p.name() << '"' << endl;
-
-        // Temporary PrimitivePatch to calculate compact points & faces
-        // use 'UList' to avoid allocations!
-        PrimitivePatch<Face, UList, const pointField&> patch
-        (
-            faceLst,
-            pointLst
-        );
-
-        os << "numvert " << patch.nPoints() << endl;
-
-        forAll(patch.localPoints(), ptI)
-        {
-            const point& pt = patch.localPoints()[ptI];
-
-            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-        }
-
-        os << "numsurf " << patch.localFaces().size() << endl;
-
-        forAll(patch.localFaces(), faceI)
-        {
-            const Face& f = patch.localFaces()[faceI];
-
-            os  << "SURF 0x20" << nl          // polygon
-                << "mat " << patchI << nl
-                << "refs " << f.size() << nl;
-
-            forAll(f, fp)
-            {
-                os << f[fp] << " 0 0" << nl;
-            }
-        }
-
-        os << "kids 0" << endl;
-    }
-}
 
 // ************************************************************************* //

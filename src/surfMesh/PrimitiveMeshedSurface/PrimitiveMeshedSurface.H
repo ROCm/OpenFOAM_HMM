@@ -84,6 +84,9 @@ protected:
             return static_cast<List<Face> &>(*this);
         }
 
+        //- Set new regions/patches from faceMap
+        virtual void remapFaces(const UList<label>& faceMap);
+
 public:
 
     // Static
@@ -91,14 +94,6 @@ public:
         //- Face storage only handles triangulated faces
         inline static bool isTri();
 
-        //- Triangulate faceLst in-place
-        //  Returning the number of triangles added and a map to the
-        //  the original face Ids
-        static label triangulate
-        (
-            List<Face>& faceLst,
-            List<label>& faceMap=const_cast<List<label>&>(List<label>::null())
-        );
 
     // Constructors
 
@@ -144,18 +139,34 @@ public:
             const xfer<List<Face> >&
         );
 
+        //- Remove invalid faces
+        virtual void cleanup(const bool verbose);
+
         virtual bool stitchFaces
         (
-            List<label>& faceMap=const_cast<List<label>&>(List<label>::null()),
             const scalar tol=SMALL,
             const bool verbose=false
         );
 
         virtual bool checkFaces
         (
-            List<label>& faceMap=const_cast<List<label>&>(List<label>::null()),
             const bool verbose=false
         );
+
+        //- Triangulate in-place
+        //  Returning the number of triangles added
+        //  Optionally returning a map of original face Ids (zero-sized when
+        //  no triangulation was done)
+        virtual label triangulate();
+
+        //- Triangulate in-place, setting a map of original face Ids
+        //  faceMap is zero-sized when no triangulation was done
+        virtual label triangulate(List<label>& faceMap);
+
+
+    // Write
+
+        void writeStats(Ostream& os) const;
 
 };
 
@@ -167,6 +178,25 @@ template<>
 inline bool PrimitiveMeshedSurface<triFace>::isTri()
 {
     return true;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label PrimitiveMeshedSurface<triFace>::triangulate()
+{
+    return 0;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label PrimitiveMeshedSurface<triFace>::triangulate(List<label>& faceMap)
+{
+    if (&faceMap)
+    {
+        faceMap.clear();
+    }
+
+    return 0;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

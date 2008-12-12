@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Gulder
+    Foam::XiEqModels::Gulder
 
 Description
     Simple Gulder model for XiEq based on Gulders correlation

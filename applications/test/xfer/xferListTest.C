@@ -108,13 +108,13 @@ int main(int argc, char *argv[])
     face f1(dl);
     face f2(xferCopy<labelList>(dl));
 
-    Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
+    Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << endl;
     Info<< "f1: " << f1 << endl;
     Info<< "f2: " << f2 << endl;
 
     // note: using xferMoveTo to ensure the correct transfer() method is called
     face f3( xferMoveTo<labelList>(dl) );
-    Info<< "dl[" << dl.size() << "/" << dl.allocSize() << "] " << dl << endl;
+    Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << endl;
     Info<< "f3: " << f3 << endl;
 
     return 0;

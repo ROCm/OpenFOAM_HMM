@@ -62,7 +62,7 @@ namespace fileFormats
 template<class Face>
 class STARCDsurfaceFormat
 :
-    public UnsortedMeshedSurface<Face>,
+    public MeshedSurface<Face>,
     public STARCDsurfaceFormatCore
 {
     // Private Data
@@ -97,15 +97,12 @@ public:
 
     // Selectors
 
-        //- Read file and return keyedSurface
-        static autoPtr<UnsortedMeshedSurface<Face> > New
-        (
-            const fileName& fName
-        )
+        //- Read file and return surface
+        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
         {
-            return autoPtr<UnsortedMeshedSurface<Face> >
+            return autoPtr<MeshedSurface<Face> >
             (
-                new STARCDsurfaceFormat<Face>(fName)
+                new STARCDsurfaceFormat<Face>(name)
             );
         }
 

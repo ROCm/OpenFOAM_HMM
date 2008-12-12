@@ -119,7 +119,7 @@ Foam::label Foam::face::mostConcaveAngle
 }
 
 
-void Foam::face::split
+Foam::label Foam::face::split
 (
     const face::splitMode mode,
     const pointField& points,
@@ -129,6 +129,8 @@ void Foam::face::split
     faceList& quadFaces
 ) const
 {
+    label oldIndices = (triI + quadI);
+
     if (size() <= 2)
     {
         FatalErrorIn
@@ -143,7 +145,7 @@ void Foam::face::split
     if (size() == 3)
     {
         // Triangle. Just copy.
-        if ((mode == COUNTQUAD) || (mode == COUNTTRIANGLE))
+        if (mode == COUNTTRIANGLE || mode == COUNTQUAD)
         {
             triI++;
         }
@@ -250,7 +252,7 @@ void Foam::face::split
         }
         else
         {
-            // folded round
+            // folded around
             diff = minIndex + size() - startIndex;
         }
 
@@ -281,6 +283,8 @@ void Foam::face::split
         face1.split(mode, points, triI, quadI, triFaces, quadFaces);
         face2.split(mode, points, triI, quadI, triFaces, quadFaces);
     }
+
+    return (triI + quadI - oldIndices);
 }
 
 
@@ -749,30 +753,27 @@ int Foam::face::edgeDirection(const edge& e) const
 
 
 // Number of triangles directly known from number of vertices
-Foam::label Foam::face::nTriangles
-(
-    const pointField&
-) const
+Foam::label Foam::face::nTriangles(const pointField&) const
 {
-    return size() - 2;
+    return nTriangles();
 }
 
 
-void Foam::face::triangles
+Foam::label Foam::face::triangles
 (
     const pointField& points,
     label& triI,
     faceList& triFaces
 ) const
 {
-    faceList quadFaces;
     label quadI = 0;
+    faceList quadFaces;
 
-    split(SPLITTRIANGLE, points, triI, quadI, triFaces, quadFaces);
+    return split(SPLITTRIANGLE, points, triI, quadI, triFaces, quadFaces);
 }
 
 
-void Foam::face::nTrianglesQuads
+Foam::label Foam::face::nTrianglesQuads
 (
     const pointField& points,
     label& triI,
@@ -782,11 +783,11 @@ void Foam::face::nTrianglesQuads
     faceList triFaces;
     faceList quadFaces;
 
-    split(COUNTQUAD, points, triI, quadI, triFaces, quadFaces);
+    return split(COUNTQUAD, points, triI, quadI, triFaces, quadFaces);
 }
 
 
-void Foam::face::trianglesQuads
+Foam::label Foam::face::trianglesQuads
 (
     const pointField& points,
     label& triI,
@@ -795,7 +796,7 @@ void Foam::face::trianglesQuads
     faceList& quadFaces
 ) const
 {
-    split(SPLITQUAD, points, triI, quadI, triFaces, quadFaces);
+    return split(SPLITQUAD, points, triI, quadI, triFaces, quadFaces);
 }
 
 

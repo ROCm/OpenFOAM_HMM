@@ -43,7 +43,7 @@ namespace Foam
 Foam::DICPreconditioner::DICPreconditioner
 (
     const lduMatrix::solver& sol,
-    Istream&
+    const dictionary&
 )
 :
     lduMatrix::preconditioner(sol),

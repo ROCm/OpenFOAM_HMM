@@ -29,14 +29,10 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// all input is indirect via UnsortedMeshedSurface
+
 template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face> >
-Foam::MeshedSurface<Face>::New
-(
-    const fileName& fName,
-    const word& ext
-)
+Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
 {
     if (debug)
     {
@@ -56,7 +52,7 @@ Foam::MeshedSurface<Face>::New
         {
             // create indirectly
             autoPtr<MeshedSurface<Face> > surf(new MeshedSurface<Face>);
-            surf().transfer(SiblingType::New(fName, ext)());
+            surf().transfer(SiblingType::New(name, ext)());
 
             return surf;
         }
@@ -67,8 +63,7 @@ Foam::MeshedSurface<Face>::New
 
         FatalErrorIn
         (
-            "MeshedSurface<Face>::New"
-            "(const fileName&, const word&) : "
+            "MeshedSurface<Face>::New(const fileName&, const word&) : "
             "constructing MeshedSurface"
         )   << "Unknown file extension " << ext << nl << nl
             << "Valid types are :" << nl
@@ -76,23 +71,20 @@ Foam::MeshedSurface<Face>::New
             << exit(FatalError);
     }
 
-    return autoPtr<MeshedSurface<Face> >(cstrIter()(fName));
+    return autoPtr<MeshedSurface<Face> >(cstrIter()(name));
 }
 
 
 template<class Face>
 Foam::autoPtr<Foam::MeshedSurface<Face> >
-Foam::MeshedSurface<Face>::New
-(
-    const fileName& fName
-)
+Foam::MeshedSurface<Face>::New(const fileName& name)
 {
-    word ext = fName.ext();
+    word ext = name.ext();
     if (ext == "gz")
     {
-        ext = fName.lessExt().ext();
+        ext = name.lessExt().ext();
     }
-    return New(fName, ext);
+    return New(name, ext);
 }
 
 // ************************************************************************* //

@@ -58,7 +58,7 @@ Foam::displacementInterpolationFvMotionSolver::
 displacementInterpolationFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream& msData
+    Istream&
 )
 :
     fvMotionSolver(mesh),

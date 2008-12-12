@@ -49,7 +49,7 @@ Foam::GAMGSolver::GAMGSolver
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 :
     lduMatrix::solver
@@ -59,7 +59,7 @@ Foam::GAMGSolver::GAMGSolver
         interfaceBouCoeffs,
         interfaceIntCoeffs,
         interfaces,
-        solverData
+        solverControls
     ),
 
     // Default values for all controls
@@ -112,7 +112,7 @@ Foam::GAMGSolver::GAMGSolver
             "const FieldField<Field, scalar>& interfaceBouCoeffs,"
             "const FieldField<Field, scalar>& interfaceIntCoeffs,"
             "const lduInterfaceFieldPtrsList& interfaces,"
-            "Istream& solverData"
+            "const dictionary& solverControls"
             ")"
         )   << "No coarse levels created, either matrix too small for GAMG"
                " or nCellsInCoarsestLevel too large.\n"
@@ -154,6 +154,7 @@ void Foam::GAMGSolver::readControls()
 {
     lduMatrix::solver::readControls();
 
+    // we could also consider supplying defaults here too
     controlDict_.readIfPresent("cacheAgglomeration", cacheAgglomeration_);
     controlDict_.readIfPresent("nPreSweeps", nPreSweeps_);
     controlDict_.readIfPresent("nPostSweeps", nPostSweeps_);

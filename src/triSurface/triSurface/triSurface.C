@@ -1213,11 +1213,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
     pointIsUsed = 0U;
 
     label nPoints = 0;
-    boundBox bb
-    (
-        point(VGREAT, VGREAT, VGREAT),
-        point(-VGREAT, -VGREAT, -VGREAT)
-    );
+    boundBox bb = boundBox::invertedBox;
 
     forAll(*this, triI)
     {

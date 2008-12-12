@@ -201,6 +201,34 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 }
 
 
+void Foam::isoSurfaceCell::calcCutTypes
+(
+    const PackedList<1>& isTet,
+    const scalarField& cVals,
+    const scalarField& pVals
+)
+{
+    cellCutType_.setSize(mesh_.nCells());
+    nCutCells_ = 0;
+    forAll(mesh_.cells(), cellI)
+    {
+        cellCutType_[cellI] = calcCutType(isTet, cVals, pVals, cellI);
+
+        if (cellCutType_[cellI] == CUT)
+        {
+            nCutCells_++;
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "isoSurfaceCell : detected " << nCutCells_
+            << " candidate cut cells." << endl;
+    }
+}
+
+
+
 // Return the two common points between two triangles
 Foam::labelPair Foam::isoSurfaceCell::findCommonPoints
 (
@@ -325,7 +353,6 @@ void Foam::isoSurfaceCell::calcSnappedCc
     const PackedList<1>& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
-    const List<cellCutType>& cellCutType,
 
     DynamicList<point>& snappedPoints,
     labelList& snappedCc
@@ -344,7 +371,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
 
     forAll(mesh_.cells(), cellI)
     {
-        if (cellCutType[cellI] == CUT && isTet.get(cellI) == 0)
+        if (cellCutType_[cellI] == CUT && isTet.get(cellI) == 0)
         {
             scalar cVal = cVals[cellI];
 
@@ -604,7 +631,6 @@ void Foam::isoSurfaceCell::calcSnappedPoint
     const PackedList<1>& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
-    const List<cellCutType>& cellCutType,
 
     DynamicList<point>& snappedPoints,
     labelList& snappedPoint
@@ -635,10 +661,10 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
             if
             (
-                cellCutType[mesh_.faceOwner()[faceI]] == CUT
+                cellCutType_[mesh_.faceOwner()[faceI]] == CUT
              || (
                     mesh_.isInternalFace(faceI)
-                 && cellCutType[mesh_.faceNeighbour()[faceI]] == CUT
+                 && cellCutType_[mesh_.faceNeighbour()[faceI]] == CUT
                 )
             )
             {
@@ -766,171 +792,6 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 }
 
 
-Foam::point Foam::isoSurfaceCell::generatePoint
-(
-    const DynamicList<point>& snappedPoints,
-
-    const scalar s0,
-    const point& p0,
-    const label p0Index,
-
-    const scalar s1,
-    const point& p1,
-    const label p1Index
-) const
-{
-    scalar d = s1-s0;
-
-    if (mag(d) > VSMALL)
-    {
-        scalar s = (iso_-s0)/d;
-
-        if (s >= 0.5 && s <= 1 && p1Index != -1)
-        {
-            return snappedPoints[p1Index];
-        }
-        else if (s >= 0.0 && s <= 0.5 && p0Index != -1)
-        {
-            return snappedPoints[p0Index];
-        }
-        else
-        {
-            return s*p1 + (1.0-s)*p0;
-        }
-    }
-    else
-    {
-        scalar s = 0.4999;
-
-        return s*p1 + (1.0-s)*p0;
-    }
-}
-
-
-void Foam::isoSurfaceCell::generateTriPoints
-(
-    const DynamicList<point>& snapped,
-
-    const scalar s0,
-    const point& p0,
-    const label p0Index,
-
-    const scalar s1,
-    const point& p1,
-    const label p1Index,
-
-    const scalar s2,
-    const point& p2,
-    const label p2Index,
-
-    const scalar s3,
-    const point& p3,
-    const label p3Index,
-
-    DynamicList<point>& points
-) const
-{
-    int triIndex = 0;
-    if (s0 < iso_)
-    {
-        triIndex |= 1;
-    }
-    if (s1 < iso_)
-    {
-        triIndex |= 2;
-    }
-    if (s2 < iso_)
-    {
-        triIndex |= 4;
-    }
-    if (s3 < iso_)
-    {
-        triIndex |= 8;
-    }
-
-    /* Form the vertices of the triangles for each case */
-    switch (triIndex)
-    {
-        case 0x00:
-        case 0x0F:
-        break;
-
-        case 0x0E:
-        case 0x01:
-            points.append(generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index));
-            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
-            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
-        break;
-
-        case 0x0D:
-        case 0x02:
-            points.append(generatePoint(snapped,s1,p1,p1Index,s0,p0,p0Index));
-            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
-            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
-        break;
-
-        case 0x0C:
-        case 0x03:
-        {
-            point tp1 = generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index);
-            point tp2 = generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index);
-
-            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
-            points.append(tp1);
-            points.append(tp2);
-            points.append(tp2);
-            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
-            points.append(tp1);
-        }
-        break;
-
-        case 0x0B:
-        case 0x04:
-        {
-            points.append(generatePoint(snapped,s2,p2,p2Index,s0,p0,p0Index));
-            points.append(generatePoint(snapped,s2,p2,p2Index,s1,p1,p1Index));
-            points.append(generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index));
-        }
-        break;
-
-        case 0x0A:
-        case 0x05:
-        {
-            point tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
-            point tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
-
-            points.append(tp0);
-            points.append(tp1);
-            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
-            points.append(tp0);
-            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
-            points.append(tp1);
-        }
-        break;
-
-        case 0x09:
-        case 0x06:
-        {
-            point tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
-            point tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
-
-            points.append(tp0);
-            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
-            points.append(tp1);
-            points.append(tp0);
-            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
-            points.append(tp1);
-        }
-        break;
-
-        case 0x07:
-        case 0x08:
-            points.append(generatePoint(snapped,s3,p3,p3Index,s0,p0,p0Index));
-            points.append(generatePoint(snapped,s3,p3,p3Index,s2,p2,p2Index));
-            points.append(generatePoint(snapped,s3,p3,p3Index,s1,p1,p1Index));
-        break;
-    }
-}
 
 
 Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
@@ -1589,26 +1450,9 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
 
     // Determine if any cut through cell
+    calcCutTypes(isTet, cVals, pVals);
 
-    List<cellCutType> cellCutType(mesh_.nCells());
-    label nCutCells = 0;
-    forAll(mesh_.cells(), cellI)
-    {
-        cellCutType[cellI] = calcCutType(isTet, cVals, pVals, cellI);
-
-        if (cellCutType[cellI] == CUT)
-        {
-            nCutCells++;
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "isoSurfaceCell : detected " << nCutCells
-            << " candidate cut cells." << endl;
-    }
-
-    DynamicList<point> snappedPoints(nCutCells);
+    DynamicList<point> snappedPoints(nCutCells_);
 
     // Per cc -1 or a point inside snappedPoints.
     labelList snappedCc;
@@ -1619,7 +1463,6 @@ Foam::isoSurfaceCell::isoSurfaceCell
             isTet,
             cVals,
             pVals,
-            cellCutType,
             snappedPoints,
             snappedCc
         );
@@ -1629,6 +1472,8 @@ Foam::isoSurfaceCell::isoSurfaceCell
         snappedCc.setSize(mesh_.nCells());
         snappedCc = -1;
     }
+
+    snappedPoints.shrink();
 
     if (debug)
     {
@@ -1648,7 +1493,6 @@ Foam::isoSurfaceCell::isoSurfaceCell
             isTet,
             cVals,
             pVals,
-            cellCutType,
             snappedPoints,
             snappedPoint
         );
@@ -1667,115 +1511,24 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
 
 
-    DynamicList<point> triPoints(nCutCells);
-    DynamicList<label> triMeshCells(nCutCells);
+    DynamicList<point> triPoints(nCutCells_);
+    DynamicList<label> triMeshCells(nCutCells_);
 
-    forAll(mesh_.cells(), cellI)
-    {
-        if (cellCutType[cellI] != NOTCUT)
-        {
-            label oldNPoints = triPoints.size();
+    generateTriPoints
+    (
+        cVals,
+        pVals,
 
-            const cell& cFaces = mesh_.cells()[cellI];
+        mesh_.cellCentres(),
+        mesh_.points(),
 
-            if (isTet.get(cellI) == 1)
-            {
-                // For tets don't do cell-centre decomposition, just use the
-                // tet points and values
+        snappedPoints,
+        snappedCc,
+        snappedPoint,
 
-                const face& f0 = mesh_.faces()[cFaces[0]];
-
-                // Get the other point
-                const face& f1 = mesh_.faces()[cFaces[1]];
-                label oppositeI = -1;
-                forAll(f1, fp)
-                {
-                    oppositeI = f1[fp];
-
-                    if (findIndex(f0, oppositeI) == -1)
-                    {
-                        break;
-                    }
-                }
-
-                generateTriPoints
-                (
-                    snappedPoints,
-                    pVals[f0[0]],
-                    mesh_.points()[f0[0]],
-                    snappedPoint[f0[0]],
-
-                    pVals[f0[1]],
-                    mesh_.points()[f0[1]],
-                    snappedPoint[f0[1]],
-
-                    pVals[f0[2]],
-                    mesh_.points()[f0[2]],
-                    snappedPoint[f0[2]],
-
-                    pVals[oppositeI],
-                    mesh_.points()[oppositeI],
-                    snappedPoint[oppositeI],
-
-                    triPoints
-                );
-            }
-            else
-            {
-                const cell& cFaces = mesh_.cells()[cellI];
-
-                forAll(cFaces, cFaceI)
-                {
-                    label faceI = cFaces[cFaceI];
-                    const face& f = mesh_.faces()[faceI];
-
-                    for (label fp = 1; fp < f.size() - 1; fp++)
-                    {
-                        triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
-                    //List<triFace> tris(triangulate(f));
-                    //forAll(tris, i)
-                    //{
-                    //    const triFace& tri = tris[i];
-
-
-                        generateTriPoints
-                        (
-                            snappedPoints,
-
-                            pVals[tri[0]],
-                            mesh_.points()[tri[0]],
-                            snappedPoint[tri[0]],
-
-                            pVals[tri[1]],
-                            mesh_.points()[tri[1]],
-                            snappedPoint[tri[1]],
-
-                            pVals[tri[2]],
-                            mesh_.points()[tri[2]],
-                            snappedPoint[tri[2]],
-
-                            cVals[cellI],
-                            mesh_.cellCentres()[cellI],
-                            snappedCc[cellI],
-
-                            triPoints
-                        );
-                    }
-                }
-            }
-
-
-            // Every three triPoints is a cell
-            label nCells = (triPoints.size()-oldNPoints)/3;
-            for (label i = 0; i < nCells; i++)
-            {
-                triMeshCells.append(cellI);
-            }
-        }
-    }
-
-    triPoints.shrink();
-    triMeshCells.shrink();
+        triPoints,
+        triMeshCells
+    );
 
     if (debug)
     {
@@ -1878,123 +1631,123 @@ Foam::isoSurfaceCell::isoSurfaceCell
 }
 
 
-//XXXXXXX
-// Experimental retriangulation of triangles per cell. Problem is that
-// -it is very expensive   -only gets rid of internal points, not of boundary
-// ones so limited benefit (e.g. 60 v.s. 88 triangles)
-void Foam::isoSurfaceCell::combineCellTriangles()
-{
-    if (size() > 0)
-    {
-        DynamicList<labelledTri> newTris(size());
-        DynamicList<label> newTriToCell(size());
-
-        label startTriI = 0;
-
-        DynamicList<labelledTri> tris;
-
-        for (label triI = 1; triI <= meshCells_.size(); triI++)
-        {
-            if
-            (
-                triI == meshCells_.size()
-             || meshCells_[triI] != meshCells_[startTriI]
-            )
-            {
-                label nTris = triI-startTriI;
-
-                if (nTris == 1)
-                {
-                    newTris.append(operator[](startTriI));
-                    newTriToCell.append(meshCells_[startTriI]);
-                }
-                else
-                {
-                    // Collect from startTriI to triI in a triSurface
-                    tris.clear();
-                    for (label i = startTriI; i < triI; i++)
-                    {
-                        tris.append(operator[](i));
-                    }
-                    triSurface cellTris(tris, patches(), points());
-                    tris.clear();
-
-                    // Get outside
-                    const labelListList& loops = cellTris.edgeLoops();
-
-                    forAll(loops, i)
-                    {
-                        // Do proper triangulation of loop
-                        face loop(renumber(cellTris.meshPoints(), loops[i]));
-
-                        faceTriangulation faceTris
-                        (
-                            points(),
-                            loop,
-                            true
-                        );
-
-                        // Copy into newTris
-                        forAll(faceTris, faceTriI)
-                        {
-                            const triFace& tri = faceTris[faceTriI];
-
-                            newTris.append
-                            (
-                                labelledTri
-                                (
-                                    tri[0],
-                                    tri[1],
-                                    tri[2],
-                                    operator[](startTriI).region()
-                                )
-                            );
-                            newTriToCell.append(meshCells_[startTriI]);
-                        }
-                    }
-                }
-
-                startTriI = triI;
-            }
-        }
-        newTris.shrink();
-        newTriToCell.shrink();
-
-        // Compact
-        pointField newPoints(points().size());
-        label newPointI = 0;
-        labelList oldToNewPoint(points().size(), -1);
-
-        forAll(newTris, i)
-        {
-            labelledTri& tri = newTris[i];
-            forAll(tri, j)
-            {
-                label pointI = tri[j];
-
-                if (oldToNewPoint[pointI] == -1)
-                {
-                    oldToNewPoint[pointI] = newPointI;
-                    newPoints[newPointI++] = points()[pointI];
-                }
-                tri[j] = oldToNewPoint[pointI];
-            }
-        }
-        newPoints.setSize(newPointI);
-
-        triSurface::operator=
-        (
-            triSurface
-            (
-                newTris,
-                patches(),
-                newPoints,
-                true
-            )
-        );
-        meshCells_.transfer(newTriToCell);
-    }
-}
-//XXXXXXX
+////XXXXXXX
+//// Experimental retriangulation of triangles per cell. Problem is that
+//// -it is very expensive   -only gets rid of internal points, not of boundary
+//// ones so limited benefit (e.g. 60 v.s. 88 triangles)
+//void Foam::isoSurfaceCell::combineCellTriangles()
+//{
+//    if (size() > 0)
+//    {
+//        DynamicList<labelledTri> newTris(size());
+//        DynamicList<label> newTriToCell(size());
+//
+//        label startTriI = 0;
+//
+//        DynamicList<labelledTri> tris;
+//
+//        for (label triI = 1; triI <= meshCells_.size(); triI++)
+//        {
+//            if
+//            (
+//                triI == meshCells_.size()
+//             || meshCells_[triI] != meshCells_[startTriI]
+//            )
+//            {
+//                label nTris = triI-startTriI;
+//
+//                if (nTris == 1)
+//                {
+//                    newTris.append(operator[](startTriI));
+//                    newTriToCell.append(meshCells_[startTriI]);
+//                }
+//                else
+//                {
+//                    // Collect from startTriI to triI in a triSurface
+//                    tris.clear();
+//                    for (label i = startTriI; i < triI; i++)
+//                    {
+//                        tris.append(operator[](i));
+//                    }
+//                    triSurface cellTris(tris, patches(), points());
+//                    tris.clear();
+//
+//                    // Get outside
+//                    const labelListList& loops = cellTris.edgeLoops();
+//
+//                    forAll(loops, i)
+//                    {
+//                        // Do proper triangulation of loop
+//                        face loop(renumber(cellTris.meshPoints(), loops[i]));
+//
+//                        faceTriangulation faceTris
+//                        (
+//                            points(),
+//                            loop,
+//                            true
+//                        );
+//
+//                        // Copy into newTris
+//                        forAll(faceTris, faceTriI)
+//                        {
+//                            const triFace& tri = faceTris[faceTriI];
+//
+//                            newTris.append
+//                            (
+//                                labelledTri
+//                                (
+//                                    tri[0],
+//                                    tri[1],
+//                                    tri[2],
+//                                    operator[](startTriI).region()
+//                                )
+//                            );
+//                            newTriToCell.append(meshCells_[startTriI]);
+//                        }
+//                    }
+//                }
+//
+//                startTriI = triI;
+//            }
+//        }
+//        newTris.shrink();
+//        newTriToCell.shrink();
+//
+//        // Compact
+//        pointField newPoints(points().size());
+//        label newPointI = 0;
+//        labelList oldToNewPoint(points().size(), -1);
+//
+//        forAll(newTris, i)
+//        {
+//            labelledTri& tri = newTris[i];
+//            forAll(tri, j)
+//            {
+//                label pointI = tri[j];
+//
+//                if (oldToNewPoint[pointI] == -1)
+//                {
+//                    oldToNewPoint[pointI] = newPointI;
+//                    newPoints[newPointI++] = points()[pointI];
+//                }
+//                tri[j] = oldToNewPoint[pointI];
+//            }
+//        }
+//        newPoints.setSize(newPointI);
+//
+//        triSurface::operator=
+//        (
+//            triSurface
+//            (
+//                newTris,
+//                patches(),
+//                newPoints,
+//                true
+//            )
+//        );
+//        meshCells_.transfer(newTriToCell);
+//    }
+//}
+////XXXXXXX
 
 // ************************************************************************* //
