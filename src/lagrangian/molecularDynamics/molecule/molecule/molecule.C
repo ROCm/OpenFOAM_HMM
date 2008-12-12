@@ -169,14 +169,6 @@ bool Foam::molecule::move(molecule::trackData& td)
             tau_ += (constProps.siteReferencePositions()[s] ^ (Q_.T() & f));
         }
 
-        Info<< nl << "move " << id_
-            << nl << constProps.siteReferencePositions()
-            << nl << siteForces_
-            << nl << tau_
-            << nl << a_
-            << nl << m
-            << endl;
-
         v_ += 0.5*deltaT*a_;
 
         pi_ += 0.5*deltaT*tau_;

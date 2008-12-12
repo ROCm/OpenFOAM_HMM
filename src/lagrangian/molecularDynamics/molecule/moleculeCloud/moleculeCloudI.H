@@ -91,14 +91,6 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molJ->potentialEnergy() += 0.5*potentialEnergy;
 
-                    Info<< "pair"
-                        << nl << idI << ' ' << sI << ' ' << idsI
-                        << nl << idJ << ' ' << sJ << ' ' << idsJ
-                        << nl << rsIsJ
-                        << nl << fsIsJ
-                        << nl << potentialEnergy
-                        << endl;
-
                     // What to do here?
 
                     // molI->rf() += rIJ * fIJ;
@@ -131,14 +123,6 @@ inline void Foam::moleculeCloud::evaluatePair
                 molI->potentialEnergy() += 0.5*potentialEnergy;
 
                 molJ->potentialEnergy() += 0.5*potentialEnergy;
-
-                Info<< "electro"
-                    << nl << idI << ' ' << sI << ' ' << idsI
-                    << nl << idJ << ' ' << sJ << ' ' << idsJ
-                    << nl << rsIsJ
-                    << nl << fsIsJ
-                    << nl << potentialEnergy
-                    << endl;
 
                 // What to do here?
 
