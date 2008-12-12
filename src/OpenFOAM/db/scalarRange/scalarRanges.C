@@ -51,7 +51,6 @@ Foam::scalarRanges::scalarRanges(Istream& is)
         }
     }
 
-    lst.shrink();
     transfer(lst);
 }
 

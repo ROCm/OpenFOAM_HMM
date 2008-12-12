@@ -289,9 +289,7 @@ int main(int argc, char *argv[])
                 << patchNames[patchI] << "\t\t"
                 << allPatchFaces[patchI].size() << endl;
 
-            allPatchFaces[patchI].shrink();
             patchFaces[patchI].transfer(allPatchFaces[patchI]);
-            allPatchFaces[patchI].clear();
         }
 
         Info<< endl;

@@ -165,8 +165,7 @@ void Foam::decompositionMethod::calcCellCells
     cellCells.setSize(dynCellCells.size());
     forAll(dynCellCells, coarseI)
     {
-        cellCells[coarseI].transfer(dynCellCells[coarseI].shrink());
-        dynCellCells[coarseI].clear();
+        cellCells[coarseI].transfer(dynCellCells[coarseI]);
     }
 }
 
