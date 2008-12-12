@@ -205,7 +205,7 @@ Foam::label Foam::meshRefinement::getBafflePatch
 
     WarningIn
     (
-        "meshRefinement::getBafflePatch(const labelList& const label)"
+        "meshRefinement::getBafflePatch(const labelList&, const label)"
     )   << "Could not find boundary face neighbouring internal face "
         << faceI << " with face centre " << mesh_.faceCentres()[faceI]
         << nl
@@ -1854,16 +1854,15 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             break;
         }
+
+	// Synchronise regionToCellZone.
+	// Note:
+	// - region numbers are identical on all processors
+	// - keepRegion is identical ,,
+	// - cellZones are identical ,,
+	Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
+	Pstream::listCombineScatter(regionToCellZone);
     }
-
-
-    // Synchronise regionToCellZone.
-    // Note:
-    // - region numbers are identical on all processors
-    // - keepRegion is identical ,,
-    // - cellZones are identical ,,
-    Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-    Pstream::listCombineScatter(regionToCellZone);
 
 
     forAll(regionToCellZone, regionI)

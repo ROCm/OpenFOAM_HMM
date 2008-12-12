@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    instability
+    Foam::XiEqModels::instability
 
 Description
-    
+
 SourceFiles
     instability.C
 

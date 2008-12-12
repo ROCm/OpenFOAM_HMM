@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    instabilityG
+    Foam::XiGModels::instabilityG
 
 Description
     Flame-surface instabilityG flame-wrinking generation rate coefficient model.
