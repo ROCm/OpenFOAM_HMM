@@ -45,7 +45,7 @@ WITH_MPI=OFF
 MPI_MAX_PROCS=32
 
 # Python support:
-# note: script will try to determine python library.
+# note: script will try to determine the appropriate python library.
 #       If it fails, specify the path using the PYTHON_LIBRARY variable
 WITH_PYTHON=OFF
 PYTHON_LIBRARY=""
@@ -60,8 +60,8 @@ WITH_MESA=OFF
 Script=${0##*/}
 
 usage() {
-   while [ "$#" -ge 1 ]; do echo "$1"; shift; done
-   cat<<USAGE
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 
 usage: ${0##*/} [OPTION]
 options:
@@ -71,6 +71,11 @@ options:
   -mesa      with mesa (if not already enabled)
   -verbose   verbose cmake output
   -help
+
+For finer control, the build stages can be selected (mutually exclusive)
+  -config
+  -make
+  -install
 
 Build and install $PARAVIEW_SRC
   - run from folder above the ParaView source folder or place the
@@ -86,50 +91,77 @@ case "$Script" in *-mpi*)    WITH_MPI=ON;; esac
 case "$Script" in *-python*) WITH_PYTHON=ON;; esac
 case "$Script" in *-mesa*)   WITH_MESA=ON;; esac
 
+runCONFIG=true
+runMAKE=true
+runINSTALL=true
+
 # parse options
 while [ "$#" -gt 0 ]
 do
-   case "$1" in
-   -h | -help)
-      usage
-      ;;
-   -fast)
-      CMAKE_SKIP=YES
-      shift
-      ;;
-   -mpi)
-      WITH_MPI=ON
-      shift
-      ;;
-   -python)
-      WITH_PYTHON=ON
-      shift
-      ;;
-   -mesa)
-      WITH_MESA=ON
-      shift
-      ;;
-   -verbose)
-      VERBOSE=ON
-      shift
-      ;;
-   *)
-      usage "unknown option/argument: '$*'"
-      ;;
-   esac
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -config)             # stage 1: config only
+        runCONFIG=true
+        runMAKE=false
+        runINSTALL=false
+        shift
+        ;;
+    -make)               # stage 2: make only
+        runCONFIG=false
+        runMAKE=true
+        runINSTALL=false
+        shift
+        ;;
+    -install)            # stage 3: install only
+        runCONFIG=false
+        runMAKE=false
+        runINSTALL=true
+        shift
+        ;;
+    -fast)               # shortcut for rebuild
+        runCONFIG=false
+        runMAKE=true
+        runINSTALL=true
+        shift
+        ;;
+    -mpi)
+        WITH_MPI=ON
+        shift
+        ;;
+    -python)
+        WITH_PYTHON=ON
+        shift
+        ;;
+    -mesa)
+        WITH_MESA=ON
+        shift
+        ;;
+    -verbose)
+        VERBOSE=ON
+        shift
+        ;;
+    *)
+        usage "unknown option/argument: '$*'"
+        ;;
+    esac
 done
 
 # Set configure options
 #~~~~~~~~~~~~~~~~~~~~~~
-addVerbosity        # set CMake verbosity
+addVerbosity
 addMpiSupport       # set MPI-specific options
 addPythonSupport    # set Python-specific options
 addMesaSupport      # set MESA-specific options
 
+getPaths            # discover where things are or should be put
+
 # Build and install
 # ~~~~~~~~~~~~~~~~~
-buildParaView
-installParaView
+[ $runCONFIG = true ] && configParaView
+[ $runMAKE = true ] && makeParaView
+[ $runINSTALL = true ] && installParaView
 
 echo "done"
 
