@@ -208,7 +208,7 @@ configParaView()
     echo cmake \
         -DCMAKE_INSTALL_PREFIX:PATH=$ParaView_DIR \
         $CMAKE_VARIABLES \
-        $ParaView_INST_DIR
+        ../..
     echo
     echo "----"
     echo
@@ -217,7 +217,7 @@ configParaView()
     cmake \
         -DCMAKE_INSTALL_PREFIX:PATH=$ParaView_DIR \
         $CMAKE_VARIABLES \
-        $ParaView_INST_DIR
+        ../..
 
 }
 
@@ -232,33 +232,68 @@ makeParaView()
         WM_NCOMPPROCS=$(egrep "^processor" /proc/cpuinfo | wc -l)
         [ $WM_NCOMPPROCS -le 8 ] || WM_NCOMPPROCS=8
 
-        make -j $WM_NCOMPPROCS
+        time make -j $WM_NCOMPPROCS
     else
-        make
+        time make
     fi
-    make install
     echo "    Done make"
 }
 
 
 # adjust hard-links
 # Note: use loop with grep to avoid touching too many files
-fixCMakeHardLinks()
+fixHardLinks()
 {
-    fileSpec=$1
+    envName=$1
     string=$2
-    envName=$3
+    shift 2
 
-    echo -n "    for \$$envName "
-    for i in $(find . -type f -iname "$fileSpec")
+    echo "-- Replacing path hard links for \$$envName"
+
+    for fileSpec
     do
-        if grep -q "$string" $i
-        then
-            echo -n "#"
-            sed -i "s,$string,\$ENV{$envName},g" $i
-        fi
+        echo -n "   $fileSpec: "
+        for i in $(find . -type f -iname "$fileSpec")
+        do
+            if grep -q "$string" $i
+            then
+                echo -n "#"
+                sed -i "s,$string,\$ENV{$envName},g" $i
+            fi
+        done
+        echo
     done
-    echo
+}
+
+
+fixCMakeFiles()
+{
+    # change to build/install folder
+    cd $ParaView_DIR || exit 1
+
+    # Replace path with env variable: ParaView_DIR
+    fixHardLinks ParaView_DIR "$ParaView_DIR" '*.cmake'
+
+    # Replace path with env variable: ParaView_INST_DIR
+    fixHardLinks ParaView_INST_DIR "$ParaView_INST_DIR" '*.cmake'
+
+    # Replace path with env variable: MPI_ARCH_PATH
+    if [ "$WITH_MPI" = ON ]
+    then
+        fixHardLinks MPI_ARCH_PATH "$MPI_ARCH_PATH" '*.cmake'
+    fi
+
+    # Replace path with env variable: CMAKE_HOME
+    if [ -r "$CMAKE_HOME" ]
+    then
+        fixHardLinks CMAKE_HOME "$CMAKE_HOME" '*cmake*'
+    fi
+
+    # Replace path with env variable: WM_COMPILER_DIR
+    # (include cmake.check_cache)
+    ## SKIP THIS - it (it always triggers a complete rebuild)
+    ## when using cmake-2.6.2
+    ## fixHardLinks WM_COMPILER_DIR "$WM_COMPILER_DIR" '*cmake*'
 }
 
 
@@ -273,65 +308,47 @@ installParaView()
     cd $ParaView_DIR || exit 1
 
     echo "    Installing ParaView"
-    echo "    Replacing path hard links"
+    ## This triggers a partial rebuild, but might let us find our files
+    ## fixCMakeFiles
 
-    # Replace local ParaView_INST_DIR path with ParaView_INST_DIR
-    # environment variable
-    fixCMakeHardLinks '*.cmake' "$ParaView_INST_DIR" ParaView_INST_DIR
-
-    # Replace local MPI_ARCH_PATH path with MPI_ARCH_PATH
-    # environment variable
-    if [ "$WITH_MPI" = ON ]
-    then
-        fixCMakeHardLinks '*.cmake' "$MPI_ARCH_PATH" MPI_ARCH_PATH
-    fi
-
-    # Replace local CMAKE_HOME path with CMAKE_HOME
-    # environment variable
-    if [ -r "$CMAKE_HOME" ]
-    then
-        fixCMakeHardLinks '*cmake*' "$CMAKE_HOME" CMAKE_HOME
-    fi
-
-    # Replace local WM_COMPILER_DIR path with WM_COMPILER_DIR
-    # environment variable
-    fixCMakeHardLinks '*cmake*' "$WM_COMPILER_DIR" WM_COMPILER_DIR
-
-    # create a softlink to the $ParaView_DIR/bin folder
-    # - workaround for chosen install location
-    echo "    Creating lib/paraview-$PARAVIEW_MAJOR_VERSION soft link to 'bin'"
+    # skip the normal 'make install' in favour of simply creating
+    # a softlink to the $ParaView_DIR/bin folder
+    # - this seems to keep things portable (except documentation)
+    echo "    Creating link  lib/paraview-$PARAVIEW_MAJOR_VERSION/ -> bin/ "
     rm -rf lib/paraview-$PARAVIEW_MAJOR_VERSION
-    [ -d lib ] || mkdir lib
+    mkdir lib 2>/dev/null
     ( cd lib && ln -s ../bin paraview-$PARAVIEW_MAJOR_VERSION )
 
     # info on symlinks to screen
-    echo ""
-    echo "    ---"
-    echo "    Installation complete"
-    echo "    Set environment variables:"
-    echo "    - ParaView_INST_DIR to $ParaView_INST_DIR"
-    echo "    - ParaView_DIR to $ParaView_DIR"
-    echo "    - PV_PLUGIN_PATH to $FOAM_LIBBIN"
-    echo "    Add $ParaView_DIR/bin to PATH"
-    # echo "   Add $ParaView_INST_DIR/lib to LD_LIBRARY_PATH"
-    echo "    ---"
+cat << INFO
+    ---
+    Installation complete
+    Set environment variables:
+
+        export ParaView_INST_DIR=$ParaView_INST_DIR
+        export ParaView_DIR=$ParaView_DIR
+        export PV_PLUGIN_PATH=$FOAM_LIBBIN
+        export PATH=\$ParaView_DIR/bin:\$PATH
+
+    ---
+    NB: if you move the paraview installation, you will need to change this file
+        \$ParaView_DIR/bin/pqClientDocFinder.txt
+    ---
+INFO
 }
 
 
 # clear all the variables used before using any of the functions
 
 unset VERBOSE
-unset WITH_MPI
-unset WITH_MESA
-unset WITH_PYTHON
-unset PYTHON_LIBRARY
+unset WITH_MPI WITH_MESA
+unset WITH_PYTHON PYTHON_LIBRARY
 unset CMAKE_VARIABLES
 unset OBJ_ADD
 
 # start with these general settings
 addCMakeVariable  VTK_USE_TK=FALSE
-addCMakeVariable  BUILD_SHARED_LIBS:BOOL=ON
-addCMakeVariable  VTK_USE_RPATH:BOOL=OFF
+addCMakeVariable  BUILD_SHARED_LIBS:BOOL=ON VTK_USE_RPATH:BOOL=OFF
 addCMakeVariable  CMAKE_BUILD_TYPE:STRING=Release
 
 # ----------------------------------------------------------------- end-of-file

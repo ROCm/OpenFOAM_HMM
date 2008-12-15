@@ -34,8 +34,8 @@
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/buildParaViewFunctions
 
-PARAVIEW_SRC="ParaView3.3-cvs"
-PARAVIEW_MAJOR_VERSION="3.3"
+PARAVIEW_SRC=ParaView3.3-cvs
+PARAVIEW_MAJOR_VERSION=3.3
 
 # User options:
 # ~~~~~~~~~~~~~
@@ -65,14 +65,15 @@ usage() {
 
 usage: ${0##*/} [OPTION]
 options:
-  -fast      skip cmake for repeated builds - use with caution
+  -fast      skip configure for repeated builds - use with caution
   -mpi       with mpi (if not already enabled)
   -python    with python (if not already enabled)
   -mesa      with mesa (if not already enabled)
-  -verbose   verbose cmake output
+  -verbose   verbose output in Makefiles
   -help
 
-For finer control, the build stages can be selected (mutually exclusive)
+For finer control, the build stages can be also selected individually
+(mutually exclusive)
   -config
   -make
   -install
@@ -150,7 +151,7 @@ done
 
 # Set configure options
 #~~~~~~~~~~~~~~~~~~~~~~
-addVerbosity
+addVerbosity        # verbose makefiles
 addMpiSupport       # set MPI-specific options
 addPythonSupport    # set Python-specific options
 addMesaSupport      # set MESA-specific options
@@ -159,8 +160,8 @@ getPaths            # discover where things are or should be put
 
 # Build and install
 # ~~~~~~~~~~~~~~~~~
-[ $runCONFIG = true ] && configParaView
-[ $runMAKE = true ] && makeParaView
+[ $runCONFIG  = true ] && configParaView
+[ $runMAKE    = true ] && makeParaView
 [ $runINSTALL = true ] && installParaView
 
 echo "done"
