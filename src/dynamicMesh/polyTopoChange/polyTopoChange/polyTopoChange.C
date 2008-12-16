@@ -3355,7 +3355,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         faceZoneFlip_.clear();
         faceZoneFlip_.resize(0);
 
-        cellZone_.clear();
         cellZone_.clearStorage();
     }
 
