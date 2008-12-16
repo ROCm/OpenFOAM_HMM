@@ -29,6 +29,8 @@
 #     Setup file for paraview-3.x
 #     Sourced from OpenFOAM-?.?/etc/bashrc
 #
+# Note
+#     The env. variable 'ParaView_DIR' is required for building plugins
 #------------------------------------------------------------------------------
 
 # determine the cmake to be used
