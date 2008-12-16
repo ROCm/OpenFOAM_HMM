@@ -65,7 +65,8 @@ usage() {
 
 usage: ${0##*/} [OPTION]
 options:
-  -fast      skip configure for repeated builds - use with caution
+  -fast      for repeated builds (-make -abspath -install) *use with caution*
+  -abspath   suppress the '-envpath' stage of changing the cmake files
   -mpi       with mpi (if not already enabled)
   -python    with python (if not already enabled)
   -mesa      with mesa (if not already enabled)
@@ -76,6 +77,7 @@ For finer control, the build stages can be also selected individually
 (mutually exclusive)
   -config
   -make
+  -envpath
   -install
 
 Build and install $PARAVIEW_SRC
@@ -94,6 +96,7 @@ case "$Script" in *-mesa*)   WITH_MESA=ON;; esac
 
 runCONFIG=true
 runMAKE=true
+runENVPATH=true
 runINSTALL=true
 
 # parse options
@@ -106,25 +109,40 @@ do
     -config)             # stage 1: config only
         runCONFIG=true
         runMAKE=false
+        runENVPATH=false
         runINSTALL=false
         shift
         ;;
     -make)               # stage 2: make only
         runCONFIG=false
         runMAKE=true
+        runENVPATH=false
         runINSTALL=false
         shift
         ;;
-    -install)            # stage 3: install only
+    -envpath)            # stage 3: alter paths to use env variables
         runCONFIG=false
         runMAKE=false
+        runENVPATH=true
+        runINSTALL=false
+        shift
+        ;;
+    -install)            # stage 4: install only
+        runCONFIG=false
+        runMAKE=false
+        runENVPATH=false
         runINSTALL=true
         shift
         ;;
     -fast)               # shortcut for rebuild
         runCONFIG=false
         runMAKE=true
+        runENVPATH=false
         runINSTALL=true
+        shift
+        ;;
+    -abspath)            # suppress changing the cmake files
+        runENVPATH=false
         shift
         ;;
     -mpi)
@@ -162,6 +180,7 @@ getPaths            # discover where things are or should be put
 # ~~~~~~~~~~~~~~~~~
 [ $runCONFIG  = true ] && configParaView
 [ $runMAKE    = true ] && makeParaView
+[ $runENVPATH = true ] && fixCMakeFiles
 [ $runINSTALL = true ] && installParaView
 
 echo "done"

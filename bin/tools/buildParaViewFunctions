@@ -266,10 +266,16 @@ fixHardLinks()
 }
 
 
+# This triggers a partial rebuild, but might let us find our files
 fixCMakeFiles()
 {
     # change to build/install folder
     cd $ParaView_DIR || exit 1
+
+    # change to build/install folder
+    cd $ParaView_DIR || exit 1
+
+    echo "    Installing ParaView"
 
     # Replace path with env variable: ParaView_DIR
     fixHardLinks ParaView_DIR "$ParaView_DIR" '*.cmake'
@@ -291,9 +297,9 @@ fixCMakeFiles()
 
     # Replace path with env variable: WM_COMPILER_DIR
     # (include cmake.check_cache)
-    ## SKIP THIS - it (it always triggers a complete rebuild)
-    ## when using cmake-2.6.2
-    ## fixHardLinks WM_COMPILER_DIR "$WM_COMPILER_DIR" '*cmake*'
+    # This triggers a complete rebuild (with cmake-2.6.2), but is likely
+    # needed when redistributing files
+    fixHardLinks WM_COMPILER_DIR "$WM_COMPILER_DIR" '*cmake*'
 }
 
 
@@ -308,8 +314,6 @@ installParaView()
     cd $ParaView_DIR || exit 1
 
     echo "    Installing ParaView"
-    ## This triggers a partial rebuild, but might let us find our files
-    ## fixCMakeFiles
 
     # skip the normal 'make install' in favour of simply creating
     # a softlink to the $ParaView_DIR/bin folder
