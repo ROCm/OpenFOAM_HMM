@@ -65,8 +65,7 @@ usage() {
 
 usage: ${0##*/} [OPTION]
 options:
-  -fast      for repeated builds (-make -abspath -install) *use with caution*
-  -abspath   suppress the '-envpath' stage of changing the cmake files
+  -fast      for repeated builds (-make -install) *use with caution*
   -mpi       with mpi (if not already enabled)
   -python    with python (if not already enabled)
   -mesa      with mesa (if not already enabled)
@@ -77,8 +76,9 @@ For finer control, the build stages can be also selected individually
 (mutually exclusive)
   -config
   -make
-  -envpath
+  -makedoc
   -install
+  [-envpath]    alter absolute paths in CMake files to use env variables
 
 Build and install $PARAVIEW_SRC
   - run from folder above the ParaView source folder or place the
@@ -88,16 +88,16 @@ USAGE
    exit 1
 }
 
-# options based on the script name:
-case "$Script" in *-fast*)   CMAKE_SKIP=ON;; esac
+# add options based on script name:
 case "$Script" in *-mpi*)    WITH_MPI=ON;; esac
 case "$Script" in *-python*) WITH_PYTHON=ON;; esac
 case "$Script" in *-mesa*)   WITH_MESA=ON;; esac
 
 runCONFIG=true
 runMAKE=true
-runENVPATH=true
+runMAKEDOC=true
 runINSTALL=true
+runENVPATH=false
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -109,40 +109,44 @@ do
     -config)             # stage 1: config only
         runCONFIG=true
         runMAKE=false
-        runENVPATH=false
+        runMAKEDOC=false
         runINSTALL=false
         shift
         ;;
     -make)               # stage 2: make only
         runCONFIG=false
         runMAKE=true
-        runENVPATH=false
+        runMAKEDOC=false
         runINSTALL=false
         shift
         ;;
-    -envpath)            # stage 3: alter paths to use env variables
+    -makedoc)            # stage 3: generate html documentation
         runCONFIG=false
         runMAKE=false
-        runENVPATH=true
+        runMAKEDOC=true
         runINSTALL=false
         shift
         ;;
     -install)            # stage 4: install only
         runCONFIG=false
         runMAKE=false
-        runENVPATH=false
+        runMAKEDOC=false
         runINSTALL=true
+        shift
+        ;;
+    -envpath)            # optional: change cmake files to use env variables
+        runCONFIG=false
+        runMAKE=false
+        runMAKEDOC=false
+        runINSTALL=false
+        runENVPATH=true
         shift
         ;;
     -fast)               # shortcut for rebuild
         runCONFIG=false
         runMAKE=true
-        runENVPATH=false
+        runMAKEDOC=false
         runINSTALL=true
-        shift
-        ;;
-    -abspath)            # suppress changing the cmake files
-        runENVPATH=false
         shift
         ;;
     -mpi)
@@ -180,9 +184,9 @@ getPaths            # discover where things are or should be put
 # ~~~~~~~~~~~~~~~~~
 [ $runCONFIG  = true ] && configParaView
 [ $runMAKE    = true ] && makeParaView
-[ $runENVPATH = true ] && fixCMakeFiles
+[ $runMAKEDOC = true ] && makeDocs
 [ $runINSTALL = true ] && installParaView
+[ $runENVPATH = true ] && fixCMakeFiles
 
 echo "done"
-
 #------------------------------------------------------------------------------

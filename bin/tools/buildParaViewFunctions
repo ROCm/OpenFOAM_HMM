@@ -31,8 +31,13 @@
 #------------------------------------------------------------------------------
 
 # ParaView_INST_DIR  : location of the original sources
-# ParaView_DIR       : location of the compiled output
+# ParaView_DIR       : location of the build (for the ParaViewConfig.cmake)
+#                      and the installed program
 
+
+#
+# set CMake cache variables
+#
 addCMakeVariable()
 {
     while [ -n "$1" ]
@@ -43,12 +48,18 @@ addCMakeVariable()
 }
 
 
+#
+# verbose makefiles
+#
 addVerbosity()
 {
     [ "$VERBOSE" = ON ] && addCMakeVariable  CMAKE_VERBOSE_MAKEFILE=TRUE
 }
 
 
+#
+# define options for mpi support
+#
 addMpiSupport()
 {
     [ "$WITH_MPI" = ON ] || return
@@ -62,6 +73,9 @@ addMpiSupport()
 }
 
 
+#
+# define options for python support
+#
 addPythonSupport()
 {
     [ "$WITH_PYTHON" = ON ] || return
@@ -133,6 +147,9 @@ addPythonSupport()
 }
 
 
+#
+# define options for mesa support
+#
 addMesaSupport()
 {
     [ "$WITH_MESA" = ON ] || return
@@ -183,17 +200,23 @@ getPaths()
 
     # ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER$OBJ_ADD
     ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
-
     echo "ParaView_DIR=$ParaView_DIR"
 }
 
 
+#
 # configure via cmake, but don't actually build anything
+#
 configParaView()
 {
     # remove any existing build folder and recreate
-    rm -rf $ParaView_DIR
+    if [ -d $ParaView_DIR ]
+    then
+        echo "removing old build/install directory"
+        rm -rf $ParaView_DIR
+    fi
     mkdir -p $ParaView_DIR
+
     cd $ParaView_DIR
 
     echo "----"
@@ -221,10 +244,14 @@ configParaView()
 
 }
 
+
+#
+# invoke make
+# also link bin/ to lib/paraview-* for development without installation
+#
 makeParaView()
 {
-    # change to build/install folder
-    cd $ParaView_DIR || exit 1
+    cd $ParaView_DIR || exit 1  # change to build folder
     echo "    Starting make"
 
     if [ -r /proc/cpuinfo ]
@@ -237,11 +264,18 @@ makeParaView()
         time make
     fi
     echo "    Done make"
+
+    echo "    For quicker development, linking lib/paraview-$PARAVIEW_MAJOR_VERSION/ -> bin/"
+    rm -rf lib/paraview-$PARAVIEW_MAJOR_VERSION
+    mkdir lib 2>/dev/null
+    ( cd lib && ln -s ../bin paraview-$PARAVIEW_MAJOR_VERSION )
 }
 
 
-# adjust hard-links
+#
+# adjust hard-links (internal function)
 # Note: use loop with grep to avoid touching too many files
+#
 fixHardLinks()
 {
     envName=$1
@@ -266,16 +300,14 @@ fixHardLinks()
 }
 
 
-# This triggers a partial rebuild, but might let us find our files
+#
+# replace absolute paths with environment variables
+# This triggers a partial (or even a full) rebuild, but might let us
+# find our files later if we relocate the build
+#
 fixCMakeFiles()
 {
-    # change to build/install folder
-    cd $ParaView_DIR || exit 1
-
-    # change to build/install folder
-    cd $ParaView_DIR || exit 1
-
-    echo "    Installing ParaView"
+    cd $ParaView_DIR || exit 1  # change to build folder
 
     # Replace path with env variable: ParaView_DIR
     fixHardLinks ParaView_DIR "$ParaView_DIR" '*.cmake'
@@ -303,28 +335,36 @@ fixCMakeFiles()
 }
 
 
+#
+# make html documentation (mostly just for the readers/writers)
+#
+makeDocs()
+{
+    cd $ParaView_DIR || exit 1  # change to build folder
+    echo "    Creating html documentation"
+
+    make HTMLDocumentation
+}
+
+
+#
+# actually install the program
+#
 installParaView()
 {
-    [ -e "$ParaView_DIR/bin/paraview" ] || {
-        echo "    Cannot install - no paraview binary found"
-        return
-    }
+    cd $ParaView_DIR || exit 1  # change to build folder
+    echo "    Installing ParaView to $ParaView_DIR"
 
-    # change to build/install folder
-    cd $ParaView_DIR || exit 1
+    echo "disabled 'make install' for now, just use links"
 
-    echo "    Installing ParaView"
+    # about.txt may be missing
+    paraviewLibDir="$ParaView_DIR/lib/paraview-$PARAVIEW_MAJOR_VERSION"
+    if [ -d "$paraviewLibDir" -a ! -e "$paraviewLibDir/about.txt" ]
+    then
+        echo "paraview-$PARAVIEW_MAJOR_VERSION installed - $(date)" > $paraviewLibDir/about.txt
+    fi
 
-    # skip the normal 'make install' in favour of simply creating
-    # a softlink to the $ParaView_DIR/bin folder
-    # - this seems to keep things portable (except documentation)
-    echo "    Creating link  lib/paraview-$PARAVIEW_MAJOR_VERSION/ -> bin/ "
-    rm -rf lib/paraview-$PARAVIEW_MAJOR_VERSION
-    mkdir lib 2>/dev/null
-    ( cd lib && ln -s ../bin paraview-$PARAVIEW_MAJOR_VERSION )
-
-    # info on symlinks to screen
-cat << INFO
+cat<< INFO
     ---
     Installation complete
     Set environment variables:
@@ -333,17 +373,12 @@ cat << INFO
         export ParaView_DIR=$ParaView_DIR
         export PV_PLUGIN_PATH=$FOAM_LIBBIN
         export PATH=\$ParaView_DIR/bin:\$PATH
-
-    ---
-    NB: if you move the paraview installation, you will need to change this file
-        \$ParaView_DIR/bin/pqClientDocFinder.txt
     ---
 INFO
 }
 
 
 # clear all the variables used before using any of the functions
-
 unset VERBOSE
 unset WITH_MPI WITH_MESA
 unset WITH_PYTHON PYTHON_LIBRARY
