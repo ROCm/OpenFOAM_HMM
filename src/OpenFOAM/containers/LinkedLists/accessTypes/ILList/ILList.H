@@ -139,6 +139,10 @@ public:
             //- Clear the contents of the list
             void clear();
 
+            //- Transfer the contents of the argument into this List
+            //  and annull the argument list.
+            void transfer(ILList<LListBase, T>&);
+
 
     // Member operators
 

@@ -124,6 +124,14 @@ void Foam::ILList<LListBase, T>::clear()
 }
 
 
+template<class LListBase, class T>
+void Foam::ILList<LListBase, T>::transfer(ILList<LListBase, T>& lst)
+{
+    clear();
+    LListBase::transfer(lst);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
