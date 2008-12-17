@@ -81,7 +81,8 @@ inline Foam::label Foam::DLListBase::size() const
 }
 
 
-inline Foam::DLListBase::link* Foam::DLListBase::first()
+inline Foam::DLListBase::link*
+Foam::DLListBase::first()
 {
     if (!nElmts_)
     {
@@ -93,7 +94,8 @@ inline Foam::DLListBase::link* Foam::DLListBase::first()
 }
 
 
-inline const Foam::DLListBase::link* Foam::DLListBase::first() const
+inline const Foam::DLListBase::link*
+Foam::DLListBase::first() const
 {
     if (!nElmts_)
     {
@@ -105,7 +107,8 @@ inline const Foam::DLListBase::link* Foam::DLListBase::first() const
 }
 
 
-inline Foam::DLListBase::link* Foam::DLListBase::last()
+inline Foam::DLListBase::link*
+Foam::DLListBase::last()
 {
     if (!nElmts_)
     {
@@ -117,7 +120,8 @@ inline Foam::DLListBase::link* Foam::DLListBase::last()
 }
 
 
-inline const Foam::DLListBase::link* Foam::DLListBase::last() const
+inline const Foam::DLListBase::link*
+Foam::DLListBase::last() const
 {
     if (!nElmts_)
     {
@@ -131,13 +135,24 @@ inline const Foam::DLListBase::link* Foam::DLListBase::last() const
 
 inline void Foam::DLListBase::clear()
 {
-    nElmts_ = 0;
     first_ = 0;
-    last_ = 0;
+    last_  = 0;
+    nElmts_ = 0;
 }
 
 
-inline Foam::DLListBase::link* Foam::DLListBase::remove
+inline void Foam::DLListBase::transfer(DLListBase& lst)
+{
+    first_  = lst.first_;
+    last_   = lst.last_;
+    nElmts_ = lst.nElmts_;
+
+    lst.clear();
+}
+
+
+inline Foam::DLListBase::link*
+Foam::DLListBase::remove
 (
     DLListBase::iterator& it
 )
@@ -146,7 +161,8 @@ inline Foam::DLListBase::link* Foam::DLListBase::remove
 }
 
 
-inline Foam::DLListBase::link* Foam::DLListBase::replace
+inline Foam::DLListBase::link*
+Foam::DLListBase::replace
 (
     DLListBase::iterator& oldIter,
     DLListBase::link* newLink
@@ -193,13 +209,15 @@ inline bool Foam::DLListBase::iterator::operator!=(const iterator& iter) const
 }
 
 
-inline Foam::DLListBase::link& Foam::DLListBase::iterator::operator*()
+inline Foam::DLListBase::link&
+Foam::DLListBase::iterator::operator*()
 {
     return *curElmt_;
 }
 
 
-inline Foam::DLListBase::iterator& Foam::DLListBase::iterator::operator++()
+inline Foam::DLListBase::iterator&
+Foam::DLListBase::iterator::operator++()
 {
     // Check if the curElmt_ is the last element (if it points to itself)
     // or if the list is empty because the last element may have been removed
@@ -217,7 +235,8 @@ inline Foam::DLListBase::iterator& Foam::DLListBase::iterator::operator++()
 }
 
 
-inline Foam::DLListBase::iterator Foam::DLListBase::iterator::operator++(int)
+inline Foam::DLListBase::iterator
+Foam::DLListBase::iterator::operator++(int)
 {
     iterator tmp = *this;
     ++*this;
@@ -225,7 +244,8 @@ inline Foam::DLListBase::iterator Foam::DLListBase::iterator::operator++(int)
 }
 
 
-inline Foam::DLListBase::iterator Foam::DLListBase::begin()
+inline Foam::DLListBase::iterator
+Foam::DLListBase::begin()
 {
     if (size())
     {
@@ -291,7 +311,8 @@ inline bool Foam::DLListBase::const_iterator::operator!=
 }
 
 
-inline const Foam::DLListBase::link& DLListBase::const_iterator::operator*()
+inline const Foam::DLListBase::link&
+Foam::DLListBase::const_iterator::operator*()
 {
     return *curElmt_;
 }
@@ -322,7 +343,8 @@ Foam::DLListBase::const_iterator::operator++(int)
 }
 
 
-inline Foam::DLListBase::const_iterator Foam::DLListBase::begin() const
+inline Foam::DLListBase::const_iterator
+Foam::DLListBase::begin() const
 {
     if (size())
     {
@@ -335,7 +357,8 @@ inline Foam::DLListBase::const_iterator Foam::DLListBase::begin() const
 }
 
 
-inline const Foam::DLListBase::const_iterator& Foam::DLListBase::end() const
+inline const Foam::DLListBase::const_iterator&
+Foam::DLListBase::end() const
 {
     return endConstIter;
 }
