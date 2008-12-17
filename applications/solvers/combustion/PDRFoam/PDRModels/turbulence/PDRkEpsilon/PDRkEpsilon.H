@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PDRkEpsilon
+    Foam::compressible::RASModels::PDRkEpsilon
 
 Description
     Standard k-epsilon turbulence model with additional source terms
