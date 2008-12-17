@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
@@ -92,12 +92,11 @@ int main(int argc, char *argv[])
         Info<< "element : " << *iter;
     }
 
-    Info<< dict.toc() << endl;
+    Info<< "keys: " << dict.toc() << endl;
 
     delete dictPtr;
 
-    dictPtr = new Dictionary<ent>;
-    Dictionary<ent>& dict2 = *dictPtr;
+    Dictionary<ent> dict2;
 
     for (int i = 0; i<10; i++)
     {
@@ -106,9 +105,20 @@ int main(int argc, char *argv[])
         dict2.swapUp(ePtr);
     }
 
-    Info<< dict2 << endl;
+    Info<< "dict:\n" << dict2 << endl;
 
-    Info<< nl << "Bye." << endl;
+    Info<< nl << "Testing transfer: " << nl << endl;
+    Info<< "original: " << dict2 << endl;
+
+    Dictionary<ent> newDict;
+    newDict.transfer(dict2);
+
+    Info<< nl << "source: " << dict2 << nl
+        << "keys: " << dict2.toc() << nl
+        << "target: " << newDict << nl
+        << "keys: " << newDict.toc() << endl;
+
+    Info<< nl << "Done." << endl;
     return 0;
 }
 

@@ -237,6 +237,17 @@ void Foam::DictionaryBase<IDLListType, T>::clear()
 }
 
 
+template<class IDLListType, class T>
+void Foam::DictionaryBase<IDLListType, T>::transfer
+(
+    DictionaryBase<IDLListType, T>& dict
+)
+{
+    IDLListType::transfer(dict);
+    hashedTs_.transfer(dict.hashedTs_);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class IDLListType, class T>

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     }
 
     myList.append(100.3);
-
     myList.append(500.3);
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
@@ -120,7 +119,18 @@ int main(int argc, char *argv[])
         Info<< "element:" << *iter << endl;
     }
 
-    Info<< nl << "Bye." << endl;
+
+    Info<< nl << "Testing transfer: " << nl << endl;
+    Info<< "original: " << myList << endl;
+
+    DLList<scalar> newList;
+    newList.transfer(myList);
+
+    Info<< nl << "source: " << myList << nl
+        << nl << "target: " << newList << endl;
+
+
+    Info<< nl << "Done." << endl;
     return 0;
 }
 
