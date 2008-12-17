@@ -67,7 +67,7 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           Class LList Declaration
+                            Class LList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class LListBase, class T>

@@ -34,11 +34,11 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-LPtrList<LListBase, T>::LPtrList(const LPtrList<LListBase, T>& slpl)
+LPtrList<LListBase, T>::LPtrList(const LPtrList<LListBase, T>& lst)
 :
     LList<LListBase, T*>()
 {
-    for(const_iterator iter = slpl.begin(); iter != slpl.end(); ++iter)
+    for (const_iterator iter = lst.begin(); iter != lst.end(); ++iter)
     {
         append(iter().clone().ptr());
     }
@@ -89,11 +89,11 @@ void LPtrList<LListBase, T>::clear()
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-void LPtrList<LListBase, T>::operator=(const LPtrList<LListBase, T>& slpl)
+void LPtrList<LListBase, T>::operator=(const LPtrList<LListBase, T>& lst)
 {
     clear();
 
-    for(const_iterator iter = slpl.begin(); iter != slpl.end(); ++iter)
+    for (const_iterator iter = lst.begin(); iter != lst.end(); ++iter)
     {
         append(iter().clone().ptr());
     }
