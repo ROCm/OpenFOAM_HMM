@@ -30,8 +30,11 @@ Description
 
 #include "OSspecific.H"
 
+#include "scalar.H"
+
 #include "IOstreams.H"
 #include "Dictionary.H"
+#include "PtrDictionary.H"
 
 using namespace Foam;
 
@@ -61,6 +64,36 @@ public:
         return os;
     }
 };
+
+
+class Scalar
+{
+    scalar data_;
+
+public:
+
+    Scalar()
+    :
+        data_(0)
+    {}
+
+    Scalar(scalar val)
+    :
+        data_(val)
+    {}
+
+    ~Scalar()
+    {
+        Info <<"delete Scalar: " << data_ << endl;
+    }
+
+    friend Ostream& operator<<(Ostream& os, const Scalar& val)
+    {
+        os << val.data_;
+        return os;
+    }
+};
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -117,6 +150,65 @@ int main(int argc, char *argv[])
         << "keys: " << dict2.toc() << nl
         << "target: " << newDict << nl
         << "keys: " << newDict.toc() << endl;
+
+
+    PtrDictionary<Scalar> scalarDict;
+    for (int i = 0; i<10; i++)
+    {
+        word key("ent" + name(i));
+        scalarDict.insert(key, new Scalar(1.3*i));
+    }
+
+    Info<< nl << "scalarDict1: " << endl;
+    for
+    (
+        PtrDictionary<Scalar>::const_iterator iter = scalarDict.begin();
+        iter != scalarDict.end();
+        ++iter
+    )
+    {
+        Info<< " = " << iter() << endl;
+    }
+    
+    PtrDictionary<Scalar> scalarDict2;
+    for (int i = 8; i<15; i++)
+    {
+        word key("ent" + name(i));
+        scalarDict2.insert(key, new Scalar(1.3*i));
+    }
+    Info<< nl << "scalarDict2: " << endl;
+    for
+    (
+        PtrDictionary<Scalar>::const_iterator iter = scalarDict2.begin();
+        iter != scalarDict2.end();
+        ++iter
+    )
+    {
+        Info<< "elem = " << *iter << endl;
+    }
+    
+    scalarDict.transfer(scalarDict2);
+
+    
+    Scalar* p = scalarDict.lookupPtr("ent8");
+    
+    // This does not (yet) work
+    // Scalar* q = scalarDict.remove("ent10");
+
+    if (p)
+    {
+        Info << "found: " << *p << endl;
+    }
+    else
+    {
+        Info << "no p: " << endl;
+    }
+
+    scalarDict.clear();
+
+    // Info<< " = " << *iter << endl;
+
+
 
     Info<< nl << "Done." << endl;
     return 0;
