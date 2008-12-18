@@ -31,13 +31,22 @@ License
 template<class Stream>
 inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
 {
-    static bool spacesSet = false;
+    static bool spacesSet(false);
     static char spaces[40];
 
     if (!spacesSet)
     {
         memset(spaces, ' ', 40);
-        spaces[38 - strlen(Foam::FOAMversion)] = '\0';
+
+        size_t len = strlen(Foam::FOAMversion);
+        if (len < 38)
+        {
+            spaces[38 - len] = '\0';
+        }
+        else
+        {
+            spaces[0] = '\0';
+        }
         spacesSet = true;
     }
 

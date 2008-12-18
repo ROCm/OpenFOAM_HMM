@@ -2,6 +2,9 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
+# force update of Foam::FOAMversion string (git tag or $WM_PROJECT_VERSION)
+/bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
+
 wmakeLnInclude -f OpenFOAM
 wmakeLnInclude -f OSspecific/$WM_OS
 Pstream/Allwmake
