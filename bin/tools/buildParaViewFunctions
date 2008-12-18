@@ -390,4 +390,7 @@ addCMakeVariable  VTK_USE_TK=FALSE
 addCMakeVariable  BUILD_SHARED_LIBS:BOOL=ON VTK_USE_RPATH:BOOL=OFF
 addCMakeVariable  CMAKE_BUILD_TYPE:STRING=Release
 
+# include development files in "make install"
+addCMakeVariable  PARAVIEW_INSTALL_DEVELOPMENT:BOOL=ON
+
 # ----------------------------------------------------------------- end-of-file
