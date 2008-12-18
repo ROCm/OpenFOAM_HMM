@@ -90,10 +90,6 @@ private:
 
         mutable scalar h_;
 
-    // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
-
     // private member functions
 
         scalar kv
@@ -142,6 +138,7 @@ public:
         vector direction
         (
             const label injector,
+            const label hole,
             const scalar time,
             const scalar d
         ) const;

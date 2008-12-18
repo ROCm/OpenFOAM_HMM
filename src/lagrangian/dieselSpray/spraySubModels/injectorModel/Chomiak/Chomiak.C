@@ -64,9 +64,7 @@ ChomiakInjector::ChomiakInjector
             sm.rndGen()
         )
     ),
-    maxSprayAngle_(ChomiakDict_.lookup("maxSprayConeAngle")),
-    tan1_(maxSprayAngle_.size()),
-    tan2_(maxSprayAngle_.size())
+    maxSprayAngle_(ChomiakDict_.lookup("maxSprayConeAngle"))
 {
 
     if (sm.injectors().size() != maxSprayAngle_.size())
@@ -77,24 +75,6 @@ ChomiakInjector::ChomiakInjector
             << abort(FatalError);
     }
 
-    forAll(sm.injectors(), i)
-    {
-        Random rndGen(label(0));
-        vector dir = sm.injectors()[i].properties()->direction();
-        scalar magV = 0.0;
-        vector tangent;
-        
-        while (magV < SMALL)
-        {
-            vector testThis = rndGen.vector01();
-            
-            tangent = testThis - (testThis & dir)*dir;
-            magV = mag(tangent);
-        }
-        
-        tan1_[i] = tangent/magV;
-        tan2_[i] = dir ^ tan1_[i];
-    }
     scalar referencePressure = sm.p().average().value();
 
     // correct velocityProfile
@@ -127,7 +107,8 @@ scalar ChomiakInjector::d0
 vector ChomiakInjector::direction
 (
     const label n,
-    const scalar,
+    const label hole,
+    const scalar time,
     const scalar d
 ) const
 {
@@ -162,13 +143,13 @@ vector ChomiakInjector::direction
     {
         normal = alpha*
         (
-            tan1_[n]*cos(beta) +
-            tan2_[n]*sin(beta)
+            injectors_[n].properties()->tan1(hole)*cos(beta) +
+            injectors_[n].properties()->tan2(hole)*sin(beta)
         );
     }
     
     // set the direction of injection by adding the normal vector
-    vector dir = dcorr*injectors_[n].properties()->direction() + normal;
+    vector dir = dcorr*injectors_[n].properties()->direction(hole, time) + normal;
     dir /= mag(dir);
 
     return dir;

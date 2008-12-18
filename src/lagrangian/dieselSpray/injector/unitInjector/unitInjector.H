@@ -68,7 +68,6 @@ private:
         scalar d_;
         scalar Cd_;
         scalar mass_;
-        scalar T_;
         label nParcels_;
         scalarField X_;
         List<pair> massFlowRateProfile_;
@@ -132,11 +131,12 @@ public:
         ) const;
 
         //- Return the injection position
-        const vector position() const;
+        const vector position(const label n) const;
 
         //- Return the injection position
         vector position
         (
+            const label n,
             const scalar time,
             const bool twoD,
             const scalar angleOfWedge,
@@ -146,11 +146,18 @@ public:
             Random& rndGen
         ) const;
     
+        //- Return the number of holes
+        label nHoles() const;
+
         //- Return the injector diameter
         scalar d() const;
 
         //- Return the injection direction
-        const vector& direction() const;
+        const vector& direction
+        (
+            const label i,
+            const scalar time
+        ) const;
 
         //- Return the mass of the injected particle
         scalar mass
@@ -205,6 +212,9 @@ public:
 
         List<pair> CdProfile() const;
         scalar Cd(const scalar time) const;
+
+        vector tan1(const label n) const;
+        vector tan2(const label n) const;
 
         void correctProfiles
         (

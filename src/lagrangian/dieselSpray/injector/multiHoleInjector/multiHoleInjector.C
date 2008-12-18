@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "unitInjector.H"
+#include "multiHoleInjector.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Random.H"
 #include "mathematicalConstants.H"
@@ -33,12 +33,12 @@ License
 namespace Foam
 {
 
-defineTypeNameAndDebug(unitInjector, 0);
+defineTypeNameAndDebug(multiHoleInjector, 0);
 
 addToRunTimeSelectionTable
 (
     injectorType,
-    unitInjector,
+    multiHoleInjector,
     dictionary
 );
 }
@@ -47,7 +47,7 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::unitInjector::unitInjector
+Foam::multiHoleInjector::multiHoleInjector
 (
     const Foam::Time& t,
     const Foam::dictionary& dict
@@ -55,8 +55,13 @@ Foam::unitInjector::unitInjector
 :
     injectorType(t, dict),
     propsDict_(dict.subDict(typeName + "Props")),
-    position_(propsDict_.lookup("position")),
-    direction_(propsDict_.lookup("direction")),
+    centerPosition_(propsDict_.lookup("position")),
+    xyAngle_(readScalar(propsDict_.lookup("xyAngle"))),
+    zAngle_(readScalar(propsDict_.lookup("zAngle"))),
+    nHoles_(readLabel(propsDict_.lookup("nHoles"))),
+    umbrellaAngle_(readScalar(propsDict_.lookup("umbrellaAngle"))),
+    nozzleTipDiameter_(readScalar(propsDict_.lookup("nozzleTipDiameter"))),
+    angleSpacing_(propsDict_.lookup("angleSpacing")),
     d_(readScalar(propsDict_.lookup("diameter"))),
     Cd_(readScalar(propsDict_.lookup("Cd"))),
     mass_(readScalar(propsDict_.lookup("mass"))),
@@ -67,21 +72,26 @@ Foam::unitInjector::unitInjector
     injectionPressureProfile_(massFlowRateProfile_),
     CdProfile_(massFlowRateProfile_),
     TProfile_(propsDict_.lookup("temperatureProfile")),
-    averageParcelMass_(mass_/nParcels_),
-    pressureIndependentVelocity_(true)
+    averageParcelMass_(nHoles_*mass_/nParcels_),
+    direction_(nHoles_),
+    position_(nHoles_),
+    pressureIndependentVelocity_(true),
+    tangentialInjectionVector1_(nHoles_),
+    tangentialInjectionVector2_(nHoles_)
 {
+
 
     // check if time entries for soi and eoi match
     if (mag(massFlowRateProfile_[0][0]-TProfile_[0][0]) > SMALL)
     {
-        FatalError << "unitInjector::unitInjector(const time& t, const dictionary dict) " << endl
+        FatalError << "multiHoleInjector::multiHoleInjector(const time& t, const dictionary dict) " << endl
             << " start-times do not match for TemperatureProfile and massFlowRateProfile."
             << abort(FatalError);
     }
 
     if (mag(massFlowRateProfile_[massFlowRateProfile_.size()-1][0]-TProfile_[TProfile_.size()-1][0]) > SMALL)
     {
-        FatalError << "unitInjector::unitInjector(const time& t, const dictionary dict) " << endl
+        FatalError << "multiHoleInjector::multiHoleInjector(const time& t, const dictionary dict) " << endl
             << " end-times do not match for TemperatureProfile and massFlowRateProfile."
             << abort(FatalError);
     }
@@ -110,9 +120,6 @@ Foam::unitInjector::unitInjector
         CdProfile_[i][1] = Cd_;
     }
 
-    // Normalize the direction vector
-    direction_ /= mag(direction_);
-    
     setTangentialVectors();
 
     // check molar fractions
@@ -124,7 +131,7 @@ Foam::unitInjector::unitInjector
 
     if (mag(Xsum - 1.0) > SMALL)
     {
-        Info << "Warning!!!\n unitInjector::unitInjector(const time& t, Istream& is)"
+        Info << "Warning!!!\n multiHoleInjector::multiHoleInjector(const time& t, Istream& is)"
             << "X does not add up to 1.0, correcting molar fractions."
             << endl;
         forAll(X_, i)
@@ -137,33 +144,70 @@ Foam::unitInjector::unitInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::unitInjector::~unitInjector()
+Foam::multiHoleInjector::~multiHoleInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::unitInjector::setTangentialVectors()
+void Foam::multiHoleInjector::setTangentialVectors()
 {
-    Random rndGen(label(0));
-    scalar magV = 0.0;
-    vector tangent;
+    scalar pi180 = mathematicalConstant::pi/180.0;
+    scalar alpha = xyAngle_*pi180;
+    scalar phi = zAngle_*pi180;
 
-    while (magV < SMALL)
+    vector xp(cos(alpha), sin(alpha), 0.0);
+    vector zp(cos(alpha)*sin(phi), sin(alpha)*sin(phi), cos(phi));
+    if (mag(zp-xp) < 1.0e-15)
     {
-        vector testThis = rndGen.vector01();
+        xp = vector(0.0, 0.0, -1.0);
+        xp -= (xp & zp)*zp;
+        xp /= mag(xp);
+    }
+    vector yp = zp^xp;
 
-        tangent = testThis - (testThis & direction_)*direction_;
-        magV = mag(tangent);
+//    Info << "xp = " << xp << endl;
+//    Info << "yp = " << yp << endl;
+//    Info << "zp = " << zp << endl;
+
+    scalar angle = 0.0;
+    scalar u = umbrellaAngle_*pi180/2.0;
+    for(label i=0; i<nHoles_; i++)
+    {
+        angle += angleSpacing_[i];
+        scalar v = angle*pi180;
+        direction_[i] = cos(v)*sin(u)*xp + sin(v)*sin(u)*yp + cos(u)*zp;
+        vector dp = direction_[i] - (direction_[i] & zp)*direction_[i];
+        if (mag(dp) > SMALL)
+        {
+            dp /= mag(dp);
+        }
+        position_[i] = centerPosition_ + 0.5*nozzleTipDiameter_*dp;
+//        Info << "i = " << i << ", dir = " << direction_[i] << ", pos = " << position_[i] << endl;
     }
 
-    tangentialInjectionVector1_ = tangent/magV;
-    tangentialInjectionVector2_ = direction_ ^ tangentialInjectionVector1_;
+    Random rndGen(label(0));
 
+    for(label i=0; i<nHoles_; i++)
+    {
+        vector tangent(vector::zero);
+        scalar magV = 0;
+        while (magV < SMALL)
+        {
+            vector testThis = rndGen.vector01();
+            
+            tangent = testThis - (testThis & direction_[i])*direction_[i];
+            magV = mag(tangent);
+        }
+
+        tangentialInjectionVector1_[i] = tangent/magV;
+        tangentialInjectionVector2_[i] = direction_[i] ^ tangentialInjectionVector1_[i];
+
+    }   
 }
 
 
-Foam::label Foam::unitInjector::nParcelsToInject
+Foam::label Foam::multiHoleInjector::nParcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -176,12 +220,12 @@ Foam::label Foam::unitInjector::nParcelsToInject
     return nParcels;
 }
 
-const Foam::vector Foam::unitInjector::position(const label n) const
+const Foam::vector Foam::multiHoleInjector::position(const label n) const
 {
-    return position_;
+    return position_[n];
 }
 
-Foam::vector Foam::unitInjector::position
+Foam::vector Foam::multiHoleInjector::position
 (
     const label n,
     const scalar time,
@@ -195,8 +239,8 @@ Foam::vector Foam::unitInjector::position
 {
     if (twoD)
     {
-        scalar is = position_ & axisOfSymmetry;
-        scalar magInj = mag(position_ - is*axisOfSymmetry);
+        scalar is = position_[n] & axisOfSymmetry;
+        scalar magInj = mag(position_[n] - is*axisOfSymmetry);
 
         vector halfWedge =
             axisOfWedge*cos(0.5*angleOfWedge)
@@ -213,39 +257,38 @@ Foam::vector Foam::unitInjector::position
 
         return
         ( 
-            position_
+            position_[n]
           + iRadius
           * (
-              tangentialInjectionVector1_*cos(iAngle)
-            + tangentialInjectionVector2_*sin(iAngle)
+              tangentialInjectionVector1_[n]*cos(iAngle)
+            + tangentialInjectionVector2_[n]*sin(iAngle)
           )
         );
         
     }
-
-    return position_;
+    return position_[0];
 }
 
-Foam::label Foam::unitInjector::nHoles() const
+Foam::label Foam::multiHoleInjector::nHoles() const
 {
-    return 1;
+    return nHoles_;
 }
 
-Foam::scalar Foam::unitInjector::d() const
+Foam::scalar Foam::multiHoleInjector::d() const
 {
     return d_;
 }
 
-const Foam::vector& Foam::unitInjector::direction
+const Foam::vector& Foam::multiHoleInjector::direction
 (
     const label i,
     const scalar time
 ) const
 {
-    return direction_;
+    return direction_[i];
 }
 
-Foam::scalar Foam::unitInjector::mass
+Foam::scalar Foam::multiHoleInjector::mass
 (
     const scalar time0,
     const scalar time1,
@@ -264,37 +307,37 @@ Foam::scalar Foam::unitInjector::mass
     return mInj;
 }
 
-Foam::scalar Foam::unitInjector::mass() const
+Foam::scalar Foam::multiHoleInjector::mass() const
 {
     return mass_;
 }
 
-const Foam::scalarField& Foam::unitInjector::X() const
+const Foam::scalarField& Foam::multiHoleInjector::X() const
 {
     return X_;
 }
 
-Foam::List<Foam::unitInjector::pair> Foam::unitInjector::T() const
+Foam::List<Foam::multiHoleInjector::pair> Foam::multiHoleInjector::T() const
 {
     return TProfile_;
 }
 
-Foam::scalar Foam::unitInjector::T(const scalar time) const
+Foam::scalar Foam::multiHoleInjector::T(const scalar time) const
 {
     return getTableValue(TProfile_, time);
 }
 
-Foam::scalar Foam::unitInjector::tsoi() const
+Foam::scalar Foam::multiHoleInjector::tsoi() const
 {
     return massFlowRateProfile_[0][0];
 }
 
-Foam::scalar Foam::unitInjector::teoi() const
+Foam::scalar Foam::multiHoleInjector::teoi() const
 {
     return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
 }
 
-Foam::scalar Foam::unitInjector::massFlowRate
+Foam::scalar Foam::multiHoleInjector::massFlowRate
 (
     const scalar time
 ) const
@@ -302,7 +345,7 @@ Foam::scalar Foam::unitInjector::massFlowRate
     return getTableValue(massFlowRateProfile_, time);
 }
 
-Foam::scalar Foam::unitInjector::injectionPressure
+Foam::scalar Foam::multiHoleInjector::injectionPressure
 (
     const scalar time
 ) const
@@ -310,7 +353,7 @@ Foam::scalar Foam::unitInjector::injectionPressure
     return getTableValue(injectionPressureProfile_, time);
 }
 
-Foam::scalar Foam::unitInjector::velocity
+Foam::scalar Foam::multiHoleInjector::velocity
 (
     const scalar time
 ) const
@@ -318,12 +361,12 @@ Foam::scalar Foam::unitInjector::velocity
     return getTableValue(velocityProfile_, time);
 }
 
-Foam::List<Foam::unitInjector::pair> Foam::unitInjector::CdProfile() const
+Foam::List<Foam::multiHoleInjector::pair> Foam::multiHoleInjector::CdProfile() const
 {
     return CdProfile_;
 }
 
-Foam::scalar Foam::unitInjector::Cd
+Foam::scalar Foam::multiHoleInjector::Cd
 (
     const scalar time
 ) const
@@ -331,12 +374,12 @@ Foam::scalar Foam::unitInjector::Cd
     return Cd_;
 }
 
-Foam::scalar Foam::unitInjector::fractionOfInjection(const scalar time) const
+Foam::scalar Foam::multiHoleInjector::fractionOfInjection(const scalar time) const
 {
     return integrateTable(massFlowRateProfile_, time)/mass_;
 }
 
-Foam::scalar Foam::unitInjector::injectedMass
+Foam::scalar Foam::multiHoleInjector::injectedMass
 (
     const scalar t
 ) const
@@ -345,34 +388,33 @@ Foam::scalar Foam::unitInjector::injectedMass
 }
 
 
-void Foam::unitInjector::correctProfiles
+void Foam::multiHoleInjector::correctProfiles
 (
     const liquidMixture& fuel,
     const scalar referencePressure
 )
 {
 
-    scalar A = 0.25*mathematicalConstant::pi*pow(d_, 2.0);
-    scalar pDummy = 1.0e+5;
+    scalar A = nHoles_*0.25*mathematicalConstant::pi*pow(d_, 2.0);
 
     forAll(velocityProfile_, i)
     {
         scalar time = velocityProfile_[i][0];
-        scalar rho = fuel.rho(pDummy, T(time), X_);
+        scalar rho = fuel.rho(referencePressure, T(time), X_);
         scalar v = massFlowRateProfile_[i][1]/(Cd_*rho*A);
         velocityProfile_[i][1] = v;
         injectionPressureProfile_[i][1] = referencePressure + 0.5*rho*v*v;
     }
 }
 
-Foam::vector Foam::unitInjector::tan1(const label n) const
+Foam::vector Foam::multiHoleInjector::tan1(const label n) const
 {
-    return tangentialInjectionVector1_;
+    return tangentialInjectionVector1_[n];
 }
 
-Foam::vector Foam::unitInjector::tan2(const label n) const
+Foam::vector Foam::multiHoleInjector::tan2(const label n) const
 {
-    return tangentialInjectionVector2_;
+    return tangentialInjectionVector2_[n];
 }
 
 // ************************************************************************* //
