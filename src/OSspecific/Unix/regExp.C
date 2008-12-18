@@ -37,15 +37,20 @@ License
 void Foam::regExp::compile(const char* pat) const
 {
     clear();
-    preg_ = new regex_t;
 
-    if (regcomp(preg_, pat, REG_EXTENDED) != 0)
+    // avoid NULL and zero-length patterns
+    if (pat && *pat)
     {
-        FatalErrorIn
-        (
-            "regExp::compile(const char*)"
-        )   << "Failed to compile regular expression '" << pat << "'"
-            << exit(FatalError);
+        preg_ = new regex_t;
+
+        if (regcomp(preg_, pat, REG_EXTENDED) != 0)
+        {
+            FatalErrorIn
+            (
+                "regExp::compile(const char*)"
+            )   << "Failed to compile regular expression '" << pat << "'"
+                << exit(FatalError);
+        }
     }
 }
 
@@ -59,6 +64,7 @@ void Foam::regExp::clear() const
         preg_ = 0;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -83,12 +89,14 @@ Foam::regExp::regExp(const char* pat)
     compile(pat);
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::regExp::~regExp()
 {
     clear();
 }
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -110,6 +118,7 @@ bool Foam::regExp::match
         regmatch_t pmatch[1];
 
         // match and also verify that the entire string was matched
+        // pmatch[0] is the entire match
         if
         (
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
@@ -141,6 +150,8 @@ bool Foam::regExp::match
         regmatch_t pmatch[nmatch];
 
         // match and also verify that the entire string was matched
+        // pmatch[0] is the entire match
+        // pmatch[1..] are the (...) sub-groups
         if
         (
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
@@ -179,8 +190,8 @@ bool Foam::regExp::match
     return false;
 }
 
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 void Foam::regExp::operator=(const string& pat)
 {
@@ -192,5 +203,6 @@ void Foam::regExp::operator=(const char* pat)
 {
     compile(pat);
 }
+
 
 // ************************************************************************* //
