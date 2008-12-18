@@ -52,6 +52,7 @@ defineTemplateTypeNameAndDebug(IOPtrList<injector>, 0);
 // Construct from components
 Foam::spray::spray
 (
+    const volPointInterpolation& vpi,
     const volVectorField& U,
     const volScalarField& rho,
     const volScalarField& p,
@@ -66,6 +67,7 @@ Foam::spray::spray
     runTime_(U.time()),
     time0_(runTime_.value()),
     mesh_(U.mesh()),
+    volPointInterpolation_(vpi),
     rndGen_(label(0)),
 
     U_(U),
@@ -261,7 +263,7 @@ Foam::spray::spray
         {
             FatalErrorIn
             (
-                "spray::spray(const volVectorField& U, "
+                "spray::spray(const pointMesh& pMesh, const volVectorField& U, "
                 "const volScalarField& rho, const volScalarField& p, "
                 "const volScalarField& T, const combustionMixture& composition,"
                 "const PtrList<specieProperties>& gaseousFuelProperties, "

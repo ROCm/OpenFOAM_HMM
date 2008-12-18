@@ -63,10 +63,6 @@ private:
         scalarList innerAngle_;
         scalarList outerAngle_;
 
-    // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
-
 public:
 
     //- Runtime type information
@@ -96,7 +92,8 @@ public:
         //- Return the spray angle of the injector
         vector direction
         (
-            const label injector, 
+            const label injector,
+            const label hole,
             const scalar time,
             const scalar d
         ) const;

@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::swirlInjector
+    Foam::multiHoleInjector
 
 Description
-    The swirl injector
+    The unit injector
 
 SourceFiles
-    swirlInjectorI.H
-    swirlInjector.C
-    swirlInjectorIO.C
+    multiHoleInjectorI.H
+    multiHoleInjector.C
+    multiHoleInjectorIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef swirlInjector_H
-#define swirlInjector_H
+#ifndef multiHoleInjector_H
+#define multiHoleInjector_H
 
 #include "injectorType.H"
 #include "vector.H"
@@ -47,55 +47,57 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class swirlInjector Declaration
+                           Class multiHoleInjector Declaration
 \*---------------------------------------------------------------------------*/
 
-class swirlInjector
+class multiHoleInjector
 :
     public injectorType
 {
 
 private:
 
-    // Private data
+    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+    // Private data
 
         dictionary propsDict_;
 
-        vector position_;
-        vector direction_;
+        vector centerPosition_;
+        scalar xyAngle_;
+        scalar zAngle_;
+        label nHoles_;
+        scalar umbrellaAngle_;
+        scalar nozzleTipDiameter_;
+        List<scalar> angleSpacing_;
         scalar d_;
+        scalar Cd_;
         scalar mass_;
-        scalar injectionPressure_;
-        scalar T_;
         label nParcels_;
         scalarField X_;
         List<pair> massFlowRateProfile_;
-        List<pair> injectionPressureProfile_;
         List<pair> velocityProfile_;
+        List<pair> injectionPressureProfile_;
         List<pair> CdProfile_;
         List<pair> TProfile_;
         scalar averageParcelMass_;
+        List<vector> direction_;
+        List<vector> position_;
 
         bool pressureIndependentVelocity_;
 
         //- two orthogonal vectors that are also orthogonal
         //  to the injection direction
-        vector tangentialInjectionVector1_, tangentialInjectionVector2_;
+        List<vector> tangentialInjectionVector1_, tangentialInjectionVector2_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        swirlInjector(const swirlInjector&);
+        multiHoleInjector(const multiHoleInjector&);
 
         //- Disallow default bitwise assignment
-        void operator=(const swirlInjector&);
-
-        //- Integrate the mass-flow profile and set
-        //  the integral value
-        void setIntegralProfileValue();
+        void operator=(const multiHoleInjector&);
 
         //- Create two vectors orthonoal to each other
         //  and the injection vector
@@ -105,26 +107,16 @@ private:
         scalar fractionOfInjection(const scalar time) const;
 
 
-/*
-
-        //- Return the average injection velocity
-        scalar averageInjectionVelocityTime(const scalar liquidDensity) const;
-
-        //- Return the instantaneous injection velocity
-        scalar injectionVelocity(const scalar, const scalar liquidDensity) const;
-
-*/
-
 public:
 
     //- Runtime type information
-    TypeName("swirlInjector");
+    TypeName("multiHoleInjector");
 
 
     // Constructors
 
         //- Construct from components
-        swirlInjector
+        multiHoleInjector
         (
             const Time& t,
             const dictionary& dict
@@ -133,7 +125,7 @@ public:
 
     // Destructor
 
-        ~swirlInjector();
+        ~multiHoleInjector();
 
 
     // Member Functions
@@ -186,37 +178,13 @@ public:
         //- Return the mass injected by the injector
         scalar mass() const;
 
-        //- Return the mass flow rate profile
-        List<pair> massFlowRateProfile() const;
-
-        //- Return the instantaneous mass flow rate profile
-        scalar massFlowRate(const scalar time) const;
-
-        //- Return the pressure injection profile
-        List<pair> injectionPressureProfile() const;
-
-        //- Return the instantaneous injection pressure
-        scalar injectionPressure(const scalar time) const;
-
-        //- Return the velocity injection profile
-        List<pair> velocityProfile() const;
-
-        //- Return the instantaneous velocity
-        scalar velocity(const scalar time) const;
-
-        //- Return the discharge coefficient    
-        List<pair> CdProfile() const;
-
-        //- Return the instantaneous discharge coefficient
-        scalar Cd(const scalar time) const;
-
         //- Return the fuel mass fractions of the injected particle
         const scalarField& X() const;
 
-        //- Return the temperatue profile of the injected parcel
+        //- Return the temperature profile of the injected particle
         List<pair> T() const;
 
-        //- Return the temperatue of the injected parcel
+        //- Return the temperature of the injected particle
         scalar T(const scalar time) const;
 
         //- Return the start-of-injection time
@@ -228,6 +196,30 @@ public:
         //- Return the injected liquid mass
         scalar injectedMass(const scalar t) const;
 
+        List<pair> massFlowRateProfile() const
+        {
+            return massFlowRateProfile_;
+        }
+
+        scalar massFlowRate(const scalar time) const;
+
+        List<pair> injectionPressureProfile() const
+        {
+            return injectionPressureProfile_;
+        }
+    
+        scalar injectionPressure(const scalar time) const;
+
+        List<pair> velocityProfile() const
+        {
+            return velocityProfile_;
+        }
+        
+        scalar velocity(const scalar time) const;
+
+        List<pair> CdProfile() const;
+        scalar Cd(const scalar time) const;
+
         vector tan1(const label n) const;
         vector tan2(const label n) const;
 
@@ -236,11 +228,12 @@ public:
             const liquidMixture& fuel,
             const scalar referencePressure
         );
-        
+
         bool pressureIndependentVelocity() const
         {
             return pressureIndependentVelocity_;
         }
+
 };
 
 

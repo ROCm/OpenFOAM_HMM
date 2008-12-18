@@ -127,8 +127,6 @@ public:
             const scalar, 
             const scalar, 
             const scalar, 
-            const scalar, 
-            const scalar, 
             const scalar 
         ) const;
 

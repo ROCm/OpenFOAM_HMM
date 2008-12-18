@@ -61,31 +61,8 @@ definedPressureSwirlInjector::definedPressureSwirlInjector
     coneInterval_(definedPressureSwirlInjectorDict_.lookup("ConeInterval")),
     maxKv_(definedPressureSwirlInjectorDict_.lookup("maxKv")),
 
-    angle_(0.0),
-    tan1_(coneAngle_.size()),
-    tan2_(coneAngle_.size())
+    angle_(0.0)
 {
-
-
-
-    forAll(sm.injectors(), i)
-    {
-        Random rndGen(label(0));
-        vector dir = sm.injectors()[i].properties()->direction();
-        scalar magV = 0.0;
-        vector tangent;
-        
-        while (magV < SMALL)
-        {
-            vector testThis = rndGen.vector01();
-            
-            tangent = testThis - (testThis & dir)*dir;
-            magV = mag(tangent);
-        }
-        
-        tan1_[i] = tangent/magV;
-        tan2_[i] = dir ^ tan1_[i];
-    }
 
     scalar referencePressure = sm.p().average().value();
 
@@ -219,8 +196,9 @@ scalar definedPressureSwirlInjector::d0
 vector definedPressureSwirlInjector::direction
 (
     const label n,
-    const scalar,
-    const scalar
+    const label hole,
+    const scalar time,
+    const scalar d
 ) const
 {
 
@@ -249,13 +227,13 @@ vector definedPressureSwirlInjector::direction
     {
         normal = alpha*
         (
-            tan1_[n]*cos(beta) +
-            tan2_[n]*sin(beta)
+            injectors_[n].properties()->tan1(hole)*cos(beta) +
+            injectors_[n].properties()->tan2(hole)*sin(beta)
         );
     }
     
     // set the direction of injection by adding the normal vector
-    vector dir = dcorr*injectors_[n].properties()->direction() + normal;
+    vector dir = dcorr*injectors_[n].properties()->direction(hole, time) + normal;
     dir /= mag(dir);
 
     return dir;
