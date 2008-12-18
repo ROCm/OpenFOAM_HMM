@@ -2,6 +2,12 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
+# update version string if under Git
+git describe 2> /dev/null | \
+(read project_string \
+   && sed -e 's/WM_PROJECT_VERSION/\"'"${project_string}"'"/' \
+   OpenFOAM/global/global_raw.C >OpenFOAM/global/global.C)
+
 wmakeLnInclude -f OpenFOAM
 wmakeLnInclude -f OSspecific/$WM_OS
 Pstream/Allwmake
