@@ -174,7 +174,7 @@ void Foam::ReactingCloud<ParcelType>::evolve()
         this->g().value()
     );
 
-    inject(td);
+    inject();
 
     if (this->coupled())
     {
@@ -186,15 +186,11 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 
 
 template<class ParcelType>
-template<class TrackingData>
-void Foam::ReactingCloud<ParcelType>::inject
-(
-    TrackingData& td
-)
+void Foam::ReactingCloud<ParcelType>::inject()
 {
     scalar time = this->db().time().value();
 
-    scalar pRho = td.constProps().rho0();
+    scalar pRho = this->constProps().rho0();
 
     this->injection().prepareForNextTimeStep(this->time0(), time);
 
@@ -276,7 +272,7 @@ void Foam::ReactingCloud<ParcelType>::inject
             // construct the parcel that is to be injected
             ParcelType* pPtr = new ParcelType
             (
-                td.cloud(),
+                *this,
                 this->parcelTypeId(),
                 pPosition,
                 pCell,
@@ -287,7 +283,7 @@ void Foam::ReactingCloud<ParcelType>::inject
                 composition().YLiquid0(),
                 composition().YSolid0(),
                 composition().YMixture0(),
-                td.constProps()
+                this->constProps()
             );
 
             scalar dt = time - timeInj;

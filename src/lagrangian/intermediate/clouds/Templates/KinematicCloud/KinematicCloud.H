@@ -234,8 +234,7 @@ protected:
         );
 
         //- Inject more parcels
-        template<class TrackingData>
-        void inject(TrackingData& td);
+        void inject();
 
         //- Inject parcel if it is valid - delete otherwise
         void injectParcel(ParcelType* p);

@@ -265,7 +265,7 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         g_.value()
     );
 
-    inject(td);
+    inject();
 
     if (coupled_)
     {
@@ -277,15 +277,11 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
 
 template<class ParcelType>
-template<class TrackingData>
-void Foam::KinematicCloud<ParcelType>::inject
-(
-    TrackingData& td
-)
+void Foam::KinematicCloud<ParcelType>::inject()
 {
     scalar time = this->db().time().value();
 
-    scalar pRho = td.constProps().rho0();
+    scalar pRho = constProps_.rho0();
 
     this->injection().prepareForNextTimeStep(time0_, time);
 
@@ -367,14 +363,14 @@ void Foam::KinematicCloud<ParcelType>::inject
             // construct the parcel that is to be injected
             ParcelType* pPtr = new ParcelType
             (
-                td.cloud(),
+                *this,
                 parcelTypeId_,
                 pPosition,
                 pCell,
                 pDiameter,
                 pU,
                 pNumberOfParticles,
-                td.constProps()
+                constProps_
             );
 
             scalar dt = time - timeInj;
