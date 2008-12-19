@@ -36,7 +36,6 @@ Description
 #include "parcel.H"
 #include "injector.H"
 #include "IOPtrList.H"
-#include "volPointInterpolation.H"
 #include "interpolation.H"
 #include "liquid.H"
 #include "sprayThermoTypes.H"
@@ -76,7 +75,6 @@ class spray
             const Time& runTime_;
             scalar time0_;
             const fvMesh& mesh_;
-            const volPointInterpolation& volPointInterpolation_;
 
             //- Random number generator
             Random rndGen_;
@@ -189,7 +187,6 @@ public:
         //- Construct from components
         spray
         (
-            const volPointInterpolation& vpi,
             const volVectorField& U,
             const volScalarField& rho,
             const volScalarField& p,
