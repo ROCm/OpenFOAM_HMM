@@ -36,65 +36,6 @@ License
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::setInjectorCellAndPosition
-(
-    label& pCell,
-    vector& pPosition
-)
-{
-    const vector originalPosition = pPosition;
-
-    bool foundCell = false;
-
-    pCell = mesh_.findCell(pPosition);
-
-    if (pCell >= 0)
-    {
-        const vector& C = mesh_.C()[pCell];
-        pPosition += 1.0e-6*(C - pPosition);
-
-        foundCell = mesh_.pointInCell
-        (
-            pPosition,
-            pCell
-        );
-    }
-    reduce(foundCell, orOp<bool>());
-
-    // Last chance - find nearest cell and try that one
-    // - the point is probably on an edge
-    if (!foundCell)
-    {
-        pCell =  mesh_.findNearestCell(pPosition);
-
-        if (pCell >= 0)
-        {
-            const vector& C = mesh_.C()[pCell];
-            pPosition += 1.0e-6*(C - pPosition);
-
-            foundCell = mesh_.pointInCell
-            (
-                pPosition,
-                pCell
-            );
-        }
-        reduce(foundCell, orOp<bool>());
-    }
-
-    if (!foundCell)
-    {
-        FatalErrorIn
-        (
-            "void KinematicCloud<ParcelType>::findInjectorCell"
-            "(label&, vector&)"
-        )<< "Cannot find parcel injection cell. "
-         << "Parcel position = " << originalPosition << nl
-         << abort(FatalError);
-    }
-}
-
-
-template<class ParcelType>
 Foam::scalar Foam::KinematicCloud<ParcelType>::setNumberOfParticles
 (
     const label nParcels,
@@ -419,7 +360,7 @@ void Foam::KinematicCloud<ParcelType>::inject
 
         // Determine the injection cell
         label pCell = -1;
-        setInjectorCellAndPosition(pCell, pPosition);
+        this->injection().findInjectorCellAndPosition(pCell, pPosition);
 
         if (pCell >= 0)
         {

@@ -269,7 +269,7 @@ void Foam::ReactingCloud<ParcelType>::inject
 
         // Determine the injection cell
         label pCell = -1;
-        this->setInjectorCellAndPosition(pCell, pPosition);
+        this->injection().findInjectorCellAndPosition(pCell, pPosition);
 
         if (pCell >= 0)
         {

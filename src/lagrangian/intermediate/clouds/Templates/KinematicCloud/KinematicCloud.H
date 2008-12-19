@@ -223,13 +223,6 @@ protected:
 
     // Protected member functions
 
-        //- Set parcel position and cell into which parcel is introduced
-        void setInjectorCellAndPosition
-        (
-            label& pCell,
-            vector& pPosition
-        );
-
         //- Set the number of particles per parcel
         scalar setNumberOfParticles
         (
