@@ -70,6 +70,8 @@ int main(int argc, char *argv[])
               + turbulence->divDevReff(U)
             );
 
+            UEqn.relax();
+
             if (momentumPredictor)
             {
                 solve(UEqn == -fvc::grad(p));
