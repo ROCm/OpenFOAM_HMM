@@ -61,15 +61,15 @@ do
     -h | -help)
         usage
         ;;
-    -check)
+    -c | -check)
         checkOnly=true
         shift
         ;;
-    -update)
+    -u | -update)
         update=true
         shift
         ;;
-    -version)
+    -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version=$2
         shift 2
@@ -108,14 +108,14 @@ fi
 # update persistent build tag if possible
 if [ $rc -eq 0 -a -n "$update" -a "$version" != "$previous" ]
 then
-    if [ -w "$build" -a \( -w "$WM_PROJECT_DIR" -o ! -e "$build" \) ]
+    if [ -w "$build" -o \( -w "$WM_PROJECT_DIR" -a ! -e "$build" \) ]
     then
         echo $version >| "$build" 2>/dev/null
     fi
 fi
 
 
-# check git vs. persistent build tag - no output
+# check git vs. persistent build tag
 if [ -n "$checkOnly" ]
 then
     if [ $rc -eq 0 ]
