@@ -396,7 +396,6 @@ void Foam::KinematicCloud<ParcelType>::inject
 
 
 template<class ParcelType>
-template<class TrackingData>
 void Foam::KinematicCloud<ParcelType>::injectParcel(ParcelType* p)
 {
     addParticle(p);
