@@ -35,7 +35,12 @@ Script=${0##*/}
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
-usage: $Script
+usage: $Script [OPTION]
+options:
+  -check          check git description vs. \$WM_PROJECT_DIR/.build
+                  (exit code 0 for no changes)
+  -update         update the \$WM_PROJECT_DIR/.build from the git description
+  -version VER    specify an alternative version
 
 Print the version used when building the project, in this order of precedence:
   * git description
@@ -47,11 +52,33 @@ USAGE
 }
 #------------------------------------------------------------------------------
 
-# provide immediate help
-if [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    usage
-fi
+unset checkOnly update version
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -check)
+        checkOnly=true
+        shift
+        ;;
+    -update)
+        update=true
+        shift
+        ;;
+    -version)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        version=$2
+        shift 2
+        ;;
+    *)
+        usage "unknown option/argument: '$*'"
+        ;;
+    esac
+done
 
 #------------------------------------------------------------------------------
 
@@ -61,35 +88,60 @@ fi
 build="$WM_PROJECT_DIR/.build"
 previous=$(tail -1 $build 2>/dev/null)
 
-#
-# building under git
-# note: could also use --abbrev=32 for maximum resolution
-#
-version=$(git describe --always --tags 2>/dev/null)
-if [ $? -eq 0 ]
+# specified a version
+if [ -n "$version" ]
 then
-    # update persistent build tag (this could be made optional or removed)
-    if [ "$version" != "$previous" ]
+    # specified a version - no error possible
+    rc=0
+else
+    # building under git (could use --abbrev=32 for maximum resolution)
+    version=$(git describe --always --tags 2>/dev/null)
+    rc=$?
+fi
+
+
+# update persistent build tag if possible
+if [ $rc -eq 0 -a -n "$update" -a "$version" != "$previous" ]
+then
+    if [ -w "$build" -a \( -w "$WM_PROJECT_DIR" -o ! -e "$build" \) ]
     then
-        if [ -w "$build" -a \( -w "$WM_PROJECT_DIR" -o ! -e "$build" \) ]
-        then
-            echo $version >| "$build" 2>/dev/null
-        fi
+        echo $version >| "$build" 2>/dev/null
     fi
+fi
 
+
+# check git vs. persistent build tag - no output
+if [ -n "$checkOnly" ]
+then
+    if [ $rc -eq 0 ]
+    then
+        test "$version" = "$previous"
+        rc=$?
+        if [ $rc -eq 0 ]
+        then
+            echo "same version as previous build"
+        else
+            echo "version changed from previous build"
+        fi
+    else
+        echo "no git description found"
+    fi
+    exit $rc
+fi
+
+
+
+if [ $rc -eq 0 ]
+then
+    # output the git description or -version version
     echo $version
-
 elif [ -n "$previous" ]
 then
-
     # use previous build tag
     echo $previous
-
 else
-
     # fallback to WM_PROJECT_VERSION
     echo ${WM_PROJECT_VERSION:-unknown}
-
 fi
 
 #------------------------------------------------------------------------------

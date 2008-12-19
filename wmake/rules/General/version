@@ -1,10 +1,10 @@
 .SUFFIXES: .Cver
 
 #
-# update version string
+# update version string in C++ file and in $WM_PROJECT_DIR/.build file
 #
 Cvertoo = \
-    sed s/WM_PROJECT_VERSION/\"$(shell wmakePrintBuild)\"/ $$SOURCE > $*.C; \
+    sed s/WM_PROJECT_VERSION/\"$(shell wmakePrintBuild -update)\"/ $$SOURCE > $*.C; \
     $(CC) $(c++FLAGS) -c $*.C -o $@
 
 .Cver.dep:
