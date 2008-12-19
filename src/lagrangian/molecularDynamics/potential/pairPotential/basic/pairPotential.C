@@ -97,7 +97,7 @@ Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
-    label k(k_rIJ);
+    label k = label(k_rIJ);
 
     if (k < 0)
     {
@@ -134,7 +134,7 @@ Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
-    label k(k_rIJ);
+    label k = label(k_rIJ);
 
     if (k < 0)
     {

@@ -186,7 +186,13 @@ bool Foam::molecule::move(molecule::trackData& td)
 
 
 void Foam::molecule::transformProperties(const tensor& T)
-{}
+{
+    Q_ = T & Q_;
+
+    sitePositions_ = position_ + (T & (sitePositions_ - position_));
+
+    siteForces_ = T & siteForces_;
+}
 
 
 void Foam::molecule::transformProperties(const vector& separation)

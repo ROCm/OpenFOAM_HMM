@@ -77,7 +77,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellJ > cellI)
                             {
-                                if(findIndex(directInteractionList[cellI], cellJ) == -1)
+                                if
+                                (
+                                    findIndex(directInteractionList[cellI],
+                                    cellJ) == -1
+                                )
                                 {
                                     directInteractionList[cellI].append(cellJ);
                                 }
@@ -85,7 +89,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellI > cellJ)
                             {
-                                if(findIndex(directInteractionList[cellJ], cellI) == -1)
+                                if
+                                (
+                                    findIndex(directInteractionList[cellJ],
+                                    cellI) == -1
+                                )
                                 {
                                     directInteractionList[cellJ].append(cellI);
                                 }
@@ -98,7 +106,8 @@ void Foam::directInteractionList::buildDirectInteractionList
     }
     else
     {
-        Info<< tab << "Point-Face, Edge-Edge direct interaction list build." << endl;
+        Info<< tab << "Point-Face, Edge-Edge direct interaction list build."
+            << endl;
 
         forAll (mesh.points(), p)
         {
@@ -120,7 +129,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                         if (cellO > cellI)
                         {
-                            if (findIndex(directInteractionList[cellI], cellO) == -1)
+                            if
+                            (
+                                findIndex(directInteractionList[cellI],
+                                cellO) == -1
+                            )
                             {
                                 directInteractionList[cellI].append(cellO);
                             }
@@ -128,7 +141,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                         if (cellI > cellO)
                         {
-                            if (findIndex(directInteractionList[cellO], cellI) == -1)
+                            if
+                            (
+                                findIndex(directInteractionList[cellO],
+                                cellI) == -1
+                            )
                             {
                                 directInteractionList[cellO].append(cellI);
                             }
@@ -136,11 +153,16 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                         if (mesh.isInternalFace(f))
                         {
-                            // boundary faces will not have neighbour information
+                            // boundary faces will not have neighbour
+                            // information
 
                             if (cellN > cellI)
                             {
-                                if (findIndex(directInteractionList[cellI], cellN) == -1)
+                                if
+                                (
+                                    findIndex(directInteractionList[cellI],
+                                    cellN) == -1
+                                )
                                 {
                                     directInteractionList[cellI].append(cellN);
                                 }
@@ -148,7 +170,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellI > cellN)
                             {
-                                if (findIndex(directInteractionList[cellN], cellI) == -1)
+                                if
+                                (
+                                    findIndex(directInteractionList[cellN],
+                                    cellI) == -1
+                                )
                                 {
                                     directInteractionList[cellN].append(cellI);
                                 }
@@ -190,7 +216,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellJ > cellI)
                             {
-                                if (findIndex(directInteractionList[cellI], cellJ) == -1)
+                                if
+                                (
+                                    findIndex(directInteractionList[cellI],
+                                    cellJ) == -1
+                                )
                                 {
                                     directInteractionList[cellI].append(cellJ);
                                 }
@@ -198,7 +228,11 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                             if (cellI > cellJ)
                             {
-                                if (findIndex(directInteractionList[cellJ], cellI) == -1)
+                                if
+                                (
+                                    findIndex(directInteractionList[cellJ],
+                                    cellI) == -1
+                                )
                                 {
                                     directInteractionList[cellJ].append(cellI);
                                 }
@@ -238,7 +272,18 @@ Foam::directInteractionList::directInteractionList
     labelListList(il.mesh().nCells()),
     il_(il)
 {
-    buildDirectInteractionList(pointPointListBuild);
+    if((*this).size() > 1)
+    {
+        buildDirectInteractionList(pointPointListBuild);
+    }
+    else
+    {
+        Info<< nl
+            << "Single cell mesh, no direct interaction lists required."
+            << endl;
+
+        (*this)[0].setSize(0);
+    }
 }
 
 

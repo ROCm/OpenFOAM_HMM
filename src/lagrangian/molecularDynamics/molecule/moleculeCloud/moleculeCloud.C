@@ -227,7 +227,8 @@ void Foam::moleculeCloud::calculateTetherForce()
 
             mol().potentialEnergy() += tetherPot.energy(idI, rIT);
 
-            mol().rf() += rIT*fIT;
+            // What to do here?
+            // mol().rf() += rIT*fIT;
         }
     }
 }
@@ -237,13 +238,9 @@ void Foam::moleculeCloud::calculateExternalForce()
 {
     iterator mol(this->begin());
 
-    // Info<< "Warning! Includes dissipation term!" << endl;
-
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
         mol().a() += pot_.gravity();
-
-        // mol().a() += -1.0 * mol().U() /constProps(mol.id()).mass()
     }
 }
 
