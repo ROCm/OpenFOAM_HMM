@@ -382,7 +382,7 @@ void Foam::KinematicCloud<ParcelType>::inject
             pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
                 /this->time().deltaT().value();
 
-            this->injectParcel(td, pPtr);
+            this->injectParcel(pPtr);
          }
     }
 
@@ -397,11 +397,7 @@ void Foam::KinematicCloud<ParcelType>::inject
 
 template<class ParcelType>
 template<class TrackingData>
-void Foam::KinematicCloud<ParcelType>::injectParcel
-(
-    TrackingData& td,
-    ParcelType* p
-)
+void Foam::KinematicCloud<ParcelType>::injectParcel(ParcelType* p)
 {
     addParticle(p);
     nParcelsAdded_++;

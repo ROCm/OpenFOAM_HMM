@@ -239,11 +239,7 @@ protected:
 
         //- Inject parcel if it is valid - delete otherwise
         template<class TrackingData>
-        void injectParcel
-        (
-            TrackingData& td,
-            ParcelType* p
-        );
+        void injectParcel(ParcelType* p);
 
         //- Post-injection checks
         void postInjectCheck();

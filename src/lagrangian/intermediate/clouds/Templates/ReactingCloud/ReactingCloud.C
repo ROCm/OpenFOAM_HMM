@@ -295,7 +295,7 @@ void Foam::ReactingCloud<ParcelType>::inject
             pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
                 /this->db().time().deltaT().value();
 
-            this->injectParcel(td, pPtr);
+            this->injectParcel(pPtr);
          }
     }
 
