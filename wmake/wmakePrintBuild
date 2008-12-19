@@ -37,13 +37,13 @@ usage() {
     cat<<USAGE
 usage: $Script [OPTION]
 options:
-  -check          check git description vs. \$WM_PROJECT_DIR/.build
+  -check          check the git head commit vs. \$WM_PROJECT_DIR/.build
                   (exit code 0 for no changes)
-  -update         update the \$WM_PROJECT_DIR/.build from the git description
+  -update         update the \$WM_PROJECT_DIR/.build from the git information
   -version VER    specify an alternative version
 
 Print the version used when building the project, in this order of precedence:
-  * git description
+  * the git head commit (prefixed with \$WM_PROJECT_VERSION)
   * \$WM_PROJECT_DIR/.build
   * \$WM_PROJECT_VERSION
 
@@ -88,15 +88,20 @@ done
 build="$WM_PROJECT_DIR/.build"
 previous=$(tail -1 $build 2>/dev/null)
 
-# specified a version
 if [ -n "$version" ]
 then
     # specified a version - no error possible
     rc=0
 else
-    # building under git (could use --abbrev=32 for maximum resolution)
-    version=$(git describe --always --tags 2>/dev/null)
+    # building under git (get the head SHA1)
+    version=$(git show-ref --hash=12 --head HEAD 2>/dev/null)
     rc=$?
+
+    # prefix with WM_PROJECT_VERSION
+    if [ $rc -eq 0 ]
+    then
+        version="${WM_PROJECT_VERSION}-$version"
+    fi
 fi
 
 
@@ -130,17 +135,16 @@ then
 fi
 
 
-
 if [ $rc -eq 0 ]
 then
-    # output the git description or -version version
+    # output the git information or the -version version
     echo $version
 elif [ -n "$previous" ]
 then
     # use previous build tag
     echo $previous
 else
-    # fallback to WM_PROJECT_VERSION
+    # fallback to WM_PROJECT_VERSION alone
     echo ${WM_PROJECT_VERSION:-unknown}
 fi
 
