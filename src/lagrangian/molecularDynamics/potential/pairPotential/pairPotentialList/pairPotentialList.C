@@ -192,6 +192,19 @@ const Foam::pairPotential& Foam::pairPotentialList::pairPotentialFunction
 }
 
 
+bool Foam::pairPotentialList::rCutMaxSqr(const scalar rIJMagSqr) const
+{
+    if (rIJMagSqr <= rCutMaxSqr_)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 bool Foam::pairPotentialList::rCutSqr
 (
     const label a,

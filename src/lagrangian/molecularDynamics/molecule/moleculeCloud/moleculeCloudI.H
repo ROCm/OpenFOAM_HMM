@@ -104,31 +104,36 @@ inline void Foam::moleculeCloud::evaluatePair
                 vector rsIsJ =
                 molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
-                scalar rsIsJMag = mag(rsIsJ);
+                scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                scalar chargeI = constPropI.siteCharges()[sI];
+                if(pairPot.rCutMaxSqr(rsIsJMagSq))
+                {
+                    scalar rsIsJMag = mag(rsIsJ);
 
-                scalar chargeJ = constPropJ.siteCharges()[sJ];
+                    scalar chargeI = constPropI.siteCharges()[sI];
 
-                vector fsIsJ = (rsIsJ/rsIsJMag)
-                *chargeI*chargeJ*electrostatic.force(rsIsJMag);
+                    scalar chargeJ = constPropJ.siteCharges()[sJ];
 
-                molI->siteForces()[sI] += fsIsJ;
+                    vector fsIsJ = (rsIsJ/rsIsJMag)
+                    *chargeI*chargeJ*electrostatic.force(rsIsJMag);
 
-                molJ->siteForces()[sJ] += -fsIsJ;
+                    molI->siteForces()[sI] += fsIsJ;
 
-                scalar potentialEnergy = chargeI*chargeJ
-                *electrostatic.energy(rsIsJMag);
+                    molJ->siteForces()[sJ] += -fsIsJ;
 
-                molI->potentialEnergy() += 0.5*potentialEnergy;
+                    scalar potentialEnergy = chargeI*chargeJ
+                    *electrostatic.energy(rsIsJMag);
 
-                molJ->potentialEnergy() += 0.5*potentialEnergy;
+                    molI->potentialEnergy() += 0.5*potentialEnergy;
 
-                // What to do here?
+                    molJ->potentialEnergy() += 0.5*potentialEnergy;
 
-                // molI->rf() += rIJ * fIJ;
+                    // What to do here?
 
-                // molJ->rf() += rIJ * fIJ;
+                    // molI->rf() += rIJ * fIJ;
+
+                    // molJ->rf() += rIJ * fIJ;
+                }
             }
         }
     }
@@ -207,27 +212,31 @@ inline void Foam::moleculeCloud::evaluatePair
                 vector rsRealsRef =
                 molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
 
-                scalar rsRealsRefMag = mag(rsRealsRef);
+                scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                scalar chargeReal = constPropReal.siteCharges()[sReal];
+                if(pairPot.rCutMaxSqr(rsRealsRefMagSq))
+                {
+                    scalar rsRealsRefMag = mag(rsRealsRef);
 
-                scalar chargeRef = constPropRef.siteCharges()[sRef];
+                    scalar chargeReal = constPropReal.siteCharges()[sReal];
 
-                vector fsRealsRef = (rsRealsRef/rsRealsRefMag)
-                *chargeReal*chargeRef
-                *electrostatic.force(rsRealsRefMag);
+                    scalar chargeRef = constPropRef.siteCharges()[sRef];
 
-                molReal->siteForces()[sReal] += fsRealsRef;
+                    vector fsRealsRef = (rsRealsRef/rsRealsRefMag)
+                    *chargeReal*chargeRef
+                    *electrostatic.force(rsRealsRefMag);
 
-                scalar potentialEnergy = chargeReal*chargeRef
-                *electrostatic.energy(rsRealsRefMag);
+                    molReal->siteForces()[sReal] += fsRealsRef;
 
-                molReal->potentialEnergy() += 0.5*potentialEnergy;
+                    scalar potentialEnergy = chargeReal*chargeRef
+                    *electrostatic.energy(rsRealsRefMag);
 
-                // What to do here?
+                    molReal->potentialEnergy() += 0.5*potentialEnergy;
 
-                // molReal->rf() += rRealRef * fRealRef;
+                    // What to do here?
 
+                    // molReal->rf() += rRealRef * fRealRef;
+                }
             }
         }
     }
@@ -326,40 +335,44 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                 vector rsIsJ =
                 molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
-                scalar rsIsJMag = mag(rsIsJ);
+                scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                // Guard against pairPot.energy being evaluated
-                // if rIJMag < SMALL. A floating point exception will
-                // happen otherwise.
-
-                if (rsIsJMag < SMALL)
+                if(pairPot.rCutMaxSqr(rsIsJMagSq))
                 {
-                    WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                    << "Molecule site pair closer than "
-                        << SMALL
-                        << ": mag separation = " << rsIsJMag
-                        << ". These may have been placed on top of each"
-                        << " other by a rounding error in molConfig in"
-                        << " parallel or a block filled with molecules "
-                        << " twice. Removing one of the molecules."
-                        << endl;
+                    scalar rsIsJMag = mag(rsIsJ);
 
-                    return true;
+                    // Guard against pairPot.energy being evaluated
+                    // if rIJMag < SMALL. A floating point exception will
+                    // happen otherwise.
+
+                    if (rsIsJMag < SMALL)
+                    {
+                        WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
+                        << "Molecule site pair closer than "
+                            << SMALL
+                            << ": mag separation = " << rsIsJMag
+                            << ". These may have been placed on top of each"
+                            << " other by a rounding error in molConfig in"
+                            << " parallel or a block filled with molecules "
+                            << " twice. Removing one of the molecules."
+                            << endl;
+
+                        return true;
+                    }
+
+                    scalar chargeI = constPropI.siteCharges()[sI];
+
+                    scalar chargeJ = constPropJ.siteCharges()[sJ];
+
+                    if
+                    (
+                        chargeI*chargeJ*electrostatic.energy(rsIsJMag)
+                        > pot_.potentialEnergyLimit()
+                    )
+                    {
+                        return true;
+                    };
                 }
-
-                scalar chargeI = constPropI.siteCharges()[sI];
-
-                scalar chargeJ = constPropJ.siteCharges()[sJ];
-
-                if
-                (
-                    chargeI*chargeJ*electrostatic.energy(rsIsJMag)
-                  > pot_.potentialEnergyLimit()
-                )
-                {
-                    return true;
-                };
-
             }
         }
     }
@@ -461,40 +474,44 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                 vector rsRealsRef =
                 molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
 
-                scalar rsRealsRefMag = mag(rsRealsRef);
+                scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                // Guard against pairPot.energy being evaluated
-                // if rRealRefMag < SMALL. A floating point exception will
-                // happen otherwise.
-
-                if (rsRealsRefMag < SMALL)
+                if(pairPot.rCutMaxSqr(rsRealsRefMagSq))
                 {
-                    WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                    << "Molecule site pair closer than "
-                        << SMALL
-                        << ": mag separation = " << rsRealsRefMag
-                        << ". These may have been placed on top of each"
-                        << " other by a rounding error in molConfig in"
-                        << " parallel or a block filled with molecules "
-                        << " twice. Removing one of the molecules."
-                        << endl;
+                    scalar rsRealsRefMag = mag(rsRealsRef);
 
-                    return true;
+                    // Guard against pairPot.energy being evaluated
+                    // if rRealRefMag < SMALL. A floating point exception will
+                    // happen otherwise.
+
+                    if (rsRealsRefMag < SMALL)
+                    {
+                        WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
+                        << "Molecule site pair closer than "
+                            << SMALL
+                            << ": mag separation = " << rsRealsRefMag
+                            << ". These may have been placed on top of each"
+                            << " other by a rounding error in molConfig in"
+                            << " parallel or a block filled with molecules "
+                            << " twice. Removing one of the molecules."
+                            << endl;
+
+                        return true;
+                    }
+
+                    scalar chargeReal = constPropReal.siteCharges()[sReal];
+
+                    scalar chargeRef = constPropRef.siteCharges()[sRef];
+
+                    if
+                    (
+                        chargeReal*chargeRef*electrostatic.energy(rsRealsRefMag)
+                        > pot_.potentialEnergyLimit()
+                    )
+                    {
+                        return true;
+                    };
                 }
-
-                scalar chargeReal = constPropReal.siteCharges()[sReal];
-
-                scalar chargeRef = constPropRef.siteCharges()[sRef];
-
-                if
-                (
-                    chargeReal*chargeRef*electrostatic.energy(rsRealsRefMag)
-                  > pot_.potentialEnergyLimit()
-                )
-                {
-                    return true;
-                };
-
             }
         }
     }

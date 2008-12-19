@@ -116,6 +116,8 @@ public:
 
             inline scalar rCutMaxSqr() const;
 
+            bool rCutMaxSqr(scalar rIJMagSqr) const;
+
             const pairPotential& pairPotentialFunction
             (
                 const label a,
