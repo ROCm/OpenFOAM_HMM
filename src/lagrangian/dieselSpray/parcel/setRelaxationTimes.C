@@ -86,6 +86,7 @@ void parcel::setRelaxationTimes
     W = 1.0/W;
 
     scalarField Xf(Nf, 0.0);
+    scalarField Yf(Nf, 0.0);
     scalarField psat(Nf, 0.0);
     scalarField msat(Nf, 0.0);
 
@@ -94,6 +95,7 @@ void parcel::setRelaxationTimes
         label j = sDB.liquidToGasIndex()[i];
         scalar Y = sDB.composition().Y()[j][celli];        
         scalar Wi = sDB.gasProperties()[j].W();
+        Yf[i] = Y;
         Xf[i] = Y*W/Wi;
         psat[i] = fuels.properties()[i].pv(pressure, temperature);
         msat[i] = min(1.0, psat[i]/pressure)*Wi/W;
@@ -116,6 +118,22 @@ void parcel::setRelaxationTimes
     scalar rhoFuelVap = pressureAtSurface*fuels.W(X())/(specie::RR*Tf);
 
     scalarField Xs(sDB.fuels().Xs(pressure, temperature, T(), Xf, X()));
+    scalarField Ys(Nf, 0.0);
+    scalar Wliq = 0.0;
+
+    for(label i=0; i<Nf; i++)
+    {
+        label j = sDB.liquidToGasIndex()[i];
+        scalar Wi = sDB.gasProperties()[j].W();
+        Wliq += Xs[i]*Wi;
+    }
+
+    for(label i=0; i<Nf; i++)
+    {
+        label j = sDB.liquidToGasIndex()[i];
+        scalar Wi = sDB.gasProperties()[j].W();
+        Ys[i] = Xs[i]*Wi/Wliq;
+    }
 
     scalar Reynolds = Re(Up, nuf);
     scalar Prandtl = Pr(cpMixture, muf, kMixture);
@@ -238,7 +256,6 @@ void parcel::setRelaxationTimes
                     dp0 = dp;
                 }
                 
-                label j = sDB.liquidToGasIndex()[i];
                 scalar vapourSurfaceEnthalpy = 0.0;
                 scalar vapourFarEnthalpy = 0.0;
                 
@@ -266,8 +283,6 @@ void parcel::setRelaxationTimes
                     vapourSurfaceEnthalpy,
                     vapourFarEnthalpy,
                     cpMixture,
-                    Xs[i],
-                    Xf[j],
                     temperature,
                     kLiquid
                 );

@@ -815,8 +815,8 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
             }
         }
 
-        triMap.transfer(newToOldTri.shrink());
-        tris.transfer(dynTris.shrink());
+        triMap.transfer(newToOldTri);
+        tris.transfer(dynTris);
     }
 
 
@@ -875,7 +875,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
                 }
             }
 
-            triMap.transfer(newToOldTri.shrink());
+            triMap.transfer(newToOldTri);
             tris.setSize(newTriI);
         }
     }
@@ -1373,7 +1373,17 @@ Foam::isoSurface::isoSurface
     {
         const polyPatch& pp = patches[patchI];
 
-        if (!pp.coupled())
+        if (pp.coupled())
+        {
+            label faceI = pp.start();
+
+            forAll(pp, i)
+            {
+                boundaryRegion[faceI-mesh_.nInternalFaces()] = patchI;
+                faceI++;
+            }
+        }
+        else
         {
             label faceI = pp.start();
 
@@ -1381,12 +1391,13 @@ Foam::isoSurface::isoSurface
             {
                 boundaryRegion[faceI-mesh_.nInternalFaces()] = patchI;
 
-                const face& f = mesh_.faces()[faceI++];
+                const face& f = mesh_.faces()[faceI];
 
                 forAll(f, fp)
                 {
                     isBoundaryPoint.set(f[fp], 1);
                 }
+                faceI++;
             }
         }
     }

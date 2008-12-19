@@ -1,3 +1,3 @@
 callbackTest.C
 
-EXE = $(FOAM_APPBIN)/callbackTest
+EXE = $(FOAM_USER_APPBIN)/callbackTest

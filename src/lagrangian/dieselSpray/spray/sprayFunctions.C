@@ -246,7 +246,23 @@ scalar spray::liquidPenetration
     const scalar prc
 ) const
 {
-    vector ip = injectors_[nozzlei].properties()->position();
+
+    label nHoles = injectors_[nozzlei].properties()->nHoles();
+    vector ip(vector::zero);
+    if (nHoles > 1)
+    {
+        for(label i=0;i<nHoles;i++)
+        {
+            ip += injectors_[nozzlei].properties()->position(i);
+        }
+        ip /= nHoles;
+    }
+    else
+    {
+        ip = injectors_[nozzlei].properties()->position(0);
+    }
+
+//    vector ip = injectors_[nozzlei].properties()->position();
     scalar d = 0.0;
     scalar mTot = 0.0;
 

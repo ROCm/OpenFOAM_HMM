@@ -25,7 +25,6 @@ FoamFile
             diameter        0.00019;
             Cd              0.9;
             mass            6e-06;
-            temperature     320;
             nParcels        5000;
 
             X
@@ -67,6 +66,14 @@ FoamFile
                 (0.00120833 5.1737)
                 (0.00125 3.9213)
             );
+
+            temperatureProfile
+            (
+                (0.0      320.0)
+                (0.00125  320.0)
+            );
+
+
         }
 
         commonRailInjectorProps

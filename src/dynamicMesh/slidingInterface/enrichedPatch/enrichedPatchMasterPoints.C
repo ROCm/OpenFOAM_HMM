@@ -138,11 +138,11 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     forAll (mpfToc, mpfTocI)
     {
         labelList l;
-        l.transfer(mpf.find(mpfToc[mpfTocI])().shrink());
+        l.transfer(mpf.find(mpfToc[mpfTocI])());
 
         masterPointFaceAddr.insert(mpfToc[mpfTocI], l);
     }
-//     Pout << "masterPointFaceAddr: " << masterPointFaceAddr << endl;
+    // Pout<< "masterPointFaceAddr: " << masterPointFaceAddr << endl;
 }
 
 

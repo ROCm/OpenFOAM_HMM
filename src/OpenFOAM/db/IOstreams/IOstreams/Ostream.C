@@ -32,22 +32,22 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Write keyType
-Foam::Ostream& Foam::Ostream::write(const keyType& s)
+// Write keyType
+Foam::Ostream& Foam::Ostream::write(const keyType& kw)
 {
-    // Write as word?
-    if (s.isWildCard())
+    // Write as word or string
+    if (kw.isPattern())
     {
-        return write(static_cast<const string&>(s));
+        return write(static_cast<const string&>(kw));
     }
     else
     {
-        return write(static_cast<const word&>(s));
+        return write(static_cast<const word&>(kw));
     }
 }
 
 
-//- Decrememt the indent level
+// Decrement the indent level
 void Foam::Ostream::decrIndent()
 {
     if (indentLevel_ == 0)
@@ -62,15 +62,26 @@ void Foam::Ostream::decrIndent()
 }
 
 
-// Write the keyword to the Ostream followed by appropriate indentation
-Foam::Ostream& Foam::Ostream::writeKeyword(const Foam::keyType& keyword)
+// Write the keyword followed by appropriate indentation
+Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
     indent();
-    write(keyword);
+    write(kw);
 
-    label nSpaces = max(entryIndentation_ - label(keyword.size()), 1);
+    label nSpaces = entryIndentation_ - label(kw.size());
 
-    for (label i=0; i<nSpaces; i++)
+    // pattern is surrounded by quotes
+    if (kw.isPattern())
+    {
+        nSpaces -= 2;
+    }
+
+    if (nSpaces < 1)
+    {
+        nSpaces = 1;
+    }
+
+    while (nSpaces--)
     {
         write(char(token::SPACE));
     }

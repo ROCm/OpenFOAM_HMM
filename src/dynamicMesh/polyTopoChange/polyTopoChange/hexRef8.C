@@ -1079,8 +1079,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
         }
 
         face newFace;
-        newFace.transfer(newFaceVerts.shrink());
-        newFaceVerts.clear();
+        newFace.transfer(newFaceVerts);
 
         label anchorCell0 = getAnchorCell
         (
@@ -3687,8 +3686,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                     );
 
                     // Convert dynamiclist to face.
-                    newFace.transfer(faceVerts.shrink());
-                    faceVerts.clear();
+                    newFace.transfer(faceVerts);
 
                     //Pout<< "Split face:" << faceI << " verts:" << f
                     //    << " into quad:" << newFace << endl;
@@ -3811,8 +3809,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                     }
 
                     face newFace;
-                    newFace.transfer(newFaceVerts.shrink());
-
+                    newFace.transfer(newFaceVerts);
 
                     // The point with the lowest level should be an anchor
                     // point of the neighbouring cells.
@@ -3993,10 +3990,8 @@ Foam::labelListList Foam::hexRef8::setRefinement
         }
     }
 
-    pointLevel_.transfer(newPointLevel.shrink());
-    newPointLevel.clear();
-    cellLevel_.transfer(newCellLevel.shrink());
-    newCellLevel.clear();
+    pointLevel_.transfer(newPointLevel);
+    cellLevel_.transfer(newCellLevel);
 
     // Mark files as changed
     setInstance(mesh_.facesInstance());

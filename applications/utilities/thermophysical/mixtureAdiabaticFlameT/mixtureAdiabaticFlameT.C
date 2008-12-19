@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Reading Burcat data dictionary" << endl;
 
-    fileName BurcatCpDataFileName(dotFoam("thermoData/BurcatCpData"));
+    fileName BurcatCpDataFileName(findEtcFile("thermoData/BurcatCpData"));
 
     // Construct control dictionary
     IFstream BurcatCpDataFile(BurcatCpDataFileName);

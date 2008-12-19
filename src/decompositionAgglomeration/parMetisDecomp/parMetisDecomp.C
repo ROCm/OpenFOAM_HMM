@@ -794,8 +794,7 @@ Foam::labelList Foam::parMetisDecomp::decompose
         globalRegionRegions.setSize(dynRegionRegions.size());
         forAll(dynRegionRegions, i)
         {
-            globalRegionRegions[i].transfer(dynRegionRegions[i].shrink());
-            dynRegionRegions[i].clear();
+            globalRegionRegions[i].transfer(dynRegionRegions[i]);
         }
     }
 
@@ -859,7 +858,7 @@ Foam::labelList Foam::parMetisDecomp::decompose
     // Check for user supplied weights and decomp options
     if (decompositionDict_.found("metisCoeffs"))
     {
-        const dictionary& metisCoeffs = 
+        const dictionary& metisCoeffs =
             decompositionDict_.subDict("metisCoeffs");
         word weightsFile;
 
