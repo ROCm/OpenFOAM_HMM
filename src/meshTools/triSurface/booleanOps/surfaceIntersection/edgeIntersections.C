@@ -218,14 +218,8 @@ void Foam::edgeIntersections::intersectEdges
 
 
         // Done current edge. Transfer all data into *this
-        currentIntersections.shrink();
-        currentIntersectionTypes.shrink();
-
         operator[](edgeI).transfer(currentIntersections);
         classification_[edgeI].transfer(currentIntersectionTypes);
-
-        currentIntersections.clear();
-        currentIntersectionTypes.clear();
     }
 
     if (debug)
@@ -651,7 +645,7 @@ Foam::label Foam::edgeIntersections::removeDegenerates
                             offsetPerturb
                             (
                                 surf1,
-                                surf2,  
+                                surf2,
                                 edgeI,
                                 rndGen,
                                 points1,

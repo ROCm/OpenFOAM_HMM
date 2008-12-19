@@ -27,8 +27,9 @@ Description
     are constructed in the appropriate order to avoid the use of unconstructed
     data in the global namespace.
 
-    This file gets preprocessed by the Allwmake script to replace
-    PROJECT_VERSION with the appropriate version number string.
+    This file has the extension .ver to force it to be parsed by the script
+    which converts WM_PROJECT_VERSION into the appropriate version number
+    string.
 
 \*---------------------------------------------------------------------------*/
 

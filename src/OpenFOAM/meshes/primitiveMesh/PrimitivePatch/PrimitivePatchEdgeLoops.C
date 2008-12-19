@@ -151,8 +151,6 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops()
         while (currentEdgeI != -1);
 
         // Done all for current loop. Transfer to edgeLoops.
-        loop.shrink();
-
         edgeLoops[loopI].transfer(loop);
 
         loopI++;

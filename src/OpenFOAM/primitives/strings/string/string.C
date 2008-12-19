@@ -202,7 +202,7 @@ Foam::string& Foam::string::expand()
             // otherwise add extra test
             if (user == "OpenFOAM")
             {
-                *this = dotFoam(file);
+                *this = findEtcFile(file);
             }
             else
             {

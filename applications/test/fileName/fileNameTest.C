@@ -32,6 +32,7 @@ Description
 
 #include "fileName.H"
 #include "IOstreams.H"
+#include "OSspecific.H"
 
 using namespace Foam;
 
@@ -57,7 +58,16 @@ int main()
     Info<< "pathName.components() = " << pathName.components() << endl;
     Info<< "pathName.component(2) = " << pathName.component(2) << endl;
 
-    Info<< "end" << endl;
+
+    // test findEtcFile
+    Info<< "\n\nfindEtcFile tests:" << nl
+        << " controlDict => " << findEtcFile("controlDict") << nl
+        << " badName => " << findEtcFile("badName") << endl;
+    Info<< "This should emit a fatal error:" << endl;
+    Info<< " badName(die) => " << findEtcFile("badName", true) << nl
+        << endl;
+
+    Info<< "\nEnd" << endl;
 
     return 0;
 }

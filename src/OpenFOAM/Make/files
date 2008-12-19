@@ -1,5 +1,4 @@
-global/global.C
-
+global/global.Cver
 global/dimensionedConstants/dimensionedConstants.C
 global/argList/argList.C
 global/clock/clock.C
@@ -290,7 +289,6 @@ $(tetCell)/tetCell.C
 
 cellModeller = $(meshShapes)/cellModeller
 $(cellModeller)/cellModeller.C
-$(cellModeller)/cellModellerIO.C
 
 cellModel = $(meshShapes)/cellModel
 $(cellModel)/cellModel.C

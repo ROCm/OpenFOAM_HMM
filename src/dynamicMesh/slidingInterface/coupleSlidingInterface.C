@@ -372,7 +372,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
     // sliding intergace coupling in order to allow the point
     // projection to be done separately from the actual cutting.
     // Please change consistently with slidingInterfaceProjectPoints.C
-    // 
+    //
     if (debug)
     {
         Pout << "Processing slave edges " << endl;
@@ -543,7 +543,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             forAll (curFaces, faceI)
             {
 //                 Pout<< "face: " << curFaces[faceI] << " "
-//                     << masterPatch[curFaces[faceI]] 
+//                     << masterPatch[curFaces[faceI]]
 //                     << " local: "
 //                     << masterPatch.localFaces()[curFaces[faceI]]
 //                     << endl;
@@ -566,7 +566,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             // The edge cutting code is repeated in
             // slidingInterface::modifyMotionPoints.  This is done for
             // efficiency reasons and avoids multiple creation of cutting
-            // planes.  Please update both simultaneously.  
+            // planes.  Please update both simultaneously.
 
             const point& a = projectedSlavePoints[curEdge.start()];
             const point& b = projectedSlavePoints[curEdge.end()];
@@ -623,7 +623,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                         if (slaveCut.hit())
                         {
                             // Strict checking of slave cut to avoid capturing
-                            // end points.  
+                            // end points.
                             scalar cutOnSlave =
                                 (
                                     (
@@ -747,14 +747,14 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
 
     forAll (pointsIntoMasterEdges, i)
     {
-        pime[i].transfer(pointsIntoMasterEdges[i].shrink());
+        pime[i].transfer(pointsIntoMasterEdges[i]);
     }
 
     labelListList pise(pointsIntoSlaveEdges.size());
 
     forAll (pointsIntoSlaveEdges, i)
     {
-        pise[i].transfer(pointsIntoSlaveEdges[i].shrink());
+        pise[i].transfer(pointsIntoSlaveEdges[i]);
     }
 
     // Prepare the enriched faces
@@ -1398,7 +1398,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             }
 
             face newFace;
-            newFace.transfer(newFaceLabels.shrink());
+            newFace.transfer(newFaceLabels);
 
 //             Pout << "Modifying master stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 
@@ -1683,7 +1683,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             }
 
             face newFace;
-            newFace.transfer(newFaceLabels.shrink());
+            newFace.transfer(newFaceLabels);
 
 //             Pout << "Modifying slave stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 

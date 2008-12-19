@@ -449,7 +449,6 @@ void Foam::triSurfaceMesh::findLineAll
                 pt = inter.hitPoint() + smallVec[pointI];
             }
 
-            hits.shrink();
             info[pointI].transfer(hits);
         }
         else

@@ -23,27 +23,88 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "OSspecific.H"
+
+#include "scalar.H"
 #include "IOstreams.H"
-#include "IFstream.H"
-#include "dictionary.H"
+#include "PtrList.H"
 
 using namespace Foam;
+
+class Scalar
+{
+    scalar data_;
+
+public:
+
+    Scalar()
+    :
+        data_(0)
+    {}
+
+    Scalar(scalar val)
+    :
+        data_(val)
+    {}
+
+    ~Scalar()
+    {
+        Info <<"delete Scalar: " << data_ << endl;
+    }
+
+    friend Ostream& operator<<(Ostream& os, const Scalar& val)
+    {
+        os << val.data_;
+        return os;
+    }
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
-    IFstream dictStream("testDict");
-    dictionary testDict(dictStream);
+    PtrList<Scalar> list1(10);
+    PtrList<Scalar> list2(15);
 
-    Info<< testDict << endl;
+    forAll(list1, i)
+    {
+        list1.set(i, new Scalar(1.3*i));
+    }
 
+    forAll(list2, i)
+    {
+        list2.set(i, new Scalar(10 + 1.3*i));
+    }
+
+
+    Info<<"list1: " << list1 << endl;
+    Info<<"list2: " << list2 << endl;
+
+    Info<<"indirectly delete some items via set(.., 0) :" << endl;
+    for (label i = 0; i < 3; i++)
+    {
+        list1.set(i, 0);
+    }
+
+    Info<<"transfer list2 -> list1:" << endl;
+    list1.transfer(list2);
+
+    Info<<"list1: " << list1 << endl;
+    Info<<"list2: " << list2 << endl;
+
+    Info<<"indirectly delete some items via setSize :" << endl;
+    list1.setSize(4);
+
+    Info<<"list1: " << list1 << endl;
+
+    Info<< nl << "Done." << endl;
     return 0;
 }
 

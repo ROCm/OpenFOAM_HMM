@@ -110,7 +110,7 @@ void Foam::enrichedPatch::calcPointPoints() const
 
     forAll (pp, pointI)
     {
-        ppAddr[pointI].transfer(pp[pointI].shrink());
+        ppAddr[pointI].transfer(pp[pointI]);
     }
 }
 

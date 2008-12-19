@@ -23,70 +23,105 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::functionEntries::calcEntry
+    Foam::cylinderToCell
 
 Description
+    A topoSetSource to select cells based on cell centres inside a cylinder.
 
 SourceFiles
-    calcEntry.C
+    cylinderToCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
+#ifndef cylinderToCell_H
+#define cylinderToCell_H
 
-#include "functionEntry.H"
+#include "topoSetSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace functionEntries
-{
 
 /*---------------------------------------------------------------------------*\
-                           Class calcEntry Declaration
+                       Class cylinderToCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class calcEntry
+class cylinderToCell
 :
-    public functionEntry
+    public topoSetSource
 {
+
+    // Private data
+
+        //- Add usage string
+        static addToUsageTable usage_;
+
+        //- First point on cylinder axis
+        vector p1_;
+
+        //- Second point on cylinder axis
+        vector p2_;
+
+        //- Radius
+        scalar radius_;
+
+
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
+        void combine(topoSet& set, const bool add) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("calc");
+    TypeName("cylinderToCell");
+
+
+    // Constructors
+
+        //- Construct from components
+        cylinderToCell
+        (
+            const polyMesh& mesh,
+            const vector& p1,
+            const vector& p2,
+            const scalar radius
+        );
+
+        //- Construct from dictionary
+        cylinderToCell
+        (
+            const polyMesh& mesh,
+            const dictionary& dict
+        );
+
+        //- Construct from Istream
+        cylinderToCell
+        (
+            const polyMesh& mesh,
+            Istream&
+        );
+
+
+    // Destructor
+
+        virtual ~cylinderToCell();
 
 
     // Member Functions
 
-        static bool insert
+        virtual void applyToSet
         (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
-        );
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
-        static bool insert
-        (
-            dictionary& parentDict,
-            Istream& is
-        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace functionEntries
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

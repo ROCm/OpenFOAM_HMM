@@ -133,7 +133,7 @@ void Foam::enrichedPatch::calcCutFaces() const
         // The seed edges include all the edges of the original face + all edges
         // of other faces that have been used in the construction of the
         // facet.  Edges from other faces can be considered as
-        // internal to the current face if used only once.  
+        // internal to the current face if used only once.
 
         // Track the edge usage to avoid duplicate faces and reset it to unused
         boolList usedFaceEdges(curLocalFace.size(), false);
@@ -304,12 +304,12 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                     // Append the face
                     face cutFaceGlobal;
-                    cutFaceGlobal.transfer(cutFaceGlobalPoints.shrink());
+                    cutFaceGlobal.transfer(cutFaceGlobalPoints);
 
                     cf.append(cutFaceGlobal);
 
                     face cutFaceLocal;
-                    cutFaceLocal.transfer(cutFaceLocalPoints.shrink());
+                    cutFaceLocal.transfer(cutFaceLocalPoints);
 //                     Pout << "\ncutFaceLocal: " << cutFaceLocal.points(lp) << endl;
                     // Go through all edges of the cut faces.
                     // If the edge corresponds to a starting face edge,
@@ -358,7 +358,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                             edgeSeeds.append(curCutFaceEdge.reverseEdge());
                         }
                     }
-                            
+
 
                     // Find out what the other side is
 
@@ -596,20 +596,19 @@ void Foam::enrichedPatch::calcCutFaces() const
 
     // Re-pack the list into compact storage
     cutFacesPtr_ = new faceList();
-    cutFacesPtr_->transfer(cf.shrink());
+    cutFacesPtr_->transfer(cf);
 
     cutFaceMasterPtr_ = new labelList();
-    cutFaceMasterPtr_->transfer(cfMaster.shrink());
+    cutFaceMasterPtr_->transfer(cfMaster);
 
     cutFaceSlavePtr_ = new labelList();
-    cutFaceSlavePtr_->transfer(cfSlave.shrink());
+    cutFaceSlavePtr_->transfer(cfSlave);
 }
 
 
 void Foam::enrichedPatch::clearCutFaces()
 {
     deleteDemandDrivenData(cutFacesPtr_);
-
     deleteDemandDrivenData(cutFaceMasterPtr_);
     deleteDemandDrivenData(cutFaceSlavePtr_);
 }

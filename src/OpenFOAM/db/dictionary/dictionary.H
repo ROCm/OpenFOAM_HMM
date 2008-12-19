@@ -27,12 +27,12 @@ Class
 
 Description
     A list of keyword definitions, which are a keyword followed by any number
-    of values (e.g. words and numbers). The keywords can represent wildcards
+    of values (e.g. words and numbers). The keywords can represent patterns
     which are matched using Posix regular expressions. The general order for
-    searching is
+    searching is as follows:
     - exact match
-    - wildcard match (in reverse order)
-    - optional recursion into subdictionaries
+    - pattern match (in reverse order)
+    - optional recursion into the enclosing (parent) dictionaries
 
     The dictionary class is the base class for IOdictionary.
     It also serves as a bootstrap dictionary for the objectRegistry data
@@ -92,29 +92,27 @@ class dictionary
         //- Parent dictionary
         const dictionary& parent_;
 
-        //- Wildcard entries
-        DLList<entry*> wildCardEntries_;
+        //- Entries of matching patterns
+        DLList<entry*> patternEntries_;
 
-        //- Wildcard precompiled regular expressions
-        DLList<autoPtr<regExp> > wildCardRegexps_;
+        //- Patterns as precompiled regular expressions
+        DLList<autoPtr<regExp> > patternRegexps_;
 
    // Private Member Functions
 
-        //- Search wildcard table either for exact match or for regular
-        //  expression match.
-        bool findInWildcards
+        //- Search patterns table for exact match or regular expression match
+        bool findInPatterns
         (
-            const bool wildCardMatch,
+            const bool patternMatch,
             const word& Keyword,
             DLList<entry*>::const_iterator& wcLink,
             DLList<autoPtr<regExp> >::const_iterator& reLink
         ) const;
 
-        //- Search wildcard table either for exact match or for regular
-        //  expression match.
-        bool findInWildcards
+        //- Search patterns table for exact match or regular expression match
+        bool findInPatterns
         (
-            const bool wildCardMatch,
+            const bool patternMatch,
             const word& Keyword,
             DLList<entry*>::iterator& wcLink,
             DLList<autoPtr<regExp> >::iterator& reLink
@@ -210,83 +208,88 @@ public:
         // Search and lookup
 
             //- Search dictionary for given keyword
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries
             bool found(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
-            //  If recursive search parent dictionaries.
-            //  If wildCardMatch use wildcards.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions
             const entry* lookupEntryPtr
             (
                 const word&,
                 bool recursive,
-                bool wildCardMatch
+                bool patternMatch
             ) const;
 
             //- Find and return an entry data stream pointer for manipulation
             //  if present otherwise return NULL.
-            //  If recursive search parent dictionaries.
-            //  If wildCardMatch use wildcards.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             entry* lookupEntryPtr
             (
                 const word&,
                 bool recursive,
-                bool wildCardMatch
+                bool patternMatch
             );
 
             //- Find and return an entry data stream if present otherwise error.
-            //  If recursive search parent dictionaries.
-            //  If wildCardMatch use wildcards.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             const entry& lookupEntry
             (
                 const word&,
                 bool recursive,
-                bool wildCardMatch
+                bool patternMatch
             ) const;
 
             //- Find and return an entry data stream
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             ITstream& lookup
             (
                 const word&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             ) const;
 
             //- Find and return a T,
             //  if not found return the given default value
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             template<class T>
             T lookupOrDefault
             (
                 const word&,
                 const T&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             ) const;
 
             //- Find and return a T, if not found return the given
             //  default value, and add to dictionary.
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             template<class T>
             T lookupOrAddDefault
             (
                 const word&,
                 const T&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             );
 
             //- Find an entry if present, and assign to T
-            //  Returns true if the entry was found
+            //  Returns true if the entry was found.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             template<class T>
             bool readIfPresent
             (
                 const word&,
                 T&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             ) const;
 
             //- Check if entry is a sub-dictionary
@@ -304,6 +307,9 @@ public:
 
             //- Return the table of contents
             wordList toc() const;
+
+            //- Return the list of available keys or patterns
+            List<keyType> keys(bool patterns=false) const;
 
         // Editing
 
@@ -393,7 +399,7 @@ public:
         void operator=(const dictionary&);
 
         //- Include entries from the given dictionary.
-        //  Warn, but do not overwrite existing entries
+        //  Warn, but do not overwrite existing entries.
         void operator+=(const dictionary&);
 
         //- Conditionally include entries from the given dictionary.
@@ -417,13 +423,13 @@ public:
 
 // Global Operators
 
-//- Combine dictionaries starting from the entries in dict1 and then including
-//  those from dict2.
+//- Combine dictionaries.
+//  Starting from the entries in dict1 and then including those from dict2.
 //  Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
 
-//- Combine dictionaries starting from the entries in dict1 and then including
-//  those from dict2.
+//- Combine dictionaries.
+//  Starting from the entries in dict1 and then including those from dict2.
 //  Do not overwrite the entries from dict1.
 dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 
