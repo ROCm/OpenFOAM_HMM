@@ -1,6 +1,9 @@
-    surfaceScalarField muf =
+    surfaceScalarField muf
+    (
+        "muf",
         twoPhaseProperties->muf()
-      + fvc::interpolate(rho*turbulence->nut());
+      + fvc::interpolate(rho*turbulence->nut())
+    );
 
     fvVectorMatrix UEqn
     (
