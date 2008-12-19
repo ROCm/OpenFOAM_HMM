@@ -1,6 +1,6 @@
-    surfaceScalarField muf
+    surfaceScalarField muEff
     (
-        "muf",
+        "muEff",
         twoPhaseProperties.muf()
       + fvc::interpolate(rho*turbulence->nut())
     );
@@ -9,8 +9,8 @@
     (
         fvm::ddt(rho, U)
       + fvm::div(rhoPhi, U)
-      - fvm::laplacian(muf, U)
-      - (fvc::grad(U) & fvc::grad(muf))
+      - fvm::laplacian(muEff, U)
+      - (fvc::grad(U) & fvc::grad(muEff))
     //- fvc::div(muf*(mesh.Sf() & fvc::interpolate(fvc::grad(U)().T())))
     );
 
