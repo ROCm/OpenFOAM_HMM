@@ -1,0 +1,95 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     wmakePrintBuild
+#
+# Description
+#     Print the version used when building the project.
+#
+#------------------------------------------------------------------------------
+Script=${0##*/}
+
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+usage: $Script
+
+Print the version used when building the project, in this order of precedence:
+  * git description
+  * \$WM_PROJECT_DIR/.build
+  * \$WM_PROJECT_VERSION
+
+USAGE
+    exit 1
+}
+#------------------------------------------------------------------------------
+
+# provide immediate help
+if [ "$1" = "-h" -o "$1" = "-help" ]
+then
+    usage
+fi
+
+#------------------------------------------------------------------------------
+
+#
+# persistent build tag
+#
+build="$WM_PROJECT_DIR/.build"
+previous=$(tail -1 $build 2>/dev/null)
+
+#
+# building under git
+# note: could also use --abbrev=32 for maximum resolution
+#
+version=$(git describe --always --tags 2>/dev/null)
+if [ $? -eq 0 ]
+then
+    # update persistent build tag (this could be made optional or removed)
+    if [ "$version" != "$previous" ]
+    then
+        if [ -w "$build" -a \( -w "$WM_PROJECT_DIR" -o ! -e "$build" \) ]
+        then
+            echo $version >| "$build" 2>/dev/null
+        fi
+    fi
+
+    echo $version
+
+elif [ -n "$previous" ]
+then
+
+    # use previous build tag
+    echo $previous
+
+else
+
+    # fallback to WM_PROJECT_VERSION
+    echo ${WM_PROJECT_VERSION:-unknown}
+
+fi
+
+#------------------------------------------------------------------------------
