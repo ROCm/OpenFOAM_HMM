@@ -94,7 +94,7 @@ then
     rc=0
 else
     # building under git (get the head SHA1)
-    version=$(git show-ref --hash=12 --head HEAD 2>/dev/null)
+    version=$(git show-ref --hash=12 --head refs/heads/master 2>/dev/null)
     rc=$?
 
     # prefix with WM_PROJECT_VERSION
