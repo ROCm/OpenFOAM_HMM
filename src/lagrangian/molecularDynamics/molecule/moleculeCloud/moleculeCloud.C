@@ -482,68 +482,71 @@ Foam::moleculeCloud::moleculeCloud
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const Cloud<molecule>& cloud = *this;
 
-    vector position1 = vector(0.4e-9,0,0.3e-9);
+    if(Pstream::master())
+    {
+        vector position1 = vector(-2.4e-9,0,0.3e-9);
 
-    addParticle
-    (
-        new molecule
+        addParticle
         (
-            cloud,
-            position1,
-            mesh_.findCell(position1),
-            tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
-            vector(-5, 5, 5),
-            vector::zero,
-            vector(1e-36, -1.2e-35, -3.7e-35),
-            vector::zero,
-            vector::zero,
-            constProps(0),
-            0,
-            0
-        )
-    );
+            new molecule
+            (
+                cloud,
+                position1,
+                mesh_.findCell(position1),
+                tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
+                vector(-405, 5, 5),
+                vector::zero,
+                vector(1e-36, -1.2e-35, -3.7e-35),
+                vector::zero,
+                vector::zero,
+                constProps(0),
+                0,
+                0
+            )
+        );
 
-    vector position2 = vector(-0.35e-9,0,-0.4e-9);
+        vector position2 = vector(-2.35e-9,0,-0.4e-9);
 
-    addParticle
-    (
-        new molecule
+        addParticle
         (
-            cloud,
-            position2,
-            mesh_.findCell(position2),
-            tensor(0, 0, 1, 0, 1, 0, -1, 0, 0),
-            vector(-4,-3.7,-5),
-            vector::zero,
-            vector(-2.1e-35, 1.4e-35, 2e-36),
-            vector::zero,
-            vector::zero,
-            constProps(1),
-            0,
-            1
-        )
-    );
+            new molecule
+            (
+                cloud,
+                position2,
+                mesh_.findCell(position2),
+                tensor(0, 0, 1, 0, 1, 0, -1, 0, 0),
+                vector(396,-3.7,-5),
+                vector::zero,
+                vector(-2.1e-35, 1.4e-35, 2e-36),
+                vector::zero,
+                vector::zero,
+                constProps(1),
+                0,
+                1
+            )
+        );
 
-    // vector position3 = vector(0,0.52e-9,0);
+        vector position3 = vector(-2e-9,0.52e-9,0);
 
-    // addParticle
-    // (
-    //     new molecule
-    //     (
-    //         cloud,
-    //         position3,
-    //         mesh_.findCell(position2),
-    //         tensor(-1, 0, 0, 0, 1, 0, 0, 0, -1),
-    //         vector(3.2, 1, -2),
-    //         vector::zero,
-    //         vector(4e-36, 1e-35, -1.3e-35),
-    //         vector::zero,
-    //         vector::zero,
-    //         constProps(1),
-    //         0,
-    //         1
-    //     )
-    // );
+        addParticle
+        (
+            new molecule
+            (
+                cloud,
+                position3,
+                mesh_.findCell(position2),
+                tensor(-1, 0, 0, 0, 1, 0, 0, 0, -1),
+                vector(403.2, 1, -2),
+                vector::zero,
+                vector(4e-36, 1e-35, -1.3e-35),
+                vector::zero,
+                vector::zero,
+                constProps(1),
+                0,
+                1
+            )
+        );
+    }
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

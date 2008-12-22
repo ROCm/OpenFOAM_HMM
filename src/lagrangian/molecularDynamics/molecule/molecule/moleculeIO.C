@@ -37,23 +37,20 @@ Foam::molecule::molecule
     bool readFields
 )
 :
-    Particle<molecule>(cloud, is),
+    Particle<molecule>(cloud, is, true),
     Q_(tensor::zero),
     v_(vector::zero),
     a_(vector::zero),
     pi_(vector::zero),
     tau_(vector::zero),
-    siteForces_(List<vector>(0,vector::zero)),
-    sitePositions_(List<vector>(0,vector::zero)),
     specialPosition_(vector::zero),
     potentialEnergy_(0.0),
     rf_(tensor::zero),
     special_(0),
-    id_(0)
+    id_(0),
+    siteForces_(0),
+    sitePositions_(0)
 {
-    Info<< "Set sizes of siteForces_ and sitePositions_ "
-        << "from molCloud reference if possible" << endl;
-
     if (readFields)
     {
         if (is.format() == IOstream::ASCII)
@@ -73,6 +70,8 @@ Foam::molecule::molecule
         }
         else
         {
+            Pout<< "Binary readfields." << endl;
+
             is.read
             (
                 reinterpret_cast<char*>(&Q_),
@@ -81,13 +80,14 @@ Foam::molecule::molecule
                 + sizeof(a_)
                 + sizeof(pi_)
                 + sizeof(tau_)
-                + sizeof(siteForces_)
-                + sizeof(sitePositions_)
                 + sizeof(specialPosition_)
+                + sizeof(potentialEnergy_)
                 + sizeof(rf_)
                 + sizeof(special_)
                 + sizeof(id_)
             );
+
+            is >> siteForces_ >> sitePositions_;
         }
     }
 
@@ -212,13 +212,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
             << token::SPACE << mol.a_
             << token::SPACE << mol.pi_
             << token::SPACE << mol.tau_
-            << token::SPACE << mol.siteForces_
-            << token::SPACE << mol.sitePositions_
             << token::SPACE << mol.specialPosition_
             << token::SPACE << mol.potentialEnergy_
             << token::SPACE << mol.rf_
             << token::SPACE << mol.special_
-            << token::SPACE << mol.id_;
+            << token::SPACE << mol.id_
+            << token::SPACE << mol.siteForces_
+            << token::SPACE << mol.sitePositions_;
     }
     else
     {
@@ -231,14 +231,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
             + sizeof(mol.a_)
             + sizeof(mol.pi_)
             + sizeof(mol.tau_)
-            + sizeof(mol.siteForces_)
-            + sizeof(mol.sitePositions_)
             + sizeof(mol.specialPosition_)
             + sizeof(mol.potentialEnergy_)
             + sizeof(mol.rf_)
             + sizeof(mol.special_)
             + sizeof(mol.id_)
         );
+        os << mol.siteForces_ << mol.sitePositions_;
     }
 
     // Check state of Ostream

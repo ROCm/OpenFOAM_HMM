@@ -50,6 +50,8 @@ scalar singleStepTotalrDotf = 0.0;
 
 vector singleStepCentreOfMass(vector::zero);
 
+label singleStepNMols = molecules.size();
+
 {
     IDLList<molecule>::iterator mol(molecules.begin());
 
@@ -69,7 +71,10 @@ vector singleStepCentreOfMass(vector::zero);
         singleStepCentreOfMass += mol().position()*molMass;
     }
 
-    singleStepCentreOfMass /= singleStepTotalMass;
+    if(singleStepNMols)
+    {
+        singleStepCentreOfMass /= singleStepTotalMass;
+    }
 
     for
     (
@@ -109,8 +114,6 @@ vector singleStepCentreOfMass(vector::zero);
         singleStepTotalrDotf += tr(mol().rf());
     }
 }
-
-label singleStepNMols = molecules.size();
 
 if (Pstream::parRun())
 {

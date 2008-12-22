@@ -276,7 +276,7 @@ Foam::directInteractionList::directInteractionList
     {
         buildDirectInteractionList(pointPointListBuild);
     }
-    else
+    else if((*this).size() == 1)
     {
         Info<< nl
             << "Single cell mesh, no direct interaction lists required."

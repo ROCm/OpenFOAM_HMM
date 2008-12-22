@@ -187,10 +187,6 @@ private:
 
         vector tau_;
 
-        List<vector> siteForces_;
-
-        List<vector> sitePositions_;
-
         vector specialPosition_;
 
         scalar potentialEnergy_;
@@ -201,6 +197,10 @@ private:
         label special_;
 
         label id_;
+
+        List<vector> siteForces_;
+
+        List<vector> sitePositions_;
 
     // Private Member Functions
 

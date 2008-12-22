@@ -175,13 +175,13 @@ inline Foam::molecule::molecule
     a_(a),
     pi_(pi),
     tau_(tau),
-    siteForces_(constProps.nSites(), vector::zero),
-    sitePositions_(constProps.nSites()),
     specialPosition_(specialPosition),
     potentialEnergy_(0.0),
     rf_(tensor::zero),
     special_(special),
-    id_(id)
+    id_(id),
+    siteForces_(constProps.nSites(), vector::zero),
+    sitePositions_(constProps.nSites())
 {
     setSitePositions(constProps);
 }
