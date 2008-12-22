@@ -298,7 +298,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
 
     forAll (faceFaces, faceI)
     {
-        faceFaces[faceI].transfer(ff[faceI].shrink());
+        faceFaces[faceI].transfer(ff[faceI]);
     }
 
 

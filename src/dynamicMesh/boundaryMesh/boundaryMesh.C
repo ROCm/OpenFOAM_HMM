@@ -1503,17 +1503,13 @@ void Foam::boundaryMesh::setExtraEdges(const label edgeI)
 {
     labelList minDistance(mesh().nEdges(), -1);
 
-   // All edge labels encountered
-
+    // All edge labels encountered
     DynamicList<label> visitedEdges;
 
     // Floodfill from edgeI starting from distance 0. Stop at distance.
     markEdges(8, edgeI, 0, minDistance, visitedEdges);
 
-    visitedEdges.shrink();
-
     // Set edge labels to display
-    //? Allowed to transfer from DynamicList to List
     extraEdges_.transfer(visitedEdges);
 }
 

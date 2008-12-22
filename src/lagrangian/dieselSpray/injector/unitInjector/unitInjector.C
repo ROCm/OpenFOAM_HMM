@@ -60,17 +60,32 @@ Foam::unitInjector::unitInjector
     d_(readScalar(propsDict_.lookup("diameter"))),
     Cd_(readScalar(propsDict_.lookup("Cd"))),
     mass_(readScalar(propsDict_.lookup("mass"))),
-    T_(readScalar(propsDict_.lookup("temperature"))),
     nParcels_(readLabel(propsDict_.lookup("nParcels"))),
     X_(propsDict_.lookup("X")),
     massFlowRateProfile_(propsDict_.lookup("massFlowRateProfile")),
     velocityProfile_(massFlowRateProfile_),
     injectionPressureProfile_(massFlowRateProfile_),
     CdProfile_(massFlowRateProfile_),
-    TProfile_(massFlowRateProfile_),
+    TProfile_(propsDict_.lookup("temperatureProfile")),
     averageParcelMass_(mass_/nParcels_),
     pressureIndependentVelocity_(true)
 {
+
+    // check if time entries for soi and eoi match
+    if (mag(massFlowRateProfile_[0][0]-TProfile_[0][0]) > SMALL)
+    {
+        FatalError << "unitInjector::unitInjector(const time& t, const dictionary dict) " << endl
+            << " start-times do not match for TemperatureProfile and massFlowRateProfile."
+            << abort(FatalError);
+    }
+
+    if (mag(massFlowRateProfile_[massFlowRateProfile_.size()-1][0]-TProfile_[TProfile_.size()-1][0]) > SMALL)
+    {
+        FatalError << "unitInjector::unitInjector(const time& t, const dictionary dict) " << endl
+            << " end-times do not match for TemperatureProfile and massFlowRateProfile."
+            << abort(FatalError);
+    }
+
     // convert CA to real time
     forAll(massFlowRateProfile_, i)
     {
@@ -79,6 +94,11 @@ Foam::unitInjector::unitInjector
         injectionPressureProfile_[i][0] = massFlowRateProfile_[i][0];
     }
     
+    forAll(TProfile_, i)
+    {
+        TProfile_[i][0] = t.userTimeToTime(TProfile_[i][0]);
+    }
+
     scalar integratedMFR = integrateTable(massFlowRateProfile_);
 
     forAll(massFlowRateProfile_, i)
@@ -86,9 +106,6 @@ Foam::unitInjector::unitInjector
         // correct the massFlowRateProfile to match the injected mass
         massFlowRateProfile_[i][1] *= mass_/integratedMFR;
         
-        TProfile_[i][0] = massFlowRateProfile_[i][0];
-        TProfile_[i][1] = T_;
-
         CdProfile_[i][0] = massFlowRateProfile_[i][0];
         CdProfile_[i][1] = Cd_;
     }
@@ -159,13 +176,14 @@ Foam::label Foam::unitInjector::nParcelsToInject
     return nParcels;
 }
 
-const Foam::vector Foam::unitInjector::position() const
+const Foam::vector Foam::unitInjector::position(const label n) const
 {
     return position_;
 }
 
 Foam::vector Foam::unitInjector::position
 (
+    const label n,
     const scalar time,
     const bool twoD,
     const scalar angleOfWedge,
@@ -208,12 +226,21 @@ Foam::vector Foam::unitInjector::position
     return position_;
 }
 
+Foam::label Foam::unitInjector::nHoles() const
+{
+    return 1;
+}
+
 Foam::scalar Foam::unitInjector::d() const
 {
     return d_;
 }
 
-const Foam::vector& Foam::unitInjector::direction() const
+const Foam::vector& Foam::unitInjector::direction
+(
+    const label i,
+    const scalar time
+) const
 {
     return direction_;
 }
@@ -254,7 +281,7 @@ Foam::List<Foam::unitInjector::pair> Foam::unitInjector::T() const
 
 Foam::scalar Foam::unitInjector::T(const scalar time) const
 {
-    return T_;
+    return getTableValue(TProfile_, time);
 }
 
 Foam::scalar Foam::unitInjector::tsoi() const
@@ -328,14 +355,24 @@ void Foam::unitInjector::correctProfiles
     scalar A = 0.25*mathematicalConstant::pi*pow(d_, 2.0);
     scalar pDummy = 1.0e+5;
 
-    scalar rho = fuel.rho(pDummy, T_, X_);
-
     forAll(velocityProfile_, i)
     {
+        scalar time = velocityProfile_[i][0];
+        scalar rho = fuel.rho(pDummy, T(time), X_);
         scalar v = massFlowRateProfile_[i][1]/(Cd_*rho*A);
         velocityProfile_[i][1] = v;
         injectionPressureProfile_[i][1] = referencePressure + 0.5*rho*v*v;
     }
+}
+
+Foam::vector Foam::unitInjector::tan1(const label n) const
+{
+    return tangentialInjectionVector1_;
+}
+
+Foam::vector Foam::unitInjector::tan2(const label n) const
+{
+    return tangentialInjectionVector2_;
 }
 
 // ************************************************************************* //

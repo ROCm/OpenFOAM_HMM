@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class OSstream Declaration
+                          Class OSstream Declaration
 \*---------------------------------------------------------------------------*/
 
 class OSstream
@@ -162,20 +162,20 @@ public:
             //- Flush stream
             virtual void flush();
 
-            //- Add '\n' and flush stream
+            //- Add newline and flush stream
             virtual void endl();
 
             //- Get width of output field
             virtual int width() const;
 
             //- Set width of output field (and return old width)
-            virtual int width(const int w);
+            virtual int width(const int);
 
             //- Get precision of output field
             virtual int precision() const;
 
             //- Set precision of output field (and return old precision)
-            virtual int precision(const int p);
+            virtual int precision(const int);
 
 
         // Print

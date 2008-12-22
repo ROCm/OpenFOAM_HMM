@@ -815,8 +815,8 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
             }
         }
 
-        triMap.transfer(newToOldTri.shrink());
-        tris.transfer(dynTris.shrink());
+        triMap.transfer(newToOldTri);
+        tris.transfer(dynTris);
     }
 
 
@@ -875,7 +875,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
                 }
             }
 
-            triMap.transfer(newToOldTri.shrink());
+            triMap.transfer(newToOldTri);
             tris.setSize(newTriI);
         }
     }

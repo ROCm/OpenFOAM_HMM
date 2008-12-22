@@ -34,7 +34,7 @@ Description
     Used as a base class for word and fileName.
 
 See Also
-    Foam::dotFoam() for information about the site/user OpenFOAM
+    Foam::findEtcFile() for information about the site/user OpenFOAM
     configuration directory
 
 SourceFiles
@@ -176,7 +176,7 @@ public:
             //     - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
             //
             //  @sa
-            //  Foam::dotFoam
+            //  Foam::findEtcFile
             string& expand();
 
             //- Remove repeated characters returning true if string changed

@@ -269,8 +269,8 @@ void Foam::MULES::implicitSolve
         }
         else
         {
-            Info<< "max(" + psi.name() + " - 1 = " << maxPsiM1 << endl;
-            Info<< "min(" + psi.name() + ") = " << minPsi << endl;
+            Info<< "MULES: max(" << psi.name() << " - 1) = " << maxPsiM1
+                << " min(" << psi.name() << ") = " << minPsi << endl;
 
             phiBD = psiConvectionDiffusion.flux();
 

@@ -1,7 +1,7 @@
 {
     if (nOuterCorr == 1)
     {
-        p = 
+        p =
         (
             rho
           - (1.0 - gamma)*rhol0
@@ -37,7 +37,14 @@
           - fvm::laplacian(rUAf, p)
         );
 
-        pEqn.solve();
+        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
+        {
+            pEqn.solve(mesh.solver(p.name() + "Final"));
+        }
+        else
+        {
+            pEqn.solve(mesh.solver(p.name()));
+        }
 
         if (nonOrth == nNonOrthCorr)
         {

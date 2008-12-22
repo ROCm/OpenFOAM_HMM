@@ -117,8 +117,6 @@ scalar saturateEvaporationModel::boilingTime
     const scalar, 
     const scalar, 
     const scalar, 
-    const scalar, 
-    const scalar, 
     const scalar 
 ) const
 {

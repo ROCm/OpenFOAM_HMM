@@ -112,7 +112,22 @@ void blobsSheetAtomization::atomizeParcel
     const injectorType& it =
         spray_.injectors()[label(p.injector())].properties();
 
-    const vector itPosition = it.position();
+    vector itPosition(vector::zero);
+    label nHoles = it.nHoles();
+    if (nHoles > 1)
+    {
+        for(label i=0; i<nHoles;i++)
+        {
+            itPosition += it.position(i);
+        }
+        itPosition /= nHoles;
+    }
+    else
+    {
+        itPosition = it.position(0);
+    }
+//    const vector itPosition = it.position();
+
 
     scalar lBU = B_ * sqrt
     (

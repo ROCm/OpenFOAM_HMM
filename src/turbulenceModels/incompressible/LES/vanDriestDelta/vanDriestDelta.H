@@ -61,6 +61,7 @@ class vanDriestDelta
         scalar kappa_;
         scalar Aplus_;
         scalar Cdelta_;
+        label calcInterval_;
 
 
     // Private Member Functions

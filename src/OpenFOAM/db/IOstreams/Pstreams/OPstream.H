@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class OPstream Declaration
+                          Class OPstream Declaration
 \*---------------------------------------------------------------------------*/
 
 class OPstream
@@ -160,7 +160,7 @@ public:
             void flush()
             {}
 
-            //- Add '\n' and flush stream
+            //- Add newline and flush stream
             void endl()
             {}
 
