@@ -289,7 +289,6 @@ $(tetCell)/tetCell.C
 
 cellModeller = $(meshShapes)/cellModeller
 $(cellModeller)/cellModeller.C
-$(cellModeller)/cellModellerIO.C
 
 cellModel = $(meshShapes)/cellModel
 $(cellModel)/cellModel.C

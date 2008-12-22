@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class UDictionary Declaration
+                         Class UDictionary Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>

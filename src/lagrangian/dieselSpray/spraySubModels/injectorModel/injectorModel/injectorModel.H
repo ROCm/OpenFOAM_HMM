@@ -118,6 +118,7 @@ public:
         virtual vector direction
         (
             const label injector, 
+            const label hole,
             const scalar time,
             const scalar d
         ) const = 0;

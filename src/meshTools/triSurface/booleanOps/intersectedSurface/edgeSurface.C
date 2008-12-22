@@ -287,18 +287,12 @@ Foam::edgeSurface::edgeSurface
     }
 
     // Transfer.
-    allEdges.shrink();
     edges_.transfer(allEdges);
-
-    allParentEdges.shrink();
     parentEdges_.transfer(allParentEdges);
 
     forAll(allFaceEdges, faceI)
     {
-        DynamicList<label>& allFEdges = allFaceEdges[faceI];
-
-        allFEdges.shrink();
-        faceEdges_[faceI].transfer(allFEdges);
+        faceEdges_[faceI].transfer(allFaceEdges[faceI]);
     }
 
 

@@ -31,13 +31,22 @@ License
 template<class Stream>
 inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
 {
-    static bool spacesSet = false;
+    static bool spacesSet(false);
     static char spaces[40];
 
     if (!spacesSet)
     {
         memset(spaces, ' ', 40);
-        spaces[38 - strlen(Foam::FOAMversion)] = '\0';
+
+        size_t len = strlen(Foam::FOAMversion);
+        if (len < 38)
+        {
+            spaces[38 - len] = '\0';
+        }
+        else
+        {
+            spaces[0] = '\0';
+        }
         spacesSet = true;
     }
 
@@ -56,8 +65,8 @@ inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
         "| =========                 |                                                 |\n"
         "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
         "|  \\\\    /   O peration     | Version:  " << FOAMversion << spaces << "|\n"
-        "|   \\\\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n"
-        "|    \\\\/     M anipulation  |                                                 |\n"
+        "|   \\\\  /    A nd           |                                                 |\n"
+        "|    \\\\/     M anipulation  |                                www.OpenFOAM.org |\n"
         "\\*---------------------------------------------------------------------------*/\n";
 }
 

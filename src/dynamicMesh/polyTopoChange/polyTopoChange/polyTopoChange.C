@@ -1964,19 +1964,13 @@ void Foam::polyTopoChange::compactAndReorder
 
     // Clear inflation info
     {
-        faceFromPoint_.clear();
-        faceFromPoint_.resize(0);
-        faceFromEdge_.clear();
-        faceFromEdge_.resize(0);
+        faceFromPoint_.clearStorage();
+        faceFromEdge_.clearStorage();
 
-        cellFromPoint_.clear();
-        cellFromPoint_.resize(0);
-        cellFromEdge_.clear();
-        cellFromEdge_.resize(0);
-        cellFromFace_.clear();
-        cellFromFace_.resize(0);
+        cellFromPoint_.clearStorage();
+        cellFromEdge_.clearStorage();
+        cellFromFace_.clearStorage();
     }
-
 
 
     const polyBoundaryMesh& boundary = mesh.boundaryMesh();
@@ -2092,10 +2086,8 @@ void Foam::polyTopoChange::clear()
     points_.clearStorage();
     pointMap_.clearStorage();
     reversePointMap_.clearStorage();
-    pointZone_.clear();
-    pointZone_.resize(0);
-    retiredPoints_.clear();
-    retiredPoints_.resize(0);
+    pointZone_.clearStorage();
+    retiredPoints_.clearStorage();
 
     faces_.clearStorage();
     region_.clearStorage();
@@ -2103,27 +2095,19 @@ void Foam::polyTopoChange::clear()
     faceNeighbour_.clearStorage();
     faceMap_.clearStorage();
     reverseFaceMap_.clearStorage();
-    faceFromPoint_.clear();
-    faceFromPoint_.resize(0);
-    faceFromEdge_.clear();
-    faceFromEdge_.resize(0);
-    flipFaceFlux_.clear();
-    flipFaceFlux_.resize(0);
-    faceZone_.clear();
-    faceZone_.resize(0);
-    faceZoneFlip_.clear();
-    faceZoneFlip_.resize(0);
+    faceFromPoint_.clearStorage();
+    faceFromEdge_.clearStorage();
+    flipFaceFlux_.clearStorage();
+    faceZone_.clearStorage();
+    faceZoneFlip_.clearStorage();
     nActiveFaces_ = 0;
 
     cellMap_.clearStorage();
     reverseCellMap_.clearStorage();
     cellZone_.clearStorage();
-    cellFromPoint_.clear();
-    cellFromPoint_.resize(0);
-    cellFromEdge_.clear();
-    cellFromEdge_.resize(0);
-    cellFromFace_.clear();
-    cellFromFace_.resize(0);
+    cellFromPoint_.clearStorage();
+    cellFromEdge_.clearStorage();
+    cellFromFace_.clearStorage();
 }
 
 
@@ -2996,8 +2980,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
     // Clear out primitives
     {
-        retiredPoints_.clear();
-        retiredPoints_.resize(0);
+        retiredPoints_.clearStorage();
         region_.clearStorage();
     }
 
@@ -3053,15 +3036,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
     // Clear zone info
     {
-        pointZone_.clear();
-        pointZone_.resize(0);
-
-        faceZone_.clear();
-        faceZone_.resize(0);
-
-        faceZoneFlip_.clear();
-        faceZoneFlip_.resize(0);
-
+        pointZone_.clearStorage();
+        faceZone_.clearStorage();
+        faceZoneFlip_.clearStorage();
         cellZone_.clearStorage();
     }
 
@@ -3227,8 +3204,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     // Clear out primitives
     {
-        retiredPoints_.clear();
-        retiredPoints_.resize(0);
+        retiredPoints_.clearStorage();
         region_.clearStorage();
     }
 
@@ -3346,16 +3322,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     // Clear zone info
     {
-        pointZone_.clear();
-        pointZone_.resize(0);
-
-        faceZone_.clear();
-        faceZone_.resize(0);
-
-        faceZoneFlip_.clear();
-        faceZoneFlip_.resize(0);
-
-        cellZone_.clear();
+        pointZone_.clearStorage();
+        faceZone_.clearStorage();
+        faceZoneFlip_.clearStorage();
         cellZone_.clearStorage();
     }
 

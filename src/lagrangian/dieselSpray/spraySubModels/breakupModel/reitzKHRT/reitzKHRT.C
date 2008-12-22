@@ -169,7 +169,7 @@ void reitzKHRT::breakupParcel
     // check if we have RT breakup
     if ((p.ct() > tauRT) && (lambdaRT < p.d()))
     {
-        // the RT breakup creates diameter/lmbdaRT new droplets
+        // the RT breakup creates diameter/lambdaRT new droplets
         p.ct() = -GREAT;
         scalar multiplier = p.d()/lambdaRT;
         scalar nDrops = multiplier*Np;
@@ -200,8 +200,6 @@ void reitzKHRT::breakupParcel
 
             scalar averageParcelMass = spray_.injectors()[injector].properties()->mass()/nParcels;
 
-            // NN. Since the parcel doesn't know from which injector
-            // it comes we use the first one to obtain a 'reference' mass
             if
             (
                 (p.ms()/averageParcelMass > msLimit_)

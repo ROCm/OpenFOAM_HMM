@@ -87,6 +87,7 @@ $(cellSources)/nearestToCell/nearestToCell.C
 $(cellSources)/nbrToCell/nbrToCell.C
 $(cellSources)/zoneToCell/zoneToCell.C
 $(cellSources)/sphereToCell/sphereToCell.C
+$(cellSources)/cylinderToCell/cylinderToCell.C
 
 faceSources = sets/faceSources
 $(faceSources)/faceToFace/faceToFace.C

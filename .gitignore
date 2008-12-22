@@ -49,6 +49,9 @@ doc/[Dd]oxygen/man
 *.tar.gz
 *.tgz
 
+# ignore the persistent .build tag in the main directory
+/.build
+
 # ignore .timeStamp in the main directory
 /.timeStamp
 

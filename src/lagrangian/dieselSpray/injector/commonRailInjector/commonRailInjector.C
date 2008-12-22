@@ -187,13 +187,14 @@ Foam::label Foam::commonRailInjector::nParcelsToInject
     return nParcels;
 }
 
-const Foam::vector Foam::commonRailInjector::position() const
+const Foam::vector Foam::commonRailInjector::position(const label n) const
 {
     return position_;
 }
 
 Foam::vector Foam::commonRailInjector::position
 (
+    const label n,
     const scalar time,
     const bool twoD,
     const scalar angleOfWedge,
@@ -236,12 +237,21 @@ Foam::vector Foam::commonRailInjector::position
     return position_;
 }
 
+Foam::label Foam::commonRailInjector::nHoles() const
+{
+    return 1;
+}
+
 Foam::scalar Foam::commonRailInjector::d() const
 {
     return d_;
 }
 
-const Foam::vector& Foam::commonRailInjector::direction() const
+const Foam::vector& Foam::commonRailInjector::direction
+(
+    const label i,
+    const scalar time
+) const
 {
     return direction_;
 }
@@ -358,13 +368,23 @@ void Foam::commonRailInjector::correctProfiles
 
     forAll(velocityProfile_, i)
     {
-        scalar Pinj = getTableValue(injectionPressureProfile_, massFlowRateProfile_[i][0]);
+        scalar Pinj = getTableValue(injectionPressureProfile_, velocityProfile_[i][0]);
         scalar Vinj = sqrt(2.0*(Pinj - referencePressure)/rho);
         scalar mfr = massFlowRateProfile_[i][1]/(rho*A);
         scalar Cd = mfr/Vinj;
         velocityProfile_[i][1] = Vinj;
         CdProfile_[i][1] = Cd;
     }
+}
+
+Foam::vector Foam::commonRailInjector::tan1(const label n) const
+{
+    return tangentialInjectionVector1_;
+}
+
+Foam::vector Foam::commonRailInjector::tan2(const label n) const
+{
+    return tangentialInjectionVector2_;
 }
 
 // ************************************************************************* //

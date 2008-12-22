@@ -245,7 +245,7 @@ public:
 
                 const T& operator*()
                 {
-                    return 
+                    return
                         static_cast<const T&>
                         (LListBase_const_iterator::operator*());
                 }
@@ -266,7 +266,7 @@ public:
     // STL member operators
 
         //- Equality operation on ULists of the same type.
-        //  Returns true when the ULists are elementwise equal
+        //  Returns true when the ULists are element-wise equal
         //  (using UList::value_type::operator==).  Takes linear time.
         bool operator==(const UILList<LListBase, T>&) const;
 

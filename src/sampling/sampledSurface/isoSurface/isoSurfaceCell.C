@@ -434,7 +434,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
             }
             else
             {
-                // Need to analyse 
+                // Need to analyse
                 forAll(cFaces, cFaceI)
                 {
                     const face& f = mesh_.faces()[cFaces[cFaceI]];
@@ -747,7 +747,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
                 (
                     false,                  // do not check for duplicate tris
                     localTriPoints,
-                    triPointReverseMap,  
+                    triPointReverseMap,
                     triMap
                 )
             );
@@ -871,8 +871,8 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
             }
         }
 
-        triMap.transfer(newToOldTri.shrink());
-        tris.transfer(dynTris.shrink());
+        triMap.transfer(newToOldTri);
+        tris.transfer(dynTris);
     }
 
 
@@ -930,7 +930,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
                 }
             }
 
-            triMap.transfer(newToOldTri.shrink());
+            triMap.transfer(newToOldTri);
             tris.setSize(newTriI);
         }
     }
@@ -1062,7 +1062,7 @@ void Foam::isoSurfaceCell::calcAddressing
         faceEdges[triI][1] = oldToMerged[edgeI++];
         faceEdges[triI][2] = oldToMerged[edgeI++];
     }
-    
+
 
     // Determine edgeFaces
     edgeFace0.setSize(mergedCentres.size());
@@ -1137,7 +1137,7 @@ void Foam::isoSurfaceCell::walkOrientation
             forAll(fEdges, fp)
             {
                 label edgeI = fEdges[fp];
-    
+
                 // my points:
                 label p0 = tri[fp];
                 label p1 = tri[tri.fcIndex(fp)];
@@ -1174,7 +1174,7 @@ void Foam::isoSurfaceCell::walkOrientation
 
         changedFaces.transfer(newChangedFaces);
     }
-}    
+}
 
 
 void Foam::isoSurfaceCell::orientSurface
@@ -1199,7 +1199,7 @@ void Foam::isoSurfaceCell::orientSurface
         for
         (
             ;
-            seedTriI < surf.size() && flipState[seedTriI] != -1; 
+            seedTriI < surf.size() && flipState[seedTriI] != -1;
             seedTriI++
         )
         {}
@@ -1473,14 +1473,13 @@ Foam::isoSurfaceCell::isoSurfaceCell
         snappedCc = -1;
     }
 
-    snappedPoints.shrink();
-
     if (debug)
     {
         Pout<< "isoSurfaceCell : shifted " << snappedPoints.size()
             << " cell centres to intersection." << endl;
     }
 
+    snappedPoints.shrink();
     label nCellSnaps = snappedPoints.size();
 
     // Per point -1 or a point inside snappedPoints.

@@ -111,8 +111,6 @@ public:
             const scalar vapourSurfaceEnthalpy,
             const scalar vapourFarEnthalpy,
             const scalar cpGas,
-            const scalar Xs,
-            const scalar Xf,
             const scalar temperature,
             const scalar kLiq
         ) const;

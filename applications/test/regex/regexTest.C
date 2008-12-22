@@ -76,6 +76,36 @@ int main(int argc, char *argv[])
         Info << endl;
     }
 
+    Info<<"test regExp(const char*) ..." << endl;
+    string me("Mark");
+
+    if (regExp("[Mm]ar[ck]").match(me))
+    {
+        Info<< "matched: " << me << endl;
+    }
+    else
+    {
+        Info<< "no match" << endl;
+    }
+
+    if (regExp("").match(me))
+    {
+        Info<< "matched: " << me << endl;
+    }
+    else
+    {
+        Info<< "no match" << endl;
+    }
+
+    if (regExp(NULL).match(me))
+    {
+        Info<< "matched: " << me << endl;
+    }
+    else
+    {
+        Info<< "no match" << endl;
+    }
+
     Info<< endl;
 
     return 0;

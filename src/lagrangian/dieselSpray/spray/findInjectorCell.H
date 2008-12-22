@@ -22,7 +22,7 @@ reduce(foundCell, orOp<bool>());
 
 if (!foundCell)
 {
-    injectionPosition = it.position();
+    injectionPosition = it->position(n);
     injectorCell = mesh_.findCell(injectionPosition);
     
     if (injectorCell >= 0)

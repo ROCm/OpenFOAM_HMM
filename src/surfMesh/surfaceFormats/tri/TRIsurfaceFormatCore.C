@@ -175,7 +175,7 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
         }
     }
     // truncate addressed size
-    dynSizes.setSize(nPatch);
+    dynSizes.setCapacity(nPatch);
 
     // transfer to normal lists
     points_.transfer(dynPoints);

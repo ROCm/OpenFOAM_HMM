@@ -187,13 +187,14 @@ Foam::label Foam::swirlInjector::nParcelsToInject
     return nParcels;
 }
 
-const Foam::vector Foam::swirlInjector::position() const
+const Foam::vector Foam::swirlInjector::position(const label n) const
 {
     return position_;
 }
 
 Foam::vector Foam::swirlInjector::position
 (
+    const label n,
     const scalar time,
     const bool twoD,
     const scalar angleOfWedge,
@@ -236,12 +237,21 @@ Foam::vector Foam::swirlInjector::position
     return position_;
 }
 
+Foam::label Foam::swirlInjector::nHoles() const
+{
+    return 1;
+}
+
 Foam::scalar Foam::swirlInjector::d() const
 {
     return d_;
 }
 
-const Foam::vector& Foam::swirlInjector::direction() const
+const Foam::vector& Foam::swirlInjector::direction
+(
+    const label i,
+    const scalar time
+) const
 {
     return direction_;
 }
@@ -368,6 +378,16 @@ void Foam::swirlInjector::correctProfiles
         velocityProfile_[i][1] = v;
         CdProfile_[i][1] = mfr/v;
     }
+}
+
+Foam::vector Foam::swirlInjector::tan1(const label n) const
+{
+    return tangentialInjectionVector1_;
+}
+
+Foam::vector Foam::swirlInjector::tan2(const label n) const
+{
+    return tangentialInjectionVector2_;
 }
 
 // ************************************************************************* //

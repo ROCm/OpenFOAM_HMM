@@ -222,8 +222,6 @@ Foam::wallLayerCells::wallLayerCells
         }
     }
 
-    refineCells.shrink();
-
     // Transfer refineCells storage to this.
     transfer(refineCells);
 }

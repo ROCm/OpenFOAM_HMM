@@ -250,8 +250,7 @@ void Foam::regionSplit::fillSeedMask
         //        << newChangedFaces.size() << endl;
         //}
 
-        changedFaces.transfer(newChangedFaces.shrink());
-        newChangedFaces.clear();
+        changedFaces.transfer(newChangedFaces);
     }
 }
 

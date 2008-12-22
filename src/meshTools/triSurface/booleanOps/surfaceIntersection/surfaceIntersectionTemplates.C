@@ -38,7 +38,6 @@ void Foam::surfaceIntersection::transfer
     List<T>& lList
 )
 {
-    dList.shrink();
     lList.transfer(dList);
 }
 

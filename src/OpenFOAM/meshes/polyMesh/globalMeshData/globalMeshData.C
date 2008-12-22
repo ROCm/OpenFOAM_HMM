@@ -393,12 +393,11 @@ void Foam::globalMeshData::calcSharedEdges() const
             }
         }
     }
-    dynSharedEdgeLabels.shrink();
+
     sharedEdgeLabelsPtr_ = new labelList();
     labelList& sharedEdgeLabels = *sharedEdgeLabelsPtr_;
     sharedEdgeLabels.transfer(dynSharedEdgeLabels);
 
-    dynSharedEdgeAddr.shrink();
     sharedEdgeAddrPtr_ = new labelList();
     labelList& sharedEdgeAddr = *sharedEdgeAddrPtr_;
     sharedEdgeAddr.transfer(dynSharedEdgeAddr);

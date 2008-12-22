@@ -131,11 +131,8 @@ Foam::face Foam::boundaryCutter::addEdgeCutsToFace
         }
     }
 
-    newFace.shrink();
-
     face returnFace;
     returnFace.transfer(newFace);
-    newFace.clear();
 
     if (debug)
     {
@@ -361,9 +358,7 @@ bool Foam::boundaryCutter::splitFace
             {
                 // Enough vertices to create a face from.
                 face tmpFace;
-                newFace.shrink();
                 tmpFace.transfer(newFace);
-                newFace.clear();
 
                 // Add face tmpFace
                 addFace(faceI, tmpFace, modifiedFace, meshMod);
@@ -381,9 +376,7 @@ bool Foam::boundaryCutter::splitFace
         {
             // Enough vertices to create a face from.
             face tmpFace;
-            newFace.shrink();
             tmpFace.transfer(newFace);
-            newFace.clear();
 
             // Add face tmpFace
             addFace(faceI, tmpFace, modifiedFace, meshMod);

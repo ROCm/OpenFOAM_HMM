@@ -7,6 +7,8 @@
 # the pqReader.xml file contains xml defining readers with their
 # file extensions and descriptions.
 
+cmake_minimum_required(VERSION 2.4)
+
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 
