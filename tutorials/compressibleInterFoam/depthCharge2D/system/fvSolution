@@ -120,7 +120,7 @@ PISO
     nNonOrthogonalCorrectors 0;
     nAlphaCorr      1;
     nAlphaSubCycles 1;
-    cGamma          1;
+    cAlpha          1;
 }
 
 // ************************************************************************* //

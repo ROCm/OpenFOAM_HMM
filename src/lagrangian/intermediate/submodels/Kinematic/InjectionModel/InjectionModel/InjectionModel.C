@@ -159,6 +159,57 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 }
 
 
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::findInjectorCellAndPosition
+(
+    label& cellI,
+    vector& position
+)
+{
+    const vector p0 = position;
+
+    bool foundCell = false;
+
+    cellI = owner_.mesh().findCell(position);
+
+    if (cellI >= 0)
+    {
+        const vector& C = owner_.mesh().C()[cellI];
+        position += 1.0e-6*(C - position);
+
+        foundCell = owner_.mesh().pointInCell(position, cellI);
+    }
+    reduce(foundCell, orOp<bool>());
+
+    // Last chance - find nearest cell and try that one
+    // - the point is probably on an edge
+    if (!foundCell)
+    {
+        cellI = owner_.mesh().findNearestCell(position);
+
+        if (cellI >= 0)
+        {
+            const vector& C = owner_.mesh().C()[cellI];
+            position += 1.0e-6*(C - position);
+
+            foundCell = owner_.mesh().pointInCell(position, cellI);
+        }
+        reduce(foundCell, orOp<bool>());
+    }
+
+    if (!foundCell)
+    {
+        FatalErrorIn
+        (
+            "InjectionModel<CloudType>::setInjectorCellAndPosition"
+            "(label&, vector&)"
+        )<< "Cannot find parcel injection cell. "
+         << "Parcel position = " << p0 << nl
+         << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "NewInjectionModel.C"

@@ -88,7 +88,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
             )
         );
 
-        turbulencePropertiesDict.lookup("turbulenceModel")
+        turbulencePropertiesDict.lookup("simulationType")
             >> turbulenceModelTypeName;
     }
 
