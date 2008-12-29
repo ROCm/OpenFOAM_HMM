@@ -66,7 +66,7 @@ Istream& operator>>(Istream& is, unsigned int& i)
 
     if (t.isLabel())
     {
-        i = uint(t.labelToken());
+        i = (unsigned int)(t.labelToken());
     }
     else
     {
