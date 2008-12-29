@@ -38,6 +38,11 @@ Description
 const char* const Foam::FOAMversion = "WM_PROJECT_VERSION";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Static initializers for string::null, word::null and fileName::null
+
+#include "stringsGlobals.C"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Setup an error handler for the global new operator
 
 #include "new.C"

@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Return a string representation of an uint
 word name(const unsigned int i)
 {
     std::ostringstream osBuffer;
@@ -66,7 +65,7 @@ Istream& operator>>(Istream& is, unsigned int& i)
 
     if (t.isLabel())
     {
-        i = (unsigned int)(t.labelToken());
+        i = unsigned(t.labelToken());
     }
     else
     {
