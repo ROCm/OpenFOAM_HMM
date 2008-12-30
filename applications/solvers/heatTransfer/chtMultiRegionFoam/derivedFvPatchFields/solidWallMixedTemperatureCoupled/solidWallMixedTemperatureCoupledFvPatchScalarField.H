@@ -23,16 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    solidWallHeatFluxCoupledFvPatchScalarField
+    solidWallMixedTemperatureCoupledFvPatchScalarField
 
 Description
-    Fixed value boundary condition for temperature, to be used by the
+    Mixed boundary condition for temperature, to be used by the
     conjugate heat transfer solver.
+    If my temperature is T1, neighbour is T2:
+
+    T1 > T2: my side becomes fixedValue T2 bc, other side becomes fixedGradient.
+    
 
     Example usage:
         myInterfacePatchName
         {
-            type                solidWallTemperatureCoupled;
+            type                solidWallMixedTemperatureCoupled;
             neighbourRegionName fluid;
             neighbourPatchName  fluidSolidInterface;
             neighbourFieldName  T;
@@ -41,16 +45,17 @@ Description
         }
 
 SourceFiles
-    solidWallTemperatureCoupledFvPatchScalarField.C
+    solidWallMixedTemperatureCoupledFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidWallTemperatureCoupledFvPatchScalarField_H
-#define solidWallTemperatureCoupledFvPatchScalarField_H
+#ifndef solidWallMixedTemperatureCoupledFvPatchScalarField_H
+#define solidWallMixedTemperatureCoupledFvPatchScalarField_H
 
 #include "fvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
+#include "mixedFvPatchFields.H"
 #include "coupleManager.H"
+#include "fvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,12 +63,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class solidWallTemperatureCoupledFvPatchScalarField Declaration
+        Class solidWallMixedTemperatureCoupledFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class solidWallTemperatureCoupledFvPatchScalarField
+class solidWallMixedTemperatureCoupledFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public mixedFvPatchScalarField
 {
     // Private data
 
@@ -73,35 +78,36 @@ class solidWallTemperatureCoupledFvPatchScalarField
         //- Name of thermal conductivity field
         word KName_;
 
+        bool fixesValue_;
 
 public:
 
     //- Runtime type information
-    TypeName("solidWallTemperatureCoupled");
+    TypeName("solidWallMixedTemperatureCoupled");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        solidWallTemperatureCoupledFvPatchScalarField
+        solidWallMixedTemperatureCoupledFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        solidWallTemperatureCoupledFvPatchScalarField
+        solidWallMixedTemperatureCoupledFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given solidWallTemperatureCoupledFvPatchScalarField
+        //- Construct by mapping given solidWallMixedTemperatureCoupledFvPatchScalarField
         //  onto a new patch
-        solidWallTemperatureCoupledFvPatchScalarField
+        solidWallMixedTemperatureCoupledFvPatchScalarField
         (
-            const solidWallTemperatureCoupledFvPatchScalarField&,
+            const solidWallMixedTemperatureCoupledFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
@@ -112,14 +118,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new solidWallTemperatureCoupledFvPatchScalarField(*this)
+                new solidWallMixedTemperatureCoupledFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        solidWallTemperatureCoupledFvPatchScalarField
+        solidWallMixedTemperatureCoupledFvPatchScalarField
         (
-            const solidWallTemperatureCoupledFvPatchScalarField&,
+            const solidWallMixedTemperatureCoupledFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -131,18 +137,36 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new solidWallTemperatureCoupledFvPatchScalarField(*this, iF)
+                new solidWallMixedTemperatureCoupledFvPatchScalarField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
 
     // Member functions
 
-        //- (intensive) flux
-        tmp<scalarField> flux() const;
+        //- Get corresponding K field
+        const fvPatchScalarField& K() const;
+
+        //- Return true if this patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return fixesValue_;
+        }
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
+
+        //- Evaluate the patch field
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType=Pstream::blocking
+        );
 
         //- Write
         virtual void write(Ostream&) const;
