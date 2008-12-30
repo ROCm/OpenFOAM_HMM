@@ -546,7 +546,7 @@ void Foam::meshRefinement::calcLocalRegions
             }
         }
     }
-    localCc.shrink();
+
     localPoints.transfer(localCc);
 
     if (localPoints.size() != globalToLocalRegion.size())

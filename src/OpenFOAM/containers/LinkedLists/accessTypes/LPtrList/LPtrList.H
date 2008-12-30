@@ -149,11 +149,15 @@ public:
 
         // Edit
 
-            //- Remove the head element specified from the list and delete it
+            //- Remove the head element from the list and delete the pointer
             bool eraseHead();
 
-            //- Remove the specified element from the list and delete it
+            //- Clear the contents of the list
             void clear();
+
+            //- Transfer the contents of the argument into this List
+            //  and annull the argument list.
+            void transfer(LPtrList<LListBase, T>&);
 
 
     // Member operators

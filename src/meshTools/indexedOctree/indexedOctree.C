@@ -183,9 +183,7 @@ void indexedOctree<Type>::divide
     result.setSize(8);
     for (direction octant = 0; octant < subIndices.size(); octant++)
     {
-        subIndices[octant].shrink();
         result[octant].transfer(subIndices[octant]);
-        subIndices[octant].clear();
     }
 }
 

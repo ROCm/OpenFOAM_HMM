@@ -412,11 +412,9 @@ void Foam::polyDualMesh::collectPatchInternalFace
         }
     }
 
-    dualFace2.transfer(dualFace.shrink());
-    dualFace.clear();
+    dualFace2.transfer(dualFace);
 
-    featEdgeIndices2.transfer(featEdgeIndices.shrink());
-    featEdgeIndices.clear();
+    featEdgeIndices2.transfer(featEdgeIndices);
 
     if (reverseFace)
     {
@@ -1590,8 +1588,7 @@ void Foam::polyDualMesh::calcFeatures
             allFeaturePoints.append(allBoundary.meshPoints()[pointI]);
         }
     }
-    featurePoints.transfer(allFeaturePoints.shrink());
-    allFeaturePoints.clear();
+    featurePoints.transfer(allFeaturePoints);
 
     if (debug)
     {
@@ -1633,8 +1630,7 @@ void Foam::polyDualMesh::calcFeatures
             allFeatureEdges.append(meshEdges[edgeI]);
         }
     }
-    featureEdges.transfer(allFeatureEdges.shrink());
-    allFeatureEdges.clear();
+    featureEdges.transfer(allFeatureEdges);
 }
 
 

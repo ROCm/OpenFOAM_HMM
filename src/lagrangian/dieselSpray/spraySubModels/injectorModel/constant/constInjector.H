@@ -59,10 +59,6 @@ private:
         scalarList dropletNozzleDiameterRatio_;
         scalarList sprayAngle_;
 
-    // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
-
 public:
 
     //- Runtime type information
@@ -93,6 +89,7 @@ public:
         vector direction
         (
             const label injector, 
+            const label hole,
             const scalar time,
             const scalar d
         ) const;

@@ -64,7 +64,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
 
     forAll (pc, pointI)
     {
-        pointCellAddr[pointI].transfer(pc[pointI].shrink());
+        pointCellAddr[pointI].transfer(pc[pointI]);
     }
 
     return pointCellAddr;

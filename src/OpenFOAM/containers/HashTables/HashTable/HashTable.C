@@ -457,6 +457,14 @@ void HashTable<T, Key, Hash>::clear()
 
 
 template<class T, class Key, class Hash>
+void HashTable<T, Key, Hash>::clearStorage()
+{
+    clear();
+    resize(0);
+}
+
+
+template<class T, class Key, class Hash>
 void HashTable<T, Key, Hash>::transfer(HashTable<T, Key, Hash>& ht)
 {
     clear();

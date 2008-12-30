@@ -32,7 +32,6 @@ License
 
 const char* const Foam::string::typeName = "string";
 int Foam::string::debug(debug::debugSwitch(string::typeName, 0));
-const Foam::string Foam::string::null;
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -202,7 +201,7 @@ Foam::string& Foam::string::expand()
             // otherwise add extra test
             if (user == "OpenFOAM")
             {
-                *this = dotFoam(file);
+                *this = findEtcFile(file);
             }
             else
             {

@@ -1,3 +1,5 @@
+include $(GENERAL_RULES)/version
+
 include $(GENERAL_RULES)/sourceToDep
 
 include $(GENERAL_RULES)/java

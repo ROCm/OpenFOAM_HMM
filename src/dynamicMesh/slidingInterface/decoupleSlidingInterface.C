@@ -227,7 +227,7 @@ void Foam::slidingInterface::decoupleInterface
             }
 
             face newFace;
-            newFace.transfer(newFaceLabels.shrink());
+            newFace.transfer(newFaceLabels);
 
 //             Pout << "Modifying master stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 
@@ -350,7 +350,7 @@ void Foam::slidingInterface::decoupleInterface
             }
 
             face newFace;
-            newFace.transfer(newFaceLabels.shrink());
+            newFace.transfer(newFaceLabels);
 
 //             Pout << "Modifying slave stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 

@@ -60,12 +60,11 @@ protected:
         //- Number of spaces per indent level
         static const unsigned short indentSize_ = 4;
 
-        //- Current indent level
-        unsigned short indentLevel_;
-
         //- Indentation of the entry from the start of the keyword
         static const unsigned short entryIndentation_ = 16;
 
+        //- Current indent level
+        unsigned short indentLevel_;
 
 public:
 
@@ -148,9 +147,8 @@ public:
             //- Decrememt the indent level
             void decrIndent();
 
-            //- Write the keyword to the Ostream followed by
-            //  appropriate indentation
-            Ostream& writeKeyword(const keyType& keyword);
+            //- Write the keyword followed by an appropriate indentation
+            Ostream& writeKeyword(const keyType&);
 
 
         // Stream state functions

@@ -108,7 +108,7 @@ void Foam::primitiveMesh::calcCellEdges() const
         // reset the size
         forAll (ce, cellI)
         {
-            cellEdgeAddr[cellI].transfer(ce[cellI].shrink());
+            cellEdgeAddr[cellI].transfer(ce[cellI]);
         }
     }
 }

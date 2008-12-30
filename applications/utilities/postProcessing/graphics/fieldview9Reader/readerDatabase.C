@@ -74,10 +74,7 @@ void Foam::readerDatabase::getPolyHedra()
         }
     }
 
-    polys.shrink();
-
     Info<< "Found " << polys.size() << " polyhedral cells " << endl;
-
     polys_.transfer(polys);
 }
 
