@@ -5,7 +5,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,42 +24,51 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamCleanTutorials
+#     finddep
 #
 # Description
-#       Run either Allclean or default cleanCase in current directory
-#       and all its subdirectories.
+#     find all .dep files referring to any of <file1> ... <fileN>
 #
 #------------------------------------------------------------------------------
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 
-# Source tutorial clean functions
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+usage: ${0##*/} <file1> ... <fileN>
 
-thisScript=$0
-if [ "/${thisScript#/}" != "$thisScript" ]
-then
-    thisScript="$PWD/$thisScript"
-fi
+* find all .dep files referring to any of <file1> ... <fileN>
 
-# If an argument is supplied do not execute ./Allclean to avoid recursion
-if [ $# = 0 -a -f Allclean ]
-then
-    # Specialised script.
-    ./Allclean
-elif [ -d system ]
-then
-    # Normal case.
-    cleanCase
-elif [ -d Make ]
-then
-    # Normal application.
-    cleanApplication
-else
-    # Recurse to subdirectories
-    for caseDir in *
+USAGE
+    exit 1
+}
+
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+[ "$#" -gt 0 ] || usage
+
+
+find . -name '*.dep' -print | \
+    while read src
     do
-        ( cd $caseDir 2>/dev/null && $thisScript )
+        for file in $@
+        do
+            grep -l "$file" $src && break
+        done
     done
-fi
 
 #------------------------------------------------------------------------------

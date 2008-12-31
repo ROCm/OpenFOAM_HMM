@@ -67,10 +67,10 @@ set -- $*
 # strip out wildcards via sed
 while [ "$#" -ge 1 ]
 do
-   wildcard=$1
-   shift
-   ##DEBUG echo "remove>$wildcard<" 1>&2
-   dirList=`echo "$dirList" | sed -e "s@${wildcard}[^:]*:@@g"`
+    wildcard=$1
+    shift
+    ##DEBUG echo "remove>$wildcard<" 1>&2
+    dirList=`echo "$dirList" | sed -e "s@${wildcard}[^:]*:@@g"`
 done
 
 # split on ':' (and on space as well to avoid any surprises)
@@ -83,18 +83,18 @@ set -- $dirList
 unset dirList
 for dir
 do
-   ##DEBUG echo "check>$dir<" 1>&2
-   #- dirs must exist
-   if [ -e "$dir" ]
-   then
-      #- no duplicate dirs
-      duplicate=`echo " $dirList " | sed -ne "s@ $dir @DUP@p"`
+    ##DEBUG echo "check>$dir<" 1>&2
+    #- dirs must exist
+    if [ -e "$dir" ]
+    then
+        #- no duplicate dirs
+        duplicate=`echo " $dirList " | sed -ne "s@ $dir @DUP@p"`
 
-      if [ ! "$duplicate" ]
-      then
-         dirList="$dirList $dir"
-      fi
-   fi
+        if [ ! "$duplicate" ]
+        then
+            dirList="$dirList $dir"
+        fi
+    fi
 done
 
 # parse on whitespace

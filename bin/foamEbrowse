@@ -45,8 +45,8 @@ fi
 trap 'rm -f $headersFile $sourcesFile 2>/dev/null; exit 0' EXIT TERM INT
 
 cd $WM_PROJECT_DIR
-find -H . -name "*.H" | fgrep -v "lnInclude" > $headersFile
-find -H . -name "*.C" | fgrep -v "lnInclude" > $sourcesFile
+find -H . -name "*.H" | fgrep -v lnInclude > $headersFile
+find -H . -name "*.C" | fgrep -v lnInclude > $sourcesFile
 ebrowse --files=$headersFile --files=$sourcesFile --output-file=.ebrowse
 
 #------------------------------------------------------------------------------
