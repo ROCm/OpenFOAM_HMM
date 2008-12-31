@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
             Pout<< "    " << min << " .. " << min+dist << "  : "
                 << 1.0/surf.size() * binCount[binI]
                 << endl;
-            min += dist; 
+            min += dist;
         }
         Pout<< endl;
 
@@ -408,10 +408,10 @@ int main(int argc, char *argv[])
         const pointField& localPoints = surf.localPoints();
 
         const boundBox bb(localPoints);
-        scalar smallDim = 1E-6*mag(bb.max() - bb.min());
+        scalar smallDim = 1E-6 * bb.mag();
 
-        Pout<< "Checking for points less than 1E-6 of bounding box (" 
-            << bb.max() - bb.min() << " meter) apart."
+        Pout<< "Checking for points less than 1E-6 of bounding box ("
+            << bb.span() << " meter) apart."
             << endl;
 
         // Sort points
@@ -495,7 +495,7 @@ int main(int argc, char *argv[])
             nSingleEdges++;
         }
     }
-            
+
     label nMultEdges = 0;
     forAll(eFaces, edgeI)
     {
@@ -654,7 +654,7 @@ int main(int argc, char *argv[])
         }
         Pout<< endl;
     }
-     
+
 
     Pout<< "End\n" << endl;
 

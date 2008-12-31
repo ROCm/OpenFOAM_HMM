@@ -224,10 +224,8 @@ void Foam::displacementSBRStressFvMotionSolver::updateMesh
     );
 
     // Note: boundBox does reduce
-    const boundBox bb0(points0_, true);
-    const vector span0(bb0.max()-bb0.min());
-    const boundBox bb(points, true);
-    const vector span(bb.max()-bb.min());
+    const vector span0 = boundBox(points0_, true).span();
+    const vector span  = boundBox(points, true).span();
 
     vector scaleFactors(cmptDivide(span0, span));
 

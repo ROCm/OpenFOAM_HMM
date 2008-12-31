@@ -20,7 +20,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
 
 
     // Min length
-    scalar minDistSqr = magSqr(1e-6*(globalBb.max() - globalBb.min()));
+    scalar minDistSqr = magSqr(1e-6 * globalBb.span());
 
     // Non-empty directions
     const Vector<label> validDirs = (mesh.directions() + Vector<label>::one)/2;

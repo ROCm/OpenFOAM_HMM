@@ -62,7 +62,7 @@ void cubeRootVolDelta::calcDelta()
             {
                 boundBox bb(mesh().points(), false);
 
-                thickness = (bb.max() - bb.min())[dir];
+                thickness = bb.span()[dir];
             }
         }
 

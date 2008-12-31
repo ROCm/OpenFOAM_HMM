@@ -233,7 +233,7 @@ void Foam::orientedSurface::propagateOrientation
     labelList changedFaces(1, nearestFaceI);
     // List of edges that were changed in the last iteration.
     labelList changedEdges;
-    
+
     while(true)
     {
         changedEdges = faceToEdge(s, changedFaces);
@@ -337,9 +337,7 @@ Foam::orientedSurface::orientedSurface
 :
     triSurface(surf)
 {
-    treeBoundBox bb(localPoints());
-
-    point outsidePoint = 2 * bb.max() - bb.min();
+    point outsidePoint = 2 * treeBoundBox(localPoints()).span();
 
     orient(*this, outsidePoint, orientOutside);
 }

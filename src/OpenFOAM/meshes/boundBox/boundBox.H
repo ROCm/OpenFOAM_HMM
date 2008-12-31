@@ -98,26 +98,37 @@ public:
 
         // Access
 
+            //- Minimum describing the bounding box
             const point& min() const
             {
                 return min_;
             }
 
+            //- Maximum describing the bounding box
             const point& max() const
             {
                 return max_;
             }
 
+            //- Minimum describing the bounding box, non-const access
             point& min()
             {
                 return min_;
             }
 
+            //- Maximum describing the bounding box, non-const access
             point& max()
             {
                 return max_;
             }
 
+            //- The bounding box span (from minimum to maximum)
+            vector span() const
+            {
+                return (max_ - min_);
+            }
+
+            //- The magnitude of the bounding box span
             scalar mag() const
             {
                 return ::Foam::mag(max_ - min_);

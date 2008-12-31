@@ -243,7 +243,7 @@ void Foam::directMappedPolyPatch::findSamples
                     nearInfo = boundaryTree().findNearest
                     (
                         sample,
-                        magSqr(patchBb.max()-patchBb.min())
+                        magSqr(patchBb.span())
                     );
 
                     if (!nearInfo.hit())

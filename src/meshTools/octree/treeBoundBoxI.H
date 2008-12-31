@@ -436,18 +436,18 @@ inline Foam::treeBoundBox Foam::treeBoundBox::extend
 {
     treeBoundBox bb(*this);
 
-    vector span(bb.max() - bb.min());
+    vector newSpan = bb.span();
 
     // Make 3D
-    scalar magSpan = Foam::mag(span);
+    scalar minSpan = s * Foam::mag(newSpan);
 
     for (direction dir = 0; dir < vector::nComponents; dir++)
     {
-        span[dir] = Foam::max(s*magSpan, span[dir]);
+        newSpan[dir] = Foam::max(minSpan, newSpan[dir]);
     }
 
-    bb.min() -= cmptMultiply(s*rndGen.vector01(), span);
-    bb.max() += cmptMultiply(s*rndGen.vector01(), span);
+    bb.min() -= cmptMultiply(s * rndGen.vector01(), newSpan);
+    bb.max() += cmptMultiply(s * rndGen.vector01(), newSpan);
 
     return bb;
 }

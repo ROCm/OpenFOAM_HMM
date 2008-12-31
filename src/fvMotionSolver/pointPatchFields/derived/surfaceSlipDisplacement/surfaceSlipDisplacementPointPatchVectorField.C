@@ -169,12 +169,12 @@ void surfaceSlipDisplacementPointPatchVectorField::evaluate
 {
     const polyMesh& mesh = patch().boundaryMesh().mesh()();
 
-    //const scalar deltaT = mesh.time().deltaT().value();
+    // const scalar deltaT = mesh.time().deltaT().value();
 
     // Construct large enough vector in direction of projectDir so
     // we're guaranteed to hit something.
 
-    const scalar projectLen = mag(mesh.bounds().max()-mesh.bounds().min());
+    const scalar projectLen = mesh.bounds().mag();
 
     // For case of fixed projection vector:
     vector projectVec;
@@ -307,7 +307,7 @@ void surfaceSlipDisplacementPointPatchVectorField::evaluate
                 rightHit
             );
         }
-        
+
         List<pointIndexHit> leftHit;
         {
             labelList leftSurf;

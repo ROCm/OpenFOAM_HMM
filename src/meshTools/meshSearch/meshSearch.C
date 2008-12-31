@@ -100,8 +100,8 @@ Foam::label Foam::meshSearch::findNearestCellTree(const point& location) const
 {
     const indexedOctree<treeDataPoint>& tree = cellCentreTree();
 
-    scalar span = mag(tree.bb().max() - tree.bb().min());
-
+    scalar span = tree.bb().mag();
+    
     pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
 
     if (!info.hit())
@@ -177,7 +177,7 @@ Foam::label Foam::meshSearch::findNearestFaceTree(const point& location) const
     // Search nearest cell centre.
     const indexedOctree<treeDataPoint>& tree = cellCentreTree();
 
-    scalar span = mag(tree.bb().max() - tree.bb().min());
+    scalar span = tree.bb().mag();
 
     // Search with decent span
     pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
@@ -803,7 +803,7 @@ Foam::label Foam::meshSearch::findNearestBoundaryFace
         {
             const indexedOctree<treeDataFace>& tree =  boundaryTree();
 
-            scalar span = mag(tree.bb().max() - tree.bb().min());
+            scalar span = tree.bb().mag();
 
             pointIndexHit info = boundaryTree().findNearest
             (

@@ -177,9 +177,9 @@ int main(int argc, char *argv[])
 
 
     const boundBox& bb = mesh.globalData().bb();
-    const vector span(bb.max() - bb.min());
+    const vector span = bb.span();
     const scalar minDim = min(span[0], min(span[1], span[2]));
-    const scalar mergeDim = 1E-4*minDim;
+    const scalar mergeDim = 1E-4 * minDim;
 
     Pout<< "Mesh bounding box:" << bb << nl
         << "        with span:" << span << nl

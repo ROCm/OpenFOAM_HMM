@@ -46,10 +46,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(autoHexMeshDriver, 0);
-
-} // End namespace Foam
+    defineTypeNameAndDebug(autoHexMeshDriver, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -59,7 +57,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
  const
 {
     const boundBox& meshBb = mesh_.bounds();
-    scalar mergeDist = mergeTol*mag(meshBb.max() - meshBb.min());
+    scalar mergeDist = mergeTol * meshBb.mag();
     scalar writeTol = std::pow
     (
         scalar(10.0),
@@ -118,7 +116,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 //
 //    if (hasSurface)
 //    {
-//        const point outsidePt(2*overallBb.max() - overallBb.min());
+//        const point outsidePt = 2 * overallBb.span();
 //
 //        //Info<< "Using point " << outsidePt << " to orient shells" << endl;
 //

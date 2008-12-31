@@ -55,7 +55,7 @@ using namespace Foam;
 scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
 {
     const boundBox& meshBb = mesh.bounds();
-    scalar mergeDist = mergeTol*mag(meshBb.max() - meshBb.min());
+    scalar mergeDist = mergeTol * meshBb.mag();
     scalar writeTol = std::pow
     (
         scalar(10.0),

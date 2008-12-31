@@ -220,7 +220,7 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
         max
         (
             Foam::sqr(GREAT),
-            Foam::magSqr(treeBb.max() - treeBb.min())
+            Foam::magSqr(treeBb.span())
         )
     );
 
