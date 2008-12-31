@@ -341,11 +341,11 @@ Foam::cuttingPlane::cuttingPlane(const plane& pln)
 {}
 
 
-// Construct from mesh reference and plane, restricted to a list of cells
+// Construct from plane and mesh reference, restricted to a list of cells
 Foam::cuttingPlane::cuttingPlane
 (
-    const primitiveMesh& mesh,
     const plane& pln,
+    const primitiveMesh& mesh,
     const UList<label>& cellIdLabels
 )
 :

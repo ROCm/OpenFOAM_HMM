@@ -61,11 +61,11 @@ class primitiveMesh;
 
 class cuttingPlane
 :
-    public PrimitiveMeshedSurface<face>,
-    public plane
+    public plane,
+    public BasicMeshedSurface<face>
 {
     //- Private typedefs for convenience
-        typedef PrimitiveMeshedSurface<face> MeshStorage;
+        typedef BasicMeshedSurface<face> MeshStorage;
 
     // Private data
 
@@ -132,12 +132,12 @@ public:
 
     // Constructors
 
-        //- Construct from mesh reference and plane,
+        //- Construct from plane and mesh reference,
         //  possibly restricted to a list of cells
         cuttingPlane
         (
-            const primitiveMesh&,
             const plane&,
+            const primitiveMesh&,
             const UList<label>& cellIdLabels = UList<label>::null()
         );
 
