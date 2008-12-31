@@ -1409,7 +1409,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 :
     mesh_(mesh),
     iso_(iso),
-    mergeDistance_(mergeTol*mag(mesh.bounds().max()-mesh.bounds().min()))
+    mergeDistance_(mergeTol*mesh.bounds().mag())
 {
     // Determine if cell is tet
     PackedList<1> isTet(mesh_.nCells());

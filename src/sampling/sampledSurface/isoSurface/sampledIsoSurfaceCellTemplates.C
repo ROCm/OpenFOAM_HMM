@@ -40,7 +40,7 @@ Foam::sampledIsoSurfaceCell::sampleField
 ) const
 {
     // Recreate geometry if time has changed
-    createGeometry();
+    updateGeometry();
 
     return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
 }
@@ -54,7 +54,7 @@ Foam::sampledIsoSurfaceCell::interpolateField
 ) const
 {
     // Recreate geometry if time has changed
-    createGeometry();
+    updateGeometry();
 
     // One value per point
     tmp<Field<Type> > tvalues(new Field<Type>(points().size()));

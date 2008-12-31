@@ -109,26 +109,24 @@ sets
 //      plane : values on plane defined by point, normal.
 //      patch : values on patch.
 //
-// 1] planes are triangulated by default
-// 2] patches are not triangulated by default
+// 1] patches are not triangulated by default
+// 2] planes are always triangulated
+// 3] iso-surfaces are always triangulated
 surfaces
 (
     constantPlane
     {
-        type            plane;
+        type            plane;    // always triangulated
         basePoint       (0.0501 0.0501 0.005);
         normalVector    (0.1 0.1 1);
 
         //- Optional: restrict to a particular zone
         // zoneName        zone1;
-
-        // Optional: whether to leave as faces or triangulate (=default)
-        triangulate     false;
     }
 
     interpolatedPlane
     {
-        type            plane;
+        type            plane;    // always triangulated
         // make plane relative to the coordinateSystem (Cartesian)
         coordinateSystem
         {
@@ -136,7 +134,6 @@ surfaces
         }
         basePoint       (0 0 0);
         normalVector    (0.1 0.1 1);
-        triangulate     false;
         interpolate     true;
     }
 
@@ -145,6 +142,7 @@ surfaces
         type            patch;
         patchName       movingWall;
         // Optional: whether to leave as faces (=default) or triangulate
+        // triangulate     false;
     }
 
     movingWall_interpolated
@@ -153,26 +151,27 @@ surfaces
         patchName       movingWall;
         interpolate     true;
         // Optional: whether to leave as faces (=default) or triangulate
+        // triangulate     false;
     }
 
     interpolatedIso
     {
         // Iso surface for interpolated values only
-        type            isoSurface;
+        type            isoSurface;    // always triangulated
         isoField        rho;
         isoValue        0.5;
         interpolate     true;
-        //regularise      false;    //optional: do not simplify
+        // regularise      false;    // Optional: do not simplify
     }
     constantIso
     {
-        // Iso surface for constant values. Guarantees triangles to not
-        // cross cells.
-        type            isoSurfaceCell;
+        // Iso surface for constant values.
+        // Triangles guaranteed not to cross cells.
+        type            isoSurfaceCell;    // always triangulated
         isoField        rho;
         isoValue        0.5;
         interpolate     false;
-        //regularise      false;    //optional: do not simplify
+        // regularise      false;    // Optional: do not simplify
     }
 );
 

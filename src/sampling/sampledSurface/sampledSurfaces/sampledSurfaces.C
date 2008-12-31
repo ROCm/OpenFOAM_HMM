@@ -60,11 +60,13 @@ namespace Foam
         }
     };
 
+
     defineTypeNameAndDebug(sampledSurfaces, 0);
 }
 
-bool Foam::sampledSurfaces::verbose_ = false;
 
+bool Foam::sampledSurfaces::verbose_(false);
+Foam::scalar Foam::sampledSurfaces::mergeTol_(1e-10);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -155,18 +157,213 @@ bool Foam::sampledSurfaces::checkFieldTypes()
 }
 
 
-void Foam::sampledSurfaces::mergeSurfaces()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::sampledSurfaces::sampledSurfaces
+(
+    const word& name,
+    const objectRegistry& obr,
+    const dictionary& dict,
+    const bool loadFromFiles
+)
+:
+    PtrList<sampledSurface>(),
+    name_(name),
+    mesh_(refCast<const fvMesh>(obr)),
+    loadFromFiles_(loadFromFiles),
+    outputPath_(fileName::null),
+    fieldNames_(),
+    interpolationScheme_(word::null),
+    writeFormat_(word::null),
+    mergeList_(),
+    scalarFields_(),
+    vectorFields_(),
+    sphericalTensorFields_(),
+    symmTensorFields_(),
+    tensorFields_()
 {
-    if (!Pstream::parRun())
+    if (Pstream::parRun())
     {
-        return;
+        outputPath_ = mesh_.time().path()/".."/name_;
+    }
+    else
+    {
+        outputPath_ = mesh_.time().path()/name_;
     }
 
-    // Merge close points (1E-10 of mesh bounding box)
-    const scalar mergeTol = 1e-10;
+    read(dict);
+}
 
-    const boundBox& bb = mesh_.globalData().bb();
-    scalar mergeDim = mergeTol * mag(bb.max() - bb.min());
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::sampledSurfaces::~sampledSurfaces()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+void Foam::sampledSurfaces::verbose(const bool verbosity)
+{
+    verbose_ = verbosity;
+}
+
+
+void Foam::sampledSurfaces::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::sampledSurfaces::write()
+{
+    if (size() && checkFieldTypes())
+    {
+        // finalize surfaces, merge points etc.
+        update();
+
+        sampleAndWrite(scalarFields_);
+        sampleAndWrite(vectorFields_);
+        sampleAndWrite(sphericalTensorFields_);
+        sampleAndWrite(symmTensorFields_);
+        sampleAndWrite(tensorFields_);
+    }
+}
+
+
+void Foam::sampledSurfaces::read(const dictionary& dict)
+{
+    fieldNames_ = wordList(dict.lookup("fields"));
+
+    interpolationScheme_ = dict.lookupOrDefault<word>
+    (
+        "interpolationScheme",
+        "cell"
+    );
+    writeFormat_ = dict.lookupOrDefault<word>
+    (
+        "surfaceFormat",
+        "null"
+    );
+
+    PtrList<sampledSurface> newList
+    (
+        dict.lookup("surfaces"),
+        sampledSurface::iNew(mesh_)
+    );
+
+    transfer(newList);
+
+    if (Pstream::parRun())
+    {
+        mergeList_.setSize(size());
+    }
+
+    // ensure all surfaces and merge information are expired
+    expire();
+
+    if (Pstream::master() && debug)
+    {
+        Pout<< "sample fields:" << fieldNames_ << nl
+            << "sample surfaces:" << nl << "(" << nl;
+
+        forAll(*this, surfI)
+        {
+            Pout<< "  " << operator[](surfI) << endl;
+        }
+        Pout<< ")" << endl;
+    }
+}
+
+
+void Foam::sampledSurfaces::updateMesh(const mapPolyMesh&)
+{
+    expire();
+}
+
+
+void Foam::sampledSurfaces::movePoints(const pointField&)
+{
+    expire();
+}
+
+
+void Foam::sampledSurfaces::readUpdate(const polyMesh::readUpdateState state)
+{
+    if (state != polyMesh::UNCHANGED)
+    {
+        expire();
+    }
+}
+
+
+bool Foam::sampledSurfaces::needsUpdate() const
+{
+    forAll(*this, surfI)
+    {
+        if (operator[](surfI).needsUpdate())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool Foam::sampledSurfaces::expire()
+{
+    bool justExpired = false;
+
+    forAll(*this, surfI)
+    {
+        if (operator[](surfI).expire())
+        {
+            justExpired = true;
+        }
+
+        // clear merge information
+        if (Pstream::parRun())
+        {
+            mergeList_[surfI].clear();
+        }
+    }
+
+    // reset interpolation
+    pointMesh::Delete(mesh_);
+    volPointInterpolation::Delete(mesh_);
+
+    // true if any surfaces just expired
+    return justExpired;
+}
+
+
+bool Foam::sampledSurfaces::update()
+{
+    bool updated = false;
+
+    if (!needsUpdate())
+    {
+        return updated;
+    }
+
+    // serial: quick and easy, no merging required
+    if (!Pstream::parRun())
+    {
+        forAll(*this, surfI)
+        {
+            if (operator[](surfI).update())
+            {
+                updated = true;
+            }
+        }
+
+        return updated;
+    }
+
+    // dimension as fraction of mesh bounding box
+    scalar mergeDim = mergeTol_ * mesh_.globalData().bb().mag();
 
     if (Pstream::master() && debug)
     {
@@ -174,10 +371,19 @@ void Foam::sampledSurfaces::mergeSurfaces()
             << mergeDim << " meter" << endl;
     }
 
-    mergeList_.setSize(size());
     forAll(*this, surfI)
     {
         sampledSurface& s = operator[](surfI);
+
+        if (s.update())
+        {
+            updated = true;
+        }
+        else
+        {
+            continue;
+        }
+
 
         // Collect points from all processors
         List<pointField> gatheredPoints(Pstream::nProcs());
@@ -253,147 +459,8 @@ void Foam::sampledSurfaces::mergeSurfaces()
             }
         }
     }
-}
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::sampledSurfaces::sampledSurfaces
-(
-    const word& name,
-    const objectRegistry& obr,
-    const dictionary& dict,
-    const bool loadFromFiles
-)
-:
-    PtrList<sampledSurface>(),
-    name_(name),
-    mesh_(refCast<const fvMesh>(obr)),
-    loadFromFiles_(loadFromFiles),
-    outputPath_(fileName::null),
-    fieldNames_(),
-    interpolationScheme_(word::null),
-    writeFormat_(word::null),
-    mergeList_(),
-    scalarFields_(),
-    vectorFields_(),
-    sphericalTensorFields_(),
-    symmTensorFields_(),
-    tensorFields_()
-{
-    if (Pstream::parRun())
-    {
-        outputPath_ = mesh_.time().path()/".."/name_;
-    }
-    else
-    {
-        outputPath_ = mesh_.time().path()/name_;
-    }
-
-    read(dict);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledSurfaces::~sampledSurfaces()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::sampledSurfaces::verbose(const bool verbosity)
-{
-    verbose_ = verbosity;
-}
-
-
-void Foam::sampledSurfaces::execute()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::sampledSurfaces::write()
-{
-    if (size() && checkFieldTypes())
-    {
-        sampleAndWrite(scalarFields_);
-        sampleAndWrite(vectorFields_);
-        sampleAndWrite(sphericalTensorFields_);
-        sampleAndWrite(symmTensorFields_);
-        sampleAndWrite(tensorFields_);
-    }
-}
-
-
-void Foam::sampledSurfaces::read(const dictionary& dict)
-{
-    fieldNames_ = wordList(dict.lookup("fields"));
-
-    interpolationScheme_ = "cell";
-    dict.readIfPresent("interpolationScheme", interpolationScheme_);
-
-    writeFormat_ = "null";
-    dict.readIfPresent("surfaceFormat", writeFormat_);
-
-
-    PtrList<sampledSurface> newList
-    (
-        dict.lookup("surfaces"),
-        sampledSurface::iNew(mesh_)
-    );
-
-    transfer(newList);
-    mergeSurfaces();
-
-    if (Pstream::master() && debug)
-    {
-        Pout<< "sample fields:" << fieldNames_ << nl
-            << "sample surfaces:" << nl << "(" << nl;
-
-        forAll(*this, surfI)
-        {
-            Pout << "  " << operator[](surfI) << endl;
-        }
-        Pout << ")" << endl;
-    }
-}
-
-
-void Foam::sampledSurfaces::correct()
-{
-    forAll(*this, surfI)
-    {
-        operator[](surfI).correct(true);
-    }
-
-    // reset interpolation
-    pointMesh::Delete(mesh_);
-    volPointInterpolation::Delete(mesh_);
-
-    mergeSurfaces();
-}
-
-
-void Foam::sampledSurfaces::updateMesh(const mapPolyMesh&)
-{
-    correct();
-}
-
-
-void Foam::sampledSurfaces::movePoints(const pointField&)
-{
-    correct();
-}
-
-
-void Foam::sampledSurfaces::readUpdate(const polyMesh::readUpdateState state)
-{
-    if (state != polyMesh::UNCHANGED)
-    {
-        correct();
-    }
+    return updated;
 }
 
 

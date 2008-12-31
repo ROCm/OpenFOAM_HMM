@@ -161,7 +161,7 @@ void Foam::sampledSurfaces::sampleAndWrite
 }
 
 
-template <class Type>
+template<class Type>
 void Foam::sampledSurfaces::sampleAndWrite
 (
     fieldGroup<Type>& fields

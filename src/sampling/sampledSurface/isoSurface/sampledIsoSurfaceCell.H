@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledIsoSurfaceCell Declaration
+                    Class sampledIsoSurfaceCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledIsoSurfaceCell
@@ -78,8 +78,8 @@ class sampledIsoSurfaceCell
 
         // Recreated for every isoSurface
 
-            //- Time at last call
-            mutable label storedTimeIndex_;
+            //- Time at last call, also track it surface needs an update
+            mutable label prevTimeIndex_;
 
             //- For every triangle the original cell in mesh
             mutable labelList meshCells_;
@@ -88,7 +88,8 @@ class sampledIsoSurfaceCell
     // Private Member Functions
 
         //- Create iso surface (if time has changed)
-        void createGeometry() const;
+        //  Do nothing (and return false) if no update was needed
+        bool updateGeometry() const;
 
         //- sample field on faces
         template <class Type>
@@ -127,6 +128,19 @@ public:
 
     // Member Functions
 
+        //- Does the surface need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surface as needing an update.
+        //  May also free up unneeded data.
+        //  Return false if surface was already marked as expired.
+        virtual bool expire();
+
+        //- Update the surface as required.
+        //  Do nothing (and return false) if no update was needed
+        virtual bool update();
+
+
         //- Points of surface
         virtual const pointField& points() const
         {
@@ -149,10 +163,6 @@ public:
             }
             return facesPtr_;
         }
-
-
-        //- Correct for mesh movement and/or field changes
-        virtual void correct(const bool meshChanged);
 
 
         //- sample field on surface

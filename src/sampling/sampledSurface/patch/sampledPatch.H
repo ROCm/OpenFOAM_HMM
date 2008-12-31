@@ -50,30 +50,28 @@ namespace Foam
 
 class sampledPatch
 :
-    public PrimitiveMeshedSurface<face>,
+    public BasicMeshedSurface<face>,
     public sampledSurface
 {
     //- Private typedefs for convenience
-        typedef PrimitiveMeshedSurface<face> MeshStorage;
+        typedef BasicMeshedSurface<face> MeshStorage;
 
     // Private data
 
         //- Name of patch
         const word patchName_;
 
-        //- Index of patch in boundaryMesh
-        const label patchIndex_;
-
         //- Triangulated faces or keep faces as is
         bool triangulate_;
+
+        //- Track if the surface needs an update
+        mutable bool needsUpdate_;
 
         //- Local patch face labels
         labelList patchFaceLabels_;
 
     // Private Member Functions
 
-        //- Do all to construct geometry.
-        void createGeometry();
 
         //- sample field on faces
         template <class Type>
@@ -88,7 +86,7 @@ class sampledPatch
         interpolateField(const interpolation<Type>&) const;
 
 
-        //- remap action on triangulation or cleanup 
+        //- remap action on triangulation or cleanup
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:
@@ -124,6 +122,19 @@ public:
 
     // Member Functions
 
+        //- Does the surface need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surface as needing an update.
+        //  May also free up unneeded data.
+        //  Return false if surface was already marked as expired.
+        virtual bool expire();
+
+        //- Update the surface as required.
+        //  Do nothing (and return false) if no update was needed
+        virtual bool update();
+
+
         const word patchName() const
         {
             return patchName_;
@@ -131,7 +142,7 @@ public:
 
         label patchIndex() const
         {
-            return patchIndex_;
+            return mesh().boundaryMesh().findPatchID(patchName_);
         }
 
         const labelList& patchFaceLabels() const
@@ -150,10 +161,6 @@ public:
         {
             return MeshStorage::faces();
         }
-
-
-        //- Correct for mesh movement and/or field changes
-        virtual void correct(const bool meshChanged);
 
 
         //- sample field on surface
