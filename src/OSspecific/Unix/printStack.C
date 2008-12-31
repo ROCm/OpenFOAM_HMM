@@ -149,7 +149,7 @@ void getSymbolForRaw
     const word& address
 )
 {
-    if (filename[0] == '/')
+    if (filename.size() > 0 && filename[0] == '/')
     {
         string fcnt = pOpen
         (
@@ -220,6 +220,7 @@ void error::printStack(Ostream& os)
             if (lPos != string::npos && rPos != string::npos && lPos<rPos)
             {
                 address = msg.substr(lPos+1, rPos-lPos-1);
+                msg = msg.substr(0, lPos);
             }
 
             string::size_type bracketPos = msg.find('(');
