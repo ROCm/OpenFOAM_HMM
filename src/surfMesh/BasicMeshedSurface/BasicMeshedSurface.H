@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::PrimitiveMeshedSurface
+    Foam::BasicMeshedSurface
 
 Description
-    Holds surfaces without any patch information
+    Holds surfaces without any zone information
 
 SourceFiles
-    PrimitiveMeshedSurface.C
+    BasicMeshedSurface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PrimitiveMeshedSurface_H
-#define PrimitiveMeshedSurface_H
+#ifndef BasicMeshedSurface_H
+#define BasicMeshedSurface_H
 
 #include "PrimitivePatchExtra.H"
 #include "pointField.H"
@@ -50,11 +50,11 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 /*---------------------------------------------------------------------------*\
-                  Class PrimitiveMeshedSurface Declaration
+                     Class BasicMeshedSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
-class PrimitiveMeshedSurface
+class BasicMeshedSurface
 :
     public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>
 {
@@ -98,10 +98,10 @@ public:
     // Constructors
 
         //- Construct null
-        PrimitiveMeshedSurface();
+        BasicMeshedSurface();
 
         //- Construct by transferring components (points, faces).
-        PrimitiveMeshedSurface
+        BasicMeshedSurface
         (
             const xfer<pointField>&,
             const xfer<List<Face> >&
@@ -109,7 +109,7 @@ public:
 
     // Destructor
 
-        virtual ~PrimitiveMeshedSurface();
+        virtual ~BasicMeshedSurface();
 
     // Member Functions
 
@@ -175,21 +175,21 @@ public:
 
 //- Specialization for holding triangulated information
 template<>
-inline bool PrimitiveMeshedSurface<triFace>::isTri()
+inline bool BasicMeshedSurface<triFace>::isTri()
 {
     return true;
 }
 
 //- Specialization for holding triangulated information
 template<>
-inline label PrimitiveMeshedSurface<triFace>::triangulate()
+inline label BasicMeshedSurface<triFace>::triangulate()
 {
     return 0;
 }
 
 //- Specialization for holding triangulated information
 template<>
-inline label PrimitiveMeshedSurface<triFace>::triangulate(List<label>& faceMap)
+inline label BasicMeshedSurface<triFace>::triangulate(List<label>& faceMap)
 {
     if (&faceMap)
     {
@@ -206,7 +206,7 @@ inline label PrimitiveMeshedSurface<triFace>::triangulate(List<label>& faceMap)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PrimitiveMeshedSurface.C"
+#   include "BasicMeshedSurface.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

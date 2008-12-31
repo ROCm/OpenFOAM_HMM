@@ -24,13 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitiveMeshedSurface.H"
+#include "BasicMeshedSurface.H"
 #include "boundBox.H"
 #include "mergePoints.H"
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
-inline bool Foam::PrimitiveMeshedSurface<Face>::isTri()
+inline bool Foam::BasicMeshedSurface<Face>::isTri()
 {
     return false;
 }
@@ -39,14 +39,14 @@ inline bool Foam::PrimitiveMeshedSurface<Face>::isTri()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::PrimitiveMeshedSurface<Face>::PrimitiveMeshedSurface()
+Foam::BasicMeshedSurface<Face>::BasicMeshedSurface()
 :
     ParentType(List<Face>(), pointField())
 {}
 
 
 template<class Face>
-Foam::PrimitiveMeshedSurface<Face>::PrimitiveMeshedSurface
+Foam::BasicMeshedSurface<Face>::BasicMeshedSurface
 (
     const xfer<pointField>& pointLst,
     const xfer<List<Face> >& faceLst
@@ -61,14 +61,14 @@ Foam::PrimitiveMeshedSurface<Face>::PrimitiveMeshedSurface
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Face>
-Foam::PrimitiveMeshedSurface<Face>::~PrimitiveMeshedSurface()
+Foam::BasicMeshedSurface<Face>::~BasicMeshedSurface()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::clear()
+void Foam::BasicMeshedSurface<Face>::clear()
 {
     ParentType::clearOut();
 
@@ -78,7 +78,7 @@ void Foam::PrimitiveMeshedSurface<Face>::clear()
 
 
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::movePoints(const pointField& newPoints)
+void Foam::BasicMeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
     // Remove all geometry dependent data
     ParentType::clearTopology();
@@ -92,7 +92,7 @@ void Foam::PrimitiveMeshedSurface<Face>::movePoints(const pointField& newPoints)
 
 
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
+void Foam::BasicMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
 {
     // avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
@@ -109,7 +109,7 @@ void Foam::PrimitiveMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
 
 
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::reset
+void Foam::BasicMeshedSurface<Face>::reset
 (
     const xfer<pointField>& pointLst,
     const xfer<List<Face> >& faceLst
@@ -133,7 +133,7 @@ void Foam::PrimitiveMeshedSurface<Face>::reset
 
 // Remove badly degenerate faces, double faces.
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::cleanup(const bool verbose)
+void Foam::BasicMeshedSurface<Face>::cleanup(const bool verbose)
 {
     // merge points (already done for STL, TRI)
     stitchFaces(SMALL, verbose);
@@ -144,7 +144,7 @@ void Foam::PrimitiveMeshedSurface<Face>::cleanup(const bool verbose)
 
 
 template<class Face>
-bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
+bool Foam::BasicMeshedSurface<Face>::stitchFaces
 (
     const scalar tol,
     const bool verbose
@@ -165,7 +165,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
 
     if (verbose)
     {
-        Info<< "PrimitiveMeshedSurface::stitchFaces : Renumbering all faces"
+        Info<< "BasicMeshedSurface::stitchFaces : Renumbering all faces"
             << endl;
     }
 
@@ -198,7 +198,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
         }
         else if (verbose)
         {
-            Pout<< "PrimitiveMeshedSurface::stitchFaces : "
+            Pout<< "BasicMeshedSurface::stitchFaces : "
                 << "Removing collapsed face " << faceI << endl
                 << "    vertices   :" << f << endl;
         }
@@ -209,7 +209,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
     {
         if (verbose)
         {
-            Pout<< "PrimitiveMeshedSurface::stitchFaces : "
+            Pout<< "BasicMeshedSurface::stitchFaces : "
                 << "Removed " << faceLst.size() - newFaceI
                 << " faces" << endl;
         }
@@ -226,7 +226,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::stitchFaces
 
 // Remove badly degenerate faces and double faces.
 template<class Face>
-bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
+bool Foam::BasicMeshedSurface<Face>::checkFaces
 (
     const bool verbose
 )
@@ -250,7 +250,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
             {
                 if (f[fp] < 0 || f[fp] > maxPointI)
                 {
-                    FatalErrorIn("PrimitiveMeshedSurface::checkFaces(bool)")
+                    FatalErrorIn("BasicMeshedSurface::checkFaces(bool)")
                         << "face " << f
                         << " uses point indices outside point range 0.."
                     << maxPointI
@@ -271,7 +271,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
             {
                 WarningIn
                 (
-                    "PrimitiveMeshedSurface::checkFaces(bool verbose)"
+                    "BasicMeshedSurface::checkFaces(bool verbose)"
                 )   << "face[" << faceI << "] = " << f
                     << " does not have three unique vertices" << endl;
             }
@@ -319,7 +319,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
                 {
                     WarningIn
                     (
-                        "PrimitiveMeshedSurface::checkFaces(bool verbose)"
+                        "BasicMeshedSurface::checkFaces(bool verbose)"
                     )   << "faces share the same vertices:" << nl
                         << "    face[" << faceI << "] : " << f << nl
                         << "    face[" << neiFaceI << "] : " << nei << endl;
@@ -353,7 +353,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
         {
             WarningIn
             (
-                "PrimitiveMeshedSurface::checkFaces(bool verbose)"
+                "BasicMeshedSurface::checkFaces(bool verbose)"
             )   << "Removed " << faceLst.size() - newFaceI
                 << " illegal faces." << endl;
         }
@@ -385,7 +385,7 @@ bool Foam::PrimitiveMeshedSurface<Face>::checkFaces
 
 
 template<class Face>
-Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate()
+Foam::label Foam::BasicMeshedSurface<Face>::triangulate()
 {
     return triangulate
     (
@@ -395,7 +395,7 @@ Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate()
 
 
 template<class Face>
-Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate
+Foam::label Foam::BasicMeshedSurface<Face>::triangulate
 (
     List<label>& faceMapOut
 )
@@ -500,13 +500,13 @@ Foam::label Foam::PrimitiveMeshedSurface<Face>::triangulate
 
 // dummy implementation to avoid a pure virtual class
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::remapFaces(const UList<label>&)
+void Foam::BasicMeshedSurface<Face>::remapFaces(const UList<label>&)
 {
 }
 
 
 template<class Face>
-void Foam::PrimitiveMeshedSurface<Face>::writeStats(Ostream& os) const
+void Foam::BasicMeshedSurface<Face>::writeStats(Ostream& os) const
 {
     os  << "points      : " << this->points().size() << nl
         << (this->isTri() ? "triangles   : " : "faces       : ")

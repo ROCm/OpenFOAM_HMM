@@ -44,7 +44,7 @@ SourceFiles
 #ifndef MeshedSurface_H
 #define MeshedSurface_H
 
-#include "PrimitiveMeshedSurface.H"
+#include "BasicMeshedSurface.H"
 #include "surfGroupList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
@@ -75,7 +75,7 @@ template<class Face>
 template<class Face>
 class MeshedSurface
 :
-    public PrimitiveMeshedSurface<Face>,
+    public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
     friend class UnsortedMeshedSurface<Face>;
@@ -83,7 +83,7 @@ class MeshedSurface
 private:
 
     //- Private typedefs for convenience
-        typedef PrimitiveMeshedSurface<Face> ParentType;
+        typedef BasicMeshedSurface<Face> ParentType;
         typedef UnsortedMeshedSurface<Face>  SiblingType;
 
     // Private Member Data

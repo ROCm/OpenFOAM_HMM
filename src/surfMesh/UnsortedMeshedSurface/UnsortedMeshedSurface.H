@@ -47,7 +47,7 @@ SourceFiles
 #ifndef UnsortedMeshedSurface_H
 #define UnsortedMeshedSurface_H
 
-#include "PrimitiveMeshedSurface.H"
+#include "BasicMeshedSurface.H"
 #include "surfPatchIdentifierList.H"
 #include "surfGroupList.H"
 #include "surfaceFormatsCore.H"
@@ -80,7 +80,7 @@ template<class Face>
 template<class Face>
 class UnsortedMeshedSurface
 :
-    public PrimitiveMeshedSurface<Face>,
+    public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
     friend class MeshedSurface<Face>;
@@ -88,7 +88,7 @@ class UnsortedMeshedSurface
 private:
 
     //- Typedefs for convenience
-        typedef PrimitiveMeshedSurface<Face> ParentType;
+        typedef BasicMeshedSurface<Face> ParentType;
         typedef MeshedSurface<Face> SiblingType;
 
     // Private Member Data
