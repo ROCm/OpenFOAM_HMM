@@ -65,8 +65,8 @@ inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
         "| =========                 |                                                 |\n"
         "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
         "|  \\\\    /   O peration     | Version:  " << FOAMversion << spaces << "|\n"
-        "|   \\\\  /    A nd           |                                                 |\n"
-        "|    \\\\/     M anipulation  |                                www.OpenFOAM.org |\n"
+        "|   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\n"
+        "|    \\\\/     M anipulation  |                                                 |\n"
         "\\*---------------------------------------------------------------------------*/\n";
 }
 
