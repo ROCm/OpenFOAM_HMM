@@ -63,7 +63,7 @@ Foam::label Foam::cellClassification::count
         }
     }
     return cnt;
-    
+
 }
 
 
@@ -150,7 +150,7 @@ Foam::boolList Foam::cellClassification::markFaces
     treeBoundBox allBb(mesh_.points());
 
     // Extend domain slightly (also makes it 3D if was 2D)
-    scalar tol = 1E-6*allBb.avgDim();
+    scalar tol = 1E-6 * allBb.avgDim();
 
     point& bbMin = allBb.min();
     bbMin.x() -= tol;
@@ -166,9 +166,9 @@ Foam::boolList Foam::cellClassification::markFaces
     (
         treeDataFace(false, mesh_, allFaces),
         allBb,      // overall search domain
-        8,      // maxLevel
-        10,     // leafsize
-        3.0     // duplicity
+        8,          // maxLevel
+        10,         // leafsize
+        3.0         // duplicity
     );
 
     const triSurface& surf = search.surface();
@@ -359,7 +359,7 @@ void Foam::cellClassification::classifyPoints
         const labelList& pCells = mesh_.pointCells()[pointI];
 
         pointSide[pointI] = UNSET;
-    
+
         forAll(pCells, i)
         {
             label type = cellType[pCells[i]];
@@ -665,7 +665,7 @@ Foam::label Foam::cellClassification::growSurface
 
                     nChanged++;
                 }
-            }     
+            }
         }
     }
     return nChanged;
@@ -694,7 +694,7 @@ Foam::label Foam::cellClassification::fillHangingCells
         classifyPoints(meshType, *this, pointSide);
 
         // Check all cells using mixed point type for whether they use mixed
-        // points only. Note: could probably speed this up by counting number 
+        // points only. Note: could probably speed this up by counting number
         // of mixed verts per face and mixed faces per cell or something?
         forAll(pointSide, pointI)
         {
@@ -800,7 +800,7 @@ Foam::label Foam::cellClassification::fillRegionEdges
 
     return nTotChanged;
 }
-    
+
 
 Foam::label Foam::cellClassification::fillRegionPoints
 (

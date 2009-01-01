@@ -29,10 +29,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+const Foam::scalar Foam::treeBoundBox::great(GREAT);
+
 const Foam::treeBoundBox Foam::treeBoundBox::greatBox
 (
     vector(-GREAT, -GREAT, -GREAT),
     vector(GREAT, GREAT, GREAT)
+);
+
+
+const Foam::treeBoundBox Foam::treeBoundBox::invertedBox
+(
+    vector(GREAT, GREAT, GREAT),
+    vector(-GREAT, -GREAT, -GREAT)
 );
 
 
@@ -185,63 +194,7 @@ Foam::pointField Foam::treeBoundBox::points() const
 
 Foam::treeBoundBox Foam::treeBoundBox::subBbox(const direction octant) const
 {
-    if (octant > 7)
-    {
-        FatalErrorIn
-        (
-            "treeBoundBox::subCube(const direction)"
-        )   << "octant should be [0..7]"
-            << abort(FatalError);
-    }
-
-    scalar leftx, lefty, leftz;
-    scalar rightx, righty, rightz;
-
-    scalar midx=0.5*(min().x() + max().x());
-    scalar midy=0.5*(min().y() + max().y());
-    scalar midz=0.5*(min().z() + max().z());
-
-    // X half
-    if (octant & treeBoundBox::RIGHTHALF)
-    {
-        leftx = midx;
-        rightx = max().x();
-    }
-    else
-    {
-        leftx = min().x();
-        rightx = midx;
-    }
-
-    // Y half
-    if (octant & treeBoundBox::TOPHALF)
-    {
-        lefty = midy;
-        righty = max().y();
-    }
-    else
-    {
-        lefty = min().y();
-        righty = midy;
-    }
-
-    // Z half
-    if (octant & treeBoundBox::FRONTHALF)
-    {
-        leftz = midz;
-        rightz = max().z();
-    }
-    else
-    {
-        leftz = min().z();
-        rightz = midz;
-    }
-
-    return treeBoundBox
-    (
-        point(leftx, lefty, leftz),
-        point(rightx, righty, rightz)
-    );
+    return subBbox(midpoint(), octant);
 }
 
 
@@ -256,44 +209,41 @@ Foam::treeBoundBox Foam::treeBoundBox::subBbox
     {
         FatalErrorIn
         (
-            "treeBoundBox::subCube(const point&, const direction)"
+            "treeBoundBox::subBbox(const point&, const direction)"
         )   << "octant should be [0..7]"
             << abort(FatalError);
     }
 
-    treeBoundBox subBb;
-    point& subMin = subBb.min();
-    point& subMax = subBb.max();
+    // start with a copy of this bounding box and adjust limits accordingly
+    treeBoundBox subBb(*this);
+    point& bbMin = subBb.min();
+    point& bbMax = subBb.max();
 
     if (octant & treeBoundBox::RIGHTHALF)
     {
-        subMin.x() = mid.x();
-        subMax.x() = max().x();
+        bbMin.x() = mid.x();    // mid -> max
     }
     else
     {
-        subMin.x() = min().x();
-        subMax.x() = mid.x();
+        bbMax.x() = mid.x();    // min -> mid
     }
+
     if (octant & treeBoundBox::TOPHALF)
     {
-        subMin.y() = mid.y();
-        subMax.y() = max().y();
+        bbMin.y() = mid.y();    // mid -> max
     }
     else
     {
-        subMin.y() = min().y();
-        subMax.y() = mid.y();
+        bbMax.y() = mid.y();    // min -> mid
     }
+
     if (octant & treeBoundBox::FRONTHALF)
     {
-        subMin.z() = mid.z();
-        subMax.z() = max().z();
+        bbMin.z() = mid.z();    // mid -> max
     }
     else
     {
-        subMin.z() = min().z();
-        subMax.z() = mid.z();
+        bbMax.z() = mid.z();    // min -> mid
     }
 
     return subBb;
@@ -364,13 +314,11 @@ bool Foam::treeBoundBox::intersects
     point& pt
 ) const
 {
-    vector vec(end - start);
-
+    const vector vec(end - start);
+    const direction endBits = posBits(end);
     pt = start;
 
-    const direction endBits = posBits(end);
-
-    while(true)
+    while (true)
     {
         direction ptBits = posBits(pt);
 
@@ -465,32 +413,18 @@ bool Foam::treeBoundBox::contains(const treeBoundBox& bb) const
 }
 
 
-bool Foam::treeBoundBox::containsNarrow(const point& sample) const
-{
-    return
-    (
-        (sample.x() > min().x()) &&
-        (sample.y() > min().y()) &&
-        (sample.z() > min().z()) &&
-        (sample.x() < max().x()) &&
-        (sample.y() < max().y()) &&
-        (sample.z() < max().z())
-    );
-}
-
-bool Foam::treeBoundBox::contains(const vector& dir, const point& sample) const
+bool Foam::treeBoundBox::contains(const vector& dir, const point& pt) const
 {
     //
     // Compare all components against min and max of bb
     //
-
     for (direction cmpt=0; cmpt<3; cmpt++)
     {
-        if (sample[cmpt] < min()[cmpt])
+        if (pt[cmpt] < min()[cmpt])
         {
             return false;
         }
-        else if (sample[cmpt] == min()[cmpt])
+        else if (pt[cmpt] == min()[cmpt])
         {
             // On edge. Outside if direction points outwards.
             if (dir[cmpt] < 0)
@@ -499,11 +433,11 @@ bool Foam::treeBoundBox::contains(const vector& dir, const point& sample) const
             }
         }
 
-        if (sample[cmpt] > max()[cmpt])
+        if (pt[cmpt] > max()[cmpt])
         {
             return false;
         }
-        else if (sample[cmpt] == max()[cmpt])
+        else if (pt[cmpt] == max()[cmpt])
         {
             // On edge. Outside if direction points outwards.
             if (dir[cmpt] > 0)
@@ -557,7 +491,7 @@ Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
 // !names of treeBoundBox::min() and treeBoundBox::max() are confusing!
 void Foam::treeBoundBox::calcExtremities
 (
-    const point& sample,
+    const point& pt,
     point& nearest,
     point& furthest
 ) const
@@ -565,7 +499,7 @@ void Foam::treeBoundBox::calcExtremities
     scalar nearX, nearY, nearZ;
     scalar farX, farY, farZ;
 
-    if (Foam::mag(min().x() - sample.x()) < Foam::mag(max().x() - sample.x()))
+    if (Foam::mag(min().x() - pt.x()) < Foam::mag(max().x() - pt.x()))
     {
         nearX = min().x();
         farX = max().x();
@@ -576,7 +510,7 @@ void Foam::treeBoundBox::calcExtremities
         farX = min().x();
     }
 
-    if (Foam::mag(min().y() - sample.y()) < Foam::mag(max().y() - sample.y()))
+    if (Foam::mag(min().y() - pt.y()) < Foam::mag(max().y() - pt.y()))
     {
         nearY = min().y();
         farY = max().y();
@@ -587,7 +521,7 @@ void Foam::treeBoundBox::calcExtremities
         farY = min().y();
     }
 
-    if (Foam::mag(min().z() - sample.z()) < Foam::mag(max().z() - sample.z()))
+    if (Foam::mag(min().z() - pt.z()) < Foam::mag(max().z() - pt.z()))
     {
         nearZ = min().z();
         farZ = max().z();
@@ -603,12 +537,12 @@ void Foam::treeBoundBox::calcExtremities
 }
 
 
-Foam::scalar Foam::treeBoundBox::maxDist(const point& sample) const
+Foam::scalar Foam::treeBoundBox::maxDist(const point& pt) const
 {
     point near, far;
-    calcExtremities(sample, near, far);
+    calcExtremities(pt, near, far);
 
-    return Foam::mag(far - sample);
+    return Foam::mag(far - pt);
 }
 
 
@@ -617,57 +551,57 @@ Foam::scalar Foam::treeBoundBox::maxDist(const point& sample) const
 // box to see if all vertices of one are nearer
 Foam::label Foam::treeBoundBox::distanceCmp
 (
-    const point& sample,
+    const point& pt,
     const treeBoundBox& other
 ) const
 {
     //
-    // Distance sample <-> nearest and furthest away vertex of this
+    // Distance point <-> nearest and furthest away vertex of this
     //
 
     point nearThis, farThis;
 
     // get nearest and furthest away vertex
-    calcExtremities(sample, nearThis, farThis);
+    calcExtremities(pt, nearThis, farThis);
 
     const scalar minDistThis =
-        sqr(nearThis.x() - sample.x())
-     +  sqr(nearThis.y() - sample.y())
-     +  sqr(nearThis.z() - sample.z());
+        sqr(nearThis.x() - pt.x())
+     +  sqr(nearThis.y() - pt.y())
+     +  sqr(nearThis.z() - pt.z());
     const scalar maxDistThis =
-        sqr(farThis.x() - sample.x())
-     +  sqr(farThis.y() - sample.y())
-     +  sqr(farThis.z() - sample.z());
+        sqr(farThis.x() - pt.x())
+     +  sqr(farThis.y() - pt.y())
+     +  sqr(farThis.z() - pt.z());
 
     //
-    // Distance sample <-> other
+    // Distance point <-> other
     //
 
     point nearOther, farOther;
 
     // get nearest and furthest away vertex
-    other.calcExtremities(sample, nearOther, farOther);
+    other.calcExtremities(pt, nearOther, farOther);
 
     const scalar minDistOther =
-        sqr(nearOther.x() - sample.x())
-     +  sqr(nearOther.y() - sample.y())
-     +  sqr(nearOther.z() - sample.z());
+        sqr(nearOther.x() - pt.x())
+     +  sqr(nearOther.y() - pt.y())
+     +  sqr(nearOther.z() - pt.z());
     const scalar maxDistOther =
-        sqr(farOther.x() - sample.x())
-     +  sqr(farOther.y() - sample.y())
-     +  sqr(farOther.z() - sample.z());
+        sqr(farOther.x() - pt.x())
+     +  sqr(farOther.y() - pt.y())
+     +  sqr(farOther.z() - pt.z());
 
     //
     // Categorize
     //
     if (maxDistThis < minDistOther)
     {
-        // All vertices of this are nearer to sample than any vertex of other
+        // All vertices of this are nearer to point than any vertex of other
         return -1;
     }
     else if (minDistThis > maxDistOther)
     {
-        // All vertices of this are further from sample than any vertex of other
+        // All vertices of this are further from point than any vertex of other
         return 1;
     }
     else

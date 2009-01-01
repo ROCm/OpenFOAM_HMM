@@ -69,7 +69,7 @@ public:
     // Constructors
 
         //- Construct from components. Holds reference to points!
-        octreeDataPoint(const pointField& points);
+        octreeDataPoint(const pointField&);
 
 
     // Member Functions

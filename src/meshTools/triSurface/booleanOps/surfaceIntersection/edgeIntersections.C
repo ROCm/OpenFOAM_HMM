@@ -59,7 +59,7 @@ void Foam::edgeIntersections::checkEdges(const triSurface& surf)
 
     treeBoundBox bb(localPoints);
 
-    scalar minSize = SMALL*bb.minDim();
+    scalar minSize = SMALL * bb.minDim();
 
     forAll(edges, edgeI)
     {

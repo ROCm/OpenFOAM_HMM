@@ -902,7 +902,7 @@ Foam::labelList Foam::boundaryMesh::getNearest
 
     // Extend domain slightly (also makes it 3D if was 2D)
     // Note asymmetry to avoid having faces align with octree cubes.
-    scalar tol = 1E-6*overallBb.avgDim();
+    scalar tol = 1E-6 * overallBb.avgDim();
 
     point& bbMin = overallBb.min();
     bbMin.x() -= tol;

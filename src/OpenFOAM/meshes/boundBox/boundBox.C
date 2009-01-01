@@ -26,8 +26,11 @@ License
 
 #include "boundBox.H"
 #include "PstreamReduceOps.H"
+#include "tmp.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::scalar Foam::boundBox::great(VGREAT);
 
 const Foam::boundBox Foam::boundBox::greatBox
 (
@@ -43,16 +46,16 @@ const Foam::boundBox Foam::boundBox::invertedBox
 );
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
-:
-    min_(point::zero),
-    max_(point::zero)
+void Foam::boundBox::calculate(const pointField& points, const bool doReduce)
 {
     if (points.size() == 0)
     {
-        if (Pstream::parRun() && doReduce)
+        min_ = point::zero;
+        max_ = point::zero;
+
+        if (doReduce && Pstream::parRun())
         {
             // Use values that get overwritten by reduce minOp, maxOp below
             min_ = point(VGREAT, VGREAT, VGREAT);
@@ -64,19 +67,40 @@ Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
         min_ = points[0];
         max_ = points[0];
 
-        forAll(points, i)
+        for (label i = 1; i < points.size(); i++)
         {
             min_ = ::Foam::min(min_, points[i]);
             max_ = ::Foam::max(max_, points[i]);
         }
     }
 
+    // Reduce parallel information
     if (doReduce)
     {
-        // Reduce parallel information
         reduce(min_, minOp<point>());
         reduce(max_, maxOp<point>());
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
+:
+    min_(point::zero),
+    max_(point::zero)
+{
+    calculate(points, doReduce);
+}
+
+
+Foam::boundBox::boundBox(const tmp<pointField>& points, const bool doReduce)
+:
+    min_(point::zero),
+    max_(point::zero)
+{
+    calculate(points(), doReduce);
+    points.clear();
 }
 
 

@@ -52,7 +52,7 @@ triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
 {
     treeBoundBox treeBb(surface_.points(), surface_.meshPoints());
 
-    scalar tol = 1E-6*treeBb.avgDim();
+    scalar tol = 1E-6 * treeBb.avgDim();
 
     point& bbMin = treeBb.min();
     bbMin.x() -= tol;

@@ -728,8 +728,8 @@ void Foam::globalMeshData::updateMesh()
     // Do processor patch addressing
     initProcAddr();
 
-    // Bounding box (does communication)
-    bb_ = boundBox(mesh_.points(), true);
+    // Note: boundBox does reduce
+    bb_ = boundBox(mesh_.points());
 
     scalar tolDim = matchTol_ * bb_.mag();
 
@@ -738,7 +738,6 @@ void Foam::globalMeshData::updateMesh()
         Pout<< "globalMeshData : bb_:" << bb_
             << " merge dist:" << tolDim << endl;
     }
-
 
 
     // Option 1. Topological
@@ -770,7 +769,7 @@ void Foam::globalMeshData::updateMesh()
     // processor faces (on highest numbered processor) before summing.
     nTotalFaces_ = mesh_.nFaces();
 
-    // Do not count processorpatch faces that are coincident.
+    // Do not count processor-patch faces that are coincident.
     forAll(processorPatches_, i)
     {
         label patchI = processorPatches_[i];

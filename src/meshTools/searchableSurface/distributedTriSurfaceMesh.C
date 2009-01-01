@@ -38,12 +38,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        distributedTriSurfaceMesh,
+        dict
+    );
 
-defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
-addToRunTimeSelectionTable(searchableSurface, distributedTriSurfaceMesh, dict);
-
-scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
-
+    scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
 }
 
 

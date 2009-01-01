@@ -30,8 +30,8 @@ Description
 
 SourceFiles
     treeLeaf.C
-    octreeDataPointTreaLeaf.H       (specialization for points only )
-    octreeDataPointTreeLeaf.C       (   ,,                          )
+    octreeDataPointTreeLeaf.C  (specialization for points only)
+    octreeDataPointTreeLeaf.H  (specialization for points only)
 
 \*---------------------------------------------------------------------------*/
 
@@ -212,7 +212,7 @@ public:
                 const Type& shapes,
                 const point& sample,
                 treeBoundBox& tightest,
-                label& tightesti,
+                label& tightestI,
                 scalar& tightestDist
             ) const;
 
@@ -224,7 +224,7 @@ public:
                 const Type& shapes,
                 const linePointRef& ln,
                 treeBoundBox& tightest,
-                label& tightesti,   // index of nearest shape
+                label& tightestI,   // index of nearest shape
                 point& linePoint,   // nearest point on line
                 point& shapePoint   // nearest point on shape
             ) const;
@@ -250,7 +250,7 @@ public:
                 label& vertNo
             ) const;
 
-            //- debug: 
+            //- debug:
             label countLeaf(Ostream&, const label) const;
 
 

@@ -433,8 +433,8 @@ void Foam::displacementInterpolationFvMotionSolver::updateMesh
     );
 
     // Note: boundBox does reduce
-    const vector span0 = boundBox(points0_, true).span();
-    const vector span  = boundBox(points, true).span();
+    const vector span0 = boundBox(points0_).span();
+    const vector span  = boundBox(points).span();
 
     vector scaleFactors(cmptDivide(span0, span));
 
@@ -455,13 +455,11 @@ void Foam::displacementInterpolationFvMotionSolver::updateMesh
             else
             {
                 // New point. Assume motion is scaling.
-                newPoints0[pointI] =
-                    points0_[oldPointI]
-                  + cmptMultiply
-                    (
-                        scaleFactors,
-                        points[pointI]-points[masterPointI]
-                    );
+                newPoints0[pointI] = points0_[oldPointI] + cmptMultiply
+                (
+                    scaleFactors,
+                    points[pointI]-points[masterPointI]
+                );
             }
         }
         else

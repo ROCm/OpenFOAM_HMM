@@ -58,11 +58,7 @@ Foam::octreeDataCell::octreeDataCell
     bbs_
     (
         mesh_.nCells(),
-        treeBoundBox
-        (
-            vector(GREAT, GREAT, GREAT),
-            vector(-GREAT, -GREAT, -GREAT)
-        )
+        treeBoundBox::invertedBox
     )
 {
     // Set one-one indexing
