@@ -22,24 +22,15 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    A simple wrapper around bool so that it can
-    be read as on/off, yes/no or y/n.
-
 \*---------------------------------------------------------------------------*/
 
 #include "Switch.H"
 #include "error.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Switch Switch::lookupOrAddToDict
+Foam::Switch Foam::Switch::lookupOrAddToDict
 (
     const word& name,
     dictionary& dict,
@@ -52,52 +43,39 @@ Switch Switch::lookupOrAddToDict
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-word Switch::wordValue(const bool l) const
+Foam::word Foam::Switch::wordValue(const bool val) const
 {
-    word w("off");
-
-    if (l)
-    {
-        w = "on";
-    }
-
-    return w;
+    return word(val ? "on" : "off");
 }
 
 
-bool Switch::boolValue(const word& w) const
+bool Foam::Switch::boolValue(const word& val) const
 {
-    bool l = true;
-
-    if (w == "on" || w == "yes" || w == "y" || w == "true")
+    if (val == "on" || val == "true" || val == "yes" || val == "y")
     {
-        l = true;
+        return true;
     }
-    else if (w == "off" || w == "no" || w == "n" || w == "false")
+    else if (val == "off" || val == "false" || val == "no" || val == "n")
     {
-        l = false;
+        return false;
     }
     else
     {
-        FatalErrorIn("Switch::boolValue(const word& w) const")
-            << "unknown switch word " << w
+        FatalErrorIn("Switch::boolValue(const word&) const")
+            << "unknown switch word " << val
             << abort(FatalError);
     }
 
-    return l;
+    return false;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
-bool Switch::readIfPresent(const word& name, const dictionary& dict)
+bool Foam::Switch::readIfPresent(const word& name, const dictionary& dict)
 {
     return dict.readIfPresent(name, logicalSwitch_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,8 +26,8 @@ Class
     Foam::Switch
 
 Description
-    A simple wrapper around bool so that it can be read as
-    on/off, yes/no or y/n.
+    A simple wrapper around bool so that it can be read as a word:
+    on/off, true/false, yes/no or y/n.
 
 SourceFiles
     Switch.C
@@ -68,6 +68,7 @@ class Switch
 
     // Private member functions
 
+        // could be static instead:
         word wordValue(const bool) const;
         bool boolValue(const word&) const;
 

@@ -22,23 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    A simple wrapper around bool so that it can
-    be read as on/off, yes/no or y/n.
-
 \*---------------------------------------------------------------------------*/
 
 #include "Switch.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Switch::Switch(Istream& is)
+Foam::Switch::Switch(Istream& is)
 :
     wordSwitch_(is),
     logicalSwitch_(boolValue(wordSwitch_))
@@ -47,29 +38,25 @@ Switch::Switch(Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, Switch& s)
+Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 {
     is >> s.wordSwitch_;
     s.logicalSwitch_ = s.boolValue(s.wordSwitch_);
 
-    is.check("Istream& operator>>(Istream& is, Switch& s)");
+    is.check("Istream& operator>>(Istream&, Switch&)");
 
     return is;
 }
 
 
-Ostream& operator<<(Ostream& os, const Switch& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Switch& s)
 {
     os << s.wordSwitch_;
 
-    os.check("Ostream& operator<<(Ostream& os, const Switch& s)");
+    os.check("Ostream& operator<<(Ostream&, const Switch&)");
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
