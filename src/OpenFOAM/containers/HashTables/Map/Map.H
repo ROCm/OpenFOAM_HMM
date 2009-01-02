@@ -86,6 +86,12 @@ public:
             HashTable<T, label, Hash<label> >(map)
         {}
 
+        //- Construct by transferring the parameter contents
+        Map(const xfer<HashTable<T, label, Hash<label> > >& map)
+        :
+            HashTable<T, label, Hash<label> >(map)
+        {}
+
 
     //- Return a null Map
     static const Map<T>& null()

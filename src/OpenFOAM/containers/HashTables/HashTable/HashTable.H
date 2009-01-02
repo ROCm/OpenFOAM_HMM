@@ -50,9 +50,7 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T>
-class List;
-
+template<class T> class List;
 template<class T, class Key, class Hash> class HashTable;
 template<class T, class Key, class Hash> class HashPtrTable;
 
@@ -216,6 +214,9 @@ public:
             //  and annull the argument table.
             void transfer(HashTable<T, Key, Hash>&);
 
+            //- Transfer the contents to the xfer container
+            inline xfer<HashTable<T, Key, Hash> > transfer();
+
 
     // Member Operators
 
@@ -225,14 +226,13 @@ public:
         //- Find and return an hashedEntry
         inline const T& operator[](const Key&) const;
 
-        //- Find and return an hashedEntry and
-        //  if it is not present create it null.
+        //- Find and return an hashedEntry, create it null if not present.
         inline T& operator()(const Key&);
 
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>&);
 
-        //- Equality. Two hashtables are equal if all contents of first are
+        //- Equality. Two hash tables are equal if all contents of first are
         //  also in second and vice versa. So does not depend on table size or
         //  order!
         bool operator==(const HashTable<T, Key, Hash>&) const;

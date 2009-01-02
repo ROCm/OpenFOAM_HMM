@@ -54,7 +54,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class HashSet Declaration
+                           Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Key=word, class Hash=string::hash>
@@ -102,6 +102,12 @@ public:
 
         //- Construct by transferring the parameter contents
         HashSet(const xfer<HashSet<Key, Hash> >& hs)
+        :
+            HashTable<empty, Key, Hash>(hs)
+        {}
+
+        //- Construct by transferring the parameter contents
+        HashSet(const xfer<HashTable<empty, Key, Hash> >& hs)
         :
             HashTable<empty, Key, Hash>(hs)
         {}
