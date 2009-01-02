@@ -178,6 +178,9 @@ public:
             //  and annull the argument list.
             void transfer(SortableList<T>&);
 
+            //- Transfer the contents to the xfer container
+            inline xfer<List<T> > transfer();
+
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
 

@@ -65,6 +65,16 @@ inline Foam::label Foam::List<T>::size() const
     return UList<T>::size_;
 }
 
+
+template<class T>
+inline Foam::xfer<Foam::List<T> > Foam::List<T>::transfer()
+{
+    Foam::xfer<List<T> > xf;
+    xf().transfer(*this);
+    return xf;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

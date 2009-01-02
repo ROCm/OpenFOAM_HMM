@@ -145,6 +145,14 @@ int main(int argc, char *argv[])
     Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
         << " " << dlC.size() << "/" << dlC.capacity() << endl;
 
+    List<label> lstB(dlC.transfer());
+
+    Info<< "Transferred to normal list via the transfer() method" << endl;
+    Info<< "<lstB>" << lstB << "</lstB>" << nl << "sizes: "
+        << " " << lstB.size() << endl;
+    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
+        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+
     return 0;
 }
 

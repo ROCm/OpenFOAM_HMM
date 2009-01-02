@@ -153,6 +153,8 @@ public:
         //- Transfer contents of the argument DynamicList into this DynamicList
         inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
+        //- Transfer the contents to the xfer container as a plain List
+        inline xfer<List<T> > transfer();
 
     // Member Operators
 

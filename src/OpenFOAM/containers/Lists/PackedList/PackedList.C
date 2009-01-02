@@ -101,7 +101,6 @@ void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Assignment.
 template<int nBits>
 void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {

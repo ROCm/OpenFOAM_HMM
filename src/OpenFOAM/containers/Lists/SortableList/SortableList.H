@@ -114,6 +114,9 @@ public:
 
         //- Reverse (stable) sort the list
         void reverseSort();
+   
+        //- Transfer the contents to the xfer container as a plain List
+        inline Foam::xfer<List<T> > transfer();
 
     // Member Operators
 

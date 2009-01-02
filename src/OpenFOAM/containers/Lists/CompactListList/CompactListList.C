@@ -26,15 +26,10 @@ License
 
 #include "CompactListList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-CompactListList<T>::CompactListList(const List<List<T> >& ll)
+Foam::CompactListList<T>::CompactListList(const List<List<T> >& ll)
 :
     offsets_(ll.size())
 {
@@ -61,7 +56,10 @@ CompactListList<T>::CompactListList(const List<List<T> >& ll)
 
 
 template<class T>
-CompactListList<T>::CompactListList(const UList<label>& rowSizes)
+Foam::CompactListList<T>::CompactListList
+(
+    const UList<label>& rowSizes
+)
 :
     offsets_(rowSizes.size())
 {
@@ -77,7 +75,11 @@ CompactListList<T>::CompactListList(const UList<label>& rowSizes)
 
 
 template<class T>
-CompactListList<T>::CompactListList(const UList<label>& rowSizes, const T& t)
+Foam::CompactListList<T>::CompactListList
+(
+    const UList<label>& rowSizes,
+    const T& t
+)
 :
     offsets_(rowSizes.size())
 {
@@ -93,23 +95,31 @@ CompactListList<T>::CompactListList(const UList<label>& rowSizes, const T& t)
 
 
 template<class T>
-CompactListList<T>::CompactListList(const xfer<CompactListList<T> >& lst)
+Foam::CompactListList<T>::CompactListList
+(
+    const xfer<CompactListList<T> >& lst
+)
 {
     transfer(lst());
 }
 
+
 template<class T>
-CompactListList<T>::CompactListList(CompactListList<T>& cll, bool reUse)
+Foam::CompactListList<T>::CompactListList
+(
+    CompactListList<T>& lst,
+    bool reUse
+)
 :
-    offsets_(cll.offsets_, reUse),
-    m_(cll.m_, reUse)
+    offsets_(lst.offsets_, reUse),
+    m_(lst.m_, reUse)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const CompactListList<T>& CompactListList<T>::null()
+const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
 {
     CompactListList<T>* nullPtr = reinterpret_cast<CompactListList<T>*>(NULL);
     return *nullPtr;
@@ -117,7 +127,7 @@ const CompactListList<T>& CompactListList<T>::null()
 
 
 template<class T>
-void CompactListList<T>::setSize(const label nRows)
+void Foam::CompactListList<T>::setSize(const label nRows)
 {
     if (nRows == 0)
     {
@@ -140,14 +150,14 @@ void CompactListList<T>::setSize(const label nRows)
 
 
 template<class T>
-void CompactListList<T>::setSize(const label nRows, const label nData)
+void Foam::CompactListList<T>::setSize(const label nRows, const label nData)
 {
     offsets_.setSize(nRows);
     m_.setSize(nData);
 }
 
 template<class T>
-void CompactListList<T>::setSize
+void Foam::CompactListList<T>::setSize
 (
     const label nRows,
     const label nData,
@@ -159,7 +169,7 @@ void CompactListList<T>::setSize
 }
 
 template<class T>
-labelList CompactListList<T>::sizes() const
+Foam::labelList Foam::CompactListList<T>::sizes() const
 {
     labelList rowSizes(offsets_.size());
 
@@ -173,7 +183,7 @@ labelList CompactListList<T>::sizes() const
 }
 
 template<class T>
-void CompactListList<T>::setSize(const UList<label>& rowSizes)
+void Foam::CompactListList<T>::setSize(const UList<label>& rowSizes)
 {
     offsets_.setSize(rowSizes.size());
 
@@ -188,7 +198,7 @@ void CompactListList<T>::setSize(const UList<label>& rowSizes)
 }
 
 template<class T>
-void CompactListList<T>::clear()
+void Foam::CompactListList<T>::clear()
 {
     offsets_.clear();
     m_.clear();
@@ -196,7 +206,7 @@ void CompactListList<T>::clear()
 
 
 template<class T>
-void CompactListList<T>::transfer(CompactListList<T>& a)
+void Foam::CompactListList<T>::transfer(CompactListList<T>& a)
 {
     offsets_.transfer(a.offsets_);
     m_.transfer(a.m_);
@@ -206,33 +216,28 @@ void CompactListList<T>::transfer(CompactListList<T>& a)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-List<List<T> > CompactListList<T>::operator()() const
+Foam::List<Foam::List<T> > Foam::CompactListList<T>::operator()() const
 {
-    List<List<T> > llt(offsets_.size());
+    List<List<T> > ll(offsets_.size());
 
     label offsetPrev = 0;
     forAll(offsets_, i)
     {
-        List<T>& llti = llt[i];
+        List<T>& lst = ll[i];
 
-        llti.setSize(offsets_[i] - offsetPrev);
+        lst.setSize(offsets_[i] - offsetPrev);
 
-        forAll(llti, j)
+        forAll(lst, j)
         {
-            llti[j] = m_[offsetPrev + j];
+            lst[j] = m_[offsetPrev + j];
         }
 
         offsetPrev = offsets_[i];
     }
 
-    return llt;
+    return ll;
 }
 
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 

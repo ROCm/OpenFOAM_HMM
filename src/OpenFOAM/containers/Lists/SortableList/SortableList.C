@@ -138,6 +138,15 @@ void Foam::SortableList<Type>::reverseSort()
 }
 
 
+template <class Type>
+Foam::xfer<Foam::List<Type> > Foam::SortableList<Type>::transfer()
+{
+    Foam::xfer<List<T> > xf;
+    xf().transfer(*this);
+    return xf;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template <class Type>

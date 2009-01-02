@@ -164,6 +164,8 @@ public:
             //  into this CompactListList and annull the argument list.
             void transfer(CompactListList<T>&);
 
+            //- Transfer the contents to the xfer container
+            inline xfer<CompactListList<T> > transfer();
 
         // Other
 

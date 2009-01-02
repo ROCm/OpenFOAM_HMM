@@ -175,6 +175,9 @@ public:
             //  and annull the argument list.
             void transfer(PtrList<T>&);
 
+            //- Transfer the contents to the xfer container
+            inline xfer<PtrList<T> > transfer();
+
             //- Is element set
             inline bool set(const label) const;
 

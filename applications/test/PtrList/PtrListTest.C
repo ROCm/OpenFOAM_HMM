@@ -104,6 +104,13 @@ int main(int argc, char *argv[])
 
     Info<<"list1: " << list1 << endl;
 
+    PtrList<Scalar> list3(list1.transfer());
+    Info<< "Transferred via the transfer() method" << endl;
+
+    Info<<"list1: " << list1 << endl;
+    Info<<"list2: " << list2 << endl;
+    Info<<"list3: " << list3 << endl;
+
     Info<< nl << "Done." << endl;
     return 0;
 }

@@ -46,7 +46,6 @@ SourceFiles
 namespace Foam
 {
 
-
 /*---------------------------------------------------------------------------*\
                       Class PackedListName Declaration
 \*---------------------------------------------------------------------------*/
@@ -158,6 +157,9 @@ public:
             //  and annull the argument list.
             void transfer(PackedList<nBits>&);
 
+            //- Transfer the contents to the xfer container
+            inline xfer<PackedList<nBits> > transfer();
+
 
         // Access
 
@@ -195,10 +197,9 @@ public:
 
     // Ostream operator
 
-//        // Write PackedList to Ostream.
-//        friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
-}
-;
+   //  // Write PackedList to Ostream.
+   //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

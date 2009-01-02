@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
@@ -53,6 +53,11 @@ int main(int argc, char *argv[])
 
     list2.setSize(10, vector(1, 2, 3));
     Info<< list2 << endl;
+
+    List<vector> list3(list2.transfer());
+    Info<< "Transferred via the transfer() method" << endl;
+    Info<< list2 << endl;
+    Info<< list3 << endl;
 
     return 0;
 }

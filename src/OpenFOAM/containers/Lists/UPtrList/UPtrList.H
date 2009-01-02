@@ -139,6 +139,9 @@ public:
             //  UPtrList and annull the argument list.
             void transfer(UPtrList<T>&);
 
+            //- Transfer the contents to the xfer container
+            inline xfer<UPtrList<T> > transfer();
+
             //- Is element set
             inline bool set(const label) const;
 
