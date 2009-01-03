@@ -22,65 +22,91 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "string.H"
+#include "wordRe.H"
 #include "IOstreams.H"
-
-using namespace Foam;
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
-int main(int argc, char *argv[])
+Foam::wordRe::wordRe(Istream& is)
+:
+    word(),
+    re_(NULL)
 {
-    string test("$HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$");
+    is >> *this;
+}
 
-    Info<< test << endl;
 
-    // test sub-strings via iterators
-    string::const_iterator iter = test.end();
-    string::const_iterator iter2 = test.end();
-    string::size_type fnd = test.find('\\');
+Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
+{
+    token t(is);
 
-    if (fnd != string::npos)
+    if (!t.good())
     {
-        iter  = test.begin() + fnd;
-        iter2 = iter + 6;
+        is.setBad();
+        return is;
     }
 
-    Info<< "sub-string via iterators : >";
-    while (iter != iter2)
+    if (t.isWord())
     {
-        Info<< *iter;
-        iter++;
+        w = t.wordToken();
     }
-    Info<< "<\n";
+    else if (t.isString())
+    {
+        // Auto-tests for regular expression
+        w = t.stringToken();
+    }
+    else
+    {
+        is.setBad();
+        FatalIOErrorIn("operator>>(Istream&, wordRe&)", is)
+            << "wrong token type - expected word or string found "
+            << t.info()
+            << exit(FatalIOError);
 
-    Info<< string(test).replace("kj", "zzz") << endl;
-    Info<< string(test).replace("kj", "") << endl;
-    Info<< string(test).replaceAll("kj", "zzz") << endl;
-    Info<< string(test).replaceAll("kj", "z") << endl;
+        return is;
+    }
 
-    Info<< string(test).expand() << endl;
+    // Check state of IOstream
+    is.check("Istream& operator>>(Istream&, wordRe&)");
 
-    string test2("~OpenFOAM/controlDict");
-    Info<< test2 << " => " << test2.expand() << endl;
+    return is;
+}
 
-    string s;
-    Sin.getLine(s);
 
-    string s2(s.expand());
+Foam::Ostream& Foam::operator<<(Ostream& os, const wordRe& w)
+{
+    if (w.isPattern())
+    {
+        os.write(static_cast<const string&>(w));
+    }
+    else
+    {
+        os.write(static_cast<const word&>(w));
+    }
+    os.check("Ostream& operator<<(Ostream&, const wordRe&)");
+    return os;
+}
 
-    cout<< "output string with " << s2.length() << " characters\n";
-    cout<< "ostream<<  >" << s2 << "<\n";
-    Info<< "Ostream<<  >" << s2 << "<\n";
 
-    Info << "End\n" << endl;
+template<>
+Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<wordRe>& ip)
+{
+    const wordRe& wre = ip.t_;
 
-    return 0;
+    if (wre.isPattern())
+    {
+        os  << "wordRe(regex) " << wre;
+    }
+    else
+    {
+        os  << "wordRe(plain) '" << wre << "'";
+    }
+    os.flush();
+
+    return os;
 }
 
 

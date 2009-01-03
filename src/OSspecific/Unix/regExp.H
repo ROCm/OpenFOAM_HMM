@@ -44,6 +44,7 @@ SourceFiles
 #define regExp_H
 
 #include <regex.h>
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,10 +68,7 @@ class regExp
 
     // Private member functions
 
-        //- release allocated space
-        void clear() const;
-
-        //- compile into a regular expression
+        //- Compile into a regular expression
         void compile(const char*) const;
 
         //- Disallow default bitwise copy construct
@@ -81,48 +79,72 @@ class regExp
 
 public:
 
+        //- Is character a regular expression meta-character?
+        //  any character: '.' \n
+        //  quantifiers: '*', '+', '?' \n
+        //  grouping: '(', '|', ')' \n
+        //  range: '[', ']' \n
+        //
+        //  Don't bother checking for '{digit}' bounds
+        inline static bool meta(char c)
+        {
+            return
+            (
+                (c == '.')                           // any character
+             || (c == '*' || c == '+' || c == '?')   // quantifiers
+             || (c == '(' || c == ')' || c == '|')   // grouping/branching
+             || (c == '[' || c == ']')               // range
+            );
+        }
+
+
     // Constructors
 
         //- Construct null
         regExp();
 
-        //- Construct from string
-        regExp(const string&);
-
         //- Construct from character array
         regExp(const char*);
+
+        //- Construct from std::string (or string)
+        regExp(const std::string&);
 
     // Destructor
 
         ~regExp();
 
+
     // Member functions
 
+        //- Is the precompiled expression set?
+        inline bool exists() const
+        {
+            return preg_ ? true : false;
+        }
+
         //- Return the number of (groups)
-        int ngroups() const;
+        inline int ngroups() const
+        {
+            return preg_ ? preg_->re_nsub : 0;
+        }
+
+        //- Release precompiled expression.
+        //  Returns true if precompiled expression existed before clear
+        bool clear() const;
 
         //- Return true if it matches, partial matches are optional
-        bool match
-        (
-            const string&,
-            bool partialMatch=false
-        ) const;
+        bool match(const std::string&, bool partial=false) const;
 
-        //- Return true if it matches and sets the sub-groups matched,
-        //  partial matches are optional
-        bool match
-        (
-            const string&,
-            List<string>& groups,
-            bool partialMatch=false
-        ) const;
+        //- Return true if it matches and sets the sub-groups matched
+        bool match(const string&, List<string>& groups) const;
+
 
     // Member Operators
 
-        //- Assign from a string
-        void operator=(const string&);
+        //- Assign from a string and compile regular expression
+        void operator=(const std::string&);
 
-        //- Assign from a character array
+        //- Assign from a character array and compile regular expression
         void operator=(const char*);
 
 };

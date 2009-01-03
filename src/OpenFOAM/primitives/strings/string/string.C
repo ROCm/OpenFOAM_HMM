@@ -39,14 +39,9 @@ const Foam::string Foam::string::null;
 // Count and return the number of a given character in the string
 Foam::string::size_type Foam::string::count(const char c) const
 {
-    register size_type cCount=0;
+    register size_type cCount = 0;
 
-    for
-    (
-        const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    for (const_iterator iter = begin(); iter != end(); ++iter)
     {
         if (*iter == c)
         {
@@ -269,9 +264,9 @@ bool Foam::string::removeRepeated(const char character)
 // Return string with repeated characters removed
 Foam::string Foam::string::removeRepeated(const char character) const
 {
-    string s(*this);
-    s.removeRepeated(character);
-    return s;
+    string str(*this);
+    str.removeRepeated(character);
+    return str;
 }
 
 
@@ -294,9 +289,9 @@ bool Foam::string::removeTrailing(const char character)
 // Return string with trailing character removed
 Foam::string Foam::string::removeTrailing(const char character) const
 {
-    string s(*this);
-    s.removeTrailing(character);
-    return s;
+    string str(*this);
+    str.removeTrailing(character);
+    return str;
 }
 
 

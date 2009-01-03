@@ -37,14 +37,11 @@ const Foam::fileName Foam::fileName::null;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileName::fileName(const wordList& wrdList)
+Foam::fileName::fileName(const wordList& lst)
 {
-    if (wrdList.size() != 0)
+    forAll(lst, elemI)
     {
-        forAll(wrdList, i)
-        {
-            operator=((*this)/wrdList[i]);
-        }
+        operator=((*this)/lst[elemI]);
     }
 }
 
@@ -77,7 +74,7 @@ Foam::word Foam::fileName::name() const
 }
 
 
-//- Return directory path name (part before last /)
+//  Return directory path name (part before last /)
 //
 //  behaviour compared to /usr/bin/dirname:
 //    input           path()          dirname
@@ -205,35 +202,35 @@ Foam::fileName::Type Foam::fileName::type() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::fileName::operator=(const fileName& q)
+void Foam::fileName::operator=(const fileName& str)
 {
-    string::operator=(q);
+    string::operator=(str);
 }
 
 
-void Foam::fileName::operator=(const word& q)
+void Foam::fileName::operator=(const word& str)
 {
-    string::operator=(q);
+    string::operator=(str);
 }
 
 
-void Foam::fileName::operator=(const string& q)
+void Foam::fileName::operator=(const string& str)
 {
-    string::operator=(q);
+    string::operator=(str);
     stripInvalid();
 }
 
 
-void Foam::fileName::operator=(const std::string& q)
+void Foam::fileName::operator=(const std::string& str)
 {
-    string::operator=(q);
+    string::operator=(str);
     stripInvalid();
 }
 
 
-void Foam::fileName::operator=(const char* q)
+void Foam::fileName::operator=(const char* str)
 {
-    string::operator=(q);
+    string::operator=(str);
     stripInvalid();
 }
 

@@ -22,66 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::wordReList
+
 Description
+    List of wordRe (word or regular expression)
 
 \*---------------------------------------------------------------------------*/
 
-#include "string.H"
-#include "IOstreams.H"
+#ifndef wordReList_H
+#define wordReList_H
 
-using namespace Foam;
+#include "wordRe.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    string test("$HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$");
-
-    Info<< test << endl;
-
-    // test sub-strings via iterators
-    string::const_iterator iter = test.end();
-    string::const_iterator iter2 = test.end();
-    string::size_type fnd = test.find('\\');
-
-    if (fnd != string::npos)
-    {
-        iter  = test.begin() + fnd;
-        iter2 = iter + 6;
-    }
-
-    Info<< "sub-string via iterators : >";
-    while (iter != iter2)
-    {
-        Info<< *iter;
-        iter++;
-    }
-    Info<< "<\n";
-
-    Info<< string(test).replace("kj", "zzz") << endl;
-    Info<< string(test).replace("kj", "") << endl;
-    Info<< string(test).replaceAll("kj", "zzz") << endl;
-    Info<< string(test).replaceAll("kj", "z") << endl;
-
-    Info<< string(test).expand() << endl;
-
-    string test2("~OpenFOAM/controlDict");
-    Info<< test2 << " => " << test2.expand() << endl;
-
-    string s;
-    Sin.getLine(s);
-
-    string s2(s.expand());
-
-    cout<< "output string with " << s2.length() << " characters\n";
-    cout<< "ostream<<  >" << s2 << "<\n";
-    Info<< "Ostream<<  >" << s2 << "<\n";
-
-    Info << "End\n" << endl;
-
-    return 0;
+    typedef List<wordRe> wordReList;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

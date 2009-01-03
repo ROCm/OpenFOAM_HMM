@@ -40,6 +40,7 @@ $(strings)/word/wordIO.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyTypeIO.C
+$(strings)/wordRe/wordReIO.C
 
 primitives/random/Random.C
 

@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <sys/types.h>
+
 #include "regExp.H"
 #include "label.H"
 #include "string.H"
@@ -34,34 +35,23 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-void Foam::regExp::compile(const char* pat) const
+void Foam::regExp::compile(const char* pattern) const
 {
     clear();
 
-    // avoid NULL and zero-length patterns
-    if (pat && *pat)
+    // avoid NULL pointer and zero-length patterns
+    if (pattern && *pattern)
     {
         preg_ = new regex_t;
 
-        if (regcomp(preg_, pat, REG_EXTENDED) != 0)
+        if (regcomp(preg_, pattern, REG_EXTENDED) != 0)
         {
             FatalErrorIn
             (
                 "regExp::compile(const char*)"
-            )   << "Failed to compile regular expression '" << pat << "'"
+            )   << "Failed to compile regular expression '" << pattern << "'"
                 << exit(FatalError);
         }
-    }
-}
-
-
-void Foam::regExp::clear() const
-{
-    if (preg_)
-    {
-        regfree(preg_);
-        delete preg_;
-        preg_ = 0;
     }
 }
 
@@ -74,19 +64,19 @@ Foam::regExp::regExp()
 {}
 
 
-Foam::regExp::regExp(const string& pat)
+Foam::regExp::regExp(const char* pattern)
 :
     preg_(0)
 {
-    compile(pat.c_str());
+    compile(pattern);
 }
 
 
-Foam::regExp::regExp(const char* pat)
+Foam::regExp::regExp(const std::string& pattern)
 :
     preg_(0)
 {
-    compile(pat);
+    compile(pattern.c_str());
 }
 
 
@@ -100,17 +90,22 @@ Foam::regExp::~regExp()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-int Foam::regExp::ngroups() const
+bool Foam::regExp::clear() const
 {
-    return preg_ ? preg_->re_nsub : 0;
+    if (preg_)
+    {
+        regfree(preg_);
+        delete preg_;
+        preg_ = 0;
+
+        return true;
+    }
+
+    return false;
 }
 
 
-bool Foam::regExp::match
-(
-    const string& str,
-    bool partialMatch
-) const
+bool Foam::regExp::match(const std::string& str, bool partial) const
 {
     if (preg_ && str.size())
     {
@@ -124,7 +119,7 @@ bool Foam::regExp::match
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
          &&
             (
-                partialMatch
+                partial
              || (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
             )
         )
@@ -137,12 +132,7 @@ bool Foam::regExp::match
 }
 
 
-bool Foam::regExp::match
-(
-    const string& str,
-    List<string>& groups,
-    bool partialMatch
-) const
+bool Foam::regExp::match(const string& str, List<string>& groups) const
 {
     if (preg_ && str.size())
     {
@@ -155,11 +145,7 @@ bool Foam::regExp::match
         if
         (
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
-         &&
-            (
-                partialMatch
-             || (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
-            )
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
         )
         {
             groups.setSize(ngroups());
@@ -193,15 +179,15 @@ bool Foam::regExp::match
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-void Foam::regExp::operator=(const string& pat)
-{
-    compile(pat.c_str());
-}
-
-
 void Foam::regExp::operator=(const char* pat)
 {
     compile(pat);
+}
+
+
+void Foam::regExp::operator=(const std::string& pat)
+{
+    compile(pat.c_str());
 }
 
 

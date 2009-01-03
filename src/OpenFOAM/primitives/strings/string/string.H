@@ -88,18 +88,10 @@ public:
     //- Hashing function class
     class hash
     {
-
     public:
-
         inline hash();
-
-        inline size_type operator()(const string& key) const;
-
-        inline size_type operator()
-        (
-            const string& key,
-            const size_type tableSize
-        ) const;
+        inline size_type operator()(const string&) const;
+        inline size_type operator()(const string&, const size_type) const;
     };
 
 
@@ -126,70 +118,80 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Count and return the number of a given character in the string
-            size_type count(const char) const;
+        //- Count and return the number of a given character in the string
+        size_type count(const char) const;
 
-            //- Is this string type valid?
-            template<class String>
-            static inline bool valid(const string&);
+        //- Is this string type valid?
+        template<class String>
+        static inline bool valid(const string&);
+
+        //- Does this string have particular meta-characters?
+        //  The meta characters can be optionally quoted.
+        template<class String>
+        static inline bool meta(const string&, const char quote='\\');
 
 
-        // Edit
+    // Edit
 
-            //- Strip invalid characters from the given string
-            template<class String>
-            static inline bool stripInvalid(string&);
+        //- Strip invalid characters from the given string
+        template<class String>
+        static inline bool stripInvalid(string&);
 
-            //- Return a valid String from the given string
-            template<class String>
-            static inline String validate(const string&);
+        //- Return a valid String from the given string
+        template<class String>
+        static inline String validate(const string&);
 
-            //- Replace first occurence of sub-string oldStr with newStr
-            //  starting at start
-            string& replace
-            (
-                const string& oldStr,
-                const string& newStr,
-                size_type start = 0
-            );
+        //- Return a String with quoted meta-characters from the given string
+        template<class String>
+        static inline string quotemeta(const string&, const char quote='\\');
 
-            //- Replace all occurences of sub-string oldStr with newStr
-            //  starting at start
-            string& replaceAll
-            (
-                const string& oldStr,
-                const string& newStr,
-                size_type start = 0
-            );
 
-            //- Expand initial tildes and all occurences of environment variables
-            //  Expansion includes:
-            //  -# environment variables
-            //     - "$VAR", "${VAR}"
-            //  -# current directory
-            //     - leading "./" : the current directory
-            //  -# tilde expansion
-            //     - leading "~/" : home directory
-            //     - leading "~user" : home directory for specified user
-            //     - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
-            //
-            //  @sa
-            //  Foam::findEtcFile
-            string& expand();
+        //- Replace first occurence of sub-string oldStr with newStr
+        //  starting at start
+        string& replace
+        (
+            const string& oldStr,
+            const string& newStr,
+            size_type start = 0
+        );
 
-            //- Remove repeated characters returning true if string changed
-            bool removeRepeated(const char character);
+        //- Replace all occurences of sub-string oldStr with newStr
+        //  starting at start
+        string& replaceAll
+        (
+            const string& oldStr,
+            const string& newStr,
+            size_type start = 0
+        );
 
-            //- Return string with repeated characters removed
-            string removeRepeated(const char character) const;
+        //- Expand initial tildes and all occurences of environment variables
+        //  Expansion includes:
+        //  -# environment variables
+        //     - "$VAR", "${VAR}"
+        //  -# current directory
+        //     - leading "./" : the current directory
+        //  -# tilde expansion
+        //     - leading "~/" : home directory
+        //     - leading "~user" : home directory for specified user
+        //     - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+        //
+        //  @sa
+        //  Foam::findEtcFile
+        string& expand();
 
-            //- Remove trailing character returning true if string changed
-            bool removeTrailing(const char character);
+        //- Remove repeated characters returning true if string changed
+        bool removeRepeated(const char);
 
-            //- Return string with trailing character removed
-            string removeTrailing(const char character) const;
+        //- Return string with repeated characters removed
+        string removeRepeated(const char) const;
+
+        //- Remove trailing character returning true if string changed
+        bool removeTrailing(const char);
+
+        //- Return string with trailing character removed
+        string removeTrailing(const char) const;
 
 
     // Member Operators
