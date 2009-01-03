@@ -29,8 +29,7 @@ Description
     Input token stream.
 
 SourceFiles
-    ITread.C
-    ITprint.C
+    ITstream.C
 
 \*---------------------------------------------------------------------------*/
 

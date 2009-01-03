@@ -32,8 +32,7 @@ Description
     to be automatically prepended to each message line.
 
 SourceFiles
-    prefixOSwrite.C
-    prefixOSprint.C
+    prefixOSstream.C
 
 \*---------------------------------------------------------------------------*/
 

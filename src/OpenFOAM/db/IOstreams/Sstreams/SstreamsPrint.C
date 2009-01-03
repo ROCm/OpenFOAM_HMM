@@ -23,63 +23,31 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    IOstream check.
+    Prints out a description of the streams
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "IOstream.H"
+#include "ISstream.H"
+#include "OSstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+void Foam::ISstream::print(Ostream& os) const
 {
+    os  << "ISstream: " << name().c_str() << ' ';
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-fileName IOstream::name_("IOstream");
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// check file status for given operation
-bool IOstream::check(const char* operation) const
-{
-    if (bad())
-    {
-        FatalIOErrorIn
-        (
-            "IOstream::check(const char* operation) const", *this
-        )   << "IOstream::check(const char* operation) : "
-            << "error in IOstream " << name() << " for operation "
-            << operation
-            << exit(FatalIOError);
-    }
-
-    return !bad();
+    IOstream::print(os);
+    IOstream::print(os, is_.rdstate());
 }
 
 
-//- Check IOstream status for given operation
-//  print IOstream state if error has occured and exit
-void IOstream::fatalCheck(const char* operation) const
+void Foam::OSstream::print(Ostream& os) const
 {
-    if (bad())
-    {
-        FatalIOErrorIn
-        (
-            "IOstream::fatalCheck(const char* operation) const", *this
-        )   << "IOstream::check(const char* operation) : "
-            << "error in IOstream " << name() << " for operation "
-            << operation
-            << exit(FatalIOError);
-    }
+    os  << "OSstream: " << name().c_str() << ' ';
+
+    IOstream::print(os);
+    IOstream::print(os, os_.rdstate());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

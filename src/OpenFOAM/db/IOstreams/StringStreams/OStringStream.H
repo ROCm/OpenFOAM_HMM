@@ -29,7 +29,7 @@ Description
     Output to memory buffer stream.
 
 SourceFiles
-    Mprint.C
+    StringStreamsPrint.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,7 +37,6 @@ SourceFiles
 #define OStringStream_H
 
 #include "OSstream.H"
-
 #include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class OStringStream Declaration
+                        Class OStringStream Declaration
 \*---------------------------------------------------------------------------*/
 
 class OStringStream
@@ -128,7 +127,7 @@ public:
 
         // Print
 
-            //- Print description OM IOstream to Ostream
+            //- Print description to Ostream
             void print(Ostream&) const;
 };
 

@@ -36,8 +36,7 @@ Description
     sequence one can read token by token, and then analyse.
 
 SourceFiles
-    IOprint.C
-    IOcheck.C
+    IOstream.C
 
 \*---------------------------------------------------------------------------*/
 

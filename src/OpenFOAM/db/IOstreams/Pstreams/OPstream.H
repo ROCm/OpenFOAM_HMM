@@ -29,8 +29,7 @@ Description
     Output inter-processor communications stream.
 
 SourceFiles
-    OPstreamI.H
-    OPwrite.C
+    OPstream.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -208,11 +207,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// include inline implementaions
-#   include "OPstreamI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

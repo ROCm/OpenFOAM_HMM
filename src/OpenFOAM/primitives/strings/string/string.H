@@ -131,7 +131,7 @@ public:
             //- Count and return the number of a given character in the string
             size_type count(const char) const;
 
-            //- Is this string type valid
+            //- Is this string type valid?
             template<class String>
             static inline bool valid(const string&);
 

@@ -29,12 +29,32 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+void Foam::ITstream::print(Ostream& os) const
 {
+    os  << "ITstream : " << name_.c_str();
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    if (size())
+    {
+        if (begin()->lineNumber() == rbegin()->lineNumber())
+        {
+            os  << ", line " << begin()->lineNumber() << ", ";
+        }
+        else
+        {
+            os  << ", lines " << begin()->lineNumber()
+                << '-' << rbegin()->lineNumber() << ", ";
+        }
+    }
+    else
+    {
+        os  << ", line " << lineNumber() << ", ";
+    }
 
-Istream& ITstream::read(token& t)
+    IOstream::print(os);
+}
+
+
+Foam::Istream& Foam::ITstream::read(token& t)
 {
     // Return the put back token if it exists
     if (Istream::getBack(t))
@@ -88,48 +108,49 @@ Istream& ITstream::read(token& t)
 }
 
 
-Istream& ITstream::read(char&)
+Foam::Istream& Foam::ITstream::read(char&)
 {
     notImplemented("Istream& ITstream::read(char& c)");
     return *this;
 }
 
-Istream& ITstream::read(word&)
+
+Foam::Istream& Foam::ITstream::read(word&)
 {
     notImplemented("Istream& ITstream::read(word&)");
     return *this;
 }
 
 
-Istream& ITstream::read(string&)
+Foam::Istream& Foam::ITstream::read(string&)
 {
     notImplemented("Istream& ITstream::read(string&)");
     return *this;
 }
 
 
-Istream& ITstream::read(label&)
+Foam::Istream& Foam::ITstream::read(label&)
 {
     notImplemented("Istream& ITstream::read(label&)");
     return *this;
 }
 
 
-Istream& ITstream::read(floatScalar&)
+Foam::Istream& Foam::ITstream::read(floatScalar&)
 {
     notImplemented("Istream& ITstream::read(floatScalar&)");
     return *this;
 }
 
 
-Istream& ITstream::read(doubleScalar&)
+Foam::Istream& Foam::ITstream::read(doubleScalar&)
 {
     notImplemented("Istream& ITstream::read(doubleScalar&)");
     return *this;
 }
 
 
-Istream& ITstream::read(char*, std::streamsize)
+Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 {
     notImplemented("Istream& ITstream::read(char*, std::streamsize)");
     return *this;
@@ -137,7 +158,7 @@ Istream& ITstream::read(char*, std::streamsize)
 
 
 // Rewind the token stream so that it may be read again
-Istream& ITstream::rewind()
+Foam::Istream& Foam::ITstream::rewind()
 {
     tokenIndex_ = 0;
 
@@ -151,9 +172,5 @@ Istream& ITstream::rewind()
     return *this;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

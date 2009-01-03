@@ -30,7 +30,7 @@ Description
 
 SourceFiles
     OSstreamI.H
-    OSwrite.C
+    OSstream.C
     chkStream.C
 
 \*---------------------------------------------------------------------------*/
@@ -136,6 +136,9 @@ public:
             virtual Ostream& write(const word&);
 
             //- Write string
+            //  In the rare case that the string contains a final trailing
+            //  backslash, it will be dropped to the appearance of an escaped
+            //  double-quote.
             virtual Ostream& write(const string&);
 
             //- Write label

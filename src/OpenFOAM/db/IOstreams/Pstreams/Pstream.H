@@ -30,9 +30,8 @@ Description
 
 SourceFiles
     Pstream.C
-    IPread.C
-    OPwrite.C
-    Pprint.C
+    PstreamsPrint.C
+    PstreamCommsStruct.C
     gatherScatter.C
     combineGatherScatter.C
     gatherScatterList.C

@@ -48,11 +48,16 @@ int main(int argc, char *argv[])
     Info<< string(test).expand() << endl;
 
     string test2("~OpenFOAM/controlDict");
-    Info<< test2.expand() << endl;
+    Info<< test2 << " => " << test2.expand() << endl;
 
     string s;
     Sin.getLine(s);
-    Info<< s.expand() << endl;
+
+    string s2(s.expand());
+
+    cout<< "output string with " << s2.length() << " characters\n";
+    cout<< "ostream<<  >" << s2 << "<\n";
+    Info<< "Ostream<<  >" << s2 << "<\n";
 
     Info << "End\n" << endl;
 

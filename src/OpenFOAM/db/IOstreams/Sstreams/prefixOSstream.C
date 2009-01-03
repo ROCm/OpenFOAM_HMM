@@ -28,14 +28,21 @@ License
 #include "Pstream.H"
 #include "token.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-namespace Foam
+inline void Foam::prefixOSstream::checkWritePrefix()
 {
+    if (printPrefix_ && prefix_.size())
+    {
+        OSstream::write(prefix_.c_str());
+        printPrefix_ = false;
+    }
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-prefixOSstream::prefixOSstream
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::prefixOSstream::prefixOSstream
 (
     ostream& os,
     const string& name,
@@ -50,23 +57,22 @@ prefixOSstream::prefixOSstream
 {}
 
 
-inline void prefixOSstream::checkWritePrefix()
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::prefixOSstream::print(Ostream& os) const
 {
-    if (printPrefix_ && prefix_.size())
-    {
-        OSstream::write(prefix_.c_str());
-        printPrefix_ = false;
-    }
+    os  << "prefixOSstream ";
+    OSstream::print(os);
 }
 
 
-Ostream& prefixOSstream::write(const token&)
+Foam::Ostream& Foam::prefixOSstream::write(const token&)
 {
     return *this;
 }
 
 
-Ostream& prefixOSstream::write(const char c)
+Foam::Ostream& Foam::prefixOSstream::write(const char c)
 {
     checkWritePrefix();
     OSstream::write(c);
@@ -80,13 +86,13 @@ Ostream& prefixOSstream::write(const char c)
 }
 
 
-Ostream& prefixOSstream::write(const char* s)
+Foam::Ostream& Foam::prefixOSstream::write(const char* str)
 {
     checkWritePrefix();
-    OSstream::write(s);
+    OSstream::write(str);
 
-    size_t sl = strlen(s);
-    if (sl && s[sl - 1] == token::NL)
+    size_t len = strlen(str);
+    if (len && str[len-1] == token::NL)
     {
         printPrefix_ = true;
     }
@@ -95,58 +101,56 @@ Ostream& prefixOSstream::write(const char* s)
 }
 
 
-Ostream& prefixOSstream::write(const word& w)
+Foam::Ostream& Foam::prefixOSstream::write(const word& val)
 {
     checkWritePrefix();
-    return OSstream::write(w);
+    return OSstream::write(val);
 }
 
 
-Ostream& prefixOSstream::write(const string& s)
+Foam::Ostream& Foam::prefixOSstream::write(const string& val)
 {
     checkWritePrefix();
-    return OSstream::write(s);
+    return OSstream::write(val);
 }
 
 
-Ostream& prefixOSstream::write(const label l)
+Foam::Ostream& Foam::prefixOSstream::write(const label val)
 {
     checkWritePrefix();
-    return OSstream::write(l);
+    return OSstream::write(val);
 }
 
 
-Ostream& prefixOSstream::write(const floatScalar s)
+Foam::Ostream& Foam::prefixOSstream::write(const floatScalar val)
 {
     checkWritePrefix();
-    return OSstream::write(s);
+    return OSstream::write(val);
 }
 
 
-Ostream& prefixOSstream::write(const doubleScalar s)
+Foam::Ostream& Foam::prefixOSstream::write(const doubleScalar val)
 {
     checkWritePrefix();
-    return OSstream::write(s);
+    return OSstream::write(val);
 }
 
 
-Ostream& prefixOSstream::write(const char* buf, std::streamsize count)
+Foam::Ostream& Foam::prefixOSstream::write
+(
+    const char* buf,
+    std::streamsize count
+)
 {
     checkWritePrefix();
     return OSstream::write(buf, count);
 }
 
 
-//- Add indentation characters
-void prefixOSstream::indent()
+void Foam::prefixOSstream::indent()
 {
     checkWritePrefix();
     OSstream::indent();
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

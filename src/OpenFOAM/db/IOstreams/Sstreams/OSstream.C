@@ -30,18 +30,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Ostream& OSstream::write(const token&)
+Foam::Ostream& Foam::OSstream::write(const token&)
 {
     return *this;
 }
 
 
-Ostream& OSstream::write(const char c)
+Foam::Ostream& Foam::OSstream::write(const char c)
 {
     os_ << c;
     if (c == token::NL)
@@ -53,85 +48,95 @@ Ostream& OSstream::write(const char c)
 }
 
 
-Ostream& OSstream::write(const char* s)
+Foam::Ostream& Foam::OSstream::write(const char* str)
 {
-    lineNumber_ += string(s).count(token::NL);
-    os_ << s;
+    lineNumber_ += string(str).count(token::NL);
+    os_ << str;
     setState(os_.rdstate());
     return *this;
 }
 
 
-Ostream& OSstream::write(const word& w)
+Foam::Ostream& Foam::OSstream::write(const word& str)
 {
-    os_ << w;
+    os_ << str;
     setState(os_.rdstate());
     return *this;
 }
 
 
-Ostream& OSstream::write(const string& s)
+Foam::Ostream& Foam::OSstream::write(const string& str)
 {
-    os_ << '\"';
+    os_ << token::BEGIN_STRING;
 
-    for
-    (
-        string::const_iterator iter = s.begin();
-        iter != s.end();
-        ++iter
-    )
+    register int backslash = 0;
+    for (string::const_iterator iter = str.begin(); iter != str.end(); ++iter)
     {
         register char c = *iter;
 
-        if (c == token::NL)
+        switch (c)
         {
-            os_ << '\\';
-            lineNumber_++;
+            case '\\' :
+                backslash++;
+                // suppress output until we know if other characters follow
+                continue;
+                break;
+
+            case token::NL :
+                lineNumber_++;
+                backslash++;    // backslash escape for newline
+                break;
+
+            case token::END_STRING :
+                backslash++;    // backslash escape for double-quote
+                break;
         }
 
-        if (c == '"')
+        // output pending backslashes
+        while (backslash)
         {
-            os_ << '\\';
+            os_ << '\\';    // escape for new-line
+            backslash--;
         }
 
-        if (c != '\\')
-        {
-            os_ << c;
-        }
+        os_ << c;
     }
 
-    os_ << '\"';
+    // silently drop any trailing backslashes
+    // they would otherwise appear like an escaped double-quote
+
+    os_ << token::END_STRING;
 
     setState(os_.rdstate());
     return *this;
 }
 
 
-Ostream& OSstream::write(const label l)
+Foam::Ostream& Foam::OSstream::write(const label val)
 {
-    os_ << l;
+    os_ << val;
     setState(os_.rdstate());
     return *this;
 }
 
 
-Ostream& OSstream::write(const floatScalar s)
+Foam::Ostream& Foam::OSstream::write(const floatScalar val)
 {
-    os_ << s;
+    os_ << val;
     setState(os_.rdstate());
     return *this;
 }
 
 
-Ostream& OSstream::write(const doubleScalar s)
+Foam::Ostream& Foam::OSstream::write(const doubleScalar val)
 {
-    os_ << s;
+    os_ << val;
     setState(os_.rdstate());
     return *this;
 }
 
 
-Ostream& OSstream::write(const char* buf, std::streamsize count)
+Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
 {
     if (format() != BINARY)
     {
@@ -150,8 +155,7 @@ Ostream& OSstream::write(const char* buf, std::streamsize count)
 }
 
 
-//- Add indentation characters
-void OSstream::indent()
+void Foam::OSstream::indent()
 {
     for (register unsigned short i = 0; i < indentLevel_*indentSize_; i++)
     {
@@ -160,62 +164,60 @@ void OSstream::indent()
 }
 
 
-// Flush stream
-void OSstream::flush()
+void Foam::OSstream::flush()
 {
     os_.flush();
 }
 
 
 // Add carriage return and flush stream
-void OSstream::endl()
+void Foam::OSstream::endl()
 {
     write('\n');
     os_.flush();
 }
 
 
-// Set flags of output stream
-ios_base::fmtflags OSstream::flags() const
+// Get flags of output stream
+std::ios_base::fmtflags Foam::OSstream::flags() const
 {
     return os_.flags();
 }
 
 
-// Set flags of given field of output stream
-ios_base::fmtflags OSstream::flags(const ios_base::fmtflags f)
+// Set flags of output stream
+std::ios_base::fmtflags Foam::OSstream::flags(const ios_base::fmtflags f)
 {
     return os_.flags(f);
 }
 
 
-//- Get width of output field
-int OSstream::width() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+// Get width of output field
+int Foam::OSstream::width() const
 {
     return os_.width();
 }
 
 // Set width of output field (and return old width)
-int OSstream::width(const int w)
+int Foam::OSstream::width(const int w)
 {
     return os_.width(w);
 }
 
-//- Get precision of output field
-int OSstream::precision() const
+// Get precision of output field
+int Foam::OSstream::precision() const
 {
     return os_.precision();
 }
 
 // Set precision of output field (and return old precision)
-int OSstream::precision(const int p)
+int Foam::OSstream::precision(const int p)
 {
     return os_.precision(p);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

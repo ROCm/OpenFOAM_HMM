@@ -23,41 +23,31 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
+    Prints out a description of the StringStream
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOstream.H"
-
-#include <sstream>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-string IOstream::versionNumber::str() const
-{
-    std::ostringstream osBuffer;
-    osBuffer.precision(1);
-    osBuffer.setf(ios_base::fixed, ios_base::floatfield);
-    osBuffer << versionNumber_;
-    return osBuffer.str();
-}
-
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
-
-Ostream& operator<<(Ostream& os, const IOstream::versionNumber& vn)
-{
-    os << vn.str().c_str();
-    return os;
-}
-
+#include "IStringStream.H"
+#include "OStringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+void Foam::IStringStream::print(Ostream& os) const
+{
+    os  << "IStringStream " << name() << " : "
+        << "buffer = \n" << str() << Foam::endl;
+
+    ISstream::print(os);
+}
+
+
+void Foam::OStringStream::print(Ostream& os) const
+{
+    os  << "OStringStream " << name() << " : "
+        << "buffer = \n" << str() << Foam::endl;
+
+    OSstream::print(os);
+}
+
 
 // ************************************************************************* //

@@ -28,18 +28,17 @@ License
 #include "OSspecific.H"
 #include "gzstream.h"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(OFstream, 0);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(OFstream, 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-OFstreamAllocator::OFstreamAllocator
+Foam::OFstreamAllocator::OFstreamAllocator
 (
     const fileName& pathname,
     IOstream::compressionType compression
@@ -51,11 +50,8 @@ OFstreamAllocator::OFstreamAllocator
     {
         if (OFstream::debug)
         {
-            Info
-                << "OFstreamAllocator::OFstreamAllocator"
-                   "(const fileName& pathname) : "
-                   "can't open null file "
-                << endl;
+            Info<< "OFstreamAllocator::OFstreamAllocator(const fileName&) : "
+                   "cannot open null file " << endl;
         }
     }
 
@@ -80,13 +76,13 @@ OFstreamAllocator::OFstreamAllocator
 }
 
 
-OFstreamAllocator::~OFstreamAllocator()
+Foam::OFstreamAllocator::~OFstreamAllocator()
 {
     delete ofPtr_;
 }
 
 
-ostream& OFstreamAllocator::stdStream()
+std::ostream& Foam::OFstreamAllocator::stdStream()
 {
     if (!ofPtr_)
     {
@@ -99,7 +95,7 @@ ostream& OFstreamAllocator::stdStream()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-OFstream::OFstream
+Foam::OFstream::OFstream
 (
     const fileName& pathname,
     streamFormat format,
@@ -112,17 +108,16 @@ OFstream::OFstream
     pathname_(pathname)
 {
     setClosed();
-
     setState(ofPtr_->rdstate());
-                
+
     if (!good())
     {
         if (debug)
         {
-            Info<< "IFstream::IFstream(const fileName& pathname,"
+            Info<< "IFstream::IFstream(const fileName&,"
                    "streamFormat format=ASCII,"
                    "versionNumber version=currentVersion) : "
-                   "couldn't open File for input\n"
+                   "could not open file for input\n"
                    "in stream " << info() << Foam::endl;
         }
 
@@ -132,29 +127,24 @@ OFstream::OFstream
     {
         setOpened();
     }
-    
+
     lineNumber_ = 1;
 }
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-OFstream::~OFstream()
+Foam::OFstream::~OFstream()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void OFstream::print(Ostream& os) const
+void Foam::OFstream::print(Ostream& os) const
 {
-    // Print File data
     os  << "    OFstream: ";
     OSstream::print(os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

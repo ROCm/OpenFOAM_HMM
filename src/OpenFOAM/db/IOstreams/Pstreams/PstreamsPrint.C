@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Prints out a description of the Sstreams to Serr.
+    Prints out a description of the streams
 
 \*---------------------------------------------------------------------------*/
 
@@ -32,27 +32,18 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void IPstream::print(Ostream& os) const
+void Foam::IPstream::print(Ostream& os) const
 {
     os  << "Reading from processor " << fromProcNo_
         << " to processor " << myProcNo() << Foam::endl;
 }
 
 
-void OPstream::print(Ostream& os) const
+void Foam::OPstream::print(Ostream& os) const
 {
     os  << "Writing from processor " << toProcNo_
         << " to processor " << myProcNo() << Foam::endl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

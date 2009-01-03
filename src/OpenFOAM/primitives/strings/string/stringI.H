@@ -32,9 +32,9 @@ inline Foam::string::string()
 {}
 
 
-inline Foam::string::string(const std::string& stdStr)
+inline Foam::string::string(const std::string& str)
 :
-    std::string(stdStr)
+    std::string(str)
 {}
 
 
@@ -64,18 +64,14 @@ inline Foam::string::string(const char c)
 template<class String>
 inline bool Foam::string::valid(const string& s)
 {
-    bool iv = false;
-
     for (const_iterator iter = s.begin(); iter != s.end(); iter++)
     {
         if (!String::valid(*iter))
         {
-            iv = true;
-            break;
+            return false;
         }
     }
-
-    return !iv;
+    return true;
 }
 
 
@@ -114,9 +110,9 @@ inline bool Foam::string::stripInvalid(string& s)
 
 
 template<class String>
-inline String Foam::string::validate(const string& s)
+inline String Foam::string::validate(const string& str)
 {
-    string ss = s;
+    string ss = str;
     stripInvalid<String>(ss);
     return ss;
 }
