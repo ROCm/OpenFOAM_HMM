@@ -88,7 +88,7 @@ removeCase ()
 
 cleanSamples ()
 {
-    rm -rf {samples,sampleSurfaces} > /dev/null 2>&1
+    rm -rf {sets,samples,sampleSurfaces} > /dev/null 2>&1
 }
 
 cleanUcomponents ()
