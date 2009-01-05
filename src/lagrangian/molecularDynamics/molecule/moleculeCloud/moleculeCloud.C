@@ -496,7 +496,7 @@ void Foam::moleculeCloud::initialiseMolecules
                 label molsPlacedThisIteration = 0;
 
                 const dictionary& zoneDict =
-                molConfigDescription_.subDict(cellZones[cZ].name());
+                mdInitialiseDict.subDict(cellZones[cZ].name());
 
                 const scalar temperature
                 (
