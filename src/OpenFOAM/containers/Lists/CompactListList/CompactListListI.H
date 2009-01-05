@@ -82,7 +82,7 @@ inline const Foam::List<Foam::label>& Foam::CompactListList<T>::offsets() const
 
 
 template<class T>
-inline Foam::List<label>& Foam::CompactListList<T>::offsets()
+inline Foam::List<Foam::label>& Foam::CompactListList<T>::offsets()
 {
     return offsets_;
 }
@@ -127,7 +127,7 @@ inline Foam::label Foam::CompactListList<T>::whichRow(const label i) const
     {
         FatalErrorIn
         (
-            "CompactListList<T>::whichRow(const label i) const"
+            "CompactListList<T>::whichRow(const label) const"
         )   << "Index " << i << " outside 0.." << m_.size()
             << abort(FatalError);
     }
@@ -156,12 +156,9 @@ inline Foam::label Foam::CompactListList<T>::whichColumn
 
 
 template<class T>
-inline Foam::xfer<Foam::CompactListList<T> >
-Foam::CompactListList<T>::transfer()
+inline Foam::Xfer<Foam::CompactListList<T> > Foam::CompactListList<T>::xfer()
 {
-    Foam::xfer<CompactListList<T> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 

@@ -67,11 +67,9 @@ inline Foam::label Foam::List<T>::size() const
 
 
 template<class T>
-inline Foam::xfer<Foam::List<T> > Foam::List<T>::transfer()
+inline Foam::Xfer<Foam::List<T> > Foam::List<T>::xfer()
 {
-    Foam::xfer<List<T> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 

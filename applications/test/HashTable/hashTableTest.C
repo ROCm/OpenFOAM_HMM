@@ -91,10 +91,10 @@ int main()
 
 
     HASHTABLE_CLASS<double> table2(table1);
-    HASHTABLE_CLASS<double> table3(table1.transfer());
+    HASHTABLE_CLASS<double> table3(table1.xfer());
 
     Info<< "\ncopy table1 -> table2" << nl
-        << "transfer table1 -> table3 via the transfer() method" << nl;
+        << "transfer table1 -> table3 via the xfer() method" << nl;
 
     Info<< "\ntable1" << table1 << nl
         << "\ntable2" << table1 << nl

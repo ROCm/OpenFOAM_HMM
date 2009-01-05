@@ -167,8 +167,8 @@ public:
         faceZone
         (
             const word& name,
-            const xfer<labelList>& addr,
-            const xfer<boolList>& fm,
+            const Xfer<labelList>& addr,
+            const Xfer<boolList>& fm,
             const label index,
             const faceZoneMesh&
         );
@@ -198,8 +198,8 @@ public:
         faceZone
         (
             const faceZone&,
-            const xfer<labelList>& addr,
-            const xfer<boolList>& fm,
+            const Xfer<labelList>& addr,
+            const Xfer<boolList>& fm,
             const label index,
             const faceZoneMesh&
         );

@@ -155,18 +155,18 @@ public:
         //  (points, faces, region ids, patches).
         UnsortedMeshedSurface
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
-            const xfer<List<label> >& regionIds,
-            const xfer<surfPatchIdentifierList>&
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&,
+            const Xfer<List<label> >& regionIds,
+            const Xfer<surfPatchIdentifierList>&
         );
 
         //- Construct by transferring points, faces.
         //  Use patch information, or set single default patch
         UnsortedMeshedSurface
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&,
             const UList<label>& patchSizes = UList<label>::null(),
             const UList<word>& patchNames = UList<word>::null()
         );
@@ -182,10 +182,10 @@ public:
         UnsortedMeshedSurface(const MeshedSurface<Face>&);
 
         //- Construct by transferring the contents from a UnsortedMeshedSurface
-        UnsortedMeshedSurface(const xfer<UnsortedMeshedSurface<Face> >&);
+        UnsortedMeshedSurface(const Xfer<UnsortedMeshedSurface<Face> >&);
 
         //- Construct by transferring the contents from a meshedSurface
-        UnsortedMeshedSurface(const xfer<MeshedSurface<Face> >&);
+        UnsortedMeshedSurface(const Xfer<MeshedSurface<Face> >&);
 
         //- Construct from file name (uses extension to determine type)
         UnsortedMeshedSurface(const fileName&);
@@ -317,9 +317,9 @@ public:
         //- Transfer components (points, faces, region ids).
         virtual void reset
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
-            const xfer<List<label> >& regionIds = xfer<List<label> >::null()
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&,
+            const Xfer<List<label> >& regionIds = Xfer<List<label> >::null()
         );
 
         //- Transfer the contents of the argument and annull the argument

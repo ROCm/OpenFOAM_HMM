@@ -38,7 +38,6 @@ SourceFiles
 
 #include "PrimitivePatchExtra.H"
 #include "pointField.H"
-#include "xfer.H"
 #include "face.H"
 #include "triFace.H"
 
@@ -103,8 +102,8 @@ public:
         //- Construct by transferring components (points, faces).
         BasicMeshedSurface
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&
         );
 
     // Destructor
@@ -135,8 +134,8 @@ public:
         //- Transfer components (points, faces).
         virtual void reset
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&
         );
 
         //- Remove invalid faces

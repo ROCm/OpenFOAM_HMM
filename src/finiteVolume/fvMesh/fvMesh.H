@@ -173,10 +173,10 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
-            const xfer<faceList>& faces,
-            const xfer<labelList>& allOwner,
-            const xfer<labelList>& allNeighbour,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<labelList>& allOwner,
+            const Xfer<labelList>& allNeighbour,
             const bool syncPar = true
         );
 
@@ -185,9 +185,9 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
-            const xfer<faceList>& faces,
-            const xfer<cellList>& cells,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<cellList>& cells,
             const bool syncPar = true
         );
 

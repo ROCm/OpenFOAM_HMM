@@ -79,11 +79,9 @@ inline Foam::autoPtr<T> Foam::PtrList<T>::set
 
 
 template<class T>
-inline Foam::xfer<Foam::PtrList<T> > Foam::PtrList<T>::transfer()
+inline Foam::Xfer<Foam::PtrList<T> > Foam::PtrList<T>::xfer()
 {
-    Foam::xfer<PtrList<T> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 

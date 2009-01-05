@@ -147,7 +147,7 @@ public:
         explicit inline face(const labelList&);
 
         //- Construct by transferring the parameter contents
-        explicit inline face(const xfer<labelList>&);
+        explicit inline face(const Xfer<labelList>&);
 
         //- Copy construct from triFace
         face(const triFace&);

@@ -73,7 +73,7 @@ public:
         IOMap(const IOobject&, const Map<T>&);
 
         //- Construct by transferring the Map contents
-        IOMap(const IOobject&, const xfer<Map<T> >&);
+        IOMap(const IOobject&, const Xfer<Map<T> >&);
 
 
     // Destructor

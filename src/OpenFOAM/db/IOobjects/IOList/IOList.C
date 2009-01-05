@@ -88,7 +88,7 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
 
 
 template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const xfer<List<T> >& list)
+Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T> >& list)
 :
     regIOobject(io)
 {

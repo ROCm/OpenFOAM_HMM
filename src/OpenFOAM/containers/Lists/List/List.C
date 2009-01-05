@@ -72,7 +72,7 @@ Foam::List<T>::List(const label s, const T& a)
 {
     if (this->size_ < 0)
     {
-        FatalErrorIn("List<T>::List(const label size, const T a)")
+        FatalErrorIn("List<T>::List(const label size, const T&)")
             << "bad size " << this->size_
             << abort(FatalError);
     }
@@ -127,7 +127,7 @@ Foam::List<T>::List(const List<T>& a)
 
 // Construct by transferring the parameter contents
 template<class T>
-Foam::List<T>::List(const xfer<List<T> >& lst)
+Foam::List<T>::List(const Xfer<List<T> >& lst)
 {
     transfer(lst());
 }

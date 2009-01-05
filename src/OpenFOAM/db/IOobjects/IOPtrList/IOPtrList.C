@@ -85,7 +85,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& list)
 
 
 template<class T>
-Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const xfer<PtrList<T> >& list)
+Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const Xfer<PtrList<T> >& list)
 :
     regIOobject(io)
 {

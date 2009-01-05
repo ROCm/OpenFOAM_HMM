@@ -135,7 +135,7 @@ public:
         cellZone
         (
             const word& name,
-            const xfer<labelList>& addr,
+            const Xfer<labelList>& addr,
             const label index,
             const cellZoneMesh&
         );
@@ -164,7 +164,7 @@ public:
         cellZone
         (
             const cellZone&,
-            const xfer<labelList>& addr,
+            const Xfer<labelList>& addr,
             const label index,
             const cellZoneMesh&
         );

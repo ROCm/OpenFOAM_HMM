@@ -32,16 +32,16 @@ License
 template<class T>
 Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& L)
 {
-    // Write size of list and start contents delimiter
+    // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST;
 
-    // Write list contents
+    // Write contents
     forAll(L, i)
     {
         os << nl << L[i];
     }
 
-    // Write end of contents delimiter
+    // Write end delimiter
     os << nl << token::END_LIST << nl;
 
     // Check state of IOstream

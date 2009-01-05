@@ -41,7 +41,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "className.H"
-#include "xfer.H"
+#include "Xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -156,7 +156,7 @@ public:
         HashTable(const HashTable<T, Key, Hash>&);
 
         //- Construct by transferring the parameter contents
-        HashTable(const xfer<HashTable<T, Key, Hash> >&);
+        HashTable(const Xfer<HashTable<T, Key, Hash> >&);
 
 
     // Destructor
@@ -214,8 +214,8 @@ public:
             //  and annull the argument table.
             void transfer(HashTable<T, Key, Hash>&);
 
-            //- Transfer the contents to the xfer container
-            inline xfer<HashTable<T, Key, Hash> > transfer();
+            //- Transfer contents to the Xfer container
+            inline Xfer<HashTable<T, Key, Hash> > xfer();
 
 
     // Member Operators

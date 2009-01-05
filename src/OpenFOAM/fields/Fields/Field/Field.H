@@ -43,7 +43,6 @@ SourceFiles
 #define Field_H
 
 #include "tmp.H"
-#include "xfer.H"
 #include "direction.H"
 #include "VectorSpace.H"
 #include "scalarList.H"
@@ -166,7 +165,7 @@ public:
         Field(Field<Type>&, bool reUse);
 
         //- Construct by transferring the Field contents
-        Field(const xfer<Field<Type> >&);
+        Field(const Xfer<Field<Type> >&);
 
         //- Construct as copy of subField
         Field(const typename Field<Type>::subField&);

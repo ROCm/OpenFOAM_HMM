@@ -382,7 +382,7 @@ public:
             const label nInternalFaces,
             const label nFaces,
             const label nCells,
-            const xfer<cellList>& cells
+            const Xfer<cellList>& cells
         );
 
 

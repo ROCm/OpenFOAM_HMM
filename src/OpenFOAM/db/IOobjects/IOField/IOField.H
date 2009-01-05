@@ -72,7 +72,7 @@ public:
         IOField(const IOobject&, const Field<Type>&);
 
         //- Construct by transferring the Field contents
-        IOField(const IOobject&, const xfer<Field<Type> >&);
+        IOField(const IOobject&, const Xfer<Field<Type> >&);
 
 
     // Destructor

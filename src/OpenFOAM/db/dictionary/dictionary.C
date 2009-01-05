@@ -170,7 +170,7 @@ Foam::dictionary::dictionary
 Foam::dictionary::dictionary
 (
     const dictionary& parentDict,
-    const xfer<dictionary>& dict
+    const Xfer<dictionary>& dict
 )
 :
     parent_(parentDict)
@@ -181,7 +181,7 @@ Foam::dictionary::dictionary
 
 Foam::dictionary::dictionary
 (
-    const xfer<dictionary>& dict
+    const Xfer<dictionary>& dict
 )
 :
     parent_(dictionary::null)
@@ -832,11 +832,9 @@ void Foam::dictionary::transfer(dictionary& dict)
 }
 
 
-Foam::xfer<Foam::dictionary> Foam::dictionary::transfer()
+Foam::Xfer<Foam::dictionary> Foam::dictionary::xfer()
 {
-    Foam::xfer<dictionary> xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 
@@ -866,8 +864,8 @@ void Foam::dictionary::operator=(const dictionary& rhs)
 
     for
     (
-        IDLList<entry>::const_iterator iter = rhs.begin(); 
-        iter != rhs.end(); 
+        IDLList<entry>::const_iterator iter = rhs.begin();
+        iter != rhs.end();
         ++iter
     )
     {

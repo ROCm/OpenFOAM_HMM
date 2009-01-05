@@ -36,13 +36,13 @@ template<class T>
 template<class INew>
 void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
 {
-    is.fatalCheck("PtrList<T>::read(Istream& is, const INew& inewt)");
+    is.fatalCheck("PtrList<T>::read(Istream&, const INew&)");
 
     token firstToken(is);
 
     is.fatalCheck
     (
-        "PtrList<T>::read(Istream& is, const INew& inewt) : "
+        "PtrList<T>::read(Istream&, const INew&) : "
         "reading first token"
     );
 
@@ -66,7 +66,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
 
                     is.fatalCheck
                     (
-                        "PtrList<T>::read(Istream& is, const INew& inewt) : "
+                        "PtrList<T>::read(Istream&, const INew&) : "
                         "reading entry"
                     );
                 }
@@ -78,7 +78,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
 
                 is.fatalCheck
                 (
-                    "PtrList<T>::read(Istream& is, const INew& inewt) : "
+                    "PtrList<T>::read(Istream&, const INew&) : "
                     "reading the single entry"
                 );
 
@@ -98,7 +98,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
         {
             FatalIOErrorIn
             (
-                "PtrList<T>::read(Istream& is, const INew& inewt)",
+                "PtrList<T>::read(Istream&, const INew&)",
                 is
             )   << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
@@ -137,7 +137,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
     {
         FatalIOErrorIn
         (
-            "PtrList<T>::read(Istream& is, const INew& inewt)",
+            "PtrList<T>::read(Istream&, const INew&)",
             is
         )   << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
@@ -180,16 +180,16 @@ Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& L)
 template<class T>
 Foam::Ostream& Foam::operator<<(Ostream& os, const PtrList<T>& L)
 {
-    // Write size of list and start contents delimiter
+    // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST;
 
-    // Write list contents
+    // Write contents
     forAll(L, i)
     {
         os << nl << L[i];
     }
 
-    // Write end of contents delimiter
+    // Write end delimiter
     os << nl << token::END_LIST << nl;
 
     // Check state of IOstream

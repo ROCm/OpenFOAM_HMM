@@ -104,6 +104,9 @@ public:
         //- Construct from UList. Size set to UList size.
         explicit inline DynamicList(const UList<T>&);
 
+        //- Construct by transferring the parameter contents
+        explicit inline DynamicList(const Xfer<List<T> >&);
+
         //- Construct from Istream. Size set to size of read list.
         explicit DynamicList(Istream&);
 
@@ -153,8 +156,8 @@ public:
         //- Transfer contents of the argument DynamicList into this DynamicList
         inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
-        //- Transfer the contents to the xfer container as a plain List
-        inline xfer<List<T> > transfer();
+        //- Transfer contents to the Xfer container as a plain List
+        inline Xfer<List<T> > xfer();
 
     // Member Operators
 

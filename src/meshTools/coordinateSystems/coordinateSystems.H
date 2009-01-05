@@ -85,7 +85,7 @@ public:
         coordinateSystems
         (
             const IOobject&,
-            const xfer<PtrList<coordinateSystem> >&
+            const Xfer<PtrList<coordinateSystem> >&
         );
 
     // Selectors

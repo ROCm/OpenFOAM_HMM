@@ -117,7 +117,7 @@ Foam::cellZone::cellZone
 Foam::cellZone::cellZone
 (
     const word& name,
-    const xfer<labelList>& addr,
+    const Xfer<labelList>& addr,
     const label index,
     const cellZoneMesh& zm
 )
@@ -167,7 +167,7 @@ Foam::cellZone::cellZone
 Foam::cellZone::cellZone
 (
     const cellZone& cz,
-    const xfer<labelList>& addr,
+    const Xfer<labelList>& addr,
     const label index,
     const cellZoneMesh& zm
 )

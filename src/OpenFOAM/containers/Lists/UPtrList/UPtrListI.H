@@ -51,11 +51,9 @@ inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
 }
 
 template<class T>
-inline Foam::xfer<Foam::UPtrList<T> > Foam::UPtrList<T>::transfer()
+inline Foam::Xfer<Foam::UPtrList<T> > Foam::UPtrList<T>::xfer()
 {
-    Foam::xfer<UPtrList<T> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 

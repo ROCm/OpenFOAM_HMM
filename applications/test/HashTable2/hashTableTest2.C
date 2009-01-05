@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     Info<< "table3: " << table3 << nl
         << "toc: " << table3.toc() << endl;
 
-    Map<label> table4(table3.transfer());
+    Map<label> table4(table3.xfer());
 
     Info<< "table3: " << table3 << nl
         << "toc: " << table3.toc() << endl;

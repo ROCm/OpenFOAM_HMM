@@ -47,7 +47,7 @@ inline Foam::cell::cell(const UList<label>& lst)
 {}
 
 
-inline Foam::cell::cell(const xfer<labelList>& lst)
+inline Foam::cell::cell(const Xfer<labelList>& lst)
 :
     labelList(lst)
 {}

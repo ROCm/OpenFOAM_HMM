@@ -316,7 +316,7 @@ autoPtr<mapPolyMesh> reorderMesh
 
     mesh.resetPrimitives
     (
-        xfer<pointField>::null(),
+        Xfer<pointField>::null(),
         xferMove(newFaces),
         xferMove(newOwner),
         xferMove(newNeighbour),

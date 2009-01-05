@@ -64,7 +64,7 @@ inline Foam::face::face(const labelList& lst)
 {}
 
 
-inline Foam::face::face(const xfer<labelList>& lst)
+inline Foam::face::face(const Xfer<labelList>& lst)
 :
     labelList(lst)
 {}

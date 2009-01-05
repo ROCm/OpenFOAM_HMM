@@ -756,10 +756,10 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
         // (patches guaranteed to be in increasing order)
         mesh.resetPrimitives
         (
-            xfer<pointField>::null(),
+            Xfer<pointField>::null(),
             xferMove(newFaces),
-            xfer<labelList>::null(),
-            xfer<labelList>::null(),
+            Xfer<labelList>::null(),
+            Xfer<labelList>::null(),
             patchSizes,
             patchStarts,
             true                // boundary forms valid boundary mesh.

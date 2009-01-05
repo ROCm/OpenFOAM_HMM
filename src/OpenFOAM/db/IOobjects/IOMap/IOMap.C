@@ -87,7 +87,7 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& map)
 
 
 template<class T>
-Foam::IOMap<T>::IOMap(const IOobject& io, const xfer<Map<T> >& map)
+Foam::IOMap<T>::IOMap(const IOobject& io, const Xfer<Map<T> >& map)
 :
     regIOobject(io)
 {

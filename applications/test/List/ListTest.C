@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
     list2.setSize(10, vector(1, 2, 3));
     Info<< list2 << endl;
 
-    List<vector> list3(list2.transfer());
-    Info<< "Transferred via the transfer() method" << endl;
-    Info<< list2 << endl;
-    Info<< list3 << endl;
+    List<vector> list3(list2.xfer());
+    Info<< "Transferred via the xfer() method" << endl;
+    Info<< list2 << nl
+        << list3 << endl;
 
     return 0;
 }

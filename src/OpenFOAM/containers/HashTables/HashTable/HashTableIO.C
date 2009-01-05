@@ -168,7 +168,7 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
 template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
 {
-    // Write size of HashTable and start contents delimiter
+    // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST << nl;
 
     // Write contents
@@ -182,7 +182,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
         os << iter.key() << token::SPACE << iter() << nl;
     }
 
-    // Write end of contents delimiter
+    // Write end delimiter
     os << token::END_LIST;
 
     // Check state of IOstream

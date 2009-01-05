@@ -40,7 +40,7 @@ Foam::NamedEnum<Enum, nEnum>::NamedEnum()
         {
             stringList goodNames(i);
 
-            for (label j = 0; j < i; j++)
+            for (int j = 0; j < i; j++)
             {
                 goodNames[j] = names[j];
             }
@@ -70,10 +70,9 @@ Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
     {
         FatalIOErrorIn
         (
-            "NamedEnum<Enum, nEnum>::read(Istream& is) const",
-            is
-        ) << name << " is not in enumeration " << toc()
-            << exit(FatalIOError);
+            "NamedEnum<Enum, nEnum>::read(Istream&) const", is
+        )   << name << " is not in enumeration: "
+            << toc() << exit(FatalIOError);
     }
 
     return Enum(iter());
@@ -83,7 +82,7 @@ Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
 template<class Enum, int nEnum>
 void Foam::NamedEnum<Enum, nEnum>::write(const Enum e, Ostream& os) const
 {
-    os << operator[](e);
+    os  << operator[](e);
 }
 
 

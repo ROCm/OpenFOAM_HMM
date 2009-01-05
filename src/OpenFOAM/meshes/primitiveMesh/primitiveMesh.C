@@ -288,7 +288,7 @@ void Foam::primitiveMesh::reset
     const label nInternalFaces,
     const label nFaces,
     const label nCells,
-    const xfer<cellList>& clst
+    const Xfer<cellList>& clst
 )
 {
     reset

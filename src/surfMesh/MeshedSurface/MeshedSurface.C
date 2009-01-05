@@ -164,9 +164,9 @@ Foam::MeshedSurface<Face>::MeshedSurface()
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
-    const xfer<surfGroupList>& patchLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<surfGroupList>& patchLst
 )
 :
     ParentType(pointLst, faceLst),
@@ -177,8 +177,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
     const UList<label>& patchSizes,
     const UList<word>& patchNames
 )
@@ -395,7 +395,7 @@ Foam::MeshedSurface<Face>::MeshedSurface(const MeshedSurface& surf)
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const xfer<UnsortedMeshedSurface<Face> >& surf
+    const Xfer<UnsortedMeshedSurface<Face> >& surf
 )
 {
     transfer(surf());
@@ -403,7 +403,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const xfer<MeshedSurface>& surf)
+Foam::MeshedSurface<Face>::MeshedSurface(const Xfer<MeshedSurface>& surf)
 {
     transfer(surf());
 }
@@ -493,8 +493,8 @@ void Foam::MeshedSurface<Face>::checkPatches()
 template<class Face>
 void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
-    const xfer<List<Face> >& unsortedFaces,
-    const xfer<List<label> >& regionIds,
+    const Xfer<List<Face> >& unsortedFaces,
+    const Xfer<List<label> >& regionIds,
     const bool sorted
 )
 {

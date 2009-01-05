@@ -61,7 +61,7 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
         MeshedSurface<face> surf;
         surf.reset
         (
-            xfer<pointField>::null(),
+            Xfer<pointField>::null(),
             xferMove(faceLst)
         );
         surf.addPatches(patches_);

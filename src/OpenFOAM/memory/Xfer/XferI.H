@@ -27,14 +27,14 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::xfer<T>::xfer(T* p)
+inline Foam::Xfer<T>::Xfer(T* p)
 :
     ptr_(p ? p : new T)
 {}
 
 
 template<class T>
-inline Foam::xfer<T>::xfer(T& t, bool allowTransfer)
+inline Foam::Xfer<T>::Xfer(T& t, bool allowTransfer)
 :
     ptr_(new T)
 {
@@ -50,7 +50,7 @@ inline Foam::xfer<T>::xfer(T& t, bool allowTransfer)
 
 
 template<class T>
-inline Foam::xfer<T>::xfer(const T& t)
+inline Foam::Xfer<T>::Xfer(const T& t)
 :
     ptr_(new T)
 {
@@ -59,7 +59,7 @@ inline Foam::xfer<T>::xfer(const T& t)
 
 
 template<class T>
-inline Foam::xfer<T>::xfer(const xfer<T>& t)
+inline Foam::Xfer<T>::Xfer(const Xfer<T>& t)
 :
     ptr_(new T)
 {
@@ -70,7 +70,7 @@ inline Foam::xfer<T>::xfer(const xfer<T>& t)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::xfer<T>::~xfer()
+inline Foam::Xfer<T>::~Xfer()
 {
     delete ptr_;
     ptr_ = 0;
@@ -80,9 +80,9 @@ inline Foam::xfer<T>::~xfer()
 // * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
 
 template<class T>
-inline const Foam::xfer<T>& Foam::xfer<T>::null()
+inline const Foam::Xfer<T>& Foam::Xfer<T>::null()
 {
-    xfer<T>* nullPtr = reinterpret_cast<xfer<T>*>(0);
+    Xfer<T>* nullPtr = reinterpret_cast<Xfer<T>*>(0);
     return *nullPtr;
 }
 
@@ -90,14 +90,14 @@ inline const Foam::xfer<T>& Foam::xfer<T>::null()
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::xfer<T>::operator=(T& t)
+inline void Foam::Xfer<T>::operator=(T& t)
 {
     ptr_->transfer(t);
 }
 
 
 template<class T>
-inline void Foam::xfer<T>::operator=(const xfer<T>& t)
+inline void Foam::Xfer<T>::operator=(const Xfer<T>& t)
 {
     // silently ignore attempted copy to self
     if (this != &t)
@@ -108,14 +108,14 @@ inline void Foam::xfer<T>::operator=(const xfer<T>& t)
 
 
 template<class T>
-inline T& Foam::xfer<T>::operator()() const
+inline T& Foam::Xfer<T>::operator()() const
 {
     return *ptr_;
 }
 
 
 template<class T>
-inline T* Foam::xfer<T>::operator->() const
+inline T* Foam::Xfer<T>::operator->() const
 {
     return ptr_;
 }
@@ -125,38 +125,39 @@ inline T* Foam::xfer<T>::operator->() const
 
 
 template<class T>
-inline Foam::xfer<T> Foam::xferCopy(const T& t)
+inline Foam::Xfer<T> Foam::xferCopy(const T& t)
 {
-    return Foam::xfer<T>(t);
-}
-
-template<class T>
-inline Foam::xfer<T> Foam::xferMove(T& t)
-{
-    return Foam::xfer<T>(t, true);
+    return Foam::Xfer<T>(t);
 }
 
 
 template<class T>
-inline Foam::xfer<T> Foam::xferTmp(Foam::tmp<T>& tt)
+inline Foam::Xfer<T> Foam::xferMove(T& t)
 {
-    return Foam::xfer<T>(tt(), tt.isTmp());
+    return Foam::Xfer<T>(t, true);
+}
+
+
+template<class T>
+inline Foam::Xfer<T> Foam::xferTmp(Foam::tmp<T>& tt)
+{
+    return Foam::Xfer<T>(tt(), tt.isTmp());
 }
 
 
 template<class To, class From>
-inline Foam::xfer<To> Foam::xferCopyTo(const From& t)
+inline Foam::Xfer<To> Foam::xferCopyTo(const From& t)
 {
-    Foam::xfer<To> xf;
+    Foam::Xfer<To> xf;
     xf() = t;
     return xf;
 }
 
 
 template<class To, class From>
-inline Foam::xfer<To> Foam::xferMoveTo(From& t)
+inline Foam::Xfer<To> Foam::xferMoveTo(From& t)
 {
-    Foam::xfer<To> xf;
+    Foam::Xfer<To> xf;
     xf().transfer(t);
     return xf;
 }

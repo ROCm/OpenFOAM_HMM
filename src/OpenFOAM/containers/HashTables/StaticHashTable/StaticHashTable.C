@@ -75,7 +75,7 @@ Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
 template<class T, class Key, class Hash>
 Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
 (
-    const xfer<StaticHashTable<T, Key, Hash> >& ht
+    const Xfer<StaticHashTable<T, Key, Hash> >& ht
 )
 :
     StaticHashTableName(),

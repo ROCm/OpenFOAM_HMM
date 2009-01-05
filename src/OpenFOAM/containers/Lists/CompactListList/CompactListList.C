@@ -97,7 +97,7 @@ Foam::CompactListList<T>::CompactListList
 template<class T>
 Foam::CompactListList<T>::CompactListList
 (
-    const xfer<CompactListList<T> >& lst
+    const Xfer<CompactListList<T> >& lst
 )
 {
     transfer(lst());

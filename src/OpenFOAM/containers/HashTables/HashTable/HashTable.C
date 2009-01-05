@@ -81,7 +81,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable
 (
-    const xfer<HashTable<T, Key, Hash> >& ht
+    const Xfer<HashTable<T, Key, Hash> >& ht
 )
 :
     HashTableName(),

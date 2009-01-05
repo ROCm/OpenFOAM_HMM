@@ -57,7 +57,7 @@ Foam::coordinateSystems::coordinateSystems
 Foam::coordinateSystems::coordinateSystems
 (
     const IOobject& io,
-    const xfer<PtrList<coordinateSystem> >& lst
+    const Xfer<PtrList<coordinateSystem> >& lst
 )
 :
     IOPtrList<coordinateSystem>(io, lst)

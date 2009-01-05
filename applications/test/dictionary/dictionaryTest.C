@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
             << "keys: " << dict1.keys() << nl
             << "patterns: " << dict1.keys(true) << endl;
 
-        dictionary dict2(dict1.transfer());
+        dictionary dict2(dict1.xfer());
 
         Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
             << "dict2.toc(): " << dict2.name() << " " << dict2.toc() << endl;

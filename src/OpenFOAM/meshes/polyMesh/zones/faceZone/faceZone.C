@@ -245,8 +245,8 @@ Foam::faceZone::faceZone
 Foam::faceZone::faceZone
 (
     const word& name,
-    const xfer<labelList>& addr,
-    const xfer<boolList>& fm,
+    const Xfer<labelList>& addr,
+    const Xfer<boolList>& fm,
     const label index,
     const faceZoneMesh& zm
 )
@@ -319,8 +319,8 @@ Foam::faceZone::faceZone
 Foam::faceZone::faceZone
 (
     const faceZone& fz,
-    const xfer<labelList>& addr,
-    const xfer<boolList>& fm,
+    const Xfer<labelList>& addr,
+    const Xfer<boolList>& fm,
     const label index,
     const faceZoneMesh& zm
 )

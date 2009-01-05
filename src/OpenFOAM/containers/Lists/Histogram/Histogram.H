@@ -45,7 +45,7 @@ namespace Foam
 
 
 /*---------------------------------------------------------------------------*\
-                           Class Histogram Declaration
+                          Class Histogram Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class List>

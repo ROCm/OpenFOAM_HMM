@@ -61,12 +61,10 @@ inline bool Foam::StaticHashTable<T, Key, Hash>::set
 
 
 template<class T, class Key, class Hash>
-inline Foam::xfer<Foam::StaticHashTable<T, Key, Hash> >
-Foam::StaticHashTable<T, Key, Hash>::transfer()
+inline Foam::Xfer<Foam::StaticHashTable<T, Key, Hash> >
+Foam::StaticHashTable<T, Key, Hash>::xfer()
 {
-    Foam::xfer<StaticHashTable<T, Key, Hash> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 

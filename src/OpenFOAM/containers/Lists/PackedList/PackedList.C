@@ -47,7 +47,7 @@ Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 
 
 template<int nBits>
-Foam::PackedList<nBits>::PackedList(const xfer<PackedList<nBits> >& lst)
+Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
 {
     transfer(lst());
 }

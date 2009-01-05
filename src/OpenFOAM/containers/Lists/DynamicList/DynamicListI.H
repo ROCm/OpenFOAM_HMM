@@ -60,6 +60,18 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 {}
 
 
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
+(
+    const Xfer<List<T> >& lst
+)
+:
+    List<T>(lst),
+    capacity_(List<T>::size())
+{}
+
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
@@ -212,12 +224,10 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline Foam::xfer<Foam::List<T> >
-Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer()
+inline Foam::Xfer<Foam::List<T> >
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::xfer()
 {
-    Foam::xfer<List<T> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMoveTo<List<T> >(*this);
 }
 
 

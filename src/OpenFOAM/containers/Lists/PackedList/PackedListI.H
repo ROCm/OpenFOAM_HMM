@@ -187,12 +187,10 @@ inline Foam::List<unsigned int>& Foam::PackedList<nBits>::storage()
 
 
 template<int nBits>
-inline Foam::xfer<Foam::PackedList<nBits> >
-Foam::PackedList<nBits>::transfer()
+inline Foam::Xfer<Foam::PackedList<nBits> >
+Foam::PackedList<nBits>::xfer()
 {
-    Foam::xfer<PackedList<nBits> > xf;
-    xf().transfer(*this);
-    return xf;
+    return xferMove(*this);
 }
 
 

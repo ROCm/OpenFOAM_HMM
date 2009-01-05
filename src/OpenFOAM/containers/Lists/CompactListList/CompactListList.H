@@ -104,7 +104,7 @@ public:
         CompactListList(const UList<label>& rowSizes, const T&);
 
         //- Construct by transferring the parameter contents
-        CompactListList(const xfer<CompactListList<T> >&);
+        CompactListList(const Xfer<CompactListList<T> >&);
 
         //- Construct as copy or re-use as specified.
         CompactListList(CompactListList<T>&, bool reUse);
@@ -164,8 +164,8 @@ public:
             //  into this CompactListList and annull the argument list.
             void transfer(CompactListList<T>&);
 
-            //- Transfer the contents to the xfer container
-            inline xfer<CompactListList<T> > transfer();
+            //- Transfer the contents to the Xfer container
+            inline Xfer<CompactListList<T> > xfer();
 
         // Other
 

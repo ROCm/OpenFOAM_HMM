@@ -130,7 +130,7 @@ public:
         PtrList(const PtrList<T>&, const CloneArg&);
 
         //- Construct by transferring the parameter contents
-        PtrList(const xfer<PtrList<T> >&);
+        PtrList(const Xfer<PtrList<T> >&);
 
         //- Construct as copy or re-use as specified.
         PtrList(PtrList<T>&, bool reUse);
@@ -175,8 +175,8 @@ public:
             //  and annull the argument list.
             void transfer(PtrList<T>&);
 
-            //- Transfer the contents to the xfer container
-            inline xfer<PtrList<T> > transfer();
+            //- Transfer contents to the Xfer container
+            inline Xfer<PtrList<T> > xfer();
 
             //- Is element set
             inline bool set(const label) const;

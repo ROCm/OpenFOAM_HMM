@@ -61,14 +61,14 @@ public:
 
     // Constructors
 
-        //- Construct from UList and SubList size
+        //- Construct from UList and sub-list size
         inline SubList
         (
             const UList<T>& list,
             const label subSize
         );
 
-        //- Construct from UList, start and end indices
+        //- Construct from UList, sub-list size and start index
         inline SubList
         (
             const UList<T>& list,

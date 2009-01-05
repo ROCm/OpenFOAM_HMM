@@ -88,7 +88,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
 
 
 template<class Type>
-Foam::IOField<Type>::IOField(const IOobject& io, const xfer<Field<Type> >& f)
+Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type> >& f)
 :
     regIOobject(io)
 {

@@ -135,7 +135,7 @@ public:
         PackedList(const PackedList<nBits>& PList);
 
         //- Construct by transferring the parameter contents
-        PackedList(const xfer<PackedList<nBits> >&);
+        PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
         PackedList(const UList<label>&);
@@ -157,8 +157,8 @@ public:
             //  and annull the argument list.
             void transfer(PackedList<nBits>&);
 
-            //- Transfer the contents to the xfer container
-            inline xfer<PackedList<nBits> > transfer();
+            //- Transfer contents to the Xfer container
+            inline Xfer<PackedList<nBits> > xfer();
 
 
         // Access

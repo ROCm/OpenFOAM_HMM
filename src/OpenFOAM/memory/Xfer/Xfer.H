@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::xfer
+    Foam::Xfer
 
 Description
     A simple container for copying or transferring objects of type \<T\>.
@@ -31,9 +31,9 @@ Description
     The wrapped object of type \<T\> must implement a transfer() method and
     an operator=() copy method.
 
-    Since it is decided upon construction of the xfer object whether the
+    Since it is decided upon construction of the Xfer object whether the
     parameter is to be copied or transferred, the contents of the resulting
-    xfer object can be transferred unconditionally. This greatly simplifies
+    Xfer object can be transferred unconditionally. This greatly simplifies
     defining constructors or methods in other classes with mixed
     transfer/copy semantics without requiring 2^N different versions.
 
@@ -54,12 +54,12 @@ SeeAlso
     xferCopy, xferCopyTo, xferMove, xferMoveTo, xferTmp
 
 SourceFiles
-    xferI.H
+    XferI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef xfer_H
-#define xfer_H
+#ifndef Xfer_H
+#define Xfer_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,11 +70,11 @@ namespace Foam
 template<class T> class tmp;
 
 /*---------------------------------------------------------------------------*\
-                           Class xfer Declaration
+                           Class Xfer Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
-class xfer
+class Xfer
 {
     // Private data
 
@@ -87,25 +87,25 @@ public:
 
         //- Store object pointer and manage its deletion
         //  Can also be used later to transfer by assignment
-        inline explicit xfer(T* = 0);
+        inline explicit Xfer(T* = 0);
 
         //- Construct by copying or by transferring the parameter contents
-        inline explicit xfer(T&, bool allowTransfer=false);
+        inline explicit Xfer(T&, bool allowTransfer=false);
 
         //- Construct by copying the parameter contents
-        inline explicit xfer(const T&);
+        inline explicit Xfer(const T&);
 
         //- Construct by transferring the contents
-        inline xfer(const xfer<T>&);
+        inline Xfer(const Xfer<T>&);
 
     // Destructor
 
-        inline ~xfer();
+        inline ~Xfer();
 
     // Member Functions
 
         //- Return a null object reference
-        inline static const xfer<T>& null();
+        inline static const Xfer<T>& null();
 
     // Member Operators
 
@@ -113,7 +113,7 @@ public:
         inline void operator=(T&);
 
         //- Transfer the contents into the object
-        inline void operator=(const xfer<T>&);
+        inline void operator=(const Xfer<T>&);
 
         //- Reference to the underlying datatype
         inline T& operator()() const;
@@ -129,37 +129,37 @@ public:
 /**
  * Construct by copying the contents of the @a arg
  *
- * @sa xferCopyTo, xferMove, xferMoveTo, xferTmp and Foam::xfer
+ * @sa xferCopyTo, xferMove, xferMoveTo, xferTmp and Foam::Xfer
 */
 template<class T>
-inline xfer<T> xferCopy(const T&);
+inline Xfer<T> xferCopy(const T&);
 
 /**
  * Construct by transferring the contents of the @a arg
  *
- * @sa xferCopy, xferCopyTo, xferMoveTo, xferTmp and Foam::xfer
+ * @sa xferCopy, xferCopyTo, xferMoveTo, xferTmp and Foam::Xfer
 */
 template<class T>
-inline xfer<T> xferMove(T&);
+inline Xfer<T> xferMove(T&);
 
 
 /**
  * Construct by transferring the contents of the @a arg
  *
- * @sa xferCopy, xferCopyTo, xferMove, xferMoveTo and Foam::xfer
+ * @sa xferCopy, xferCopyTo, xferMove, xferMoveTo and Foam::Xfer
 */
 template<class T>
-inline xfer<T> xferTmp(Foam::tmp<T>&);
+inline Xfer<T> xferTmp(Foam::tmp<T>&);
 
 
 /**
  * Construct by copying the contents of the @a arg
  * between dissimilar types
  *
- * @sa xferCopy, xferMove, xferMoveTo, xferTmp and Foam::xfer
+ * @sa xferCopy, xferMove, xferMoveTo, xferTmp and Foam::Xfer
 */
 template<class To, class From>
-inline xfer<To> xferCopyTo(const From&);
+inline Xfer<To> xferCopyTo(const From&);
 
 
 /**
@@ -173,10 +173,10 @@ inline xfer<To> xferCopyTo(const From&);
  *     labelList plainLst( xferMoveTo<labelList>(dynLst) );
  * @endcode
  *
- * @sa xferCopy, xferCopyTo, xferMove, xferTmp and Foam::xfer
+ * @sa xferCopy, xferCopyTo, xferMove, xferTmp and Foam::Xfer
 */
 template<class To, class From>
-inline xfer<To> xferMoveTo(From&);
+inline Xfer<To> xferMoveTo(From&);
 
 
 } // End namespace Foam
@@ -184,7 +184,7 @@ inline xfer<To> xferMoveTo(From&);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "xferI.H"
+#include "XferI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

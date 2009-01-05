@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class NamedEnum Declaration
+                          Class NamedEnum Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Enum, int nEnum>
@@ -79,10 +79,10 @@ public:
 
         //- Read a word from Istream and return the corresponding
         //  enumeration element
-        Enum read(Istream& is) const;
+        Enum read(Istream&) const;
 
         //- Write the name representation of the enumeration to an Ostream
-        void write(const Enum e, Ostream& os) const;
+        void write(const Enum e, Ostream&) const;
 
 
     // Member Operators

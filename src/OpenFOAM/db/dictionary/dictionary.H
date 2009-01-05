@@ -167,10 +167,10 @@ public:
         dictionary(const dictionary&);
 
         //- Construct by transferring parameter contents given parent dictionary
-        dictionary(const dictionary& parentDict, const xfer<dictionary>&);
+        dictionary(const dictionary& parentDict, const Xfer<dictionary>&);
 
         //- Construct top-level dictionary by transferring parameter contents
-        dictionary(const xfer<dictionary>&);
+        dictionary(const Xfer<dictionary>&);
 
         //- Construct and return clone
         autoPtr<dictionary> clone() const;
@@ -394,8 +394,8 @@ public:
             //- Transfer the contents of the argument and annull the argument.
             void transfer(dictionary&);
 
-            //- Transfer the contents to the xfer container
-            xfer<dictionary> transfer();
+            //- Transfer contents to the Xfer container
+            Xfer<dictionary> xfer();
 
 
         // Write

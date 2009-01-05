@@ -137,7 +137,7 @@ public:
         pointZone
         (
             const word& name,
-            const xfer<labelList>& addr,
+            const Xfer<labelList>& addr,
             const label index,
             const pointZoneMesh&
         );
@@ -166,7 +166,7 @@ public:
         pointZone
         (
             const pointZone&,
-            const xfer<labelList>& addr,
+            const Xfer<labelList>& addr,
             const label index,
             const pointZoneMesh&
         );

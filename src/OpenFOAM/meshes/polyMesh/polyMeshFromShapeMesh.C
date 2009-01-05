@@ -136,7 +136,7 @@ Foam::labelList Foam::polyMesh::facePatchFaceCells
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const xfer<pointField>& points,
+    const Xfer<pointField>& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
@@ -415,7 +415,7 @@ Foam::polyMesh::polyMesh
                     "polyMesh::polyMesh\n"
                     "(\n"
                     "    const IOobject&,\n"
-                    "    const xfer<pointField>&,\n"
+                    "    const Xfer<pointField>&,\n"
                     "    const cellShapeList& cellsAsShapes,\n"
                     "    const faceListList& boundaryFaces,\n"
                     "    const wordList& boundaryPatchTypes,\n"
@@ -473,7 +473,7 @@ Foam::polyMesh::polyMesh
                             "polyMesh::polyMesh\n"
                             "(\n"
                             "    const IOobject&,\n"
-                            "    const xfer<pointField>&,\n"
+                            "    const Xfer<pointField>&,\n"
                             "    const cellShapeList& cellsAsShapes,\n"
                             "    const faceListList& boundaryFaces,\n"
                             "    const wordList& boundaryPatchTypes,\n"

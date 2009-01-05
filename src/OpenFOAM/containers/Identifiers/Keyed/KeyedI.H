@@ -46,7 +46,7 @@ inline Foam::Keyed<T>::Keyed(const T& item, const label key)
 
 
 template<class T>
-inline Foam::Keyed<T>::Keyed(const xfer<T>& item, const label key)
+inline Foam::Keyed<T>::Keyed(const Xfer<T>& item, const label key)
 :
     T(item),
     key_(key)

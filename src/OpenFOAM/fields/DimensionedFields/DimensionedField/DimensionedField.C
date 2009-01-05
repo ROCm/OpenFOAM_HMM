@@ -141,7 +141,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 template<class Type, class GeoMesh>
 DimensionedField<Type, GeoMesh>::DimensionedField
 (
-    const xfer<DimensionedField<Type, GeoMesh> >& df
+    const Xfer<DimensionedField<Type, GeoMesh> >& df
 )
 :
     regIOobject(df(), true),
@@ -219,7 +219,7 @@ template<class Type, class GeoMesh>
 DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const word& newName,
-    const xfer<DimensionedField<Type, GeoMesh> >& df
+    const Xfer<DimensionedField<Type, GeoMesh> >& df
 )
 :
     regIOobject(IOobject(newName, df->time().timeName(), df->db())),

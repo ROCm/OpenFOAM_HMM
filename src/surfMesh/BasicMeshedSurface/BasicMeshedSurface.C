@@ -48,8 +48,8 @@ Foam::BasicMeshedSurface<Face>::BasicMeshedSurface()
 template<class Face>
 Foam::BasicMeshedSurface<Face>::BasicMeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst
 )
 :
     ParentType(List<Face>(), pointField())
@@ -111,8 +111,8 @@ void Foam::BasicMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::reset
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst
 )
 {
     ParentType::clearOut();

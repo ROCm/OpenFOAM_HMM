@@ -115,7 +115,7 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const word& name,
-    const xfer<labelList>& addr,
+    const Xfer<labelList>& addr,
     const label index,
     const pointZoneMesh& zm
 )
@@ -166,7 +166,7 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const pointZone& pz,
-    const xfer<labelList>& addr,
+    const Xfer<labelList>& addr,
     const label index,
     const pointZoneMesh& zm
 )

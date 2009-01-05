@@ -101,13 +101,13 @@ public:
         {}
 
         //- Construct by transferring the parameter contents
-        HashSet(const xfer<HashSet<Key, Hash> >& hs)
+        HashSet(const Xfer<HashSet<Key, Hash> >& hs)
         :
             HashTable<empty, Key, Hash>(hs)
         {}
 
         //- Construct by transferring the parameter contents
-        HashSet(const xfer<HashTable<empty, Key, Hash> >& hs)
+        HashSet(const Xfer<HashTable<empty, Key, Hash> >& hs)
         :
             HashTable<empty, Key, Hash>(hs)
         {}

@@ -111,7 +111,7 @@ public:
         explicit UPtrList(const label);
 
         //- Construct by transferring the parameter contents
-        UPtrList(const xfer<UPtrList<T> >&);
+        UPtrList(const Xfer<UPtrList<T> >&);
 
         //- Construct as copy or re-use as specified.
         UPtrList(UPtrList<T>&, bool reUse);
@@ -139,8 +139,8 @@ public:
             //  UPtrList and annull the argument list.
             void transfer(UPtrList<T>&);
 
-            //- Transfer the contents to the xfer container
-            inline xfer<UPtrList<T> > transfer();
+            //- Transfer contents to the Xfer container
+            inline Xfer<UPtrList<T> > xfer();
 
             //- Is element set
             inline bool set(const label) const;

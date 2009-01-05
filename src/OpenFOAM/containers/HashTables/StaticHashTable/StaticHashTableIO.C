@@ -180,7 +180,7 @@ Foam::Ostream& Foam::operator<<
     Ostream& os,
     const StaticHashTable<T, Key, Hash>& L)
 {
-    // Write size of HashTable and start contents delimiter
+    // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST << nl;
 
     // Write contents
@@ -194,7 +194,7 @@ Foam::Ostream& Foam::operator<<
         os << iter.key() << token::SPACE << iter() << nl;
     }
 
-    // Write end of contents delimiter
+    // Write end delimiter
     os << token::END_LIST;
 
     // Check state of IOstream

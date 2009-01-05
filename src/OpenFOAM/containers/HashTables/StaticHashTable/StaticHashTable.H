@@ -47,7 +47,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "className.H"
-#include "xfer.H"
+#include "Xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -150,7 +150,7 @@ public:
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
 
         //- Construct by transferring the parameter contents
-        StaticHashTable(const xfer<StaticHashTable<T, Key, Hash> >&);
+        StaticHashTable(const Xfer<StaticHashTable<T, Key, Hash> >&);
 
     // Destructor
 
@@ -207,8 +207,8 @@ public:
             //  and annull the argument table.
             void transfer(StaticHashTable<T, Key, Hash>&);
 
-            //- Transfer the contents to the xfer container
-            inline xfer<StaticHashTable<T, Key, Hash> > transfer();
+            //- Transfer contents to the Xfer container
+            inline Xfer<StaticHashTable<T, Key, Hash> > xfer();
 
 
     // Member Operators
