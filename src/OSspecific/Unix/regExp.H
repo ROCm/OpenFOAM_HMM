@@ -28,9 +28,6 @@ Class
 Description
     Wrapper around POSIX extended regular expressions.
 
-    The beginning-of-line (^) and the end-of-line ($) anchors are implicit
-    by default.
-
 SeeAlso
     The manpage regex(7) for more information about POSIX regular expressions.
     These differ somewhat from @c Perl and @c sed regular expressions.
@@ -56,7 +53,7 @@ class string;
 template<class T> class List;
 
 /*---------------------------------------------------------------------------*\
-                          Class regExp Declaration
+                           Class regExp Declaration
 \*---------------------------------------------------------------------------*/
 
 class regExp
@@ -132,11 +129,23 @@ public:
         //  Returns true if precompiled expression existed before clear
         bool clear() const;
 
-        //- Return true if it matches, partial matches are optional
-        bool match(const std::string&, bool partial=false) const;
+        //- Find position within string.
+        //  Returns the index where it begins or string::npos if not found
+        std::string::size_type find(const std::string& str) const;
+
+        //- Return true if it matches the entire string
+        //  The begin-of-line (^) and end-of-line ($) anchors are implicit
+        bool match(const std::string&) const;
 
         //- Return true if it matches and sets the sub-groups matched
+        //  The begin-of-line (^) and end-of-line ($) anchors are implicit
         bool match(const string&, List<string>& groups) const;
+
+        //- Return true if the regex was found in within string
+        bool search(const std::string& str) const
+        {
+            return std::string::npos != find(str);
+        }
 
 
     // Member Operators

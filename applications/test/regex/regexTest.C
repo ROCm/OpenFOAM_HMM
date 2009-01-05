@@ -62,18 +62,18 @@ int main(int argc, char *argv[])
             Info<< "true";
             if (re.ngroups())
             {
-                Info<< groups;
+                Info<< " groups:" << groups;
             }
         }
         else
         {
             Info<< "false";
-            if (re.match(str, true))
+            if (re.search(str))
             {
                 Info<< " partial match";
             }
         }
-        Info << endl;
+        Info<< endl;
     }
 
     Info<<"test regExp(const char*) ..." << endl;

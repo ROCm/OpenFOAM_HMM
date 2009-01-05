@@ -105,23 +105,36 @@ bool Foam::regExp::clear() const
 }
 
 
-bool Foam::regExp::match(const std::string& str, bool partial) const
+std::string::size_type Foam::regExp::find(const std::string& str) const
 {
     if (preg_ && str.size())
     {
         size_t nmatch = 1;
         regmatch_t pmatch[1];
 
-        // match and also verify that the entire string was matched
+        if (regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0)
+        {
+            return pmatch[0].rm_so;
+        }
+    }
+
+    return string::npos;
+}
+
+
+bool Foam::regExp::match(const std::string& str) const
+{
+    if (preg_ && str.size())
+    {
+        size_t nmatch = 1;
+        regmatch_t pmatch[1];
+
+        // also verify that the entire string was matched
         // pmatch[0] is the entire match
         if
         (
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
-         &&
-            (
-                partial
-             || (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
-            )
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
         )
         {
             return true;
@@ -139,7 +152,7 @@ bool Foam::regExp::match(const string& str, List<string>& groups) const
         size_t nmatch = ngroups() + 1;
         regmatch_t pmatch[nmatch];
 
-        // match and also verify that the entire string was matched
+        // also verify that the entire string was matched
         // pmatch[0] is the entire match
         // pmatch[1..] are the (...) sub-groups
         if

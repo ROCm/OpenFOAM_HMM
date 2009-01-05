@@ -48,7 +48,7 @@ labelList findStrings
     label matchI = 0;
     forAll(lst, elemI)
     {
-        if (re.match(lst[elemI], partialMatch))
+        if (partialMatch ? re.search(lst[elemI]) : re.match(lst[elemI]))
         {
             matched[matchI++] = elemI;
         }

@@ -44,8 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-    //- Return the indices of the strings in the list
-    //  that match the given regular expression
+    //- Return list indices for the strings matching the regular expression
     //  partial matches are optional
     template<class StringType>
     labelList findStrings
