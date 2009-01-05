@@ -99,9 +99,6 @@ public:
 
     // Member functions
 
-        //- Is this character valid for a keyType
-        inline static bool valid(char c);
-
         //- Should be treated as a match rather than a literal string
         inline bool isPattern() const;
 

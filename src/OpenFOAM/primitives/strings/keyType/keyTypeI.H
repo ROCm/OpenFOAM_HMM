@@ -81,13 +81,7 @@ inline Foam::keyType::keyType
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::keyType::valid(char c)
-{
-    return c != '"';
-}
-
-
-bool Foam::keyType::isPattern() const
+inline bool Foam::keyType::isPattern() const
 {
     return isPattern_;
 }

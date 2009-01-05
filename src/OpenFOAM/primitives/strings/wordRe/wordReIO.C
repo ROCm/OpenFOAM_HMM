@@ -91,18 +91,15 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const wordRe& w)
 }
 
 
-template<>
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<wordRe>& ip)
+Foam::Ostream& Foam::wordRe::info(Ostream& os) const
 {
-    const wordRe& wre = ip.t_;
-
-    if (wre.isPattern())
+    if (isPattern())
     {
-        os  << "wordRe(regex) " << wre;
+        os  << "wordRe(regex) " << *this;
     }
     else
     {
-        os  << "wordRe(plain) '" << wre << "'";
+        os  << "wordRe(plain) '" << *this << "'";
     }
     os.flush();
 

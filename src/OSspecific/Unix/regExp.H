@@ -65,9 +65,6 @@ class regExp
 
     // Private member functions
 
-        //- Compile into a regular expression
-        void compile(const char*) const;
-
         //- Disallow default bitwise copy construct
         regExp(const regExp&);
 
@@ -100,11 +97,11 @@ public:
         //- Construct null
         regExp();
 
-        //- Construct from character array
-        regExp(const char*);
+        //- Construct from character array, optionally ignoring case
+        regExp(const char*, const bool ignoreCase=false);
 
-        //- Construct from std::string (or string)
-        regExp(const std::string&);
+        //- Construct from std::string (or string), optionally ignoring case
+        regExp(const std::string&, const bool ignoreCase=false);
 
     // Destructor
 
@@ -113,7 +110,9 @@ public:
 
     // Member functions
 
-        //- Is the precompiled expression set?
+    //- Access
+
+        //- Does a precompiled expression exist?
         inline bool exists() const
         {
             return preg_ ? true : false;
@@ -125,9 +124,22 @@ public:
             return preg_ ? preg_->re_nsub : 0;
         }
 
+
+    //- Editing
+
+        //- Compile pattern into a regular expression, optionally ignoring case
+        void set(const char*, const bool ignoreCase=false) const;
+
+        //- Compile pattern into a regular expression, optionally ignoring case
+        void set(const std::string&, const bool ignoreCase=false) const;
+
+
         //- Release precompiled expression.
         //  Returns true if precompiled expression existed before clear
         bool clear() const;
+
+
+    //- Searching
 
         //- Find position within string.
         //  Returns the index where it begins or string::npos if not found
@@ -150,11 +162,13 @@ public:
 
     // Member Operators
 
-        //- Assign from a string and compile regular expression
-        void operator=(const std::string&);
-
-        //- Assign from a character array and compile regular expression
+        //- Assign and compile pattern from a character array
+        //  Always case sensitive
         void operator=(const char*);
+
+        //- Assign and compile pattern from string
+        //  Always case sensitive
+        void operator=(const std::string&);
 
 };
 

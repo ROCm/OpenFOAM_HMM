@@ -29,12 +29,19 @@ Description
     A wordRe is a word, but can also have a regular expression for matching
     words.
 
+    By default the constructors will generally preserve the argument as
+    string literal and the assignment operators will use the wordRe::DETECT
+    compOption to scan the string for regular expression meta characters
+    and/or invalid word characters and react accordingly.
+
+    The exceptions are when constructing/assigning from another
+    Foam::wordRe (preserve the same type) or from a Foam::word (always
+    literal).
+
 Note
     If the string contents are changed - eg, by the operator+=() or by
     string::replace(), etc - it will be necessary to use compile() or
     recompile() to sychronize the regular expression.
-
-    THIS IS STILL A DRAFT -- NOT YET RELEASED FOR GENERAL USE
 
 SourceFiles
     wordRe.C
@@ -47,7 +54,6 @@ SourceFiles
 
 #include "word.H"
 #include "regExp.H"
-#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,11 +85,23 @@ class wordRe
 
 public:
 
+    // Public data types
+
+        //- Enumeration with compile options
+        //  Note that 'REGEXP' is implicit if 'NOCASE' is specified alone.
+        enum compOption
+        {
+            LITERAL = 0, /*!< treat as a strign literal */
+            DETECT  = 1, /*!< treat as regular expression */
+            REGEXP  = 2, /*!< detect if the string contains meta-characters */
+            NOCASE  = 4, /*!< ignore case in regular expression */
+            DETECT_NOCASE = DETECT | NOCASE,
+            REGEXP_NOCASE = REGEXP | NOCASE
+        };
+
+
         //- Is this a meta character?
         static inline bool meta(char);
-
-        //- Is this character valid for a wordRe
-        inline static bool valid(char);
 
         //- Test string for regular expression meta characters
         static inline bool isPattern(const string&);
@@ -100,64 +118,67 @@ public:
         inline wordRe(const word&);
 
         //- Construct as copy of character array
-        //  Treat as regular expression specified explicitly.
-        inline wordRe(const char*, const bool asPattern=false);
+        //  Optionally specify how it should be treated.
+        inline wordRe(const char*, const compOption=LITERAL);
 
         //- Construct as copy of string.
-        //  Treat as regular expression specified explicitly.
-        inline wordRe(const string&, const bool asPattern);
-
-        //- Construct as copy of string.
-        //  Auto-test for regular expression
-        inline wordRe(const string&);
+        //  Optionally specify how it should be treated.
+        inline wordRe(const string&, const compOption=LITERAL);
 
         //- Construct as copy of std::string
-        //  Treat as regular expression specified explicitly.
-        inline wordRe(const std::string&, const bool asPattern);
-
-        //- Construct as copy of std::string
-        //  Auto-test for regular expression
-        inline wordRe(const std::string&);
+        //  Optionally specify how it should be treated.
+        inline wordRe(const std::string&, const compOption=LITERAL);
 
         //- Construct from Istream
+        //  Words are treated as literals, strings with an auto-test
         wordRe(Istream&);
 
-    // Destructor
-
-        ~wordRe();
-
-
     // Member functions
+
+    //- Access
 
         //- Should be treated as a match rather than a literal string?
         inline bool isPattern() const;
 
-        //- Create and compile the regular expression
-        //  Optionally detect if it appears to be a regular expression
-        inline bool compile(const bool detect=false) const;
+    //- Infrastructure
+
+        //- Compile the regular expression
+        inline bool compile() const;
+
+        //- Possibly compile the regular expression, with greater control
+        inline bool compile(const compOption) const;
 
         //- Recompile an existing regular expression
         inline bool recompile() const;
 
-        //- Frees precompiled regular expression and makes is a literal string.
+        //- Frees precompiled regular expression, making wordRe a literal.
         //  Optionally strips invalid word characters
         inline void uncompile(const bool doStripInvalid=false) const;
 
+    //- Editing
+
+        //- Copy string, auto-test for regular expression or other options
+        inline void set(const std::string&, const compOption=DETECT);
+
+        //- Copy string, auto-test for regular expression or other options
+        inline void set(const char*, const compOption=DETECT);
+
         //- Clear string and precompiled regular expression
         inline void clear();
+
+    //- Searching
 
         //- Smart match as regular expression or as a string
         //  Optionally specify a literal match only
         inline bool match(const string&, bool literalMatch=false) const;
 
+    //- Miscellaneous
+
         //- Return a string with quoted meta-characters
         inline string quotemeta() const;
 
-        //- Return info proxy.
-        InfoProxy<wordRe> info() const
-        {
-            return *this;
-        }
+        //- Output some basic info
+        Ostream& info(Ostream&) const;
 
 
     // Member operators
@@ -165,18 +186,22 @@ public:
         // Assignment
 
             //- Assign copy
+            //  Always case sensitive
             inline void operator=(const wordRe&);
 
             //- Copy word, never a regular expression
             inline void operator=(const word&);
 
             //- Copy string, auto-test for regular expression
+            //  Always case sensitive
             inline void operator=(const string&);
 
             //- Copy string, auto-test for regular expression
+            //  Always case sensitive
             inline void operator=(const std::string&);
 
             //- Copy string, auto-test for regular expression
+            //  Always case sensitive
             inline void operator=(const char*);
 
 
@@ -185,10 +210,6 @@ public:
         friend Istream& operator>>(Istream&, wordRe&);
         friend Ostream& operator<<(Ostream&, const wordRe&);
 };
-
-
-template<>
-Ostream& operator<<(Ostream&, const InfoProxy<wordRe>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

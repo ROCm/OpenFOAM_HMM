@@ -32,16 +32,6 @@ inline bool Foam::wordRe::meta(char c)
 }
 
 
-inline bool Foam::wordRe::valid(char c)
-{
-    return
-    (
-          !isspace(c)
-     && c != '"'
-     && c != '/'
-    );
-}
-
 inline bool Foam::wordRe::isPattern(const string& str)
 {
     return string::meta<regExp>(str);
@@ -76,64 +66,31 @@ inline Foam::wordRe::wordRe(const word& str)
 {}
 
 
-inline Foam::wordRe::wordRe(const char* str, const bool asPattern)
+inline Foam::wordRe::wordRe(const char* str, const compOption opt)
 :
     word(str, false),
     re_()
 {
-    if (asPattern)
-    {
-        compile();
-    }
+    compile(opt);
 }
 
 
-inline Foam::wordRe::wordRe(const string& str, const bool asPattern)
+inline Foam::wordRe::wordRe(const string& str, const compOption opt)
 :
     word(str, false),
     re_()
 {
-    if (asPattern)
-    {
-        compile();
-    }
+    compile(opt);
 }
 
 
-inline Foam::wordRe::wordRe(const string& str)
+inline Foam::wordRe::wordRe(const std::string& str, const compOption opt)
 :
     word(str, false),
     re_()
 {
-    compile(true);  // auto-detect regex
+    compile(opt);
 }
-
-
-inline Foam::wordRe::wordRe(const std::string& str, const bool asPattern)
-:
-    word(str, false),
-    re_()
-{
-    if (asPattern)
-    {
-        compile();
-    }
-}
-
-
-inline Foam::wordRe::wordRe(const std::string& str)
-:
-    word(str, false),
-    re_()
-{
-    compile(true);  // auto-detect regex
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wordRe::~wordRe()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -144,18 +101,43 @@ inline bool Foam::wordRe::isPattern() const
 }
 
 
-inline bool Foam::wordRe::compile(const bool detect) const
+inline bool Foam::wordRe::compile(const compOption opt) const
 {
-    // appears to be a plain word and not a regex
-    if (detect && string::valid<word>(*this) && !string::meta<regExp>(*this))
+    bool doCompile = false;
+
+    if (opt & wordRe::REGEXP)
     {
-        re_.clear();
+        doCompile = true;
+    }
+    else if (opt & wordRe::DETECT)
+    {
+        if (string::meta<regExp>(*this) || !string::valid<word>(*this))
+        {
+            doCompile = true;
+        }
+    }
+    else if (opt & wordRe::NOCASE)
+    {
+        doCompile = true;
+    }
+
+
+    if (doCompile)
+    {
+        re_.set(*this, (opt & wordRe::NOCASE));
     }
     else
     {
-        re_ = *this;
+        re_.clear();
     }
 
+    return re_.exists();
+}
+
+
+inline bool Foam::wordRe::compile() const
+{
+    re_ = *this;
     return re_.exists();
 }
 
@@ -215,6 +197,20 @@ inline Foam::string Foam::wordRe::quotemeta() const
 }
 
 
+inline void Foam::wordRe::set(const std::string& str, const compOption opt)
+{
+    string::operator=(str);
+    compile(opt);
+}
+
+
+inline void Foam::wordRe::set(const char* str, const compOption opt)
+{
+    string::operator=(str);
+    compile(opt);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::wordRe::operator=(const wordRe& str)
@@ -242,21 +238,21 @@ inline void Foam::wordRe::operator=(const word& str)
 inline void Foam::wordRe::operator=(const string& str)
 {
     string::operator=(str);
-    compile(true);  // auto-detect regex
+    compile(DETECT);  // auto-detect regex
 }
 
 
 inline void Foam::wordRe::operator=(const std::string& str)
 {
     string::operator=(str);
-    compile(true);  // auto-detect regex
+    compile(DETECT);  // auto-detect regex
 }
 
 
 inline void Foam::wordRe::operator=(const char* str)
 {
     string::operator=(str);
-    compile(true);  // auto-detect regex
+    compile(DETECT);  // auto-detect regex
 }
 
 

@@ -12,7 +12,8 @@
 (
     ( "a.*" "abc" )
     ( "a.*" "bac" )
-    ( "a.*" "abcd" )
+    ( "A.*" "abcd" )
+    ( "a.*" "ABCD" )
     ( "a.*" "def" )
     ( "d(.*)f" "def" )
     ( "plain" "def" )

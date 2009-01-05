@@ -45,36 +45,42 @@ int main(int argc, char *argv[])
     Foam::string s2("this .* file");
     const char * s3 = "this .* file";
 
-    Info<< wordRe(s1).info() << endl;
-    Info<< wordRe(s2, false).info() << endl;
-    Info<< wordRe(s2).info() << endl;
-    Info<< wordRe(s3, true).info() << endl;
+    wordRe(s1, wordRe::DETECT).info(Info) << endl;
+    wordRe(s2).info(Info) << endl;
+    wordRe(s2, wordRe::DETECT).info(Info) << endl;
+    wordRe(s3, wordRe::REGEXP).info(Info) << endl;
 
     wre = "this .* file";
-    Info<< wre.info() << endl;
+    wre.info(Info) << endl;
     wre = s1;
-    Info<< wre.info() << endl;
+    wre.info(Info) << endl;
     wre.uncompile();
-    Info<< wre.info() << " uncompiled" << endl;
+    wre.info(Info) << endl;
 
-    
     wre = "something";
-    Info<< wre.info() << " before" << endl;
+    wre.info(Info) << " before" << endl;
     wre.uncompile();
-    Info<< wre.info() << " uncompiled" << endl;
-    wre.compile(true);
-    Info<< wre.info() << " after auto-detect" << endl;
+    wre.info(Info) << " uncompiled" << endl;
+    wre.compile(wordRe::DETECT);
+    wre.info(Info) << " after DETECT" << endl;
+    wre.compile(wordRe::NOCASE);
+    wre.info(Info) << " after NOCASE" << endl;
+    wre.compile(wordRe::DETECT_NOCASE);
+    wre.info(Info) << " after DETECT_NOCASE" << endl;
 
     wre = "something .* value";
-    Info<< wre.info() << " before" << endl;
+    wre.info(Info) << " before" << endl;
     wre.uncompile();
-    Info<< wre.info() << " uncompiled" << endl;
-    wre.compile(true);
-    Info<< wre.info() << " after auto-detect" << endl;
+    wre.info(Info) << " uncompiled" << endl;
+    wre.compile(wordRe::DETECT);
+    wre.info(Info) << " after DETECT" << endl;
     wre.uncompile();
-    Info<< wre.info() << " uncompiled" << endl;
+    wre.info(Info) << " uncompiled" << endl;
     wre.recompile();
-    Info<< wre.info() << " recompiled" << endl;
+    wre.info(Info) << " recompiled" << endl;
+
+    wre.set("something .* value", wordRe::LITERAL);
+    wre.info(Info) << " set as LITERAL" << endl;
 
     IOobject::writeDivider(Info);
 
@@ -88,12 +94,21 @@ int main(int argc, char *argv[])
         const wordRe& wre = rawList[elemI].first();
         const string& str = rawList[elemI].second();
 
-        Info<< wre.info()
+        wre.info(Info)
             << " equals:" << (wre == str)
             << "(" << wre.match(str, true) << ")"
             << " match:" << wre.match(str)
             << "  str=" << str
             << endl;
+
+        wordRe wre2;
+        wre2.set(wre, wordRe::NOCASE);
+
+        wre2.info(Info)
+            << " match:" << wre2.match(str)
+            << "  str=" << str
+            << endl;
+
     }
 
     Info<< endl;

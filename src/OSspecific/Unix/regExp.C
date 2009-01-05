@@ -32,30 +32,6 @@ License
 #include "List.H"
 #include "IOstreams.H"
 
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-void Foam::regExp::compile(const char* pattern) const
-{
-    clear();
-
-    // avoid NULL pointer and zero-length patterns
-    if (pattern && *pattern)
-    {
-        preg_ = new regex_t;
-
-        if (regcomp(preg_, pattern, REG_EXTENDED) != 0)
-        {
-            FatalErrorIn
-            (
-                "regExp::compile(const char*)"
-            )   << "Failed to compile regular expression '" << pattern << "'"
-                << exit(FatalError);
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::regExp::regExp()
@@ -64,19 +40,19 @@ Foam::regExp::regExp()
 {}
 
 
-Foam::regExp::regExp(const char* pattern)
+Foam::regExp::regExp(const char* pattern, const bool ignoreCase)
 :
     preg_(0)
 {
-    compile(pattern);
+    set(pattern, ignoreCase);
 }
 
 
-Foam::regExp::regExp(const std::string& pattern)
+Foam::regExp::regExp(const std::string& pattern, const bool ignoreCase)
 :
     preg_(0)
 {
-    compile(pattern.c_str());
+    set(pattern.c_str(), ignoreCase);
 }
 
 
@@ -89,6 +65,39 @@ Foam::regExp::~regExp()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::regExp::set(const char* pattern, const bool ignoreCase) const
+{
+    clear();
+
+    // avoid NULL pointer and zero-length patterns
+    if (pattern && *pattern)
+    {
+        preg_ = new regex_t;
+
+        int cflags = REG_EXTENDED;
+        if (ignoreCase)
+        {
+            cflags |= REG_ICASE;
+        }
+
+        if (regcomp(preg_, pattern, cflags) != 0)
+        {
+            FatalErrorIn
+            (
+                "regExp::set(const char*)"
+            )   << "Failed to compile regular expression '" << pattern << "'"
+                << exit(FatalError);
+        }
+    }
+}
+
+
+void Foam::regExp::set(const std::string& pattern, const bool ignoreCase) const
+{
+    return set(pattern.c_str(), ignoreCase);
+}
+
 
 bool Foam::regExp::clear() const
 {
@@ -194,13 +203,13 @@ bool Foam::regExp::match(const string& str, List<string>& groups) const
 
 void Foam::regExp::operator=(const char* pat)
 {
-    compile(pat);
+    set(pat);
 }
 
 
 void Foam::regExp::operator=(const std::string& pat)
 {
-    compile(pat.c_str());
+    set(pat);
 }
 
 
