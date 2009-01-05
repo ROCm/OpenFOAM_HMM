@@ -65,6 +65,7 @@ SourceFiles
 #include "Map.H"
 #include "dictionary.H"
 #include "labelList.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -136,6 +137,9 @@ public:
 
         //- Return a Map of (id => name)
         Map<word> names() const;
+
+        //- Return a Map of (id => names) selected by patterns
+        Map<word> names(const List<wordRe>& patterns) const;
 
         //- Return a Map of (id => name) for materialType (fluid | solid | shell)
         Map<word> selectType(const word& materialType) const;

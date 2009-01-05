@@ -38,21 +38,45 @@ SourceFiles
 
 #include "labelList.H"
 #include "stringList.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-    //- Return list indices for the strings matching the regular expression
-    //  partial matches are optional
+    //- Return list indices for strings matching the regular expression
     template<class StringType>
     labelList findStrings
     (
         const string& regexpPattern,
-        const UList<StringType>&,
-        bool partialMatch=false
+        const UList<StringType>&
     );
+
+    //- Return list indices for strings matching the regular expression
+    template<class StringType>
+    labelList findStrings
+    (
+        const wordRe&,
+        const UList<StringType>&
+    );
+
+    //- Return list indices for strings matching one of the regular expression
+    template<class StringType>
+    labelList findStrings
+    (
+        const UList<wordRe>&,
+        const UList<StringType>&
+    );
+
+    //- Return true if string matches one of the regular expressions
+    template<class StringType>
+    bool findStrings
+    (
+        const UList<wordRe>&,
+        const StringType& str
+    );
+
 }
 
 

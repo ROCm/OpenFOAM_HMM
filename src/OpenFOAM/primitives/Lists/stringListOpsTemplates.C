@@ -38,8 +38,7 @@ template<class StringType>
 labelList findStrings
 (
     const string& pattern,
-    const UList<StringType>& lst,
-    bool  partialMatch
+    const UList<StringType>& lst
 )
 {
     regExp re(pattern);
@@ -48,7 +47,7 @@ labelList findStrings
     label matchI = 0;
     forAll(lst, elemI)
     {
-        if (partialMatch ? re.search(lst[elemI]) : re.match(lst[elemI]))
+        if (re.match(lst[elemI]))
         {
             matched[matchI++] = elemI;
         }
@@ -56,6 +55,75 @@ labelList findStrings
     matched.setSize(matchI);
 
     return matched;
+}
+
+
+template<class StringType>
+labelList findStrings
+(
+    const wordRe& wre,
+    const UList<StringType>& lst
+)
+{
+    labelList matched(lst.size());
+
+    label matchI = 0;
+    forAll(lst, elemI)
+    {
+        if (wre.match(lst[elemI]))
+        {
+            matched[matchI++] = elemI;
+        }
+    }
+    matched.setSize(matchI);
+
+    return matched;
+}
+
+
+template<class StringType>
+labelList findStrings
+(
+    const UList<wordRe>& wreLst,
+    const UList<StringType>& lst
+)
+{
+    labelList matched(lst.size());
+
+    label matchI = 0;
+    forAll(lst, elemI)
+    {
+        forAll(wreLst, reI)
+        {
+            if (wreLst[reI].match(lst[elemI]))
+            {
+                matched[matchI++] = elemI;
+                break;
+            }
+        }
+    }
+    matched.setSize(matchI);
+
+    return matched;
+}
+
+
+template<class StringType>
+bool findStrings
+(
+    const UList<wordRe>& wreLst,
+    const StringType& str
+)
+{
+    forAll(wreLst, reI)
+    {
+        if (wreLst[reI].match(str))
+        {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 
