@@ -28,37 +28,8 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::potential::potential::readPotentialDict()
+void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
 {
-    Info<< nl <<  "Reading potential dictionary:" << endl;
-
-    IOdictionary idListDict
-    (
-        IOobject
-        (
-            "idList",
-            mesh_.time().constant(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
-
-    idList_ = List<word>(idListDict.lookup("idList"));
-
-    IOdictionary moleculePropertiesDict
-    (
-        IOobject
-        (
-            "moleculeProperties",
-            mesh_.time().constant(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     DynamicList<word> siteIdList;
 
     DynamicList<word> pairPotentialSiteIdList;
@@ -108,7 +79,7 @@ void Foam::potential::potential::readPotentialDict()
         }
     }
 
-    label nPairPotIds_ = pairPotentialSiteIdList.size();
+    nPairPotIds_ = pairPotentialSiteIdList.size();
 
     forAll(siteIdList, aSIN)
     {
@@ -121,8 +92,46 @@ void Foam::potential::potential::readPotentialDict()
     }
 
     siteIdList_.transfer(pairPotentialSiteIdList.shrink());
+}
 
-    pairPotentialSiteIdList = SubList<word>(siteIdList_, nPairPotIds_);
+
+void Foam::potential::potential::readPotentialDict()
+{
+    Info<< nl <<  "Reading potential dictionary:" << endl;
+
+    IOdictionary idListDict
+    (
+        IOobject
+        (
+            "idList",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
+
+    idList_ = List<word>(idListDict.lookup("idList"));
+
+    IOdictionary moleculePropertiesDict
+    (
+        IOobject
+        (
+            "moleculeProperties",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    setSiteIdList(moleculePropertiesDict);
+
+    List<word> pairPotentialSiteIdList
+    (
+        SubList<word>(siteIdList_, nPairPotIds_)
+    );
 
     Info<< nl << "Unique site ids found: " << siteIdList_
         << nl << "Site Ids requiring a pair potential: "
@@ -239,6 +248,119 @@ void Foam::potential::potential::readPotentialDict()
 }
 
 
+void Foam::potential::potential::readMdInitialiseDict
+(
+    const IOdictionary& mdInitialiseDict,
+    IOdictionary& idListDict
+)
+{
+    IOdictionary moleculePropertiesDict
+    (
+        IOobject
+        (
+            "moleculeProperties",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    DynamicList<word> idList;
+
+    DynamicList<word> tetherSiteIdList;
+
+    forAll(mdInitialiseDict.toc(), zone)
+    {
+        const dictionary& zoneDict = mdInitialiseDict.subDict
+        (
+            mdInitialiseDict.toc()[zone]
+        );
+
+        List<word> ids
+        (
+            zoneDict.lookup("latticeIds")
+        );
+
+        forAll(ids, i)
+        {
+            const word& id = ids[i];
+
+            if(!moleculePropertiesDict.found(id))
+            {
+                FatalErrorIn("potential.C") << nl
+                    << "Molecule type "
+                    << id
+                    << " not found in moleculeProperties dictionary."
+                    << nl
+                    << abort(FatalError);
+            }
+
+            if (findIndex(idList,id) == -1)
+            {
+                idList.append(id);
+            }
+        }
+
+        List<word> tetherSiteIds
+        (
+            zoneDict.lookup("tetherSiteIds")
+        );
+
+        forAll(tetherSiteIds, t)
+        {
+            const word& tetherSiteId = tetherSiteIds[t];
+
+            bool idFound = false;
+
+            forAll(ids, i)
+            {
+                if (idFound)
+                {
+                    break;
+                }
+
+                const word& id = ids[i];
+
+                List<word> siteIds
+                (
+                    moleculePropertiesDict.subDict(id).lookup("siteIds")
+                );
+
+                if (findIndex(siteIds, tetherSiteId) != -1)
+                {
+                    idFound = true;
+                }
+            }
+
+            if (idFound)
+            {
+                tetherSiteIdList.append(tetherSiteId);
+            }
+            else
+            {
+                FatalErrorIn("potential.C") << nl
+                    << "Tether id  "
+                    << tetherSiteId
+                    << " not found as a site of any molecule in zone."
+                    << nl
+                    << abort(FatalError);
+            }
+        }
+    }
+
+    idList_.transfer(idList);
+
+    tetherSiteIdList.shrink();
+
+    idListDict.add("idList", idList_);
+
+    idListDict.add("tetherSiteIdList", tetherSiteIdList);
+
+    setSiteIdList(moleculePropertiesDict);
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::potential::potential(const polyMesh& mesh)
@@ -249,6 +371,19 @@ Foam::potential::potential(const polyMesh& mesh)
     readPotentialDict();
 }
 
+
+Foam::potential::potential
+(
+    const polyMesh& mesh,
+    const IOdictionary& mdInitialiseDict,
+    IOdictionary& idListDict
+)
+:
+    mesh_(mesh),
+    electrostaticPotential_()
+{
+    readMdInitialiseDict(mdInitialiseDict, idListDict);
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

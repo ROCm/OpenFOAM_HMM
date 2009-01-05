@@ -22,50 +22,74 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    mdFoam
-
-Description
-    molecular dynamics solver for fluid dynamics
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
 #include "md.H"
+#include "fvCFD.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    potential pot(mesh);
+    IOdictionary mdInitialiseDict
+    (
+        IOobject
+        (
+            "mdInitialiseDict",
+            runTime.system(),
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
 
-    moleculeCloud molecules(mesh, pot);
+    IOdictionary idListDict
+    (
+        IOobject
+        (
+            "idList",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        )
+    );
 
-#   include "temperatureAndPressureVariables.H"
+    potential pot(mesh, mdInitialiseDict, idListDict);
 
-    Info << "\nStarting time loop\n" << endl;
+    moleculeCloud molecules(mesh, pot, mdInitialiseDict);
 
-    while (runTime.run())
+    label totalMolecules = molecules.size();
+
+    if (Pstream::parRun())
     {
-        runTime++;
-
-        Info << "Time = " << runTime.timeName() << endl;
-
-        molecules.evolve();
-
-#       include "meanMomentumEnergyAndNMols.H"
-
-        runTime.write();
-
-        Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+        reduce(totalMolecules, sumOp<label>());
     }
 
-    Info << "End\n" << endl;
+    Info<< nl << "Total number of molecules added: " << totalMolecules
+        << nl << endl;
 
-    return(0);
+    IOstream::defaultPrecision(12);
+
+    if (!mesh.write())
+    {
+        FatalErrorIn(args.executable())
+            << "Failed writing moleculeCloud."
+            << nl << exit(FatalError);
+    }
+
+    Info<< nl << "ClockTime = " << runTime.elapsedClockTime() << " s"
+        << nl << endl;
+
+    Info << nl << "End\n" << endl;
+
+    return 0;
 }
+
+
+// ************************************************************************* //

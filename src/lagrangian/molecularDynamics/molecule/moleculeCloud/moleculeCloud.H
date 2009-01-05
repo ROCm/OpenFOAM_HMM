@@ -110,6 +110,11 @@ private:
 
         void removeHighEnergyOverlaps();
 
+        void initialiseMolecules
+        (
+            const IOdictionary& mdInitialiseDict
+        );
+
         //- Disallow default bitwise copy construct
         moleculeCloud(const moleculeCloud&);
 
@@ -136,23 +141,13 @@ public:
             const potential& pot
         );
 
-        //- Construct given polyMesh and fields of components.
-        //- Intended for use
-        //- by the molConfig utility
-        // moleculeCloud
-        // (
-        //     const polyMesh& mesh,
-        //     label nMol,
-        //     const labelField& id,
-        //     const scalarField& mass,
-        //     const vectorField& positions,
-        //     const labelField& cells,
-        //     const vectorField& U,
-        //     const vectorField& A,
-        //     const labelField& tethered,
-        //     const vectorField& tetherPositions
-        // );
-
+        //- Construct given mesh, potential and mdInitialiseDict
+        moleculeCloud
+        (
+            const polyMesh& mesh,
+            const potential& pot,
+            const IOdictionary& mdInitialiseDict
+        );
 
     // Member Functions
 

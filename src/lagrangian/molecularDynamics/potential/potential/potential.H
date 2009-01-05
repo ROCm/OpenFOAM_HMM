@@ -78,7 +78,15 @@ class potential
 
     // Private Member Functions
 
+        void setSiteIdList(const IOdictionary& moleculePropertiesDict);
+
         void readPotentialDict();
+
+        void readMdInitialiseDict
+        (
+            const IOdictionary& mdInitialiseDict,
+            IOdictionary& idListDict
+        );
 
         //- Disallow default bitwise copy construct
         potential(const potential&);
@@ -93,6 +101,14 @@ public:
 
         //- Construct from mesh reference
         potential(const polyMesh& mesh);
+
+        //- Construct from mdInitialiseDict
+        potential
+        (
+            const polyMesh& mesh,
+            const IOdictionary& mdInitialiseDict,
+            IOdictionary& idListDict
+        );
 
     // Destructor
 

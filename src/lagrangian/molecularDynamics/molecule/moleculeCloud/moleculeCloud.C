@@ -460,6 +460,53 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 }
 
 
+void Foam::moleculeCloud::initialiseMolecules
+(
+    const IOdictionary& mdInitialiseDict
+)
+{
+    Info<< nl
+        << "Initialising molecules in each zone specified in mdInitialiseDict."
+        << endl;
+
+    const cellZoneMesh& cellZoneI = mesh_.cellZones();
+
+    if (!cellZoneI.size())
+    {
+        FatalErrorIn("void Foam::moleculeCloud::initialiseMolecules")
+            << "No cellZones found in the mesh."
+            << abort(FatalError);
+    }
+
+    forAll (cellZoneI, cZ)
+    {
+        if (cellZoneI[cZ].size())
+        {
+            if (!mdInitialiseDict.found(cellZoneI[cZ].name()))
+            {
+                Info<< "No specification subDictionary for zone "
+                    << cellZoneI[cZ].name() << " found.  Not filling." << endl;
+            }
+            else
+            {
+                label n = 0;
+
+                label totalZoneMols = 0;
+
+                label molsPlacedThisIteration = 0;
+
+                // Continue trying to place molecules as long as at
+                // least one molecule is placed in each iteration.
+                // The "|| totalZoneMols == 0" condition means that the
+                // algorithm will continue if the origin is outside the
+                // zone.
+
+
+            }
+        }
+    }
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::moleculeCloud::moleculeCloud
@@ -479,77 +526,6 @@ Foam::moleculeCloud::moleculeCloud
 
     buildConstProps();
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const Cloud<molecule>& cloud = *this;
-
-    if(Pstream::master())
-    {
-        vector position1 = vector(-2.4e-9,0,0.3e-9);
-
-        addParticle
-        (
-            new molecule
-            (
-                cloud,
-                position1,
-                mesh_.findCell(position1),
-                tensor(1, 0, 0, 0, 1, 0, 0, 0, 1),
-                vector(-405, 5, 5),
-                vector::zero,
-                vector(1e-36, -1.2e-35, -3.7e-35),
-                vector::zero,
-                vector::zero,
-                constProps(0),
-                0,
-                0
-            )
-        );
-
-        vector position2 = vector(-2.35e-9,0,-0.4e-9);
-
-        addParticle
-        (
-            new molecule
-            (
-                cloud,
-                position2,
-                mesh_.findCell(position2),
-                tensor(0, 0, 1, 0, 1, 0, -1, 0, 0),
-                vector(396,-3.7,-5),
-                vector::zero,
-                vector(-2.1e-35, 1.4e-35, 2e-36),
-                vector::zero,
-                vector::zero,
-                constProps(1),
-                0,
-                1
-            )
-        );
-
-        vector position3 = vector(-2e-9,0.52e-9,0);
-
-        addParticle
-        (
-            new molecule
-            (
-                cloud,
-                position3,
-                mesh_.findCell(position2),
-                tensor(-1, 0, 0, 0, 1, 0, 0, 0, -1),
-                vector(403.2, 1, -2),
-                vector::zero,
-                vector(4e-36, 1e-35, -1.3e-35),
-                vector::zero,
-                vector::zero,
-                constProps(1),
-                0,
-                1
-            )
-        );
-    }
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
     buildCellOccupancy();
 
     removeHighEnergyOverlaps();
@@ -558,29 +534,27 @@ Foam::moleculeCloud::moleculeCloud
 }
 
 
-// Foam::moleculeCloud::moleculeCloud
-// (
-//     const polyMesh& mesh,
-//     label nMol,
-//     const labelField& id,
-//     const scalarField& mass,
-//     const vectorField& positions,
-//     const labelField& cells,
-//     const vectorField& U,
-//     const vectorField& A,
-//     const labelField& tethered,
-//     const vectorField& tetherPositions
-// )
-// :
-//     Cloud<molecule>(mesh, "moleculeCloud", false),
-//     mesh_(mesh),
-//     referredInteractionList_(*this)
-// {
+Foam::moleculeCloud::moleculeCloud
+(
+    const polyMesh& mesh,
+    const potential& pot,
+    const IOdictionary& mdInitialiseDict
+)
+    :
+    Cloud<molecule>(mesh, "moleculeCloud", false),
+    mesh_(mesh),
+    pot_(pot),
+    il_(mesh_),
+    constPropList_()
+{
+    buildConstProps();
+
+    initialiseMolecules(mdInitialiseDict);
+}
 //     // Do I need to read the fields if I'm just about to clear them?
 //     molecule::readFields(*this);
 
 //     clear();
-
 //     // This clear() is here for the moment to stop existing files
 //     // being appended to, this would be better accomplished by getting
 //     // mesh.removeFiles(mesh.instance()); (or equivalent) to work.
