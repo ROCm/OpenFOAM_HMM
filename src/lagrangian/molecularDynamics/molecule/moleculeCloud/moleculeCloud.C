@@ -469,23 +469,23 @@ void Foam::moleculeCloud::initialiseMolecules
         << "Initialising molecules in each zone specified in mdInitialiseDict."
         << endl;
 
-    const cellZoneMesh& cellZoneI = mesh_.cellZones();
+    const cellZoneMesh& cellZones = mesh_.cellZones();
 
-    if (!cellZoneI.size())
+    if (!cellZones.size())
     {
         FatalErrorIn("void Foam::moleculeCloud::initialiseMolecules")
             << "No cellZones found in the mesh."
             << abort(FatalError);
     }
 
-    forAll (cellZoneI, cZ)
+    forAll (cellZones, cZ)
     {
-        if (cellZoneI[cZ].size())
+        if (cellZones[cZ].size())
         {
-            if (!mdInitialiseDict.found(cellZoneI[cZ].name()))
+            if (!mdInitialiseDict.found(cellZones[cZ].name()))
             {
                 Info<< "No specification subDictionary for zone "
-                    << cellZoneI[cZ].name() << " found.  Not filling." << endl;
+                    << cellZones[cZ].name() << " found, skipping." << endl;
             }
             else
             {
@@ -495,12 +495,97 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 label molsPlacedThisIteration = 0;
 
+                const dictionary& zoneDict =
+                molConfigDescription_.subDict(cellZones[cZ].name());
+
+                const scalar temperature
+                (
+                    readScalar(zoneDict.lookup("temperature"))
+                );
+
+                const word velocityDistribution
+                (
+                    zoneDict.lookup("velocityDistribution")
+                );
+
+                const vector bulkVelocity(zoneDict.lookup("bulkVelocity"));
+
+                // const word id(zoneDict.lookup("id"));
+
+                // const scalar mass(readScalar(zoneDict.lookup("mass")));
+
+                // scalar numberDensity_read(0.0);
+
+                // if (zoneDict.found("numberDensity"))
+                // {
+                //     numberDensity_read = readScalar
+                //     (
+                //         zoneDict.lookup("numberDensity")
+                //     );
+                // }
+                // else if (zoneDict.found("massDensity"))
+                // {
+                //     numberDensity_read = readScalar
+                //     (
+                //         zoneDict.lookup("massDensity")
+                //     )/mass;
+                // }
+                // else
+                // {
+                //     FatalErrorIn("readZoneSubDict.H\n")
+                //     << "massDensity or numberDensity not specified " << nl
+                //         << abort(FatalError);
+                // }
+
+                // const scalar numberDensity(numberDensity_read);
+
+                const vector anchorPoint(zoneDict.lookup("anchor"));
+
+                // bool tethered = false;
+
+                // if (zoneDict.found("tethered"))
+                // {
+                //     tethered = Switch(zoneDict.lookup("tethered"));
+                // }
+
+                const vector orientationAngles
+                (
+                    zoneDict.lookup("orientationAngles")
+                );
+
+                scalar phi
+                (
+                    orientationAngles.x()*mathematicalConstant::pi/180.0
+                );
+
+                scalar theta
+                (
+                    orientationAngles.y()*mathematicalConstant::pi/180.0
+                );
+
+                scalar psi
+                (
+                    orientationAngles.z()*mathematicalConstant::pi/180.0
+                );
+
+                const tensor latticeToGlobal
+                (
+                    cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
+                    cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
+                    sin(psi)*sin(theta),
+                    - sin(psi)*cos(phi) - cos(theta)*sin(phi)*cos(psi),
+                    - sin(psi)*sin(phi) + cos(theta)*cos(phi)*cos(psi),
+                    cos(psi)*sin(theta),
+                    sin(theta)*sin(phi),
+                    - sin(theta)*cos(phi),
+                    cos(theta)
+                );
+
                 // Continue trying to place molecules as long as at
                 // least one molecule is placed in each iteration.
                 // The "|| totalZoneMols == 0" condition means that the
                 // algorithm will continue if the origin is outside the
                 // zone.
-
 
             }
         }
@@ -547,18 +632,14 @@ Foam::moleculeCloud::moleculeCloud
     il_(mesh_),
     constPropList_()
 {
+    molecule::readFields(*this);
+
+    clear();
+
     buildConstProps();
 
     initialiseMolecules(mdInitialiseDict);
 }
-//     // Do I need to read the fields if I'm just about to clear them?
-//     molecule::readFields(*this);
-
-//     clear();
-//     // This clear() is here for the moment to stop existing files
-//     // being appended to, this would be better accomplished by getting
-//     // mesh.removeFiles(mesh.instance()); (or equivalent) to work.
-
 //     int i;
 
 //     const Cloud<molecule>& cloud = *this;
