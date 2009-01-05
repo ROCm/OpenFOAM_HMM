@@ -44,7 +44,14 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createMesh.H"
 
-    IOprobes sniff(mesh, "probesDict", IOobject::MUST_READ, true);
+    IOprobes sniff
+    (
+        probes::typeName,
+        mesh,
+        "probesDict",
+        IOobject::MUST_READ,
+        true
+    );
 
     forAll(timeDirs, timeI)
     {
