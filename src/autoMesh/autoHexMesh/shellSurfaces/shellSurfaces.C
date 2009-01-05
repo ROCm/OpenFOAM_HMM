@@ -59,7 +59,7 @@ const NamedEnum<shellSurfaces::refineMode, 3> shellSurfaces::refineModeNames_;
 
 void Foam::shellSurfaces::setAndCheckLevels
 (
-    const scalar shellI,
+    const label shellI,
     const List<Tuple2<scalar, label> >& distLevels
 )
 {

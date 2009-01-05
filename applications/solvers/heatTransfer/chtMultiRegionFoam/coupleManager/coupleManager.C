@@ -26,6 +26,7 @@ License
 
 #include "coupleManager.H"
 #include "OFstream.H"
+#include "regionProperties.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -73,6 +74,51 @@ Foam::coupleManager::~coupleManager()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::coupleManager::regionOwner() const
+{
+    const fvMesh& nbrRegion = neighbourRegion();
+
+    const regionProperties& props =
+        localRegion_.objectRegistry::parent().lookupObject<regionProperties>
+        (
+            "regionProperties"
+        );
+
+    label myIndex = findIndex(props.fluidRegionNames(), localRegion_.name());
+    if (myIndex == -1)
+    {
+        label i = findIndex(props.solidRegionNames(), localRegion_.name());
+
+        if (i == -1)
+        {
+            FatalErrorIn("coupleManager::regionOwner() const")
+                << "Cannot find region " << localRegion_.name()
+                << " neither in fluids " << props.fluidRegionNames()
+                << " nor in solids " << props.solidRegionNames()
+                << exit(FatalError);
+        }
+        myIndex = props.fluidRegionNames().size() + i;
+    }
+    label nbrIndex = findIndex(props.fluidRegionNames(), nbrRegion.name());
+    if (nbrIndex == -1)
+    {
+        label i = findIndex(props.solidRegionNames(), nbrRegion.name());
+
+        if (i == -1)
+        {
+            FatalErrorIn("coupleManager::regionOwner() const")
+                << "Cannot find region " << nbrRegion.name()
+                << " neither in fluids " << props.fluidRegionNames()
+                << " nor in solids " << props.solidRegionNames()
+                << exit(FatalError);
+        }
+        nbrIndex = props.fluidRegionNames().size() + i;
+    }
+
+    return myIndex < nbrIndex;
+}
+
 
 void Foam::coupleManager::checkCouple() const
 {

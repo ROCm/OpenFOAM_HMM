@@ -33,7 +33,6 @@ License
 
 const char* const Foam::fileName::typeName = "fileName";
 int Foam::fileName::debug(debug::debugSwitch(fileName::typeName, 0));
-const Foam::fileName Foam::fileName::null;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

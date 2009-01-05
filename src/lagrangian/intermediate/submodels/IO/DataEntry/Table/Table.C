@@ -78,11 +78,14 @@ Type Foam::Table<Type>::value(const scalar x) const
         i++;
     }
 
-    // Linear interpolation to find value
-    return
+    // Linear interpolation to find value. Note constructor needed for
+    // Table<label> to convert intermediate scalar back to label.
+    return Type
+    (
         (x - table_[i].first())/(table_[i+1].first() - table_[i].first())
       * (table_[i+1].second() - table_[i].second())
-      + table_[i].second();
+      + table_[i].second()
+    );
 }
 
 

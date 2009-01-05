@@ -22,14 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+    Static initializers for
+        Foam::string::null
+        Foam::word::null
+        Foam::fileName::null.
+    This file is included in global.Cver since these members are required by
+    debug.C.
+
 \*---------------------------------------------------------------------------*/
 
+#include "string.H"
 #include "word.H"
-#include "debug.H"
+#include "fileName.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::word::typeName = "word";
-int Foam::word::debug(Foam::debug::debugSwitch(word::typeName, 0));
+const Foam::string Foam::string::null;
+const Foam::word Foam::word::null;
+const Foam::fileName Foam::fileName::null;
 
 // ************************************************************************* //

@@ -82,7 +82,7 @@
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                thermof[i].rho()*thermof[i].Cp()*thermof[i].alpha()
+                thermof[i].Cp()*thermof[i].alpha()
             )
         );
 
