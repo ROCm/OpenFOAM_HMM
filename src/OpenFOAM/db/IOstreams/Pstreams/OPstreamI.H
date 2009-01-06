@@ -40,7 +40,7 @@ inline void OPstream::writeToBuffer(const T& t)
     //(T&)(buf_[bufPosition_]) = t;
     //bufPosition_ += sizeof(T);
 
-    writeToBuffer(&t, sizeof(T));
+    writeToBuffer(&t, sizeof(T), sizeof(T));
 }
 
 
@@ -56,11 +56,24 @@ inline void OPstream::writeToBuffer(const char& c)
 }
 
 
-inline void OPstream::writeToBuffer(const void* data, size_t count)
+inline void OPstream::writeToBuffer
+(
+    const void* data,
+    size_t count,
+    size_t align
+)
 {
+    label oldPos = bufPosition_;
+
+    if (align > 1)
+    {
+        // Align bufPosition. Pads bufPosition_-oldPos characters.
+        bufPosition_ = align + ((bufPosition_ - 1) & ~(align - 1));
+    }
+
     if (size_t(buf_.size()) < bufPosition_ + count)
     {
-        enlargeBuffer(count);
+        enlargeBuffer(bufPosition_ - oldPos + count);
     }
 
     register char* bufPtr = &buf_[bufPosition_];

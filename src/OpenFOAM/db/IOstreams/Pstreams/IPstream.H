@@ -71,7 +71,7 @@ class IPstream
         inline void readFromBuffer(T&);
 
         //- Read data from the transfer buffer
-        inline void readFromBuffer(void* data, size_t count);
+        inline void readFromBuffer(void* data, size_t count, size_t align);
 
 
 public:

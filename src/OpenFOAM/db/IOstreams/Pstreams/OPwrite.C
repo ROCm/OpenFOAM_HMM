@@ -111,7 +111,7 @@ Ostream& OPstream::write(const word& w)
 
     size_t ws = w.size();
     writeToBuffer(ws);
-    writeToBuffer(w.c_str(), ws + 1);
+    writeToBuffer(w.c_str(), ws + 1, 1);
 
     return *this;
 }
@@ -123,7 +123,7 @@ Ostream& OPstream::write(const string& s)
 
     size_t ss = s.size();
     writeToBuffer(ss);
-    writeToBuffer(s.c_str(), ss + 1);
+    writeToBuffer(s.c_str(), ss + 1, 1);
 
     return *this;
 }
@@ -168,7 +168,7 @@ Ostream& OPstream::write(const char* data, std::streamsize count)
             << Foam::abort(FatalError);
     }
 
-    writeToBuffer(data, count);
+    writeToBuffer(data, count, 8);
 
     return *this;
 }
