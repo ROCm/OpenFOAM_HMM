@@ -88,8 +88,6 @@ bool Foam::molecule::move(molecule::trackData& td)
 
     const constantProperties& constProps(td.molCloud().constProps(id_));
 
-    const diagTensor& momentOfInertia(constProps.momentOfInertia());
-
     scalar deltaT = cloud().pMesh().time().deltaT().value();
 
     if (td.part() == 0)
@@ -124,6 +122,8 @@ bool Foam::molecule::move(molecule::trackData& td)
         // Leapfrog orientation adjustment, carried out before force calculation
         // but after tracking stage, i.e. rotation carried once linear motion
         // complete.
+
+        const diagTensor& momentOfInertia(constProps.momentOfInertia());
 
         tensor R;
 

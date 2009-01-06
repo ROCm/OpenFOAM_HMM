@@ -478,25 +478,21 @@ void Foam::moleculeCloud::initialiseMolecules
             << abort(FatalError);
     }
 
-    forAll (cellZones, cZ)
+    forAll (cellZones, z)
     {
-        if (cellZones[cZ].size())
+        const cellZone& zone(cellZones[z]);
+
+        if (zone.size())
         {
-            if (!mdInitialiseDict.found(cellZones[cZ].name()))
+            if (!mdInitialiseDict.found(zone.name()))
             {
                 Info<< "No specification subDictionary for zone "
-                    << cellZones[cZ].name() << " found, skipping." << endl;
+                    << zone.name() << " found, skipping." << endl;
             }
             else
             {
-                label n = 0;
-
-                label totalZoneMols = 0;
-
-                label molsPlacedThisIteration = 0;
-
                 const dictionary& zoneDict =
-                mdInitialiseDict.subDict(cellZones[cZ].name());
+                mdInitialiseDict.subDict(zone.name());
 
                 const scalar temperature
                 (
@@ -510,43 +506,88 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 const vector bulkVelocity(zoneDict.lookup("bulkVelocity"));
 
-                // const word id(zoneDict.lookup("id"));
+                List<word> latticeIds
+                (
+                    zoneDict.lookup("latticeIds")
+                );
 
-                // const scalar mass(readScalar(zoneDict.lookup("mass")));
+                List<vector> latticePositions
+                (
+                    zoneDict.lookup("latticePositions")
+                );
 
-                // scalar numberDensity_read(0.0);
+                if(latticeIds.size() != latticePositions.size())
+                {
+                    FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
+                        << "latticeIds and latticePositions must be the same "
+                            << " size." << nl
+                        << abort(FatalError);
+                }
 
-                // if (zoneDict.found("numberDensity"))
-                // {
-                //     numberDensity_read = readScalar
-                //     (
-                //         zoneDict.lookup("numberDensity")
-                //     );
-                // }
-                // else if (zoneDict.found("massDensity"))
-                // {
-                //     numberDensity_read = readScalar
-                //     (
-                //         zoneDict.lookup("massDensity")
-                //     )/mass;
-                // }
-                // else
-                // {
-                //     FatalErrorIn("readZoneSubDict.H\n")
-                //     << "massDensity or numberDensity not specified " << nl
-                //         << abort(FatalError);
-                // }
+                diagTensor latticeCellShape
+                (
+                    zoneDict.lookup("latticeCellShape")
+                );
 
-                // const scalar numberDensity(numberDensity_read);
+                scalar latticeCellScale = 0.0;
 
-                const vector anchorPoint(zoneDict.lookup("anchor"));
+                if (zoneDict.found("numberDensity"))
+                {
+                    scalar numberDensity = readScalar
+                    (
+                        zoneDict.lookup("numberDensity")
+                    );
 
-                // bool tethered = false;
+                    latticeCellScale = pow
+                    (
+                        latticeIds.size()/(det(latticeCellShape)*numberDensity),
+                        (1.0/3.0)
+                    );
+                }
+                else if (zoneDict.found("massDensity"))
+                {
+                    scalar unitCellMass = 0.0;
 
-                // if (zoneDict.found("tethered"))
-                // {
-                //     tethered = Switch(zoneDict.lookup("tethered"));
-                // }
+                    forAll(latticeIds, i)
+                    {
+                        label id = findIndex(pot_.idList(), latticeIds[i]);
+
+                        const molecule::constantProperties& cP(constProps(id));
+
+                        unitCellMass += cP.mass();
+                    }
+
+                    scalar massDensity = readScalar
+                    (
+                        zoneDict.lookup("massDensity")
+                    );
+
+                    latticeCellScale = pow
+                    (
+                        unitCellMass /(det(latticeCellShape)*massDensity),
+                        (1.0/3.0)
+                    );
+                }
+                else
+                {
+                    FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
+                    << "massDensity or numberDensity not specified " << nl
+                        << abort(FatalError);
+                }
+
+                latticeCellShape *= latticeCellScale;
+
+                vector anchor(zoneDict.lookup("anchor"));
+
+                bool tethered = false;
+
+                if (zoneDict.found("tetherSiteIds"))
+                {
+                    tethered = bool
+                    (
+                        List<word>(zoneDict.lookup("tetherSiteIds")).size()
+                    );
+                }
 
                 const vector orientationAngles
                 (
@@ -568,7 +609,7 @@ void Foam::moleculeCloud::initialiseMolecules
                     orientationAngles.z()*mathematicalConstant::pi/180.0
                 );
 
-                const tensor latticeToGlobal
+                const tensor R
                 (
                     cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
                     cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
@@ -581,11 +622,148 @@ void Foam::moleculeCloud::initialiseMolecules
                     cos(theta)
                 );
 
+                // Find the optimal anchor position.  Finding the approximate
+                // mid-point of the zone of cells and snapping to the nearest
+                // lattice location.
+
+                vector zoneMin = VGREAT*vector::one;
+
+                vector zoneMax = -VGREAT*vector::one;
+
+                forAll (zone, cell)
+                {
+                    const point cellCentre = mesh_.cellCentres()[zone[cell]];
+
+                    if (cellCentre.x() > zoneMax.x())
+                    {
+                        zoneMax.x() = cellCentre.x();
+                    }
+                    if (cellCentre.x() < zoneMin.x())
+                    {
+                        zoneMin.x() = cellCentre.x();
+                    }
+                    if (cellCentre.y() > zoneMax.y())
+                    {
+                        zoneMax.y() = cellCentre.y();
+                    }
+                    if (cellCentre.y() < zoneMin.y())
+                    {
+                        zoneMin.y() = cellCentre.y();
+                    }
+                    if (cellCentre.z() > zoneMax.z())
+                    {
+                        zoneMax.z() = cellCentre.z();
+                    }
+                    if (cellCentre.z() < zoneMin.z())
+                    {
+                        zoneMin.z() = cellCentre.z();
+                    }
+                }
+
+                point zoneMid = 0.5*(zoneMin + zoneMax);
+
+                point latticeMid = inv(latticeCellShape) & (R.T()
+                & (zoneMid - anchor));
+
+                point latticeAnchor
+                (
+                    label(latticeMid.x() + 0.5*sign(latticeMid.x())),
+                    label(latticeMid.y() + 0.5*sign(latticeMid.y())),
+                    label(latticeMid.z() + 0.5*sign(latticeMid.z()))
+                );
+
+                anchor += (R & (latticeCellShape & latticeAnchor));
+
                 // Continue trying to place molecules as long as at
                 // least one molecule is placed in each iteration.
                 // The "|| totalZoneMols == 0" condition means that the
                 // algorithm will continue if the origin is outside the
                 // zone.
+
+                label n = 0;
+
+                label totalZoneMols = 0;
+
+                label molsPlacedThisIteration = 0;
+
+                while
+                (
+                    molsPlacedThisIteration != 0
+                 || totalZoneMols == 0
+                )
+                {
+                    label sizeBeforeIteration = this->size();
+
+                    bool partOfLayerInBounds = false;
+
+                    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    // start of place molecules
+                    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                    vector unitCellLatticePosition(0,0,0);
+
+                    // Special treatment is required for the first position,
+                    // i.e. iteration zero.
+
+                    if (n == 0)
+                    {
+                        forAll(latticePositions, p)
+                        {
+                            const vector& latticePosition =
+                            unitCellLatticePosition + latticePositions[p];
+
+                            point globalPosition =
+                            anchor + (R & (latticeCellShape & latticePosition));
+
+                            partOfLayerInBounds =
+                            mesh_.bounds().contains(globalPosition);
+
+                            label cell = mesh_.findCell(globalPosition);
+
+                            if (findIndex(zone, cell) != -1)
+                            {
+                                Info<< "add molecule at "
+                                    << globalPosition
+                                    << " to cell "
+                                    << cell
+                                    << endl;
+                            }
+                        }
+                    }
+
+                    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    // end of place molecules
+                    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                    if
+                    (
+                        totalZoneMols == 0
+                     && !partOfLayerInBounds
+                    )
+                    {
+                        WarningIn("molConfig::createMolecules()")
+                        << "A whole layer of unit cells was placed "
+                            << "outside the bounds of the mesh, but no "
+                            << "molecules have been placed in zone '"
+                            << zone.name()
+                            << "'.  This is likely to be because the zone "
+                            << "has few cells ("
+                            << zone.size()
+                            << " in this case) and no lattice position "
+                            << "fell inside them.  "
+                            << "Aborting filling this zone."
+                            << endl;
+
+                        break;
+                    }
+
+                    molsPlacedThisIteration =
+                    this->size() - sizeBeforeIteration;
+
+                    totalZoneMols += molsPlacedThisIteration;
+
+                    n++;
+                }
 
             }
         }

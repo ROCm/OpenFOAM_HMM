@@ -321,7 +321,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
                     if
                     (
-                        pairPot.energy(idsI, idsJ, rsIsJMag)
+                        mag(pairPot.energy(idsI, idsJ, rsIsJMag))
                       > pot_.potentialEnergyLimit()
                     )
                     {
@@ -366,7 +366,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
                     if
                     (
-                        chargeI*chargeJ*electrostatic.energy(rsIsJMag)
+                        mag(chargeI*chargeJ*electrostatic.energy(rsIsJMag))
                         > pot_.potentialEnergyLimit()
                     )
                     {
@@ -460,7 +460,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
                     if
                     (
-                        pairPot.energy(idsReal, idsRef, rsRealsRefMag)
+                        mag(pairPot.energy(idsReal, idsRef, rsRealsRefMag))
                       > pot_.potentialEnergyLimit()
                     )
                     {
@@ -505,7 +505,11 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
                     if
                     (
-                        chargeReal*chargeRef*electrostatic.energy(rsRealsRefMag)
+                        mag
+                        (
+                            chargeReal*chargeRef
+                            *electrostatic.energy(rsRealsRefMag)
+                        )
                         > pot_.potentialEnergyLimit()
                     )
                     {

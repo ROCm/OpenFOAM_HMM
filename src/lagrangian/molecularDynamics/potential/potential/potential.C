@@ -278,14 +278,14 @@ void Foam::potential::potential::readMdInitialiseDict
             mdInitialiseDict.toc()[zone]
         );
 
-        List<word> ids
+        List<word> latticeIds
         (
             zoneDict.lookup("latticeIds")
         );
 
-        forAll(ids, i)
+        forAll(latticeIds, i)
         {
-            const word& id = ids[i];
+            const word& id = latticeIds[i];
 
             if(!moleculePropertiesDict.found(id))
             {
@@ -314,14 +314,14 @@ void Foam::potential::potential::readMdInitialiseDict
 
             bool idFound = false;
 
-            forAll(ids, i)
+            forAll(latticeIds, i)
             {
                 if (idFound)
                 {
                     break;
                 }
 
-                const word& id = ids[i];
+                const word& id = latticeIds[i];
 
                 List<word> siteIds
                 (
