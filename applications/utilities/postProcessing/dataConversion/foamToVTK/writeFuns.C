@@ -27,7 +27,7 @@ License
 #include "writeFuns.H"
 #include "vtkTopo.H"
 
-#ifdef __mips
+#if defined(__mips) && !defined(__SICORTEX__)
 #include <standards.h>
 #include <sys/endian.h>
 #endif
