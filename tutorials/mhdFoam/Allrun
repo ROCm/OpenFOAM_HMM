@@ -7,4 +7,5 @@ application="mhdFoam"
 
 (cd hartmann && runApplication blockMesh)
 (cd hartmann && runApplication $application)
+(cd hartmann && runApplication foamCalc components U)
 (cd hartmann && runApplication sample)
