@@ -31,25 +31,15 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+const char* const Foam::pTraits<bool>::typeName = "bool";
+const bool Foam::pTraits<bool>::zero = 0;
+const bool Foam::pTraits<bool>::one = 1;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const char* Foam::pTraits<bool>::componentNames[] = { "x" };
 
-const char* const pTraits<bool>::typeName = "bool";
-const bool pTraits<bool>::zero = 0;
-const bool pTraits<bool>::one = 1;
-
-const char* pTraits<bool>::componentNames[] = { "x" };
-
-pTraits<bool>::pTraits(Istream& is)
+Foam::pTraits<bool>::pTraits(Istream& is)
 {
     is >> p_;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

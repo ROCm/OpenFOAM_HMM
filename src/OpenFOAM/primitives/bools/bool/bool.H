@@ -50,7 +50,7 @@ class Ostream;
 Istream& operator>>(Istream&, bool&);
 Ostream& operator<<(Ostream&, const bool);
 
-bool readBool(Istream& is);
+bool readBool(Istream&);
 
 } // End namespace Foam
 

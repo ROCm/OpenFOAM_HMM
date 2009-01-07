@@ -3,8 +3,10 @@ global/dimensionedConstants/dimensionedConstants.C
 global/argList/argList.C
 global/clock/clock.C
 
-primitives/bool/bool.C
-primitives/bool/boolIO.C
+primitives/bools/bool/bool.C
+primitives/bools/bool/boolIO.C
+primitives/bools/Switch/Switch.C
+primitives/bools/Switch/SwitchIO.C
 primitives/char/charIO.C
 primitives/int/intIO.C
 primitives/uint/uintIO.C
@@ -141,10 +143,6 @@ db/functionObject/functionObject.C
 db/functionObjectList/functionObjectList.C
 db/CallbackRegistry/CallbackRegistryName.C
 db/dlLibraryTable/dlLibraryTable.C
-
-Switch = db/Switch
-$(Switch)/Switch.C
-$(Switch)/SwitchIO.C
 
 Time = db/Time
 $(Time)/TimePaths.C

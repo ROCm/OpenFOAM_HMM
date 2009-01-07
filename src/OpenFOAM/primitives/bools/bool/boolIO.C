@@ -37,12 +37,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Istream& operator>>(Istream& is, bool& b)
+Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 {
     token t(is);
 
@@ -58,6 +53,7 @@ Istream& operator>>(Istream& is, bool& b)
     }
     else if (t.isWord())
     {
+        // use Switch asBool() here?
         if (t.wordToken() == "true" || t.wordToken() == "on")
         {
             b = true;
@@ -95,7 +91,7 @@ Istream& operator>>(Istream& is, bool& b)
 }
 
 
-Ostream& operator<<(Ostream& os, const bool b)
+Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 {
     os.write(label(b));
     os.check("Ostream& operator<<(Ostream&, const bool&)");
@@ -103,17 +99,12 @@ Ostream& operator<<(Ostream& os, const bool b)
 }
 
 
-bool readBool(Istream& is)
+bool Foam::readBool(Istream& is)
 {
-    bool rb;
-    is >> rb;
+    bool b;
+    is >> b;
 
-    return rb;
+    return b;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -40,16 +40,24 @@ Foam::Switch Foam::Switch::lookupOrAddToDict
     return dict.lookupOrAddDefault<Switch>(name, defaultValue);
 }
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// NOTE: possible alternative implementation
+// make a direct bool, handle assignments and use switchTypes instead of word
+// for the word representation ...
+//
+//   //- Possible word representions
+//   enum switchTypes
+//   {
+//       OFF = 0, ON = 1,
+//       FALSE = 2, TRUE = 3,
+//       NO = 4, YES = 5
+//   };
 
-Foam::word Foam::Switch::wordValue(const bool val) const
-{
-    return word(val ? "on" : "off");
-}
 
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-bool Foam::Switch::boolValue(const word& val) const
+bool Foam::Switch::asBool(const word& val)
 {
     if (val == "on" || val == "true" || val == "yes" || val == "y")
     {
@@ -61,7 +69,7 @@ bool Foam::Switch::boolValue(const word& val) const
     }
     else
     {
-        FatalErrorIn("Switch::boolValue(const word&) const")
+        FatalErrorIn("Switch::asBool(const word&)")
             << "unknown switch word " << val
             << abort(FatalError);
     }
@@ -70,11 +78,17 @@ bool Foam::Switch::boolValue(const word& val) const
 }
 
 
+Foam::word Foam::Switch::asWord(const bool val)
+{
+    return word((val ? "on" : "off"), false);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
 bool Foam::Switch::readIfPresent(const word& name, const dictionary& dict)
 {
-    return dict.readIfPresent(name, logicalSwitch_);
+    return dict.readIfPresent(name, bool_);
 }
 
 

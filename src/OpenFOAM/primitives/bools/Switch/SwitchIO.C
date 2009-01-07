@@ -30,18 +30,17 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::Switch::Switch(Istream& is)
-:
-    wordSwitch_(is),
-    logicalSwitch_(boolValue(wordSwitch_))
-{}
+{
+    is >> *this;
+}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 {
-    is >> s.wordSwitch_;
-    s.logicalSwitch_ = s.boolValue(s.wordSwitch_);
+    is >> s.word_;
+    s.bool_ = Switch::asBool(s.word_);
 
     is.check("Istream& operator>>(Istream&, Switch&)");
 
@@ -51,7 +50,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const Switch& s)
 {
-    os << s.wordSwitch_;
+    os << s.word_;
 
     os.check("Ostream& operator<<(Ostream&, const Switch&)");
 

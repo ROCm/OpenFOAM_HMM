@@ -63,32 +63,33 @@ class Switch
 {
     // Private data
 
-        word wordSwitch_;
-        bool logicalSwitch_;
+        bool bool_;
 
-    // Private member functions
-
-        // could be static instead:
-        word wordValue(const bool) const;
-        bool boolValue(const word&) const;
-
+        word word_;
 
 public:
+    // Private member functions
+
+        //- Return a bool representation of a word
+        static bool asBool(const word&);
+
+        //- Return a word representation of a bool value
+        static word asWord(const bool);
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from bool
         Switch(const bool value)
         :
-            wordSwitch_(wordValue(value)),
-            logicalSwitch_(value)
+            bool_(value),
+            word_(asWord(value))
         {}
 
         //- Construct from word
-        Switch(const word& w)
+        Switch(const word& value)
         :
-            wordSwitch_(w),
-            logicalSwitch_(boolValue(w))
+            bool_(asBool(value)),
+            word_(value)
         {}
 
         //- Construct from Istream
@@ -106,22 +107,22 @@ public:
 
     // Member Operators
 
-        Switch& operator=(const Switch& s)
+        Switch& operator=(const Switch& rhs)
         {
-            wordSwitch_ = s.wordSwitch_;
-            logicalSwitch_ = s.logicalSwitch_;
+            bool_ = rhs.bool_;
+            word_ = rhs.word_;
 
             return *this;
         }
 
         operator bool() const
         {
-            return logicalSwitch_;
+            return bool_;
         }
 
         operator const word&() const
         {
-            return wordSwitch_;
+            return word_;
         }
 
 
