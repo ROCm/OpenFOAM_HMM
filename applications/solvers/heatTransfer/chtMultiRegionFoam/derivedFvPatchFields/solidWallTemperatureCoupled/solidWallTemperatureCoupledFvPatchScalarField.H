@@ -138,7 +138,7 @@ public:
 
     // Member functions
 
-        //- Flux
+        //- (intensive) flux
         tmp<scalarField> flux() const;
 
         //- Update the coefficients associated with the patch field

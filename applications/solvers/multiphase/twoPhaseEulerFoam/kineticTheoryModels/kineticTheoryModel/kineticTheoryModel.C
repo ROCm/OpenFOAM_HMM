@@ -167,7 +167,7 @@ Foam::kineticTheoryModel::kineticTheoryModel
             IOobject::NO_WRITE
         ),
         Ua_.mesh(),
-        dimensionedScalar("zero", dimensionSet(0, 0, 0, 0, 0), 0.0)
+        dimensionedScalar("zero", dimensionSet(1, -1, -1, 0, 0), 0.0)
     ),
     gs0_
     (

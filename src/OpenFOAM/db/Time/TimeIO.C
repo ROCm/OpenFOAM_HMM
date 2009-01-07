@@ -67,7 +67,12 @@ void Foam::Time::readDict()
             case wcAdjustableRunTime:
                 // Recalculate outputTimeIndex_ to be in units of current
                 // writeInterval.
-                outputTimeIndex_ *= oldWriteInterval/writeInterval_;
+                outputTimeIndex_ = label
+                (
+                    outputTimeIndex_
+                  * oldWriteInterval
+                  / writeInterval_
+                );
             break;
 
             default:

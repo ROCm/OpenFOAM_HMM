@@ -10,50 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      fvSchemes;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default Euler;
-}
+//simulationType       laminar;
+//simulationType       RASModel;
+simulationType       LESModel;
 
-gradSchemes
-{
-    default         Gauss linear;
-    grad(U)         Gauss linear;
-    grad(gamma)     Gauss linear;
-}
-
-divSchemes
-{
-    div(rho*phi,U)  Gauss upwind; //limitedLinearV 1;
-    div(phi,gamma)  Gauss vanLeer;
-    div(phirb,gamma) Gauss interfaceCompression;
-}
-
-laplacianSchemes
-{
-    default         Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default         linear;
-}
-
-snGradSchemes
-{
-    default         corrected;
-}
-
-fluxRequired
-{
-    default         no;
-    pd;
-    pcorr;
-    gamma;
-}
 
 // ************************************************************************* //

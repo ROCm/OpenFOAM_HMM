@@ -45,15 +45,27 @@ inline void Foam::IPstream::checkEof()
 template<class T>
 inline void Foam::IPstream::readFromBuffer(T& t)
 {
+    const size_t align = sizeof(T);
+    bufPosition_ = align + ((bufPosition_ - 1) & ~(align - 1));
+
     t = reinterpret_cast<T&>(buf_[bufPosition_]);
     bufPosition_ += sizeof(T);
     checkEof();
-    // readFromBuffer(&t, sizeof(T));
 }
 
 
-inline void Foam::IPstream::readFromBuffer(void* data, size_t count)
+inline void Foam::IPstream::readFromBuffer
+(
+    void* data,
+    size_t count,
+    size_t align
+)
 {
+    if (align > 1)
+    {
+        bufPosition_ = align + ((bufPosition_ - 1) & ~(align - 1));
+    }
+
     register const char* bufPtr = &buf_[bufPosition_];
     register char* dataPtr = reinterpret_cast<char*>(data);
     register size_t i = count;
@@ -279,7 +291,7 @@ Foam::Istream& Foam::IPstream::read(char* data, std::streamsize count)
             << Foam::abort(FatalError);
     }
 
-    readFromBuffer(data, count);
+    readFromBuffer(data, count, 8);
     return *this;
 }
 

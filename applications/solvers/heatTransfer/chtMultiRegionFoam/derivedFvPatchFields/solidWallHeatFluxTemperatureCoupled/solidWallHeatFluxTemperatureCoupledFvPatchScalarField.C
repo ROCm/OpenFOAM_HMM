@@ -115,7 +115,7 @@ void Foam::solidWallHeatFluxTemperatureCoupledFvPatchScalarField::updateCoeffs()
     const fvPatchField<scalar>& K =
         patch().lookupPatchField<volScalarField, scalar>(KName_);
 
-    gradient() = refCast<const solidWallTemperatureCoupledFvPatchScalarField>
+    gradient() = -refCast<const solidWallTemperatureCoupledFvPatchScalarField>
         (neighbourField).flux()/K;
 
     fixedGradientFvPatchScalarField::updateCoeffs();

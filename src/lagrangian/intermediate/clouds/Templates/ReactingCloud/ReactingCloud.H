@@ -117,8 +117,7 @@ class ReactingCloud
 protected:
 
     //- Inject more parcels
-    template<class TrackingData>
-    void inject(TrackingData& td);
+    void inject();
 
 
 public:

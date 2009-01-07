@@ -136,7 +136,7 @@ Foam::solidWallTemperatureCoupledFvPatchScalarField::flux() const
 
     const fvPatchScalarField& Tw = *this;
 
-    return Tw.snGrad()*patch().magSf()*Kw;
+    return Tw.snGrad()*Kw;
 }
 
 

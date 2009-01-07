@@ -93,14 +93,19 @@ then
     # specified a version - no error possible
     rc=0
 else
-    # building under git (get the head SHA1)
-    version=$(git show-ref --hash=12 --head HEAD 2>/dev/null)
-    rc=$?
+    # get the head SHA1 when building under git
+    # if there are multiple values (eg, HEAD, origin/HEAD, ...)
+    # only take the first one, which is 'HEAD'
+    version=$(git show-ref --hash=12 --head HEAD 2>/dev/null | head -1)
 
-    # prefix with WM_PROJECT_VERSION
-    if [ $rc -eq 0 ]
+    if [ -n "$version" ]
     then
+        # mark as success and prefix with WM_PROJECT_VERSION
+        rc=0
         version="${WM_PROJECT_VERSION}-$version"
+    else
+        # mark as failure
+        rc=1
     fi
 fi
 

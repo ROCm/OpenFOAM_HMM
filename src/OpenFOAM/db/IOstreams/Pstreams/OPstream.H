@@ -69,7 +69,7 @@ class OPstream
         inline void writeToBuffer(const char&);
 
         //- Write data to the transfer buffer
-        inline void writeToBuffer(const void* data, size_t count);
+        inline void writeToBuffer(const void* data, size_t count, size_t align);
 
 
 public:

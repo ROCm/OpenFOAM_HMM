@@ -16,7 +16,9 @@ FoamFile
 
 LESModel        laminar;
 
-delta           smooth;
+turbulence      off;
+
+delta           cubeRootVol;
 
 laminarCoeffs
 {

@@ -208,6 +208,14 @@ public:
 
         // Injection geometry
 
+            //- Find the cell that contains the injector position
+            //  Will modify position slightly towards the owner cell centroid
+            virtual void findInjectorCellAndPosition
+            (
+                label& cellI,
+                vector& position
+            );
+
             //- Return the injection position
             virtual vector position
             (
