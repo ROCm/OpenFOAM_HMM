@@ -41,13 +41,23 @@ Description
     xferMoveTo() functions can prove useful. An example is transferring
     from a DynamicList to a List.  Since the
     List\<T\>::transfer(List\<T\>&) method could result in some allocated
-    memory becoming inaccessible, the xferMoveTo() function can be used to
+    memory becoming inaccessible, the xferMoveTo() function should be used to
     invoke the correct List\<T\>::transfer(DynamicList\<T\>&) method.
 
     @code
         DynamicList<label> dynLst;
         ...
         labelList plainLst( xferMoveTo<labelList>(dynLst) );
+    @endcode
+
+    Of course, since this example is a very common operation, the
+    DynamicList::xfer() method transfers to a plain List anyhow.
+    It would thus be simpler (and clearer) just to use the following code:
+
+    @code
+        DynamicList<label> dynLst;
+        ...
+        labelList plainLst(dynLst.xfer());
     @endcode
 
 SeeAlso
