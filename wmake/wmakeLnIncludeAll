@@ -24,13 +24,13 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wcleanLnIncludeAll
+#     wmakeLnIncludeAll
 #
 # Description
-#     Delete all the lnInclude directories in the tree.
+#     Find directories containing a Make/ directory and execute
+#     'wmakeLnInclude -f' for each one
 #
 #------------------------------------------------------------------------------
-
 # default is pwd
 if [ "$#" -eq 0 ]
 then
@@ -39,21 +39,31 @@ elif [ "$1" = "-h" -o "$1" = "-help" ]
 then
     echo "Usage: ${0##*/} [dir1] .. [dirN]"
     echo
-    echo "    Delete all the lnInclude directories in the tree"
+    echo "    Find directories containing a Make/ directory and"
+    echo "    execute 'wmakeLnInclude -f' for each one"
     echo
     exit 1
 fi
 
 
-for i
+for checkDir
 do
-    if [ -d "$i" ]
+    if [ -d $checkDir ]
     then
-        echo "removing lnInclude directories: $i"
-        find $i -depth -type d -name lnInclude -exec rm -rf {} \;
+        echo "searching: $checkDir for 'Make' directories"
     else
-        echo "no directory: $i" 1>&2
+        echo "skipping non-dir: $checkDir"
+        continue
     fi
+
+    find $checkDir -depth -type d -name Make -print | while read dir
+    do
+        dir=${dir%Make}
+        if [ -d "$dir" ]
+        then
+            wmakeLnInclude -f $dir
+        fi
+    done
 done
 
 #------------------------------------------------------------------------------
