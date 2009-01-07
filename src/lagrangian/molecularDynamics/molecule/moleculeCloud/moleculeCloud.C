@@ -100,6 +100,21 @@ void Foam::moleculeCloud::buildConstProps()
 }
 
 
+void Foam::moleculeCloud::setSiteSizesAndPositions()
+{
+    iterator mol(this->begin());
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        const molecule::constantProperties& cP = constProps(mol().id());
+
+        mol().setSiteSizes(cP.nSites());
+
+        mol().setSitePositions(cP);
+    }
+}
+
+
 void Foam::moleculeCloud::buildCellOccupancy()
 {
     forAll(cellOccupancy_, cO)
@@ -499,11 +514,6 @@ void Foam::moleculeCloud::initialiseMolecules
                     readScalar(zoneDict.lookup("temperature"))
                 );
 
-                const word velocityDistribution
-                (
-                    zoneDict.lookup("velocityDistribution")
-                );
-
                 const vector bulkVelocity(zoneDict.lookup("bulkVelocity"));
 
                 List<word> latticeIds
@@ -571,7 +581,7 @@ void Foam::moleculeCloud::initialiseMolecules
                 else
                 {
                     FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
-                    << "massDensity or numberDensity not specified " << nl
+                        << "massDensity or numberDensity not specified " << nl
                         << abort(FatalError);
                 }
 
@@ -697,20 +707,28 @@ void Foam::moleculeCloud::initialiseMolecules
                     bool partOfLayerInBounds = false;
 
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    // start of place molecules
+                    // start of placement of molecules
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-                    vector unitCellLatticePosition(0,0,0);
-
-                    // Special treatment is required for the first position,
-                    // i.e. iteration zero.
 
                     if (n == 0)
                     {
+                        // Special treatment is required for the first position,
+                        // i.e. iteration zero.
+
+                        labelVector unitCellLatticePosition(0,0,0);
+
                         forAll(latticePositions, p)
                         {
+                            label id = findIndex(pot_.idList(), latticeIds[p]);
+
                             const vector& latticePosition =
-                            unitCellLatticePosition + latticePositions[p];
+                            vector
+                            (
+                                unitCellLatticePosition.x(),
+                                unitCellLatticePosition.y(),
+                                unitCellLatticePosition.z()
+                            )
+                            + latticePositions[p];
 
                             point globalPosition =
                             anchor + (R & (latticeCellShape & latticePosition));
@@ -722,17 +740,163 @@ void Foam::moleculeCloud::initialiseMolecules
 
                             if (findIndex(zone, cell) != -1)
                             {
-                                Info<< "add molecule at "
-                                    << globalPosition
-                                    << " to cell "
-                                    << cell
-                                    << endl;
+                                createMolecule
+                                (
+                                    globalPosition,
+                                    cell,
+                                    id,
+                                    tethered,
+                                    temperature,
+                                    bulkVelocity
+                                );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Place top and bottom caps.
+
+                        labelVector unitCellLatticePosition(0,0,0);
+
+                        for
+                        (
+                            unitCellLatticePosition.z() = -n;
+                            unitCellLatticePosition.z() <= n;
+                            unitCellLatticePosition.z() += 2*n
+                        )
+                        {
+                            for
+                            (
+                                unitCellLatticePosition.y() = -n;
+                                unitCellLatticePosition.y() <= n;
+                                unitCellLatticePosition.y()++
+                            )
+                            {
+                                for
+                                (
+                                    unitCellLatticePosition.x() = -n;
+                                    unitCellLatticePosition.x() <= n;
+                                    unitCellLatticePosition.x()++
+                                )
+                                {
+                                    forAll(latticePositions, p)
+                                    {
+                                        label id = findIndex
+                                        (
+                                            pot_.idList(),
+                                            latticeIds[p]
+                                        );
+
+                                        const vector& latticePosition =
+                                        vector
+                                        (
+                                            unitCellLatticePosition.x(),
+                                            unitCellLatticePosition.y(),
+                                            unitCellLatticePosition.z()
+                                        )
+                                        + latticePositions[p];
+
+                                        point globalPosition = anchor
+                                        + (R
+                                        &(latticeCellShape & latticePosition));
+
+                                        partOfLayerInBounds =
+                                        mesh_.bounds().contains(globalPosition);
+
+                                        label cell = mesh_.findCell
+                                        (
+                                            globalPosition
+                                        );
+
+                                        if (findIndex(zone, cell) != -1)
+                                        {
+                                            createMolecule
+                                            (
+                                                globalPosition,
+                                                cell,
+                                                id,
+                                                tethered,
+                                                temperature,
+                                                bulkVelocity
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        for
+                        (
+                            unitCellLatticePosition.z() = -(n-1);
+                            unitCellLatticePosition.z() <= (n-1);
+                            unitCellLatticePosition.z()++
+                        )
+                        {
+                            for (label iR = 0; iR <= 2*n -1; iR++)
+                            {
+                                unitCellLatticePosition.x() = n;
+
+                                unitCellLatticePosition.y() = -n + (iR + 1);
+
+                                for (label iK = 0; iK < 4; iK++)
+                                {
+                                    forAll(latticePositions, p)
+                                    {
+                                        label id = findIndex
+                                        (
+                                            pot_.idList(),
+                                            latticeIds[p]
+                                        );
+
+                                        const vector& latticePosition =
+                                        vector
+                                        (
+                                            unitCellLatticePosition.x(),
+                                            unitCellLatticePosition.y(),
+                                            unitCellLatticePosition.z()
+                                        )
+                                        + latticePositions[p];
+
+                                        point globalPosition = anchor
+                                        + (R
+                                        &(latticeCellShape & latticePosition));
+
+                                        partOfLayerInBounds =
+                                        mesh_.bounds().contains(globalPosition);
+
+                                        label cell = mesh_.findCell
+                                        (
+                                            globalPosition
+                                        );
+
+                                        if (findIndex(zone, cell) != -1)
+                                        {
+                                            createMolecule
+                                            (
+                                                globalPosition,
+                                                cell,
+                                                id,
+                                                tethered,
+                                                temperature,
+                                                bulkVelocity
+                                            );
+                                        }
+                                    }
+
+                                    unitCellLatticePosition =
+                                    labelVector
+                                    (
+                                        - unitCellLatticePosition.y(),
+                                        unitCellLatticePosition.x(),
+                                        unitCellLatticePosition.z()
+                                    );
+                                }
                             }
                         }
                     }
 
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    // end of place molecules
+                    // end of placement of molecules
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
                     if
@@ -741,7 +905,7 @@ void Foam::moleculeCloud::initialiseMolecules
                      && !partOfLayerInBounds
                     )
                     {
-                        WarningIn("molConfig::createMolecules()")
+                        WarningIn("Foam::moleculeCloud::initialiseMolecules()")
                         << "A whole layer of unit cells was placed "
                             << "outside the bounds of the mesh, but no "
                             << "molecules have been placed in zone '"
@@ -770,6 +934,75 @@ void Foam::moleculeCloud::initialiseMolecules
     }
 }
 
+
+void Foam::moleculeCloud::createMolecule
+(
+    const point& position,
+    label cell,
+    label id,
+    bool tethered,
+    scalar temperature,
+    const vector& bulkVelocity
+)
+{
+    const Cloud<molecule>& cloud = *this;
+
+    if (cell == -1)
+    {
+        cell = mesh_.findCell(position);
+    }
+
+    if (cell == -1)
+    {
+        FatalErrorIn("Foam::moleculeCloud::createMolecule")
+            << "Position specified does not correspond to a mesh cell." << nl
+            << abort(FatalError);
+    }
+
+    point specialPosition(vector::zero);
+
+    label special = 0;
+
+    if (tethered)
+    {
+        specialPosition = position;
+
+        special = molecule::SPECIAL_TETHERED;
+    }
+
+    const molecule::constantProperties& cP(constProps(id));
+
+    vector v = equipartitionLinearVelocity(temperature, cP.mass());
+
+    v += bulkVelocity;
+
+    vector pi = equipartitionAngularMomentum
+    (
+        temperature,
+        cP.momentOfInertia()
+    );
+
+    addParticle
+    (
+        new molecule
+        (
+            cloud,
+            position,
+            cell,
+            I,
+            v,
+            vector::zero,
+            pi,
+            vector::zero,
+            specialPosition,
+            constProps(id),
+            special,
+            id
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::moleculeCloud::moleculeCloud
@@ -783,13 +1016,14 @@ Foam::moleculeCloud::moleculeCloud
     pot_(pot),
     cellOccupancy_(mesh_.nCells()),
     il_(mesh_, pot_.pairPotentials().rCutMaxSqr(), false),
-    constPropList_()
+    constPropList_(),
+    rndGen_(clock::getTime())
 {
     molecule::readFields(*this);
 
     buildConstProps();
 
-    buildCellOccupancy();
+    setSiteSizesAndPositions();
 
     removeHighEnergyOverlaps();
 
@@ -808,7 +1042,8 @@ Foam::moleculeCloud::moleculeCloud
     mesh_(mesh),
     pot_(pot),
     il_(mesh_),
-    constPropList_()
+    constPropList_(),
+    rndGen_(clock::getTime())
 {
     molecule::readFields(*this);
 
@@ -818,29 +1053,6 @@ Foam::moleculeCloud::moleculeCloud
 
     initialiseMolecules(mdInitialiseDict);
 }
-//     int i;
-
-//     const Cloud<molecule>& cloud = *this;
-
-//     for (i=0; i<nMol; i++)
-//     {
-//         addParticle
-//         (
-//             new molecule
-//             (
-//                 cloud,
-//                 positions[i],
-//                 cells[i],
-//                 mass[i],
-//                 U[i],
-//                 A[i],
-//                 tetherPositions[i],
-//                 tethered[i],
-//                 id[i]
-//             )
-//         );
-//     }
-// };
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

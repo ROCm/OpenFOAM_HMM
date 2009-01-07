@@ -259,6 +259,8 @@ public:
 
             void setSitePositions(const constantProperties& constProps);
 
+            void setSiteSizes(label size);
+
         // Access
 
             inline const tensor& Q() const;

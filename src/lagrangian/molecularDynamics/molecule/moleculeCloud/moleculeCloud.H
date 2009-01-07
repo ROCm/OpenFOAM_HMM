@@ -42,6 +42,8 @@ SourceFiles
 #include "IOdictionary.H"
 #include "potential.H"
 #include "interactionLists.H"
+#include "labelVector.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,9 +73,13 @@ private:
 
         List<molecule::constantProperties> constPropList_;
 
+        Random rndGen_;
+
     // Private Member Functions
 
         void buildConstProps();
+
+        void setSiteSizesAndPositions();
 
         //- Determine which molecules are in which cells
         void buildCellOccupancy();
@@ -113,6 +119,28 @@ private:
         void initialiseMolecules
         (
             const IOdictionary& mdInitialiseDict
+        );
+
+        void createMolecule
+        (
+            const point& position,
+            label cell,
+            label id,
+            bool tethered,
+            scalar temperature,
+            const vector& bulkVelocity
+        );
+
+        inline vector equipartitionLinearVelocity
+        (
+            scalar temperature,
+            scalar mass
+        );
+
+        inline vector equipartitionAngularMomentum
+        (
+            scalar temperature,
+            const diagTensor& momentOfInertia
         );
 
         //- Disallow default bitwise copy construct
@@ -177,6 +205,8 @@ public:
 
             inline const molecule::constantProperties&
             constProps(label id) const;
+
+            inline Random& rndGen();
 
     // Member Operators
 

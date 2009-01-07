@@ -210,6 +210,14 @@ void Foam::molecule::setSitePositions(const constantProperties& constProps)
 }
 
 
+void Foam::molecule::setSiteSizes(label size)
+{
+    sitePositions_.setSize(size);
+
+    siteForces_.setSize(size);
+}
+
+
 void Foam::molecule::hitProcessorPatch
 (
     const processorPolyPatch&,

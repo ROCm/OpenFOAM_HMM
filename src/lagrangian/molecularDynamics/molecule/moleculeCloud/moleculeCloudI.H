@@ -367,7 +367,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     if
                     (
                         mag(chargeI*chargeJ*electrostatic.energy(rsIsJMag))
-                        > pot_.potentialEnergyLimit()
+                      > pot_.potentialEnergyLimit()
                     )
                     {
                         return true;
@@ -510,7 +510,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                             chargeReal*chargeRef
                             *electrostatic.energy(rsRealsRefMag)
                         )
-                        > pot_.potentialEnergyLimit()
+                      > pot_.potentialEnergyLimit()
                     )
                     {
                         return true;
@@ -523,6 +523,35 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
     return false;
 }
 
+
+inline Foam::vector Foam::moleculeCloud::equipartitionLinearVelocity
+(
+    scalar temperature,
+    scalar mass
+)
+{
+    return sqrt(kb*temperature/mass)*vector
+    (
+        rndGen_.GaussNormal(),
+        rndGen_.GaussNormal(),
+        rndGen_.GaussNormal()
+    );
+}
+
+
+inline Foam::vector Foam::moleculeCloud::equipartitionAngularMomentum
+(
+    scalar temperature,
+    const diagTensor& momentOfInertia
+)
+{
+    return vector
+    (
+        sqrt(kb*temperature*momentOfInertia.xx())*rndGen_.GaussNormal(),
+        sqrt(kb*temperature*momentOfInertia.yy())*rndGen_.GaussNormal(),
+        sqrt(kb*temperature*momentOfInertia.zz())*rndGen_.GaussNormal()
+    );
+}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -563,6 +592,12 @@ inline const Foam::molecule::constantProperties&
     Foam::moleculeCloud::constProps(label id) const
 {
     return constPropList_[id];
+}
+
+
+inline Foam::Random& Foam::moleculeCloud::rndGen()
+{
+    return rndGen_;
 }
 
 

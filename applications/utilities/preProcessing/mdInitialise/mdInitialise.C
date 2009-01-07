@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     Info<< nl << "Total number of molecules added: " << totalMolecules
         << nl << endl;
 
-    IOstream::defaultPrecision(12);
+    IOstream::defaultPrecision(15);
 
     if (!mesh.write())
     {
