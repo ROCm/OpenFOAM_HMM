@@ -70,8 +70,6 @@ Foam::molecule::molecule
         }
         else
         {
-            Pout<< "Binary readfields." << endl;
-
             is.read
             (
                 reinterpret_cast<char*>(&Q_),
