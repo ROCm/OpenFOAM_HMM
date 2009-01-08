@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,9 @@ Description
     Usually one would use the read primitive member functions, but if one
     were reading a stream on unknown data sequence one can read token by
     token, and then analyse.
+
+SourceFiles
+    Istream.C
 
 \*---------------------------------------------------------------------------*/
 

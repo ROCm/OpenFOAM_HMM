@@ -17,10 +17,10 @@ Switch planeMapping
 );
 
 Info << "Constructing planePatch" << endl;
-cuttingPlane cut(mesh, plane(planeToPatchDict));
+cuttingPlane cut(plane(planeToPatchDict), mesh);
 
 primitiveFacePatch planePatch
-(   
+(
     cut.faces(),
     cut.points()
 );
@@ -38,24 +38,23 @@ label targetPatchNumber = -1;
 
 forAll(patches, patchI)
 {
-    if(patches[patchI].name() == toPatchName)
+    if (patches[patchI].name() == toPatchName)
     {
         targetPatchNamePresent = true;
         targetPatchNumber = patchI;
     }
-}   
+}
 
 const labelList& cutCells(cut.cells());
 
-if(!targetPatchNamePresent)
+if (!targetPatchNamePresent)
 {
     targetPatchNumber = 1;
-    Serr << "Target patch not present. " << endl;
+    Serr<< "Target patch not present. " << endl;
 }
 else
 {
-    Serr << "Target patch name: " << patches[targetPatchNumber].name() 
-         << endl;
+    Serr<< "Target patch name: " << patches[targetPatchNumber].name() << endl;
 }
 
 patchToPatchInterpolation interPatch
@@ -72,6 +71,7 @@ PrimitivePatchInterpolation
 (
     planePatch
 );
+
 
 PrimitivePatchInterpolation
 <

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,21 +32,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Write keyType
-Foam::Ostream& Foam::Ostream::write(const keyType& kw)
-{
-    // Write as word or string
-    if (kw.isPattern())
-    {
-        return write(static_cast<const string&>(kw));
-    }
-    else
-    {
-        return write(static_cast<const word&>(kw));
-    }
-}
-
-
 // Decrement the indent level
 void Foam::Ostream::decrIndent()
 {
@@ -58,6 +43,21 @@ void Foam::Ostream::decrIndent()
     else
     {
         indentLevel_--;
+    }
+}
+
+
+// Write keyType
+Foam::Ostream& Foam::Ostream::write(const keyType& kw)
+{
+    // Write as word or string
+    if (kw.isPattern())
+    {
+        return write(static_cast<const string&>(kw));
+    }
+    else
+    {
+        return write(static_cast<const word&>(kw));
     }
 }
 

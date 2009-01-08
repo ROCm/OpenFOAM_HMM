@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,9 +98,6 @@ public:
 
 
     // Member functions
-
-        //- Is this character valid for a keyType
-        inline static bool valid(char c);
 
         //- Should be treated as a match rather than a literal string
         inline bool isPattern() const;

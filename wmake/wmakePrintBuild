@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -61,15 +61,15 @@ do
     -h | -help)
         usage
         ;;
-    -check)
+    -c | -check)
         checkOnly=true
         shift
         ;;
-    -update)
+    -u | -update)
         update=true
         shift
         ;;
-    -version)
+    -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version=$2
         shift 2
@@ -93,14 +93,19 @@ then
     # specified a version - no error possible
     rc=0
 else
-    # building under git (get the head SHA1)
-    version=$(git show-ref --hash=12 --head refs/heads/master 2>/dev/null)
-    rc=$?
+    # get the head SHA1 when building under git
+    # if there are multiple values (eg, HEAD, origin/HEAD, ...)
+    # only take the first one, which is 'HEAD'
+    version=$(git show-ref --hash=12 --head HEAD 2>/dev/null | head -1)
 
-    # prefix with WM_PROJECT_VERSION
-    if [ $rc -eq 0 ]
+    if [ -n "$version" ]
     then
+        # mark as success and prefix with WM_PROJECT_VERSION
+        rc=0
         version="${WM_PROJECT_VERSION}-$version"
+    else
+        # mark as failure
+        rc=1
     fi
 fi
 
@@ -108,14 +113,14 @@ fi
 # update persistent build tag if possible
 if [ $rc -eq 0 -a -n "$update" -a "$version" != "$previous" ]
 then
-    if [ -w "$build" -a \( -w "$WM_PROJECT_DIR" -o ! -e "$build" \) ]
+    if [ -w "$build" -o \( -w "$WM_PROJECT_DIR" -a ! -e "$build" \) ]
     then
         echo $version >| "$build" 2>/dev/null
     fi
 fi
 
 
-# check git vs. persistent build tag - no output
+# check git vs. persistent build tag
 if [ -n "$checkOnly" ]
 then
     if [ $rc -eq 0 ]

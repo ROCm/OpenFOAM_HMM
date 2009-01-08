@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
 SourceFiles
     OSstreamI.H
-    OSwrite.C
+    OSstream.C
     chkStream.C
 
 \*---------------------------------------------------------------------------*/
@@ -136,6 +136,9 @@ public:
             virtual Ostream& write(const word&);
 
             //- Write string
+            //  In the rare case that the string contains a final trailing
+            //  backslash, it will be dropped to the appearance of an escaped
+            //  double-quote.
             virtual Ostream& write(const string&);
 
             //- Write label

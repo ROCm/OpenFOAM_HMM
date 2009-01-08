@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,13 +81,7 @@ inline Foam::keyType::keyType
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::keyType::valid(char c)
-{
-    return c != '"';
-}
-
-
-bool Foam::keyType::isPattern() const
+inline bool Foam::keyType::isPattern() const
 {
     return isPattern_;
 }

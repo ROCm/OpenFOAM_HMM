@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ SourceFiles
 
 #include "UList.H"
 #include "autoPtr.H"
-#include "xfer.H"
+#include "Xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,7 +102,7 @@ public:
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(const xfer<List<T> >&);
+        List(const Xfer<List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
@@ -177,6 +177,9 @@ public:
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list.
             void transfer(SortableList<T>&);
+
+            //- Transfer contents to the Xfer container
+            inline Xfer<List<T> > xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);

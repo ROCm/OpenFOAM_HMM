@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,18 +51,12 @@ SourceFiles
 namespace Foam
 {
 
-//- Pre-declare related List type
-template<class T>
-class List;
-
-//- Pre-declare related SubList type
-template<class T>
-class SubList;
+// Forward declaration of friend classes
+template<class T> class List;
+template<class T> class SubList;
 
 // Forward declaration of friend functions and operators
-
 template<class T> class UList;
-
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 
 
@@ -157,10 +151,10 @@ public:
 
 
         //- Write the UList as a dictionary entry.
-        void writeEntry(Ostream& os) const;
+        void writeEntry(Ostream&) const;
 
         //- Write the UList as a dictionary entry with keyword.
-        void writeEntry(const word& keyword, Ostream& os) const;
+        void writeEntry(const word& keyword, Ostream&) const;
 
         //- Assign elements to those from UList.
         void assign(const UList<T>&);
@@ -306,11 +300,11 @@ public:
 
 // Reverse the first n elements of the list
 template<class T>
-inline void reverse(UList<T>& ul, const label n);
+inline void reverse(UList<T>&, const label n);
 
 // Reverse all the elements of the list
 template<class T>
-inline void reverse(UList<T>& ul);
+inline void reverse(UList<T>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

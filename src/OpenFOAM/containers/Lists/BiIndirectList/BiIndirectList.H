@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,7 @@ Class
     Foam::BiIndirectList
 
 Description
-    Indexes into left list (negative index) or right list (zero or positive
-    index).
+    Indexes into negList (negative index) or posList (zero or positive index).
 
 SourceFiles
     BiIndirectListI.H
@@ -82,8 +81,8 @@ public:
             inline List<label>& addressing();
 
             //- Calculate index given whether index is into posList or negList
-            inline static label posIndex(const label i);
-            inline static label negIndex(const label i);
+            inline static label posIndex(const label);
+            inline static label negIndex(const label);
 
 
         // Member Operators

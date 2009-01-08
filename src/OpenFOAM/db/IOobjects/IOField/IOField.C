@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
 
 
 template<class Type>
-Foam::IOField<Type>::IOField(const IOobject& io, const xfer<Field<Type> >& f)
+Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type> >& f)
 :
     regIOobject(io)
 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
         MeshedSurface<face> surf;
         surf.reset
         (
-            xfer<pointField>::null(),
+            Xfer<pointField>::null(),
             xferMove(faceLst)
         );
         surf.addPatches(patches_);

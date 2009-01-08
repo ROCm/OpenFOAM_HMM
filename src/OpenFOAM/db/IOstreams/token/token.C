@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,12 +50,13 @@ void Foam::token::parseError(const char* expected) const
 Foam::token::compound::~compound()
 {}
 
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 (
-    const Foam::word& compoundType,
-    Foam::Istream& is
+    const word& compoundType,
+    Istream& is
 )
 {
     IstreamConstructorTable::iterator cstrIter =
@@ -63,10 +64,9 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 
     if (cstrIter == IstreamConstructorTablePtr_->end())
     {
-        FatalErrorIn("token::compound::New(Istream&)")
-            << "Unknown compound type " << compoundType
-            << endl << endl
-            << "Valid compound types are :" << endl
+        FatalErrorIn("token::compound::New(const word&, Istream&)")
+            << "Unknown compound type " << compoundType << nl << nl
+            << "Valid compound types:" << endl
             << IstreamConstructorTablePtr_->toc()
             << abort(FatalError);
     }
@@ -77,7 +77,7 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::token::compound::isCompound(const Foam::word& name)
+bool Foam::token::compound::isCompound(const word& name)
 {
     return
     (

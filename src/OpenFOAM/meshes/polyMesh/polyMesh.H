@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -219,10 +219,10 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
-            const xfer<faceList>& faces,
-            const xfer<labelList>& owner,
-            const xfer<labelList>& neighbour,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<labelList>& owner,
+            const Xfer<labelList>& neighbour,
             const bool syncPar = true
         );
 
@@ -231,9 +231,9 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
-            const xfer<faceList>& faces,
-            const xfer<cellList>& cells,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -241,7 +241,7 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
+            const Xfer<pointField>& points,
             const cellShapeList& shapes,
             const faceListList& boundaryFaces,
             const wordList& boundaryPatchNames,
@@ -434,10 +434,10 @@ public:
             //  patch ends at nActiveFaces) and change patches with addPatches.
             void resetPrimitives
             (
-                const xfer<pointField>& points,
-                const xfer<faceList>& faces,
-                const xfer<labelList>& owner,
-                const xfer<labelList>& neighbour,
+                const Xfer<pointField>& points,
+                const Xfer<faceList>& faces,
+                const Xfer<labelList>& owner,
+                const Xfer<labelList>& neighbour,
                 const labelList& patchSizes,
                 const labelList& patchStarts,
                 const bool validBoundary = true

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,22 +36,22 @@ Description
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::cuttingPlane::sample
 (
-    const Field<Type>& sf
+    const Field<Type>& fld
 ) const
 {
-    return tmp<Field<Type> >(new Field<Type>(sf, cutCells()));
+    return tmp<Field<Type> >(new Field<Type>(fld, cutCells()));
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::cuttingPlane::sample
 (
-    const tmp<Field<Type> >& tsf
+    const tmp<Field<Type> >& tfld
 ) const
 {
-    tmp<Field<Type> > tint = sample(tsf());
-    tsf.clear();
-    return tint;
+    tmp<Field<Type> > tsf = sample(tfld());
+    tfld.clear();
+    return tsf;
 }
 
 // ************************************************************************* //
