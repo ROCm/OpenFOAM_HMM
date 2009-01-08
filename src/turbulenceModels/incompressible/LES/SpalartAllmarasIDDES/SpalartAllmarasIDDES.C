@@ -119,12 +119,12 @@ void SpalartAllmarasIDDES::dTildaUpdate(const volScalarField& S)
         2.0*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
 
 
-    volScalarField fStep = min(2.0*pow(expTerm, -9.0), 1.0);
+    volScalarField fStep = min(2.0*pow(expTerm, -9.0), scalar(1));
     volScalarField fHyb = max(1.0 - fd(S), fStep);
 
     volScalarField fAmp = 1.0 - max(ft(S), fl(S));
 
-    volScalarField fRestore = max(fHill - 1.0, 0.0)*fAmp;
+    volScalarField fRestore = max(fHill - 1.0, scalar(0))*fAmp;
 
     // volScalarField ft2 = IGNORING ft2 terms
 
@@ -132,7 +132,7 @@ void SpalartAllmarasIDDES::dTildaUpdate(const volScalarField& S)
     (
         min
         (
-            100.0,
+            scalar(100),
             (1.0 - Cb1_/(Cw1_*sqr(kappa_)*fwStar_)*fv2())/max(SMALL, fv1())
         )
     );

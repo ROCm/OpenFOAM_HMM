@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Return a string representation of an ulong
 word name(const unsigned long i)
 {
     std::ostringstream osBuffer;
@@ -66,7 +65,7 @@ Istream& operator>>(Istream& is, unsigned long& i)
 
     if (t.isLabel())
     {
-        i = ulong(t.labelToken());
+        i = static_cast<unsigned long>(t.labelToken());
     }
     else
     {

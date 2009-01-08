@@ -65,7 +65,7 @@ Istream& operator>>(Istream& is, unsigned int& i)
 
     if (t.isLabel())
     {
-        i = unsigned(t.labelToken());
+        i = static_cast<unsigned int>(t.labelToken());
     }
     else
     {

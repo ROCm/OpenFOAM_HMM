@@ -139,7 +139,7 @@ void nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
 
             do
             {
-                scalar kUu = min(kappa*magUpara/utau, 100);
+                scalar kUu = min(kappa*magUpara/utau, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =

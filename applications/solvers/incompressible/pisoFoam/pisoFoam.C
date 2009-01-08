@@ -100,7 +100,19 @@ int main(int argc, char *argv[])
                     );
 
                     pEqn.setReference(pRefCell, pRefValue);
-                    pEqn.solve();
+
+                    if
+                    (
+                        corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                    {
+                        pEqn.solve(mesh.solver("pFinal"));
+                    }
+                    else
+                    {
+                        pEqn.solve();
+                    }
 
                     if (nonOrth == nNonOrthCorr)
                     {
