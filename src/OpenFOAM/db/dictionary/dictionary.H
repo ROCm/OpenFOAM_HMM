@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,11 +166,17 @@ public:
         //- Construct top-level dictionary as copy
         dictionary(const dictionary&);
 
+        //- Construct by transferring parameter contents given parent dictionary
+        dictionary(const dictionary& parentDict, const Xfer<dictionary>&);
+
+        //- Construct top-level dictionary by transferring parameter contents
+        dictionary(const Xfer<dictionary>&);
+
         //- Construct and return clone
-        Foam::autoPtr<dictionary> clone() const;
+        autoPtr<dictionary> clone() const;
 
         //- Construct top-level dictionary on freestore from Istream
-        static Foam::autoPtr<dictionary> New(Istream&);
+        static autoPtr<dictionary> New(Istream&);
 
 
     // Destructor
@@ -384,6 +390,12 @@ public:
 
             //- Clear the dictionary
             void clear();
+
+            //- Transfer the contents of the argument and annull the argument.
+            void transfer(dictionary&);
+
+            //- Transfer contents to the Xfer container
+            Xfer<dictionary> xfer();
 
 
         // Write

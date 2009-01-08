@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ Ostream& operator<<(Ostream&, const fileName&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class fileName Declaration
+                          Class fileName Declaration
 \*---------------------------------------------------------------------------*/
 
 class fileName
@@ -73,7 +73,7 @@ class fileName
 {
     // Private member functions
 
-        //- Strip invalid characters from this word
+        //- Strip invalid characters
         inline void stripInvalid();
 
 
@@ -102,16 +102,16 @@ public:
         inline fileName();
 
         //- Construct as copy
-        inline fileName(const fileName& fn);
+        inline fileName(const fileName&);
 
         //- Construct as copy of word
-        inline fileName(const word& w);
+        inline fileName(const word&);
 
         //- Construct as copy of string
-        inline fileName(const string& s);
+        inline fileName(const string&);
 
         //- Construct as copy of std::string
-        inline fileName(const std::string& s);
+        inline fileName(const std::string&);
 
         //- Construct as copy of character array
         inline fileName(const char*);
@@ -125,7 +125,7 @@ public:
 
     // Member functions
 
-        //- Is this character valid for a fileName
+        //- Is this character valid for a fileName?
         inline static bool valid(char);
 
 

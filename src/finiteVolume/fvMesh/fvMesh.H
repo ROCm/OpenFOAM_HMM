@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open So
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -173,10 +173,10 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
-            const xfer<faceList>& faces,
-            const xfer<labelList>& allOwner,
-            const xfer<labelList>& allNeighbour,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<labelList>& allOwner,
+            const Xfer<labelList>& allNeighbour,
             const bool syncPar = true
         );
 
@@ -185,9 +185,9 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const xfer<pointField>& points,
-            const xfer<faceList>& faces,
-            const xfer<cellList>& cells,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<cellList>& cells,
             const bool syncPar = true
         );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ public:
 
     // Constructors
 
-        //- Construct from bb
+        //- Construct from bounding box
         treeElem(const treeBoundBox& bb)
         :
             bb_(bb)
@@ -70,11 +70,13 @@ public:
 
         // Access
 
+            //- Bounding box of this node
             const treeBoundBox& bb() const
             {
                 return bb_;
             }
 
+            //- Bounding box of this node
             treeBoundBox& bb()
             {
                 return bb_;

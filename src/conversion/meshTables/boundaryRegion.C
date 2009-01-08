@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "boundaryRegion.H"
 #include "IOMap.H"
 #include "OFstream.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -89,6 +90,31 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names() const
             )
         );
     }
+
+    return lookup;
+}
+
+
+Foam::Map<Foam::word> Foam::boundaryRegion::names
+(
+    const List<wordRe>& patterns
+) const
+{
+    Map<word> lookup;
+
+    forAllConstIter(Map<dictionary>, *this, iter)
+    {
+        word lookupName = iter().lookupOrDefault<word>
+        (
+            "Label",
+            "boundaryRegion_" + Foam::name(iter.key())
+        );
+
+        if (findStrings(patterns, lookupName))
+        {
+            lookup.insert(iter.key(), lookupName);
+        }
+    }    
 
     return lookup;
 }

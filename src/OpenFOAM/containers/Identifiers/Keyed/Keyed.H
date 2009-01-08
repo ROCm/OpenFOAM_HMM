@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,6 @@ SourceFiles
 #define Keyed_H
 
 #include "List.H"
-#include "xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +48,6 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 template<class T> class Keyed;
-template<class T> class xfer;
 
 template<class T> Istream& operator>>(Istream&, Keyed<T>&);
 template<class T> Ostream& operator<<(Ostream&, const Keyed<T>&);
@@ -95,7 +93,7 @@ public:
         inline Keyed(const T& item, const label key=0);
 
         //- Construct by transferring the item, with a key
-        inline Keyed(const xfer<T>& item, const label key=0);
+        inline Keyed(const Xfer<T>& item, const label key=0);
 
         //- Construct from Istream
         inline Keyed(Istream&);

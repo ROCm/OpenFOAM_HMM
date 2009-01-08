@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,22 +71,22 @@ bool Foam::dictionary::substituteKeyword(const word& keyword)
 {
     word varName = keyword(1, keyword.size()-1);
 
-    // lookup the variable name in the given dictionary....
+    // lookup the variable name in the given dictionary
     const entry* ePtr = lookupEntryPtr(varName, true, true);
 
-    // ...if defined insert its entries into this dictionary...
+    // if defined insert its entries into this dictionary
     if (ePtr != NULL)
     {
         const dictionary& addDict = ePtr->dict();
 
         for
         (
-            IDLList<entry>::const_iterator addIter = addDict.begin();
-            addIter != addDict.end();
-            ++addIter
+            IDLList<entry>::const_iterator iter = addDict.begin();
+            iter != addDict.end();
+            ++iter
         )
         {
-            add(addIter());
+            add(iter());
         }
 
         return true;

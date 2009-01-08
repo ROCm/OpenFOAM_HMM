@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ Class
 Description
     STL conforming hash table.
 
+Note
     Uses straight lists as underlying type.
     Is slower to insert than the standard HashTable, but should be more
     memory efficient and faster to access.
@@ -46,7 +47,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "className.H"
-#include "xfer.H"
+#include "Xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,9 +56,7 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T>
-class List;
-
+template<class T> class List;
 template<class T, class Key, class Hash> class StaticHashTable;
 
 template<class T, class Key, class Hash> Istream& operator>>
@@ -74,14 +73,14 @@ template<class T, class Key, class Hash> Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                        Class StaticHashTableName Declaration
+                     Class StaticHashTableName Declaration
 \*---------------------------------------------------------------------------*/
 
 TemplateName(StaticHashTable);
 
 
 /*---------------------------------------------------------------------------*\
-                          Class StaticHashTable Declaration
+                       Class StaticHashTable Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class Key=word, class Hash=string::hash>
@@ -99,6 +98,9 @@ class StaticHashTable
 
         //- The current number of elements in table
         label nElmts_;
+
+        //- Assign a new hashed entry to a possibly already existing key
+        bool set(const Key&, const T& newElmt, bool protect);
 
 public:
 
@@ -147,8 +149,8 @@ public:
         //- Construct as copy
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
 
-        //- Construct as copy
-        StaticHashTable(const xfer<StaticHashTable<T, Key, Hash> >&);
+        //- Construct by transferring the parameter contents
+        StaticHashTable(const Xfer<StaticHashTable<T, Key, Hash> >&);
 
     // Destructor
 
@@ -162,14 +164,14 @@ public:
             //- Return number of elements in table.
             inline label size() const;
 
-            //- Return true if hashedEntry is found in table
+            //- Return true if hashed entry is found in table
             bool found(const Key& key) const;
 
-            //- Find and return an iterator set at the hashedEntry
+            //- Find and return an iterator set at the hashed entry
             //  If not found iterator = end()
             iterator find(const Key& key);
 
-            //- Find and return an const_iterator set at the hashedEntry
+            //- Find and return an const_iterator set at the hashed entry
             //  If not found iterator = end()
             const_iterator find(const Key& key) const;
 
@@ -179,13 +181,16 @@ public:
 
         // Edit
 
-            //- Insert a new hashedEntry
+            //- Insert a new hashed entry
             bool insert(const Key& key, const T& newElmt);
 
-            //- Erase an hashedEntry specified by given iterator
+            //- Assign a new hashed entry, overwriting existing entries
+            inline bool set(const Key&, const T& newElmt);
+
+            //- Erase an hashed entry specified by given iterator
             bool erase(const iterator& it);
 
-            //- Erase an hashedEntry specified by given key if in table
+            //- Erase an hashed entry specified by given key if in table
             bool erase(const Key& key);
 
             //- Resize the hash table for efficiency
@@ -194,22 +199,38 @@ public:
             //- Clear all entries from table
             void clear();
 
+            //- Clear the table entries and the table itself.
+            //  Equivalent to clear() followed by resize(1)
+            void clearStorage();
+
             //- Transfer the contents of the argument table into this table
             //  and annull the argument table.
             void transfer(StaticHashTable<T, Key, Hash>&);
 
+            //- Transfer contents to the Xfer container
+            inline Xfer<StaticHashTable<T, Key, Hash> > xfer();
+
 
     // Member Operators
 
-        //- Find and return an hashedEntry
-        inline T& operator[](const Key& key);
+        //- Find and return an hashed entry
+        inline T& operator[](const Key&);
 
-        //- Find and return an hashedEntry
-        inline const T& operator[](const Key& key) const;
+        //- Find and return an hashed entry
+        inline const T& operator[](const Key&) const;
+
+        //- Find and return an hashed entry, create it null if not present.
+        inline T& operator()(const Key&);
 
         //- Assignment
         void operator=(const StaticHashTable<T, Key, Hash>&);
 
+        //- Equality. Two hash tables are equal if all contents of first are
+        //  also in second and vice versa.
+        bool operator==(const StaticHashTable<T, Key, Hash>&) const;
+
+        //- The opposite of the equality operation.
+        bool operator!=(const StaticHashTable<T, Key, Hash>&) const;
 
     // STL type definitions
 
@@ -245,7 +266,7 @@ public:
             // Private data
 
                 //- Reference to the StaticHashTable this is an iterator for
-                TableRef curStaticHashTable_;
+                TableRef curHashTable_;
 
                 //- Current hash index
                 label hashIndex_;
@@ -257,10 +278,10 @@ public:
 
             // Constructors
 
-                //- Construct from hash table, element and hash index
+                //- Construct from hash table, hash index and element index
                 inline Iterator
                 (
-                    TableRef curStaticHashTable,
+                    TableRef curHashTable,
                     label hashIndex_,
                     label elementIndex_
                 );

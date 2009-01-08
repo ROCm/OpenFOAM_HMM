@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -902,7 +902,7 @@ Foam::labelList Foam::boundaryMesh::getNearest
 
     // Extend domain slightly (also makes it 3D if was 2D)
     // Note asymmetry to avoid having faces align with octree cubes.
-    scalar tol = 1E-6*overallBb.avgDim();
+    scalar tol = 1E-6 * overallBb.avgDim();
 
     point& bbMin = overallBb.min();
     bbMin.x() -= tol;

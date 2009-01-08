@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
 
 
 template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const xfer<List<T> >& list)
+Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T> >& list)
 :
     regIOobject(io)
 {

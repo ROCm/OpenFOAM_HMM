@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,14 @@ inline Foam::label Foam::List<T>::size() const
 {
     return UList<T>::size_;
 }
+
+
+template<class T>
+inline Foam::Xfer<Foam::List<T> > Foam::List<T>::xfer()
+{
+    return xferMove(*this);
+}
+
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

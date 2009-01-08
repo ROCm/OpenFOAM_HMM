@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,7 @@ Description
 #include "IOMap.H"
 #include "OFstream.H"
 #include "wordList.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -166,6 +167,31 @@ Foam::Map<Foam::word> Foam::cellTable::names() const
 }
 
 
+Foam::Map<Foam::word> Foam::cellTable::names
+(
+    const List<wordRe>& patterns
+) const
+{
+    Map<word> lookup;
+
+    forAllConstIter(Map<dictionary>, *this, iter)
+    {
+        word lookupName = iter().lookupOrDefault<word>
+        (
+            "Label",
+            "cellTable_" + Foam::name(iter.key())
+        );
+
+        if (findStrings(patterns, lookupName))
+        {
+            lookup.insert(iter.key(), lookupName);
+        }
+    }
+
+    return lookup;
+}
+
+
 Foam::word Foam::cellTable::name(const label& id) const
 {
     word theName("cellTable_" + Foam::name(id));
@@ -281,7 +307,7 @@ void Foam::cellTable::setName(const label& id)
 
     if (iter == end() || !iter().found("Label"))
     {
-        setName(id, "cellTable_" + ::Foam::name(id));
+        setName(id, "cellTable_" + Foam::name(id));
     }
 }
 
@@ -491,64 +517,43 @@ void Foam::cellTable::combine(const dictionary& mapDict, labelList& tableIds)
     bool remap = false;
     labelList mapping(identity(max(this->toc()) + 1));
 
-    forAllConstIter (dictionary, mapDict, iter)
+    forAllConstIter(dictionary, mapDict, iter)
     {
-        wordList  zoneNames(iter().stream());
-        labelList zoneIndex(zoneNames.size());
+        Map<word> matches = names(wordReList(iter().stream()));
 
-        label nElem = 0;
-        forAll(zoneNames, zoneI)
-        {
-            zoneIndex[nElem] = this->findIndex(zoneNames[zoneI]);
-            if (zoneIndex[nElem] >= 0)
-            {
-                if (zoneI != nElem)
-                {
-                    zoneNames[nElem] = zoneNames[zoneI];
-                }
-                ++nElem;
-            }
-        }
-
-        zoneIndex.setSize(nElem);
-        zoneNames.setSize(nElem);
-
-        if (nElem)
+        if (matches.size())
         {
             remap = true;
             label targetId = this->findIndex(iter().keyword());
 
             Info<< "combine cellTable: " << iter().keyword();
-            if (targetId >= 0)
+            if (targetId < 0)
             {
-                Info<< " += (";
+                // re-use the first element if possible
+                targetId = min(matches.toc());
+                operator[](targetId).set("Label", iter().keyword());
+
+                Info<< " = (";
             }
             else
             {
-                Info<< " = (";
-            }
-            forAll(zoneNames, zoneI)
-            {
-                Info<< " " << zoneNames[zoneI];
-            }
-            Info<< " )" << endl;
-
-            // re-use the first element if possible
-            if (targetId < 0)
-            {
-                targetId = min(zoneIndex);
-                operator[](targetId).set("Label", iter().keyword());
+                Info<< " += (";
             }
 
-            forAll(zoneIndex, zoneI)
+
+            forAllConstIter(Map<word>, matches, matchIter)
             {
-                label idx = zoneIndex[zoneI];
+                label idx = matchIter.key();
+
                 if (idx != targetId && idx >= 0)
                 {
                     mapping[idx] = targetId;
                     this->erase(idx);
                 }
+
+                Info<< " " << matchIter();
             }
+            Info<< " )" << endl;
         }
     }
 

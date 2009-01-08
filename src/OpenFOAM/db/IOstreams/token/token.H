@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,8 @@ Description
 
 SourceFiles
     tokenI.H
+    token.C
     tokenIO.C
-    printToken.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -165,7 +165,7 @@ public:
         // Selectors
 
             //- Select null constructed
-            static autoPtr<compound> New(const word& type, Istream& is);
+            static autoPtr<compound> New(const word& type, Istream&);
 
 
         // Destructor
@@ -291,22 +291,22 @@ public:
         inline token(const token&);
 
         //- Construct punctuation character token
-        inline token(punctuationToken p, label lineNumber=0);
+        inline token(punctuationToken, label lineNumber=0);
 
         //- Construct word token
-        inline token(const word& w, label lineNumber=0);
+        inline token(const word&, label lineNumber=0);
 
         //- Construct string token
-        inline token(const string& s, label lineNumber=0);
+        inline token(const string&, label lineNumber=0);
 
         //- Construct label token
         inline token(const label, label lineNumber=0);
 
         //- Construct floatScalar token
-        inline token(const floatScalar s, label lineNumber=0);
+        inline token(const floatScalar, label lineNumber=0);
 
         //- Construct doubleScalar token
-        inline token(const doubleScalar s, label lineNumber=0);
+        inline token(const doubleScalar, label lineNumber=0);
 
         //- Construct from Istream
         token(Istream&);

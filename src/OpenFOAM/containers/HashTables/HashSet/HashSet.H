@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class HashSet Declaration
+                           Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Key=word, class Hash=string::hash>
@@ -101,7 +101,13 @@ public:
         {}
 
         //- Construct by transferring the parameter contents
-        HashSet(const xfer<HashSet<Key, Hash> >& hs)
+        HashSet(const Xfer<HashSet<Key, Hash> >& hs)
+        :
+            HashTable<empty, Key, Hash>(hs)
+        {}
+
+        //- Construct by transferring the parameter contents
+        HashSet(const Xfer<HashTable<empty, Key, Hash> >& hs)
         :
             HashTable<empty, Key, Hash>(hs)
         {}

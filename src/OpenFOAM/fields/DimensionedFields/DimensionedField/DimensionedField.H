@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,7 +159,7 @@ public:
         //- Construct by transferring the DimensionedField
         DimensionedField
         (
-            const xfer<DimensionedField<Type, GeoMesh> >&
+            const Xfer<DimensionedField<Type, GeoMesh> >&
         );
 
         //- Construct as copy of tmp<DimensionedField> deleting argument
@@ -196,7 +196,7 @@ public:
         DimensionedField
         (
             const word& newName,
-            const xfer<DimensionedField<Type, GeoMesh> >&
+            const Xfer<DimensionedField<Type, GeoMesh> >&
         );
 
         //- Construct as copy resetting name

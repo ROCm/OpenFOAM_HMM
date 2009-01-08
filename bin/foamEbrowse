@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -45,8 +45,8 @@ fi
 trap 'rm -f $headersFile $sourcesFile 2>/dev/null; exit 0' EXIT TERM INT
 
 cd $WM_PROJECT_DIR
-find -H . -name "*.H" | fgrep -v "lnInclude" > $headersFile
-find -H . -name "*.C" | fgrep -v "lnInclude" > $sourcesFile
+find -H . -name "*.H" | fgrep -v lnInclude > $headersFile
+find -H . -name "*.C" | fgrep -v lnInclude > $sourcesFile
 ebrowse --files=$headersFile --files=$sourcesFile --output-file=.ebrowse
 
 #------------------------------------------------------------------------------

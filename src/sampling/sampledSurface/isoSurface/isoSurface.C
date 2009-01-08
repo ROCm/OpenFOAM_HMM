@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -512,7 +512,7 @@ void Foam::isoSurface::calcSnappedCc
                     (
                         false,              // do not check for duplicate tris
                         localTriPoints,
-                        triPointReverseMap,  
+                        triPointReverseMap,
                         triMap
                     )
                 );
@@ -696,7 +696,7 @@ void Foam::isoSurface::calcSnappedPoint
                 (
                     false,                  // do not check for duplicate tris
                     localTriPoints,
-                    triPointReverseMap,  
+                    triPointReverseMap,
                     triMap
                 )
             );
@@ -1084,7 +1084,7 @@ void Foam::isoSurface::walkOrientation
             forAll(fEdges, fp)
             {
                 label edgeI = fEdges[fp];
-    
+
                 // my points:
                 label p0 = tri[fp];
                 label p1 = tri[tri.fcIndex(fp)];
@@ -1121,7 +1121,7 @@ void Foam::isoSurface::walkOrientation
 
         changedFaces.transfer(newChangedFaces);
     }
-}    
+}
 
 
 void Foam::isoSurface::orientSurface
@@ -1146,7 +1146,7 @@ void Foam::isoSurface::orientSurface
         for
         (
             ;
-            seedTriI < surf.size() && flipState[seedTriI] != -1; 
+            seedTriI < surf.size() && flipState[seedTriI] != -1;
             seedTriI++
         )
         {}
@@ -1355,7 +1355,7 @@ Foam::isoSurface::isoSurface
 :
     mesh_(cVals.mesh()),
     iso_(iso),
-    mergeDistance_(mergeTol*mag(mesh_.bounds().max()-mesh_.bounds().min()))
+    mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
     // Determine if any cut through face/cell
     calcCutTypes(cVals, pVals);

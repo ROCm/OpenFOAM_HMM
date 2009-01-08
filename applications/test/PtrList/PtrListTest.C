@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,6 +103,13 @@ int main(int argc, char *argv[])
     list1.setSize(4);
 
     Info<<"list1: " << list1 << endl;
+
+    PtrList<Scalar> list3(list1.xfer());
+    Info<< "Transferred via the xfer() method" << endl;
+
+    Info<<"list1: " << list1 << endl;
+    Info<<"list2: " << list2 << endl;
+    Info<<"list3: " << list3 << endl;
 
     Info<< nl << "Done." << endl;
     return 0;
