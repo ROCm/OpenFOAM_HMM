@@ -37,6 +37,10 @@ Description
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldAverage.so");
 
+        // Whether to perform a clean restart, or start from previous
+        // averaging info if available
+        cleanRestart true;
+
         // Fields to be probed. runTime modifiable!
         fields
         (
@@ -80,6 +84,7 @@ SourceFiles
 
 #include "volFieldsFwd.H"
 #include "pointFieldFwd.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,6 +118,9 @@ protected:
 
         //- On/off switch
         bool active_;
+
+        //- Clean restart flag
+        Switch cleanRestart_;
 
         //- List of field average items, describing waht averages to be
         //  calculated and output
