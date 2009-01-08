@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 {
 
 #   include "addTimeOptions.H"
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
 
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
     for (label i=startTime; i<endTime; i++)
     {
