@@ -592,9 +592,9 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
             scalar faceArea = dualFace.mag(dualVertices);
 
-            scalar directStiffness = 2.0*relaxation;
+            scalar directStiffness = 2.0;
 
-            scalar transverseStiffness = 0.0001*relaxation;
+            scalar transverseStiffness = 0.0001;
 
             scalar r0 = 0.9*controls_.minCellSize;
 
@@ -606,11 +606,11 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
             if (vA->internalPoint())
             {
-                displacementAccumulator[vA->index()] += dA + dT;
+                displacementAccumulator[vA->index()] += (dA + dT);
             }
             if (vB->internalPoint())
             {
-                displacementAccumulator[vB->index()] += -dA + dT;
+                displacementAccumulator[vB->index()] += (-dA + dT);
             }
         }
     }
@@ -620,6 +620,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     Info<< "Total displacement = " << totalDisp
         << " total distance = " << totalDist << endl;
+
+    displacementAccumulator *= relaxation;
 
     for
     (

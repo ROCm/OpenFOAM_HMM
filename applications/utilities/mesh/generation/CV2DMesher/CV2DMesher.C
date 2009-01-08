@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
             << "Relaxation iteration " << iter << nl
             << "~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 
-        scalar relax = 
+        scalar relax =
            mesh.meshingControls().relaxationFactorStart
-         + 
+         +
          (
             mesh.meshingControls().relaxationFactorEnd
           - mesh.meshingControls().relaxationFactorStart

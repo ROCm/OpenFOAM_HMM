@@ -67,7 +67,7 @@ void Foam::CV2D::external_flip(Face_handle& f, int i)
 
     if
     (
-        CGAL::ON_POSITIVE_SIDE 
+        CGAL::ON_POSITIVE_SIDE
      != side_of_oriented_circle(n, f->vertex(i)->point())
     ) return;
 
@@ -147,7 +147,7 @@ void Foam::CV2D::insertPoints
         }
         else
         {
-            Warning 
+            Warning
                 << "Rejecting point " << p << " outside surface" << endl;
         }
     }
@@ -471,7 +471,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
                     // Calculate the centre to edge-centre vector
                     vector2D deltai = vertices[edgei] - defVert0;
-                    
+
                     // Set the weight for this edge contribution
                     scalar w = 1;
 
@@ -481,7 +481,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
                         // alternative weights
                         //w = mag(deltai.x()*ei.y() - deltai.y()*ei.x());
                         //w = magSqr(ei)*mag(deltai);
-                    
+
                         // Use the following for an ~square mesh
                         // Find the coordinate contributions for this edge delta
                         scalar cd0deltai = cd0 & deltai;
@@ -527,7 +527,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
         }
     }
 
-    Info << "\nTotal displacement = " << totalDisp 
+    Info << "\nTotal displacement = " << totalDisp
          << " total distance = " << totalDist << endl;
 }
 
