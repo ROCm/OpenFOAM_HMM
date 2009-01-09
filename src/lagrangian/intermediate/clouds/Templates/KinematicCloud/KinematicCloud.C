@@ -36,43 +36,32 @@ License
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
-Foam::scalar Foam::KinematicCloud<ParcelType>::setNumberOfParticles
+void Foam::KinematicCloud<ParcelType>::addNewParcel
 (
-    const label nParcels,
-    const scalar pDiameter,
-    const scalar pVolumeFraction,
-    const scalar pRho,
-    const scalar pVolume
+    const vector& position,
+    const label cellId,
+    const scalar d,
+    const vector& U,
+    const scalar nParticles,
+    const scalar lagrangianDt
 )
 {
-    scalar nP = 0.0;
-    switch (parcelBasis_)
-    {
-        case pbMass:
-        {
-            nP = pVolumeFraction*massTotal_/nParcels
-               /(pRho*mathematicalConstant::pi/6.0*pow(pDiameter, 3));
-            break;
-        }
-        case pbNumber:
-        {
-            nP = pVolumeFraction*massTotal_/(pRho*pVolume);
-            break;
-        }
-        default:
-        {
-            nP = 0.0;
-            FatalErrorIn
-            (
-                "Foam::KinematicCloud<ParcelType>::setNumberOfParticles"
-                "(const label, const scalar, const scalar, const scalar, "
-                "const scalar)"
-            )<< "Unknown parcelBasis type" << nl
-             << exit(FatalError);
-        }
-    }
+    ParcelType* pPtr = new ParcelType
+    (
+        *this,
+        parcelTypeId_,
+        position,
+        cellId,
+        d,
+        U,
+        nParticles,
+        constProps_
+    );
 
-    return nP;
+    scalar continuousDt = this->db().time().deltaT().value();
+    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
+
+    addParticle(pPtr);
 }
 
 
@@ -107,14 +96,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
     rndGen_(label(0)),
-    time0_(this->db().time().value()),
-    parcelBasisType_(particleProperties_.lookup("parcelBasisType")),
-    parcelBasis_(pbNumber),
-    massTotal_
-    (
-        dimensionedScalar(particleProperties_.lookup("massTotal")).value()
-    ),
-    massInjected_(0.0),
     rho_(rho),
     U_(U),
     mu_(mu),
@@ -160,9 +141,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             particleProperties_.subDict("integrationSchemes")
         )
     ),
-    nInjections_(0),
-    nParcelsAdded_(0),
-    nParcelsAddedTotal_(0),
     UTrans_
     (
         IOobject
@@ -191,27 +169,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         mesh_,
         dimensionedScalar("zero",  dimensionSet(1, 0, -1, 0, 0), 0.0)
     )
-{
-    if (parcelBasisType_ == "mass")
-    {
-        parcelBasis_ = pbMass;
-    }
-    else if (parcelBasisType_ == "number")
-    {
-        parcelBasis_ = pbNumber;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::KinematicCloud<ParcelType>::KinematicCloud"
-            "(const word&, const volScalarField&"
-            ", const volVectorField&, const volScalarField&, const "
-            "dimensionedVector&)"
-        )<< "parcelBasisType must be either 'number' or 'mass'" << nl
-         << exit(FatalError);
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -265,7 +223,12 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         g_.value()
     );
 
-    inject();
+    this->injection().inject(td);
+
+    if (debug)
+    {
+        this->dumpParticlePositions();
+    }
 
     if (coupled_)
     {
@@ -277,159 +240,15 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
 
 template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::inject()
-{
-    scalar time = this->db().time().value();
-
-    scalar pRho = constProps_.rho0();
-
-    this->injection().prepareForNextTimeStep(time0_, time);
-
-    // Number of parcels to introduce during this timestep
-    const label nParcels = this->injection().nParcels();
-
-    // Return if no parcels are required
-    if (!nParcels)
-    {
-        this->postInjectCheck();
-        return;
-    }
-
-    // Volume of particles to introduce during this timestep
-    scalar pVolume = this->injection().volume();
-
-    // Volume fraction to introduce during this timestep
-    scalar pVolumeFraction = this->injection().volumeFraction();
-
-    // Duration of injection period during this timestep
-    scalar deltaT = min
-    (
-        this->db().time().deltaT().value(),
-        min
-        (
-            time - this->injection().timeStart(),
-            this->injection().timeEnd() - time0_
-        )
-    );
-
-    // Pad injection time if injection starts during this timestep
-    scalar padTime = max
-    (
-        0.0,
-        this->injection().timeStart() - time0_
-    );
-
-    // Introduce new parcels linearly with time
-    for (label iParcel=0; iParcel<nParcels; iParcel++)
-    {
-        // Calculate the pseudo time of injection for parcel 'iParcel'
-        scalar timeInj = time0_ + padTime + deltaT*iParcel/nParcels;
-
-        // Determine injected parcel properties
-        vector pPosition = this->injection().position
-        (
-            iParcel,
-            timeInj,
-            this->meshInfo()
-        );
-
-        // Diameter of parcels
-        scalar pDiameter = this->injection().d0(iParcel, timeInj);
-
-        // Number of particles per parcel
-        scalar pNumberOfParticles = setNumberOfParticles
-        (
-            nParcels,
-            pDiameter,
-            pVolumeFraction,
-            pRho,
-            pVolume
-        );
-
-        // Velocity of parcels
-        vector pU = this->injection().velocity
-        (
-            iParcel,
-            timeInj,
-            this->meshInfo()
-        );
-
-        // Determine the injection cell
-        label pCell = -1;
-        this->injection().findInjectorCellAndPosition(pCell, pPosition);
-
-        if (pCell >= 0)
-        {
-            // construct the parcel that is to be injected
-            ParcelType* pPtr = new ParcelType
-            (
-                *this,
-                parcelTypeId_,
-                pPosition,
-                pCell,
-                pDiameter,
-                pU,
-                pNumberOfParticles,
-                constProps_
-            );
-
-            scalar dt = time - timeInj;
-
-            pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
-                /this->time().deltaT().value();
-
-            this->injectParcel(pPtr);
-         }
-    }
-
-    this->postInjectCheck();
-
-    if (debug)
-    {
-        this->dumpParticlePositions();
-    }
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::injectParcel(ParcelType* p)
-{
-    addParticle(p);
-    nParcelsAdded_++;
-    nParcelsAddedTotal_++;
-    massInjected_ += p->mass()*p->nParticle();
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::postInjectCheck()
-{
-    if (nParcelsAdded_)
-    {
-        Pout<< "\n--> Cloud: " << this->name() << nl
-            << "    Added " << nParcelsAdded_
-            <<  " new parcels" << nl << endl;
-    }
-
-    // Reset parcel counters
-    nParcelsAdded_ = 0;
-
-    // Set time for start of next injection
-    time0_ = this->db().time().value();
-
-    // Increment number of injections
-    nInjections_++;
-}
-
-
-template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
     Info<< "Cloud name: " << this->name() << nl
         << "    Parcels added during this run   = "
-        << returnReduce(nParcelsAddedTotal_, sumOp<label>()) << nl
+        << returnReduce(this->injection().nParcelsAddedTotal(), sumOp<label>())
+            << nl
         << "    Mass introduced during this run = "
-        << returnReduce(massInjected_, sumOp<scalar>()) << nl
+        << returnReduce(this->injection().massInjected(), sumOp<scalar>())
+            << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
@@ -445,7 +264,7 @@ void Foam::KinematicCloud<ParcelType>::dumpParticlePositions() const
     (
         this->db().time().path()/"parcelPositions_"
       + this->name() + "_"
-      + name(this->nInjections_) + ".obj"
+      + name(this->injection().nInjections()) + ".obj"
     );
 
     forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)

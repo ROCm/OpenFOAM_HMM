@@ -85,19 +85,6 @@ class KinematicCloud
     public kinematicCloud
 {
 
-public:
-
-    // Enumerations
-
-        //- Parcel basis representation options
-        //  i.e constant number of particles OR constant mass per parcel
-        enum parcelBasis
-        {
-            pbNumber,
-            pbMass
-        };
-
-
 private:
 
     // Private data
@@ -126,22 +113,6 @@ private:
         //- Random number generator - used by some injection routines
         Random rndGen_;
 
-        //- Time at beginning of timestep
-        scalar time0_;
-
-
-        // Injection properties
-
-            //- Parcel basis
-            const word parcelBasisType_;
-            parcelBasis parcelBasis_;
-
-            //- Total mass to inject [kg]
-            scalar massTotal_;
-
-            //- Total mass injected to date [kg]
-            scalar massInjected_;
-
 
         // References to the carrier gas fields
 
@@ -161,9 +132,8 @@ private:
             const dimensionedVector& g_;
 
 
-        // Interpolation
-
-            dictionary interpolationSchemes_;
+        //- Interpolation schemes dictionary
+        dictionary interpolationSchemes_;
 
 
         // References to the cloud sub-models
@@ -190,17 +160,6 @@ private:
             autoPtr<vectorIntegrationScheme> UIntegrator_;
 
 
-        // Counters
-
-            //- Number of injections counter
-            label nInjections_;
-
-            //- Running counters describing parcels added during each
-            //  injection
-            label nParcelsAdded_;
-            label nParcelsAddedTotal_;
-
-
         // Sources
 
             //- Momentum
@@ -217,30 +176,6 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const KinematicCloud&);
-
-
-protected:
-
-    // Protected member functions
-
-        //- Set the number of particles per parcel
-        scalar setNumberOfParticles
-        (
-            const label nParcels,
-            const scalar pDiameter,
-            const scalar pVolumeFraction,
-            const scalar pRho,
-            const scalar pVolume
-        );
-
-        //- Inject more parcels
-        void inject();
-
-        //- Inject parcel if it is valid - delete otherwise
-        void injectParcel(ParcelType* p);
-
-        //- Post-injection checks
-        void postInjectCheck();
 
 
 public:
@@ -285,12 +220,6 @@ public:
 
             //- Return refernce to the random object
             inline Random& rndGen();
-
-            //- Return the start of injection interval time
-            inline scalar time0() const;
-
-            //- Return a reference to the mass of particles to introduce
-            inline scalar massTotal() const;
 
 
             // References to the carrier gas fields
@@ -380,15 +309,6 @@ public:
             void dumpParticlePositions() const;
 
 
-            // Counters
-
-                //- Return the number of injections
-                inline label nInjections() const;
-
-                //- Return the total number parcels added
-                inline label nParcelsAddedTotal() const;
-
-
             // Fields
 
                 //- Return the particle volume fraction field
@@ -401,6 +321,17 @@ public:
 
 
         // Cloud evolution functions
+
+            //- Add new parcel
+            void addNewParcel
+            (
+                const vector& position,
+                const label cellId,
+                const scalar d,
+                const vector& U,
+                const scalar nParticles,
+                const scalar lagrangianDt
+            );
 
             //- Reset the spray source terms
             void resetSourceTerms();

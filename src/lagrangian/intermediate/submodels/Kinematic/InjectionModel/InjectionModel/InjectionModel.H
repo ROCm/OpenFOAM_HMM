@@ -55,6 +55,21 @@ template<class CloudType>
 class InjectionModel
 {
 
+public:
+
+    // Enumerations
+
+        //- Parcel basis representation options
+        //  i.e constant number of particles OR constant mass per parcel
+        enum parcelBasis
+        {
+            pbNumber,
+            pbMass
+        };
+
+
+private:
+
     // Private data
 
         //- The cloud dictionary
@@ -74,23 +89,46 @@ protected:
         // Global injection properties
 
             //- Start of injection [s]
-            scalar SOI_;
+            const scalar SOI_;
 
             //- Total volume of parcels to introduce [m^3]
             //  Initialised in the individual injection models
             scalar volumeTotal_;
 
+            //- Total mass to inject [kg]
+            const scalar massTotal_;
+
+            //- Total mass injected to date [kg]
+            scalar massInjected_;
+
+
+        // Counters
+
+            //- Number of injections counter
+            label nInjections_;
+
+            //- Running counter of parcels added during each injection
+            label nParcelsAdded_;
+
+            //- Running counter of total number of parcels added
+            label nParcelsAddedTotal_;
+
 
         // Injection properties per Lagrangian time step
 
+            // Parcel basis
+
+                //- Parcel basis name
+                const word parcelBasisType_;
+
+                //- Parcel basis enumeration
+                parcelBasis parcelBasis_;
+
+            //- Continuous phase time at start of injection time step [s]
+            scalar time0_;
+
             //- Time at start of injection time step [s]
             scalar timeStep0_;
-
-            //- Number of parcels to introduce []
-            label nParcels_;
-
-            //- Volume of parcels to introduce [m^3]
-            scalar volume_;
 
 
     // Protected member functions
@@ -108,6 +146,37 @@ protected:
             const scalar time0,
             const scalar time1
         ) const = 0;
+
+
+        //- Determine properties for next time step/injection interval
+        void prepareForNextTimeStep
+        (
+            const scalar time0,
+            const scalar time1,
+            label& nParcels,
+            scalar& volume
+        );
+
+        //- Find the cell that contains the injector position
+        //  Will modify position slightly towards the owner cell centroid
+        virtual void findInjectorCellAndPosition
+        (
+            label& cellI,
+            vector& position
+        );
+
+        //- Set number of particles to inject given parcel properties
+        scalar setNumberOfParticles
+        (
+            const label nParcels,
+            const scalar diameter,
+            const scalar volumeFraction,
+            const scalar rho,
+            const scalar volume
+        );
+
+        //- Post injection checks
+        void postInjectCheck();
 
 
 public:
@@ -140,33 +209,31 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~InjectionModel();
 
-        virtual ~InjectionModel();
 
-
-    // Selector
-
-        static autoPtr<InjectionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<InjectionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access
 
+        //- Return the owner cloud dictionary
+        inline const dictionary& dict() const;
+
         //- Return const access the owner cloud object
-        const CloudType& owner() const;
+        inline const CloudType& owner() const;
 
         //- Return non-const access the owner cloud object for manipulation
-        CloudType& owner();
-
-        //- Return the dictionary
-        const dictionary& dict() const;
+        inline CloudType& owner();
 
         //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
+        inline const dictionary& coeffDict() const;
 
 
     // Member Functions
@@ -178,43 +245,40 @@ public:
         // Global information
 
             //- Return the start-of-injection time
-            scalar timeStart() const;
+            inline scalar timeStart() const;
 
             //- Return the total volume to be injected across the event
-            scalar volumeTotal() const;
+            inline scalar volumeTotal() const;
+
+            //- Return mass of particles to introduce
+            inline scalar massTotal() const;
+
+            //- Return mass of particles injected (cummulative)
+            inline scalar massInjected() const;
 
             //- Return the end-of-injection time
             virtual scalar timeEnd() const = 0;
 
+            // Counters
 
-        // Per Lagrangian time step properties
+                //- Return the number of injections
+                inline label nInjections() const;
 
-            //- Determine properties for next time step/injection interval
-            void prepareForNextTimeStep
-            (
-                const scalar time0,
-                const scalar time1
-            );
+                //- Return the total number parcels added
+                inline label nParcelsAddedTotal() const;
 
-            //- Return the number of parcels to introduce
-            label nParcels() const;
 
-            //- Return the volume of parcels to introduce
-            scalar volume() const;
+        // Per-injection event functions
+
+            //- Main injection loop
+            template<class TrackData>
+            void inject(TrackData& td);
 
             //- Return the volume fraction to introduce
-            scalar volumeFraction() const;
+            inline scalar volumeFraction(const scalar volume) const;
 
 
         // Injection geometry
-
-            //- Find the cell that contains the injector position
-            //  Will modify position slightly towards the owner cell centroid
-            virtual void findInjectorCellAndPosition
-            (
-                label& cellI,
-                vector& position
-            );
 
             //- Return the injection position
             virtual vector position
@@ -240,6 +304,10 @@ public:
             ) const = 0;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "InjectionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

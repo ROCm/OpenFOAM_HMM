@@ -30,6 +30,38 @@ License
 #include "interpolationCellPoint.H"
 #include "ThermoParcel.H"
 
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::addNewParcel
+(
+    const vector& position,
+    const label cellId,
+    const scalar d,
+    const vector& U,
+    const scalar nParticles,
+    const scalar lagrangianDt
+)
+{
+    ParcelType* pPtr = new ParcelType
+    (
+        *this,
+        this->parcelTypeId(),
+        position,
+        cellId,
+        d,
+        U,
+        nParticles,
+        constProps_
+    );
+
+    scalar continuousDt = this->db().time().deltaT().value();
+    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
+
+    addParticle(pPtr);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -167,7 +199,12 @@ void Foam::ThermoCloud<ParcelType>::evolve()
         this->g().value()
     );
 
-    inject(td);
+    this->injection().inject(td);
+
+    if (debug)
+    {
+        this->dumpParticlePositions();
+    }
 
     if (this->coupled())
     {
@@ -175,18 +212,6 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
-}
-
-
-template<class ParcelType>
-template<class TrackingData>
-void Foam::ThermoCloud<ParcelType>::inject
-(
-    TrackingData& td
-)
-{
-    // Injection is same as for KinematicCloud<ParcelType>
-    KinematicCloud<ParcelType>::inject(td);
 }
 
 
