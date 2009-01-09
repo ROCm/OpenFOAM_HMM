@@ -35,7 +35,7 @@ template<class Key, class Hash>
 template<class T>
 Foam::HashSet<Key, Hash>::HashSet(const HashTable<T, Key, Hash>& ht)
 :
-    HashTable<empty, Key, Hash>(ht.size())
+    HashTable<nil, Key, Hash>(ht.size())
 {
     for
     (

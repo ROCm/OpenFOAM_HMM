@@ -158,6 +158,9 @@ public:
             //- Return the number of elements in the PtrList
             inline label size() const;
 
+            //- Return true if the PtrList is empty (i.e., if size() == 0).
+            inline bool empty() const;
+
 
         // Edit
 

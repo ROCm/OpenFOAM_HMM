@@ -126,6 +126,9 @@ public:
             //- Return the primary size, i.e. the number of rows
             inline label size() const;
 
+            //- Return true if the number of rows is zero
+            inline bool empty() const;
+
             //- Return the offset table
             inline const List<label>& offsets() const;
 

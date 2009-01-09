@@ -75,6 +75,13 @@ inline Foam::label Foam::CompactListList<T>::size() const
 
 
 template<class T>
+inline bool Foam::CompactListList<T>::empty() const
+{
+    return offsets_.empty();
+}
+
+
+template<class T>
 inline const Foam::List<Foam::label>& Foam::CompactListList<T>::offsets() const
 {
     return offsets_;

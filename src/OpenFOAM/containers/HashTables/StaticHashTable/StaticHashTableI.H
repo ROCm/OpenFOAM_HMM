@@ -39,6 +39,13 @@ inline Foam::label Foam::StaticHashTable<T, Key, Hash>::size() const
 
 
 template<class T, class Key, class Hash>
+inline bool Foam::StaticHashTable<T, Key, Hash>::empty() const
+{
+    return (nElmts_ == 0);
+}
+
+
+template<class T, class Key, class Hash>
 inline bool Foam::StaticHashTable<T, Key, Hash>::insert
 (
     const Key& key,

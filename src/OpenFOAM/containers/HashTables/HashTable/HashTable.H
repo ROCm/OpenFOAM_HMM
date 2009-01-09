@@ -171,6 +171,9 @@ public:
             //- Return number of elements in table.
             inline label size() const;
 
+            //- Return true if the hash table is empty
+            inline bool empty() const;
+
             //- Return true if hashedEntry is found in table
             bool found(const Key&) const;
 
