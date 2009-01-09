@@ -48,7 +48,7 @@ scalar singleStepTotalPE = 0.0;
 
 scalar singleStepTotalrDotf = 0.0;
 
-vector singleStepCentreOfMass(vector::zero);
+//vector singleStepCentreOfMass(vector::zero);
 
 label singleStepNMols = molecules.size();
 
@@ -68,13 +68,13 @@ label singleStepNMols = molecules.size();
 
         singleStepTotalMass += molMass;
 
-        singleStepCentreOfMass += mol().position()*molMass;
+        //singleStepCentreOfMass += mol().position()*molMass;
     }
 
-    if(singleStepNMols)
-    {
-        singleStepCentreOfMass /= singleStepTotalMass;
-    }
+    // if(singleStepNMols)
+    // {
+    //     singleStepCentreOfMass /= singleStepTotalMass;
+    // }
 
     for
     (
@@ -97,8 +97,8 @@ label singleStepNMols = molecules.size();
 
         singleStepTotalLinearMomentum += molV * molMass;
 
-        singleStepTotalAngularMomentum += molPiGlobal
-        +((mol().position() - singleStepCentreOfMass) ^ (molV * molMass));
+        singleStepTotalAngularMomentum += molPiGlobal;
+        //+((mol().position() - singleStepCentreOfMass) ^ (molV * molMass));
 
         if(mag(molV) > singleStepMaxVelocityMag)
         {

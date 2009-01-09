@@ -234,8 +234,7 @@ void Foam::referredCellList::buildReferredCellList
                 OPstream toNeighbProc
                 (
                     Pstream::blocking,
-                    patch.neighbProcNo(),
-                    + 2*(sizeof(label) + patch.size()*sizeof(vector))
+                    patch.neighbProcNo()
                 );
 
                 toNeighbProc << patch.faceCentres() << patch.faceAreas();
@@ -261,8 +260,7 @@ void Foam::referredCellList::buildReferredCellList
                 IPstream fromNeighbProc
                 (
                     Pstream::blocking,
-                    patch.neighbProcNo(),
-                    2*(sizeof(label) + patch.size()*sizeof(vector))
+                    patch.neighbProcNo()
                 );
 
                 fromNeighbProc >> neighbFaceCentres >> neighbFaceAreas;
