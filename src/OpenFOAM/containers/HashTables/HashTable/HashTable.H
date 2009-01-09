@@ -200,6 +200,10 @@ public:
             //- Erase an hashedEntry specified by given key if in table
             bool erase(const Key&);
 
+            //- Remove entries in the given HashTable from this HashTable
+            //  Return the number of elements removed
+            label erase(const HashTable<T, Key, Hash>&);
+
             //- Resize the hash table for efficiency
             void resize(const label newSize);
 

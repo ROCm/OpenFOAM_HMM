@@ -196,6 +196,10 @@ public:
             //- Resize the hash table for efficiency
             void resize(const label newSize);
 
+            //- Remove entries in the given hash table from this hash table
+            //  Return the number of elements removed
+            label erase(const StaticHashTable<T, Key, Hash>&);
+
             //- Clear all entries from table
             void clear();
 

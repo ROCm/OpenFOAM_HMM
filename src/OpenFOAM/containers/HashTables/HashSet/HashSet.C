@@ -126,6 +126,7 @@ void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 }
 
 
+// same as HashTable::erase()
 template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {
