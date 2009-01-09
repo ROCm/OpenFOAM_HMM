@@ -20,12 +20,6 @@ DragModel                                SphereDrag;
 DispersionModel                          StochasticDispersionRAS;
 WallInteractionModel                     StandardWallInteraction;
 
-// Parcel basis type
-parcelBasisType                          mass;
-
-// Total mass to inject
-massTotal  massTotal [ 1  0  0  0  0]    2.0e-4;
-
 // Minimum particle mass
 minParticleMass      minParticleMass     [ 1  0  0  0  0]     1.0e-15;
 
@@ -52,6 +46,12 @@ integrationSchemes
 
 ManualInjectionCoeffs
 {
+    // Parcel basis type
+    parcelBasisType                          mass;
+
+    // Total mass to inject
+    massTotal  massTotal [ 1  0  0  0  0]    2.0e-4;
+
     SOI                                  0.0;
     positionsFile                        kinematicCloud1Positions;
     U0                                   (0 0 0);
