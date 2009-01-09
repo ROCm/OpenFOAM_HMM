@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,142 +42,147 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::sampledIsoSurfaceCell::createGeometry() const
+bool Foam::sampledIsoSurfaceCell::updateGeometry() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
-    if (fvm.time().timeIndex() != storedTimeIndex_)
+    // no update needed
+    if (fvm.time().timeIndex() == prevTimeIndex_)
     {
-        storedTimeIndex_ = fvm.time().timeIndex();
+        return false;
+    }
 
-        // Clear any stored topo
-        facesPtr_.clear();
+    prevTimeIndex_ = fvm.time().timeIndex();
 
-        // Optionally read volScalarField
-        autoPtr<volScalarField> readFieldPtr_;
+    // Clear any stored topo
+    facesPtr_.clear();
 
-        // 1. see if field in database
-        // 2. see if field can be read
-        const volScalarField* cellFldPtr = NULL;
-        if (fvm.foundObject<volScalarField>(isoField_))
+    // Optionally read volScalarField
+    autoPtr<volScalarField> readFieldPtr_;
+
+    // 1. see if field in database
+    // 2. see if field can be read
+    const volScalarField* cellFldPtr = NULL;
+    if (fvm.foundObject<volScalarField>(isoField_))
+    {
+        if (debug)
         {
-            if (debug)
-            {
-                Info<< "sampledIsoSurfaceCell::createGeometry() : lookup "
-                    << isoField_ << endl;
-            }
-
-            cellFldPtr = &fvm.lookupObject<volScalarField>(isoField_);
-        }
-        else
-        {
-            // Bit of a hack. Read field and store.
-
-            if (debug)
-            {
-                Info<< "sampledIsoSurfaceCell::createGeometry() : reading "
-                    << isoField_ << " from time " <<fvm.time().timeName()
-                    << endl;
-            }
-
-            readFieldPtr_.reset
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        isoField_,
-                        fvm.time().timeName(),
-                        fvm,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    fvm
-                )
-            );
-
-            cellFldPtr = readFieldPtr_.operator->();
-        }
-        const volScalarField& cellFld = *cellFldPtr;
-
-        tmp<pointScalarField> pointFld
-        (
-            volPointInterpolation::New(fvm).interpolate(cellFld)
-        );
-
-        if (average_)
-        {
-            //- From point field and interpolated cell.
-            scalarField cellAvg(fvm.nCells(), scalar(0.0));
-            labelField nPointCells(fvm.nCells(), 0);
-            {
-                for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
-                {
-                    const labelList& pCells = fvm.pointCells(pointI);
-
-                    forAll(pCells, i)
-                    {
-                        label cellI = pCells[i];
-
-                        cellAvg[cellI] += pointFld().internalField()[pointI];
-                        nPointCells[cellI]++;
-                    }
-                }
-            }
-            forAll(cellAvg, cellI)
-            {
-                cellAvg[cellI] /= nPointCells[cellI];
-            }
-
-            const isoSurfaceCell iso
-            (
-                fvm,
-                cellAvg,
-                pointFld().internalField(),
-                isoVal_,
-                regularise_
-            );
-
-            const_cast<sampledIsoSurfaceCell&>
-            (
-                *this
-            ).triSurface::operator=(iso);
-            meshCells_ = iso.meshCells();
-        }
-        else
-        {
-            //- Direct from cell field and point field. Gives bad continuity.
-            const isoSurfaceCell iso
-            (
-                fvm,
-                cellFld.internalField(),
-                pointFld().internalField(),
-                isoVal_,
-                regularise_
-            );
-
-            const_cast<sampledIsoSurfaceCell&>
-            (
-                *this
-            ).triSurface::operator=(iso);
-            meshCells_ = iso.meshCells();
+            Info<< "sampledIsoSurfaceCell::updateGeometry() : lookup "
+                << isoField_ << endl;
         }
 
+        cellFldPtr = &fvm.lookupObject<volScalarField>(isoField_);
+    }
+    else
+    {
+        // Bit of a hack. Read field and store.
 
         if (debug)
         {
-            Pout<< "sampledIsoSurfaceCell::createGeometry() : constructed iso:"
-                << nl
-                << "    regularise     : " << regularise_ << nl
-                << "    average        : " << average_ << nl
-                << "    isoField       : " << isoField_ << nl
-                << "    isoValue       : " << isoVal_ << nl
-                << "    points         : " << points().size() << nl
-                << "    tris           : " << triSurface::size() << nl
-                << "    cut cells      : " << meshCells_.size() << endl;
+            Info<< "sampledIsoSurfaceCell::updateGeometry() : reading "
+                << isoField_ << " from time " <<fvm.time().timeName()
+                << endl;
         }
+
+        readFieldPtr_.reset
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    isoField_,
+                    fvm.time().timeName(),
+                    fvm,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                fvm
+            )
+        );
+
+        cellFldPtr = readFieldPtr_.operator->();
     }
+    const volScalarField& cellFld = *cellFldPtr;
+
+    tmp<pointScalarField> pointFld
+    (
+        volPointInterpolation::New(fvm).interpolate(cellFld)
+    );
+
+    if (average_)
+    {
+        //- From point field and interpolated cell.
+        scalarField cellAvg(fvm.nCells(), scalar(0.0));
+        labelField nPointCells(fvm.nCells(), 0);
+        {
+            for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
+            {
+                const labelList& pCells = fvm.pointCells(pointI);
+
+                forAll(pCells, i)
+                {
+                    label cellI = pCells[i];
+
+                    cellAvg[cellI] += pointFld().internalField()[pointI];
+                    nPointCells[cellI]++;
+                }
+            }
+        }
+        forAll(cellAvg, cellI)
+        {
+            cellAvg[cellI] /= nPointCells[cellI];
+        }
+
+        const isoSurfaceCell iso
+        (
+            fvm,
+            cellAvg,
+            pointFld().internalField(),
+            isoVal_,
+            regularise_
+        );
+
+        const_cast<sampledIsoSurfaceCell&>
+        (
+            *this
+        ).triSurface::operator=(iso);
+        meshCells_ = iso.meshCells();
+    }
+    else
+    {
+        //- Direct from cell field and point field. Gives bad continuity.
+        const isoSurfaceCell iso
+        (
+            fvm,
+            cellFld.internalField(),
+            pointFld().internalField(),
+            isoVal_,
+            regularise_
+        );
+
+        const_cast<sampledIsoSurfaceCell&>
+        (
+            *this
+        ).triSurface::operator=(iso);
+        meshCells_ = iso.meshCells();
+    }
+
+
+    if (debug)
+    {
+        Pout<< "sampledIsoSurfaceCell::updateGeometry() : constructed iso:"
+            << nl
+            << "    regularise     : " << regularise_ << nl
+            << "    average        : " << average_ << nl
+            << "    isoField       : " << isoField_ << nl
+            << "    isoValue       : " << isoVal_ << nl
+            << "    points         : " << points().size() << nl
+            << "    tris           : " << triSurface::size() << nl
+            << "    cut cells      : " << meshCells_.size() << endl;
+    }
+
+    return true;
 }
 
 
@@ -197,18 +202,17 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     average_(dict.lookupOrDefault("average", true)),
     zoneName_(word::null),
     facesPtr_(NULL),
-    storedTimeIndex_(-1),
+    prevTimeIndex_(-1),
     meshCells_(0)
 {
-//    label zoneId = -1;
-//    if (dict.readIfPresent("zone", zoneName_))
+//    dict.readIfPresent("zone", zoneName_);
+//
+//    if (debug && zoneName_.size())
 //    {
-//        zoneId = mesh.cellZones().findZoneID(zoneName_);
-//        if (debug && zoneId < 0)
+//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
 //        {
 //            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh"
-//                << endl;
+//                << "\" not found - using entire mesh" << endl;
 //        }
 //    }
 }
@@ -222,13 +226,33 @@ Foam::sampledIsoSurfaceCell::~sampledIsoSurfaceCell()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sampledIsoSurfaceCell::correct(const bool meshChanged)
+bool Foam::sampledIsoSurfaceCell::needsUpdate() const
 {
-    // Only change of mesh changes plane - zone restriction gets lost
-    if (meshChanged)
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+
+    return fvm.time().timeIndex() != prevTimeIndex_;
+}
+
+
+bool Foam::sampledIsoSurfaceCell::expire()
+{
+    facesPtr_.clear();
+
+    // already marked as expired
+    if (prevTimeIndex_ == -1)
     {
-        facesPtr_.clear();
+        return false;
     }
+    
+    // force update
+    prevTimeIndex_ = -1;
+    return true;
+}
+
+
+bool Foam::sampledIsoSurfaceCell::update()
+{
+    return updateGeometry();
 }
 
 

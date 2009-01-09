@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,25 @@ int main(int argc, char *argv[])
 
     Info<< test << endl;
 
+    // test sub-strings via iterators
+    string::const_iterator iter = test.end();
+    string::const_iterator iter2 = test.end();
+    string::size_type fnd = test.find('\\');
+
+    if (fnd != string::npos)
+    {
+        iter  = test.begin() + fnd;
+        iter2 = iter + 6;
+    }
+
+    Info<< "sub-string via iterators : >";
+    while (iter != iter2)
+    {
+        Info<< *iter;
+        iter++;
+    }
+    Info<< "<\n";
+
     Info<< string(test).replace("kj", "zzz") << endl;
     Info<< string(test).replace("kj", "") << endl;
     Info<< string(test).replaceAll("kj", "zzz") << endl;
@@ -48,11 +67,16 @@ int main(int argc, char *argv[])
     Info<< string(test).expand() << endl;
 
     string test2("~OpenFOAM/controlDict");
-    Info<< test2.expand() << endl;
+    Info<< test2 << " => " << test2.expand() << endl;
 
     string s;
     Sin.getLine(s);
-    Info<< s.expand() << endl;
+
+    string s2(s.expand());
+
+    cout<< "output string with " << s2.length() << " characters\n";
+    cout<< "ostream<<  >" << s2 << "<\n";
+    Info<< "Ostream<<  >" << s2 << "<\n";
 
     Info << "End\n" << endl;
 

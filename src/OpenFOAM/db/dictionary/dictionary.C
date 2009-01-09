@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,6 +164,29 @@ Foam::dictionary::dictionary
             );
         }
     }
+}
+
+
+Foam::dictionary::dictionary
+(
+    const dictionary& parentDict,
+    const Xfer<dictionary>& dict
+)
+:
+    parent_(parentDict)
+{
+    transfer(dict());
+}
+
+
+Foam::dictionary::dictionary
+(
+    const Xfer<dictionary>& dict
+)
+:
+    parent_(dictionary::null)
+{
+    transfer(dict());
 }
 
 
@@ -756,17 +779,15 @@ bool Foam::dictionary::merge(const dictionary& dict)
         ++iter
     )
     {
-        const word& keyword = iter().keyword();
+        HashTable<entry*>::iterator fnd = hashedEntries_.find(iter().keyword());
 
-        HashTable<entry*>::iterator iter2 = hashedEntries_.find(keyword);
-
-        if (iter2 != hashedEntries_.end())
+        if (fnd != hashedEntries_.end())
         {
             // Recursively merge sub-dictionaries
             // TODO: merge without copying
-            if (iter2()->isDict() && iter().isDict())
+            if (fnd()->isDict() && iter().isDict())
             {
-                if (iter2()->dict().merge(iter().dict()))
+                if (fnd()->dict().merge(iter().dict()))
                 {
                     changed = true;
                 }
@@ -798,6 +819,25 @@ void Foam::dictionary::clear()
 }
 
 
+void Foam::dictionary::transfer(dictionary& dict)
+{
+    // changing parents probably doesn't make much sense,
+    // but what about the names?
+    name_ = dict.name_;
+
+    IDLList<entry>::transfer(dict);
+    hashedEntries_.transfer(dict.hashedEntries_);
+    patternEntries_.transfer(dict.patternEntries_);
+    patternRegexps_.transfer(dict.patternRegexps_);
+}
+
+
+Foam::Xfer<Foam::dictionary> Foam::dictionary::xfer()
+{
+    return xferMove(*this);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::ITstream& Foam::dictionary::operator[](const word& keyword) const
@@ -806,17 +846,17 @@ Foam::ITstream& Foam::dictionary::operator[](const word& keyword) const
 }
 
 
-void Foam::dictionary::operator=(const dictionary& dict)
+void Foam::dictionary::operator=(const dictionary& rhs)
 {
     // Check for assignment to self
-    if (this == &dict)
+    if (this == &rhs)
     {
         FatalErrorIn("dictionary::operator=(const dictionary&)")
             << "attempted assignment to self for dictionary " << name()
             << abort(FatalError);
     }
 
-    name_ = dict.name();
+    name_ = rhs.name();
     clear();
 
     // Create clones of the entries in the given dictionary
@@ -824,8 +864,8 @@ void Foam::dictionary::operator=(const dictionary& dict)
 
     for
     (
-        IDLList<entry>::const_iterator iter = dict.begin();
-        iter != dict.end();
+        IDLList<entry>::const_iterator iter = rhs.begin();
+        iter != rhs.end();
         ++iter
     )
     {
@@ -834,10 +874,10 @@ void Foam::dictionary::operator=(const dictionary& dict)
 }
 
 
-void Foam::dictionary::operator+=(const dictionary& dict)
+void Foam::dictionary::operator+=(const dictionary& rhs)
 {
     // Check for assignment to self
-    if (this == &dict)
+    if (this == &rhs)
     {
         FatalErrorIn("dictionary::operator+=(const dictionary&)")
             << "attempted addition assignment to self for dictionary " << name()
@@ -846,8 +886,8 @@ void Foam::dictionary::operator+=(const dictionary& dict)
 
     for
     (
-        IDLList<entry>::const_iterator iter = dict.begin();
-        iter != dict.end();
+        IDLList<entry>::const_iterator iter = rhs.begin();
+        iter != rhs.end();
         ++iter
     )
     {
@@ -856,10 +896,10 @@ void Foam::dictionary::operator+=(const dictionary& dict)
 }
 
 
-void Foam::dictionary::operator|=(const dictionary& dict)
+void Foam::dictionary::operator|=(const dictionary& rhs)
 {
     // Check for assignment to self
-    if (this == &dict)
+    if (this == &rhs)
     {
         FatalErrorIn("dictionary::operator|=(const dictionary&)")
             << "attempted assignment to self for dictionary " << name()
@@ -868,8 +908,8 @@ void Foam::dictionary::operator|=(const dictionary& dict)
 
     for
     (
-        IDLList<entry>::const_iterator iter = dict.begin();
-        iter != dict.end();
+        IDLList<entry>::const_iterator iter = rhs.begin();
+        iter != rhs.end();
         ++iter
     )
     {
@@ -881,10 +921,10 @@ void Foam::dictionary::operator|=(const dictionary& dict)
 }
 
 
-void Foam::dictionary::operator<<=(const dictionary& dict)
+void Foam::dictionary::operator<<=(const dictionary& rhs)
 {
     // Check for assignment to self
-    if (this == &dict)
+    if (this == &rhs)
     {
         FatalErrorIn("dictionary::operator<<=(const dictionary&)")
             << "attempted assignment to self for dictionary " << name()
@@ -893,8 +933,8 @@ void Foam::dictionary::operator<<=(const dictionary& dict)
 
     for
     (
-        IDLList<entry>::const_iterator iter = dict.begin();
-        iter != dict.end();
+        IDLList<entry>::const_iterator iter = rhs.begin();
+        iter != rhs.end();
         ++iter
     )
     {

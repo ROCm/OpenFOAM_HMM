@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,46 +25,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <sys/types.h>
+
 #include "regExp.H"
 #include "label.H"
 #include "string.H"
 #include "List.H"
 #include "IOstreams.H"
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-void Foam::regExp::compile(const char* pat) const
-{
-    clear();
-
-    // avoid NULL and zero-length patterns
-    if (pat && *pat)
-    {
-        preg_ = new regex_t;
-
-        if (regcomp(preg_, pat, REG_EXTENDED) != 0)
-        {
-            FatalErrorIn
-            (
-                "regExp::compile(const char*)"
-            )   << "Failed to compile regular expression '" << pat << "'"
-                << exit(FatalError);
-        }
-    }
-}
-
-
-void Foam::regExp::clear() const
-{
-    if (preg_)
-    {
-        regfree(preg_);
-        delete preg_;
-        preg_ = 0;
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -74,19 +40,19 @@ Foam::regExp::regExp()
 {}
 
 
-Foam::regExp::regExp(const string& pat)
+Foam::regExp::regExp(const char* pattern, const bool ignoreCase)
 :
     preg_(0)
 {
-    compile(pat.c_str());
+    set(pattern, ignoreCase);
 }
 
 
-Foam::regExp::regExp(const char* pat)
+Foam::regExp::regExp(const std::string& pattern, const bool ignoreCase)
 :
     preg_(0)
 {
-    compile(pat);
+    set(pattern.c_str(), ignoreCase);
 }
 
 
@@ -100,33 +66,84 @@ Foam::regExp::~regExp()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-int Foam::regExp::ngroups() const
+void Foam::regExp::set(const char* pattern, const bool ignoreCase) const
 {
-    return preg_ ? preg_->re_nsub : 0;
+    clear();
+
+    // avoid NULL pointer and zero-length patterns
+    if (pattern && *pattern)
+    {
+        preg_ = new regex_t;
+
+        int cflags = REG_EXTENDED;
+        if (ignoreCase)
+        {
+            cflags |= REG_ICASE;
+        }
+
+        if (regcomp(preg_, pattern, cflags) != 0)
+        {
+            FatalErrorIn
+            (
+                "regExp::set(const char*)"
+            )   << "Failed to compile regular expression '" << pattern << "'"
+                << exit(FatalError);
+        }
+    }
 }
 
 
-bool Foam::regExp::match
-(
-    const string& str,
-    bool partialMatch
-) const
+void Foam::regExp::set(const std::string& pattern, const bool ignoreCase) const
+{
+    return set(pattern.c_str(), ignoreCase);
+}
+
+
+bool Foam::regExp::clear() const
+{
+    if (preg_)
+    {
+        regfree(preg_);
+        delete preg_;
+        preg_ = 0;
+
+        return true;
+    }
+
+    return false;
+}
+
+
+std::string::size_type Foam::regExp::find(const std::string& str) const
 {
     if (preg_ && str.size())
     {
         size_t nmatch = 1;
         regmatch_t pmatch[1];
 
-        // match and also verify that the entire string was matched
+        if (regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0)
+        {
+            return pmatch[0].rm_so;
+        }
+    }
+
+    return string::npos;
+}
+
+
+bool Foam::regExp::match(const std::string& str) const
+{
+    if (preg_ && str.size())
+    {
+        size_t nmatch = 1;
+        regmatch_t pmatch[1];
+
+        // also verify that the entire string was matched
         // pmatch[0] is the entire match
         if
         (
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
-         &&
-            (
-                partialMatch
-             || (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
-            )
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
         )
         {
             return true;
@@ -137,29 +154,20 @@ bool Foam::regExp::match
 }
 
 
-bool Foam::regExp::match
-(
-    const string& str,
-    List<string>& groups,
-    bool partialMatch
-) const
+bool Foam::regExp::match(const string& str, List<string>& groups) const
 {
     if (preg_ && str.size())
     {
         size_t nmatch = ngroups() + 1;
         regmatch_t pmatch[nmatch];
 
-        // match and also verify that the entire string was matched
+        // also verify that the entire string was matched
         // pmatch[0] is the entire match
         // pmatch[1..] are the (...) sub-groups
         if
         (
             regexec(preg_, str.c_str(), nmatch, pmatch, 0) == 0
-         &&
-            (
-                partialMatch
-             || (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
-            )
+         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(str.size()))
         )
         {
             groups.setSize(ngroups());
@@ -193,15 +201,15 @@ bool Foam::regExp::match
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-void Foam::regExp::operator=(const string& pat)
+void Foam::regExp::operator=(const char* pat)
 {
-    compile(pat.c_str());
+    set(pat);
 }
 
 
-void Foam::regExp::operator=(const char* pat)
+void Foam::regExp::operator=(const std::string& pat)
 {
-    compile(pat);
+    set(pat);
 }
 
 

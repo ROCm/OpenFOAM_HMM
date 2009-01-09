@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,19 +77,15 @@ class FixedList
 public:
 
     //- Hashing function class
+    //  Rotating hash from http://burtleburtle.net/bob/hash/doobs.html
     template<class HashT=Hash<T> >
     class Hash
     :
         public Foam::Hash<FixedList<T, Size> >
     {
-
     public:
-
         inline Hash();
-
-        //- Rotating Hash. From http://burtleburtle.net/bob/hash/doobs.html.
         label operator()(const FixedList<T, Size>&) const;
-
         label operator()
         (
             const FixedList<T, Size>&,
@@ -165,10 +161,10 @@ public:
             void transfer(const FixedList<T, Size>&);
 
         //- Write the FixedList as a dictionary entry
-        void writeEntry(Ostream& os) const;
+        void writeEntry(Ostream&) const;
 
         //- Write the FixedList as a dictionary entry with keyword
-        void writeEntry(const word& keyword, Ostream& os) const;
+        void writeEntry(const word& keyword, Ostream&) const;
 
 
     // Member operators

@@ -308,7 +308,7 @@ Foam::SVD::SVD(const scalarRectangularMatrix& A, const scalar minCondition)
             g = rv1[nm];
             scalar h = rv1[k];
             scalar f = ((y - z)*(y + z) + (g - h)*(g + h))/(2.0*h*y);
-            g = sqrtSumSqr(f, 1.0);
+            g = sqrtSumSqr(f, scalar(1));
             f = ((x - z)*(x + z) + h*((y/(f + sign(g, f))) - h))/x;
             scalar c = 1.0;
             s = 1.0;

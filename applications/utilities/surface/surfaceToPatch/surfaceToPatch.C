@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,8 +202,7 @@ int main(int argc, char *argv[])
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.globalData().bb();
-
-    const vector searchSpan(searchTol*(meshBb.max() - meshBb.min()));
+    const vector searchSpan = searchTol * meshBb.span();
 
     Info<< "All boundary faces further away than " << searchTol
         << " of mesh bounding box " << meshBb
@@ -217,7 +216,7 @@ int main(int argc, char *argv[])
     {
         Info<< "    " << mesh.boundaryMesh()[patchI].name() << '\t'
             << mesh.boundaryMesh()[patchI].size() << endl;
-    } 
+    }
     Info<< endl;
 
 
@@ -309,7 +308,7 @@ int main(int argc, char *argv[])
         {
             Info<< "    " << mesh.boundaryMesh()[patchI].name() << '\t'
                 << mesh.boundaryMesh()[patchI].size() << endl;
-        } 
+        }
         Info<< endl;
 
 
@@ -318,7 +317,7 @@ int main(int argc, char *argv[])
         // Write resulting mesh
         Info << "Writing modified mesh to time " << runTime.value() << endl;
         mesh.write();
-    }    
+    }
 
 
     Info<< "End\n" << endl;

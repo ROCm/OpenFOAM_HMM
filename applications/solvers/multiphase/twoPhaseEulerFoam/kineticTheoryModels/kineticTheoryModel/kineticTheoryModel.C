@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,7 +167,7 @@ Foam::kineticTheoryModel::kineticTheoryModel
             IOobject::NO_WRITE
         ),
         Ua_.mesh(),
-        dimensionedScalar("zero", dimensionSet(0, 0, 0, 0, 0), 0.0)
+        dimensionedScalar("zero", dimensionSet(1, -1, -1, 0, 0), 0.0)
     ),
     gs0_
     (

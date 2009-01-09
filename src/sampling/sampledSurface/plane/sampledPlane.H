@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,14 +58,10 @@ class sampledPlane
         //- zone name (if restricted to zones)
         word zoneName_;
 
-    // Private Member Functions
+        //- Track if the surface needs an update
+        mutable bool needsUpdate_;
 
-        //- Do all to create geometry.
-        void createGeometry
-        (
-            const polyMesh& mesh,
-            const label zoneId
-        );
+    // Private Member Functions
 
         //- sample field on faces
         template <class Type>
@@ -113,6 +109,19 @@ public:
 
     // Member Functions
 
+        //- Does the surface need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surface as needing an update.
+        //  May also free up unneeded data.
+        //  Return false if surface was already marked as expired.
+        virtual bool expire();
+
+        //- Update the surface as required.
+        //  Do nothing (and return false) if no update was needed
+        virtual bool update();
+
+
         //- Points of surface
         virtual const pointField& points() const
         {
@@ -130,10 +139,6 @@ public:
         {
             return cuttingPlane::cutCells();
         }
-
-        //- Correct for mesh movement and/or field changes
-        virtual void correct(const bool meshChanged);
-
 
         //- sample field on surface
         virtual tmp<scalarField> sample

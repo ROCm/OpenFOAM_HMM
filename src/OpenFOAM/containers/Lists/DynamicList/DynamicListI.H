@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,18 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
     List<T>(lst),
     capacity_(lst.size())
 {}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
+(
+    const Xfer<List<T> >& lst
+)
+:
+    List<T>(lst),
+    capacity_(List<T>::size())
+{}
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -208,6 +220,14 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
     lst.capacity_ = 0;
 
     List<T>::transfer(static_cast<List<T>&>(lst));
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::Xfer<Foam::List<T> >
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::xfer()
+{
+    return xferMoveTo<List<T> >(*this);
 }
 
 

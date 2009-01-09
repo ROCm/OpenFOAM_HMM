@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "isoSurface.H"
-//#include "isoSurfaceCell.H"
+// #include "isoSurfaceCell.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,9 +45,8 @@ namespace Foam
 
 void Foam::distanceSurface::createGeometry()
 {
-    // Clear any stored topo
+    // Clear any stored topologies
     facesPtr_.clear();
-
 
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
@@ -232,21 +231,20 @@ Foam::distanceSurface::distanceSurface
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     zoneName_(word::null),
+    needsUpdate_(true),
     isoSurfPtr_(NULL),
     facesPtr_(NULL)
 {
-//    label zoneId = -1;
-//    if (dict.readIfPresent("zone", zoneName_))
+//    dict.readIfPresent("zone", zoneName_);
+//
+//    if (debug && zoneName_.size())
 //    {
-//        zoneId = mesh.cellZones().findZoneID(zoneName_);
-//        if (debug && zoneId < 0)
+//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
 //        {
 //            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh"
-//                << endl;
+//                << "\" not found - using entire mesh" << endl;
 //        }
 //    }
-    correct(true);
 }
 
 
@@ -258,13 +256,39 @@ Foam::distanceSurface::~distanceSurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::distanceSurface::correct(const bool meshChanged)
+bool Foam::distanceSurface::needsUpdate() const
 {
-    // Only change of mesh changes plane - zone restriction gets lost
-    if (meshChanged)
+    return needsUpdate_;
+}
+
+
+bool Foam::distanceSurface::expire()
+{
+    // Clear any stored topologies
+    facesPtr_.clear();
+
+    // already marked as expired
+    if (needsUpdate_)
     {
-        createGeometry();
+        return false;
     }
+
+    needsUpdate_ = true;
+    return true;
+}
+
+
+bool Foam::distanceSurface::update()
+{
+    if (!needsUpdate_)
+    {
+        return false;
+    }
+
+    createGeometry();
+
+    needsUpdate_ = false;
+    return true;
 }
 
 

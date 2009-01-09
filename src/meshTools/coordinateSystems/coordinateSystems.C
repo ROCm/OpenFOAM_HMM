@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ Foam::coordinateSystems::coordinateSystems
 Foam::coordinateSystems::coordinateSystems
 (
     const IOobject& io,
-    const xfer<PtrList<coordinateSystem> >& lst
+    const Xfer<PtrList<coordinateSystem> >& lst
 )
 :
     IOPtrList<coordinateSystem>(io, lst)

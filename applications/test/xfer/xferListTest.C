@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
     Info<< "lstA: " << lstA << endl;
     Info<< "lstC: " << lstC << endl;
 
-    xfer<List<label> > xA = xferMove(lstA);
-    xfer<List<label> > xB;
+    Xfer<List<label> > xA = xferMove(lstA);
+    Xfer<List<label> > xB;
 
     List<label> lstB( xA );
 
@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
     Info<< "f1: " << f1 << endl;
     Info<< "f2: " << f2 << endl;
 
-    // note: using xferMoveTo to ensure the correct transfer() method is called
-    face f3( xferMoveTo<labelList>(dl) );
+    // note: xfer() method returns a plain labelList
+    face f3( dl.xfer() );
     Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << endl;
     Info<< "f3: " << f3 << endl;
 

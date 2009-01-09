@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const word& name,
-    const xfer<labelList>& addr,
+    const Xfer<labelList>& addr,
     const label index,
     const pointZoneMesh& zm
 )
@@ -166,7 +166,7 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const pointZone& pz,
-    const xfer<labelList>& addr,
+    const Xfer<labelList>& addr,
     const label index,
     const pointZoneMesh& zm
 )

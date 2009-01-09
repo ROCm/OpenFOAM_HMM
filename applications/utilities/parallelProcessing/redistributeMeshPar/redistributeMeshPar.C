@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -244,7 +244,8 @@ scalar getMergeDistance
     {
         mergeTol = readScalar(IStringStream(args.options()["mergeTol"])());
     }
-    scalar writeTol = 
+
+    scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
 
     Info<< "Merge tolerance : " << mergeTol << nl
@@ -263,7 +264,7 @@ scalar getMergeDistance
             << exit(FatalError);
     }
 
-    scalar mergeDist = mergeTol*mag(bb.max() - bb.min());
+    scalar mergeDist = mergeTol * bb.mag();
 
     Info<< "Overall meshes bounding box : " << bb << nl
         << "Relative tolerance          : " << mergeTol << nl
@@ -276,26 +277,15 @@ scalar getMergeDistance
 
 void printMeshData(Ostream& os, const polyMesh& mesh)
 {
-    os  << "Number of points:           "
-        << mesh.points().size() << nl
-        << "          edges:            "
-        << mesh.edges().size() << nl
-        << "          faces:            "
-        << mesh.faces().size() << nl
-        << "          internal faces:   "
-        << mesh.faceNeighbour().size() << nl
-        << "          cells:            "
-        << mesh.cells().size() << nl
-        << "          boundary patches: "
-        << mesh.boundaryMesh().size() << nl
-        << "          point zones:      "
-        << mesh.pointZones().size() << nl
-
-        << "          face zones:       "
-        << mesh.faceZones().size() << nl
-
-        << "          cell zones:       "
-        << mesh.cellZones().size() << nl;
+    os  << "Number of points:           " << mesh.points().size() << nl
+        << "          edges:            " << mesh.edges().size() << nl
+        << "          faces:            " << mesh.faces().size() << nl
+        << "          internal faces:   " << mesh.faceNeighbour().size() << nl
+        << "          cells:            " << mesh.cells().size() << nl
+        << "          boundary patches: " << mesh.boundaryMesh().size() << nl
+        << "          point zones:      " << mesh.pointZones().size() << nl
+        << "          face zones:       " << mesh.faceZones().size() << nl
+        << "          cell zones:       " << mesh.cellZones().size() << nl;
 }
 
 
@@ -308,7 +298,7 @@ void writeDecomposition
 )
 {
     Info<< "Writing wanted cell distribution to volScalarField " << name
-        << " for postprocessing purposes." << nl << endl;    
+        << " for postprocessing purposes." << nl << endl;
 
     volScalarField procCells
     (

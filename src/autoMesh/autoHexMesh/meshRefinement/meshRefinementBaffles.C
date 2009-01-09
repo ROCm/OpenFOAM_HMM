@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,10 +44,6 @@ License
 #include "OFstream.H"
 #include "regionSplit.H"
 #include "removeCells.H"
-#include "motionSmoother.H"
-#include "polyMeshGeometry.H"
-#include "IOmanip.H"
-#include "cellSet.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -230,7 +226,7 @@ void Foam::meshRefinement::getBafflePatches
     label vertI = 0;
     if (debug&OBJINTERSECTIONS)
     {
-        str.reset(new OFstream(mesh_.time().path()/"intersections.obj"));
+        str.reset(new OFstream(mesh_.time().timePath()/"intersections.obj"));
 
         Pout<< "getBafflePatches : Writing surface intersections to file "
             << str().name() << nl << endl;
@@ -508,642 +504,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
 
     return map;
 }
-
-
-void Foam::meshRefinement::markBoundaryFace
-(
-    const label faceI,
-    boolList& isBoundaryFace,
-    boolList& isBoundaryEdge,
-    boolList& isBoundaryPoint
-) const
-{
-    isBoundaryFace[faceI] = true;
-
-    const labelList& fEdges = mesh_.faceEdges(faceI);
-
-    forAll(fEdges, fp)
-    {
-        isBoundaryEdge[fEdges[fp]] = true;
-    }
-
-    const face& f = mesh_.faces()[faceI];
-
-    forAll(f, fp)
-    {
-        isBoundaryPoint[f[fp]] = true;
-    }
-}
-
-
-// Returns list with for every internal face -1 or the patch they should
-// be baffled into. Gets run after createBaffles so all the surface
-// intersections have already been turned into baffles. Used to remove cells
-// by baffling all their faces and have the splitMeshRegions chuck away non
-// used regions.
-Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
-(
-    const labelList& globalToPatch
-) const
-{
-    const labelList& cellLevel = meshCutter_.cellLevel();
-    const labelList& pointLevel = meshCutter_.pointLevel();
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-
-    // Per internal face (boundary faces not used) the patch that the
-    // baffle should get (or -1)
-    labelList facePatch(mesh_.nFaces(), -1);
-
-    // Mark all points and edges on baffle patches (so not on any inlets,
-    // outlets etc.)
-    boolList isBoundaryPoint(mesh_.nPoints(), false);
-    boolList isBoundaryEdge(mesh_.nEdges(), false);
-    boolList isBoundaryFace(mesh_.nFaces(), false);
-
-    // Fill boundary data. All elements on meshed patches get marked.
-    // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
-
-    forAll(adaptPatchIDs, i)
-    {
-        label patchI = adaptPatchIDs[i];
-
-        const polyPatch& pp = patches[patchI];
-
-        label faceI = pp.start();
-
-        forAll(pp, j)
-        {
-            markBoundaryFace
-            (
-                faceI,
-                isBoundaryFace,
-                isBoundaryEdge,
-                isBoundaryPoint
-            );
-
-            faceI++;
-        }
-    }
-
-    syncTools::syncPointList
-    (
-        mesh_,
-        isBoundaryPoint,
-        orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
-    );
-
-    syncTools::syncEdgeList
-    (
-        mesh_,
-        isBoundaryEdge,
-        orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
-    );
-
-    syncTools::syncFaceList
-    (
-        mesh_,
-        isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
-    );
-
-
-    // For each cell count the number of anchor points that are on
-    // the boundary:
-    // 8 : check the number of (baffle) boundary faces. If 3 or more block
-    //     off the cell since the cell would get squeezed down to a diamond
-    //     (probably; if the 3 or more faces are unrefined (only use the
-    //      anchor points))
-    // 7 : store. Used to check later on whether there are points with
-    //     3 or more of these cells. (note that on a flat surface a boundary
-    //     point will only have 4 cells connected to it)
-
-    // Does cell have exactly 7 of its 8 anchor points on the boundary?
-    PackedList<1> hasSevenBoundaryAnchorPoints(mesh_.nCells(), 0u);
-    // If so what is the remaining non-boundary anchor point?
-    labelHashSet nonBoundaryAnchors(mesh_.nCells()/10000);
-
-    // On-the-fly addressing storage.
-    DynamicList<label> dynFEdges;
-    DynamicList<label> dynCPoints;
-
-    // Count of faces marked for baffling
-    label nBaffleFaces = 0;
-
-    forAll(cellLevel, cellI)
-    {
-        const labelList& cPoints = mesh_.cellPoints(cellI, dynCPoints);
-
-        // Get number of anchor points (pointLevel == cellLevel)
-
-        label nBoundaryAnchors = 0;
-        label nNonAnchorBoundary = 0;
-        label nonBoundaryAnchor = -1;
-
-        forAll(cPoints, i)
-        {
-            label pointI = cPoints[i];
-
-            if (pointLevel[pointI] <= cellLevel[cellI])
-            {
-                // Anchor point
-                if (isBoundaryPoint[pointI])
-                {
-                    nBoundaryAnchors++;
-                }
-                else
-                {
-                    // Anchor point which is not on the surface
-                    nonBoundaryAnchor = pointI;
-                }
-            }
-            else if (isBoundaryPoint[pointI])
-            {
-                nNonAnchorBoundary++;
-            }
-        }
-
-        if (nBoundaryAnchors == 8)
-        {
-            const cell& cFaces = mesh_.cells()[cellI];
-
-            // Count boundary faces.
-            label nBfaces = 0;
-
-            forAll(cFaces, cFaceI)
-            {
-                if (isBoundaryFace[cFaces[cFaceI]])
-                {
-                    nBfaces++;
-                }
-            }
-
-            // If nBfaces > 1 make all non-boundary non-baffle faces baffles.
-            // We assume that this situation is where there is a single
-            // cell sticking out which would get flattened.
-
-            // Eugene: delete cell no matter what.
-            //if (nBfaces > 1)
-            {
-                forAll(cFaces, cf)
-                {
-                    label faceI = cFaces[cf];
-
-                    if (facePatch[faceI] == -1 && mesh_.isInternalFace(faceI))
-                    {
-                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                        nBaffleFaces++;
-
-                        // Mark face as a 'boundary'
-                        markBoundaryFace
-                        (
-                            faceI,
-                            isBoundaryFace,
-                            isBoundaryEdge,
-                            isBoundaryPoint
-                        );
-                    }
-                }
-            }
-        }
-        else if (nBoundaryAnchors == 7)
-        {
-            // Mark the cell. Store the (single!) non-boundary anchor point.
-            hasSevenBoundaryAnchorPoints.set(cellI, 1u);
-            nonBoundaryAnchors.insert(nonBoundaryAnchor);
-        }
-    }
-
-
-    // Loop over all points. If a point is connected to 4 or more cells
-    // with 7 anchor points on the boundary set those cell's non-boundary faces
-    // to baffles
-
-    DynamicList<label> dynPCells;
-
-    forAllConstIter(labelHashSet, nonBoundaryAnchors, iter)
-    {
-        label pointI = iter.key();
-
-        const labelList& pCells = mesh_.pointCells(pointI, dynPCells);
-
-        // Count number of 'hasSevenBoundaryAnchorPoints' cells.
-        label n = 0;
-
-        forAll(pCells, i)
-        {
-            if (hasSevenBoundaryAnchorPoints.get(pCells[i]) == 1u)
-            {
-                n++;
-            }
-        }
-
-        if (n > 3)
-        {
-            // Point in danger of being what? Remove all 7-cells.
-            forAll(pCells, i)
-            {
-                label cellI = pCells[i];
-
-                if (hasSevenBoundaryAnchorPoints.get(cellI) == 1u)
-                {
-                    const cell& cFaces = mesh_.cells()[cellI];
-
-                    forAll(cFaces, cf)
-                    {
-                        label faceI = cFaces[cf];
-
-                        if
-                        (
-                            facePatch[faceI] == -1
-                         && mesh_.isInternalFace(faceI)
-                        )
-                        {
-                            facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                            nBaffleFaces++;
-
-                            // Mark face as a 'boundary'
-                            markBoundaryFace
-                            (
-                                faceI,
-                                isBoundaryFace,
-                                isBoundaryEdge,
-                                isBoundaryPoint
-                            );
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    // Sync all. (note that pointdata and facedata not used anymore but sync
-    // anyway)
-
-    syncTools::syncPointList
-    (
-        mesh_,
-        isBoundaryPoint,
-        orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
-    );
-
-    syncTools::syncEdgeList
-    (
-        mesh_,
-        isBoundaryEdge,
-        orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
-    );
-
-    syncTools::syncFaceList
-    (
-        mesh_,
-        isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
-    );
-
-
-    // Find faces with all edges on the boundary and make them baffles
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
-    {
-        if (facePatch[faceI] == -1)
-        {
-            const labelList& fEdges = mesh_.faceEdges(faceI, dynFEdges);
-            label nFaceBoundaryEdges = 0;
-
-            forAll(fEdges, fe)
-            {
-                if (isBoundaryEdge[fEdges[fe]])
-                {
-                    nFaceBoundaryEdges++;
-                }
-            }
-
-            if (nFaceBoundaryEdges == fEdges.size())
-            {
-                facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                nBaffleFaces++;
-
-                // Do NOT update boundary data since this would grow blocked
-                // faces across gaps.
-            }
-        }
-    }
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if (pp.coupled())
-        {
-            label faceI = pp.start();
-
-            forAll(pp, i)
-            {
-                if (facePatch[faceI] == -1)
-                {
-                    const labelList& fEdges = mesh_.faceEdges(faceI, dynFEdges);
-                    label nFaceBoundaryEdges = 0;
-
-                    forAll(fEdges, fe)
-                    {
-                        if (isBoundaryEdge[fEdges[fe]])
-                        {
-                            nFaceBoundaryEdges++;
-                        }
-                    }
-
-                    if (nFaceBoundaryEdges == fEdges.size())
-                    {
-                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                        nBaffleFaces++;
-
-                        // Do NOT update boundary data since this would grow
-                        // blocked faces across gaps.
-                    }
-                }
-
-                faceI++;
-            }
-        }
-    }
-
-    Info<< "markFacesOnProblemCells : marked "
-        << returnReduce(nBaffleFaces, sumOp<label>())
-        << " additional internal faces to be converted into baffles."
-        << endl;
-
-    return facePatch;
-}
-//XXXXXXXXXXXXXX
-// Mark faces to be baffled to prevent snapping problems. Does
-// test to find nearest surface and checks which faces would get squashed.
-Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
-(
-    const dictionary& motionDict,
-    const labelList& globalToPatch
-) const
-{
-    // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
-
-    // Construct addressing engine.
-    autoPtr<indirectPrimitivePatch> ppPtr
-    (
-        meshRefinement::makePatch
-        (
-            mesh_,
-            adaptPatchIDs
-        )
-    );
-    const indirectPrimitivePatch& pp = ppPtr();
-    const pointField& localPoints = pp.localPoints();
-    const labelList& meshPoints = pp.meshPoints();
-
-    // Find nearest (non-baffle) surface
-    pointField newPoints(mesh_.points());
-    {
-        List<pointIndexHit> hitInfo;
-        labelList hitSurface;
-        surfaces_.findNearest
-        (
-            surfaces_.getUnnamedSurfaces(),
-            localPoints,
-            scalarField(localPoints.size(), sqr(GREAT)),    // sqr of attraction
-            hitSurface,
-            hitInfo
-        );
-    
-        forAll(hitInfo, i)
-        {
-            if (hitInfo[i].hit())
-            {
-                //label pointI = meshPoints[i];
-                //Pout<< "   " << pointI << " moved from "
-                //    << mesh_.points()[pointI] << " by "
-                //    << mag(hitInfo[i].hitPoint()-mesh_.points()[pointI])
-                //    << endl;
-                newPoints[meshPoints[i]] = hitInfo[i].hitPoint();
-            }
-        }
-    }
-
-    // Per face (internal or coupled!) the patch that the
-    // baffle should get (or -1).
-    labelList facePatch(mesh_.nFaces(), -1);
-    // Count of baffled faces
-    label nBaffleFaces = 0;
-
-
-//    // Sync position? Or not since same face on both side so just sync
-//    // result of baffle.
-//
-//    const scalar minArea(readScalar(motionDict.lookup("minArea")));
-//
-//    Pout<< "markFacesOnProblemCellsGeometric : Comparing to minArea:"
-//        << minArea << endl;
-//
-//    pointField facePoints;
-//    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
-//    {
-//        const face& f = mesh_.faces()[faceI];
-//
-//        bool usesPatchPoint = false;
-//
-//        facePoints.setSize(f.size());
-//        forAll(f, fp)
-//        {
-//            Map<label>::const_iterator iter = pp.meshPointMap().find(f[fp]);
-//
-//            if (iter != pp.meshPointMap().end())
-//            {
-//                facePoints[fp] = newPosition[iter()];
-//                usesPatchPoint = true;
-//            }
-//            else
-//            {
-//                facePoints[fp] = mesh_.points()[f[fp]];
-//            }
-//        }
-//
-//        if (usesPatchPoint)
-//        {
-//            // Check area of face wrt original area
-//            face identFace(identity(f.size()));
-//
-//            if (identFace.mag(facePoints) < minArea)
-//            {
-//                facePatch[faceI] = getBafflePatch(facePatch, faceI);
-//                nBaffleFaces++;
-//            }
-//        }
-//    }
-//
-//
-//    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-//    forAll(patches, patchI)
-//    {
-//        const polyPatch& pp = patches[patchI];
-//
-//        if (pp.coupled())
-//        {
-//            forAll(pp, i)
-//            {
-//                label faceI = pp.start()+i;
-//
-//                const face& f = mesh_.faces()[faceI];
-//
-//                bool usesPatchPoint = false;
-//
-//                facePoints.setSize(f.size());
-//                forAll(f, fp)
-//                {
-//                    Map<label>::const_iterator iter =
-//                        pp.meshPointMap().find(f[fp]);
-//
-//                    if (iter != pp.meshPointMap().end())
-//                    {
-//                        facePoints[fp] = newPosition[iter()];
-//                        usesPatchPoint = true;
-//                    }
-//                    else
-//                    {
-//                        facePoints[fp] = mesh_.points()[f[fp]];
-//                    }
-//                }
-//
-//                if (usesPatchPoint)
-//                {
-//                    // Check area of face wrt original area
-//                    face identFace(identity(f.size()));
-//
-//                    if (identFace.mag(facePoints) < minArea)
-//                    {
-//                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
-//                        nBaffleFaces++;
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    {
-        pointField oldPoints(mesh_.points());
-        mesh_.movePoints(newPoints);
-        faceSet wrongFaces(mesh_, "wrongFaces", 100);
-        {
-            //motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
-
-            // Just check the errors from squashing
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            const labelList allFaces(identity(mesh_.nFaces()));
-            label nWrongFaces = 0;
-
-            scalar minArea(readScalar(motionDict.lookup("minArea")));
-            if (minArea > -SMALL)
-            {
-                polyMeshGeometry::checkFaceArea
-                (
-                    false,
-                    minArea,
-                    mesh_,
-                    mesh_.faceAreas(),
-                    allFaces,
-                    &wrongFaces
-                );
-
-                label nNewWrongFaces = returnReduce
-                (
-                    wrongFaces.size(),
-                    sumOp<label>()
-                );
-
-                Info<< "    faces with area < "
-                    << setw(5) << minArea
-                    << " m^2                            : "
-                    << nNewWrongFaces-nWrongFaces << endl;
-
-                nWrongFaces = nNewWrongFaces;
-            }
-
-//            scalar minDet(readScalar(motionDict.lookup("minDeterminant")));
-            scalar minDet = 0.01;
-            if (minDet > -1)
-            {
-                polyMeshGeometry::checkCellDeterminant
-                (
-                    false,
-                    minDet,
-                    mesh_,
-                    mesh_.faceAreas(),
-                    allFaces,
-                    polyMeshGeometry::affectedCells(mesh_, allFaces),
-                    &wrongFaces
-                );
-
-                label nNewWrongFaces = returnReduce
-                (
-                    wrongFaces.size(),
-                    sumOp<label>()
-                );
-
-                Info<< "    faces on cells with determinant < "
-                    << setw(5) << minDet << "                : "
-                    << nNewWrongFaces-nWrongFaces << endl;
-
-                nWrongFaces = nNewWrongFaces;
-            }
-        }
-
-
-        forAllConstIter(faceSet, wrongFaces, iter)
-        {
-            label patchI = mesh_.boundaryMesh().whichPatch(iter.key());
-
-            if (patchI == -1 || mesh_.boundaryMesh()[patchI].coupled())
-            {
-                facePatch[iter.key()] = getBafflePatch(facePatch, iter.key());
-                nBaffleFaces++;
-
-                //Pout<< "    " << iter.key()
-                //    //<< " on patch " << mesh_.boundaryMesh()[patchI].name()
-                //    << " is destined for patch " << facePatch[iter.key()]
-                //    << endl;
-            }
-        }
-        // Restore points.
-        mesh_.movePoints(oldPoints);
-    }
-
-
-    Info<< "markFacesOnProblemCellsGeometric : marked "
-        << returnReduce(nBaffleFaces, sumOp<label>())
-        << " additional internal and coupled faces"
-        << " to be converted into baffles." << endl;
-
-    syncTools::syncFaceList
-    (
-        mesh_,
-        facePatch,
-        maxEqOp<label>(),
-        false               // no separation
-    );
-
-    return facePatch;
-}
-//XXXXXXXX
 
 
 // Return a list of coupled face pairs, i.e. faces that use the same vertices.
@@ -1855,13 +1215,13 @@ void Foam::meshRefinement::findCellZoneTopo
             break;
         }
 
-	// Synchronise regionToCellZone.
-	// Note:
-	// - region numbers are identical on all processors
-	// - keepRegion is identical ,,
-	// - cellZones are identical ,,
-	Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-	Pstream::listCombineScatter(regionToCellZone);
+        // Synchronise regionToCellZone.
+        // Note:
+        // - region numbers are identical on all processors
+        // - keepRegion is identical ,,
+        // - cellZones are identical ,,
+        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
+        Pstream::listCombineScatter(regionToCellZone);
     }
 
 
@@ -1904,6 +1264,8 @@ void Foam::meshRefinement::findCellZoneTopo
 void Foam::meshRefinement::baffleAndSplitMesh
 (
     const bool handleSnapProblems,
+    const bool removeEdgeConnectedCells,
+    const scalarField& perpendicularAngle,
     const bool mergeFreeStanding,
     const dictionary& motionDict,
     Time& runTime,
@@ -1981,6 +1343,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         (
             markFacesOnProblemCells
             (
+                removeEdgeConnectedCells,
+                perpendicularAngle,
                 globalToPatch
             )
             //markFacesOnProblemCellsGeometric
@@ -2024,6 +1388,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
             (    
                 markFacesOnProblemCells
                 (
+                    removeEdgeConnectedCells,
+                    perpendicularAngle,
                     globalToPatch
                 )
             );
@@ -2099,7 +1465,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     {
         Pout<< "Writing subsetted mesh to time " << mesh_.time().timeName()
             << endl;
-        write(debug, runTime.path()/runTime.timeName());
+        write(debug, runTime.timePath());
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }

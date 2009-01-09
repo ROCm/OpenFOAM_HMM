@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -245,8 +245,8 @@ Foam::faceZone::faceZone
 Foam::faceZone::faceZone
 (
     const word& name,
-    const xfer<labelList>& addr,
-    const xfer<boolList>& fm,
+    const Xfer<labelList>& addr,
+    const Xfer<boolList>& fm,
     const label index,
     const faceZoneMesh& zm
 )
@@ -319,8 +319,8 @@ Foam::faceZone::faceZone
 Foam::faceZone::faceZone
 (
     const faceZone& fz,
-    const xfer<labelList>& addr,
-    const xfer<boolList>& fm,
+    const Xfer<labelList>& addr,
+    const Xfer<boolList>& fm,
     const label index,
     const faceZoneMesh& zm
 )

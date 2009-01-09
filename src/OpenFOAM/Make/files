@@ -3,8 +3,10 @@ global/dimensionedConstants/dimensionedConstants.C
 global/argList/argList.C
 global/clock/clock.C
 
-primitives/bool/bool.C
-primitives/bool/boolIO.C
+primitives/bools/bool/bool.C
+primitives/bools/bool/boolIO.C
+primitives/bools/Switch/Switch.C
+primitives/bools/Switch/SwitchIO.C
 primitives/char/charIO.C
 primitives/int/intIO.C
 primitives/uint/uintIO.C
@@ -40,6 +42,7 @@ $(strings)/word/wordIO.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyTypeIO.C
+$(strings)/wordRe/wordReIO.C
 
 primitives/random/Random.C
 
@@ -65,21 +68,15 @@ $(Streams)/token/tokenIO.C
 
 IOstreams = $(Streams)/IOstreams
 $(IOstreams)/IOstream.C
-$(IOstreams)/versionNumber.C
 $(IOstreams)/Istream.C
-$(IOstreams)/IOprint.C
-$(IOstreams)/IOcheck.C
 $(IOstreams)/Ostream.C
 
 Sstreams = $(Streams)/Sstreams
-$(Sstreams)/ISread.C
-$(Sstreams)/ISnextValid.C
-$(Sstreams)/ISreadToken.C
+$(Sstreams)/ISstream.C
+$(Sstreams)/OSstream.C
+$(Sstreams)/SstreamsPrint.C
 $(Sstreams)/readHexLabel.C
-$(Sstreams)/OSwrite.C
-$(Sstreams)/Sprint.C
-$(Sstreams)/prefixOSstream/prefixOSwrite.C
-$(Sstreams)/prefixOSstream/prefixOSprint.C
+$(Sstreams)/prefixOSstream.C
 
 gzstream = $(Streams)/gzstream
 $(gzstream)/gzstream.C
@@ -89,19 +86,17 @@ $(Fstreams)/IFstream.C
 $(Fstreams)/OFstream.C
 
 Tstreams = $(Streams)/Tstreams
-$(Tstreams)/ITread.C
-$(Tstreams)/Tprint.C
+$(Tstreams)/ITstream.C
 
 StringStreams = $(Streams)/StringStreams
-$(StringStreams)/StringStreamPrint.C
+$(StringStreams)/StringStreamsPrint.C
 
 Pstreams = $(Streams)/Pstreams
 $(Pstreams)/Pstream.C
 $(Pstreams)/PstreamCommsStruct.C
-$(Pstreams)/IPread.C
-$(Pstreams)/OPwrite.C
-$(Pstreams)/Pprint.C
-$(Pstreams)/IPreadToken.C
+$(Pstreams)/IPstream.C
+$(Pstreams)/OPstream.C
+$(Pstreams)/PstreamsPrint.C
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C
@@ -148,10 +143,6 @@ db/functionObject/functionObject.C
 db/functionObjectList/functionObjectList.C
 db/CallbackRegistry/CallbackRegistryName.C
 db/dlLibraryTable/dlLibraryTable.C
-
-Switch = db/Switch
-$(Switch)/Switch.C
-$(Switch)/SwitchIO.C
 
 Time = db/Time
 $(Time)/TimePaths.C
@@ -335,17 +326,15 @@ $(globalMeshData)/globalIndex.C
 
 $(polyMesh)/syncTools/syncTools.C
 
-zones = $(polyMesh)/zones
-
-cellZone = $(zones)/cellZone
+cellZone = $(polyMesh)/zones/cellZone
 $(cellZone)/cellZone.C
 $(cellZone)/newCellZone.C
 
-faceZone = $(zones)/faceZone
+faceZone = $(polyMesh)/zones/faceZone
 $(faceZone)/faceZone.C
 $(faceZone)/newFaceZone.C
 
-pointZone = $(zones)/pointZone
+pointZone = $(polyMesh)/zones/pointZone
 $(pointZone)/pointZone.C
 $(pointZone)/newPointZone.C
 
@@ -462,6 +451,7 @@ $(Fields)/diagTensorField/diagTensorIOField.C
 $(Fields)/symmTensorField/symmTensorIOField.C
 $(Fields)/tensorField/tensorIOField.C
 $(Fields)/transformField/transformField.C
+
 pointPatchFields = fields/pointPatchFields
 $(pointPatchFields)/pointPatchField/pointPatchFields.C
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,6 +116,14 @@ class sampledSurfaces
             pointField points;
             faceList   faces;
             labelList  pointsMap;
+
+            //- Clear all storage
+            void clear()
+            {
+                points.clear();
+                faces.clear();
+                pointsMap.clear();
+            }
         };
 
 
@@ -124,6 +132,8 @@ class sampledSurfaces
         //- output verbosity
         static bool verbose_;
 
+        //- Tolerance for merging points (fraction of mesh bounding box)
+        static scalar mergeTol_;
 
     // Private data
 
@@ -173,9 +183,6 @@ class sampledSurfaces
 
         //- Classify field types, return true if nFields > 0
         bool checkFieldTypes();
-
-        //- Merge points on surfaces
-        void mergeSurfaces();
 
         //- Find the fields in the list of the given type, return count
         template<class Type>
@@ -228,7 +235,20 @@ public:
 
     // Member Functions
 
-        //- Return name of the set of probes
+        //- Does any of the surfaces need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surfaces as needing an update.
+        //  May also free up unneeded data.
+        //  Return false if all surfaces were already marked as expired.
+        virtual bool expire();
+
+        //- Update the surfaces as required and merge surface points (parallel).
+        //  Return false if no surfaces required an update.
+        virtual bool update();
+
+
+        //- Return name of the set of surfaces
         virtual const word& name() const
         {
             return name_;
@@ -243,20 +263,18 @@ public:
         //- Sample and write
         virtual void write();
 
-        //- Read the sampledSurfaces
+        //- Read the sampledSurfaces dictionary
         virtual void read(const dictionary&);
 
-        //- Correct for mesh changes
-        void correct();
-
-        //- Update for changes of mesh
+        //- Update for changes of mesh - expires the surfaces
         virtual void updateMesh(const mapPolyMesh&);
 
-        //- Update for mesh point-motion
+        //- Update for mesh point-motion - expires the surfaces
         virtual void movePoints(const pointField&);
 
-        //- Update for changes of mesh due to readUpdate
+        //- Update for changes of mesh due to readUpdate - expires the surfaces
         virtual void readUpdate(const polyMesh::readUpdateState state);
+
 };
 
 

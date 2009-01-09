@@ -18,9 +18,9 @@ interpolationScheme cellPoint;
 
 setFormat     raw;
 
-sets      
+sets
 (
-    line_centreProfile 
+    line_centreProfile
     {
         type            uniform;
 
@@ -34,9 +34,9 @@ sets
 surfaces
 ();
 
-fields          
+fields
 (
-    U.component(0)
+    Ux
 );
 
 // ************************************************************************* //

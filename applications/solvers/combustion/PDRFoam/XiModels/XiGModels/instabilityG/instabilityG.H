@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,10 @@ Class
     Foam::XiGModels::instabilityG
 
 Description
-    Flame-surface instabilityG flame-wrinking generation rate coefficient model.
+    Flame-surface instabilityG flame-wrinking generation rate coefficient model
+    used in \link XiModel.H \endlink.
+
+    See Technical Report SH/RE/01R for details on the PDR modelling.
 
 SourceFiles
     instabilityG.C

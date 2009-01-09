@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,9 +177,8 @@ int main(int argc, char *argv[])
 
 
     const boundBox& bb = mesh.globalData().bb();
-    const vector span(bb.max() - bb.min());
-    const scalar minDim = min(span[0], min(span[1], span[2]));
-    const scalar mergeDim = 1E-4*minDim;
+    const vector span = bb.span();
+    const scalar mergeDim = 1E-4 * bb.minDim();
 
     Pout<< "Mesh bounding box:" << bb << nl
         << "        with span:" << span << nl

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,13 +175,10 @@ Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L)
 template<class T, class Key, class Hash>
 Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& L)
 {
-    // Write size of HashPtrTable
-    os << nl << L.size();
+    // Write size and start delimiter
+    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
 
-    // Write beginning of contents
-    os << nl << token::BEGIN_LIST << nl;
-
-    // Write HashPtrTable contents
+    // Write contents
     for
     (
         typename HashPtrTable<T, Key, Hash>::const_iterator iter = L.begin();
@@ -192,7 +189,7 @@ Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& L)
         os << iter.key() << token::SPACE << *iter() << nl;
     }
 
-    // Write end of contents
+    // Write end delimiter
     os << token::END_LIST;
 
     // Check state of IOstream

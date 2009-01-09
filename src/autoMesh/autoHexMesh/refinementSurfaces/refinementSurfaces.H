@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,6 +90,9 @@ class refinementSurfaces
         //- From global region number to refinement level
         labelList maxLevel_;
 
+        //- From global region number to perpendicular angle
+        scalarField perpendicularAngle_;
+
 
     // Private Member Functions
 
@@ -176,6 +179,12 @@ public:
             const labelList& maxLevel() const
             {
                 return maxLevel_;
+            }
+
+            //- From global region number to perpendicular angle
+            const scalarField& perpendicularAngle() const
+            {
+                return perpendicularAngle_;
             }
 
 

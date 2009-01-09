@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        distributedTriSurfaceMesh,
+        dict
+    );
 
-defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
-addToRunTimeSelectionTable(searchableSurface, distributedTriSurfaceMesh, dict);
-
-scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
-
+    scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
 }
 
 

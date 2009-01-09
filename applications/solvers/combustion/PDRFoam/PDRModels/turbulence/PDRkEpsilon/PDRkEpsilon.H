@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Class
 
 Description
     Standard k-epsilon turbulence model with additional source terms
-    corresponding to PDR basic drag model (basic.H)
+    corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
@@ -93,7 +93,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel
+            basicThermo& thermophysicalModel
         );
 
 
