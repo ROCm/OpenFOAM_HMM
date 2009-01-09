@@ -128,7 +128,7 @@ bool Foam::sampledSurfaces::checkFieldTypes()
     nFields += grep(symmTensorFields_, fieldTypes);
     nFields += grep(tensorFields_, fieldTypes);
 
-    if (Pstream::master)
+    if (Pstream::master())
     {
         if (debug)
         {
