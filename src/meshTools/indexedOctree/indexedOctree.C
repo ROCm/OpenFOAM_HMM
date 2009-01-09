@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,21 +26,16 @@ License
 
 #include "indexedOctree.H"
 #include "linePointRef.H"
-//#include "triSurface.H"
+// #include "triSurface.H"
 #include "meshTools.H"
 #include "OFstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Does bb intersect a sphere around sample? Or is any corner point of bb
 // closer than nearestDistSqr to sample.
 template <class Type>
-bool indexedOctree<Type>::overlaps
+bool Foam::indexedOctree<Type>::overlaps
 (
     const point& p0,
     const point& p1,
@@ -84,7 +79,7 @@ bool indexedOctree<Type>::overlaps
 // Does bb intersect a sphere around sample? Or is any corner point of bb
 // closer than nearestDistSqr to sample.
 template <class Type>
-bool indexedOctree<Type>::overlaps
+bool Foam::indexedOctree<Type>::overlaps
 (
     const treeBoundBox& parentBb,
     const direction octant,
@@ -92,7 +87,7 @@ bool indexedOctree<Type>::overlaps
     const point& sample
 )
 {
-    //- Speeded up version of
+    //- Accelerated version of
     //     treeBoundBox subBb(parentBb.subBbox(mid, octant))
     //     overlaps
     //     (
@@ -147,7 +142,7 @@ bool indexedOctree<Type>::overlaps
 
 // Split list of indices into 8 bins
 template <class Type>
-void indexedOctree<Type>::divide
+void Foam::indexedOctree<Type>::divide
 (
     const labelList& indices,
     const treeBoundBox& bb,
@@ -183,16 +178,15 @@ void indexedOctree<Type>::divide
     result.setSize(8);
     for (direction octant = 0; octant < subIndices.size(); octant++)
     {
-        subIndices[octant].shrink();
         result[octant].transfer(subIndices[octant]);
-        subIndices[octant].clear();
     }
 }
 
 
 // Subdivide the (content) node.
 template <class Type>
-typename indexedOctree<Type>::node indexedOctree<Type>::divide
+typename Foam::indexedOctree<Type>::node
+Foam::indexedOctree<Type>::divide
 (
     const treeBoundBox& bb,
     DynamicList<labelList>& contents,
@@ -261,7 +255,7 @@ typename indexedOctree<Type>::node indexedOctree<Type>::divide
 
 // Split any contents node with more than minSize elements.
 template <class Type>
-void indexedOctree<Type>::splitNodes
+void Foam::indexedOctree<Type>::splitNodes
 (
     const label minSize,
     DynamicList<indexedOctree<Type>::node>& nodes,
@@ -315,7 +309,7 @@ void indexedOctree<Type>::splitNodes
 // Reorder contents to be in same order as nodes. Returns number of nodes on
 // the compactLevel.
 template <class Type>
-label indexedOctree<Type>::compactContents
+Foam::label Foam::indexedOctree<Type>::compactContents
 (
     DynamicList<node>& nodes,
     DynamicList<labelList>& contents,
@@ -385,7 +379,8 @@ label indexedOctree<Type>::compactContents
 // Recurses to determine status of lowest level boxes. Level above is
 // combination of octants below.
 template <class Type>
-typename indexedOctree<Type>::volumeType indexedOctree<Type>::calcVolumeType
+typename Foam::indexedOctree<Type>::volumeType
+Foam::indexedOctree<Type>::calcVolumeType
 (
     const label nodeI
 ) const
@@ -417,7 +412,10 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::calcVolumeType
             // of its bounding box.
             const treeBoundBox subBb = nod.bb_.subBbox(octant);
 
-            subType = volumeType(shapes_.getVolumeType(*this, subBb.mid()));
+            subType = volumeType
+            (
+                shapes_.getVolumeType(*this, subBb.midpoint())
+            );
         }
 
         // Store octant type
@@ -439,7 +437,8 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::calcVolumeType
 
 
 template <class Type>
-typename indexedOctree<Type>::volumeType indexedOctree<Type>::getVolumeType
+typename Foam::indexedOctree<Type>::volumeType
+Foam::indexedOctree<Type>::getVolumeType
 (
     const label nodeI,
     const point& sample
@@ -514,7 +513,8 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::getVolumeType
 
 
 template <class Type>
-typename indexedOctree<Type>::volumeType indexedOctree<Type>::getSide
+typename Foam::indexedOctree<Type>::volumeType
+Foam::indexedOctree<Type>::getSide
 (
     const vector& outsideNormal,
     const vector& vec
@@ -538,7 +538,7 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::getSide
 
 // Find nearest point starting from nodeI
 template <class Type>
-void indexedOctree<Type>::findNearest
+void Foam::indexedOctree<Type>::findNearest
 (
     const label nodeI,
     const point& sample,
@@ -610,7 +610,7 @@ void indexedOctree<Type>::findNearest
 
 // Find nearest point to line.
 template <class Type>
-void indexedOctree<Type>::findNearest
+void Foam::indexedOctree<Type>::findNearest
 (
     const label nodeI,
     const linePointRef& ln,
@@ -680,7 +680,7 @@ void indexedOctree<Type>::findNearest
 // the faceID (one of treeBoundBox::LEFTBIT, RIGHTBIT etc.)
 // Returns false if edge of tree hit.
 template <class Type>
-bool indexedOctree<Type>::walkToNeighbour
+bool Foam::indexedOctree<Type>::walkToNeighbour
 (
     const point& facePoint,
     const direction faceID,         // direction to walk in
@@ -787,7 +787,11 @@ bool indexedOctree<Type>::walkToNeighbour
 // (number is single bit but not really nessecary)
 // Return 0 if point not on any face of bb.
 template <class Type>
-direction indexedOctree<Type>::getFace(const treeBoundBox& bb, const point& pt)
+Foam::direction Foam::indexedOctree<Type>::getFace
+(
+    const treeBoundBox& bb,
+    const point& pt
+)
 {
     direction faceID = 0;
 
@@ -826,7 +830,7 @@ direction indexedOctree<Type>::getFace(const treeBoundBox& bb, const point& pt)
 //  hitInfo.point = coordinate of intersection of ray with bounding box
 //  faceID  = index of bounding box face
 template <class Type>
-void indexedOctree<Type>::traverseNode
+void Foam::indexedOctree<Type>::traverseNode
 (
     const bool findAny,
     const point& start,
@@ -952,7 +956,7 @@ void indexedOctree<Type>::traverseNode
 
 // Find first intersection
 template <class Type>
-pointIndexHit indexedOctree<Type>::findLine
+Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const bool findAny,
     const point& treeStart,
@@ -1039,7 +1043,7 @@ pointIndexHit indexedOctree<Type>::findLine
 
 // Find first intersection
 template <class Type>
-pointIndexHit indexedOctree<Type>::findLine
+Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const bool findAny,
     const point& start,
@@ -1103,7 +1107,7 @@ pointIndexHit indexedOctree<Type>::findLine
 
 
 template <class Type>
-void indexedOctree<Type>::findBox
+void Foam::indexedOctree<Type>::findBox
 (
     const label nodeI,
     const treeBoundBox& searchBox,
@@ -1151,7 +1155,10 @@ void indexedOctree<Type>::findBox
 
 // Number of elements in node.
 template <class Type>
-label indexedOctree<Type>::countElements(const labelBits index) const
+Foam::label Foam::indexedOctree<Type>::countElements
+(
+    const labelBits index
+) const
 {
     label nElems = 0;
 
@@ -1181,7 +1188,7 @@ label indexedOctree<Type>::countElements(const labelBits index) const
 
 
 template <class Type>
-void indexedOctree<Type>::writeOBJ
+void Foam::indexedOctree<Type>::writeOBJ
 (
     const label nodeI,
     const direction octant
@@ -1258,7 +1265,7 @@ void indexedOctree<Type>::writeOBJ
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class Type>
-indexedOctree<Type>::indexedOctree(const Type& shapes)
+Foam::indexedOctree<Type>::indexedOctree(const Type& shapes)
 :
     shapes_(shapes),
     nodes_(0),
@@ -1268,7 +1275,7 @@ indexedOctree<Type>::indexedOctree(const Type& shapes)
 
 
 template <class Type>
-indexedOctree<Type>::indexedOctree
+Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
     const List<node>& nodes,
@@ -1283,7 +1290,7 @@ indexedOctree<Type>::indexedOctree
 
 
 template <class Type>
-indexedOctree<Type>::indexedOctree
+Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
     const treeBoundBox& bb,
@@ -1424,7 +1431,7 @@ indexedOctree<Type>::indexedOctree
 
 
 template <class Type>
-indexedOctree<Type>::indexedOctree
+Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
     Istream& is
@@ -1440,7 +1447,7 @@ indexedOctree<Type>::indexedOctree
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class Type>
-pointIndexHit indexedOctree<Type>::findNearest
+Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const point& sample,
     const scalar startDistSqr
@@ -1472,7 +1479,7 @@ pointIndexHit indexedOctree<Type>::findNearest
 
 
 template <class Type>
-pointIndexHit indexedOctree<Type>::findNearest
+Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const linePointRef& ln,
     treeBoundBox& tightest,
@@ -1506,7 +1513,7 @@ pointIndexHit indexedOctree<Type>::findNearest
 
 // Find nearest intersection
 template <class Type>
-pointIndexHit indexedOctree<Type>::findLine
+Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const point& start,
     const point& end
@@ -1518,7 +1525,7 @@ pointIndexHit indexedOctree<Type>::findLine
 
 // Find nearest intersection
 template <class Type>
-pointIndexHit indexedOctree<Type>::findLineAny
+Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 (
     const point& start,
     const point& end
@@ -1529,7 +1536,10 @@ pointIndexHit indexedOctree<Type>::findLineAny
 
 
 template <class Type>
-labelList indexedOctree<Type>::findBox(const boundBox& searchBox) const
+Foam::labelList Foam::indexedOctree<Type>::findBox
+(
+    const boundBox& searchBox
+) const
 {
     // Storage for labels of shapes inside bb. Size estimate.
     labelHashSet elements(shapes_.size() / 100);
@@ -1545,7 +1555,7 @@ labelList indexedOctree<Type>::findBox(const boundBox& searchBox) const
 
 // Find node (as parent+octant) containing point
 template <class Type>
-labelBits indexedOctree<Type>::findNode
+Foam::labelBits Foam::indexedOctree<Type>::findNode
 (
     const label nodeI,
     const point& sample
@@ -1583,7 +1593,8 @@ labelBits indexedOctree<Type>::findNode
 
 // Determine type (inside/outside/mixed) per node.
 template <class Type>
-typename indexedOctree<Type>::volumeType indexedOctree<Type>::getVolumeType
+typename Foam::indexedOctree<Type>::volumeType
+Foam::indexedOctree<Type>::getVolumeType
 (
     const point& sample
 ) const
@@ -1653,7 +1664,7 @@ typename indexedOctree<Type>::volumeType indexedOctree<Type>::getVolumeType
 
 // Print contents of nodeI
 template <class Type>
-void indexedOctree<Type>::print
+void Foam::indexedOctree<Type>::print
 (
     prefixOSstream& os,
     const bool printContents,
@@ -1717,7 +1728,7 @@ void indexedOctree<Type>::print
 
 // Print contents of nodeI
 template <class Type>
-bool indexedOctree<Type>::write(Ostream& os) const
+bool Foam::indexedOctree<Type>::write(Ostream& os) const
 {
     os << *this;
 
@@ -1726,16 +1737,12 @@ bool indexedOctree<Type>::write(Ostream& os) const
 
 
 template <class Type>
-Ostream& operator<<(Ostream& os, const indexedOctree<Type>& t)
+Foam::Ostream& Foam::operator<<(Ostream& os, const indexedOctree<Type>& t)
 {
     return
         os  << t.bb() << token::SPACE << t.nodes()
             << token::SPACE << t.contents();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

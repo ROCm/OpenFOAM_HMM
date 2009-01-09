@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,42 +83,42 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
 
         if (uniform)
         {
-            // Write size of list and start contents delimiter
+            // Write size and start delimiter
             os << L.size() << token::BEGIN_BLOCK;
 
-            // Write list contents
+            // Write contents
             os << L[0];
 
-            // Write end of contents delimiter
+            // Write end delimiter
             os << token::END_BLOCK;
         }
         else if (L.size() < 11 && contiguous<T>())
         {
-            // Write size of list and start contents delimiter
+            // Write size and start delimiter
             os << L.size() << token::BEGIN_LIST;
 
-            // Write list contents
+            // Write contents
             forAll(L, i)
             {
                 if (i > 0) os << token::SPACE;
                 os << L[i];
             }
 
-            // Write end of contents delimiter
+            // Write end delimiter
             os << token::END_LIST;
         }
         else
         {
-            // Write size of list and start contents delimiter
+            // Write size and start delimiter
             os << nl << L.size() << nl << token::BEGIN_LIST;
 
-            // Write list contents
+            // Write contents
             forAll(L, i)
             {
                 os << nl << L[i];
             }
 
-            // Write end of contents delimiter
+            // Write end delimiter
             os << nl << token::END_LIST << nl;
         }
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,17 +40,83 @@ namespace Foam
     addNamedToRunTimeSelectionTable(sampledSurface, sampledPatch, word, patch);
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::sampledPatch::createGeometry()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::sampledPatch::sampledPatch
+(
+    const word& name,
+    const polyMesh& mesh,
+    const word& patchName,
+    const bool triangulate
+)
+:
+    sampledSurface(name, mesh),
+    patchName_(patchName),
+    triangulate_(triangulate),
+    needsUpdate_(true),
+    patchFaceLabels_(0)
+{}
+
+
+Foam::sampledPatch::sampledPatch
+(
+    const word& name,
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    sampledSurface(name, mesh, dict),
+    patchName_(dict.lookup("patchName")),
+    triangulate_(dict.lookupOrDefault("triangulate", false)),
+    needsUpdate_(true),
+    patchFaceLabels_(0)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::sampledPatch::~sampledPatch()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::sampledPatch::needsUpdate() const
 {
+    return needsUpdate_;
+}
+
+
+bool Foam::sampledPatch::expire()
+{
+    // already marked as expired
+    if (needsUpdate_)
+    {
+        return false;
+    }
+
     sampledSurface::clearGeom();
     MeshStorage::clear();
     patchFaceLabels_.clear();
 
-    if (patchIndex_ != -1)
+    needsUpdate_ = true;
+    return true;
+}
+
+
+bool Foam::sampledPatch::update()
+{
+    if (!needsUpdate_)
     {
-        const polyPatch& p = mesh().boundaryMesh()[patchIndex_];
+        return false;
+    }
+
+    label patchI = mesh().boundaryMesh().findPatchID(patchName_);
+
+    if (patchI != -1)
+    {
+        const polyPatch& p = mesh().boundaryMesh()[patchI];
         this->storedPoints() = p.localPoints();
         this->storedFaces()  = p.localFaces();
 
@@ -76,60 +142,9 @@ void Foam::sampledPatch::createGeometry()
         print(Pout);
         Pout << endl;
     }
-}
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::sampledPatch::sampledPatch
-(
-    const word& name,
-    const polyMesh& mesh,
-    const word& patchName,
-    const bool triangulate
-)
-:
-    sampledSurface(name, mesh),
-    patchName_(patchName),
-    patchIndex_(mesh.boundaryMesh().findPatchID(patchName_)),
-    triangulate_(triangulate),
-    patchFaceLabels_(0)
-{
-    createGeometry();
-}
-
-
-Foam::sampledPatch::sampledPatch
-(
-    const word& name,
-    const polyMesh& mesh,
-    const dictionary& dict
-)
-:
-    sampledSurface(name, mesh, dict),
-    patchName_(dict.lookup("patchName")),
-    patchIndex_(mesh.boundaryMesh().findPatchID(patchName_)),
-    triangulate_(dict.lookupOrDefault("triangulate", false)),
-    patchFaceLabels_(0)
-{
-    createGeometry();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledPatch::~sampledPatch()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::sampledPatch::correct(const bool meshChanged)
-{
-    if (meshChanged)
-    {
-        createGeometry();
-    }
+    needsUpdate_ = false;
+    return true;
 }
 
 
@@ -143,13 +158,6 @@ void Foam::sampledPatch::remapFaces
     if (&faceMap && faceMap.size())
     {
         MeshStorage::remapFaces(faceMap);
-//
-//        List<label> newCutCells(faceMap.size());
-//        forAll(faceMap, faceI)
-//        {
-//            newCutCells[faceI] = cutCells_[faceMap[faceI]];
-//        }
-//        cutCells_.transfer(newCutCells);
     }
 }
 

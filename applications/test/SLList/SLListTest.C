@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
@@ -48,9 +48,7 @@ int main(int argc, char *argv[])
     }
 
     myList.append(100.3);
-
     myList.append(500.3);
-
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
 
@@ -99,7 +97,27 @@ int main(int argc, char *argv[])
         Info<< "element:" << *iter2 << endl;
     }
 
-    Info<< nl << "Bye." << endl;
+
+
+    for (int i = 0; i<10; i++)
+    {
+        myList.append(1.3*i);
+    }
+
+    myList.append(100.3);
+    myList.append(500.3);
+
+    Info<< nl << "Testing transfer: " << nl << endl;
+    Info<< "original: " << myList << endl;
+
+    SLList<scalar> newList;
+    newList.transfer(myList);
+
+    Info<< nl << "source: " << myList << nl
+        << nl << "target: " << newList << endl;
+
+
+    Info<< nl << "Done." << endl;
     return 0;
 }
 

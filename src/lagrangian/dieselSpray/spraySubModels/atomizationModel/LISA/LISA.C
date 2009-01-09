@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,12 +140,18 @@ void LISA::atomizeParcel
     const injectorType& it = 
         spray_.injectors()[label(p.injector())].properties();
 
-    const vector itPosition = it.position();
+    if (it.nHoles() > 1)
+    {
+        Info << "Warning: This atomization model is not suitable for multihole injector." << endl
+             << "Only the first hole will be used." << endl;
+    }
+
+    const vector itPosition = it.position(0);
     scalar pWalk = mag(p.position() - itPosition);
 
 //  Updating liquid sheet tickness... that is the droplet diameter
-
-    const vector direction = it.direction();
+ 
+    const vector direction = it.direction(0, spray_.runTime().value());
     
     scalar h = (p.position() - itPosition) & direction;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,6 +115,10 @@ vanDriestDelta::vanDriestDelta
     Cdelta_
     (
         dd.subDict(type() + "Coeffs").lookupOrDefault<scalar>("Cdelta", 0.158)
+    ),
+    calcInterval_
+    (
+        dd.subDict(type() + "Coeffs").lookupOrDefault<label>("calcInterval", 1)
     )
 {
     delta_ = geometricDelta_();
@@ -131,14 +135,18 @@ void vanDriestDelta::read(const dictionary& d)
     d.readIfPresent<scalar>("kappa", kappa_);
     dd.readIfPresent<scalar>("Aplus", Aplus_);
     dd.readIfPresent<scalar>("Cdelta", Cdelta_);
+    dd.readIfPresent<label>("calcInterval", calcInterval_);
     calcDelta();
 }
 
 
 void vanDriestDelta::correct()
 {
-    geometricDelta_().correct();
-    calcDelta();
+    if (mesh().time().timeIndex() % calcInterval_ == 0)
+    {
+        geometricDelta_().correct();
+        calcDelta();
+    }
 }
 
 

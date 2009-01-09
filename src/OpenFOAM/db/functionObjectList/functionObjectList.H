@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ Class
     Foam::functionObjectList
 
 Description
-    List of function objects with execute function which is called for
-    each object.
+    List of function objects with execute() function that is called for each
+    object.
 
 See Also
     Foam::functionObject and Foam::OutputFilterFunctionObject
@@ -41,7 +41,8 @@ SourceFiles
 #define functionObjectList_H
 
 #include "functionObject.H"
-#include "HashPtrTable.H"
+#include "HashTable.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,25 +50,40 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class functionObjectList Declaration
+                     Class functionObjectList Declaration
 \*---------------------------------------------------------------------------*/
 
 class functionObjectList
-:
-    public HashPtrTable<functionObject>
 {
     // Private data
 
+        //- A list of function objects
+        //  Avoid 'is-a' relationship for protection
+        PtrList<functionObject> functions_;
+
+        //- Quick lookup of the index into the PtrList<functionObject>
+        //  Currently only used to manage rereading/deletion
+        HashTable<label>  indices_;
+
         const Time& time_;
 
-        //- Dictionary containing the list of function object specifications
-        const dictionary& foDict_;
+        //- Dictionary containing the "functions" entry
+        //  This entry can either be a list or a dictionary of
+        //  functionObject specifications.
+        const dictionary& parentDict_;
 
         //- Switch for the execution of the functionObjects
         bool execution_;
 
+        //- Tracks if read() was called while execution was turned off
+        bool updated_;
+
 
     // Private Member Functions
+
+        //- Remove and return the function object pointer by name.
+        //  Return NULL if it didn't exist.
+        functionObject* remove(const word&);
 
         //- Disallow default bitwise copy construct
         functionObjectList(const functionObjectList&);
@@ -85,17 +101,17 @@ public:
         functionObjectList
         (
             const Time&,
-            const bool execution = true
+            const bool execution=true
         );
 
 
-        //- Construct from Time, functionObject dictionary and the execution
-        //  setting
+        //- Construct from Time, dictionary with "functions" entry
+        //  and the execution setting
         functionObjectList
         (
             const Time&,
-            const dictionary& foDict,
-            const bool execution = true
+            const dictionary& parentDict,
+            const bool execution=true
         );
 
 
@@ -118,7 +134,7 @@ public:
         //- Switch the function objects off
         virtual void off();
 
-        //- Read and set the function objects if their data has changed
+        //- Read and set the function objects if their data have changed
         virtual bool read();
 };
 

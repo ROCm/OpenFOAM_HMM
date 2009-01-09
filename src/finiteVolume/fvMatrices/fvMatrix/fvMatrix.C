@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -336,8 +336,8 @@ Foam::fvMatrix<Type>::fvMatrix
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>(GeometricField<Type, fvPatchField, volMesh>&,"
-               " Istream&) : "
+        Info<< "fvMatrix<Type>"
+               "(GeometricField<Type, fvPatchField, volMesh>&, Istream&) : "
                "constructing fvMatrix<Type> for field " << psi_.name()
             << endl;
     }
@@ -1257,7 +1257,7 @@ template<class Type>
 Foam::lduMatrix::solverPerformance Foam::solve
 (
     fvMatrix<Type>& fvm,
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     return fvm.solve(solverControls);
@@ -1267,7 +1267,7 @@ template<class Type>
 Foam::lduMatrix::solverPerformance Foam::solve
 (
     const tmp<fvMatrix<Type> >& tfvm,
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     lduMatrix::solverPerformance solverPerf =

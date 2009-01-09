@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,8 +45,10 @@ Description
 
 int main(int argc, char *argv[])
 {
+    // enable -constant ... if someone really wants it
+    // enable -zeroTime to prevent accidentally trashing the initial fields
+    timeSelector::addOptions(true, true);
     argList::noParallel();
-    timeSelector::addOptions();
 #   include "addRegionOption.H"
     argList::validOptions.insert("fields", "\"(list of fields)\"");
 

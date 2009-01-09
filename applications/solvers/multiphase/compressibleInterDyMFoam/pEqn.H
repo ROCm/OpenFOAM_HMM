@@ -21,7 +21,7 @@
     surfaceScalarField phiU
     (
         "phiU",
-        (fvc::interpolate(U) & mesh.Sf()) + fvc::ddtPhiCorr(rUA, rho, U, phi)
+        (fvc::interpolate(U) & mesh.Sf())
     );
 
     phi = phiU +
@@ -30,7 +30,7 @@
           - ghf*fvc::snGrad(rho)
         )*rUAf*mesh.magSf();
 
-    for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pdEqnIncomp
         (
@@ -38,15 +38,36 @@
           - fvm::laplacian(rUAf, pd)
         );
 
-        solve
+        if
         (
+            oCorr == nOuterCorr-1
+            && corr == nCorr-1
+            && nonOrth == nNonOrthCorr
+        )
+        {
+            solve
             (
-                max(alpha1, scalar(0))*(psi1/rho1)
-              + max(alpha2, scalar(0))*(psi2/rho2)
-            )
-           *pdEqnComp()
-          + pdEqnIncomp
-        );
+                (
+                    max(alpha1, scalar(0))*(psi1/rho1)
+                  + max(alpha2, scalar(0))*(psi2/rho2)
+                )
+               *pdEqnComp()
+              + pdEqnIncomp,
+                mesh.solver(pd.name() + "Final")
+            );
+        }
+        else
+        {
+            solve
+            (
+                (
+                    max(alpha1, scalar(0))*(psi1/rho1)
+                  + max(alpha2, scalar(0))*(psi2/rho2)
+                )
+               *pdEqnComp()
+              + pdEqnIncomp
+            );
+        }
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -62,7 +83,8 @@
 
     p = max
         (
-            (pd + gh*(alpha1*rho10 + alpha2*rho20))/(1.0 - gh*(alpha1*psi1 + alpha2*psi2)),
+            (pd + gh*(alpha1*rho10 + alpha2*rho20))
+           /(1.0 - gh*(alpha1*psi1 + alpha2*psi2)),
             pMin
         );
 

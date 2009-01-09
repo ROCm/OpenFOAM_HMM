@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,33 +39,6 @@ namespace Foam
     addNamedToRunTimeSelectionTable(sampledSurface, sampledPlane, word, plane);
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::sampledPlane::createGeometry
-(
-    const polyMesh& mesh,
-    const label zoneId
-)
-{
-    sampledSurface::clearGeom();
-
-    if (zoneId < 0)
-    {
-        reCut(mesh);
-    }
-    else
-    {
-        reCut(mesh, mesh.cellZones()[zoneId]);
-    }
-
-    if (debug)
-    {
-        print(Pout);
-        Pout << endl;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::sampledPlane::sampledPlane
@@ -78,21 +51,17 @@ Foam::sampledPlane::sampledPlane
 :
     sampledSurface(name, mesh),
     cuttingPlane(planeDesc),
-    zoneName_(zoneName)
+    zoneName_(zoneName),
+    needsUpdate_(true)
 {
-    label zoneId = -1;
-    if (zoneName_.size())
+    if (debug && zoneName_.size())
     {
-        zoneId = mesh.cellZones().findZoneID(zoneName_);
-        if (debug && zoneId < 0)
+        if (mesh.cellZones().findZoneID(zoneName_) < 0)
         {
             Info<< "cellZone \"" << zoneName_
-                << "\" not found - using entire mesh"
-                << endl;
+                << "\" not found - using entire mesh" << endl;
         }
     }
-
-    createGeometry(mesh, zoneId);
 }
 
 
@@ -105,9 +74,9 @@ Foam::sampledPlane::sampledPlane
 :
     sampledSurface(name, mesh, dict),
     cuttingPlane(plane(dict.lookup("basePoint"), dict.lookup("normalVector"))),
-    zoneName_(word::null)
+    zoneName_(word::null),
+    needsUpdate_(true)
 {
-
     // make plane relative to the coordinateSystem (Cartesian)
     // allow lookup from global coordinate systems
     if (dict.found("coordinateSystem"))
@@ -121,21 +90,17 @@ Foam::sampledPlane::sampledPlane
         static_cast<plane&>(*this) = plane(base, norm);
     }
 
+    dict.readIfPresent("zone", zoneName_);
 
-    label zoneId = -1;
-    if (dict.readIfPresent("zone", zoneName_))
+    if (debug && zoneName_.size())
     {
-        zoneId = mesh.cellZones().findZoneID(zoneName_);
-        if (debug && zoneId < 0)
+        if (mesh.cellZones().findZoneID(zoneName_) < 0)
         {
             Info<< "cellZone \"" << zoneName_
-                << "\" not found - using entire mesh"
-                << endl;
+                << "\" not found - using entire mesh" << endl;
         }
     }
 
-
-    createGeometry(mesh, zoneId);
 }
 
 
@@ -147,19 +112,59 @@ Foam::sampledPlane::~sampledPlane()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sampledPlane::correct(const bool meshChanged)
+bool Foam::sampledPlane::needsUpdate() const
 {
-    // Only change of mesh changes plane - zone restriction gets lost
-    if (meshChanged)
-    {
-        label zoneId = -1;
-        if (zoneName_.size())
-        {
-            zoneId = mesh().cellZones().findZoneID(zoneName_);
-        }
+    return needsUpdate_;
+}
 
-        createGeometry(mesh(), zoneId);
+
+bool Foam::sampledPlane::expire()
+{
+    // already marked as expired
+    if (needsUpdate_)
+    {
+        return false;
     }
+
+    sampledSurface::clearGeom();
+
+    needsUpdate_ = true;
+    return true;
+}
+
+
+bool Foam::sampledPlane::update()
+{
+    if (!needsUpdate_)
+    {
+        return false;
+    }
+
+    sampledSurface::clearGeom();
+
+    label zoneId = -1;
+    if (zoneName_.size())
+    {
+        zoneId = mesh().cellZones().findZoneID(zoneName_);
+    }
+
+    if (zoneId < 0)
+    {
+        reCut(mesh());
+    }
+    else
+    {
+        reCut(mesh(), mesh().cellZones()[zoneId]);
+    }
+
+    if (debug)
+    {
+        print(Pout);
+        Pout << endl;
+    }
+
+    needsUpdate_ = false;
+    return true;
 }
 
 
@@ -181,6 +186,7 @@ Foam::sampledPlane::sample
 {
     return sampleField(vField);
 }
+
 
 Foam::tmp<Foam::sphericalTensorField>
 Foam::sampledPlane::sample

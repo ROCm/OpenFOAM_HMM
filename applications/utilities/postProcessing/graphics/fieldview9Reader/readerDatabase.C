@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,10 +74,7 @@ void Foam::readerDatabase::getPolyHedra()
         }
     }
 
-    polys.shrink();
-
     Info<< "Found " << polys.size() << " polyhedral cells " << endl;
-
     polys_.transfer(polys);
 }
 

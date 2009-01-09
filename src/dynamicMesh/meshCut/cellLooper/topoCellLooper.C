@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ void Foam::topoCellLooper::subsetList
                 << "startI:" << startI << "  freeI:" << freeI
                 << "  lst:" << lst << abort(FatalError);
         }
-        lst.setSize(freeI);
+        lst.setCapacity(freeI);
     }
     else
     {
@@ -88,7 +88,7 @@ void Foam::topoCellLooper::subsetList
                 << "  lst:" << lst << abort(FatalError);
         }
 
-        lst.setSize(freeI - startI);
+        lst.setCapacity(freeI - startI);
     }
 }
 
@@ -787,9 +787,6 @@ bool Foam::topoCellLooper::cut
             }
             else
             {
-                localLoop.shrink();
-                localLoopWeights.shrink();
-
                 loop.transfer(localLoop);
                 loopWeights.transfer(localLoopWeights);
 
@@ -799,17 +796,16 @@ bool Foam::topoCellLooper::cut
         else
         {
             // Let parent handle poly case.
-            return
-                hexCellLooper::cut
-                (
-                    refDir,
-                    cellI,
-                    vertIsCut,
-                    edgeIsCut,
-                    edgeWeight,
-                    loop,
-                    loopWeights
-                );
+            return hexCellLooper::cut
+            (
+                refDir,
+                cellI,
+                vertIsCut,
+                edgeIsCut,
+                edgeWeight,
+                loop,
+                loopWeights
+            );
         }
     }
 }

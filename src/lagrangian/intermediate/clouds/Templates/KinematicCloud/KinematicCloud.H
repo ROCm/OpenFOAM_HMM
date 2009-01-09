@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -223,13 +223,6 @@ protected:
 
     // Protected member functions
 
-        //- Set parcel position and cell into which parcel is introduced
-        void setInjectorCellAndPosition
-        (
-            label& pCell,
-            vector& pPosition
-        );
-
         //- Set the number of particles per parcel
         scalar setNumberOfParticles
         (
@@ -241,16 +234,10 @@ protected:
         );
 
         //- Inject more parcels
-        template<class TrackingData>
-        void inject(TrackingData& td);
+        void inject();
 
         //- Inject parcel if it is valid - delete otherwise
-        template<class TrackingData>
-        void injectParcel
-        (
-            TrackingData& td,
-            ParcelType* p
-        );
+        void injectParcel(ParcelType* p);
 
         //- Post-injection checks
         void postInjectCheck();

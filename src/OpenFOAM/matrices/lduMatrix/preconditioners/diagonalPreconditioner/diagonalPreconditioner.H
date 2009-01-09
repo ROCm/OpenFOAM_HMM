@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ class diagonalPreconditioner
 {
     // Private data
 
-        //- The reciprocal diagonal 
+        //- The reciprocal diagonal
         scalarField rD;
 
 
@@ -77,11 +77,11 @@ public:
 
     // Constructors
 
-        //- Construct from matrix components and preconditioner data stream
+        //- Construct from matrix components and preconditioner solver controls
         diagonalPreconditioner
         (
-            const lduMatrix::solver& sol,
-            Istream& preconditionerData
+            const lduMatrix::solver&,
+            const dictionary& solverControlsUnused
         );
 
 
@@ -93,9 +93,6 @@ public:
 
     // Member Functions
 
-        //- Read and reset the preconditioner parameters from the given stream
-        virtual void read(Istream& preconditionerData);
-
         //- Return wA the preconditioned form of residual rA
         virtual void precondition
         (
@@ -104,8 +101,7 @@ public:
             const direction cmpt=0
         ) const;
 
-        //- Return wT the transpose-matrix preconditioned form of
-        //  residual rT.
+        //- Return wT the transpose-matrix preconditioned form of residual rT.
         virtual void preconditionT
         (
             scalarField& wT,
@@ -113,7 +109,7 @@ public:
             const direction cmpt=0
         ) const
         {
-            return(precondition(wT, rT, cmpt));
+            return precondition(wT, rT, cmpt);
         }
 };
 

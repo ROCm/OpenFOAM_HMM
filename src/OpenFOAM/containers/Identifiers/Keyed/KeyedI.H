@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ inline Foam::Keyed<T>::Keyed(const T& item, const label key)
 
 
 template<class T>
-inline Foam::Keyed<T>::Keyed(const xfer<T>& item, const label key)
+inline Foam::Keyed<T>::Keyed(const Xfer<T>& item, const label key)
 :
     T(item),
     key_(key)

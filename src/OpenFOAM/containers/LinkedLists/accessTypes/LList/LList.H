@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,7 +67,7 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           Class LList Declaration
+                            Class LList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class LListBase, class T>
@@ -200,6 +200,9 @@ public:
             //- Delete contents of list
             void clear();
 
+            //- Transfer the contents of the argument into this List
+            //  and annull the argument list.
+            void transfer(LList<LListBase, T>&);
 
     // Member operators
 

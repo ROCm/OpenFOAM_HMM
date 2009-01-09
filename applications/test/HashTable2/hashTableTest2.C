@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ Description
 
 #include "HashTable.H"
 #include "HashPtrTable.H"
+#include "Map.H"
 
 using namespace Foam;
 
@@ -36,38 +37,46 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    HashTable<label, Foam::string> testTable(0);
+    HashTable<label, Foam::string> table1(0);
 
-    testTable.insert("kjhk", 10);
-    testTable.insert("kjhk2", 12);
+    table1.insert("kjhk", 10);
+    table1.insert("kjhk2", 12);
 
-    Info<< testTable << endl;
-    Info<< testTable.toc() << endl;
+    Info<< "table1: " << table1 << nl
+        << "toc: " << table1.toc() << endl;
 
-    HashTable<label, label, Hash<label> > testTable2(10);
+    HashTable<label, label, Hash<label> > table2(10);
 
-    testTable2.insert(3, 10);
-    testTable2.insert(5, 12);
-    testTable2.insert(7, 16);
+    table2.insert(3, 10);
+    table2.insert(5, 12);
+    table2.insert(7, 16);
 
-    Info<< testTable2 << endl;
-    Info<< testTable2.toc() << endl;
+    Info<< "table2: " << table2 << nl
+        << "toc: " << table2.toc() << endl;
 
-    HashTable<label, label, Hash<label> > testTable3(1);
-    testTable3.transfer(testTable2);
+    Map<label> table3(1);
+    table3.transfer(table2);
 
-    Info<< testTable2 << endl;
-    Info<< testTable2.toc() << endl;
+    Info<< "table2: " << table2 << nl
+        << "toc: " << table2.toc() << endl;
 
-    Info<< testTable3 << endl;
-    Info<< testTable3.toc() << endl;
+    Info<< "table3: " << table3 << nl
+        << "toc: " << table3.toc() << endl;
 
-    Foam::HashPtrTable<label, Foam::string> testPtrTable(0);
-    testPtrTable.insert("kjhkjh", new label(10));
+    Map<label> table4(table3.xfer());
 
-    Info<< testPtrTable.toc() << endl;
+    Info<< "table3: " << table3 << nl
+        << "toc: " << table3.toc() << endl;
 
-    Info << "End\n" << endl;
+    Info<< "table4: " << table4 << nl
+        << "toc: " << table4.toc() << endl;
+
+    HashPtrTable<label, Foam::string> ptable1(0);
+    ptable1.insert("kjhkjh", new label(10));
+
+    Info<< "PtrTable toc: " << ptable1.toc() << endl;
+
+    Info<< "End\n" << endl;
 
     return 0;
 }

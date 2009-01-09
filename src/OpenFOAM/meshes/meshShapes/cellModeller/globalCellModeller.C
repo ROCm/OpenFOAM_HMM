@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
+    cellModeller global initializations
 
 \*---------------------------------------------------------------------------*/
 
@@ -30,24 +31,25 @@ Description
 #include "OSspecific.H"
 #include "IFstream.H"
 
+// * * * * * * * * * * * * * * * Static data * * * * * * * * * * * * * * * * //
+
+
+// PtrList of models
+Foam::PtrList<Foam::cellModel> Foam::cellModeller::models_
+(
+    IFstream(findEtcFile("cellModels", true))()
+);
+
+// List of model pointers
+Foam::List<Foam::cellModel*> Foam::cellModeller::modelPtrs_;
+
+// HashTable of model pointers
+Foam::HashTable<const Foam::cellModel*> Foam::cellModeller::modelDictionary_;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * Static data * * * * * * * * * * * * * * * * //
-
-// PtrList of models
-PtrList<cellModel> cellModeller::models_
-(
-    (IFstream(dotFoam("cellModels"))())
-);
-
-// List of model pointers
-List<cellModel*> cellModeller::modelPtrs_;
-
-// HashTable of model pointers
-HashTable<const cellModel*> cellModeller::modelDictionary_;
 
 // Construct a dummy cellModeller which reads the models and fills
 // the above tables

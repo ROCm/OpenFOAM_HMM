@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,8 @@ void Foam::sampledIsoSurface::getIsoFields() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
+    word pointFldName = "volPointInterpolate(" + isoField_ + ')';
+
     // Get volField
     // ~~~~~~~~~~~~
 
@@ -64,36 +66,62 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if (debug)
         {
-            Info<< "sampledIsoSurface::getIsoField() : reading "
-                << isoField_ << " from time " << fvm.time().timeName()
+            Info<< "sampledIsoSurface::getIsoField() : checking "
+                << isoField_ << " for same time " << fvm.time().timeName()
                 << endl;
         }
 
-        storedVolFieldPtr_.reset
+        if
         (
-            new volScalarField
+           !storedVolFieldPtr_.valid()
+         || (fvm.time().timeName() != storedVolFieldPtr_().instance())
+        )
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : reading "
+                    << isoField_ << " from time " << fvm.time().timeName()
+                    << endl;
+            }
+
+            storedVolFieldPtr_.reset
             (
-                IOobject
+                new volScalarField
                 (
-                    isoField_,
-                    fvm.time().timeName(),
-                    fvm,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                fvm
-            )
-        );
-        volFieldPtr_ = storedVolFieldPtr_.operator->();
+                    IOobject
+                    (
+                        isoField_,
+                        fvm.time().timeName(),
+                        fvm,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    fvm
+                )
+            );
+            volFieldPtr_ = storedVolFieldPtr_.operator->();
+
+            // Interpolate to get pointField
+
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : interpolating "
+                    << pointFldName << endl;
+            }
+
+            storedPointFieldPtr_.reset
+            (
+                volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
+            );
+            pointFieldPtr_ = storedPointFieldPtr_.operator->();
+        }
     }
 
 
 
     // Get pointField
     // ~~~~~~~~~~~~~~
-
-    word pointFldName = "volPointInterpolate(" + isoField_ + ')';
 
     if (fvm.foundObject<pointScalarField>(pointFldName))
     {
@@ -102,7 +130,6 @@ void Foam::sampledIsoSurface::getIsoFields() const
             Info<< "sampledIsoSurface::getIsoField() : lookup "
                 << pointFldName << endl;
         }
-        storedPointFieldPtr_.clear();
         pointFieldPtr_ = &fvm.lookupObject<pointScalarField>(pointFldName);
     }
     else
@@ -111,15 +138,29 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if (debug)
         {
-            Info<< "sampledIsoSurface::getIsoField() : interpolating "
-                << pointFldName << endl;
+            Info<< "sampledIsoSurface::getIsoField() : checking interpolate "
+                << isoField_ << " for same time " << fvm.time().timeName()
+                << endl;
         }
 
-        storedPointFieldPtr_.reset
+        if
         (
-            volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
-        );
-        pointFieldPtr_ = storedPointFieldPtr_.operator->();
+           !storedPointFieldPtr_.valid()
+         || (fvm.time().timeName() != storedPointFieldPtr_().instance())
+        )
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : interpolating "
+                    << pointFldName << endl;
+            }
+
+            storedPointFieldPtr_.reset
+            (
+                volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
+            );
+            pointFieldPtr_ = storedPointFieldPtr_.operator->();
+        }
     }
 
     if (debug)
@@ -135,100 +176,105 @@ void Foam::sampledIsoSurface::getIsoFields() const
 }
 
 
-void Foam::sampledIsoSurface::createGeometry() const
+bool Foam::sampledIsoSurface::updateGeometry() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
-    if (fvm.time().timeIndex() != storedTimeIndex_)
+    // no update needed
+    if (fvm.time().timeIndex() == prevTimeIndex_)
     {
-        storedTimeIndex_ = fvm.time().timeIndex();
+        return false;
+    }
 
-        getIsoFields();
 
-        // Clear any stored topo
-        surfPtr_.clear();
-        facesPtr_.clear();
+    prevTimeIndex_ = fvm.time().timeIndex();
+    getIsoFields();
 
-        if (average_)
-        {
-            //- From point field and interpolated cell.
-            volScalarField cellAvg
+    // Clear any stored topo
+    surfPtr_.clear();
+    facesPtr_.clear();
+
+    if (average_)
+    {
+        //- From point field and interpolated cell.
+        volScalarField cellAvg
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "cellAvg",
-                    fvm.time().timeName(),
-                    fvm.time(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                fvm,
-                dimensionedScalar("zero", dimless, scalar(0.0))
-            );
-            labelField nPointCells(fvm.nCells(), 0);
+                "cellAvg",
+                fvm.time().timeName(),
+                fvm.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fvm,
+            dimensionedScalar("zero", dimless, scalar(0.0))
+        );
+        labelField nPointCells(fvm.nCells(), 0);
+        {
+            for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
             {
-                for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
+                const labelList& pCells = fvm.pointCells(pointI);
+
+                forAll(pCells, i)
                 {
-                    const labelList& pCells = fvm.pointCells(pointI);
+                    label cellI = pCells[i];
 
-                    forAll(pCells, i)
-                    {
-                        label cellI = pCells[i];
-
-                        cellAvg[cellI] += (*pointFieldPtr_)[pointI];
-                        nPointCells[cellI]++;
-                    }
+                    cellAvg[cellI] += (*pointFieldPtr_)[pointI];
+                    nPointCells[cellI]++;
                 }
             }
-            forAll(cellAvg, cellI)
-            {
-                cellAvg[cellI] /= nPointCells[cellI];
-            }
-            // Give value to calculatedFvPatchFields
-            cellAvg.correctBoundaryConditions();
-
-            surfPtr_.reset
-            (
-                new isoSurface
-                (
-                    cellAvg,
-                    *pointFieldPtr_,
-                    isoVal_,
-                    regularise_
-                )
-            );
         }
-        else
+        forAll(cellAvg, cellI)
         {
-            //- Direct from cell field and point field.
-            surfPtr_.reset
+            cellAvg[cellI] /= nPointCells[cellI];
+        }
+        // Give value to calculatedFvPatchFields
+        cellAvg.correctBoundaryConditions();
+
+        surfPtr_.reset
+        (
+            new isoSurface
             (
-                new isoSurface
-                (
-                    *volFieldPtr_,
-                    *pointFieldPtr_,
-                    isoVal_,
-                    regularise_
-                )
-            );
-        }
-
-
-        if (debug)
-        {
-            Pout<< "sampledIsoSurface::createGeometry() : constructed iso:"
-                << nl
-                << "    regularise     : " << regularise_ << nl
-                << "    average        : " << average_ << nl
-                << "    isoField       : " << isoField_ << nl
-                << "    isoValue       : " << isoVal_ << nl
-                << "    points         : " << points().size() << nl
-                << "    tris           : " << surface().size() << nl
-                << "    cut cells      : " << surface().meshCells().size()
-                << endl;
-        }
+                cellAvg,
+                *pointFieldPtr_,
+                isoVal_,
+                regularise_
+            )
+        );
     }
+    else
+    {
+        //- Direct from cell field and point field.
+        surfPtr_.reset
+        (
+            new isoSurface
+            (
+                *volFieldPtr_,
+                *pointFieldPtr_,
+                isoVal_,
+                regularise_
+            )
+        );
+    }
+
+
+    if (debug)
+    {
+        Pout<< "sampledIsoSurface::updateGeometry() : constructed iso:"
+            << nl
+            << "    regularise     : " << regularise_ << nl
+            << "    average        : " << average_ << nl
+            << "    isoField       : " << isoField_ << nl
+            << "    isoValue       : " << isoVal_ << nl
+            << "    points         : " << points().size() << nl
+            << "    tris           : " << surface().size() << nl
+            << "    cut cells      : " << surface().meshCells().size()
+            << endl;
+    }
+
+    return true;
 }
 
 
@@ -249,7 +295,7 @@ Foam::sampledIsoSurface::sampledIsoSurface
     zoneName_(word::null),
     surfPtr_(NULL),
     facesPtr_(NULL),
-    storedTimeIndex_(-1),
+    prevTimeIndex_(-1),
     storedVolFieldPtr_(NULL),
     volFieldPtr_(NULL),
     storedPointFieldPtr_(NULL),
@@ -265,15 +311,14 @@ Foam::sampledIsoSurface::sampledIsoSurface
             << " span across cells." << exit(FatalError);
     }
 
-//    label zoneId = -1;
-//    if (dict.readIfPresent("zone", zoneName_))
+//    dict.readIfPresent("zone", zoneName_);
+//
+//    if (debug && zoneName_.size())
 //    {
-//        zoneId = mesh.cellZones().findZoneID(zoneName_);
-//        if (debug && zoneId < 0)
+//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
 //        {
 //            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh"
-//                << endl;
+//                << "\" not found - using entire mesh" << endl;
 //        }
 //    }
 }
@@ -287,14 +332,34 @@ Foam::sampledIsoSurface::~sampledIsoSurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sampledIsoSurface::correct(const bool meshChanged)
+bool Foam::sampledIsoSurface::needsUpdate() const
 {
-    // Only change of mesh changes plane - zone restriction gets lost
-    if (meshChanged)
+    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
+
+    return fvm.time().timeIndex() != prevTimeIndex_;
+}
+
+
+bool Foam::sampledIsoSurface::expire()
+{
+    surfPtr_.clear();
+    facesPtr_.clear();
+
+    // already marked as expired
+    if (prevTimeIndex_ == -1)
     {
-        surfPtr_.clear();
-        facesPtr_.clear();
+        return false;
     }
+
+    // force update
+    prevTimeIndex_ = -1;
+    return true;
+}
+
+
+bool Foam::sampledIsoSurface::update()
+{
+    return updateGeometry();
 }
 
 

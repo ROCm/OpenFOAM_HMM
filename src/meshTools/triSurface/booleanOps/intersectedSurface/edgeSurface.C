@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -287,18 +287,12 @@ Foam::edgeSurface::edgeSurface
     }
 
     // Transfer.
-    allEdges.shrink();
     edges_.transfer(allEdges);
-
-    allParentEdges.shrink();
     parentEdges_.transfer(allParentEdges);
 
     forAll(allFaceEdges, faceI)
     {
-        DynamicList<label>& allFEdges = allFaceEdges[faceI];
-
-        allFEdges.shrink();
-        faceEdges_[faceI].transfer(allFEdges);
+        faceEdges_[faceI].transfer(allFaceEdges[faceI]);
     }
 
 

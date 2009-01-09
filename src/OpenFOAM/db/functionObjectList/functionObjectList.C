@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,26 @@ License
 #include "functionObjectList.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::functionObject* Foam::functionObjectList::remove(const word& key)
+{
+    functionObject* ptr = 0;
+
+    // Find index of existing functionObject
+    HashTable<label>::iterator fnd = indices_.find(key);
+
+    if (fnd != indices_.end())
+    {
+        // remove the pointer from the old list
+        ptr = functions_.set(fnd(), 0).ptr();
+        indices_.erase(fnd);
+    }
+
+    return ptr;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjectList::functionObjectList
@@ -35,24 +55,28 @@ Foam::functionObjectList::functionObjectList
     const bool execution
 )
 :
-    HashPtrTable<functionObject>(),
+    functions_(),
+    indices_(),
     time_(t),
-    foDict_(t.controlDict()),
-    execution_(execution)
+    parentDict_(t.controlDict()),
+    execution_(execution),
+    updated_(false)
 {}
 
 
 Foam::functionObjectList::functionObjectList
 (
     const Time& t,
-    const dictionary& foDict,
+    const dictionary& parentDict,
     const bool execution
 )
 :
-    HashPtrTable<functionObject>(),
+    functions_(),
+    indices_(),
     time_(t),
-    foDict_(foDict),
-    execution_(execution)
+    parentDict_(parentDict),
+    execution_(execution),
+    updated_(false)
 {}
 
 
@@ -66,52 +90,28 @@ Foam::functionObjectList::~functionObjectList()
 
 bool Foam::functionObjectList::start()
 {
-    if (execution_)
-    {
-        bool ok = false;
-
-        if (foDict_.found("functions"))
-        {
-            HashPtrTable<functionObject> functions
-            (
-                foDict_.lookup("functions"),
-                functionObject::iNew(time_)
-            );
-
-            transfer(functions);
-
-            forAllIter(HashPtrTable<functionObject>, *this, iter)
-            {
-                ok = iter()->start() && ok;
-            }
-        }
-
-        return ok;
-    }
-    else
-    {
-        return true;
-    }
+    return read();
 }
 
 
 bool Foam::functionObjectList::execute()
 {
+    bool ok = true;
+
     if (execution_)
     {
-        bool ok = false;
-
-        forAllIter(HashPtrTable<functionObject>, *this, iter)
+        if (!updated_)
         {
-            ok = iter()->execute() && ok;
+            read();
         }
 
-        return ok;
+        forAllIter(PtrList<functionObject>, functions_, iter)
+        {
+            ok = iter().execute() && ok;
+        }
     }
-    else
-    {
-        return true;
-    }
+
+    return ok;
 }
 
 
@@ -129,46 +129,108 @@ void Foam::functionObjectList::off()
 
 bool Foam::functionObjectList::read()
 {
-    bool read = false;
+    bool ok = true;
+    updated_ = execution_;
 
-    if (foDict_.found("functions"))
+    // avoid reading/initializing if execution is off
+    if (!execution_)
     {
-        HashPtrTable<dictionary> functionDicts(foDict_.lookup("functions"));
+        return ok;
+    }
 
-        // Update existing and add new functionObjects
-        forAllConstIter(HashPtrTable<dictionary>, functionDicts, iter)
+    // Update existing and add new functionObjects
+    const entry* entryPtr = parentDict_.lookupEntryPtr("functions",false,false);
+    if (entryPtr)
+    {
+        PtrList<functionObject> newPtrs;
+        HashTable<label> newIndices;
+
+        label nFunc = 0;
+
+        if (entryPtr->isDict())
         {
-            if (found(iter.key()))
+            // a dictionary of functionObjects
+            const dictionary& functionDicts = entryPtr->dict();
+            newPtrs.setSize(functionDicts.size());
+
+            forAllConstIter(dictionary, functionDicts, iter)
             {
-                read = find(iter.key())()->read(*iter()) && read;
+                // safety:
+                if (!iter().isDict())
+                {
+                    continue;
+                }
+                const word& key = iter().keyword();
+                const dictionary& dict = iter().dict();
+
+                functionObject* objPtr = remove(key);
+                if (objPtr)
+                {
+                    // existing functionObject
+                    ok = objPtr->read(dict) && ok;
+                }
+                else
+                {
+                    // new functionObject
+                    objPtr = functionObject::New(key, time_, dict).ptr();
+                    ok = objPtr->start() && ok;
+                }
+
+                newPtrs.set(nFunc, objPtr);
+                newIndices.insert(key, nFunc);
+                nFunc++;
             }
-            else
+        }
+        else
+        {
+            // a list of functionObjects
+            PtrList<entry> functionDicts(entryPtr->stream());
+            newPtrs.setSize(functionDicts.size());
+
+            forAllIter(PtrList<entry>, functionDicts, iter)
             {
-                functionObject* functionObjectPtr =
-                    functionObject::New(iter.key(), time_, *iter()).ptr();
+                // safety:
+                if (!iter().isDict())
+                {
+                    continue;
+                }
+                const word& key = iter().keyword();
+                const dictionary& dict = iter().dict();
 
-                functionObjectPtr->start();
+                functionObject* objPtr = remove(key);
+                if (objPtr)
+                {
+                    // existing functionObject
+                    ok = objPtr->read(dict) && ok;
+                }
+                else
+                {
+                    // new functionObject
+                    objPtr = functionObject::New(key, time_, dict).ptr();
+                    ok = objPtr->start() && ok;
+                }
 
-                insert(iter.key(), functionObjectPtr);
+                newPtrs.set(nFunc, objPtr);
+                newIndices.insert(key, nFunc);
+                nFunc++;
             }
         }
 
-        // Remove deleted functionObjects
-        forAllIter(HashPtrTable<functionObject>, *this, iter)
-        {
-            if (!functionDicts.found(iter.key()))
-            {
-                erase(iter);
-            }
-        }
+        // safety:
+        newPtrs.setSize(nFunc);
+
+        // update PtrList of functionObjects
+        // also deletes existing, unused functionObjects
+        functions_.transfer(newPtrs);
+        indices_.transfer(newIndices);
     }
     else
     {
-        clear();
-        read = true;
+        functions_.clear();
+        indices_.clear();
     }
 
-    return read;
+    return ok;
 }
 
 

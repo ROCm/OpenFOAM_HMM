@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,9 +74,6 @@ class coupleManager
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-//        coupleManager(const coupleManager&);
-
         //- Disallow default bitwise assignment
         void operator=(const coupleManager&);
 
@@ -128,6 +125,9 @@ public:
             //- Return a reference to the neighbour patch field
             template<class Type>
             inline const fvPatchField<Type>& neighbourPatchField() const;
+
+            //- Am I owner (= first to evaluate) of this region interface? 
+            bool regionOwner() const;
 
             //- Check that the couple is valid
             void checkCouple() const;

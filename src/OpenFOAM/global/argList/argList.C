@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,19 +37,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    SLList<string>    argList::validArgs;
-    HashTable<string> argList::validOptions;
-    HashTable<string> argList::validParOptions;
-}
+Foam::SLList<Foam::string>    Foam::argList::validArgs;
+Foam::HashTable<Foam::string> Foam::argList::validOptions;
+Foam::HashTable<Foam::string> Foam::argList::validParOptions;
+bool Foam::argList::bannerEnabled(true);
 
 
 Foam::argList::initValidTables::initValidTables()
 {
-    validOptions.insert("case", "dir");
-    validOptions.insert("parallel", "");
-    validParOptions.insert("parallel", "");
+    validOptions.set("case", "dir");
+    validOptions.set("parallel", "");
+    validParOptions.set("parallel", "");
 
     Pstream::addValidParOptions(validParOptions);
 }
@@ -138,7 +136,7 @@ void Foam::argList::getRootCase()
         casePath = cwd();
 
         // we could add this back in as '-case'?
-        // options_.insert("case", casePath);
+        // options_.set("case", casePath);
     }
 
     rootPath_   = casePath.path();
@@ -285,7 +283,7 @@ Foam::argList::argList
     string timeString = clock::clockTime();
 
     // Print the banner once only for parallel runs
-    if (Pstream::master())
+    if (Pstream::master() && bannerEnabled)
     {
         IOobject::writeBanner(Info, true);
         Info<< "Exec   : " << argListString.c_str() << nl
@@ -315,8 +313,6 @@ Foam::argList::argList
         // For the master
         if (Pstream::master())
         {
-            fileNameList roots;
-
             // establish rootPath_/globalCase_/case_ for master
             getRootCase();
 
@@ -333,45 +329,25 @@ Foam::argList::argList
                     << exit(FatalError);
             }
 
-            dictionary decompositionDict(decompDictStream);
-
-            Switch distributed(false);
-
-            if
-            (
-                decompositionDict.readIfPresent("distributed", distributed)
-             && distributed
-            )
-            {
-                decompositionDict.lookup("roots") >> roots;
-
-                if (roots.size() != Pstream::nProcs()-1)
-                {
-                    FatalError
-                        << "number of entries in decompositionDict::roots"
-                        << " is not equal to the number of slaves "
-                        << Pstream::nProcs()-1
-                        << exit(FatalError);
-                }
-            }
-
+            dictionary decompDict(decompDictStream);
 
             label dictNProcs
             (
                 readLabel
                 (
-                    decompositionDict.lookup("numberOfSubdomains")
+                    decompDict.lookup("numberOfSubdomains")
                 )
             );
 
-            // Check number of processors. We have nProcs(number of
-            // actual processes), dictNProcs(wanted number of processes read
-            // from decompositionDict) and nProcDirs(number of processor
-            // directories - n/a when running distributed)
+            // Check number of processors.
+            // nProcs     => number of actual procs
+            // dictNProcs => number of procs specified in decompositionDict
+            // nProcDirs  => number of processor directories
+            //               (n/a when running distributed)
             //
             // - normal running : nProcs = dictNProcs = nProcDirs
-            // - decomposition to more processors : nProcs = dictNProcs
-            // - decomposition to less processors : nProcs = nProcDirs
+            // - decomposition to more  processors : nProcs = dictNProcs
+            // - decomposition to fewer processors : nProcs = nProcDirs
             if (dictNProcs > Pstream::nProcs())
             {
                 FatalError
@@ -382,38 +358,23 @@ Foam::argList::argList
                     << exit(FatalError);
             }
 
-            if (!distributed && dictNProcs < Pstream::nProcs())
+            // distributed data
+            if (decompDict.lookupOrDefault<Switch>("distributed", false))
             {
-                // Possibly going to fewer processors.
-                // Check if all procDirs are there.
-                label nProcDirs = 0;
-                while
-                (
-                    dir
-                    (
-                        rootPath_/globalCase_/"processor"
-                      + name(++nProcDirs)
-                    )
-                )
-                {}
+                fileNameList roots;
+                decompDict.lookup("roots") >> roots;
 
-                if (nProcDirs != Pstream::nProcs())
+                if (roots.size() != Pstream::nProcs()-1)
                 {
                     FatalError
-                        << "number of processor directories = "
-                        << nProcDirs
-                        << " is not equal to the number of processors = "
-                        << Pstream::nProcs()
+                        << "number of entries in decompositionDict::roots"
+                        << " is not equal to the number of slaves "
+                        << Pstream::nProcs()-1
                         << exit(FatalError);
                 }
-            }
-
-            // distributed data
-            if (roots.size())
-            {
-                bool hadOptCase = options_.found("case");
 
                 // Distribute the master's argument list (with new root)
+                bool hadCaseOpt = options_.found("case");
                 for
                 (
                     int slave=Pstream::firstSlave();
@@ -421,8 +382,7 @@ Foam::argList::argList
                     slave++
                 )
                 {
-                    options_.erase("case");
-                    options_.insert
+                    options_.set
                     (
                         "case",
                         fileName(roots[slave-1])/globalCase_
@@ -431,17 +391,42 @@ Foam::argList::argList
                     OPstream toSlave(Pstream::scheduled, slave);
                     toSlave << args_ << options_;
                 }
-
                 options_.erase("case");
 
                 // restore [-case dir]
-                if (hadOptCase)
+                if (hadCaseOpt)
                 {
-                    options_.insert("case", rootPath_/globalCase_);
+                    options_.set("case", rootPath_/globalCase_);
                 }
             }
             else
             {
+                // Possibly going to fewer processors.
+                // Check if all procDirs are there.
+                if (dictNProcs < Pstream::nProcs())
+                {
+                    label nProcDirs = 0;
+                    while
+                    (
+                        dir
+                        (
+                            rootPath_/globalCase_/"processor"
+                          + name(++nProcDirs)
+                        )
+                    )
+                    {}
+
+                    if (nProcDirs != Pstream::nProcs())
+                    {
+                        FatalError
+                            << "number of processor directories = "
+                            << nProcDirs
+                            << " is not equal to the number of processors = "
+                            << Pstream::nProcs()
+                            << exit(FatalError);
+                    }
+                }
+
                 // Distribute the master's argument list (unaltered)
                 for
                 (
@@ -472,7 +457,6 @@ Foam::argList::argList
     {
         // establish rootPath_/globalCase_/case_
         getRootCase();
-
         case_ = globalCase_;
     }
 
@@ -510,21 +494,21 @@ Foam::argList::argList
     }
 
 
-    if (Pstream::master())
+    if (Pstream::master() && bannerEnabled)
     {
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
             << "nProcs : " << nProcs << endl;
-    }
 
-    if (parRunControl_.parRun() && Pstream::master())
-    {
-        Info<< "Slaves : " << slaveProcs << nl
-            << "Pstream initialized with:" << nl
-            << "    floatTransfer     : " << Pstream::floatTransfer << nl
-            << "    nProcsSimpleSum   : " << Pstream::nProcsSimpleSum << nl
-            << "    commsType         : "
-            << Pstream::commsTypeNames[Pstream::defaultCommsType]
-            << endl;
+        if (parRunControl_.parRun())
+        {
+            Info<< "Slaves : " << slaveProcs << nl
+                << "Pstream initialized with:" << nl
+                << "    floatTransfer     : " << Pstream::floatTransfer << nl
+                << "    nProcsSimpleSum   : " << Pstream::nProcsSimpleSum << nl
+                << "    commsType         : "
+                << Pstream::commsTypeNames[Pstream::defaultCommsType]
+                << endl;
+        }
     }
 
     jobInfo.add("root", rootPath_);
@@ -546,7 +530,7 @@ Foam::argList::argList
     sigQuit_.set();
     sigSegv_.set();
 
-    if (Pstream::master())
+    if (Pstream::master() && bannerEnabled)
     {
         Info<< endl;
         IOobject::writeDivider(Info);
@@ -563,6 +547,12 @@ Foam::argList::~argList()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::argList::noBanner()
+{
+    bannerEnabled = false;
+}
+
 
 void Foam::argList::noParallel()
 {

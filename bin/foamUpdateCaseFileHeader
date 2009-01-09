@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -45,8 +45,8 @@ options:
   -h      help
 
   Updates the header of application files and removes consecutive blank lines.
-  By default, writes current version in the header.
-  An alternative version can be specified with -v option.
+  By default, writes current OpenFOAM version in the header.
+  An alternative version can be specified with the -v option.
 
 USAGE
     exit 1
@@ -59,8 +59,8 @@ printHeader() {
 | =========                 |                                                 |
 | \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\\\    /   O peration     | Version:  ${foamVersion}  |
-|   \\\\  /    A nd           | Web:      http://www.OpenFOAM.org               |
-|    \\\\/     M anipulation  |                                                 |
+|   \\\\  /    A nd           |                                                 |
+|    \\\\/     M anipulation  |                                www.OpenFOAM.org |
 \\*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -84,13 +84,13 @@ FoamFileAttribute() {
 #
 # OPTIONS
 #
-OPTS=`getopt hv: $*`
+opts=$(getopt hv: $*)
 if [ $? -ne 0 ]
 then
     echo "Aborting due to invalid option"
     usage
 fi
-eval set -- '$OPTS'
+eval set -- '$opts'
 while [ "$1" != "--" ]
 do
     case $1 in
@@ -110,11 +110,13 @@ shift
 
 
 # constant width for version
-foamVersion=`printf %-36s $foamVersion`
+foamVersion=$(printf %-36s $foamVersion)
 
 #
 # MAIN
 #
+unset NOTE
+
 for caseFile
 do
     if grep FoamFile $caseFile >/dev/null 2>&1
@@ -122,16 +124,17 @@ do
         echo "Updating case file: $caseFile"
         sed -n '/FoamFile/,/}/p' $caseFile > FoamFile.tmp
 
-        CLASS=`FoamFileAttribute class FoamFile.tmp`
-        OBJECT=`FoamFileAttribute object FoamFile.tmp`
-        FORMAT=`FoamFileAttribute format FoamFile.tmp`
+        FORMAT=$(FoamFileAttribute format FoamFile.tmp)
+        CLASS=$(FoamFileAttribute  class  FoamFile.tmp)
+        OBJECT=$(FoamFileAttribute object FoamFile.tmp)
+        # extract NOTE?
 
         printHeader $FORMAT $CLASS $OBJECT $NOTE > FoamFile.tmp
         sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> FoamFile.tmp
 
         # use cat to avoid removing/replace soft-links
         [ -s FoamFile.tmp ] && cat FoamFile.tmp >| $caseFile
-        rm FoamFile.tmp
+        rm -f FoamFile.tmp 2>/dev/null
     else
         echo " Invalid case file: $caseFile" 1>&2
     fi

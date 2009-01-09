@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,7 +174,7 @@ void Foam::ReactingCloud<ParcelType>::evolve()
         this->g().value()
     );
 
-    inject(td);
+    inject();
 
     if (this->coupled())
     {
@@ -186,15 +186,11 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 
 
 template<class ParcelType>
-template<class TrackingData>
-void Foam::ReactingCloud<ParcelType>::inject
-(
-    TrackingData& td
-)
+void Foam::ReactingCloud<ParcelType>::inject()
 {
     scalar time = this->db().time().value();
 
-    scalar pRho = td.constProps().rho0();
+    scalar pRho = this->constProps().rho0();
 
     this->injection().prepareForNextTimeStep(this->time0(), time);
 
@@ -269,14 +265,14 @@ void Foam::ReactingCloud<ParcelType>::inject
 
         // Determine the injection cell
         label pCell = -1;
-        this->setInjectorCellAndPosition(pCell, pPosition);
+        this->injection().findInjectorCellAndPosition(pCell, pPosition);
 
         if (pCell >= 0)
         {
             // construct the parcel that is to be injected
             ParcelType* pPtr = new ParcelType
             (
-                td.cloud(),
+                *this,
                 this->parcelTypeId(),
                 pPosition,
                 pCell,
@@ -287,7 +283,7 @@ void Foam::ReactingCloud<ParcelType>::inject
                 composition().YLiquid0(),
                 composition().YSolid0(),
                 composition().YMixture0(),
-                td.constProps()
+                this->constProps()
             );
 
             scalar dt = time - timeInj;
@@ -295,7 +291,7 @@ void Foam::ReactingCloud<ParcelType>::inject
             pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
                 /this->db().time().deltaT().value();
 
-            this->injectParcel(td, pPtr);
+            this->injectParcel(pPtr);
          }
     }
 

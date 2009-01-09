@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,26 +135,27 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     label regionI = 0;
 
     label lineLabel, shapeId, nLabels, cellTableId, typeId;
-    labelList starLabels(64);
+    DynamicList<label> vertexLabels(64);
 
     while ((is >> lineLabel).good())
     {
         is >> shapeId >> nLabels >> cellTableId >> typeId;
 
-        if (nLabels > starLabels.size())
-        {
-            starLabels.setSize(nLabels);
-        }
-        starLabels = -1;
+        vertexLabels.clear();
+        vertexLabels.reserve(nLabels);
 
         // read indices - max 8 per line
         for (label i = 0; i < nLabels; ++i)
         {
+            label vrtId;
             if ((i % 8) == 0)
             {
                is >> lineLabel;
             }
-            is >> starLabels[i];
+            is >> vrtId;
+
+            // convert original vertex id to point label
+            vertexLabels.append(mapPointId[vrtId]);
         }
 
         if (typeId == starcdShellType_)
@@ -178,14 +179,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                 dynSizes.append(0);
             }
 
-            SubList<label> vertices(starLabels, nLabels);
-
-            // convert orig vertex id to point label
-            forAll(vertices, i)
-            {
-                vertices[i] = mapPointId[vertices[i]];
-            }
-
+            SubList<label> vertices(vertexLabels, vertexLabels.size());
             if (mustTriangulate && nLabels > 3)
             {
                 face f(vertices);

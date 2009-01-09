@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,7 +143,7 @@ void Foam::processorPolyPatch::initGeometry()
         (
             Pstream::blocking,
             neighbProcNo(),
-          + 3*(sizeof(label) + size()*sizeof(vector))
+            3*(sizeof(label) + size()*sizeof(vector) + sizeof(float))
         );
 
         toNeighbProc
@@ -163,7 +163,7 @@ void Foam::processorPolyPatch::calcGeometry()
             (
                 Pstream::blocking,
                 neighbProcNo(),
-                3*(sizeof(label) + size()*sizeof(vector))
+                3*(sizeof(label) + size()*sizeof(vector) + sizeof(float))
             );
             fromNeighbProc
                 >> neighbFaceCentres_
@@ -582,7 +582,7 @@ bool Foam::processorPolyPatch::order
                 transformedCtrs = masterCtrs-v[0];
             }
             else
-            {                    
+            {
                 transformedCtrs = masterCtrs-v;
             }
             matchedAll = matchPoints
@@ -605,7 +605,7 @@ bool Foam::processorPolyPatch::order
                     masterAnchors -= v[0];
                 }
                 else
-                {                    
+                {
                     masterAnchors -= v;
                 }
             }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 Foam::Pstream::commsStruct::commsStruct()
 :
     above_(-1),
@@ -39,7 +38,6 @@ Foam::Pstream::commsStruct::commsStruct()
 {}
 
 
-// Construct from components
 Foam::Pstream::commsStruct::commsStruct
 (
     const label above,
@@ -55,7 +53,6 @@ Foam::Pstream::commsStruct::commsStruct
 {}
 
 
-// Construct from components
 Foam::Pstream::commsStruct::commsStruct
 (
     const label nProcs,
@@ -114,11 +111,7 @@ bool Foam::Pstream::commsStruct::operator!=(const commsStruct& comm) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const Foam::Pstream::commsStruct& comm
-)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Pstream::commsStruct& comm)
 {
     os  << comm.above_ << token::SPACE
         << comm.below_ << token::SPACE
@@ -127,7 +120,7 @@ Foam::Ostream& Foam::operator<<
 
     os.check
     (
-        "Ostream& operator<<(Ostream& f, const commsStruct& comm)"
+        "Ostream& operator<<(Ostream&, const commsStruct&)"
     );
 
     return os;

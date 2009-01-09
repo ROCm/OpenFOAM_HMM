@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,9 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    // with -constant and -zeroTime
+    // enable -constant
+    // probably don't need -zeroTime though, since the fields are vetted
+    // afterwards anyhow
     timeSelector::addOptions(true, false);
     argList::noParallel();
     argList::validOptions.insert("ascii", "");

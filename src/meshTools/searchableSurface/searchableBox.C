@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableBox, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
-
+    defineTypeNameAndDebug(searchableBox, 0);
+    addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
 }
 
 
@@ -211,7 +209,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     const scalar nearestDistSqr
 ) const
 {
-    return findNearest(mid(), sample, nearestDistSqr);
+    return findNearest(midpoint(), sample, nearestDistSqr);
 }
 
 
@@ -221,7 +219,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
     const scalar nearestDistSqr
 ) const
 {
-    const point bbMid(mid());
+    const point bbMid(midpoint());
 
     // Outside point projected onto cube. Assume faces 0..5.
     pointIndexHit info(true, sample, -1);
@@ -383,7 +381,7 @@ void Foam::searchableBox::findNearest
 {
     info.setSize(samples.size());
 
-    const point bbMid(mid());
+    const point bbMid(midpoint());
 
     forAll(samples, i)
     {
@@ -482,7 +480,6 @@ void Foam::searchableBox::findLineAll
                 pt = inter.hitPoint() + smallVec[pointI];
             }
 
-            hits.shrink();
             info[pointI].transfer(hits);
         }
         else

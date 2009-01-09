@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,16 +30,10 @@ Description
 #include "Istream.H"
 #include "Ostream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from Istream
 template<class LListBase, class T>
-LList<LListBase, T>::LList(Istream& is)
+Foam::LList<LListBase, T>::LList(Istream& is)
 {
     operator>>(is, *this);
 }
@@ -48,18 +42,18 @@ LList<LListBase, T>::LList(Istream& is)
 // * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Istream& operator>>(Istream& is, LList<LListBase, T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
 {
     // Anull list
     L.clear();
 
-    is.fatalCheck(" operator>>(Istream& is, LList<LListBase, T>& L)");
+    is.fatalCheck(" operator>>(Istream&, LList<LListBase, T>&)");
 
     token firstToken(is);
 
     is.fatalCheck
     (
-        " operator>>(Istream& is, LList<LListBase, T>& L) : reading first token"
+        " operator>>(Istream&, LList<LListBase, T>&) : reading first token"
     );
 
     if (firstToken.isLabel())
@@ -101,14 +95,14 @@ Istream& operator>>(Istream& is, LList<LListBase, T>& L)
         {
             FatalIOErrorIn
             (
-                " operator>>(Istream& is, LList<LListBase, T>& L)",
+                " operator>>(Istream&, LList<LListBase, T>&)",
                 is
             )   << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
         }
 
         token lastToken(is);
-        is.fatalCheck(" operator>>(Istream& is, LList<LListBase, T>& L)");
+        is.fatalCheck(" operator>>(Istream&, LList<LListBase, T>&)");
 
         while
         (
@@ -124,19 +118,19 @@ Istream& operator>>(Istream& is, LList<LListBase, T>& L)
             L.append(element);
 
             is >> lastToken;
-            is.fatalCheck(" operator>>(Istream& is, LList<LListBase, T>& L)");
+            is.fatalCheck(" operator>>(Istream&, LList<LListBase, T>&)");
         }
     }
     else
     {
-        FatalIOErrorIn(" operator>>(Istream& is, LList<LListBase, T>& L)", is)
+        FatalIOErrorIn(" operator>>(Istream&, LList<LListBase, T>&)", is)
             << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
             << exit(FatalIOError);
     }
 
     // Check state of IOstream
-    is.fatalCheck(" operator>>(Istream& is, LList<LListBase, T>& L)");
+    is.fatalCheck(" operator>>(Istream&, LList<LListBase,>&)");
 
     return is;
 }
@@ -145,19 +139,19 @@ Istream& operator>>(Istream& is, LList<LListBase, T>& L)
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Ostream& operator<<(Ostream& os, const LList<LListBase, T>& ll)
+Foam::Ostream& Foam::operator<<(Ostream& os, const LList<LListBase, T>& lst)
 {
-    // Write size of LList
-    os << nl << ll.size();
+    // Write size
+    os << nl << lst.size();
 
     // Write beginning of contents
     os << nl << token::BEGIN_LIST << nl;
 
-    // Write LList contents
+    // Write contents
     for
     (
-        typename LList<LListBase, T>::const_iterator iter = ll.begin();
-        iter != ll.end();
+        typename LList<LListBase, T>::const_iterator iter = lst.begin();
+        iter != lst.end();
         ++iter
     )
     {
@@ -168,14 +162,10 @@ Ostream& operator<<(Ostream& os, const LList<LListBase, T>& ll)
     os << token::END_LIST;
 
     // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const LList&)");
+    os.check("Ostream& operator<<(Ostream&, const LList<LListBase, T>&)");
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

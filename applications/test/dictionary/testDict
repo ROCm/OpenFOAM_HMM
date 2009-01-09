@@ -89,6 +89,12 @@ baz
 }
 
 
+"anynumber.*"
+{
+    $active
+}
+
+
 // this should work
 #remove active
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,14 +57,17 @@ class pressureGradientExplicitSource
 {
     // Private data
 
-        //- Properties dictionary
-        IOdictionary dict_;
+        //- Name of the source
+        const word sourceName_;
 
         //- Reference to the mesh
         const fvMesh& mesh_;
 
         //- Reference to the velocity field
         volVectorField& U_;
+
+        //- Properties dictionary
+        IOdictionary dict_;
 
         //- Average velocity
         vector Ubar_;
@@ -90,6 +93,9 @@ class pressureGradientExplicitSource
 
     // Private Member Functions
 
+        //- Write the pressure gradient to file (for restarts etc)
+        void writeGradP() const;
+
         //- Disallow default bitwise copy construct
         pressureGradientExplicitSource(const pressureGradientExplicitSource&);
 
@@ -105,7 +111,6 @@ public:
         pressureGradientExplicitSource
         (
             const word& sourceName,
-            const fvMesh& mesh,
             volVectorField& U
         );
 

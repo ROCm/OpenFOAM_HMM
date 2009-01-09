@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,6 @@ SourceFiles
 #define FieldField_H
 
 #include "tmp.H"
-#include "xfer.H"
 #include "PtrList.H"
 #include "scalar.H"
 #include "direction.H"

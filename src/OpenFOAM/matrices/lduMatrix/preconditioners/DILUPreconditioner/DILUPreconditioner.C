@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ namespace Foam
 Foam::DILUPreconditioner::DILUPreconditioner
 (
     const lduMatrix::solver& sol,
-    Istream&
+    const dictionary&
 )
 :
     lduMatrix::preconditioner(sol),

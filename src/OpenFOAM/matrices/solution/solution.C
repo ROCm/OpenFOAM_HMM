@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,22 @@ License
 #include "solution.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// these are for old syntax compatibility:
+#include "BICCG.H"
+#include "ICCG.H"
+#include "IStringStream.H"
 
-int Foam::solution::debug(Foam::debug::debugSwitch("solution", false));
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::solution::debug(::Foam::debug::debugSwitch("solution", 0));
+
+// list of sub-dictionaries to rewrite
+//! @cond localScope
+static const Foam::List<Foam::word> subDictNames
+(
+    Foam::IStringStream("(preconditioner smoother)")()
+);
+//! @endcond localScope
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -55,6 +68,84 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::label Foam::solution::upgradeSolverDict
+(
+    dictionary& dict,
+    const bool verbose
+)
+{
+    label nChanged = 0;
+
+    // backward compatibility:
+    // recast primitive entries into dictionary entries
+    forAllIter(dictionary, dict, iter)
+    {
+        if (!iter().isDict())
+        {
+            Istream& is = iter().stream();
+            word name(is);
+            dictionary subdict;
+
+            if (name == "BICCG")
+            {
+                // special treatment for very old syntax
+                subdict = BICCG::solverDict(is);
+            }
+            else if (name == "ICCG")
+            {
+                // special treatment for very old syntax
+                subdict = ICCG::solverDict(is);
+            }
+            else
+            {
+                subdict.add("solver", name);
+                subdict <<= dictionary(is);
+
+                // preconditioner and smoother entries can be
+                // 1) primitiveEntry w/o settings,
+                // 2) or a dictionaryEntry.
+                // transform primitiveEntry with settings -> dictionaryEntry
+                forAll(subDictNames, dictI)
+                {
+                    const word& dictName = subDictNames[dictI];
+                    entry* ePtr = subdict.lookupEntryPtr(dictName,false,false);
+
+                    if (ePtr && !ePtr->isDict())
+                    {
+                        Istream& is = ePtr->stream();
+                        is >> name;
+
+                        if (!is.eof())
+                        {
+                            dictionary newDict;
+                            newDict.add(dictName, name);
+                            newDict <<= dictionary(is);
+
+                            subdict.set(dictName, newDict);
+                        }
+                    }
+                }
+            }
+
+
+            // write out information to help people adjust to the new syntax
+            if (verbose)
+            {
+                Info<< "// using new solver syntax:\n"
+                    << iter().keyword() << subdict << endl;
+            }
+
+            // overwrite with dictionary entry
+            dict.set(iter().keyword(), subdict);
+
+            nChanged++;
+        }
+    }
+
+    return nChanged;
+}
+
+
 bool Foam::solution::read()
 {
     if (regIOobject::read())
@@ -69,6 +160,7 @@ bool Foam::solution::read()
         if (dict.found("solvers"))
         {
             solvers_ = dict.subDict("solvers");
+            upgradeSolverDict(solvers_);
         }
 
         return true;
@@ -97,7 +189,7 @@ bool Foam::solution::relax(const word& name) const
 {
     if (debug)
     {
-        Info<< "Lookup relax for " << name << endl;
+        Info<< "Find relax for " << name << endl;
     }
 
     return relaxationFactors_.found(name);
@@ -127,7 +219,7 @@ const Foam::dictionary& Foam::solution::solverDict(const word& name) const
 }
 
 
-Foam::ITstream& Foam::solution::solver(const word& name) const
+const Foam::dictionary& Foam::solution::solver(const word& name) const
 {
     if (debug)
     {
@@ -135,7 +227,7 @@ Foam::ITstream& Foam::solution::solver(const word& name) const
             << "Lookup solver for " << name << endl;
     }
 
-    return solvers_.lookup(name);
+    return solvers_.subDict(name);
 }
 
 

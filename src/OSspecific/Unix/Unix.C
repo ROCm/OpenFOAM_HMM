@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -211,7 +211,7 @@ bool Foam::chDir(const fileName& dir)
 }
 
 
-Foam::fileName Foam::dotFoam(const fileName& name)
+Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
 {
     // Search user files:
     // ~~~~~~~~~~~~~~~~~~
@@ -268,6 +268,15 @@ Foam::fileName Foam::dotFoam(const fileName& name)
     }
 
     // Not found
+    // abort if the file is mandatory, otherwise return null
+    if (mandatory)
+    {
+        cerr<< "--> FOAM FATAL ERROR in Foam::findEtcFile() :"
+               " could not find mandatory file\n    '"
+            << name.c_str() << "'\n\n" << std::endl;
+        ::exit(1);
+    }
+
     return fileName::null;
 }
 

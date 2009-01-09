@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,12 +27,12 @@ Class
 
 Description
     A list of keyword definitions, which are a keyword followed by any number
-    of values (e.g. words and numbers). The keywords can represent wildcards
+    of values (e.g. words and numbers). The keywords can represent patterns
     which are matched using Posix regular expressions. The general order for
-    searching is
+    searching is as follows:
     - exact match
-    - wildcard match (in reverse order)
-    - optional recursion into subdictionaries
+    - pattern match (in reverse order)
+    - optional recursion into the enclosing (parent) dictionaries
 
     The dictionary class is the base class for IOdictionary.
     It also serves as a bootstrap dictionary for the objectRegistry data
@@ -67,7 +67,7 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-class regularExpression;
+class regExp;
 class dictionary;
 Istream& operator>>(Istream&, dictionary&);
 Ostream& operator<<(Ostream&, const dictionary&);
@@ -92,32 +92,30 @@ class dictionary
         //- Parent dictionary
         const dictionary& parent_;
 
-        //- Wildcard entries
-        DLList<entry*> wildCardEntries_;
+        //- Entries of matching patterns
+        DLList<entry*> patternEntries_;
 
-        //- Wildcard precompiled regex
-        DLList<autoPtr<regularExpression> > wildCardRegexps_;
+        //- Patterns as precompiled regular expressions
+        DLList<autoPtr<regExp> > patternRegexps_;
 
    // Private Member Functions
 
-        //- Search wildcard table either for exact match or for regular
-        //  expression match.
-        bool findInWildcards
+        //- Search patterns table for exact match or regular expression match
+        bool findInPatterns
         (
-            const bool wildCardMatch,
+            const bool patternMatch,
             const word& Keyword,
             DLList<entry*>::const_iterator& wcLink,
-            DLList<autoPtr<regularExpression> >::const_iterator& reLink
+            DLList<autoPtr<regExp> >::const_iterator& reLink
         ) const;
 
-        //- Search wildcard table either for exact match or for regular
-        //  expression match.
-        bool findInWildcards
+        //- Search patterns table for exact match or regular expression match
+        bool findInPatterns
         (
-            const bool wildCardMatch,
+            const bool patternMatch,
             const word& Keyword,
             DLList<entry*>::iterator& wcLink,
-            DLList<autoPtr<regularExpression> >::iterator& reLink
+            DLList<autoPtr<regExp> >::iterator& reLink
         );
 
 
@@ -163,16 +161,22 @@ public:
         dictionary(Istream&);
 
         //- Construct as copy given the parent dictionary
-        dictionary(const dictionary& parentDict, const dictionary& dict);
+        dictionary(const dictionary& parentDict, const dictionary&);
 
         //- Construct top-level dictionary as copy
-        dictionary(const dictionary& dict);
+        dictionary(const dictionary&);
+
+        //- Construct by transferring parameter contents given parent dictionary
+        dictionary(const dictionary& parentDict, const Xfer<dictionary>&);
+
+        //- Construct top-level dictionary by transferring parameter contents
+        dictionary(const Xfer<dictionary>&);
 
         //- Construct and return clone
-        Foam::autoPtr<dictionary> clone() const;
+        autoPtr<dictionary> clone() const;
 
         //- Construct top-level dictionary on freestore from Istream
-        static Foam::autoPtr<dictionary> New(Istream& is);
+        static autoPtr<dictionary> New(Istream&);
 
 
     // Destructor
@@ -210,83 +214,88 @@ public:
         // Search and lookup
 
             //- Search dictionary for given keyword
-            //  If recursive search parent dictionaries
-            bool found(const word& keyword, bool recursive=false) const;
+            //  If recursive, search parent dictionaries
+            bool found(const word&, bool recursive=false) const;
 
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
-            //  If recursive search parent dictionaries. If wildCardMatch
-            //  use wildcards.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions
             const entry* lookupEntryPtr
             (
                 const word&,
                 bool recursive,
-                bool wildCardMatch
+                bool patternMatch
             ) const;
 
             //- Find and return an entry data stream pointer for manipulation
             //  if present otherwise return NULL.
-            //  If recursive search parent dictionaries. If wildCardMatch
-            //  use wildcards.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             entry* lookupEntryPtr
             (
                 const word&,
                 bool recursive,
-                bool wildCardMatch
+                bool patternMatch
             );
 
             //- Find and return an entry data stream if present otherwise error.
-            //  If recursive search parent dictionaries. If wildCardMatch
-            //  use wildcards.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             const entry& lookupEntry
             (
                 const word&,
                 bool recursive,
-                bool wildCardMatch
+                bool patternMatch
             ) const;
 
             //- Find and return an entry data stream
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             ITstream& lookup
             (
                 const word&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             ) const;
 
             //- Find and return a T,
             //  if not found return the given default value
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             template<class T>
             T lookupOrDefault
             (
                 const word&,
                 const T&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             ) const;
 
             //- Find and return a T, if not found return the given
             //  default value, and add to dictionary.
-            //  If recursive search parent dictionaries
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             template<class T>
             T lookupOrAddDefault
             (
                 const word&,
                 const T&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             );
 
             //- Find an entry if present, and assign to T
-            //  Returns true if the entry was found
+            //  Returns true if the entry was found.
+            //  If recursive, search parent dictionaries.
+            //  If patternMatch, use regular expressions.
             template<class T>
             bool readIfPresent
             (
                 const word&,
                 T&,
                 bool recursive=false,
-                bool wildCardMatch=true
+                bool patternMatch=true
             ) const;
 
             //- Check if entry is a sub-dictionary
@@ -304,6 +313,9 @@ public:
 
             //- Return the table of contents
             wordList toc() const;
+
+            //- Return the list of available keys or patterns
+            List<keyType> keys(bool patterns=false) const;
 
         // Editing
 
@@ -331,13 +343,13 @@ public:
 
             //- Add a scalar entry
             //  optionally overwrite an existing entry
-            void add (const keyType&, const scalar, bool overwrite=false);
+            void add(const keyType&, const scalar, bool overwrite=false);
 
             //- Add a dictionary entry
             //  optionally merge with an existing sub-dictionary
             void add
             (
-                const keyType& keyword,
+                const keyType&,
                 const dictionary&,
                 bool mergeEntry=false
             );
@@ -345,7 +357,7 @@ public:
             //- Add a T entry
             //  optionally overwrite an existing entry
             template<class T>
-            void add(const keyType& keyword, const T&, bool overwrite=false);
+            void add(const keyType&, const T&, bool overwrite=false);
 
             //- Assign a new entry, overwrite any existing entry
             void set(entry*);
@@ -354,14 +366,14 @@ public:
             void set(const entry&);
 
             //- Assign a dictionary entry, overwrite any existing entry
-            void set(const keyType& keyword, const dictionary&);
+            void set(const keyType&, const dictionary&);
 
             //- Assign a T entry, overwrite any existing entry
             template<class T>
-            void set(const keyType& keyword, const T&);
+            void set(const keyType&, const T&);
 
             //- Remove an entry specified by keyword
-            bool remove(const word& keyword);
+            bool remove(const word&);
 
             //- Change the keyword for an entry,
             //  optionally forcing overwrite of an existing entry
@@ -369,7 +381,7 @@ public:
             (
                 const keyType& oldKeyword,
                 const keyType& newKeyword,
-                bool forceOverwrite = false
+                bool forceOverwrite=false
             );
 
             //- Merge entries from the given dictionary.
@@ -379,10 +391,16 @@ public:
             //- Clear the dictionary
             void clear();
 
+            //- Transfer the contents of the argument and annull the argument.
+            void transfer(dictionary&);
+
+            //- Transfer contents to the Xfer container
+            Xfer<dictionary> xfer();
+
 
         // Write
 
-            void write(Ostream& os, bool subDict = true) const;
+            void write(Ostream&, bool subDict=true) const;
 
 
     // Member Operators
@@ -393,7 +411,7 @@ public:
         void operator=(const dictionary&);
 
         //- Include entries from the given dictionary.
-        //  Warn, but do not overwrite existing entries
+        //  Warn, but do not overwrite existing entries.
         void operator+=(const dictionary&);
 
         //- Conditionally include entries from the given dictionary.
@@ -417,13 +435,13 @@ public:
 
 // Global Operators
 
-//- Combine dictionaries starting from the entries in dict1 and then including
-//  those from dict2.
+//- Combine dictionaries.
+//  Starting from the entries in dict1 and then including those from dict2.
 //  Warn, but do not overwrite the entries from dict1.
 dictionary operator+(const dictionary& dict1, const dictionary& dict2);
 
-//- Combine dictionaries starting from the entries in dict1 and then including
-//  those from dict2.
+//- Combine dictionaries.
+//  Starting from the entries in dict1 and then including those from dict2.
 //  Do not overwrite the entries from dict1.
 dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 

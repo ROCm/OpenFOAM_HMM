@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,65 +34,6 @@ License
 
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::setInjectorCellAndPosition
-(
-    label& pCell,
-    vector& pPosition
-)
-{
-    const vector originalPosition = pPosition;
-
-    bool foundCell = false;
-
-    pCell = mesh_.findCell(pPosition);
-
-    if (pCell >= 0)
-    {
-        const vector& C = mesh_.C()[pCell];
-        pPosition += 1.0e-6*(C - pPosition);
-
-        foundCell = mesh_.pointInCell
-        (
-            pPosition,
-            pCell
-        );
-    }
-    reduce(foundCell, orOp<bool>());
-
-    // Last chance - find nearest cell and try that one
-    // - the point is probably on an edge
-    if (!foundCell)
-    {
-        pCell =  mesh_.findNearestCell(pPosition);
-
-        if (pCell >= 0)
-        {
-            const vector& C = mesh_.C()[pCell];
-            pPosition += 1.0e-6*(C - pPosition);
-
-            foundCell = mesh_.pointInCell
-            (
-                pPosition,
-                pCell
-            );
-        }
-        reduce(foundCell, orOp<bool>());
-    }
-
-    if (!foundCell)
-    {
-        FatalErrorIn
-        (
-            "void KinematicCloud<ParcelType>::findInjectorCell"
-            "(label&, vector&)"
-        )<< "Cannot find parcel injection cell. "
-         << "Parcel position = " << originalPosition << nl
-         << abort(FatalError);
-    }
-}
-
 
 template<class ParcelType>
 Foam::scalar Foam::KinematicCloud<ParcelType>::setNumberOfParticles
@@ -324,7 +265,7 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         g_.value()
     );
 
-    inject(td);
+    inject();
 
     if (coupled_)
     {
@@ -336,15 +277,11 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
 
 template<class ParcelType>
-template<class TrackingData>
-void Foam::KinematicCloud<ParcelType>::inject
-(
-    TrackingData& td
-)
+void Foam::KinematicCloud<ParcelType>::inject()
 {
     scalar time = this->db().time().value();
 
-    scalar pRho = td.constProps().rho0();
+    scalar pRho = constProps_.rho0();
 
     this->injection().prepareForNextTimeStep(time0_, time);
 
@@ -419,21 +356,21 @@ void Foam::KinematicCloud<ParcelType>::inject
 
         // Determine the injection cell
         label pCell = -1;
-        setInjectorCellAndPosition(pCell, pPosition);
+        this->injection().findInjectorCellAndPosition(pCell, pPosition);
 
         if (pCell >= 0)
         {
             // construct the parcel that is to be injected
             ParcelType* pPtr = new ParcelType
             (
-                td.cloud(),
+                *this,
                 parcelTypeId_,
                 pPosition,
                 pCell,
                 pDiameter,
                 pU,
                 pNumberOfParticles,
-                td.constProps()
+                constProps_
             );
 
             scalar dt = time - timeInj;
@@ -441,7 +378,7 @@ void Foam::KinematicCloud<ParcelType>::inject
             pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
                 /this->time().deltaT().value();
 
-            this->injectParcel(td, pPtr);
+            this->injectParcel(pPtr);
          }
     }
 
@@ -455,12 +392,7 @@ void Foam::KinematicCloud<ParcelType>::inject
 
 
 template<class ParcelType>
-template<class TrackingData>
-void Foam::KinematicCloud<ParcelType>::injectParcel
-(
-    TrackingData& td,
-    ParcelType* p
-)
+void Foam::KinematicCloud<ParcelType>::injectParcel(ParcelType* p)
 {
     addParticle(p);
     nParcelsAdded_++;

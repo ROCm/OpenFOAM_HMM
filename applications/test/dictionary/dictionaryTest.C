@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "IOstreams.H"
+#include "IOobject.H"
 #include "IFstream.H"
 #include "dictionary.H"
 
@@ -40,29 +41,54 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    IFstream dictStream("testDict");
-    dictionary testDict(dictStream);
+    {
+        dictionary dict1(IFstream("testDict")());
+        Info<< "dict1: " << dict1 << nl
+            << "toc: " << dict1.toc() << nl
+            << "keys: " << dict1.keys() << nl
+            << "patterns: " << dict1.keys(true) << endl;
 
-    Info<< testDict << endl;
+        dictionary dict2(dict1.xfer());
+
+        Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
+            << "dict2.toc(): " << dict2.name() << " " << dict2.toc() << endl;
+        
+        // copy back
+        dict1 = dict2;
+        Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << endl;
+    }
+
+
+    IOobject::writeDivider(Info);
 
     {
-        dictionary someDict;
-        someDict.add(keyType("a.*", true), "subdictValue");
+        dictionary dict(IFstream("testDictRegex")());
+        dict.add(keyType("fooba[rz]", true), "anything");
 
-        dictionary dict;
-        dict.add("someDict", someDict);
-        dict.add(keyType(".*", true), "parentValue");
+        Info<< "dict:" << dict << nl
+            << "toc: " << dict.toc() << nl
+            << "keys: " << dict.keys() << nl
+            << "patterns: " << dict.keys(true) << endl;
 
-        Info<< "dict:" << dict << endl;
-
-        // Wildcard find.
-        Info<< "Wildcard find \"abc\" in top directory : "
+        Info<< "Pattern find \"abc\" in top directory : "
             << dict.lookup("abc") << endl;
-        Info<< "Wildcard find \"abc\" in sub directory : "
+        Info<< "Pattern find \"abc\" in sub directory : "
             << dict.subDict("someDict").lookup("abc")
             << endl;
-        Info<< "Recursive wildcard find \"def\" in sub directory : "
+        Info<< "Recursive pattern find \"def\" in sub directory : "
             << dict.subDict("someDict").lookup("def", true)
+            << endl;
+        Info<< "Recursive pattern find \"foo\" in sub directory : "
+            << dict.subDict("someDict").lookup("foo", true)
+            << endl;
+        Info<< "Recursive pattern find \"fooz\" in sub directory : "
+            << dict.subDict("someDict").lookup("fooz", true)
+            << endl;
+        Info<< "Recursive pattern find \"bar\" in sub directory : "
+            << dict.subDict("someDict").lookup("bar", true)
+            << endl;
+        Info<< "Recursive pattern find \"xxx\" in sub directory : "
+            << dict.subDict("someDict").lookup("xxx", true)
             << endl;
     }
 

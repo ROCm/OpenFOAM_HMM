@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,18 +35,18 @@ T Foam::dictionary::lookupOrDefault
     const word& keyword,
     const T& deflt,
     bool recursive,
-    bool wildCardMatch
+    bool patternMatch
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, patternMatch);
 
-    if (entryPtr == NULL)
+    if (entryPtr)
     {
-        return deflt;
+        return pTraits<T>(entryPtr->stream());
     }
     else
     {
-        return pTraits<T>(entryPtr->stream());
+        return deflt;
     }
 }
 
@@ -57,19 +57,19 @@ T Foam::dictionary::lookupOrAddDefault
     const word& keyword,
     const T& deflt,
     bool recursive,
-    bool wildCardMatch
+    bool patternMatch
 )
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive, wildCardMatch);
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, patternMatch);
 
-    if (entryPtr == NULL)
+    if (entryPtr)
     {
-        add(new primitiveEntry(keyword, deflt));
-        return deflt;
+        return pTraits<T>(entryPtr->stream());
     }
     else
     {
-        return pTraits<T>(entryPtr->stream());
+        add(new primitiveEntry(keyword, deflt));
+        return deflt;
     }
 }
 
@@ -80,19 +80,19 @@ bool Foam::dictionary::readIfPresent
     const word& k,
     T& val,
     bool recursive,
-    bool wildCardMatch
+    bool patternMatch
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(k, recursive, wildCardMatch);
+    const entry* entryPtr = lookupEntryPtr(k, recursive, patternMatch);
 
-    if (entryPtr == NULL)
-    {
-        return false;
-    }
-    else
+    if (entryPtr)
     {
         entryPtr->stream() >> val;
         return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

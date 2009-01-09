@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,16 +87,22 @@ public:
 
     // Static data members
 
+        //- The great value used for greatBox and invertedBox
+        static const scalar great;
+
         //- As per boundBox::greatBox, but with GREAT instead of VGREAT
         static const treeBoundBox greatBox;
 
-        //- Bits used for octant/point coding. Every octant/corner point
-        //  is the combination of three faces.
+        //- As per boundBox::invertedBox, but with GREAT instead of VGREAT
+        static const treeBoundBox invertedBox;
+
+        //- Bits used for octant/point coding.
+        //  Every octant/corner point is the combination of three faces.
         enum octantBit
         {
-            RIGHTHALF   = 0x1 << 0,
-            TOPHALF     = 0x1 << 1,
-            FRONTHALF   = 0x1 << 2
+            RIGHTHALF = 0x1 << 0,
+            TOPHALF   = 0x1 << 1,
+            FRONTHALF = 0x1 << 2
         };
 
         //- Face codes
@@ -167,11 +173,12 @@ public:
         //- Construct from components
         inline treeBoundBox(const boundBox& bb);
 
-        //- Construct as the bounding box of the given pointField. Local
-        //  processor domain only (no reduce as in boundBox)
-        treeBoundBox(const UList<point>& points);
+        //- Construct as the bounding box of the given pointField.
+        //  Local processor domain only (no reduce as in boundBox)
+        treeBoundBox(const UList<point>&);
 
         //- Construct as subset of points
+        //  Local processor domain only (no reduce as in boundBox)
         treeBoundBox(const UList<point>&, const UList<label>& meshPoints);
 
         //- Construct from Istream
@@ -181,15 +188,6 @@ public:
     // Member functions
 
         // Access
-
-            //- Smallest of length,height,width
-            inline scalar minDim() const;
-
-            //- Largest of length,height,width
-            inline scalar maxDim() const;
-
-            //- Average of length,height,width
-            inline scalar avgDim() const;
 
             //- Typical dimension length,height,width
             inline scalar typDim() const;
@@ -203,64 +201,61 @@ public:
             //- Corner point given octant
             inline point corner(const direction) const;
 
-            //- Calculates midpoint
-            inline point mid() const;
-
             //- Sub box given by octant number. Midpoint calculated.
             treeBoundBox subBbox(const direction) const;
 
             //- Sub box given by octant number. Midpoint provided.
             treeBoundBox subBbox(const point& mid, const direction) const;
 
-            //- Returns octant number given point. Midpoint calculated.
+            //- Returns octant number given point and the calculated midpoint.
             inline direction subOctant
             (
-                const point& sample
+                const point& pt
             ) const;
 
-            //- Returns octant number given point. Midpoint provided.
+            //- Returns octant number given point and midpoint.
             static inline direction subOctant
             (
                 const point& mid,
-                const point& sample
+                const point& pt
             );
 
-            //- Returns octant number given point. Midpoint calculated.
-            //  onEdge set if sample on edge of subOctant
+            //- Returns octant number given point and the calculated midpoint.
+            //  onEdge set if the point is on edge of subOctant
             inline direction subOctant
             (
-                const point& mid,
+                const point& pt,
                 bool& onEdge
             ) const;
 
-            //- Returns octant number given point. Midpoint provided.
-            //  onEdge set if sample on edge of subOctant
+            //- Returns octant number given point and midpoint.
+            //  onEdge set if the point is on edge of subOctant
             static inline direction subOctant
             (
                 const point& mid,
-                const point& sample,
+                const point& pt,
                 bool& onEdge
             );
 
-            //- Returns octant number given intersection. Midpoint provided.
-            //  onEdge set if sample on edge of subOctant. If onEdge
-            // the direction vector determines which octant to use
-            // (acc. to which octant the sample would be if it were moved
+            //- Returns octant number given intersection and midpoint.
+            //  onEdge set if the point is on edge of subOctant
+            //  If onEdge, the direction vector determines which octant to use
+            //  (acc. to which octant the point would be if it were moved
             //  along dir)
             static inline direction subOctant
             (
                 const point& mid,
                 const vector& dir,
-                const point& sample,
+                const point& pt,
                 bool& onEdge
             );
 
-            //- Calculates optimal order to look for nearest to sample. First
-            //  will be the octant containing the sample, second the octant
-            //  with boundary nearest to the sample etc.
+            //- Calculates optimal order to look for nearest to point.
+            //  First will be the octant containing the point,
+            //  second the octant with boundary nearest to the point etc.
             inline void searchOrder
             (
-	         const point& sample,
+	         const point& pt,
                  FixedList<direction, 8>& octantOrder
             ) const;
 
@@ -273,36 +268,37 @@ public:
             //- Intersects segment; set point to intersection position,
             //  return true if intersection found.
             // (intPt argument used during calculation even if not intersecting)
-            bool intersects(const point&, const point&, point& intPt) const;
+            bool intersects
+            (
+                const point& start,
+                const point& end,
+                point& pt
+            ) const;
 
-            //- fully contains bb
-            bool contains(const treeBoundBox& bb) const;
+            //- fully contains other boundingBox?
+            inline bool contains(const treeBoundBox&) const;
 
             //- Contains point? (inside or on edge)
             inline bool contains(const point&) const;
 
-            //- Contains point? (only inside)
-            bool containsNarrow(const point&) const;
-
-            //- Contains point inside or
-            //  on edge and moving in direction dir would cause it to go
-            //  inside.
+            //- Contains point (inside or on edge) and moving in direction
+            //  dir would cause it to go inside.
             bool contains(const vector& dir, const point&) const;
 
-            //- Position of point relative to bb
+            //- Position of point relative to bounding box
             direction posBits(const point&) const;
 
-            //- Calculate nearest and furthest (to sample) vertex coords of
+            //- Calculate nearest and furthest (to point) vertex coords of
             //  bounding box
             void calcExtremities
             (
-                const point& sample,
+                const point& pt,
                 point& nearest,
                 point& furthest
             ) const;
 
-            //- Returns distance sample to furthest away corner.
-            scalar maxDist(const point& sample) const;
+            //- Returns distance point to furthest away corner.
+            scalar maxDist(const point&) const;
 
             //- Compare distance to point with other bounding box
             //  return:

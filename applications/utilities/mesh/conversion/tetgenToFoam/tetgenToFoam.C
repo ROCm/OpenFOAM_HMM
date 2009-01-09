@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -461,7 +461,7 @@ int main(int argc, char *argv[])
             }
         }
 
-   
+
         // Trim
         boundaryFaces.setSize(faceI);
         boundaryPatch.setSize(faceI);
@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
             Info<< "    " << patchNames[patchI] << " : "
                 << allPatchFaces[patchI].size() << endl;
 
-            patchFaces[patchI].transfer(allPatchFaces[patchI].shrink());
+            patchFaces[patchI].transfer(allPatchFaces[patchI]);
         }
 
         Info<< endl;
@@ -547,7 +547,6 @@ int main(int argc, char *argv[])
     Info<< "Writing mesh to " << runTime.constant() << endl << endl;
 
     meshPtr().write();
-
 
     Info<< "End\n" << endl;
 

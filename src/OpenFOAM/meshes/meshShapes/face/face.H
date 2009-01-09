@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ public:
         explicit inline face(const labelList&);
 
         //- Construct by transferring the parameter contents
-        explicit inline face(const xfer<labelList>&);
+        explicit inline face(const Xfer<labelList>&);
 
         //- Copy construct from triFace
         face(const triFace&);

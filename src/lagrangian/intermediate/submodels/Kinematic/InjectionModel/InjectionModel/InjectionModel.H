@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -207,6 +207,14 @@ public:
 
 
         // Injection geometry
+
+            //- Find the cell that contains the injector position
+            //  Will modify position slightly towards the owner cell centroid
+            virtual void findInjectorCellAndPosition
+            (
+                label& cellI,
+                vector& position
+            );
 
             //- Return the injection position
             virtual vector position

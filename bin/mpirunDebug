@@ -1,25 +1,50 @@
 #!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
 #
-# Driver script to run mpi jobs with the processes in separate
-# windows or to separate log files.
-# Requires bash on all processors.
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     mpirunDebug
+#
+# Description
+#     Driver script to run mpi jobs with the processes in separate
+#     windows or to separate log files.
+#     Requires bash on all processors.
+#------------------------------------------------------------------------------
 
-
-PROGNAME=`basename $0`
-PROGDIR=`dirname $0`
-
-if [ `uname -s` = 'Linux' ]; then
-   ECHO='echo -e'
+if [ `uname -s` = Linux ]
+then
+    ECHO='echo -e'
 else
-   ECHO='echo'
+    ECHO='echo'
 fi
 
 
 printUsage() {
-  echo ""
-  echo "Usage: $PROGNAME -np <dd> <executable> <args>"
-  echo ""
-  echo "This will run like mpirun but with each process in an xterm"
+    echo ""
+    echo "Usage: ${0##*/} -np <dd> <executable> <args>"
+    echo ""
+    echo "This will run like mpirun but with each process in an xterm"
 }
 
 nProcs=''
@@ -30,7 +55,8 @@ while [ "$1" != "" ]; do
     echo "$1"
     case $1 in
       -np)
-        nProcs=$2;shift
+        nProcs=$2
+        shift
         ;;
       *)
         if [ ! "$exec" ]; then
@@ -195,3 +221,5 @@ echo ""
 $ECHO "Press return to execute.\c"
 read dummy
 exec $cmd
+
+#------------------------------------------------------------------------------

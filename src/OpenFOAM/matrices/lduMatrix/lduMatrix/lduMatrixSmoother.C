@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,30 @@ namespace Foam
     defineRunTimeSelectionTable(lduMatrix::smoother, asymMatrix);
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::word
+Foam::lduMatrix::smoother::getName
+(
+    const dictionary& solverControls
+)
+{
+    word name;
+
+    // handle primitive or dictionary entry
+    const entry& e = solverControls.lookupEntry("smoother", false, false);
+    if (e.isDict())
+    {
+        e.dict().lookup("smoother") >> name;
+    }
+    else
+    {
+        e.stream() >> name;
+    }
+
+    return name;
+}
+
 
 Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 (
@@ -44,23 +66,37 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& smootherData
+    const dictionary& solverControls
 )
 {
-    word smootherName(smootherData);
+    word name;
+
+    // handle primitive or dictionary entry
+    const entry& e = solverControls.lookupEntry("smoother", false, false);
+    if (e.isDict())
+    {
+        e.dict().lookup("smoother") >> name;
+    }
+    else
+    {
+        e.stream() >> name;
+    }
+
+    // not (yet?) needed:
+    // const dictionary& controls = e.isDict() ? e.dict() : dictionary::null;
 
     if (matrix.symmetric())
     {
         symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(smootherName);
+            symMatrixConstructorTablePtr_->find(name);
 
         if (constructorIter == symMatrixConstructorTablePtr_->end())
         {
             FatalIOErrorIn
             (
-                "lduMatrix::smoother::New", smootherData
-            )   << "Unknown symmetric matrix smoother " << smootherName
-                << endl << endl
+                "lduMatrix::smoother::New", solverControls
+            )   << "Unknown symmetric matrix smoother "
+                << name << nl << nl
                 << "Valid symmetric matrix smoothers are :" << endl
                 << symMatrixConstructorTablePtr_->toc()
                 << exit(FatalIOError);
@@ -81,15 +117,15 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
     else if (matrix.asymmetric())
     {
         asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(smootherName);
+            asymMatrixConstructorTablePtr_->find(name);
 
         if (constructorIter == asymMatrixConstructorTablePtr_->end())
         {
             FatalIOErrorIn
             (
-                "lduMatrix::smoother::New", smootherData
-            )   << "Unknown asymmetric matrix smoother " << smootherName
-                << endl << endl
+                "lduMatrix::smoother::New", solverControls
+            )   << "Unknown asymmetric matrix smoother "
+                << name << nl << nl
                 << "Valid asymmetric matrix smoothers are :" << endl
                 << asymMatrixConstructorTablePtr_->toc()
                 << exit(FatalIOError);
@@ -111,8 +147,9 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
     {
         FatalIOErrorIn
         (
-            "lduMatrix::smoother::New", smootherData
-        )   << "cannot solve incomplete matrix, no off-diagonal coefficients"
+            "lduMatrix::smoother::New", solverControls
+        )   << "cannot solve incomplete matrix, "
+               "no diagonal or off-diagonal coefficient"
             << exit(FatalIOError);
 
         return autoPtr<lduMatrix::smoother>(NULL);

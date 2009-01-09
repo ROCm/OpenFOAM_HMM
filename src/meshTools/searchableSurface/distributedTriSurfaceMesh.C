@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        distributedTriSurfaceMesh,
+        dict
+    );
 
-defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
-addToRunTimeSelectionTable(searchableSurface, distributedTriSurfaceMesh, dict);
-
-scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
-
+    scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
 }
 
 
@@ -239,12 +242,11 @@ Foam::distributedTriSurfaceMesh::constructSegments
         sendMap.setSize(Pstream::nProcs());
         forAll(sendMap, procI)
         {
-            dynSendMap[procI].shrink();
             sendMap[procI].transfer(dynSendMap[procI]);
         }
 
-        allSegments.transfer(dynAllSegments.shrink());
-        allSegmentMap.transfer(dynAllSegmentMap.shrink());
+        allSegments.transfer(dynAllSegments);
+        allSegmentMap.transfer(dynAllSegmentMap);
     }
 
 
@@ -704,13 +706,12 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         sendMap.setSize(Pstream::nProcs());
         forAll(sendMap, procI)
         {
-            dynSendMap[procI].shrink();
             sendMap[procI].transfer(dynSendMap[procI]);
         }
 
-        allCentres.transfer(dynAllCentres.shrink());
-        allRadiusSqr.transfer(dynAllRadiusSqr.shrink());
-        allSegmentMap.transfer(dynAllSegmentMap.shrink());
+        allCentres.transfer(dynAllCentres);
+        allRadiusSqr.transfer(dynAllRadiusSqr);
+        allSegmentMap.transfer(dynAllSegmentMap);
     }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ namespace Foam
 Foam::FDICPreconditioner::FDICPreconditioner
 (
     const lduMatrix::solver& sol,
-    Istream&
+    const dictionary&
 )
 :
     lduMatrix::preconditioner(sol),
@@ -164,7 +164,7 @@ void Foam::FDICPreconditioner::precondition
         __builtin_prefetch (&uPtr[face+96],0,0);
         __builtin_prefetch (&lPtr[face+96],0,0);
         __builtin_prefetch (&rDuUpperPtr[face+96],0,0);
-        __builtin_prefetch (&wAPtr[uPtr[face+32]],0,1); 
+        __builtin_prefetch (&wAPtr[uPtr[face+32]],0,1);
         __builtin_prefetch (&wAPtr[lPtr[face+32]],0,1);
         #endif
 

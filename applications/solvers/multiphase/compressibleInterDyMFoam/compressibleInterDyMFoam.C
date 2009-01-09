@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,24 +74,26 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
-
-        // Do any mesh changes
-        mesh.update();
-
-        if (mesh.changing())
         {
-            Info<< "Execution time for mesh.update() = "
-                << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
-                << " s" << endl;
+            // Store divU from the previous mesh for the correctPhi
+            volScalarField divU = fvc::div(phi);
 
-            gh = g & mesh.C();
-            ghf = g & mesh.Cf();
-        }
+            scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
-        if (mesh.changing() && correctPhi)
-        {
-            //***HGW#include "correctPhi.H"
+            // Do any mesh changes
+            mesh.update();
+
+            if (mesh.changing())
+            {
+                Info<< "Execution time for mesh.update() = "
+                    << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
+                    << " s" << endl;
+            }
+
+            if (mesh.changing() && correctPhi)
+            {
+                #include "correctPhi.H"
+            }
         }
 
         // Make the fluxes relative to the mesh motion
@@ -100,6 +102,12 @@ int main(int argc, char *argv[])
         if (mesh.changing() && checkMeshCourantNo)
         {
             #include "meshCourantNo.H"
+        }
+
+        if (mesh.changing())
+        {
+            gh = g & mesh.C();
+            ghf = g & mesh.Cf();
         }
 
         turbulence->correct();

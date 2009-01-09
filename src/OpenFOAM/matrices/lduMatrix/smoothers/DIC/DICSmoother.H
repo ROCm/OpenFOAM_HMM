@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,10 @@ Class
 
 Description
     Simplified diagonal-based incomplete Cholesky smoother for symmetric
-    matrices.  In order to improve efficiency the residual is evaluated after
-    every nSweeps sweeps.
+    matrices.
+
+    To improve efficiency, the residual is evaluated after every nSweeps
+    sweeps.
 
 SourceFiles
     DICSmoother.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -144,6 +144,22 @@ int main(int argc, char *argv[])
 
     Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
         << " " << dlC.size() << "/" << dlC.capacity() << endl;
+
+    List<label> lstB(dlC.xfer());
+
+    Info<< "Transferred to normal list via the xfer() method" << endl;
+    Info<< "<lstB>" << lstB << "</lstB>" << nl << "sizes: "
+        << " " << lstB.size() << endl;
+    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
+        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+
+    DynamicList<label> dlD(lstB.xfer());
+
+    Info<< "Transfer construct from normal list" << endl;
+    Info<< "<lstB>" << lstB << "</lstB>" << nl << "sizes: "
+        << " " << lstB.size() << endl;
+    Info<< "<dlD>" << dlD << "</dlD>" << nl << "sizes: "
+        << " " << dlD.size() << "/" << dlD.capacity() << endl;
 
     return 0;
 }

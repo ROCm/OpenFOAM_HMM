@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ void Foam::primitiveMesh::calcCellEdges() const
         // reset the size
         forAll (ce, cellI)
         {
-            cellEdgeAddr[cellI].transfer(ce[cellI].shrink());
+            cellEdgeAddr[cellI].transfer(ce[cellI]);
         }
     }
 }

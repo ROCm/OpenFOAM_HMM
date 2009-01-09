@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,29 +26,20 @@ License
 
 #include "UDictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 template<class T>
-UDictionary<T>::UDictionary()
+Foam::UDictionary<T>::UDictionary()
 {}
 
 
-// Copy constructor
 template<class T>
-UDictionary<T>::UDictionary(const UDictionary& dict)
+Foam::UDictionary<T>::UDictionary(const UDictionary& dict)
 :
     DictionaryBase<UIDLList<T>, T>(dict)
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

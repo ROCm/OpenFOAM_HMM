@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ template
     template<class> class FaceList,
     class PointField
 >
-Foam::xfer<Foam::pointField> Foam::extrudedMesh::extrudedPoints
+Foam::Xfer<Foam::pointField> Foam::extrudedMesh::extrudedPoints
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
     const extrudeModel& model
@@ -82,7 +82,7 @@ Foam::xfer<Foam::pointField> Foam::extrudedMesh::extrudedPoints
 
 
 template<class Face, template<class> class FaceList, class PointField>
-Foam::xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
+Foam::Xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
     const extrudeModel& model
@@ -184,7 +184,7 @@ Foam::xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
 
 
 template<class Face, template<class> class FaceList, class PointField>
-Foam::xfer<Foam::cellList> Foam::extrudedMesh::extrudedCells
+Foam::Xfer<Foam::cellList> Foam::extrudedMesh::extrudedCells
 (
     const PrimitivePatch<Face, FaceList, PointField>& extrudePatch,
     const extrudeModel& model

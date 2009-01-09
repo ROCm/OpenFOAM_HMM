@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,9 +61,7 @@ pressureSwirlInjector::pressureSwirlInjector
     coneInterval_(pressureSwirlInjectorDict_.lookup("ConeInterval")),
     maxKv_(pressureSwirlInjectorDict_.lookup("maxKv")),
 
-    angle_(0.0),
-    tan1_(coneAngle_.size()),
-    tan2_(coneAngle_.size())
+    angle_(0.0)
 {
 
     if (sm.injectors().size() != coneAngle_.size())
@@ -72,26 +70,6 @@ pressureSwirlInjector::pressureSwirlInjector
             << "(const dictionary& dict, spray& sm)\n"
             << "Wrong number of entries in innerAngle"
             << abort(FatalError);
-    }
-
-
-    forAll(sm.injectors(), i)
-    {
-        Random rndGen(label(0));
-        vector dir = sm.injectors()[i].properties()->direction();
-        scalar magV = 0.0;
-        vector tangent;
-        
-        while (magV < SMALL)
-        {
-            vector testThis = rndGen.vector01();
-            
-            tangent = testThis - (testThis & dir)*dir;
-            magV = mag(tangent);
-        }
-        
-        tan1_[i] = tangent/magV;
-        tan2_[i] = dir ^ tan1_[i];
     }
 
     scalar referencePressure = sm.p().average().value();
@@ -147,8 +125,9 @@ scalar pressureSwirlInjector::d0
 vector pressureSwirlInjector::direction
 (
     const label n,
-    const scalar,
-    const scalar
+    const label hole,
+    const scalar time,
+    const scalar d
 ) const
 {
 
@@ -177,13 +156,13 @@ vector pressureSwirlInjector::direction
     {
         normal = alpha*
         (
-            tan1_[n]*cos(beta) +
-            tan2_[n]*sin(beta)
+            injectors_[n].properties()->tan1(hole)*cos(beta) +
+            injectors_[n].properties()->tan2(hole)*sin(beta)
         );
     }
     
     // set the direction of injection by adding the normal vector
-    vector dir = dcorr*injectors_[n].properties()->direction() + normal;
+    vector dir = dcorr*injectors_[n].properties()->direction(hole, time) + normal;
     dir /= mag(dir);
 
     return dir;

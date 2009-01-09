@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,7 +80,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
     // For correct functioning of the enrichedPatch class, the slave
     // faces need to be inserted first.  See comments in
-    // enrichedPatch.H  
+    // enrichedPatch.H
 
     // Get reference to the point merge map
     const Map<label>& pmm = pointMergeMap();
@@ -233,10 +233,10 @@ void Foam::enrichedPatch::calcEnrichedFaces
                 }
             }
         }
-//         Info << "New slave face " << faceI << ": " << newFace << endl;
+        // Info<< "New slave face " << faceI << ": " << newFace << endl;
 
         // Add the new face to the list
-        enrichedFaces[nEnrichedFaces].transfer(newFace.shrink());
+        enrichedFaces[nEnrichedFaces].transfer(newFace);
         nEnrichedFaces++;
     }
 
@@ -384,10 +384,10 @@ void Foam::enrichedPatch::calcEnrichedFaces
                 }
             }
         }
-//         Info << "New master face: " << newFace << endl;
+        // Info<< "New master face: " << newFace << endl;
 
         // Add the new face to the list
-        enrichedFaces[nEnrichedFaces].transfer(newFace.shrink());
+        enrichedFaces[nEnrichedFaces].transfer(newFace);
         nEnrichedFaces++;
     }
 

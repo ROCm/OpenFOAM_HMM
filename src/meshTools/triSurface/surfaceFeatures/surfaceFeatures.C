@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,7 +197,7 @@ void Foam::surfaceFeatures::calcFeatPoints(const List<edgeStatus>& edgeStat)
             featurePoints.append(pointI);
         }
     }
-    featurePoints.shrink();
+
     featurePoints_.transfer(featurePoints);
 }
 

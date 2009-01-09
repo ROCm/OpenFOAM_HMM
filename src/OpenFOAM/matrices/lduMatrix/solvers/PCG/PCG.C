@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ Foam::PCG::PCG
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 :
     lduMatrix::solver
@@ -56,7 +56,7 @@ Foam::PCG::PCG
         interfaceBouCoeffs,
         interfaceIntCoeffs,
         interfaces,
-        solverData
+        solverControls
     )
 {}
 
@@ -70,12 +70,10 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
     const direction cmpt
 ) const
 {
-    word preconditionerName(controlDict_.lookup("preconditioner"));
-
     // --- Setup class containing solver performance data
     lduMatrix::solverPerformance solverPerf
     (
-        preconditionerName + typeName,
+        lduMatrix::preconditioner::getName(controlDict_) + typeName,
         fieldName_
     );
 
@@ -119,7 +117,7 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
         lduMatrix::preconditioner::New
         (
             *this,
-            controlDict_.lookup("preconditioner")
+            controlDict_
         );
 
         // --- Solver iteration

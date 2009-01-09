@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,8 +142,8 @@ void Foam::MULES::implicitSolve
 {
     const fvMesh& mesh = psi.mesh();
 
-    dictionary MULESSolver(mesh.solver(psi.name()));
-    const dictionary& MULEScontrols = MULESSolver.subDict("MULESImplicit");
+    const dictionary& MULEScontrols = 
+       mesh.solverDict(psi.name()).subDict("MULESImplicit");
 
     label maxIter
     (
@@ -269,8 +269,8 @@ void Foam::MULES::implicitSolve
         }
         else
         {
-            Info<< "max(" + psi.name() + " - 1 = " << maxPsiM1 << endl;
-            Info<< "min(" + psi.name() + ") = " << minPsi << endl;
+            Info<< "MULES: max(" << psi.name() << " - 1) = " << maxPsiM1
+                << " min(" << psi.name() << ") = " << minPsi << endl;
 
             phiBD = psiConvectionDiffusion.flux();
 

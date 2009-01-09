@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,34 @@ License
 
 #include "ISstream.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::ISstream::ISstream
+(
+    istream& is,
+    const string& name,
+    streamFormat format,
+    versionNumber version,
+    compressionType compression
+)
+:
+    Istream(format, version, compression),
+    name_(name),
+    is_(is)
+{
+    if (is_.good())
+    {
+        setOpened();
+        setGood();
+    }
+    else
+    {
+        setState(is_.rdstate());
+    }
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 inline Foam::ISstream& Foam::ISstream::get(char& c)
 {
@@ -67,33 +94,6 @@ inline Foam::ISstream& Foam::ISstream::putback(const char& c)
     setState(is_.rdstate());
 
     return *this;
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::ISstream::ISstream
-(
-    istream& is,
-    const string& name,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
-)
-:
-    Istream(format, version, compression),
-    name_(name),
-    is_(is)
-{
-    if (is_.good())
-    {
-        setOpened();
-        setGood();
-    }
-    else
-    {
-        setState(is_.rdstate());
-    }
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -259,7 +259,7 @@ public:
                     const FieldField<Field, scalar>& interfaceBouCoeffs,
                     const FieldField<Field, scalar>& interfaceIntCoeffs,
                     const lduInterfaceFieldPtrsList& interfaces,
-                    Istream& solverData
+                    const dictionary& solverControls
                 ),
                 (
                     fieldName,
@@ -267,7 +267,7 @@ public:
                     interfaceBouCoeffs,
                     interfaceIntCoeffs,
                     interfaces,
-                    solverData
+                    solverControls
                 )
             );
 
@@ -282,7 +282,7 @@ public:
                     const FieldField<Field, scalar>& interfaceBouCoeffs,
                     const FieldField<Field, scalar>& interfaceIntCoeffs,
                     const lduInterfaceFieldPtrsList& interfaces,
-                    Istream& solverData
+                    const dictionary& solverControls
                 ),
                 (
                     fieldName,
@@ -290,7 +290,7 @@ public:
                     interfaceBouCoeffs,
                     interfaceIntCoeffs,
                     interfaces,
-                    solverData
+                    solverControls
                 )
             );
 
@@ -304,7 +304,7 @@ public:
                 const FieldField<Field, scalar>& interfaceBouCoeffs,
                 const FieldField<Field, scalar>& interfaceIntCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
-                Istream& solverData
+                const dictionary& solverControls
             );
 
         // Selectors
@@ -317,7 +317,7 @@ public:
                 const FieldField<Field, scalar>& interfaceBouCoeffs,
                 const FieldField<Field, scalar>& interfaceIntCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
-                Istream& solverData
+                const dictionary& solverControls
             );
 
 
@@ -359,7 +359,7 @@ public:
 
 
             //- Read and reset the solver parameters from the given stream
-            virtual void read(Istream& solverData);
+            virtual void read(const dictionary&);
 
             virtual solverPerformance solve
             (
@@ -395,6 +395,9 @@ public:
 
 
     public:
+
+        //- Find the smoother name (directly or from a sub-dictionary)
+        static word getName(const dictionary&);
 
         //- Runtime type information
         virtual const word& type() const = 0;
@@ -467,7 +470,7 @@ public:
                 const FieldField<Field, scalar>& interfaceBouCoeffs,
                 const FieldField<Field, scalar>& interfaceIntCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
-                Istream& smootherData
+                const dictionary& solverControls
             );
 
 
@@ -531,6 +534,9 @@ public:
 
     public:
 
+        //- Find the preconditioner name (directly or from a sub-dictionary)
+        static word getName(const dictionary&);
+
         //- Runtime type information
         virtual const word& type() const = 0;
 
@@ -544,9 +550,9 @@ public:
                 symMatrix,
                 (
                     const solver& sol,
-                    Istream& preconditionerData
+                    const dictionary& solverControls
                 ),
-                (sol, preconditionerData)
+                (sol, solverControls)
             );
 
             declareRunTimeSelectionTable
@@ -556,9 +562,9 @@ public:
                 asymMatrix,
                 (
                     const solver& sol,
-                    Istream& preconditionerData
+                    const dictionary& solverControls
                 ),
-                (sol, preconditionerData)
+                (sol, solverControls)
             );
 
 
@@ -579,7 +585,7 @@ public:
             static autoPtr<preconditioner> New
             (
                 const solver& sol,
-                Istream& preconditionerData
+                const dictionary& solverControls
             );
 
 
@@ -593,7 +599,7 @@ public:
 
             //- Read and reset the preconditioner parameters
             //  from the given stream
-            virtual void read(Istream& preconditionerData)
+            virtual void read(const dictionary&)
             {}
 
             //- Return wA the preconditioned form of residual rA

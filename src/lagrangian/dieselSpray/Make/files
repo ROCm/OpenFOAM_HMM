@@ -26,6 +26,7 @@ $(injector)/injector/injector.C
 $(injector)/injector/injectorIO.C
 $(injector)/injectorType/injectorType.C
 $(injector)/unitInjector/unitInjector.C
+$(injector)/multiHoleInjector/multiHoleInjector.C
 $(injector)/commonRailInjector/commonRailInjector.C
 $(injector)/swirlInjector/swirlInjector.C
 $(injector)/definedInjector/definedInjector.C

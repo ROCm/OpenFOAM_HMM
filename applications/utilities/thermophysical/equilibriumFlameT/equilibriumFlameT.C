@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Reading Burcat data dictionary" << endl;
 
-    fileName BurcatCpDataFileName(dotFoam("thermoData/BurcatCpData"));
+    fileName BurcatCpDataFileName(findEtcFile("thermoData/BurcatCpData"));
 
     // Construct control dictionary
     IFstream BurcatCpDataFile(BurcatCpDataFileName);

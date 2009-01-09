@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
-    label k(k_rIJ);
+    label k = label(k_rIJ);
 
     if (k < 0)
     {
@@ -135,7 +135,7 @@ Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
-    label k(k_rIJ);
+    label k = label(k_rIJ);
 
     if (k < 0)
     {

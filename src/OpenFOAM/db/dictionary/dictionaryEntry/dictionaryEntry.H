@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,20 +74,20 @@ public:
     // Constructors
 
         //- Construct from the parent dictionary and Istream
-        dictionaryEntry(const dictionary& parentDict, Istream& is);
+        dictionaryEntry(const dictionary& parentDict, Istream&);
 
         //- Construct from the keyword, parent dictionary and a Istream
         dictionaryEntry
         (
-            const keyType& keyword,
+            const keyType&,
             const dictionary& parentDict,
-            Istream& is
+            Istream&
         );
 
         //- Construct from the keyword, parent dictionary and a dictionary
         dictionaryEntry
         (
-            const keyType& keyword,
+            const keyType&,
             const dictionary& parentDict,
             const dictionary& dict
         );
@@ -96,7 +96,7 @@ public:
         dictionaryEntry
         (
             const dictionary& parentDict,
-            const dictionaryEntry& dictEnt
+            const dictionaryEntry&
         );
 
         autoPtr<entry> clone(const dictionary& parentDict) const
@@ -158,10 +158,8 @@ public:
 };
 
 
-#if defined (__GNUC__)
 template<>
-#endif
-Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip);
+Ostream& operator<<(Ostream&, const InfoProxy<dictionaryEntry>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

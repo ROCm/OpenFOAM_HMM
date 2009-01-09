@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,6 @@ protected:
         //- Read the control parameters from the controlDict_
         virtual void readControls();
 
-
 public:
 
     //- Runtime type information
@@ -75,7 +74,7 @@ public:
 
     // Constructors
 
-        //- Construct from matrix components and solver data stream
+        //- Construct from matrix components and solver controls
         smoothSolver
         (
             const word& fieldName,
@@ -83,9 +82,14 @@ public:
             const FieldField<Field, scalar>& interfaceBouCoeffs,
             const FieldField<Field, scalar>& interfaceIntCoeffs,
             const lduInterfaceFieldPtrsList& interfaces,
-            Istream& solverData
+            const dictionary& solverControls
         );
 
+
+    // Destructor
+
+        virtual ~smoothSolver()
+        {}
 
     // Member Functions
 

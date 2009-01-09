@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,22 +32,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Write keyType
-Foam::Ostream& Foam::Ostream::write(const keyType& s)
-{
-    // Write as word?
-    if (s.isWildCard())
-    {
-        return write(static_cast<const string&>(s));
-    }
-    else
-    {
-        return write(static_cast<const word&>(s));
-    }
-}
-
-
-//- Decrememt the indent level
+// Decrement the indent level
 void Foam::Ostream::decrIndent()
 {
     if (indentLevel_ == 0)
@@ -62,15 +47,41 @@ void Foam::Ostream::decrIndent()
 }
 
 
-// Write the keyword to the Ostream followed by appropriate indentation
-Foam::Ostream& Foam::Ostream::writeKeyword(const Foam::keyType& keyword)
+// Write keyType
+Foam::Ostream& Foam::Ostream::write(const keyType& kw)
+{
+    // Write as word or string
+    if (kw.isPattern())
+    {
+        return write(static_cast<const string&>(kw));
+    }
+    else
+    {
+        return write(static_cast<const word&>(kw));
+    }
+}
+
+
+// Write the keyword followed by appropriate indentation
+Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
     indent();
-    write(keyword);
+    write(kw);
 
-    label nSpaces = max(entryIndentation_ - label(keyword.size()), 1);
+    label nSpaces = entryIndentation_ - label(kw.size());
 
-    for (label i=0; i<nSpaces; i++)
+    // pattern is surrounded by quotes
+    if (kw.isPattern())
+    {
+        nSpaces -= 2;
+    }
+
+    if (nSpaces < 1)
+    {
+        nSpaces = 1;
+    }
+
+    while (nSpaces--)
     {
         write(char(token::SPACE));
     }

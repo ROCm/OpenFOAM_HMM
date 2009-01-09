@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     Input from memory buffer stream.
 
 SourceFiles
-    Mprint.C
+    StringStreamsPrint.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,7 +37,6 @@ SourceFiles
 #define IStringStream_H
 
 #include "ISstream.H"
-
 #include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -114,7 +113,7 @@ public:
 
         // Print
 
-            //- Print description of IOstream to Ostream
+            //- Print description to Ostream
             void print(Ostream&) const;
 
 

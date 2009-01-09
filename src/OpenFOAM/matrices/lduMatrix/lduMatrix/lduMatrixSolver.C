@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,10 +45,10 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 {
-    word solverName(solverData);
+    word name(solverControls.lookup("solver"));
 
     if (matrix.diagonal())
     {
@@ -61,22 +61,21 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
                 interfaceBouCoeffs,
                 interfaceIntCoeffs,
                 interfaces,
-                solverData
+                solverControls
             )
         );
     }
     else if (matrix.symmetric())
     {
         symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(solverName);
+            symMatrixConstructorTablePtr_->find(name);
 
         if (constructorIter == symMatrixConstructorTablePtr_->end())
         {
             FatalIOErrorIn
             (
-                "lduMatrix::solver::New", solverData
-            )   << "Unknown symmetric matrix solver " << solverName
-                << endl << endl
+                "lduMatrix::solver::New", solverControls
+            )   << "Unknown symmetric matrix solver " << name << nl << nl
                 << "Valid symmetric matrix solvers are :" << endl
                 << symMatrixConstructorTablePtr_->toc()
                 << exit(FatalIOError);
@@ -91,22 +90,21 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
                 interfaceBouCoeffs,
                 interfaceIntCoeffs,
                 interfaces,
-                solverData
+                solverControls
             )
         );
     }
     else if (matrix.asymmetric())
     {
         asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(solverName);
+            asymMatrixConstructorTablePtr_->find(name);
 
         if (constructorIter == asymMatrixConstructorTablePtr_->end())
         {
             FatalIOErrorIn
             (
-                "lduMatrix::solver::New", solverData
-            )   << "Unknown asymmetric matrix solver " << solverName
-                << endl << endl
+                "lduMatrix::solver::New", solverControls
+            )   << "Unknown asymmetric matrix solver " << name << nl << nl
                 << "Valid asymmetric matrix solvers are :" << endl
                 << asymMatrixConstructorTablePtr_->toc()
                 << exit(FatalIOError);
@@ -121,7 +119,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
                 interfaceBouCoeffs,
                 interfaceIntCoeffs,
                 interfaces,
-                solverData
+                solverControls
             )
         );
     }
@@ -129,7 +127,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     {
         FatalIOErrorIn
         (
-            "lduMatrix::solver::New", solverData
+            "lduMatrix::solver::New", solverControls
         )   << "cannot solve incomplete matrix, "
                "no diagonal or off-diagonal coefficient"
             << exit(FatalIOError);
@@ -148,7 +146,7 @@ Foam::lduMatrix::solver::solver
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 :
     fieldName_(fieldName),
@@ -156,12 +154,7 @@ Foam::lduMatrix::solver::solver
     interfaceBouCoeffs_(interfaceBouCoeffs),
     interfaceIntCoeffs_(interfaceIntCoeffs),
     interfaces_(interfaces),
-
-    controlDict_(solverData),
-
-    maxIter_(1000),
-    tolerance_(1e-6),
-    relTol_(0)
+    controlDict_(solverControls)
 {
     readControls();
 }
@@ -171,16 +164,15 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    controlDict_.readIfPresent("maxIter", maxIter_);
-    controlDict_.readIfPresent("tolerance", tolerance_);
-    controlDict_.readIfPresent("relTol", relTol_);
+    maxIter_   = controlDict_.lookupOrDefault<label>("maxIter", 1000);
+    tolerance_ = controlDict_.lookupOrDefault<scalar>("tolerance", 1e-6);
+    relTol_    = controlDict_.lookupOrDefault<scalar>("relTol", 0);
 }
 
 
-void Foam::lduMatrix::solver::read(Istream& solverData)
+void Foam::lduMatrix::solver::read(const dictionary& solverControls)
 {
-    word solverName(solverData);
-    solverData >> controlDict_;
+    controlDict_ = solverControls;
     readControls();
 }
 

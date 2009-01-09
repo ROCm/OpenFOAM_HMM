@@ -56,5 +56,5 @@
     }
 
     // Update thermal conductivity
-    Kf[i] = rhof[i]*thermof[i].Cp()*turb[i].alphaEff();
+    Kf[i] = thermof[i].Cp()*turb[i].alphaEff();
 }

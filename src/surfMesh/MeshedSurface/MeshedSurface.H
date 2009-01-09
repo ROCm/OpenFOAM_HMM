@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ SourceFiles
 #ifndef MeshedSurface_H
 #define MeshedSurface_H
 
-#include "PrimitiveMeshedSurface.H"
+#include "BasicMeshedSurface.H"
 #include "surfGroupList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
@@ -75,7 +75,7 @@ template<class Face>
 template<class Face>
 class MeshedSurface
 :
-    public PrimitiveMeshedSurface<Face>,
+    public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
     friend class UnsortedMeshedSurface<Face>;
@@ -83,7 +83,7 @@ class MeshedSurface
 private:
 
     //- Private typedefs for convenience
-        typedef PrimitiveMeshedSurface<Face> ParentType;
+        typedef BasicMeshedSurface<Face> ParentType;
         typedef UnsortedMeshedSurface<Face>  SiblingType;
 
     // Private Member Data
@@ -107,8 +107,8 @@ protected:
         //- sort faces by regions and store sorted faces
         void sortFacesAndStore
         (
-            const xfer<List<Face> >& unsortedFaces,
-            const xfer<List<label> >& regionIds,
+            const Xfer<List<Face> >& unsortedFaces,
+            const Xfer<List<label> >& regionIds,
             const bool sorted
         );
 
@@ -142,17 +142,17 @@ public:
         //- Construct by transferring components (points, faces, patches).
         MeshedSurface
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
-            const xfer<surfGroupList>&
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&,
+            const Xfer<surfGroupList>&
         );
 
         //- Construct by transferring points, faces.
         //  Use patch information, or set single default patch.
         MeshedSurface
         (
-            const xfer<pointField>&,
-            const xfer<List<Face> >&,
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&,
             const UList<label>& patchSizes = UList<label>::null(),
             const UList<word>& patchNames = UList<word>::null()
         );
@@ -171,10 +171,10 @@ public:
         MeshedSurface(const surfMesh&);
 
         //- Construct by transferring the contents from a UnsortedMeshedSurface
-        MeshedSurface(const xfer<UnsortedMeshedSurface<Face> >&);
+        MeshedSurface(const Xfer<UnsortedMeshedSurface<Face> >&);
 
         //- Construct by transferring the contents from a MeshedSurface
-        MeshedSurface(const xfer<MeshedSurface<Face> >&);
+        MeshedSurface(const Xfer<MeshedSurface<Face> >&);
 
         //- Construct from file name (uses extension to determine type)
         MeshedSurface(const fileName&);

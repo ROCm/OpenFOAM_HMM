@@ -3,8 +3,9 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application name from directory
-application="mdEquilibrationFoam"
+application="mhdFoam"
 
 (cd hartmann && runApplication blockMesh)
 (cd hartmann && runApplication $application)
+(cd hartmann && runApplication foamCalc components U)
 (cd hartmann && runApplication sample)

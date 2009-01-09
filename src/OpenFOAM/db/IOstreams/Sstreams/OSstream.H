@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
 SourceFiles
     OSstreamI.H
-    OSwrite.C
+    OSstream.C
     chkStream.C
 
 \*---------------------------------------------------------------------------*/
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class OSstream Declaration
+                          Class OSstream Declaration
 \*---------------------------------------------------------------------------*/
 
 class OSstream
@@ -136,6 +136,9 @@ public:
             virtual Ostream& write(const word&);
 
             //- Write string
+            //  In the rare case that the string contains a final trailing
+            //  backslash, it will be dropped to the appearance of an escaped
+            //  double-quote.
             virtual Ostream& write(const string&);
 
             //- Write label
@@ -162,20 +165,20 @@ public:
             //- Flush stream
             virtual void flush();
 
-            //- Add '\n' and flush stream
+            //- Add newline and flush stream
             virtual void endl();
 
             //- Get width of output field
             virtual int width() const;
 
             //- Set width of output field (and return old width)
-            virtual int width(const int w);
+            virtual int width(const int);
 
             //- Get precision of output field
             virtual int precision() const;
 
             //- Set precision of output field (and return old precision)
-            virtual int precision(const int p);
+            virtual int precision(const int);
 
 
         // Print

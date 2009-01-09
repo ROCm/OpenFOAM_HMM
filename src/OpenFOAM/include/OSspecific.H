@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,8 @@ bool chDir(const fileName& dir);
 //    - $WM_PROJECT_DIR/etc/
 //
 //  @return the full path name or fileName::null if the name cannot be found
-fileName dotFoam(const fileName& name);
+//  Optionally abort if the file cannot be found
+fileName findEtcFile(const fileName& name, bool mandatory=false);
 
 //- Make a directory and return an error if it could not be created
 //  and does not already exist
