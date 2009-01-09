@@ -26,7 +26,7 @@ Application
     foamVersionString.C
 
 Description
-    Print the FOAMversion string.
+    Print the OpenFOAM version strings.
     Simultaneously the smallest possible program to use a minimal bit of
     the OpenFOAM library
 
@@ -37,7 +37,10 @@ Description
 
 int main()
 {
-    std::cerr<< "FOAMversion " << Foam::FOAMversion << "\n";
+    std::cerr
+        << "build   " << Foam::FOAMbuild << "\n"
+        << "version " << Foam::FOAMversion << "\n";
+
     return 0;
 }
 

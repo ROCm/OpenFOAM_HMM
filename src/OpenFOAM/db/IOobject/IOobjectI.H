@@ -38,7 +38,7 @@ inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
     {
         memset(spaces, ' ', 40);
 
-        size_t len = strlen(Foam::FOAMversion);
+        size_t len = strlen(Foam::FOAMbuild);
         if (len < 38)
         {
             spaces[38 - len] = '\0';
@@ -64,7 +64,7 @@ inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
     os  <<
         "| =========                 |                                                 |\n"
         "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
-        "|  \\\\    /   O peration     | Version:  " << FOAMversion << spaces << "|\n"
+        "|  \\\\    /   O peration     | Version:  " << FOAMbuild << spaces << "|\n"
         "|   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\n"
         "|    \\\\/     M anipulation  |                                                 |\n"
         "\\*---------------------------------------------------------------------------*/\n";
