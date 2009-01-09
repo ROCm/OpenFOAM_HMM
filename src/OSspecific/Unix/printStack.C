@@ -217,7 +217,7 @@ void error::printStack(Ostream& os)
             string::size_type lPos = msg.find('[');
             string::size_type rPos = msg.find(']');
 
-            if (lPos != string::npos && rPos != string::npos && lPos<rPos)
+            if (lPos != string::npos && rPos != string::npos && lPos < rPos)
             {
                 address = msg.substr(lPos+1, rPos-lPos-1);
                 msg = msg.substr(0, lPos);
@@ -232,7 +232,7 @@ void error::printStack(Ostream& os)
                 // not an absolute path
                 if (programFile[0] != '/')
                 {
-                    string tmp = pOpen("which "+programFile);
+                    string tmp = pOpen("which " + programFile);
                     if (tmp[0] == '/' || tmp[0] == '~')
                     {
                         programFile = tmp;
@@ -243,13 +243,13 @@ void error::printStack(Ostream& os)
 
         string::size_type bracketPos = msg.find('(');
 
-        if (bracketPos != string::size_type(string::npos))
+        if (bracketPos != string::npos)
         {
             string::size_type start = bracketPos+1;
 
             string::size_type plusPos = msg.find('+', start);
 
-            if (plusPos != string::size_type(string::npos))
+            if (plusPos != string::npos)
             {
                 string cName(msg.substr(start, plusPos-start));
 
@@ -276,7 +276,7 @@ void error::printStack(Ostream& os)
             {
                 string::size_type endBracketPos = msg.find(')', start);
 
-                if (endBracketPos != string::size_type(string::npos))
+                if (endBracketPos != string::npos)
                 {
                     string fullName(msg.substr(start, endBracketPos-start));
 

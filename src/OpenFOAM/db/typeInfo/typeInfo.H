@@ -60,15 +60,21 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+// declarations for use in header files
+
+#define TypeNameNoDebug(TypeNameString)                                       \
+    ClassNameNoDebug(TypeNameString);                                         \
+    virtual const word& type() const { return typeName; }
+
+#define TypeName(TypeNameString)                                              \
+    ClassName(TypeNameString);                                                \
+    virtual const word& type() const { return typeName; }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define TypeName(TypeNameString)                              \
-    ClassName(TypeNameString);                                \
-    virtual const word& type() const { return typeName; }
-
+namespace Foam
+{
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 

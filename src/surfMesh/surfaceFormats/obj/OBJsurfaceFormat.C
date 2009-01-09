@@ -138,7 +138,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                 string::size_type startNum =
                     line.find_first_not_of(' ', endNum);
 
-                if (startNum == string::size_type(string::npos))
+                if (startNum == string::npos)
                 {
                     break;
                 }
@@ -146,7 +146,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                 endNum = line.find(' ', startNum);
 
                 string vertexSpec;
-                if (endNum != string::size_type(string::npos))
+                if (endNum != string::npos)
                 {
                     vertexSpec = line.substr(startNum, endNum-startNum);
                 }
@@ -158,7 +158,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                 string::size_type slashPos = vertexSpec.find('/');
 
                 label vertI = 0;
-                if (slashPos != string::size_type(string::npos))
+                if (slashPos != string::npos)
                 {
                     IStringStream intStream(vertexSpec.substr(0, slashPos));
 

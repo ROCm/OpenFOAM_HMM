@@ -105,13 +105,14 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
             DynamicList<label> verts;
 
             // Assume 'f' is followed by space.
-            size_type endNum = 1;
+            string::size_type endNum = 1;
 
             while(true)
             {
-                size_type startNum = line.find_first_not_of(' ', endNum);
+                string::size_type startNum = 
+                    line.find_first_not_of(' ', endNum);
 
-                if (startNum == size_type(string::npos))
+                if (startNum == string::npos)
                 {
                     break;
                 }
@@ -119,7 +120,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
                 endNum = line.find(' ', startNum);
 
                 string vertexSpec;
-                if (endNum != size_type(string::npos))
+                if (endNum != string::npos)
                 {
                     vertexSpec = line.substr(startNum, endNum-startNum);
                 }
@@ -128,10 +129,10 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
                     vertexSpec = line.substr(startNum, line.size() - startNum);
                 }
 
-                size_type slashPos = vertexSpec.find('/');
+                string::size_type slashPos = vertexSpec.find('/');
 
                 label vertI = 0;
-                if (slashPos != size_type(string::npos))
+                if (slashPos != string::npos)
                 {
                     IStringStream intStream(vertexSpec.substr(0, slashPos));
 

@@ -62,13 +62,12 @@ static bool readCmd(IFstream& ACfile, string& cmd, string& args)
         string line;
         ACfile.getLine(line);
 
-        label spaceIndex = line.find(' ');
+        string::size_type space = line.find(' ');
 
-        if (spaceIndex != label(string::npos))
+        if (space != string::npos)
         {
-            cmd = line.substr(0, spaceIndex);
-
-            args = line.substr(spaceIndex+1);
+            cmd  = line.substr(0, space);
+            args = line.substr(space+1);
 
             return true;
         }
@@ -91,16 +90,12 @@ static bool readUpto
         string line;
         ACfile.getLine(line);
 
-        label spaceIndex = line.find(' ');
+        string::size_type space = line.find(' ');
 
-        if (spaceIndex != label(string::npos))
+        if (space != string::npos && line.substr(0, space) == cmd)
         {
-            if (line.substr(0, spaceIndex) == cmd)
-            {
-                args = line.substr(spaceIndex+1);
-
-                return true;
-            }
+            args = line.substr(space+1);            
+            return true;
         }
     }
     return false;
