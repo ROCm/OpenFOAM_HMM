@@ -62,6 +62,7 @@ void Foam::refinementHistory::writeEntry
             << " no subcells"
             << endl;
     }
+
     if (split.parent_ >= 0)
     {
         Pout<< "parent data:" << endl;
@@ -234,7 +235,7 @@ Foam::label Foam::refinementHistory::allocateSplitCell
     {
         splitCell8& parentSplit = splitCells_[parent];
 
-        if (!parentSplit.addedCellsPtr_.valid())
+        if (parentSplit.addedCellsPtr_.empty())
         {
             // Allocate storage on parent for the 8 subcells.
             parentSplit.addedCellsPtr_.reset(new FixedList<label, 8>(-1));
@@ -406,7 +407,7 @@ Foam::refinementHistory::refinementHistory
     )
     {
         readStream(typeName) >> *this;
-        close();        
+        close();
     }
     else
     {
@@ -497,7 +498,7 @@ void Foam::refinementHistory::resize(const label size)
     }
 }
 
-    
+
 void Foam::refinementHistory::updateMesh(const mapPolyMesh& map)
 {
     if (active())
@@ -514,7 +515,7 @@ void Foam::refinementHistory::updateMesh(const mapPolyMesh& map)
             {
                 label index = visibleCells_[cellI];
 
-                // Check
+                // Check not already set
                 if (splitCells_[index].addedCellsPtr_.valid())
                 {
                     FatalErrorIn
@@ -974,7 +975,7 @@ void Foam::refinementHistory::compact()
         else if
         (
             splitCells_[index].parent_ == -1
-         && !splitCells_[index].addedCellsPtr_.valid()
+         && splitCells_[index].addedCellsPtr_.empty()
         )
         {
             // recombined cell. No need to keep since no parent and no subsplits
@@ -989,7 +990,7 @@ void Foam::refinementHistory::compact()
 
 
     // Now oldToNew is fully complete and compacted elements are in
-    // newSplitCells. 
+    // newSplitCells.
     // Renumber contents of newSplitCells and visibleCells.
     forAll(newSplitCells, index)
     {

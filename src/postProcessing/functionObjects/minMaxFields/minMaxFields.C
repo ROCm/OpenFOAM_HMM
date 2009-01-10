@@ -93,7 +93,7 @@ void Foam::minMaxFields::read(const dictionary& dict)
 void Foam::minMaxFields::makeFile()
 {
     // Create the minMaxFields file if not already created
-    if (!minMaxFieldsFilePtr_.valid())
+    if (minMaxFieldsFilePtr_.empty())
     {
         if (debug)
         {

@@ -73,7 +73,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if
         (
-           !storedVolFieldPtr_.valid()
+            storedVolFieldPtr_.empty()
          || (fvm.time().timeName() != storedVolFieldPtr_().instance())
         )
         {
@@ -145,7 +145,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
 
         if
         (
-           !storedPointFieldPtr_.valid()
+            storedPointFieldPtr_.empty()
          || (fvm.time().timeName() != storedPointFieldPtr_().instance())
         )
         {

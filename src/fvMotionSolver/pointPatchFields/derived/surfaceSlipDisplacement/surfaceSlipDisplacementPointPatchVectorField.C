@@ -136,10 +136,10 @@ surfaceSlipDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const searchableSurfaces& surfaceSlipDisplacementPointPatchVectorField::
-surfaces() const
+const searchableSurfaces&
+surfaceSlipDisplacementPointPatchVectorField::surfaces() const
 {
-    if (!surfacesPtr_.valid())
+    if (surfacesPtr_.empty())
     {
         surfacesPtr_.reset
         (

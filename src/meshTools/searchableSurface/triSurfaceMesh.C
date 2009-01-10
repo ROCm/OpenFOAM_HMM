@@ -229,7 +229,7 @@ void Foam::triSurfaceMesh::movePoints(const pointField& newPoints)
 const Foam::indexedOctree<Foam::treeDataTriSurface>&
     Foam::triSurfaceMesh::tree() const
 {
-    if (!tree_.valid())
+    if (tree_.empty())
     {
         treeBoundBox bb(points(), meshPoints());
 
@@ -256,7 +256,7 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 const Foam::indexedOctree<Foam::treeDataEdge>&
     Foam::triSurfaceMesh::edgeTree() const
 {
-    if (!edgeTree_.valid())
+    if (edgeTree_.empty())
     {
         treeBoundBox bb(localPoints());
 
