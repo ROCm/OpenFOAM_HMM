@@ -58,7 +58,7 @@ do
 
     find $checkDir -depth -type d -name Make -print | while read dir
     do
-        dir=${dir%Make}
+        dir=${dir%/Make}    # trim /Make directory from the end
         if [ -d "$dir" ]
         then
             wmakeLnInclude -f $dir
