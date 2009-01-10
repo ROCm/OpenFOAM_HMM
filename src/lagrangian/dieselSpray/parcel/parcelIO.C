@@ -172,7 +172,7 @@ void Foam::parcel::readFields
     }
 
     // read the liquid molar fractions
-    if (c.size() > 0)
+    if (c.size())
     {
         Cloud<parcel>::const_iterator iter = c.begin();
         const parcel& p0 = iter();

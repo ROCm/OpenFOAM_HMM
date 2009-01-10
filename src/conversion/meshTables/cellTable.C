@@ -208,7 +208,7 @@ Foam::word Foam::cellTable::name(const label& id) const
 
 Foam::label Foam::cellTable::findIndex(const word& name) const
 {
-    if (!name.size())
+    if (name.empty())
     {
         return -1;
     }
@@ -466,7 +466,7 @@ void Foam::cellTable::addCellZones
     forAll(zoneCells, zoneI)
     {
         zoneCells[zoneI].shrink();
-        if (zoneCells[zoneI].size() > 0)
+        if (zoneCells[zoneI].size())
         {
             zoneUsed[nZone++] = zoneI;
         }
@@ -509,7 +509,7 @@ void Foam::cellTable::addCellZones
 
 void Foam::cellTable::combine(const dictionary& mapDict, labelList& tableIds)
 {
-    if (!mapDict.size())
+    if (mapDict.empty())
     {
         return;
     }

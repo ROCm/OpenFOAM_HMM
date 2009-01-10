@@ -897,7 +897,7 @@ void Foam::combineFaces::setUnrefinement
 
         faceList& faces = faceSetsVertices_[setI];
 
-        if (faces.size() == 0)
+        if (faces.empty())
         {
             FatalErrorIn
             (

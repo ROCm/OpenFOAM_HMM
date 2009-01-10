@@ -181,7 +181,7 @@ Foam::edgeSurface::edgeSurface
         // Store current top of allEdges.
         label freeNewEdgeI = allEdges.size();
 
-        if (extraVerts.size() == 0)
+        if (extraVerts.empty())
         {
             // No cuts across this edge. Note that vertices do not need to be
             // renumbered.

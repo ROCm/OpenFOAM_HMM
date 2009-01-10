@@ -652,7 +652,7 @@ int main(int argc, char *argv[])
         // Remove cut cells from cellsToCut  (Note:only relevant if -readSet)
         forAll(cuts.cellLoops(), cellI)
         {
-            if (cuts.cellLoops()[cellI].size() > 0)
+            if (cuts.cellLoops()[cellI].size())
             {
                 //Info<< "Removing cut cell " << cellI << " from wishlist"
                 //    << endl;

@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -863,7 +863,7 @@ bool finishReaction = false;
             {
                 case unimolecularFallOffReactionType:
                 {
-                    if (!pDependentSpecieName.size())
+                    if (pDependentSpecieName.empty())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "LOW keyword given for a unimolecular fall-off"
@@ -898,7 +898,7 @@ bool finishReaction = false;
 
                 case chemicallyActivatedBimolecularReactionType:
                 {
-                    if (!pDependentSpecieName.size())
+                    if (pDependentSpecieName.empty())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "HIGH keyword given for a chemically"
@@ -935,7 +935,7 @@ bool finishReaction = false;
 
                 case TroeReactionType:
                 {
-                    if (!pDependentSpecieName.size())
+                    if (pDependentSpecieName.empty())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "TROE keyword given for a"
@@ -969,7 +969,7 @@ bool finishReaction = false;
 
                 case SRIReactionType:
                 {
-                    if (!pDependentSpecieName.size())
+                    if (pDependentSpecieName.empty())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "SRI keyword given for a"

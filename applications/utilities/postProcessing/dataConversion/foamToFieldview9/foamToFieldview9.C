@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
 #   include "getFieldNames.H"
 
     bool hasLagrangian = false;
-    if ((sprayScalarNames.size() > 0) || (sprayVectorNames.size() > 0))
+    if (sprayScalarNames.size() || sprayVectorNames.size())
     {
         hasLagrangian = true;
     }

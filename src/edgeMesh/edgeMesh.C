@@ -123,7 +123,7 @@ Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
         edgeRegion[startEdgeI] = currentRegion;
         labelList edgesToVisit(1, startEdgeI);
 
-        while (edgesToVisit.size() > 0)
+        while (edgesToVisit.size())
         {
             // neighbours of current edgesToVisit
             DynamicList<label> newEdgesToVisit(edgesToVisit.size());

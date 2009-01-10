@@ -307,13 +307,13 @@ void Foam::UnsortedMeshedSurface<Face>::onePatch(const word& name)
     regions_ = 0;
 
     word patchName(name);
-    if (!patchName.size())
+    if (patchName.empty())
     {
-        if (patches_.size() >= 1)
+        if (patches_.size())
         {
             patchName = patches_[0].name();
         }
-        if (!patchName.size())
+        if (patchName.empty())
         {
             patchName = "patch0";
         }
@@ -404,7 +404,7 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
     // re-assign the region Ids
     if (&faceMap && faceMap.size())
     {
-        if (patches_.size() == 0)
+        if (patches_.empty())
         {
             onePatch();
         }

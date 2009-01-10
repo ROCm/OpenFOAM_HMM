@@ -149,7 +149,7 @@ void getSymbolForRaw
     const word& address
 )
 {
-    if (filename.size() > 0 && filename[0] == '/')
+    if (filename.size() && filename[0] == '/')
     {
         string fcnt = pOpen
         (
@@ -189,7 +189,7 @@ void error::printStack(Ostream& os)
             string::size_type space = line.rfind(' ') + 1;
             fileName libPath = line.substr(space, line.size()-space);
 
-            if (libPath.size() > 0 && libPath[0] == '/')
+            if (libPath.size() && libPath[0] == '/')
             {
                 string offsetString(line.substr(0, line.find('-')));
                 IStringStream offsetStr(offsetString);

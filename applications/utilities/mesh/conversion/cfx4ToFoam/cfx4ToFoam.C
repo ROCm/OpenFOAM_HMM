@@ -584,7 +584,7 @@ int main(int argc, char *argv[])
 
     forAll (rawPatches, patchI)
     {
-        if (rawPatches[patchI].size() > 0 && cfxPatchTypes[patchI] != "BLKBDY")
+        if (rawPatches[patchI].size() && cfxPatchTypes[patchI] != "BLKBDY")
         {
             // Check if this name has been already created
             label existingPatch = -1;

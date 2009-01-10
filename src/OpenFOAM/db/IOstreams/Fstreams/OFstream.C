@@ -46,7 +46,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
 :
     ofPtr_(NULL)
 {
-    if (!pathname.size())
+    if (pathname.empty())
     {
         if (OFstream::debug)
         {

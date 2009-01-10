@@ -416,12 +416,12 @@ Foam::refinementSurfaces::refinementSurfaces
 // Get indices of unnamed surfaces (surfaces without faceZoneName)
 Foam::labelList Foam::refinementSurfaces::getUnnamedSurfaces() const
 {
-   labelList anonymousSurfaces(faceZoneNames_.size());
+    labelList anonymousSurfaces(faceZoneNames_.size());
 
     label i = 0;
     forAll(faceZoneNames_, surfI)
     {
-        if (faceZoneNames_[surfI].size() == 0)
+        if (faceZoneNames_[surfI].empty())
         {
             anonymousSurfaces[i++] = surfI;
         }
@@ -440,7 +440,7 @@ Foam::labelList Foam::refinementSurfaces::getNamedSurfaces() const
     label namedI = 0;
     forAll(faceZoneNames_, surfI)
     {
-        if (faceZoneNames_[surfI].size() > 0)
+        if (faceZoneNames_[surfI].size())
         {
             namedSurfaces[namedI++] = surfI;
         }
@@ -574,7 +574,7 @@ void Foam::refinementSurfaces::findHigherIntersection
     surfaceLevel.setSize(start.size());
     surfaceLevel = -1;
 
-    if (surfaces_.size() == 0)
+    if (surfaces_.empty())
     {
         return;
     }
@@ -614,14 +614,14 @@ void Foam::refinementSurfaces::findHigherIntersection
             if (hitInfo[hitI].hit())
             {
                 // Check if minLevelField for this surface.
-                if (minLevelField.size() > 0)
+                if (minLevelField.size())
                 {
                     minLocalLevel = minLevelField[hitI];
                 }
                 else
                 {
                     // Use the min level for the surface instead. Assume
-                    // single region 0. 
+                    // single region 0.
                     minLocalLevel = minLevel(surfI, 0);
                 }
             }
@@ -673,7 +673,7 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     surfaceLevel.setSize(start.size());
     surfaceNormal.setSize(start.size());
 
-    if (surfaces_.size() == 0)
+    if (surfaces_.empty())
     {
         return;
     }
@@ -969,7 +969,7 @@ void Foam::refinementSurfaces::findNearestRegion
 
         List<pointIndexHit> localHits
         (
-            IndirectList<pointIndexHit> 
+            IndirectList<pointIndexHit>
             (
                 hitInfo,
                 localIndices

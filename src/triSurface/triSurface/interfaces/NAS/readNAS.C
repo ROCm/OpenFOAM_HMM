@@ -169,7 +169,7 @@ bool triSurface::readNAS(const fileName& fName)
         }
 
 
-        if (line.size() == 0 || line[0] == '$')
+        if (line.empty() || line[0] == '$')
         {
             // Skip empty or comment
             continue;

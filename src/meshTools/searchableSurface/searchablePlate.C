@@ -244,7 +244,7 @@ Foam::searchablePlate::~searchablePlate()
 
 const Foam::wordList& Foam::searchablePlate::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(1);
         regions_[0] = "region0";

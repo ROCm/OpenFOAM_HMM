@@ -56,7 +56,7 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     {
         is.getLine(line);
     }
-    while ((line.size() == 0 || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == '#') && is.good());
 
     return line;
 }

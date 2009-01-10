@@ -206,23 +206,22 @@ bool Foam::hexCellLooper::cut
     }
     else
     {
-        success = 
-            geomCellLooper::cut
-            (
-                refDir,
-                cellI,
-                vertIsCut,
-                edgeIsCut,
-                edgeWeight,
+        success = geomCellLooper::cut
+        (
+            refDir,
+            cellI,
+            vertIsCut,
+            edgeIsCut,
+            edgeWeight,
 
-                loop,
-                loopWeights
-            );
+            loop,
+            loopWeights
+        );
     }
 
     if (debug)
     {
-        if (loop.size() == 0)
+        if (loop.empty())
         {
             WarningIn("hexCellLooper")
                 << "could not cut cell " << cellI << endl;

@@ -41,7 +41,7 @@ namespace Foam
 
 void Foam::probes::findCells(const fvMesh& mesh)
 {
-    if (cellList_.size() == 0)
+    if (cellList_.empty())
     {
         cellList_.setSize(probeLocations_.size());
 

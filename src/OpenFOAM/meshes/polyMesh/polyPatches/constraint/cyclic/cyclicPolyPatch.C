@@ -86,7 +86,7 @@ Foam::label Foam::cyclicPolyPatch::findMaxArea
 
 void Foam::cyclicPolyPatch::calcTransforms()
 {
-    if (size() > 0)
+    if (size())
     {
         const pointField& points = this->points();
 
@@ -1111,7 +1111,7 @@ bool Foam::cyclicPolyPatch::order
     rotation.setSize(pp.size());
     rotation = 0;
 
-    if (pp.size() == 0)
+    if (pp.empty())
     {
         // No faces, nothing to change.
         return false;

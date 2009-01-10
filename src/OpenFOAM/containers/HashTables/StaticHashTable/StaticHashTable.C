@@ -476,8 +476,8 @@ void Foam::StaticHashTable<T, Key, Hash>::operator=
     }
 
 
-    // could be zero-sized from a previous transfer()
-    if (keys_.size() == 0)
+    // keys could be empty from a previous transfer()
+    if (keys_.empty())
     {
         keys_.setSize(rhs.keys_.size());
         objects_.setSize(keys_.size());

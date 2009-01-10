@@ -37,12 +37,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(cellCuts, 0);
-
-}
+defineTypeNameAndDebug(Foam::cellCuts, 0);
 
 
 // * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //
@@ -2012,7 +2007,7 @@ void Foam::cellCuts::setFromCellLoops()
     {
         const labelList& loop = cellLoops_[cellI];
 
-        if (loop.size() > 0)
+        if (loop.size())
         {
             // Storage for cross-face cuts
             Map<edge> faceSplitCuts(loop.size());
@@ -2203,7 +2198,7 @@ void Foam::cellCuts::setFromCellLoops
 
         const labelList& loop = cellLoops[cellLabelI];
 
-        if (loop.size() > 0)
+        if (loop.size())
         {
             const scalarField& loopWeights = cellLoopWeights[cellLabelI];
 
@@ -2296,7 +2291,7 @@ void Foam::cellCuts::setFromCellCutter
         }
     }
 
-    if (debug && invalidCutCells.size() > 0)
+    if (debug && invalidCutCells.size())
     {
         invalidCutCells.shrink();
         invalidCutLoops.shrink();
@@ -2408,7 +2403,7 @@ void Foam::cellCuts::setFromCellCutter
         }
     }
 
-    if (debug && invalidCutCells.size() > 0)
+    if (debug && invalidCutCells.size())
     {
         invalidCutCells.shrink();
         invalidCutLoops.shrink();
@@ -2458,7 +2453,7 @@ void Foam::cellCuts::orientPlanesAndLoops()
     {
         const labelList& loop = cellLoops_[cellI];
 
-        if (loop.size() > 0 && cellAnchorPoints_[cellI].size() == 0)
+        if (loop.size() && cellAnchorPoints_[cellI].empty())
         {
             // Leave anchor points empty if illegal loop.
             calcAnchors
@@ -2477,9 +2472,9 @@ void Foam::cellCuts::orientPlanesAndLoops()
     }
     forAll(cellAnchorPoints_, cellI)
     {
-        if (cellLoops_[cellI].size() > 0)
+        if (cellLoops_[cellI].size())
         {
-            if (cellAnchorPoints_[cellI].size() == 0)
+            if (cellAnchorPoints_[cellI].empty())
             {
                 FatalErrorIn("orientPlanesAndLoops()")
                     << "No anchor points for cut cell " << cellI << endl
@@ -2499,7 +2494,7 @@ void Foam::cellCuts::orientPlanesAndLoops()
 
     forAll(cellLoops_, cellI)
     {
-        if (cellLoops_[cellI].size() > 0)
+        if (cellLoops_[cellI].size())
         {
             nLoops_++;
         }
@@ -2545,7 +2540,7 @@ void Foam::cellCuts::calcLoopsAndAddressing(const labelList& cutCells)
         {
             const labelList& loop = cellLoops_[cellI];
 
-            if (loop.size() > 0)
+            if (loop.size())
             {
                 Pout<< "cell:" << cellI << "  ";
                 writeCuts(Pout, loop, loopWeights(loop));
@@ -2632,7 +2627,7 @@ void Foam::cellCuts::check() const
 
         const labelList& loop = cellLoops_[cellI];
 
-        if (loop.size() > 0 && anchors.size() == 0)
+        if (loop.size() && anchors.empty())
         {
             FatalErrorIn("cellCuts::check()")
                 << "cell:" << cellI << " loop:" << loop
@@ -2671,11 +2666,7 @@ void Foam::cellCuts::check() const
             label own = mesh().faceOwner()[faceI];
             label nei = mesh().faceNeighbour()[faceI];
 
-            if
-            (
-                cellLoops_[own].size() == 0
-             && cellLoops_[nei].size() == 0
-            )
+            if (cellLoops_[own].empty() && cellLoops_[nei].empty())
             {
                 FatalErrorIn("cellCuts::check()")
                     << "Internal face:" << faceI << " cut by " << iter()
@@ -2689,7 +2680,7 @@ void Foam::cellCuts::check() const
         {
             label own = mesh().faceOwner()[faceI];
 
-            if (cellLoops_[own].size() == 0)
+            if (cellLoops_[own].empty())
             {
                 FatalErrorIn("cellCuts::check()")
                     << "Boundary face:" << faceI << " cut by " << iter()

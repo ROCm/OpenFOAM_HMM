@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
     {
         const labelList& added = oldToNew[oldCellI];
 
-        if (added.size() > 0)
+        if (added.size())
         {
             forAll(added, i)
             {

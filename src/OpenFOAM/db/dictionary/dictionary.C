@@ -46,7 +46,7 @@ bool Foam::dictionary::findInPatterns
     DLList<autoPtr<regExp> >::const_iterator& reLink
 ) const
 {
-    if (patternEntries_.size() > 0)
+    if (patternEntries_.size())
     {
         while (wcLink != patternEntries_.end())
         {
@@ -76,7 +76,7 @@ bool Foam::dictionary::findInPatterns
     DLList<autoPtr<regExp> >::iterator& reLink
 )
 {
-    if (patternEntries_.size() > 0)
+    if (patternEntries_.size())
     {
         while (wcLink != patternEntries_.end())
         {
@@ -240,7 +240,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     }
     else
     {
-        if (patternEntries_.size() > 0)
+        if (patternEntries_.size())
         {
             DLList<entry*>::const_iterator wcLink = patternEntries_.begin();
             DLList<autoPtr<regExp> >::const_iterator reLink =
@@ -276,7 +276,7 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
 
     if (iter == hashedEntries_.end())
     {
-        if (patternMatch && patternEntries_.size() > 0)
+        if (patternMatch && patternEntries_.size())
         {
             DLList<entry*>::const_iterator wcLink =
                 patternEntries_.begin();
@@ -315,7 +315,7 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
 
     if (iter == hashedEntries_.end())
     {
-        if (patternMatch && patternEntries_.size() > 0)
+        if (patternMatch && patternEntries_.size())
         {
             DLList<entry*>::iterator wcLink =
                 patternEntries_.begin();

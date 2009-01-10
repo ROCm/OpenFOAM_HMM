@@ -55,7 +55,7 @@ bool regIOobject::writeObject
         return false;
     }
 
-    if (!instance().size())
+    if (instance().empty())
     {
         SeriousErrorIn("regIOobject::write()")
             << "instance undefined for object " << name()

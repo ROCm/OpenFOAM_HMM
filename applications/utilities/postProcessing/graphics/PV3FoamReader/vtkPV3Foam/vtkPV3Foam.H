@@ -154,6 +154,11 @@ class vtkPV3Foam
                 return size_;
             }
 
+            bool empty() const
+            {
+                return (size_ == 0);
+            }
+
             void reset()
             {
                 start_ = -1;

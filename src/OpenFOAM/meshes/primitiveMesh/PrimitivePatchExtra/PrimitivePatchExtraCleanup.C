@@ -53,7 +53,7 @@ checkEdges
 
         // boundary edges have one face
         // interior edges have two faces
-        if (myFaces.size() == 0)
+        if (myFaces.empty())
         {
             FatalErrorIn
             (

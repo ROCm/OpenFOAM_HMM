@@ -760,7 +760,7 @@ bool primitiveMesh::checkPoints
 
     forAll (pf, pointI)
     {
-        if (pf[pointI].size() == 0)
+        if (pf[pointI].empty())
         {
             if (setPtr)
             {
@@ -776,7 +776,7 @@ bool primitiveMesh::checkPoints
     {
         const labelList& pc = pointCells(pointI);
 
-        if (pc.size() == 0)
+        if (pc.empty())
         {
             if (setPtr)
             {

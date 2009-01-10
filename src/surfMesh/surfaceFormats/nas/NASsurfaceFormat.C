@@ -169,7 +169,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
 
         // Skip empty or comment
-        if (line.size() == 0 || line[0] == '$')
+        if (line.empty() || line[0] == '$')
         {
             continue;
         }

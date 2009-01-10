@@ -438,7 +438,7 @@ Foam::label Foam::BasicMeshedSurface<Face>::triangulate
     // remember the number of *additional* faces
     nTri -= faceLst.size();
 
-    if (this->points().size() == 0)
+    if (this->points().empty())
     {
         // triangulate without points
         // simple face triangulation around f[0]

@@ -48,7 +48,7 @@ string getLine(std::ifstream& is)
     {
         std::getline(is, line);
     }
-    while((line.size() > 0) && (line[0] == '#'));
+    while (line.size() && line[0] == '#');
 
     return line;
 }

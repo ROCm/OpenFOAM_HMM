@@ -153,7 +153,7 @@ Foam::Istream& Foam::operator>>(Istream& is, refinementHistory::splitCell8& sc)
 
     is >> sc.parent_ >> addedCells;
 
-    if (addedCells.size() > 0)
+    if (addedCells.size())
     {
         sc.addedCellsPtr_.reset(new FixedList<label, 8>(addedCells));
     }
@@ -216,7 +216,7 @@ Foam::label Foam::refinementHistory::allocateSplitCell
 {
     label index = -1;
 
-    if (freeSplitCells_.size() > 0)
+    if (freeSplitCells_.size())
     {
         index = freeSplitCells_.remove();
 

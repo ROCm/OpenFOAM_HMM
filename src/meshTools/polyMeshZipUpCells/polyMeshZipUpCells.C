@@ -720,7 +720,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
             }
         }
 
-        if (problemCells.size() > 0)
+        if (problemCells.size())
         {
             // This cycle has failed.  Print out the problem cells
             labelList toc(problemCells.toc());

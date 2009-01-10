@@ -286,7 +286,7 @@ void Foam::polyTopoChange::getMergeSets
 
             objectMap& mergeSet = cellsFromCells[setI];
 
-            if (mergeSet.masterObjects().size() == 0)
+            if (mergeSet.masterObjects().empty())
             {
                 // First occurrence of master cell mergeCellI
 
@@ -569,7 +569,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
                     }
                 }
             }
-            while (nextCell.size() > 0);
+            while (nextCell.size());
         }
     }
 
@@ -1223,7 +1223,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
 
     facesFromPoints.setSize(faceFromPoint_.size());
 
-    if (faceFromPoint_.size() > 0)
+    if (faceFromPoint_.size())
     {
         label nFacesFromPoints = 0;
 
@@ -1269,7 +1269,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
 
     facesFromEdges.setSize(faceFromEdge_.size());
 
-    if (faceFromEdge_.size() > 0)
+    if (faceFromEdge_.size())
     {
         label nFacesFromEdges = 0;
 
@@ -1333,7 +1333,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
 {
     cellsFromPoints.setSize(cellFromPoint_.size());
 
-    if (cellFromPoint_.size() > 0)
+    if (cellFromPoint_.size())
     {
         label nCellsFromPoints = 0;
 
@@ -1351,7 +1351,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
 
     cellsFromEdges.setSize(cellFromEdge_.size());
 
-    if (cellFromEdge_.size() > 0)
+    if (cellFromEdge_.size())
     {
         label nCellsFromEdges = 0;
 
@@ -1369,7 +1369,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
 
     cellsFromFaces.setSize(cellFromFace_.size());
 
-    if (cellFromFace_.size() > 0)
+    if (cellFromFace_.size())
     {
         label nCellsFromFaces = 0;
 

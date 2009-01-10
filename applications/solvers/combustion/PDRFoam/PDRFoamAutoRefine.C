@@ -26,7 +26,7 @@ Application
     PDRFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence 
+    Compressible premixed/partially-premixed combustion solver with turbulence
     modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
@@ -121,7 +121,8 @@ scalar StCoNum = 0.0;
             // Test : disable refinement for some cells
             PackedList<1>& protectedCell =
                 refCast<dynamicRefineFvMesh>(mesh).protectedCell();
-            if (protectedCell.size() == 0)
+
+            if (protectedCell.empty())
             {
                 protectedCell.setSize(mesh.nCells());
                 protectedCell = 0;
@@ -135,7 +136,7 @@ scalar StCoNum = 0.0;
                 }
             }
 
-            //volScalarField pIndicator("pIndicator", 
+            //volScalarField pIndicator("pIndicator",
             //    p*(fvc::laplacian(p))
             //  / (
             //        magSqr(fvc::grad(p))

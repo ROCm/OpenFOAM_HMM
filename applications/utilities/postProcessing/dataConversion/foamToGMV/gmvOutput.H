@@ -80,7 +80,7 @@ for(label i=0; i < nTypes; i++)
             wordList lagrangianScalarNames = objects.names("scalarField");
             wordList lagrangianVectorNames = objects.names("vectorField");
 
-            if (particles.size() > 0)
+            if (particles.size())
             {
 #               include "gmvOutputLagrangian.H"
             }

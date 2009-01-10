@@ -298,7 +298,7 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
 
 const Foam::wordList& Foam::triSurfaceMesh::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(patches().size());
         forAll(regions_, regionI)

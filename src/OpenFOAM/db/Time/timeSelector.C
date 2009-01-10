@@ -236,7 +236,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select0
 {
     instantList timeDirs = timeSelector::select(runTime.times(), args);
 
-    if (!timeDirs.size())
+    if (timeDirs.empty())
     {
         FatalErrorIn(args.executable())
             << "No times selected"

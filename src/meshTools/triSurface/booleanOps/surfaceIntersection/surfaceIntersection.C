@@ -1044,7 +1044,7 @@ Foam::surfaceIntersection::surfaceIntersection
     transfer(allCutPoints, cutPoints_);
 
     // Shortcut. 
-    if ((cutPoints_.size() == 0) && (cutEdges_.size() == 0))
+    if (cutPoints_.empty() && cutEdges_.empty())
     {
         if (debug)
         {

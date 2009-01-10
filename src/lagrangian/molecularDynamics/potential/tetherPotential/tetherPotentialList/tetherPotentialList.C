@@ -35,11 +35,11 @@ void Foam::tetherPotentialList::readTetherPotentialDict
     const List<label>& tetherIds
 )
 {
-    if (!tetherIds.size())
+    if (tetherIds.empty())
     {
         Info<< nl << "No tethered molecules found." << endl;
 
-        idMap_.setSize(0);
+        idMap_.clear();
     }
     else
     {

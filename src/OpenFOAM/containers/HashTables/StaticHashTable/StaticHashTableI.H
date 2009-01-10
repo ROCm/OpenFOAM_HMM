@@ -328,7 +328,7 @@ Foam::StaticHashTable<T, Key, Hash>::begin()
     // Find first non-empty entry
     forAll(keys_, hashIdx)
     {
-        if (keys_[hashIdx].size() > 0)
+        if (keys_[hashIdx].size())
         {
             return iterator(*this, hashIdx, 0);
         }
@@ -360,7 +360,7 @@ Foam::StaticHashTable<T, Key, Hash>::begin() const
     // Find first non-empty entry
     forAll(keys_, hashIdx)
     {
-        if (keys_[hashIdx].size() > 0)
+        if (keys_[hashIdx].size())
         {
             return const_iterator(*this, hashIdx, 0);
         }

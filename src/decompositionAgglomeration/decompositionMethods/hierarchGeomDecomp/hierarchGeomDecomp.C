@@ -236,14 +236,18 @@ void Foam::hierarchGeomDecomp::sortComponent
 
     scalar minCoord = returnReduce
     (
-        (sortedCoord.size() > 0 ? sortedCoord[0] : GREAT),
+        (
+            sortedCoord.size()
+          ? sortedCoord[0]
+          : GREAT
+        ),
         minOp<scalar>()
     );
 
     scalar maxCoord = returnReduce
     (
         (
-            sortedCoord.size() > 0
+            sortedCoord.size()
           ? sortedCoord[sortedCoord.size()-1]
           : -GREAT
         ),
@@ -251,7 +255,7 @@ void Foam::hierarchGeomDecomp::sortComponent
     );
 
     if (debug)
-    {   
+    {
         Pout<< "sortComponent : minCoord:" << minCoord
             << " maxCoord:" << maxCoord << endl;
     }
@@ -274,7 +278,7 @@ void Foam::hierarchGeomDecomp::sortComponent
 
         // Value at right of bin (leftIndex+localSize-1)
         scalar rightCoord = -GREAT;
-        
+
         if (bin == n_[compI]-1)
         {
             // Last bin. Copy all.
