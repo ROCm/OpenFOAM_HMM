@@ -267,7 +267,7 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
     else if (verbose)
     {
         wordList toc = available.toc();
-        SortableList<word> known(xferMove(toc));
+        SortableList<word> known(toc.xfer());
 
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl

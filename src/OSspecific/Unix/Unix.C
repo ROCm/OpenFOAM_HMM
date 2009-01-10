@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    UNIX versions of the functions declated in OSspecific.H.
+    UNIX versions of the functions declared in OSspecific.H.
 
 \*---------------------------------------------------------------------------*/
 

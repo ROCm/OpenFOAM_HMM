@@ -202,12 +202,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     // transfer to normal lists
     this->storedPoints().transfer(dynPoints);
 
-    sortFacesAndStore
-    (
-        xferMoveTo<List<Face> >(dynFaces),
-        xferMoveTo<List<label> >(dynRegions),
-        sorted
-    );
+    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
 
     // add patches, culling empty groups
     this->addPatches(dynSizes, dynNames, true);

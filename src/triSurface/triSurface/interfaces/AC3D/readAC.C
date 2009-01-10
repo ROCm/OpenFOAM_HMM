@@ -326,13 +326,10 @@ bool triSurface::readAC(const fileName& ACfileName)
         }
     }
 
-    points.shrink();
     faces.shrink();
 
     // Transfer DynamicLists to straight ones.
-    pointField allPoints;
-    allPoints.transfer(points);
-    points.clear();
+    pointField allPoints(points.xfer());
 
     *this = triSurface(faces, patches, allPoints, true);
 

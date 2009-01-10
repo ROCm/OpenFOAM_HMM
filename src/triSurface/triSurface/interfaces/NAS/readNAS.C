@@ -353,11 +353,8 @@ bool triSurface::readNAS(const fileName& fName)
 
     Info<< "patches:" << patches << endl;
 
-
     // Transfer DynamicLists to straight ones.
-    pointField allPoints;
-    allPoints.transfer(points);
-    points.clear();
+    pointField allPoints(points.xfer());
 
     // Create triSurface
     *this = triSurface(faces, patches, allPoints, true);

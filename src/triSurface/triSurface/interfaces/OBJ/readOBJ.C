@@ -109,7 +109,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
 
             while(true)
             {
-                string::size_type startNum = 
+                string::size_type startNum =
                     line.find_first_not_of(' ', endNum);
 
                 if (startNum == string::npos)
@@ -194,8 +194,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
 
 
     // Transfer DynamicLists to straight ones.
-    pointField allPoints;
-    allPoints.transfer(points);
+    pointField allPoints(points.xfer());
 
     // Create triSurface
     *this = triSurface(faces, patches, allPoints, true);

@@ -88,8 +88,8 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     this->storedPoints().transfer(reader.points());
 
     // retrieve the original region information
-    List<label> sizes(xferMove(reader.sizes()));
-    List<label> regions(xferMove(reader.regions()));
+    List<label> sizes(reader.sizes().xfer());
+    List<label> regions(reader.regions().xfer());
 
     // generate the (sorted) faces
     List<Face> faceLst(regions.size());

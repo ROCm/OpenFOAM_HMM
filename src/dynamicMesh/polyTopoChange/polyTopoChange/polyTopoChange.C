@@ -2952,9 +2952,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         mesh.resetPrimitives
         (
             xferMove(renumberedMeshPoints),
-            xferMoveTo<faceList>(faces_),
-            xferMoveTo<labelList>(faceOwner_),
-            xferMoveTo<labelList>(faceNeighbour_),
+            faces_.xfer(),
+            faceOwner_.xfer(),
+            faceNeighbour_.xfer(),
             patchSizes,
             patchStarts,
             syncParallel
@@ -2968,9 +2968,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         mesh.resetPrimitives
         (
             xferMove(newPoints),
-            xferMoveTo<faceList>(faces_),
-            xferMoveTo<labelList>(faceOwner_),
-            xferMoveTo<labelList>(faceNeighbour_),
+            faces_.xfer(),
+            faceOwner_.xfer(),
+            faceNeighbour_.xfer(),
             patchSizes,
             patchStarts,
             syncParallel
@@ -3195,9 +3195,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         (
             io,
             xferMove(newPoints),
-            xferMoveTo<faceList>(faces_),
-            xferMoveTo<labelList>(faceOwner_),
-            xferMoveTo<labelList>(faceNeighbour_)
+            faces_.xfer(),
+            faceOwner_.xfer(),
+            faceNeighbour_.xfer()
         )
     );
     fvMesh& newMesh = newMeshPtr();
