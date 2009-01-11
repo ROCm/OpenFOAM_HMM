@@ -491,7 +491,7 @@ bool Foam::dir(const fileName& name)
 
 
 // Return size of file
-off_t Foam::size(const fileName& name)
+off_t Foam::fileSize(const fileName& name)
 {
     fileStat fileStatus(name);
     if (fileStatus.isValid())
@@ -541,7 +541,7 @@ Foam::fileNameList Foam::readDir
     // Setup empty string list MAXTVALUES long
     fileNameList dirEntries(maxNnames);
 
-    // Pointers to the Unix director system
+    // Pointers to the directory entries
     DIR *source;
     struct dirent *list;
 
@@ -806,7 +806,7 @@ bool Foam::rmDir(const fileName& directory)
             << "removing directory " << directory << endl;
     }
 
-    // Pointers to the Unix director system
+    // Pointers to the directory entries
     DIR *source;
     struct dirent *list;
 

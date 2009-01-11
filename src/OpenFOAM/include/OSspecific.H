@@ -26,7 +26,7 @@ InNamespace
     Foam
 
 Description
-    Functions used by OpenFOAM which are specific to the UNIX operating system
+    Functions used by OpenFOAM that are specific to the UNIX operating system
     and need to be replaced or emulated on other systems.
 
 SourceFiles
@@ -118,7 +118,7 @@ mode_t mode(const fileName&);
 //- Return the file type: FILE or DIRECTORY
 fileName::Type type(const fileName&);
 
-//- Does the name exist in the filing system?
+//- Does the name exist in the file system?
 bool exists(const fileName& name);
 
 //- Does the file exist?
@@ -128,7 +128,7 @@ bool file(const fileName&);
 bool dir(const fileName&);
 
 //- Return size of file
-off_t size(const fileName&);
+off_t fileSize(const fileName&);
 
 //- Return time of last file modification
 time_t lastModified(const fileName&);
