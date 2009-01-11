@@ -51,20 +51,15 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 template<class T> class List;
+template<class T> class UList;
 template<class T, class Key, class Hash> class HashTable;
 template<class T, class Key, class Hash> class HashPtrTable;
 
-template<class T, class Key, class Hash> Istream& operator>>
-(
-    Istream&,
-    HashTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Istream& operator>>(Istream&, HashTable<T, Key, Hash>&);
 
-template<class T, class Key, class Hash> Ostream& operator<<
-(
-    Ostream&,
-    const HashTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream&, const HashTable<T, Key, Hash>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -203,9 +198,16 @@ public:
             //- Erase an hashedEntry specified by given key if in table
             bool erase(const Key&);
 
-            //- Remove entries in the given HashTable from this HashTable
+            //- Remove entries given by the listed keys from this HashTable
             //  Return the number of elements removed
-            label erase(const HashTable<T, Key, Hash>&);
+            label erase(const UList<Key>&);
+
+            //- Remove entries given by the given keys from this HashTable
+            //  Return the number of elements removed.
+            //  The parameter HashTable needs the same type of keys, but
+            //  but the type of values held is arbitrary.
+            template<class AnyType>
+            label erase(const HashTable<AnyType, Key, Hash>&);
 
             //- Resize the hash table for efficiency
             void resize(const label newSize);

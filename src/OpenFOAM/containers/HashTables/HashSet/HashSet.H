@@ -112,9 +112,10 @@ public:
             HashTable<nil, Key, Hash>(hs)
         {}
 
-        //- Construct from table of contents of the HashTable
-        template<class T>
-        HashSet(const HashTable<T, Key, Hash>& ht);
+        //- Construct from the keys of another HashTable,
+        //  the type of values held is arbitrary.
+        template<class AnyType>
+        HashSet(const HashTable<AnyType, Key, Hash>&);
 
     // Member Functions
 
