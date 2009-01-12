@@ -982,6 +982,25 @@ void Foam::moleculeCloud::createMolecule
         cP.momentOfInertia()
     );
 
+    scalar phi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+
+    scalar theta(rndGen_.scalar01()*mathematicalConstant::twoPi);
+
+    scalar psi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+
+    const tensor Q
+    (
+        cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
+        cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
+        sin(psi)*sin(theta),
+        - sin(psi)*cos(phi) - cos(theta)*sin(phi)*cos(psi),
+        - sin(psi)*sin(phi) + cos(theta)*cos(phi)*cos(psi),
+        cos(psi)*sin(theta),
+        sin(theta)*sin(phi),
+        - sin(theta)*cos(phi),
+        cos(theta)
+    );
+
     addParticle
     (
         new molecule
@@ -989,7 +1008,7 @@ void Foam::moleculeCloud::createMolecule
             cloud,
             position,
             cell,
-            I,
+            Q,
             v,
             vector::zero,
             pi,
@@ -1124,6 +1143,8 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
         mol().v() *= temperatureCorrectionFactor;
+
+        mol().pi() *= temperatureCorrectionFactor;
     }
 }
 

@@ -46,11 +46,15 @@ int main(int argc, char *argv[])
 
 #   include "temperatureAndPressureVariables.H"
 
+    label nAveragingSteps = 0;
+
     Info << "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
         runTime++;
+
+        nAveragingSteps++;
 
         Info << "Time = " << runTime.timeName() << endl;
 
@@ -58,7 +62,23 @@ int main(int argc, char *argv[])
 
 #       include "meanMomentumEnergyAndNMols.H"
 
+#       include "temperatureAndPressure.H"
+
+        if (runTime.outputTime())
+        {
+            molecules.applyConstraintsAndThermostats
+            (
+                485.4,
+                averageTemperature
+            );
+        }
+
         runTime.write();
+
+        if (runTime.outputTime())
+        {
+            nAveragingSteps = 0;
+        }
 
         Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

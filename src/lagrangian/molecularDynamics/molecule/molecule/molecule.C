@@ -246,38 +246,12 @@ void Foam::molecule::hitWallPatch
     nw /= mag(nw);
 
     scalar vn = v_ & nw;
-//     vector vt = v_ - vn*nw;
 
-//     Random rand(clock::getTime());
-
-//     scalar tmac = 0.8;
-
-//     scalar wallTemp = 2.5;
-
-//     if (rand.scalar01() < tmac)
-//     {
-//         // Diffuse reflection
-//
-//         vector tw1 = vt/mag(vt);
-//
-//         vector tw2 = nw ^ tw1;
-//
-//         V_ = sqrt(wallTemp/mass_)*rand.GaussNormal()*tw1
-//                 + sqrt(wallTemp/mass_)*rand.GaussNormal()*tw2
-//                 - mag(sqrt(wallTemp/mass_)*rand.GaussNormal())*nw;
-//     }
-
-//     else
-//     {
-        // Specular reflection
-
-        if (vn > 0)
-        {
-            v_ -= 2*vn*nw;
-        }
-
-//     }
-
+    // Specular reflection
+    if (vn > 0)
+    {
+        v_ -= 2*vn*nw;
+    }
 }
 
 

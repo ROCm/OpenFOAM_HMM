@@ -63,46 +63,47 @@ inline Foam::molecule::constantProperties::constantProperties
 
     mass_ = sum(siteMasses);
 
+    // Calculate the centre of mass of the body and subtract it from each
+    // position
+
+    vector centreOfMass(vector::zero);
+
+    forAll(siteReferencePositions_, i)
     {
-        // Calculate the centre of mass of the body and subtract it from each
-        // position
+        centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+    }
 
-        vector centreOfMass(vector::zero);
+    centreOfMass /= mass_;
 
-        forAll(siteReferencePositions_, i)
-        {
-            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
-        }
+    siteReferencePositions_ -= centreOfMass;
 
-        centreOfMass /= mass_;
+    // Calculate the inertia tensor in the current orientation
 
-        siteReferencePositions_ -= centreOfMass;
+    tensor momOfInertia(tensor::zero);
 
-        // Calculate the inertia tensor in the current orientation
+    forAll(siteReferencePositions_, i)
+    {
+        const vector& p(siteReferencePositions_[i]);
 
-        tensor I(tensor::zero);
+        momOfInertia += siteMasses[i]*tensor
+        (
+            p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
+            -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
+            -p.z()*p.x(), -p.z()*p.y(), p.x()*p.x() + p.y()*p.y()
+        );
+    }
 
-        forAll(siteReferencePositions_, i)
-        {
-            const vector& p(siteReferencePositions_[i]);
-
-            I += siteMasses[i]*tensor
-            (
-                p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
-                -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
-                -p.z()*p.x(), -p.z()*p.y(), p.x()*p.x() + p.y()*p.y()
-            );
-        }
-
+    if(eigenValues(momOfInertia).z() > VSMALL)
+    {
         // Normalise the inertia tensor magnitude to avoid SMALL numbers in the
         // components causing problems
 
-        I /= eigenValues(I).z();
+        momOfInertia /= eigenValues(momOfInertia).z();
 
-        tensor e = eigenVectors(I);
+        tensor e = eigenVectors(momOfInertia);
 
-        // Calculate the transformation between the principle axes to the global
-        // axes
+        // Calculate the transformation between the principle axes to the
+        // global axes
 
         tensor Q =
         vector(1,0,0)*e.x() + vector(0,1,0)*e.y() + vector(0,0,1)*e.z();
@@ -110,13 +111,11 @@ inline Foam::molecule::constantProperties::constantProperties
         // Transform the site positions
 
         siteReferencePositions_ = (Q & siteReferencePositions_);
-    }
 
-    {
         // Recalculating the moment of inertia with the new site positions
 
-        // The rotation was around the centre of mass but remove any components
-        // that have crept in due to floating point errors
+        // The rotation was around the centre of mass but remove any
+        // components that have crept in due to floating point errors
 
         vector centreOfMass(vector::zero);
 
@@ -129,16 +128,16 @@ inline Foam::molecule::constantProperties::constantProperties
 
         siteReferencePositions_ -= centreOfMass;
 
-        // Calculate the moment of inertia in the principle component reference
-        // frame
+        // Calculate the moment of inertia in the principle component
+        // reference frame
 
-        tensor I(tensor::zero);
+        tensor momOfInertia(tensor::zero);
 
         forAll(siteReferencePositions_, i)
         {
             const vector& p(siteReferencePositions_[i]);
 
-            I += siteMasses[i]*tensor
+            momOfInertia += siteMasses[i]*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -146,9 +145,19 @@ inline Foam::molecule::constantProperties::constantProperties
             );
         }
 
-        momentOfInertia_ = diagTensor(I.xx(), I.yy(), I.zz());
+        momentOfInertia_ = diagTensor
+        (
+            momOfInertia.xx(),
+            momOfInertia.yy(),
+            momOfInertia.zz()
+        );
     }
+    else
+    {
+        Info<< nl << "Molecule " << dict.name()  << " is a point mass." << endl;
 
+        momentOfInertia_ = diagTensor(0, 0, 0);
+    }
 }
 
 

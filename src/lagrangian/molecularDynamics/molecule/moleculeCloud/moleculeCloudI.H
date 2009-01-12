@@ -91,11 +91,9 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molJ->potentialEnergy() += 0.5*potentialEnergy;
 
-                    // What to do here?
+                    molI->rf() += rsIsJ * fsIsJ;
 
-                    // molI->rf() += rIJ * fIJ;
-
-                    // molJ->rf() += rIJ * fIJ;
+                    molJ->rf() += rsIsJ * fsIsJ;
                 }
             }
 
@@ -128,11 +126,9 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molJ->potentialEnergy() += 0.5*potentialEnergy;
 
-                    // What to do here?
+                    molI->rf() += rsIsJ * fsIsJ;
 
-                    // molI->rf() += rIJ * fIJ;
-
-                    // molJ->rf() += rIJ * fIJ;
+                    molJ->rf() += rsIsJ * fsIsJ;
                 }
             }
         }
@@ -200,9 +196,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molReal->potentialEnergy() += 0.5*potentialEnergy;
 
-                    // What to do here?
-
-                    // molReal->rf() += rRealRef * fRealRef;
+                    molReal->rf() += rsRealsRef * fsRealsRef;
 
                 }
             }
@@ -233,9 +227,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molReal->potentialEnergy() += 0.5*potentialEnergy;
 
-                    // What to do here?
-
-                    // molReal->rf() += rRealRef * fRealRef;
+                    molReal->rf() += rsRealsRef * fsRealsRef;
                 }
             }
         }
