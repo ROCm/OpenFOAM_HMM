@@ -113,19 +113,9 @@ int main(int argc, char *argv[])
     {
         regionPrefix = regionName;
     }
-
-
-    // Set all times (on reconstructed mesh and on processor meshes)
-    runTime.setTime(timeDirs[0], 0);
-    mesh.readUpdate();
-
-    forAll (databases, procI)
-    {
-        databases[procI].setTime(timeDirs[0], 0);
-    }
-
     // Read all meshes and addressing to reconstructed mesh
     processorMeshes procMeshes(databases, regionName);
+
 
     // check face addressing for meshes that have been decomposed
     // with a very old foam version
