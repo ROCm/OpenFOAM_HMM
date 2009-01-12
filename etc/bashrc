@@ -61,7 +61,7 @@ foamInstall=$HOME/$WM_PROJECT
 foamOldDirs="$FOAM_INST_DIR $HOME/$WM_PROJECT/$USER"
 if [ "$WM_PROJECT_INST_DIR" != "$FOAM_INST_DIR" ]
 then
-    foamOldDirs="$WM_PROJECT_INST_DIR $foamOldPaths"
+    foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
 fi
 
 
