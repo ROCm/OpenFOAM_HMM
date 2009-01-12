@@ -26,7 +26,8 @@ Class
     Foam::PDRDragModel
 
 Description
-    Base-class for sub-grid obstacle drag models.
+    Base-class for sub-grid obstacle drag models. The available drag model is at
+    \link basic.H \endlink.
 
 SourceFiles
     PDRDragModel.C

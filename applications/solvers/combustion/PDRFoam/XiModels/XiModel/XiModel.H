@@ -29,8 +29,10 @@ Description
     Base-class for all Xi models used by the b-Xi combustion model.
     See Technical Report SH/RE/01R for details on the PDR modelling.
 
-    Xi is given through an algebraic expression (algebraic.H),
-    by solving a transport equation (transport.H) or a fixed value (fixed.H).
+    Xi is given through an algebraic expression (\link algebraic.H \endlink),
+    by solving a transport equation (\link transport.H \endlink) or a
+    fixed value (\link fixed.H \endlink).
+
     See report TR/HGW/10 for details on the Weller two equations model.
 
     In the algebraic and transport methods \f$\Xi_{eq}\f$ is calculated in
@@ -44,6 +46,8 @@ Description
     where:
 
         \f$ \dwea{b} \f$ is the regress variable.
+
+        \f$ \Xi_{coeff} \f$ is a model constant.
 
         \f$ \Xi^* \f$ is the total equilibrium wrinkling combining the effects
         of the flame inestability and turbulence interaction and is given by

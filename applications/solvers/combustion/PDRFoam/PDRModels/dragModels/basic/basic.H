@@ -70,7 +70,7 @@ Description
         \f$ T \f$ is a tensor in the file CT.
 
     The term \f$ G_{R} \f$ is treated explicitly in the \f$ \kappa-\epsilon
-    \f$ Eqs in the PDRkEpsilon.C file.
+    \f$ Eqs in the \link PDRkEpsilon.C \endlink file.
 
 
 SourceFiles
