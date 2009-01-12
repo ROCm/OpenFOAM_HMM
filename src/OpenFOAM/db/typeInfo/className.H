@@ -52,7 +52,7 @@ Description
     inline const char* typeName_() { return TypeNameString; }                 \
     extern const ::Foam::word typeName;
 
-//- Add typeName information from argument @a TypeNameString to a template class.
+//- Add typeName information from argument @a TemplateNameString to a template class.
 //  Without debug information.
 #define TemplateNameNoDebug(TemplateNameString)                               \
 class TemplateNameString##Name                                                \
@@ -186,68 +186,6 @@ public:                                                                       \
     defineNamedTemplateTypeName(Type);                                        \
     defineNamedTemplateDebugSwitch(Type, DebugSwitch);
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#if 0 // PREVIOUS DEFINITIONS
-
-//- Adds typeName information from its argument @a TypeNameString to a class
-#define ClassName(TypeNameString)                                             \
-    static const char* typeName_() { return TypeNameString; }                 \
-    static const ::Foam::word typeName;                                       \
-    static int debug
-
-#define NamespaceName(TypeNameString)                                         \
-    inline const char* typeName_() { return TypeNameString; }                 \
-    extern const ::Foam::word typeName;                                       \
-    extern int debug
-
-#define TemplateName(template)                                                \
-class template##Name                                                          \
-{                                                                             \
-public:                                                                       \
-                                                                              \
-    template##Name()                                                          \
-    {}                                                                        \
-                                                                              \
-    ClassName(#template);                                                     \
-};
-
-
-#define defineTypeNameAndDebug(Type, DebugSwitch)                             \
-    const ::Foam::word Type::typeName(Type::typeName_());                     \
-    int Type::debug(::Foam::debug::debugSwitch(Type::typeName_(), DebugSwitch));
-
-#ifdef __INTEL_COMPILER
-#define defineTemplateTypeNameAndDebugWithName(Type, Name, DebugSwitch)       \
-    const ::Foam::word Type::typeName(Name);                                  \
-    int Type::debug(::Foam::debug::debugSwitch(Name, DebugSwitch));
-#else
-#define defineTemplateTypeNameAndDebugWithName(Type, Name, DebugSwitch)       \
-    template<>                                                                \
-    const ::Foam::word Type::typeName(Name);                                  \
-    template<>                                                                \
-    int Type::debug(::Foam::debug::debugSwitch(Name, DebugSwitch));
-#endif
-
-#define defineTemplateTypeNameAndDebug(Type, DebugSwitch)                     \
-    defineTemplateTypeNameAndDebugWithName(Type, #Type, DebugSwitch);
-
-#ifdef __INTEL_COMPILER
-#define defineNamedTemplateTypeNameAndDebug(Type, DebugSwitch)                \
-    const ::Foam::word Type::typeName(Type::typeName_());                     \
-    int Type::debug(::Foam::debug::debugSwitch(Type::typeName_(), DebugSwitch));
-#else
-#define defineNamedTemplateTypeNameAndDebug(Type, DebugSwitch)                \
-    template<>                                                                \
-    const ::Foam::word Type::typeName(Type::typeName_());                     \
-    template<>                                                                \
-    int Type::debug(::Foam::debug::debugSwitch(Type::typeName_(), DebugSwitch));
-#endif
-
-#endif  // OLD DEFINITIONS
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
