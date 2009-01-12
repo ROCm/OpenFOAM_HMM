@@ -28,10 +28,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#ifdef FULLDEBUG
 defineTypeNameAndDebug(Foam::HashTableName, 0);
-#else
-defineTypeName(Foam::HashTableName);
-int Foam::HashTableName::debug(0);
-#endif
+
 // ************************************************************************* //
