@@ -105,13 +105,13 @@ public:
             //- Check if running subMesh
             bool useSubMesh() const
             {
-                return setName_.size() > 0;
+                return setName_.size();
             }
 
             //- topology
             const vtkTopo& topo() const
             {
-                if (!topoPtr_.valid())
+                if (topoPtr_.empty())
                 {
                     topoPtr_.reset(new vtkTopo(mesh()));
                 }

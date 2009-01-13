@@ -100,10 +100,10 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
             << exit(FatalError);
     }
 
-    if (bMesh[patchI].size() != 0)
+    if (bMesh[patchI].size())
     {
         FatalErrorIn("checkPatch(const polyBoundaryMesh&, const word&)")
-            << "Patch " << name << " is present but not of zero size"
+            << "Patch " << name << " is present but non-zero size"
             << exit(FatalError);
     }
 }

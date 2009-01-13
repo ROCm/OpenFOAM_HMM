@@ -26,7 +26,8 @@ Class
     Foam::XiModels::fixed
 
 Description
-    Fixed value model for Xi.
+    Fixed value model for Xi. See \link XiModel.H \endlink for more details
+    on flame wrinkling modelling.
 
 SourceFiles
     fixed.C

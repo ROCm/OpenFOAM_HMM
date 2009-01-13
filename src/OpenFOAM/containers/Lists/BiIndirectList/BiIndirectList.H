@@ -75,6 +75,8 @@ public:
         // Access
 
             inline label size() const;
+            inline bool  empty() const;
+
             inline const UList<T>& posList() const;
             inline const UList<T>& negList() const;
             inline const List<label>& addressing() const;

@@ -49,7 +49,7 @@ bool Foam::matchPoints
 
     if (origin == point(VGREAT, VGREAT, VGREAT))
     {
-        if (pts1.size() > 0)
+        if (pts1.size())
         {
             compareOrigin = sum(pts1)/pts1.size();
         }

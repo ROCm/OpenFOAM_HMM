@@ -241,7 +241,7 @@ void Foam::meshRefinement::getBafflePatches
     label baffleI = 0;
     forAll(cellZoneNames, surfI)
     {
-        if (cellZoneNames[surfI].size() > 0)
+        if (cellZoneNames[surfI].size())
         {
             if (debug)
             {
@@ -1385,7 +1385,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
             faceSet problemTopo(mesh_, "problemFacesTopo", 100);
 
             const labelList facePatchTopo
-            (    
+            (
                 markFacesOnProblemCells
                 (
                     removeEdgeConnectedCells,
@@ -1605,7 +1605,7 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
 
     // Patch for exposed faces for lack of anything sensible.
     label defaultPatch = 0;
-    if (globalToPatch.size() > 0)
+    if (globalToPatch.size())
     {
         defaultPatch = globalToPatch[0];
     }
@@ -2155,7 +2155,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Set using geometric test
     // ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (closedNamedSurfaces.size() > 0)
+    if (closedNamedSurfaces.size())
     {
         findCellZoneGeometric
         (

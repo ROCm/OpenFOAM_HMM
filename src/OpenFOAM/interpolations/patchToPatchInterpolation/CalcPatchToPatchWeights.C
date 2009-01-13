@@ -312,7 +312,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
             if
             (
                 m < directHitTol                            // Direct hit
-             || neighbours.size() == 0
+             || neighbours.empty()
             )
             {
                 faceWeights.set(faceI, new scalarField(1));

@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         args
     );
 
-    if (!timeDirs.size())
+    if (timeDirs.empty())
     {
         FatalErrorIn(args.executable())
             << "No times selected"
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
         }
 
 
-        if (cloudObjects.size() > 0)
+        if (cloudObjects.size())
         {
             // Pass2: reconstruct the cloud
             forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)

@@ -114,6 +114,9 @@ public:
         //- Construct as copy of a UList<Type>
         explicit Field(const UList<Type>&);
 
+        //- Construct by transferring the List contents
+        explicit Field(const Xfer<List<Type> >&);
+
         //- Construct by 1 to 1 mapping from the given field
         Field
         (

@@ -441,7 +441,7 @@ void Foam::faceCollapser::setRefinement
                 }
             }
 
-            if (edgePoints.size() > 0)
+            if (edgePoints.size())
             {
                 edgePoints.shrink();
 

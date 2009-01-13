@@ -120,7 +120,7 @@ bool Foam::octreeLine<Type>::getNextLeaf()
         // Get intersections and sort.
         calcSortedIntersections();
     }
-    while (sortedIntersections_.size() == 0);
+    while (sortedIntersections_.empty());
 
     return true;
 }

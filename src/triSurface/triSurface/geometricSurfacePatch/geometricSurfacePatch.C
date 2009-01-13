@@ -60,7 +60,7 @@ geometricSurfacePatch::geometricSurfacePatch
     boundaryIndex_(index)
 
 {
-    if (geometricType_.size() == 0)
+    if (geometricType_.empty())
     {
         geometricType_ = "empty";
     }
@@ -74,7 +74,7 @@ geometricSurfacePatch::geometricSurfacePatch(Istream& is, const label index)
     name_(is),
     boundaryIndex_(index)
 {
-    if (geometricType_.size() == 0)
+    if (geometricType_.empty())
     {
         geometricType_ = "empty";
     }
@@ -93,7 +93,7 @@ geometricSurfacePatch::geometricSurfacePatch
     name_(name),
     boundaryIndex_(index)
 {
-    if (geometricType_.size() == 0)
+    if (geometricType_.empty())
     {
         geometricType_ = "empty";
     }

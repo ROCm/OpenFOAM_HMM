@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     {
         nodeStream.getLine(line);
     }
-    while((line.size() > 0) && (line[0] == '#'));
+    while (line.size() && line[0] == '#');
 
     IStringStream nodeLine(line);
 
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
         {
             nodeStream.getLine(line);
 
-            if ((line.size() > 0) && (line[0] != '#'))
+            if (line.size() && line[0] != '#')
             {
                 IStringStream nodeLine(line);
 
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
     {
         eleStream.getLine(line);
     }
-    while((line.size() > 0) && (line[0] == '#'));
+    while (line.size() && line[0] == '#');
 
     IStringStream eleLine(line);
 
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     {
         eleStream.getLine(line);
 
-        if ((line.size() > 0) && (line[0] != '#'))
+        if (line.size() && line[0] != '#')
         {
             IStringStream eleLine(line);
 
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
         {
             faceStream.getLine(line);
         }
-        while((line.size() > 0) && (line[0] == '#'));
+        while (line.size() && line[0] == '#');
 
         IStringStream faceLine(line);
 
@@ -398,7 +398,7 @@ int main(int argc, char *argv[])
         {
             faceStream.getLine(line);
 
-            if ((line.size() > 0) && (line[0] != '#'))
+            if (line.size() && line[0] != '#')
             {
                 IStringStream faceLine(line);
 

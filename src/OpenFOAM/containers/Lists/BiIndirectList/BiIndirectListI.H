@@ -50,6 +50,13 @@ inline Foam::label Foam::BiIndirectList<T>::size() const
 
 
 template<class T>
+inline bool Foam::BiIndirectList<T>::empty() const
+{
+    return addressing_.empty();
+}
+
+
+template<class T>
 inline const Foam::UList<T>& Foam::BiIndirectList<T>::posList() const
 {
     return posList_;

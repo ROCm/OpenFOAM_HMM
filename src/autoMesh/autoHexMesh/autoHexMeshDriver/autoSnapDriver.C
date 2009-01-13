@@ -73,7 +73,7 @@ void Foam::autoSnapDriver::getZonedSurfaces
 
     forAll(faceZoneNames, surfI)
     {
-        if (faceZoneNames[surfI].size() > 0)
+        if (faceZoneNames[surfI].size())
         {
             zonedSurfaces[zonedI++] = surfI;
         }
@@ -103,7 +103,7 @@ Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
 
     forAll(faceZoneNames, surfI)
     {
-        if (faceZoneNames[surfI].size() > 0)
+        if (faceZoneNames[surfI].size())
         {
             // Get zone
             label zoneI = fZones.findZoneID(faceZoneNames[surfI]);
@@ -718,7 +718,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::createZoneBaffles
     autoPtr<mapPolyMesh> map;
 
     // No need to sync; all processors will have all same zonedSurfaces.
-    if (zonedSurfaces.size() > 0)
+    if (zonedSurfaces.size())
     {
         fvMesh& mesh = meshRefiner_.mesh();
 
@@ -806,7 +806,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::mergeZoneBaffles
 
     // No need to sync; all processors will have all same zonedSurfaces.
     label nBaffles = returnReduce(baffles.size(), sumOp<label>());
-    if (zonedSurfaces.size() > 0 && nBaffles > 0)
+    if (zonedSurfaces.size() && nBaffles > 0)
     {
         // Merge any baffles
         Info<< "Converting " << nBaffles << " baffles back into zoned faces ..."
@@ -1122,7 +1122,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
 
             forAll(hitInfo, i)
             {
-                label pointI = zonePointIndices[i]; 
+                label pointI = zonePointIndices[i];
 
                 if (hitInfo[i].hit())
                 {
@@ -1391,7 +1391,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
             forAll(fZone, i)
             {
                 isZonedFace.set(fZone[i], 1);
-            }  
+            }
         }
     }
 

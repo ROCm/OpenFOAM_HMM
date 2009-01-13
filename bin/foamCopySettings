@@ -35,7 +35,7 @@
 #------------------------------------------------------------------------------
 if [ "$1" = "-h" -o "$1" = "-help" -o "$#" -ne 2 ]
 then
-   cat <<USAGE 1>&2
+    cat <<USAGE 1>&2
 Usage: ${0##*/} srcDir dstDir
 
     Copy OpenFOAM settings from one case to another, without copying
@@ -46,30 +46,23 @@ USAGE
    exit 1
 fi
 
-srcDir=$1
-dstDir=$2
+srcDir=${1%/}
+dstDir=${2%/}
 
-if [ ! -d $srcDir ]
-then
-   echo "Error: directory '$srcDir' does not exist"
-   exit 1
-fi
-
-if [ ! -d $dstDir ]
-then
-   echo "Error: directory '$dstDir' does not exist"
-   exit 1
-fi
+for i in $srcDir $dstDir
+do
+    [ -d "$i" ] || { echo "Error: directory '$i' does not exist"; exit 1; }
+done
 
 # check that the srcDir looks okay
 for i in $srcDir/constant $srcDir/system
 do
-   if [ ! -d $i ]
-   then
-      echo "Error: no '${i##*/}' directory in '$srcDir'"
-      echo "       does not appear to be an OpenFOAM case"
-      exit 1
-   fi
+    if [ ! -d "$i" ]
+    then
+        echo "Error: no '${i##*/}' directory in '$srcDir'"
+        echo "       does not appear to be an OpenFOAM case"
+        exit 1
+    fi
 done
 
 # files and directories to copy
@@ -82,19 +75,19 @@ fileList=$(find -H $srcDir -mindepth 1 -maxdepth 1 -not -name "processor*")
 
 for i in $fileList
 do
-   name="${i##*/}"
-   # skip numerical (results) directories (except 0)
-   # and things that look like queuing system output or log files
-   case "$name" in
-   [1-9] | [0-9]?* | foam.[eo][1-9]* | log | *.log )
-      echo "$i  [skipped]"
-      continue
-      ;;
-   *)
-      echo "$i -> $dstDir/$name"
-      rsync --exclude polyMesh --exclude "processor*" -a $i $dstDir
-      ;;
-   esac
+    name="${i##*/}"
+    # skip numerical (results) directories (except 0)
+    # and things that look like log files or queuing system output
+    case "$name" in
+    [1-9] | [0-9]?* | log | *.log | foam.[eo][1-9]* )
+        echo "$i  [skipped]"
+        continue
+        ;;
+    *)
+        echo "$i -> $dstDir/$name"
+        rsync --exclude polyMesh --exclude "processor*" -a $i $dstDir
+        ;;
+    esac
 done
 
 # --------------------------------------------------------------- end-of-file

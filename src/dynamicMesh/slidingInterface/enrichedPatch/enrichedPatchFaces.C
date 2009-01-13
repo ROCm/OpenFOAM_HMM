@@ -136,7 +136,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 //             Info << "slavePointsOnEdge for " << curEdges[i] << ": " << slavePointsOnEdge << endl;
             // If there are no points on the edge, skip everything
             // If there is only one point, no need for sorting
-            if (slavePointsOnEdge.size() > 0)
+            if (slavePointsOnEdge.size())
             {
                 // Sort edge points in order
                 scalarField edgePointWeights(slavePointsOnEdge.size());
@@ -287,7 +287,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
             // If there are no points on the edge, skip everything
             // If there is only one point, no need for sorting
-            if (masterPointsOnEdge.size() > 0)
+            if (masterPointsOnEdge.size())
             {
                 // Sort edge points in order
                 scalarField edgePointWeights(masterPointsOnEdge.size());

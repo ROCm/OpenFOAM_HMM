@@ -286,7 +286,8 @@ Foam::argList::argList
     if (Pstream::master() && bannerEnabled)
     {
         IOobject::writeBanner(Info, true);
-        Info<< "Exec   : " << argListString.c_str() << nl
+        Info<< "Build  : " << Foam::FOAMbuild << nl
+            << "Exec   : " << argListString.c_str() << nl            
             << "Date   : " << dateString.c_str() << nl
             << "Time   : " << timeString.c_str() << nl
             << "Host   : " << hostName() << nl

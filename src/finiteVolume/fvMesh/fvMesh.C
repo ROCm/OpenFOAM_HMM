@@ -58,10 +58,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(fvMesh, 0);
-}
+defineTypeNameAndDebug(Foam::fvMesh, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -302,7 +299,7 @@ void Foam::fvMesh::addFvPatches
     const bool validBoundary
 )
 {
-    if (boundary().size() > 0)
+    if (boundary().size())
     {
         FatalErrorIn
         (

@@ -151,7 +151,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            if (!facesPtr_.valid())
+            if (facesPtr_.empty())
             {
                 const triSurface& s = surface();
 

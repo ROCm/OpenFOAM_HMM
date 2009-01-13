@@ -23,10 +23,9 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Reads an bool from an input stream, for a given version
-    number and File format. If an ascii File is being read,
-    then the line numbers are counted and an erroneous read
-    ised.
+    Reads an bool from an input stream, for a given version number and file
+    format. If an ASCII file is being read, then the line numbers are counted
+    and an erroneous read is reported.
 
 \*---------------------------------------------------------------------------*/
 

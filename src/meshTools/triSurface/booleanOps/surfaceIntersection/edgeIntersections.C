@@ -255,7 +255,7 @@ bool Foam::edgeIntersections::inlinePerturb
 
     const labelList& edgeEnds = classification_[edgeI];
 
-    if (edgeEnds.size() > 0)
+    if (edgeEnds.size())
     {
         bool perturbStart = false;
         bool perturbEnd = false;
@@ -701,7 +701,7 @@ Foam::label Foam::edgeIntersections::removeDegenerates
         // Transfer and test.
         edgesToTest.transfer(newEdgesToTest);
 
-        if (edgesToTest.size() == 0)
+        if (edgesToTest.empty())
         {
             FatalErrorIn("perturb") << "oops" << abort(FatalError);
         }

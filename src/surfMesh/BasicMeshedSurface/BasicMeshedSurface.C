@@ -131,6 +131,29 @@ void Foam::BasicMeshedSurface<Face>::reset
 }
 
 
+template<class Face>
+void Foam::BasicMeshedSurface<Face>::reset
+(
+    const Xfer<List<point> >& pointLst,
+    const Xfer<List<Face> >& faceLst
+)
+{
+    ParentType::clearOut();
+
+    // Take over new primitive data.
+    // Optimized to avoid overwriting data at all
+    if (&pointLst)
+    {
+        storedPoints().transfer(pointLst());
+    }
+
+    if (&faceLst)
+    {
+        storedFaces().transfer(faceLst());
+    }
+}
+
+
 // Remove badly degenerate faces, double faces.
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::cleanup(const bool verbose)
@@ -438,7 +461,7 @@ Foam::label Foam::BasicMeshedSurface<Face>::triangulate
     // remember the number of *additional* faces
     nTri -= faceLst.size();
 
-    if (this->points().size() == 0)
+    if (this->points().empty())
     {
         // triangulate without points
         // simple face triangulation around f[0]

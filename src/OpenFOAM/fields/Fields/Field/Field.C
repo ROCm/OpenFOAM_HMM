@@ -156,6 +156,13 @@ Field<Type>::Field(Field<Type>& f, bool reUse)
 
 
 template<class Type>
+Field<Type>::Field(const Xfer<List<Type> >& f)
+:
+    List<Type>(f)
+{}
+
+
+template<class Type>
 Field<Type>::Field(const Xfer<Field<Type> >& f)
 :
     List<Type>(f)

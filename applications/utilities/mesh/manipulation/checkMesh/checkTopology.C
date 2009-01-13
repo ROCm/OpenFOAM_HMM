@@ -177,7 +177,7 @@ Foam::label Foam::checkTopology
 
             primitivePatch::surfaceTopo pTyp = pp.surfaceType();
 
-            if (pp.size() == 0)
+            if (pp.empty())
             {
                 Pout<< setw(34) << "ok (empty)";
             }
@@ -232,7 +232,7 @@ Foam::label Foam::checkTopology
             Pout<< endl;
         }
 
-        if (points.size() > 0)
+        if (points.size())
         {
             Pout<< "  <<Writing " << points.size()
                 << " conflicting points to set "

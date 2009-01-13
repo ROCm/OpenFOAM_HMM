@@ -42,7 +42,7 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
     ifPtr_(NULL),
     compression_(IOstream::UNCOMPRESSED)
 {
-    if (!pathname.size())
+    if (pathname.empty())
     {
         if (IFstream::debug)
         {

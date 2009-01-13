@@ -129,7 +129,7 @@ bool Foam::OPstream::write
 
 void Foam::OPstream::waitRequests()
 {
-    if (OPstream_outstandingRequests_.size() > 0)
+    if (OPstream_outstandingRequests_.size())
     {
         if
         (

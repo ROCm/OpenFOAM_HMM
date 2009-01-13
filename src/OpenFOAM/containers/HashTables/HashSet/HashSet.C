@@ -32,19 +32,19 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-template<class T>
-Foam::HashSet<Key, Hash>::HashSet(const HashTable<T, Key, Hash>& ht)
+template<class AnyType>
+Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& ht)
 :
-    HashTable<empty, Key, Hash>(ht.size())
+    HashTable<nil, Key, Hash>(ht.size())
 {
     for
     (
-        typename HashTable<T, Key, Hash>::const_iterator iter = ht.begin();
-        iter != ht.end();
-        ++iter
+        typename HashTable<AnyType, Key, Hash>::const_iterator cit = ht.begin();
+        cit != ht.end();
+        ++cit
     )
     {
-        insert(iter.key());
+        insert(cit.key());
     }
 }
 
@@ -126,6 +126,7 @@ void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 }
 
 
+// same as HashTable::erase()
 template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {

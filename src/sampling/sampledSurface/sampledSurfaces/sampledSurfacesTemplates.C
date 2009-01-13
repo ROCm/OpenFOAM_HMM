@@ -80,7 +80,7 @@ void Foam::sampledSurfaces::sampleAndWrite
 
         if (s.interpolate())
         {
-            if (!interpolator.valid())
+            if (interpolator.empty())
             {
                 interpolator = interpolation<Type>::New
                 (
@@ -170,7 +170,7 @@ void Foam::sampledSurfaces::sampleAndWrite
     if (fields.size())
     {
         // create or use existing surfaceWriter
-        if (!fields.formatter.valid())
+        if (fields.formatter.empty())
         {
             fields.formatter = surfaceWriter<Type>::New(writeFormat_);
         }

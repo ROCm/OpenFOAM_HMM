@@ -135,7 +135,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
 
     scalar skewCoeff = 0.0;
 
-    if (Sf.internalField().size() > 0)
+    if (Sf.internalField().size())
     {
         skewCoeff = max(mag(SkewCorrVecs)/mag(d)).value();
     }
