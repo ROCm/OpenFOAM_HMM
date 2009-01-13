@@ -104,6 +104,8 @@ public:
                 const List<word>& pairPotSiteIds
             );
 
+            bool linearMoleculeTest() const;
+
     public:
 
         inline constantProperties();
@@ -130,6 +132,10 @@ public:
         inline bool electrostaticSite(label sId) const;
 
         inline const diagTensor& momentOfInertia() const;
+
+        inline bool linearMolecule() const;
+
+        inline bool pointMolecule() const;
 
         inline scalar mass() const;
 

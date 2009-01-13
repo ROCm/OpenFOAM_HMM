@@ -140,7 +140,7 @@ private:
         inline vector equipartitionAngularMomentum
         (
             scalar temperature,
-            const diagTensor& momentOfInertia
+            const molecule::constantProperties& cP
         );
 
         //- Disallow default bitwise copy construct

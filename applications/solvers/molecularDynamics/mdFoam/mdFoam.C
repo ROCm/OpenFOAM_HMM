@@ -64,15 +64,6 @@ int main(int argc, char *argv[])
 
 #       include "temperatureAndPressure.H"
 
-        if (runTime.outputTime())
-        {
-            molecules.applyConstraintsAndThermostats
-            (
-                485.4,
-                averageTemperature
-            );
-        }
-
         runTime.write();
 
         if (runTime.outputTime())

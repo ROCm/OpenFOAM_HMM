@@ -534,15 +534,29 @@ inline Foam::vector Foam::moleculeCloud::equipartitionLinearVelocity
 inline Foam::vector Foam::moleculeCloud::equipartitionAngularMomentum
 (
     scalar temperature,
-    const diagTensor& momentOfInertia
+    const molecule::constantProperties& cP
 )
 {
-    return vector
-    (
-        sqrt(kb*temperature*momentOfInertia.xx())*rndGen_.GaussNormal(),
-        sqrt(kb*temperature*momentOfInertia.yy())*rndGen_.GaussNormal(),
-        sqrt(kb*temperature*momentOfInertia.zz())*rndGen_.GaussNormal()
-    );
+    scalar sqrtKbT = sqrt(kb*temperature);
+
+    if (cP.linearMolecule())
+    {
+        return sqrtKbT*vector
+        (
+            0.0,
+            sqrt(cP.momentOfInertia().yy())*rndGen_.GaussNormal(),
+            sqrt(cP.momentOfInertia().zz())*rndGen_.GaussNormal()
+        );
+    }
+    else
+    {
+        return sqrtKbT*vector
+        (
+            sqrt(cP.momentOfInertia().xx())*rndGen_.GaussNormal(),
+            sqrt(cP.momentOfInertia().yy())*rndGen_.GaussNormal(),
+            sqrt(cP.momentOfInertia().zz())*rndGen_.GaussNormal()
+        );
+    }
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

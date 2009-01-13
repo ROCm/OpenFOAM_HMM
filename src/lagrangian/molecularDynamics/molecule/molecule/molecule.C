@@ -123,29 +123,38 @@ bool Foam::molecule::move(molecule::trackData& td)
         // but after tracking stage, i.e. rotation carried once linear motion
         // complete.
 
-        const diagTensor& momentOfInertia(constProps.momentOfInertia());
+        if (!constProps.pointMolecule())
+        {
+            const diagTensor& momentOfInertia(constProps.momentOfInertia());
 
-        tensor R;
+            tensor R;
 
-        R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
-        pi_ = pi_ & R;
-        Q_ = Q_ & R;
+            if (!constProps.linearMolecule())
+            {
+                R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
+                pi_ = pi_ & R;
+                Q_ = Q_ & R;
+            }
 
-        R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
-        pi_ = pi_ & R;
-        Q_ = Q_ & R;
+            R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
+            pi_ = pi_ & R;
+            Q_ = Q_ & R;
 
-        R = rotationTensorZ(deltaT*pi_.z()/momentOfInertia.zz());
-        pi_ = pi_ & R;
-        Q_ = Q_ & R;
+            R = rotationTensorZ(deltaT*pi_.z()/momentOfInertia.zz());
+            pi_ = pi_ & R;
+            Q_ = Q_ & R;
 
-        R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
-        pi_ = pi_ & R;
-        Q_ = Q_ & R;
+            R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
+            pi_ = pi_ & R;
+            Q_ = Q_ & R;
 
-        R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
-        pi_ = pi_ & R;
-        Q_ = Q_ & R;
+            if (!constProps.linearMolecule())
+            {
+                R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
+                pi_ = pi_ & R;
+                Q_ = Q_ & R;
+            }
+        }
 
         setSitePositions(constProps);
     }
@@ -172,6 +181,20 @@ bool Foam::molecule::move(molecule::trackData& td)
         v_ += 0.5*deltaT*a_;
 
         pi_ += 0.5*deltaT*tau_;
+
+        if (constProps.pointMolecule())
+        {
+            tau_ = vector::zero;
+
+            pi_ = vector::zero;
+        }
+
+        if (constProps.linearMolecule())
+        {
+            tau_.x() = 0.0;
+
+            pi_.x() = 0.0;
+        }
     }
     else
     {

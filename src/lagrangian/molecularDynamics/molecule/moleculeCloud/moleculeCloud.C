@@ -976,30 +976,33 @@ void Foam::moleculeCloud::createMolecule
 
     v += bulkVelocity;
 
-    vector pi = equipartitionAngularMomentum
-    (
-        temperature,
-        cP.momentOfInertia()
-    );
+    vector pi = vector::zero;
 
-    scalar phi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+    tensor Q = I;
 
-    scalar theta(rndGen_.scalar01()*mathematicalConstant::twoPi);
+    if (!cP.pointMolecule())
+    {
+        pi = equipartitionAngularMomentum(temperature, cP);
 
-    scalar psi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+        scalar phi(rndGen_.scalar01()*mathematicalConstant::twoPi);
 
-    const tensor Q
-    (
-        cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
-        cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
-        sin(psi)*sin(theta),
-        - sin(psi)*cos(phi) - cos(theta)*sin(phi)*cos(psi),
-        - sin(psi)*sin(phi) + cos(theta)*cos(phi)*cos(psi),
-        cos(psi)*sin(theta),
-        sin(theta)*sin(phi),
-        - sin(theta)*cos(phi),
-        cos(theta)
-    );
+        scalar theta(rndGen_.scalar01()*mathematicalConstant::twoPi);
+
+        scalar psi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+
+        Q = tensor
+        (
+            cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
+            cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
+            sin(psi)*sin(theta),
+            - sin(psi)*cos(phi) - cos(theta)*sin(phi)*cos(psi),
+            - sin(psi)*sin(phi) + cos(theta)*cos(phi)*cos(psi),
+            cos(psi)*sin(theta),
+            sin(theta)*sin(phi),
+            - sin(theta)*cos(phi),
+            cos(theta)
+        );
+    }
 
     addParticle
     (

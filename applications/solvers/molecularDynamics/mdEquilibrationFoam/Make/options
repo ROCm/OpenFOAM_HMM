@@ -1,6 +1,7 @@
 EXE_INC = \
     -I$(LIB_SRC)/lagrangian/molecularDynamics/molecule/lnInclude \
     -I$(LIB_SRC)/lagrangian/molecularDynamics/potential/lnInclude \
+    -I$(LIB_SRC)/lagrangian/molecularDynamics/molecularMeasurements/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
@@ -10,4 +11,6 @@ EXE_LIBS = \
     -lfiniteVolume \
     -llagrangian \
     -lmolecule \
-    -lpotential
+    -lpotential \
+    -lmolecularMeasurements
+
