@@ -22,29 +22,22 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::IOminMaxFields
-
-Description
-    Instance of the generic IOOutputFilter for minMaxFields.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOminMaxFields_H
-#define IOminMaxFields_H
+#include "fieldMinMaxFunctionObject.H"
 
-#include "minMaxFields.H"
-#include "IOOutputFilter.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOOutputFilter<minMaxFields> IOminMaxFields;
+    defineNamedTemplateTypeNameAndDebug(fieldMinMaxFunctionObject, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        fieldMinMaxFunctionObject,
+        dictionary
+    );
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

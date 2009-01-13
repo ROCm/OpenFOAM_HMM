@@ -24,20 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "minMaxFieldsFunctionObject.H"
+#include "fieldMinMax.H"
+#include "volFields.H"
+#include "dictionary.H"
+#include "Time.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+void Foam::fieldMinMax::calcMinMaxFields(const word& fieldName)
 {
-    defineNamedTemplateTypeNameAndDebug(minMaxFieldsFunctionObject, 0);
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        minMaxFieldsFunctionObject,
-        dictionary
-    );
+    if (obr_.foundObject<fieldType>(fieldName))
+    {
+        const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
+        scalar minValue = min(mag(field)).value();
+        scalar maxValue = max(mag(field)).value();
+
+        reduce(minValue, minOp<scalar>());
+        reduce(maxValue, maxOp<scalar>());
+
+        if (Pstream::master())
+        {
+            fieldMinMaxFilePtr_() << obr_.time().value() << tab
+                << fieldName << tab << minValue << tab << maxValue << endl;
+
+            if (log_)
+            {
+                Info<< "fieldMinMax output:" << nl
+                    << "    min(mag(" << fieldName << ")) = " << minValue << nl
+                    << "    max(mag(" << fieldName << ")) = " << maxValue << nl
+                    << endl;
+            }
+        }
+    }
 }
+
 
 // ************************************************************************* //

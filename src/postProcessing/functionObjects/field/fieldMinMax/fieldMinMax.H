@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::minMaxFields
+    Foam::fieldMinMax
 
 Description
     Calculates scalar minimim and maximum field values.
@@ -31,17 +31,17 @@ Description
     For variables with rank > 0, computes the magnitude of the min/max
     values.
 
-    Data written to the file \<timeDir\>/minMaxFields.dat
+    Data written to the file \<timeDir\>/fieldMinMax.dat
 
 
 SourceFiles
-    minMaxFields.C
-    IOminMaxFields.H
+    fieldMinMax.C
+    IOfieldMinMax.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef minMaxFields_H
-#define minMaxFields_H
+#ifndef fieldMinMax_H
+#define fieldMinMax_H
 
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
@@ -61,10 +61,10 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class minMaxFields Declaration
+                       Class fieldMinMax Declaration
 \*---------------------------------------------------------------------------*/
 
-class minMaxFields
+class fieldMinMax
 {
 protected:
 
@@ -87,7 +87,7 @@ protected:
 
 
         //- Forces/moment file ptr
-        autoPtr<OFstream> minMaxFieldsFilePtr_;
+        autoPtr<OFstream> fieldMinMaxFilePtr_;
 
 
     // Private Member Functions
@@ -96,10 +96,10 @@ protected:
         void makeFile();
 
         //- Disallow default bitwise copy construct
-        minMaxFields(const minMaxFields&);
+        fieldMinMax(const fieldMinMax&);
 
         //- Disallow default bitwise assignment
-        void operator=(const minMaxFields&);
+        void operator=(const fieldMinMax&);
 
         //- Output file header information
         virtual void writeFileHeader();
@@ -108,14 +108,14 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("minMaxFields");
+    TypeName("fieldMinMax");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        minMaxFields
+        fieldMinMax
         (
             const word& name,
             const objectRegistry&,
@@ -126,7 +126,7 @@ public:
 
     // Destructor
 
-        virtual ~minMaxFields();
+        virtual ~fieldMinMax();
 
 
     // Member Functions
@@ -147,7 +147,7 @@ public:
         template<class Type>
         void calcMinMaxFields(const word& fieldName);
 
-        //- Write the minMaxFields
+        //- Write the fieldMinMax
         virtual void write();
 
         //- Update for changes of mesh
@@ -162,7 +162,7 @@ public:
 
 // Template specialisation for scalar fields
 template<>
-void minMaxFields::calcMinMaxFields<scalar>(const word& fieldName);
+void fieldMinMax::calcMinMaxFields<scalar>(const word& fieldName);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -172,7 +172,7 @@ void minMaxFields::calcMinMaxFields<scalar>(const word& fieldName);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "minMaxFieldsTemplates.C"
+#   include "fieldMinMaxTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

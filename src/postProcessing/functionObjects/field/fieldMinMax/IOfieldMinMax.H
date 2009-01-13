@@ -22,44 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::IOfieldMinMax
+
+Description
+    Instance of the generic IOOutputFilter for fieldMinMax.
+
 \*---------------------------------------------------------------------------*/
 
-#include "minMaxFields.H"
-#include "volFields.H"
-#include "dictionary.H"
-#include "Time.H"
+#ifndef IOfieldMinMax_H
+#define IOfieldMinMax_H
+
+#include "fieldMinMax.H"
+#include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::minMaxFields::calcMinMaxFields(const word& fieldName)
+namespace Foam
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    if (obr_.foundObject<fieldType>(fieldName))
-    {
-        const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
-        scalar minValue = min(mag(field)).value();
-        scalar maxValue = max(mag(field)).value();
-
-        reduce(minValue, minOp<scalar>());
-        reduce(maxValue, maxOp<scalar>());
-
-        if (Pstream::master())
-        {
-            minMaxFieldsFilePtr_() << obr_.time().value() << tab
-                << fieldName << tab << minValue << tab << maxValue << endl;
-
-            if (log_)
-            {
-                Info<< "minMaxFields output:" << nl
-                    << "    min(mag(" << fieldName << ")) = " << minValue << nl
-                    << "    max(mag(" << fieldName << ")) = " << maxValue << nl
-                    << endl;
-            }
-        }
-    }
+    typedef IOOutputFilter<fieldMinMax> IOfieldMinMax;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

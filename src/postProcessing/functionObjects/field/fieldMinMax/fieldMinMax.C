@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "minMaxFields.H"
+#include "fieldMinMax.H"
 #include "volFields.H"
 #include "dictionary.H"
 #include "Time.H"
@@ -34,13 +34,13 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(minMaxFields, 0);
+    defineTypeNameAndDebug(fieldMinMax, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::minMaxFields::minMaxFields
+Foam::fieldMinMax::fieldMinMax
 (
     const word& name,
     const objectRegistry& obr,
@@ -53,7 +53,7 @@ Foam::minMaxFields::minMaxFields
     active_(true),
     log_(false),
     fieldSet_(),
-    minMaxFieldsFilePtr_(NULL)
+    fieldMinMaxFilePtr_(NULL)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
@@ -61,7 +61,7 @@ Foam::minMaxFields::minMaxFields
         active_ = false;
         WarningIn
         (
-            "minMaxFields::minMaxFields"
+            "fieldMinMax::fieldMinMax"
             "(const objectRegistry& obr, const dictionary& dict)"
         )   << "No fvMesh available, deactivating."
             << endl;
@@ -73,13 +73,13 @@ Foam::minMaxFields::minMaxFields
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::minMaxFields::~minMaxFields()
+Foam::fieldMinMax::~fieldMinMax()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::minMaxFields::read(const dictionary& dict)
+void Foam::fieldMinMax::read(const dictionary& dict)
 {
     if (active_)
     {
@@ -90,40 +90,40 @@ void Foam::minMaxFields::read(const dictionary& dict)
 }
 
 
-void Foam::minMaxFields::makeFile()
+void Foam::fieldMinMax::makeFile()
 {
-    // Create the minMaxFields file if not already created
-    if (minMaxFieldsFilePtr_.empty())
+    // Create the fieldMinMax file if not already created
+    if (fieldMinMaxFilePtr_.empty())
     {
         if (debug)
         {
-            Info<< "Creating minMaxFields file." << endl;
+            Info<< "Creating fieldMinMax file." << endl;
         }
 
         // File update
         if (Pstream::master())
         {
-            fileName minMaxFieldsDir;
+            fileName fieldMinMaxDir;
             if (Pstream::parRun())
             {
                 // Put in undecomposed case (Note: gives problems for
                 // distributed data running)
-                minMaxFieldsDir =
+                fieldMinMaxDir =
                     obr_.time().path()/".."/name_/obr_.time().timeName();
             }
             else
             {
-                minMaxFieldsDir =
+                fieldMinMaxDir =
                     obr_.time().path()/name_/obr_.time().timeName();
             }
 
             // Create directory if does not exist.
-            mkDir(minMaxFieldsDir);
+            mkDir(fieldMinMaxDir);
 
             // Open new file at start up
-            minMaxFieldsFilePtr_.reset
+            fieldMinMaxFilePtr_.reset
             (
-                new OFstream(minMaxFieldsDir/(type() + ".dat"))
+                new OFstream(fieldMinMaxDir/(type() + ".dat"))
             );
 
             // Add headers to output data
@@ -133,27 +133,27 @@ void Foam::minMaxFields::makeFile()
 }
 
 
-void Foam::minMaxFields::writeFileHeader()
+void Foam::fieldMinMax::writeFileHeader()
 {
-    if (minMaxFieldsFilePtr_.valid())
+    if (fieldMinMaxFilePtr_.valid())
     {
-        minMaxFieldsFilePtr_()
+        fieldMinMaxFilePtr_()
             << "# Time" << tab << "field" << tab << "min" << tab << "max"
             << endl;
     }
 }
 
 
-void Foam::minMaxFields::execute()
+void Foam::fieldMinMax::execute()
 {
     // Do nothing - only valid on write
 }
 
-void Foam::minMaxFields::write()
+void Foam::fieldMinMax::write()
 {
     if (active_)
     {
-        // Create the minMaxFields file if not already created
+        // Create the fieldMinMax file if not already created
         makeFile();
 
         forAll(fieldSet_, fieldI)
@@ -169,7 +169,7 @@ void Foam::minMaxFields::write()
 
 
 template<>
-void Foam::minMaxFields::calcMinMaxFields<Foam::scalar>
+void Foam::fieldMinMax::calcMinMaxFields<Foam::scalar>
 (
     const word& fieldName
 )
@@ -185,12 +185,12 @@ void Foam::minMaxFields::calcMinMaxFields<Foam::scalar>
 
         if (Pstream::master())
         {
-            minMaxFieldsFilePtr_() << obr_.time().value() << tab
+            fieldMinMaxFilePtr_() << obr_.time().value() << tab
                 << fieldName << tab << minValue << tab << maxValue << endl;
 
             if (log_)
             {
-                Info<< "minMaxFields output:" << nl
+                Info<< "fieldMinMax output:" << nl
                     << "    min(" << fieldName << ") = " << minValue << nl
                     << "    max(" << fieldName << ") = " << maxValue << nl
                     << endl;

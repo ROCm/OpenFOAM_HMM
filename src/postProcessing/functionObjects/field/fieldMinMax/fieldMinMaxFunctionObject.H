@@ -23,29 +23,29 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::minMaxFieldsFunctionObject
+    Foam::fieldMinMaxFunctionObject
 
 Description
-    FunctionObject wrapper around minMaxFields to allow them to be created via
+    FunctionObject wrapper around fieldMinMax to allow them to be created via
     the functions list within controlDict.
 
 SourceFiles
-    minMaxFieldsFunctionObject.C
+    fieldMinMaxFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef minMaxFieldsFunctionObject_H
-#define minMaxFieldsFunctionObject_H
+#ifndef fieldMinMaxFunctionObject_H
+#define fieldMinMaxFunctionObject_H
 
-#include "minMaxFields.H"
+#include "fieldMinMax.H"
 #include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef OutputFilterFunctionObject<minMaxFields>
-        minMaxFieldsFunctionObject;
+    typedef OutputFilterFunctionObject<fieldMinMax>
+        fieldMinMaxFunctionObject;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
