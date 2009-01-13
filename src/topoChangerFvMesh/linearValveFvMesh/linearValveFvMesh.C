@@ -49,10 +49,10 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
 
     if
     (
-        pointZones().size() > 0
-     || faceZones().size() > 0
-     || cellZones().size() > 0
-     || topoChanger_.size() > 0
+        pointZones().size()
+     || faceZones().size()
+     || cellZones().size()
+     || topoChanger_.size()
     )
     {
         Info<< "void linearValveFvMesh::addZonesAndModifiers() : "
@@ -235,7 +235,7 @@ bool Foam::linearValveFvMesh::attached() const
         {
             if
             (
-                result 
+                result
              != refCast<const slidingInterface>(topoChanges[modI]).attached()
             )
             {

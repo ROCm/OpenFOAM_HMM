@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    UNIX versions of the functions declated in OSspecific.H.
+    UNIX versions of the functions declared in OSspecific.H.
 
 \*---------------------------------------------------------------------------*/
 
@@ -284,7 +284,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
 bool Foam::mkDir(const fileName& pathName, mode_t mode)
 {
     // empty names are meaningless
-    if (!pathName.size())
+    if (pathName.empty())
     {
         return false;
     }
@@ -491,7 +491,7 @@ bool Foam::dir(const fileName& name)
 
 
 // Return size of file
-off_t Foam::size(const fileName& name)
+off_t Foam::fileSize(const fileName& name)
 {
     fileStat fileStatus(name);
     if (fileStatus.isValid())
@@ -541,7 +541,7 @@ Foam::fileNameList Foam::readDir
     // Setup empty string list MAXTVALUES long
     fileNameList dirEntries(maxNnames);
 
-    // Pointers to the Unix director system
+    // Pointers to the directory entries
     DIR *source;
     struct dirent *list;
 
@@ -567,10 +567,10 @@ Foam::fileNameList Foam::readDir
         {
             fileName fName(list->d_name);
 
-            // ignore files begining with ., i.e. ., .. and .??*
-            if (fName.size() > 0 && fName[size_t(0)] != '.')
+            // ignore files begining with ., i.e. '.', '..' and '.*'
+            if (fName.size() && fName[0] != '.')
             {
-                word fileNameExt = fName.ext();
+                word fExt = fName.ext();
 
                 if
                 (
@@ -578,11 +578,11 @@ Foam::fileNameList Foam::readDir
                  ||
                     (
                         type == fileName::FILE
-                        && fName[fName.size()-1] != '~'
-                        && fileNameExt != "bak"
-                        && fileNameExt != "BAK"
-                        && fileNameExt != "old"
-                        && fileNameExt != "save"
+                     && fName[fName.size()-1] != '~'
+                     && fExt != "bak"
+                     && fExt != "BAK"
+                     && fExt != "old"
+                     && fExt != "save"
                     )
                 )
                 {
@@ -593,7 +593,7 @@ Foam::fileNameList Foam::readDir
                             dirEntries.setSize(dirEntries.size() + maxNnames);
                         }
 
-                        if (filtergz && fileNameExt == "gz")
+                        if (filtergz && fExt == "gz")
                         {
                             dirEntries[nEntries++] = fName.lessExt();
                         }
@@ -616,16 +616,16 @@ Foam::fileNameList Foam::readDir
 }
 
 
-// Copy, recursively if necessary, the source top the destination
+// Copy, recursively if necessary, the source to the destination
 bool Foam::cp(const fileName& src, const fileName& dest)
 {
-    fileName destFile(dest);
-
     // Make sure source exists.
     if (!exists(src))
     {
         return false;
     }
+
+    fileName destFile(dest);
 
     // Check type of source file.
     if (src.type() == fileName::FILE)
@@ -676,7 +676,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
             destFile = destFile/src.component(src.components().size() -1);
         }
 
-        // Make sure the destination directory extists.
+        // Make sure the destination directory exists.
         if (!dir(destFile) && !mkDir(destFile))
         {
             return false;
@@ -806,7 +806,7 @@ bool Foam::rmDir(const fileName& directory)
             << "removing directory " << directory << endl;
     }
 
-    // Pointers to the Unix director system
+    // Pointers to the directory entries
     DIR *source;
     struct dirent *list;
 

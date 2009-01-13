@@ -159,7 +159,7 @@ public:
         //- Return true or false to question: have any cells been cut?
         bool cut() const
         {
-            return (cutCells_.size() != 0);
+            return cutCells_.size();
         }
 
         //- Sample the cell field

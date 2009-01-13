@@ -49,7 +49,7 @@ UNARY_FUNCTION(tensor, tensor, cof)
 
 void inv(Field<tensor>& tf, const UList<tensor>& tf1)
 {
-    if (!tf.size())
+    if (tf.empty())
     {
         return;
     }

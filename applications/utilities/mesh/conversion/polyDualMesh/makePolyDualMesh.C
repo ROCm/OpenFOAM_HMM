@@ -229,7 +229,7 @@ void simpleMarkFeatures
 
     if (doNotPreserveFaceZones)
     {
-        if (faceZones.size() > 0)
+        if (faceZones.size())
         {
             WarningIn("simpleMarkFeatures(..)")
                 << "Detected " << faceZones.size()
@@ -239,7 +239,7 @@ void simpleMarkFeatures
     }
     else
     {
-        if (faceZones.size() > 0)
+        if (faceZones.size())
         {
             Info<< "Detected " << faceZones.size()
                 << " faceZones. Preserving these by marking their"

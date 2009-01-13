@@ -80,8 +80,6 @@ public:
 
     // Static data members
 
-        static const char* const typeName;
-        static int debug;
         static const string null;
 
 

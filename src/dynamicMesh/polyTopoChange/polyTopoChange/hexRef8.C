@@ -532,7 +532,7 @@ Foam::label Foam::hexRef8::getAnchorCell
     const label pointI
 ) const
 {
-    if (cellAnchorPoints[cellI].size() > 0)
+    if (cellAnchorPoints[cellI].size())
     {
         label index = findIndex(cellAnchorPoints[cellI], pointI);
 
@@ -4017,7 +4017,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         {
             const labelList& addedCells = cellAddedCells[cellI];
 
-            if (addedCells.size() > 0)
+            if (addedCells.size())
             {
                 // Cell was split.
                 history_.storeSplit(cellI, addedCells);

@@ -245,7 +245,7 @@ void Foam::orientedSurface::propagateOrientation
                 << endl;
         }
 
-        if (changedEdges.size() == 0)
+        if (changedEdges.empty())
         {
             break;
         }
@@ -259,7 +259,7 @@ void Foam::orientedSurface::propagateOrientation
                 << endl;
         }
 
-        if (changedFaces.size() == 0)
+        if (changedFaces.empty())
         {
             break;
         }

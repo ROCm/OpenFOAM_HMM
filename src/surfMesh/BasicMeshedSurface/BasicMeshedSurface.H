@@ -138,6 +138,13 @@ public:
             const Xfer<List<Face> >&
         );
 
+        //- Transfer components (points, faces).
+        virtual void reset
+        (
+            const Xfer<List<point> >&,
+            const Xfer<List<Face> >&
+        );
+
         //- Remove invalid faces
         virtual void cleanup(const bool verbose);
 

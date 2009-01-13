@@ -166,6 +166,9 @@ public:
             //- Number of packed elements
             inline label size() const;
 
+            //- Return true if the list is empty (i.e., if size() == 0).
+            inline bool empty() const;
+
             //- Get value at index I
             inline unsigned int get(const label i) const;
 

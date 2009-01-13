@@ -50,7 +50,7 @@ const Foam::boundBox Foam::boundBox::invertedBox
 
 void Foam::boundBox::calculate(const pointField& points, const bool doReduce)
 {
-    if (points.size() == 0)
+    if (points.empty())
     {
         min_ = point::zero;
         max_ = point::zero;

@@ -195,7 +195,7 @@ void Foam::sampledSets::combineSampledSets
         // Get reference point (note: only master has all points)
         point refPt;
 
-        if (allPts.size() > 0)
+        if (allPts.size())
         {
             refPt = samplePts.getRefPoint(allPts);
         }

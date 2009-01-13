@@ -814,7 +814,7 @@ void Foam::polyMesh::addPatches
     const bool validBoundary
 )
 {
-    if (boundaryMesh().size() > 0)
+    if (boundaryMesh().size())
     {
         FatalErrorIn
         (
@@ -858,12 +858,7 @@ void Foam::polyMesh::addZones
     const List<cellZone*>& cz
 )
 {
-    if
-    (
-        pointZones().size() > 0
-     || faceZones().size() > 0
-     || cellZones().size() > 0
-    )
+    if (pointZones().size() || faceZones().size() || cellZones().size())
     {
         FatalErrorIn
         (

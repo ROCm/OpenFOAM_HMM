@@ -232,11 +232,9 @@ void distribution::insertMissingKeys()
 
     sort(keys);
 
-    label k;
-
-    if (keys.size() > 0)
+    if (keys.size())
     {
-        for (k = keys[0]; k < keys[keys.size()-1]; k++)
+        for (label k = keys[0]; k < keys[keys.size()-1]; k++)
         {
             iter = find(k);
 

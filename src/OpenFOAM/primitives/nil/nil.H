@@ -23,20 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::empty
+    Foam::nil
 
 Description
-    A class without storage. Used, for example, in HashSet.
+    A zero-sized class without any storage. Used, for example, in HashSet.
 
-SourceFiles
-    emptyI.H
-    empty.C
-    emptyIO.C
+Note
+    A zero-sized class actually does still require at least 1 byte storage.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef empty_H
-#define empty_H
+#ifndef nil_H
+#define nil_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,17 +47,17 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 
-class empty;
+class nil;
 
-Istream& operator>>(Istream& is, empty&);
-Ostream& operator<<(Ostream& os, const empty&);
+Istream& operator>>(Istream&, nil&);
+Ostream& operator<<(Ostream&, const nil&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class empty Declaration
+                             Class nil Declaration
 \*---------------------------------------------------------------------------*/
 
-class empty
+class nil
 {
 
 public:
@@ -67,22 +65,22 @@ public:
     // Constructors
 
         //- Construct null
-        empty()
+        nil()
         {}
 
         //- Construct from Istream
-        empty(Istream&)
+        nil(Istream&)
         {}
 
 
-    // IOstream Operator
+    // IOstream Operators
 
-        friend Istream& operator>>(Istream& is, empty&)
+        friend Istream& operator>>(Istream& is, nil&)
         {
             return is;
         }
 
-        friend Ostream& operator<<(Ostream& os, const empty&)
+        friend Ostream& operator<<(Ostream& os, const nil&)
         {
             return os;
         }

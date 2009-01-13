@@ -211,7 +211,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
 
             forAll (neiFaces, nfI)
             {
-                if (neiFaces[nfI].size() > 0 && neiFaces[nfI][0] < minNei)
+                if (neiFaces[nfI].size() && neiFaces[nfI][0] < minNei)
                 {
                     nextNei = nfI;
                     minNei = neiFaces[nfI][0];

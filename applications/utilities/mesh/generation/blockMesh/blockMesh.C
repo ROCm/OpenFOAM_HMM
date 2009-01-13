@@ -118,7 +118,7 @@ Foam::label Foam::blockMesh::numZonedBlocks() const
 
     forAll(*this, blockI)
     {
-        if (operator[](blockI).blockDef().zoneName().size() > 0)
+        if (operator[](blockI).blockDef().zoneName().size())
         {
             num++;
         }

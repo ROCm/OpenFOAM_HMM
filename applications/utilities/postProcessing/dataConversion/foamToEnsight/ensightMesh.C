@@ -129,7 +129,7 @@ Foam::ensightMesh::ensightMesh
     {
         wordList patchNameList(IStringStream(args.options()["patches"])());
 
-        if (!patchNameList.size())
+        if (patchNameList.empty())
         {
             patchNameList = allPatchNames_.toc();
         }
@@ -163,7 +163,7 @@ Foam::ensightMesh::ensightMesh
     label nHexes = 0;
     label nPolys = 0;
 
-    if (!patchNames_.size())
+    if (patchNames_.empty())
     {
         forAll(cellShapes, celli)
         {
@@ -267,7 +267,7 @@ Foam::ensightMesh::ensightMesh
         const word& patchName = iter.key();
         nFacePrimitives nfp;
 
-        if (!patchNames_.size() || patchNames_.found(patchName))
+        if (patchNames_.empty() || patchNames_.found(patchName))
         {
             if (patchIndices_.found(patchName))
             {
@@ -403,7 +403,7 @@ void Foam::ensightMesh::writePrimsBinary
 
     numElem = cellShapes.size();
 
-    if (cellShapes.size() > 0)
+    if (cellShapes.size())
     {
         // All the cellShapes have the same number of elements!
         int numIntElem = cellShapes.size()*cellShapes[0].size();
@@ -917,7 +917,7 @@ void Foam::ensightMesh::writeAscii
 
     labelList pointOffsets(Pstream::nProcs(), 0);
 
-    if (!patchNames_.size())
+    if (patchNames_.empty())
     {
         label nPoints = points.size();
         Pstream::gather(nPoints, sumOp<label>());
@@ -1044,7 +1044,7 @@ void Foam::ensightMesh::writeAscii
     {
         const labelList& patchProcessors = iter();
 
-        if (!patchNames_.size() || patchNames_.found(iter.key()))
+        if (patchNames_.empty() || patchNames_.found(iter.key()))
         {
             const word& patchName = iter.key();
             const nFacePrimitives& nfp = nPatchPrims_.find(patchName)();
@@ -1244,7 +1244,7 @@ void Foam::ensightMesh::writeBinary
 
     labelList pointOffsets(Pstream::nProcs(), 0);
 
-    if (!patchNames_.size())
+    if (patchNames_.empty())
     {
         label nPoints = points.size();
         Pstream::gather(nPoints, sumOp<label>());
@@ -1373,7 +1373,7 @@ void Foam::ensightMesh::writeBinary
         iCount ++;
         const labelList& patchProcessors = iter();
 
-        if (!patchNames_.size() || patchNames_.found(iter.key()))
+        if (patchNames_.empty() || patchNames_.found(iter.key()))
         {
             const word& patchName = iter.key();
             const nFacePrimitives& nfp = nPatchPrims_.find(patchName)();

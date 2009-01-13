@@ -621,12 +621,12 @@ void Foam::octree<Type>::printStats(Ostream& os) const
         << "  nLeaves  :" << nLeaves() << endl
         << "  nEntries :" << nEntries() << endl;
 
-    if (nLeaves() > 0 && shapes().size() > 0)
+    if (nLeaves() && shapes().size())
     {
         os
             << "  Cells per leaf :"
             << scalar(nEntries())/nLeaves()
-            << endl
+            << nl
             << "  Every cell in  :"
             << scalar(nEntries())/shapes().size() << " cubes"
             << endl;

@@ -50,7 +50,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, cof)
 
 void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
 {
-    if (!tf.size())
+    if (tf.empty())
     {
         return;
     }

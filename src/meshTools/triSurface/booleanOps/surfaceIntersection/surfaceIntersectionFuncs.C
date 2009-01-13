@@ -291,7 +291,7 @@ void Foam::surfaceIntersection::writeIntersectedEdges
     {
         const labelList& extraVerts = edgeCutVerts[edgeI];
 
-        if (extraVerts.size() != 0)
+        if (extraVerts.size())
         {
             const edge& e = surf.edges()[edgeI];
 

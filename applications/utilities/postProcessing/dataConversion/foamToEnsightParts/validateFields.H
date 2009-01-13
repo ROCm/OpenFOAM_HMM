@@ -77,9 +77,9 @@ forAllIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
         }
     }
 
-    if (!cloudIter().size())
+    if (cloudIter().empty())
     {
-        Info<< "removing cloud " << cloudName<< endl;
+        Info<< "removing cloud " << cloudName << endl;
         cloudFields.erase(cloudIter);
     }
 }

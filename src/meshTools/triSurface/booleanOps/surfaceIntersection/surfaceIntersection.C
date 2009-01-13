@@ -110,7 +110,7 @@ bool Foam::surfaceIntersection::excludeEdgeHit
 //                << "  e0Vec:" << e0Vec << "  n:" << n
 //                << "  normalComponent:" << (n & surf.faceNormals()[faceI])
 //                << "  tol:" << tol << endl;
-//        
+//
 //            return true;
 //        }
 //        else
@@ -399,7 +399,7 @@ void Foam::surfaceIntersection::classifyHit
         {
             // 4. Edge hits edge.
 
-            // Cut edge with new point (creates duplicates when 
+            // Cut edge with new point (creates duplicates when
             // doing the surf2 with surf1 intersection but these
             // are merged later on)
 
@@ -509,7 +509,7 @@ void Foam::surfaceIntersection::classifyHit
                         << " coords:" << surf1.localPoints()[e.start()]
                         << surf1.localPoints()[e.end()] << endl;
                 }
-                
+
                 // Reclassify as normal edge-face pierce (see below)
 
                 allCutPoints.append(hitPt);
@@ -533,7 +533,7 @@ void Foam::surfaceIntersection::classifyHit
                         << " since edge " << e << " on inside of surf2."
                         << " surf2 normal:" << surf2.faceNormals()[surf2FaceI]
                         << endl;
-                }   
+                }
             }
         }
         else
@@ -636,7 +636,7 @@ void Foam::surfaceIntersection::doCutEdges
                     // Label of face on surface2 edgeI intersected
                     label hitFaceI = pHit.index();
 
-                    if 
+                    if
                     (
                         !excludeEdgeHit
                         (
@@ -803,8 +803,8 @@ Foam::surfaceIntersection::surfaceIntersection
 
     // Transfer to straight label(List)List
     transfer(edgeCuts2, surf2EdgeCuts_);
-    transfer(allCutEdges, cutEdges_);
-    transfer(allCutPoints, cutPoints_);
+    cutEdges_.transfer(allCutEdges);
+    cutPoints_.transfer(allCutPoints);
 
 
     if (debug)
@@ -936,8 +936,8 @@ Foam::surfaceIntersection::surfaceIntersection
 
 
     // Transfer to straight label(List)List
-    transfer(allCutEdges, cutEdges_);
-    transfer(allCutPoints, cutPoints_);
+    cutEdges_.transfer(allCutEdges);
+    cutPoints_.transfer(allCutPoints);
 
 
     if (debug)
@@ -1040,11 +1040,11 @@ Foam::surfaceIntersection::surfaceIntersection
 
     // Transfer to straight label(List)List
     transfer(edgeCuts1, surf1EdgeCuts_);
-    transfer(allCutEdges, cutEdges_);
-    transfer(allCutPoints, cutPoints_);
+    cutEdges_.transfer(allCutEdges);
+    cutPoints_.transfer(allCutPoints);
 
-    // Shortcut. 
-    if ((cutPoints_.size() == 0) && (cutEdges_.size() == 0))
+    // Shortcut.
+    if (cutPoints_.empty() && cutEdges_.empty())
     {
         if (debug)
         {
@@ -1071,7 +1071,7 @@ Foam::surfaceIntersection::surfaceIntersection
     // Merge points
     labelList pointMap;
     pointField newPoints;
-    
+
     bool hasMerged = mergePoints
     (
         cutPoints_,

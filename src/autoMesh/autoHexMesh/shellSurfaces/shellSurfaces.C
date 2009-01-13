@@ -170,7 +170,7 @@ void Foam::shellSurfaces::orient()
         {
             const triSurfaceMesh& shell = refCast<const triSurfaceMesh>(s);
 
-            if (shell.triSurface::size() > 0)
+            if (shell.triSurface::size())
             {
                 const pointField& points = shell.points();
 

@@ -388,16 +388,63 @@ bool Foam::HashTable<T, Key, Hash>::erase(const iterator& cit)
 template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::erase(const Key& key)
 {
-    iterator it = find(key);
+    iterator fnd = find(key);
 
-    if (it != end())
+    if (fnd != end())
     {
-        return erase(it);
+        return erase(fnd);
     }
     else
     {
         return false;
     }
+}
+
+
+template<class T, class Key, class Hash>
+Foam::label Foam::HashTable<T, Key, Hash>::erase(const UList<Key>& keys)
+{
+    label count = 0;
+
+    // Remove listed keys from this table
+    if (this->size())
+    {
+        forAll(keys, keyI)
+        {
+            if (erase(keys[keyI]))
+            {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+
+template<class T, class Key, class Hash>
+template<class AnyType>
+Foam::label Foam::HashTable<T, Key, Hash>::erase
+(
+    const HashTable<AnyType, Key, Hash>& rhs
+)
+{
+    label count = 0;
+
+    // Remove rhs elements from this table
+    if (this->size())
+    {
+        // NOTE: could further optimize depending on which hash is smaller
+        for (iterator iter = begin(); iter != end(); ++iter)
+        {
+            if (rhs.found(iter.key()) && erase(iter))
+            {
+                count++;
+            }
+        }
+    }
+
+    return count;
 }
 
 

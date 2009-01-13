@@ -74,7 +74,7 @@ class removePoints
             {
                 if (y.size() > 0)
                 {
-                    if (x.size() == 0)
+                    if (x.empty())
                     {
                         x = y;
                     }

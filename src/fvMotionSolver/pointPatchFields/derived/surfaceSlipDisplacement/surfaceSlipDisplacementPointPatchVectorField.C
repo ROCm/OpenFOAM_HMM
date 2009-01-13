@@ -136,10 +136,10 @@ surfaceSlipDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const searchableSurfaces& surfaceSlipDisplacementPointPatchVectorField::
-surfaces() const
+const searchableSurfaces&
+surfaceSlipDisplacementPointPatchVectorField::surfaces() const
 {
-    if (!surfacesPtr_.valid())
+    if (surfacesPtr_.empty())
     {
         surfacesPtr_.reset
         (
@@ -195,7 +195,7 @@ void surfaceSlipDisplacementPointPatchVectorField::evaluate
     // Get fixed points (bit of a hack)
     const pointZone* zonePtr = NULL;
 
-    if (frozenPointsZone_.size() > 0)
+    if (frozenPointsZone_.size())
     {
         const pointZoneMesh& pZones = mesh.pointZones();
 

@@ -558,7 +558,7 @@ void ensightFieldAscii
 
     GeometricField<Type, fvPatchField, volMesh> vf(fieldObject, mesh);
 
-    if (!patchNames.size())
+    if (patchNames.empty())
     {
         if (Pstream::master())
         {
@@ -633,7 +633,7 @@ void ensightFieldAscii
         const word& patchName = iter.key();
         const labelList& patchProcessors = iter();
 
-        if (!patchNames.size() || patchNames.found(patchName))
+        if (patchNames.empty() || patchNames.found(patchName))
         {
             if (patchIndices.found(patchName))
             {
@@ -734,7 +734,7 @@ void ensightFieldBinary
 
     GeometricField<Type, fvPatchField, volMesh> vf(fieldObject, mesh);
 
-    if (!patchNames.size())
+    if (patchNames.empty())
     {
         if (Pstream::master())
         {
@@ -805,7 +805,7 @@ void ensightFieldBinary
         const word& patchName = iter.key();
         const labelList& patchProcessors = iter();
 
-        if (!patchNames.size() || patchNames.found(patchName))
+        if (patchNames.empty() || patchNames.found(patchName))
         {
             if (patchIndices.found(patchName))
             {

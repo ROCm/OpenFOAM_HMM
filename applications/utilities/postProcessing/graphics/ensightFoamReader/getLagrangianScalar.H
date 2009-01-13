@@ -4,7 +4,6 @@ nVar -= Num_variables - nSprayVariables;
 
 if (nVar >= 0)
 {
-    
     word name = lagrangianScalarNames[nVar];
 
     IOField<scalar> s
@@ -20,15 +19,9 @@ if (nVar >= 0)
         )
     );
 
-    if (s.size() != 0)
+    if (s.size())
     {
-
-        for
-        (
-            label n = 0;
-            n < s.size();
-            n++
-        )
+        for (label n = 0; n < s.size(); n++)
         {
             var_array[n+1] = s[n];
         }
@@ -36,7 +29,7 @@ if (nVar >= 0)
 }
 else
 {
-    //Info << "getLagrangianScalar: nVar = " << nVar << endl;
+    // Info << "getLagrangianScalar: nVar = " << nVar << endl;
     return Z_UNDEF;
 }
 

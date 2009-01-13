@@ -220,7 +220,7 @@ void Foam::forces::read(const dictionary& dict)
 void Foam::forces::makeFile()
 {
     // Create the forces file if not already created
-    if (!forcesFilePtr_.valid())
+    if (forcesFilePtr_.empty())
     {
         if (debug)
         {

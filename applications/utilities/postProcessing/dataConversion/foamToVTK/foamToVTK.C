@@ -339,7 +339,7 @@ int main(int argc, char *argv[])
         (
             args.options().found("time")
          || args.options().found("latestTime")
-         || cellSetName.size() > 0
+         || cellSetName.size()
          || regionName != polyMesh::defaultRegion
         )
         {

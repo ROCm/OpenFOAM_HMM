@@ -220,12 +220,12 @@ Foam::label Foam::metisDecomp::decompose
     int* vwgtPtr = NULL;
     int* adjwgtPtr = NULL;
 
-    if (cellWeights.size() > 0)
+    if (cellWeights.size())
     {
         vwgtPtr = cellWeights.begin();
         wgtFlag += 2;       // Weights on vertices
     }
-    if (faceWeights.size() > 0)
+    if (faceWeights.size())
     {
         adjwgtPtr = faceWeights.begin();
         wgtFlag += 1;       // Weights on edges

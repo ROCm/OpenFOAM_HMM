@@ -372,7 +372,7 @@ public:
             //- Top bounding box
             const treeBoundBox& bb() const
             {
-                if (nodes_.size() == 0)
+                if (nodes_.empty())
                 {
                     FatalErrorIn("indexedOctree<Type>::bb() const")
                         << "Tree is empty" << abort(FatalError);

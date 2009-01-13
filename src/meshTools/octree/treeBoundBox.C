@@ -117,7 +117,7 @@ Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 :
     boundBox()
 {
-    if (points.size() == 0)
+    if (points.empty())
     {
         WarningIn
         (
@@ -148,7 +148,7 @@ Foam::treeBoundBox::treeBoundBox
 :
     boundBox()
 {
-    if (points.size() == 0 || meshPoints.size() == 0)
+    if (points.empty() || meshPoints.empty())
     {
         WarningIn
         (

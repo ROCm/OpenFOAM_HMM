@@ -88,10 +88,10 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
 
     if
     (
-        pointZones().size() > 0
-     || faceZones().size() > 0
-     || cellZones().size() > 0
-     || topoChanger_.size() > 0
+        pointZones().size()
+     || faceZones().size()
+     || cellZones().size()
+     || topoChanger_.size()
     )
     {
         Info<< "void movingConeTopoFvMesh::addZonesAndModifiers() : "
@@ -133,7 +133,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
                 << flipZone1[nZoneFaces1] << endl;
             nZoneFaces1++;
         }
-        else if 
+        else if
         (
             fc[faceI].x() > -0.00701
          && fc[faceI].x() < -0.00699
@@ -326,7 +326,7 @@ bool Foam::movingConeTopoFvMesh::update()
 
     vector curMotionVel_ =
         motionVelAmplitude_*
-        Foam::sin(time().value()*M_PI/motionVelPeriod_); 
+        Foam::sin(time().value()*M_PI/motionVelPeriod_);
 
     Pout<< "time:" << time().value() << " curMotionVel_:" << curMotionVel_
         << " curLeft:" << curLeft_ << " curRight:" << curRight_

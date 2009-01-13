@@ -26,8 +26,7 @@ Primitive
     bool
 
 Description
-    C++ 4.0 supports a builtin type bool but older compilers do not.
-    This is a simple typedef to emulate the standard bool type.
+    System bool
 
 SourceFiles
     boolIO.C

@@ -347,6 +347,28 @@ bool Foam::StaticHashTable<T, Key, Hash>::erase(const Key& key)
 
 
 template<class T, class Key, class Hash>
+Foam::label Foam::StaticHashTable<T, Key, Hash>::erase
+(
+    const StaticHashTable<T, Key, Hash>& rhs
+)
+{
+    label count = 0;
+
+    // Remove rhs elements from this table
+    // NOTE: could optimize depending on which hash is smaller
+    for (iterator iter = this->begin(); iter != this->end(); ++iter)
+    {
+        if (rhs.found(iter.key()) && erase(iter))
+        {
+            count++;
+        }
+    }
+
+   return count;
+}
+
+
+template<class T, class Key, class Hash>
 void Foam::StaticHashTable<T, Key, Hash>::resize(const label newSize)
 {
     if (newSize == keys_.size())
@@ -454,8 +476,8 @@ void Foam::StaticHashTable<T, Key, Hash>::operator=
     }
 
 
-    // could be zero-sized from a previous transfer()
-    if (keys_.size() == 0)
+    // keys could be empty from a previous transfer()
+    if (keys_.empty())
     {
         keys_.setSize(rhs.keys_.size());
         objects_.setSize(keys_.size());

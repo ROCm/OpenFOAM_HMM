@@ -143,11 +143,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    reset
-    (
-        xferMove(pointLst),
-        xferMoveTo<List<Face> >(dynFaces)
-    );
+    reset(pointLst.xfer(), dynFaces.xfer());
 
     // no region information
     this->onePatch();

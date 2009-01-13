@@ -1260,7 +1260,7 @@ void Foam::distributedTriSurfaceMesh::clearOut()
 
 const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 {
-    if (!globalTris_.valid())
+    if (globalTris_.empty())
     {
         globalTris_.reset(new globalIndex(triSurface::size()));
     }

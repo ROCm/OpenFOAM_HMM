@@ -56,7 +56,7 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     {
         is.getLine(line);
     }
-    while ((line.size() == 0 || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == '#') && is.good());
 
     return line;
 }
@@ -267,7 +267,7 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
     else if (verbose)
     {
         wordList toc = available.toc();
-        SortableList<word> known(xferMove(toc));
+        SortableList<word> known(toc.xfer());
 
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl

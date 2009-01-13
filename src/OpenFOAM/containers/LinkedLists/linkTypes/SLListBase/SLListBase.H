@@ -119,6 +119,9 @@ public:
             //- Return number of elements in list
             inline label size() const;
 
+            //- Return true if the list is empty
+            inline bool empty() const;
+
             //- Return first entry
             inline link* first();
 

@@ -341,7 +341,7 @@ Foam::intersectedSurface::calcPointEdgeAddressing
         iter().shrink();
 
         // Check on dangling points.
-        if (iter().size() < 1)
+        if (iter().empty())
         {
             FatalErrorIn
             (
@@ -1171,7 +1171,7 @@ Foam::intersectedSurface::intersectedSurface
     faceMap_(0),
     nSurfacePoints_(surf.nPoints())
 {
-    if ((inter.cutPoints().size() == 0) && (inter.cutEdges().size() == 0))
+    if (inter.cutPoints().empty() && inter.cutEdges().empty())
     {
         // No intersection. Make straight copy.
         triSurface::operator=(surf);

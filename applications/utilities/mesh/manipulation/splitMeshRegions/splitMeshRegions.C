@@ -878,7 +878,7 @@ void createAndWriteRegion
     {
         const polyPatch& pp = newPatches[patchI];
 
-        if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+        if (isA<processorPolyPatch>(pp) && pp.size())
         {
             oldToNew[patchI] = newI++;
         }
@@ -1049,7 +1049,7 @@ label findCorrespondingZone
 
     labelList regionCells = findIndices(cellRegion, regionI);
 
-    if (regionCells.size() == 0)
+    if (regionCells.empty())
     {
         // My local portion is empty. Maps to any empty cellZone. Mark with
         // special value which can get overwritten by other processors.
@@ -1200,7 +1200,7 @@ int main(int argc, char *argv[])
     boolList blockedFace;
 
     // Read from faceSet
-    if (blockedFacesName.size() > 0)
+    if (blockedFacesName.size())
     {
         faceSet blockedFaceSet(mesh, blockedFacesName);
         Info<< "Read " << returnReduce(blockedFaceSet.size(), sumOp<label>())

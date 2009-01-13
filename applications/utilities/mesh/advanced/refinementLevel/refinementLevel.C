@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
     )
     {}
 
-    if (refCells.size() > 0)
+    if (refCells.size())
     {
         Info<< "Collected " << refCells.size() << " cells that need to be"
             << " refined to get closer to overall 2:1 refinement level limit"

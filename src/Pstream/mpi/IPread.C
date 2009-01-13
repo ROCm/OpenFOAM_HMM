@@ -191,7 +191,7 @@ Foam::label Foam::IPstream::read
 
 void Foam::IPstream::waitRequests()
 {
-    if (IPstream_outstandingRequests_.size() > 0)
+    if (IPstream_outstandingRequests_.size())
     {
         if
         (

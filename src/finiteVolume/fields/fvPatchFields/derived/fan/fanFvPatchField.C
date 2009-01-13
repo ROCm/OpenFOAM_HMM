@@ -131,7 +131,7 @@ void fanFvPatchField<Type>::autoMap
     jumpCyclicFvPatchField<Type>::autoMap(m);
 
     // Jump is half size. Expand to full size, map and truncate.
-    if (jump_.size() > 0 && jump_.size() == this->size()/2)
+    if (jump_.size() && jump_.size() == this->size()/2)
     {
         label oldSize = jump_.size();
         jump_.setSize(this->size());
@@ -157,7 +157,7 @@ void fanFvPatchField<Type>::rmap
     jumpCyclicFvPatchField<Type>::rmap(ptf, addr);
 
     // Jump is half size. Expand to full size, map and truncate.
-    if (jump_.size() > 0 && jump_.size() == this->size()/2)
+    if (jump_.size() && jump_.size() == this->size()/2)
     {
         label oldSize = jump_.size();
         jump_.setSize(this->size());

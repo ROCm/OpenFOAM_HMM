@@ -351,7 +351,7 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     ////  in when snapping)
     //
     //labelList namedSurfaces(surfaces().getNamedSurfaces());
-    //if (namedSurfaces.size() > 0)
+    //if (namedSurfaces.size())
     //{
     //    Info<< nl
     //        << "Introducing cyclics for faceZones" << nl

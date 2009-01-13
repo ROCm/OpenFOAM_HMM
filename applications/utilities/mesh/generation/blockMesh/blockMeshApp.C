@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
             const labelListList& blockCells = b.cells();
             const word& zoneName = b.blockDef().zoneName();
 
-            if (zoneName.size() > 0)
+            if (zoneName.size())
             {
                 HashTable<label>::const_iterator iter = zoneMap.find(zoneName);
 
