@@ -24,54 +24,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoMassTransfer.H"
+#include "ConstantRateDevolatilisation.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::NoMassTransfer<CloudType>::NoMassTransfer
+Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
 (
     const dictionary& dict,
-    CloudType& cloud
+    CloudType& owner
 )
 :
-    MassTransferModel<CloudType>(dict, cloud, typeName)
+    DevolatilisationModel<CloudType>(dict, owner, typeName),
+    A0_(dimensionedScalar(this->coeffDict().lookup("A0")).value()),
+    volatileResidualCoeff_
+    (
+        readScalar(this->coeffDict().lookup("volatileResidualCoeff"))
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::NoMassTransfer<CloudType>::~NoMassTransfer()
+Foam::ConstantRateDevolatilisation<CloudType>::~ConstantRateDevolatilisation()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::NoMassTransfer<CloudType>::active() const
+bool Foam::ConstantRateDevolatilisation<CloudType>::active() const
 {
-    return false;
+    return true;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::NoMassTransfer<CloudType>::calculate
+Foam::scalar Foam::ConstantRateDevolatilisation<CloudType>::calculate
 (
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalarField&,
-    const scalarField&,
-    const scalar,
+    const scalar dt,
+    const scalar mass0,
+    const scalar mass,
+    const scalarField& YMixture0,
+    const scalarField& YMixture,
+    const scalar T,
     bool& canCombust
 ) const
 {
-    // Model does not stop combustion taking place
-    canCombust = true;
+    const scalar massVolatile0 = YMixture0[0]*mass0;
+    const scalar massVolatile  = YMixture[0]*mass;
 
-    // Nothing more to do...
-    return 0.0;
+    if (massVolatile <= volatileResidualCoeff_*massVolatile0)
+    {
+        canCombust = true;
+    }
+
+    // Volatile devolatilisation from particle to carrier gas phase
+    const scalar dMass = min(dt*A0_*massVolatile0, massVolatile);
+
+    return dMass;
 }
 
 

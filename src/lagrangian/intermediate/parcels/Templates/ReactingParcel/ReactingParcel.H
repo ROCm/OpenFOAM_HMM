@@ -202,9 +202,9 @@ protected:
 
     // Protected member functions
 
-        //- Calculate mass transfer
+        //- Calculate Devolatilisation
         template<class TrackData>
-        void calcMassTransfer
+        void calcDevolatilisation
         (
             TrackData& td,
             const scalar dt,

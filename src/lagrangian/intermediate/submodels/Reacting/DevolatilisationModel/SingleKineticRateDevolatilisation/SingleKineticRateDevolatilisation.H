@@ -33,7 +33,7 @@ Description
 #ifndef SingleKineticRateDevolatilisation_H
 #define SingleKineticRateDevolatilisation_H
 
-#include "MassTransferModel.H"
+#include "DevolatilisationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +46,7 @@ namespace Foam
 template<class CloudType>
 class SingleKineticRateDevolatilisation
 :
-    public MassTransferModel<CloudType>
+    public DevolatilisationModel<CloudType>
 {
 
     // Private data
@@ -88,7 +88,7 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates mass transfer model
+        //- Flag to indicate whether model activates devolatilisation model
         bool active() const;
 
         //- Update model

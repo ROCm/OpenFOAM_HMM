@@ -24,67 +24,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ConstantRateDevolatilisation.H"
+#include "DevolatilisationModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
+template<class CloudType>
+Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
-:
-    MassTransferModel<CloudType>(dict, owner, typeName),
-    A0_(dimensionedScalar(this->coeffDict().lookup("A0")).value()),
-    volatileResidualCoeff_
-    (
-        readScalar(this->coeffDict().lookup("volatileResidualCoeff"))
-    )
+:   dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::ConstantRateDevolatilisation<CloudType>::~ConstantRateDevolatilisation()
+template<class CloudType>
+Foam::DevolatilisationModel<CloudType>::~DevolatilisationModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 template<class CloudType>
-bool Foam::ConstantRateDevolatilisation<CloudType>::active() const
+const CloudType& Foam::DevolatilisationModel<CloudType>::owner() const
 {
-    return true;
+    return owner_;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ConstantRateDevolatilisation<CloudType>::calculate
-(
-    const scalar dt,
-    const scalar mass0,
-    const scalar mass,
-    const scalarField& YMixture0,
-    const scalarField& YMixture,
-    const scalar T,
-    bool& canCombust
-) const
+const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::dict() const
 {
-    const scalar massVolatile0 = YMixture0[0]*mass0;
-    const scalar massVolatile  = YMixture[0]*mass;
-
-    if (massVolatile <= volatileResidualCoeff_*massVolatile0)
-    {
-        canCombust = true;
-    }
-
-    // Volatile mass transfer from particle to carrier gas phase
-    const scalar dMass = min(dt*A0_*massVolatile0, massVolatile);
-
-    return dMass;
+    return dict_;
 }
 
+
+template<class CloudType>
+const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "NewDevolatilisationModel.C"
 
 // ************************************************************************* //
+

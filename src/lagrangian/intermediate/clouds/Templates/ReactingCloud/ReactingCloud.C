@@ -26,7 +26,7 @@ License
 
 #include "ReactingCloud.H"
 #include "CompositionModel.H"
-#include "MassTransferModel.H"
+#include "DevolatilisationModel.H"
 #include "SurfaceReactionModel.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
@@ -91,9 +91,9 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    massTransferModel_
+    devolatilisationModel_
     (
-        MassTransferModel<ReactingCloud<ParcelType> >::New
+        DevolatilisationModel<ReactingCloud<ParcelType> >::New
         (
             this->particleProperties(),
             *this

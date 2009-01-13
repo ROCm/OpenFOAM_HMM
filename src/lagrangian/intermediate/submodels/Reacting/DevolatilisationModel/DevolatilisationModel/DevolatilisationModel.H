@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::MassTransferModel
-
+    Foam::DevolatilisationModel
 
 Description
-    Templated mass transfer model class
+    Templated devolatilisation model class
 
 SourceFiles
-    MassTransferModel.C
-    NewMassTransferModel.C
+    DevolatilisationModel.C
+    NewDevolatilisationModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MassTransferModel_H
-#define MassTransferModel_H
+#ifndef DevolatilisationModel_H
+#define DevolatilisationModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -48,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class MassTransferModel Declaration
+                      Class DevolatilisationModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class MassTransferModel
+class DevolatilisationModel
 {
 
 protected:
@@ -72,13 +71,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("MassTransferModel");
+    TypeName("DevolatilisationModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        MassTransferModel,
+        DevolatilisationModel,
         dictionary,
         (
             const dictionary& dict,
@@ -91,7 +90,7 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        MassTransferModel
+        DevolatilisationModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -101,12 +100,12 @@ public:
 
     // Destructor
 
-        virtual ~MassTransferModel();
+        virtual ~DevolatilisationModel();
 
 
     // Selector
 
-        static autoPtr<MassTransferModel<CloudType> > New
+        static autoPtr<DevolatilisationModel<CloudType> > New
         (
             const dictionary& dict,
             CloudType& owner
@@ -127,7 +126,7 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates mass transfer model
+        //- Flag to indicate whether model activates devolatilisation model
         virtual bool active() const = 0;
 
         //- Update model
@@ -150,22 +149,22 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeMassTransferModel(CloudType)                                      \
+#define makeDevolatilisationModel(CloudType)                                  \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(MassTransferModel<CloudType>, 0);     \
+    defineNamedTemplateTypeNameAndDebug(DevolatilisationModel<CloudType>, 0); \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        MassTransferModel<CloudType>,                                         \
+        DevolatilisationModel<CloudType>,                                     \
         dictionary                                                            \
     );
 
 
-#define makeMassTransferModelType(SS, CloudType, ParcelType)                  \
+#define makeDevolatilisationModelType(SS, CloudType, ParcelType)              \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    MassTransferModel<CloudType<ParcelType> >::                               \
+    DevolatilisationModel<CloudType<ParcelType> >::                           \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
@@ -173,7 +172,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "MassTransferModel.C"
+#   include "DevolatilisationModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

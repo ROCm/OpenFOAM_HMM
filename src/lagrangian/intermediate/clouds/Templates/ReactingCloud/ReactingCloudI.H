@@ -59,10 +59,10 @@ Foam::ReactingCloud<ParcelType>::composition() const
 
 
 template<class ParcelType>
-inline const Foam::MassTransferModel<Foam::ReactingCloud<ParcelType> >&
-Foam::ReactingCloud<ParcelType>::massTransfer() const
+inline const Foam::DevolatilisationModel<Foam::ReactingCloud<ParcelType> >&
+Foam::ReactingCloud<ParcelType>::devolatilisation() const
 {
-    return massTransferModel_;
+    return devolatilisationModel_;
 }
 
 

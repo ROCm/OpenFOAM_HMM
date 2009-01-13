@@ -35,7 +35,7 @@ Foam::SingleKineticRateDevolatilisation<CloudType>::SingleKineticRateDevolatilis
     CloudType& owner
 )
 :
-    MassTransferModel<CloudType>(dict, owner, typeName),
+    DevolatilisationModel<CloudType>(dict, owner, typeName),
     A1_(dimensionedScalar(this->coeffDict().lookup("A1")).value()),
     E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
     volatileResidualCoeff_
@@ -85,7 +85,7 @@ Foam::scalar Foam::SingleKineticRateDevolatilisation<CloudType>::calculate
     // Kinetic rate
     const scalar kappa = A1_*exp(-E_/(specie::RR*T));
 
-    // Volatile mass transfer from particle to carrier gas phase
+    // Volatile devolatilisation from particle to carrier gas phase
     const scalar dMass = min(dt*kappa*massVolatile, massVolatile);
 
     return dMass;

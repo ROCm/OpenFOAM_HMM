@@ -23,82 +23,68 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::ConstantRateDevolatilisation
+    Foam::NoDevolatilisation
 
 Description
-    Constant rate devolatisation model
-    - need to set vapourisation temperature to 600 K
+    Dummy devolatilisation model for 'no devolatilisation'
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ConstantRateDevolatilisation_H
-#define ConstantRateDevolatilisation_H
+#ifndef NoDevolatilisation_H
+#define NoDevolatilisation_H
 
-#include "MassTransferModel.H"
+#include "DevolatilisationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                 Class ConstantRateDevolatilisation Declaration
+                     Class NoDevolatilisation Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ConstantRateDevolatilisation
+class NoDevolatilisation
 :
-    public MassTransferModel<CloudType>
+    public DevolatilisationModel<CloudType>
 {
-
-    // Private data
-
-        // Model constants
-
-            //- Rate constant (suggested default = 12) [1/s]
-            const scalar A0_;
-
-            //- Volatile residual coefficient (0-1)
-            //  When the fraction of volatiles are depleted below this
-            //  threshold, combustion can occur
-            const scalar volatileResidualCoeff_;
-
 
 public:
 
     //- Runtime type information
-    TypeName("ConstantRateDevolatilisation");
+    TypeName("NoDevolatilisation");
 
 
     // Constructors
 
         //- Construct from dictionary
-        ConstantRateDevolatilisation
+        NoDevolatilisation
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& cloud
         );
 
 
     // Destructor
 
-        ~ConstantRateDevolatilisation();
+        ~NoDevolatilisation();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates mass transfer model
+        //- Flag to indicate whether model activates devolatilisation model
         bool active() const;
 
         //- Update model
         scalar calculate
         (
-            const scalar dt,
-            const scalar mass0,
-            const scalar mass,
-            const scalarField& YMixture0,
-            const scalarField& YMixture,
-            const scalar T,
-            bool& canCombust
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalarField&,
+            const scalarField&,
+            const scalar,
+            bool&
         ) const;
 };
 
@@ -110,7 +96,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ConstantRateDevolatilisation.C"
+#   include "NoDevolatilisation.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

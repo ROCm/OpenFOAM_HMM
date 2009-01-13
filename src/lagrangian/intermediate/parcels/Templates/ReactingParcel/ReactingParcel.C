@@ -94,10 +94,10 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate mass transfer
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    calcMassTransfer(td, dt, T0, T1, dMassMT);
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate Devolatilisation
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    calcDevolatilisation(td, dt, T0, T1, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,10 +253,10 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate mass transfer
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    calcMassTransfer(td, dt, T0, T1, dMassMT);
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate Devolatilisation
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    calcDevolatilisation(td, dt, T0, T1, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -311,7 +311,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::calcMassTransfer
+void Foam::ReactingParcel<ParcelType>::calcDevolatilisation
 (
     TrackData& td,
     const scalar dt,
@@ -325,16 +325,16 @@ void Foam::ReactingParcel<ParcelType>::calcMassTransfer
         notImplemented
         (
             "void Foam::ReactingParcel<ParcelType>::"
-            "calcMassTransfer(...): no treatment currently "
+            "calcDevolatilisation(...): no treatment currently "
             "available for particles containing liquid species"
         )
     }
 
     // Check that model is active, and that the parcel temperature is
-    // within necessary limits for mass transfer to occur
+    // within necessary limits for devolatilisation to occur
     if
     (
-        !td.cloud().massTransfer().active()
+        !td.cloud().devolatilisation().active()
      || this->T_<td.constProps().Tvap()
      || this->T_<td.constProps().Tbp()
     )
@@ -344,7 +344,7 @@ void Foam::ReactingParcel<ParcelType>::calcMassTransfer
 
     // Determine mass to add to carrier phase
     const scalar mass = this->mass();
-    const scalar dMassTot = td.cloud().massTransfer().calculate
+    const scalar dMassTot = td.cloud().devolatilisation().calculate
     (
         dt,
         mass0_,
@@ -365,7 +365,7 @@ void Foam::ReactingParcel<ParcelType>::calcMassTransfer
     {
         label id = td.cloud().composition().gasGlobalIds()[i];
 
-        // Mass transfer
+        // Volatiles mass transfer
         scalar volatileMass = YGas_[i]*dMassTot;
         dMassMT[id] += volatileMass;
     }

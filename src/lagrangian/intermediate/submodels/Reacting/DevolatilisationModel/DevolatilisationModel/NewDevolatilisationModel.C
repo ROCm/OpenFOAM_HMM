@@ -24,55 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "MassTransferModel.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::MassTransferModel<CloudType>::MassTransferModel
-(
-    const dictionary& dict,
-    CloudType& owner,
-    const word& type
-)
-:   dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::MassTransferModel<CloudType>::~MassTransferModel()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-template<class CloudType>
-const CloudType& Foam::MassTransferModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::MassTransferModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::MassTransferModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
+#include "DevolatilisationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewMassTransferModel.C"
+template<class CloudType>
+Foam::autoPtr<Foam::DevolatilisationModel<CloudType> >
+Foam::DevolatilisationModel<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner
+)
+{
+    word DevolatilisationModelType
+    (
+        dict.lookup("DevolatilisationModel")
+    );
+
+    Info<< "Selecting DevolatilisationModel " << DevolatilisationModelType
+        << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(DevolatilisationModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "DevolatilisationModel<CloudType>::New"
+            "(const dictionary&, CloudType&)"
+        )
+            << "Unknown DevolatilisationModelType type "
+            << DevolatilisationModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid DevolatilisationModel types are :" << nl
+            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+    }
+
+    return autoPtr<DevolatilisationModel<CloudType> >(cstrIter()(dict, owner));
+}
+
 
 // ************************************************************************* //
-

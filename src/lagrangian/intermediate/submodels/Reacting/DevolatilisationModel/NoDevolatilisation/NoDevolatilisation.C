@@ -24,43 +24,54 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "MassTransferModel.H"
+#include "NoDevolatilisation.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::autoPtr<Foam::MassTransferModel<CloudType> >
-Foam::MassTransferModel<CloudType>::New
+template <class CloudType>
+Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& cloud
 )
+:
+    DevolatilisationModel<CloudType>(dict, cloud, typeName)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template <class CloudType>
+Foam::NoDevolatilisation<CloudType>::~NoDevolatilisation()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::NoDevolatilisation<CloudType>::active() const
 {
-    word MassTransferModelType
-    (
-        dict.lookup("MassTransferModel")
-    );
+    return false;
+}
 
-    Info<< "Selecting MassTransferModel " << MassTransferModelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(MassTransferModelType);
+template<class CloudType>
+Foam::scalar Foam::NoDevolatilisation<CloudType>::calculate
+(
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalarField&,
+    const scalarField&,
+    const scalar,
+    bool& canCombust
+) const
+{
+    // Model does not stop combustion taking place
+    canCombust = true;
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "MassTransferModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown MassTransferModelType type "
-            << MassTransferModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid MassTransferModel types are :" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
-    }
-
-    return autoPtr<MassTransferModel<CloudType> >(cstrIter()(dict, owner));
+    // Nothing more to do...
+    return 0.0;
 }
 
 

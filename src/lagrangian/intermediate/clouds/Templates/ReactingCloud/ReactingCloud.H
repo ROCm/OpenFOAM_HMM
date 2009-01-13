@@ -58,7 +58,7 @@ template<class CloudType>
 class CompositionModel;
 
 template<class CloudType>
-class MassTransferModel;
+class DevolatilisationModel;
 
 template<class CloudType>
 class SurfaceReactionModel;
@@ -91,9 +91,9 @@ class ReactingCloud
             autoPtr<CompositionModel<ReactingCloud<ParcelType> > >
                 compositionModel_;
 
-            //- Mass transfer model
-            autoPtr<MassTransferModel<ReactingCloud<ParcelType> > >
-                massTransferModel_;
+            //- Devolatilisation model
+            autoPtr<DevolatilisationModel<ReactingCloud<ParcelType> > >
+                devolatilisationModel_;
 
             //- Surface reaction model
             autoPtr<SurfaceReactionModel<ReactingCloud<ParcelType> > >
@@ -101,7 +101,7 @@ class ReactingCloud
 
         // Sources
 
-            //- Mass transfer fields - one per carrier phase specie
+            //- Devolatilisation fields - one per carrier phase specie
             PtrList<DimensionedField<scalar, volMesh> > rhoTrans_;
 
 
@@ -159,9 +159,9 @@ public:
                 inline const CompositionModel<ReactingCloud<ParcelType> >&
                     composition() const;
 
-                //- Return reference to mass transfer model
-                inline const MassTransferModel<ReactingCloud<ParcelType> >&
-                    massTransfer() const;
+                //- Return reference to devolatilisation model
+                inline const DevolatilisationModel<ReactingCloud<ParcelType> >&
+                    devolatilisation() const;
 
                 //- Return reference to surface reaction model
                 inline const SurfaceReactionModel<ReactingCloud<ParcelType> >&
