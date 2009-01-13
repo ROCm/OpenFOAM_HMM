@@ -8,4 +8,6 @@ field/magGrad/magGrad.C
 field/div/div.C
 field/randomise/randomise.C
 
+basic/add/add.C
+
 LIB = $(FOAM_LIBBIN)/libfoamCalcFunctions

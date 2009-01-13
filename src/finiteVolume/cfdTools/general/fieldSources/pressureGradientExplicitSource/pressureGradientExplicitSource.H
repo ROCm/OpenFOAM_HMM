@@ -73,10 +73,10 @@ class pressureGradientExplicitSource
         vector Ubar_;
 
         //- Initial pressure gradient
-        scalar gradPini_;
+        dimensionedScalar gradPini_;
 
         //- Pressure gradient
-        scalar gradP_;
+        dimensionedScalar gradP_;
 
         //- Flow direction
         vector flowDir_;

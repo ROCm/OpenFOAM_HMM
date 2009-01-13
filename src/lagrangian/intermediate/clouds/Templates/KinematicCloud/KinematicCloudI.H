@@ -156,41 +156,6 @@ Foam::KinematicCloud<ParcelType>::UIntegrator() const
 
 
 template<class ParcelType>
-inline Foam::label Foam::KinematicCloud<ParcelType>::nInjections() const
-{
-    return nInjections_;
-}
-
-
-template<class ParcelType>
-inline Foam::label Foam::KinematicCloud<ParcelType>::nParcelsAddedTotal() const
-{
-    return nParcelsAddedTotal_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar Foam::KinematicCloud<ParcelType>::time0() const
-{
-    return time0_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar Foam::KinematicCloud<ParcelType>::massTotal() const
-{
-    return massTotal_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar Foam::KinematicCloud<ParcelType>::massInjected() const
-{
-    return massInjected_;
-}
-
-
-template<class ParcelType>
 inline Foam::scalar Foam::KinematicCloud<ParcelType>::massInSystem() const
 {
     scalar sysMass = 0.0;

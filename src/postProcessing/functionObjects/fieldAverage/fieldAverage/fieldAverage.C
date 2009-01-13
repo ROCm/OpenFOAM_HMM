@@ -170,6 +170,7 @@ Foam::fieldAverage::fieldAverage
     name_(name),
     obr_(obr),
     active_(true),
+    cleanRestart_(dict.lookupOrDefault<Switch>("cleanRestart", false)),
     faItems_(dict.lookup("fields")),
     meanScalarFields_(faItems_.size()),
     meanVectorFields_(faItems_.size()),
@@ -326,29 +327,44 @@ void Foam::fieldAverage::writeAveragingProperties() const
 
 void Foam::fieldAverage::readAveragingProperties()
 {
-    IFstream propsFile
-    (
-        obr_.time().path()/obr_.time().timeName()
-       /"uniform"/"fieldAveragingProperties"
-    );
-
-    if (!propsFile.good())
+    if (cleanRestart_)
     {
-        return;
+        Info<< "fieldAverage: starting averaging at time "
+            << obr_.time().timeName() << nl << endl;
     }
-
-    dictionary propsDict(dictionary::null, propsFile);
-
-    forAll(faItems_, i)
+    else
     {
-        const word& fieldName = faItems_[i].fieldName();
-        if (propsDict.found(fieldName))
-        {
-            dictionary fieldDict(propsDict.subDict(fieldName));
+        IFstream propsFile
+        (
+            obr_.time().path()/obr_.time().timeName()
+            /"uniform"/"fieldAveragingProperties"
+        );
 
-            totalIter_[i] = readLabel(fieldDict.lookup("totalIter"));
-            totalTime_[i] = readScalar(fieldDict.lookup("totalTime"));
+        if (!propsFile.good())
+        {
+            Info<< "fieldAverage: starting averaging at time "
+                << obr_.time().timeName() << nl << endl;
+            return;
         }
+
+        dictionary propsDict(dictionary::null, propsFile);
+
+        Info<< "fieldAverage: restarting averaging for fields:" << endl;
+        forAll(faItems_, i)
+        {
+            const word& fieldName = faItems_[i].fieldName();
+            if (propsDict.found(fieldName))
+            {
+                dictionary fieldDict(propsDict.subDict(fieldName));
+
+                totalIter_[i] = readLabel(fieldDict.lookup("totalIter"));
+                totalTime_[i] = readScalar(fieldDict.lookup("totalTime"));
+                Info<< "    " << fieldName
+                    << " iters = " << totalIter_[i]
+                    << " time = " << totalTime_[i] << endl;
+            }
+        }
+        Info<< endl;
     }
 }
 
