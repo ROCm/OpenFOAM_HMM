@@ -30,11 +30,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-vector accumulatedTotalMomentum(vector::zero);
+vector accumulatedTotalLinearMomentum(vector::zero);
 
 scalar accumulatedTotalMass = 0.0;
 
-scalar accumulatedTotalKE = 0.0;
+scalar accumulatedTotalAngularKE = 0.0;
+
+scalar accumulatedTotalLinearKE = 0.0;
 
 scalar accumulatedTotalPE = 0.0;
 

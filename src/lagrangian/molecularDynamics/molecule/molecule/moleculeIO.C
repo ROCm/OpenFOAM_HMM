@@ -26,7 +26,6 @@ License
 
 #include "molecule.H"
 #include "IOstreams.H"
-
 #include "moleculeCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -38,136 +37,163 @@ Foam::molecule::molecule
     bool readFields
 )
 :
-    Particle<molecule>(cloud, is)
+    Particle<molecule>(cloud, is, true),
+    Q_(tensor::zero),
+    v_(vector::zero),
+    a_(vector::zero),
+    pi_(vector::zero),
+    tau_(vector::zero),
+    specialPosition_(vector::zero),
+    potentialEnergy_(0.0),
+    rf_(tensor::zero),
+    special_(0),
+    id_(0),
+    siteForces_(0),
+    sitePositions_(0)
 {
     if (readFields)
     {
         if (is.format() == IOstream::ASCII)
         {
-            id_ = readLabel(is);
-            mass_ = readScalar(is);
-            is >> U_;
-            is >> A_;
-            is >> potentialEnergy_;
+            is >> Q_;
+            is >> v_;
+            is >> a_;
+            is >> pi_;
+            is >> tau_;
+            is >> siteForces_;
+            is >> sitePositions_;
+            is >> specialPosition_;
+            potentialEnergy_ = readScalar(is);
             is >> rf_;
-            is >> tethered_;
-            is >> tetherPosition_;
+            special_ = readLabel(is);
+            id_ = readLabel(is);
         }
         else
         {
             is.read
             (
-                reinterpret_cast<char*>(&mass_),
-                sizeof(mass_)
-                + sizeof(U_)
-                + sizeof(A_)
-                + sizeof(tetherPosition_)
+                reinterpret_cast<char*>(&Q_),
+                sizeof(Q_)
+                + sizeof(v_)
+                + sizeof(a_)
+                + sizeof(pi_)
+                + sizeof(tau_)
+                + sizeof(specialPosition_)
                 + sizeof(potentialEnergy_)
                 + sizeof(rf_)
-                + sizeof(tethered_)
+                + sizeof(special_)
                 + sizeof(id_)
             );
+
+            is >> siteForces_ >> sitePositions_;
         }
     }
 
     // Check state of Istream
-    is.check("Foam::molecule::molecule(Foam::Istream&)");
+    is.check
+    (
+        "Foam::molecule::molecule"
+        "(const Cloud<molecule>& cloud, Foam::Istream&), bool"
+    );
 }
 
 
-namespace Foam
-{
-
-void molecule::readFields(moleculeCloud& mC)
+void Foam::molecule::readFields(moleculeCloud& mC)
 {
     if (!mC.size())
     {
         return;
     }
 
+    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, Q);
+
+    IOField<vector> v(mC.fieldIOobject("v", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, v);
+
+    IOField<vector> a(mC.fieldIOobject("a", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, a);
+
+    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, pi);
+
+    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, tau);
+
+    IOField<vector> specialPosition
+    (
+        mC.fieldIOobject("specialPosition", IOobject::MUST_READ)
+    );
+    mC.checkFieldIOobject(mC, specialPosition);
+
+    IOField<label> special(mC.fieldIOobject("special", IOobject::MUST_READ));
+    mC.checkFieldIOobject(mC, special);
+
     IOField<label> id(mC.fieldIOobject("id", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, id);
-
-    IOField<scalar> mass(mC.fieldIOobject("mass", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, mass);
-
-    IOField<vector> U(mC.fieldIOobject("U", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, U);
-
-    IOField<vector> A(mC.fieldIOobject("A", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, A);
-
-    IOField<label> tethered(mC.fieldIOobject("tethered", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, tethered);
-
-    IOField<vector> tetherPositions
-    (
-        mC.fieldIOobject("tetherPositions", IOobject::MUST_READ)
-    );
-    mC.checkFieldIOobject(mC, tetherPositions);
 
     label i = 0;
     forAllIter(moleculeCloud, mC, iter)
     {
         molecule& mol = iter();
 
+        mol.Q_ = Q[i];
+        mol.v_ = v[i];
+        mol.a_ = a[i];
+        mol.pi_ = pi[i];
+        mol.tau_ = tau[i];
+        mol.specialPosition_ = specialPosition[i];
+        mol.special_ = special[i];
         mol.id_ = id[i];
-        mol.mass_ = mass[i];
-        mol.U_ = U[i];
-        mol.A_ = A[i];
-        mol.potentialEnergy_ = 0.0;
-        mol.rf_ = tensor::zero;
-        mol.tethered_ = tethered[i];
-        mol.tetherPosition_ = tetherPositions[i];
         i++;
     }
 }
 
 
-void molecule::writeFields(const moleculeCloud& mC)
+void Foam::molecule::writeFields(const moleculeCloud& mC)
 {
     Particle<molecule>::writeFields(mC);
 
-    label np =  mC.size();
+    label np = mC.size();
 
+    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::NO_READ), np);
+    IOField<vector> v(mC.fieldIOobject("v", IOobject::NO_READ), np);
+    IOField<vector> a(mC.fieldIOobject("a", IOobject::NO_READ), np);
+    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::NO_READ), np);
+    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::NO_READ), np);
+    IOField<vector> specialPosition
+    (
+        mC.fieldIOobject("specialPosition", IOobject::NO_READ),
+        np
+    );
+    IOField<label> special(mC.fieldIOobject("special", IOobject::NO_READ), np);
     IOField<label> id(mC.fieldIOobject("id", IOobject::NO_READ), np);
-    IOField<scalar> mass(mC.fieldIOobject("mass", IOobject::NO_READ), np);
-    IOField<vector> U(mC.fieldIOobject("U", IOobject::NO_READ), np);
-    IOField<vector> A(mC.fieldIOobject("A", IOobject::NO_READ), np);
-    IOField<label> tethered
-    (
-        mC.fieldIOobject("tethered", IOobject::NO_READ),
-        np
-    );
-    IOField<vector> tetherPositions
-    (
-        mC.fieldIOobject("tetherPositions", IOobject::NO_READ),
-        np
-    );
 
     label i = 0;
     forAllConstIter(moleculeCloud, mC, iter)
     {
         const molecule& mol = iter();
 
+        Q[i] = mol.Q_;
+        v[i] = mol.v_;
+        a[i] = mol.a_;
+        pi[i] = mol.pi_;
+        tau[i] = mol.tau_;
+        specialPosition[i] = mol.specialPosition_;
+        special[i] = mol.special_;
         id[i] = mol.id_;
-        mass[i] = mol.mass_;
-        U[i] = mol.U_;
-        A[i] = mol.A_;
-        tethered[i] = mol.tethered_;
-        tetherPositions[i] = mol.tetherPosition_;
         i++;
     }
 
+    Q.write();
+    v.write();
+    a.write();
+    pi.write();
+    tau.write();
+    specialPosition.write();
+    special.write();
     id.write();
-    mass.write();
-    U.write();
-    A.write();
-    tethered.write();
-    tetherPositions.write();
 }
-
-};  // end of namespace Foam
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
@@ -176,33 +202,40 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << mol.id_
-                << token::SPACE << mol.mass_
-                << token::SPACE << static_cast<const Particle<molecule>&>(mol)
-                << token::SPACE << mol.face()
-                << token::SPACE << mol.stepFraction()
-                << token::SPACE << mol.U_
-                << token::SPACE << mol.A_
-                << token::SPACE << mol.potentialEnergy_
-                << token::SPACE << mol.rf_
-                << token::SPACE << mol.tethered_
-                << token::SPACE << mol.tetherPosition_;
+        os  << token::SPACE << static_cast<const Particle<molecule>&>(mol)
+            << token::SPACE << mol.face()
+            << token::SPACE << mol.stepFraction()
+            << token::SPACE << mol.Q_
+            << token::SPACE << mol.v_
+            << token::SPACE << mol.a_
+            << token::SPACE << mol.pi_
+            << token::SPACE << mol.tau_
+            << token::SPACE << mol.specialPosition_
+            << token::SPACE << mol.potentialEnergy_
+            << token::SPACE << mol.rf_
+            << token::SPACE << mol.special_
+            << token::SPACE << mol.id_
+            << token::SPACE << mol.siteForces_
+            << token::SPACE << mol.sitePositions_;
     }
     else
     {
         os  << static_cast<const Particle<molecule>&>(mol);
         os.write
         (
-            reinterpret_cast<const char*>(&mol.mass_),
-            sizeof(mol.mass_)
-            + sizeof(mol.U_)
-            + sizeof(mol.A_)
-            + sizeof(mol.tetherPosition_)
+            reinterpret_cast<const char*>(&mol.Q_),
+            sizeof(mol.Q_)
+            + sizeof(mol.v_)
+            + sizeof(mol.a_)
+            + sizeof(mol.pi_)
+            + sizeof(mol.tau_)
+            + sizeof(mol.specialPosition_)
             + sizeof(mol.potentialEnergy_)
             + sizeof(mol.rf_)
-            + sizeof(mol.tethered_)
+            + sizeof(mol.special_)
             + sizeof(mol.id_)
         );
+        os << mol.siteForces_ << mol.sitePositions_;
     }
 
     // Check state of Ostream

@@ -36,12 +36,12 @@ inline Foam::label Foam::pairPotentialList::pairPotentialIndex
 
     if (a < b)
     {
-        index = a*(2*nIds() - a - 1)/2 + b;
+        index = a*(2*nIds_ - a - 1)/2 + b;
     }
 
     else
     {
-        index = b*(2*nIds() - b - 1)/2 + a;
+        index = b*(2*nIds_ - b - 1)/2 + a;
     }
 
     if (index > size() - 1)
@@ -57,18 +57,6 @@ inline Foam::label Foam::pairPotentialList::pairPotentialIndex
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::pairPotentialList::nIds() const
-{
-    return idList_.size();
-}
-
-
-inline const Foam::List<Foam::word>& Foam::pairPotentialList::idList() const
-{
-    return idList_;
-}
-
 
 inline Foam::scalar Foam::pairPotentialList::rCutMax() const
 {

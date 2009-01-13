@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    mdEquilibrationFOAM
+    mdEquilibrationFoam
 
 Description
     Equilibrates and/or preconditions MD systems
@@ -40,9 +40,9 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    moleculeCloud molecules(mesh);
+    potential pot(mesh);
 
-    molecules.removeHighEnergyOverlaps();
+    moleculeCloud molecules(mesh, pot);
 
 #   include "temperatureAndPressureVariables.H"
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
         Info << "Time = " << runTime.timeName() << endl;
 
-        molecules.integrateEquationsOfMotion();
+        molecules.evolve();
 
 #       include "meanMomentumEnergyAndNMols.H"
 
