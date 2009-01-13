@@ -176,9 +176,10 @@ void Foam::fieldMinMax::calcMinMaxFields<Foam::scalar>
 {
     if (obr_.foundObject<volScalarField>(fieldName))
     {
-        const scalarField& field = obr_.lookupObject<scalarField>(fieldName);
-        scalar minValue = min(field);
-        scalar maxValue = max(field);
+        const volScalarField& field =
+            obr_.lookupObject<volScalarField>(fieldName);
+        scalar minValue = min(field).value();
+        scalar maxValue = max(field).value();
 
         reduce(minValue, minOp<scalar>());
         reduce(maxValue, maxOp<scalar>());
