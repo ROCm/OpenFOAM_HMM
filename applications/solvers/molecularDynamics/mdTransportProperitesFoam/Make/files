@@ -1,3 +1,0 @@
-mdTransportProperitesFoam.C
-
-EXE = $(FOAM_APPBIN)/mdTransportProperitesFoam
