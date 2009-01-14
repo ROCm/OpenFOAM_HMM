@@ -14,6 +14,7 @@ primitives/long/longIO.C
 primitives/longLong/longLongIO.C
 primitives/ulong/ulongIO.C
 primitives/label/label.C
+primitives/uLabel/uLabel.C
 primitives/Scalar/doubleScalar/doubleScalar.C
 primitives/Scalar/floatScalar/floatScalar.C
 primitives/Scalar/scalar/scalar.C

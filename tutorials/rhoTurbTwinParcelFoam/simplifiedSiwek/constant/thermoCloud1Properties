@@ -23,12 +23,6 @@ HeatTransferModel                        RanzMarshall;
 
 radiation                                off;
 
-// Parcel basis type
-parcelBasisType                          mass;
-
-// Total mass to inject
-massTotal  massTotal [ 1  0  0  0  0]    1e-4;
-
 // Minimum particle mass
 minParticleMass      minParticleMass     [ 1  0  0  0  0]     1.0e-15;
 
@@ -62,6 +56,12 @@ integrationSchemes
 
 ManualInjectionCoeffs
 {
+    // Total mass to inject
+    massTotal  massTotal [ 1  0  0  0  0]    1e-4;
+
+    // Parcel basis type
+    parcelBasisType                          mass;
+
     SOI                                  0.0;
     positionsFile                        thermoCloud1Positions;
     U0                                   (0 0 0);

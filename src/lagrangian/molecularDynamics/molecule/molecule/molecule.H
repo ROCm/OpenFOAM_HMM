@@ -41,6 +41,7 @@ SourceFiles
 #include "Particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
+#include "diagTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,54 +59,98 @@ class molecule
 :
     public Particle<molecule>
 {
-    // Private data
-
-        //- Be careful with the ordering of data.
-        //  It has an impact on binary transfer:
-        //    -# Put the largest data members 1st
-        //    -# Pair up labels,
-        //    -# Don't go scalar-label, scalar-label, because in 64bit mode,
-        //       the labels will be padded by 4bytes.
-
-        // - mass of molecule
-        scalar mass_;
-
-        // - Velocity of molecule
-        vector U_;
-
-        // - Acceleration of molecule
-        vector A_;
-
-        // - Tether position
-        vector tetherPosition_;
-
-        // - Potential energy that this molecules posseses
-        scalar potentialEnergy_;
-
-        // - r_ij f_ij, stress dyad
-        tensor rf_;
-
-        // - Is the molecule tethered?
-        label tethered_;
-
-        // - id (type) of molecule
-        label id_;
-
 
 public:
 
-    friend class Cloud<molecule>;
+    // Values of special that are less than zero are for built-in functionality.
+    // Values greater than zero are user specifiable/expandable (i.e. test
+    // special_ >= SPECIAL_USER)
+
+    enum specialTypes
+    {
+        SPECIAL_TETHERED = -1,
+        SPECIAL_FROZEN   = -2,
+        NOT_SPECIAL      = 0,
+        SPECIAL_USER     = 1
+    };
+
+    //- Class to hold molecule constant properties
+    class constantProperties
+    {
+
+        // Private data
+
+            Field<vector> siteReferencePositions_;
+
+            List<scalar> siteCharges_;
+
+            List<label> siteIds_;
+
+            List<bool> pairPotentialSites_;
+
+            List<bool> electrostaticSites_;
+
+            diagTensor momentOfInertia_;
+
+            scalar mass_;
+
+        // Private Member Functions
+
+            void checkSiteListSizes() const;
+
+            void setInteracionSiteBools
+            (
+                const List<word>& siteIds,
+                const List<word>& pairPotSiteIds
+            );
+
+            bool linearMoleculeTest() const;
+
+    public:
+
+        inline constantProperties();
+
+        //- Construct from dictionary
+        inline constantProperties(const dictionary& dict);
+
+        // Member functions
+
+        inline const Field<vector>& siteReferencePositions() const;
+
+        inline const List<scalar>& siteCharges() const;
+
+        inline const List<label>& siteIds() const;
+
+        inline List<label>& siteIds();
+
+        inline const List<bool>& pairPotentialSites() const;
+
+        inline bool pairPotentialSite(label sId) const;
+
+        inline const List<bool>& electrostaticSites() const;
+
+        inline bool electrostaticSite(label sId) const;
+
+        inline const diagTensor& momentOfInertia() const;
+
+        inline bool linearMolecule() const;
+
+        inline bool pointMolecule() const;
+
+        inline scalar mass() const;
+
+        inline label nSites() const;
+    };
+
 
     //- Class used to pass tracking data to the trackToFace function
     class trackData
     :
         public Particle<molecule>::trackData
     {
-        //- Reference to the cloud containing this particle
         moleculeCloud& molCloud_;
 
         // label specifying which part of the integration algorithm is taking
-        // place (i.e. leapfrog 1 or leapfrog 2. Predictor or Corrector)
         label part_;
 
 
@@ -113,7 +158,7 @@ public:
 
         // Constructors
 
-            inline trackData
+            trackData
             (
                 moleculeCloud& molCloud,
                 label part
@@ -126,6 +171,55 @@ public:
             inline label part() const;
     };
 
+
+private:
+
+    // Private data
+
+        //- Be careful with the ordering of data.
+        //  It has an impact on binary transfer:
+        //    -# Put the largest data members 1st
+        //    -# Pair up labels,
+        //    -# Don't go scalar-label, scalar-label, because in 64bit mode,
+        //       the labels will be padded by 4bytes.
+
+        tensor Q_;
+
+        vector v_;
+
+        vector a_;
+
+        vector pi_;
+
+        vector tau_;
+
+        vector specialPosition_;
+
+        scalar potentialEnergy_;
+
+        // - r_ij f_ij, stress dyad
+        tensor rf_;
+
+        label special_;
+
+        label id_;
+
+        List<vector> siteForces_;
+
+        List<vector> sitePositions_;
+
+    // Private Member Functions
+
+        tensor rotationTensorX(scalar deltaT) const;
+
+        tensor rotationTensorY(scalar deltaT) const;
+
+        tensor rotationTensorZ(scalar deltaT) const;
+
+public:
+
+    friend class Cloud<molecule>;
+
     // Constructors
 
         //- Construct from components
@@ -134,11 +228,14 @@ public:
             const Cloud<molecule>& c,
             const vector& position,
             const label celli,
-            const scalar mass,
-            const vector& U,
-            const vector& A,
-            const vector& tetherPosition,
-            const label tethered,
+            const tensor& Q,
+            const vector& v,
+            const vector& a,
+            const vector& pi,
+            const vector& tau,
+            const vector& specialPosition,
+            const constantProperties& constProps,
+            const label special,
             const label id
         );
 
@@ -159,45 +256,54 @@ public:
 
     // Member Functions
 
-        void transformProperties(const tensor& T);
+        //- Tracking
+            bool move(trackData&);
 
-        void transformProperties(const vector& separation);
+            void transformProperties(const tensor& T);
+
+            void transformProperties(const vector& separation);
+
+            void setSitePositions(const constantProperties& constProps);
+
+            void setSiteSizes(label size);
 
         // Access
 
-            //- Return id
-            inline label id() const;
+            inline const tensor& Q() const;
+            inline tensor& Q();
 
-            //- Return mass
-            inline scalar mass() const;
+            inline const vector& v() const;
+            inline vector& v();
 
-            //- Return velocity
-            inline const vector& U() const;
-            inline vector& U();
+            inline const vector& a() const;
+            inline vector& a();
 
-            //- Return acceleration
-            inline const vector& A() const;
-            inline vector& A();
+            inline const vector& pi() const;
+            inline vector& pi();
 
-            //- Return potential energy
+            inline const vector& tau() const;
+            inline vector& tau();
+
+            inline const List<vector>& siteForces() const;
+            inline List<vector>& siteForces();
+
+            inline const List<vector>& sitePositions() const;
+            inline List<vector>& sitePositions();
+
+            inline const vector& specialPosition() const;
+            inline vector& specialPosition();
+
             inline scalar potentialEnergy() const;
             inline scalar& potentialEnergy();
 
-            //- Return stress contribution
             inline const tensor& rf() const;
             inline tensor& rf();
 
-            //- Return tethered
-            inline label tethered() const;
+            inline label special() const;
 
-            //- Return tetherPosition
-            inline const vector& tetherPosition() const;
-            inline vector& tetherPosition();
+            inline bool tethered() const;
 
-
-        //- Tracking
-        bool move(trackData&);
-
+            inline label id() const;
 
     // Member Operators
 

@@ -1,4 +1,4 @@
-Info<< "Reading MD Equilibration Dictionary" << nl << endl;
+Info<< nl << "Reading MD Equilibration Dictionary" << nl << endl;
 
 IOdictionary mdEquilibrationDict
 (

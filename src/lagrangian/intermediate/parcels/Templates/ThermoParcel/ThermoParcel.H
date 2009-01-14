@@ -193,7 +193,7 @@ protected:
             scalar cp_;
 
 
-        // Call-based quantities
+        // Cell-based quantities
 
             //- Temperature [K]
             scalar Tc_;

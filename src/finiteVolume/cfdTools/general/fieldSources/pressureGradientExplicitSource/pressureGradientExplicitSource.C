@@ -76,7 +76,7 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
         )
     ),
     Ubar_(dict_.lookup("Ubar")),
-    gradPini_(readScalar(dict_.lookup("gradPini"))),
+    gradPini_(dict_.lookup("gradPini")),
     gradP_(gradPini_),
     flowDir_(Ubar_/mag(Ubar_)),
     cellSource_(dict_.lookup("cellSource")),
@@ -121,7 +121,7 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
         propsDict.lookup("gradient") >> gradP_;
     }
 
-    Info<< "    Initial pressure gradient = " << gradP_ << endl;
+    Info<< "    Initial pressure gradient = " << gradP_ << nl << endl;
 }
 
 
@@ -143,7 +143,7 @@ Foam::pressureGradientExplicitSource::Su() const
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedVector("zero", dimVelocity/dimTime, vector::zero)
+            dimensionedVector("zero", gradP_.dimensions(), vector::zero)
         )
     );
 
@@ -153,7 +153,7 @@ Foam::pressureGradientExplicitSource::Su() const
     {
         label cellI = iter.key();
 
-        sourceField[cellI] = flowDir_*gradP_;
+        sourceField[cellI] = flowDir_*gradP_.value();
     }
 
     return tSource;
@@ -201,10 +201,10 @@ void Foam::pressureGradientExplicitSource::update()
     }
 
     // Update pressure gradient
-    gradP_ += gradPplus;
+    gradP_.value() += gradPplus;
 
     Info<< "Uncorrected Ubar = " << magUbarAve << tab
-        << "Pressure gradient = " << gradP_ << endl;
+        << "Pressure gradient = " << gradP_.value() << endl;
 
     writeGradP();
 }

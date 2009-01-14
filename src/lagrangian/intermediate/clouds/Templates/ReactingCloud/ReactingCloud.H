@@ -114,12 +114,6 @@ class ReactingCloud
         void operator=(const ReactingCloud&);
 
 
-protected:
-
-    //- Inject more parcels
-    void inject();
-
-
 public:
 
     //- Runtime type information
@@ -198,6 +192,17 @@ public:
 
 
         // Cloud evolution functions
+
+            //- Add new parcel
+            void addNewParcel
+            (
+                const vector& position,
+                const label cellId,
+                const scalar d,
+                const vector& U,
+                const scalar nParticles,
+                const scalar lagrangianDt
+            );
 
             //- Reset the spray source terms
             void resetSourceTerms();

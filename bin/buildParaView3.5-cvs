@@ -53,6 +53,8 @@ PYTHON_LIBRARY=""
 
 # MESA graphics support:
 WITH_MESA=OFF
+MESA_INCLUDE_DIR="/usr/include/GL"
+MESA_LIBRARY="/usr/lib64/libOSMesa.so"
 
 #
 # No further editing below this line

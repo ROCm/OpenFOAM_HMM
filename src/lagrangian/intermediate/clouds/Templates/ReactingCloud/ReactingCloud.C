@@ -29,6 +29,42 @@ License
 #include "MassTransferModel.H"
 #include "SurfaceReactionModel.H"
 
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::addNewParcel
+(
+    const vector& position,
+    const label cellId,
+    const scalar d,
+    const vector& U,
+    const scalar nParticles,
+    const scalar lagrangianDt
+)
+{
+    ParcelType* pPtr = new ParcelType
+    (
+        *this,
+        this->parcelTypeId(),
+        position,
+        cellId,
+        d,
+        U,
+        nParticles,
+        composition().YGas0(),
+        composition().YLiquid0(),
+        composition().YSolid0(),
+        composition().YMixture0(),
+        constProps_
+    );
+
+    scalar continuousDt = this->db().time().deltaT().value();
+    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
+
+    addParticle(pPtr);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -174,7 +210,12 @@ void Foam::ReactingCloud<ParcelType>::evolve()
         this->g().value()
     );
 
-    inject();
+    this->injection().inject(td);
+
+    if (debug)
+    {
+        this->dumpParticlePositions();
+    }
 
     if (this->coupled())
     {
@@ -182,125 +223,6 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::inject()
-{
-    scalar time = this->db().time().value();
-
-    scalar pRho = this->constProps().rho0();
-
-    this->injection().prepareForNextTimeStep(this->time0(), time);
-
-    // Number of parcels to introduce during this timestep
-    const label nParcels = this->injection().nParcels();
-
-    // Return if no parcels are required
-    if (!nParcels)
-    {
-        this->postInjectCheck();
-        return;
-    }
-
-    // Volume of particles to introduce during this timestep
-    scalar pVolume = this->injection().volume();
-
-    // Volume fraction to introduce during this timestep
-    scalar pVolumeFraction = this->injection().volumeFraction();
-
-    // Duration of injection period during this timestep
-    scalar deltaT = min
-    (
-        this->db().time().deltaT().value(),
-        min
-        (
-            time - this->injection().timeStart(),
-            this->injection().timeEnd() - this->time0()
-        )
-    );
-
-    // Pad injection time if injection starts during this timestep
-    scalar padTime = max
-    (
-        0.0,
-        this->injection().timeStart() - this->time0()
-    );
-
-    // Introduce new parcels linearly with time
-    for (label iParcel=0; iParcel<nParcels; iParcel++)
-    {
-        // Calculate the pseudo time of injection for parcel 'iParcel'
-        scalar timeInj = this->time0() + padTime + deltaT*iParcel/nParcels;
-
-        // Determine injected parcel properties
-        vector pPosition = this->injection().position
-        (
-            iParcel,
-            timeInj,
-            this->meshInfo()
-        );
-
-        // Diameter of parcels
-        scalar pDiameter = this->injection().d0(iParcel, timeInj);
-
-        // Number of particles per parcel
-        scalar pNumberOfParticles = this->setNumberOfParticles
-        (
-            nParcels,
-            pDiameter,
-            pVolumeFraction,
-            pRho,
-            pVolume
-        );
-
-        // Velocity of parcels
-        vector pU = this->injection().velocity
-        (
-            iParcel,
-            timeInj,
-            this->meshInfo()
-        );
-
-        // Determine the injection cell
-        label pCell = -1;
-        this->injection().findInjectorCellAndPosition(pCell, pPosition);
-
-        if (pCell >= 0)
-        {
-            // construct the parcel that is to be injected
-            ParcelType* pPtr = new ParcelType
-            (
-                *this,
-                this->parcelTypeId(),
-                pPosition,
-                pCell,
-                pDiameter,
-                pU,
-                pNumberOfParticles,
-                composition().YGas0(),
-                composition().YLiquid0(),
-                composition().YSolid0(),
-                composition().YMixture0(),
-                this->constProps()
-            );
-
-            scalar dt = time - timeInj;
-
-            pPtr->stepFraction() = (this->db().time().deltaT().value() - dt)
-                /this->db().time().deltaT().value();
-
-            this->injectParcel(pPtr);
-         }
-    }
-
-    this->postInjectCheck();
-
-    if (debug)
-    {
-        this->dumpParticlePositions();
-    }
 }
 
 

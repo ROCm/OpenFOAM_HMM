@@ -56,8 +56,8 @@ class pairPotentialList
 {
     // Private data
 
-        List<word> idList_;
-        
+        label nIds_;
+
         scalar rCutMax_;
 
         scalar rCutMaxSqr_;
@@ -72,6 +72,7 @@ class pairPotentialList
 
         void readPairPotentialDict
         (
+            const List<word>& idList,
             const dictionary& pairPotentialDict,
             const polyMesh& mesh
         );
@@ -91,7 +92,7 @@ public:
         //- Construct from idList and potental dictionaries
         pairPotentialList
         (
-            const dictionary& idListDict,
+            const List<word>& idList,
             const dictionary& pairPotentialDict,
             const polyMesh& mesh
         );
@@ -101,23 +102,21 @@ public:
         ~pairPotentialList();
 
     // Member Functions
-        
+
         void buildPotentials
         (
-            const dictionary& idListDict,
+            const List<word>& idList,
             const dictionary& pairPotentialDict,
             const polyMesh& mesh
         );
 
         // Access
 
-            inline const List<word>& idList() const;
-
-            inline label nIds() const;
-
             inline scalar rCutMax() const;
 
             inline scalar rCutMaxSqr() const;
+
+            bool rCutMaxSqr(scalar rIJMagSqr) const;
 
             const pairPotential& pairPotentialFunction
             (
