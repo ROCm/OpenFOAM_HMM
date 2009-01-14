@@ -27,17 +27,21 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class T>
-void Foam::SortableList<T>::sortIndices(List<label>& ind) const
+void Foam::SortableList<T>::sortIndices(List<label>& order) const
 {
     // list lengths must be identical
-    ind.setSize(this->size());
-
-    forAll(ind, i)
+    if (order.size() != this->size())
     {
-        ind[i] = i;
+        // avoid copying any elements, they are overwritten anyhow
+        order.clear();
+        order.setSize(this->size());
     }
 
-    Foam::stableSort(ind, typename UList<T>::less(*this));
+    forAll(order, elemI)
+    {
+        order[elemI] = elemI;
+    }
+    Foam::stableSort(order, typename UList<T>::less(*this));
 }
 
 
