@@ -154,9 +154,6 @@ addMesaSupport()
 {
     [ "$WITH_MESA" = ON ] || return
 
-    MESA_INCLUDE_DIR=/usr/include/GL
-    MESA_LIBRARY=/usr/lib$WM_COMPILER_LIB_ARCH/libOSMesa.so
-
     if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]
     then
         OBJ_ADD="$OBJ_ADD-mesa"
@@ -167,6 +164,10 @@ addMesaSupport()
 
     else
        echo "*** Error: no MESA information found"
+       echo "***        Deactivate MESA support by setting WITH_MESA=OFF, or"
+       echo "***        correct paths given by:"
+       echo "***        - MESA_INCLUDE_DIR ($MESA_INCLUDE_DIR)"
+       echo "***        - MESA_LIBRARY ($MESA_LIBRARY)"
        exit 1
     fi
 }
