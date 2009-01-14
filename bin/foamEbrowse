@@ -27,7 +27,7 @@
 #     foamEbrowse
 #
 # Description
-#     Build the Ebrowse dadbase for all the .C and .H files
+#     Build the Ebrowse database for all the .C and .H files
 #
 #------------------------------------------------------------------------------
 headersFile=${TMPDIR:-/tmp}/headersFile.$$
