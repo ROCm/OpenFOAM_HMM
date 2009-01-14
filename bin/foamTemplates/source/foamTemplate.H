@@ -55,7 +55,7 @@ Ostream& operator<<(Ostream&, const className&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class className Declaration
+                          Class className Declaration
 \*---------------------------------------------------------------------------*/
 
 class className
@@ -64,6 +64,7 @@ class className
 {
     // Private data
 
+        //- Description of data_
         dataType data_;
 
 
@@ -80,7 +81,7 @@ public:
 
     // Static data members
 
-        //- Static data someStaticData
+        //- Static data staticData
         static const dataType staticData;
 
 
@@ -105,9 +106,8 @@ public:
         static autoPtr<className> New();
 
 
-    // Destructor
-
-        ~className();
+    //- Destructor
+    ~className();
 
 
     // Member Functions
