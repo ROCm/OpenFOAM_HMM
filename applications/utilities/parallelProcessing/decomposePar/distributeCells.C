@@ -104,7 +104,7 @@ void domainDecomposition::distributeCells()
         }
     }
 
-    if (sameProcFaces.size() > 0)
+    if (sameProcFaces.size())
     {
         Info<< "Selected " << sameProcFaces.size()
             << " faces whose owner and neighbour cell should be kept on the"
@@ -123,7 +123,7 @@ void domainDecomposition::distributeCells()
         *this
     );
 
-    if (sameProcFaces.size() == 0)
+    if (sameProcFaces.empty())
     {
         cellToProc_ = decomposePtr().decompose(cellCentres());
     }

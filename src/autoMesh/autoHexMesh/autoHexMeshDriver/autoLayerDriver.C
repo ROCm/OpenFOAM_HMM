@@ -2420,7 +2420,7 @@ void Foam::autoLayerDriver::getLayerCellsFaces
     {
         const labelList& layer = layerFaces[oldPatchFaceI];
 
-        if (layer.size() > 0)
+        if (layer.size())
         {
             for (label i = 1; i < layer.size()-1; i++)
             {

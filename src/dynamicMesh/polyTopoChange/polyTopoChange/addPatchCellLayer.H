@@ -135,9 +135,9 @@ class addPatchCellLayer
 
             void operator()(labelList& x, const labelList& y) const
             {
-                if (x.size() == 0)
+                if (x.empty())
                 {
-                    if (y.size() > 0)
+                    if (y.size())
                     {
                         x = y;
                     }

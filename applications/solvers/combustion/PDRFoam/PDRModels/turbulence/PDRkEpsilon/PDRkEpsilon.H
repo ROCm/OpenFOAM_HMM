@@ -27,7 +27,7 @@ Class
 
 Description
     Standard k-epsilon turbulence model with additional source terms
-    corresponding to PDR basic drag model (basic.H)
+    corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to

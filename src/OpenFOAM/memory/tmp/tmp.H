@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class tmp Declaration
+                             Class tmp Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -91,11 +91,15 @@ public:
 
         // Access
 
-            //- Is this really a temporary object
+            //- Return true if this is really a temporary object
             inline bool isTmp() const;
 
-            //- Is this temporary object valid, i.e. is it a reference
-            //  or a temporary that has been allocated
+            //- Return true if this temporary object empty,
+            //  ie, a temporary without allocation
+            inline bool empty() const;
+
+            //- Is this temporary object valid,
+            //  ie, it is a reference or a temporary that has been allocated
             inline bool valid() const;
 
         // Edit

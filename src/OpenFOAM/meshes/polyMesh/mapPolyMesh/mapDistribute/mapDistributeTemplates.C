@@ -50,7 +50,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = subMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 List<T> subField(map.size());
                 forAll(map, i)
@@ -86,7 +86,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = constructMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 IPstream fromNbr(Pstream::blocking, domain);
                 List<T> subField(fromNbr);
@@ -227,7 +227,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = subMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 List<T>& subField = sendFields[domain];
                 subField.setSize(map.size());
@@ -254,7 +254,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = constructMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 recvFields[domain].setSize(map.size());
                 IPstream::read
@@ -303,14 +303,14 @@ void Foam::mapDistribute::distribute
 
         OPstream::waitRequests();
         IPstream::waitRequests();
-        
+
         // Collect neighbour fields
 
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
         {
             const labelList& map = constructMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 if (recvFields[domain].size() != map.size())
                 {
@@ -372,7 +372,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = subMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 List<T> subField(map.size());
                 forAll(map, i)
@@ -409,7 +409,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = constructMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 IPstream fromNbr(Pstream::blocking, domain);
                 List<T> subField(fromNbr);
@@ -550,7 +550,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = subMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 List<T>& subField = sendFields[domain];
                 subField.setSize(map.size());
@@ -577,7 +577,7 @@ void Foam::mapDistribute::distribute
         {
             const labelList& map = constructMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 recvFields[domain].setSize(map.size());
                 IPstream::read
@@ -625,14 +625,14 @@ void Foam::mapDistribute::distribute
 
         OPstream::waitRequests();
         IPstream::waitRequests();
-        
+
         // Collect neighbour fields
 
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
         {
             const labelList& map = constructMap[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 if (recvFields[domain].size() != map.size())
                 {

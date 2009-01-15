@@ -482,7 +482,7 @@ void Foam::searchableSurfacesQueries::findAllIntersections
     hitSurfaces.setSize(start.size());
     hitInfo.setSize(start.size());
 
-    if (surfacesToTest.size() == 0)
+    if (surfacesToTest.empty())
     {
         return;
     }

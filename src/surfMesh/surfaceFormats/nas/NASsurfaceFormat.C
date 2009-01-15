@@ -169,7 +169,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
 
         // Skip empty or comment
-        if (line.size() == 0 || line[0] == '$')
+        if (line.empty() || line[0] == '$')
         {
             continue;
         }
@@ -389,12 +389,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     }
 
 
-    sortFacesAndStore
-    (
-        xferMoveTo<List<Face> >(dynFaces),
-        xferMoveTo<List<label> >(dynRegions),
-        sorted
-    );
+    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
 
     // add patches, culling empty groups
     this->addPatches(dynSizes, names, true);

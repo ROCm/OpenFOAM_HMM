@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
-#include "debug.H"
 #include "OSspecific.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */

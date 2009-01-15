@@ -47,16 +47,11 @@ forAll(lagrangianScalarNames, i)
         )
     );
 
-    if (s.size() != 0)
+    if (s.size())
     {
         gmvFile << name  << nl;
 
-        for
-        (
-            label n = 0;
-            n < s.size();
-            n++
-        )
+        for (label n = 0; n < s.size(); n++)
         {
             gmvFile << s[n] << token::SPACE;
         }

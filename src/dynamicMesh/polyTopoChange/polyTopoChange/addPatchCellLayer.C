@@ -196,8 +196,8 @@ bool Foam::addPatchCellLayer::sameEdgeNeighbour
     return
         !doneEdge[edgeI]                            // not yet handled
      && (
-            addedPoints_[e[0]].size() != 0          // is extruded
-         || addedPoints_[e[1]].size() != 0
+            addedPoints_[e[0]].size()               // is extruded
+         || addedPoints_[e[1]].size()
         )
      && (
             nbrFace(globalEdgeFaces, edgeI, thisGlobalFaceI)
@@ -232,10 +232,7 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
         if
         (
             !doneEdge[edgeI]
-         && (
-                addedPoints_[e[0]].size() != 0
-             || addedPoints_[e[1]].size() != 0
-            )
+         && ( addedPoints_[e[0]].size() || addedPoints_[e[1]].size() )
         )
         {
             startFp = fp;
@@ -529,7 +526,7 @@ Foam::labelListList Foam::addPatchCellLayer::addedCells
     {
         const labelList& faceLabels = layerFaces[patchFaceI];
 
-        if (faceLabels.size() > 0)
+        if (faceLabels.size())
         {
             labelList& added = layerCells[patchFaceI];
             added.setSize(faceLabels.size()-1);
@@ -862,7 +859,7 @@ void Foam::addPatchCellLayer::setRefinement
 
     forAll(firstLayerDisp, patchPointI)
     {
-        if (addedPoints_[patchPointI].size() > 0)
+        if (addedPoints_[patchPointI].size())
         {
             label meshPointI = meshPoints[patchPointI];
 
@@ -965,7 +962,7 @@ void Foam::addPatchCellLayer::setRefinement
     {
         label meshFaceI = pp.addressing()[patchFaceI];
 
-        if (addedCells[patchFaceI].size() > 0)
+        if (addedCells[patchFaceI].size())
         {
             layerFaces_[patchFaceI].setSize(addedCells[patchFaceI].size() + 1);
             layerFaces_[patchFaceI][0] = meshFaceI;
@@ -981,7 +978,7 @@ void Foam::addPatchCellLayer::setRefinement
             {
                 forAll(f, fp)
                 {
-                    if (addedPoints_[f[fp]].size() == 0)
+                    if (addedPoints_[f[fp]].empty())
                     {
                         // Keep original point
                         newFace[fp] = meshPoints[f[fp]];
@@ -1045,7 +1042,7 @@ void Foam::addPatchCellLayer::setRefinement
     //
     forAll(pp, patchFaceI)
     {
-        if (addedCells[patchFaceI].size() > 0)
+        if (addedCells[patchFaceI].size())
         {
             label meshFaceI = pp.addressing()[patchFaceI];
 
@@ -1235,15 +1232,15 @@ void Foam::addPatchCellLayer::setRefinement
                     {
                         // layer 0 gets all the truncation of neighbouring
                         // faces with more layers.
-                        if (addedPoints_[vEnd].size() != 0)
+                        if (addedPoints_[vEnd].size())
                         {
-                            newFp +=
+                            newFp += 
                                 addedPoints_[vEnd].size() - numEdgeSideFaces;
                         }
-                        if (addedPoints_[vStart].size() != 0)
+                        if (addedPoints_[vStart].size())
                         {
                             newFp +=
-                                addedPoints_[vStart].size()  - numEdgeSideFaces;
+                                addedPoints_[vStart].size() - numEdgeSideFaces;
                         }
                     }
 
@@ -1266,7 +1263,7 @@ void Foam::addPatchCellLayer::setRefinement
                         forAll(stringedVerts, stringedI)
                         {
                             label v = stringedVerts[stringedI];
-                            if (addedPoints_[v].size() > 0)
+                            if (addedPoints_[v].size())
                             {
                                 label offset =
                                     addedPoints_[v].size() - numEdgeSideFaces;
@@ -1287,7 +1284,7 @@ void Foam::addPatchCellLayer::setRefinement
                     // add points between stringed vertices (end)
                     if (numEdgeSideFaces < addedPoints_[vEnd].size())
                     {
-                        if (i == 0 && addedPoints_[vEnd].size() != 0)
+                        if (i == 0 && addedPoints_[vEnd].size())
                         {
                             label offset =
                                 addedPoints_[vEnd].size() - numEdgeSideFaces;
@@ -1306,7 +1303,7 @@ void Foam::addPatchCellLayer::setRefinement
                     forAllReverse(stringedVerts, stringedI)
                     {
                         label v = stringedVerts[stringedI];
-                        if (addedPoints_[v].size() > 0)
+                        if (addedPoints_[v].size())
                         {
                             label offset =
                                 addedPoints_[v].size() - numEdgeSideFaces;
@@ -1327,7 +1324,7 @@ void Foam::addPatchCellLayer::setRefinement
                     // add points between stringed vertices (start)
                     if (numEdgeSideFaces < addedPoints_[vStart].size())
                     {
-                        if (i == 0 && addedPoints_[vStart].size() != 0)
+                        if (i == 0 && addedPoints_[vStart].size())
                         {
                             label offset =
                                 addedPoints_[vStart].size() - numEdgeSideFaces;

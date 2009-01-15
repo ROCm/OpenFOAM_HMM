@@ -130,7 +130,7 @@ void patchZones::markZone(label faceI)
                 << endl;
         }
 
-        if (changedEdges.size() == 0)
+        if (changedEdges.empty())
         {
             break;
         }
@@ -144,7 +144,7 @@ void patchZones::markZone(label faceI)
                 << endl;
         }
 
-        if (changedFaces.size() == 0)
+        if (changedEdges.empty())
         {
             break;
         }

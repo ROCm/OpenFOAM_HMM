@@ -239,9 +239,9 @@ void Foam::fileName::operator=(const char* str)
 
 Foam::fileName Foam::operator/(const string& a, const string& b)
 {
-    if (a.size() > 0)       // First string non-null
+    if (a.size())           // First string non-null
     {
-        if (b.size() > 0)   // Second string non-null
+        if (b.size())       // Second string non-null
         {
             return fileName(a + '/' + b);
         }
@@ -252,7 +252,7 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
     }
     else                    // First string null
     {
-        if (b.size() > 0)   // Second string non-null
+        if (b.size())       // Second string non-null
         {
             return b;
         }

@@ -292,7 +292,7 @@ public:
         //- Access to communication.
         const List<labelPair>& schedule() const
         {
-            if (!schedulePtr_.valid())
+            if (schedulePtr_.empty())
             {
                 calcMapping();
             }
@@ -307,7 +307,7 @@ public:
                 Pout<< "Asking for sendLabels." << endl;
             }
 
-            if (!sendLabelsPtr_.valid())
+            if (sendLabelsPtr_.empty())
             {
                 if (debug)
                 {
@@ -326,7 +326,7 @@ public:
                 Pout<< "Asking for receiveFaceLabels." << endl;
             }
 
-            if (!receiveFaceLabelsPtr_.valid())
+            if (receiveFaceLabelsPtr_.empty())
             {
                 if (debug)
                 {

@@ -39,12 +39,7 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(meshCutter, 0);
-
-}
+defineTypeNameAndDebug(Foam::meshCutter, 0);
 
 
 // * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //
@@ -111,12 +106,12 @@ Foam::label Foam::meshCutter::findCutCell
     {
         label cellI = cellLabels[labelI];
 
-        if (cuts.cellLoops()[cellI].size() > 0)
+        if (cuts.cellLoops()[cellI].size())
         {
             return cellI;
         }
     }
-    return -1;        
+    return -1;
 }
 
 
@@ -146,7 +141,7 @@ Foam::label Foam::meshCutter::findInternalFacePoint
         }
     }
 
-    if (pointLabels.size() == 0)
+    if (pointLabels.empty())
     {
         FatalErrorIn("meshCutter::findInternalFacePoint(const labelList&)")
             << "Empty pointLabels" << abort(FatalError);
@@ -173,7 +168,7 @@ void Foam::meshCutter::faceCells
 
     own = mesh().faceOwner()[faceI];
 
-    if (cellLoops[own].size() > 0 && uses(f, anchorPts[own]))
+    if (cellLoops[own].size() && uses(f, anchorPts[own]))
     {
         own = addedCells_[own];
     }
@@ -184,7 +179,7 @@ void Foam::meshCutter::faceCells
     {
         nei = mesh().faceNeighbour()[faceI];
 
-        if (cellLoops[nei].size() > 0 && uses(f, anchorPts[nei]))
+        if (cellLoops[nei].size() && uses(f, anchorPts[nei]))
         {
             nei = addedCells_[nei];
         }
@@ -653,7 +648,7 @@ void Foam::meshCutter::setRefinement
 
     forAll(cellLoops, cellI)
     {
-        if (cellLoops[cellI].size() > 0)
+        if (cellLoops[cellI].size())
         {
             // Add a cell to the existing cell
             label addedCellI =
@@ -688,7 +683,7 @@ void Foam::meshCutter::setRefinement
     {
         const labelList& loop = cellLoops[cellI];
 
-        if (loop.size() > 0)
+        if (loop.size())
         {
             //
             // Convert loop (=list of cuts) into proper face.
@@ -769,7 +764,7 @@ void Foam::meshCutter::setRefinement
 
         // Renumber face to include split edges.
         face newFace(addEdgeCutsToFace(faceI));
-        
+
         // Edge splitting the face. Convert cuts to new vertex numbering.
         const edge& splitEdge = iter();
 
@@ -832,7 +827,7 @@ void Foam::meshCutter::setRefinement
         label f0Owner = -1;
         label f1Owner = -1;
 
-        if (cellLoops[own].size() == 0)
+        if (cellLoops[own].empty())
         {
             f0Owner = own;
             f1Owner = own;
@@ -875,7 +870,7 @@ void Foam::meshCutter::setRefinement
 
         if (nei != -1)
         {
-            if (cellLoops[nei].size() == 0)
+            if (cellLoops[nei].empty())
             {
                 f0Neighbour = nei;
                 f1Neighbour = nei;
@@ -935,7 +930,7 @@ void Foam::meshCutter::setRefinement
         {
             const labelList& eFaces = mesh().edgeFaces()[edgeI];
 
-            forAll(eFaces, i)    
+            forAll(eFaces, i)
             {
                 label faceI = eFaces[i];
 
@@ -970,7 +965,7 @@ void Foam::meshCutter::setRefinement
 
     forAll(cellLoops, cellI)
     {
-        if (cellLoops[cellI].size() > 0)
+        if (cellLoops[cellI].size())
         {
             const labelList& cllFaces = mesh().cells()[cellI];
 
@@ -991,7 +986,7 @@ void Foam::meshCutter::setRefinement
                             ", polyTopoChange&)"
                         )   << "Problem: edges added to face which does "
                             << " not use a marked cut" << endl
-                            << "faceI:" << faceI << endl    
+                            << "faceI:" << faceI << endl
                             << "face:" << f << endl
                             << "newFace:" << addEdgeCutsToFace(faceI)
                             << abort(FatalError);
@@ -1000,7 +995,7 @@ void Foam::meshCutter::setRefinement
                     // Get (new or original) owner and neighbour of faceI
                     label own, nei;
                     faceCells(cuts, faceI, own, nei);
-                    
+
                     modFace
                     (
                         meshMod,
@@ -1142,7 +1137,7 @@ void Foam::meshCutter::updateMesh(const mapPolyMesh& morphMap)
                     (debug & 2)
                  && (e != newE || newAddedPointI != addedPointI)
                 )
-                {        
+                {
                     Pout<< "meshCutter::updateMesh :"
                         << " updating addedPoints for edge " << e
                         << " from " << addedPointI

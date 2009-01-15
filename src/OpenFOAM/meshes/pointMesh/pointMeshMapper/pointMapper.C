@@ -97,7 +97,7 @@ void Foam::pointMapper::calcAddressing() const
 
             label pointI = cfc[cfcI].index();
 
-            if (addr[pointI].size() > 0)
+            if (addr[pointI].size())
             {
                 FatalErrorIn("void pointMapper::calcAddressing() const")
                     << "Master point " << pointI
@@ -118,7 +118,7 @@ void Foam::pointMapper::calcAddressing() const
 
         forAll (cm, pointI)
         {
-            if (cm[pointI] > -1 && addr[pointI].size() == 0)
+            if (cm[pointI] > -1 && addr[pointI].empty())
             {
                 // Mapped from a single point
                 addr[pointI] = labelList(1, cm[pointI]);
@@ -135,7 +135,7 @@ void Foam::pointMapper::calcAddressing() const
 
         forAll (addr, pointI)
         {
-            if (addr[pointI].size() == 0)
+            if (addr[pointI].empty())
             {
                 // Mapped from a dummy point. Take point 0 with weight 1.
                 addr[pointI] = labelList(1, 0);
@@ -175,7 +175,7 @@ Foam::pointMapper::pointMapper(const pointMesh& pMesh, const mapPolyMesh& mpm)
     insertedPointLabelsPtr_(NULL)
 {
     // Check for possibility of direct mapping
-    if (mpm_.pointsFromPointsMap().size() == 0)
+    if (mpm_.pointsFromPointsMap().empty())
     {
         direct_ = true;
     }
@@ -185,7 +185,7 @@ Foam::pointMapper::pointMapper(const pointMesh& pMesh, const mapPolyMesh& mpm)
     }
 
     // Check for inserted points
-    if (direct_ && (mpm_.pointMap().size() == 0 || min(mpm_.pointMap()) > -1))
+    if (direct_ && (mpm_.pointMap().empty() || min(mpm_.pointMap()) > -1))
     {
         insertedPoints_ = false;
     }

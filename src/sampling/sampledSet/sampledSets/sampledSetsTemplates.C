@@ -227,7 +227,7 @@ void Foam::sampledSets::sampleAndWrite
         bool interpolate = interpolationScheme_ != "cell";
 
         // Create or use existing writer
-        if (!fields.formatter.valid())
+        if (fields.formatter.empty())
         {
             fields.formatter = writer<Type>::New(writeFormat_);
         }

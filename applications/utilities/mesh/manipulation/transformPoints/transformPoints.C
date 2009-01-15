@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     );
 
 
-    if (args.options().size() == 0)
+    if (args.options().empty())
     {
         FatalErrorIn(args.executable())
             << "No options supplied, please use one or more of "

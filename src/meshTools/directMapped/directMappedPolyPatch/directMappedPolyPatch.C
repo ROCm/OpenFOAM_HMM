@@ -139,7 +139,7 @@ void Foam::directMappedPolyPatch::findSamples
     {
         case NEARESTCELL:
         {
-            if (samplePatch_.size() != 0 && samplePatch_ != "none")
+            if (samplePatch_.size() && samplePatch_ != "none")
             {
                 FatalErrorIn
                 (
@@ -196,7 +196,7 @@ void Foam::directMappedPolyPatch::findSamples
 
             const polyPatch& pp = boundaryMesh()[patchI];
 
-            if (pp.size() == 0)
+            if (pp.empty())
             {
                 forAll(samples, sampleI)
                 {
@@ -267,7 +267,7 @@ void Foam::directMappedPolyPatch::findSamples
 
         case NEARESTFACE:
         {
-            if (samplePatch_.size() != 0 && samplePatch_ != "none")
+            if (samplePatch_.size() && samplePatch_ != "none")
             {
                 FatalErrorIn
                 (

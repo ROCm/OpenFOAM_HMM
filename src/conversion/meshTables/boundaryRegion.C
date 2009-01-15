@@ -114,7 +114,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names
         {
             lookup.insert(iter.key(), lookupName);
         }
-    }    
+    }
 
     return lookup;
 }
@@ -139,7 +139,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::boundaryTypes() const
 
 Foam::label Foam::boundaryRegion::findIndex(const word& name) const
 {
-    if (!name.size())
+    if (name.empty())
     {
         return -1;
     }
@@ -254,7 +254,7 @@ void Foam::boundaryRegion::operator=(const Map<dictionary>& rhs)
 
 void Foam::boundaryRegion::rename(const dictionary& mapDict)
 {
-    if (!mapDict.size())
+    if (mapDict.empty())
     {
         return;
     }

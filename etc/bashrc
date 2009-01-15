@@ -36,9 +36,10 @@ export WM_PROJECT=OpenFOAM
 # export WM_PROJECT_VERSION=1.5.x
 : ${WM_PROJECT_VERSION:=dev}; export WM_PROJECT_VERSION
 
-
-#!!User:
-#    either set $FOAM_INST_DIR before sourcing this file or set
+################################################################################
+# USER EDITABLE PART
+#
+# either set $FOAM_INST_DIR before sourcing this file or set
 #    $foamInstall below to where OpenFOAM is installed
 #
 # Location of FOAM installation
@@ -47,8 +48,21 @@ foamInstall=$HOME/$WM_PROJECT
 # foamInstall=~$WM_PROJECT
 # foamInstall=/usr/local/$WM_PROJECT
 # foamInstall=/opt/$WM_PROJECT
+#
+# END OF (NORMAL) USER EDITABLE PART
+################################################################################
 
+# note the location for later use (eg, in job scripts)
 : ${FOAM_INST_DIR:=$foamInstall}; export FOAM_INST_DIR
+
+# The old dirs to be cleaned from the various environment variables
+# - remove anything under top-level directory.
+# NB: the WM_PROJECT_INST_DIR might not be identical between versions
+foamOldDirs="$FOAM_INST_DIR $HOME/$WM_PROJECT/$USER"
+if [ "$WM_PROJECT_INST_DIR" != "$FOAM_INST_DIR" ]
+then
+    foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
+fi
 
 
 # Location of site/user files
@@ -169,21 +183,18 @@ USAGE
 esac
 
 
-# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Clean standard environment variables (PATH, LD_LIBRARY_PATH, MANPATH)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 cleanProg=$WM_PROJECT_DIR/bin/foamCleanPath
 
-# Remove anything under top-level foam directory
-wildCards="$WM_PROJECT_INST_DIR $HOME/$WM_PROJECT/$USER"
-
-#- Clean path/PATH
-cleanPath=`$cleanProg "$PATH" "$wildCards"` && PATH="$cleanPath"
+#- Clean PATH
+cleanEnv=`$cleanProg "$PATH" "$foamOldDirs"` && PATH="$cleanEnv"
 
 #- Clean LD_LIBRARY_PATH
-cleanPath=`$cleanProg "$LD_LIBRARY_PATH" "$wildCards"` && LD_LIBRARY_PATH="$cleanPath"
+cleanEnv=`$cleanProg "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleanEnv"
 
 #- Clean MANPATH
-cleanPath=`$cleanProg "$MANPATH" "$wildCards"` && MANPATH="$cleanPath"
+cleanEnv=`$cleanProg "$MANPATH" "$foamCleanDirs"` && MANPATH="$cleanEnv"
 
 export PATH LD_LIBRARY_PATH MANPATH
 
@@ -212,29 +223,30 @@ _foamSource $WM_PROJECT_DIR/etc/apps/ensight/bashrc
 _foamSource $WM_PROJECT_DIR/etc/apps/cint/bashrc
 
 
-# Again clean environment (path, PATH, MANPATH, LD_LIBRARY_PATH)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#- Clean path/PATH. Only remove duplicates
-cleanPath=`$cleanProg "$PATH"` && PATH="$cleanPath"
+# Clean environment paths again. Only remove duplicates
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#- Clean PATH
+cleanEnv=`$cleanProg "$PATH"` && PATH="$cleanEnv"
 
 #- Clean LD_LIBRARY_PATH
-cleanPath=`$cleanProg "$LD_LIBRARY_PATH"` && LD_LIBRARY_PATH="$cleanPath"
+cleanEnv=`$cleanProg "$LD_LIBRARY_PATH"` && LD_LIBRARY_PATH="$cleanEnv"
 
 #- Clean MANPATH
-cleanPath=`$cleanProg "$MANPATH"` && MANPATH="$cleanPath"
+cleanEnv=`$cleanProg "$MANPATH"` && MANPATH="$cleanEnv"
 
 export PATH LD_LIBRARY_PATH MANPATH
 
 #- Clean LD_PRELOAD
-if [ "$LD_PRELOAD" != "" ]; then
-    cleanPath=`$cleanProg "$LD_PRELOAD"` && LD_PRELOAD="$cleanPath"
+if [ "$LD_PRELOAD" != "" ]
+then
+    cleanEnv=`$cleanProg "$LD_PRELOAD"` && LD_PRELOAD="$cleanEnv"
     export LD_PRELOAD
 fi
 
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset cleanPath cleanProg foamInstall
+unset cleanEnv cleanProg foamInstall foamOldDirs
 unset _foamSource
 
 # -----------------------------------------------------------------------------

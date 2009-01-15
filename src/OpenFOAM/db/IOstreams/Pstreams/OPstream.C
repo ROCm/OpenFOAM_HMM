@@ -136,17 +136,17 @@ Foam::Ostream& Foam::OPstream::write(const char* str)
 {
     word nonWhiteChars(string::validate<word>(str));
 
-    if (nonWhiteChars.size() == 0)
-    {
-        return *this;
-    }
-    else if (nonWhiteChars.size() == 1)
+    if (nonWhiteChars.size() == 1)
     {
         return write(nonWhiteChars.c_str()[1]);
     }
-    else
+    else if (nonWhiteChars.size())
     {
         return write(nonWhiteChars);
+    }
+    else
+    {
+        return *this;
     }
 }
 

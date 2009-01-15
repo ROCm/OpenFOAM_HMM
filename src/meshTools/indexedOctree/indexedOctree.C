@@ -224,7 +224,7 @@ Foam::indexedOctree<Type>::divide
     {
         labelList& subIndices = dividedIndices[octant];
 
-        if (subIndices.size() > 0)
+        if (subIndices.size())
         {
             if (!replaced)
             {
@@ -1052,7 +1052,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 {
     pointIndexHit hitInfo;
 
-    if (nodes_.size() > 0)
+    if (nodes_.size())
     {
         const treeBoundBox& treeBb = nodes_[0].bb_;
 
@@ -1457,11 +1457,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
     label nearestShapeI = -1;
     point nearestPoint;
 
-    if (nodes_.size() == 0)
-    {
-        nearestPoint = vector::zero;
-    }
-    else
+    if (nodes_.size())
     {
         findNearest
         (
@@ -1472,6 +1468,10 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
             nearestShapeI,
             nearestPoint
         );
+    }
+    else
+    {
+        nearestPoint = vector::zero;
     }
 
     return pointIndexHit(nearestShapeI != -1, nearestPoint, nearestShapeI);
@@ -1489,11 +1489,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
     label nearestShapeI = -1;
     point nearestPoint;
 
-    if (nodes_.size() == 0)
-    {
-        nearestPoint = vector::zero;
-    }
-    else
+    if (nodes_.size())
     {
         findNearest
         (
@@ -1505,6 +1501,10 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
             linePoint,
             nearestPoint
         );
+    }
+    else
+    {
+        nearestPoint = vector::zero;
     }
 
     return pointIndexHit(nearestShapeI != -1, nearestPoint, nearestShapeI);
@@ -1544,7 +1544,7 @@ Foam::labelList Foam::indexedOctree<Type>::findBox
     // Storage for labels of shapes inside bb. Size estimate.
     labelHashSet elements(shapes_.size() / 100);
 
-    if (nodes_.size() > 0)
+    if (nodes_.size())
     {
         findBox(0, searchBox, elements);
     }
@@ -1561,7 +1561,7 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
     const point& sample
 ) const
 {
-    if (nodes_.size() == 0)
+    if (nodes_.empty())
     {
         // Empty tree. Return what?
         return nodePlusOctant(nodeI, 0);
@@ -1599,7 +1599,7 @@ Foam::indexedOctree<Type>::getVolumeType
     const point& sample
 ) const
 {
-    if (nodes_.size() == 0)
+    if (nodes_.empty())
     {
         return UNKNOWN;
     }

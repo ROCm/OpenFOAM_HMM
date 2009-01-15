@@ -151,7 +151,7 @@ Foam::searchableSphere::~searchableSphere()
 
 const Foam::wordList& Foam::searchableSphere::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(1);
         regions_[0] = "region0";

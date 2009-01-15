@@ -510,15 +510,14 @@ void Foam::topoCellLooper::walkSplitHex
             {
                 // Normal vertex on edge of face. Get edges connected to it
                 // which are not on faceI.
-                labelList nextEdges =
-                    getVertEdgesNonFace
-                    (
-                        cellI,
-                        faceI,
-                        vertI
-                    );
+                labelList nextEdges = getVertEdgesNonFace
+                (
+                    cellI,
+                    faceI,
+                    vertI
+                );
 
-                if (nextEdges.size() == 0)
+                if (nextEdges.empty())
                 {
                     // Cross to other face (there is only one since no edges)
                     const labelList& pFaces = mesh().pointFaces()[vertI];

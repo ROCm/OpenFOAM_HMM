@@ -92,15 +92,6 @@ public:
             }
 
 
-        // Check
-
-            //- Is the stack empty
-            bool empty() const
-            {
-                return this->size() == 0;
-            }
-
-
         // Edit
 
             //- Push an element onto the stack

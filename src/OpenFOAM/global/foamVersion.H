@@ -35,6 +35,12 @@ Global
 Description
     OpenFOAM version number static string.
 
+Global
+    Foam::FOAMbuild
+
+Description
+    OpenFOAM version number static string with build information
+
 SourceFiles
     global.Cver
 
@@ -48,6 +54,7 @@ SourceFiles
 namespace Foam
 {
     extern const char* const FOAMversion;
+    extern const char* const FOAMbuild;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

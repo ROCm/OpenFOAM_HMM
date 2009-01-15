@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         meshSubsetDict.lookup("zone")
     );
 
-    if ((markedZone.size() != 0) && (markedZone.size() != 2))
+    if (markedZone.size() && markedZone.size() != 2)
     {
         FatalErrorIn(args.executable())
             << "zone specification should be two points, min and max of "
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     // pick up faces connected to "localPoints"
     //
 
-    if (markedPoints.size() > 0)
+    if (markedPoints.size())
     {
         Info << "Found " << markedPoints.size() << " marked point(s)." << endl;
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     // pick up faces connected to "edges"
     //
 
-    if (markedEdges.size() > 0)
+    if (markedEdges.size())
     {
         Info << "Found " << markedEdges.size() << " marked edge(s)." << endl;
 
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
     // Number of additional faces picked up because of addFaceNeighbours
     label nFaceNeighbours = 0;
 
-    if (markedFaces.size() > 0)
+    if (markedFaces.size())
     {
         Info << "Found " << markedFaces.size() << " marked face(s)." << endl;
 

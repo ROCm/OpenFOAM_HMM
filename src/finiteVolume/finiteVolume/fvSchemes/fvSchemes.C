@@ -358,11 +358,7 @@ ITstream& fvSchemes::ddtScheme(const word& name) const
         Info<< "Lookup ddtScheme for " << name << endl;
     }
 
-    if
-    (
-        ddtSchemes_.found(name)
-     || !defaultDdtScheme_.size()
-    )
+    if (ddtSchemes_.found(name) || defaultDdtScheme_.empty())
     {
         return ddtSchemes_.lookup(name);
     }
@@ -381,11 +377,7 @@ ITstream& fvSchemes::d2dt2Scheme(const word& name) const
         Info<< "Lookup d2dt2Scheme for " << name << endl;
     }
 
-    if
-    (
-        d2dt2Schemes_.found(name)
-     || !defaultD2dt2Scheme_.size()
-    )
+    if (d2dt2Schemes_.found(name) || defaultD2dt2Scheme_.empty())
     {
         return d2dt2Schemes_.lookup(name);
     }
@@ -407,7 +399,7 @@ ITstream& fvSchemes::interpolationScheme(const word& name) const
     if
     (
         interpolationSchemes_.found(name)
-     || !defaultInterpolationScheme_.size()
+     || defaultInterpolationScheme_.empty()
     )
     {
         return interpolationSchemes_.lookup(name);
@@ -427,7 +419,7 @@ ITstream& fvSchemes::divScheme(const word& name) const
         Info<< "Lookup divScheme for " << name << endl;
     }
 
-    if (divSchemes_.found(name) || !defaultDivScheme_.size())
+    if (divSchemes_.found(name) || defaultDivScheme_.empty())
     {
         return divSchemes_.lookup(name);
     }
@@ -446,7 +438,7 @@ ITstream& fvSchemes::gradScheme(const word& name) const
         Info<< "Lookup gradScheme for " << name << endl;
     }
 
-    if (gradSchemes_.found(name) || !defaultGradScheme_.size())
+    if (gradSchemes_.found(name) || defaultGradScheme_.empty())
     {
         return gradSchemes_.lookup(name);
     }
@@ -465,7 +457,7 @@ ITstream& fvSchemes::snGradScheme(const word& name) const
         Info<< "Lookup snGradScheme for " << name << endl;
     }
 
-    if (snGradSchemes_.found(name) || !defaultSnGradScheme_.size())
+    if (snGradSchemes_.found(name) || defaultSnGradScheme_.empty())
     {
         return snGradSchemes_.lookup(name);
     }
@@ -484,7 +476,7 @@ ITstream& fvSchemes::laplacianScheme(const word& name) const
         Info<< "Lookup laplacianScheme for " << name << endl;
     }
 
-    if (laplacianSchemes_.found(name) || !defaultLaplacianScheme_.size())
+    if (laplacianSchemes_.found(name) || defaultLaplacianScheme_.empty())
     {
         return laplacianSchemes_.lookup(name);
     }

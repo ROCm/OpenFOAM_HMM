@@ -413,7 +413,7 @@ bool limitRefinementLevel
         }
     }
 
-    if (addCutCells.size() > 0)
+    if (addCutCells.size())
     {
         // Add cells to cutCells.
 
@@ -479,7 +479,7 @@ void doRefinement
     {
         const labelList& added = addedCells[oldCellI];
 
-        if (added.size() > 0)
+        if (added.size())
         {
             // Give all cells resulting from split the refinement level
             // of the master.
@@ -895,7 +895,7 @@ int main(int argc, char *argv[])
             << "    Selected for refinement :" << cutCells.size() << nl
             << endl;
 
-        if (cutCells.size() == 0)
+        if (cutCells.empty())
         {
             Info<< "Stopping refining since 0 cells selected to be refined ..."
                 << nl << endl;

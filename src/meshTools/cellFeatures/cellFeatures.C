@@ -282,7 +282,7 @@ void Foam::cellFeatures::calcSuperFaces() const
 
         label superFaceI = toSuperFace[faceI];
 
-        if (faces[superFaceI].size() == 0)
+        if (faces[superFaceI].empty())
         {
             // Superface not yet constructed.
 

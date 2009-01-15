@@ -27,15 +27,14 @@ License
 #include "pairPotential.H"
 #include "energyScalingFunction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(pairPotential, 0);
+    defineRunTimeSelectionTable(pairPotential, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(pairPotential, 0);
-defineRunTimeSelectionTable(pairPotential, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -229,9 +228,5 @@ bool Foam::pairPotential::read(const dictionary& pairPotentialProperties)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,7 +26,8 @@ Class
     Foam::XiGModels::KTS
 
 Description
-    Simple Kolmogorov time-scale model for the flame-wrinling generation rate.
+    Simple Kolmogorov time-scale (KTS) model for the flame-wrinling generation
+    rate.
 
 SourceFiles
     KTS.C

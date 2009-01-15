@@ -117,6 +117,13 @@ inline Foam::label Foam::PackedList<nBits>::size() const
 }
 
 
+template<int nBits>
+inline bool Foam::PackedList<nBits>::empty() const
+{
+    return (size_ == 0);
+}
+
+
 // Get value at i
 template<int nBits>
 inline unsigned int Foam::PackedList<nBits>::get(const label i) const

@@ -289,9 +289,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 {
     pointIndexHit info(false, vector::zero, localTris.size());
 
-    if (localTris.size() == 0)
-    {}
-    else if (localTris.size() == 1)
+    if (localTris.size() == 1)
     {
         const labelledTri& tri = localTris[0];
         info.setPoint(tri.centre(localPoints));
@@ -318,7 +316,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
             info.setHit();
         }
     }
-    else
+    else if (localTris.size())
     {
         // Check if single region. Rare situation.
         triSurface surf
@@ -404,11 +402,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
                 }
             }
 
-            if (localPoints.size() == 0)
-            {
-                // No near intersections
-            }
-            else if (localPoints.size() == 1)
+            if (localPoints.size() == 1)
             {
                 // No need for any analysis.
                 snappedCc[cellI] = snappedPoints.size();
@@ -432,7 +426,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
                 //    << " intersections down to "
                 //    << snappedPoints[snappedCc[cellI]] << endl;
             }
-            else
+            else if (localPoints.size())
             {
                 // Need to analyse
                 forAll(cFaces, cFaceI)
@@ -719,11 +713,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             }
         }
 
-        if (localTriPoints.size() == 0)
-        {
-            // No near intersections
-        }
-        else if (localTriPoints.size() == 3)
+        if (localTriPoints.size() == 3)
         {
             // Single triangle. No need for any analysis. Average points.
             pointField points;
@@ -734,7 +724,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             //    << " replacing coord:" << mesh_.points()[pointI]
             //    << " by average:" << collapsedPoint[pointI] << endl;
         }
-        else
+        else if (localTriPoints.size())
         {
             // Convert points into triSurface.
 
@@ -1124,7 +1114,7 @@ void Foam::isoSurfaceCell::walkOrientation
 
     changedFaces.append(seedTriI);
 
-    while (changedFaces.size() > 0)
+    while (changedFaces.size())
     {
         DynamicList<label> newChangedFaces(changedFaces.size());
 
@@ -1636,7 +1626,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 //// ones so limited benefit (e.g. 60 v.s. 88 triangles)
 //void Foam::isoSurfaceCell::combineCellTriangles()
 //{
-//    if (size() > 0)
+//    if (size())
 //    {
 //        DynamicList<labelledTri> newTris(size());
 //        DynamicList<label> newTriToCell(size());

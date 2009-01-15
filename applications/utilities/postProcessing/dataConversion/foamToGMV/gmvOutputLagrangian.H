@@ -49,16 +49,11 @@ forAll(lagrangianScalarNames, i)
         )
     );
 
-    if (s.size() != 0)
+    if (s.size())
     {
         gmvFile << name  << nl;
 
-        for
-        (
-            label n = 0;
-            n < s.size();
-            n++
-        )
+        for (label n = 0; n < s.size(); n++)
         {
             gmvFile << s[n] << token::SPACE;
         }
@@ -85,16 +80,11 @@ forAll(lagrangianVectorNames, i)
         )
     );
 
-    if (v.size() != 0)
+    if (v.size())
     {
         gmvFile << name + "x" << nl;
 
-        for
-        (
-            label n = 0;
-            n < v.size();
-            n++
-        )
+        for (label n = 0; n < v.size(); n++)
         {
             gmvFile << v[n].x() << token::SPACE;
         }
@@ -102,12 +92,7 @@ forAll(lagrangianVectorNames, i)
 
         gmvFile << name + "y" << nl;
 
-        for
-        (
-            label n = 0;
-            n < v.size();
-            n++
-        )
+        for (label n = 0; n < v.size(); n++)
         {
             gmvFile << v[n].y() << token::SPACE;
         }
@@ -115,18 +100,12 @@ forAll(lagrangianVectorNames, i)
 
         gmvFile << name + "z" << nl;
 
-        for
-        (
-            label n = 0;
-            n < v.size();
-            n++
-        )
+        for (label n = 0; n < v.size(); n++)
         {
             gmvFile << v[n].z() << token::SPACE;
         }
         gmvFile << nl;
     }
-
 
 }
 

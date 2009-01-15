@@ -127,7 +127,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::
                         }
                     }
                 }
-            } while (faceOrder.size() > 0);
+            } while (faceOrder.size());
         }
     }
 

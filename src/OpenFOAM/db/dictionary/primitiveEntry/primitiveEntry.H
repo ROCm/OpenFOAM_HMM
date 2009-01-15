@@ -58,7 +58,7 @@ namespace Foam
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                           Class primitiveEntry Declaration
+                       Class primitiveEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class primitiveEntry
@@ -99,8 +99,8 @@ public:
         //- Read the complete entry from the given stream
         void readEntry(const dictionary&, Istream&);
 
-        //- Insert the given tokens at token i
-        void insert(const tokenList&, const label i);
+        //- Insert the given tokens at token posI
+        void insert(const tokenList&, const label posI);
 
 
 public:

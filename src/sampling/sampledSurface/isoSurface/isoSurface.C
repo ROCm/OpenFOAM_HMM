@@ -274,9 +274,7 @@ Foam::pointIndexHit Foam::isoSurface::collapseSurface
 {
     pointIndexHit info(false, vector::zero, localTris.size());
 
-    if (localTris.size() == 0)
-    {}
-    else if (localTris.size() == 1)
+    if (localTris.size() == 1)
     {
         const labelledTri& tri = localTris[0];
         info.setPoint(tri.centre(localPoints));
@@ -303,7 +301,7 @@ Foam::pointIndexHit Foam::isoSurface::collapseSurface
             info.setHit();
         }
     }
-    else
+    else if (localTris.size())
     {
         // Check if single region. Rare situation.
         triSurface surf
@@ -1071,7 +1069,7 @@ void Foam::isoSurface::walkOrientation
 
     changedFaces.append(seedTriI);
 
-    while (changedFaces.size() > 0)
+    while (changedFaces.size())
     {
         DynamicList<label> newChangedFaces(changedFaces.size());
 

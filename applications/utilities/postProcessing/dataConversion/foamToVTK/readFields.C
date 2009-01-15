@@ -58,7 +58,7 @@ void readFields
         ++iter
     )
     {
-        if (!selectedFields.size() || selectedFields.found(iter()->name()))
+        if (selectedFields.empty() || selectedFields.found(iter()->name()))
         {
             fields.set
             (
