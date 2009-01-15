@@ -344,8 +344,8 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                             << SMALL
                             << ": mag separation = " << rsIsJMag
                             << ". These may have been placed on top of each"
-                            << " other by a rounding error in molConfig in"
-                            << " parallel or a block filled with molecules "
+                            << " other by a rounding error in mdInitialise in"
+                            << " parallel or a block filled with molecules"
                             << " twice. Removing one of the molecules."
                             << endl;
 
@@ -438,8 +438,8 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                             << SMALL
                             << ": mag separation = " << rsRealsRefMag
                             << ". These may have been placed on top of each"
-                            << " other by a rounding error in molConfig in"
-                            << " parallel or a block filled with molecules "
+                            << " other by a rounding error in mdInitialise in"
+                            << " parallel or a block filled with molecules"
                             << " twice. Removing one of the molecules."
                             << endl;
 
@@ -488,8 +488,8 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                             << SMALL
                             << ": mag separation = " << rsRealsRefMag
                             << ". These may have been placed on top of each"
-                            << " other by a rounding error in molConfig in"
-                            << " parallel or a block filled with molecules "
+                            << " other by a rounding error in mdInitialise in"
+                            << " parallel or a block filled with molecules"
                             << " twice. Removing one of the molecules."
                             << endl;
 
