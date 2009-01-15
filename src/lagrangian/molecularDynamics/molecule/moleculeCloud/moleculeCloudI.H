@@ -352,6 +352,11 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                         return true;
                     }
 
+                    if (rsIsJMag < electrostatic.rMin())
+                    {
+                        return true;
+                    }
+
                     scalar chargeI = constPropI.siteCharges()[sI];
 
                     scalar chargeJ = constPropJ.siteCharges()[sJ];
@@ -488,6 +493,11 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                             << " twice. Removing one of the molecules."
                             << endl;
 
+                        return true;
+                    }
+
+                    if (rsRealsRefMag < electrostatic.rMin())
+                    {
                         return true;
                     }
 
