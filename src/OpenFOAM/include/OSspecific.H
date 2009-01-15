@@ -62,7 +62,7 @@ pid_t pgid();
 bool env(const word&);
 
 //- Return environment variable of given name
-//  Return string::null if the environment is undefined
+//  Return string() if the environment is undefined
 string getEnv(const word& name);
 
 //- Set an environment variable
@@ -101,7 +101,7 @@ bool chDir(const fileName& dir);
 //  -# shipped settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  @return the full path name or fileName::null if the name cannot be found
+//  @return the full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName& name, bool mandatory=false);
 
