@@ -39,6 +39,7 @@ SourceFiles
 #include "coupledFvPatch.H"
 #include "cyclicLduInterface.H"
 #include "cyclicPolyPatch.H"
+#include "fvBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,6 +83,10 @@ public:
         cyclicFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
         :
             coupledFvPatch(patch, bm),
+            cyclicLduInterface
+            (
+                refCast<const cyclicPolyPatch>(patch).neighbPatchID()
+            ),
             cyclicPolyPatch_(refCast<const cyclicPolyPatch>(patch))
         {}
 
@@ -90,21 +95,41 @@ public:
 
         // Access
 
-            //- Return face transformation tensor
-            const tensorField& forwardT() const
+            //- Return local reference cast into the cyclic patch
+            const cyclicPolyPatch& cyclicPatch() const
             {
-                return coupledFvPatch::forwardT();
+                return cyclicPolyPatch_;
+            }
+
+            //- Are the cyclic planes parallel
+            virtual bool parallel() const
+            {
+                return cyclicPolyPatch_.parallel();
+            }
+
+            //- Return face transformation tensor
+            virtual const tensor& forwardT() const
+            {
+                return cyclicPolyPatch_.forwardT();
             }
 
             //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
+            virtual const tensor& reverseT() const
             {
-                return coupledFvPatch::reverseT();
+                return cyclicPolyPatch_.reverseT();
+            }
+
+            const cyclicFvPatch& neighbFvPatch() const
+            {
+                return refCast<const cyclicFvPatch>
+                (
+                    this->boundaryMesh()[cyclicPolyPatch_.neighbPatchID()]
+                );
             }
 
 
             //- Return delta (P to N) vectors across coupled patch
-            tmp<vectorField> delta() const;
+            virtual tmp<vectorField> delta() const;
 
 
         // Interface transfer functions

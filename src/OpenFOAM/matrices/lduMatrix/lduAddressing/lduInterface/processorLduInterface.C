@@ -36,18 +36,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions *  * * * * * * * * * * //
 
-void Foam::processorLduInterface::resizeBuf
-(
-    List<char>& buf, 
-    const label size
-) const
-{
-    if (buf.size() < size)
-    {
-        buf.setSize(size);
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

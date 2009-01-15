@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,13 +130,13 @@ public:
             }
 
             //- Return face transformation tensor
-            const tensorField& forwardT() const
+            const tensor& forwardT() const
             {
                 return cyclicPolyPatch_.forwardT();
             }
 
             //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
+            const tensor& reverseT() const
             {
                 return cyclicPolyPatch_.reverseT();
             }

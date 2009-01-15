@@ -19,6 +19,8 @@ meshReader/starcd/STARCDMeshReader.C
 meshWriter/meshWriter.C
 meshWriter/starcd/STARCDMeshWriter.C
 
+/*
 polyDualMesh/polyDualMesh.C
+*/
 
 LIB = $(FOAM_LIBBIN)/libconversion

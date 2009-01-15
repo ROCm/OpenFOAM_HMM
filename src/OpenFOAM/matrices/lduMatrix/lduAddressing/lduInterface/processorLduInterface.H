@@ -61,9 +61,6 @@ class processorLduInterface
         //  Only sized and used when compressed or non-blocking comms used.
         mutable List<char> receiveBuf_;
 
-        //- Resize the buffer if required
-        void resizeBuf(List<char>& buf, const label size) const;
-
 
 public:
 
@@ -92,8 +89,17 @@ public:
             //- Return neigbour processor number
             virtual int neighbProcNo() const = 0;
 
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const = 0;
+            //- Set send buffer to sufficient size to hold List<Type>(nElems).
+            //  Returns reference to buffer (note:buffer.size() is number
+            //  of characters, not nElems)
+            template<class Type>
+            List<Type>& setSendBuf(const label nElems) const;
+
+            //- Set receive buffer to sufficient size to hold List<Type>(nElems)
+            //  Returns reference to buffer (note:buffer.size() is number
+            //  of characters, not nElems)
+            template<class Type>
+            List<Type>& setReceiveBuf(const label nElems) const;
 
 
         // Transfer functions
@@ -142,6 +148,26 @@ public:
             //- Raw field receive function with data compression returning field
             template<class Type>
             tmp<Field<Type> > compressedReceive
+            (
+                const Pstream::commsTypes commsType,
+                const label size
+            ) const;
+
+
+            //- Raw field send function of internal send buffer with data
+            //  compression.
+            template<class Type>
+            void compressedBufferSend
+            (
+                const Pstream::commsTypes commsType
+            ) const;
+
+            //- Raw field receive function of internal receive buffer with data
+            //  compression.
+            //  Returns reference to buffer (note:buffer.size() is number
+            //  of characters, not size)
+            template<class Type>
+            const List<Type>& compressedBufferReceive
             (
                 const Pstream::commsTypes commsType,
                 const label size

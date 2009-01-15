@@ -34,6 +34,7 @@ License
 #include "matchPoints.H"
 #include "EdgeMap.H"
 #include "Time.H"
+#include "diagTensor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -87,33 +88,12 @@ void Foam::cyclicPolyPatch::calcTransforms()
 {
     if (size() > 0)
     {
-        const pointField& points = this->points();
+        // Half0
 
-        primitivePatch half0
-        (
-            SubList<face>
-            (
-                *this,
-                size()/2
-            ),
-            points
-        );
+        const cyclicPolyPatch& half0 = *this;
+
         pointField half0Ctrs(calcFaceCentres(half0, half0.points()));
-        scalarField half0Tols(calcFaceTol(half0, half0.points(), half0Ctrs));
 
-        primitivePatch half1
-        (
-            SubList<face>
-            (
-                *this,
-                size()/2,
-                size()/2
-            ),
-            points
-        );
-        pointField half1Ctrs(calcFaceCentres(half1, half1.points()));
-
-        // Dump halves
         if (debug)
         {
             fileName casePath(boundaryMesh().mesh().time().path());
@@ -122,6 +102,27 @@ void Foam::cyclicPolyPatch::calcTransforms()
             Pout<< "cyclicPolyPatch::calcTransforms : Writing half0"
                 << " faces to OBJ file " << nm0 << endl;
             writeOBJ(nm0, half0, half0.points());
+        }
+
+        vectorField half0Areas(half0.size());
+
+        forAll(half0, facei)
+        {
+            half0Areas[facei] = half0[facei].normal(half0.points());
+        }
+
+
+
+        // Half0
+
+        const cyclicPolyPatch& half1 = neighbPatch();
+
+        pointField half1Ctrs(calcFaceCentres(half1, half1.points()));
+
+        // Dump halves
+        if (debug)
+        {
+            fileName casePath(boundaryMesh().mesh().time().path());
 
             fileName nm1(casePath/name()+"_half1_faces.obj");
             Pout<< "cyclicPolyPatch::calcTransforms : Writing half1"
@@ -129,17 +130,60 @@ void Foam::cyclicPolyPatch::calcTransforms()
             writeOBJ(nm1, half1, half1.points());
         }
 
-        vectorField half0Normals(half0.size());
-        vectorField half1Normals(half1.size());
+        vectorField half1Areas(half1.size());
 
-        for (label facei = 0; facei < size()/2; facei++)
+        forAll(half1, facei)
         {
-            half0Normals[facei] = operator[](facei).normal(points);
-            label nbrFacei = facei+size()/2;
-            half1Normals[facei] = operator[](nbrFacei).normal(points);
+            half1Areas[facei] = half1[facei].normal(half1.points());
+        }
 
-            scalar magSf = mag(half0Normals[facei]);
-            scalar nbrMagSf = mag(half1Normals[facei]);
+        calcTransforms
+        (
+            half0,
+            half0Ctrs,
+            half0Areas,
+            half1Ctrs,
+            half1Areas
+        );
+    }
+}
+
+
+void Foam::cyclicPolyPatch::calcTransforms
+(
+    const primitivePatch& half0,
+    const UList<point>& half0Ctrs,
+    const UList<point>& half0Areas,
+    const UList<point>& half1Ctrs,
+    const UList<point>& half1Areas
+)
+{
+Pout<< "cyclicPolyPatch::calcTransforms : name:" << name() << endl
+    << "    half0Ctrs:"
+    << " min:" << min(half0Ctrs) << " max:" << max(half0Ctrs)<< endl
+    << "    half1Ctrs:"
+    << " min:" << min(half1Ctrs) << " max:" << max(half1Ctrs)<< endl
+    << endl;
+
+    if (half0Ctrs.size() > 0)
+    {
+        scalarField half0Tols
+        (
+            calcFaceTol
+            (
+                half0,
+                half0.points(),
+                static_cast<const pointField&>(half0Ctrs)
+            )
+        );
+
+        vectorField half0Normals(half0Areas.size());
+        vectorField half1Normals(half1Areas.size());
+
+        forAll(half0, facei)
+        {
+            scalar magSf = mag(half0Areas[facei]);
+            scalar nbrMagSf = mag(half1Areas[facei]);
             scalar avSf = (magSf + nbrMagSf)/2.0;
 
             if (magSf < ROOTVSMALL && nbrMagSf < ROOTVSMALL)
@@ -148,15 +192,14 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 // check. (note use of sqrt(VSMALL) since that is how mag
                 // scales)
                 half0Normals[facei] = point(1, 0, 0);
-                half1Normals[facei] = half0Normals[facei];
+                half1Normals[facei] = -half0Normals[facei];
             }
             else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol)
             {
                 FatalErrorIn
                 (
                     "cyclicPolyPatch::calcTransforms()"
-                )   << "face " << facei << " area does not match neighbour "
-                    << nbrFacei << " by "
+                )   << "face " << facei << " area does not match neighbour by "
                     << 100*mag(magSf - nbrMagSf)/avSf
                     << "% -- possible face ordering problem." << endl
                     << "patch:" << name()
@@ -165,33 +208,44 @@ void Foam::cyclicPolyPatch::calcTransforms()
                     << " matching tolerance:" << coupledPolyPatch::matchTol
                      << endl
                     << "Mesh face:" << start()+facei
-                    << " vertices:"
-                    << IndirectList<point>(points, operator[](facei))()
+                    << " fc:" << half0Ctrs[facei]
                     << endl
-                    << "Neighbour face:" << start()+nbrFacei
-                    << " vertices:"
-                    << IndirectList<point>(points, operator[](nbrFacei))()
+                    << "Neighbour fc:" << half1Ctrs[facei]
                     << endl
                     << "Rerun with cyclic debug flag set"
                     << " for more information." << exit(FatalError);
             }
             else
             {
-                half0Normals[facei] /= magSf;
-                half1Normals[facei] /= nbrMagSf;
+                half0Normals[facei] = half0Areas[facei] / magSf;
+                half1Normals[facei] = half1Areas[facei] / nbrMagSf;
             }
         }
-
 
         // Calculate transformation tensors
         calcTransformTensors
         (
-            half0Ctrs,
-            half1Ctrs,
+            separated_,
+            separation_,
+            parallel_,
+            forwardT_,
+            reverseT_,
+            static_cast<const pointField&>(half0Ctrs),
+            static_cast<const pointField&>(half1Ctrs),
             half0Normals,
             half1Normals,
             half0Tols
         );
+
+Pout<< "cyclicPolyPatch::calcTransforms : calculated transforms for:"
+    << name() << endl
+    << "    separated_:" << separated_ << endl
+    << "    separation_:" << separation_ << endl
+    << "    parallel_:" << parallel_ << endl
+    << "    forwardT_:" << forwardT_ << endl
+    << "    reverseT_:" << reverseT_ << endl
+    << endl;
+
     }
 }
 
@@ -610,14 +664,22 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(name, size, start, index, bm),
+    neighbPatchName_(""),
+    neighbPatchID_(-1),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(0.9),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
-    rotationCentre_(point::zero)
+    rotationCentre_(point::zero),
+    separated_(false),
+    separation_(vector::zero),
+    parallel_(true),
+    forwardT_(I),
+    reverseT_(I)
 {
-    calcTransforms();
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
 }
 
 
@@ -630,12 +692,19 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm),
+    neighbPatchName_(dict.lookup("neighbourPatch")),
+    neighbPatchID_(-1),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(0.9),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
-    rotationCentre_(point::zero)
+    rotationCentre_(point::zero),
+    separated_(false),
+    separation_(vector::zero),
+    parallel_(true),
+    forwardT_(I),
+    reverseT_(I)
 {
     dict.readIfPresent("featureCos", featureCos_);
 
@@ -652,12 +721,13 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             }
             default:
             {
-                // no additioanl info required
+                // no additional info required
             }
         }
     }
 
-    calcTransforms();
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
 }
 
 
@@ -668,14 +738,22 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
+    neighbPatchName_(pp.neighbPatchName()),
+    neighbPatchID_(-1),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(pp.featureCos_),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
-    rotationCentre_(pp.rotationCentre_)
+    rotationCentre_(pp.rotationCentre_),
+    separated_(false),
+    separation_(vector::zero),
+    parallel_(true),
+    forwardT_(I),
+    reverseT_(I)
 {
-    calcTransforms();
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
 }
 
 
@@ -685,10 +763,13 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     const polyBoundaryMesh& bm,
     const label index,
     const label newSize,
-    const label newStart
+    const label newStart,
+    const word& neighbPatchName
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
+    neighbPatchName_(neighbPatchName),
+    neighbPatchID_(-1),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL),
     featureCos_(pp.featureCos_),
@@ -696,7 +777,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_)
 {
-    calcTransforms();
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
 }
 
 
@@ -720,7 +802,47 @@ void Foam::cyclicPolyPatch::initGeometry()
 void Foam::cyclicPolyPatch::calcGeometry()
 {
     polyPatch::calcGeometry();
+
+    calcTransforms();
 }
+
+
+void Foam::cyclicPolyPatch::initGeometry
+(
+    const primitivePatch& referPatch,
+    UList<point>& nbrCtrs,
+    UList<point>& nbrAreas,
+    UList<point>& nbrCc
+)
+{}
+
+
+void Foam::cyclicPolyPatch::calcGeometry
+(
+    const primitivePatch& referPatch,
+    const UList<point>& thisCtrs,
+    const UList<point>& thisAreas,
+    const UList<point>& thisCc,
+    const UList<point>& nbrCtrs,
+    const UList<point>& nbrAreas,
+    const UList<point>& nbrCc
+)
+{
+    polyPatch::calcGeometry();
+
+Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
+    << " referred from:" << referPatch.size() << endl;
+
+    calcTransforms
+    (
+        referPatch,
+        thisCtrs,
+        thisAreas,
+        nbrCtrs,
+        nbrAreas
+    );
+}
+
 
 void Foam::cyclicPolyPatch::initMovePoints(const pointField& p)
 {
@@ -750,82 +872,89 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
 {
     if (!coupledPointsPtr_)
     {
-        // Look at cyclic patch as two halves, A and B.
-        // Now all we know is that relative face index in halfA is same
-        // as coupled face in halfB and also that the 0th vertex
-        // corresponds.
+        WarningIn("cyclicPolyPatch::coupledPoints() const")
+            << "to be implemented." << endl;
 
-        // From halfA point to halfB or -1.
-        labelList coupledPoint(nPoints(), -1);
-
-        for (label patchFaceA = 0; patchFaceA < size()/2; patchFaceA++)
-        {
-            const face& fA = localFaces()[patchFaceA];
-
-            forAll(fA, indexA)
-            {
-                label patchPointA = fA[indexA];
-
-                if (coupledPoint[patchPointA] == -1)
-                {
-                    const face& fB = localFaces()[patchFaceA + size()/2];
-
-                    label indexB = (fB.size() - indexA) % fB.size();
-
-                    // Filter out points on wedge axis
-                    if (patchPointA != fB[indexB])
-                    {
-                        coupledPoint[patchPointA] = fB[indexB];
-                    }
-                }
-            }
-        }
-
-        coupledPointsPtr_ = new edgeList(nPoints());
-        edgeList& connected = *coupledPointsPtr_;
-
-        // Extract coupled points.
-        label connectedI = 0;
-
-        forAll(coupledPoint, i)
-        {
-            if (coupledPoint[i] != -1)
-            {
-                connected[connectedI++] = edge(i, coupledPoint[i]);
-            }
-        }
-
-        connected.setSize(connectedI);
-
-        if (debug)
-        {
-            OFstream str
-            (
-                boundaryMesh().mesh().time().path()
-               /"coupledPoints.obj"
-            );
-            label vertI = 0;
-
-            Pout<< "Writing file " << str.name() << " with coordinates of "
-                << "coupled points" << endl;
-
-            forAll(connected, i)
-            {
-                const point& a = points()[meshPoints()[connected[i][0]]];
-                const point& b = points()[meshPoints()[connected[i][1]]];
-
-                str<< "v " << a.x() << ' ' << a.y() << ' ' << a.z() << nl;
-                str<< "v " << b.x() << ' ' << b.y() << ' ' << b.z() << nl;
-                vertI += 2;
-
-                str<< "l " << vertI-1 << ' ' << vertI << nl;
-            }
-        }
-
-        // Remove any addressing calculated for the coupled edges calculation
-        const_cast<primitivePatch&>(static_cast<const primitivePatch&>(*this))
-            .clearOut();
+        coupledPointsPtr_ = new edgeList();
     }
+
+
+//        // Look at cyclic patch as two halves, A and B.
+//        // Now all we know is that relative face index in halfA is same
+//        // as coupled face in halfB and also that the 0th vertex
+//        // corresponds.
+//
+//        // From halfA point to halfB or -1.
+//        labelList coupledPoint(nPoints(), -1);
+//
+//        for (label patchFaceA = 0; patchFaceA < size()/2; patchFaceA++)
+//        {
+//            const face& fA = localFaces()[patchFaceA];
+//
+//            forAll(fA, indexA)
+//            {
+//                label patchPointA = fA[indexA];
+//
+//                if (coupledPoint[patchPointA] == -1)
+//                {
+//                    const face& fB = localFaces()[patchFaceA + size()/2];
+//
+//                    label indexB = (fB.size() - indexA) % fB.size();
+//
+//                    // Filter out points on wedge axis
+//                    if (patchPointA != fB[indexB])
+//                    {
+//                        coupledPoint[patchPointA] = fB[indexB];
+//                    }
+//                }
+//            }
+//        }
+//
+//        coupledPointsPtr_ = new edgeList(nPoints());
+//        edgeList& connected = *coupledPointsPtr_;
+//
+//        // Extract coupled points.
+//        label connectedI = 0;
+//
+//        forAll(coupledPoint, i)
+//        {
+//            if (coupledPoint[i] != -1)
+//            {
+//                connected[connectedI++] = edge(i, coupledPoint[i]);
+//            }
+//        }
+//
+//        connected.setSize(connectedI);
+//
+//        if (debug)
+//        {
+//            OFstream str
+//            (
+//                boundaryMesh().mesh().time().path()
+//               /"coupledPoints.obj"
+//            );
+//            label vertI = 0;
+//
+//            Pout<< "Writing file " << str.name() << " with coordinates of "
+//                << "coupled points" << endl;
+//
+//            forAll(connected, i)
+//            {
+//                const point& a = points()[meshPoints()[connected[i][0]]];
+//                const point& b = points()[meshPoints()[connected[i][1]]];
+//
+//                str<< "v " << a.x() << ' ' << a.y() << ' ' << a.z() << nl;
+//                str<< "v " << b.x() << ' ' << b.y() << ' ' << b.z() << nl;
+//                vertI += 2;
+//
+//                str<< "l " << vertI-1 << ' ' << vertI << nl;
+//            }
+//        }
+//
+//        // Remove any addressing calculated for the coupled edges calculation
+//        const_cast<primitivePatch&>(static_cast<const primitivePatch&>(*this))
+//            .clearOut();
+//    }
     return *coupledPointsPtr_;
 }
 
@@ -834,126 +963,133 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 {
     if (!coupledEdgesPtr_)
     {
-        // Build map from points on halfA to points on halfB.
-        const edgeList& pointCouples = coupledPoints();
+        WarningIn("cyclicPolyPatch::coupledEdges() const")
+            << "to be implemented." << endl;
 
-        Map<label> aToB(2*pointCouples.size());
-
-        forAll(pointCouples, i)
-        {
-            const edge& e = pointCouples[i];
-
-            aToB.insert(e[0], e[1]);
-        }
-
-        // Map from edge on half A to points (in halfB indices)
-        EdgeMap<label> edgeMap(nEdges());
-
-        for (label patchFaceA = 0; patchFaceA < size()/2; patchFaceA++)
-        {
-            const labelList& fEdges = faceEdges()[patchFaceA];
-
-            forAll(fEdges, i)
-            {
-                label edgeI = fEdges[i];
-
-                const edge& e = edges()[edgeI];
-
-                // Convert edge end points to corresponding points on halfB
-                // side.
-                Map<label>::const_iterator fnd0 = aToB.find(e[0]);
-                if (fnd0 != aToB.end())
-                {
-                    Map<label>::const_iterator fnd1 = aToB.find(e[1]);
-                    if (fnd1 != aToB.end())
-                    {
-                        edgeMap.insert(edge(fnd0(), fnd1()), edgeI);
-                    }
-                }
-            }
-        }
-
-        coupledEdgesPtr_ = new edgeList(nEdges()/2);
-        edgeList& coupledEdges = *coupledEdgesPtr_;
-        label coupleI = 0;
-
-        for (label patchFaceB = size()/2; patchFaceB < size(); patchFaceB++)
-        {
-            const labelList& fEdges = faceEdges()[patchFaceB];
-
-            forAll(fEdges, i)
-            {
-                label edgeI = fEdges[i];
-
-                const edge& e = edges()[edgeI];
-
-                // Look up halfA edge from HashTable.
-                EdgeMap<label>::iterator iter = edgeMap.find(e);
-
-                if (iter != edgeMap.end())
-                {
-                    label halfAEdgeI = iter();
-
-                    // Store correspondence. Filter out edges on wedge axis.
-                    if (halfAEdgeI != edgeI)
-                    {
-                        coupledEdges[coupleI++] = edge(halfAEdgeI, edgeI);
-                    }
-
-                    // Remove so we build unique list
-                    edgeMap.erase(iter);
-                }
-            }
-        }
-        coupledEdges.setSize(coupleI);
-
-
-        // Some checks
-
-        forAll(coupledEdges, i)
-        {
-            const edge& e = coupledEdges[i];
-
-            if (e[0] == e[1] || e[0] < 0 || e[1] < 0)
-            {
-                FatalErrorIn("cyclicPolyPatch::coupledEdges() const")
-                    << "Problem : at position " << i
-                    << " illegal couple:" << e
-                    << abort(FatalError);
-            }
-        }
-
-        if (debug)
-        {
-            OFstream str
-            (
-                boundaryMesh().mesh().time().path()
-               /"coupledEdges.obj"
-            );
-            label vertI = 0;
-
-            Pout<< "Writing file " << str.name() << " with centres of "
-                << "coupled edges" << endl;
-
-            forAll(coupledEdges, i)
-            {
-                const edge& e = coupledEdges[i];
-
-                const point& a = edges()[e[0]].centre(localPoints());
-                const point& b = edges()[e[1]].centre(localPoints());
-
-                str<< "v " << a.x() << ' ' << a.y() << ' ' << a.z() << nl;
-                str<< "v " << b.x() << ' ' << b.y() << ' ' << b.z() << nl;
-                vertI += 2;
-
-                str<< "l " << vertI-1 << ' ' << vertI << nl;
-            }
-        }
-
-        // Remove any addressing calculated for the coupled edges calculation
-        const_cast<primitivePatch&>(static_cast<const primitivePatch&>(*this))
-            .clearOut();
+        coupledEdgesPtr_ = new edgeList();
     }
+
+
+//        // Build map from points on halfA to points on halfB.
+//        const edgeList& pointCouples = coupledPoints();
+//
+//        Map<label> aToB(2*pointCouples.size());
+//
+//        forAll(pointCouples, i)
+//        {
+//            const edge& e = pointCouples[i];
+//
+//            aToB.insert(e[0], e[1]);
+//        }
+//
+//        // Map from edge on half A to points (in halfB indices)
+//        EdgeMap<label> edgeMap(nEdges());
+//
+//        for (label patchFaceA = 0; patchFaceA < size()/2; patchFaceA++)
+//        {
+//            const labelList& fEdges = faceEdges()[patchFaceA];
+//
+//            forAll(fEdges, i)
+//            {
+//                label edgeI = fEdges[i];
+//
+//                const edge& e = edges()[edgeI];
+//
+//                // Convert edge end points to corresponding points on halfB
+//                // side.
+//                Map<label>::const_iterator fnd0 = aToB.find(e[0]);
+//                if (fnd0 != aToB.end())
+//                {
+//                    Map<label>::const_iterator fnd1 = aToB.find(e[1]);
+//                    if (fnd1 != aToB.end())
+//                    {
+//                        edgeMap.insert(edge(fnd0(), fnd1()), edgeI);
+//                    }
+//                }
+//            }
+//        }
+//
+//        coupledEdgesPtr_ = new edgeList(nEdges()/2);
+//        edgeList& coupledEdges = *coupledEdgesPtr_;
+//        label coupleI = 0;
+//
+//        for (label patchFaceB = size()/2; patchFaceB < size(); patchFaceB++)
+//        {
+//            const labelList& fEdges = faceEdges()[patchFaceB];
+//
+//            forAll(fEdges, i)
+//            {
+//                label edgeI = fEdges[i];
+//
+//                const edge& e = edges()[edgeI];
+//
+//                // Look up halfA edge from HashTable.
+//                EdgeMap<label>::iterator iter = edgeMap.find(e);
+//
+//                if (iter != edgeMap.end())
+//                {
+//                    label halfAEdgeI = iter();
+//
+//                    // Store correspondence. Filter out edges on wedge axis.
+//                    if (halfAEdgeI != edgeI)
+//                    {
+//                        coupledEdges[coupleI++] = edge(halfAEdgeI, edgeI);
+//                    }
+//
+//                    // Remove so we build unique list
+//                    edgeMap.erase(iter);
+//                }
+//            }
+//        }
+//        coupledEdges.setSize(coupleI);
+//
+//
+//        // Some checks
+//
+//        forAll(coupledEdges, i)
+//        {
+//            const edge& e = coupledEdges[i];
+//
+//            if (e[0] == e[1] || e[0] < 0 || e[1] < 0)
+//            {
+//                FatalErrorIn("cyclicPolyPatch::coupledEdges() const")
+//                    << "Problem : at position " << i
+//                    << " illegal couple:" << e
+//                    << abort(FatalError);
+//            }
+//        }
+//
+//        if (debug)
+//        {
+//            OFstream str
+//            (
+//                boundaryMesh().mesh().time().path()
+//               /"coupledEdges.obj"
+//            );
+//            label vertI = 0;
+//
+//            Pout<< "Writing file " << str.name() << " with centres of "
+//                << "coupled edges" << endl;
+//
+//            forAll(coupledEdges, i)
+//            {
+//                const edge& e = coupledEdges[i];
+//
+//                const point& a = edges()[e[0]].centre(localPoints());
+//                const point& b = edges()[e[1]].centre(localPoints());
+//
+//                str<< "v " << a.x() << ' ' << a.y() << ' ' << a.z() << nl;
+//                str<< "v " << b.x() << ' ' << b.y() << ' ' << b.z() << nl;
+//                vertI += 2;
+//
+//                str<< "l " << vertI-1 << ' ' << vertI << nl;
+//            }
+//        }
+//
+//        // Remove any addressing calculated for the coupled edges calculation
+//        const_cast<primitivePatch&>(static_cast<const primitivePatch&>(*this))
+//            .clearOut();
+//    }
     return *coupledEdgesPtr_;
 }
 
@@ -1305,6 +1441,8 @@ bool Foam::cyclicPolyPatch::order
 void Foam::cyclicPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
+    os.writeKeyword("neighbourPatch") << neighbPatchName_
+        << token::END_STATEMENT << nl;
     os.writeKeyword("featureCos") << featureCos_ << token::END_STATEMENT << nl;
     switch (transform_)
     {

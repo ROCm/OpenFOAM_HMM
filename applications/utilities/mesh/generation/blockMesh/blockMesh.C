@@ -81,45 +81,21 @@ const curvedEdgeList& blockMesh::edges() const
 }
 
 
-wordList blockMesh::patchNames() const
+PtrList<dictionary> blockMesh::patchDicts() const
 {
     const polyPatchList& patchTopologies = topology().boundaryMesh();
-    wordList names(patchTopologies.size());
 
-    forAll (names, patchI)
+    PtrList<dictionary> patchDicts(patchTopologies.size());
+
+    forAll(patchTopologies, patchI)
     {
-        names[patchI] = patchTopologies[patchI].name();
+        OStringStream os;
+        patchTopologies[patchI].write(os);
+        IStringStream is(os.str());
+        patchDicts.set(patchI, new dictionary(is));
+        patchDicts[patchI].set("name", patchTopologies[patchI].name());
     }
-
-    return names;
-}
-
-
-wordList blockMesh::patchTypes() const
-{
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
-    wordList types(patchTopologies.size());
-
-    forAll (types, patchI)
-    {
-        types[patchI] = patchTopologies[patchI].type();
-    }
-
-    return types;
-}
-
-
-wordList blockMesh::patchPhysicalTypes() const
-{
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
-    wordList physicalTypes(patchTopologies.size());
-
-    forAll (physicalTypes, patchI)
-    {
-        physicalTypes[patchI] = patchTopologies[patchI].physicalType();
-    }
-
-    return physicalTypes;
+    return patchDicts;
 }
 
 

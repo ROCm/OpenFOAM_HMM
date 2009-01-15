@@ -50,9 +50,8 @@ Description
     To see if point is equal to above value we don't use == (which might give
     problems with roundoff error) but instead compare the individual component
     with >.
-    - coupled patches: the reorderCoupledFaces routine (borrowed from
-    the couplePatches utility) reorders coupled patch faces and
-    uses the cyclicPolyPatch,processorPolyPatch functionality.
+    - coupled patches: the reorderCoupledFaces routine reorders coupled patch
+    faces and uses the cyclicPolyPatch,processorPolyPatch functionality.
 
 SourceFiles
     polyTopoChange.C
@@ -147,6 +146,10 @@ class polyTopoChange
 
             //- Patch for every external face (-1 for internal faces)
             DynamicList<label> region_;
+
+            //- Sub-patch (for processor faces). -1 for internal and non-
+            //  processor patches.
+            DynamicList<label> subRegion_;
 
             //- Owner for all faces
             DynamicList<label> faceOwner_;
@@ -286,7 +289,11 @@ class polyTopoChange
 
             labelList& oldToNew,
             labelList& patchSizes,
-            labelList& patchStarts
+            labelList& patchStarts,
+
+            labelListList& subPatches,
+            labelListList& subPatchSizes,
+            labelListList& subPatchStarts
         ) const;
 
         //- Compact and reorder faces according to map
@@ -307,7 +314,10 @@ class polyTopoChange
             const bool orderPoints,
             label& nInternalPoints,
             labelList& patchSizes,
-            labelList& patchStarts
+            labelList& patchStarts,
+            labelListList& subPatches,
+            labelListList& subPatchSizes,
+            labelListList& subPatchStarts
         );
 
         //- Select either internal or external faces out of faceLabels
@@ -372,6 +382,9 @@ class polyTopoChange
                 const polyBoundaryMesh&,
                 const labelList& patchStarts,
                 const labelList& patchSizes,
+                const labelListList& subPatches,
+                const labelListList& subPatchSizes,
+                const labelListList& subPatchStarts,
                 const pointField& points
             );
 
@@ -385,6 +398,9 @@ class polyTopoChange
             pointField& newPoints,
             labelList& patchSizes,
             labelList& patchStarts,
+            labelListList& subPatches,
+            labelListList& subPatchSizes,
+            labelListList& subPatchStarts,
             List<objectMap>& pointsFromPoints,
             List<objectMap>& facesFromPoints,
             List<objectMap>& facesFromEdges,
@@ -515,7 +531,8 @@ public:
                 const bool flipFaceFlux,
                 const label patchID,
                 const label zoneID,
-                const bool zoneFlip
+                const bool zoneFlip,
+                const label subPatchID = -1
             );
 
             //- Modify vertices or cell of face.
@@ -528,7 +545,8 @@ public:
                 const bool flipFaceFlux,
                 const label patchID,
                 const label zoneID,
-                const bool zoneFlip
+                const bool zoneFlip,
+                const label subPatchID = -1
             );
 
             //- Remove/merge face.

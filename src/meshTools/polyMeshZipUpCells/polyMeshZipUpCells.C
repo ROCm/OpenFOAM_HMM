@@ -27,6 +27,7 @@ License
 #include "polyMeshZipUpCells.H"
 #include "polyMesh.H"
 #include "Time.H"
+#include "globalMeshData.H"
 
 // #define DEBUG_ZIPUP 1
 // #define DEBUG_CHAIN 1
@@ -745,12 +746,26 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
         // Collect the patch sizes
         labelList patchSizes(bMesh.size(), 0);
         labelList patchStarts(bMesh.size(), 0);
-
         forAll (bMesh, patchI)
         {
             patchSizes[patchI] = bMesh[patchI].size();
             patchStarts[patchI] = bMesh[patchI].start();
         }
+
+        labelListList subPatches(bMesh.size());
+        labelListList subPatchStarts(bMesh.size());
+
+        forAll(mesh.globalData().processorPatches(), i)
+        {
+            label patchI = mesh.globalData().processorPatches()[i];
+            const processorPolyPatch& ppp = refCast<const processorPolyPatch>
+            (
+                bMesh[patchI]
+            );
+            subPatches[patchI] = ppp.patchIDs();
+            subPatchStarts[patchI] = ppp.starts();
+        }
+
 
         // Reset the mesh. Number of active faces is one beyond the last patch
         // (patches guaranteed to be in increasing order)
@@ -763,6 +778,8 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
             mesh.faceNeighbour(),
             patchSizes,
             patchStarts,
+            subPatches,
+            subPatchStarts,
             true                // boundary forms valid boundary mesh.
         );
 

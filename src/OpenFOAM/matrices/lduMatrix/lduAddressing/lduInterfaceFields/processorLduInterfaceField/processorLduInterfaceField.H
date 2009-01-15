@@ -79,22 +79,22 @@ public:
             //- Return neigbour processor number
             virtual int neighbProcNo() const = 0;
 
-            //- Is the transform required
-            virtual bool doTransform() const = 0;
-
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const = 0;
+//            //- Is the transform required
+//            virtual bool doTransform() const = 0;
+//
+//            //- Return face transformation tensor
+//            virtual const tensorField& forwardT() const = 0;
 
             //- Return rank of component for transform
             virtual int rank() const = 0;
 
 
-        //- Transform given patch component field
-        void transformCoupleField
-        (
-            scalarField& f,
-            const direction cmpt
-        ) const;
+//        //- Transform given patch component field
+//        virtual void transformCoupleField
+//        (
+//            scalarField& f,
+//            const direction cmpt
+//        ) const = 0;
 };
 
 

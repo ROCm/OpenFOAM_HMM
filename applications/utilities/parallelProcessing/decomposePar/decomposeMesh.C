@@ -40,6 +40,63 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void domainDecomposition::append(labelList& lst, const label elem)
+{
+    label sz = lst.size();
+    lst.setSize(sz+1);
+    lst[sz] = elem;
+}
+
+
+void domainDecomposition::addInterProcFace
+(
+    const label facei,
+    const label ownerProc,
+    const label nbrProc,
+
+    List<Map<label> >& nbrToInterPatch,
+    List<DynamicList<DynamicList<label> > >& interPatchFaces
+) const
+{
+    Map<label>::iterator patchIter = nbrToInterPatch[ownerProc].find(nbrProc);
+
+    // Introduce turning index only for internal faces (are duplicated).
+    label ownerIndex = facei+1;
+    label nbrIndex = -(facei+1);
+
+    if (patchIter != nbrToInterPatch[ownerProc].end())
+    {
+        // Existing interproc patch. Add to both sides.
+        label toNbrProcPatchI = patchIter();
+        interPatchFaces[ownerProc][toNbrProcPatchI].append(ownerIndex);
+
+        if (isInternalFace(facei))
+        {
+            label toOwnerProcPatchI = nbrToInterPatch[nbrProc][ownerProc];
+            interPatchFaces[nbrProc][toOwnerProcPatchI].append(nbrIndex);
+        }
+    }
+    else
+    {
+        // Create new interproc patches.
+        label toNbrProcPatchI = nbrToInterPatch[ownerProc].size();
+        nbrToInterPatch[ownerProc].insert(nbrProc, toNbrProcPatchI);
+        DynamicList<label> oneFace;
+        oneFace.append(ownerIndex);
+        interPatchFaces[ownerProc].append(oneFace);
+
+        if (isInternalFace(facei))
+        {
+            label toOwnerProcPatchI = nbrToInterPatch[nbrProc].size();
+            nbrToInterPatch[nbrProc].insert(ownerProc, toOwnerProcPatchI);
+            oneFace.clear();
+            oneFace.append(nbrIndex);
+            interPatchFaces[nbrProc].append(oneFace);
+        }
+    }
+}
+
+
 void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 {
     // Decide which cell goes to which processor
@@ -61,31 +118,8 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
     Info<< "\nDistributing cells to processors" << endl;
 
-    // Memory management
-    {
-        List<SLList<label> > procCellList(nProcs_);
-
-        forAll (cellToProc_, celli)
-        {
-            if (cellToProc_[celli] >= nProcs_)
-            {
-                FatalErrorIn("domainDecomposition::decomposeMesh()")
-                    << "Impossible processor label " << cellToProc_[celli]
-                    << "for cell " << celli
-                    << abort(FatalError);
-            }
-            else
-            {
-                procCellList[cellToProc_[celli]].append(celli);
-            }
-        }
-
-        // Convert linked lists into normal lists
-        forAll (procCellList, procI)
-        {
-            procCellAddressing_[procI] = procCellList[procI];
-        }
-    }
+    // Cells per processor
+    procCellAddressing_ = invertOneToMany(nProcs_, cellToProc_);
 
     Info << "\nDistributing faces to processors" << endl;
 
@@ -94,567 +128,357 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     // same processor, the face is an internal face. If they are different,
     // it belongs to both processors.
 
-    // Memory management
+    procFaceAddressing_.setSize(nProcs_);
+
+    // Internal faces
+    forAll (neighbour, facei)
     {
-        List<SLList<label> > procFaceList(nProcs_);
-
-        forAll (neighbour, facei)
+        if (cellToProc_[owner[facei]] == cellToProc_[neighbour[facei]])
         {
-            if (cellToProc_[owner[facei]] == cellToProc_[neighbour[facei]])
-            {
-                // Face internal to processor
-                procFaceList[cellToProc_[owner[facei]]].append(facei);
-            }
+            // Face internal to processor. Notice no turning index.
+            procFaceAddressing_[cellToProc_[owner[facei]]].append(facei+1);
         }
+    }
 
-        // Detect inter-processor boundaries
+    // for all processors, set the size of start index and patch size
+    // lists to the number of patches in the mesh
+    forAll (procPatchSize_, procI)
+    {
+        procPatchSize_[procI].setSize(patches.size());
+        procPatchStartIndex_[procI].setSize(patches.size());
+    }
 
-        // Neighbour processor for each subdomain
-        List<SLList<label> > interProcBoundaries(nProcs_);
-
-        // Face labels belonging to each inter-processor boundary
-        List<SLList<SLList<label> > > interProcBFaces(nProcs_);
-
-        List<SLList<label> > procPatchIndex(nProcs_);
-
-        forAll (neighbour, facei)
-        {
-            if (cellToProc_[owner[facei]] != cellToProc_[neighbour[facei]])
-            {
-                // inter - processor patch face found. Go through the list of
-                // inside boundaries for the owner processor and try to find
-                // this inter-processor patch.
-
-                label ownerProc = cellToProc_[owner[facei]];
-                label neighbourProc = cellToProc_[neighbour[facei]];
-
-                SLList<label>::iterator curInterProcBdrsOwnIter =
-                    interProcBoundaries[ownerProc].begin();
-
-                SLList<SLList<label> >::iterator curInterProcBFacesOwnIter =
-                    interProcBFaces[ownerProc].begin();
-
-                bool interProcBouFound = false;
-
-                // WARNING: Synchronous SLList iterators
-
-                for
-                (
-                    ;
-                    curInterProcBdrsOwnIter
-                 != interProcBoundaries[ownerProc].end()
-                 && curInterProcBFacesOwnIter
-                 != interProcBFaces[ownerProc].end();
-                    ++curInterProcBdrsOwnIter, ++curInterProcBFacesOwnIter
-                )
-                {
-                    if (curInterProcBdrsOwnIter() == neighbourProc)
-                    {
-                        // the inter - processor boundary exists. Add the face
-                        interProcBouFound = true;
-
-                        curInterProcBFacesOwnIter().append(facei);
-
-                        SLList<label>::iterator curInterProcBdrsNeiIter =
-                            interProcBoundaries[neighbourProc].begin();
-
-                        SLList<SLList<label> >::iterator 
-                            curInterProcBFacesNeiIter =
-                            interProcBFaces[neighbourProc].begin();
-
-                        bool neighbourFound = false;
-
-                        // WARNING: Synchronous SLList iterators
-
-                        for
-                        (
-                            ;
-                            curInterProcBdrsNeiIter !=
-                            interProcBoundaries[neighbourProc].end()
-                         && curInterProcBFacesNeiIter !=
-                            interProcBFaces[neighbourProc].end();
-                            ++curInterProcBdrsNeiIter,
-                            ++curInterProcBFacesNeiIter
-                        )
-                        {
-                            if (curInterProcBdrsNeiIter() == ownerProc)
-                            {
-                                // boundary found. Add the face
-                                neighbourFound = true;
-
-                                curInterProcBFacesNeiIter().append(facei);
-                            }
-
-                            if (neighbourFound) break;
-                        }
-
-                        if (interProcBouFound && !neighbourFound)
-                        {
-                            FatalErrorIn("domainDecomposition::decomposeMesh()")
-                                << "Inconsistency in inter - "
-                                << "processor boundary lists for processors "
-                                << ownerProc << " and " << neighbourProc
-                                << abort(FatalError);
-                        }
-                    }
-
-                    if (interProcBouFound) break;
-                }
-
-                if (!interProcBouFound)
-                {
-                    // inter - processor boundaries do not exist and need to
-                    // be created
-
-                    // set the new addressing information
-
-                    // owner
-                    interProcBoundaries[ownerProc].append(neighbourProc);
-                    interProcBFaces[ownerProc].append(SLList<label>(facei));
-
-                    // neighbour
-                    interProcBoundaries[neighbourProc].append(ownerProc);
-                    interProcBFaces[neighbourProc].append(SLList<label>(facei));
-                }
-            }
-        }
-
-        // Loop through patches. For cyclic boundaries detect inter-processor
-        // faces; for all other, add faces to the face list and remember start
-        // and size of all patches.
-
-        // for all processors, set the size of start index and patch size
-        // lists to the number of patches in the mesh
+    forAll (patches, patchi)
+    {
+        // Reset size and start index for all processors
         forAll (procPatchSize_, procI)
         {
-            procPatchSize_[procI].setSize(patches.size());
-            procPatchStartIndex_[procI].setSize(patches.size());
+            procPatchSize_[procI][patchi] = 0;
+            procPatchStartIndex_[procI][patchi] =
+                procFaceAddressing_[procI].size();
         }
 
-        forAll (patches, patchi)
+        const label patchStart = patches[patchi].start();
+
+        if (!isA<cyclicPolyPatch>(patches[patchi]))
         {
-            // Reset size and start index for all processors
-            forAll (procPatchSize_, procI)
+            // Normal patch. Add faces to processor where the cell
+            // next to the face lives
+
+            const unallocLabelList& patchFaceCells =
+                patches[patchi].faceCells();
+
+            forAll (patchFaceCells, facei)
             {
-                procPatchSize_[procI][patchi] = 0;
-                procPatchStartIndex_[procI][patchi] =
-                    procFaceList[procI].size();
+                const label curProc = cellToProc_[patchFaceCells[facei]];
+
+                // add the face without turning index
+                procFaceAddressing_[curProc].append(patchStart+facei+1);
+
+                // increment the number of faces for this patch
+                procPatchSize_[curProc][patchi]++;
             }
+        }
+        else
+        {
+            const cyclicPolyPatch& pp = refCast<const cyclicPolyPatch>
+            (
+                patches[patchi]
+            );
+            // cyclic: check opposite side on this processor
+            const unallocLabelList& patchFaceCells = pp.faceCells();
 
-            const label patchStart = patches[patchi].start();
+            const unallocLabelList& nbrPatchFaceCells =
+                pp.neighbPatch().faceCells();
 
-            if (typeid(patches[patchi]) != typeid(cyclicPolyPatch))
+            forAll (patchFaceCells, facei)
             {
-                // Normal patch. Add faces to processor where the cell
-                // next to the face lives
-
-                const unallocLabelList& patchFaceCells =
-                    patches[patchi].faceCells();
-
-                forAll (patchFaceCells, facei)
+                const label curProc = cellToProc_[patchFaceCells[facei]];
+                const label nbrProc = cellToProc_[nbrPatchFaceCells[facei]];
+                if (curProc == nbrProc)
                 {
-                    const label curProc = cellToProc_[patchFaceCells[facei]];
-
-                    // add the face
-                    procFaceList[curProc].append(patchStart + facei);
-
+                    // add the face without turning index
+                    procFaceAddressing_[curProc].append(patchStart+facei+1);
                     // increment the number of faces for this patch
                     procPatchSize_[curProc][patchi]++;
                 }
             }
-            else
-            {
-                // Cyclic patch special treatment
-
-                const polyPatch& cPatch = patches[patchi];
-
-                const label cycOffset = cPatch.size()/2;
-
-                // Set reference to faceCells for both patches
-                const labelList::subList firstFaceCells
-                (
-                    cPatch.faceCells(),
-                    cycOffset
-                );
-
-                const labelList::subList secondFaceCells
-                (
-                    cPatch.faceCells(),
-                    cycOffset,
-                    cycOffset
-                );
-
-                forAll (firstFaceCells, facei)
-                {
-                    if
-                    (
-                        cellToProc_[firstFaceCells[facei]]
-                     != cellToProc_[secondFaceCells[facei]]
-                    )
-                    {
-                        // This face becomes an inter-processor boundary face
-                        // inter - processor patch face found. Go through
-                        // the list of inside boundaries for the owner
-                        // processor and try to find this inter-processor
-                        // patch.
-
-                        cyclicParallel_ = true;
-
-                        label ownerProc = cellToProc_[firstFaceCells[facei]];
-                        label neighbourProc =
-                            cellToProc_[secondFaceCells[facei]];
-
-                        SLList<label>::iterator curInterProcBdrsOwnIter =
-                            interProcBoundaries[ownerProc].begin();
-
-                        SLList<SLList<label> >::iterator 
-                            curInterProcBFacesOwnIter =
-                            interProcBFaces[ownerProc].begin();
-
-                        bool interProcBouFound = false;
-
-                        // WARNING: Synchronous SLList iterators
-
-                        for
-                        (
-                            ;
-                            curInterProcBdrsOwnIter !=
-                            interProcBoundaries[ownerProc].end()
-                         && curInterProcBFacesOwnIter !=
-                            interProcBFaces[ownerProc].end();
-                            ++curInterProcBdrsOwnIter,
-                            ++curInterProcBFacesOwnIter
-                        )
-                        {
-                            if (curInterProcBdrsOwnIter() == neighbourProc)
-                            {
-                                // the inter - processor boundary exists.
-                                // Add the face
-                                interProcBouFound = true;
-
-                                curInterProcBFacesOwnIter().append
-                                    (patchStart + facei);
-
-                                SLList<label>::iterator curInterProcBdrsNeiIter
-                                   = interProcBoundaries[neighbourProc].begin();
-
-                                SLList<SLList<label> >::iterator
-                                    curInterProcBFacesNeiIter =
-                                    interProcBFaces[neighbourProc].begin();
-
-                                bool neighbourFound = false;
-
-                                // WARNING: Synchronous SLList iterators
-
-                                for
-                                (
-                                    ;
-                                    curInterProcBdrsNeiIter
-                                   != interProcBoundaries[neighbourProc].end()
-                                 && curInterProcBFacesNeiIter
-                                   != interProcBFaces[neighbourProc].end();
-                                    ++curInterProcBdrsNeiIter,
-                                    ++curInterProcBFacesNeiIter
-                                )
-                                {
-                                    if (curInterProcBdrsNeiIter() == ownerProc)
-                                    {
-                                        // boundary found. Add the face
-                                        neighbourFound = true;
-
-                                        curInterProcBFacesNeiIter()
-                                            .append
-                                            (
-                                                patchStart
-                                              + cycOffset
-                                              + facei
-                                            );
-                                    }
-
-                                    if (neighbourFound) break;
-                                }
-
-                                if (interProcBouFound && !neighbourFound)
-                                {
-                                    FatalErrorIn
-                                    (
-                                        "domainDecomposition::decomposeMesh()"
-                                    )   << "Inconsistency in inter-processor "
-                                        << "boundary lists for processors "
-                                        << ownerProc << " and " << neighbourProc
-                                        << " in cyclic boundary matching"
-                                        << abort(FatalError);
-                                }
-                            }
-
-                            if (interProcBouFound) break;
-                        }
-
-                        if (!interProcBouFound)
-                        {
-                            // inter - processor boundaries do not exist
-                            // and need to be created
-
-                            // set the new addressing information
-
-                            // owner
-                            interProcBoundaries[ownerProc]
-                                .append(neighbourProc);
-                            interProcBFaces[ownerProc]
-                                .append(SLList<label>(patchStart + facei));
-
-                            // neighbour
-                            interProcBoundaries[neighbourProc]
-                                .append(ownerProc);
-                            interProcBFaces[neighbourProc]
-                                .append
-                                (
-                                    SLList<label>
-                                    (
-                                        patchStart
-                                      + cycOffset
-                                      + facei
-                                    )
-                                );
-                        }
-                    }
-                    else
-                    {
-                        // This cyclic face remains on the processor
-                        label ownerProc = cellToProc_[firstFaceCells[facei]];
-
-                        // add the face
-                        procFaceList[ownerProc].append(patchStart + facei);
-
-                        // increment the number of faces for this patch
-                        procPatchSize_[ownerProc][patchi]++;
-
-                        // Note: I cannot add the other side of the cyclic
-                        // boundary here because this would violate the order.
-                        // They will be added in a separate loop below
-                        // 
-                    }
-                }
-
-                // Ordering in cyclic boundaries is important.
-                // Add the other half of cyclic faces for cyclic boundaries
-                // that remain on the processor
-                forAll (secondFaceCells, facei)
-                {
-                    if
-                    (
-                        cellToProc_[firstFaceCells[facei]]
-                     == cellToProc_[secondFaceCells[facei]]
-                    )
-                    {
-                        // This cyclic face remains on the processor
-                        label ownerProc = cellToProc_[firstFaceCells[facei]];
-
-                        // add the second face
-                        procFaceList[ownerProc].append
-                            (patchStart + cycOffset + facei);
-
-                        // increment the number of faces for this patch
-                        procPatchSize_[ownerProc][patchi]++;
-                    }
-                }
-            }
-        }
-
-        // Convert linked lists into normal lists
-        // Add inter-processor boundaries and remember start indices
-        forAll (procFaceList, procI)
-        {
-            // Get internal and regular boundary processor faces
-            SLList<label>& curProcFaces = procFaceList[procI];
-
-            // Get reference to processor face addressing
-            labelList& curProcFaceAddressing = procFaceAddressing_[procI];
-
-            labelList& curProcNeighbourProcessors =
-                procNeighbourProcessors_[procI];
-
-            labelList& curProcProcessorPatchSize =
-                procProcessorPatchSize_[procI];
-
-            labelList& curProcProcessorPatchStartIndex =
-                procProcessorPatchStartIndex_[procI];
-
-            // calculate the size
-            label nFacesOnProcessor = curProcFaces.size();
-
-            for 
-            (
-                SLList<SLList<label> >::iterator curInterProcBFacesIter =
-                    interProcBFaces[procI].begin();
-                curInterProcBFacesIter != interProcBFaces[procI].end();
-                ++curInterProcBFacesIter
-            )
-            {
-                nFacesOnProcessor += curInterProcBFacesIter().size();
-            }
-
-            curProcFaceAddressing.setSize(nFacesOnProcessor);
-
-            // Fill in the list. Calculate turning index.
-            // Turning index will be -1 only for some faces on processor
-            // boundaries, i.e. the ones where the current processor ID
-            // is in the cell which is a face neighbour.
-            // Turning index is stored as the sign of the face addressing list
-
-            label nFaces = 0;
-
-            // Add internal and boundary faces
-            // Remember to increment the index by one such that the
-            // turning index works properly.  
-            for
-            (
-                SLList<label>::iterator curProcFacesIter = curProcFaces.begin();
-                curProcFacesIter != curProcFaces.end();
-                ++curProcFacesIter
-            )
-            {
-                curProcFaceAddressing[nFaces] = curProcFacesIter() + 1;
-                nFaces++;
-            }
-
-            // Add inter-processor boundary faces. At the beginning of each
-            // patch, grab the patch start index and size
-
-            curProcNeighbourProcessors.setSize
-            (
-                interProcBoundaries[procI].size()
-            );
-
-            curProcProcessorPatchSize.setSize
-            (
-                interProcBoundaries[procI].size()
-            );
-
-            curProcProcessorPatchStartIndex.setSize
-            (
-                interProcBoundaries[procI].size()
-            );
-
-            label nProcPatches = 0;
-
-            SLList<label>::iterator curInterProcBdrsIter =
-                interProcBoundaries[procI].begin();
-
-            SLList<SLList<label> >::iterator curInterProcBFacesIter =
-                interProcBFaces[procI].begin();
-
-            for
-            (
-                ;
-                curInterProcBdrsIter != interProcBoundaries[procI].end()
-             && curInterProcBFacesIter != interProcBFaces[procI].end();
-                ++curInterProcBdrsIter, ++curInterProcBFacesIter
-            )
-            {
-                curProcNeighbourProcessors[nProcPatches] =
-                    curInterProcBdrsIter();
-
-                // Get start index for processor patch
-                curProcProcessorPatchStartIndex[nProcPatches] = nFaces;
-
-                label& curSize =
-                    curProcProcessorPatchSize[nProcPatches];
-
-                curSize = 0;
-
-                // add faces for this processor boundary
-
-                for
-                (
-                    SLList<label>::iterator curFacesIter =
-                        curInterProcBFacesIter().begin();
-                    curFacesIter != curInterProcBFacesIter().end();
-                    ++curFacesIter
-                )
-                {
-                    // add the face
-
-                    // Remember to increment the index by one such that the
-                    // turning index works properly.  
-                    if (cellToProc_[owner[curFacesIter()]] == procI)
-                    {
-                        curProcFaceAddressing[nFaces] = curFacesIter() + 1;
-                    }
-                    else
-                    {
-                        // turning face
-                        curProcFaceAddressing[nFaces] = -(curFacesIter() + 1);
-                    }
-
-                    // increment the size
-                    curSize++;
-
-                    nFaces++;
-                }
-
-                nProcPatches++;
-            }
         }
     }
 
-    Info << "\nCalculating processor boundary addressing" << endl;
-    // For every patch of processor boundary, find the index of the original
-    // patch. Mis-alignment is caused by the fact that patches with zero size
-    // are omitted. For processor patches, set index to -1.
-    // At the same time, filter the procPatchSize_ and procPatchStartIndex_
-    // lists to exclude zero-size patches
-    forAll (procPatchSize_, procI)
+
+    // Done internal bits of the new mesh and the ordinary patches.
+
+
+    // Per processor, from neighbour processor to the interprocessorpatch that
+    // communicates with that neighbour.
+    List<Map<label> > procNbrToInterPatch(nProcs_);
+    // Per processor the faces per interprocessorpatch.
+    List<DynamicList<DynamicList<label> > > interPatchFaces(nProcs_);
+
+    // Processor boundaries from internal faces
+    forAll (neighbour, facei)
     {
-        // Make a local copy of old lists
-        const labelList oldPatchSizes = procPatchSize_[procI];
+        label ownerProc = cellToProc_[owner[facei]];
+        label nbrProc = cellToProc_[neighbour[facei]];
 
-        const labelList oldPatchStarts = procPatchStartIndex_[procI];
-
-        labelList& curPatchSizes = procPatchSize_[procI];
-
-        labelList& curPatchStarts = procPatchStartIndex_[procI];
-
-        const labelList& curProcessorPatchSizes =
-            procProcessorPatchSize_[procI];
-
-        labelList& curBoundaryAddressing = procBoundaryAddressing_[procI];
-
-        curBoundaryAddressing.setSize
-        (
-            oldPatchSizes.size()
-          + curProcessorPatchSizes.size()
-        );
-
-        label nPatches = 0;
-
-        forAll (oldPatchSizes, patchi)
+        if (ownerProc != nbrProc)
         {
-            if (!filterEmptyPatches || oldPatchSizes[patchi] > 0)
+            // inter - processor patch face found.
+            addInterProcFace
+            (
+                facei,
+                ownerProc,
+                nbrProc,
+                procNbrToInterPatch,
+                interPatchFaces
+            );
+        }
+    }
+
+    // Add the proper processor faces to the sub information. Since faces
+    // originate from internal faces this is always -1.
+    List<labelListList> subPatchIDs(nProcs_);
+    List<labelListList> subPatchStarts(nProcs_);
+    forAll(interPatchFaces, procI)
+    {
+        label nInterfaces = interPatchFaces[procI].size();
+
+        subPatchIDs[procI].setSize(nInterfaces, labelList(1, -1));
+        subPatchStarts[procI].setSize(nInterfaces, labelList(1, 0));
+    }
+
+
+    // Processor boundaries from split cyclics
+    forAll (patches, patchi)
+    {
+        if (isA<cyclicPolyPatch>(patches[patchi]))
+        {
+            const cyclicPolyPatch& pp = refCast<const cyclicPolyPatch>
+            (
+                patches[patchi]
+            );
+
+            // cyclic: check opposite side on this processor
+            const unallocLabelList& patchFaceCells = pp.faceCells();
+            const unallocLabelList& nbrPatchFaceCells =
+                pp.neighbPatch().faceCells();
+
+            // Store old sizes. Used to detect which inter-proc patches
+            // have been added to.
+            labelListList oldInterfaceSizes(nProcs_);
+            forAll(oldInterfaceSizes, procI)
             {
-                curBoundaryAddressing[nPatches] = patchi;
+                labelList& curOldSizes = oldInterfaceSizes[procI];
 
-                curPatchSizes[nPatches] = oldPatchSizes[patchi];
+                curOldSizes.setSize(interPatchFaces[procI].size());
+                forAll(curOldSizes, interI)
+                {
+                    curOldSizes[interI] =
+                        interPatchFaces[procI][interI].size();
+                }
+            }
 
-                curPatchStarts[nPatches] = oldPatchStarts[patchi];
+            // Add faces with different owner and neighbour processors
+            forAll (patchFaceCells, facei)
+            {
+                const label ownerProc = cellToProc_[patchFaceCells[facei]];
+                const label nbrProc = cellToProc_[nbrPatchFaceCells[facei]];
+                if (ownerProc != nbrProc)
+                {
+                    // inter - processor patch face found.
+                    addInterProcFace
+                    (
+                        pp.start()+facei,
+                        ownerProc,
+                        nbrProc,
+                        procNbrToInterPatch,
+                        interPatchFaces
+                    );
+                }
+            }
 
-                nPatches++;
+            // 1. Check if any faces added to existing interfaces
+            forAll(oldInterfaceSizes, procI)
+            {
+                const labelList& curOldSizes = oldInterfaceSizes[procI];
+
+                forAll(curOldSizes, interI)
+                {
+                    label oldSz = curOldSizes[interI];
+                    if (interPatchFaces[procI][interI].size() > oldSz)
+                    {
+                        // Added faces to this interface. Add an entry
+                        append(subPatchIDs[procI][interI], patchi);
+                        append(subPatchStarts[procI][interI], oldSz);
+                    }
+                }
+            }
+
+            // 2. Any new interfaces
+            forAll(subPatchIDs, procI)
+            {
+                label nIntfcs = interPatchFaces[procI].size();
+                subPatchIDs[procI].setSize(nIntfcs, labelList(1, patchi));
+                subPatchStarts[procI].setSize(nIntfcs, labelList(1, 0));
             }
         }
-
-        // reset to the size of live patches
-        curPatchSizes.setSize(nPatches);
-        curPatchStarts.setSize(nPatches);
-
-        forAll (curProcessorPatchSizes, procPatchI)
-        {
-            curBoundaryAddressing[nPatches] = -1;
-
-            nPatches++;
-        }
-
-        curBoundaryAddressing.setSize(nPatches);
     }
+
+
+    // Shrink processor patch face addressing
+    forAll(interPatchFaces, procI)
+    {
+        DynamicList<DynamicList<label> >& curInterPatchFaces =
+            interPatchFaces[procI];
+
+        forAll(curInterPatchFaces, i)
+        {
+            curInterPatchFaces[i].shrink();
+        }
+        curInterPatchFaces.shrink();
+    }
+
+
+    // Sort inter-proc patch by neighbour
+    labelList order;
+    forAll(procNbrToInterPatch, procI)
+    {
+        label nInterfaces = procNbrToInterPatch[procI].size();
+
+        procNeighbourProcessors_[procI].setSize(nInterfaces);
+        procProcessorPatchSize_[procI].setSize(nInterfaces);
+        procProcessorPatchStartIndex_[procI].setSize(nInterfaces);
+        procProcessorPatchSubPatchIDs_[procI].setSize(nInterfaces);
+        procProcessorPatchSubPatchStarts_[procI].setSize(nInterfaces);
+
+        Info<< "Processor " << procI << endl;
+
+        // Get sorted neighbour processors
+        const Map<label>& curNbrToInterPatch = procNbrToInterPatch[procI];
+        labelList nbrs = curNbrToInterPatch.toc();
+        sortedOrder(nbrs, order);
+
+        DynamicList<DynamicList<label> >& curInterPatchFaces =
+            interPatchFaces[procI];
+
+        forAll(order, i)
+        {
+            const label nbrProc = nbrs[i];
+            const label interPatch = curNbrToInterPatch[nbrProc];
+
+            procNeighbourProcessors_[procI][i] = nbrProc;
+            procProcessorPatchSize_[procI][i] = curInterPatchFaces[i].size();
+            procProcessorPatchStartIndex_[procI][i] =
+                procFaceAddressing_[procI].size();
+
+            // Add size as last element to substarts and transfer
+            append
+            (
+                subPatchStarts[procI][interPatch],
+                curInterPatchFaces[interPatch].size()
+            );
+            procProcessorPatchSubPatchIDs_[procI][i].transfer
+            (
+                subPatchIDs[procI][interPatch]
+            );
+            procProcessorPatchSubPatchStarts_[procI][i].transfer
+            (
+                subPatchStarts[procI][interPatch]
+            );
+
+            Info<< "    nbr:" << nbrProc << endl;
+            Info<< "    interpatch:" << interPatch << endl;
+            Info<< "    size:" << procProcessorPatchSize_[procI][i] << endl;
+            Info<< "    start:" << procProcessorPatchStartIndex_[procI][i]
+                << endl;
+            Info<< "    subPatches:" << procProcessorPatchSubPatchIDs_[procI][i]
+                << endl;
+            Info<< "    subStarts:"
+                << procProcessorPatchSubPatchStarts_[procI][i] << endl;
+
+            // And add all the face labels for interPatch
+            DynamicList<label>& interPatchFaces =
+                curInterPatchFaces[interPatch];
+
+            forAll(interPatchFaces, j)
+            {
+                procFaceAddressing_[procI].append(interPatchFaces[j]);
+            }
+            interPatchFaces.clearStorage();
+        }
+        curInterPatchFaces.clearStorage();
+        procFaceAddressing_[procI].shrink();
+    }
+
+
+    // Set the patch map. No filterPatches allowed.
+    forAll(procBoundaryAddressing_, procI)
+    {
+        label nNormal = procPatchSize_[procI].size();
+        label nInterProc = procProcessorPatchSize_[procI].size();
+
+        procBoundaryAddressing_[procI].setSize(nNormal + nInterProc);
+
+        for (label patchI = 0; patchI < nNormal; patchI++)
+        {
+            procBoundaryAddressing_[procI][patchI] = patchI;
+        }
+        for (label patchI = nNormal; patchI < nNormal+nInterProc; patchI++)
+        {
+            procBoundaryAddressing_[procI][patchI] = -1;
+        }
+    }
+
+//XXXXXXX
+// Print a bit
+    forAll(procPatchStartIndex_, procI)
+    {
+        Info<< "Processor:" << procI << endl;
+
+        Info<< "    total faces:" << procFaceAddressing_[procI].size() << endl;
+
+        const labelList& curProcPatchStartIndex = procPatchStartIndex_[procI];
+
+        forAll(curProcPatchStartIndex, patchI)
+        {
+            Info<< "    patch:" << patchI
+                << "\tstart:" << curProcPatchStartIndex[patchI]
+                << "\tsize:" << procPatchSize_[procI][patchI]
+                << endl;
+        }
+    }
+    Info<< endl;
+
+    forAll(procBoundaryAddressing_, procI)
+    {
+        Info<< "Processor:" << procI << endl;
+        Info<< "    patchMap:" << procBoundaryAddressing_[procI] << endl;
+    }
+    Info<< endl;
+
+    forAll(procNeighbourProcessors_, procI)
+    {
+        Info<< "Processor " << procI << endl;
+
+        forAll(procNeighbourProcessors_[procI], i)
+        {
+            Info<< "    nbr:" << procNeighbourProcessors_[procI][i] << endl;
+            Info<< "    size:" << procProcessorPatchSize_[procI][i] << endl;
+            Info<< "    start:" << procProcessorPatchStartIndex_[procI][i]
+                << endl;
+        }
+    }
+    Info<< endl;
+
+//    forAll(procFaceAddressing_, procI)
+//    {
+//        Info<< "Processor:" << procI << endl;
+//
+//        Info<< "    faces:" << procFaceAddressing_[procI] << endl;
+//    }
+
+
 
     Info << "\nDistributing points to processors" << endl;
     // For every processor, loop through the list of faces for the processor.
@@ -700,78 +524,5 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         // Reset the size of used points
         procPointLabels.setSize(nUsedPoints);
-    }
-
-    // Gather data about globally shared points
-
-    // Memory management
-    {
-        labelList pointsUsage(nPoints(), 0);
-
-        // Globally shared points are the ones used by more than 2 processors
-        // Size the list approximately and gather the points
-        labelHashSet gSharedPoints
-        (
-            min(100, nPoints()/1000)
-        );
-
-        // Loop through all the processors and mark up points used by
-        // processor boundaries.  When a point is used twice, it is a
-        // globally shared point
-
-        for (label procI = 0; procI < nProcs_; procI++)
-        {
-            // Get list of face labels
-            const labelList& curFaceLabels = procFaceAddressing_[procI];
-
-            // Get start of processor faces
-            const labelList& curProcessorPatchStarts =
-                procProcessorPatchStartIndex_[procI];
-
-            const labelList& curProcessorPatchSizes =
-                procProcessorPatchSize_[procI];
-
-            // Reset the lookup list
-            pointsUsage = 0;
-
-            forAll (curProcessorPatchStarts, patchi)
-            {
-                const label curStart = curProcessorPatchStarts[patchi];
-                const label curEnd = curStart + curProcessorPatchSizes[patchi];
-
-                for
-                (
-                    label facei = curStart;
-                    facei < curEnd;
-                    facei++
-                )
-                {
-                    // Mark the original face as used
-                    // Remember to decrement the index by one (turning index)
-                    // 
-                    const label curF = mag(curFaceLabels[facei]) - 1;
-
-                    const face& f = fcs[curF];
-
-                    forAll (f, pointi)
-                    {
-                        if (pointsUsage[f[pointi]] == 0)
-                        {
-                            // Point not previously used
-                            pointsUsage[f[pointi]] = patchi + 1;
-                        }
-                        else if (pointsUsage[f[pointi]] != patchi + 1)
-                        {
-                            // Point used by some other patch = global point!
-                            gSharedPoints.insert(f[pointi]);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Grab the result from the hash list
-        globallySharedPoints_ = gSharedPoints.toc();
-        sort(globallySharedPoints_);
     }
 }

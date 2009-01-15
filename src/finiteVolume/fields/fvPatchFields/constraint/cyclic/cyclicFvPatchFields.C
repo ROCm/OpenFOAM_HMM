@@ -36,6 +36,7 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 makePatchFields(cyclic);
+//makePatchTypeField(fvPatchScalarField, cyclicFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

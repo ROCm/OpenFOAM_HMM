@@ -210,13 +210,6 @@ class globalMeshData
         //- Calculate shared edge addressing
         void calcSharedEdges() const;
 
-        //- Count coincident faces.
-        static label countCoincidentFaces
-        (
-            const scalar tolDim,
-            const vectorField& separationDist
-        );
-
         //- Disallow default bitwise copy construct
         globalMeshData(const globalMeshData&);
 

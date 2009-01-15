@@ -40,7 +40,6 @@ SourceFiles
 #include "List.H"
 #include "Map.H"
 #include "EdgeMap.H"
-#include "tensorField.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,37 +57,47 @@ List<T> transform
     const UList<T>& field
 );
 
-//- Apply transformation to list. Either single transformation tensor
-//  or one tensor per element.
+//- Apply transformation to list.
 template<class T>
-void transformList(const tensorField&, UList<T>&);
-
-template<class T>
-void transformList(const tensorField&, Map<T>&);
+void transformList(const tensor&, UList<T>&);
 
 template<class T>
-void transformList(const tensorField&, EdgeMap<T>&);
+void transformList(const tensor&, Map<T>&);
+
+template<class T>
+void transformList(const tensor&, EdgeMap<T>&);
 
 
 template<>
-inline void transformList(const tensorField&, UList<label>&)
+inline void transformList(const tensor&, UList<bool>&)
 {}
 template<>
-inline void transformList(const tensorField&, Map<label>&)
+inline void transformList(const tensor&, Map<bool>&)
 {}
 template<>
-inline void transformList(const tensorField&, EdgeMap<label>&)
+inline void transformList(const tensor&, EdgeMap<bool>&)
 {}
 
 
 template<>
-inline void transformList(const tensorField&, UList<scalar>&)
+inline void transformList(const tensor&, UList<label>&)
 {}
 template<>
-inline void transformList(const tensorField&, Map<scalar>&)
+inline void transformList(const tensor&, Map<label>&)
 {}
 template<>
-inline void transformList(const tensorField&, EdgeMap<scalar>&)
+inline void transformList(const tensor&, EdgeMap<label>&)
+{}
+
+
+template<>
+inline void transformList(const tensor&, UList<scalar>&)
+{}
+template<>
+inline void transformList(const tensor&, Map<scalar>&)
+{}
+template<>
+inline void transformList(const tensor&, EdgeMap<scalar>&)
 {}
 
 

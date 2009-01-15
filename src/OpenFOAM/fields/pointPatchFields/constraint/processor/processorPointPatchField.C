@@ -134,22 +134,120 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
                 procPatch_.nonGlobalPatchPoints();
 
             const processorPolyPatch& ppp = procPatch_.procPolyPatch();
-            const labelListList& pointFaces = ppp.pointFaces();
-            const tensorField& forwardT = ppp.forwardT();
 
-            if (forwardT.size() == 1)
+            // Mark patch that transformed point:
+            // -3  : global patch point so handled in different patch
+            // -2  : nonGlobalPatchPoints, initial value
+            // -1  : originating from internal face, no transform necessary
+            // >=0 : originating from coupled patch
+            labelList hasTransformed(ppp.nPoints(), -3);
+            forAll(nonGlobalPatchPoints, i)
             {
-                transform(pnf, forwardT[0], pnf);
+                hasTransformed[nonGlobalPatchPoints[i]] = -2;
             }
-            else
+
+            forAll(ppp.patchIDs(), subI)
             {
-                forAll(nonGlobalPatchPoints, pfi)
+                label patchI = ppp.patchIDs()[subI];
+
+                if (patchI == -1)
                 {
-                    pnf[pfi] = transform
+                    for
                     (
-                        forwardT[pointFaces[nonGlobalPatchPoints[pfi]][0]],
-                        pnf[pfi]
-                    );
+                        label faceI = ppp.starts()[subI];
+                        faceI < ppp.starts()[subI+1];
+                        faceI++
+                    )
+                    {
+                        const face& f = ppp.localFaces()[faceI];
+
+                        forAll(f, fp)
+                        {
+                            label pointI = f[fp];
+
+                            if (hasTransformed[pointI] == -3)
+                            {
+                                // special point, handled elsewhere
+                            }
+                            else if (hasTransformed[pointI] == -2)
+                            {
+                                // first visit. Just mark.
+                                hasTransformed[pointI] = patchI;
+                            }
+                            else if (hasTransformed[pointI] == patchI)
+                            {
+                                // already done
+                            }
+                            else
+                            {
+                                FatalErrorIn
+                                (
+                                    "processorPointPatchField<Type>::"
+                                    "swapAdd(Field<Type>& pField) const"
+                                )   << "Point " << pointI
+                                    << " on patch " << ppp.name()
+                                    << " already transformed by patch "
+                                    << hasTransformed[pointI]
+                                    << abort(FatalError);
+                            }
+                        }
+                    }
+                }
+                else if 
+                (
+                   !refCast<const coupledPolyPatch>
+                    (
+                        ppp.boundaryMesh()[patchI]
+                    ).parallel()
+                )
+                {
+                    const tensor& T = refCast<const coupledPolyPatch>
+                    (
+                        ppp.boundaryMesh()[patchI]
+                    ).forwardT();
+
+                    for
+                    (
+                        label faceI = ppp.starts()[subI];
+                        faceI < ppp.starts()[subI+1];
+                        faceI++
+                    )
+                    {
+                        const face& f = ppp.localFaces()[faceI];
+
+                        forAll(f, fp)
+                        {
+                            label pointI = f[fp];
+
+                            if (hasTransformed[pointI] == -3)
+                            {
+                                // special point, handled elsewhere
+                            }
+                            else if (hasTransformed[pointI] == -2)
+                            {
+                                pnf[pointI] = transform(T, pnf[pointI]);
+
+                                hasTransformed[pointI] = patchI;
+                            }
+                            else if (hasTransformed[pointI] == patchI)
+                            {
+                                // already done
+                            }
+                            else
+                            {
+                                FatalErrorIn
+                                (
+                                    "processorPointPatchField<Type>::"
+                                    "swapAdd(Field<Type>& pField) const"
+                                )   << "Point " << pointI
+                                    << " on patch " << ppp.name()
+                                    << " subPatch " << patchI
+                                    << " already transformed by patch "
+                                    << hasTransformed[pointI]
+                                    << abort(FatalError);
+                            }
+                        }
+                    }
                 }
             }
         }

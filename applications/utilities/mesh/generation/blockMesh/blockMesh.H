@@ -88,6 +88,30 @@ class blockMesh
             const faceList& patchShapes
         );
 
+        bool readPatches
+        (
+            const dictionary& meshDescription,
+            const pointField& tmpBlockPoints,
+            faceListList& tmpBlocksPatches,
+            wordList& patchNames,
+            wordList& patchTypes,
+            wordList& nbrPatchNames
+        );
+
+        bool readBoundary
+        (
+            const dictionary& meshDescription,
+            const pointField& tmpBlockPoints,
+            faceListList& tmpBlocksPatches,
+            PtrList<dictionary>& patchDicts
+        );
+
+        void createCellShapes
+        (
+            const pointField& tmpBlockPoints,
+            PtrList<cellShape>& tmpBlockCells
+        );
+
         polyMesh* createTopology(IOdictionary&);
         void checkBlockMesh(const polyMesh&);
 
@@ -140,11 +164,15 @@ public:
                 return patches_;
             }
 
-            wordList patchNames() const;
 
-            wordList patchTypes() const;
+            //- Get patch information from the topology mesh
+            PtrList<dictionary> patchDicts() const;
 
-            wordList patchPhysicalTypes() const;
+//            wordList patchNames() const;
+//
+//            wordList patchTypes() const;
+//
+//            wordList patchPhysicalTypes() const;
 
             //- Number of blocks with specified zones
             label numZonedBlocks() const;

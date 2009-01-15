@@ -91,8 +91,8 @@ domainDecomposition::domainDecomposition(const IOobject& io)
     procNeighbourProcessors_(nProcs_),
     procProcessorPatchSize_(nProcs_),
     procProcessorPatchStartIndex_(nProcs_),
-    globallySharedPoints_(0),
-    cyclicParallel_(false)
+    procProcessorPatchSubPatchIDs_(nProcs_),
+    procProcessorPatchSubPatchStarts_(nProcs_)
 {
     if (decompositionDict_.found("distributed"))
     {
@@ -113,15 +113,6 @@ domainDecomposition::~domainDecomposition()
 bool domainDecomposition::writeDecomposition()
 {
     Info<< "\nConstructing processor meshes" << endl;
-
-    // Make a lookup map for globally shared points
-    Map<label> sharedPointLookup(2*globallySharedPoints_.size());
-
-    forAll (globallySharedPoints_, pointi)
-    {
-        sharedPointLookup.insert(globallySharedPoints_[pointi], pointi);
-    }
-
 
     // Mark point/faces/cells that are in zones.
     // -1   : not in zone
@@ -293,6 +284,12 @@ bool domainDecomposition::writeDecomposition()
         const labelList& curProcessorPatchStarts =
             procProcessorPatchStartIndex_[procI];
 
+        const labelListList& curSubPatchIDs = 
+            procProcessorPatchSubPatchIDs_[procI];
+
+        const labelListList& curSubStarts = 
+            procProcessorPatchSubPatchStarts_[procI];
+
         const polyPatchList& meshPatches = boundaryMesh();
 
         List<polyPatch*> procPatches
@@ -331,11 +328,23 @@ bool domainDecomposition::writeDecomposition()
                     nPatches,
                     procMesh.boundaryMesh(),
                     procI,
-                    curNeighbourProcessors[procPatchI]
+                    curNeighbourProcessors[procPatchI],
+                    curSubPatchIDs[procPatchI],
+                    curSubStarts[procPatchI]
             );
 
             nPatches++;
         }
+
+
+forAll(procPatches, patchI)
+{
+    Pout<< "    " << patchI
+        << '\t' << "name:" << procPatches[patchI]->name()
+        << '\t' << "type:" << procPatches[patchI]->type()
+        << '\t' << "size:" << procPatches[patchI]->size()
+        << endl;
+}
 
         // Add boundary patches
         procMesh.addPatches(procPatches);

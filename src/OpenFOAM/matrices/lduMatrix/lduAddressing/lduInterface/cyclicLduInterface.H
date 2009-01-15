@@ -50,6 +50,12 @@ namespace Foam
 
 class cyclicLduInterface
 {
+    // Private data
+
+        //- Coupled patch
+        const label neighbPatchID_;
+
+//        const cyclicLduInterface* neighbPatch_;
 
 public:
 
@@ -57,6 +63,9 @@ public:
     TypeName("cyclicLduInterface");
 
     // Constructors
+
+        //- Construct from components
+        cyclicLduInterface(const label neighbPatchID);
 
     // Destructor
 
@@ -67,11 +76,28 @@ public:
 
         // Access
 
+            //- Return processor number
+            label neighbPatchID() const
+            {
+                return neighbPatchID_;
+            }
+
+//            //- Return processor number
+//            const cyclicLduInterface& neighbPatch() const
+//            {
+//                if (!neighbPatch_)
+//                {
+//                    FatalErrorIn("cyclicLduInterface::neighbPatch() const")
+//                        << "Not owner." << abort(FatalError);
+//                }
+//                return neighbPatchID_;
+//            }
+
             //- Return face transformation tensor
-            virtual const tensorField& forwardT() const = 0;
+            virtual const tensor& forwardT() const = 0;
 
             //- Return face reverse transformation tensor
-            virtual const tensorField& reverseT() const = 0;
+            virtual const tensor& reverseT() const = 0;
 };
 
 

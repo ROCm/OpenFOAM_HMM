@@ -120,39 +120,24 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 
     celli_ = ppp.faceCells()[facei_];
 
-    if (!ppp.parallel())
+    label subPatchI = ppp.whichSubPatch(facei_);
+
+    const coupledPolyPatch& cpp =
+        refCast<const coupledPolyPatch>
+        (cloud_.pMesh().boundaryMesh()[subPatchI]);
+
+    // We are on receiving end.
+    if (!cpp.parallel())
     {
-        if (ppp.forwardT().size() == 1)
-        {
-            const tensor& T = ppp.forwardT()[0];
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
-        else
-        {
-            const tensor& T = ppp.forwardT()[facei_];
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
+        const tensor& T = cpp.forwardT();
+        transformPosition(T);
+        static_cast<ParticleType&>(*this).transformProperties(T);
     }
-    else if (ppp.separated())
+    else if (cpp.separated())
     {
-        if (ppp.separation().size() == 1)
-        {
-            position_ -= ppp.separation()[0];
-            static_cast<ParticleType&>(*this).transformProperties
-            (
-                -ppp.separation()[0]
-            );
-        }
-        else
-        {
-            position_ -= ppp.separation()[facei_];
-            static_cast<ParticleType&>(*this).transformProperties
-            (
-                -ppp.separation()[facei_]
-            );
-        }
+        const vector d = -cpp.separation();
+        position_ += d;
+        static_cast<ParticleType&>(*this).transformProperties(d);
     }
 
     // Reset the face index for the next tracking operation
@@ -208,13 +193,13 @@ Foam::label Foam::Particle<ParticleType>::track
 }
 
 
-
 template<class ParticleType>
 Foam::label Foam::Particle<ParticleType>::track(const vector& endPosition)
 {
     int dummyTd;
     return track(endPosition, dummyTd);
 }
+
 
 template<class ParticleType>
 template<class TrackData>
@@ -461,7 +446,7 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
     TrackData&
 )
 {
-    label patchFacei_ = cpp.whichFace(facei_);
+    // Transform (still on sending side)
 
     facei_ = cpp.transformGlobalFace(facei_);
 
@@ -469,18 +454,17 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
 
     if (!cpp.parallel())
     {
-        const tensor& T = cpp.transformT(patchFacei_);
+        const tensor& T = cpp.reverseT();
 
         transformPosition(T);
         static_cast<ParticleType&>(*this).transformProperties(T);
     }
     else if (cpp.separated())
     {
-        position_ += cpp.separation(patchFacei_);
-        static_cast<ParticleType&>(*this).transformProperties
-        (
-            cpp.separation(patchFacei_)
-        );
+        const vector& d = cpp.separation();
+
+        position_ += d;
+        static_cast<ParticleType&>(*this).transformProperties(d);
     }
 }
 

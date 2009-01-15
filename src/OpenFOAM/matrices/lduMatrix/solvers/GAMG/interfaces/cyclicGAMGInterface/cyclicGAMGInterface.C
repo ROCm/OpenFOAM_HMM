@@ -26,6 +26,7 @@ License
 
 #include "cyclicGAMGInterface.H"
 #include "addToRunTimeSelectionTable.H"
+#include "Map.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -50,6 +51,10 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     const labelField& neighbourRestrictAddressing
 )
 :
+    cyclicLduInterface
+    (
+        refCast<const cyclicLduInterface>(fineInterface).neighbPatchID()
+    ),
     GAMGInterface
     (
         fineInterface,
@@ -59,13 +64,13 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
 {
     // Make a lookup table of entries for owner/neighbour
-    HashTable<SLList<label>, label, Hash<label> > neighboursTable
+    Map<SLList<label> > neighboursTable
     (
         localRestrictAddressing.size()
     );
 
     // Table of face-sets to be agglomerated
-    HashTable<SLList<SLList<label> >, label, Hash<label> > faceFaceTable
+    Map<SLList<SLList<label> > > faceFaceTable
     (
         localRestrictAddressing.size()
     );
@@ -228,6 +233,9 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::transfer
     const unallocLabelList& interfaceData
 ) const
 {
+    notImplemented("cyclicGAMGInterface::transfer(..)");
+
+//XXXXX to be done
     tmp<labelField> tpnf(new labelField(size()));
     labelField& pnf = tpnf();
 
@@ -249,12 +257,13 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
+    notImplemented("cyclicGAMGInterface::internalFieldTransfer(..)");
+
+//XXXXX to be done
     tmp<labelField> tpnf(new labelField(size()));
     labelField& pnf = tpnf();
 
-    label sizeby2 = size()/2;
-
-    for (label facei=0; facei<sizeby2; facei++)
+    forAll(pnf, facei)
     {
         pnf[facei] = iF[faceCells_[facei + sizeby2]];
         pnf[facei + sizeby2] = iF[faceCells_[facei]];

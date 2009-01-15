@@ -32,15 +32,7 @@ Description
 
 SourceFiles
     polyPatch.C
-    calcPolyPatchAddressing.C
-    calcPolyPatchFaceCells.C
-    calcPolyPatchIntBdryEdges.C
-    calcPolyPatchMeshEdges.C
-    calcPolyPatchMeshData.C
-    calcPolyPatchPointAddressing.C
-    clearPolyPatch.C
     newPolyPatch.C
-    polyPatchTools.C
 
 \*---------------------------------------------------------------------------*/
 

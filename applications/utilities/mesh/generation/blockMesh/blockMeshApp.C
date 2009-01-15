@@ -190,23 +190,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Creating mesh from block mesh" << endl;
 
-    wordList patchNames = blocks.patchNames();
-    wordList patchTypes = blocks.patchTypes();
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
-    wordList patchPhysicalTypes = blocks.patchPhysicalTypes();
-
-    preservePatchTypes
-    (
-        runTime,
-        runTime.constant(),
-        polyMeshDir,
-        patchNames,
-        patchTypes,
-        defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
-    );
 
     polyMesh mesh
     (
@@ -219,11 +204,9 @@ int main(int argc, char *argv[])
         blocks.points(),
         blocks.cells(),
         blocks.patches(),
-        patchNames,
-        patchTypes,
+        blocks.patchDicts(),
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
 

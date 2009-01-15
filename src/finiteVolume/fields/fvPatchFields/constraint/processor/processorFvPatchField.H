@@ -60,7 +60,10 @@ class processorFvPatchField
         //- Local reference cast into the processor patch
         const processorFvPatch& procPatch_;
 
+    // Private Member Functions
 
+        //- Get other patchfield
+        const coupledFvPatchField<Type>& patchField(const label patchID) const;
 public:
 
     //- Runtime type information
@@ -206,23 +209,100 @@ public:
                 return procPatch_.neighbProcNo();
             }
 
-            //- Does the patch field perform the transfromation
-            virtual bool doTransform() const
-            {
-                return !(procPatch_.parallel() || pTraits<Type>::rank == 0);
-            }
-
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return procPatch_.forwardT();
-            }
-
             //- Return rank of component for transform
             virtual int rank() const
             {
                 return pTraits<Type>::rank;
             }
+
+//            //- Transform given patch component field
+//            void transformCoupleField
+//            (
+//                scalarField& f,
+//                const direction cmpt
+//            ) const;
+
+        // Referred-patch functionality. Get called with a slice (size, start)
+        // of a patch that supplies fields and geometry/topology.
+
+            //- Get patch-normal gradient
+            virtual void snGrad
+            (
+                Field<Type>& exchangeBuf,
+                const Field<Type>& subFld,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const
+            {
+                notImplemented("processorFvPatchField::snGrad(..)");
+            }
+
+            //- Initialise the evaluation of the patch field.
+            virtual void initEvaluate
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const
+            {
+                notImplemented("processorFvPatchField::initEvaluate(..)");
+            }
+
+            //- Evaluate the patch field.
+            virtual void evaluate
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const
+            {
+                notImplemented("processorFvPatchField::evaluate(..)");
+            }
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix& m,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                scalarField& exchangeBuf
+            ) const
+            {
+                notImplemented
+                (
+                    "processorFvPatchField::initInterfaceMatrixUpdate(..)"
+                );
+            }
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix&,
+                const scalarField& coeffs,
+                const direction,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                scalarField& exchangeBuf
+            ) const
+            {
+                notImplemented
+                (
+                    "processorFvPatchField::updateInterfaceMatrix(..)"
+                );
+            }
+
+
 };
 
 

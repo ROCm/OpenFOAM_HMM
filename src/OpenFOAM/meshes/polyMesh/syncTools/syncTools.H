@@ -48,7 +48,6 @@ SourceFiles
 
 #include "UList.H"
 #include "Pstream.H"
-#include "transformList.H"
 #include "Map.H"
 #include "EdgeMap.H"
 #include "PackedList.H"
@@ -60,7 +59,7 @@ namespace Foam
 
 class polyBoundaryMesh;
 class polyMesh;
-class coupledPolyPatch;
+class processorPolyPatch;
 
 /*---------------------------------------------------------------------------*\
                            Class syncTools Declaration
@@ -74,18 +73,17 @@ class syncTools
         static bool hasCouples(const polyBoundaryMesh&);
 
         //- Check for single transformation tensor only.
-        static void checkTransform(const coupledPolyPatch&, const bool);
+        static void checkTransform(const processorPolyPatch&, const bool);
 
-        //- Apply separation to list. Either single vector or one vector
-        //  per element.
+        //- Apply separation to list.
         template <class T>
-        static void separateList(const vectorField&, UList<T>&);
-
-        template <class T>
-        static void separateList(const vectorField&, Map<T>&);
+        static void separateList(const vector&, UList<T>&);
 
         template <class T>
-        static void separateList(const vectorField&, EdgeMap<T>&);
+        static void separateList(const vector&, Map<T>&);
+
+        template <class T>
+        static void separateList(const vector&, EdgeMap<T>&);
 
         //- Combine value with existing value in map.
         template <class T, class CombineOp>
@@ -271,13 +269,13 @@ public:
 
 
 template<>
-void syncTools::separateList(const vectorField&, UList<vector>&);
+void syncTools::separateList(const vector&, UList<vector>&);
 
 template<>
-void syncTools::separateList(const vectorField&, Map<vector>&);
+void syncTools::separateList(const vector&, Map<vector>&);
 
 template<>
-void syncTools::separateList(const vectorField&, EdgeMap<vector>&);
+void syncTools::separateList(const vector&, EdgeMap<vector>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

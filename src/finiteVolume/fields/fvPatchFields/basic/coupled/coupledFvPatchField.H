@@ -121,6 +121,124 @@ public:
 
     // Member functions
 
+
+        // Referred-patch functionality. Get called with a slice (size, start)
+        // of a patch that supplies fields and geometry/topology.
+
+        // Evaluation functions
+
+            //- Return internal field next to patch as patch field
+            virtual void patchInternalField
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const;
+
+            //- Get patch-normal gradient
+            virtual void snGrad
+            (
+                Field<Type>& exchangeBuf,
+                const Field<Type>& subFld,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const = 0;
+
+            //- Initialise the evaluation of the patch field.
+            virtual void initEvaluate
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const = 0;
+
+            //- Evaluate the patch field.
+            virtual void evaluate
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const = 0;
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //  evaluation of the value of this patchField with given weights
+            virtual tmp<Field<Type> > valueInternalCoeffs
+            (
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                const tmp<scalarField>&
+            ) const;
+
+            //- Return the matrix source coefficients corresponding to the
+            //  evaluation of the value of this patchField with given weights
+            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            (
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                const tmp<scalarField>&
+            ) const;
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //  evaluation of the gradient of this patchField
+            virtual tmp<Field<Type> > gradientInternalCoeffs
+            (
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const;
+
+            //- Return the matrix source coefficients corresponding to the
+            //  evaluation of the gradient of this patchField
+            virtual tmp<Field<Type> > gradientBoundaryCoeffs
+            (
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const;
+
+
+        // Coupled interface functionality
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix& m,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                scalarField& exchangeBuf
+            ) const = 0;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix&,
+                const scalarField& coeffs,
+                const direction,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                scalarField& exchangeBuf
+            ) const = 0;
+
+        //- Write
+        //?virtual void write(Ostream&) const;
+//XXXX
+
+
+
         // Access
 
             //- Return true if this patch field is derived from

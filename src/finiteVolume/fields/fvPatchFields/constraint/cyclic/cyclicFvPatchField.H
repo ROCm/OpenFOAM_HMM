@@ -142,7 +142,7 @@ public:
 
         // Access
 
-            //- Retirn local reference cast into the cyclic patch
+            //- Return local reference cast into the cyclic patch
             const cyclicFvPatch& cyclicPatch() const
             {
                 return cyclicPatch_;
@@ -150,6 +150,66 @@ public:
 
 
         // Evaluation functions
+
+        // Referred-patch functionality. Get called with a slice (size, start)
+        // of a patch that supplies fields and geometry/topology.
+
+            //- Get patch-normal gradient
+            virtual void snGrad
+            (
+                Field<Type>& exchangeBuf,
+                const Field<Type>& subFld,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const;
+
+            //- Initialise the evaluation of the patch field.
+            virtual void initEvaluate
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const;
+
+            //- Evaluate the patch field.
+            virtual void evaluate
+            (
+                Field<Type>& exchangeBuf,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start
+            ) const;
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix& m,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                scalarField& exchangeBuf
+            ) const;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                const scalarField& psiInternal,
+                scalarField& result,
+                const lduMatrix&,
+                const scalarField& coeffs,
+                const direction,
+                const coupledFvPatch& referringPatch,
+                const label size,
+                const label start,
+                scalarField& exchangeBuf
+            ) const;
+
 
             //- Return neighbour coupled given internal cell data
             tmp<Field<Type> > patchNeighbourField() const;
@@ -175,13 +235,13 @@ public:
             }
 
             //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
+            virtual const tensor& forwardT() const
             {
                 return cyclicPatch_.forwardT();
             }
 
             //- Return neighbour-cell transformation tensor
-            virtual const tensorField& reverseT() const
+            virtual const tensor& reverseT() const
             {
                 return cyclicPatch_.reverseT();
             }

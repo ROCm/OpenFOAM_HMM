@@ -113,14 +113,49 @@ public:
             }
         }
 
-        //- Return face transformation tensor
-        virtual const tensorField& forwardT() const
+        const processorPolyPatch& procPolyPatch() const
         {
-            return procPolyPatch_.forwardT();
+            return procPolyPatch_;
         }
 
+        //- Are the planes separated.
+        virtual bool separated() const
+        {
+            notImplemented("processorFvPatch::separated() const");
+            return false;
+        }
+
+        //- If the planes are separated the separation vector.
+        virtual const vector& separation() const
+        {
+            notImplemented("processorFvPatch::separation() const");
+            return vector::zero;
+        }
+
+        //- Are the cyclic planes parallel
+        virtual bool parallel() const
+        {
+            notImplemented("processorFvPatch::separated() const");
+            return false;
+        }
+
+        //- Return face transformation tensor
+        virtual const tensor& forwardT() const
+        {
+            notImplemented("processorFvPatch::forwardT() const");
+            return tensor::zero;
+        }
+
+        //- Return neighbour-cell transformation tensor
+        virtual const tensor& reverseT() const
+        {
+            notImplemented("processorFvPatch::reverseT() const");
+            return tensor::zero;
+        }
+
+
         //- Return delta (P to N) vectors across coupled patch
-        tmp<vectorField> delta() const;
+        virtual tmp<vectorField> delta() const;
 
 
         // Interface transfer functions
@@ -137,14 +172,21 @@ public:
             (
                 const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
-            ) const;
+            ) const
+            {
+                notImplemented("processorFvPatch::initTransfer() const");
+            }
 
             //- Transfer and return neighbour field
             virtual tmp<labelField> transfer
             (
                 const Pstream::commsTypes commsType,
                 const unallocLabelList& interfaceData
-            ) const;
+            ) const
+            {
+                notImplemented("processorFvPatch::initTransfer() const");
+                return tmp<labelField>(new labelField());
+            }
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer

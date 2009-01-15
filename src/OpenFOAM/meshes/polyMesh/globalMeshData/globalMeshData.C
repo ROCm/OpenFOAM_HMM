@@ -414,30 +414,6 @@ void Foam::globalMeshData::calcSharedEdges() const
 }
 
 
-// Helper function to count coincident faces. This part used to be
-// in updateMesh but I've had to move it to a separate function
-// because of aliasing optimisation errors in icc9.1 on the
-// Itanium.
-Foam::label Foam::globalMeshData::countCoincidentFaces
-(
-    const scalar tolDim,
-    const vectorField& separationDist
-)
-{
-    label nCoincident = 0;
-
-    forAll(separationDist, faceI)
-    {
-        if (mag(separationDist[faceI]) < tolDim)
-        {
-            // Faces coincide
-            nCoincident++;
-        }
-    }
-    return nCoincident;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from polyMesh
@@ -781,18 +757,14 @@ void Foam::globalMeshData::updateMesh()
 
         if (Pstream::myProcNo() > procPatch.neighbProcNo())
         {
-            // Uncount my faces. Handle cyclics separately.
-
-            if (procPatch.separated())
+            forAll(procPatch.patchIDs(), i)
             {
-                const vectorField& separationDist = procPatch.separation();
-
-                nTotalFaces_ -= countCoincidentFaces(tolDim, separationDist);
-            }
-            else
-            {
-                // Normal, unseparated processor patch. Remove duplicates.
-                nTotalFaces_ -= procPatch.size();
+                if (procPatch.patchIDs()[i] == -1)
+                {
+                    // Normal, unseparated processor patch. Remove duplicates.
+                    label sz = procPatch.starts()[i+1]-procPatch.starts()[i];
+                    nTotalFaces_ -= sz;
+                }
             }
         }
     }

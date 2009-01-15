@@ -595,7 +595,11 @@ void Foam::polyTopoChange::getFaceOrder
 
     labelList& oldToNew,
     labelList& patchSizes,
-    labelList& patchStarts
+    labelList& patchStarts,
+
+    labelListList& subPatches,
+    labelListList& subPatchSizes,
+    labelListList& subPatchStarts
 ) const
 {
     oldToNew.setSize(faceOwner_.size());
@@ -668,6 +672,10 @@ void Foam::polyTopoChange::getFaceOrder
     patchSizes.setSize(nPatches_);
     patchSizes = 0;
 
+    // Per patch (that contains sub regions) the number of faces per subregion.
+    // Does not include the face originating from subRegion -1.
+    List<Map<label> > subPatchSizeMap(nPatches_);
+
     patchStarts[0] = newFaceI;
 
     for (label faceI = 0; faceI < nActiveFaces; faceI++)
@@ -675,6 +683,21 @@ void Foam::polyTopoChange::getFaceOrder
         if (region_[faceI] >= 0)
         {
             patchSizes[region_[faceI]]++;
+
+            if (subRegion_[faceI] >= 0)
+            {
+                Map<label>& subSizes = subPatchSizeMap[region_[faceI]];
+                Map<label>::iterator iter = subSizes.find(subRegion_[faceI]);
+
+                if (iter != subSizes.end())
+                {
+                    iter()++;
+                }
+                else
+                {
+                    subSizes.insert(subRegion_[faceI], 1);
+                }
+            }
         }
     }
 
@@ -686,21 +709,105 @@ void Foam::polyTopoChange::getFaceOrder
         faceI += patchSizes[patchI];
     }
 
-    //if (debug)
-    //{
-    //    Pout<< "patchSizes:" << patchSizes << nl
-    //        << "patchStarts:" << patchStarts << endl;
-    //}
+
+    // From subpatch to sub index
+    List<Map<label> > subRegionToIndex(nPatches_);
+
+    subPatches.setSize(nPatches_);
+    subPatchSizes.setSize(nPatches_);
+    subPatchStarts.setSize(nPatches_);
+
+    forAll(subPatchSizeMap, patchI)
+    {
+        if (subPatchSizeMap[patchI].size() > 0)
+        {
+            // Check if there are any internal faces. Note: no need to parallel
+            // sync sizes since processor patches are unique.
+            label nSubFaces = 0;
+            forAllConstIter(Map<label>, subPatchSizeMap[patchI], iter)
+            {
+                nSubFaces += iter();
+            }
+            label nFromInternal = patchSizes[patchI] - nSubFaces;
+
+            if (nFromInternal > 0)
+            {
+                subPatchSizeMap[patchI].insert(-1, nFromInternal);
+            }
+
+            // Sort according to patch. patch=-1 (internal faces) come first.
+            labelList usedSubs = subPatchSizeMap[patchI].toc();
+
+            // From index to subpatch
+            subPatches[patchI] = SortableList<label>(usedSubs);
+
+            // Reverse: from subpatch to index
+            forAll(subPatches, i)
+            {
+                subRegionToIndex[patchI].insert
+                (
+                    usedSubs[i],
+                    subPatches[patchI][i]
+                );
+            }
+
+            subPatchSizes[patchI].setSize(subPatches[patchI].size());
+            subPatchStarts[patchI].setSize(subPatches[patchI].size()+1);
+            label subFaceI = 0;
+            forAll(subPatches[patchI], i)
+            {
+                label subPatchI = subPatches[patchI][i];
+                subPatchSizes[patchI][i] = subPatchSizeMap[patchI][subPatchI];
+                subPatchStarts[patchI][i] = subFaceI;
+                subFaceI += subPatchSizes[patchI][i];
+            }
+            subPatchStarts[patchI][subPatchStarts[patchI].size()-1] = subFaceI;
+        }
+    }
+
+    if (debug)
+    {
+        forAll(patchSizes, patchI)
+        {
+            Pout<< "Patch:" << patchI
+                << " \tsize:" << patchSizes[patchI]
+                << " \tstart:" << patchStarts[patchI]
+                << endl;
+
+            forAll(subPatches[patchI], subI)
+            {
+                Pout<< "\tsubPatch:" << subPatches[patchI][subI]
+                    << " \tsize:" << subPatchSizes[patchI][subI]
+                    << " \tstart:" << subPatchStarts[patchI][subI]
+                    << endl;
+            }
+        }
+        Pout<< endl;
+    }
 
     labelList workPatchStarts(patchStarts);
+    labelListList workSubPatchStarts(subPatchStarts);
 
     for (label faceI = 0; faceI < nActiveFaces; faceI++)
     {
         if (region_[faceI] >= 0)
         {
-            oldToNew[faceI] = workPatchStarts[region_[faceI]]++;
+            label patchI = region_[faceI];
+
+            if (subPatchStarts[patchI].size() > 0)
+            {
+                label subPatchI = subRegion_[faceI];
+                label index = subRegionToIndex[patchI][subPatchI];
+
+                oldToNew[faceI] = workSubPatchStarts[patchI][index]++;
+            }
+            else
+            {
+                oldToNew[faceI] = workPatchStarts[region_[faceI]]++;
+            }
         }
     }
+
 
     // Retired faces.
     for (label faceI = nActiveFaces; faceI < oldToNew.size(); faceI++)
@@ -708,19 +815,22 @@ void Foam::polyTopoChange::getFaceOrder
         oldToNew[faceI] = faceI;
     }
 
-    // Check done all faces.
-    forAll(oldToNew, faceI)
+    if (debug)
     {
-        if (oldToNew[faceI] == -1)
+        // Check done all faces.
+        forAll(oldToNew, faceI)
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::getFaceOrder"
-                "(const label, const labelList&, const labelList&)"
-                " const"
-            )   << "Did not determine new position"
-                << " for face " << faceI
-                << abort(FatalError);
+            if (oldToNew[faceI] == -1)
+            {
+                FatalErrorIn
+                (
+                    "polyTopoChange::getFaceOrder"
+                    "(const label, const labelList&, const labelList&)"
+                    " const"
+                )   << "Did not determine new position"
+                    << " for face " << faceI
+                    << abort(FatalError);
+            }
         }
     }
 }
@@ -740,6 +850,10 @@ void Foam::polyTopoChange::reorderCompactFaces
     reorder(oldToNew, region_);
     region_.setSize(newSize);
     region_.shrink();
+
+    reorder(oldToNew, subRegion_);
+    subRegion_.setSize(newSize);
+    subRegion_.shrink();
 
     reorder(oldToNew, faceOwner_);
     faceOwner_.setSize(newSize);
@@ -773,7 +887,11 @@ void Foam::polyTopoChange::compact
     const bool orderPoints,
     label& nInternalPoints,
     labelList& patchSizes,
-    labelList& patchStarts
+    labelList& patchStarts,
+
+    labelListList& subPatches,
+    labelListList& subPatchSizes,
+    labelListList& subPatchStarts
 )
 {
     points_.shrink();
@@ -782,6 +900,7 @@ void Foam::polyTopoChange::compact
 
     faces_.shrink();
     region_.shrink();
+    subRegion_.shrink();
     faceOwner_.shrink();
     faceNeighbour_.shrink();
     faceMap_.shrink();
@@ -1105,7 +1224,11 @@ void Foam::polyTopoChange::compact
 
             localFaceMap,
             patchSizes,
-            patchStarts
+            patchStarts,
+
+            subPatches,
+            subPatchSizes,
+            subPatchStarts
         );
 
         // Reorder faces.
@@ -1777,6 +1900,11 @@ void Foam::polyTopoChange::reorderCoupledFaces
     const polyBoundaryMesh& boundary,
     const labelList& patchStarts,
     const labelList& patchSizes,
+
+    const labelListList& subPatches,
+    const labelListList& subPatchSizes,
+    const labelListList& subPatchStarts,
+
     const pointField& points
 )
 {
@@ -1890,6 +2018,11 @@ void Foam::polyTopoChange::compactAndReorder
     pointField& newPoints,
     labelList& patchSizes,
     labelList& patchStarts,
+
+    labelListList& subPatches,
+    labelListList& subPatchSizes,
+    labelListList& subPatchStarts,
+
     List<objectMap>& pointsFromPoints,
     List<objectMap>& facesFromPoints,
     List<objectMap>& facesFromEdges,
@@ -1917,7 +2050,17 @@ void Foam::polyTopoChange::compactAndReorder
 
     // Remove any holes from points/faces/cells and sort faces.
     // Sets nActiveFaces_.
-    compact(orderCells, orderPoints, nInternalPoints, patchSizes, patchStarts);
+    compact
+    (
+        orderCells,
+        orderPoints,
+        nInternalPoints,
+        patchSizes,
+        patchStarts,
+        subPatches,
+        subPatchSizes,
+        subPatchStarts
+    );
 
     // Transfer points to pointField. points_ are now cleared!
     // Only done since e.g. reorderCoupledFaces requires pointField.
@@ -1930,6 +2073,9 @@ void Foam::polyTopoChange::compactAndReorder
         mesh.boundaryMesh(),
         patchStarts,
         patchSizes,
+        subPatches,
+        subPatchSizes,
+        subPatchStarts,
         newPoints
     );
 
@@ -2030,6 +2176,7 @@ Foam::polyTopoChange::polyTopoChange(const label nPatches, const bool strict)
     retiredPoints_(0),
     faces_(0),
     region_(0),
+    subRegion_(0),
     faceOwner_(0),
     faceNeighbour_(0),
     faceMap_(0),
@@ -2065,6 +2212,7 @@ Foam::polyTopoChange::polyTopoChange
     retiredPoints_(0),
     faces_(0),
     region_(0),
+    subRegion_(0),
     faceOwner_(0),
     faceNeighbour_(0),
     faceMap_(0),
@@ -2112,6 +2260,8 @@ void Foam::polyTopoChange::clear()
     faces_.setSize(0);
     region_.clear();
     region_.setSize(0);
+    subRegion_.clear();
+    subRegion_.setSize(0);
     faceOwner_.clear();
     faceOwner_.setSize(0);
     faceNeighbour_.clear();
@@ -2272,6 +2422,7 @@ void Foam::polyTopoChange::addMesh
 
         faces_.setSize(faces_.size() + nAllFaces);
         region_.setSize(region_.size() + nAllFaces);
+        subRegion_.setSize(subRegion_.size() + nAllFaces);
         faceOwner_.setSize(faceOwner_.size() + nAllFaces);
         faceNeighbour_.setSize(faceNeighbour_.size() + nAllFaces);
         faceMap_.setSize(faceMap_.size() + nAllFaces);
@@ -2643,7 +2794,8 @@ Foam::label Foam::polyTopoChange::addFace
     const bool flipFaceFlux,
     const label patchID,
     const label zoneID,
-    const bool zoneFlip
+    const bool zoneFlip,
+    const label subPatchID
 )
 {
     // Check validity
@@ -2656,6 +2808,7 @@ Foam::label Foam::polyTopoChange::addFace
 
     faces_.append(f);
     region_.append(patchID);
+    subRegion_.append(subPatchID);
     faceOwner_.append(own);
     faceNeighbour_.append(nei);
 
@@ -2708,7 +2861,8 @@ void Foam::polyTopoChange::modifyFace
     const bool flipFaceFlux,
     const label patchID,
     const label zoneID,
-    const bool zoneFlip
+    const bool zoneFlip,
+    const label subPatchID
 )
 {
     // Check validity
@@ -2721,6 +2875,7 @@ void Foam::polyTopoChange::modifyFace
     faceOwner_[faceI] = own;
     faceNeighbour_[faceI] = nei;
     region_[faceI] = patchID;
+    subRegion_[faceI] = subPatchID;
 
     if (flipFaceFlux)
     {
@@ -2778,6 +2933,7 @@ void Foam::polyTopoChange::removeFace(const label faceI, const label mergeFaceI)
 
     faces_[faceI].setSize(0);
     region_[faceI] = -1;
+    subRegion_[faceI] = -1;
     faceOwner_[faceI] = -1;
     faceNeighbour_[faceI] = -1;
     faceMap_[faceI] = -1;
@@ -2907,6 +3063,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     // patch slicing
     labelList patchSizes;
     labelList patchStarts;
+    // subpatch slicing
+    labelListList subPatches;
+    labelListList subPatchSizes;
+    labelListList subPatchStarts;
     // inflate maps
     List<objectMap> pointsFromPoints;
     List<objectMap> facesFromPoints;
@@ -2934,6 +3094,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         newPoints,
         patchSizes,
         patchStarts,
+        subPatches,
+        subPatchSizes,
+        subPatchStarts,
         pointsFromPoints,
         facesFromPoints,
         facesFromEdges,
@@ -2987,6 +3150,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
             faceNeighbour_,
             patchSizes,
             patchStarts,
+            subPatches,
+            subPatchStarts,
             syncParallel
         );
 
@@ -3004,6 +3169,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
             faceNeighbour_,
             patchSizes,
             patchStarts,
+            subPatches,
+            subPatchStarts,
             syncParallel
         );
         // Invalidate new points to go into map.
@@ -3011,6 +3178,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
         mesh.changing(true);
     }
+
 
     if (debug)
     {
@@ -3057,6 +3225,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         faces_.setSize(0);
         region_.clear();
         region_.setSize(0);
+        subRegion_.clear();
+        subRegion_.setSize(0);
         faceOwner_.clear();
         faceOwner_.setSize(0);
         faceNeighbour_.clear();
@@ -3188,6 +3358,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     // patch slicing
     labelList patchSizes;
     labelList patchStarts;
+    // subpatch slicing
+    labelListList subPatches;
+    labelListList subPatchSizes;
+    labelListList subPatchStarts;
     // inflate maps
     List<objectMap> pointsFromPoints;
     List<objectMap> facesFromPoints;
@@ -3216,6 +3390,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         newPoints,
         patchSizes,
         patchStarts,
+        subPatches,
+        subPatchSizes,
+        subPatchStarts,
         pointsFromPoints,
         facesFromPoints,
         facesFromEdges,
@@ -3291,6 +3468,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         faces_.setSize(0);
         region_.clear();
         region_.setSize(0);
+        subRegion_.clear();
+        subRegion_.setSize(0);
         faceOwner_.clear();
         faceOwner_.setSize(0);
         faceNeighbour_.clear();
@@ -3312,6 +3491,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
                 patchSizes[patchI],
                 patchStarts[patchI]
             ).ptr();
+
+            // If it was a processor patch reset the sub addressing
+            if (isA<processorPolyPatch>(oldPatches[patchI]))
+            {
+                processorPolyPatch& ppp = refCast<processorPolyPatch>
+                (
+                    *newBoundary[patchI]
+                );
+                const_cast<labelList&>(ppp.patchIDs()) = subPatches[patchI];
+                const_cast<labelList&>(ppp.starts()) = subPatchStarts[patchI];
+            }
         }
         newMesh.addFvPatches(newBoundary);
     }

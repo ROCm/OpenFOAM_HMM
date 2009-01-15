@@ -49,26 +49,26 @@ bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
 
 void Foam::syncTools::checkTransform
 (
-    const coupledPolyPatch& pp,
+    const processorPolyPatch& pp,
     const bool applySeparation
 )
 {
-    if (!pp.parallel() && pp.forwardT().size() > 1)
-    {
-        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
-            << "Non-uniform transformation not supported for point or edge"
-            << " fields." << endl
-            << "Patch:" << pp.name()
-            << abort(FatalError);
-    }
-    if (applySeparation && pp.separated() && pp.separation().size() > 1)
-    {
-        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
-            << "Non-uniform separation vector not supported for point or edge"
-            << " fields." << endl
-            << "Patch:" << pp.name()
-            << abort(FatalError);
-    }
+//    if (!pp.parallel() && pp.forwardT().size() > 1)
+//    {
+//        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
+//            << "Non-uniform transformation not supported for point or edge"
+//            << " fields." << endl
+//            << "Patch:" << pp.name()
+//            << abort(FatalError);
+//    }
+//    if (applySeparation && pp.separated() && pp.separation().size() > 1)
+//    {
+//        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
+//            << "Non-uniform separation vector not supported for point or edge"
+//            << " fields." << endl
+//            << "Patch:" << pp.name()
+//            << abort(FatalError);
+//    }
 }
 
 
@@ -365,34 +365,13 @@ Foam::PackedList<1> Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 template <>
 void Foam::syncTools::separateList
 (
-    const vectorField& separation,
+    const vector& separation,
     UList<vector>& field
 )
 {
-    if (separation.size() == 1)
+    forAll(field, i)
     {
-        // Single value for all.
-
-        forAll(field, i)
-        {
-            field[i] += separation[0];
-        }
-    }
-    else if (separation.size() == field.size())
-    {
-        forAll(field, i)
-        {
-            field[i] += separation[i];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "syncTools::separateList(const vectorField&, UList<vector>&)"
-        )   << "Sizes of field and transformation not equal. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
+        field[i] += separation;
     }
 }
 
@@ -400,33 +379,13 @@ void Foam::syncTools::separateList
 template <>
 void Foam::syncTools::separateList
 (
-    const vectorField& separation,
+    const vector& separation,
     Map<vector>& field
 )
 {
-    if (separation.size() == 1)
+    forAllIter(Map<vector>, field, iter)
     {
-        // Single value for all.
-        forAllIter(Map<vector>, field, iter)
-        {
-            iter() += separation[0];
-        }
-    }
-    else if (separation.size() == field.size())
-    {
-        forAllIter(Map<vector>, field, iter)
-        {
-            iter() += separation[iter.key()];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "syncTools::separateList(const vectorField&, Map<vector>&)"
-        )   << "Sizes of field and transformation not equal. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
+        iter() += separation;
     }
 }
 
@@ -434,26 +393,13 @@ void Foam::syncTools::separateList
 template <>
 void Foam::syncTools::separateList
 (
-    const vectorField& separation,
+    const vector& separation,
     EdgeMap<vector>& field
 )
 {
-    if (separation.size() == 1)
+    forAllIter(EdgeMap<vector>, field, iter)
     {
-        // Single value for all.
-        forAllIter(EdgeMap<vector>, field, iter)
-        {
-            iter() += separation[0];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "syncTools::separateList(const vectorField&, EdgeMap<vector>&)"
-        )   << "Multiple separation vectors not supported. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
+        iter() += separation;
     }
 }
 

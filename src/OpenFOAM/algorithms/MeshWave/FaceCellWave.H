@@ -254,7 +254,7 @@ class FaceCellWave
             //- Apply transformation to Type
             void transform
             (
-                const tensorField& rotTensor,
+                const tensor& rotTensor,
                 const label nFaces,
                 List<Type>& faceInfo
             );

@@ -215,7 +215,9 @@ $(lduMatrix)/preconditioners/diagonalPreconditioner/diagonalPreconditioner.C
 $(lduMatrix)/preconditioners/DICPreconditioner/DICPreconditioner.C
 $(lduMatrix)/preconditioners/FDICPreconditioner/FDICPreconditioner.C
 $(lduMatrix)/preconditioners/DILUPreconditioner/DILUPreconditioner.C
+/*
 $(lduMatrix)/preconditioners/GAMGPreconditioner/GAMGPreconditioner.C
+*/
 
 lduAddressing = $(lduMatrix)/lduAddressing
 $(lduAddressing)/lduAddressing.C
@@ -228,6 +230,7 @@ $(lduInterfaceFields)/lduInterfaceField/lduInterfaceField.C
 $(lduInterfaceFields)/processorLduInterfaceField/processorLduInterfaceField.C
 $(lduInterfaceFields)/cyclicLduInterfaceField/cyclicLduInterfaceField.C
 
+/*
 GAMG = $(lduMatrix)/solvers/GAMG
 $(GAMG)/GAMGSolver.C
 $(GAMG)/GAMGSolverAgglomerateMatrix.C
@@ -259,6 +262,7 @@ $(pairGAMGAgglomeration)/pairGAMGAgglomerationCombineLevels.C
 
 algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomeration
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
+*/
 
 meshes/lduMesh/lduMesh.C
 
@@ -463,6 +467,7 @@ $(Fields)/diagTensorField/diagTensorIOField.C
 $(Fields)/symmTensorField/symmTensorIOField.C
 $(Fields)/tensorField/tensorIOField.C
 $(Fields)/transformField/transformField.C
+
 pointPatchFields = fields/pointPatchFields
 $(pointPatchFields)/pointPatchField/pointPatchFields.C
 

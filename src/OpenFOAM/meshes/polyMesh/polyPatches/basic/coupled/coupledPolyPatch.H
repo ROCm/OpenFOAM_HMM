@@ -32,8 +32,7 @@ Description
 
 SourceFiles
     coupledPolyPatch.C
-    coupledPolyPatchMorph.C
-
+ 
 \*---------------------------------------------------------------------------*/
 
 #ifndef coupledPolyPatch_H
@@ -54,17 +53,6 @@ class coupledPolyPatch
 :
     public polyPatch
 {
-    // Private data
-
-        //- offset (distance) vector from one side of the couple to the other
-        mutable vectorField separation_;
-
-        //- Face transformation tensor
-        mutable tensorField forwardT_;
-
-        //- Neighbour-cell transformation tensor
-        mutable tensorField reverseT_;
-
 public:
 
     // Static data members
@@ -82,6 +70,11 @@ protected:
         //  absTol    : absolute error in normal
         void calcTransformTensors
         (
+            bool& separated,
+            vector& separation,
+            bool& parallel,
+            tensor& forwardT,
+            tensor& reverseT,
             const vectorField& Cf,
             const vectorField& Cr,
             const vectorField& nf,
@@ -238,39 +231,42 @@ public:
                 return true;
             }
 
+            //- Are the planes separated.
+            virtual bool separated() const = 0;
 
-            //- Are the coupled planes separated
-            bool separated() const
-            {
-                return separation_.size();
-            }
+            //- If the planes are separated the separation vector.
+            virtual const vector& separation() const = 0;
 
-            //- Return the offset (distance) vector from one side of the couple
-            //  to the other
-            const vectorField& separation() const
-            {
-                return separation_;
-            }
+            //- Are the cyclic planes parallel.
+            virtual bool parallel() const = 0;
+
+            //- Return face transformation tensor.
+            virtual const tensor& forwardT() const = 0;
+
+            //- Return neighbour-cell transformation tensor.
+            virtual const tensor& reverseT() const = 0;
 
 
-            //- Are the cyclic planes parallel
-            bool parallel() const
-            {
-                return forwardT_.size() == 0;
-            }
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry
+        (
+            const primitivePatch& referPatch,
+            UList<point>& nbrCtrs,
+            UList<point>& nbrAreas,
+            UList<point>& nbrCc
+        ) = 0;
 
-            //- Return face transformation tensor
-            const tensorField& forwardT() const
-            {
-                return forwardT_;
-            }
-
-            //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
-            {
-                return reverseT_;
-            }
-
+        //- Calculate the patch geometry
+        virtual void calcGeometry
+        (
+            const primitivePatch& referPatch,
+            const UList<point>& thisCtrs,
+            const UList<point>& thisAreas,
+            const UList<point>& thisCc,
+            const UList<point>& nbrCtrs,
+            const UList<point>& nbrAreas,
+            const UList<point>& nbrCc
+        ) = 0;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

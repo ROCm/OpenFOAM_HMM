@@ -190,6 +190,19 @@ private:
                 const label patchID
             ) const;
 
+            void setTopology
+            (
+                const cellShapeList& cellsAsShapes,
+                const faceListList& boundaryFaces,
+                const wordList& boundaryPatchNames,
+                labelList& patchSizes,
+                labelList& patchStarts,
+                label& defaultPatchStart,
+                label& nFaces,
+                cellList& cells
+            );
+
+
 
 public:
 
@@ -250,6 +263,20 @@ public:
             const word& defaultBoundaryPatchName,
             const word& defaultBoundaryPatchType,
             const wordList& boundaryPatchPhysicalTypes,
+            const bool syncPar = true
+        );
+
+        //- Construct from cell shapes with patch information in dictionary
+        //  format.
+        polyMesh
+        (
+            const IOobject& io,
+            const pointField& points,
+            const cellShapeList& shapes,
+            const faceListList& boundaryFaces,
+            const PtrList<dictionary>& boundaryDicts,
+            const word& defaultBoundaryPatchName,
+            const word& defaultBoundaryPatchType,
             const bool syncPar = true
         );
 
@@ -443,6 +470,8 @@ public:
                 const labelList& neighbour,
                 const labelList& patchSizes,
                 const labelList& patchStarts,
+                const labelListList& subPatches,
+                const labelListList& subPatchStarts,
                 const bool validBoundary = true
             );
 

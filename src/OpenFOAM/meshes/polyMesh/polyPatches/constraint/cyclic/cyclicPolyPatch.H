@@ -42,7 +42,6 @@ Description
 
 SourceFiles
     cyclicPolyPatch.C
-    cyclicPolyPatchMorph.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,6 +53,7 @@ SourceFiles
 #include "FixedList.H"
 #include "edgeList.H"
 #include "transform.H"
+#include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,6 +85,13 @@ private:
 
     // Private data
 
+        //- Name of other half
+        const word neighbPatchName_;
+
+        //- Index of other half
+        mutable label neighbPatchID_;
+
+
         //- List of edges formed from connected points. e[0] is the point on
         //  the first half of the patch, e[1] the corresponding point on the
         //  second half.
@@ -108,12 +115,39 @@ private:
         point rotationCentre_;
 
 
+        // Transformation
+
+            //- Has non-zero separation
+            mutable bool separated_;
+
+            //- Offset (distance) vector from one side of the couple to the other
+            mutable vector separation_;
+
+            //- No rotation
+            mutable bool parallel_;
+
+            //- Face transformation tensor
+            mutable tensor forwardT_;
+
+            //- Neighbour-cell transformation tensor
+            mutable tensor reverseT_;
+
+
     // Private member functions
 
         //- Find amongst selected faces the one with the largest area
         static label findMaxArea(const pointField&, const faceList&);
 
         void calcTransforms();
+
+        void calcTransforms
+        (
+            const primitivePatch& half0,
+            const UList<point>& half0Ctrs,
+            const UList<point>& half0Areas,
+            const UList<point>& half1Ctrs,
+            const UList<point>& half1Areas
+        );
 
 
         // Face ordering
@@ -172,8 +206,29 @@ protected:
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry();
 
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry
+        (
+            const primitivePatch& referPatch,
+            UList<point>& nbrCtrs,
+            UList<point>& nbrAreas,
+            UList<point>& nbrCc
+        );
+
         //- Calculate the patch geometry
         virtual void calcGeometry();
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry
+        (
+            const primitivePatch& referPatch,
+            const UList<point>& thisCtrs,
+            const UList<point>& thisAreas,
+            const UList<point>& thisCc,
+            const UList<point>& nbrCtrs,
+            const UList<point>& nbrAreas,
+            const UList<point>& nbrCc
+        );
 
         //- Initialise the patches for moving points
         virtual void initMovePoints(const pointField&);
@@ -225,7 +280,8 @@ public:
             const polyBoundaryMesh& bm,
             const label index,
             const label newSize,
-            const label newStart
+            const label newStart,
+            const word& neighbPatchName
         );
 
         //- Construct and return a clone, resetting the boundary mesh
@@ -246,7 +302,15 @@ public:
         {
             return autoPtr<polyPatch>
             (
-                new cyclicPolyPatch(*this, bm, index, newSize, newStart)
+                new cyclicPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    newSize,
+                    newStart,
+                    neighbPatchName_
+                )
             );
         }
 
@@ -258,6 +322,48 @@ public:
 
     // Member Functions
 
+        const word& neighbPatchName() const
+        {
+            return neighbPatchName_;
+        }
+
+        //- Neighbour patchID.
+        label neighbPatchID() const
+        {
+            if (neighbPatchID_ == -1)
+            {
+                neighbPatchID_ = this->boundaryMesh().findPatchID
+                (
+                    neighbPatchName_
+                );
+                if (neighbPatchID_ == -1)
+                {
+                    FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
+                        << "Illegal neighbourPatch name " << neighbPatchName_
+                        << endl << "Valid patch names are "
+                        << this->boundaryMesh().names()
+                        << exit(FatalError);
+                }
+            }
+            return neighbPatchID_;
+        }
+
+        bool owner() const
+        {
+            return index() < neighbPatchID();
+        }
+
+        bool neighbour() const
+        {
+            return !owner();
+        }
+
+        const cyclicPolyPatch& neighbPatch() const
+        {
+            const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
+            return refCast<const cyclicPolyPatch>(pp);
+        }
+
         //- Return connected points (in patch local point indexing). Demand
         //  driven calculation. Does primitivePatch::clearOut after calculation!
         const edgeList& coupledPoints() const;
@@ -267,67 +373,64 @@ public:
         const edgeList& coupledEdges() const;
 
 
-        vector separation(const label facei) const
+        //- Are the coupled planes separated
+        virtual bool separated() const
         {
-            if (facei < size()/2)
-            {
-                return coupledPolyPatch::separation()[0];
-            }
-            else
-            {
-                return -coupledPolyPatch::separation()[0];
-            }
+            return separated_;
         }
 
-        const tensor& transformT(const label facei) const
+        virtual const vector& separation() const
         {
-            if (facei < size()/2)
-            {
-                return reverseT()[0];
-            }
-            else
-            {
-                return forwardT()[0];
-            }
+            return separation_;
         }
 
-        template<class T>
-        T transform(const T& t, const label facei) const
+        //- Are the cyclic planes parallel
+        virtual bool parallel() const
         {
-            if (parallel())
-            {
-                return t;
-            }
-            else
-            {
-                return Foam::transform(transformT(facei), t);
-            }
+            return parallel_;
         }
 
-        label transformLocalFace(const label facei) const
+        //- Return face transformation tensor
+        virtual const tensor& forwardT() const
         {
-            if (facei < size()/2)
-            {
-                return facei + size()/2;
-            }
-            else
-            {
-                return facei - size()/2;
-            }
+            return forwardT_;
+        }
+
+        //- Return neighbour-cell transformation tensor
+        virtual const tensor& reverseT() const
+        {
+            return reverseT_;
         }
 
         label transformGlobalFace(const label facei) const
         {
-            if (facei - start() < size()/2)
+            label offset = facei-start();
+            label neighbStart = neighbPatch().start();
+            //label neighbSize = neighbPatch().size();
+            //label neighbOffset = facei-neighbStart;
+
+            if (offset >= 0 && offset < size())
             {
-                return facei + size()/2;
+                return neighbStart+offset;
             }
+            //else if (neighbOffset >= 0 && neighbOffset < neighbSize)
+            //{
+            //    return start()+neighbOffset;
+            //}
             else
             {
-                return facei - size()/2;
+                FatalErrorIn
+                (
+                    "cyclicPolyPatch::transformGlobalFace(const label) const"
+                )   << "Face " << facei << " not in patch " << name()
+                    //<< " nor in patch " << neighbPatch().name()
+                    << exit(FatalError);
+                return -1;
             }
         }
 
+        ////- Transform a position on a (local) face
+        //virtual void transformPosition(point&, const label facei) const;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

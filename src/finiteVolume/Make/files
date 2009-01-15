@@ -1,7 +1,9 @@
 fvMesh/fvMeshGeometry.C
 fvMesh/fvMesh.C
 
+/*
 fvMesh/fvMeshSubset/fvMeshSubset.C
+*/
 
 fvBoundaryMesh = fvMesh/fvBoundaryMesh
 $(fvBoundaryMesh)/fvBoundaryMesh.C
@@ -23,7 +25,9 @@ $(constraintFvPatches)/processor/processorFvPatch.C
 
 derivedFvPatches = $(fvPatches)/derived
 $(derivedFvPatches)/wall/wallFvPatch.C
+/*
 $(derivedFvPatches)/directMapped/directMappedFvPatch.C
+*/
 
 wallDist = fvMesh/wallDist
 $(wallDist)/wallPointYPlus/wallPointYPlus.C
@@ -38,8 +42,10 @@ fvMeshMapper = fvMesh/fvMeshMapper
 $(fvMeshMapper)/fvPatchMapper.C
 $(fvMeshMapper)/fvSurfaceMapper.C
 
+/*
 extendedStencil = fvMesh/extendedStencil
 $(extendedStencil)/extendedStencil.C
+*/
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
@@ -71,12 +77,14 @@ $(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
 
 derivedFvPatchFields = $(fvPatchFields)/derived
 $(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
+$(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
+
+/*
 $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
 $(derivedFvPatchFields)/fluxCorrectedVelocity/fluxCorrectedVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/freestream/freestreamFvPatchFields.C
@@ -111,6 +119,7 @@ $(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/waveTransmissive/waveTransmissiveFvPatchFields.C
+*/
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
@@ -134,8 +143,10 @@ fields/surfaceFields/surfaceFields.C
 
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
+/*
 fvMatrices/solvers/MULES/MULES.C
 fvMatrices/solvers/GAMGSymSolver/GAMGAgglomerations/faceAreaPairGAMGAgglomeration/faceAreaPairGAMGAgglomeration.C
+*/
 
 interpolation = interpolation/interpolation
 $(interpolation)/interpolation/interpolations.C
@@ -156,6 +167,7 @@ $(surfaceInterpolation)/surfaceInterpolationScheme/surfaceInterpolationSchemes.C
 schemes = $(surfaceInterpolation)/schemes
 $(schemes)/linear/linear.C
 $(schemes)/midPoint/midPoint.C
+/*
 $(schemes)/downwind/downwind.C
 $(schemes)/weighted/weighted.C
 $(schemes)/cubic/cubic.C
@@ -170,10 +182,12 @@ $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
 $(schemes)/quadraticFit/quadraticFit.C
 $(schemes)/quadraticFit/quadraticFitData.C
+*/
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
 $(limitedSchemes)/upwind/upwind.C
+/*
 $(limitedSchemes)/blended/blended.C
 $(limitedSchemes)/linearUpwind/linearUpwind.C
 $(limitedSchemes)/linearUpwindV/linearUpwindV.C
@@ -195,11 +209,13 @@ $(limitedSchemes)/filteredLinear/filteredLinear.C
 $(limitedSchemes)/filteredLinear2/filteredLinear2.C
 $(limitedSchemes)/filteredLinear3/filteredLinear3.C
 $(limitedSchemes)/limitWith/limitWith.C
+*/
 
 multivariateSchemes = $(surfaceInterpolation)/multivariateSchemes
 $(multivariateSchemes)/multivariateSurfaceInterpolationScheme/multivariateSurfaceInterpolationSchemes.C
 $(multivariateSchemes)/multivariateSelectionScheme/multivariateSelectionSchemes.C
 $(multivariateSchemes)/upwind/multivariateUpwind.C
+/*
 $(multivariateSchemes)/Gamma/multivariateGamma.C
 $(multivariateSchemes)/vanLeer/multivariateVanLeer.C
 $(multivariateSchemes)/Minmod/multivariateMinmod.C
@@ -207,6 +223,7 @@ $(multivariateSchemes)/SuperBee/multivariateSuperBee.C
 $(multivariateSchemes)/MUSCL/multivariateMUSCL.C
 $(multivariateSchemes)/limitedLinear/multivariateLimitedLinear.C
 $(multivariateSchemes)/limitedCubic/multivariateLimitedCubic.C
+*/
 
 finiteVolume/fv/fv.C
 finiteVolume/fvSchemes/fvSchemes.C
@@ -234,17 +251,21 @@ $(divSchemes)/gaussDivScheme/gaussDivSchemes.C
 gradSchemes = finiteVolume/gradSchemes
 $(gradSchemes)/gradScheme/gradSchemes.C
 $(gradSchemes)/gaussGrad/gaussGrads.C
+/*
 $(gradSchemes)/leastSquaresGrad/leastSquaresVectors.C
 $(gradSchemes)/leastSquaresGrad/leastSquaresGrads.C
 $(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresVectors.C
 $(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresGrads.C
 $(gradSchemes)/fourthGrad/fourthGrads.C
+*/
 
 limitedGradSchemes = $(gradSchemes)/limitedGradSchemes
+/*
 $(limitedGradSchemes)/faceLimitedGrad/faceLimitedGrads.C
 $(limitedGradSchemes)/cellLimitedGrad/cellLimitedGrads.C
 $(limitedGradSchemes)/faceMDLimitedGrad/faceMDLimitedGrads.C
 $(limitedGradSchemes)/cellMDLimitedGrad/cellMDLimitedGrads.C
+*/
 
 snGradSchemes = finiteVolume/snGradSchemes
 $(snGradSchemes)/snGradScheme/snGradSchemes.C
@@ -266,6 +287,7 @@ finiteVolume/fvc/fvcMeshPhi.C
 cfdTools/general/findRefCell/findRefCell.C
 cfdTools/general/adjustPhi/adjustPhi.C
 cfdTools/general/bound/bound.C
+/*
 cfdTools/general/porousMedia/porousZone.C
 cfdTools/general/porousMedia/porousZones.C
 cfdTools/general/MRF/MRFZone.C
@@ -276,16 +298,20 @@ cfdTools/general/SRF/SRFModel/SRFModel/SRFModel.C
 cfdTools/general/SRF/SRFModel/SRFModel/newSRFModel.C
 cfdTools/general/SRF/SRFModel/rpm/rpm.C
 cfdTools/general/SRF/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
+*/
 
 fvMeshCutSurface = fvMesh/fvMeshCutSurface
 
+/*
 meshCut = $(fvMeshCutSurface)/meshCut
 $(meshCut)/meshCutSurface.C
 $(meshCut)/cellAddressing.C
-
+*/
+/*
 edgeCuts = $(fvMeshCutSurface)/edgeCuts
 $(edgeCuts)/meshEdgeCuts.C
 $(edgeCuts)/faceDecompIsoSurfaceCuts.C
 $(edgeCuts)/cellDecompIsoSurfaceCuts.C
+*/
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

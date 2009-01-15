@@ -18,16 +18,16 @@ wmake libso finiteVolume
 
 ( cd decompositionAgglomeration && ./Allwmake )
 
-wmake libso sampling
+#wmake libso sampling
 
 wmake libso dynamicMesh
-wmake libso dynamicFvMesh
-wmake libso topoChangerFvMesh
-wmake libso fvMotionSolver
-wmake libso engine
-
-wmake libso ODE
-wmake libso randomProcesses
+#wmake libso dynamicFvMesh
+#wmake libso topoChangerFvMesh
+#wmake libso fvMotionSolver
+#wmake libso engine
+#
+#wmake libso ODE
+#wmake libso randomProcesses
 
 ( cd thermophysicalModels && ./Allwmake )
 ( cd transportModels && ./Allwmake )
@@ -36,7 +36,7 @@ wmake libso randomProcesses
 ( cd postProcessing && ./Allwmake )
 ( cd conversion && ./Allwmake )
 
-wmake libso autoMesh
-wmake libso errorEstimation
+#wmake libso autoMesh
+#wmake libso errorEstimation
 
 # ----------------------------------------------------------------- end-of-file

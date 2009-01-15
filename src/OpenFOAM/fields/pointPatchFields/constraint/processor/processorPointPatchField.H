@@ -154,8 +154,8 @@ public:
             {
                 return
                    !(
-                        procPatch_.procPolyPatch().parallel()
-                     || pTraits<Type>::rank == 0
+                        pTraits<Type>::rank == 0
+                     || procPatch_.procPolyPatch().parallel()
                     );
             }
 

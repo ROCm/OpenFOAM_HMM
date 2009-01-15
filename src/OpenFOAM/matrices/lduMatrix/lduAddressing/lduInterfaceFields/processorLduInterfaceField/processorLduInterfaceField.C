@@ -43,24 +43,24 @@ Foam::processorLduInterfaceField::~processorLduInterfaceField()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::processorLduInterfaceField::transformCoupleField
-(
-    scalarField& f,
-    const direction cmpt
-) const
-{
-    if (doTransform())
-    {
-        if (forwardT().size() == 1)
-        {
-            f *= pow(diag(forwardT()[0]).component(cmpt), rank());
-        }
-        else
-        {
-            f *= pow(diag(forwardT())().component(cmpt), rank());
-        }
-    }
-}
+//void Foam::processorLduInterfaceField::transformCoupleField
+//(
+//    scalarField& f,
+//    const direction cmpt
+//) const
+//{
+//    if (doTransform())
+//    {
+//        if (forwardT().size() == 1)
+//        {
+//            f *= pow(diag(forwardT()[0]).component(cmpt), rank());
+//        }
+//        else
+//        {
+//            f *= pow(diag(forwardT())().component(cmpt), rank());
+//        }
+//    }
+//}
 
 
 // ************************************************************************* //

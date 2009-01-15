@@ -62,7 +62,7 @@ public:
 // Dummy transform for faces. Used in synchronisation
 void transformList
 (
-    const tensorField& rotTensor,
+    const tensor& rotTensor,
     UList<face>& field
 )
 {};

@@ -133,8 +133,8 @@ void cyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
         forAll(pairs, pairi)
         {
             Type tmp = pf[pairs[pairi][0]];
-            pf[pairs[pairi][0]] = transform(forwardT()[0], pf[pairs[pairi][1]]);
-            pf[pairs[pairi][1]] = transform(reverseT()[0], tmp);
+            pf[pairs[pairi][0]] = transform(forwardT(), pf[pairs[pairi][1]]);
+            pf[pairs[pairi][1]] = transform(reverseT(), tmp);
         }
     }
     else

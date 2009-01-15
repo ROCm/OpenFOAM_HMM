@@ -27,6 +27,7 @@ License
 #include "processorFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "transformField.H"
+#include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,16 +46,29 @@ void processorFvPatch::makeWeights(scalarField& w) const
 {
     if (Pstream::parRun())
     {
+        const processorPolyPatch& pp = procPolyPatch();
+
+Pout<< name() << " pp.neighbFaceAreas():" << pp.neighbFaceAreas()
+    << endl;
+
+Pout<< name() << " pp.neighbFaceCentres():" << pp.neighbFaceCentres()
+    << endl;
+
+Pout<< name() << " pp.neighbFaceCellCentres():" << pp.neighbFaceCellCentres()
+    << endl;
+
+
         // The face normals point in the opposite direction on the other side
         scalarField neighbFaceCentresCn
         (
             (
-                procPolyPatch_.neighbFaceAreas()
-               /(mag(procPolyPatch_.neighbFaceAreas()) + VSMALL)
+                pp.neighbFaceAreas()
+               /(mag(pp.neighbFaceAreas()) + VSMALL)
             )
           & (
-              procPolyPatch_.neighbFaceCentres()
-            - procPolyPatch_.neighbFaceCellCentres())
+              pp.neighbFaceCentres()
+            - pp.neighbFaceCellCentres()
+            )
         );
 
         w = neighbFaceCentresCn/((nf()&fvPatch::delta()) + neighbFaceCentresCn);
@@ -63,11 +77,22 @@ void processorFvPatch::makeWeights(scalarField& w) const
     {
         w = 1.0;
     }
+Pout<< name() << " w:" << w
+    << endl;
 }
 
 
 void processorFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
+Pout<< name() << " fvPatch::delta():" << fvPatch::delta()
+    << endl;
+
+Pout<< name() << " nf():" << nf()
+    << endl;
+
+Pout<< name() << " weights():" << weights()
+    << endl;
+
     if (Pstream::parRun())
     {
         dc = (1.0 - weights())/(nf() & fvPatch::delta());
@@ -76,41 +101,71 @@ void processorFvPatch::makeDeltaCoeffs(scalarField& dc) const
     {
         dc = 1.0/(nf() & fvPatch::delta());
     }
+Pout<< name() << " dc:" << dc << endl;
 }
 
 
 tmp<vectorField> processorFvPatch::delta() const
 {
+    tmp<vectorField> deltaFld(fvPatch::delta());
+
     if (Pstream::parRun())
     {
-        // To the transformation if necessary
-        if (parallel())
+        // Do the transformation if necessary.
+
+        const processorPolyPatch& pp = procPolyPatch();
+
+        const pointField& nfc = pp.neighbFaceCentres();
+        const pointField& ncc = pp.neighbFaceCellCentres();
+
+        forAll(pp.patchIDs(), i)
         {
-            return
-                fvPatch::delta()
-              - (
-                    procPolyPatch_.neighbFaceCentres()
-                  - procPolyPatch_.neighbFaceCellCentres()
-                );
-        }
-        else
-        {
-            return
-                fvPatch::delta()
-              - transform
-                (
-                    forwardT(),
+            const SubField<point> subFc(pp.subSlice(nfc, i));
+            const SubField<point> subCc(pp.subSlice(ncc, i));
+            SubField<vector> subDelta(pp.subSlice(deltaFld(), i));
+            const vectorField& subFld = static_cast<const vectorField&>
+            (
+                subDelta
+            );
+
+            label patchI = pp.patchIDs()[i];
+
+Pout<< name() << " delta:" << " subFc:" << subFc
+    << " subCc:" << subCc << " subDelta:" << subDelta
+    << endl;
+
+            if (patchI == -1)
+            {
+                const_cast<vectorField&>(subFld) -= (subFc - subCc);
+            }
+            else
+            {
+                const coupledPolyPatch& subPatch =
+                    refCast<const coupledPolyPatch>
                     (
-                        procPolyPatch_.neighbFaceCentres()
-                      - procPolyPatch_.neighbFaceCellCentres()
-                    )
-                );
+                        pp.boundaryMesh()[patchI]
+                    );
+
+                if (subPatch.parallel())
+                {
+                    const_cast<vectorField&>(subFld) -= (subFc - subCc);
+                }
+                else
+                {
+                    const_cast<vectorField&>(subFld) -= transform
+                    (
+                        subPatch.forwardT(),
+                        subFc - subCc
+                    );
+                }
+            }
+Pout<< name() << " subDelta:" << subDelta
+    << endl;
+
         }
     }
-    else
-    {
-        return fvPatch::delta();
-    }
+
+    return deltaFld;
 }
 
 
@@ -123,24 +178,24 @@ tmp<labelField> processorFvPatch::interfaceInternalField
 }
 
 
-void processorFvPatch::initTransfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList& interfaceData
-) const
-{
-    send(commsType, interfaceData);
-}
-
-
-tmp<labelField> processorFvPatch::transfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList&
-) const
-{
-    return receive<label>(commsType, this->size());
-}
+//void processorFvPatch::initTransfer
+//(
+//    const Pstream::commsTypes commsType,
+//    const unallocLabelList& interfaceData
+//) const
+//{
+//    send(commsType, interfaceData);
+//}
+//
+//
+//tmp<labelField> processorFvPatch::transfer
+//(
+//    const Pstream::commsTypes commsType,
+//    const unallocLabelList&
+//) const
+//{
+//    return receive<label>(commsType, this->size());
+//}
 
 
 void processorFvPatch::initInternalFieldTransfer
