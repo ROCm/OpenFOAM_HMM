@@ -34,7 +34,7 @@ inline void Foam::moleculeCloud::evaluatePair
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
-    const electrostaticPotential& electrostatic(pot_.electrostatic());
+    const pairPotential& electrostatic(pairPot.electrostatic());
 
     label idI = molI->id();
 
@@ -143,7 +143,7 @@ inline void Foam::moleculeCloud::evaluatePair
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
-    const electrostaticPotential& electrostatic(pot_.electrostatic());
+    const pairPotential& electrostatic(pairPot.electrostatic());
 
     label idReal = molReal->id();
 
@@ -243,7 +243,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
-    const electrostaticPotential& electrostatic(pot_.electrostatic());
+    const pairPotential& electrostatic(pairPot.electrostatic());
 
     label idI = molI->id();
 
@@ -381,7 +381,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 {
     const pairPotentialList& pairPot(pot_.pairPotentials());
 
-    const electrostaticPotential& electrostatic(pot_.electrostatic());
+    const pairPotential& electrostatic(pairPot.electrostatic());
 
     label idReal = molReal->id();
 

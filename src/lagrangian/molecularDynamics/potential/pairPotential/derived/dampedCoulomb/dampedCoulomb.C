@@ -22,21 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::pairPotentials::electrostatic
-
-Description
-
-
-SourceFiles
-    coulomb.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef coulomb_H
-#define coulomb_H
-
-#include "pairPotential.H"
+#include "dampedCoulomb.H"
+#include "mathematicalConstants.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,55 +35,65 @@ namespace Foam
 namespace pairPotentials
 {
 
-/*---------------------------------------------------------------------------*\
-                           Class coulomb Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class coulomb
+defineTypeNameAndDebug(dampedCoulomb, 0);
+
+addToRunTimeSelectionTable
+(
+    pairPotential,
+    dampedCoulomb,
+    dictionary
+);
+
+scalar dampedCoulomb::oneOverFourPiEps0 =
+1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+dampedCoulomb::dampedCoulomb
+(
+    const word& name,
+    const dictionary& pairPotentialProperties
+)
 :
-    public pairPotential
+    pairPotential(name, pairPotentialProperties),
+    dampedCoulombCoeffs_
+    (
+        pairPotentialProperties.subDict(typeName + "Coeffs")
+    ),
+    alpha_(readScalar(dampedCoulombCoeffs_.lookup("alpha")))
 {
-public:
+    setLookupTables();
+}
 
-    //- Runtime type information
-        TypeName("coulomb");
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-    // Static data members
-
-        static scalar oneOverFourPiEps0;
-
-    // Constructors
-
-        //- Construct from components
-        coulomb
-        (
-            const word& name,
-            const dictionary& pairPotentialProperties
-        );
+scalar dampedCoulomb::unscaledEnergy(const scalar r) const
+{
+    return oneOverFourPiEps0*erfc(alpha_*r)/r;
+}
 
 
-    // Destructor
+bool dampedCoulomb::read(const dictionary& pairPotentialProperties)
+{
+    pairPotential::read(pairPotentialProperties);
 
-        ~coulomb()
-        {}
+    dampedCoulombCoeffs_ =
+    pairPotentialProperties.subDict(typeName + "Coeffs");
 
+    dampedCoulombCoeffs_.lookup("alpha") >> alpha_;
 
-    // Member Functions
-
-        scalar unscaledEnergy(const scalar r) const;
-
-        //- Read dictionary
-        bool read(const dictionary& pairPotentialProperties);
-};
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace pairPotentials
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

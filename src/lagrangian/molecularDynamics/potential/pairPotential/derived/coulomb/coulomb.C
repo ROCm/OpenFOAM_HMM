@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coulomb.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,6 +45,9 @@ addToRunTimeSelectionTable
     coulomb,
     dictionary
 );
+
+scalar coulomb::oneOverFourPiEps0 =
+1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -65,7 +69,7 @@ coulomb::coulomb
 
 scalar coulomb::unscaledEnergy(const scalar r) const
 {
-    return 1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12 * r);
+    return oneOverFourPiEps0/r;
 }
 
 

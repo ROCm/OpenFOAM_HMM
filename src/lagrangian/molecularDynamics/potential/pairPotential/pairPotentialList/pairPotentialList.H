@@ -62,6 +62,8 @@ class pairPotentialList
 
         scalar rCutMaxSqr_;
 
+        autoPtr<pairPotential> electrostaticPotential_;
+
     // Private Member Functions
 
         inline label pairPotentialIndex
@@ -153,6 +155,8 @@ public:
                 const label b,
                 const scalar rIJMag
             ) const;
+
+            inline const pairPotential& electrostatic() const;
 };
 
 

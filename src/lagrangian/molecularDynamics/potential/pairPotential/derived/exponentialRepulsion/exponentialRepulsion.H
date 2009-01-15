@@ -86,7 +86,7 @@ public:
 
         scalar unscaledEnergy(const scalar r) const;
 
-        //- Read transportProperties dictionary
+        //- Read dictionary
         bool read(const dictionary& pairPotentialProperties);
 };
 

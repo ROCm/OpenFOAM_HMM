@@ -365,8 +365,7 @@ void Foam::potential::potential::readMdInitialiseDict
 
 Foam::potential::potential(const polyMesh& mesh)
 :
-    mesh_(mesh),
-    electrostaticPotential_()
+    mesh_(mesh)
 {
     readPotentialDict();
 }
@@ -379,8 +378,7 @@ Foam::potential::potential
     IOdictionary& idListDict
 )
 :
-    mesh_(mesh),
-    electrostaticPotential_()
+    mesh_(mesh)
 {
     readMdInitialiseDict(mdInitialiseDict, idListDict);
 }

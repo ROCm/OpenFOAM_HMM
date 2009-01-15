@@ -29,12 +29,12 @@ Description
 
 
 SourceFiles
-    coulomb.C
+    dampedCoulomb.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coulomb_H
-#define coulomb_H
+#ifndef dampedCoulomb_H
+#define dampedCoulomb_H
 
 #include "pairPotential.H"
 
@@ -46,17 +46,23 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class coulomb Declaration
+                           Class dampedCoulomb Declaration
 \*---------------------------------------------------------------------------*/
 
-class coulomb
+class dampedCoulomb
 :
     public pairPotential
 {
+    // Private data
+
+        dictionary dampedCoulombCoeffs_;
+
+        scalar alpha_;
+
 public:
 
     //- Runtime type information
-        TypeName("coulomb");
+        TypeName("dampedCoulomb");
 
     // Static data members
 
@@ -65,7 +71,7 @@ public:
     // Constructors
 
         //- Construct from components
-        coulomb
+        dampedCoulomb
         (
             const word& name,
             const dictionary& pairPotentialProperties
@@ -74,7 +80,7 @@ public:
 
     // Destructor
 
-        ~coulomb()
+        ~dampedCoulomb()
         {}
 
 

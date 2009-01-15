@@ -93,7 +93,7 @@ void Foam::pairPotential::setLookupTables()
 }
 
 
-Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
+Foam::scalar Foam::pairPotential::force(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
@@ -102,7 +102,7 @@ Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
     if (k < 0)
     {
         FatalErrorIn("pairPotential.C") << nl
-            << "r less than rMin" << nl
+            << "r less than rMin in pair potential " << name_ << nl
             << abort(FatalError);
     }
 
@@ -130,7 +130,7 @@ Foam::pairPotential::forceTable() const
 }
 
 
-Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
+Foam::scalar Foam::pairPotential::energy(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
@@ -139,7 +139,7 @@ Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
     if (k < 0)
     {
         FatalErrorIn("pairPotential.C") << nl
-            << "r less than rMin" << nl
+            << "r less than rMin in pair potential " << name_ << nl
             << abort(FatalError);
     }
 

@@ -70,13 +70,6 @@ inline const Foam::pairPotentialList& Foam::potential::pairPotentials() const
 }
 
 
-inline const Foam::electrostaticPotential&
-Foam::potential::electrostatic() const
-{
-    return electrostaticPotential_;
-}
-
-
 inline const Foam::tetherPotentialList&
 Foam::potential::tetherPotentials() const
 {

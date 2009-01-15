@@ -70,8 +70,6 @@ class potential
 
         pairPotentialList pairPotentials_;
 
-        electrostaticPotential electrostaticPotential_;
-
         tetherPotentialList tetherPotentials_;
 
         vector gravity_;
@@ -132,8 +130,6 @@ public:
             inline const labelList& removalOrder() const;
 
             inline const pairPotentialList& pairPotentials() const;
-
-            inline const electrostaticPotential& electrostatic() const;
 
             inline const tetherPotentialList& tetherPotentials() const;
 

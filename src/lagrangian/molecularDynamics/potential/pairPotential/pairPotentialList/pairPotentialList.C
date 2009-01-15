@@ -136,6 +136,37 @@ void Foam::pairPotentialList::readPairPotentialDict
         }
     }
 
+    if (!pairPotentialDict.found("electrostatic"))
+    {
+        FatalErrorIn("pairPotentialList::buildPotentials") << nl
+            << "Pair pairPotential specification subDict electrostatic"
+            << nl << abort(FatalError);
+    }
+
+    electrostaticPotential_ = pairPotential::New
+    (
+        "electrostatic",
+        pairPotentialDict.subDict("electrostatic")
+    );
+
+    if (electrostaticPotential_->rCut() > rCutMax_)
+    {
+        rCutMax_ = electrostaticPotential_->rCut();
+    }
+
+    if (electrostaticPotential_->writeTables())
+    {
+        OFstream ppTabFile(mesh.time().path()/"electrostatic");
+
+        if(!electrostaticPotential_->writeEnergyAndForceTables(ppTabFile))
+        {
+            FatalErrorIn("pairPotentialList::readPairPotentialDict")
+                << "Failed writing to "
+                << ppTabFile.name() << nl
+                << abort(FatalError);
+        }
+    }
+
     rCutMaxSqr_ = rCutMax_*rCutMax_;
 }
 
@@ -270,7 +301,7 @@ Foam::scalar Foam::pairPotentialList::force
     const scalar rIJMag
 ) const
 {
-    scalar f = (*this)[pairPotentialIndex (a, b)].forceLookup(rIJMag);
+    scalar f = (*this)[pairPotentialIndex (a, b)].force(rIJMag);
 
     return f;
 }
@@ -283,7 +314,7 @@ Foam::scalar Foam::pairPotentialList::energy
     const scalar rIJMag
 ) const
 {
-    scalar e = (*this)[pairPotentialIndex (a, b)].energyLookup(rIJMag);
+    scalar e = (*this)[pairPotentialIndex (a, b)].energy(rIJMag);
 
     return e;
 }

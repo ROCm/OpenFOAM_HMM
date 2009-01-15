@@ -70,4 +70,10 @@ inline Foam::scalar Foam::pairPotentialList::rCutMaxSqr() const
 }
 
 
+inline const Foam::pairPotential& Foam::pairPotentialList::electrostatic() const
+{
+    return electrostaticPotential_;
+}
+
+
 // ************************************************************************* //

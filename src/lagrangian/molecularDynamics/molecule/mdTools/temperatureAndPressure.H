@@ -84,12 +84,9 @@ if (runTime.outputTime())
         Info << "----------------------------------------" << nl
             << "Averaged properties" << nl
             << "Average |velocity| = "
-                << mag(accumulatedTotalLinearMomentum)/accumulatedTotalMass
-                << " m/s" << nl
-            << "Average temperature = "
-                << averageTemperature << " K" << nl
-            << "Average pressure = "
-                << averagePressure << " N/m^2" << nl
+            << mag(accumulatedTotalLinearMomentum)/accumulatedTotalMass << nl
+            << "Average temperature = " << averageTemperature << nl
+            << "Average pressure = " << averagePressure << nl
             << "----------------------------------------" << endl;
     }
     else

@@ -90,7 +90,7 @@ public:
 
         vector force(const vector r) const;
 
-        //- Read transportProperties dictionary
+        //- Read dictionary
         bool read(const dictionary& tetherPotentialProperties);
 };
 

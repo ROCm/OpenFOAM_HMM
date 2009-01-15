@@ -94,7 +94,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("pairPotential");
+        TypeName("pairPotential");
 
 
     // Declare run-time constructor selection table
@@ -150,9 +150,9 @@ public:
 
         inline scalar rCutSqr() const;
 
-        scalar energyLookup (const scalar r) const;
+        scalar energy (const scalar r) const;
 
-        scalar forceLookup (const scalar r) const;
+        scalar force (const scalar r) const;
 
         List<Pair<scalar> > energyTable() const;
 
