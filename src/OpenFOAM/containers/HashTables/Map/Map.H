@@ -63,7 +63,7 @@ public:
     // Constructors
 
         //- Construct given initial size
-        Map(label size = 100)
+        Map(const label size = 100)
         :
             HashTable<T, label, Hash<label> >(size)
         {}
