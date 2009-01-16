@@ -39,11 +39,6 @@ const char* const Foam::FOAMversion = "VERSION_STRING";
 const char* const Foam::FOAMbuild = "BUILD_STRING";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Static initializers for string::null, word::null and fileName::null
-
-#include "stringsGlobals.C"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Setup an error handler for the global new operator
 
 #include "new.C"

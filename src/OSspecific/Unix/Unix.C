@@ -91,7 +91,9 @@ Foam::string Foam::getEnv(const word& envName)
     }
     else
     {
-        return string::null;
+        // Return null-constructed string rather than string::null
+        // to avoid cyclic dependencies in the construction of globals
+        return string();
     }
 }
 
@@ -277,7 +279,9 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
         ::exit(1);
     }
 
-    return fileName::null;
+    // Return null-constructed fileName rather than fileName::null
+    // to avoid cyclic dependencies in the construction of globals
+    return fileName();
 }
 
 
