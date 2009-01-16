@@ -93,6 +93,11 @@ public:
         ) const;
     };
 
+    // Static Member Functions
+
+        //- Return a null FixedList
+        inline static const FixedList<T, Size>& null();
+
 
     // Constructors
 
@@ -121,11 +126,7 @@ public:
         inline autoPtr<FixedList<T, Size> > clone() const;
 
 
-    // Member functions
-
-        //- Return a null FixedList
-        static const FixedList<T, Size>& null();
-
+    // Member Functions
 
         // Access
 

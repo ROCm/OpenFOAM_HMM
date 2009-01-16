@@ -41,6 +41,13 @@ inline Foam::autoPtr<Foam::List<T> > Foam::List<T>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline const Foam::List<T>& Foam::List<T>::null()
+{
+    return *reinterpret_cast< List<T>* >(0);
+}
+
+
+template<class T>
 inline T& Foam::List<T>::newElmt(const label i)
 {
     if (i >= this->size())

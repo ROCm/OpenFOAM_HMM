@@ -29,8 +29,7 @@ License
 template<class T>
 inline const Foam::Xfer<T>& Foam::Xfer<T>::null()
 {
-    Xfer<T>* nullPtr = reinterpret_cast<Xfer<T>*>(0);
-    return *nullPtr;
+    return *reinterpret_cast< Xfer<T>* >(0);
 }
 
 

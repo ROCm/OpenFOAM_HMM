@@ -81,6 +81,11 @@ class CompactListList
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null CompactListList
+        inline static const CompactListList<T>& null();
+
     // Constructors
 
         //- Null constructor.
@@ -116,10 +121,7 @@ public:
         inline autoPtr<CompactListList<T> > clone() const;
 
 
-    // Member functions
-
-        //- Return a null CompactListList
-        static const CompactListList<T>& null();
+    // Member Functions
 
         // Access
 

@@ -254,6 +254,11 @@ public:
 
         typedef typename Field<Type>::cmptType cmptType;
 
+    // Static Member Functions
+
+        //- Return a null geometric field
+        inline static const GeometricField<Type, PatchField, GeoMesh>& null();
+
 
     // Constructors
 
@@ -381,7 +386,7 @@ public:
         virtual ~GeometricField();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return dimensioned internal field
         DimensionedInternalField& dimensionedInternalField();
@@ -434,9 +439,6 @@ public:
 
         //- Does the field need a reference level for solution
         bool needReference() const;
-
-        //- Return a null geometric field
-        static const GeometricField<Type, PatchField, GeoMesh>& null();
 
         //- Return a component of the field
         tmp<GeometricField<cmptType, PatchField, GeoMesh> > component

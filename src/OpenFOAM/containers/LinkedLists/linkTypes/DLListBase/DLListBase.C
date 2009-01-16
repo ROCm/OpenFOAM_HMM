@@ -40,7 +40,7 @@ Foam::DLListBase::iterator Foam::DLListBase::endIter
 Foam::DLListBase::const_iterator Foam::DLListBase::endConstIter
 (
     static_cast<const DLListBase&>(DLListBase()),
-    reinterpret_cast<const link*>(NULL)
+    reinterpret_cast<const link*>(0)
 );
 
 

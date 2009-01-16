@@ -37,7 +37,7 @@ Foam::SLListBase::iterator Foam::SLListBase::endIter
 Foam::SLListBase::const_iterator Foam::SLListBase::endConstIter
 (
     static_cast<const SLListBase&>(SLListBase()),
-    reinterpret_cast<const link*>(NULL)
+    reinterpret_cast<const link*>(0)
 );
 
 

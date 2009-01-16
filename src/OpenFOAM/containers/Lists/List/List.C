@@ -333,14 +333,6 @@ Foam::List<T>::~List()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const Foam::List<T>& Foam::List<T>::null()
-{
-    List<T>* nullPtr = reinterpret_cast<List<T>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class T>
 void Foam::List<T>::setSize(const label newSize)
 {
     if (newSize < 0)

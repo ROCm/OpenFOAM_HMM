@@ -119,14 +119,6 @@ Foam::CompactListList<T>::CompactListList
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
-{
-    CompactListList<T>* nullPtr = reinterpret_cast<CompactListList<T>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class T>
 void Foam::CompactListList<T>::setSize(const label nRows)
 {
     if (nRows == 0)

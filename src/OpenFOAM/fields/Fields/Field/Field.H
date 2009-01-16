@@ -98,6 +98,15 @@ public:
         static const char* const typeName;
 
 
+    // Static Member Functions
+
+        //- Return a null field
+        inline static const Field<Type>& null()
+        {
+            return *reinterpret_cast< Field<Type>* >(0);
+        }
+
+
     // Constructors
 
         //- Construct null
@@ -198,11 +207,7 @@ public:
         #endif
 
 
-    // Member functions
-
-        //- Return a null Field
-        static const Field<Type>& null();
-
+    // Member Functions
 
         //- 1 to 1 map from the given field
         void map

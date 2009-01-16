@@ -105,6 +105,13 @@ Foam::FixedList<T, Size>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, Foam::label Size>
+inline const Foam::FixedList<T, Size>& Foam::FixedList<T, Size>::null()
+{
+    return *reinterpret_cast< FixedList<T, Size>* >(0);
+}
+
+
+template<class T, Foam::label Size>
 inline Foam::label Foam::FixedList<T, Size>::fcIndex(const label i) const
 {
     return (i == Size-1 ? 0 : i+1);

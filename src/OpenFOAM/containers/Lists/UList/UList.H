@@ -86,6 +86,11 @@ public:
         //- Declare friendship with the SubList class
         friend class SubList<T>;
 
+    // Static Member Functions
+
+        //- Return a null UList
+        inline static const UList<T>& null();
+
     // Public classes
 
         //- Less function class that can be used for sorting
@@ -116,10 +121,7 @@ public:
         inline UList(T* __restrict__ v, label size);
 
 
-    // Member functions
-
-        //- Return a null UList
-        static const UList<T>& null();
+    // Member Functions
 
 
         // Access

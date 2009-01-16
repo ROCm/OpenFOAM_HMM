@@ -68,6 +68,13 @@ Foam::CompactListList<T>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
+{
+    return *reinterpret_cast< CompactListList<T>* >(0);
+}
+
+
+template<class T>
 inline Foam::label Foam::CompactListList<T>::size() const
 {
     return offsets_.size();

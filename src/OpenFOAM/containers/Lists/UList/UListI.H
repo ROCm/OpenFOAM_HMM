@@ -48,6 +48,13 @@ inline Foam::UList<T>::UList(T* __restrict__ v, label size)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline const Foam::UList<T>& Foam::UList<T>::null()
+{
+    return *reinterpret_cast< UList<T>* >(0);
+}
+
+
+template<class T>
 inline Foam::label Foam::UList<T>::fcIndex(const label i) const
 {
     return (i == size()-1 ? 0 : i+1);

@@ -59,6 +59,12 @@ class SubList
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null SubList
+        inline static const SubList<T>& null();
+
+
     // Constructors
 
         //- Construct from UList and sub-list size
@@ -75,12 +81,6 @@ public:
             const label subSize,
             const label startIndex
         );
-
-
-    // Member functions
-
-        //- Return a null SubList
-        static inline const SubList<T>& null();
 
 
     // Member operators
