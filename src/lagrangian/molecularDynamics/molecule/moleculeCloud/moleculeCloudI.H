@@ -91,9 +91,18 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molJ->potentialEnergy() += 0.5*potentialEnergy;
 
-                    molI->rf() += rsIsJ * fsIsJ;
+                    vector rIJ = molI->position() - molJ->position();
 
-                    molJ->rf() += rsIsJ * fsIsJ;
+                    tensor virialContribution =
+                    (rsIsJ * fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
+
+                    molI->rf() += virialContribution;
+
+                    molJ->rf() += virialContribution;
+
+                    // molI->rf() += rsIsJ * fsIsJ;
+
+                    // molJ->rf() += rsIsJ * fsIsJ;
                 }
             }
 
@@ -104,7 +113,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                if(pairPot.rCutMaxSqr(rsIsJMagSq))
+                if(rsIsJMagSq <= electrostatic.rCutSqr())
                 {
                     scalar rsIsJMag = mag(rsIsJ);
 
@@ -126,9 +135,18 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molJ->potentialEnergy() += 0.5*potentialEnergy;
 
-                    molI->rf() += rsIsJ * fsIsJ;
+                    vector rIJ = molI->position() - molJ->position();
 
-                    molJ->rf() += rsIsJ * fsIsJ;
+                    tensor virialContribution =
+                    (rsIsJ * fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
+
+                    molI->rf() += virialContribution;
+
+                    molJ->rf() += virialContribution;
+
+                    // molI->rf() += rsIsJ * fsIsJ;
+
+                    // molJ->rf() += rsIsJ * fsIsJ;
                 }
             }
         }
@@ -196,7 +214,13 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molReal->potentialEnergy() += 0.5*potentialEnergy;
 
-                    molReal->rf() += rsRealsRef * fsRealsRef;
+                    vector rRealRef = molReal->position() - molRef->position();
+
+                    molReal->rf() += (rsRealsRef * fsRealsRef)
+                    *(rsRealsRef & rRealRef)
+                    /rsRealsRefMagSq;
+
+                    // molReal->rf() += rsRealsRef * fsRealsRef;
 
                 }
             }
@@ -208,7 +232,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
                 scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                if(pairPot.rCutMaxSqr(rsRealsRefMagSq))
+                if(rsRealsRefMagSq <= electrostatic.rCutSqr())
                 {
                     scalar rsRealsRefMag = mag(rsRealsRef);
 
@@ -227,7 +251,13 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     molReal->potentialEnergy() += 0.5*potentialEnergy;
 
-                    molReal->rf() += rsRealsRef * fsRealsRef;
+                    vector rRealRef = molReal->position() - molRef->position();
+
+                    molReal->rf() += (rsRealsRef * fsRealsRef)
+                    *(rsRealsRef & rRealRef)
+                    /rsRealsRefMagSq;
+
+                    // molReal->rf() += rsRealsRef * fsRealsRef;
                 }
             }
         }
