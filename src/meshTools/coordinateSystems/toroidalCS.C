@@ -38,19 +38,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::toroidalCS::toroidalCS
-(
-    const word& name,
-    const point& origin,
-    const vector& axis,
-    const vector& direction,
-    const scalar radius
-)
-:
-    coordinateSystem(name, origin, axis, direction),
-    radius_(radius)
-{}
-
 
 Foam::toroidalCS::toroidalCS
 (

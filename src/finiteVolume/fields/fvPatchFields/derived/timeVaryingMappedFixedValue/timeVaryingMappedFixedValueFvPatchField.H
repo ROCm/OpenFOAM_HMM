@@ -107,7 +107,7 @@ class timeVaryingMappedFixedValueFvPatchField
             label& lo,
             label& hi
         ) const;
-        
+
         //- Read boundary points and determine interpolation weights to patch
         //  faceCentres
         void readSamplePoints();
