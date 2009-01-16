@@ -687,6 +687,7 @@ DebugSwitches
     staticFvMesh        0;
     steadyState         0;
     stl                 0;
+    string              0;
     stochasticDispersionRAS 0;
     supersonicFreestream 0;
     surfaceFeatures     0;
