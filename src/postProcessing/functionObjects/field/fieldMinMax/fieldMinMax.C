@@ -181,9 +181,6 @@ void Foam::fieldMinMax::calcMinMaxFields<Foam::scalar>
         scalar minValue = min(field).value();
         scalar maxValue = max(field).value();
 
-        reduce(minValue, minOp<scalar>());
-        reduce(maxValue, maxOp<scalar>());
-
         if (Pstream::master())
         {
             fieldMinMaxFilePtr_() << obr_.time().value() << tab
