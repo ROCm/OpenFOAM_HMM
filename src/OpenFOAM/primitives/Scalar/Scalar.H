@@ -51,7 +51,7 @@ public:
         enum
         {
             dim = 3,         // Dimensionality of space
-            rank = 0,        // Rank od Scalar is 0
+            rank = 0,        // Rank of Scalar is 0
             nComponents = 1  // Number of components in Scalar is 1
         };
 
@@ -65,7 +65,8 @@ public:
     // Constructors
 
         //- Construct from Istream
-        pTraits(Istream& is);
+        pTraits(Istream&);
+
 
     // Member Functions
 
@@ -78,8 +79,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Return a string representation of a Scalar
-word name(const Scalar s);
+//- Return a string representation of a Scalar
+word name(const Scalar);
 
 
 inline Scalar& setComponent(Scalar& s, const direction)
@@ -261,7 +262,7 @@ inline Scalar stabilise(const Scalar s, const Scalar small)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Scalar readScalar(Istream& is);
+Scalar readScalar(Istream&);
 Istream& operator>>(Istream&, Scalar&);
 Ostream& operator<<(Ostream&, const Scalar);
 

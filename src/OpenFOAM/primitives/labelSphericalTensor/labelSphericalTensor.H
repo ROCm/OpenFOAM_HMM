@@ -48,10 +48,10 @@ namespace Foam
 
 typedef SphericalTensor<label> labelSphericalTensor;
 
-// Identity labelTensor
+//- Identity labelTensor
 static const labelSphericalTensor labelI(1);
 
-//- Specify data associated with labelSphericalTensor type is contiguous
+//- Data associated with labelSphericalTensor type are contiguous
 template<>
 inline bool contiguous<labelSphericalTensor>() {return true;}
 

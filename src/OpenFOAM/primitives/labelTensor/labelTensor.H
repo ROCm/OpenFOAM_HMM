@@ -48,7 +48,7 @@ namespace Foam
 
 typedef Tensor<label> labelTensor;
 
-//- Specify data associated with labelTensor type is contiguous
+//- Specify data associated with labelTensor type are contiguous
 template<>
 inline bool contiguous<labelTensor>() {return true;}
 

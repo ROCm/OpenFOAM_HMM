@@ -39,21 +39,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::word Foam::name(const unsigned long val)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-word name(const unsigned long i)
-{
-    std::ostringstream osBuffer;
-    osBuffer << i;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf << val;
+    return buf.str();
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, unsigned long& i)
+Foam::Istream& Foam::operator>>(Istream& is, unsigned long& i)
 {
     token t(is);
 
@@ -84,25 +79,21 @@ Istream& operator>>(Istream& is, unsigned long& i)
 }
 
 
-unsigned long readUlong(Istream& is)
+unsigned long Foam::readUlong(Istream& is)
 {
-    unsigned long ri;
-    is >> ri;
+    unsigned long val;
+    is >> val;
 
-    return ri;
+    return val;
 }
 
 
-Ostream& operator<<(Ostream& os, const unsigned long i)
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long i)
 {
     os.write(label(i));
     os.check("Ostream& operator<<(Ostream&, const unsigned long)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

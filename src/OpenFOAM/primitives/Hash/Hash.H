@@ -45,7 +45,7 @@ namespace Foam
                            Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class primitive>
+template<class PrimitiveType>
 class Hash
 {
 
@@ -54,12 +54,12 @@ public:
     Hash()
     {}
 
-    label operator()(const primitive& p) const
+    label operator()(const PrimitiveType& p) const
     {
         return label(p);
     }
 
-    label operator()(const primitive& p, const label tableSize) const
+    label operator()(const PrimitiveType& p, const label tableSize) const
     {
         return mag(operator()(p)) % tableSize;
     }

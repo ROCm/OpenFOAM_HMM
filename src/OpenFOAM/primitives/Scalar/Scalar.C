@@ -26,18 +26,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+const char* const Foam::pTraits<Foam::Scalar>::typeName = "scalar";
+const Foam::Scalar Foam::pTraits<Foam::Scalar>::zero(0.0);
+const Foam::Scalar Foam::pTraits<Foam::Scalar>::one(1.0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const char* Foam::pTraits<Foam::Scalar>::componentNames[] = { "x" };
 
-const char* const pTraits<Scalar>::typeName = "scalar";
-const Scalar pTraits<Scalar>::zero = 0.0;
-const Scalar pTraits<Scalar>::one = 1.0;
-
-const char* pTraits<Scalar>::componentNames[] = { "x" };
-
-pTraits<Scalar>::pTraits(Istream& is)
+Foam::pTraits<Foam::Scalar>::pTraits(Istream& is)
 {
     is >> p_;
 }
@@ -45,27 +40,26 @@ pTraits<Scalar>::pTraits(Istream& is)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- return a string representation of a Scalar
-word name(const Scalar s)
+Foam::word Foam::name(const Scalar s)
 {
-    std::ostringstream osBuffer;
-    osBuffer << s;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf << s;
+    return buf.str();
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Scalar readScalar(Istream& is)
+Foam::Scalar Foam::readScalar(Istream& is)
 {
-    Scalar rs;
-    is >> rs;
+    Scalar val;
+    is >> val;
 
-    return rs;
+    return val;
 }
 
 
-Istream& operator>>(Istream& is, Scalar& s)
+Foam::Istream& Foam::operator>>(Istream& is, Scalar& s)
 {
     token t(is);
 
@@ -96,16 +90,12 @@ Istream& operator>>(Istream& is, Scalar& s)
 }
 
 
-Ostream& operator<<(Ostream& os, const Scalar s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Scalar s)
 {
     os.write(s);
     os.check("Ostream& operator<<(Ostream&, const Scalar&)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
