@@ -38,21 +38,60 @@ void Foam::fieldMinMax::calcMinMaxFields(const word& fieldName)
 
     if (obr_.foundObject<fieldType>(fieldName))
     {
-        const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
-        scalar minValue = min(mag(field)).value();
-        scalar maxValue = max(mag(field)).value();
-
         if (Pstream::master())
         {
-            fieldMinMaxFilePtr_() << obr_.time().value() << tab
-                << fieldName << tab << minValue << tab << maxValue << endl;
-
-            if (log_)
+            const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
+            switch (mode_)
             {
-                Info<< "fieldMinMax output:" << nl
-                    << "    min(mag(" << fieldName << ")) = " << minValue << nl
-                    << "    max(mag(" << fieldName << ")) = " << maxValue << nl
-                    << endl;
+                case mdMag:
+                {
+                    scalar minValue = min(mag(field)).value();
+                    scalar maxValue = max(mag(field)).value();
+
+                    fieldMinMaxFilePtr_() << obr_.time().value() << tab
+                        << fieldName << tab << minValue << tab << maxValue
+                        << endl;
+
+                    if (log_)
+                    {
+                        Info<< "fieldMinMax output:" << nl
+                            << "    min(mag(" << fieldName << ")) = "
+                            << minValue << nl
+                            << "    max(mag(" << fieldName << ")) = "
+                            << maxValue << nl
+                            << endl;
+                    }
+                    break;
+                }
+                case mdCmpt:
+                {
+                    Type minValue = min(field).value();
+                    Type maxValue = max(field).value();
+
+                    fieldMinMaxFilePtr_() << obr_.time().value() << tab
+                        << fieldName << tab << minValue << tab << maxValue
+                        << endl;
+
+                    if (log_)
+                    {
+                        Info<< "fieldMinMax output:" << nl
+                            << "    cmptMin(" << fieldName << ") = "
+                            << minValue << nl
+                            << "    cmptMax(" << fieldName << ") = "
+                            << maxValue << nl
+                            << endl;
+                    }
+                    break;
+                }
+                default:
+                {
+                    FatalErrorIn
+                    (
+                        "Foam::fieldMinMax::calcMinMaxFields"
+                        "(const word& fieldName)"
+                    )<< "Unknown min/max mode: " << modeTypeNames_[mode_]
+                     << exit(FatalError);
+                }
             }
         }
     }
