@@ -61,35 +61,69 @@ class dictionary;
 
 class Switch
 {
+public:
+
+    //- The various text representations for a switch value.
+    enum switchType
+    {
+        FALSE = 0,  TRUE  = 1,
+        OFF   = 2,  ON    = 3,
+        NO    = 4,  YES   = 5,
+        NO_1  = 6,  YES_1 = 7,
+        INVALID
+    };
+
+private:
+
+    // Static data members
+
+        //- The set of names corresponding to the switchType enumeration
+        //  Includes an extra entry for "invalid".
+        static const char* names[INVALID+1];
+
     // Private data
 
-        bool bool_;
+        //- Enumerated string representation
+        switchType switch_;
 
-        word word_;
+        //- The boolean value
+        bool bool_;
 
 public:
     // Private member functions
 
+        //- Return a switchType representation of a bool
+        static switchType asEnum(const bool);
+
+        //- Return a switchType representation of a word
+        static switchType asEnum(const word&, const bool ignoreError=false);
+
         //- Return a bool representation of a word
-        static bool asBool(const word&);
+        static bool asBool(const word&, const bool ignoreError=false);
+
+        //- Return a bool representation of a switchType
+        static bool asBool(const switchType&);
 
         //- Return a word representation of a bool value
         static word asWord(const bool);
+
+        //- Return a word representation of a switchType
+        static word asWord(const switchType&);
 
     // Constructors
 
         //- Construct from bool
         Switch(const bool value)
         :
-            bool_(value),
-            word_(asWord(value))
+            switch_(asEnum(value)),
+            bool_(value)
         {}
 
         //- Construct from word
         Switch(const word& value)
         :
-            bool_(asBool(value)),
-            word_(value)
+            switch_(asEnum(value)),
+            bool_(asBool(switch_))
         {}
 
         //- Construct from Istream
@@ -109,8 +143,8 @@ public:
 
         Switch& operator=(const Switch& rhs)
         {
-            bool_ = rhs.bool_;
-            word_ = rhs.word_;
+            switch_ = rhs.switch_;
+            bool_   = rhs.bool_;
 
             return *this;
         }
@@ -120,10 +154,10 @@ public:
             return bool_;
         }
 
-        operator const word&() const
-        {
-            return word_;
-        }
+//         operator const word&() const
+//         {
+//             return asWord(switch_);
+//         }
 
 
     // Member fuctions

@@ -39,8 +39,10 @@ Foam::Switch::Switch(Istream& is)
 
 Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 {
-    is >> s.word_;
-    s.bool_ = Switch::asBool(s.word_);
+    word w(is);
+
+    s.switch_ = Switch::asEnum(w);
+    s.bool_   = Switch::asBool(s.switch_);
 
     is.check("Istream& operator>>(Istream&, Switch&)");
 
@@ -50,10 +52,8 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const Switch& s)
 {
-    os << s.word_;
-
+    os  << Switch::names[s.switch_];
     os.check("Ostream& operator<<(Ostream&, const Switch&)");
-
     return os;
 }
 
