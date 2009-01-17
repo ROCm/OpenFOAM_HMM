@@ -80,6 +80,8 @@ public:
 
     // Static data members
 
+        static const char* const typeName;
+        static int debug;
         static const string null;
 
 
@@ -116,8 +118,6 @@ public:
 
     // Member Functions
 
-    // Access
-
         //- Count and return the number of a given character in the string
         size_type count(const char) const;
 
@@ -130,9 +130,6 @@ public:
         template<class String>
         static inline bool meta(const string&, const char quote='\\');
 
-
-    // Edit
-
         //- Strip invalid characters from the given string
         template<class String>
         static inline bool stripInvalid(string&);
@@ -144,7 +141,6 @@ public:
         //- Return a String with quoted meta-characters from the given string
         template<class String>
         static inline string quotemeta(const string&, const char quote='\\');
-
 
         //- Replace first occurence of sub-string oldStr with newStr
         //  starting at start
