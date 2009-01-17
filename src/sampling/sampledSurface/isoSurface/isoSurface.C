@@ -58,6 +58,31 @@ Foam::scalar Foam::isoSurface::isoFraction
 }
 
 
+bool Foam::isoSurface::isEdgeOfFaceCut
+(
+    const scalarField& pVals,
+    const face& f,
+    const bool ownLower,
+    const bool neiLower
+) const
+{
+    forAll(f, fp)
+    {
+        bool fpLower = (pVals[f[fp]] < iso_);
+        if
+        (
+            (fpLower != ownLower)
+         || (fpLower != neiLower)
+         || (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
+        )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Determine for every face/cell whether it (possibly) generates triangles.
 void Foam::isoSurface::calcCutTypes
 (
@@ -84,22 +109,13 @@ void Foam::isoSurface::calcCutTypes
         }
         else
         {
-            // Mesh edge.
+            // See if any mesh edge is cut by looping over all the edges of the
+            // face.
             const face f = mesh_.faces()[faceI];
 
-            forAll(f, fp)
+            if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
             {
-                bool fpLower = (pVals[f[fp]] < iso_);
-                if
-                (
-                    (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                 || (fpLower != ownLower)
-                 || (fpLower != neiLower)
-                )
-                {
-                    faceCutType_[faceI] = CUT;
-                    break;
-                }
+                faceCutType_[faceI] = CUT;
             }
         }
     }
@@ -117,22 +133,13 @@ void Foam::isoSurface::calcCutTypes
             {
                 bool ownLower = (cVals[own[faceI]] < iso_);
 
-                // Mesh edge.
                 const face f = mesh_.faces()[faceI];
 
-                forAll(f, fp)
+                if (isEdgeOfFaceCut(pVals, f, ownLower, ownLower))
                 {
-                    bool fpLower = (pVals[f[fp]] < iso_);
-                    if
-                    (
-                        (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                     || (fpLower != ownLower)
-                    )
-                    {
-                        faceCutType_[faceI] = CUT;
-                        break;
-                    }
+                    faceCutType_[faceI] = CUT;
                 }
+
                 faceI++;
             }
         }
@@ -152,19 +159,9 @@ void Foam::isoSurface::calcCutTypes
                     // Mesh edge.
                     const face f = mesh_.faces()[faceI];
 
-                    forAll(f, fp)
+                    if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
                     {
-                        bool fpLower = (pVals[f[fp]] < iso_);
-                        if
-                        (
-                            (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                         || (fpLower != ownLower)
-                         || (fpLower != neiLower)
-                        )
-                        {
-                            faceCutType_[faceI] = CUT;
-                            break;
-                        }
+                        faceCutType_[faceI] = CUT;
                     }
                 }
                 faceI++;
@@ -1355,6 +1352,30 @@ Foam::isoSurface::isoSurface
     iso_(iso),
     mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const labelList& own = mesh_.faceOwner();
+
+    // Check
+    forAll(patches, patchI)
+    {
+        if (isA<emptyPolyPatch>(patches[patchI]))
+        {
+            FatalErrorIn
+            (
+                "isoSurface::isoSurface\n"
+                "(\n"
+                "    const volScalarField& cVals,\n"
+                "    const scalarField& pVals,\n"
+                "    const scalar iso,\n"
+                "    const bool regularise,\n"
+                "    const scalar mergeTol\n"
+                ")\n"
+            )   << "Iso surfaces not supported on case with empty patches."
+                << exit(FatalError);
+        }
+    }
+
+
     // Determine if any cut through face/cell
     calcCutTypes(cVals, pVals);
 
@@ -1364,8 +1385,6 @@ Foam::isoSurface::isoSurface
     PackedList<1> isBoundaryPoint(mesh_.nPoints());
 
     labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const labelList& own = mesh_.faceOwner();
 
     forAll(patches, patchI)
     {

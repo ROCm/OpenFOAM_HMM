@@ -200,7 +200,7 @@ void Foam::isoSurface::generateTriPoints
 
 
 template<class Type>
-Foam::label Foam::isoSurface::generateTriPoints
+Foam::label Foam::isoSurface::generateFaceTriPoints
 (
     const volScalarField& cVals,
     const scalarField& pVals,
@@ -288,6 +288,19 @@ void Foam::isoSurface::generateTriPoints
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
+    if
+    (
+        (cVals.size() != mesh_.nCells())
+     || (pVals.size() != mesh_.nPoints())
+     || (cCoords.size() != mesh_.nCells())
+     || (pCoords.size() != mesh_.nPoints())
+     || (snappedCc.size() != mesh_.nCells())
+     || (snappedPoint.size() != mesh_.nPoints())
+    )
+    {
+        FatalErrorIn("isoSurface::generateTriPoints(..)")
+            << "Incorrect size." << abort(FatalError);
+    }
 
     // Determine neighbouring snap status
     labelList neiSnappedCc(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
@@ -319,7 +332,7 @@ void Foam::isoSurface::generateTriPoints
     {
         if (faceCutType_[faceI] != NOTCUT)
         {
-            generateTriPoints
+            generateFaceTriPoints
             (
                 cVals,
                 pVals,
@@ -357,7 +370,7 @@ void Foam::isoSurface::generateTriPoints
                 {
                     if (faceCutType_[faceI] != NOTCUT)
                     {
-                        generateTriPoints
+                        generateFaceTriPoints
                         (
                             cVals,
                             pVals,
@@ -384,14 +397,14 @@ void Foam::isoSurface::generateTriPoints
         }
         else if (isA<emptyPolyPatch>(pp))
         {
-            // Assume zero-gradient.
+            // Assume zero-gradient. But what about coordinates?
             label faceI = pp.start();
 
             forAll(pp, i)
             {
                 if (faceCutType_[faceI] != NOTCUT)
                 {
-                    generateTriPoints
+                    generateFaceTriPoints
                     (
                         cVals,
                         pVals,
@@ -423,7 +436,7 @@ void Foam::isoSurface::generateTriPoints
             {
                 if (faceCutType_[faceI] != NOTCUT)
                 {
-                    generateTriPoints
+                    generateFaceTriPoints
                     (
                         cVals,
                         pVals,
