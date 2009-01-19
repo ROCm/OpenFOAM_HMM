@@ -94,7 +94,12 @@ inline Foam::fileName::fileName(const char* str)
 
 inline bool Foam::fileName::valid(char c)
 {
-    return (!isspace(c) && c != '"');
+    return
+    (
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+    );
 }
 
 

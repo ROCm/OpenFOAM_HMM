@@ -136,6 +136,14 @@ public:
             //- Write string
             Ostream& write(const string&);
 
+            //- Write std::string surrounded by single quotes.
+            //  Optional write without quotes.
+            Ostream& writeQuoted
+            (
+                const std::string&,
+                const bool quoted=true
+            );
+
             //- Write label
             Ostream& write(const label);
 

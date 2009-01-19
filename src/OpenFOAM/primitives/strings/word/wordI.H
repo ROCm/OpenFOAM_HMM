@@ -119,12 +119,13 @@ inline bool Foam::word::valid(char c)
 {
     return
     (
-          !isspace(c)
-     && c != '"'
-     && c != '/'
-     && c != ';'
-     && c != '{'
-     && c != '}'
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+     && c != '/'   // path separator
+     && c != ';'   // end statement
+     && c != '{'   // beg subdict
+     && c != '}'   // end subdict
     );
 }
 

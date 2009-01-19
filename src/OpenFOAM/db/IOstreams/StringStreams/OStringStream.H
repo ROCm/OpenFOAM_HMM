@@ -57,7 +57,7 @@ public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         OStringStream
         (
             streamFormat format=ASCII,
@@ -106,6 +106,7 @@ public:
 
         // Access
 
+            //- Return the string
             string str() const
             {
                 return dynamic_cast<const std::ostringstream&>(stream()).str();

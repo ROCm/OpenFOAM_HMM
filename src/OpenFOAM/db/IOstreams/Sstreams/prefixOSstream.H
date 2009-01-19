@@ -114,6 +114,14 @@ public:
             //- Write string
             virtual Ostream& write(const string&);
 
+            //- Write std::string
+            //  Specify if string should be single quoted or remain unquoted.
+            virtual Ostream& writeQuoted
+            (
+                const std::string&,
+                const bool quoted=true
+            );
+
             //- Write label
             virtual Ostream& write(const label);
 

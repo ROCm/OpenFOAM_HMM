@@ -78,14 +78,7 @@ Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const wordRe& w)
 {
-    if (w.isPattern())
-    {
-        os.write(static_cast<const string&>(w));
-    }
-    else
-    {
-        os.write(static_cast<const word&>(w));
-    }
+    os.writeQuoted(w, w.isPattern());
     os.check("Ostream& operator<<(Ostream&, const wordRe&)");
     return os;
 }
@@ -99,7 +92,7 @@ Foam::Ostream& Foam::wordRe::info(Ostream& os) const
     }
     else
     {
-        os  << "wordRe(plain) '" << *this << "'";
+        os  << "wordRe(plain) \"" << *this << '"';
     }
     os.flush();
 

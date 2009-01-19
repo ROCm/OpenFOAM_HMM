@@ -175,6 +175,18 @@ Foam::Ostream& Foam::OPstream::write(const string& str)
 }
 
 
+Foam::Ostream& Foam::OPstream::writeQuoted(const std::string& str, const bool)
+{
+    write(char(token::STRING));
+
+    size_t len = str.size();
+    writeToBuffer(len);
+    writeToBuffer(str.c_str(), len + 1, 1);
+
+    return *this;
+}
+
+
 Foam::Ostream& Foam::OPstream::write(const label val)
 {
     write(char(token::LABEL));
