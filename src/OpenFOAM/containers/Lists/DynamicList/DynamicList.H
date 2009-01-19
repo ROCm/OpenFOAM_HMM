@@ -101,7 +101,14 @@ public:
         //- Construct given size.
         explicit inline DynamicList(const label);
 
+        //- Construct copy.
+        explicit inline DynamicList
+        (
+            const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+        );
+
         //- Construct from UList. Size set to UList size.
+        //  Also constructs from DynamicList with different sizing parameters.
         explicit inline DynamicList(const UList<T>&);
 
         //- Construct by transferring the parameter contents

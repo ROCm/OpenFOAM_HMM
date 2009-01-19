@@ -53,6 +53,17 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
+    const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+)
+:
+    List<T>(lst),
+    capacity_(lst.size())
+{}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
+(
     const UList<T>& lst
 )
 :
@@ -98,7 +109,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setCapacity
         nextFree = capacity_;
     }
     // we could also enforce SizeInc granularity when (!SizeMult || !SizeDiv)
-
 
     List<T>::setSize(capacity_);
     List<T>::size(nextFree);
