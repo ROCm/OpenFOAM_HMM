@@ -16,44 +16,51 @@ FoamFile
 
 solvers
 {
-    rho PCG
+    rho
     {
+        solver           PCG;
         preconditioner   DIC;
         tolerance        1e-06;
         relTol           0;
     };
-    U PBiCG
+    U
     {
+        solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-06;
         relTol           0;
     };
-    p PCG
+    p
     {
+        solver           PCG;
         preconditioner   DIC;
         tolerance        1e-09;
         relTol           0;
     };
-    Yi PBiCG
+    Yi
     {
+        solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-06;
         relTol           0;
     };
-    h PBiCG
+    h
     {
+        solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-06;
         relTol           0;
     };
-    k PBiCG
+    k
     {
+        solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-06;
         relTol           0;
     };
-    epsilon PBiCG
+    epsilon
     {
+        solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-06;
         relTol           0;

@@ -33,7 +33,7 @@ Description
 
 if (adjustTimeStep)
 {
-    if (CoNum > SMALL)
+    if ((runTime.timeIndex() == 0) && (CoNum > SMALL))
     {
         runTime.setDeltaT
         (

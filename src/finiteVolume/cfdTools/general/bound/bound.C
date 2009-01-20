@@ -53,7 +53,6 @@ void Foam::bound(volScalarField& vsf, const dimensionedScalar& vsf0)
             vsf0.value()
         );
 
-        vsf.correctBoundaryConditions();
         vsf.boundaryField() = max(vsf.boundaryField(), vsf0.value());
     }
 }

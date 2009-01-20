@@ -11,20 +11,20 @@ FoamFile
     format      binary;
     class       volScalarField;
     location    "0";
-    object      epsilon;
+    object      mut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [1 -1 -1 0 0 0 0];
 
-internalField   uniform 90;
+internalField   uniform 0;
 
 boundaryField
 {
     walls
     {
-        type            epsilonWallFunction;
-        value           uniform 90;
+        type            mutWallFunction;
+        value           uniform 0;
     }
 }
 
