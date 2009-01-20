@@ -14,6 +14,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+<<<<<<< HEAD:tutorials/dieselFoam/aachenBomb/constant/turbulenceProperties
 simulationType RASModel;
+=======
+simulationType      RASModel;
+>>>>>>> c2eac7aaca53e9702c56bbbbd2c0dc47a83829e0:tutorials/dieselFoam/aachenBomb/constant/turbulenceProperties
 
 // ************************************************************************* //

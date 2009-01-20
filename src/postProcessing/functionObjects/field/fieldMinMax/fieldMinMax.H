@@ -49,6 +49,7 @@ SourceFiles
 #include "OFstream.H"
 #include "Switch.H"
 #include "pointFieldFwd.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,9 +67,18 @@ class mapPolyMesh;
 
 class fieldMinMax
 {
+public:
+
+    enum modeType
+    {
+        mdMag,
+        mdCmpt
+    };
+
+
 protected:
 
-    // Private data
+    // Protected data
 
         //- Name of this set of forces,
         //  Also used as the name of the probes directory.
@@ -82,11 +92,17 @@ protected:
         //- Switch to send output to Info as well as to file
         Switch log_;
 
-        //- Patches to integrate forces over
+        //- Mode type names
+        static const NamedEnum<modeType, 2> modeTypeNames_;
+
+        //- Mode for min/max - only applicable for ranks > 0
+        modeType mode_;
+
+        //- Fields to assess min/max
         wordList fieldSet_;
 
 
-        //- Forces/moment file ptr
+        //- Min/max file ptr
         autoPtr<OFstream> fieldMinMaxFilePtr_;
 
 
