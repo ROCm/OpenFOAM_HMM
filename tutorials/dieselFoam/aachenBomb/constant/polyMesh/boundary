@@ -9,24 +9,20 @@ FoamFile
 {
     version     2.0;
     format      binary;
-    class       volScalarField;
-    location    "0";
-    object      epsilon;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
-
-internalField   uniform 90;
-
-boundaryField
-{
+1
+(
     walls
     {
-        type            epsilonWallFunction;
-        value           uniform 90;
+        type            wall;
+        nFaces          19762;
+        startFace       494419;
     }
-}
-
+)
 
 // ************************************************************************* //
