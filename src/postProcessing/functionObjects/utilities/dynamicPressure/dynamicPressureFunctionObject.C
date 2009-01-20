@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,22 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Static initializers for
-        Foam::string::null
-        Foam::word::null
-        Foam::fileName::null.
-    This file is included in global.Cver since these members are required by
-    debug.C.
-
 \*---------------------------------------------------------------------------*/
 
-#include "string.H"
-#include "word.H"
-#include "fileName.H"
+#include "dynamicPressureFunctionObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineNamedTemplateTypeNameAndDebug(dynamicPressureFunctionObject, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        dynamicPressureFunctionObject,
+        dictionary
+    );
+}
 
 // ************************************************************************* //

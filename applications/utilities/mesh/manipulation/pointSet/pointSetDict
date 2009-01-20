@@ -57,6 +57,12 @@ topoSetSources
        box   (0 0 0) (1 1 1);
     }
 
+    // All points in pointzone
+    zoneToPoint
+    {
+        name ".*Zone";      // name of pointZone, wildcards allowed.
+    }
+
     // Select based on surface
     surfaceToPoint
     {

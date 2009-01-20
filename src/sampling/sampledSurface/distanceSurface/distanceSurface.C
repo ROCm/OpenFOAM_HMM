@@ -45,6 +45,11 @@ namespace Foam
 
 void Foam::distanceSurface::createGeometry()
 {
+    if (debug)
+    {
+        Pout<< "distanceSurface::createGeometry :updating geometry." << endl;
+    }
+
     // Clear any stored topologies
     facesPtr_.clear();
 
@@ -67,7 +72,7 @@ void Foam::distanceSurface::createGeometry()
                 false
             ),
             fvm,
-            dimensionedScalar("zero", dimless/dimTime, 0)
+            dimensionedScalar("zero", dimLength, 0)
         )
     );
     volScalarField& cellDistance = cellDistancePtr_();
@@ -157,6 +162,7 @@ void Foam::distanceSurface::createGeometry()
         }
     }
 
+
     // On processor patches the mesh.C() will already be the cell centre
     // on the opposite side so no need to swap cellDistance.
 
@@ -164,22 +170,69 @@ void Foam::distanceSurface::createGeometry()
     // Distance to points
     pointDistance_.setSize(fvm.nPoints());
     {
+        const pointField& pts = fvm.points();
+
         List<pointIndexHit> nearest;
         surfPtr_().findNearest
         (
-            fvm.points(),
-            scalarField(fvm.nPoints(), GREAT),
+            pts,
+            scalarField(pts.size(), GREAT),
             nearest
         );
-        forAll(pointDistance_, pointI)
+
+        if (signed_)
         {
-            pointDistance_[pointI] = Foam::mag
-            (
-                nearest[pointI].hitPoint()
-              - fvm.points()[pointI]
-            );
+            vectorField normal;
+            surfPtr_().getNormal(nearest, normal);
+
+            forAll(nearest, i)
+            {
+                vector d(pts[i]-nearest[i].hitPoint());
+
+                if ((d&normal[i]) > 0)
+                {
+                    pointDistance_[i] = Foam::mag(d);
+                }
+                else
+                {
+                    pointDistance_[i] = -Foam::mag(d);
+                }
+            }
+        }
+        else
+        {
+            forAll(nearest, i)
+            {
+                pointDistance_[i] = Foam::mag(pts[i]-nearest[i].hitPoint());
+            }
         }
     }
+
+
+    if (debug)
+    {
+        Pout<< "Writing cell distance:" << cellDistance.objectPath() << endl;
+        cellDistance.write();
+        pointScalarField pDist
+        (
+            IOobject
+            (
+                "pointDistance",
+                fvm.time().timeName(),
+                fvm.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pointMesh::New(fvm),
+            dimensionedScalar("zero", dimLength, 0)
+        );
+        pDist.internalField() = pointDistance_;
+
+        Pout<< "Writing point distance:" << pDist.objectPath() << endl;
+        pDist.write();
+    }
+
 
     //- Direct from cell field and point field.
     isoSurfPtr_.reset
@@ -196,6 +249,7 @@ void Foam::distanceSurface::createGeometry()
     if (debug)
     {
         print(Pout);
+        Pout<< endl;
     }
 }
 
@@ -264,6 +318,13 @@ bool Foam::distanceSurface::needsUpdate() const
 
 bool Foam::distanceSurface::expire()
 {
+    if (debug)
+    {
+        Pout<< "distanceSurface::expire :"
+            << " have-facesPtr_:" << facesPtr_.valid()
+            << " needsUpdate_:" << needsUpdate_ << endl;
+    }
+
     // Clear any stored topologies
     facesPtr_.clear();
 
@@ -280,6 +341,13 @@ bool Foam::distanceSurface::expire()
 
 bool Foam::distanceSurface::update()
 {
+    if (debug)
+    {
+        Pout<< "distanceSurface::update :"
+            << " have-facesPtr_:" << facesPtr_.valid()
+            << " needsUpdate_:" << needsUpdate_ << endl;
+    }
+
     if (!needsUpdate_)
     {
         return false;

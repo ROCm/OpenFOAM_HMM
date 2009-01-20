@@ -488,17 +488,18 @@ labelList getNonRegionCells(const labelList& cellRegion, const label regionI)
 }
 
 
-// Get per region-region interface the sizes.
-// If sumParallel does merge.
-EdgeMap<label> getInterfaceSizes
+// Get per region-region interface the sizes. If sumParallel sums sizes.
+// Returns interfaces as straight list for looping in identical order.
+void getInterfaceSizes
 (
     const polyMesh& mesh,
     const labelList& cellRegion,
-    const bool sumParallel
+    const bool sumParallel,
+
+    edgeList& interfaces,
+    EdgeMap<label>& interfaceSizes
 )
 {
-    EdgeMap<label> interfaceSizes;
-
     forAll(mesh.faceNeighbour(), faceI)
     {
         label ownRegion = cellRegion[mesh.faceOwner()[faceI]];
@@ -585,7 +586,12 @@ EdgeMap<label> getInterfaceSizes
         }
     }
 
-    return interfaceSizes;
+    // Make sure all processors have interfaces in same order
+    interfaces = interfaceSizes.toc();
+    if (sumParallel)
+    {
+        Pstream::scatter(interfaces);
+    }
 }
 
 
@@ -705,11 +711,7 @@ autoPtr<mapPolyMesh> createRegionMesh
 
         if (otherRegion != -1)
         {
-            edge interface
-            (
-                min(regionI, otherRegion),
-                max(regionI, otherRegion)
-            );
+            edge interface(regionI, otherRegion);
 
             // Find the patch.
             if (regionI < otherRegion)
@@ -848,6 +850,7 @@ void createAndWriteRegion
 
 
     const polyBoundaryMesh& newPatches = newMesh().boundaryMesh();
+    newPatches.checkParallelSync(true);
 
     // Delete empty patches
     // ~~~~~~~~~~~~~~~~~~~~
@@ -863,13 +866,12 @@ void createAndWriteRegion
     {
         const polyPatch& pp = newPatches[patchI];
 
-        if
-        (
-            !isA<processorPolyPatch>(pp)
-         && returnReduce(pp.size(), sumOp<label>()) > 0
-        )
+        if (!isA<processorPolyPatch>(pp))
         {
-            oldToNew[patchI] = newI++;
+            if (returnReduce(pp.size(), sumOp<label>()) > 0)
+            {
+                oldToNew[patchI] = newI++;
+            }
         }
     }
 
@@ -983,10 +985,15 @@ void createAndWriteRegion
 }
 
 
+// Create for every region-region interface with non-zero size two patches.
+// First one is for minimumregion to maximumregion.
+// Note that patches get created in same order on all processors (if parallel)
+// since looping over synchronised 'interfaces'.
 EdgeMap<label> addRegionPatches
 (
     fvMesh& mesh,
     const regionSplit& cellRegion,
+    const edgeList& interfaces,
     const EdgeMap<label>& interfaceSizes,
     const wordList& regionNames
 )
@@ -998,15 +1005,12 @@ EdgeMap<label> addRegionPatches
 
     EdgeMap<label> interfaceToPatch(cellRegion.nRegions());
 
-    // Keep start of added patches for later.
-    label minAddedPatchI = labelMax;
-
-    forAllConstIter(EdgeMap<label>, interfaceSizes, iter)
+    forAll(interfaces, interI)
     {
-        if (iter() > 0)
-        {
-            const edge& e = iter.key();
+        const edge& e = interfaces[interI];
 
+        if (interfaceSizes[e] > 0)
+        {
             label patchI = addPatch
             (
                 mesh,
@@ -1025,12 +1029,9 @@ EdgeMap<label> addRegionPatches
                 << " " << mesh.boundaryMesh()[patchI].name()
                 << endl;
 
-            interfaceToPatch.insert(iter.key(), patchI);
-
-            minAddedPatchI = min(minAddedPatchI, patchI);
+            interfaceToPatch.insert(e, patchI);
         }
     }
-    //Info<< "minAddedPatchI:" << minAddedPatchI << endl;
     return interfaceToPatch;
 }
 
@@ -1348,24 +1349,26 @@ int main(int argc, char *argv[])
 
     // Sizes of interface between regions. From pair of regions to number of
     // faces.
-    EdgeMap<label> interfaceSizes
+    edgeList interfaces;
+    EdgeMap<label> interfaceSizes;
+    getInterfaceSizes
     (
-        getInterfaceSizes
-        (
-            mesh,
-            cellRegion,
-            true       // sum in parallel?
-        )
+        mesh,
+        cellRegion,
+        true,      // sum in parallel?
+
+        interfaces,
+        interfaceSizes
     );
 
     Info<< "Region\tRegion\tFaces" << nl
         << "------\t------\t-----" << endl;
 
-    forAllConstIter(EdgeMap<label>, interfaceSizes, iter)
+    forAll(interfaces, interI)
     {
-        const edge& e = iter.key();
+        const edge& e = interfaces[interI];
 
-        Info<< e[0] << '\t' << e[1] << '\t' << iter() << nl;
+        Info<< e[0] << '\t' << e[1] << '\t' << interfaceSizes[e] << nl;
     }
     Info<< endl;
 
@@ -1511,6 +1514,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 cellRegion,
+                interfaces,
                 interfaceSizes,
                 regionNames
             )

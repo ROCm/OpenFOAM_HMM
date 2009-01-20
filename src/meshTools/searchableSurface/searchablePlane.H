@@ -23,29 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::searchablePlate
+    Foam::searchablePlane
 
 Description
-    Searching on finite plate. Plate has to be aligned with coordinate
-    axes.
-    Plate defined as origin and span. One of the components of span has
-    to be 0 which defines the normal direction. E.g.
-
-    span    = (Sx Sy 0)     // plate in x-y plane
-    origin  = (Ox Oy Oz)
-
-    now plane is from (Ox Oy Oz) to (Ox+Sx Oy+Sy Oz)
+    Searching on plane. See plane.H
 
 SourceFiles
-    searchablePlate.C
+    searchablePlane.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchablePlate_H
-#define searchablePlate_H
+#ifndef searchablePlane_H
+#define searchablePlane_H
 
 #include "searchableSurface.H"
-#include "treeBoundBox.H"
+#include "plane.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,37 +47,22 @@ namespace Foam
 // Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
-                           Class searchablePlate Declaration
+                           Class searchablePlane Declaration
 \*---------------------------------------------------------------------------*/
 
-class searchablePlate
+class searchablePlane
 :
-    public searchableSurface
+    public searchableSurface,
+    public plane
 {
 private:
 
     // Private Member Data
 
-        const point origin_;
-
-        const vector span_;
-
-        //- Coordinate direction which is normal
-        const direction normalDir_;
-
         mutable wordList regions_;
 
 
     // Private Member Functions
-
-        //- Calculate normal direction from span
-        static direction calcNormal(const point&);
-
-        pointIndexHit findNearest
-        (
-            const point& sample,
-            const scalar nearestDistSqr
-        ) const;
 
         pointIndexHit findLine
         (
@@ -95,30 +72,30 @@ private:
 
 
         //- Disallow default bitwise copy construct
-        searchablePlate(const searchablePlate&);
+        searchablePlane(const searchablePlane&);
 
         //- Disallow default bitwise assignment
-        void operator=(const searchablePlate&);
+        void operator=(const searchablePlane&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("searchablePlate");
+    TypeName("searchablePlane");
 
 
     // Constructors
 
         //- Construct from components
-        searchablePlate
+        searchablePlane
         (
             const IOobject& io,
-            const point& origin,
-            const point& span
+            const point& basePoint,
+            const vector& normal
         );
 
         //- Construct from dictionary (used by searchableSurface)
-        searchablePlate
+        searchablePlane
         (
             const IOobject& io,
             const dictionary& dict
@@ -126,7 +103,7 @@ public:
 
     // Destructor
 
-        virtual ~searchablePlate();
+        virtual ~searchablePlane();
 
 
     // Member Functions
@@ -204,7 +181,7 @@ public:
 
             bool writeData(Ostream&) const
             {
-                notImplemented("searchablePlate::writeData(Ostream&) const");
+                notImplemented("searchablePlane::writeData(Ostream&) const");
                 return false;
             }
 
