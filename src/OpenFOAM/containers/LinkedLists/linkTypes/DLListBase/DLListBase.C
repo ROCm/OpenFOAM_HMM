@@ -30,14 +30,14 @@ License
 #include "IOstreams.H"
 #include "long.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::DLListBase::iterator Foam::DLListBase::endIter
+Foam::DLListBase::iterator Foam::DLListBase::endIter_
 (
     const_cast<DLListBase&>(static_cast<const DLListBase&>(DLListBase()))
 );
 
-Foam::DLListBase::const_iterator Foam::DLListBase::endConstIter
+Foam::DLListBase::const_iterator Foam::DLListBase::endConstIter_
 (
     static_cast<const DLListBase&>(DLListBase()),
     reinterpret_cast<const link*>(0)

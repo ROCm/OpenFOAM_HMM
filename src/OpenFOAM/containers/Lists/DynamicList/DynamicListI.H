@@ -208,6 +208,27 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::resize
+(
+    const label nElem
+)
+{
+    this->setSize(nElem);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::resize
+(
+    const label nElem,
+    const T& t
+)
+{
+    this->setSize(nElem, t);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 {
     List<T>::size(0);

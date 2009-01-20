@@ -111,6 +111,13 @@ inline Foam::PackedList<nBits>::PackedList(const label size)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<int nBits>
+inline void Foam::PackedList<nBits>::resize(const label size)
+{
+    this->setSize(size);
+}
+
+
+template<int nBits>
 inline Foam::label Foam::PackedList<nBits>::size() const
 {
     return size_;

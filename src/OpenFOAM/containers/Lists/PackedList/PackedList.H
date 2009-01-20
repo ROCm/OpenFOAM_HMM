@@ -150,6 +150,9 @@ public:
             //- Reset size of List.
             void setSize(const label);
 
+            //- Reset size of List.
+            inline void resize(const label);
+
             //- Clear the list, i.e. set size to zero.
             void clear();
 

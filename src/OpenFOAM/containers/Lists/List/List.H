@@ -159,6 +159,12 @@ public:
         // Edit
 
             //- Reset size of List.
+            inline void resize(const label);
+
+            //- Reset size of List and value for new elements.
+            inline void resize(const label, const T&);
+
+            //- Reset size of List.
             void setSize(const label);
 
             //- Reset size of List and value for new elements.

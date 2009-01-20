@@ -176,6 +176,43 @@ inline Foam::Xfer<Foam::CompactListList<T> > Foam::CompactListList<T>::xfer()
 }
 
 
+template<class T>
+inline void Foam::CompactListList<T>::resize(const label nRows)
+{
+    this->setSize(nRows);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize
+(
+    const label nRows,
+    const label nData
+)
+{
+    this->setSize(nRows, nData);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize
+(
+    const label nRows,
+    const label nData,
+    const T& t
+)
+{
+    this->setSize(nRows, nData, t);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize(const UList<label>& rowSizes)
+{
+    this->setSize(rowSizes);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

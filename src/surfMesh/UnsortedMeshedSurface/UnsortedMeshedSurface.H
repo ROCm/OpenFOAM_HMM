@@ -102,6 +102,9 @@ private:
 
     // Private member functions
 
+        //- Disable resize with value
+        void resize(const label, const Face&);
+
         //- Disable setSize with value
         void setSize(const label, const Face&);
 

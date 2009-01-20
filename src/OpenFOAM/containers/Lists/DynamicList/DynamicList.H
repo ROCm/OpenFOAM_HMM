@@ -142,6 +142,15 @@ public:
         //- Alter the addressed list size and fill new space with a constant.
         inline void setSize(const label, const T&);
 
+        //- Alter the addressed list size.
+        //  New space will be allocated if required.
+        //  Use this to resize the list prior to using the operator[] for
+        //  setting values (as per List usage).
+        inline void resize(const label);
+
+        //- Alter the addressed list size and fill new space with a constant.
+        inline void resize(const label, const T&);
+
         //- Reserve allocation space for at least this size.
         //  Never shrinks the allocated size, use setCapacity() for that.
         inline void reserve(const label);

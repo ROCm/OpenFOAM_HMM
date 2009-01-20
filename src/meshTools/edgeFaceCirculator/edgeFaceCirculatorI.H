@@ -419,7 +419,31 @@ Foam::edgeFaceCirculator Foam::edgeFaceCirculator::begin() const
 }
 
 
+Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cbegin() const
+{
+    edgeFaceCirculator iter
+    (
+        mesh_,
+        faceLabel_,
+        ownerSide_,
+        index_,
+        isBoundaryEdge_
+    );
+
+    if (isBoundaryEdge_)
+    {
+        iter.setCanonical();
+    }
+    return iter;
+}
+
+
 const Foam::edgeFaceCirculator& Foam::edgeFaceCirculator::end() const
+{
+    return endConstIter;
+}
+
+const Foam::edgeFaceCirculator& Foam::edgeFaceCirculator::cend() const
 {
     return endConstIter;
 }

@@ -48,6 +48,20 @@ inline const Foam::List<T>& Foam::List<T>::null()
 
 
 template<class T>
+inline void Foam::List<T>::resize(const label newSize)
+{
+    this->setSize(newSize);
+}
+
+
+template<class T>
+inline void Foam::List<T>::resize(const label newSize, const T& a)
+{
+    this->setSize(newSize, a);
+}
+
+
+template<class T>
 inline T& Foam::List<T>::newElmt(const label i)
 {
     if (i >= this->size())
