@@ -1,32 +1,23 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      binary;
-    class       volScalarField;
-    location    "0";
-    object      epsilon;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
-
-internalField   uniform 90;
-
-boundaryField
-{
-    walls
-    {
-        type            epsilonWallFunction;
-        value           uniform 90;
-    }
-}
-
+<<<<<<< HEAD:tutorials/dieselFoam/aachenBomb/constant/turbulenceProperties
+simulationType RASModel;
+=======
+simulationType      RASModel;
+>>>>>>> c2eac7aaca53e9702c56bbbbd2c0dc47a83829e0:tutorials/dieselFoam/aachenBomb/constant/turbulenceProperties
 
 // ************************************************************************* //
