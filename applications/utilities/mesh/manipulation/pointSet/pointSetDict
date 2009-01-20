@@ -60,18 +60,18 @@ topoSetSources
     // All points in pointzone
     zoneToPoint
     {
-        name ".*Zone";      // name of pointZone, wildcards allowed.
+        name '.*Zone';      // name of pointZone, regular expressions allowed
     }
 
     // Select based on surface
     surfaceToPoint
     {
-        file                "www.avl.com-geometry.stl";
-        nearDistance        0.1;    // points near to surface
-        includeInside       false;  // points on inside of surface
-                                    // (requires closed surface with consistent
-                                    //  normals)
-        includeOutside      false;  //   ,,    outside  ,,
+        file            "www.avl.com-geometry.stl";
+        nearDistance    0.1;    // points near to surface
+        includeInside   false;  // points on inside of surface
+                                // (requires closed surface with consistent
+                                //  normals)
+        includeOutside  false;  //   ,,    outside  ,,
     }
 );
 
