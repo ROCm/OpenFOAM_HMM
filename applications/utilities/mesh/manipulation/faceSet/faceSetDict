@@ -56,13 +56,13 @@ topoSetSources
     // All faces of patch
     patchToFace
     {
-        name movingWall;
+        name ".*Wall";      // Name of patch, regular expressions allowed
     }
 
     // All faces of faceZone
     zoneToFace
     {
-        name faceZone1;     // Name of faceZone
+        name ".*Zone1";     // Name of faceZone, regular expressions allowed
     }
 
     // Faces with face centre within box

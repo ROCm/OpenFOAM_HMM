@@ -55,6 +55,7 @@ indexedOctree/treeDataTriSurface.C
 searchableSurface = searchableSurface
 $(searchableSurface)/distributedTriSurfaceMesh.C
 $(searchableSurface)/searchableBox.C
+$(searchableSurface)/searchablePlane.C
 $(searchableSurface)/searchablePlate.C
 $(searchableSurface)/searchableSphere.C
 $(searchableSurface)/searchableSurface.C
