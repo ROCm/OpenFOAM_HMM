@@ -218,7 +218,16 @@ Foam::searchablePlate::searchablePlate
     origin_(origin),
     span_(span),
     normalDir_(calcNormal(span_))
-{}
+{
+    if (debug)
+    {
+        Info<< "searchablePlate::searchablePlate :"
+            << " origin:" << origin_
+            << " origin+span:" << origin_+span_
+            << " normal:" << vector::componentNames[normalDir_]
+            << endl;
+    }
+}
 
 
 Foam::searchablePlate::searchablePlate
@@ -231,7 +240,16 @@ Foam::searchablePlate::searchablePlate
     origin_(dict.lookup("origin")),
     span_(dict.lookup("span")),
     normalDir_(calcNormal(span_))
-{}
+{
+    if (debug)
+    {
+        Info<< "searchablePlate::searchablePlate :"
+            << " origin:" << origin_
+            << " origin+span:" << origin_+span_
+            << " normal:" << vector::componentNames[normalDir_]
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

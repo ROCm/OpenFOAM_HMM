@@ -82,7 +82,7 @@ topoSetSources
     // Cells in cell zone
     zoneToCell
     {
-        name cellZone;      // name of cellZone
+        name ".*Zone";      // name of cellZone, wildcards allowed.
     }
 
     // values of field within certain range

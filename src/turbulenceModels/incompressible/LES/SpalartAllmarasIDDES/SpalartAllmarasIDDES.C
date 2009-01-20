@@ -26,7 +26,6 @@ License
 
 #include "SpalartAllmarasIDDES.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,22 +45,29 @@ addToRunTimeSelectionTable(LESModel, SpalartAllmarasIDDES, dictionary);
 
 tmp<volScalarField> SpalartAllmarasIDDES::alpha() const
 {
-    return
-        0.25
-      - wallDist(mesh_).y()
-       /dimensionedScalar("hMax", dimLength, max(cmptMax(delta())));
+    return max
+    (
+        0.25 - y_/dimensionedScalar("hMax", dimLength, max(cmptMax(delta()))),
+        scalar(-5)
+    );
 }
 
 
-tmp<volScalarField> SpalartAllmarasIDDES::ft(const volScalarField& S) const
+tmp<volScalarField> SpalartAllmarasIDDES::ft
+(
+    const volScalarField& S
+) const
 {
-    return tanh(pow3(sqr(ct_)*r(nuSgs_, S)));
+    return tanh(pow3(sqr(ct_)*rd(nuSgs_, S)));
 }
 
 
-tmp<volScalarField> SpalartAllmarasIDDES::fl(const volScalarField& S) const
+tmp<volScalarField> SpalartAllmarasIDDES::fl
+(
+    const volScalarField& S
+) const
 {
-    return tanh(pow(sqr(cl_)*r(transport().nu(), S), 10));
+    return tanh(pow(sqr(cl_)*rd(nu(), S), 10));
 }
 
 
@@ -71,33 +77,24 @@ tmp<volScalarField> SpalartAllmarasIDDES::rd
     const volScalarField& S
 ) const
 {
-    volScalarField d = wallDist(mesh_).y();
-
-    tmp<volScalarField> trd
+    return min
     (
-        new volScalarField
-        (
-            min
-            (
-                visc
-               /(
-                   max
-                   (
-                       S,
-                       dimensionedScalar("SMALL", S.dimensions(), SMALL)
-                   )*sqr(kappa_*d)
-                 + dimensionedScalar
-                   (
-                       "ROOTVSMALL",
-                       dimensionSet(0, 2 , -1, 0, 0),
-                       ROOTVSMALL
-                   )
-               ), scalar(10.0)
-            )
-        )
+        visc
+       /(
+           max
+           (
+               S,
+               dimensionedScalar("SMALL", S.dimensions(), SMALL)
+           )*sqr(kappa_*y_)
+         + dimensionedScalar
+           (
+               "ROOTVSMALL",
+               dimensionSet(0, 2 , -1, 0, 0),
+               ROOTVSMALL
+           )
+       ),
+       scalar(10)
     );
-
-    return trd;
 }
 
 
@@ -105,43 +102,38 @@ tmp<volScalarField> SpalartAllmarasIDDES::rd
 
 tmp<volScalarField> SpalartAllmarasIDDES::fd(const volScalarField& S) const
 {
-    return 1.0 - tanh(pow3(8.0*rd(nuSgs_+transport().nu(), S)));
+    return 1 - tanh(pow3(8*rd(nuEff(), S)));
 }
 
 
-void SpalartAllmarasIDDES::dTildaUpdate(const volScalarField& S)
+tmp<volScalarField> SpalartAllmarasIDDES::dTilda(const volScalarField& S) const
 {
     volScalarField alpha = this->alpha();
-
     volScalarField expTerm = exp(sqr(alpha));
 
     volScalarField fHill =
-        2.0*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
+        2*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
 
+    volScalarField fStep = min(2*pow(expTerm, -9.0), scalar(1));
+    volScalarField fHyb = max(1 - fd(S), fStep);
+    volScalarField fAmp = 1 - max(ft(S), fl(S));
+    volScalarField fRestore = max(fHill - 1, scalar(0))*fAmp;
 
-    volScalarField fStep = min(2.0*pow(expTerm, -9.0), scalar(1));
-    volScalarField fHyb = max(1.0 - fd(S), fStep);
-
-    volScalarField fAmp = 1.0 - max(ft(S), fl(S));
-
-    volScalarField fRestore = max(fHill - 1.0, scalar(0))*fAmp;
-
-    // volScalarField ft2 = IGNORING ft2 terms
-
+    // IGNORING ft2 terms
     volScalarField Psi = sqrt
     (
         min
         (
             scalar(100),
-            (1.0 - Cb1_/(Cw1_*sqr(kappa_)*fwStar_)*fv2())/max(SMALL, fv1())
+            (1 - Cb1_/(Cw1_*sqr(kappa_)*fwStar_)*fv2())/max(SMALL, fv1())
         )
     );
 
-    dTilda_ = max
+    return max
     (
-        dimensionedScalar("zero", dimLength, 0.0),
-        fHyb*(1.0 + fRestore*Psi)*wallDist(mesh_).y()
-      + (1.0 - fHyb)*CDES_*Psi*delta()
+        dimensionedScalar("SMALL", dimLength, SMALL),
+        fHyb*(1 + fRestore*Psi)*y_
+      + (1 - fHyb)*CDES_*Psi*delta()
     );
 }
 

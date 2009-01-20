@@ -38,8 +38,4 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::string Foam::string::null;
-const Foam::word Foam::word::null;
-const Foam::fileName Foam::fileName::null;
-
 // ************************************************************************* //
