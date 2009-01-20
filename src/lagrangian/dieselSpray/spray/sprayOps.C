@@ -65,7 +65,7 @@ void spray::evolve()
     inject();
     atomizationLoop();
     breakupLoop();
-            
+
     UInterpolator_.clear();
     rhoInterpolator_.clear();
     pInterpolator_.clear();
@@ -89,12 +89,7 @@ void spray::move()
 
 void spray::breakupLoop()
 {
-    for
-    (
-        spray::iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllIter(spray::iterator, *this, elmnt)
     {
         // interpolate...
         vector velocity = UInterpolator().interpolate
@@ -128,12 +123,7 @@ void spray::breakupLoop()
 
 void spray::atomizationLoop()
 {
-    for
-    (
-        spray::iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllIter(spray::iterator, *this, elmnt)
     {
         // interpolate...
         vector velocity = UInterpolator().interpolate
