@@ -132,7 +132,6 @@ public:
         return index_;
     }
 
-
     int& type()
     {
         return type_;
