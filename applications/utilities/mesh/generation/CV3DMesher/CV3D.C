@@ -261,9 +261,9 @@ Foam::scalar Foam::CV3D::alignmentDistanceWeight(scalar dist) const
 
 Foam::scalar Foam::CV3D::faceAreaWeight(scalar faceArea) const
 {
-    scalar fl2 = 0.36;
+    scalar fl2 = 0.5;
 
-    scalar fu2 = 0.8;
+    scalar fu2 = 1.0;
 
     scalar m2 = controls_.minCellSize2;
 
