@@ -92,31 +92,16 @@ int main(int argc, char *argv[])
         mesh.boundaryConform();
     }
 
-    scalar relaxation =
-    mesh.meshingControls().relaxationFactorStart;
-
-    label nIterations = label
-    (
-        (runTime.endTime().value() - runTime.startTime().value())
-        /runTime.deltaT().value()
-    );
-
-    scalar relaxationDelta =
-    (
-        mesh.meshingControls().relaxationFactorStart
-      - mesh.meshingControls().relaxationFactorEnd
-    )
-    /max(nIterations, 1);
+    scalar relaxation = mesh.meshingControls().relaxationFactorStart;
 
     while (runTime.run())
     {
         runTime++;
 
         Info<< nl
-            << "Relaxation iteration " << runTime.timeIndex() << nl
-            << "~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-
-        Info<< "relaxation = " << relaxation << endl;
+            << "Time = " << runTime.timeName()
+            << nl << "relaxation = " << relaxation
+            << endl;
 
         mesh.relaxPoints(relaxation);
 
@@ -124,7 +109,17 @@ int main(int argc, char *argv[])
         mesh.insertSurfacePointPairs();
         mesh.boundaryConform();
 
-        relaxation -= relaxationDelta;
+        relaxation -= (relaxation - mesh.meshingControls().relaxationFactorEnd)
+        /max
+        (
+            (runTime.endTime().value() - runTime.timeOutputValue())
+            /runTime.deltaT().value(),
+            1
+        );
+
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     mesh.write();
