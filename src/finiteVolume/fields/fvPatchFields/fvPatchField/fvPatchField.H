@@ -414,8 +414,21 @@ public:
             virtual void manipulateMatrix(fvMatrix<Type>& matrix);
 
 
-        //- Write
-        virtual void write(Ostream&) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
+
+            //- Helper function to write the keyword and entry only if the
+            //  values are not equal. The value is then output as value2
+            template<class EntryType>
+            void writeEntryIfDifferent
+            (
+                Ostream& os,
+                const word& entryName,
+                const EntryType& value1,
+                const EntryType& value2
+            ) const;
 
 
         // Check
