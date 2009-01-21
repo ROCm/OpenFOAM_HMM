@@ -77,6 +77,9 @@ mutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
+    rhoName_("rho"),
+    muName_("mu"),
+    kName_("k"),
     Ks_(p.size(), 0.0),
     Cs_(p.size(), 0.0)
 {}
@@ -92,6 +95,9 @@ mutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    rhoName_(ptf.rhoName_),
+    muName_(ptf.muName_),
+    kName_(ptf.kName_),
     Ks_(ptf.Ks_, mapper),
     Cs_(ptf.Cs_, mapper)
 {}
@@ -106,6 +112,9 @@ mutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    muName_(dict.lookupOrDefault<word>("mu", "mu")),
+    kName_(dict.lookupOrDefault<word>("k", "k")),
     Ks_("Ks", dict, p.size()),
     Cs_("Cs", dict, p.size())
 {}
@@ -114,25 +123,31 @@ mutRoughWallFunctionFvPatchScalarField
 mutRoughWallFunctionFvPatchScalarField::
 mutRoughWallFunctionFvPatchScalarField
 (
-    const mutRoughWallFunctionFvPatchScalarField& nrwfpsf
+    const mutRoughWallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    fixedValueFvPatchScalarField(nrwfpsf),
-    Ks_(nrwfpsf.Ks_),
-    Cs_(nrwfpsf.Cs_)
+    fixedValueFvPatchScalarField(rwfpsf),
+    rhoName_(rwfpsf.rhoName_),
+    muName_(rwfpsf.muName_),
+    kName_(rwfpsf.kName_),
+    Ks_(rwfpsf.Ks_),
+    Cs_(rwfpsf.Cs_)
 {}
 
 
 mutRoughWallFunctionFvPatchScalarField::
 mutRoughWallFunctionFvPatchScalarField
 (
-    const mutRoughWallFunctionFvPatchScalarField& nrwfpsf,
+    const mutRoughWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(nrwfpsf, iF),
-    Ks_(nrwfpsf.Ks_),
-    Cs_(nrwfpsf.Cs_)
+    fixedValueFvPatchScalarField(rwfpsf, iF),
+    rhoName_(rwfpsf.rhoName_),
+    muName_(rwfpsf.muName_),
+    kName_(rwfpsf.kName_),
+    Ks_(rwfpsf.Ks_),
+    Cs_(rwfpsf.Cs_)
 {}
 
 
@@ -178,12 +193,12 @@ void mutRoughWallFunctionFvPatchScalarField::updateCoeffs()
     const scalarField& y = ras.y()[patch().index()];
 
     const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-    const scalarField& k = db().lookupObject<volScalarField>("k");
+    const scalarField& k = db().lookupObject<volScalarField>(kName_);
 
     const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
 
     scalarField& mutw = *this;
 
@@ -229,6 +244,9 @@ void mutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 void mutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
     Cs_.writeEntry("Cs", os);
     Ks_.writeEntry("Ks", os);
     writeEntry("value", os);

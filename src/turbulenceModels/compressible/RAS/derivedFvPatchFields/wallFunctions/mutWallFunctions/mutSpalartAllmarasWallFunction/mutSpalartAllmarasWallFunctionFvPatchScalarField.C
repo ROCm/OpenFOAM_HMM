@@ -48,7 +48,10 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    UName_("U"),
+    rhoName_("rho"),
+    muName_("mu")
 {}
 
 
@@ -61,7 +64,10 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    rhoName_(ptf.rhoName_),
+    muName_(ptf.muName_)
 {}
 
 
@@ -73,28 +79,37 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    muName_(dict.lookupOrDefault<word>("mu", "mu"))
 {}
 
 
 mutSpalartAllmarasWallFunctionFvPatchScalarField::
 mutSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& tppsf
+    const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(wfpsf),
+    UName_(wfpsf.UName_),
+    rhoName_(wfpsf.rhoName_),
+    muName_(wfpsf.muName_)
 {}
 
 
 mutSpalartAllmarasWallFunctionFvPatchScalarField::
 mutSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& tppsf,
+    const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(wfpsf, iF),
+    UName_(wfpsf.UName_),
+    rhoName_(wfpsf.rhoName_),
+    muName_(wfpsf.muName_)
 {}
 
 
@@ -113,15 +128,15 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
     const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
     const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
 
     scalarField& mutw = *this;
 
@@ -171,6 +186,19 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
             mutw[faceI] = 0;
         }
     }
+}
+
+
+void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    writeEntry("value", os);
 }
 
 
