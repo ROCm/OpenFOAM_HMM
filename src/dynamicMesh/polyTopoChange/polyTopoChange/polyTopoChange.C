@@ -522,7 +522,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
     SLList<label> nextCell;
 
     // Whether cell has been done already
-    PackedList<1> visited(cellCellAddressing.size(), 0);
+    PackedBoolList visited(cellCellAddressing.size());
 
     label cellInOrder = 0;
 

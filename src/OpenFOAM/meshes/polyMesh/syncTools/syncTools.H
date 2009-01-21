@@ -28,7 +28,7 @@ Class
 Description
     Various tools to aid synchronizing lists across coupled patches.
 
-    Require 
+    Require
     - combineOperator (e.g. sumEqOp - not sumOp!) that is defined for the
       type and combineReduce(UList\<T\>, combineOperator) should be defined.
     - null value which gets overridden by any valid value.
@@ -51,7 +51,7 @@ SourceFiles
 #include "transformList.H"
 #include "Map.H"
 #include "EdgeMap.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -259,13 +259,13 @@ public:
         // Other
 
             //- Get per point whether is it master (of a coupled set of points)
-            static PackedList<1> getMasterPoints(const polyMesh&);
+            static PackedBoolList getMasterPoints(const polyMesh&);
 
             //- Get per edge whether is it master (of a coupled set of edges)
-            static PackedList<1> getMasterEdges(const polyMesh&);
+            static PackedBoolList getMasterEdges(const polyMesh&);
 
             //- Get per face whether is it master (of a coupled set of faces)
-            static PackedList<1> getMasterFaces(const polyMesh&);
+            static PackedBoolList getMasterFaces(const polyMesh&);
 
 };
 

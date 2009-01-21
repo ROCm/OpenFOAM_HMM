@@ -22,55 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::PackedBoolList
+
+Description
+    A bit-packed bool list
+
 \*---------------------------------------------------------------------------*/
 
-#include "autoLayerDriver.H"
-#include "syncTools.H"
+#ifndef PackedBoolList_H
+#define PackedBoolList_H
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "bool.H"
+#include "PackedList.H"
 
-template<class Type>
-void Foam::autoLayerDriver::averageNeighbours
-(
-    const polyMesh& mesh,
-    const PackedBoolList& isMasterEdge,
-    const labelList& meshEdges,
-    const labelList& meshPoints,
-    const edgeList& edges,
-    const scalarField& invSumWeight,
-    const Field<Type>& data,
-    Field<Type>& average
-)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    average = pTraits<Type>::zero;
-
-    forAll(edges, edgeI)
-    {
-        if (isMasterEdge.get(meshEdges[edgeI]) == 1)
-        {
-            const edge& e = edges[edgeI];
-            //scalar eWeight = edgeWeights[edgeI];
-            scalar eWeight =  1.0;
-            label v0 = e[0];
-            label v1 = e[1];
-
-            average[v0] += eWeight*data[v1];
-            average[v1] += eWeight*data[v0];
-        }
-    }
-
-    syncTools::syncPointList
-    (
-        mesh,
-        meshPoints,
-        average,
-        plusEqOp<Type>(),
-        pTraits<Type>::zero,    // null value
-        false                   // no separation
-    );
-
-    average *= invSumWeight;
+    typedef PackedList<1> PackedBoolList;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

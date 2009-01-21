@@ -31,7 +31,7 @@ License
 template<int nBits>
 Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
 :
-    List<unsigned int>(intSize(size)),
+    List<unsigned int>(storageSize(size)),
     size_(size)
 {
     operator=(val);
@@ -56,7 +56,7 @@ Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
 template<int nBits>
 Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 :
-    List<unsigned int>(intSize(lst.size()), 0),
+    List<unsigned int>(storageSize(lst.size()), 0),
     size_(lst.size())
 {
     forAll(lst, i)
@@ -76,10 +76,36 @@ Foam::autoPtr<Foam::PackedList<nBits> > Foam::PackedList<nBits>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<int nBits>
-void Foam::PackedList<nBits>::setSize(const label size)
+void Foam::PackedList<nBits>::setSize(const label newSize)
 {
-    List<unsigned int>::setSize(intSize(size));
-    size_ = size;
+    List<unsigned int>::setSize(storageSize(newSize), 0);
+    size_ = newSize;
+}
+
+
+template<int nBits>
+void Foam::PackedList<nBits>::setSize
+(
+    const label newSize,
+    const unsigned int& val
+)
+{
+#   ifdef DEBUGList
+    checkValue(val);
+#   endif
+
+    List<unsigned int>::setSize(storageSize(newSize), 0);
+
+    if (val && newSize > size_)
+    {
+        // fill new elements
+        for (label i = size_; i < newSize; i++)
+        {
+            set(i, val);
+        }
+    }
+    
+    size_ = newSize;
 }
 
 

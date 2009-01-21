@@ -31,7 +31,7 @@ License
 #include "Time.H"
 #include "boundBox.H"
 #include "SortableList.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1207,8 +1207,7 @@ void Foam::triSurface::writeStats(Ostream& os) const
 {
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves.
-    PackedList<1> pointIsUsed(points().size());
-    pointIsUsed = 0U;
+    PackedBoolList pointIsUsed(points().size());
 
     label nPoints = 0;
     boundBox bb = boundBox::invertedBox;

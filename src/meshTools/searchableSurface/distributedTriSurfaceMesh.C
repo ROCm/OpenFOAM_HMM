@@ -31,6 +31,7 @@ License
 #include "triangleFuncs.H"
 #include "matchPoints.H"
 #include "globalIndex.H"
+#include "PackedBoolList.H"
 #include "Time.H"
 
 
@@ -774,8 +775,7 @@ void Foam::distributedTriSurfaceMesh::calcBounds
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves
 
-    PackedList<1> pointIsUsed(points().size());
-    pointIsUsed = 0U;
+    PackedBoolList pointIsUsed(points().size());
 
     nPoints = 0;
     bb = boundBox::invertedBox;

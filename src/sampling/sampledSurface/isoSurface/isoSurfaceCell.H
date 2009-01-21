@@ -48,7 +48,7 @@ SourceFiles
 #include "triSurface.H"
 #include "labelPair.H"
 #include "pointIndexHit.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,7 +118,7 @@ class isoSurfaceCell
         //- Determine whether cell is cut
         cellCutType calcCutType
         (
-            const PackedList<1>&,
+            const PackedBoolList&,
             const scalarField& cellValues,
             const scalarField& pointValues,
             const label
@@ -126,7 +126,7 @@ class isoSurfaceCell
 
         void calcCutTypes
         (
-            const PackedList<1>&,
+            const PackedBoolList&,
             const scalarField& cellValues,
             const scalarField& pointValues
         );
@@ -149,7 +149,7 @@ class isoSurfaceCell
         //  point.
         void calcSnappedCc
         (
-            const PackedList<1>& isTet,
+            const PackedBoolList& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
             DynamicList<point>& triPoints,
@@ -180,8 +180,8 @@ class isoSurfaceCell
         //  point.
         void calcSnappedPoint
         (
-            const PackedList<1>& isBoundaryPoint,
-            const PackedList<1>& isTet,
+            const PackedBoolList& isBoundaryPoint,
+            const PackedBoolList& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
             DynamicList<point>& triPoints,
