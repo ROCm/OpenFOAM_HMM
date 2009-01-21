@@ -713,41 +713,43 @@ Foam::edgeList Foam::face::edges() const
 
 int Foam::face::edgeDirection(const edge& e) const
 {
-    if (size() > 2)
+    forAll (*this, i)
     {
-        edge found(-1,-1);
-
-        // find start/end points - this breaks down for degenerate faces
-        forAll (*this, i)
+        if (operator[](i) == e.start())
         {
-            if (operator[](i) == e.start())
+            if (operator[](rcIndex(i)) == e.end())
             {
-                found.start() = i;
+                // reverse direction
+                return -1;
             }
-            else if (operator[](i) == e.end())
+            else if (operator[](fcIndex(i)) == e.end())
             {
-                found.end() = i;
+                // forward direction
+                return 1;
             }
-        }
 
-        label diff = found.end() - found.start();
-        if (!diff || found.start() < 0 || found.end() < 0)
-        {
+            // no match
             return 0;
         }
+        else if (operator[](i) == e.end())
+        {
+            if (operator[](rcIndex(i)) == e.start())
+            {
+                // forward direction
+                return 1;
+            }
+            else if (operator[](fcIndex(i)) == e.start())
+            {
+                // reverse direction
+                return -1;
+            }
 
-        // forward direction
-        if (diff == 1 || diff == 1 - size())
-        {
-            return 1;
-        }
-        // reverse direction
-        if (diff ==  -1 || diff == -1 + size())
-        {
-            return -1;
+            // no match
+            return 0;
         }
     }
 
+    // not found
     return 0;
 }
 
