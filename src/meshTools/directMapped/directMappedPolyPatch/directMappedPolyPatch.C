@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,7 @@ void Foam::directMappedPolyPatch::findSamples
     {
         case NEARESTCELL:
         {
-            if (samplePatch_.size() != 0 && samplePatch_ != "none")
+            if (samplePatch_.size() && samplePatch_ != "none")
             {
                 FatalErrorIn
                 (
@@ -196,7 +196,7 @@ void Foam::directMappedPolyPatch::findSamples
 
             const polyPatch& pp = boundaryMesh()[patchI];
 
-            if (pp.size() == 0)
+            if (pp.empty())
             {
                 forAll(samples, sampleI)
                 {
@@ -243,7 +243,7 @@ void Foam::directMappedPolyPatch::findSamples
                     nearInfo = boundaryTree().findNearest
                     (
                         sample,
-                        magSqr(patchBb.max()-patchBb.min())
+                        magSqr(patchBb.span())
                     );
 
                     if (!nearInfo.hit())
@@ -267,7 +267,7 @@ void Foam::directMappedPolyPatch::findSamples
 
         case NEARESTFACE:
         {
-            if (samplePatch_.size() != 0 && samplePatch_ != "none")
+            if (samplePatch_.size() && samplePatch_ != "none")
             {
                 FatalErrorIn
                 (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,13 +58,13 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
     // Anull list
     L.clear();
 
-    is.fatalCheck("operator>>(Istream& is, HashTable<T, Key, Hash>& L)");
+    is.fatalCheck("operator>>(Istream&, HashTable<T, Key, Hash>&)");
 
     token firstToken(is);
 
     is.fatalCheck
     (
-        "operator>>(Istream& is, HashTable<T, Key, Hash>& L) : "
+        "operator>>(Istream&, HashTable<T, Key, Hash>&) : "
         "reading first token"
     );
 
@@ -101,7 +101,7 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
             {
                 FatalIOErrorIn
                 (
-                    "operator>>(Istream& is, HashTable<T, Key, Hash>& L)",
+                    "operator>>(Istream&, HashTable<T, Key, Hash>&)",
                     is
                 )   << "incorrect first token, '(', found " << firstToken.info()
                     << exit(FatalIOError);
@@ -117,7 +117,7 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
         {
             FatalIOErrorIn
             (
-                "operator>>(Istream& is, HashTable<T, Key, Hash>& L)",
+                "operator>>(Istream&, HashTable<T, Key, Hash>&)",
                 is
             )   << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
@@ -152,7 +152,7 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
     {
         FatalIOErrorIn
         (
-            "operator>>(Istream& is, HashTable<T, Key, Hash>& L)",
+            "operator>>(Istream&, HashTable<T, Key, Hash>&)",
             is
         )   << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
@@ -168,13 +168,10 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
 template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
 {
-    // Write size of HashTable
-    os << nl << L.size();
+    // Write size and start delimiter
+    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
 
-    // Write beginning of contents
-    os << nl << token::BEGIN_LIST << nl;
-
-    // Write HashTable contents
+    // Write contents
     for
     (
         typename HashTable<T, Key, Hash>::const_iterator iter = L.begin();
@@ -185,7 +182,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
         os << iter.key() << token::SPACE << iter() << nl;
     }
 
-    // Write end of contents
+    // Write end delimiter
     os << token::END_LIST;
 
     // Check state of IOstream

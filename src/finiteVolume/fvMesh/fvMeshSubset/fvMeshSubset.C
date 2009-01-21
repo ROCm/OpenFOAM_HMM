@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace Foam
 
 bool Foam::fvMeshSubset::checkCellSubset() const
 {
-    if (!fvMeshSubsetPtr_.valid())
+    if (fvMeshSubsetPtr_.empty())
     {
         FatalErrorIn("bool fvMeshSubset::checkCellSubset() const")
             << "Mesh subset not set.  Please set the cell map using "
@@ -161,11 +161,11 @@ void Foam::fvMeshSubset::doCoupledPatches
                         nCellsUsingFace[pp.start()+i] = 3;
                         nUncoupled++;
                     }
-                }       
+                }
             }
         }
     }
- 
+
     // Do same for cyclics.
     forAll (oldPatches, oldPatchI)
     {

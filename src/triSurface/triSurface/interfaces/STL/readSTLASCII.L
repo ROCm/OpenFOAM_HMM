@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -398,7 +398,7 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
 
     // Create the lexer obtaining the approximate number of vertices in the STL
     // from the file size
-    STLLexer lexer(&STLstream.stdStream(), Foam::size(STLfileName)/400);
+    STLLexer lexer(&STLstream.stdStream(), Foam::fileSize(STLfileName)/400);
     while(lexer.lex() != 0)
     {}
 

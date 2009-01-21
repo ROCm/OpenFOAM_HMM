@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,17 +33,15 @@ License
 
 const char* const Foam::fileName::typeName = "fileName";
 int Foam::fileName::debug(debug::debugSwitch(fileName::typeName, 0));
+const Foam::fileName Foam::fileName::null;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileName::fileName(const wordList& wrdList)
+Foam::fileName::fileName(const wordList& lst)
 {
-    if (wrdList.size() != 0)
+    forAll(lst, elemI)
     {
-        forAll(wrdList, i)
-        {
-            operator=((*this)/wrdList[i]);
-        }
+        operator=((*this)/lst[elemI]);
     }
 }
 
@@ -76,7 +74,7 @@ Foam::word Foam::fileName::name() const
 }
 
 
-//- Return directory path name (part before last /)
+//  Return directory path name (part before last /)
 //
 //  behaviour compared to /usr/bin/dirname:
 //    input           path()          dirname
@@ -204,35 +202,35 @@ Foam::fileName::Type Foam::fileName::type() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::fileName::operator=(const fileName& q)
+void Foam::fileName::operator=(const fileName& str)
 {
-    string::operator=(q);
+    string::operator=(str);
 }
 
 
-void Foam::fileName::operator=(const word& q)
+void Foam::fileName::operator=(const word& str)
 {
-    string::operator=(q);
+    string::operator=(str);
 }
 
 
-void Foam::fileName::operator=(const string& q)
+void Foam::fileName::operator=(const string& str)
 {
-    string::operator=(q);
+    string::operator=(str);
     stripInvalid();
 }
 
 
-void Foam::fileName::operator=(const std::string& q)
+void Foam::fileName::operator=(const std::string& str)
 {
-    string::operator=(q);
+    string::operator=(str);
     stripInvalid();
 }
 
 
-void Foam::fileName::operator=(const char* q)
+void Foam::fileName::operator=(const char* str)
 {
-    string::operator=(q);
+    string::operator=(str);
     stripInvalid();
 }
 
@@ -241,9 +239,9 @@ void Foam::fileName::operator=(const char* q)
 
 Foam::fileName Foam::operator/(const string& a, const string& b)
 {
-    if (a.size() > 0)       // First string non-null
+    if (a.size())           // First string non-null
     {
-        if (b.size() > 0)   // Second string non-null
+        if (b.size())       // Second string non-null
         {
             return fileName(a + '/' + b);
         }
@@ -254,7 +252,7 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
     }
     else                    // First string null
     {
-        if (b.size() > 0)   // Second string non-null
+        if (b.size())       // Second string non-null
         {
             return b;
         }

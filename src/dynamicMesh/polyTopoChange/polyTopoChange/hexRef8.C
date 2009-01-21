@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -532,7 +532,7 @@ Foam::label Foam::hexRef8::getAnchorCell
     const label pointI
 ) const
 {
-    if (cellAnchorPoints[cellI].size() > 0)
+    if (cellAnchorPoints[cellI].size())
     {
         label index = findIndex(cellAnchorPoints[cellI], pointI);
 
@@ -4017,7 +4017,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         {
             const labelList& addedCells = cellAddedCells[cellI];
 
-            if (addedCells.size() > 0)
+            if (addedCells.size())
             {
                 // Cell was split.
                 history_.storeSplit(cellI, addedCells);
@@ -4375,8 +4375,7 @@ void Foam::hexRef8::distribute(const mapDistributePolyMesh& map)
 
 void Foam::hexRef8::checkMesh() const
 {
-    const boundBox& meshBb = mesh_.globalData().bb();
-    const scalar smallDim = 1E-6*mag(meshBb.max() - meshBb.min());
+    const scalar smallDim = 1E-6 * mesh_.globalData().bb().mag();
 
     if (debug)
     {

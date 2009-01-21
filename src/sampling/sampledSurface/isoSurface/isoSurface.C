@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,31 @@ Foam::scalar Foam::isoSurface::isoFraction
 }
 
 
+bool Foam::isoSurface::isEdgeOfFaceCut
+(
+    const scalarField& pVals,
+    const face& f,
+    const bool ownLower,
+    const bool neiLower
+) const
+{
+    forAll(f, fp)
+    {
+        bool fpLower = (pVals[f[fp]] < iso_);
+        if
+        (
+            (fpLower != ownLower)
+         || (fpLower != neiLower)
+         || (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
+        )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Determine for every face/cell whether it (possibly) generates triangles.
 void Foam::isoSurface::calcCutTypes
 (
@@ -84,22 +109,13 @@ void Foam::isoSurface::calcCutTypes
         }
         else
         {
-            // Mesh edge.
+            // See if any mesh edge is cut by looping over all the edges of the
+            // face.
             const face f = mesh_.faces()[faceI];
 
-            forAll(f, fp)
+            if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
             {
-                bool fpLower = (pVals[f[fp]] < iso_);
-                if
-                (
-                    (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                 || (fpLower != ownLower)
-                 || (fpLower != neiLower)
-                )
-                {
-                    faceCutType_[faceI] = CUT;
-                    break;
-                }
+                faceCutType_[faceI] = CUT;
             }
         }
     }
@@ -117,22 +133,13 @@ void Foam::isoSurface::calcCutTypes
             {
                 bool ownLower = (cVals[own[faceI]] < iso_);
 
-                // Mesh edge.
                 const face f = mesh_.faces()[faceI];
 
-                forAll(f, fp)
+                if (isEdgeOfFaceCut(pVals, f, ownLower, ownLower))
                 {
-                    bool fpLower = (pVals[f[fp]] < iso_);
-                    if
-                    (
-                        (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                     || (fpLower != ownLower)
-                    )
-                    {
-                        faceCutType_[faceI] = CUT;
-                        break;
-                    }
+                    faceCutType_[faceI] = CUT;
                 }
+
                 faceI++;
             }
         }
@@ -152,19 +159,9 @@ void Foam::isoSurface::calcCutTypes
                     // Mesh edge.
                     const face f = mesh_.faces()[faceI];
 
-                    forAll(f, fp)
+                    if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
                     {
-                        bool fpLower = (pVals[f[fp]] < iso_);
-                        if
-                        (
-                            (fpLower != (pVals[f[f.fcIndex(fp)]] < iso_))
-                         || (fpLower != ownLower)
-                         || (fpLower != neiLower)
-                        )
-                        {
-                            faceCutType_[faceI] = CUT;
-                            break;
-                        }
+                        faceCutType_[faceI] = CUT;
                     }
                 }
                 faceI++;
@@ -274,9 +271,7 @@ Foam::pointIndexHit Foam::isoSurface::collapseSurface
 {
     pointIndexHit info(false, vector::zero, localTris.size());
 
-    if (localTris.size() == 0)
-    {}
-    else if (localTris.size() == 1)
+    if (localTris.size() == 1)
     {
         const labelledTri& tri = localTris[0];
         info.setPoint(tri.centre(localPoints));
@@ -303,7 +298,7 @@ Foam::pointIndexHit Foam::isoSurface::collapseSurface
             info.setHit();
         }
     }
-    else
+    else if (localTris.size())
     {
         // Check if single region. Rare situation.
         triSurface surf
@@ -512,7 +507,7 @@ void Foam::isoSurface::calcSnappedCc
                     (
                         false,              // do not check for duplicate tris
                         localTriPoints,
-                        triPointReverseMap,  
+                        triPointReverseMap,
                         triMap
                     )
                 );
@@ -696,7 +691,7 @@ void Foam::isoSurface::calcSnappedPoint
                 (
                     false,                  // do not check for duplicate tris
                     localTriPoints,
-                    triPointReverseMap,  
+                    triPointReverseMap,
                     triMap
                 )
             );
@@ -1071,7 +1066,7 @@ void Foam::isoSurface::walkOrientation
 
     changedFaces.append(seedTriI);
 
-    while (changedFaces.size() > 0)
+    while (changedFaces.size())
     {
         DynamicList<label> newChangedFaces(changedFaces.size());
 
@@ -1084,7 +1079,7 @@ void Foam::isoSurface::walkOrientation
             forAll(fEdges, fp)
             {
                 label edgeI = fEdges[fp];
-    
+
                 // my points:
                 label p0 = tri[fp];
                 label p1 = tri[tri.fcIndex(fp)];
@@ -1121,7 +1116,7 @@ void Foam::isoSurface::walkOrientation
 
         changedFaces.transfer(newChangedFaces);
     }
-}    
+}
 
 
 void Foam::isoSurface::orientSurface
@@ -1146,7 +1141,7 @@ void Foam::isoSurface::orientSurface
         for
         (
             ;
-            seedTriI < surf.size() && flipState[seedTriI] != -1; 
+            seedTriI < surf.size() && flipState[seedTriI] != -1;
             seedTriI++
         )
         {}
@@ -1355,8 +1350,32 @@ Foam::isoSurface::isoSurface
 :
     mesh_(cVals.mesh()),
     iso_(iso),
-    mergeDistance_(mergeTol*mag(mesh_.bounds().max()-mesh_.bounds().min()))
+    mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const labelList& own = mesh_.faceOwner();
+
+    // Check
+    forAll(patches, patchI)
+    {
+        if (isA<emptyPolyPatch>(patches[patchI]))
+        {
+            FatalErrorIn
+            (
+                "isoSurface::isoSurface\n"
+                "(\n"
+                "    const volScalarField& cVals,\n"
+                "    const scalarField& pVals,\n"
+                "    const scalar iso,\n"
+                "    const bool regularise,\n"
+                "    const scalar mergeTol\n"
+                ")\n"
+            )   << "Iso surfaces not supported on case with empty patches."
+                << exit(FatalError);
+        }
+    }
+
+
     // Determine if any cut through face/cell
     calcCutTypes(cVals, pVals);
 
@@ -1366,8 +1385,6 @@ Foam::isoSurface::isoSurface
     PackedList<1> isBoundaryPoint(mesh_.nPoints());
 
     labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const labelList& own = mesh_.faceOwner();
 
     forAll(patches, patchI)
     {

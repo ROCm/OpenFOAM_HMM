@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,26 +55,37 @@ Foam::topoSetSource::addToUsageTable Foam::zoneToCell::usage_
 
 void Foam::zoneToCell::combine(topoSet& set, const bool add) const
 {
-    label zoneI = mesh_.cellZones().findZoneID(zoneName_);
+    bool hasMatched = false;
 
-    if (zoneI != -1)
+    forAll(mesh_.cellZones(), i)
     {
-        const labelList& cellLabels = mesh_.cellZones()[zoneI];
+        const cellZone& zone = mesh_.cellZones()[i];
 
-        forAll(cellLabels, i)
+        if (zoneName_.match(zone.name()))
         {
-            // Only do active cells
-            if (cellLabels[i] < mesh_.nCells())
+            const labelList& cellLabels = mesh_.cellZones()[i];
+
+            Info<< "    Found matching zone " << zone.name()
+                << " with " << cellLabels.size() << " cells." << endl;
+
+            hasMatched = true;
+
+            forAll(cellLabels, i)
             {
-                addOrDelete(set, cellLabels[i], add);
+                // Only do active cells
+                if (cellLabels[i] < mesh_.nCells())
+                {
+                    addOrDelete(set, cellLabels[i], add);
+                }
             }
         }
     }
-    else
+
+    if (!hasMatched)
     {
         WarningIn("zoneToCell::combine(topoSet&, const bool)")
-            << "Cannot find zone named " << zoneName_ << endl
-            << "Valid zones are " << mesh_.cellZones().names() << endl;
+            << "Cannot find any cellZone named " << zoneName_ << endl
+            << "Valid names are " << mesh_.cellZones().names() << endl;
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,12 +97,12 @@ void Foam::PrimitivePatchExtra<Face, FaceList, PointField, PointType>::markZone
             }
         }
 
-        if (newChangedFaces.size() == 0)
+        if (newChangedFaces.empty())
         {
             break;
         }
 
-        // New dynamicList: can leave dynamicList unshrunk
+        // transfer from dynamic to normal list
         changedFaces.transfer(newChangedFaces);
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -286,7 +286,8 @@ Foam::argList::argList
     if (Pstream::master() && bannerEnabled)
     {
         IOobject::writeBanner(Info, true);
-        Info<< "Exec   : " << argListString.c_str() << nl
+        Info<< "Build  : " << Foam::FOAMbuild << nl
+            << "Exec   : " << argListString.c_str() << nl            
             << "Date   : " << dateString.c_str() << nl
             << "Time   : " << timeString.c_str() << nl
             << "Host   : " << hostName() << nl

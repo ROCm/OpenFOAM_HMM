@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
         string::stripInvalid<word>(w);
 
         // flag empty strings and bad chars as an error
-        if (!w.size() || w.size() != t.stringToken().size())
+        if (w.empty() || w.size() != t.stringToken().size())
         {
             is.setBad();
             FatalIOErrorIn("operator>>(Istream&, word&)", is)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "isoSurface.H"
-//#include "isoSurfaceCell.H"
+// #include "isoSurfaceCell.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,9 +45,13 @@ namespace Foam
 
 void Foam::distanceSurface::createGeometry()
 {
-    // Clear any stored topo
-    facesPtr_.clear();
+    if (debug)
+    {
+        Pout<< "distanceSurface::createGeometry :updating geometry." << endl;
+    }
 
+    // Clear any stored topologies
+    facesPtr_.clear();
 
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
@@ -68,7 +72,7 @@ void Foam::distanceSurface::createGeometry()
                 false
             ),
             fvm,
-            dimensionedScalar("zero", dimless/dimTime, 0)
+            dimensionedScalar("zero", dimLength, 0)
         )
     );
     volScalarField& cellDistance = cellDistancePtr_();
@@ -158,6 +162,7 @@ void Foam::distanceSurface::createGeometry()
         }
     }
 
+
     // On processor patches the mesh.C() will already be the cell centre
     // on the opposite side so no need to swap cellDistance.
 
@@ -165,22 +170,69 @@ void Foam::distanceSurface::createGeometry()
     // Distance to points
     pointDistance_.setSize(fvm.nPoints());
     {
+        const pointField& pts = fvm.points();
+
         List<pointIndexHit> nearest;
         surfPtr_().findNearest
         (
-            fvm.points(),
-            scalarField(fvm.nPoints(), GREAT),
+            pts,
+            scalarField(pts.size(), GREAT),
             nearest
         );
-        forAll(pointDistance_, pointI)
+
+        if (signed_)
         {
-            pointDistance_[pointI] = Foam::mag
-            (
-                nearest[pointI].hitPoint()
-              - fvm.points()[pointI]
-            );
+            vectorField normal;
+            surfPtr_().getNormal(nearest, normal);
+
+            forAll(nearest, i)
+            {
+                vector d(pts[i]-nearest[i].hitPoint());
+
+                if ((d&normal[i]) > 0)
+                {
+                    pointDistance_[i] = Foam::mag(d);
+                }
+                else
+                {
+                    pointDistance_[i] = -Foam::mag(d);
+                }
+            }
+        }
+        else
+        {
+            forAll(nearest, i)
+            {
+                pointDistance_[i] = Foam::mag(pts[i]-nearest[i].hitPoint());
+            }
         }
     }
+
+
+    if (debug)
+    {
+        Pout<< "Writing cell distance:" << cellDistance.objectPath() << endl;
+        cellDistance.write();
+        pointScalarField pDist
+        (
+            IOobject
+            (
+                "pointDistance",
+                fvm.time().timeName(),
+                fvm.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pointMesh::New(fvm),
+            dimensionedScalar("zero", dimLength, 0)
+        );
+        pDist.internalField() = pointDistance_;
+
+        Pout<< "Writing point distance:" << pDist.objectPath() << endl;
+        pDist.write();
+    }
+
 
     //- Direct from cell field and point field.
     isoSurfPtr_.reset
@@ -197,6 +249,7 @@ void Foam::distanceSurface::createGeometry()
     if (debug)
     {
         print(Pout);
+        Pout<< endl;
     }
 }
 
@@ -232,21 +285,20 @@ Foam::distanceSurface::distanceSurface
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     zoneName_(word::null),
+    needsUpdate_(true),
     isoSurfPtr_(NULL),
     facesPtr_(NULL)
 {
-//    label zoneId = -1;
-//    if (dict.readIfPresent("zone", zoneName_))
+//    dict.readIfPresent("zone", zoneName_);
+//
+//    if (debug && zoneName_.size())
 //    {
-//        zoneId = mesh.cellZones().findZoneID(zoneName_);
-//        if (debug && zoneId < 0)
+//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
 //        {
 //            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh"
-//                << endl;
+//                << "\" not found - using entire mesh" << endl;
 //        }
 //    }
-    correct(true);
 }
 
 
@@ -258,13 +310,53 @@ Foam::distanceSurface::~distanceSurface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::distanceSurface::correct(const bool meshChanged)
+bool Foam::distanceSurface::needsUpdate() const
 {
-    // Only change of mesh changes plane - zone restriction gets lost
-    if (meshChanged)
+    return needsUpdate_;
+}
+
+
+bool Foam::distanceSurface::expire()
+{
+    if (debug)
     {
-        createGeometry();
+        Pout<< "distanceSurface::expire :"
+            << " have-facesPtr_:" << facesPtr_.valid()
+            << " needsUpdate_:" << needsUpdate_ << endl;
     }
+
+    // Clear any stored topologies
+    facesPtr_.clear();
+
+    // already marked as expired
+    if (needsUpdate_)
+    {
+        return false;
+    }
+
+    needsUpdate_ = true;
+    return true;
+}
+
+
+bool Foam::distanceSurface::update()
+{
+    if (debug)
+    {
+        Pout<< "distanceSurface::update :"
+            << " have-facesPtr_:" << facesPtr_.valid()
+            << " needsUpdate_:" << needsUpdate_ << endl;
+    }
+
+    if (!needsUpdate_)
+    {
+        return false;
+    }
+
+    createGeometry();
+
+    needsUpdate_ = false;
+    return true;
 }
 
 

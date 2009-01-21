@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,11 +143,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    reset
-    (
-        xferMove(pointLst),
-        xferMoveTo<List<Face> >(dynFaces)
-    );
+    reset(pointLst.xfer(), dynFaces.xfer());
 
     // no region information
     this->onePatch();

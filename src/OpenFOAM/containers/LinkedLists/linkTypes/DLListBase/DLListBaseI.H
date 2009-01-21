@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,6 +78,12 @@ inline void Foam::DLListBase::link::deregister()
 inline Foam::label Foam::DLListBase::size() const
 {
     return nElmts_;
+}
+
+
+inline bool Foam::DLListBase::empty() const
+{
+    return (nElmts_ == 0);
 }
 
 

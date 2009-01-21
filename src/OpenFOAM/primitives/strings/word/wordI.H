@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -162,16 +162,16 @@ inline void Foam::word::operator=(const char* q)
 
 inline Foam::word Foam::operator&(const word& a, const word& b)
 {
-    if (!b.size())
-    {
-        return a;
-    }
-    else
+    if (b.size())
     {
         string ub = b;
         ub.string::operator[](0) = char(toupper(ub.string::operator[](0)));
 
         return a + ub;
+    }
+    else
+    {
+        return a;
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,9 +135,9 @@ class addPatchCellLayer
 
             void operator()(labelList& x, const labelList& y) const
             {
-                if (x.size() == 0)
+                if (x.empty())
                 {
-                    if (y.size() > 0)
+                    if (y.size())
                     {
                         x = y;
                     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ Description
 #define HashSet_H
 
 #include "HashTable.H"
-#include "empty.H"
+#include "nil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,19 +54,19 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class HashSet Declaration
+                           Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Key=word, class Hash=string::hash>
 class HashSet
 :
-    public HashTable<empty, Key, Hash>
+    public HashTable<nil, Key, Hash>
 {
 
 public:
 
-    typedef typename HashTable<empty, Key, Hash>::iterator iterator;
-    typedef typename HashTable<empty, Key, Hash>::const_iterator const_iterator;
+    typedef typename HashTable<nil, Key, Hash>::iterator iterator;
+    typedef typename HashTable<nil, Key, Hash>::const_iterator const_iterator;
 
 
     // Constructors
@@ -74,19 +74,19 @@ public:
         //- Construct given initial size
         HashSet(label size = 100)
         :
-            HashTable<empty, Key, Hash>(size)
+            HashTable<nil, Key, Hash>(size)
         {}
 
         //- Construct from Istream
         HashSet(Istream& is)
         :
-            HashTable<empty, Key, Hash>(is)
+            HashTable<nil, Key, Hash>(is)
         {}
 
         //- Construct from UList of Key
         HashSet(const UList<Key>& lst)
         :
-            HashTable<empty, Key, Hash>(2*lst.size())
+            HashTable<nil, Key, Hash>(2*lst.size())
         {
             forAll(lst, i)
             {
@@ -97,18 +97,25 @@ public:
         //- Construct as copy
         HashSet(const HashSet<Key, Hash>& hs)
         :
-            HashTable<empty, Key, Hash>(hs)
+            HashTable<nil, Key, Hash>(hs)
         {}
 
         //- Construct by transferring the parameter contents
-        HashSet(const xfer<HashSet<Key, Hash> >& hs)
+        HashSet(const Xfer<HashSet<Key, Hash> >& hs)
         :
-            HashTable<empty, Key, Hash>(hs)
+            HashTable<nil, Key, Hash>(hs)
         {}
 
-        //- Construct from table of contents of the HashTable
-        template<class T>
-        HashSet(const HashTable<T, Key, Hash>& ht);
+        //- Construct by transferring the parameter contents
+        HashSet(const Xfer<HashTable<nil, Key, Hash> >& hs)
+        :
+            HashTable<nil, Key, Hash>(hs)
+        {}
+
+        //- Construct from the keys of another HashTable,
+        //  the type of values held is arbitrary.
+        template<class AnyType>
+        HashSet(const HashTable<AnyType, Key, Hash>&);
 
     // Member Functions
 
@@ -117,13 +124,13 @@ public:
         //- Insert a new entry
         bool insert(const Key& key)
         {
-            return HashTable<empty, Key, Hash>::insert(key, empty());
+            return HashTable<nil, Key, Hash>::insert(key, nil());
         }
 
-        //- Same as insert (cannot overwrite empty content)
+        //- Same as insert (cannot overwrite nil content)
         bool set(const Key& key)
         {
-            return HashTable<empty, Key, Hash>::insert(key, empty());
+            return HashTable<nil, Key, Hash>::insert(key, nil());
         }
 
 

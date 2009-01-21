@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,7 +231,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     facei_ = -1;
     scalar trackFraction = 0.0;
 
-    if (faces.size() == 0) // inside cell
+    if (faces.empty())  // inside cell
     {
         trackFraction = 1.0;
         position_ = endPosition;

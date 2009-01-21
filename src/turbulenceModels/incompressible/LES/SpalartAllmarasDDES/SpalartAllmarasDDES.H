@@ -62,6 +62,14 @@ class SpalartAllmarasDDES
 {
     // Private member functions
 
+        tmp<volScalarField> fd(const volScalarField& S) const;
+
+        tmp<volScalarField> rd
+        (
+            const volScalarField& visc,
+            const volScalarField& S
+        ) const;
+
         // Disallow default bitwise copy construct and assignment
         SpalartAllmarasDDES(const SpalartAllmarasDDES&);
         SpalartAllmarasDDES& operator=(const SpalartAllmarasDDES&);
@@ -71,15 +79,8 @@ protected:
 
     // Protected member functions
 
-        tmp<volScalarField> fd(const volScalarField& S);
-        tmp<volScalarField> rd
-        (
-            const volScalarField& visc,
-            const volScalarField& S
-        ) const;
-
-        //- Length scale calculation
-        virtual void dTildaUpdate(const volScalarField& S);
+        //- Length scale
+        virtual tmp<volScalarField> dTilda(const volScalarField& S) const;
 
 
 public:

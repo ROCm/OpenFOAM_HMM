@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,6 @@ SourceFiles
 #define Field_H
 
 #include "tmp.H"
-#include "xfer.H"
 #include "direction.H"
 #include "VectorSpace.H"
 #include "scalarList.H"
@@ -115,6 +114,9 @@ public:
         //- Construct as copy of a UList<Type>
         explicit Field(const UList<Type>&);
 
+        //- Construct by transferring the List contents
+        explicit Field(const Xfer<List<Type> >&);
+
         //- Construct by 1 to 1 mapping from the given field
         Field
         (
@@ -166,7 +168,7 @@ public:
         Field(Field<Type>&, bool reUse);
 
         //- Construct by transferring the Field contents
-        Field(const xfer<Field<Type> >&);
+        Field(const Xfer<Field<Type> >&);
 
         //- Construct as copy of subField
         Field(const typename Field<Type>::subField&);

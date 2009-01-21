@@ -26,7 +26,6 @@ License
 
 #include "SpalartAllmarasDDES.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,51 +49,42 @@ tmp<volScalarField> SpalartAllmarasDDES::rd
     const volScalarField& S
 ) const
 {
-    volScalarField d = wallDist(mesh_).y();
-
-    tmp<volScalarField> trd
+    return min
     (
-        new volScalarField
-        (
-            min
+        visc
+        /(
+            max
             (
-                visc
-               /(
-                    max
-                    (
-                        S,
-                        dimensionedScalar("SMALL", S.dimensions(), SMALL)
-                    )*sqr(kappa_*d)
-                  + dimensionedScalar
-                    (
-                        "ROOTVSMALL",
-                        dimensionSet(0, 2 , -1, 0, 0),
-                        ROOTVSMALL
-                    )
-                ), scalar(10.0)
+                S,
+                dimensionedScalar("SMALL", S.dimensions(), SMALL)
+            )*sqr(kappa_*y_)
+          + dimensionedScalar
+            (
+                "ROOTVSMALL",
+                dimensionSet(0, 2 , -1, 0, 0),
+                ROOTVSMALL
             )
-        )
+        ),
+        scalar(10)
     );
-
-    return trd;
 }
 
 
-tmp<volScalarField> SpalartAllmarasDDES::fd(const volScalarField& S)
+tmp<volScalarField> SpalartAllmarasDDES::fd(const volScalarField& S) const
 {
-    return 1.0 - tanh(pow3(8.0*rd(nuSgs_ + transport().nu(), S)));
+    return 1 - tanh(pow3(8*rd(nuEff(), S)));
 }
 
 
-void SpalartAllmarasDDES::dTildaUpdate(const volScalarField& S)
+tmp<volScalarField> SpalartAllmarasDDES::dTilda(const volScalarField& S) const
 {
-    dTilda_ =
-        wallDist(mesh_).y()
-      - fd(S)*max
-        (
-            dimensionedScalar("zero", dimLength, 0.0),
-            wallDist(mesh_).y() - CDES_*delta()
-        );
+    return max
+    (
+        y_
+      - fd(S)
+       *max(y_ - CDES_*delta(), dimensionedScalar("zero", dimLength, 0)),
+        dimensionedScalar("small", dimLength, SMALL)
+    );
 }
 
 

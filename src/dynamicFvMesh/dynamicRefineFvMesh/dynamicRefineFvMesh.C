@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ void dynamicRefineFvMesh::calculateProtectedCells
     PackedList<1>& unrefineableCell
 ) const
 {
-    if (protectedCell_.size() == 0)
+    if (protectedCell_.empty())
     {
         unrefineableCell.clear();
         return;
@@ -375,7 +375,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
                 }
             }
         }
-    }            
+    }
 
 
 
@@ -383,7 +383,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
     meshCutter_.updateMesh(map);
 
     // Update numbering of protectedCell_
-    if (protectedCell_.size() > 0)
+    if (protectedCell_.size())
     {
         PackedList<1> newProtectedCell(nCells(), 0);
 
@@ -536,7 +536,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::unrefine
     meshCutter_.updateMesh(map);
 
     // Update numbering of protectedCell_
-    if (protectedCell_.size() > 0)
+    if (protectedCell_.size())
     {
         PackedList<1> newProtectedCell(nCells(), 0);
 
@@ -703,7 +703,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
                 cellLevel[cellI] < maxRefinement
              && candidateCell.get(cellI) == 1
              && (
-                    unrefineableCell.size() == 0
+                    unrefineableCell.empty()
                  || unrefineableCell.get(cellI) == 0
                 )
             )
@@ -724,7 +724,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
                     cellLevel[cellI] == level
                  && candidateCell.get(cellI) == 1
                  && (
-                        unrefineableCell.size() == 0
+                        unrefineableCell.empty()
                      || unrefineableCell.get(cellI) == 0
                     )
                 )

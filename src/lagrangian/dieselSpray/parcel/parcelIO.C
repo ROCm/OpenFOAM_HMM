@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,7 @@ void Foam::parcel::readFields
     }
 
     // read the liquid molar fractions
-    if (c.size() > 0)
+    if (c.size())
     {
         Cloud<parcel>::const_iterator iter = c.begin();
         const parcel& p0 = iter();

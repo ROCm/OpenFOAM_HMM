@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -156,7 +156,14 @@ Field<Type>::Field(Field<Type>& f, bool reUse)
 
 
 template<class Type>
-Field<Type>::Field(const xfer<Field<Type> >& f)
+Field<Type>::Field(const Xfer<List<Type> >& f)
+:
+    List<Type>(f)
+{}
+
+
+template<class Type>
+Field<Type>::Field(const Xfer<Field<Type> >& f)
 :
     List<Type>(f)
 {}

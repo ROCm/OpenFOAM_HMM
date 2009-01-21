@@ -1,0 +1,4 @@
+dynamicPressure/dynamicPressure.C
+dynamicPressure/dynamicPressureFunctionObject.C
+
+LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects

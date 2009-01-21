@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,9 +164,9 @@ Foam::MeshedSurface<Face>::MeshedSurface()
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
-    const xfer<surfGroupList>& patchLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<surfGroupList>& patchLst
 )
 :
     ParentType(pointLst, faceLst),
@@ -177,8 +177,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
     const UList<label>& patchSizes,
     const UList<word>& patchNames
 )
@@ -395,7 +395,7 @@ Foam::MeshedSurface<Face>::MeshedSurface(const MeshedSurface& surf)
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const xfer<UnsortedMeshedSurface<Face> >& surf
+    const Xfer<UnsortedMeshedSurface<Face> >& surf
 )
 {
     transfer(surf());
@@ -403,7 +403,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const xfer<MeshedSurface>& surf)
+Foam::MeshedSurface<Face>::MeshedSurface(const Xfer<MeshedSurface>& surf)
 {
     transfer(surf());
 }
@@ -423,13 +423,13 @@ template<class Face>
 void Foam::MeshedSurface<Face>::onePatch(const word& name)
 {
     word patchName(name);
-    if (!patchName.size())
+    if (patchName.empty())
     {
-        if (patches_.size() >= 1)
+        if (patches_.size())
         {
             patchName = patches_[0].name();
         }
-        if (!patchName.size())
+        if (patchName.empty())
         {
             patchName = "patch0";
         }
@@ -493,8 +493,8 @@ void Foam::MeshedSurface<Face>::checkPatches()
 template<class Face>
 void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
-    const xfer<List<Face> >& unsortedFaces,
-    const xfer<List<label> >& regionIds,
+    const Xfer<List<Face> >& unsortedFaces,
+    const Xfer<List<label> >& regionIds,
     const bool sorted
 )
 {
@@ -537,7 +537,7 @@ void Foam::MeshedSurface<Face>::remapFaces
     // recalculate the patch start/size
     if (&faceMap && faceMap.size())
     {
-        if (patches_.size() == 0)
+        if (patches_.empty())
         {
             onePatch();
         }

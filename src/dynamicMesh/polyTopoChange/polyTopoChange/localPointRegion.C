@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ public:
 
     void operator()(face& x, const face& y) const
     {
-        if (x.size() > 0)
+        if (x.size())
         {
             label j = 0;
             forAll(x, i)
@@ -134,7 +134,7 @@ void Foam::localPointRegion::countPointRegions
         {
             const face& f = mesh.faces()[faceI];
 
-            if (minRegion[faceI].size() == 0)
+            if (minRegion[faceI].empty())
             {
                 FatalErrorIn("localPointRegion::countPointRegions(..)")
                     << "Face from candidateFace without minRegion set." << endl
@@ -364,7 +364,7 @@ void Foam::localPointRegion::calcPointRegions
             {
                 label faceI = cFaces[cFaceI];
 
-                if (minRegion[faceI].size() > 0)
+                if (minRegion[faceI].size())
                 {
                     const face& f = mesh.faces()[faceI];
 
@@ -391,7 +391,7 @@ void Foam::localPointRegion::calcPointRegions
             {
                 label faceI = cFaces[cFaceI];
 
-                if (minRegion[faceI].size() > 0)
+                if (minRegion[faceI].size())
                 {
                     const face& f = mesh.faces()[faceI];
 

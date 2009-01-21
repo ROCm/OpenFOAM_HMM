@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,10 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -40,21 +36,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const pointField& edgeMesh::points() const
+inline const Foam::pointField& Foam::edgeMesh::points() const
 {
     return points_;
 }
 
 
-inline const edgeList& edgeMesh::edges() const
+inline const Foam::edgeList& Foam::edgeMesh::edges() const
 {
     return edges_;
 }
 
 
-inline const labelListList& edgeMesh::pointEdges() const
+inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
 {
-    if (!pointEdgesPtr_.valid())
+    if (pointEdgesPtr_.empty())
     {
         calcPointEdges();
     }
@@ -72,7 +68,5 @@ inline const labelListList& edgeMesh::pointEdges() const
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

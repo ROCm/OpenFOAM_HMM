@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,54 +49,9 @@ inline Foam::treeBoundBox::treeBoundBox(const boundBox& bb)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::treeBoundBox::minDim() const
-{
-    return ::Foam::min
-    (
-        max().x() - min().x(),
-        ::Foam::min
-        (
-            max().y() - min().y(),
-            max().z() - min().z()
-        )
-    );
-}
-
-
-inline Foam::scalar Foam::treeBoundBox::maxDim() const
-{
-    return ::Foam::max
-    (
-        max().x() - min().x(),
-        ::Foam::max
-        (
-            max().y() - min().y(),
-            max().z() - min().z()
-        )
-    );
-}
-
-
-inline Foam::scalar Foam::treeBoundBox::avgDim() const
-{
-    return
-    (
-        (max().x() - min().x()) +
-        (max().y() - min().y()) +
-        (max().z() - min().z())
-    )/3.0;
-}
-
-
 inline Foam::scalar Foam::treeBoundBox::typDim() const
 {
     return avgDim();
-}
-
-
-inline Foam::point Foam::treeBoundBox::mid() const
-{
-    return 0.5*(min() + max());
 }
 
 
@@ -104,59 +59,41 @@ inline Foam::point Foam::treeBoundBox::corner(const direction octant) const
 {
     return point
     (
-        (octant&RIGHTHALF) ? max().x() : min().x(),
-        (octant&TOPHALF)   ? max().y() : min().y(),
-        (octant&FRONTHALF) ? max().z() : min().z()
+        (octant & RIGHTHALF) ? max().x() : min().x(),
+        (octant & TOPHALF)   ? max().y() : min().y(),
+        (octant & FRONTHALF) ? max().z() : min().z()
     );
 }
 
-// Returns octant in which sample resides. Reverse of subBbox.
-inline Foam::direction Foam::treeBoundBox::subOctant(const point& sample) const
+
+// Returns octant in which point resides. Reverse of subBbox.
+inline Foam::direction Foam::treeBoundBox::subOctant(const point& pt) const
 {
-    point mid = 0.5*(max() + min());
-
-    direction octant = 0;
-
-    if (sample.x() > mid.x())
-    {
-        octant |= treeBoundBox::RIGHTHALF;
-    }
-
-    if (sample.y() > mid.y())
-    {
-        octant |= treeBoundBox::TOPHALF;
-    }
-
-    if (sample.z() > mid.z())
-    {
-        octant |= treeBoundBox::FRONTHALF;
-    }
-
-    return octant;
+    return subOctant(midpoint(), pt);
 }
 
 
-// Returns octant in which sample resides. Reverse of subBbox. Precalculated
-// midpoint
+// Returns octant in which point resides. Reverse of subBbox.
+// Precalculated midpoint
 inline Foam::direction Foam::treeBoundBox::subOctant
 (
     const point& mid,
-    const point& sample
+    const point& pt
 )
 {
     direction octant = 0;
 
-    if (sample.x() > mid.x())
+    if (pt.x() > mid.x())
     {
         octant |= treeBoundBox::RIGHTHALF;
     }
 
-    if (sample.y() > mid.y())
+    if (pt.y() > mid.y())
     {
         octant |= treeBoundBox::TOPHALF;
     }
 
-    if (sample.z() > mid.z())
+    if (pt.z() > mid.z())
     {
         octant |= treeBoundBox::FRONTHALF;
     }
@@ -165,85 +102,53 @@ inline Foam::direction Foam::treeBoundBox::subOctant
 }
 
 
-// Returns octant in which sample resides. Reverse of subBbox. Flags sample
-// exactly on edge.
+// Returns octant in which point resides. Reverse of subBbox.
+// Flags point exactly on edge.
 inline Foam::direction Foam::treeBoundBox::subOctant
 (
-    const point& sample,
+    const point& pt,
     bool& onEdge
 ) const
 {
-    point mid = 0.5*(max() + min());
-
-    direction octant = 0;
-
-    onEdge = false;
-    if (sample.x() > mid.x())
-    {
-        octant |= treeBoundBox::RIGHTHALF;
-    }
-    else if (sample.x() == mid.x())
-    {
-        onEdge = true;
-    }
-
-    if (sample.y() > mid.y())
-    {
-        octant |= treeBoundBox::TOPHALF;
-    }
-    else if (sample.y() == mid.y())
-    {
-        onEdge = true;
-    }
-
-    if (sample.z() > mid.z())
-    {
-        octant |= treeBoundBox::FRONTHALF;
-    }
-    else if (sample.z() == mid.z())
-    {
-        onEdge = true;
-    }
-
-    return octant;
+    return subOctant(midpoint(), pt, onEdge);
 }
 
 
-// Returns octant in which sample resides. Reverse of subBbox. Precalculated
-// midpoint
+// Returns octant in which point resides. Reverse of subBbox.
+// Precalculated midpoint
 inline Foam::direction Foam::treeBoundBox::subOctant
 (
     const point& mid,
-    const point& sample,
+    const point& pt,
     bool& onEdge
 )
 {
     direction octant = 0;
-
     onEdge = false;
-    if (sample.x() > mid.x())
+
+    if (pt.x() > mid.x())
     {
         octant |= treeBoundBox::RIGHTHALF;
     }
-    else if (sample.x() == mid.x())
+    else if (pt.x() == mid.x())
     {
         onEdge = true;
     }
 
-    if (sample.y() > mid.y())
+    if (pt.y() > mid.y())
     {
         octant |= treeBoundBox::TOPHALF;
     }
-    else if (sample.y() == mid.y())
+    else if (pt.y() == mid.y())
     {
         onEdge = true;
     }
 
-    if (sample.z() > mid.z())
+    if (pt.z() > mid.z())
     {
         octant |= treeBoundBox::FRONTHALF;
     }
-    else if (sample.z() == mid.z())
+    else if (pt.z() == mid.z())
     {
         onEdge = true;
     }
@@ -253,57 +158,53 @@ inline Foam::direction Foam::treeBoundBox::subOctant
 
 
 // Returns octant in which intersection resides.
-// Precalculated midpoint. If the sample is on the dividing line between
+// Precalculated midpoint. If the point is on the dividing line between
 // the octants the direction vector determines which octant to use
-// (i.e. in which octant the sample would be if it were moved along dir)
+// (i.e. in which octant the point would be if it were moved along dir)
 inline Foam::direction Foam::treeBoundBox::subOctant
 (
     const point& mid,
     const vector& dir,
-    const point& sample,
+    const point& pt,
     bool& onEdge
 )
 {
     direction octant = 0;
-
     onEdge = false;
 
-    if (sample.x() > mid.x())
+    if (pt.x() > mid.x())
     {
         octant |= treeBoundBox::RIGHTHALF;
     }
-    else if (sample.x() == mid.x())
+    else if (pt.x() == mid.x())
     {
         onEdge = true;
-
         if (dir.x() > 0)
         {
             octant |= treeBoundBox::RIGHTHALF;
         }
     }
 
-    if (sample.y() > mid.y())
+    if (pt.y() > mid.y())
     {
         octant |= treeBoundBox::TOPHALF;
     }
-    else if (sample.y() == mid.y())
+    else if (pt.y() == mid.y())
     {
         onEdge = true;
-
         if (dir.y() > 0)
         {
             octant |= treeBoundBox::TOPHALF;
         }
     }
 
-    if (sample.z() > mid.z())
+    if (pt.z() > mid.z())
     {
         octant |= treeBoundBox::FRONTHALF;
     }
-    else if (sample.z() == mid.z())
+    else if (pt.z() == mid.z())
     {
         onEdge = true;
-
         if (dir.z() > 0)
         {
             octant |= treeBoundBox::FRONTHALF;
@@ -318,11 +219,11 @@ inline Foam::direction Foam::treeBoundBox::subOctant
 // order to do the search.
 inline void Foam::treeBoundBox::searchOrder
 (
-    const point& sample,
+    const point& pt,
     FixedList<direction,8>& octantOrder
 ) const
 {
-    vector dist = mid() - sample;
+    vector dist = midpoint() - pt;
 
     direction octant = 0;
 
@@ -348,15 +249,15 @@ inline void Foam::treeBoundBox::searchOrder
     direction mid = 0;
     direction max = 0;
 
-    if( dist.x() < dist.y())
+    if (dist.x() < dist.y())
     {
-        if( dist.y() < dist.z())
+        if (dist.y() < dist.z())
 	{
 	    min = treeBoundBox::RIGHTHALF;
 	    mid = treeBoundBox::TOPHALF;
 	    max = treeBoundBox::FRONTHALF;
 	}
-	else if( dist.z() < dist.x())
+	else if (dist.z() < dist.x())
 	{
 	    min = treeBoundBox::FRONTHALF;
             mid = treeBoundBox::RIGHTHALF;
@@ -371,13 +272,13 @@ inline void Foam::treeBoundBox::searchOrder
     }
     else
     {
-        if( dist.z() < dist.y())
+        if (dist.z() < dist.y())
 	{
 	    min = treeBoundBox::FRONTHALF;
 	    mid = treeBoundBox::TOPHALF;
 	    max = treeBoundBox::RIGHTHALF;
 	}
-	else if( dist.x() < dist.z())
+	else if (dist.x() < dist.z())
 	{
 	    min = treeBoundBox::TOPHALF;
 	    mid = treeBoundBox::RIGHTHALF;
@@ -390,6 +291,7 @@ inline void Foam::treeBoundBox::searchOrder
 	    max = treeBoundBox::RIGHTHALF;
 	}
     }
+
     // Primary subOctant
     octantOrder[0] = octant;
     // subOctants joined to the primary by faces.
@@ -413,17 +315,9 @@ inline bool Foam::treeBoundBox::overlaps(const treeBoundBox& bb) const
 }
 
 
-inline bool Foam::treeBoundBox::contains(const point& sample) const
+inline bool Foam::treeBoundBox::contains(const point& pt) const
 {
-    return
-    (
-        (sample.x() >= min().x()) &&
-        (sample.y() >= min().y()) &&
-        (sample.z() >= min().z()) &&
-        (sample.x() <= max().x()) &&
-        (sample.y() <= max().y()) &&
-        (sample.z() <= max().z())
-    );
+    return boundBox::contains(pt);
 }
 
 
@@ -436,18 +330,18 @@ inline Foam::treeBoundBox Foam::treeBoundBox::extend
 {
     treeBoundBox bb(*this);
 
-    vector span(bb.max() - bb.min());
+    vector newSpan = bb.span();
 
     // Make 3D
-    scalar magSpan = Foam::mag(span);
+    scalar minSpan = s * Foam::mag(newSpan);
 
     for (direction dir = 0; dir < vector::nComponents; dir++)
     {
-        span[dir] = Foam::max(s*magSpan, span[dir]);
+        newSpan[dir] = Foam::max(newSpan[dir], minSpan);
     }
 
-    bb.min() -= cmptMultiply(s*rndGen.vector01(), span);
-    bb.max() += cmptMultiply(s*rndGen.vector01(), span);
+    bb.min() -= cmptMultiply(s * rndGen.vector01(), newSpan);
+    bb.max() += cmptMultiply(s * rndGen.vector01(), newSpan);
 
     return bb;
 }

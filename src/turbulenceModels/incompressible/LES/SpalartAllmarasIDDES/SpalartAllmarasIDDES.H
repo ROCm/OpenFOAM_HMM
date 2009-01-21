@@ -69,11 +69,15 @@ class SpalartAllmarasIDDES
         tmp<volScalarField> alpha() const;
         tmp<volScalarField> ft(const volScalarField& S) const;
         tmp<volScalarField> fl(const volScalarField& S) const;
+
         tmp<volScalarField> rd
         (
             const volScalarField& visc,
             const volScalarField& S
         ) const;
+
+        //- Delay function
+        tmp<volScalarField> fd(const volScalarField& S) const;
 
         // Disallow default bitwise copy construct and assignment
         SpalartAllmarasIDDES(const SpalartAllmarasIDDES&);
@@ -84,11 +88,9 @@ protected:
 
     // Protected member functions
 
-        //- Delay function
-        tmp<volScalarField> fd(const volScalarField& S) const;
+        //- Length scale
+        virtual tmp<volScalarField> dTilda(const volScalarField& S) const;
 
-        //- Length scale calculation
-        virtual void dTildaUpdate(const volScalarField& S);
 
 public:
 

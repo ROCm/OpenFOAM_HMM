@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,7 +143,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
 
     label iter = 0;
 
-    if (featureMeshes.size() > 0 && maxIter > 0)
+    if (featureMeshes.size() && maxIter > 0)
     {
         for (; iter < maxIter; iter++)
         {
@@ -518,7 +518,9 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
     // be like boundary face from now on so not coupled anymore.
     meshRefiner_.baffleAndSplitMesh
     (
-        handleSnapProblems,
+        handleSnapProblems,             // detect&remove potential snap problem
+        false,                          // perpendicular edge connected cells
+        scalarField(0),                 // per region perpendicular angle
         !handleSnapProblems,            // merge free standing baffles?
         motionDict,
         const_cast<Time&>(mesh.time()),
@@ -539,7 +541,7 @@ void Foam::autoRefineDriver::zonify
     // into that surface's faceZone. All cells inside faceZone get given the
     // same cellZone.
 
-    if (meshRefiner_.surfaces().getNamedSurfaces().size() > 0)
+    if (meshRefiner_.surfaces().getNamedSurfaces().size())
     {
         Info<< nl
             << "Introducing zones for interfaces" << nl
@@ -592,10 +594,14 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
         const_cast<Time&>(mesh.time())++;
     }
 
+    const scalarField& perpAngle = meshRefiner_.surfaces().perpendicularAngle();
+
     meshRefiner_.baffleAndSplitMesh
     (
         handleSnapProblems,
-        false,                  // merge free standing baffles?
+        handleSnapProblems,                 // remove perp edge connected cells
+        perpAngle,                          // perp angle
+        false,                              // merge free standing baffles?
         motionDict,
         const_cast<Time&>(mesh.time()),
         globalToPatch_,

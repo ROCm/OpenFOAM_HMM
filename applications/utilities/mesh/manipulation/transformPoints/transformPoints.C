@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     );
 
 
-    if (args.options().size() == 0)
+    if (args.options().empty())
     {
         FatalErrorIn(args.executable())
             << "No options supplied, please use one or more of "

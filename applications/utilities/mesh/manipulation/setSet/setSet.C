@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,7 +89,7 @@ void backup
     const word& toName
 )
 {
-    if (fromSet.size() > 0)
+    if (fromSet.size())
     {
         Pout<< "    Backing up " << fromName << " into " << toName << endl;
 
@@ -284,7 +284,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         polyMesh::meshSubDir/"sets"
     );
     IOobjectList cellSets(objects.lookupClass(cellSet::typeName));
-    if (cellSets.size() > 0)
+    if (cellSets.size())
     {
         os  << "cellSets:" << endl;
         forAllConstIter(IOobjectList, cellSets, iter)
@@ -294,7 +294,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         }
     }
     IOobjectList faceSets(objects.lookupClass(faceSet::typeName));
-    if (faceSets.size() > 0)
+    if (faceSets.size())
     {
         os  << "faceSets:" << endl;
         forAllConstIter(IOobjectList, faceSets, iter)
@@ -304,7 +304,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         }
     }
     IOobjectList pointSets(objects.lookupClass(pointSet::typeName));
-    if (pointSets.size() > 0)
+    if (pointSets.size())
     {
         os  << "pointSets:" << endl;
         forAllConstIter(IOobjectList, pointSets, iter)
@@ -347,7 +347,7 @@ bool doCommand
     bool ok = true;
 
     // Set to work on
-    autoPtr<topoSet> currentSetPtr(NULL);
+    autoPtr<topoSet> currentSetPtr;
 
     word sourceType;
 
@@ -383,7 +383,7 @@ bool doCommand
             currentSet.resize(max(currentSet.size(), typSize));
         }
 
-        if (!currentSetPtr.valid())
+        if (currentSetPtr.empty())
         {
             Pout<< "    Cannot construct/load set "
                 << topoSet::localPath(mesh, setName) << endl;
@@ -522,7 +522,7 @@ bool doCommand
 
         Pout<< fIOErr.message().c_str() << endl;
 
-        if (sourceType.size() != 0)
+        if (sourceType.size())
         {
             Pout<< topoSetSource::usage(sourceType).c_str();
         }
@@ -533,7 +533,7 @@ bool doCommand
 
         Pout<< fErr.message().c_str() << endl;
 
-        if (sourceType.size() != 0)
+        if (sourceType.size())
         {
             Pout<< topoSetSource::usage(sourceType).c_str();
         }
@@ -571,7 +571,7 @@ commandStatus parseType
     IStringStream& is
 )
 {
-    if (setType.size() == 0)
+    if (setType.empty())
     {
         Pout<< "Type 'help' for usage information" << endl;
 
@@ -689,7 +689,7 @@ commandStatus parseAction(const word& actionName)
 {
     commandStatus stat = INVALID;
 
-    if (actionName.size() != 0)
+    if (actionName.size())
     {
         try
         {
@@ -792,7 +792,7 @@ int main(int argc, char *argv[])
 
             std::getline(*fileStreamPtr, rawLine);
 
-            if (rawLine.size() > 0)
+            if (rawLine.size())
             {
                 Pout<< "Doing:" << rawLine << endl;
             }
@@ -821,7 +821,7 @@ int main(int argc, char *argv[])
 #           endif
         }
 
-        if (rawLine.size() == 0 || rawLine[0] == '#')
+        if (rawLine.empty() || rawLine[0] == '#')
         {
             continue;
         }

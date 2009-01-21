@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Return a string representation of an ulong
 word name(const unsigned long i)
 {
     std::ostringstream osBuffer;
@@ -66,7 +65,7 @@ Istream& operator>>(Istream& is, unsigned long& i)
 
     if (t.isLabel())
     {
-        i = ulong(t.labelToken());
+        i = static_cast<unsigned long>(t.labelToken());
     }
     else
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -273,10 +273,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const xfer<pointField>& points,
-    const xfer<faceList>& faces,
-    const xfer<labelList>& owner,
-    const xfer<labelList>& neighbour,
+    const Xfer<pointField>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<labelList>& owner,
+    const Xfer<labelList>& neighbour,
     const bool syncPar
 )
 :
@@ -429,9 +429,9 @@ Foam::polyMesh::polyMesh
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const xfer<pointField>& points,
-    const xfer<faceList>& faces,
-    const xfer<cellList>& cells,
+    const Xfer<pointField>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<cellList>& cells,
     const bool syncPar
 )
 :
@@ -566,9 +566,9 @@ Foam::polyMesh::polyMesh
                 "polyMesh::polyMesh\n"
                 "(\n"
                 "    const IOobject&,\n"
-                "    const xfer<pointField>&,\n"
-                "    const xfer<faceList>&,\n"
-                "    const xfer<cellList>&\n"
+                "    const Xfer<pointField>&,\n"
+                "    const Xfer<faceList>&,\n"
+                "    const Xfer<cellList>&\n"
                 ")\n"
             )   << "Face " << faceI << "contains vertex labels out of range: "
                 << curFace << " Max point index = " << points_.size()
@@ -591,9 +591,9 @@ Foam::polyMesh::polyMesh
                 "polyMesh::polyMesh\n"
                 "(\n"
                 "    const IOobject&,\n"
-                "    const xfer<pointField>&,\n"
-                "    const xfer<faceList>&,\n"
-                "    const xfer<cellList>&\n"
+                "    const Xfer<pointField>&,\n"
+                "    const Xfer<faceList>&,\n"
+                "    const Xfer<cellList>&\n"
                 ")\n"
             )   << "Cell " << cellI << "contains face labels out of range: "
                 << curCell << " Max face index = " << faces_.size()
@@ -608,10 +608,10 @@ Foam::polyMesh::polyMesh
 
 void Foam::polyMesh::resetPrimitives
 (
-    const xfer<pointField>& points,
-    const xfer<faceList>& faces,
-    const xfer<labelList>& owner,
-    const xfer<labelList>& neighbour,
+    const Xfer<pointField>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<labelList>& owner,
+    const Xfer<labelList>& neighbour,
     const labelList& patchSizes,
     const labelList& patchStarts,
     const bool validBoundary
@@ -672,10 +672,10 @@ void Foam::polyMesh::resetPrimitives
             (
                 "polyMesh::polyMesh::resetPrimitives\n"
                 "(\n"
-                "    const xfer<pointField>&,\n"
-                "    const xfer<faceList>&,\n"
-                "    const xfer<labelList>& owner,\n"
-                "    const xfer<labelList>& neighbour,\n"
+                "    const Xfer<pointField>&,\n"
+                "    const Xfer<faceList>&,\n"
+                "    const Xfer<labelList>& owner,\n"
+                "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
                 ")\n"
@@ -710,10 +710,10 @@ void Foam::polyMesh::resetPrimitives
             (
                 "polyMesh::polyMesh::resetPrimitives\n"
                 "(\n"
-                "    const xfer<pointField>&,\n"
-                "    const xfer<faceList>&,\n"
-                "    const xfer<labelList>& owner,\n"
-                "    const xfer<labelList>& neighbour,\n"
+                "    const Xfer<pointField>&,\n"
+                "    const Xfer<faceList>&,\n"
+                "    const Xfer<labelList>& owner,\n"
+                "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
                 ")\n"
@@ -814,7 +814,7 @@ void Foam::polyMesh::addPatches
     const bool validBoundary
 )
 {
-    if (boundaryMesh().size() > 0)
+    if (boundaryMesh().size())
     {
         FatalErrorIn
         (
@@ -858,12 +858,7 @@ void Foam::polyMesh::addZones
     const List<cellZone*>& cz
 )
 {
-    if
-    (
-        pointZones().size() > 0
-     || faceZones().size() > 0
-     || cellZones().size() > 0
-    )
+    if (pointZones().size() || faceZones().size() || cellZones().size())
     {
         FatalErrorIn
         (

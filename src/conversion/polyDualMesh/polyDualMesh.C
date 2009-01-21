@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -758,7 +758,7 @@ void Foam::polyDualMesh::calcDual
 
         allBoundary.checkPointManifold(true, &nonManifoldPoints);
 
-        if (nonManifoldPoints.size() > 0)
+        if (nonManifoldPoints.size())
         {
             nonManifoldPoints.write();
 
@@ -1151,7 +1151,7 @@ void Foam::polyDualMesh::calcDual
         dynDualOwner.shrink();
         dynDualNeighbour.shrink();
         dynDualRegion.shrink();
-    
+
         OFstream str("dualInternalFaces.obj");
         Pout<< "polyDualMesh::calcDual : dumping internal faces to "
             << str.name() << endl;
@@ -1163,7 +1163,7 @@ void Foam::polyDualMesh::calcDual
         forAll(dynDualFaces, dualFaceI)
         {
             const face& f = dynDualFaces[dualFaceI];
-    
+
             str<< 'f';
             forAll(f, fp)
             {
@@ -1229,7 +1229,7 @@ void Foam::polyDualMesh::calcDual
         forAll(dualFaces, dualFaceI)
         {
             const face& f = dualFaces[dualFaceI];
-    
+
             str<< 'f';
             forAll(f, fp)
             {

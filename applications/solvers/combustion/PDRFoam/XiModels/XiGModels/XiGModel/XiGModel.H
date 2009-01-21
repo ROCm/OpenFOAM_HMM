@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,9 @@ Class
 
 Description
     Base-class for all Xi generation models used by the b-Xi combustion model.
+    See Technical Report SH/RE/01R for details on the PDR modelling. For details
+    on the use of XiGModel see \link XiModel.H \endlink. The model available is
+    \link instabilityG.H \endlink
 
 SourceFiles
     XiGModel.C

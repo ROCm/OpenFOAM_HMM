@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -235,7 +235,7 @@ static void createFieldNames
     HashSet<word> surfScalarHash;
     HashSet<word> surfVectorHash;
 
-    if (setName.size() == 0)
+    if (setName.empty())
     {
         forAll(Times, timeI)
         {
@@ -536,12 +536,11 @@ void user_query_file_function
     fileName caseName(rootAndCase.name());
 
     // handle trailing '/'
-    if (caseName.size() == 0)
+    if (caseName.empty())
     {
         caseName = rootDir.name();
-        rootDir = rootDir.path();
+        rootDir  = rootDir.path();
     }
-
 
     Info<< "rootDir  : " << rootDir << endl
         << "caseName : " << caseName << endl

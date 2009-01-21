@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,11 +61,11 @@ class primitiveMesh;
 
 class cuttingPlane
 :
-    public PrimitiveMeshedSurface<face>,
-    public plane
+    public plane,
+    public BasicMeshedSurface<face>
 {
     //- Private typedefs for convenience
-        typedef PrimitiveMeshedSurface<face> MeshStorage;
+        typedef BasicMeshedSurface<face> MeshStorage;
 
     // Private data
 
@@ -132,12 +132,12 @@ public:
 
     // Constructors
 
-        //- Construct from mesh reference and plane,
+        //- Construct from plane and mesh reference,
         //  possibly restricted to a list of cells
         cuttingPlane
         (
-            const primitiveMesh&,
             const plane&,
+            const primitiveMesh&,
             const UList<label>& cellIdLabels = UList<label>::null()
         );
 
@@ -159,7 +159,7 @@ public:
         //- Return true or false to question: have any cells been cut?
         bool cut() const
         {
-            return (cutCells_.size() != 0);
+            return cutCells_.size();
         }
 
         //- Sample the cell field

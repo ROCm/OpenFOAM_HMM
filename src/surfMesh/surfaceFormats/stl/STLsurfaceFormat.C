@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -293,9 +293,9 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     this->storedPoints().transfer(reader.points());
 
     // retrieve the original region information
-    List<word>  names(xferMove(reader.names()));
-    List<label> sizes(xferMove(reader.sizes()));
-    List<label> regions(xferMove(reader.regions()));
+    List<word>  names(reader.names().xfer());
+    List<label> sizes(reader.sizes().xfer());
+    List<label> regions(reader.regions().xfer());
 
     // generate the (sorted) faces
     List<Face> faceLst(regions.size());

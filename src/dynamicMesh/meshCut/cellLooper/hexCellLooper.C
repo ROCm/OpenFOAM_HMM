@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -206,23 +206,22 @@ bool Foam::hexCellLooper::cut
     }
     else
     {
-        success = 
-            geomCellLooper::cut
-            (
-                refDir,
-                cellI,
-                vertIsCut,
-                edgeIsCut,
-                edgeWeight,
+        success = geomCellLooper::cut
+        (
+            refDir,
+            cellI,
+            vertIsCut,
+            edgeIsCut,
+            edgeWeight,
 
-                loop,
-                loopWeights
-            );
+            loop,
+            loopWeights
+        );
     }
 
     if (debug)
     {
-        if (loop.size() == 0)
+        if (loop.empty())
         {
             WarningIn("hexCellLooper")
                 << "could not cut cell " << cellI << endl;

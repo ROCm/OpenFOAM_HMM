@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ void Foam::edgeIntersections::checkEdges(const triSurface& surf)
 
     treeBoundBox bb(localPoints);
 
-    scalar minSize = SMALL*bb.minDim();
+    scalar minSize = SMALL * bb.minDim();
 
     forAll(edges, edgeI)
     {
@@ -255,7 +255,7 @@ bool Foam::edgeIntersections::inlinePerturb
 
     const labelList& edgeEnds = classification_[edgeI];
 
-    if (edgeEnds.size() > 0)
+    if (edgeEnds.size())
     {
         bool perturbStart = false;
         bool perturbEnd = false;
@@ -701,7 +701,7 @@ Foam::label Foam::edgeIntersections::removeDegenerates
         // Transfer and test.
         edgesToTest.transfer(newEdgesToTest);
 
-        if (edgesToTest.size() == 0)
+        if (edgesToTest.empty())
         {
             FatalErrorIn("perturb") << "oops" << abort(FatalError);
         }

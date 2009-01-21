@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,37 +77,41 @@ public:
 
     // Member Functions
 
-        // Check
+    // Check
 
-            //- Is the autoPtr valid, i.e. is the pointer set
-            inline bool valid() const;
+        //- Return true if the autoPtr is empty (ie, no pointer set).
+        inline bool empty() const;
+
+        //- Return true if the autoPtr valid (ie, the pointer is set).
+        inline bool valid() const;
 
 
-        // Edit
+    // Edit
 
-            //- Return object pointer for reuse
-            inline T* ptr();
+        //- Return object pointer for reuse
+        inline T* ptr();
 
-            //- Set pointer to that given.
-            //  If object pointer already set issue a FatalError.
-            inline void set(T*);
+        //- Set pointer to that given.
+        //  If object pointer already set issue a FatalError.
+        inline void set(T*);
 
-            //- If object pointer already set delete object and
-            //  set pointer to that given
-            inline void reset(T* = 0);
+        //- If object pointer already set, delete object and set to given pointer
+        inline void reset(T* = 0);
 
-            //- If object pointer points to valid object:
-            //  delete object and set pointer to NULL
-            inline void clear();
+        //- Delete object and set pointer to NULL, if the pointer is valid.
+        inline void clear();
 
 
     // Member operators
 
+        //- Return reference to the object data
         inline T& operator()();
+
+        //- Return const reference to the object data
         inline const T& operator()() const;
 
-        //inline Tref operator*();
-        //inline const Tref operator*() const;
+        // inline T& operator*();
+        // inline const T& operator*() const;
 
         inline operator const T&() const;
 
@@ -117,6 +121,7 @@ public:
         //- Return const object pointer
         inline const T* operator->() const;
 
+        //- Take over object pointer from parameter
         inline void operator=(const autoPtr<T>&);
 };
 

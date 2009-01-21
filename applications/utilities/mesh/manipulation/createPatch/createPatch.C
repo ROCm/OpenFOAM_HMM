@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,7 @@ void filterPatches(polyMesh& mesh)
 
         if (isA<processorPolyPatch>(pp))
         {
-            if (pp.size() > 0)
+            if (pp.size())
             {
                 allPatches.append
                 (
@@ -586,7 +586,7 @@ int main(int argc, char *argv[])
     // 1. Add all new patches
     // ~~~~~~~~~~~~~~~~~~~~~~
 
-    if (patchSources.size() > 0)
+    if (patchSources.size())
     {
         // Old and new patches.
         DynamicList<polyPatch*> allPatches(patches.size()+patchSources.size());

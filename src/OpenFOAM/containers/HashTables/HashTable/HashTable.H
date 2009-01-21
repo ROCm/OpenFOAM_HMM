@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ SourceFiles
 #include "label.H"
 #include "word.H"
 #include "className.H"
-#include "xfer.H"
+#include "Xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,23 +50,16 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T>
-class List;
-
+template<class T> class List;
+template<class T> class UList;
 template<class T, class Key, class Hash> class HashTable;
 template<class T, class Key, class Hash> class HashPtrTable;
 
-template<class T, class Key, class Hash> Istream& operator>>
-(
-    Istream&,
-    HashTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Istream& operator>>(Istream&, HashTable<T, Key, Hash>&);
 
-template<class T, class Key, class Hash> Ostream& operator<<
-(
-    Ostream&,
-    const HashTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream&, const HashTable<T, Key, Hash>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -158,7 +151,7 @@ public:
         HashTable(const HashTable<T, Key, Hash>&);
 
         //- Construct by transferring the parameter contents
-        HashTable(const xfer<HashTable<T, Key, Hash> >&);
+        HashTable(const Xfer<HashTable<T, Key, Hash> >&);
 
 
     // Destructor
@@ -172,6 +165,9 @@ public:
 
             //- Return number of elements in table.
             inline label size() const;
+
+            //- Return true if the hash table is empty
+            inline bool empty() const;
 
             //- Return true if hashedEntry is found in table
             bool found(const Key&) const;
@@ -202,6 +198,17 @@ public:
             //- Erase an hashedEntry specified by given key if in table
             bool erase(const Key&);
 
+            //- Remove entries given by the listed keys from this HashTable
+            //  Return the number of elements removed
+            label erase(const UList<Key>&);
+
+            //- Remove entries given by the given keys from this HashTable
+            //  Return the number of elements removed.
+            //  The parameter HashTable needs the same type of keys, but
+            //  but the type of values held is arbitrary.
+            template<class AnyType>
+            label erase(const HashTable<AnyType, Key, Hash>&);
+
             //- Resize the hash table for efficiency
             void resize(const label newSize);
 
@@ -216,6 +223,9 @@ public:
             //  and annull the argument table.
             void transfer(HashTable<T, Key, Hash>&);
 
+            //- Transfer contents to the Xfer container
+            inline Xfer<HashTable<T, Key, Hash> > xfer();
+
 
     // Member Operators
 
@@ -225,14 +235,13 @@ public:
         //- Find and return an hashedEntry
         inline const T& operator[](const Key&) const;
 
-        //- Find and return an hashedEntry and
-        //  if it is not present create it null.
+        //- Find and return an hashedEntry, create it null if not present.
         inline T& operator()(const Key&);
 
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>&);
 
-        //- Equality. Two hashtables are equal if all contents of first are
+        //- Equality. Two hash tables are equal if all contents of first are
         //  also in second and vice versa. So does not depend on table size or
         //  order!
         bool operator==(const HashTable<T, Key, Hash>&) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -75,26 +76,54 @@ int main(int argc, char *argv[])
             }
 
             // Give patch area
-            Info<< "    Patch area = " << gSum(mesh.Sf().boundaryField()[patchi]) << endl;
-
-            if (fieldHeader.headerClassName() == "volScalarField")
+            if (isType<cyclicPolyPatch>(mesh.boundaryMesh()[patchi]))
             {
-                Info<< "    Reading volScalarField " << fieldName << endl;
-                volScalarField field(fieldHeader, mesh);
+                Info<< "    Cyclic patch area: " << nl;
+                label nFaces = mesh.boundaryMesh()[patchi].size();
+                vector sum1 = vector::zero;
+                vector sum2 = vector::zero;
+                for (label i=0; i<nFaces/2; i++)
+                {
+                    sum1 += mesh.Sf().boundaryField()[patchi][i];
+                    sum2 += mesh.Sf().boundaryField()[patchi][i+nFaces/2];
+                }
+                reduce(sum1, sumOp<vector>());
+                reduce(sum2, sumOp<vector>());
+                Info<< "    - half 1 = " << sum1 << ", " << mag(sum1) << nl
+                    << "    - half 2 = " << sum2 << ", " << mag(sum2) << nl
+                    << "    - total  = " << (sum1 + sum2) << ", "
+                    << mag(sum1 + sum2) << endl;;
+            }
+            else
+            {
+                Info<< "    Patch area = "
+                    << gSum(mesh.Sf().boundaryField()[patchi]) << endl;
+            }
 
+            // Read field and calc integral
+            if (fieldHeader.headerClassName() == volScalarField::typeName)
+            {
+                Info<< "    Reading " << volScalarField::typeName << " "
+                    << fieldName << endl;
+
+                volScalarField field(fieldHeader, mesh);
                 vector sumField = gSum
                 (
                     mesh.Sf().boundaryField()[patchi]
-                  * field.boundaryField()[patchi]
+                   *field.boundaryField()[patchi]
                 );
 
                 Info<< "    Integral of " << fieldName << " over patch "
                     << patchName << '[' << patchi << ']' << " = "
                     << sumField << nl;
             }
-            else if (fieldHeader.headerClassName() == "surfaceScalarField")
+            else if
+            (
+                fieldHeader.headerClassName() == surfaceScalarField::typeName
+            )
             {
-                Info<< "    Reading surfaceScalarField " << fieldName << endl;
+                Info<< "    Reading " << surfaceScalarField::typeName << " "
+                    << fieldName << endl;
 
                 surfaceScalarField field(fieldHeader, mesh);
                 scalar sumField = gSum(field.boundaryField()[patchi]);
@@ -106,8 +135,10 @@ int main(int argc, char *argv[])
             else
             {
                 FatalError
-                    << "Only possible to integrate volScalarFields "
-                    << "and surfaceScalarFields" << nl << exit(FatalError);
+                    << "Only possible to integrate "
+                    << volScalarField::typeName << "s "
+                    << "and " << surfaceScalarField::typeName << "s"
+                    << nl << exit(FatalError);
             }
         }
         else

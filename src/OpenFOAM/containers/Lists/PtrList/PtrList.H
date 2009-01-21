@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,7 @@ public:
         PtrList(const PtrList<T>&, const CloneArg&);
 
         //- Construct by transferring the parameter contents
-        PtrList(const xfer<PtrList<T> >&);
+        PtrList(const Xfer<PtrList<T> >&);
 
         //- Construct as copy or re-use as specified.
         PtrList(PtrList<T>&, bool reUse);
@@ -158,6 +158,9 @@ public:
             //- Return the number of elements in the PtrList
             inline label size() const;
 
+            //- Return true if the PtrList is empty (i.e., if size() == 0).
+            inline bool empty() const;
+
 
         // Edit
 
@@ -174,6 +177,9 @@ public:
             //- Transfer the contents of the argument PtrList into this PtrList
             //  and annull the argument list.
             void transfer(PtrList<T>&);
+
+            //- Transfer contents to the Xfer container
+            inline Xfer<PtrList<T> > xfer();
 
             //- Is element set
             inline bool set(const label) const;

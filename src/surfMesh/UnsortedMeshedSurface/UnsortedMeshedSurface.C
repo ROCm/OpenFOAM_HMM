@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -161,10 +161,10 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface()
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
-    const xfer<List<label> >& regionIds,
-    const xfer<surfPatchIdentifierList>& patchLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<List<label> >& regionIds,
+    const Xfer<surfPatchIdentifierList>& patchLst
 )
 :
     ParentType(pointLst, faceLst),
@@ -176,8 +176,8 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
     const UList<label>& patchSizes,
     const UList<word>& patchNames
 )
@@ -274,7 +274,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const xfer<UnsortedMeshedSurface<Face> >& surf
+    const Xfer<UnsortedMeshedSurface<Face> >& surf
 )
 {
     transfer(surf());
@@ -284,7 +284,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const xfer<MeshedSurface<Face> >& surf
+    const Xfer<MeshedSurface<Face> >& surf
 )
 {
     transfer(surf());
@@ -307,13 +307,13 @@ void Foam::UnsortedMeshedSurface<Face>::onePatch(const word& name)
     regions_ = 0;
 
     word patchName(name);
-    if (!patchName.size())
+    if (patchName.empty())
     {
-        if (patches_.size() >= 1)
+        if (patches_.size())
         {
             patchName = patches_[0].name();
         }
-        if (!patchName.size())
+        if (patchName.empty())
         {
             patchName = "patch0";
         }
@@ -404,7 +404,7 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
     // re-assign the region Ids
     if (&faceMap && faceMap.size())
     {
-        if (patches_.size() == 0)
+        if (patches_.empty())
         {
             onePatch();
         }
@@ -532,9 +532,9 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::reset
 (
-    const xfer<pointField>& pointLst,
-    const xfer<List<Face> >& faceLst,
-    const xfer<List<label> >& regionIds
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<List<label> >& regionIds
 )
 {
     ParentType::reset(pointLst, faceLst);

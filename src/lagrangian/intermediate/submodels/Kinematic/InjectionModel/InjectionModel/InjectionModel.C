@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,109 +25,22 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "InjectionModel.H"
+#include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectionModel<CloudType>::InjectionModel
-(
-    const dictionary& dict,
-    CloudType& owner,
-    const word& type
-)
-:   dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    SOI_(readScalar(coeffDict_.lookup("SOI"))),
-    volumeTotal_(0.0),
-    timeStep0_(0.0),
-    nParcels_(0),
-    volume_(0.0)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectionModel<CloudType>::~InjectionModel()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-const CloudType& Foam::InjectionModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-CloudType& Foam::InjectionModel<CloudType>::owner()
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::InjectionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::InjectionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::InjectionModel<CloudType>::timeStart() const
-{
-    return SOI_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::InjectionModel<CloudType>::volumeTotal() const
-{
-    return volumeTotal_;
-}
-
-
-template<class CloudType>
-Foam::label Foam::InjectionModel<CloudType>::nParcels() const
-{
-    return nParcels_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::InjectionModel<CloudType>::volume() const
-{
-    return volume_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::InjectionModel<CloudType>::volumeFraction() const
-{
-    return volume_/volumeTotal_;
-}
-
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 (
     const scalar time0,
-    const scalar time1
+    const scalar time1,
+    label& nParcels,
+    scalar& volume
 )
 {
     // Initialise values
-    nParcels_ = 0;
-    volume_ = 0.0;
+    nParcels = 0;
+    volume = 0.0;
 
     // Return if not started injection event
     if (time1 < SOI_)
@@ -141,13 +54,13 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
     scalar t1 = time1 - SOI_;
 
     // Number of parcels to inject
-    nParcels_ = nParcelsToInject(t0, t1);
+    nParcels = nParcelsToInject(t0, t1);
 
     // Volume of parcels to inject
-    volume_ = volumeToInject(t0, t1);
+    volume = volumeToInject(t0, t1);
 
     // Hold previous time if no parcels, but non-zero volume fraction
-    if ((nParcels_ == 0) && (volume_ > 0.0))
+    if ((nParcels == 0) && (volume > 0.0))
     {
         // hold value of timeStep0_
     }
@@ -207,6 +120,203 @@ void Foam::InjectionModel<CloudType>::findInjectorCellAndPosition
          << "Parcel position = " << p0 << nl
          << abort(FatalError);
     }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
+(
+    const label nParcels,
+    const scalar diameter,
+    const scalar volumeFraction,
+    const scalar rho,
+    const scalar volume
+)
+{
+    scalar nP = 0.0;
+    switch (parcelBasis_)
+    {
+        case pbMass:
+        {
+            nP = volumeFraction*massTotal_/nParcels
+               /(rho*mathematicalConstant::pi/6.0*pow3(diameter));
+            break;
+        }
+        case pbNumber:
+        {
+            nP = volumeFraction*massTotal_/(rho*volume);
+            break;
+        }
+        default:
+        {
+            nP = 0.0;
+            FatalErrorIn
+            (
+                "void Foam::InjectionModel<CloudType>::setNumberOfParticles"
+                "(const label, const scalar, const scalar, const scalar, "
+                "const scalar)"
+            )<< "Unknown parcelBasis type" << nl
+             << exit(FatalError);
+        }
+    }
+
+    return nP;
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::postInjectCheck()
+{
+    if (nParcelsAdded_ > 0)
+    {
+        Pout<< "\n--> Cloud: " << owner_.name() << nl
+            << "    Added " << nParcelsAdded_
+            <<  " new parcels" << nl << endl;
+    }
+
+    // Increment total number of parcels added
+    nParcelsAddedTotal_ += nParcelsAdded_;
+
+    // Reset parcel counters
+    nParcelsAdded_ = 0;
+
+    // Update time for start of next injection
+    time0_ = owner_.db().time().value();
+
+    // Increment number of injections
+    nInjections_++;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::InjectionModel<CloudType>::InjectionModel
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const word& type
+)
+:   dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs")),
+    SOI_(readScalar(coeffDict_.lookup("SOI"))),
+    volumeTotal_(0.0),
+    massTotal_(dimensionedScalar(coeffDict_.lookup("massTotal")).value()),
+    massInjected_(0.0),
+    nInjections_(0),
+    nParcelsAdded_(0),
+    nParcelsAddedTotal_(0),
+    parcelBasisType_(coeffDict_.lookup("parcelBasisType")),
+    parcelBasis_(pbNumber),
+    time0_(owner.db().time().value()),
+    timeStep0_(0.0)
+{
+    if (parcelBasisType_ == "mass")
+    {
+        parcelBasis_ = pbMass;
+    }
+    else if (parcelBasisType_ == "number")
+    {
+        parcelBasis_ = pbNumber;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "Foam::InjectionModel<CloudType>::InjectionModel"
+            "(const dictionary&, CloudType&, const word&)"
+        )<< "parcelBasisType must be either 'number' or 'mass'" << nl
+         << exit(FatalError);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::InjectionModel<CloudType>::~InjectionModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+template<class TrackData>
+void Foam::InjectionModel<CloudType>::inject(TrackData& td)
+{
+    const scalar time = owner_.db().time().value();
+    const scalar continuousDt = owner_.db().time().deltaT().value();
+
+    // Prepare for next time step
+    nParcelsAdded_ = 0;
+    label nParcels = 0;
+    scalar volume = 0.0;
+    prepareForNextTimeStep(time0_, time, nParcels, volume);
+
+    // Return if no parcels are required
+    if (nParcels == 0)
+    {
+        postInjectCheck();
+        return;
+    }
+
+    // Particle density given by constant properties
+    const scalar rho = td.constProps().rho0();
+
+    // Volume fraction to introduce during this timestep
+    const scalar volFraction = volumeFraction(volume);
+
+    // Duration of injection period during this timestep
+    const scalar deltaT = min
+    (
+        continuousDt,
+        min(time - SOI_, timeEnd() - time0_)
+    );
+
+    // Pad injection time if injection starts during this timestep
+    const scalar padTime = max(0.0, SOI_ - time0_);
+
+    // Introduce new parcels linearly with time
+    for (label iParcel=0; iParcel<nParcels; iParcel++)
+    {
+        // Calculate the pseudo time of injection for parcel 'iParcel'
+        scalar timeInj = time0_ + padTime + deltaT*iParcel/nParcels;
+
+        // Determine injected parcel properties
+        vector pos = position(iParcel, timeInj, owner_.meshInfo());
+
+        // Diameter of parcels
+        scalar d = d0(iParcel, timeInj);
+
+        // Number of particles per parcel
+        scalar nP = setNumberOfParticles
+        (
+            nParcels,
+            d,
+            volFraction,
+            rho,
+            volume
+        );
+
+        // Velocity of parcels
+        vector U = velocity(iParcel, timeInj, owner_.meshInfo());
+
+        // Determine the injection cell
+        label cellI = -1;
+        findInjectorCellAndPosition(cellI, pos);
+
+        if (cellI >= 0)
+        {
+            scalar dt = time - timeInj;
+            td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
+
+            massInjected_ += nP*rho*mathematicalConstant::pi*pow3(d)/6.0;
+            nParcelsAdded_++;
+        }
+    }
+
+    postInjectCheck();
 }
 
 

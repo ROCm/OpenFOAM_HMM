@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -220,12 +220,12 @@ Foam::label Foam::metisDecomp::decompose
     int* vwgtPtr = NULL;
     int* adjwgtPtr = NULL;
 
-    if (cellWeights.size() > 0)
+    if (cellWeights.size())
     {
         vwgtPtr = cellWeights.begin();
         wgtFlag += 2;       // Weights on vertices
     }
-    if (faceWeights.size() > 0)
+    if (faceWeights.size())
     {
         adjwgtPtr = faceWeights.begin();
         wgtFlag += 1;       // Weights on edges

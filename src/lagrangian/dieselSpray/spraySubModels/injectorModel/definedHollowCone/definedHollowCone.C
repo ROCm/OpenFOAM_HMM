@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,7 @@ definedHollowConeInjector::definedHollowConeInjector
     }
  
     // check number of entries in innerConeAngle list
-    if (innerConeAngle_.size() < 1)
+    if (innerConeAngle_.empty())
     {
         FatalError << "definedHollowConeInjector::definedHollowConeInjector"
              << "(const dictionary& dict, spray& sm)\n"
@@ -99,7 +99,7 @@ definedHollowConeInjector::definedHollowConeInjector
     }
 
     // check number of entries in outerConeAngle list
-    if (outerConeAngle_.size() < 1)
+    if (outerConeAngle_.empty())
     {
         FatalError << "definedHollowConeInjector::definedHollowConeInjector"
              << "(const dictionary& dict, spray& sm)\n"

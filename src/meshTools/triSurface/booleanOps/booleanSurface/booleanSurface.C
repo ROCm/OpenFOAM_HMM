@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -637,7 +637,7 @@ Foam::booleanSurface::booleanSurface
             combinedPoints[combinedPointI++] = subSurf2.points()[pointI];
         }
     }
-    
+
 
     //
     // patches
@@ -895,7 +895,7 @@ Foam::booleanSurface::booleanSurface
             }
             else
             {
-                // Is intersection. 
+                // Is intersection.
                 combinedTri[fp] =
                     tri[fp]
                   - cutSurf2.nSurfacePoints()
@@ -905,7 +905,7 @@ Foam::booleanSurface::booleanSurface
         combinedTri.region() = patchMap2[tri.region()];
     }
 
-  
+
     // Now we have surface in combinedFaces and combinedPoints. Use
     // booleanOp to determine which part of what to keep.
 
@@ -931,7 +931,7 @@ Foam::booleanSurface::booleanSurface
     if (booleanOp == booleanSurface::ALL)
     {
         // Special case: leave surface multiply connected
-        
+
         faceMap_.setSize(combinedSurf.size());
 
         label combinedFaceI = 0;
@@ -952,11 +952,7 @@ Foam::booleanSurface::booleanSurface
 
 
     // Get outside point.
-
-    treeBoundBox bb(combinedSurf.localPoints());
-
-    point outsidePoint = 2 * bb.max() - bb.min();
-
+    point outsidePoint = 2 * treeBoundBox(combinedSurf.localPoints()).span();
 
     //
     // Linear search for nearest point on surface.
@@ -978,7 +974,7 @@ Foam::booleanSurface::booleanSurface
                 pts[f[1]],
                 pts[f[2]]
             ).nearestPoint(outsidePoint);
-    
+
         if (curHit.distance() < minHit.distance())
         {
             minHit = curHit;

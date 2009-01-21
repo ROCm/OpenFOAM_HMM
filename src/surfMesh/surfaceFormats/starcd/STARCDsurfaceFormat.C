@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -212,12 +212,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
     mapPointId.clear();
 
-    sortFacesAndStore
-    (
-        xferMoveTo<List<Face> >(dynFaces),
-        xferMoveTo<List<label> >(dynRegions),
-        sorted
-    );
+    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
 
     // add patches, culling empty groups
     this->addPatches(dynSizes, dynNames, true);

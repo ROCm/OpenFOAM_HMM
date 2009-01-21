@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,13 +116,6 @@ class ThermoCloud
         void operator=(const ThermoCloud&);
 
 
-protected:
-
-    //- Inject more parcels
-    template<class TrackingData>
-    void inject(TrackingData& td);
-
-
 public:
 
     //- Runtime type information
@@ -173,7 +166,7 @@ public:
 
             // Modelling options
 
-                //- Radiation flag
+                 //- Radiation flag
                 inline bool radiation() const;
 
 
@@ -207,6 +200,17 @@ public:
 
 
         // Cloud evolution functions
+
+            //- Add new parcel
+            void addNewParcel
+            (
+                const vector& position,
+                const label cellId,
+                const scalar d,
+                const vector& U,
+                const scalar nParticles,
+                const scalar lagrangianDt
+            );
 
             //- Reset the spray source terms
             void resetSourceTerms();

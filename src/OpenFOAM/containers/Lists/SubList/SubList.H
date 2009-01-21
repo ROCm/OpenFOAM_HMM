@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,14 +61,14 @@ public:
 
     // Constructors
 
-        //- Construct from UList and SubList size
+        //- Construct from UList and sub-list size
         inline SubList
         (
             const UList<T>& list,
             const label subSize
         );
 
-        //- Construct from UList, start and end indices
+        //- Construct from UList, sub-list size and start index
         inline SubList
         (
             const UList<T>& list,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 
 
 template<int nBits>
-Foam::PackedList<nBits>::PackedList(const xfer<PackedList<nBits> >& lst)
+Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
 {
     transfer(lst());
 }
@@ -101,7 +101,6 @@ void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Assignment.
 template<int nBits>
 void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {

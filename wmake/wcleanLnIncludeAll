@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -40,6 +40,7 @@ then
     echo "Usage: ${0##*/} [dir1] .. [dirN]"
     echo
     echo "    Delete all the lnInclude directories in the tree"
+    echo
     exit 1
 fi
 

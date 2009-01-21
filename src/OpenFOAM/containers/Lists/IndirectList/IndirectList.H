@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,8 @@ public:
         // Access
 
             inline label size() const;
+            inline bool  empty() const;
+
             inline const UList<T>& completeList() const;
             inline const List<label>& addressing() const;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -170,7 +170,7 @@ void Foam::shellSurfaces::orient()
         {
             const triSurfaceMesh& shell = refCast<const triSurfaceMesh>(s);
 
-            if (shell.triSurface::size() > 0)
+            if (shell.triSurface::size())
             {
                 const pointField& points = shell.points();
 
@@ -193,7 +193,7 @@ void Foam::shellSurfaces::orient()
 
     if (hasSurface)
     {
-        const point outsidePt(2*overallBb.max() - overallBb.min());
+        const point outsidePt = 2 * overallBb.span();
 
         //Info<< "Using point " << outsidePt << " to orient shells" << endl;
 

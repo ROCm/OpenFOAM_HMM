@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -251,7 +251,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
             }
         }
 
-        if (pointsToEdge.size() > 0)
+        if (pointsToEdge.size())
         {
             FatalErrorIn("polyBoundaryMesh::neighbourEdges() const")
                 << "Not all boundary edges of patches match up." << nl
@@ -425,7 +425,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
         // of all patch names for matches
         labelList patchIDs = findStrings(patchNames[i], allPatchNames);
 
-        if (patchIDs.size() == 0)
+        if (patchIDs.empty())
         {
             WarningIn("polyBoundaryMesh::patchSet(const wordList&)")
                 << "Cannot find any patch names matching " << patchNames[i]

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1060,7 +1060,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 forAll(fzNames, surfI)
                 {
-                    if (fzNames[surfI].size() > 0)
+                    if (fzNames[surfI].size())
                     {
                         // Get zone
                         label zoneI = fZones.findZoneID(fzNames[surfI]);
@@ -1713,7 +1713,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     labelList exposedFaces(cellRemover.getExposedFaces(cellsToRemove));
 
-    if (exposedFaces.size() > 0)
+    if (exposedFaces.size())
     {
         FatalErrorIn
         (
@@ -2148,7 +2148,7 @@ void Foam::meshRefinement::write
     {
         dumpRefinementLevel();
     }
-    if (flag&OBJINTERSECTIONS && prefix.size()>0)
+    if (flag & OBJINTERSECTIONS && prefix.size())
     {
         dumpIntersections(prefix);
     }

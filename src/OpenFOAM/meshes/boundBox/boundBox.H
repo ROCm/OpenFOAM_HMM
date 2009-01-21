@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,12 +43,13 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class boundBox;
+template<class T> class tmp;
 
 Ostream& operator<<(Ostream& os, const boundBox& b);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class boundBox Declaration
+                          Class boundBox Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundBox
@@ -58,10 +59,18 @@ class boundBox
         //- Minimum and maximum describing the bounding box
         point min_, max_;
 
+    // Private Member Functions
+
+        //- Calculate the bounding box from the given pointField.
+        //  Does parallel communication (doReduce = true)
+        void calculate(const pointField&, const bool doReduce = true);
 
 public:
 
     // Static data members
+
+        //- The great value used for greatBox and invertedBox
+        static const scalar great;
 
         //- A very large boundBox: min/max == -/+ VGREAT
         static const boundBox greatBox;
@@ -88,7 +97,11 @@ public:
 
         //- Construct as the bounding box of the given pointField.
         //  Does parallel communication (doReduce = true)
-        boundBox(const pointField& points, const bool doReduce = true);
+        boundBox(const pointField&, const bool doReduce = true);
+
+        //- Construct as the bounding box of the given temporary pointField.
+        //  Does parallel communication (doReduce = true)
+        boundBox(const tmp<pointField>&, const bool doReduce = true);
 
         //- Construct from Istream
         boundBox(Istream&);
@@ -98,53 +111,99 @@ public:
 
         // Access
 
+            //- Minimum describing the bounding box
             const point& min() const
             {
                 return min_;
             }
 
+            //- Maximum describing the bounding box
             const point& max() const
             {
                 return max_;
             }
 
+            //- Minimum describing the bounding box, non-const access
             point& min()
             {
                 return min_;
             }
 
+            //- Maximum describing the bounding box, non-const access
             point& max()
             {
                 return max_;
             }
 
+            //- The midpoint of the bounding box
+            point midpoint() const
+            {
+                return 0.5 * (max_ + min_);
+            }
+
+            //- The bounding box span (from minimum to maximum)
+            vector span() const
+            {
+                return (max_ - min_);
+            }
+
+            //- The magnitude of the bounding box span
             scalar mag() const
             {
                 return ::Foam::mag(max_ - min_);
             }
 
+            //- Smallest length/height/width dimension
+            scalar minDim() const
+            {
+                return cmptMin(span());
+            }
+
+            //- Largest length/height/width dimension
+            scalar maxDim() const
+            {
+                return cmptMax(span());
+            }
+
+            //- Average length/height/width dimension
+            scalar avgDim() const
+            {
+                return cmptAv(span());
+            }
+
 
         // Query
 
-            //- Intersects other boundingBox?
+            //- Completely contains other boundingBox? (inside or on edge)
             bool overlaps(const boundBox& bb) const
             {
                 return
                 (
-                    min_.x() <= bb.max().x() && max_.x() >= bb.min().x()
-                 && min_.y() <= bb.max().y() && max_.y() >= bb.min().y()
-                 && min_.z() <= bb.max().z() && max_.z() >= bb.min().z()
+                    bb.max_.x() >= min_.x() && bb.min_.x() <= max_.x()
+                 && bb.max_.y() >= min_.y() && bb.min_.y() <= max_.y()
+                 && bb.max_.z() >= min_.z() && bb.min_.z() <= max_.z()
                 );
             }
 
-            //- Contains a point?
+            //- Contains point? (inside or on edge)
             bool contains(const point& pt) const
             {
                 return
                 (
-                    pt.x() >= min().x() && pt.x() <= max().x()
-                 && pt.y() >= min().y() && pt.y() <= max().y()
-                 && pt.z() >= min().z() && pt.z() <= max().z()
+                    pt.x() >= min_.x() && pt.x() <= max_.x()
+                 && pt.y() >= min_.y() && pt.y() <= max_.y()
+                 && pt.z() >= min_.z() && pt.z() <= max_.z()
+                );
+            }
+
+            //- Contains point? (inside only)
+            bool containsInside(const point& pt) const
+            {
+                return
+                (
+                    pt.x() > min_.x() && pt.x() < max_.x()
+                 && pt.y() > min_.y() && pt.y() < max_.y()
+                 && pt.z() > min_.z() && pt.z() < max_.z()
                 );
             }
 
@@ -177,6 +236,8 @@ inline bool contiguous<boundBox>() {return contiguous<point>();}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// #include "boundBoxI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

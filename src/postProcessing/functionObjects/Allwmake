@@ -2,9 +2,9 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso fieldAverage
+wmake libso field
 wmake libso forces
-wmake libso minMaxFields
+wmake libso utilities
 wmake libso systemCall
 
 # ----------------------------------------------------------------- end-of-file

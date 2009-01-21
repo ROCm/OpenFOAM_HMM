@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,9 @@ class distanceSurface
         //- zone name (if restricted to zones)
         word zoneName_;
 
+        //- Track if the surface needs an update
+        mutable bool needsUpdate_;
+
 
         //- Distance to cell centres
         autoPtr<volScalarField> cellDistancePtr_;
@@ -127,6 +130,18 @@ public:
 
     // Member Functions
 
+        //- Does the surface need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surface as needing an update.
+        //  May also free up unneeded data.
+        //  Return false if surface was already marked as expired.
+        virtual bool expire();
+
+        //- Update the surface as required.
+        //  Do nothing (and return false) if no update was needed
+        virtual bool update();
+
         //- Points of surface
         virtual const pointField& points() const
         {
@@ -136,7 +151,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            if (!facesPtr_.valid())
+            if (facesPtr_.empty())
             {
                 const triSurface& s = surface();
 
@@ -150,9 +165,6 @@ public:
             return facesPtr_;
         }
 
-
-        //- Correct for mesh movement and/or field changes
-        virtual void correct(const bool meshChanged);
 
         const isoSurface& surface() const
         {

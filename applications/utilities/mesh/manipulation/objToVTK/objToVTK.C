@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ string getLine(std::ifstream& is)
     {
         std::getline(is, line);
     }
-    while((line.size() > 0) && (line[0] == '#'));
+    while (line.size() && line[0] == '#');
 
     return line;
 }
@@ -60,13 +60,13 @@ labelList parseVertices(const string& line)
     DynamicList<label> verts;
 
     // Assume 'l' is followed by space.
-    label endNum = 1;
+    string::size_type endNum = 1;
 
     do
     {
-        label startNum = line.find_first_not_of(' ', endNum);
+        string::size_type startNum = line.find_first_not_of(' ', endNum);
 
-        if (startNum == label(string::npos))
+        if (startNum == string::npos)
         {
             break;
         }
@@ -74,7 +74,7 @@ labelList parseVertices(const string& line)
         endNum = line.find(' ', startNum);
 
         string vertexSpec;
-        if (endNum != label(string::npos))
+        if (endNum != string::npos)
         {
             vertexSpec = line.substr(startNum, endNum-startNum);
         }
@@ -83,10 +83,10 @@ labelList parseVertices(const string& line)
             vertexSpec = line.substr(startNum, line.size() - startNum);
         }
 
-        label slashPos = vertexSpec.find('/');
+        string::size_type slashPos = vertexSpec.find('/');
 
         label vertI = 0;
-        if (slashPos != label(string::npos))
+        if (slashPos != string::npos)
         {
             IStringStream intStream(vertexSpec.substr(0, slashPos));
 

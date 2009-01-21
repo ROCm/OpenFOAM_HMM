@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,16 +28,14 @@ License
 #include "Istream.H"
 #include "Ostream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from Istream
 template<class T, class Key, class Hash>
-StaticHashTable<T, Key, Hash>::StaticHashTable(Istream& is, const label size)
+Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
+(
+    Istream& is, 
+    const label size
+)
 :
     StaticHashTableName(),
     keys_(size),
@@ -62,20 +60,20 @@ StaticHashTable<T, Key, Hash>::StaticHashTable(Istream& is, const label size)
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
+Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
 {
     is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
 
     // Anull list
     L.clear();
 
-    is.fatalCheck("operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)");
+    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
 
     token firstToken(is);
 
     is.fatalCheck
     (
-        "operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L) : "
+        "operator>>(Istream&, StaticHashTable<T, Key, Hash>&) : "
         "reading first token"
     );
 
@@ -112,7 +110,7 @@ Istream& operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
             {
                 FatalIOErrorIn
                 (
-                    "operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)",
+                    "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)",
                     is
                 )   << "incorrect first token, '(', found " << firstToken.info()
                     << exit(FatalIOError);
@@ -128,7 +126,7 @@ Istream& operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
         {
             FatalIOErrorIn
             (
-                "operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)",
+                "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)",
                 is
             )   << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
@@ -163,7 +161,7 @@ Istream& operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
     {
         FatalIOErrorIn
         (
-            "operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)",
+            "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)",
             is
         )   << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
@@ -177,15 +175,15 @@ Istream& operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
 
 
 template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const StaticHashTable<T, Key, Hash>& L)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const StaticHashTable<T, Key, Hash>& L)
 {
-    // Write size of StaticHashTable
-    os << nl << L.size();
+    // Write size and start delimiter
+    os << nl << L.size() << nl << token::BEGIN_LIST << nl;
 
-    // Write beginning of contents
-    os << nl << token::BEGIN_LIST << nl;
-
-    // Write StaticHashTable contents
+    // Write contents
     for
     (
         typename StaticHashTable<T, Key, Hash>::const_iterator iter = L.begin();
@@ -196,7 +194,7 @@ Ostream& operator<<(Ostream& os, const StaticHashTable<T, Key, Hash>& L)
         os << iter.key() << token::SPACE << iter() << nl;
     }
 
-    // Write end of contents
+    // Write end delimiter
     os << token::END_LIST;
 
     // Check state of IOstream
@@ -205,9 +203,5 @@ Ostream& operator<<(Ostream& os, const StaticHashTable<T, Key, Hash>& L)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

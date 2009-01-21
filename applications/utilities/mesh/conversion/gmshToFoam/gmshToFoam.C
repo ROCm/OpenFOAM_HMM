@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -667,7 +667,7 @@ void readCells
 
         const labelList& zCells = zoneCells[zoneI];
 
-        if (zCells.size() > 0)
+        if (zCells.size())
         {
             Info<< "    " << zoneI << '\t' << zCells.size() << endl;
         }
@@ -778,7 +778,7 @@ int main(int argc, char *argv[])
 
     forAll(zoneCells, zoneI)
     {
-        if (zoneCells[zoneI].size() > 0)
+        if (zoneCells[zoneI].size())
         {
             nValidCellZones++;
         }
@@ -910,7 +910,7 @@ int main(int argc, char *argv[])
 
         const labelList& zFaces = zoneFaces[zoneI];
 
-        if (zFaces.size() > 0)
+        if (zFaces.size())
         {
             nValidFaceZones++;
 
@@ -940,7 +940,7 @@ int main(int argc, char *argv[])
 
         forAll(zoneCells, zoneI)
         {
-            if (zoneCells[zoneI].size() > 0)
+            if (zoneCells[zoneI].size())
             {
                 label physReg = zoneToPhys[zoneI];
 
@@ -979,7 +979,7 @@ int main(int argc, char *argv[])
 
         forAll(zoneFaces, zoneI)
         {
-            if (zoneFaces[zoneI].size() > 0)
+            if (zoneFaces[zoneI].size())
             {
                 label physReg = zoneToPhys[zoneI];
 
@@ -1011,7 +1011,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (cz.size() > 0 || fz.size() > 0)
+    if (cz.size() || fz.size())
     {
         mesh.addZones(List<pointZone*>(0), fz, cz);
     }

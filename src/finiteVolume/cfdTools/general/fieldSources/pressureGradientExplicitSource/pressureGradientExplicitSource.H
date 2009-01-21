@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,10 +73,10 @@ class pressureGradientExplicitSource
         vector Ubar_;
 
         //- Initial pressure gradient
-        scalar gradPini_;
+        dimensionedScalar gradPini_;
 
         //- Pressure gradient
-        scalar gradP_;
+        dimensionedScalar gradP_;
 
         //- Flow direction
         vector flowDir_;

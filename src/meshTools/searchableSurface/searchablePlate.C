@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -218,7 +218,16 @@ Foam::searchablePlate::searchablePlate
     origin_(origin),
     span_(span),
     normalDir_(calcNormal(span_))
-{}
+{
+    if (debug)
+    {
+        Info<< "searchablePlate::searchablePlate :"
+            << " origin:" << origin_
+            << " origin+span:" << origin_+span_
+            << " normal:" << vector::componentNames[normalDir_]
+            << endl;
+    }
+}
 
 
 Foam::searchablePlate::searchablePlate
@@ -231,7 +240,16 @@ Foam::searchablePlate::searchablePlate
     origin_(dict.lookup("origin")),
     span_(dict.lookup("span")),
     normalDir_(calcNormal(span_))
-{}
+{
+    if (debug)
+    {
+        Info<< "searchablePlate::searchablePlate :"
+            << " origin:" << origin_
+            << " origin+span:" << origin_+span_
+            << " normal:" << vector::componentNames[normalDir_]
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -244,7 +262,7 @@ Foam::searchablePlate::~searchablePlate()
 
 const Foam::wordList& Foam::searchablePlate::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(1);
         regions_[0] = "region0";

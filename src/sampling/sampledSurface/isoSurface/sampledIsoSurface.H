@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,8 +79,8 @@ class sampledIsoSurface
 
         // Recreated for every isoSurface
 
-            //- Time at last call
-            mutable label storedTimeIndex_;
+            //- Time at last call, also track it surface needs an update
+            mutable label prevTimeIndex_;
 
             //- Cached volfield
             mutable autoPtr<volScalarField> storedVolFieldPtr_;
@@ -98,7 +98,8 @@ class sampledIsoSurface
         void getIsoFields() const;
 
         //- Create iso surface (if time has changed)
-        void createGeometry() const;
+        //  Do nothing (and return false) if no update was needed
+        bool updateGeometry() const;
 
         //- sample field on faces
         template <class Type>
@@ -137,6 +138,19 @@ public:
 
     // Member Functions
 
+        //- Does the surface need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surface as needing an update.
+        //  May also free up unneeded data.
+        //  Return false if surface was already marked as expired.
+        virtual bool expire();
+
+        //- Update the surface as required.
+        //  Do nothing (and return false) if no update was needed
+        virtual bool update();
+
+
         //- Points of surface
         virtual const pointField& points() const
         {
@@ -146,7 +160,7 @@ public:
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            if (!facesPtr_.valid())
+            if (facesPtr_.empty())
             {
                 const triSurface& s = surface();
 
@@ -159,9 +173,6 @@ public:
             }
             return facesPtr_;
         }
-
-        //- Correct for mesh movement and/or field changes
-        virtual void correct(const bool meshChanged);
 
 
         const isoSurface& surface() const

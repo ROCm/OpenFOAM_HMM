@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,7 @@ SourceFiles
 #include "dictionary.H"
 #include "labelList.H"
 #include "wordList.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,6 +110,9 @@ public:
 
         //- Return a Map of (id => name)
         Map<word> names() const;
+
+        //- Return a Map of (id => names) selected by patterns
+        Map<word> names(const List<wordRe>& patterns) const;
 
         //- Return a Map of (id => type)
         Map<word> boundaryTypes() const;

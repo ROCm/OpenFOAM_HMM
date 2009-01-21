@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,11 @@ License
 #include "edgeMesh.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // construct from file
-edgeMesh::edgeMesh(const fileName& fname)
+Foam::edgeMesh::edgeMesh(const fileName& fname)
 :
     points_(0),
     edges_(0),
@@ -57,7 +53,7 @@ edgeMesh::edgeMesh(const fileName& fname)
 
 
 // construct from Istream
-edgeMesh::edgeMesh(Istream& is)
+Foam::edgeMesh::edgeMesh(Istream& is)
 :
     points_(is),
     edges_(is),
@@ -70,7 +66,7 @@ edgeMesh::edgeMesh(Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const edgeMesh& em)
+Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
 {
     os  << em.points_ << nl << em.edges_ << endl;
 
@@ -81,7 +77,7 @@ Ostream& operator<<(Ostream& os, const edgeMesh& em)
 }
 
 
-Istream& operator>>(Istream& is, edgeMesh& em)
+Foam::Istream& Foam::operator>>(Istream& is, edgeMesh& em)
 {
     is >> em.points_ >> em.edges_;
 
@@ -91,9 +87,5 @@ Istream& operator>>(Istream& is, edgeMesh& em)
     return is;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

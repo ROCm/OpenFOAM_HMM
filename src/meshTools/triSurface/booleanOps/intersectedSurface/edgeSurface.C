@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -181,7 +181,7 @@ Foam::edgeSurface::edgeSurface
         // Store current top of allEdges.
         label freeNewEdgeI = allEdges.size();
 
-        if (extraVerts.size() == 0)
+        if (extraVerts.empty())
         {
             // No cuts across this edge. Note that vertices do not need to be
             // renumbered.

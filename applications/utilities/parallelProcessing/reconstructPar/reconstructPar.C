@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         args
     );
 
-    if (!timeDirs.size())
+    if (timeDirs.empty())
     {
         FatalErrorIn(args.executable())
             << "No times selected"
@@ -113,19 +113,9 @@ int main(int argc, char *argv[])
     {
         regionPrefix = regionName;
     }
-
-
-    // Set all times (on reconstructed mesh and on processor meshes)
-    runTime.setTime(timeDirs[0], 0);
-    mesh.readUpdate();
-
-    forAll (databases, procI)
-    {
-        databases[procI].setTime(timeDirs[0], 0);
-    }
-
     // Read all meshes and addressing to reconstructed mesh
     processorMeshes procMeshes(databases, regionName);
+
 
     // check face addressing for meshes that have been decomposed
     // with a very old foam version
@@ -319,7 +309,7 @@ int main(int argc, char *argv[])
         }
 
 
-        if (cloudObjects.size() > 0)
+        if (cloudObjects.size())
         {
             // Pass2: reconstruct the cloud
             forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)

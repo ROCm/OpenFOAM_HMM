@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,9 +129,20 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
     {
         Info<< "solidWallMixedTemperatureCoupledFvPatchScalarField::"
             << "updateCoeffs() :"
+            << " patch:" << patch().name()
             << " walltemperature "
-            << " min:" << gMin(*this)
-            << " max:" << gMax(*this)
+            << " min:"
+            <<  returnReduce
+                (
+                    (this->size() > 0 ? min(*this) : VGREAT),
+                    minOp<scalar>()
+                )
+            << " max:"
+            <<  returnReduce
+                (
+                    (this->size() > 0 ? max(*this) : -VGREAT),
+                    maxOp<scalar>()
+                )
             << " avg:" << gAverage(*this)
             << endl;
     }
@@ -163,7 +174,9 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
         label nTotSize = returnReduce(this->size(), sumOp<label>());
 
         Info<< "solidWallMixedTemperatureCoupledFvPatchScalarField::"
-            << "updateCoeffs() : Out of " << nTotSize
+            << "updateCoeffs() :"
+            << " patch:" << patch().name()
+            << " out of:" << nTotSize
             << " fixedBC:" << nFixed
             << " gradient:" << nTotSize-nFixed << endl;
     }
@@ -213,9 +226,22 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::evaluate
 
         if (debug)
         {
-            Info<< "Setting master and slave to wall temperature "
-                << " min:" << gMin(*this)
-                << " max:" << gMax(*this)
+            Info<< "solidWallMixedTemperatureCoupledFvPatchScalarField::"
+                << "updateCoeffs() :"
+                << " patch:" << patch().name()
+                << " setting master and slave to wall temperature "
+                << " min:"
+                <<  returnReduce
+                    (
+                        (this->size() > 0 ? min(*this) : VGREAT),
+                        minOp<scalar>()
+                    )
+                << " max:"
+                <<  returnReduce
+                    (
+                        (this->size() > 0 ? max(*this) : -VGREAT),
+                        maxOp<scalar>()
+                    )
                 << " avg:" << gAverage(*this)
                 << endl;
         }

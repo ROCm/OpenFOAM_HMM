@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,7 +129,7 @@ bool Foam::OPstream::write
 
 void Foam::OPstream::waitRequests()
 {
-    if (OPstream_outstandingRequests_.size() > 0)
+    if (OPstream_outstandingRequests_.size())
     {
         if
         (

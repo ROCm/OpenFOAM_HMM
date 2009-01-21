@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,11 +33,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-accumulatedTotalMomentum += singleStepTotalMomentum;
+accumulatedTotalLinearMomentum += singleStepTotalLinearMomentum;
 
 accumulatedTotalMass += singleStepTotalMass;
 
-accumulatedTotalKE += singleStepTotalKE;
+accumulatedTotalLinearKE += singleStepTotalLinearKE;
+
+accumulatedTotalAngularKE += singleStepTotalAngularKE;
 
 accumulatedTotalPE += singleStepTotalPE;
 
@@ -55,12 +57,12 @@ if (runTime.outputTime())
 
         averageTemperature =
         (
-            2.0/(3.0 * moleculeCloud::kb * accumulatedNMols)
+            2.0/(6.0 * moleculeCloud::kb * accumulatedNMols)
             *
             (
-                accumulatedTotalKE
+                accumulatedTotalLinearKE + accumulatedTotalAngularKE
                 -
-                0.5*magSqr(accumulatedTotalMomentum)/accumulatedTotalMass
+                0.5*magSqr(accumulatedTotalLinearMomentum)/accumulatedTotalMass
             )
         );
 
@@ -82,7 +84,7 @@ if (runTime.outputTime())
         Info << "----------------------------------------" << nl
             << "Averaged properties" << nl
             << "Average |velocity| = "
-                << mag(accumulatedTotalMomentum)/accumulatedTotalMass
+                << mag(accumulatedTotalLinearMomentum)/accumulatedTotalMass
                 << " m/s" << nl
             << "Average temperature = "
                 << averageTemperature << " K" << nl
@@ -98,11 +100,13 @@ if (runTime.outputTime())
 
     // reset counters
 
-    accumulatedTotalMomentum = vector::zero;
+    accumulatedTotalLinearMomentum = vector::zero;
 
     accumulatedTotalMass = 0.0;
 
-    accumulatedTotalKE = 0.0;
+    accumulatedTotalLinearKE = 0.0;
+
+    accumulatedTotalAngularKE = 0.0;
 
     accumulatedTotalPE = 0.0;
 

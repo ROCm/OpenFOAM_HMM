@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,7 +104,7 @@ public:
         CompactListList(const UList<label>& rowSizes, const T&);
 
         //- Construct by transferring the parameter contents
-        CompactListList(const xfer<CompactListList<T> >&);
+        CompactListList(const Xfer<CompactListList<T> >&);
 
         //- Construct as copy or re-use as specified.
         CompactListList(CompactListList<T>&, bool reUse);
@@ -125,6 +125,9 @@ public:
 
             //- Return the primary size, i.e. the number of rows
             inline label size() const;
+
+            //- Return true if the number of rows is zero
+            inline bool empty() const;
 
             //- Return the offset table
             inline const List<label>& offsets() const;
@@ -164,6 +167,8 @@ public:
             //  into this CompactListList and annull the argument list.
             void transfer(CompactListList<T>&);
 
+            //- Transfer the contents to the Xfer container
+            inline Xfer<CompactListList<T> > xfer();
 
         // Other
 

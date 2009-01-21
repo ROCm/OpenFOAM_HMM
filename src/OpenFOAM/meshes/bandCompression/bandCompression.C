@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ labelList bandCompression(const labelListList& cellCellAddressing)
             // neighbours. If the neighbour in question has not been visited,
             // add it to the end of the nextCell list
 
-            while (nextCell.size() > 0)
+            while (nextCell.size())
             {
                 currentCell = nextCell.removeHead();
 

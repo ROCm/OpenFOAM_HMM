@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -291,7 +291,7 @@ void Foam::surfaceIntersection::writeIntersectedEdges
     {
         const labelList& extraVerts = edgeCutVerts[edgeI];
 
-        if (extraVerts.size() != 0)
+        if (extraVerts.size())
         {
             const edge& e = surf.edges()[edgeI];
 

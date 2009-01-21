@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,11 +42,20 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     {
-        dictionary dict(IFstream("testDict")());
-        Info<< "dict: " << dict << nl
-            << "toc: " << dict.toc() << nl
-            << "keys: " << dict.keys() << nl
-            << "patterns: " << dict.keys(true) << endl;
+        dictionary dict1(IFstream("testDict")());
+        Info<< "dict1: " << dict1 << nl
+            << "toc: " << dict1.toc() << nl
+            << "keys: " << dict1.keys() << nl
+            << "patterns: " << dict1.keys(true) << endl;
+
+        dictionary dict2(dict1.xfer());
+
+        Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
+            << "dict2.toc(): " << dict2.name() << " " << dict2.toc() << endl;
+        
+        // copy back
+        dict1 = dict2;
+        Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << endl;
     }
 
 

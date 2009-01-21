@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ Foam::IOobjectList::IOobjectList
     {
         newInstance = db.time().findInstancePath(instant(instance));
 
-        if (!newInstance.size())
+        if (newInstance.empty())
         {
             return;
         }
@@ -181,7 +181,7 @@ Foam::wordList Foam::IOobjectList::names() const
 {
     wordList objectNames(size());
 
-    label count=0;
+    label count = 0;
     for
     (
         HashPtrTable<IOobject>::const_iterator iter = begin();
@@ -200,7 +200,7 @@ Foam::wordList Foam::IOobjectList::names(const word& ClassName) const
 {
     wordList objectNames(size());
 
-    label count=0;
+    label count = 0;
     for
     (
         HashPtrTable<IOobject>::const_iterator iter = begin();

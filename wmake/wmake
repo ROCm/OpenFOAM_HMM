@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -55,7 +55,7 @@ USAGE
     exit 1
 }
 
-# provide immediate help
+# provide immediate help, even if none of the environment is set
 if [ "$1" = "-h" -o "$1" = "-help" ]
 then
     usage
@@ -73,7 +73,7 @@ do
     }
 done
 
-# when compiling anything but a standalone exe,
+# when compiling anything but a standalone exe:
 # WM_PROJECT and WM_PROJECT_DIR must be set
 [ "$1" = exe -o \( "$WM_PROJECT" -a "$WM_PROJECT_DIR" \) ] || {
     echo "$Script error:" 1>&2
@@ -176,7 +176,7 @@ fi
 
 #------------------------------------------------------------------------------
 # Check the existance of the Make directory and files file
-# If both exist make the wmake derived files
+# If both exist, make the wmake derived files
 #------------------------------------------------------------------------------
 
 [ -d $MakeDir ] || {
@@ -238,7 +238,7 @@ fi
 #------------------------------------------------------------------------------
 
 cmd="$make -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/includeDeps $makeOption"
-#echo "cmd=$cmd"
+# echo "cmd=$cmd"
 exec $cmd
 
 #------------------------------------------------------------------------------

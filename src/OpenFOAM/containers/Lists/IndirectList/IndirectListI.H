@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,13 @@ template<class T>
 inline Foam::label Foam::IndirectList<T>::size() const
 {
     return addressing_.size();
+}
+
+
+template<class T>
+inline bool Foam::IndirectList<T>::empty() const
+{
+    return addressing_.empty();
 }
 
 

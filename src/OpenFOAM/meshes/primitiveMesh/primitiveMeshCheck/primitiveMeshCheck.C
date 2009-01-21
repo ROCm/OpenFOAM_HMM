@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -760,7 +760,7 @@ bool primitiveMesh::checkPoints
 
     forAll (pf, pointI)
     {
-        if (pf[pointI].size() == 0)
+        if (pf[pointI].empty())
         {
             if (setPtr)
             {
@@ -776,7 +776,7 @@ bool primitiveMesh::checkPoints
     {
         const labelList& pc = pointCells(pointI);
 
-        if (pc.size() == 0)
+        if (pc.empty())
         {
             if (setPtr)
             {

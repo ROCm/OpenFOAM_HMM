@@ -41,17 +41,10 @@
 
 
     Info<< "Creating turbulence model\n" << endl;
-    autoPtr<compressible::RASModel> turbulence
+    autoPtr<compressible::turbulenceModel> turbulence
     (
-        compressible::RASModel::New
-        (
-            rho,
-            U,
-            phi,
-            thermo()
-        )
+        compressible::turbulenceModel::New(rho, U, phi, thermo())
     );
-
 
     Info<< "Creating field DpDt\n" << endl;
     volScalarField DpDt =

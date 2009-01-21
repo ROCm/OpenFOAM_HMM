@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,6 +118,9 @@ public:
 
             //- Return number of elements in list
             inline label size() const;
+
+            //- Return true if the list is empty
+            inline bool empty() const;
 
             //- Return first entry
             inline link* first();

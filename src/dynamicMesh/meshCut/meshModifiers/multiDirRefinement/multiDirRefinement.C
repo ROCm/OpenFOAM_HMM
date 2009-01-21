@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -196,7 +196,7 @@ void Foam::multiDirRefinement::addCells
 
         labelList& added = addedCells_[masterI];
 
-        if (added.size() == 0)
+        if (added.empty())
         {
             added.setSize(2);
             added[0] = masterI;
@@ -383,7 +383,7 @@ void Foam::multiDirRefinement::refineHex8
     {
         label oldCellI = cellMap[cellI];
 
-        if (addedCells_[oldCellI].size() > 0)
+        if (addedCells_[oldCellI].size())
         {
             addedCells_[oldCellI][nAddedCells[oldCellI]++] = cellI;
         }

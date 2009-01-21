@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,9 +89,9 @@ bool triSurface::readSTLBINARY(const fileName& STLfileName)
     // If the comparison is not sensible then it maybe an ASCII file
     if (!compressed)
     {
-        label triDataSize = Foam::size(STLfileName) - 80;
+        label dataFileSize = Foam::fileSize(STLfileName) - 80;
 
-        if (nTris < triDataSize/50 || nTris > triDataSize/25)
+        if (nTris < dataFileSize/50 || nTris > dataFileSize/25)
         {
             return false;
         }

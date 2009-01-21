@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Class
     Foam::XiModels::fixed
 
 Description
-    Fixed value model for Xi.
+    Fixed value model for Xi. See \link XiModel.H \endlink for more details
+    on flame wrinkling modelling.
 
 SourceFiles
     fixed.C

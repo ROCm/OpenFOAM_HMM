@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,6 @@ SourceFiles
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                       Class PackedListName Declaration
@@ -136,7 +135,7 @@ public:
         PackedList(const PackedList<nBits>& PList);
 
         //- Construct by transferring the parameter contents
-        PackedList(const xfer<PackedList<nBits> >&);
+        PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
         PackedList(const UList<label>&);
@@ -158,11 +157,17 @@ public:
             //  and annull the argument list.
             void transfer(PackedList<nBits>&);
 
+            //- Transfer contents to the Xfer container
+            inline Xfer<PackedList<nBits> > xfer();
+
 
         // Access
 
             //- Number of packed elements
             inline label size() const;
+
+            //- Return true if the list is empty (i.e., if size() == 0).
+            inline bool empty() const;
 
             //- Get value at index I
             inline unsigned int get(const label i) const;
@@ -195,10 +200,9 @@ public:
 
     // Ostream operator
 
-//        // Write PackedList to Ostream.
-//        friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
-}
-;
+   //  // Write PackedList to Ostream.
+   //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

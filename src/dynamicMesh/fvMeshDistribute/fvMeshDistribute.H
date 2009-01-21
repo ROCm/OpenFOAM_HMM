@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ SourceFiles
 #define fvMeshDistribute_H
 
 #include "Field.H"
+#include "uLabel.H"
 #include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -114,14 +115,12 @@ class fvMeshDistribute
             labelPairHash()
             {}
 
-            label operator()(const labelPair& p) const
+            label operator()(const labelPair& p, const uLabel tableSize) const
             {
-                return label(p[0]*p[0]+p[0]+p[1]);
-            }
-
-            label operator()(const labelPair& p, const label tableSize) const
-            {
-                return mag(operator()(p)) % tableSize;
+                uLabel p0 = static_cast<uLabel>(p[0]);
+                uLabel p1 = static_cast<uLabel>(p[1]);
+                uLabel key = p0*p0+p0+p1;
+                return key % tableSize;
             }
         };
 

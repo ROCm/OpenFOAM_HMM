@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -372,7 +372,7 @@ public:
             //- Top bounding box
             const treeBoundBox& bb() const
             {
-                if (nodes_.size() == 0)
+                if (nodes_.empty())
                 {
                     FatalErrorIn("indexedOctree<Type>::bb() const")
                         << "Tree is empty" << abort(FatalError);

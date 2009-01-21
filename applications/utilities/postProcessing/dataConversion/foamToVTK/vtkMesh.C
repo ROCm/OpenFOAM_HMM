@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ Foam::vtkMesh::vtkMesh
     subsetter_(baseMesh),
     setName_(setName)
 {
-    if (setName.size() > 0)
+    if (setName.size())
     {
         // Read cellSet using whole mesh
         cellSet currentSet(baseMesh_, setName_);
@@ -71,7 +71,7 @@ Foam::polyMesh::readUpdateState Foam::vtkMesh::readUpdate()
 
         topoPtr_.clear();
 
-        if (setName_.size() > 0)
+        if (setName_.size())
         {
             Info<< "Subsetting mesh based on cellSet " << setName_ << endl;
 

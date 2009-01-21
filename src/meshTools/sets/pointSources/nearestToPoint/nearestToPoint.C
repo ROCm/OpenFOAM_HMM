@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ void Foam::nearestToPoint::combine(topoSet& set, const bool add) const
     {
         const pointField& pts = mesh_.points();
 
-        if (pts.size() > 0)
+        if (pts.size())
         {
             label minPointI = 0;
             scalar minDistSqr = magSqr(pts[minPointI] - points_[pointI]);

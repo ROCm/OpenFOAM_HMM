@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -358,18 +358,21 @@ int main(int argc, char *argv[])
     (
         dict.lookup("facesToTriangulate")
     );
+
     bool cutBoundary =
-            pointsToMove.size() > 0
-         || edgesToSplit.size() > 0
-         || facesToTriangulate.size() > 0;
+    (
+        pointsToMove.size()
+     || edgesToSplit.size()
+     || facesToTriangulate.size()
+    );
 
     List<Pair<point> > edgesToCollapse(dict.lookup("edgesToCollapse"));
 
-    bool collapseEdge = edgesToCollapse.size() > 0;
+    bool collapseEdge = edgesToCollapse.size();
 
     List<Pair<point> > cellsToPyramidise(dict.lookup("cellsToSplit"));
 
-    bool cellsToSplit = cellsToPyramidise.size() > 0;
+    bool cellsToSplit = cellsToPyramidise.size();
 
     //List<Tuple<pointField,point> >
     //  cellsToCreate(dict.lookup("cellsToCreate"));
@@ -523,7 +526,7 @@ int main(int argc, char *argv[])
         Info<< nl << "There was a problem in one of the inputs in the"
             << " dictionary. Not modifying mesh." << endl;
     }
-    else if (cellToPyrCentre.size() > 0)
+    else if (cellToPyrCentre.size())
     {
         Info<< nl << "All input cells located. Modifying mesh." << endl;
 
@@ -555,7 +558,7 @@ int main(int argc, char *argv[])
         Info << "Writing modified mesh to time " << runTime.value() << endl;
         mesh.write();
     }
-    else if (edgeToPos.size() > 0)
+    else if (edgeToPos.size())
     {
         Info<< nl << "All input edges located. Modifying mesh." << endl;
 

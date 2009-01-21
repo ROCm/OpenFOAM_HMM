@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ inline Foam::cell::cell(const UList<label>& lst)
 {}
 
 
-inline Foam::cell::cell(const xfer<labelList>& lst)
+inline Foam::cell::cell(const Xfer<labelList>& lst)
 :
     labelList(lst)
 {}

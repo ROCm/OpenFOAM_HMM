@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
     const fileName& filename
 )
 {
-    off_t fileSize = Foam::size(filename);
+    off_t dataFileSize = Foam::fileSize(filename);
 
     IFstream ifs(filename, IOstream::BINARY);
     istream& is = ifs.stdStream();
@@ -74,8 +74,8 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
     (
         !is
      || nTris < 0
-     || nTris < (fileSize - headerSize)/50
-     || nTris > (fileSize - headerSize)/25
+     || nTris < (dataFileSize - headerSize)/50
+     || nTris > (dataFileSize - headerSize)/25
     )
     {
         return 0;
@@ -89,7 +89,7 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
 bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 (
     IFstream& ifs,
-    const off_t fileSize
+    const off_t dataFileSize
 )
 {
     sorted_ = true;
@@ -124,8 +124,8 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
     (
         !is
      || nTris < 0
-     || nTris < (fileSize - headerSize)/50
-     || nTris > (fileSize - headerSize)/25
+     || nTris < (dataFileSize - headerSize)/50
+     || nTris > (dataFileSize - headerSize)/25
     )
     {
         FatalErrorIn
@@ -224,16 +224,16 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
     names_(0),
     sizes_(0)
 {
-    off_t fileSize = Foam::size(filename);
+    off_t dataFileSize = Foam::fileSize(filename);
 
     // auto-detect ascii/binary
     if (detectBINARY(filename))
     {
-        readBINARY(IFstream(filename, IOstream::BINARY)(), fileSize);
+        readBINARY(IFstream(filename, IOstream::BINARY)(), dataFileSize);
     }
     else
     {
-        readASCII(IFstream(filename)(), fileSize);
+        readASCII(IFstream(filename)(), dataFileSize);
     }
 }
 

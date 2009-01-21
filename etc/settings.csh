@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -121,7 +121,7 @@ unset MPI_ARCH_PATH
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set mpi_version=openmpi-1.2.8
+    set mpi_version=openmpi-1.3
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
     setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
 

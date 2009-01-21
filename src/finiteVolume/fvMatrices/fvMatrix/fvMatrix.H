@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -198,7 +198,7 @@ public:
 
     //- Solver class returned by the solver function
     //  used for systems in which it is useful to cache the solver for reuse
-    //  e.g. is the solver is potentialy expensive to construct (AMG) and can
+    //  e.g. if the solver is potentialy expensive to construct (AMG) and can
     //  be used several times (PISO)
     class fvSolver
     {

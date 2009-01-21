@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -178,7 +178,7 @@ Foam::string Foam::triSurface::getLineNoComment(IFstream& is)
     {
         is.getLine(line);
     }
-    while((line.size() == 0 || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == '#') && is.good());
 
     return line;
 }
@@ -327,7 +327,7 @@ void Foam::triSurface::checkEdges(const bool verbose)
     {
         const labelList& myFaces = eFaces[edgeI];
 
-        if (myFaces.size() == 0)
+        if (myFaces.empty())
         {
             FatalErrorIn("triSurface::checkEdges(bool verbose)")
                 << "Edge " << edgeI << " with vertices " << edges()[edgeI]
@@ -638,7 +638,7 @@ Foam::surfacePatchList Foam::triSurface::calcPatches(labelList& faceMap) const
     // Extend regions
     label maxRegion = patches_.size()-1;    // for non-compacted regions
 
-    if (faceMap.size() > 0)
+    if (faceMap.size())
     {
         maxRegion = max
         (
@@ -1007,7 +1007,7 @@ void Foam::triSurface::markZone
             }
         }
 
-        if (newChangedFaces.size() == 0)
+        if (newChangedFaces.empty())
         {
             break;
         }

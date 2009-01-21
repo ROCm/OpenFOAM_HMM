@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -405,12 +405,12 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
 (
     IFstream& ifs,
-    const off_t fileSize
+    const off_t dataFileSize
 )
 {
     // Create the lexer with the approximate number of vertices in the STL
     // from the file size
-    STLASCIILexer lexer(&ifs.stdStream(), fileSize/400);
+    STLASCIILexer lexer(&ifs.stdStream(), dataFileSize/400);
     while (lexer.lex() != 0) {}
 
     sorted_ = lexer.sorted();

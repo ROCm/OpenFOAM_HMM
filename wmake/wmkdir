@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -27,22 +27,22 @@
 #     wmkdir
 #
 # Description
-#     Script that makes a directory is not already constructed.
-#     Usage : wmkdir <directoryName>
+#     Script to make a directory that does not already exist
+#     Usage : wmkdir <dir>
 #
 #------------------------------------------------------------------------------
 
 if [ $# -eq 1 ]
 then
-   # provide help
-   if [ "$1" = "-h" -o "$1" = "-help" ]
-   then
-      echo "usage: ${0##*/} <dir>"
-      echo "       mkdir if directory does not already exist"
-   else
-      [ -d "$1" ] || mkdir -p "$1"
-   fi
+    # provide help
+    if [ "$1" = "-h" -o "$1" = "-help" ]
+    then
+        echo "usage: ${0##*/} <dir>"
+        echo "       mkdir if directory does not already exist"
+        echo
+    else
+        [ -d "$1" ] || mkdir -p "$1"
+    fi
 fi
-
 
 #------------------------------------------------------------------------------

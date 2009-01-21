@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ bool OPstream::write
             << Foam::abort(FatalError);
     }
 
-    if (maxSendSize.size() == 0)
+    if (maxSendSize.empty())
     {
         // Intialize maxSendSize to the initial size of the receive buffers.
         maxSendSize.setSize(Pstream::nProcs());

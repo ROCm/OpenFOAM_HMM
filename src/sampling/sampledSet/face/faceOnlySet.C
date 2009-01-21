@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,17 +121,16 @@ void Foam::faceOnlySet::calcSamples
 
 
     // Get all boundary intersections
-    List<pointIndexHit> bHits =
-        searchEngine().intersections
-        (
-            start_ - smallVec,
-            end_ + smallVec
-        );
+    List<pointIndexHit> bHits = searchEngine().intersections
+    (
+        start_ - smallVec,
+        end_ + smallVec
+    );
 
     point bPoint(GREAT, GREAT, GREAT);
     label bFaceI = -1;
 
-    if (bHits.size() > 0)
+    if (bHits.size())
     {
         bPoint = bHits[0].hitPoint();
         bFaceI = bHits[0].index();

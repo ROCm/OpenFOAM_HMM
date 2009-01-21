@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,10 +37,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(boundaryMesh, 0);
-}
+defineTypeNameAndDebug(Foam::boundaryMesh, 0);
 
 // Normal along which to divide faces into categories (used in getNearest)
 const Foam::vector Foam::boundaryMesh::splitNormal_(3, 2, 1);
@@ -394,14 +391,13 @@ void Foam::boundaryMesh::markZone
 
     while(1)
     {
-        changedEdges =
-            faceToEdge
-            (
-                borderEdge,
-                currentZone,
-                changedFaces,
-                edgeZone
-            );
+        changedEdges = faceToEdge
+        (
+            borderEdge,
+            currentZone,
+            changedFaces,
+            edgeZone
+        );
 
         if (debug)
         {
@@ -410,7 +406,7 @@ void Foam::boundaryMesh::markZone
                 << endl;
         }
 
-        if (changedEdges.size() == 0)
+        if (changedEdges.empty())
         {
             break;
         }
@@ -424,7 +420,7 @@ void Foam::boundaryMesh::markZone
                 << endl;
         }
 
-        if (changedFaces.size() == 0)
+        if (changedFaces.empty())
         {
             break;
         }
@@ -604,7 +600,7 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
 {
     triSurface surf(fName);
 
-    if (surf.size() <= 0)
+    if (surf.empty())
     {
         return;
     }
@@ -902,7 +898,7 @@ Foam::labelList Foam::boundaryMesh::getNearest
 
     // Extend domain slightly (also makes it 3D if was 2D)
     // Note asymmetry to avoid having faces align with octree cubes.
-    scalar tol = 1E-6*overallBb.avgDim();
+    scalar tol = 1E-6 * overallBb.avgDim();
 
     point& bbMin = overallBb.min();
     bbMin.x() -= tol;
@@ -1239,7 +1235,7 @@ void Foam::boundaryMesh::patchify
     // Pass2:
     // Change patch type for face
 
-    if (newPatchPtrList.size() > 0)
+    if (newPatchPtrList.size())
     {
         List<DynamicList<label> > patchFaces(nNewPatches);
 
@@ -1597,7 +1593,7 @@ void Foam::boundaryMesh::deletePatch(const word& patchName)
             << abort(FatalError);
     }
 
-    if (patches_[delPatchI].size() != 0)
+    if (patches_[delPatchI].size())
     {
         FatalErrorIn("boundaryMesh::deletePatch(const word&")
             << "Trying to delete non-empty patch " << patchName
@@ -1715,7 +1711,7 @@ void Foam::boundaryMesh::changeFaces
     {
         label patchID = patchIDs[faceI];
 
-        if ((patchID < 0) || (patchID >= patches_.size()))
+        if (patchID < 0 || patchID >= patches_.size())
         {
             FatalErrorIn("boundaryMesh::changeFaces(const labelList&)")
                 << "PatchID " << patchID << " out of range"

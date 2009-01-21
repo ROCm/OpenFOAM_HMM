@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -826,7 +826,7 @@ bool Foam::motionSmoother::scaleMesh
     const label nAllowableErrors
 )
 {
-    if (!smoothMesh && adaptPatchIDs_.size() == 0)
+    if (!smoothMesh && adaptPatchIDs_.empty())
     {
         FatalErrorIn("motionSmoother::scaleMesh(const bool")
             << "You specified both no movement on the internal mesh points"
@@ -992,7 +992,7 @@ bool Foam::motionSmoother::scaleMesh
                 << endl;
         }
 
-        if (adaptPatchIDs_.size() != 0)
+        if (adaptPatchIDs_.size())
         {
             // Scale conflicting patch points
             scaleField(pp_.meshPoints(), usedPoints, errorReduction, scale_);
@@ -1005,7 +1005,7 @@ bool Foam::motionSmoother::scaleMesh
 
         for (label i = 0; i < nSmoothScale; i++)
         {
-            if (adaptPatchIDs_.size() != 0)
+            if (adaptPatchIDs_.size())
             {
                 // Smooth patch values
                 pointScalarField oldScale(scale_);

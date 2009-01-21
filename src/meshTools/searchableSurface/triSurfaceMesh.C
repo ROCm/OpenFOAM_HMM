@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -229,7 +229,7 @@ void Foam::triSurfaceMesh::movePoints(const pointField& newPoints)
 const Foam::indexedOctree<Foam::treeDataTriSurface>&
     Foam::triSurfaceMesh::tree() const
 {
-    if (!tree_.valid())
+    if (tree_.empty())
     {
         treeBoundBox bb(points(), meshPoints());
 
@@ -256,7 +256,7 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 const Foam::indexedOctree<Foam::treeDataEdge>&
     Foam::triSurfaceMesh::edgeTree() const
 {
-    if (!edgeTree_.valid())
+    if (edgeTree_.empty())
     {
         treeBoundBox bb(localPoints());
 
@@ -298,7 +298,7 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
 
 const Foam::wordList& Foam::triSurfaceMesh::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(patches().size());
         forAll(regions_, regionI)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ InNamespace
     Foam
 
 Description
-    Functions used by OpenFOAM which are specific to the UNIX operating system
+    Functions used by OpenFOAM that are specific to the UNIX operating system
     and need to be replaced or emulated on other systems.
 
 SourceFiles
@@ -62,7 +62,7 @@ pid_t pgid();
 bool env(const word&);
 
 //- Return environment variable of given name
-//  Return string::null if the environment is undefined
+//  Return string() if the environment is undefined
 string getEnv(const word& name);
 
 //- Set an environment variable
@@ -101,7 +101,7 @@ bool chDir(const fileName& dir);
 //  -# shipped settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  @return the full path name or fileName::null if the name cannot be found
+//  @return the full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName& name, bool mandatory=false);
 
@@ -118,7 +118,7 @@ mode_t mode(const fileName&);
 //- Return the file type: FILE or DIRECTORY
 fileName::Type type(const fileName&);
 
-//- Does the name exist in the filing system?
+//- Does the name exist in the file system?
 bool exists(const fileName& name);
 
 //- Does the file exist?
@@ -128,7 +128,7 @@ bool file(const fileName&);
 bool dir(const fileName&);
 
 //- Return size of file
-off_t size(const fileName&);
+off_t fileSize(const fileName&);
 
 //- Return time of last file modification
 time_t lastModified(const fileName&);

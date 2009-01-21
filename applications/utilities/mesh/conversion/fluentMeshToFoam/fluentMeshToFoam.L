@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1486,7 +1486,7 @@ int main(int argc, char *argv[])
         }
         defaultBoundaryFaces.shrink();
 
-        if(defaultBoundaryFaces.size() != 0)
+        if (defaultBoundaryFaces.size())
         {
             Warning << " fluent mesh has " << defaultBoundaryFaces.size()
                     << " undefined boundary faces." << endl
@@ -1695,7 +1695,7 @@ int main(int argc, char *argv[])
     // soon negating the need for double output
     if (writeSets)
     {
-        if (cellGroupZoneID.size() > 1 )
+        if (cellGroupZoneID.size() > 1)
         {
             Info<< "Writing cell sets" << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ UNARY_FUNCTION(tensor, tensor, cof)
 
 void inv(Field<tensor>& tf, const UList<tensor>& tf1)
 {
-    if (!tf.size())
+    if (tf.empty())
     {
         return;
     }

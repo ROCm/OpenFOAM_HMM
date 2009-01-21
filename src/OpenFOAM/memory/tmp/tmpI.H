@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,6 +97,13 @@ inline bool Foam::tmp<T>::isTmp() const
 
 
 template<class T>
+inline bool Foam::tmp<T>::empty() const
+{
+    return (isTmp_ && !ptr_);
+}
+
+
+template<class T>
 inline bool Foam::tmp<T>::valid() const
 {
     return (!isTmp_ || (isTmp_ && ptr_));
@@ -132,7 +139,7 @@ inline T* Foam::tmp<T>::ptr() const
 template<class T>
 inline void Foam::tmp<T>::clear() const
 {
-    if (isTmp_ && ptr_) // && ptr_->okToDelete())
+    if (isTmp_ && ptr_)  // skip this bit:  && ptr_->okToDelete())
     {
         delete ptr_;
         ptr_ = 0;
@@ -161,8 +168,11 @@ inline T& Foam::tmp<T>::operator()()
         // Note: const is cast away!
         // Perhaps there should be two refs, one for const and one for non const
         // and if the ref is actually const then you cannot return it here.
+        //
         // Another possibility would be to store a const ref and a flag to say
-        // wether the tmp was constructed with a const or a non-const argument.
+        // whether the tmp was constructed with a const or a non-const argument.
+        //
+        // eg, enum refType { POINTER = 0, REF = 1, CONSTREF = 2 };
         return const_cast<T&>(ref_);
     }
 }

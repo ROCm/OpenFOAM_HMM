@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,7 +135,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
 
     scalar skewCoeff = 0.0;
 
-    if (Sf.internalField().size() > 0)
+    if (Sf.internalField().size())
     {
         skewCoeff = max(mag(SkewCorrVecs)/mag(d)).value();
     }

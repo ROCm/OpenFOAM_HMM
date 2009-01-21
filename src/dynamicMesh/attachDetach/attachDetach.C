@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,8 +83,8 @@ void Foam::attachDetach::checkDefinition()
     // Check the sizes and set up state
     if
     (
-        mesh.boundaryMesh()[masterPatchID_.index()].size() == 0
-     && mesh.boundaryMesh()[slavePatchID_.index()].size() == 0
+        mesh.boundaryMesh()[masterPatchID_.index()].empty()
+     && mesh.boundaryMesh()[slavePatchID_.index()].empty()
     )
     {
         // Boundary is attached
@@ -96,7 +96,7 @@ void Foam::attachDetach::checkDefinition()
         state_ = ATTACHED;
 
         // Check if there are faces in the master zone
-        if (mesh.faceZones()[faceZoneID_.index()].size() == 0)
+        if (mesh.faceZones()[faceZoneID_.index()].empty())
         {
             FatalErrorIn
             (
@@ -121,7 +121,7 @@ void Foam::attachDetach::checkDefinition()
                 }
             }
 
-            if (bouFacesInZone.size() > 0)
+            if (bouFacesInZone.size())
             {
                 FatalErrorIn
                 (
@@ -196,7 +196,7 @@ void Foam::attachDetach::checkDefinition()
                 }
             }
 
-            if (zoneProblemFaces.size() > 0)
+            if (zoneProblemFaces.size())
             {
                 FatalErrorIn
                 (
@@ -222,7 +222,7 @@ void Foam::attachDetach::checkDefinition()
     if
     (
         !triggersOK
-     || (triggerTimes_.size() < 1 && !manualTrigger())
+     || (triggerTimes_.empty() && !manualTrigger())
     )
     {
         FatalErrorIn

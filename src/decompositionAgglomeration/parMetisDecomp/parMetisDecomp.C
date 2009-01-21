@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -188,7 +188,7 @@ Foam::label Foam::parMetisDecomp::decompose
             << SubField<floatScalar>(xyz, nDims*nCells, nDims*startCell)
             <<
             (
-                (cellWeights.size() > 0)
+                cellWeights.size()
               ? static_cast<const Field<int>&>
                 (
                     Field<int>::subField(cellWeights, nCells, startCell)
@@ -197,7 +197,7 @@ Foam::label Foam::parMetisDecomp::decompose
             )
             <<
             (
-                (faceWeights.size() > 0)
+                faceWeights.size()
               ? static_cast<const Field<int>&>
                 (
                     Field<int>::subField(faceWeights, nFaces, startFace)
@@ -206,11 +206,11 @@ Foam::label Foam::parMetisDecomp::decompose
             );
 
         // Remove data that has been sent
-        if (faceWeights.size() > 0)
+        if (faceWeights.size())
         {
             faceWeights.setSize(faceWeights.size()-nFaces);
         }
-        if (cellWeights.size() > 0)
+        if (cellWeights.size())
         {
             cellWeights.setSize(cellWeights.size()-nCells);
         }
@@ -255,12 +255,12 @@ Foam::label Foam::parMetisDecomp::decompose
     int* vwgtPtr = NULL;
     int* adjwgtPtr = NULL;
 
-    if (cellWeights.size() > 0)
+    if (cellWeights.size())
     {
         vwgtPtr = cellWeights.begin();
         wgtFlag += 2;       // Weights on vertices
     }
-    if (faceWeights.size() > 0)
+    if (faceWeights.size())
     {
         adjwgtPtr = faceWeights.begin();
         wgtFlag += 1;       // Weights on edges
