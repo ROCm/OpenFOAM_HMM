@@ -1025,6 +1025,20 @@ void Foam::moleculeCloud::createMolecule
 }
 
 
+Foam::label Foam::moleculeCloud::nSites() const
+{
+    label n = 0;
+
+    const_iterator mol(this->begin());
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        n += constProps(mol().id()).nSites();
+    }
+
+    return n;
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::moleculeCloud::moleculeCloud
@@ -1155,6 +1169,30 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
 void Foam::moleculeCloud::writeFields() const
 {
     molecule::writeFields(*this);
+}
+
+
+void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
+{
+    OFstream str(fName);
+
+    str<< nSites() << nl << "moleculeCloud sites" << nl;
+
+    const_iterator mol(this->begin());
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        forAll(mol().sitePositions(), i)
+        {
+            const point& sP = mol().sitePositions()[i];
+
+            str<< pot_.siteIdList()[constProps(mol().id()).siteIds()[i]]
+                << ' ' << sP.x()
+                << ' ' << sP.y()
+                << ' ' << sP.z()
+                << nl;
+        }
+    }
 }
 
 

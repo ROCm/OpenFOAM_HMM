@@ -44,6 +44,7 @@ SourceFiles
 #include "interactionLists.H"
 #include "labelVector.H"
 #include "Random.H"
+#include "fileName.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -131,6 +132,8 @@ private:
             const vector& bulkVelocity
         );
 
+        label nSites() const;
+
         inline vector equipartitionLinearVelocity
         (
             scalar temperature,
@@ -213,6 +216,10 @@ public:
         //- Write fields
 
             void writeFields() const;
+
+        //- Write molecule sites in XYZ format
+
+            void writeXYZ(const fileName& fName) const;
 };
 
 
