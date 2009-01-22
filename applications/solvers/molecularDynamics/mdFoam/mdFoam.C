@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         {
             nAveragingSteps = 0;
 
-            molecules.writeXYZ("moleculeCloud.xmol");
+            molecules.writeXYZ(runTime.timePath() + "/moleculeCloud.xmol");
         }
 
         Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
