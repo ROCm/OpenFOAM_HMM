@@ -26,14 +26,21 @@ Class
     Foam::PackedList
 
 Description
-    List of packed unsigned ints.
+    A Dynamically allocatable list of packed unsigned ints.
 
     Gets given the number of bits per item.
+
+Note
+    The list resizing is similar to DynamicList, thus the methods clear()
+    and setSize() behave like their DynamicList counterparts and the methods
+    reserve() and setCapacity() can be used to influence the allocation.
+
+SeeAlso
+    Foam::DynamicList
 
 ToDo
     Add checks for bad template parameters (ie, nBits=0, nBits too large).
     Could make PackedBitRef an iterator and use for traversing as well.
-    It could be useful to make PackedList behave a bit like DynamicList.
 
 SourceFiles
     PackedListI.H
@@ -52,6 +59,13 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+template<int nBits> class PackedList;
+
+// template<int nBits>
+// Ostream& operator<<(Ostream&, const PackedList<nBits>&);
+
+
 /*---------------------------------------------------------------------------*\
                       Class PackedListName Declaration
 \*---------------------------------------------------------------------------*/
@@ -64,42 +78,73 @@ TemplateName(PackedList);
 \*---------------------------------------------------------------------------*/
 
 //- The PackedBitRef is used for PackedList
+template <int nBits>
 class PackedBitRef
 {
 private:
 
     // private data
+    // const mutable List<unsigned int>& list_;
+
     unsigned int& elem_;
 
     const label startBit_;
 
-    const unsigned int mask_;
-
 public:
 
-    inline PackedBitRef(unsigned int& elem, label startBit, unsigned int mask)
+    // Static Public Members
+
+        //- The max. number of bits that can be templated.
+        //  Might someday be useful for a template assert.
+        inline static unsigned int max_bits();
+
+        //- The max. value for an entry, can also be used as the mask
+        //  eg, ((1 << 2) - 1) yields 0b0011
+        inline static unsigned int max_value();
+
+        //- The number of entries per storage entry
+        inline static unsigned int packing();
+
+
+    // Constructors
+    inline PackedBitRef
+    (
+        // const List<unsigned int>& lst
+        const unsigned int& elem, label startBit)
     :
-        elem_(elem),
-        startBit_(startBit),
-        mask_(mask)
+        // list_(lst),
+        elem_(const_cast<unsigned int&>(elem)),
+        startBit_(startBit)
     {}
 
+
+    // Members
+
+    // Assign value
     inline void operator=(const unsigned int val)
     {
-        unsigned int shiftedMask = mask_ << startBit_;
-        unsigned int shiftedVal  = (val & mask_) << startBit_;
+        unsigned int shiftedMask = max_value() << startBit_;
+        unsigned int shiftedVal  = (val & max_value()) << startBit_;
 
         elem_ = (elem_ & ~shiftedMask) | shiftedVal;
     }
 
-    inline operator unsigned int () const
+    // return value
+    inline unsigned int operator()() const
     {
-        return ((elem_ >> startBit_) & mask_);
+        return ((elem_ >> startBit_) & max_value());
     }
 
+    //- Conversion operator
+    inline operator unsigned int () const
+    {
+        return ((elem_ >> startBit_) & max_value());
+    }
+
+    //- Conversion operator
     inline operator bool() const
     {
-        return !!((elem_ >> startBit_) & mask_);
+        return !!((elem_ >> startBit_) & max_value());
     }
 
 };
@@ -139,14 +184,23 @@ public:
 
         //- The max. number of bits that can be templated.
         //  Might someday be useful for a template assert.
-        inline static unsigned int max_bits();
+        inline static unsigned int max_bits()
+        {
+            return PackedBitRef<nBits>::max_bits();
+        }
 
         //- The max. value for an entry, can also be used as the mask
         //  eg, ((1 << 2) - 1) yields 0b0011
-        inline static unsigned int max_value();
+        inline static unsigned int max_value()
+        {
+            return PackedBitRef<nBits>::max_value();
+        }
 
         //- The number of entries per storage entry
-        inline static unsigned int packing();
+        inline static unsigned int packing()
+        {
+            return PackedBitRef<nBits>::packing();
+        }
 
 
     // Constructors
@@ -154,101 +208,116 @@ public:
         //- Null constructor
         inline PackedList();
 
-        //- Construct with given size. Note: initializes intList to 0.
+        //- Construct with given size. Note: initializes list to 0.
         inline PackedList(const label size);
 
         //- Construct with given size and value for all elements.
         PackedList(const label size, const unsigned val);
 
         //- Copy constructor.
-        PackedList(const PackedList<nBits>& PList);
+        inline PackedList(const PackedList<nBits>&);
 
         //- Construct by transferring the parameter contents
-        PackedList(const Xfer<PackedList<nBits> >&);
+        inline PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
         PackedList(const UList<label>&);
 
         //- Clone
-        inline autoPtr<PackedList<nBits> > clone() const;
+        inline autoPtr< PackedList<nBits> > clone() const;
 
     // Member Functions
 
         // Access
 
-            //- The number of elements that can be stored before resizing
-            inline label capacity() const;
+        //- The number of elements that can be stored before resizing
+        inline label capacity() const;
 
-            //- Number of packed elements
-            inline label size() const;
+        //- Number of packed elements.
+        inline label size() const;
 
-            //- Return true if the list is empty (i.e., if size() == 0).
-            inline bool empty() const;
+        //- Return true if the list is empty (i.e., if size() == 0).
+        inline bool empty() const;
 
-            //- Get value at index I
-            inline unsigned int get(const label i) const;
+        //- Get value at index I.
+        //  Does not auto-vivifies elements.
+        inline unsigned int get(const label i) const;
 
-            //- Set value at index I. Return true if value changed.
-            inline bool set(const label i, const unsigned int val);
+        //- Set value at index I. Return true if value changed.
+        //  Does not auto-vivifies elements.
+        inline bool set(const label i, const unsigned int val);
 
-            //- Underlying storage
-            inline List<unsigned int>& storage();
+        //- Underlying storage
+        inline const List<unsigned int>& storage() const;
 
-            //- Underlying storage
-            inline const List<unsigned int>& storage() const;
-
+        //- Return as labelList
+        labelList values() const;
 
         // Edit
 
-            //- Reset size of List, setting zero for any new elements.
-            void setSize(const label);
+        //- Alter the size of the underlying storage.
+        //  The addressed size will be truncated if needed to fit, but will
+        //  remain otherwise untouched.
+        //  Use this or reserve() in combination with append().
+        inline void setCapacity(const label);
 
-            //- Reset size of List and value for new elements.
-            void setSize(const label, const unsigned int& val);
+        //- Reset size of List, optionally specify a value for new elements.
+        inline void resize(const label, const unsigned int& val = 0);
 
-            //- Reset size of List, setting zero for any new elements.
-            inline void resize(const label);
+        //- Reset size of List, optionally specify a value for new elements.
+        inline void setSize(const label, const unsigned int& val = 0);
 
-            //- Reset size of List and value for new elements.
-            inline void resize(const label, const unsigned int& val);
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size.
+        //  Optionally provide an initialization value for new elements.
+        inline void reserve(const label, const unsigned int& val = 0);
 
-        //- Construct with given size and value for all elements.
+        //- Clear the list, i.e. set size to zero.
+        //- Does not adjust the underlying storage
+        inline void clear();
 
-            //- Clear the list, i.e. set size to zero.
-            void clear();
+        //- Clear the list and delete storage.
+        inline void clearStorage();
 
-            //- Transfer the contents of the argument List into this List
-            //  and annull the argument list.
-            void transfer(PackedList<nBits>&);
+        //- Shrink the allocated space to what is used.
+        inline void shrink();
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<PackedList<nBits> > xfer();
+        //- Transfer the contents of the argument List into this List
+        //  and annull the argument list.
+        inline void transfer(PackedList<nBits>&);
 
+        //- Transfer contents to the Xfer container
+        inline Xfer<PackedList<nBits> > xfer();
 
     // Member operators
 
-            //- Get value at index i
-            inline unsigned int operator[](const label i) const;
+        //- Append a value at the end of the list. Return true if value changed.
+        inline bool append(const unsigned int val);
 
-            //- Set value at index i.
-            //  Returns proxy to perform the actual operation
-            inline ::Foam::PackedBitRef operator[](const label i);
+        //- Get value at index I
+        //  Does not auto-vivifies elements.
+        inline unsigned int operator[](const label i) const;
 
-            //- Assignment operator. Takes linear time.
-            void operator=(const PackedList<nBits>&);
+        //- Set value at index I.
+        //  Returns proxy to perform the actual operation.
+        //  Auto-vivifies any new values to zero.
+        inline ::Foam::PackedBitRef<nBits> operator[](const label i);
 
-            //- Assignment of all entries to the given value.
-            //  Does set on all elements.
-            inline void operator=(const unsigned int val);
+        //- Assignment of all entries to the given value.
+        //  Does set on all elements.
+        inline void operator=(const unsigned int val);
 
-            //- Return as labelList
-            labelList operator()() const;
+        //- Assignment operator. Takes linear time.
+        void operator=(const PackedList<nBits>&);
 
+        //- Assignment operator. Takes linear time.
+        void operator=(const UList<label>&);
 
     // Ostream operator
 
-   //  // Write PackedList to Ostream.
-   //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+    //  // Write PackedList to Ostream.
+    //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

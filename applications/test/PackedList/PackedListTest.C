@@ -56,8 +56,9 @@ void printPackedList(const PackedList<nBits>& L)
     {
         cout<< L[i] << ' ';
     }
-    cout<< ")\n\n";
+    cout<< ")\n";
 
+    // using std:bitset for output works, but annoys valgrind
     cout<< "storage: " << stor.size() << "( ";
     forAll(stor, i)
     {
@@ -98,6 +99,41 @@ int main(int argc, char *argv[])
 
     list1.resize(8);
     printPackedList(list1);
+
+    list1.append(2);
+    list1.append(3);
+    list1.append(4);
+    printPackedList(list1);
+
+    list1.reserve(32);
+    printPackedList(list1);
+
+    list1.shrink();
+    printPackedList(list1);
+
+    list1.setSize(15);
+    printPackedList(list1);
+
+    list1.setSize(32);
+    printPackedList(list1);
+
+    // test assignment
+    list1[16] = 5;
+    printPackedList(list1);
+
+    // auto-vivify
+    list1[36] = list1.max_value();
+    printPackedList(list1);
+
+    list1.setSize(4);
+    printPackedList(list1);
+
+    PackedList<3> list2(list1);
+    list2.append(4);
+
+    cout << "after copy + append\n";
+    printPackedList(list1);
+    printPackedList(list2);
 
     return 0;
 }

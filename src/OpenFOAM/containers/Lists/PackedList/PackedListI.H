@@ -33,21 +33,21 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<int nBits>
-inline unsigned int Foam::PackedList<nBits>::max_bits()
+inline unsigned int Foam::PackedBitRef<nBits>::max_bits()
 {
     return sizeof(unsigned int)*8 - 1;
 }
 
 
 template<int nBits>
-inline unsigned int Foam::PackedList<nBits>::max_value()
+inline unsigned int Foam::PackedBitRef<nBits>::max_value()
 {
     return ((1u << nBits) - 1);
 }
 
 
 template<int nBits>
-inline unsigned int Foam::PackedList<nBits>::packing()
+inline unsigned int Foam::PackedBitRef<nBits>::packing()
 {
     return sizeof(unsigned int)*8 / nBits;
 }
@@ -114,7 +114,7 @@ inline void Foam::PackedList<nBits>::checkIndex(const label i) const
 template<int nBits>
 inline Foam::PackedList<nBits>::PackedList()
 :
-    List<unsigned int>(0),
+    List<unsigned int>(),
     size_(0)
 {}
 
@@ -128,32 +128,30 @@ inline Foam::PackedList<nBits>::PackedList(const label size)
 {}
 
 
+template<int nBits>
+inline Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
+:
+    List<unsigned int>(lst),
+    size_(lst.size())
+{}
+
+
+template<int nBits>
+inline Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
+{
+    transfer(lst());
+}
+
+
+
+template<int nBits>
+inline Foam::autoPtr<Foam::PackedList<nBits> > Foam::PackedList<nBits>::clone() const
+{
+    return autoPtr<PackedList<nBits> >(new PackedList<nBits>(*this));
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<int nBits>
-inline void Foam::PackedList<nBits>::resize(const label newSize)
-{
-    setSize(newSize);
-}
-
-
-template<int nBits>
-inline void Foam::PackedList<nBits>::resize
-(
-    const label newSize,
-    const unsigned int& val
-)
-{
-    setSize(newSize, val);
-}
-
-
-template<int nBits>
-inline Foam::label Foam::PackedList<nBits>::capacity() const
-{
-    return packing() * List<unsigned int>::size();
-}
-
 
 template<int nBits>
 inline Foam::label Foam::PackedList<nBits>::size() const
@@ -166,6 +164,102 @@ template<int nBits>
 inline bool Foam::PackedList<nBits>::empty() const
 {
     return !size_;
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::resize
+(
+    const label newSize,
+    const unsigned int& val
+)
+{
+    reserve(newSize, val);
+    size_ = newSize;
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::setSize
+(
+    const label newSize,
+    const unsigned int& val
+)
+{
+    resize(newSize, val);
+}
+
+
+
+template<int nBits>
+inline Foam::label Foam::PackedList<nBits>::capacity() const
+{
+    return packing() * List<unsigned int>::size();
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::setCapacity(const label nElem)
+{
+    List<unsigned int>::setSize(storageSize(nElem), 0);
+
+    for (label i = size_; i < nElem; i++)
+    {
+        set(i, 0);
+    }
+
+    size_ = nElem;
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::reserve
+(
+    const label nElem,
+    const unsigned int& val
+)
+{
+    label rawSize = storageSize(nElem);
+
+    // need more capacity?
+    if (rawSize > List<unsigned int>::size())
+    {
+        List<unsigned int>::setSize(rawSize, 0);
+    }
+
+    // fill new elements, don't rely on List::setSize
+    for (label i = size_; i < nElem; i++)
+    {
+        set(i, val);
+    }
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::clear()
+{
+    size_ = 0;
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::clearStorage()
+{
+    List<unsigned int>::clear();
+    size_ = 0;
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::shrink()
+{
+    label rawSize = storageSize(size_);
+
+    // we have unused space?
+    if (rawSize < List<unsigned int>::size())
+    {
+        List<unsigned int>::setSize(rawSize);
+    }
 }
 
 
@@ -182,6 +276,10 @@ inline unsigned int Foam::PackedList<nBits>::get(const label i) const
     (
         location(i, startBit)
     );
+
+    // PackedBitRef<nBits> iter(*this, elem, startBit);
+
+    // return PackedBitRef<nBits>(*this, elem, startBit)();
 
     return (elem >> startBit) & max_value();
 }
@@ -221,9 +319,13 @@ inline bool Foam::PackedList<nBits>::set(const label i, const unsigned int val)
 
 
 template<int nBits>
-inline Foam::List<unsigned int>& Foam::PackedList<nBits>::storage()
+inline bool Foam::PackedList<nBits>::append(const unsigned int val)
 {
-    return static_cast<List<unsigned int>&>(*this);
+    label elemI = size_;
+    reserve(elemI + 1);
+    size_++;
+
+    return set(elemI, val);
 }
 
 
@@ -232,6 +334,17 @@ inline const Foam::List<unsigned int>& Foam::PackedList<nBits>::storage() const
 {
     return static_cast<const List<unsigned int>&>(*this);
 }
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
+{
+    size_ = lst.size_;
+    lst.size_ = 0;
+
+    List<unsigned int>::transfer(lst);
+}
+
 
 
 template<int nBits>
@@ -244,12 +357,13 @@ Foam::PackedList<nBits>::xfer()
 
 
 template<int nBits>
-inline Foam::PackedBitRef
+inline typename Foam::PackedBitRef<nBits>
 Foam::PackedList<nBits>::operator[](const label i)
 {
-#   ifdef DEBUGList
-    checkIndex(i);
-#   endif
+    if (i >= size_)
+    {
+        setSize(i + 1);
+    }
 
     label startBit;
     unsigned int& elem = List<unsigned int>::operator[]
@@ -257,7 +371,12 @@ Foam::PackedList<nBits>::operator[](const label i)
         location(i, startBit)
     );
 
-    return ::Foam::PackedBitRef(elem, startBit, max_value());
+    return ::Foam::PackedBitRef<nBits>
+    (
+        // *this,
+        elem, 
+        startBit
+    );
 }
 
 
@@ -269,16 +388,16 @@ inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
     checkValue(val);
 #   endif
 
-    if (val == 0)
+    if (val)
     {
-        List<unsigned int>::operator=(val);
-    }
-    else
-    {
-        for (label i = 0; i < size_; i++)
+        forAll(*this, i)
         {
             set(i, val);
         }
+    }
+    else
+    {
+        List<unsigned int>::operator=(val);
     }
 }
 

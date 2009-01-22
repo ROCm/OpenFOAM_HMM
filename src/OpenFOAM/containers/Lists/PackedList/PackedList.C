@@ -39,21 +39,6 @@ Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
 
 
 template<int nBits>
-Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
-:
-    List<unsigned int>(lst),
-    size_(lst.size())
-{}
-
-
-template<int nBits>
-Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
-{
-    transfer(lst());
-}
-
-
-template<int nBits>
 Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 :
     List<unsigned int>(storageSize(lst.size()), 0),
@@ -66,77 +51,11 @@ Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 }
 
 
-template<int nBits>
-Foam::autoPtr<Foam::PackedList<nBits> > Foam::PackedList<nBits>::clone() const
-{
-    return autoPtr<PackedList<nBits> >(new PackedList<nBits>(*this));
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<int nBits>
-void Foam::PackedList<nBits>::setSize(const label newSize)
-{
-    List<unsigned int>::setSize(storageSize(newSize), 0);
-    size_ = newSize;
-}
-
-
-template<int nBits>
-void Foam::PackedList<nBits>::setSize
-(
-    const label newSize,
-    const unsigned int& val
-)
-{
-#   ifdef DEBUGList
-    checkValue(val);
-#   endif
-
-    List<unsigned int>::setSize(storageSize(newSize), 0);
-
-    if (val && newSize > size_)
-    {
-        // fill new elements
-        for (label i = size_; i < newSize; i++)
-        {
-            set(i, val);
-        }
-    }
-    
-    size_ = newSize;
-}
-
-
-template<int nBits>
-void Foam::PackedList<nBits>::clear()
-{
-    List<unsigned int>::clear();
-    size_ = 0;
-}
-
-
-template<int nBits>
-void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
-{
-    size_ = lst.size();
-    List<unsigned int>::transfer(lst);
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<int nBits>
-void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
-{
-    setSize(lst.size());
-    List<unsigned int>::operator=(lst);
-}
-
-
-template<int nBits>
-Foam::labelList Foam::PackedList<nBits>::operator()() const
+Foam::labelList Foam::PackedList<nBits>::values() const
 {
     labelList elems(size());
 
@@ -146,6 +65,29 @@ Foam::labelList Foam::PackedList<nBits>::operator()() const
     }
     return elems;
 }
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<int nBits>
+void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
+{
+    setCapacity(lst.size());
+    List<unsigned int>::operator=(lst);
+}
+
+
+template<int nBits>
+void Foam::PackedList<nBits>::operator=(const UList<label>& lst)
+{
+    setCapacity(lst.size());
+
+    forAll(lst, i)
+    {
+        set(i, lst[i]);
+    }
+}
+
 
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
