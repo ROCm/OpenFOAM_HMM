@@ -1176,7 +1176,7 @@ void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
 {
     OFstream str(fName);
 
-    str<< nSites() << nl << "moleculeCloud sites" << nl;
+    str<< nSites() << nl << "moleculeCloud site positions in angstroms" << nl;
 
     const_iterator mol(this->begin());
 
@@ -1187,9 +1187,9 @@ void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
             const point& sP = mol().sitePositions()[i];
 
             str<< pot_.siteIdList()[constProps(mol().id()).siteIds()[i]]
-                << ' ' << sP.x()
-                << ' ' << sP.y()
-                << ' ' << sP.z()
+                << ' ' << sP.x()*1e10
+                << ' ' << sP.y()*1e10
+                << ' ' << sP.z()*1e10
                 << nl;
         }
     }
