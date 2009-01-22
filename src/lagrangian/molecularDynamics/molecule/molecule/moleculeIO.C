@@ -169,6 +169,37 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
     IOField<label> special(mC.fieldIOobject("special", IOobject::NO_READ), np);
     IOField<label> id(mC.fieldIOobject("id", IOobject::NO_READ), np);
 
+    // Post processing fields
+
+    IOField<vector> piGlobal
+    (
+        mC.fieldIOobject("piGlobal", IOobject::NO_READ),
+        np
+    );
+    IOField<vector> tauGlobal
+    (
+        mC.fieldIOobject("tauGlobal", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> orientation1
+    (
+        mC.fieldIOobject("orientation1", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> orientation2
+    (
+        mC.fieldIOobject("orientation2", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> orientation3
+    (
+        mC.fieldIOobject("orientation3", IOobject::NO_READ),
+        np
+    );
+
     label i = 0;
     forAllConstIter(moleculeCloud, mC, iter)
     {
@@ -182,6 +213,14 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
         specialPosition[i] = mol.specialPosition_;
         special[i] = mol.special_;
         id[i] = mol.id_;
+
+        piGlobal[i] = mol.Q_ & mol.pi_;
+        tauGlobal[i] = mol.Q_ & mol.tau_;
+
+        orientation1[i] = mol.Q_ & vector(1,0,0);
+        orientation2[i] = mol.Q_ & vector(0,1,0);
+        orientation3[i] = mol.Q_ & vector(0,0,1);
+
         i++;
     }
 
@@ -193,6 +232,13 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
     specialPosition.write();
     special.write();
     id.write();
+
+    piGlobal.write();
+    tauGlobal.write();
+
+    orientation1.write();
+    orientation2.write();
+    orientation3.write();
 }
 
 
