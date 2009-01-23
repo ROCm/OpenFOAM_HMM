@@ -56,6 +56,17 @@ class mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+    // Private data
+
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of laminar viscosity field
+        word muName_;
+
 
 public:
 
@@ -142,6 +153,9 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::blocking
             );
+
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 

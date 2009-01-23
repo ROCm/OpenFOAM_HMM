@@ -57,6 +57,26 @@ class epsilonWallFunctionFvPatchScalarField
 :
     public fixedInternalValueFvPatchField<scalar>
 {
+    // Private data
+
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of turbulence kinetic energy field
+        word kName_;
+
+        //- Name of turbulence generation field
+        word GName_;
+
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of laminar viscosity field
+        word muName_;
+
+        //- Name of turbulent viscosity field
+        word mutName_;
+
 
     // Private member functions
 

@@ -48,7 +48,8 @@ alphatWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    mutName_("mut")
 {}
 
 
@@ -61,7 +62,8 @@ alphatWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    mutName_(ptf.mutName_)
 {}
 
 
@@ -73,7 +75,8 @@ alphatWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    mutName_(dict.lookupOrDefault<word>("mut", "mut"))
 {}
 
 
@@ -83,7 +86,8 @@ alphatWallFunctionFvPatchScalarField
     const alphatWallFunctionFvPatchScalarField& awfpsf
 )
 :
-    fixedValueFvPatchScalarField(awfpsf)
+    fixedValueFvPatchScalarField(awfpsf),
+    mutName_(awfpsf.mutName_)
 {}
 
 
@@ -94,7 +98,8 @@ alphatWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(awfpsf, iF)
+    fixedValueFvPatchScalarField(awfpsf, iF),
+    mutName_(awfpsf.mutName_)
 {}
 
 
@@ -106,7 +111,7 @@ void alphatWallFunctionFvPatchScalarField::updateCoeffs()
     const scalar Prt = ras.Prt().value();
 
     const scalarField& mutw =
-        patch().lookupPatchField<volScalarField, scalar>("mut");
+        patch().lookupPatchField<volScalarField, scalar>(mutName_);
 
     operator==(mutw/Prt);
 }
@@ -115,6 +120,7 @@ void alphatWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
     writeEntry("value", os);
 }
 

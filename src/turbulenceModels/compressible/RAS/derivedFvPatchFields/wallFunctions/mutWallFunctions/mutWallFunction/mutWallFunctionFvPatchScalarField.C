@@ -48,7 +48,10 @@ mutWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    rhoName_("rho"),
+    muName_("mu"),
+    kName_("k")
 {}
 
 
@@ -61,7 +64,10 @@ mutWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    rhoName_(ptf.rhoName_),
+    muName_(ptf.muName_),
+    kName_(ptf.kName_)
 {}
 
 
@@ -73,28 +79,37 @@ mutWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    muName_(dict.lookupOrDefault<word>("mu", "mu")),
+    kName_(dict.lookupOrDefault<word>("k", "k"))
 {}
 
 
 mutWallFunctionFvPatchScalarField::
 mutWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& tppsf
+    const mutWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(wfpsf),
+    rhoName_(wfpsf.rhoName_),
+    muName_(wfpsf.muName_),
+    kName_(wfpsf.kName_)
 {}
 
 
 mutWallFunctionFvPatchScalarField::
 mutWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& tppsf,
+    const mutWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(wfpsf, iF),
+    rhoName_(wfpsf.rhoName_),
+    muName_(wfpsf.muName_),
+    kName_(wfpsf.kName_)
 {}
 
 
@@ -113,12 +128,12 @@ void mutWallFunctionFvPatchScalarField::updateCoeffs()
     const scalarField& y = ras.y()[patch().index()];
 
     const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-    const volScalarField& k = db().lookupObject<volScalarField>("k");
+    const volScalarField& k = db().lookupObject<volScalarField>(kName_);
 
     const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
 
     scalarField& mutw = *this;
 
@@ -145,6 +160,9 @@ void mutWallFunctionFvPatchScalarField::updateCoeffs()
 void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
     writeEntry("value", os);
 }
 

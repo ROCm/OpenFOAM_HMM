@@ -58,9 +58,25 @@ class mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 {
     // Private data
 
-        scalar roughnessHeight_;
-        scalar roughnessConstant_;
-        scalar roughnessFudgeFactor_;
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of laminar viscosity field
+        word muName_;
+
+        // Roughness parameters
+
+            //- Height
+            scalar roughnessHeight_;
+
+            //- Constant
+            scalar roughnessConstant_;
+
+            //- Scale factor
+            scalar roughnessFudgeFactor_;
 
 
 public:
@@ -143,38 +159,38 @@ public:
 
         // Access
 
-            //- Return the fluctuation scale
+            //- Return the roughness height scale
             const scalar& roughnessHeight() const
             {
                 return roughnessHeight_;
             }
 
-            //- Return reference to the fluctuation scale to allow adjustment
+            //- Return reference to the roughness height to allow adjustment
             scalar& roughnessHeight()
             {
                 return roughnessHeight_;
             }
 
-
-            //- Return the fluctuation scale
+            //- Return the roughness constant scale
             const scalar& roughnessConstant() const
             {
                 return roughnessConstant_;
             }
 
-            //- Return reference to the fluctuation scale to allow adjustment
+            //- Return reference to the roughness constant to allow adjustment
             scalar& roughnessConstant()
             {
                 return roughnessConstant_;
             }
 
-            //- Return the fluctuation scale
+            //- Return the roughness scale factor
             const scalar& roughnessFudgeFactor() const
             {
                 return roughnessFudgeFactor_;
             }
 
-            //- Return reference to the fluctuation scale to allow adjustment
+            //- Return reference to the roughness scale factor to allow
+            //  adjustment
             scalar& roughnessFudgeFactor()
             {
                 return roughnessFudgeFactor_;

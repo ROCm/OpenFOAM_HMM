@@ -48,7 +48,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    UName_("U"),
+    nuName_("nu")
 {}
 
 
@@ -61,7 +63,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    nuName_(ptf.nuName_)
 {}
 
 
@@ -73,7 +77,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    nuName_(dict.lookupOrDefault<word>("nu", "nu"))
 {}
 
 
@@ -83,7 +89,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
     const nutSpalartAllmarasWallFunctionFvPatchScalarField& tppsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(tppsf),
+    UName_(tppsf.UName_),
+    nuName_(tppsf.nuName_)
 {}
 
 
@@ -94,7 +102,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(tppsf, iF),
+    UName_(tppsf.UName_),
+    nuName_(tppsf.nuName_)
 {}
 
 
@@ -113,12 +123,12 @@ void nutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
     const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+        patch().lookupPatchField<volScalarField, scalar>(nuName_);
 
     scalarField& nutw = *this;
 
@@ -164,6 +174,17 @@ void nutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
             nutw[facei] = 0;
         }
     }
+}
+
+
+void nutSpalartAllmarasWallFunctionFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    fixedValueFvPatchScalarField::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
 }
 
 

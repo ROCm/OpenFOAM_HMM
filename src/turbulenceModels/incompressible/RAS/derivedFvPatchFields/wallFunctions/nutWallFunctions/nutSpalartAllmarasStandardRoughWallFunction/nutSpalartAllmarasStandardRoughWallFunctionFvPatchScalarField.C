@@ -49,6 +49,8 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
+    UName_("U"),
+    nuName_("nu"),
     roughnessHeight_(pTraits<scalar>::zero),
     roughnessConstant_(pTraits<scalar>::zero),
     roughnessFudgeFactor_(pTraits<scalar>::zero)
@@ -65,6 +67,8 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    nuName_(ptf.nuName_),
     roughnessHeight_(ptf.roughnessHeight_),
     roughnessConstant_(ptf.roughnessConstant_),
     roughnessFudgeFactor_(ptf.roughnessFudgeFactor_)
@@ -80,6 +84,8 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     roughnessHeight_(readScalar(dict.lookup("roughnessHeight"))),
     roughnessConstant_(readScalar(dict.lookup("roughnessConstant"))),
     roughnessFudgeFactor_(readScalar(dict.lookup("roughnessFudgeFactor")))
@@ -93,6 +99,8 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(tppsf),
+    UName_(tppsf.UName_),
+    nuName_(tppsf.nuName_),
     roughnessHeight_(tppsf.roughnessHeight_),
     roughnessConstant_(tppsf.roughnessConstant_),
     roughnessFudgeFactor_(tppsf.roughnessFudgeFactor_)
@@ -107,6 +115,8 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(tppsf, iF),
+    UName_(tppsf.UName_),
+    nuName_(tppsf.nuName_),
     roughnessHeight_(tppsf.roughnessHeight_),
     roughnessConstant_(tppsf.roughnessConstant_),
     roughnessFudgeFactor_(tppsf.roughnessFudgeFactor_)
@@ -130,13 +140,13 @@ void nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     // The flow velocity at the adjacent cell centre.
     scalarField magUp = mag(U.patchInternalField() - U);
 
     const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+        patch().lookupPatchField<volScalarField, scalar>(nuName_);
     scalarField& nutw = *this;
 
     scalarField magFaceGradU = mag(U.snGrad());
@@ -276,6 +286,8 @@ void nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     os.writeKeyword("roughnessHeight")
         << roughnessHeight_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessConstant")
