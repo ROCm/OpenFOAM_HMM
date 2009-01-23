@@ -26,13 +26,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* const Foam::pTraits<Foam::Scalar>::typeName = "scalar";
-const Foam::Scalar Foam::pTraits<Foam::Scalar>::zero(0.0);
-const Foam::Scalar Foam::pTraits<Foam::Scalar>::one(1.0);
+namespace Foam
+{
 
-const char* Foam::pTraits<Foam::Scalar>::componentNames[] = { "x" };
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::pTraits<Foam::Scalar>::pTraits(Istream& is)
+const char* const pTraits<Scalar>::typeName = "scalar";
+const Scalar pTraits<Scalar>::zero = 0.0;
+const Scalar pTraits<Scalar>::one = 1.0;
+const Scalar pTraits<Scalar>::max = ScalarVGREAT;
+const Scalar pTraits<Scalar>::min = -ScalarVGREAT;
+
+const char* pTraits<Scalar>::componentNames[] = { "x" };
+
+pTraits<Scalar>::pTraits(Istream& is)
 {
     is >> p_;
 }
@@ -40,26 +47,26 @@ Foam::pTraits<Foam::Scalar>::pTraits(Istream& is)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const Scalar s)
+word name(const Scalar s)
 {
-    std::ostringstream buf;
-    buf << s;
-    return buf.str();
+    std::ostringstream osBuffer;
+    osBuffer << s;
+    return osBuffer.str();
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Scalar Foam::readScalar(Istream& is)
+Scalar readScalar(Istream& is)
 {
-    Scalar val;
-    is >> val;
+    Scalar rs;
+    is >> rs;
 
-    return val;
+    return rs;
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, Scalar& s)
+Istream& operator>>(Istream& is, Scalar& s)
 {
     token t(is);
 
@@ -90,12 +97,16 @@ Foam::Istream& Foam::operator>>(Istream& is, Scalar& s)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const Scalar s)
+Ostream& operator<<(Ostream& os, const Scalar s)
 {
     os.write(s);
     os.check("Ostream& operator<<(Ostream&, const Scalar&)");
     return os;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

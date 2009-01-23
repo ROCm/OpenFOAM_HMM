@@ -61,6 +61,8 @@ public:
         static const char* componentNames[];
         static const Scalar zero;
         static const Scalar one;
+        static const Scalar max;
+        static const Scalar min;
 
     // Constructors
 

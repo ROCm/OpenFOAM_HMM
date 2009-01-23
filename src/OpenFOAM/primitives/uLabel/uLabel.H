@@ -57,6 +57,7 @@ namespace Foam
     typedef unsigned int uLabel;
 
     static const uLabel uLabelMax = UINT_MAX;
+    static const uLabel uLabelMin = 0;
 
     inline uLabel readULabel(Istream& is)
     {
@@ -77,7 +78,8 @@ namespace Foam
 {
     typedef unsigned long uLabel;
 
-    static const uLabel uLabelMax = LONG_MAX;
+    static const uLabel uLabelMax = ULONG_MAX;
+    static const uLabel uLabelMin = 0;
 
     inline uLabel readULabel(Istream& is)
     {
@@ -130,6 +132,8 @@ public:
         static const char* componentNames[];
         static const uLabel zero;
         static const uLabel one;
+        static const uLabel max;
+        static const uLabel min;
 
     // Constructors
 

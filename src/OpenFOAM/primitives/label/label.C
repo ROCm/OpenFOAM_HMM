@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -38,8 +35,10 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const char* const pTraits<label>::typeName = "label";
-const label pTraits<label>::zero(0);
-const label pTraits<label>::one(1);
+const label pTraits<label>::zero = 0;
+const label pTraits<label>::one = 1;
+const label pTraits<label>::max = labelMax;
+const label pTraits<label>::min = labelMin;
 
 const char* pTraits<label>::componentNames[] = { "x" };
 
@@ -47,6 +46,7 @@ pTraits<label>::pTraits(Istream& is)
 {
     is >> p_;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

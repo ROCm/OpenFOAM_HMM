@@ -29,17 +29,27 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* const Foam::pTraits<Foam::uLabel>::typeName = "uLabel";
-const Foam::uLabel Foam::pTraits<Foam::uLabel>::zero(0);
-const Foam::uLabel Foam::pTraits<Foam::uLabel>::one(1);
+namespace Foam
+{
 
-const char* Foam::pTraits<Foam::uLabel>::componentNames[] = { "x" };
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::pTraits<Foam::uLabel>::pTraits(Istream& is)
+const char* const pTraits<uLabel>::typeName = "uLabel";
+const uLabel pTraits<uLabel>::zero = 0;
+const uLabel pTraits<uLabel>::one = 1;
+const uLabel pTraits<uLabel>::max = uLabelMax;
+const uLabel pTraits<uLabel>::min = uLabelMin;
+
+const char* pTraits<uLabel>::componentNames[] = { "x" };
+
+pTraits<uLabel>::pTraits(Istream& is)
 {
     is >> p_;
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

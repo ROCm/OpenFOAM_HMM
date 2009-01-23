@@ -150,6 +150,8 @@ public:
         static const char* componentNames[];
         static const label zero;
         static const label one;
+        static const label max;
+        static const label min;
 
     // Constructors
 

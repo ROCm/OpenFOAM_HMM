@@ -71,6 +71,8 @@ public:
         static const char* componentNames[];
         static const DiagTensor zero;
         static const DiagTensor one;
+        static const DiagTensor max;
+        static const DiagTensor min;
 
 
     //- Component labeling enumeration
