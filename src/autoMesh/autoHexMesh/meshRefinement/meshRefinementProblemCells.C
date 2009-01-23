@@ -443,7 +443,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     {
         const labelList& cPoints = mesh_.cellPoints(cellI, dynCPoints);
 
-        // Get number of anchor points (pointLevel == cellLevel)
+        // Get number of anchor points (pointLevel <= cellLevel)
 
         label nBoundaryAnchors = 0;
         label nNonAnchorBoundary = 0;

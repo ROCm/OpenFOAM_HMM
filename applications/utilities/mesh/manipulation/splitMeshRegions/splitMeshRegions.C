@@ -613,7 +613,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             "fvSchemes",
             mesh.time().system(),
             regionName,
-            mesh.db(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -642,7 +642,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             "fvSolution",
             mesh.time().system(),
             regionName,
-            mesh.db(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false

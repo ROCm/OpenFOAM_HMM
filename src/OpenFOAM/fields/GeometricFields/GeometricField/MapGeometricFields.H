@@ -75,7 +75,7 @@ void MapGeometricFields
 {
     HashTable<const GeometricField<Type, PatchField, GeoMesh>*> fields
     (
-        mapper.db().objectRegistry::lookupClass
+        mapper.thisDb().objectRegistry::lookupClass
             <GeometricField<Type, PatchField, GeoMesh> >()
     );
 
@@ -145,7 +145,7 @@ void MapGeometricFields
                 );
             }
 
-            field.instance() = field.mesh().db().time().timeName();
+            field.instance() = field.time().timeName();
         }
         else if (polyMesh::debug)
         {
