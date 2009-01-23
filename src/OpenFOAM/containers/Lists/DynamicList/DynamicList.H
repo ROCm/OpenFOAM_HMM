@@ -182,9 +182,14 @@ public:
         //- Assignment of all addressed entries to the given value
         inline void operator=(const T&);
 
-        //- Assignment from List<T>. Also handles assignment from DynamicList.
-        inline void operator=(const UList<T>&);
+        //- Assignment from DynamicList
+        inline void operator=
+        (
+            const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+        );
 
+        //- Assignment from List<T>.
+        inline void operator=(const UList<T>&);
 
     // IOstream operators
 
