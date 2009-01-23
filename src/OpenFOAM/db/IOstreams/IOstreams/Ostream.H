@@ -115,7 +115,7 @@ public:
             //- Write string
             virtual Ostream& write(const string&) = 0;
 
-            //- Write std::string surrounded by single quotes.
+            //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             virtual Ostream& writeQuoted
             (

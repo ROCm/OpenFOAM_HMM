@@ -60,7 +60,7 @@ topoSetSources
     // All points in pointzone
     zoneToPoint
     {
-        name '.*Zone';      // name of pointZone, regular expressions allowed
+        name ".*Zone";      // name of pointZone, regular expressions allowed
     }
 
     // Select based on surface

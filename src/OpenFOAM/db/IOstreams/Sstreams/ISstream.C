@@ -152,9 +152,8 @@ Foam::Istream& Foam::ISstream::read(token& t)
             return *this;
         }
 
-        // Strings: enclosed by single or double quotes.
+        // Strings: enclosed by double quotes.
         case token::BEGIN_STRING :
-        case token::BEGIN_QSTRING :
         {
             putback(c);
             string* sPtr = new string;
@@ -369,11 +368,8 @@ Foam::Istream& Foam::ISstream::read(string& str)
 
     char endTok = token::END_STRING;
 
-    if (c == token::BEGIN_QSTRING)
-    {
-        endTok = token::END_QSTRING;
-    }
-    else if (c != token::BEGIN_STRING)
+    // Note, we could also handle single-quoted strings here (if desired)
+    if (c != token::BEGIN_STRING)
     {
         buf[0] = '\0';
 

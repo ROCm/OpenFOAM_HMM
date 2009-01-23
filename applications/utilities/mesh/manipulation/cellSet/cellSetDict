@@ -82,7 +82,7 @@ topoSetSources
     // Cells in cell zone
     zoneToCell
     {
-        name '.*Zone';      // Name of cellZone, regular expressions allowed
+        name ".*Zone";      // Name of cellZone, regular expressions allowed
     }
 
     // values of field within certain range

@@ -118,7 +118,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 {
     if (quoted)
     {
-        os_ << token::BEGIN_QSTRING;
+        os_ << token::BEGIN_STRING;
 
         register int backslash = 0;
         for
@@ -141,7 +141,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
                 lineNumber_++;
                 backslash++;    // backslash escape for newline
             }
-            else if (c == token::END_QSTRING)
+            else if (c == token::END_STRING)
             {
                 backslash++;    // backslash escape for quote
             }
@@ -158,7 +158,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 
         // silently drop any trailing backslashes
         // they would otherwise appear like an escaped end-quote
-        os_ << token::END_QSTRING;
+        os_ << token::END_STRING;
     }
     else
     {

@@ -109,8 +109,6 @@ public:
 
         BEGIN_STRING   = '"',
         END_STRING     = BEGIN_STRING,
-        BEGIN_QSTRING  = '\'',
-        END_QSTRING    = BEGIN_QSTRING,
 
         ASSIGN         = '=',
         ADD            = '+',

@@ -48,7 +48,7 @@ void Foam::Ostream::decrIndent()
 
 
 // Write keyType
-// write regular expression as single-quoted string
+// write regular expression as quoted string
 // write plain word as word (unquoted)
 Foam::Ostream& Foam::Ostream::write(const keyType& kw)
 {
