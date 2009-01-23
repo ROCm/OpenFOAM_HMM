@@ -40,7 +40,7 @@ SeeAlso
 
 ToDo
     Add checks for bad template parameters (ie, nBits=0, nBits too large).
-    Could make PackedBitRef an iterator and use for traversing as well.
+    The missing const_iterator might eventually still be needed.
 
 SourceFiles
     PackedListI.H
@@ -52,7 +52,6 @@ SourceFiles
 #define PackedList_H
 
 #include "labelList.H"
-#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,84 +71,6 @@ template<int nBits> class PackedList;
 
 TemplateName(PackedList);
 
-
-/*---------------------------------------------------------------------------*\
-                        Class PackedBitRef Declaration
-\*---------------------------------------------------------------------------*/
-
-//- The PackedBitRef is used for PackedList
-template <int nBits>
-class PackedBitRef
-{
-private:
-
-    // private data
-    // const mutable List<unsigned int>& list_;
-
-    unsigned int& elem_;
-
-    const label startBit_;
-
-public:
-
-    // Static Public Members
-
-        //- The max. number of bits that can be templated.
-        //  Might someday be useful for a template assert.
-        inline static unsigned int max_bits();
-
-        //- The max. value for an entry, can also be used as the mask
-        //  eg, ((1 << 2) - 1) yields 0b0011
-        inline static unsigned int max_value();
-
-        //- The number of entries per storage entry
-        inline static unsigned int packing();
-
-
-    // Constructors
-    inline PackedBitRef
-    (
-        // const List<unsigned int>& lst
-        const unsigned int& elem, label startBit)
-    :
-        // list_(lst),
-        elem_(const_cast<unsigned int&>(elem)),
-        startBit_(startBit)
-    {}
-
-
-    // Members
-
-    // Assign value
-    inline void operator=(const unsigned int val)
-    {
-        unsigned int shiftedMask = max_value() << startBit_;
-        unsigned int shiftedVal  = (val & max_value()) << startBit_;
-
-        elem_ = (elem_ & ~shiftedMask) | shiftedVal;
-    }
-
-    // return value
-    inline unsigned int operator()() const
-    {
-        return ((elem_ >> startBit_) & max_value());
-    }
-
-    //- Conversion operator
-    inline operator unsigned int () const
-    {
-        return ((elem_ >> startBit_) & max_value());
-    }
-
-    //- Conversion operator
-    inline operator bool() const
-    {
-        return !!((elem_ >> startBit_) & max_value());
-    }
-
-};
-
-
 /*---------------------------------------------------------------------------*\
                          Class PackedList Declaration
 \*---------------------------------------------------------------------------*/
@@ -159,6 +80,8 @@ class PackedList
 :
     private List<unsigned int>
 {
+    typedef unsigned int PackedStorage;
+
     // Private data
 
         //- Number of nBits entries
@@ -166,16 +89,10 @@ class PackedList
 
     // Private Member Functions
 
-        //- Calculate underlying list size
-        inline static label storageSize(const label);
+        //- Calculate the list length when packed
+        inline static label packedLength(const label);
 
-        //- Calculate element index and offset (start) bit within storage
-        inline static label location(const label, label& offset);
-
-        //- Check if value is representable in nBits
-        inline static void checkValue(const unsigned int);
-
-        //- Check index i is within valid range (0 ... size-1).
+        //- Check index I is within valid range [ 0 .. max_value() ]
         inline void checkIndex(const label) const;
 
 public:
@@ -184,23 +101,18 @@ public:
 
         //- The max. number of bits that can be templated.
         //  Might someday be useful for a template assert.
-        inline static unsigned int max_bits()
-        {
-            return PackedBitRef<nBits>::max_bits();
-        }
+        inline static unsigned int max_bits();
 
-        //- The max. value for an entry, can also be used as the mask
+        //- The max. value for an entry, which simultaneously the bit-mask
         //  eg, ((1 << 2) - 1) yields 0b0011
-        inline static unsigned int max_value()
-        {
-            return PackedBitRef<nBits>::max_value();
-        }
+        inline static unsigned int max_value();
 
-        //- The number of entries per storage entry
-        inline static unsigned int packing()
-        {
-            return PackedBitRef<nBits>::packing();
-        }
+        //- The number of entries per packed storage element
+        inline static unsigned int packing();
+
+    // Forward declaration of iterator
+        class iterator;
+        friend class iterator;
 
 
     // Constructors
@@ -208,7 +120,7 @@ public:
         //- Null constructor
         inline PackedList();
 
-        //- Construct with given size. Note: initializes list to 0.
+        //- Construct with given size, initializes list to 0.
         inline PackedList(const label size);
 
         //- Construct with given size and value for all elements.
@@ -233,38 +145,41 @@ public:
         //- The number of elements that can be stored before resizing
         inline label capacity() const;
 
-        //- Number of packed elements.
+        //- Number of entries.
         inline label size() const;
 
         //- Return true if the list is empty (i.e., if size() == 0).
         inline bool empty() const;
 
         //- Get value at index I.
-        //  Does not auto-vivifies elements.
-        inline unsigned int get(const label i) const;
+        //  Does not auto-vivifies entries.
+        inline unsigned int get(const label) const;
 
         //- Set value at index I. Return true if value changed.
-        //  Does not auto-vivifies elements.
-        inline bool set(const label i, const unsigned int val);
+        //  Does not auto-vivifies entries.
+        inline bool set(const label, const unsigned int val);
 
-        //- Underlying storage
+        //- Return the underlying packed storage
         inline const List<unsigned int>& storage() const;
 
-        //- Return as labelList
+        //- Return the values as a labelList
         labelList values() const;
+
+        //- Print values and information
+        Ostream& print(Ostream&) const;
 
         // Edit
 
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
         //  remain otherwise untouched.
-        //  Use this or reserve() in combination with append().
         inline void setCapacity(const label);
 
-        //- Reset size of List, optionally specify a value for new elements.
+        //- Reset addressable list size, does not shrink the allocated size.
+        //  Optionally specify a value for new elements.
         inline void resize(const label, const unsigned int& val = 0);
 
-        //- Reset size of List, optionally specify a value for new elements.
+        //- Alias for resize()
         inline void setSize(const label, const unsigned int& val = 0);
 
         //- Reserve allocation space for at least this size.
@@ -272,8 +187,8 @@ public:
         //  Optionally provide an initialization value for new elements.
         inline void reserve(const label, const unsigned int& val = 0);
 
-        //- Clear the list, i.e. set size to zero.
-        //- Does not adjust the underlying storage
+        //- Clear the list, i.e. set addressable size to zero.
+        //  Does not adjust the underlying storage
         inline void clear();
 
         //- Clear the list and delete storage.
@@ -282,7 +197,7 @@ public:
         //- Shrink the allocated space to what is used.
         inline void shrink();
 
-        //- Transfer the contents of the argument List into this List
+        //- Transfer the contents of the argument list into this list
         //  and annull the argument list.
         inline void transfer(PackedList<nBits>&);
 
@@ -291,17 +206,17 @@ public:
 
     // Member operators
 
-        //- Append a value at the end of the list. Return true if value changed.
-        inline bool append(const unsigned int val);
+        //- Append a value at the end of the list
+        inline void append(const unsigned int val);
 
         //- Get value at index I
-        //  Does not auto-vivifies elements.
-        inline unsigned int operator[](const label i) const;
+        //  Auto-vivifies any new values to zero.
+        inline unsigned int operator[](const label) const;
 
         //- Set value at index I.
         //  Returns proxy to perform the actual operation.
         //  Auto-vivifies any new values to zero.
-        inline ::Foam::PackedBitRef<nBits> operator[](const label i);
+        inline iterator operator[](const label);
 
         //- Assignment of all entries to the given value.
         //  Does set on all elements.
@@ -317,6 +232,71 @@ public:
 
     //  // Write PackedList to Ostream.
     //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+
+
+    //- The iterator-like class used for PackedList
+    class iterator
+    {
+        friend class PackedList;
+
+        // Private Data
+
+        //- Reference to original list
+        PackedList& list_;
+
+        //- Element index within storage
+        unsigned elem_;
+
+        //- Offset within storage element
+        unsigned offset_;
+
+        //- Return the raw storage element
+        inline PackedStorage& chunk() const;
+
+        //- Return the position in the PackedList
+        inline label position() const;
+
+    public:
+
+        // Constructors
+
+        //- Construct from base list and position index
+        inline iterator(const PackedList&, const label i);
+
+        // Members
+
+        //- Assign value, returns true if the value changed
+        inline bool operator=(const unsigned int val);
+
+        //- Conversion operator
+        inline operator unsigned int () const;
+
+        //- Conversion operator
+        inline operator bool() const;
+
+        // Member operators
+
+        inline void operator=(const iterator&);
+        inline bool operator==(const iterator&) const;
+        inline bool operator!=(const iterator&) const;
+
+        //- Return referenced value
+        inline unsigned int operator()() const;
+
+        inline iterator& operator++();
+        inline iterator operator++(int);
+
+        //- Print value and information
+        Ostream& print(Ostream&) const;
+
+    };
+
+
+    //- iterator set to the begining of the PackedList
+    inline iterator begin();
+
+    //- iterator set to beyond the end of the HashTable
+    inline iterator end();
 
 };
 

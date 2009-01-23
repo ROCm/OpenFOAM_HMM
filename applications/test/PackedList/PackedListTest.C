@@ -28,112 +28,144 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "OSspecific.H"
-
 #include "IOstreams.H"
-#include "IStringStream.H"
-#include "scalar.H"
-#include "vector.H"
-#include "ListOps.H"
-#include "List.H"
 #include "PackedBoolList.H"
-#include <bitset>
 
 using namespace Foam;
-
-template <int nBits>
-void printPackedList(const PackedList<nBits>& L)
-{
-    const List<unsigned int>& stor = L.storage();
-
-    cout<< "PackedList<" << nBits << ">"
-        << " max_bits:"  << L.max_bits()
-        << " max_value:" << L.max_value()
-        << " packing:"   << L.packing() << nl;
-
-    cout<< "values:  " << L.size() << "/" << L.capacity() << " ( ";
-    forAll(L, i)
-    {
-        cout<< L[i] << ' ';
-    }
-    cout<< ")\n";
-
-    // using std:bitset for output works, but annoys valgrind
-    cout<< "storage: " << stor.size() << "( ";
-    forAll(stor, i)
-    {
-        cout<< std::bitset<32>(stor[i]) << ' ';
-    }
-    cout<< ")\n" << nl;
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
-{    
-    cout<< "PackedList::max_bits() = " << PackedList<0>::max_bits() << nl;
+{
+    bool changed;
+    Info<< "PackedList max_bits() = " << PackedList<0>::max_bits() << nl;
 
+    Info<< "\ntest allocation with value\n";
     PackedList<3> list1(5,1);
+    list1.print(Info);
 
-    printPackedList(list1);
-
+    Info<< "\ntest assign uniform value\n";
     list1 = 2;
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest resize with value (without reallocation)\n";
     list1.resize(6, 3);
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest set() function\n";
+    list1.set(1, 5);
+    list1.print(Info);
+
+    Info<< "\ntest assign bool\n";
     list1 = false;
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest assign bool\n";
     list1 = true;
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest resize without value (with reallocation)\n";
     list1.resize(12);
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest resize with value (with reallocation)\n";
     list1.resize(25, list1.max_value());
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest resize smaller (should not touch allocation)\n";
     list1.resize(8);
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest append() operation\n";
     list1.append(2);
     list1.append(3);
     list1.append(4);
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest reserve() operation\n";
     list1.reserve(32);
-    printPackedList(list1);
+    list1.print(Info);
 
+    Info<< "\ntest shrink() operation\n";
     list1.shrink();
-    printPackedList(list1);
+    list1.print(Info);
 
-    list1.setSize(15);
-    printPackedList(list1);
+    Info<< "\ntest setCapacity() operation\n";
+    list1.setCapacity(15);
+    list1.print(Info);
 
-    list1.setSize(32);
-    printPackedList(list1);
+    Info<< "\ntest setCapacity() operation\n";
+    list1.setCapacity(30);
+    list1.print(Info);
 
-    // test assignment
+    Info<< "\ntest operator[] assignment\n";
     list1[16] = 5;
-    printPackedList(list1);
+    list1.print(Info);
 
-    // auto-vivify
+    Info<< "\ntest operator[] assignment with auto-vivify\n";
     list1[36] = list1.max_value();
-    printPackedList(list1);
+    list1.print(Info);
 
-    list1.setSize(4);
-    printPackedList(list1);
+    Info<< "\ntest setCapacity smaller\n";
+    list1.setCapacity(32);
+    list1.print(Info);
 
+    // add in some misc values
+    list1[31] = 1;
+    list1[32] = 2;
+    list1[33] = 3;
+
+    Info<< "\ntest iterator\n";
+    PackedList<3>::iterator iter = list1.begin();
+    Info<< "iterator:" << iter() << "\n";
+    iter.print(Info) << "\n";
+
+    Info<< "\ntest iterator operator=\n";
+    changed = (iter = 5);
+
+    Info<< "iterator:" << iter() << "\n";
+    Info<< "changed:" << changed << "\n";
+    changed = (iter = 5);
+    Info<< "changed:" << changed << "\n";
+    list1.print(Info);
+
+    Info<< "\ntest get() method\n";
+    Info<< "get(10):" << list1.get(10)
+        << " and list[10]:" << unsigned(list1[10]) << "\n";
+    list1.print(Info);
+
+    Info<< "\ntest iterator indexing\n";
+    Info<< "end() ";
+    list1.end().print(Info) << "\n";
+
+    for (iter = list1[31]; iter != list1.end(); ++iter)
+    {
+        iter.print(Info);
+    }
+
+    Info<< "\ntest operator[] auto-vivify\n";
+    const unsigned int val = list1[45];
+
+    Info<< "list[45]:" << val << "\n";
+    list1.print(Info);
+
+
+    Info<< "\ntest copy constructor + append\n";
     PackedList<3> list2(list1);
     list2.append(4);
+    Info<< "source list:\n";
+    list1.print(Info);
+    Info<< "destination list:\n";
+    list2.print(Info);
 
-    cout << "after copy + append\n";
-    printPackedList(list1);
-    printPackedList(list2);
+    Info<< "\ntest pattern that fills all bits\n";
+    PackedList<4> list3(8, 8);
+    list3[list3.size()-2] = 0;
+    list3[list3.size()-1] = list3.max_value();
+    list3.print(Info);
+
+    Info<< "\n\nDone.\n";
 
     return 0;
 }

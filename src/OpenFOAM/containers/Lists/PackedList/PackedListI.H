@@ -25,71 +25,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PackedListI_H
-#define PackedListI_H
-
-#include "IOstreams.H"
+#include "error.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<int nBits>
-inline unsigned int Foam::PackedBitRef<nBits>::max_bits()
+inline unsigned int Foam::PackedList<nBits>::max_bits()
 {
-    return sizeof(unsigned int)*8 - 1;
+    return sizeof(PackedStorage)*8 - 1;
 }
 
 
 template<int nBits>
-inline unsigned int Foam::PackedBitRef<nBits>::max_value()
+inline unsigned int Foam::PackedList<nBits>::max_value()
 {
     return ((1u << nBits) - 1);
 }
 
 
 template<int nBits>
-inline unsigned int Foam::PackedBitRef<nBits>::packing()
+inline unsigned int Foam::PackedList<nBits>::packing()
 {
-    return sizeof(unsigned int)*8 / nBits;
-}
-
-
-// Calculate underlying list size
-template<int nBits>
-inline Foam::label Foam::PackedList<nBits>::storageSize(const label sz)
-{
-    return (sz + packing() - 1) / packing();
+    return sizeof(PackedStorage)*8 / nBits;
 }
 
 
 template<int nBits>
-inline Foam::label Foam::PackedList<nBits>::location
-(
-    const label i,
-    label& offset
-)
+inline Foam::label Foam::PackedList<nBits>::packedLength(const label nElem)
 {
-    // the offset is the start bit within the storage element
-    offset = nBits * (i % packing());
-    return i / packing();
+    return (nElem + packing() - 1) / packing();
 }
 
 
-// Check value is representable in nBits
-template<int nBits>
-inline void Foam::PackedList<nBits>::checkValue(const unsigned int val)
-{
-    if (val > max_value())
-    {
-        FatalErrorIn("PackedList<T>::checkValue(const unsigned int)")
-            << "value " << label(val) << " out of range 0 ... "
-            << label(max_value())
-            << " representable by " << nBits << " bits"
-            << abort(FatalError);
-    }
-}
-
-
-// Check index i is within valid range (0 ... size-1).
 template<int nBits>
 inline void Foam::PackedList<nBits>::checkIndex(const label i) const
 {
@@ -110,20 +77,18 @@ inline void Foam::PackedList<nBits>::checkIndex(const label i) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 template<int nBits>
 inline Foam::PackedList<nBits>::PackedList()
 :
-    List<unsigned int>(),
+    List<PackedStorage>(),
     size_(0)
 {}
 
 
-// Construct with given size.
 template<int nBits>
 inline Foam::PackedList<nBits>::PackedList(const label size)
 :
-    List<unsigned int>(storageSize(size), 0u),
+    List<PackedStorage>(packedLength(size), 0u),
     size_(size)
 {}
 
@@ -131,7 +96,7 @@ inline Foam::PackedList<nBits>::PackedList(const label size)
 template<int nBits>
 inline Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 :
-    List<unsigned int>(lst),
+    List<PackedStorage>(lst),
     size_(lst.size())
 {}
 
@@ -143,11 +108,158 @@ inline Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
 }
 
 
-
 template<int nBits>
-inline Foam::autoPtr<Foam::PackedList<nBits> > Foam::PackedList<nBits>::clone() const
+inline Foam::autoPtr<Foam::PackedList<nBits> >
+Foam::PackedList<nBits>::clone() const
 {
     return autoPtr<PackedList<nBits> >(new PackedList<nBits>(*this));
+}
+
+
+// * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * * //
+
+template<int nBits>
+inline Foam::PackedList<nBits>::iterator::iterator
+(
+    const PackedList<nBits>& lst,
+    const label i
+)
+:
+    list_(const_cast<PackedList<nBits>&>(lst)),
+    elem_(i / packing()),
+    offset_(i % packing())
+{}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::iterator::operator=
+(
+    const iterator& iter
+)
+{
+    elem_ = iter.elem_;
+    offset_ = iter.offset_;
+}
+
+
+template<int nBits>
+inline bool Foam::PackedList<nBits>::iterator::operator==
+(
+    const iterator& iter
+) const
+{
+    return elem_ == iter.elem_ && offset_ == iter.offset_;
+}
+
+
+template<int nBits>
+inline bool Foam::PackedList<nBits>::iterator::operator!=
+(
+    const iterator& iter
+) const
+{
+    return !(operator==(iter));
+}
+
+
+template<int nBits>
+inline bool Foam::PackedList<nBits>::iterator::operator=
+(
+    const unsigned int val
+)
+{
+    const unsigned int startBit = nBits * offset_;
+    const unsigned int mask = max_value() << startBit;
+
+    unsigned int& stored = chunk();
+    const unsigned int old = stored;
+
+    stored &= ~mask;
+    stored |= (val << startBit) & mask;
+
+    return (old != stored);
+}
+
+
+template<int nBits>
+inline Foam::label Foam::PackedList<nBits>::iterator::position() const
+{
+    return (elem_ * packing() + offset_);
+}
+
+
+template<int nBits>
+inline unsigned int& Foam::PackedList<nBits>::iterator::chunk() const
+{
+    return list_.List<PackedStorage>::operator[](elem_);
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator&
+Foam::PackedList<nBits>::iterator::operator++()
+{
+    if (position() < list_.size())
+    {
+        offset_++;
+        if (offset_ >= packing())
+        {
+            elem_++;
+            offset_ = 0;
+        }
+    }
+
+    return *this;
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator
+Foam::PackedList<nBits>::iterator::operator++(int)
+{
+    iterator old = *this;
+    ++*this;
+    return old;
+}
+
+
+template<int nBits>
+inline unsigned int
+Foam::PackedList<nBits>::iterator::operator()() const
+{
+    return (chunk() >> (nBits * offset_)) & max_value();
+}
+
+
+template<int nBits>
+inline Foam::PackedList<nBits>::iterator::operator
+unsigned int () const
+{
+    return (chunk() >> (nBits * offset_)) & max_value();
+}
+
+
+template<int nBits>
+inline Foam::PackedList<nBits>::iterator::operator
+bool() const
+{
+    return !!(chunk() >> (nBits * offset_)) & max_value();
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator
+Foam::PackedList<nBits>::begin()
+{
+    return iterator(*this, 0);
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator
+Foam::PackedList<nBits>::end()
+{
+    return iterator(*this, size());
 }
 
 
@@ -170,12 +282,12 @@ inline bool Foam::PackedList<nBits>::empty() const
 template<int nBits>
 inline void Foam::PackedList<nBits>::resize
 (
-    const label newSize,
+    const label nElem,
     const unsigned int& val
 )
 {
-    reserve(newSize, val);
-    size_ = newSize;
+    reserve(nElem, val);
+    size_ = nElem;
 }
 
 
@@ -194,21 +306,35 @@ inline void Foam::PackedList<nBits>::setSize
 template<int nBits>
 inline Foam::label Foam::PackedList<nBits>::capacity() const
 {
-    return packing() * List<unsigned int>::size();
+    return packing() * List<PackedStorage>::size();
 }
 
 
 template<int nBits>
 inline void Foam::PackedList<nBits>::setCapacity(const label nElem)
 {
-    List<unsigned int>::setSize(storageSize(nElem), 0);
+    List<PackedStorage>::setSize(packedLength(nElem), 0u);
 
-    for (label i = size_; i < nElem; i++)
+    // truncates addressable section too
+    if (size_ > nElem)
     {
-        set(i, 0);
+#       ifdef DEBUGList
+        // clear old values (purely cosmetics for string output)
+        for (label i = nElem; i < size_; i++)
+        {
+            set(i, 0);
+        }
+#       endif
+        size_ = nElem;
     }
-
-    size_ = nElem;
+    else
+    {
+        // fill new elements
+        for (label i = size_; i < nElem; i++)
+        {
+            set(i, 0);
+        }
+    }
 }
 
 
@@ -219,15 +345,15 @@ inline void Foam::PackedList<nBits>::reserve
     const unsigned int& val
 )
 {
-    label rawSize = storageSize(nElem);
+    label len = packedLength(nElem);
 
     // need more capacity?
-    if (rawSize > List<unsigned int>::size())
+    if (len > List<PackedStorage>::size())
     {
-        List<unsigned int>::setSize(rawSize, 0);
+        List<PackedStorage>::setSize(len, 0);
     }
 
-    // fill new elements, don't rely on List::setSize
+    // fill new elements
     for (label i = size_; i < nElem; i++)
     {
         set(i, val);
@@ -245,7 +371,7 @@ inline void Foam::PackedList<nBits>::clear()
 template<int nBits>
 inline void Foam::PackedList<nBits>::clearStorage()
 {
-    List<unsigned int>::clear();
+    List<PackedStorage>::clear();
     size_ = 0;
 }
 
@@ -253,86 +379,20 @@ inline void Foam::PackedList<nBits>::clearStorage()
 template<int nBits>
 inline void Foam::PackedList<nBits>::shrink()
 {
-    label rawSize = storageSize(size_);
+    label len = packedLength(size_);
 
     // we have unused space?
-    if (rawSize < List<unsigned int>::size())
+    if (len < List<PackedStorage>::size())
     {
-        List<unsigned int>::setSize(rawSize);
+        List<PackedStorage>::setSize(len);
     }
 }
 
-
-// Get value at i
 template<int nBits>
-inline unsigned int Foam::PackedList<nBits>::get(const label i) const
+inline const Foam::List<unsigned int>&
+Foam::PackedList<nBits>::storage() const
 {
-#   ifdef DEBUGList
-    checkIndex(i);
-#   endif
-
-    label startBit;
-    const unsigned int& elem = List<unsigned int>::operator[]
-    (
-        location(i, startBit)
-    );
-
-    // PackedBitRef<nBits> iter(*this, elem, startBit);
-
-    // return PackedBitRef<nBits>(*this, elem, startBit)();
-
-    return (elem >> startBit) & max_value();
-}
-
-
-template<int nBits>
-inline unsigned int Foam::PackedList<nBits>::operator[](const label i) const
-{
-    return get(i);
-}
-
-
-// Set value at i
-template<int nBits>
-inline bool Foam::PackedList<nBits>::set(const label i, const unsigned int val)
-{
-#   ifdef DEBUGList
-    checkIndex(i);
-    checkValue(val);
-#   endif
-
-    label startBit;
-    unsigned int& elem = List<unsigned int>::operator[]
-    (
-        location(i, startBit)
-    );
-
-    unsigned int oldElem = elem;
-
-    unsigned int shiftedMask = max_value() << startBit;
-    unsigned int shiftedVal  = (val & max_value()) << startBit;
-
-    elem = (elem & ~shiftedMask) | shiftedVal;
-
-    return elem != oldElem;
-}
-
-
-template<int nBits>
-inline bool Foam::PackedList<nBits>::append(const unsigned int val)
-{
-    label elemI = size_;
-    reserve(elemI + 1);
-    size_++;
-
-    return set(elemI, val);
-}
-
-
-template<int nBits>
-inline const Foam::List<unsigned int>& Foam::PackedList<nBits>::storage() const
-{
-    return static_cast<const List<unsigned int>&>(*this);
+    return static_cast<const List<PackedStorage>&>(*this);
 }
 
 
@@ -342,9 +402,8 @@ inline void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
     size_ = lst.size_;
     lst.size_ = 0;
 
-    List<unsigned int>::transfer(lst);
+    List<PackedStorage>::transfer(lst);
 }
-
 
 
 template<int nBits>
@@ -355,9 +414,69 @@ Foam::PackedList<nBits>::xfer()
 }
 
 
+template<int nBits>
+inline unsigned int Foam::PackedList<nBits>::get(const label i) const
+{
+#   ifdef DEBUGList
+    checkIndex(i);
+#   endif
+
+    return iterator(*this, i)();
+}
+
 
 template<int nBits>
-inline typename Foam::PackedBitRef<nBits>
+inline unsigned int Foam::PackedList<nBits>::operator[](const label i) const
+{
+    if (i >= size_)
+    {
+        setSize(i + 1);
+        return 0;
+    }
+    else
+    {
+        return iterator(*this, i)();
+    }
+}
+
+
+template<int nBits>
+inline bool Foam::PackedList<nBits>::set
+(
+    const label i,
+    const unsigned int val
+)
+{
+#   ifdef DEBUGList
+    checkIndex(i);
+
+    if (val & ~max_value())
+    {
+        FatalErrorIn("PackedList<T>::set(const label, const unsigned int)")
+            << "value " << label(val)
+            << " out-of-range 0 ... " << label(max_value())
+            << " representable by " << nBits << " bits"
+            << abort(FatalError);
+    }
+#   endif
+
+    return (iterator(*this, i) = val);
+}
+
+
+template<int nBits>
+inline void Foam::PackedList<nBits>::append(const unsigned int val)
+{
+    label elemI = size_;
+    reserve(elemI + 1);
+    size_++;
+
+    iterator(*this, elemI) = val;
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator
 Foam::PackedList<nBits>::operator[](const label i)
 {
     if (i >= size_)
@@ -365,45 +484,25 @@ Foam::PackedList<nBits>::operator[](const label i)
         setSize(i + 1);
     }
 
-    label startBit;
-    unsigned int& elem = List<unsigned int>::operator[]
-    (
-        location(i, startBit)
-    );
-
-    return ::Foam::PackedBitRef<nBits>
-    (
-        // *this,
-        elem, 
-        startBit
-    );
+    return iterator(*this, i);
 }
 
 
-// Set all to val
 template<int nBits>
 inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
 {
-#   ifdef DEBUGList
-    checkValue(val);
-#   endif
-
     if (val)
     {
-        forAll(*this, i)
+        forAll(*this, elemI)
         {
-            set(i, val);
+            set(elemI, val);
         }
     }
     else
     {
-        List<unsigned int>::operator=(val);
+        List<PackedStorage>::operator=(val);
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
