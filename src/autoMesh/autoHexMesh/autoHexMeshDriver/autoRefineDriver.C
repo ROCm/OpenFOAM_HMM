@@ -80,7 +80,7 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
                     featFileName,           // name
                     mesh.time().constant(), // directory
                     "triSurface",           // instance
-                    mesh.db(),              // registry
+                    mesh.time(),            // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
                     false
