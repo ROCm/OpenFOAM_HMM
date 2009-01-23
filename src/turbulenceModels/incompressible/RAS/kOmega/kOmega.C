@@ -101,9 +101,6 @@ kOmega::kOmega
         )
     ),
 
-    omega0_("omega0", dimless/dimTime, SMALL),
-    omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
-
     k_
     (
         IOobject
@@ -271,7 +268,7 @@ void kOmega::correct()
 
 
     // Re-calculate viscosity
-    nut_ == k_/omega_;
+    nut_ == k_/(omega_ + omegaSmall_);
     nut_.correctBoundaryConditions();
 }
 
