@@ -538,7 +538,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     forAll (bm, patchI)
     {
-        if (bm[patchI].start() != nextPatchStart)
+        if (bm[patchI].start() != nextPatchStart && !boundaryError)
         {
             boundaryError = true;
 
@@ -547,7 +547,9 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
                 << " of type " <<  bm[patchI].type()
                 << ". The patch should start on face no " << nextPatchStart
                 << " and the patch specifies " << bm[patchI].start()
-                << "." << endl;
+                << "." << endl
+                << "Possibly consecutive patches have this same problem."
+                << " Suppressing future warnings." << endl;
         }
 
         nextPatchStart += bm[patchI].size();
