@@ -58,6 +58,12 @@ class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 {
     // Private data
 
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of laminar viscosity field
+        word nuName_;
+
 
 public:
 
@@ -144,6 +150,9 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::blocking
             );
+
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 

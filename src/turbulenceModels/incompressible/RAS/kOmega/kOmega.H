@@ -90,10 +90,6 @@ class kOmega
             dimensionedScalar alphaOmega_;
 
 
-            dimensionedScalar omega0_;
-            dimensionedScalar omegaSmall_;
-
-
         // Fields
 
             volScalarField k_;

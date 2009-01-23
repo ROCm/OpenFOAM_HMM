@@ -46,6 +46,12 @@ template<>
 const sphericalTensor2D sphericalTensor2D::one(1);
 
 template<>
+const sphericalTensor2D sphericalTensor2D::max(VGREAT);
+
+template<>
+const sphericalTensor2D sphericalTensor2D::min(-VGREAT);
+
+template<>
 const sphericalTensor2D sphericalTensor2D::I(1);
 
 template<>

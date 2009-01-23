@@ -2889,7 +2889,7 @@ void Foam::autoLayerDriver::addLayers
                 //mesh.name()+"_layer",
                 mesh.name(),
                 static_cast<polyMesh&>(mesh).instance(),
-                mesh.db(),  // register with runTime
+                mesh.time(),  // register with runTime
                 static_cast<polyMesh&>(mesh).readOpt(),
                 static_cast<polyMesh&>(mesh).writeOpt()
             ),              // io params from original mesh but new name
