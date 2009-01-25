@@ -46,11 +46,11 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest assign uniform value\n";
-    list1 = 2;
+    list1 = 4;
     list1.print(Info);
 
     Info<< "\ntest resize with value (without reallocation)\n";
-    list1.resize(6, 3);
+    list1.resize(8, list1.max_value());
     list1.print(Info);
 
     Info<< "\ntest set() function\n";
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest setCapacity() operation\n";
-    list1.setCapacity(30);
+    list1.setCapacity(100);
     list1.print(Info);
 
     Info<< "\ntest operator[] assignment\n";
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest setCapacity smaller\n";
-    list1.setCapacity(32);
+    list1.setCapacity(24);
     list1.print(Info);
 
     // add in some misc values
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     Info<< "\ntest iterator\n";
     PackedList<3>::iterator iter = list1.begin();
-    Info<< "iterator:" << iter() << "\n";
+    Info<< "begin():";
     iter.print(Info) << "\n";
 
     Info<< "\ntest iterator operator=\n";
@@ -131,23 +131,29 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest get() method\n";
-    Info<< "get(10):" << list1.get(10)
-        << " and list[10]:" << unsigned(list1[10]) << "\n";
+    Info<< "get(10):" << list1.get(10) << " and list[10]:" << list1[10] << "\n";
     list1.print(Info);
 
     Info<< "\ntest iterator indexing\n";
-    Info<< "end() ";
-    list1.end().print(Info) << "\n";
+    Info<< "cend() ";
+    list1.cend().print(Info) << "\n";
 
-    for (iter = list1[31]; iter != list1.end(); ++iter)
+    for 
+    (
+        PackedList<3>::const_iterator cit = list1[30];
+        cit != list1.cend();
+        ++cit)
     {
-        iter.print(Info);
+        cit.print(Info);
     }
 
     Info<< "\ntest operator[] auto-vivify\n";
     const unsigned int val = list1[45];
 
     Info<< "list[45]:" << val << "\n";
+    list1[45] = list1.max_value();
+    Info<< "list[45]:" << list1[45] << "\n";
+    list1[49] = list1.max_value();
     list1.print(Info);
 
 
@@ -161,8 +167,15 @@ int main(int argc, char *argv[])
 
     Info<< "\ntest pattern that fills all bits\n";
     PackedList<4> list3(8, 8);
-    list3[list3.size()-2] = 0;
-    list3[list3.size()-1] = list3.max_value();
+    
+    label pos = list3.size() - 1;
+
+    list3[pos--] = list3.max_value();
+    list3[pos--] = 0;
+    list3[pos--] = list3.max_value();
+    list3.print(Info);
+
+    Info<< "removed final value: " << list3.remove() << endl;
     list3.print(Info);
 
     Info<< "\n\nDone.\n";
