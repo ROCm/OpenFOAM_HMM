@@ -239,6 +239,11 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
     orientation1.write();
     orientation2.write();
     orientation3.write();
+
+    mC.writeXYZ
+    (
+        mC.mesh().time().timePath() + "/lagrangian" + "/moleculeCloud.xmol"
+    );
 }
 
 

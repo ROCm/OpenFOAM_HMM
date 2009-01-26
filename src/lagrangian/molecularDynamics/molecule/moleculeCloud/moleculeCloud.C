@@ -1039,6 +1039,7 @@ Foam::label Foam::moleculeCloud::nSites() const
     return n;
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::moleculeCloud::moleculeCloud
@@ -1182,11 +1183,13 @@ void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
 
     for (mol = this->begin(); mol != this->end(); ++mol)
     {
+        const molecule::constantProperties& cP = constProps(mol().id());
+
         forAll(mol().sitePositions(), i)
         {
             const point& sP = mol().sitePositions()[i];
 
-            str<< pot_.siteIdList()[constProps(mol().id()).siteIds()[i]]
+            str<< pot_.siteIdList()[cP.siteIds()[i]]
                 << ' ' << sP.x()*1e10
                 << ' ' << sP.y()*1e10
                 << ' ' << sP.z()*1e10

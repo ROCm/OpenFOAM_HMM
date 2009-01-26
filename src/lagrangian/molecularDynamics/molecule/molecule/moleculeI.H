@@ -29,6 +29,7 @@ License
 inline Foam::molecule::constantProperties::constantProperties()
 :
     siteReferencePositions_(Field<vector>(0)),
+    siteMasses_(List<scalar>(0)),
     siteCharges_(List<scalar>(0)),
     siteIds_(List<label>(0)),
     pairPotentialSites_(List<bool>(false)),
@@ -44,6 +45,7 @@ inline Foam::molecule::constantProperties::constantProperties
 )
 :
     siteReferencePositions_(dict.lookup("siteReferencePositions")),
+    siteMasses_(dict.lookup("siteMasses")),
     siteCharges_(dict.lookup("siteCharges")),
     siteIds_(List<word>(dict.lookup("siteIds")).size(), -1),
     pairPotentialSites_(),
@@ -59,9 +61,7 @@ inline Foam::molecule::constantProperties::constantProperties
         List<word>(dict.lookup("pairPotentialSiteIds"))
     );
 
-    scalarList siteMasses(dict.lookup("siteMasses"));
-
-    mass_ = sum(siteMasses);
+    mass_ = sum(siteMasses_);
 
     vector centreOfMass(vector::zero);
 
@@ -70,7 +70,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
     forAll(siteReferencePositions_, i)
     {
-        centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+        centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
     }
 
     centreOfMass /= mass_;
@@ -106,7 +106,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
         forAll(siteReferencePositions_, i)
         {
-            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+            centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
         }
 
         centreOfMass /= mass_;
@@ -119,7 +119,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses[i]*diagTensor
+            momOfInertia += siteMasses_[i]*diagTensor
             (
                 0, p.x()*p.x(), p.x()*p.x()
             );
@@ -144,7 +144,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses[i]*tensor
+            momOfInertia += siteMasses_[i]*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -187,7 +187,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
         forAll(siteReferencePositions_, i)
         {
-            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+            centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
         }
 
         centreOfMass /= mass_;
@@ -203,7 +203,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses[i]*tensor
+            momOfInertia += siteMasses_[i]*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -334,6 +334,13 @@ inline const Foam::Field<Foam::vector>&
 Foam::molecule::constantProperties::siteReferencePositions() const
 {
     return siteReferencePositions_;
+}
+
+
+inline const Foam::List<Foam::scalar>&
+Foam::molecule::constantProperties::siteMasses() const
+{
+    return siteMasses_;
 }
 
 

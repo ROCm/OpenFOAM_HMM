@@ -82,6 +82,8 @@ public:
 
             Field<vector> siteReferencePositions_;
 
+            List<scalar> siteMasses_;
+
             List<scalar> siteCharges_;
 
             List<label> siteIds_;
@@ -116,6 +118,8 @@ public:
         // Member functions
 
         inline const Field<vector>& siteReferencePositions() const;
+
+        inline const List<scalar>& siteMasses() const;
 
         inline const List<scalar>& siteCharges() const;
 
