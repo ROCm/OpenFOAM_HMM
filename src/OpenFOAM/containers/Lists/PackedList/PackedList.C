@@ -67,10 +67,11 @@ Foam::labelList Foam::PackedList<nBits>::values() const
 
 
 template<int nBits>
-Foam::Ostream& Foam::PackedList<nBits>::iterator::print(Ostream& os) const
+Foam::Ostream& Foam::PackedList<nBits>::const_iterator::print(Ostream& os) const
 {
-    os  << "iterator<" << nBits << "> [" << position() << "]"
-        << " elem:" << elem_ << " offset:" << offset_
+    os  << "iterator<" << nBits << "> ["
+        << (index_ * packing() + offset_) << "]"
+        << " index:" << index_ << " offset:" << offset_
         << " value:" << unsigned(*this)
         << nl;
 
@@ -90,27 +91,41 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
         os << get(i) << ' ';
     }
 
+    label packLen = packedLength(size());
+
     os  << ")\n"
-        << "storage: " << storage().size() << "( ";
+        << "storage: " << packLen << "/" << storage().size() << "( ";
 
-    label count = size();
+    // mask for the valid bits
+    unsigned int validBits = max_value();
+    for (unsigned int i = 1; i < packing(); ++i)
+    {
+        validBits |= (validBits << nBits);
+    }
 
-    forAll(storage(), i)
+    for (label i=0; i < packLen; i++)
     {
         const PackedStorage& rawBits = storage()[i];
 
-        // create mask for unaddressed bits
-        unsigned int addressed = 0;
-
-        for (unsigned packI = 0; count && packI < packing(); packI++, count--)
+        // the final storage may not be full, modify validBits accordingly
+        if (i+1 == packLen)
         {
-            addressed <<= nBits;
-            addressed |= max_value();
+            label junk = size() % packing();
+
+            if (junk)
+            {
+                junk = packing() - junk;
+            }
+
+            for (label j=0; j < junk; j++)
+            {
+                validBits >>= nBits;
+            }
         }
 
         for (unsigned int testBit = 0x1 << max_bits(); testBit; testBit >>= 1)
         {
-            if (testBit & addressed)
+            if (testBit & validBits)
             {
                 if (rawBits & testBit)
                 {
@@ -123,7 +138,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
             }
             else
             {
-                os << '_';
+                os << '.';
             }
         }
         cout << ' ';
@@ -154,7 +169,6 @@ void Foam::PackedList<nBits>::operator=(const UList<label>& lst)
         set(i, lst[i]);
     }
 }
-
 
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
