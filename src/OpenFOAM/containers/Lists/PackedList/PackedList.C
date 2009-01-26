@@ -31,7 +31,7 @@ License
 template<int nBits>
 Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
 :
-    List<PackedStorage>(packedLength(size), 0u),
+    StorageList(packedLength(size), 0u),
     size_(size)
 {
     operator=(val);
@@ -41,7 +41,7 @@ Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
 template<int nBits>
 Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 :
-    List<PackedStorage>(packedLength(lst.size()), 0u),
+    StorageList(packedLength(lst.size()), 0u),
     size_(lst.size())
 {
     forAll(lst, i)
@@ -94,7 +94,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
     label packLen = packedLength(size());
 
     os  << ")\n"
-        << "storage: " << packLen << "/" << storage().size() << "( ";
+        << "storage: " << packLen << "/" << StorageList::size() << "( ";
 
     // mask for the valid bits
     unsigned int validBits = max_value();
@@ -105,7 +105,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
 
     for (label i=0; i < packLen; i++)
     {
-        const PackedStorage& rawBits = storage()[i];
+        const StorageType& rawBits = StorageList::operator[](i);
 
         // the final storage may not be full, modify validBits accordingly
         if (i+1 == packLen)
@@ -155,7 +155,7 @@ template<int nBits>
 void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {
     setCapacity(lst.size());
-    List<PackedStorage>::operator=(lst);
+    StorageList::operator=(lst);
 }
 
 

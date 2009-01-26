@@ -92,7 +92,8 @@ class PackedList
 :
     private List<unsigned int>
 {
-    typedef unsigned int PackedStorage;
+    typedef unsigned int      StorageType;
+    typedef List<StorageType> StorageList;
 
     // Private data
 
@@ -247,9 +248,9 @@ public:
     //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
 
     //- The const_iterator for PackedList
-    //  Note: make data and functions protected, to allow reuse by iterator.
+    //  Note: data and functions are protected, to allow reuse by iterator.
     //  Try not to be disturbed by non-const methods such as set(), they are
-    //  just inherited by iterator.
+    //  just inherited and used by iterator.
     class const_iterator
     {
         friend class PackedList;
@@ -258,8 +259,9 @@ public:
 
         // Protected Data
 
-        //- Reference to original list
-        PackedList& list_;
+        //- Pointer to original list
+        //  This also lets us use the default bitwise copy/assignment
+        PackedList* list_;
 
         //- Element index within storage
         unsigned index_;
@@ -281,7 +283,7 @@ public:
         // Constructors
 
         //- Construct from base list and position index
-        inline const_iterator(const PackedList&, const label);
+        inline const_iterator(const PackedList*, const label);
 
         //- Construct from non-const iterator
         explicit inline const_iterator(const iterator&);
@@ -351,7 +353,7 @@ public:
         // Constructors
 
         //- Construct from base list and position index
-        inline iterator(const PackedList&, const label);
+        inline iterator(const PackedList*, const label);
 
         // Member Operators
         inline void operator=(const iterator&);
