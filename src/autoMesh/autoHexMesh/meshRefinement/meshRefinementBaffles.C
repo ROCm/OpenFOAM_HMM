@@ -1029,8 +1029,6 @@ void Foam::meshRefinement::findCellZoneGeometric
     }
     syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
 
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
