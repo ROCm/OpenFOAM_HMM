@@ -93,6 +93,11 @@ public:
         ) const;
     };
 
+    // Static Member Functions
+
+        //- Return a null FixedList
+        inline static const FixedList<T, Size>& null();
+
 
     // Constructors
 
@@ -121,11 +126,7 @@ public:
         inline autoPtr<FixedList<T, Size> > clone() const;
 
 
-    // Member functions
-
-        //- Return a null FixedList
-        static const FixedList<T, Size>& null();
-
+    // Member Functions
 
         // Access
 
@@ -151,6 +152,10 @@ public:
 
 
         // Edit
+
+            //- Dummy resize function
+            //  needed to make FixedList consistent with List
+            inline void resize(const label);
 
             //- Dummy setSize function
             //  needed to make FixedList consistent with List
@@ -226,12 +231,16 @@ public:
         //- Random access iterator for traversing FixedList.
         typedef const T* const_iterator;
 
-        //- Return a const_iterator to begin traversing the
-        //  constant FixedList.
+        //- Return const_iterator to begin traversing the constant FixedList.
+        inline const_iterator cbegin() const;
+
+        //- Return const_iterator to end traversing the constant FixedList.
+        inline const_iterator cend() const;
+
+        //- Return const_iterator to begin traversing the constant FixedList.
         inline const_iterator begin() const;
 
-        //- Return a const_iterator to end traversing the
-        //  constant FixedList.
+        //- Return const_iterator to end traversing the constant FixedList.
         inline const_iterator end() const;
 
 
@@ -240,12 +249,10 @@ public:
         //- Reverse iterator for reverse traversal of FixedList.
         typedef T* reverse_iterator;
 
-        //- Return a reverse_iterator to begin reverse traversing the
-        //  FixedList.
+        //- Return reverse_iterator to begin reverse traversing the FixedList.
         inline reverse_iterator rbegin();
 
-        //- Return a reverse_iterator to end reverse traversing the
-        //  FixedList.
+        //- Return reverse_iterator to end reverse traversing the FixedList.
         inline reverse_iterator rend();
 
 
@@ -254,12 +261,16 @@ public:
         //- Reverse iterator for reverse traversal of constant FixedList.
         typedef const T* const_reverse_iterator;
 
-        //- Return a const_reverse_iterator to begin reverse traversing the
-        //  FixedList.
+        //- Return const_reverse_iterator to begin reverse traversing FixedList.
+        inline const_reverse_iterator crbegin() const;
+
+        //- Return const_reverse_iterator to end reverse traversing FixedList.
+        inline const_reverse_iterator crend() const;
+
+        //- Return const_reverse_iterator to begin reverse traversing FixedList.
         inline const_reverse_iterator rbegin() const;
 
-        //- Return a const_reverse_iterator to end reverse traversing the
-        //  FixedList.
+        //- Return const_reverse_iterator to end reverse traversing FixedList.
         inline const_reverse_iterator rend() const;
 
 

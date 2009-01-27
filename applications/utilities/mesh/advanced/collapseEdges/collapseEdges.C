@@ -48,7 +48,7 @@ Description
 #include "polyMesh.H"
 #include "mapPolyMesh.H"
 #include "mathematicalConstants.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "SortableList.H"
 
 using namespace Foam;
@@ -177,7 +177,7 @@ label mergeEdges
 
 
 // Return master point edge needs to be collapsed to (or -1)
-label edgeMaster(const PackedList<1>& boundaryPoint, const edge& e)
+label edgeMaster(const PackedBoolList& boundaryPoint, const edge& e)
 {
     label masterPoint = -1;
 
@@ -215,7 +215,7 @@ label edgeMaster(const PackedList<1>& boundaryPoint, const edge& e)
 label collapseSmallEdges
 (
     const polyMesh& mesh,
-    const PackedList<1>& boundaryPoint,
+    const PackedBoolList& boundaryPoint,
     const scalar minLen,
     edgeCollapser& collapser
 )
@@ -254,7 +254,7 @@ label collapseSmallEdges
 label collapseHighAspectFaces
 (
     const polyMesh& mesh,
-    const PackedList<1>& boundaryPoint,
+    const PackedBoolList& boundaryPoint,
     const scalar areaFac,
     const scalar edgeRatio,
     edgeCollapser& collapser
@@ -346,7 +346,7 @@ void set(const labelList& elems, const bool val, boolList& status)
 label simplifyFaces
 (
     const polyMesh& mesh,
-    const PackedList<1>& boundaryPoint,
+    const PackedBoolList& boundaryPoint,
     const label minSize,
     const scalar lenGap,
     edgeCollapser& collapser
@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
         const faceList& faces = mesh.faces();
 
         // Get all points on the boundary
-        PackedList<1> boundaryPoint(mesh.nPoints(), false);
+        PackedBoolList boundaryPoint(mesh.nPoints());
 
         label nIntFaces = mesh.nInternalFaces();
         for (label faceI = nIntFaces; faceI < mesh.nFaces(); faceI++)

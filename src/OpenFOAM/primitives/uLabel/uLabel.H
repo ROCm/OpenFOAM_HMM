@@ -138,7 +138,8 @@ public:
     // Constructors
 
         //- Construct from Istream
-        pTraits(Istream& is);
+        pTraits(Istream&);
+
 
     // Member Functions
 

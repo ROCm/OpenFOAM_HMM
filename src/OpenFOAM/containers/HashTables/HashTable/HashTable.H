@@ -385,6 +385,12 @@ public:
 
 
         //- const_iterator set to the beginning of the HashTable
+        inline const_iterator cbegin() const;
+
+        //- const_iterator set to beyond the end of the HashTable
+        inline const const_iterator& cend() const;
+
+        //- const_iterator set to the beginning of the HashTable
         inline const_iterator begin() const;
 
         //- const_iterator set to beyond the end of the HashTable

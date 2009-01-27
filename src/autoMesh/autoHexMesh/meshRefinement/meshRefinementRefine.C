@@ -68,7 +68,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         const label nInternalFaces = mesh.nInternalFaces();
 
         // Mark refined cells on old mesh
-        PackedList<1> oldRefineCell(map.nOldCells(), 0u);
+        PackedBoolList oldRefineCell(map.nOldCells());
 
         forAll(oldCellsToRefine, i)
         {
@@ -76,7 +76,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         }
 
         // Mark refined faces
-        PackedList<1> refinedInternalFace(nInternalFaces, 0u);
+        PackedBoolList refinedInternalFace(nInternalFaces);
 
         // 1. Internal faces
 
@@ -335,7 +335,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     maxFeatureLevel = -1;
 
     // Whether edge has been visited.
-    List<PackedList<1> > featureEdgeVisited(featureMeshes.size());
+    List<PackedBoolList> featureEdgeVisited(featureMeshes.size());
 
     forAll(featureMeshes, featI)
     {

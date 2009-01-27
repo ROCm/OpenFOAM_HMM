@@ -72,7 +72,7 @@ public:
     // Constructors
 
         //- Construct given initial size
-        HashSet(label size = 100)
+        HashSet(const label size = 100)
         :
             HashTable<nil, Key, Hash>(size)
         {}

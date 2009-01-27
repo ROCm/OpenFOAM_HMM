@@ -34,9 +34,8 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(coordinateSystem, 0);
-    defineRunTimeSelectionTable(coordinateSystem, origAxisDir);
-    defineRunTimeSelectionTable(coordinateSystem, origRotation);
     defineRunTimeSelectionTable(coordinateSystem, dictionary);
+    defineRunTimeSelectionTable(coordinateSystem, origRotation);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -54,16 +53,14 @@ Foam::coordinateSystem::coordinateSystem()
 Foam::coordinateSystem::coordinateSystem
 (
     const word& name,
-    const point& origin,
-    const vector& axis,
-    const vector& dir
+    const coordinateSystem& cs
 )
 :
     name_(name),
     note_(),
-    origin_(origin),
-    R_(axis, dir),
-    Rtr_(R_.T())
+    origin_(cs.origin_),
+    R_(cs.R_),
+    Rtr_(Rtr_)
 {}
 
 
@@ -78,6 +75,22 @@ Foam::coordinateSystem::coordinateSystem
     note_(),
     origin_(origin),
     R_(cr),
+    Rtr_(R_.T())
+{}
+
+
+Foam::coordinateSystem::coordinateSystem
+(
+    const word& name,
+    const point& origin,
+    const vector& axis,
+    const vector& dirn
+)
+:
+    name_(name),
+    note_(),
+    origin_(origin),
+    R_(axis, dirn),
     Rtr_(R_.T())
 {}
 
@@ -348,10 +361,7 @@ void Foam::coordinateSystem::operator=(const dictionary& rhs)
     // specify via coordinateRotation sub-dictionary
     if (dict.found("coordinateRotation"))
     {
-        autoPtr<coordinateRotation> cr =
-            coordinateRotation::New(dict.subDict("coordinateRotation"));
-
-        R_  = cr();
+        R_  = coordinateRotation::New(dict.subDict("coordinateRotation"))();
     }
     else
     {

@@ -38,7 +38,7 @@ SourceFiles
 #ifndef refinementSurfaces_H
 #define refinementSurfaces_H
 
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "triSurfaceGeoMesh.H"
 #include "triSurfaceFields.H"
 #include "vectorList.H"

@@ -125,7 +125,7 @@ public:
 
             inline const List<word>& siteIdList() const;
 
-            inline scalar potentialEnergyLimit() const;;
+            inline scalar potentialEnergyLimit() const;
 
             inline label nPairPotentials() const;
 

@@ -45,6 +45,7 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
     List<T>(nElem),
     capacity_(nElem)
 {
+    // we could also enforce SizeInc granularity when (!SizeMult || !SizeDiv)
     List<T>::size(0);
 }
 
@@ -107,6 +108,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setCapacity
         // truncate addressed sizes too
         nextFree = capacity_;
     }
+    // we could also enforce SizeInc granularity when (!SizeMult || !SizeDiv)
 
     List<T>::setSize(capacity_);
     List<T>::size(nextFree);
@@ -122,11 +124,25 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::reserve
     // allocate more capacity?
     if (nElem > capacity_)
     {
-        capacity_ = max
-        (
-            nElem,
-            label(SizeInc + capacity_ * SizeMult / SizeDiv)
-        );
+// TODO: convince the compiler that division by zero does not occur
+//        if (SizeInc && (!SizeMult || !SizeDiv))
+//        {
+//            // resize with SizeInc as the granularity
+//            capacity_ = nElem;
+//            unsigned pad = SizeInc - (capacity_ % SizeInc);
+//            if (pad != SizeInc)
+//            {
+//                capacity_ += pad;
+//            }
+//        }
+//        else
+        {
+            capacity_ = max
+            (
+                nElem,
+                label(SizeInc + capacity_ * SizeMult / SizeDiv)
+            );
+        }
 
         // adjust allocated size, leave addressed size untouched
         label nextFree = List<T>::size();
@@ -145,11 +161,25 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
     // allocate more capacity?
     if (nElem > capacity_)
     {
-        capacity_ = max
-        (
-            nElem,
-            label(SizeInc + capacity_ * SizeMult / SizeDiv)
-        );
+// TODO: convince the compiler that division by zero does not occur
+//        if (SizeInc && (!SizeMult || !SizeDiv))
+//        {
+//            // resize with SizeInc as the granularity
+//            capacity_ = nElem;
+//            unsigned pad = SizeInc - (capacity_ % SizeInc);
+//            if (pad != SizeInc)
+//            {
+//                capacity_ += pad;
+//            }
+//        }
+//        else
+        {
+            capacity_ = max
+            (
+                nElem,
+                label(SizeInc + capacity_ * SizeMult / SizeDiv)
+            );
+        }
 
         List<T>::setSize(capacity_);
     }
@@ -178,6 +208,27 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::setSize
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::resize
+(
+    const label nElem
+)
+{
+    this->setSize(nElem);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::resize
+(
+    const label nElem,
+    const T& t
+)
+{
+    this->setSize(nElem, t);
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::clear()
 {
     List<T>::size(0);
@@ -201,6 +252,7 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::shrink()
     {
         // use the full list when resizing
         List<T>::size(capacity_);
+
         // the new size
         capacity_ = nextFree;
         List<T>::setSize(capacity_);

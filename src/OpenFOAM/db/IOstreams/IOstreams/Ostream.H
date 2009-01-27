@@ -115,6 +115,14 @@ public:
             //- Write string
             virtual Ostream& write(const string&) = 0;
 
+            //- Write std::string surrounded by quotes.
+            //  Optional write without quotes.
+            virtual Ostream& writeQuoted
+            (
+                const std::string&,
+                const bool quoted=true
+            ) = 0;
+
             //- Write label
             virtual Ostream& write(const label) = 0;
 

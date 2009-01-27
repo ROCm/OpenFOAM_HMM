@@ -76,7 +76,7 @@ SourceFiles
 
 #include "pointFields.H"
 #include "HashSet.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "indirectPrimitivePatch.H"
 #include "className.H"
 #include "twoDPointCorrector.H"
@@ -159,11 +159,11 @@ class motionSmoother
         pointField oldPoints_;
 
         //- Is mesh point on boundary or not
-        PackedList<1> isInternalPoint_;
+        PackedBoolList isInternalPoint_;
 
         //- Is edge master (always except if on coupled boundary and on
         //  lower processor)
-        PackedList<1> isMasterEdge_;
+        PackedBoolList isMasterEdge_;
 
         //- 2-D motion corrector
         twoDPointCorrector twoDCorrector_;
@@ -220,7 +220,7 @@ class motionSmoother
         //- explicit smoothing and min on all affected internal points
         void minSmooth
         (
-            const PackedList<1>& isAffectedPoint,
+            const PackedBoolList& isAffectedPoint,
             const pointScalarField& fld,
             pointScalarField& newFld
         ) const;
@@ -228,7 +228,7 @@ class motionSmoother
         //- same but only on selected points (usually patch points)
         void minSmooth
         (
-            const PackedList<1>& isAffectedPoint,
+            const PackedBoolList& isAffectedPoint,
             const labelList& meshPoints,
             const pointScalarField& fld,
             pointScalarField& newFld
@@ -264,7 +264,7 @@ class motionSmoother
             const faceSet& wrongFaces,
 
             labelList& affectedFaces,
-            PackedList<1>& isAffectedPoint
+            PackedBoolList& isAffectedPoint
         ) const;
 
         //- Disallow default bitwise copy construct

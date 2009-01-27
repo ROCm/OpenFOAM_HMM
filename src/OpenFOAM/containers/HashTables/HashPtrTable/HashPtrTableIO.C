@@ -29,16 +29,11 @@ License
 #include "Ostream.H"
 #include "INew.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
 template<class INew>
-void HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
+void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 {
     is.fatalCheck("HashPtrTable<T, Key, Hash>::read(Istream&, const INew&)");
 
@@ -147,14 +142,14 @@ void HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
 template<class T, class Key, class Hash>
 template<class INew>
-HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is, const INew& inewt)
+Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is, const INew& inewt)
 {
     read(is, inewt);
 }
 
 
 template<class T, class Key, class Hash>
-HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is)
+Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is)
 {
     read(is, INew<T>());
 }
@@ -163,7 +158,7 @@ HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is)
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L)
+Foam::Istream& Foam::operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L)
 {
     L.clear();
     L.read(is, INew<T>());
@@ -173,7 +168,11 @@ Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& L)
 
 
 template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& L)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const HashPtrTable<T, Key, Hash>& L
+)
 {
     // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST << nl;
@@ -198,9 +197,5 @@ Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& L)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -55,7 +55,7 @@ static const sphericalTensor oneThirdI(1.0/3.0);
 static const sphericalTensor twoThirdsI(2.0/3.0);
 
 
-//- Specify data associated with sphericalTensor type is contiguous
+//- Specify data associated with sphericalTensor type are contiguous
 template<>
 inline bool contiguous<sphericalTensor>() {return true;}
 

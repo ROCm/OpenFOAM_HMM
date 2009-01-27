@@ -53,7 +53,7 @@ vector2D eigenValues(const tensor2D& t);
 vector2D eigenVector(const tensor2D& t, const scalar lambda);
 tensor2D eigenVectors(const tensor2D& t);
 
-//- Specify data associated with tensor2D type is contiguous
+//- Data associated with tensor2D type are contiguous
 template<>
 inline bool contiguous<tensor2D>() {return true;}
 

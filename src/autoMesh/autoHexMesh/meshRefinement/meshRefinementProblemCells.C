@@ -431,7 +431,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     //     point will only have 4 cells connected to it)
 
     // Does cell have exactly 7 of its 8 anchor points on the boundary?
-    PackedList<1> hasSevenBoundaryAnchorPoints(mesh_.nCells(), 0u);
+    PackedBoolList hasSevenBoundaryAnchorPoints(mesh_.nCells());
     // If so what is the remaining non-boundary anchor point?
     labelHashSet nonBoundaryAnchors(mesh_.nCells()/10000);
 
@@ -727,7 +727,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             hitSurface,
             hitInfo
         );
-    
+
         forAll(hitInfo, i)
         {
             if (hitInfo[i].hit())

@@ -29,6 +29,9 @@ Description
     An ordered pair of two objects of type \<T\> with first() and second()
     elements.
 
+SeeAlso
+    Foam::Tuple2 for storing two objects of dissimilar types.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Pair_H
@@ -136,15 +139,12 @@ public:
 
         friend bool operator==(const Pair<Type>& a, const Pair<Type>& b)
         {
-            return
-            (
-                (a.first() == b.first()) && (a.second() == b.second())
-            );
+            return (a.first() == b.first() && a.second() == b.second());
         }
 
         friend bool operator!=(const Pair<Type>& a, const Pair<Type>& b)
         {
-            return (!(a == b));
+            return !(a == b);
         }
 };
 

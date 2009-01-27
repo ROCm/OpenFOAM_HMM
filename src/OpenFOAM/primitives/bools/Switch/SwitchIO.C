@@ -39,9 +39,49 @@ Foam::Switch::Switch(Istream& is)
 
 Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 {
-    is >> s.word_;
-    s.bool_ = Switch::asBool(s.word_);
+    token t(is);
 
+    if (!t.good())
+    {
+        is.setBad();
+        return is;
+    }
+
+    if (t.isLabel())
+    {
+        s.switch_ = Switch::asEnum(bool(t.labelToken()));
+    }
+    else if (t.isWord())
+    {
+        // allow invalid values, but catch after for correct error message
+        Switch::switchType sw = Switch::asEnum(t.wordToken(), true);
+
+        if (sw == Switch::INVALID)
+        {
+            is.setBad();
+            FatalIOErrorIn("operator>>(Istream&, Switch&)", is)
+                << "expected 'true/false', 'on/off' ... found " << t.wordToken()
+                << exit(FatalIOError);
+
+            return is;
+        }
+        else
+        {
+            s.switch_ = sw;
+        }
+    }
+    else
+    {
+        is.setBad();
+        FatalIOErrorIn("operator>>(Istream&, bool/Switch&)", is)
+            << "wrong token type - expected bool found " << t
+            << exit(FatalIOError);
+
+        return is;
+    }
+
+
+    // Check state of Istream
     is.check("Istream& operator>>(Istream&, Switch&)");
 
     return is;
@@ -50,10 +90,8 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const Switch& s)
 {
-    os << s.word_;
-
+    os << Switch::names[s.switch_];
     os.check("Ostream& operator<<(Ostream&, const Switch&)");
-
     return os;
 }
 

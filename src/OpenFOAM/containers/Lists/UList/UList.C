@@ -33,14 +33,6 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const Foam::UList<T>& Foam::UList<T>::null()
-{
-    UList<T>* nullPtr = reinterpret_cast<UList<T>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class T>
 void Foam::UList<T>::assign(const UList<T>& a)
 {
     if (a.size_ != this->size_)

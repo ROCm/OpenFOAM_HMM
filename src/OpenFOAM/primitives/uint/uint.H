@@ -49,11 +49,11 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a string representation of an uint
-word name(const unsigned int i);
+word name(const unsigned int);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-unsigned int readUint(Istream& is);
+unsigned int readUint(Istream&);
 Istream& operator>>(Istream&, unsigned int&);
 Ostream& operator<<(Ostream&, const unsigned int);
 

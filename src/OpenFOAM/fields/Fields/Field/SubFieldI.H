@@ -74,8 +74,7 @@ inline Foam::SubField<Type>::SubField
 template<class Type>
 inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
 {
-    SubField<Type>* nullPtr = reinterpret_cast<SubField<Type>*>(NULL);
-    return *nullPtr;
+    return *reinterpret_cast< SubField<Type>* >(0);
 }
 
 

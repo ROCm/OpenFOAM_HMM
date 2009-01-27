@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-
 \*---------------------------------------------------------------------------*/
 
 #include "bool.H"
@@ -32,8 +29,8 @@ Description
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<bool>::typeName = "bool";
-const bool Foam::pTraits<bool>::zero = 0;
-const bool Foam::pTraits<bool>::one = 1;
+const bool Foam::pTraits<bool>::zero(false);
+const bool Foam::pTraits<bool>::one(true);
 
 const char* Foam::pTraits<bool>::componentNames[] = { "x" };
 

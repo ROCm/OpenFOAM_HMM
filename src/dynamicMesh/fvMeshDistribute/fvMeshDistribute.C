@@ -1185,7 +1185,7 @@ void Foam::fvMeshDistribute::sendMesh
     //labelList cellZoneID;
     //if (hasCellZones)
     //{
-    //    cellZoneID.setSize(mesh.nCells());;
+    //    cellZoneID.setSize(mesh.nCells());
     //    cellZoneID = -1;
     //
     //    const cellZoneMesh& cellZones = mesh.cellZones();

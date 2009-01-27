@@ -49,7 +49,7 @@ namespace Foam
 typedef DiagTensor<scalar> diagTensor;
 
 
-//- Specify data associated with diagTensor type is contiguous
+//- Data associated with diagTensor type are contiguous
 template<>
 inline bool contiguous<diagTensor>() {return true;}
 
