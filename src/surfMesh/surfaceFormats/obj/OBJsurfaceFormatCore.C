@@ -36,7 +36,7 @@ void Foam::fileFormats::OBJsurfaceFormatCore::writeHeader
     Ostream& os,
     const pointField& pointLst,
     const label nFaces,
-    const List<surfGroup>& patchLst
+    const UList<surfRegion>& regionLst
 )
 {
     os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
@@ -44,13 +44,13 @@ void Foam::fileFormats::OBJsurfaceFormatCore::writeHeader
         << nl
         << "# points : " << pointLst.size() << nl
         << "# faces  : " << nFaces << nl
-        << "# patches: " << patchLst.size() << nl;
+        << "# region : " << regionLst.size() << nl;
 
-    // Print patch names as comment
-    forAll(patchLst, patchI)
+    // Print region names as comment
+    forAll(regionLst, regionI)
     {
-        os  << "#   " << patchI << "  " << patchLst[patchI].name()
-            << "  (nFaces: " << patchLst[patchI].size() << ")" << nl;
+        os  << "#   " << regionI << "  " << regionLst[regionI].name()
+            << "  (nFaces: " << regionLst[regionI].size() << ")" << nl;
     }
 
     os  << nl

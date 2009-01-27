@@ -26,13 +26,13 @@ Class
     Foam::MeshedSurface
 
 Description
-    A surface geometry mesh with patch information, not to be confused
+    A surface geometry mesh with region information, not to be confused
     with a similarily named surfaceMesh, which actually refers to
     the cell faces of a volume mesh.
 
    The MeshedSurface is intended to surfaces from a variety of sources.
-   - A set of points and faces without any patch information.
-   - A set of points and faces with randomly sorted patch information.
+   - A set of points and faces without any region information.
+   - A set of points and faces with randomly sorted region information.
      This could arise, for example, from reading external file formats
      such as STL, etc.
 
@@ -45,7 +45,7 @@ SourceFiles
 #define MeshedSurface_H
 
 #include "BasicMeshedSurface.H"
-#include "surfGroupList.H"
+#include "surfRegionList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -88,9 +88,9 @@ private:
 
     // Private Member Data
 
-        //- Patch information (face ordering nFaces/startFace only used
-        //  during reading and writing)
-        List<surfGroup> patches_;
+        //- Region information
+        // (face ordering nFaces/startFace only used during reading/writing)
+        List<surfRegion> regions_;
 
     // Private member functions
 
@@ -101,8 +101,8 @@ protected:
 
     // Protected Member functions
 
-        //- basic sanity check on patches
-        void checkPatches();
+        //- basic sanity check on regions
+        void checkRegions();
 
         //- sort faces by regions and store sorted faces
         void sortFacesAndStore
@@ -139,22 +139,22 @@ public:
         //- Construct null
         MeshedSurface();
 
-        //- Construct by transferring components (points, faces, patches).
+        //- Construct by transferring components (points, faces, regions).
         MeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const Xfer<surfGroupList>&
+            const Xfer<surfRegionList>&
         );
 
         //- Construct by transferring points, faces.
-        //  Use patch information, or set single default patch.
+        //  Use region information, or set single default region.
         MeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& patchSizes = UList<label>::null(),
-            const UList<word>& patchNames = UList<word>::null()
+            const UList<label>& regionSizes = UList<label>::null(),
+            const UList<word>& regionNames = UList<word>::null()
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -250,31 +250,31 @@ public:
             return ParentType::size();
         }
 
-        const List<surfGroup>& patches() const
+        const List<surfRegion>& regions() const
         {
-            return patches_;
+            return regions_;
         }
 
-        //- set a single patch, optionally with a specific name
-        void onePatch(const word& name = word::null);
+        //- set a single region, optionally with a specific name
+        void oneRegion(const word& name = word::null);
 
-        //- add patches
-        void addPatches
+        //- Add regions
+        void addRegions
         (
-            const UList<surfGroup>&,
+            const UList<surfRegion>&,
             const bool cullEmpty=false
         );
 
-        //- add patches
-        void addPatches
+        //- Add regions
+        void addRegions
         (
             const UList<label>& sizes,
             const UList<word>& names,
             const bool cullEmpty=false
         );
 
-        //- add patches
-        void addPatches
+        //- Add regions
+        void addRegions
         (
             const UList<label>& sizes,
             const bool cullEmpty=false
@@ -289,7 +289,7 @@ public:
         //  Returns return pointMap, faceMap from subsetMeshMap
         MeshedSurface subsetMesh
         (
-            const UList<bool>& include,
+            const labelHashSet& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
@@ -297,7 +297,7 @@ public:
         //- Return new surface.
         MeshedSurface subsetMesh
         (
-            const UList<bool>& include
+            const labelHashSet& include
         ) const;
 
         //- Transfer the contents of the argument and annull the argument

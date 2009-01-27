@@ -37,7 +37,6 @@ Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-//- Check if file extension corresponds to 'native' surface format
 bool
 Foam::fileFormats::surfaceFormatsCore::isNative(const word& ext)
 {
@@ -75,11 +74,11 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     // closest to and lower than current time
 
     instantList ts = d.times();
-    label i;
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= d.timeOutputValue())
         {
             break;
         }
@@ -88,13 +87,13 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     // Noting that the current directory has already been searched
     // for mesh data, start searching from the previously stored time directory
 
-    if (i>=0)
+    if (instanceI >= 0)
     {
-        for (label j=i; j>=0; j--)
+        for (label i = instanceI; i >= 0; --i)
         {
-            if (file(d.path()/ts[j].name()/subdirName/foamName))
+            if (file(d.path()/ts[i].name()/subdirName/foamName))
             {
-                return ts[j].name();
+                return ts[i].name();
             }
         }
     }
@@ -116,11 +115,11 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
     // closest to and lower than current time
 
     instantList ts = d.times();
-    label i;
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= d.timeOutputValue())
         {
             break;
         }
@@ -129,11 +128,11 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
     // Noting that the current directory has already been searched
     // for mesh data, start searching from the previously stored time directory
 
-    if (i>=0)
+    if (instanceI >= 0)
     {
-        for (label j=i; j>=0; j--)
+        for (label i = instanceI; i >= 0; --i)
         {
-            fileName testName(d.path()/ts[j].name()/subdirName/foamName);
+            fileName testName(d.path()/ts[i].name()/subdirName/foamName);
 
             if (file(testName))
             {
@@ -166,14 +165,14 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
 }
 
 
-// Returns patch info.
-// Sets faceMap to the indexing according to patch numbers.
-// Patch numbers start at 0.
-Foam::surfGroupList
-Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
+// Returns region info.
+// Sets faceMap to the indexing according to region numbers.
+// Region numbers start at 0.
+Foam::surfRegionList
+Foam::fileFormats::surfaceFormatsCore::sortedRegionsById
 (
-    const UList<label>& regionLst,
-    const Map<word>& patchNames,
+    const UList<label>& regionIds,
+    const Map<word>& regionNames,
     labelList& faceMap
 )
 {
@@ -185,11 +184,11 @@ Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
     // Assuming that we have relatively fewer regions compared to the
     // number of items, just do it ourselves
 
-    // step 1: get region sizes and store (regionId => patchI)
+    // step 1: get region sizes and store (regionId => regionI)
     Map<label> lookup;
-    forAll(regionLst, faceI)
+    forAll(regionIds, faceI)
     {
-        const label regId = regionLst[faceI];
+        const label regId = regionIds[faceI];
 
         Map<label>::iterator fnd = lookup.find(regId);
         if (fnd != lookup.end())
@@ -202,52 +201,53 @@ Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
         }
     }
 
-    // step 2: assign start/size (and name) to the newPatches
-    // re-use the lookup to map (regionId => patchI)
-    surfGroupList patchLst(lookup.size());
+    // step 2: assign start/size (and name) to the newRegions
+    // re-use the lookup to map (regionId => regionI)
+    surfRegionList regionLst(lookup.size());
     label start = 0;
-    label patchI = 0;
+    label regionI = 0;
     forAllIter(Map<label>, lookup, iter)
     {
         label regId = iter.key();
 
         word name;
-        Map<word>::const_iterator fnd = patchNames.find(regId);
-        if (fnd != patchNames.end())
+        Map<word>::const_iterator fnd = regionNames.find(regId);
+        if (fnd != regionNames.end())
         {
             name = fnd();
         }
         else
         {
-            name = word("patch") + ::Foam::name(patchI);
+            name = word("region") + ::Foam::name(regionI);
         }
 
-        patchLst[patchI] = surfGroup
+        regionLst[regionI] = surfRegion
         (
             name,
             0,           // initialize with zero size
             start,
-            patchI
+            regionI
         );
 
-        // increment the start for the next patch
-        // and save the (regionId => patchI) mapping
+        // increment the start for the next region
+        // and save the (regionId => regionI) mapping
         start += iter();
-        iter() = patchI++;
+        iter() = regionI++;
     }
 
 
     // step 3: build the re-ordering
-    faceMap.setSize(regionLst.size());
+    faceMap.setSize(regionIds.size());
 
-    forAll(regionLst, faceI)
+    forAll(regionIds, faceI)
     {
-        label patchI = lookup[regionLst[faceI]];
-        faceMap[faceI] = patchLst[patchI].start() + patchLst[patchI].size()++;
+        label regionI = lookup[regionIds[faceI]];
+        faceMap[faceI] =
+            regionLst[regionI].start() + regionLst[regionI].size()++;
     }
 
     // with reordered faces registered in faceMap
-    return patchLst;
+    return regionLst;
 }
 
 

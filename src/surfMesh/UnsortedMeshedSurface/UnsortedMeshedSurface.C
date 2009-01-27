@@ -26,6 +26,7 @@ License
 
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
+#include "PrimitivePatchTools.H"
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Time.H"
@@ -164,12 +165,12 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
     const Xfer<List<label> >& regionIds,
-    const Xfer<surfPatchIdentifierList>& patchLst
+    const Xfer<surfRegionIdentifierList>& regionTofc
 )
 :
     ParentType(pointLst, faceLst),
-    regions_(regionIds),
-    patches_(patchLst)
+    regionIds_(regionIds),
+    regionToc_(regionTofc)
 {}
 
 
@@ -178,26 +179,26 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
-    const UList<label>& patchSizes,
-    const UList<word>& patchNames
+    const UList<label>& regionSizes,
+    const UList<word>& regionNames
 )
 :
     ParentType(pointLst, faceLst)
 {
-    if (&patchSizes)
+    if (&regionSizes)
     {
-        if (&patchNames)
+        if (&regionNames)
         {
-            setPatches(patchSizes, patchNames);
+            setRegions(regionSizes, regionNames);
         }
         else
         {
-            setPatches(patchSizes);
+            setRegions(regionSizes);
         }
     }
     else
     {
-        onePatch();
+        oneRegion();
     }
 }
 
@@ -223,7 +224,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 :
     ParentType(xferCopy(surf.points()), xferCopy(surf.faces()))
 {
-    setPatches(surf.patches());
+    setRegions(surf.regions());
 }
 
 
@@ -266,8 +267,8 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 )
 :
     ParentType(xferCopy(surf.points()), xferCopy(surf.faces())),
-    regions_(surf.regions_),
-    patches_(surf.patches_)
+    regionIds_(surf.regionIds_),
+    regionToc_(surf.regionToc_)
 {}
 
 
@@ -296,101 +297,105 @@ template<class Face>
 Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
 {}
 
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::onePatch(const word& name)
+void Foam::UnsortedMeshedSurface<Face>::oneRegion(const word& name)
 {
-    regions_.setSize(size());
-    regions_ = 0;
+    regionIds_.setSize(size());
+    regionIds_ = 0;
 
-    word patchName(name);
-    if (patchName.empty())
+    word regionName(name);
+    if (regionName.empty())
     {
-        if (patches_.size())
+        if (regionToc_.size())
         {
-            patchName = patches_[0].name();
+            regionName = regionToc_[0].name();
         }
-        if (patchName.empty())
+        if (regionName.empty())
         {
-            patchName = "patch0";
+            regionName = "region0";
         }
     }
 
-    // set single default patch
-    patches_.setSize(1);
-    patches_[0] = surfPatchIdentifier(patchName, 0);
+    // set single default region
+    regionToc_.setSize(1);
+    regionToc_[0] = surfRegionIdentifier(regionName, 0);
 }
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::setPatches
+void Foam::UnsortedMeshedSurface<Face>::setRegions
 (
-    const surfGroupList& patches
+    const surfRegionList& regionLst
 )
 {
-    regions_.setSize(size());
-    patches_.setSize(patches.size());
+    regionIds_.setSize(size());
+    regionToc_.setSize(regionLst.size());
 
-    forAll(patches, patchI)
+    forAll(regionToc_, regionI)
     {
-        const surfGroup& p = patches[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        patches_[patchI] = p;
+        regionToc_[regionI] = reg;
 
-        SubList<label> subRegion(regions_, p.size(), p.start());
-        subRegion = patchI;
+        // assign sub-region Ids
+        SubList<label> subRegion(regionIds_, reg.size(), reg.start());
+        subRegion = regionI;
     }
 }
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::setPatches
+void Foam::UnsortedMeshedSurface<Face>::setRegions
 (
     const UList<label>& sizes,
     const UList<word>& names
 )
 {
-    regions_.setSize(size());
-    patches_.setSize(sizes.size());
+    regionIds_.setSize(size());
+    regionToc_.setSize(sizes.size());
 
     label start = 0;
-    forAll(patches_, patchI)
+    forAll(regionToc_, regionI)
     {
-        patches_[patchI] = surfPatchIdentifier(names[patchI], patchI);
+        regionToc_[regionI] = surfRegionIdentifier(names[regionI], regionI);
 
-        SubList<label> subRegion(regions_, sizes[patchI], start);
-        subRegion = patchI;
+        // assign sub-region Ids
+        SubList<label> subRegion(regionIds_, sizes[regionI], start);
+        subRegion = regionI;
 
-        start += sizes[patchI];
+        start += sizes[regionI];
     }
 }
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::setPatches
+void Foam::UnsortedMeshedSurface<Face>::setRegions
 (
     const UList<label>& sizes
 )
 {
-    regions_.setSize(size());
-    patches_.setSize(sizes.size());
+    regionIds_.setSize(size());
+    regionToc_.setSize(sizes.size());
 
     label start = 0;
-    forAll(patches_, patchI)
+    forAll(regionToc_, regionI)
     {
-        patches_[patchI] = surfPatchIdentifier
+        regionToc_[regionI] = surfRegionIdentifier
         (
-            word("patch") + ::Foam::name(patchI),
-            patchI
+            word("region") + ::Foam::name(regionI),
+            regionI
         );
 
-        SubList<label> subRegion(regions_, sizes[patchI], start);
-        subRegion = patchI;
+        // assign sub-region Ids
+        SubList<label> subRegion(regionIds_, sizes[regionI], start);
+        subRegion = regionI;
 
-        start += sizes[patchI];
+        start += sizes[regionI];
     }
 }
 
@@ -404,14 +409,14 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
     // re-assign the region Ids
     if (&faceMap && faceMap.size())
     {
-        if (patches_.empty())
+        if (regionToc_.empty())
         {
-            onePatch();
+            oneRegion();
         }
-        else if (patches_.size() == 1)
+        else if (regionToc_.size() == 1)
         {
-            // optimized for one-patch case
-            regions_ = 0;
+            // optimized for single-region case
+            regionIds_ = 0;
         }
         else
         {
@@ -419,9 +424,9 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
 
             forAll(faceMap, faceI)
             {
-                newRegions[faceI] = regions_[faceMap[faceI]];
+                newRegions[faceI] = regionIds_[faceMap[faceI]];
             }
-            regions_.transfer(newRegions);
+            regionIds_.transfer(newRegions);
         }
     }
 }
@@ -433,8 +438,8 @@ template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setSize(const label s)
 {
     ParentType::setSize(s);
-    // if regions extend: set with last patchId
-    regions_.setSize(s, patches_.size() - 1);
+    // if regions extend: set with last regionId
+    regionIds_.setSize(s, regionToc_.size() - 1);
 }
 
 
@@ -442,32 +447,32 @@ template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::clear()
 {
     ParentType::clear();
-    regions_.clear();
-    patches_.clear();
+    regionIds_.clear();
+    regionToc_.clear();
 }
 
 
 template<class Face>
-Foam::surfGroupList Foam::UnsortedMeshedSurface<Face>::sortedRegions
+Foam::surfRegionList Foam::UnsortedMeshedSurface<Face>::sortedRegions
 (
     labelList& faceMap
 ) const
 {
-    // supply some patch names
-    Map<word> patchNames;
-    forAll(patches_, patchI)
+    // supply some region names
+    Map<word> regionNames;
+    forAll(regionToc_, regionI)
     {
-        patchNames.insert(patchI, patches_[patchI].name());
+        regionNames.insert(regionI, regionToc_[regionI].name());
     }
 
-    return sortedPatchRegions(regions_, patchNames, faceMap);
+    return sortedRegionsById(regionIds_, regionNames, faceMap);
 }
 
 
 template<class Face>
 Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
 (
-    const UList<bool>& include,
+    const labelHashSet& include,
     labelList& pointMap,
     labelList& faceMap
 ) const
@@ -476,7 +481,7 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
     const List<Face>&  locFaces  = this->localFaces();
 
     // Fill pointMap, faceMap
-    this->subsetMap(include, pointMap, faceMap);
+    PatchTools::subsetMap(*this, include, pointMap, faceMap);
 
     // Create compact coordinate list and forward mapping array
     pointField newPoints(pointMap.size());
@@ -503,7 +508,7 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
             f[fp] = oldToNew[f[fp]];
         }
 
-        newRegions[faceI] = regions_[origFaceI];
+        newRegions[faceI] = regionIds_[origFaceI];
     }
     oldToNew.clear();
 
@@ -513,7 +518,7 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
         xferMove(newPoints),
         xferMove(newFaces),
         xferMove(newRegions),
-        xferCopy(patches_)
+        xferCopy(regionToc_)
     );
 }
 
@@ -521,7 +526,7 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
 template<class Face>
 Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
 (
-    const UList<bool>& include
+    const labelHashSet& include
 ) const
 {
     labelList pointMap, faceMap;
@@ -541,7 +546,7 @@ void Foam::UnsortedMeshedSurface<Face>::reset
 
     if (&regionIds)
     {
-        regions_.transfer(regionIds());
+        regionIds_.transfer(regionIds());
     }
 }
 
@@ -556,9 +561,9 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
     (
         xferMove(surf.storedPoints()),
         xferMove(surf.storedFaces()),
-        xferMove(surf.regions_)
+        xferMove(surf.regionIds_)
     );
-    patches_.transfer(surf.patches_);
+    regionToc_.transfer(surf.regionToc_);
 
     surf.clear();
 }
@@ -571,7 +576,7 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
 )
 {
     reset(xferMove(surf.storedPoints()), xferMove(surf.storedFaces()));
-    setPatches(surf.patches());
+    setRegions(surf.regions());
     surf.clear();
 }
 
@@ -634,8 +639,8 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
 
     this->storedPoints() = surf.points();
     this->storedFaces()  = surf.faces();
-    regions_ = surf.regions_;
-    patches_ = surf.patches_;
+    regionIds_ = surf.regionIds_;
+    regionToc_ = surf.regionToc_;
 }
 
 

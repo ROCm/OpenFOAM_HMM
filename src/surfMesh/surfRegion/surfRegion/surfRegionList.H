@@ -23,17 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::surfPatchIdentifierList
+    Foam::surfRegionList
 
 Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfPatchIdentifierList_H
-#define surfPatchIdentifierList_H
+#ifndef surfRegionList_H
+#define surfRegionList_H
 
-#include "surfPatchIdentifier.H"
+#include "surfRegion.H"
 #include "List.H"
+#include "surfRegionIdentifierList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,7 +43,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef List<surfPatchIdentifier>  surfPatchIdentifierList;
+typedef List<surfRegion>  surfRegionList;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

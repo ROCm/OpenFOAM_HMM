@@ -43,7 +43,7 @@ Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
 :
     sorted_(true),
     points_(0),
-    regions_(0),
+    regionIds_(0),
     sizes_(0)
 {
     read(filename);
@@ -83,10 +83,10 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
 
-    // place faces without a group in patch0
+    // place faces without a group in region0
     label regionI = 0;
     dynSizes.append(regionI);
-    lookup.insert("patch0", regionI);
+    lookup.insert("regionI", regionI);
 
     while (is.good())
     {
@@ -132,13 +132,13 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
 
         // Region/colour in .tri file starts with 0x. Skip.
         // ie, instead of having 0xFF, skip 0 and leave xFF to
-        // get read as a word and name it "patchFF"
+        // get read as a word and name it "regionFF"
 
         char zero;
         lineStream >> zero;
 
         word rawName(lineStream);
-        word name("patch" + rawName(1, rawName.size()-1));
+        word name("region" + rawName(1, rawName.size()-1));
 
         HashTable<label>::const_iterator fnd = lookup.find(name);
         if (fnd != lookup.end())
@@ -162,24 +162,24 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     }
 
     // skip empty groups
-    label nPatch = 0;
-    forAll(dynSizes, patchI)
+    label nRegion = 0;
+    forAll(dynSizes, regionI)
     {
-        if (dynSizes[patchI])
+        if (dynSizes[regionI])
         {
-            if (nPatch != patchI)
+            if (nRegion != regionI)
             {
-                dynSizes[nPatch] = dynSizes[patchI];
+                dynSizes[nRegion] = dynSizes[regionI];
             }
-            nPatch++;
+            nRegion++;
         }
     }
     // truncate addressed size
-    dynSizes.setCapacity(nPatch);
+    dynSizes.setCapacity(nRegion);
 
     // transfer to normal lists
     points_.transfer(dynPoints);
-    regions_.transfer(dynRegions);
+    regionIds_.transfer(dynRegions);
     sizes_.transfer(dynSizes);
 
     return true;

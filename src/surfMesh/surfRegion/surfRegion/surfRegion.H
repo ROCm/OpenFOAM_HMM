@@ -23,23 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfGroup
+    Foam::surfRegion
 
 Description
-    'Patch' on surface as subset of triSurface.
+    A region on a meshed surface.
+    Similar in concept to a faceZone on the surface.
 
 SourceFiles
-    surfGroup.C
+    surfRegion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfGroup_H
-#define surfGroup_H
+#ifndef surfRegion_H
+#define surfRegion_H
 
 #include "word.H"
 #include "label.H"
 #include "className.H"
-#include "surfPatchIdentifier.H"
+#include "surfRegionIdentifier.H"
 #include "autoPtr.H"
 #include "dictionary.H"
 
@@ -50,18 +51,18 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-class surfGroup;
+class surfRegion;
 
-Istream& operator>>(Istream&, surfGroup&);
-Ostream& operator<<(Ostream&, const surfGroup&);
+Istream& operator>>(Istream&, surfRegion&);
+Ostream& operator<<(Ostream&, const surfRegion&);
 
 /*---------------------------------------------------------------------------*\
-                           Class surfGroup Declaration
+                           Class surfRegion Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfGroup
+class surfRegion
 :
-    public surfPatchIdentifier
+    public surfRegionIdentifier
 {
     // Private data
 
@@ -74,16 +75,16 @@ class surfGroup
 public:
 
     //- Runtime type information
-    ClassName("surfGroup");
+    ClassName("surfRegion");
 
 
     // Constructors
 
         //- Construct null
-        surfGroup();
+        surfRegion();
 
         //- Construct from components
-        surfGroup
+        surfRegion
         (
             const word& name,
             const label size,
@@ -93,10 +94,10 @@ public:
         );
 
         //- Construct from Istream
-        surfGroup(Istream& is, const label index);
+        surfRegion(Istream& is, const label index);
 
         //- Construct from dictionary
-        surfGroup
+        surfRegion
         (
             const word& name,
             const dictionary& dict,
@@ -104,48 +105,48 @@ public:
         );
 
         //- Construct as copy
-        surfGroup(const surfGroup&);
+        surfRegion(const surfRegion&);
 
-        //- Construct from another patch, resetting the index
-        surfGroup(const surfGroup&, const label index);
+        //- Construct from another region, resetting the index
+        surfRegion(const surfRegion&, const label index);
 
         //- Return clone
-        autoPtr<surfGroup> clone() const
+        autoPtr<surfRegion> clone() const
         {
-            notImplemented("autoPtr<surfGroup> clone() const");
-            return autoPtr<surfGroup>(NULL);
+            notImplemented("autoPtr<surfRegion> clone() const");
+            return autoPtr<surfRegion>(NULL);
         }
 
-        static autoPtr<surfGroup> New(Istream& is)
+        static autoPtr<surfRegion> New(Istream& is)
         {
             word name(is);
             dictionary dict(is);
 
-            return autoPtr<surfGroup>(new surfGroup(name, dict, 0));
+            return autoPtr<surfRegion>(new surfRegion(name, dict, 0));
         }
 
 
     // Member Functions
 
-        //- Return start label of this patch in the face list
+        //- Return start label of this region in the face list
         label start() const
         {
             return start_;
         }
 
-        //- Return start label of this patch in the face list
+        //- Return start label of this region in the face list
         label& start()
         {
             return start_;
         }
 
-        //- Return size of this patch in the face list
+        //- Return size of this region in the face list
         label size() const
         {
             return size_;
         }
 
-        //- Return size of this patch in the face list
+        //- Return size of this region in the face list
         label& size()
         {
             return size_;
@@ -160,15 +161,15 @@ public:
 
     // Member Operators
 
-        bool operator!=(const surfGroup&) const;
+        bool operator!=(const surfRegion&) const;
 
         //- compare.
-        bool operator==(const surfGroup&) const;
+        bool operator==(const surfRegion&) const;
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, surfGroup&);
-        friend Ostream& operator<<(Ostream&, const surfGroup&);
+        friend Istream& operator>>(Istream&, surfRegion&);
+        friend Ostream& operator<<(Ostream&, const surfRegion&);
 };
 
 

@@ -22,60 +22,16 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::fileFormats::OBJsurfaceFormatCore
-
-Description
-    Internal class used by the OBJsurfaceFormat
-
-SourceFiles
-    OBJsurfaceFormatCore.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef OBJsurfaceFormatCore_H
-#define OBJsurfaceFormatCore_H
+#include "PrimitivePatchTools.H"
 
-#include "Ostream.H"
-#include "OFstream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace fileFormats
-{
-
-/*---------------------------------------------------------------------------*\
-                   Class OBJsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
-
-class OBJsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
-
-    //- Write header information with points
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfRegion>&
-    );
-
-};
-
+#include "PrimitivePatchToolsCheck.C"
+#include "PrimitivePatchToolsEdgeOwner.C"
+#include "PrimitivePatchToolsSearch.C"
+#include "PrimitivePatchToolsSortEdges.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fileFormats
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -85,7 +85,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     // Ansa tags. Denoted by $ANSA_NAME.
     // These will appear just before the first use of a type.
     // We read them and store the PSHELL types which are used to name
-    // the patches.
+    // the regions.
     label ansaId = -1;
     word  ansaType, ansaName;
 
@@ -211,7 +211,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             fTri[1] = readLabel(IStringStream(line.substr(32,8))());
             fTri[2] = readLabel(IStringStream(line.substr(40,8))());
 
-            // Convert groupID into patchID
+            // Convert groupID into regionId
             Map<label>::const_iterator fnd = lookup.find(groupId);
             if (fnd != lookup.end())
             {
@@ -227,7 +227,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 regionI = dynSizes.size();
                 lookup.insert(groupId, regionI);
                 dynSizes.append(0);
-                // Info<< "patch" << regionI << " => group " << groupId <<endl;
+                // Info<< "region" << regionI << " => group " << groupId <<endl;
             }
 
             dynFaces.append(fTri);
@@ -245,7 +245,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             fQuad[2] = readLabel(IStringStream(line.substr(40,8))());
             fQuad[3] = readLabel(IStringStream(line.substr(48,8))());
 
-            // Convert groupID into patchID
+            // Convert groupID into regionId
             Map<label>::const_iterator fnd = lookup.find(groupId);
             if (fnd != lookup.end())
             {
@@ -261,7 +261,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 regionI = dynSizes.size();
                 lookup.insert(groupId, regionI);
                 dynSizes.append(0);
-                // Info<< "patch" << regionI << " => group " << groupId <<endl;
+                // Info<< "region" << regionI << " => group " << groupId <<endl;
             }
 
 
@@ -322,7 +322,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         }
         else if (cmd == "PSHELL")
         {
-            // pshell type for patch names with the Ansa extension
+            // pshell type for region names with the Ansa extension
             label groupId = readLabel(IStringStream(line.substr(8,8))());
 
             if (groupId == ansaId && ansaType == "PSHELL")
@@ -370,29 +370,29 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     mapPointId.clear();
 
 
-    // create default patch names, or from ANSA/Hypermesh information
+    // create default region names, or from ANSA/Hypermesh information
     List<word> names(dynSizes.size());
     forAllConstIter(Map<label>, lookup, iter)
     {
-        const label patchI = iter();
-        const label groupI = iter.key();
+        const label regionI = iter();
+        const label groupI  = iter.key();
 
         Map<word>::const_iterator fnd = nameLookup.find(groupI);
         if (fnd != nameLookup.end())
         {
-            names[patchI] = fnd();
+            names[regionI] = fnd();
         }
         else
         {
-            names[patchI] = word("patch") + ::Foam::name(patchI);
+            names[regionI] = word("region") + ::Foam::name(regionI);
         }
     }
 
 
     sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
 
-    // add patches, culling empty groups
-    this->addPatches(dynSizes, names, true);
+    // add regions, culling empty ones
+    this->addRegions(dynSizes, names, true);
 
     return true;
 }

@@ -24,71 +24,71 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfGroupIOList.H"
+#include "surfRegionIOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::surfGroupIOList, 0);
+defineTypeNameAndDebug(Foam::surfRegionIOList, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfGroupIOList::surfGroupIOList
+Foam::surfRegionIOList::surfRegionIOList
 (
     const IOobject& io
 )
 :
-    surfGroupList(),
+    surfRegionList(),
     regIOobject(io)
 {
     Foam::string functionName =
-        "surfGroupIOList::surfGroupIOList"
+        "surfRegionIOList::surfRegionIOList"
         "(const IOobject& io)";
 
 
     if (readOpt() == IOobject::MUST_READ)
     {
-        surfGroupList& patches = *this;
+        surfRegionList& regions = *this;
 
         // read polyPatchList
         Istream& is = readStream(typeName);
 
-        PtrList<entry> patchEntries(is);
-        patches.setSize(patchEntries.size());
+        PtrList<entry> dictEntries(is);
+        regions.setSize(dictEntries.size());
 
         label faceI = 0;
-        forAll(patches, patchI)
+        forAll(regions, regionI)
         {
-            const dictionary& dict = patchEntries[patchI].dict();
+            const dictionary& dict = dictEntries[regionI].dict();
 
-            label patchSize  = readLabel(dict.lookup("nFaces"));
+            label regionSize = readLabel(dict.lookup("nFaces"));
             label startFaceI = readLabel(dict.lookup("startFace"));
 
-            patches[patchI] = surfGroup
+            regions[regionI] = surfRegion
             (
-                patchEntries[patchI].keyword(),
-                patchSize,
+                dictEntries[regionI].keyword(),
+                regionSize,
                 startFaceI,
-                patchI
+                regionI
             );
 
             word geoType;
             if (dict.readIfPresent("geometricType", geoType))
             {
-                patches[patchI].geometricType() = geoType;
+                regions[regionI].geometricType() = geoType;
             }
 
             if (startFaceI != faceI)
             {
                 FatalErrorIn(functionName)
-                    << "Patches are not ordered. Start of patch " << patchI
-                    << " does not correspond to sum of preceding patches."
+                    << "Regions are not ordered. Start of region " << regionI
+                    << " does not correspond to sum of preceding regions."
                     << endl
                     << "while reading " << io.objectPath()
                     << exit(FatalError);
             }
 
-            faceI += patchSize;
+            faceI += regionSize;
         }
 
         // Check state of IOstream
@@ -99,20 +99,20 @@ Foam::surfGroupIOList::surfGroupIOList
 }
 
 // Construct from IOObject
-Foam::surfGroupIOList::surfGroupIOList
+Foam::surfRegionIOList::surfRegionIOList
 (
     const IOobject& io,
-    const surfGroupList& patches
+    const surfRegionList& regions
 )
 :
-    surfGroupList(patches),
+    surfRegionList(regions),
     regIOobject(io)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfGroupIOList::~surfGroupIOList()
+Foam::surfRegionIOList::~surfRegionIOList()
 {}
 
 
@@ -120,7 +120,7 @@ Foam::surfGroupIOList::~surfGroupIOList()
 
 
 // writeData member function required by regIOobject
-bool Foam::surfGroupIOList::writeData(Ostream& os) const
+bool Foam::surfRegionIOList::writeData(Ostream& os) const
 {
     os << *this;
     return os.good();
@@ -129,13 +129,13 @@ bool Foam::surfGroupIOList::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfGroupIOList& patches)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfRegionIOList& L)
 {
-    os  << patches.size() << nl << token::BEGIN_LIST;
+    os  << L.size() << nl << token::BEGIN_LIST;
 
-    forAll(patches, patchI)
+    forAll(L, i)
     {
-        patches[patchI].writeDict(os);
+        L[i].writeDict(os);
     }
 
     os  << token::END_LIST;

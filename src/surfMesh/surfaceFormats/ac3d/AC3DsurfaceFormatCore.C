@@ -116,12 +116,12 @@ Foam::string Foam::fileFormats::AC3DsurfaceFormatCore::cueToOrDie
 void Foam::fileFormats::AC3DsurfaceFormatCore::writeHeader
 (
     Ostream& os,
-    const List<surfGroup>& patchLst
+    const UList<surfRegion>& regionLst
 )
 {
-    // Write with patches as separate objects under "world" object.
+    // Write with regions as separate objects under "world" object.
     // Header is taken over from sample file.
-    // Defines separate materials for all patches. Recycle colours.
+    // Defines separate materials for all regions. Recycle colours.
 
     // Define 8 standard colours as r,g,b components
     static scalar colourMap[] =
@@ -139,14 +139,12 @@ void Foam::fileFormats::AC3DsurfaceFormatCore::writeHeader
     // Write header. Define materials.
     os  << "AC3Db" << nl;
 
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        const word& pName = patchLst[patchI].name();
-
-        label colourI = patchI % 8;
+        label colourI = regionI % 8;
         label colourCompI = 3 * colourI;
 
-        os  << "MATERIAL \"" << pName << "Mat\" rgb "
+        os  << "MATERIAL \"" << regionLst[regionI].name() << "Mat\" rgb "
             << colourMap[colourCompI] << ' ' << colourMap[colourCompI+1]
             << ' ' << colourMap[colourCompI+2]
             << "  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10"
@@ -155,7 +153,7 @@ void Foam::fileFormats::AC3DsurfaceFormatCore::writeHeader
     }
 
     os  << "OBJECT world" << nl
-        << "kids " << patchLst.size() << endl;
+        << "kids " << regionLst.size() << endl;
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

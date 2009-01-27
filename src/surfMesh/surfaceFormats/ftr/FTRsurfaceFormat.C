@@ -63,40 +63,40 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
             << exit(FatalError);
     }
 
-    List<ftrPatch> readPatches(is);
+    List<ftrPatch> ftrPatches(is);
 
     // read points directly
     is >> this->storedPoints();
 
-    // read faces with keys
-    List<Keyed<triFace> > readFaces(is);
+    // faces read with keys
+    List<Keyed<triFace> > facesRead(is);
 
-    List<Face>  faceLst(readFaces.size());
-    List<label> regionLst(readFaces.size());
+    List<Face>  faceLst(facesRead.size());
+    List<label> regionIds(facesRead.size());
 
     // disentangle faces/keys - already triangulated
-    forAll(readFaces, faceI)
+    forAll(facesRead, faceI)
     {
         // unfortunately cannot transfer to save memory
-        faceLst[faceI]   = readFaces[faceI];
-        regionLst[faceI] = readFaces[faceI].key();
+        faceLst[faceI]   = facesRead[faceI];
+        regionIds[faceI] = facesRead[faceI].key();
     }
 
     this->storedFaces().transfer(faceLst);
-    this->storedRegions().transfer(regionLst);
+    this->storedRegionIds().transfer(regionIds);
 
-    // cast ftrPatch into new form
-    List<surfPatchIdentifier> newPatches(readPatches.size());
-    forAll(newPatches, patchI)
+    // change ftrPatch into surfRegionIdentifier
+    List<surfRegionIdentifier> newRegions(ftrPatches.size());
+    forAll(newRegions, regionI)
     {
-        newPatches[patchI] = surfPatchIdentifier
+        newRegions[regionI] = surfRegionIdentifier
         (
-            readPatches[patchI].name(),
-            patchI
+            ftrPatches[regionI].name(),
+            regionI
         );
     }
 
-    this->storedPatches().transfer(newPatches);
+    this->storedRegionToc().transfer(newRegions);
     return true;
 }
 

@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class AC3DfileFormat Declaration
+                       Class AC3DfileFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 class AC3DsurfaceFormatCore
@@ -77,7 +77,7 @@ protected:
     );
 
     //- Write header with materials
-    static void writeHeader(Ostream&, const List<surfGroup>&);
+    static void writeHeader(Ostream&, const UList<surfRegion>&);
 
 };
 

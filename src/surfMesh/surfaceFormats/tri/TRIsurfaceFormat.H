@@ -69,7 +69,7 @@ class TRIsurfaceFormat
             Ostream&,
             const pointField&,
             const Face&,
-            const label patchI
+            const label regionI
         );
 
         //- Disallow default bitwise copy construct

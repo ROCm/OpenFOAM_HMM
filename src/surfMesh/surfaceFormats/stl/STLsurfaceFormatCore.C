@@ -142,14 +142,14 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 #endif
 
     points_.setSize(3*nTris);
-    regions_.setSize(nTris);
+    regionIds_.setSize(nTris);
 
     Map<label> lookup;
     DynamicList<label> dynSizes;
 
     label ptI = 0;
     label regionI = -1;
-    forAll(regions_, faceI)
+    forAll(regionIds_, faceI)
     {
         // Read an STL triangle
         STLtriangle stlTri(is);
@@ -179,7 +179,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
             dynSizes.append(0);
         }
 
-        regions_[faceI] = regionI;
+        regionIds_[faceI] = regionI;
         dynSizes[regionI]++;
 
 #ifdef DEBUG_STLBINARY
@@ -220,7 +220,7 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
 :
     sorted_(true),
     points_(0),
-    regions_(0),
+    regionIds_(0),
     names_(0),
     sizes_(0)
 {
