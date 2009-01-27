@@ -141,6 +141,8 @@ public:
 
         inline bool pointMolecule() const;
 
+        inline label degreesOfFreedom() const;
+
         inline scalar mass() const;
 
         inline label nSites() const;

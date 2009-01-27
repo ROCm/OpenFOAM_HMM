@@ -44,6 +44,8 @@ scalar accumulatedTotalrDotfSum = 0.0;
 
 label accumulatedNMols = 0;
 
+label accumulatedDOFs = 0;
+
 scalar averageTemperature = 0.0;
 
 scalar averagePressure = 0.0;

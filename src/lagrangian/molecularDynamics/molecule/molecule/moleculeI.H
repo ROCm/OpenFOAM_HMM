@@ -423,13 +423,30 @@ Foam::molecule::constantProperties::momentOfInertia() const
 
 inline bool Foam::molecule::constantProperties::linearMolecule() const
 {
-    return (momentOfInertia_.xx() < 0);
+    return ((momentOfInertia_.xx() < 0) && (momentOfInertia_.yy() > 0));
 }
 
 
 inline bool Foam::molecule::constantProperties::pointMolecule() const
 {
     return (momentOfInertia_.zz() < 0);
+}
+
+
+inline Foam::label Foam::molecule::constantProperties::degreesOfFreedom() const
+{
+    if (linearMolecule())
+    {
+        return 5;
+    }
+    else if (pointMolecule())
+    {
+        return 3;
+    }
+    else
+    {
+        return 6;
+    }
 }
 
 

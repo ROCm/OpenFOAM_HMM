@@ -47,17 +47,17 @@ accumulatedTotalrDotfSum += singleStepTotalrDotf;
 
 accumulatedNMols += singleStepNMols;
 
+accumulatedDOFs += singleStepDOFs;
+
 if (runTime.outputTime())
 {
-    // calculate averages
-
     if (accumulatedNMols)
     {
         Info << "calculating averages" << endl;
 
         averageTemperature =
         (
-            2.0/(6.0 * moleculeCloud::kb * accumulatedNMols)
+            2.0/(moleculeCloud::kb * accumulatedDOFs)
             *
             (
                 accumulatedTotalLinearKE + accumulatedTotalAngularKE
@@ -79,8 +79,6 @@ if (runTime.outputTime())
             meshVolume
         );
 
-        // output values
-
         Info << "----------------------------------------" << nl
             << "Averaged properties" << nl
             << "Average |velocity| = "
@@ -91,11 +89,9 @@ if (runTime.outputTime())
     }
     else
     {
-        Info << "Not averaging temperature and pressure: "
+        Info<< "Not averaging temperature and pressure: "
             << "no molecules in system" << endl;
     }
-
-    // reset counters
 
     accumulatedTotalLinearMomentum = vector::zero;
 
@@ -110,6 +106,8 @@ if (runTime.outputTime())
     accumulatedTotalrDotfSum = 0.0;
 
     accumulatedNMols = 0;
+
+    accumulatedDOFs = 0;
 }
 
 // ************************************************************************* //
