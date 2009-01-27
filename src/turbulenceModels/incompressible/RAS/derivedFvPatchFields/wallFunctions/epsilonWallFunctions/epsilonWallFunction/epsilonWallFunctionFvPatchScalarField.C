@@ -64,7 +64,12 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedInternalValueFvPatchField<scalar>(p, iF)
+    fixedInternalValueFvPatchField<scalar>(p, iF),
+    UName_("U"),
+    kName_("k"),
+    GName_("G"),
+    nuName_("nu"),
+    nutName_("nut")
 {
     checkType();
 }
@@ -78,7 +83,12 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper)
+    fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    kName_(ptf.kName_),
+    GName_(ptf.GName_),
+    nuName_(ptf.nuName_),
+    nutName_(ptf.nutName_)
 {
     checkType();
 }
@@ -91,7 +101,12 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedInternalValueFvPatchField<scalar>(p, iF, dict)
+    fixedInternalValueFvPatchField<scalar>(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    kName_(dict.lookupOrDefault<word>("k", "k")),
+    GName_(dict.lookupOrDefault<word>("G", "G")),
+    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
+    nutName_(dict.lookupOrDefault<word>("nut", "nut"))
 {
     checkType();
 }
@@ -102,7 +117,12 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     const epsilonWallFunctionFvPatchScalarField& ewfpsf
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ewfpsf)
+    fixedInternalValueFvPatchField<scalar>(ewfpsf),
+    UName_(ewfpsf.UName_),
+    kName_(ewfpsf.kName_),
+    GName_(ewfpsf.GName_),
+    nuName_(ewfpsf.nuName_),
+    nutName_(ewfpsf.nutName_)
 {
     checkType();
 }
@@ -114,7 +134,12 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ewfpsf, iF)
+    fixedInternalValueFvPatchField<scalar>(ewfpsf, iF),
+    UName_(ewfpsf.UName_),
+    kName_(ewfpsf.kName_),
+    GName_(ewfpsf.GName_),
+    nuName_(ewfpsf.nuName_),
+    nutName_(ewfpsf.nutName_)
 {
     checkType();
 }
@@ -135,21 +160,21 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     const scalarField& y = ras.y()[patch().index()];
 
     volScalarField& G = const_cast<volScalarField&>
-        (db().lookupObject<volScalarField>("G"));
+        (db().lookupObject<volScalarField>(GName_));
 
     volScalarField& epsilon = const_cast<volScalarField&>
-        (db().lookupObject<volScalarField>("epsilon"));
+        (db().lookupObject<volScalarField>(dimensionedInternalField().name()));
 
-    const volScalarField& k = db().lookupObject<volScalarField>("k");
+    const volScalarField& k = db().lookupObject<volScalarField>(kName_);
 
     const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+        patch().lookupPatchField<volScalarField, scalar>(nuName_);
 
     const scalarField& nutw =
-        patch().lookupPatchField<volScalarField, scalar>("nut");
+        patch().lookupPatchField<volScalarField, scalar>(nutName_);
 
     const fvPatchVectorField& Uw =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     const scalarField magGradUw = mag(Uw.snGrad());
 
@@ -192,6 +217,11 @@ void epsilonWallFunctionFvPatchScalarField::evaluate
 void epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fixedInternalValueFvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
+    writeEntryIfDifferent<word>(os, "G", "G", GName_);
+    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
+    writeEntryIfDifferent<word>(os, "nut", "nut", nutName_);
     writeEntry("value", os);
 }
 

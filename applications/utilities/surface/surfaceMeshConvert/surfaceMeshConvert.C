@@ -34,6 +34,9 @@ Usage
     @param -clean \n
     Perform some surface checking/cleanup on the input surface
 
+    @param -orient \n
+    Check face orientation on the input surface
+
     @param -scale \<scale\> \n
     Specify a scaling factor for writing the files
 
@@ -68,6 +71,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
     argList::validOptions.insert("clean", "");
+    argList::validOptions.insert("orient", "");
     argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("triSurface", "");
     argList::validOptions.insert("unsorted", "");
@@ -108,6 +112,13 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        if (args.options().found("orient"))
+        {
+            Info<< "Checking surface orientation" << endl;
+            surf.checkOrientation(true);
+            Info<< endl;
+        }
+
         if (args.options().found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
@@ -140,6 +151,13 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        if (args.options().found("orient"))
+        {
+            Info<< "Checking surface orientation" << endl;
+            surf.checkOrientation(true);
+            Info<< endl;
+        }
+
         if (args.options().found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
@@ -171,6 +189,13 @@ int main(int argc, char *argv[])
         surf.writeStats(Info);
         Info<< endl;
 
+        if (args.options().found("orient"))
+        {
+            Info<< "Checking surface orientation" << endl;
+            surf.checkOrientation(true);
+            Info<< endl;
+        }
+
         if (args.options().found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
@@ -201,6 +226,13 @@ int main(int argc, char *argv[])
         Info<< "Read surface:" << endl;
         surf.writeStats(Info);
         Info<< endl;
+
+        if (args.options().found("orient"))
+        {
+            Info<< "Checking surface orientation" << endl;
+            surf.checkOrientation(true);
+            Info<< endl;
+        }
 
         if (args.options().found("clean"))
         {

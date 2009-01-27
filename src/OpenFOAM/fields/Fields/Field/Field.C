@@ -299,14 +299,6 @@ tmp<Field<Type> > Field<Type>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Field<Type>& Field<Type>::null()
-{
-    Field<Type>* nullPtr = reinterpret_cast<Field<Type>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class Type>
 void Field<Type>::map
 (
     const UList<Type>& mapF,

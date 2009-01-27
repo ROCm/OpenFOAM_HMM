@@ -76,7 +76,7 @@ SourceFiles
 #include "HashSet.H"
 #include "mapPolyMesh.H"
 #include "CompactListList.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

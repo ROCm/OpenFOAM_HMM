@@ -29,14 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
-const Foam::FixedList<T, Size>& Foam::FixedList<T, Size>::null()
-{
-    FixedList<T, Size>* nullPtr = reinterpret_cast<FixedList<T, Size>*>(NULL);
-    return *nullPtr;
-}
-
-
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
 
 template<class T, Foam::label Size>

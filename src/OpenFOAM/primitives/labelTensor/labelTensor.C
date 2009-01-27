@@ -25,20 +25,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "labelTensor.H"
-#include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<>
-const char* const labelTensor::typeName = "labelTensor";
+const char* const Foam::labelTensor::typeName = "labelTensor";
 
 template<>
-const char* labelTensor::componentNames[] =
+const char* Foam::labelTensor::componentNames[] =
 {
     "xx", "xy", "xz",
     "yx", "yy", "yz",
@@ -46,7 +41,7 @@ const char* labelTensor::componentNames[] =
 };
 
 template<>
-const labelTensor labelTensor::zero
+const Foam::labelTensor Foam::labelTensor::zero
 (
     0, 0, 0,
     0, 0, 0,
@@ -54,7 +49,7 @@ const labelTensor labelTensor::zero
 );
 
 template<>
-const labelTensor labelTensor::one
+const Foam::labelTensor Foam::labelTensor::one
 (
     1, 1, 1,
     1, 1, 1,
@@ -62,9 +57,4 @@ const labelTensor labelTensor::one
 );
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 // ************************************************************************* //
-

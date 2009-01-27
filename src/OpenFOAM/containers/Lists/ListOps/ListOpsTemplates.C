@@ -173,7 +173,14 @@ void Foam::sortedOrder
     labelList& order
 )
 {
-    order.setSize(lst.size());
+    // list lengths must be identical
+    if (order.size() != lst.size())
+    {
+        // avoid copying any elements, they are overwritten anyhow
+        order.clear();
+        order.setSize(lst.size());
+    }
+
     forAll(order, elemI)
     {
         order[elemI] = elemI;

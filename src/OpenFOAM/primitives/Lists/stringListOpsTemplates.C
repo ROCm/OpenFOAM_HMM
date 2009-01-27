@@ -29,15 +29,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class StringType>
-labelList findStrings
+Foam::labelList Foam::findStrings
 (
-    const string& pattern,
+    const char* pattern,
     const UList<StringType>& lst
 )
 {
@@ -59,7 +55,31 @@ labelList findStrings
 
 
 template<class StringType>
-labelList findStrings
+Foam::labelList Foam::findStrings
+(
+    const std::string& pattern,
+    const UList<StringType>& lst
+)
+{
+    regExp re(pattern);
+    labelList matched(lst.size());
+
+    label matchI = 0;
+    forAll(lst, elemI)
+    {
+        if (re.match(lst[elemI]))
+        {
+            matched[matchI++] = elemI;
+        }
+    }
+    matched.setSize(matchI);
+
+    return matched;
+}
+
+
+template<class StringType>
+Foam::labelList Foam::findStrings
 (
     const wordRe& wre,
     const UList<StringType>& lst
@@ -82,7 +102,7 @@ labelList findStrings
 
 
 template<class StringType>
-labelList findStrings
+Foam::labelList Foam::findStrings
 (
     const UList<wordRe>& wreLst,
     const UList<StringType>& lst
@@ -109,7 +129,7 @@ labelList findStrings
 
 
 template<class StringType>
-bool findStrings
+bool Foam::findStrings
 (
     const UList<wordRe>& wreLst,
     const StringType& str
@@ -122,13 +142,9 @@ bool findStrings
             return true;
         }
     }
-    
+
     return false;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

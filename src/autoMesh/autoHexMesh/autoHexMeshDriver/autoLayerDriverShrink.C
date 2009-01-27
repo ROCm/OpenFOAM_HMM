@@ -43,7 +43,7 @@ Description
 // Calculate inverse sum of edge weights (currently always 1.0)
 void Foam::autoLayerDriver::sumWeights
 (
-    const PackedList<1>& isMasterEdge,
+    const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const labelList& meshPoints,
     const edgeList& edges,
@@ -91,7 +91,7 @@ void Foam::autoLayerDriver::sumWeights
 void Foam::autoLayerDriver::smoothField
 (
     const motionSmoother& meshMover,
-    const PackedList<1>& isMasterEdge,
+    const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const scalarField& fieldMin,
     const label& nSmoothDisp,
@@ -163,7 +163,7 @@ void Foam::autoLayerDriver::smoothField
 void Foam::autoLayerDriver::smoothPatchNormals
 (
     const motionSmoother& meshMover,
-    const PackedList<1>& isMasterEdge,
+    const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const label nSmoothDisp,
     pointField& normals
@@ -228,7 +228,7 @@ void Foam::autoLayerDriver::smoothPatchNormals
 void Foam::autoLayerDriver::smoothNormals
 (
     const label nSmoothDisp,
-    const PackedList<1>& isMasterEdge,
+    const PackedBoolList& isMasterEdge,
     const labelList& fixedPoints,
     pointVectorField& normals
 ) const
@@ -240,7 +240,7 @@ void Foam::autoLayerDriver::smoothNormals
     const edgeList& edges = mesh.edges();
 
     // Points that do not change.
-    PackedList<1> isFixedPoint(mesh.nPoints(), 0);
+    PackedBoolList isFixedPoint(mesh.nPoints(), 0);
 
     // Internal points that are fixed
     forAll(fixedPoints, i)
@@ -452,7 +452,7 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
 void Foam::autoLayerDriver::findIsolatedRegions
 (
     const indirectPrimitivePatch& pp,
-    const PackedList<1>& isMasterEdge,
+    const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const scalar minCosLayerTermination,
     scalarField& field,
@@ -684,7 +684,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     // ~~~~~~~~~~~~~~~~~~~~~~~
 
     // Precalulate master edge (only relevant for shared edges)
-    PackedList<1> isMasterEdge(syncTools::getMasterEdges(mesh));
+    PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
     // Precalculate meshEdge per pp edge
     labelList meshEdges(pp.nEdges());
 
@@ -979,7 +979,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     const labelList& meshPoints = pp.meshPoints();
 
     // Precalulate master edge (only relevant for shared edges)
-    PackedList<1> isMasterEdge(syncTools::getMasterEdges(mesh));
+    PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
     // Precalculate meshEdge per pp edge
     labelList meshEdges(pp.nEdges());
 

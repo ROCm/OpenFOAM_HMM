@@ -1203,7 +1203,7 @@ void Foam::syncTools::syncEdgeList
                 const labelList& meshEdges = procPatch.meshEdges();
 
                 // Receive from neighbour. Is per patch edge the region of the
-                // neighbouring patch edge. 
+                // neighbouring patch edge.
                 List<T> nbrPatchInfo(procPatch.nEdges());
 
                 {
@@ -1402,7 +1402,7 @@ void Foam::syncTools::syncBoundaryFaceList
                 else
                 {
                     OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                    toNbr << 
+                    toNbr <<
                         SubList<T>(faceValues, procPatch.size(), patchStart);
                 }
             }
@@ -1683,7 +1683,7 @@ void Foam::syncTools::syncFaceList
                 cop(t, val1);
                 faceValues.set(meshFace0, t);
 
-                cop(val1, val0);                
+                cop(val1, val0);
                 faceValues.set(meshFace1, val1);
             }
         }

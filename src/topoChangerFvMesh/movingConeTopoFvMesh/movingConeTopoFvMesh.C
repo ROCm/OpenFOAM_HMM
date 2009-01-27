@@ -343,7 +343,7 @@ bool Foam::movingConeTopoFvMesh::update()
             //    << endl;
 
             {
-                OFstream str(db().path()/"meshPoints.obj");
+                OFstream str(thisDb().path()/"meshPoints.obj");
                 Pout<< "Writing mesh with meshPoints to " << str.name()
                     << endl;
 
@@ -361,7 +361,7 @@ bool Foam::movingConeTopoFvMesh::update()
                 }
             }
             {
-                OFstream str(db().path()/"preMotionPoints.obj");
+                OFstream str(thisDb().path()/"preMotionPoints.obj");
                 Pout<< "Writing mesh with preMotionPoints to " << str.name()
                     << endl;
 

@@ -22,60 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::PackedBoolList
+
+Description
+    A bit-packed bool list
+
 \*---------------------------------------------------------------------------*/
 
-#include "cartesianCS.H"
-#include "addToRunTimeSelectionTable.H"
+#ifndef PackedBoolList_H
+#define PackedBoolList_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "bool.H"
+#include "PackedList.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(cartesianCS, 0);
-    addToRunTimeSelectionTable(coordinateSystem, cartesianCS, origAxisDir);
-    addToRunTimeSelectionTable(coordinateSystem, cartesianCS, origRotation);
-    addToRunTimeSelectionTable(coordinateSystem, cartesianCS, dictionary);
+    typedef PackedList<1> PackedBoolList;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::cartesianCS::cartesianCS()
-:
-    coordinateSystem()
-{}
-
-
-Foam::cartesianCS::cartesianCS
-(
-    const word& name,
-    const point& origin,
-    const vector& axis,
-    const vector& dir
-)
-:
-    coordinateSystem(name, origin, axis, dir)
-{}
-
-
-Foam::cartesianCS::cartesianCS
-(
-    const word& name,
-    const point& origin,
-    const coordinateRotation& cr
-)
-:
-    coordinateSystem(name, origin, cr)
-{}
-
-
-Foam::cartesianCS::cartesianCS
-(
-    const word& name,
-    const dictionary& dict
-)
-:
-    coordinateSystem(name, dict)
-{}
+#endif
 
 // ************************************************************************* //

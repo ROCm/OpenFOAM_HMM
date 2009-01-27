@@ -189,9 +189,19 @@ public:
                 return IDLList<ParticleType>::begin();
             };
 
+            const const_iterator cbegin() const
+            {
+                return IDLList<ParticleType>::cbegin();
+            };
+
             const const_iterator end() const
             {
                 return IDLList<ParticleType>::end();
+            };
+
+            const const_iterator cend() const
+            {
+                return IDLList<ParticleType>::cend();
             };
 
             iterator begin()

@@ -317,18 +317,23 @@ public:
         };
 
 
-        //- iterator set to the begining of the StaticHashTable
+        //- iterator set to the beginning of the StaticHashTable
         inline iterator begin();
 
         //- iterator set to beyond the end of the StaticHashTable
         inline const iterator& end();
 
-        //- const_iterator set to the begining of the StaticHashTable
+        //- const_iterator set to the beginning of the StaticHashTable
+        inline const_iterator cbegin() const;
+
+        //- const_iterator set to beyond the end of the StaticHashTable
+        inline const const_iterator& cend() const;
+
+        //- const_iterator set to the beginning of the StaticHashTable
         inline const_iterator begin() const;
 
         //- const_iterator set to beyond the end of the StaticHashTable
         inline const const_iterator& end() const;
-
 
     // IOstream Operator
 

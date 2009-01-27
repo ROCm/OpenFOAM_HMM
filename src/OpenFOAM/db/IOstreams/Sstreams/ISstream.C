@@ -366,6 +366,9 @@ Foam::Istream& Foam::ISstream::read(string& str)
         return *this;
     }
 
+    char endTok = token::END_STRING;
+
+    // Note, we could also handle single-quoted strings here (if desired)
     if (c != token::BEGIN_STRING)
     {
         buf[0] = '\0';
@@ -382,52 +385,49 @@ Foam::Istream& Foam::ISstream::read(string& str)
 
     while (get(c))
     {
-        switch (c)
+        if (c == endTok)
         {
-            case token::END_STRING :
-                if (escaped)
-                {
-                    escaped = false;
-                    i--;    // overwrite backslash
-                }
-                else
-                {
-                    // done reading string
-                    buf[i] = '\0';
-                    str = buf;
-                    return *this;
-                }
-                break;
-
-            case token::NL :
-                if (escaped)
-                {
-                    escaped = false;
-                    i--;    // overwrite backslash
-                }
-                else
-                {
-                    buf[i] = '\0';
-                    buf[errLen] = '\0';
-
-                    FatalIOErrorIn("ISstream::read(string&)", *this)
-                        << "found '\\n' while reading string \""
-                        << buf << "...\""
-                        << exit(FatalIOError);
-
-                    return *this;
-                }
-                break;
-
-            case '\\':
-                escaped = !escaped;    // toggle state (retains backslashes)
-                break;
-
-            default:
+            if (escaped)
+            {
                 escaped = false;
-                break;
+                i--;    // overwrite backslash
+            }
+            else
+            {
+                // done reading string
+                buf[i] = '\0';
+                str = buf;
+                return *this;
+            }
         }
+        else if (c == token::NL)
+        {
+            if (escaped)
+            {
+                escaped = false;
+                i--;    // overwrite backslash
+            }
+            else
+            {
+                buf[i] = '\0';
+                buf[errLen] = '\0';
 
+                FatalIOErrorIn("ISstream::read(string&)", *this)
+                    << "found '\\n' while reading string \""
+                    << buf << "...\""
+                    << exit(FatalIOError);
+
+                return *this;
+            }
+        }
+        else if (c == '\\')
+        {
+            escaped = !escaped;    // toggle state (retains backslashes)
+        }
+        else
+        {
+            escaped = false;
+        }
 
         buf[i] = c;
         if (i++ == maxLen)

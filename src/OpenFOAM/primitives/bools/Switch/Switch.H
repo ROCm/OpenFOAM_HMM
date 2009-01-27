@@ -27,7 +27,7 @@ Class
 
 Description
     A simple wrapper around bool so that it can be read as a word:
-    on/off, true/false, yes/no or y/n.
+    true/false, on/off, yes/no or y/n.
 
 SourceFiles
     Switch.C
@@ -61,35 +61,97 @@ class dictionary;
 
 class Switch
 {
+private:
+
     // Private data
 
-        bool bool_;
-
-        word word_;
+        //- The logic and enumerated text representation stored as a single byte
+        unsigned char switch_;
 
 public:
-    // Private member functions
+
+    // Public data types
+
+        //- The various text representations for a switch value.
+        //  These also correspond to the entries in names.
+        enum switchType
+        {
+            FALSE = 0,  TRUE  = 1,
+            OFF   = 2,  ON    = 3,
+            NO    = 4,  YES   = 5,
+            NO_1  = 6,  YES_1 = 7,
+            INVALID
+        };
+
+
+    // Static data members
+
+        //- The set of names corresponding to the switchType enumeration
+        //  Includes an extra entry for "invalid".
+        static const char* names[INVALID+1];
+
+
+    // Static Member Functions
+
+        //- Return a switchType representation of a bool
+        static switchType asEnum(const bool);
+
+        //- Return a switchType representation of a word
+        //  Optionally allow bad words, and catch the error elsewhere
+        static switchType asEnum
+        (
+            const std::string&,
+            const bool allowInvalid=false
+        );
+
+        //- Return a bool representation of a switchType
+        static bool asBool(const switchType);
 
         //- Return a bool representation of a word
-        static bool asBool(const word&);
+        //  Optionally allow bad words, and catch the error elsewhere
+        static bool asBool
+        (
+            const std::string&,
+            const bool allowInvalid=false
+        );
 
-        //- Return a word representation of a bool value
-        static word asWord(const bool);
+        //- Return a text representation of a bool value
+        static const char* asText(const bool);
+
+        //- Return a text representation of a switchType
+        static const char* asText(const switchType);
+
 
     // Constructors
+
+        //- Construct null as false
+        Switch()
+        :
+            switch_(Switch::FALSE)
+        {}
 
         //- Construct from bool
         Switch(const bool value)
         :
-            bool_(value),
-            word_(asWord(value))
+            switch_(asEnum(value))
         {}
 
-        //- Construct from word
-        Switch(const word& value)
+        //- Construct from integer values (treats integer as bool value)
+        Switch(const int value)
         :
-            bool_(asBool(value)),
-            word_(value)
+            switch_(asEnum(bool(value)))
+        {}
+
+        //- Construct from std::string, string, word
+        Switch(const std::string& value)
+        :
+            switch_(asEnum(value))
+        {}
+
+        //- Construct from character array
+        Switch(const char* value)
+        :
+            switch_(asEnum(std::string(value)))
         {}
 
         //- Construct from Istream
@@ -107,22 +169,16 @@ public:
 
     // Member Operators
 
-        Switch& operator=(const Switch& rhs)
-        {
-            bool_ = rhs.bool_;
-            word_ = rhs.word_;
-
-            return *this;
-        }
-
+        //- Conversion to bool
         operator bool() const
         {
-            return bool_;
+            return (switch_ & 0x1);
         }
 
-        operator const word&() const
+        //- Assignment from bool
+        void operator=(const bool b)
         {
-            return word_;
+            switch_ = (b ? Switch::TRUE : Switch::FALSE);
         }
 
 

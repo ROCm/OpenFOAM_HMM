@@ -319,10 +319,7 @@ Type max(const UList<Type>& f)
     }
     else
     {
-        WarningIn("max(const UList<Type>&)")
-            << "empty field, returning zero" << endl;
-
-        return pTraits<Type>::zero;
+        return pTraits<Type>::min;
     }
 }
 
@@ -339,10 +336,7 @@ Type min(const UList<Type>& f)
     }
     else
     {
-        WarningIn("min(const UList<Type>&)")
-            << "empty field, returning zero" << endl;
-
-        return pTraits<Type>::zero;
+        return pTraits<Type>::max;
     }
 }
 

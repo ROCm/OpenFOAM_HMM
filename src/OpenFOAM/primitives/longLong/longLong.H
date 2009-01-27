@@ -49,11 +49,11 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a string representation of a long long
-word name(long long l);
+word name(long long);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-long long readLongLong(Istream& is);
+long long readLongLong(Istream&);
 Istream& operator>>(Istream&, long long&);
 Ostream& operator<<(Ostream&, const long long);
 

@@ -44,6 +44,13 @@ inline Foam::autoPtr<Foam::Matrix<Form, Type> > Foam::Matrix<Form, Type>::clone(
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Form, class Type>
+inline const Foam::Matrix<Form, Type>& Foam::Matrix<Form, Type>::null()
+{
+    return *reinterpret_cast< Matrix<Form, Type>* >(0);
+}
+
+
 //- Return the number of rows
 template<class Form, class Type>
 inline Foam::label Foam::Matrix<Form, Type>::n() const

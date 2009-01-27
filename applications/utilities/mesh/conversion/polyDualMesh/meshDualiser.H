@@ -49,7 +49,7 @@ SourceFiles
 #define meshDualiser_H
 
 #include "DynamicList.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "boolList.H"
 #include "typeInfo.H"
 
@@ -101,7 +101,7 @@ class meshDualiser
         //  emanating from (boundary & feature) point
         void generateDualBoundaryEdges
         (
-            const PackedList<1>&,
+            const PackedBoolList&,
             const label pointI,
             polyTopoChange&
         );
@@ -144,7 +144,7 @@ class meshDualiser
         void createFacesAroundEdge
         (
             const bool splitFace,
-            const PackedList<1>&,
+            const PackedBoolList&,
             const label edgeI,
             const label startFaceI,
             polyTopoChange&,

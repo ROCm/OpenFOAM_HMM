@@ -56,7 +56,6 @@ Description
     @verbatim
         kOmegaSST
         {
-            Cmu         0.09;
             alphaK1     0.85034;
             alphaK2     1.0;
             alphaOmega1 0.5;
@@ -96,7 +95,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmega Declaration
+                          Class kOmegaSST Declaration
 \*---------------------------------------------------------------------------*/
 
 class kOmegaSST
@@ -105,36 +104,38 @@ class kOmegaSST
 {
     // Private data
 
-        dimensionedScalar alphaK1_;
-        dimensionedScalar alphaK2_;
+        // Model coefficients
 
-        dimensionedScalar alphaOmega1_;
-        dimensionedScalar alphaOmega2_;
+            dimensionedScalar alphaK1_;
+            dimensionedScalar alphaK2_;
 
-        dimensionedScalar alphah_;
+            dimensionedScalar alphaOmega1_;
+            dimensionedScalar alphaOmega2_;
 
-        dimensionedScalar gamma1_;
-        dimensionedScalar gamma2_;
+            dimensionedScalar alphah_;
 
-        dimensionedScalar beta1_;
-        dimensionedScalar beta2_;
+            dimensionedScalar gamma1_;
+            dimensionedScalar gamma2_;
 
-        dimensionedScalar betaStar_;
+            dimensionedScalar beta1_;
+            dimensionedScalar beta2_;
 
-        dimensionedScalar a1_;
-        dimensionedScalar c1_;
+            dimensionedScalar betaStar_;
 
-        dimensionedScalar omega0_;
-        dimensionedScalar omegaSmall_;
+            dimensionedScalar a1_;
+            dimensionedScalar c1_;
 
-        dimensionedScalar Cmu_;
 
+        //- Wall distance
+        //  Note: different to wall distance in parent RASModel
         wallDist y_;
 
-        volScalarField k_;
-        volScalarField omega_;
-        volScalarField mut_;
-        volScalarField alphat_;
+        // Fields
+
+            volScalarField k_;
+            volScalarField omega_;
+            volScalarField mut_;
+            volScalarField alphat_;
 
 
     // Private member functions

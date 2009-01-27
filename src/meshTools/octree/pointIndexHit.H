@@ -43,7 +43,7 @@ namespace Foam
 typedef PointIndexHit<point> pointIndexHit;
 
 
-//- Specify data associated with pointIndexHit type is contiguous
+//- Data associated with pointIndexHit type are contiguous
 template<>
 inline bool contiguous<pointIndexHit>() {return contiguous<point>();}
 

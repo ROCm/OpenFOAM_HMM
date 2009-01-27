@@ -126,7 +126,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     const pointField& cellCentres = mesh_.cellCentres();
 
     // Stats on edges to test. Count proc faces only once.
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
         label nMasterFaces = 0;
@@ -865,7 +865,7 @@ Foam::meshRefinement::meshRefinement
 Foam::label Foam::meshRefinement::countHits() const
 {
     // Stats on edges to test. Count proc faces only once.
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     label nHits = 0;
 
@@ -1201,7 +1201,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints
     const faceList& faces = mesh_.faces();
 
     // Mark all points on faces that will become baffles
-    PackedList<1> isBoundaryPoint(mesh_.nPoints(), 0u);
+    PackedBoolList isBoundaryPoint(mesh_.nPoints(), 0u);
     label nBoundaryPoints = 0;
 
     forAll(surfaceIndex_, faceI)

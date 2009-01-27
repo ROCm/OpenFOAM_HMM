@@ -92,28 +92,29 @@ public:
     //- Standard punctuation tokens
     enum punctuationToken
     {
-        NULL_TOKEN    = '\0',
-        SPACE         = ' ',
-        TAB           = '\t',
-        NL            = '\n',
+        NULL_TOKEN     = '\0',
+        SPACE          = ' ',
+        TAB            = '\t',
+        NL             = '\n',
 
-        END_STATEMENT = ';',
-        BEGIN_LIST    = '(',
-        END_LIST      = ')',
-        BEGIN_SQR     = '[',
-        END_SQR       = ']',
-        BEGIN_BLOCK   = '{',
-        END_BLOCK     = '}',
-        COLON         = ':',
-        COMMA         = ',',
-        BEGIN_STRING  = '"',
-        END_STRING    = '"',
+        END_STATEMENT  = ';',
+        BEGIN_LIST     = '(',
+        END_LIST       = ')',
+        BEGIN_SQR      = '[',
+        END_SQR        = ']',
+        BEGIN_BLOCK    = '{',
+        END_BLOCK      = '}',
+        COLON          = ':',
+        COMMA          = ',',
 
-        ASSIGN        = '=',
-        ADD           = '+',
-        SUBTRACT      = '-',
-        MULTIPLY      = '*',
-        DIVIDE        = '/'
+        BEGIN_STRING   = '"',
+        END_STRING     = BEGIN_STRING,
+
+        ASSIGN         = '=',
+        ADD            = '+',
+        SUBTRACT       = '-',
+        MULTIPLY       = '*',
+        DIVIDE         = '/'
     };
 
 

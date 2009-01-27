@@ -50,7 +50,7 @@ namespace Foam
 typedef Vector<label> labelVector;
 
 
-//- Specify data associated with labelVector type is contiguous
+//- Data associated with labelVector type are contiguous
 template<>
 inline bool contiguous<labelVector>() {return true;}
 

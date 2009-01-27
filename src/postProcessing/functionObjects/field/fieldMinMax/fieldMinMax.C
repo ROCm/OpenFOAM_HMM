@@ -38,6 +38,18 @@ namespace Foam
 }
 
 
+template<>
+const char* Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>::names[] =
+{
+    "magnitude",
+    "component"
+};
+
+
+const Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>
+Foam::fieldMinMax::modeTypeNames_;
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fieldMinMax::fieldMinMax
@@ -52,6 +64,7 @@ Foam::fieldMinMax::fieldMinMax
     obr_(obr),
     active_(true),
     log_(false),
+    mode_(mdMag),
     fieldSet_(),
     fieldMinMaxFilePtr_(NULL)
 {
@@ -85,6 +98,7 @@ void Foam::fieldMinMax::read(const dictionary& dict)
     {
         log_ = dict.lookupOrDefault<Switch>("log", false);
 
+        mode_ = modeTypeNames_[dict.lookup("mode")];
         dict.lookup("fields") >> fieldSet_;
     }
 }
@@ -176,16 +190,13 @@ void Foam::fieldMinMax::calcMinMaxFields<Foam::scalar>
 {
     if (obr_.foundObject<volScalarField>(fieldName))
     {
-        const volScalarField& field =
-            obr_.lookupObject<volScalarField>(fieldName);
-        scalar minValue = min(field).value();
-        scalar maxValue = max(field).value();
-
-        reduce(minValue, minOp<scalar>());
-        reduce(maxValue, maxOp<scalar>());
-
         if (Pstream::master())
         {
+            const volScalarField& field =
+                obr_.lookupObject<volScalarField>(fieldName);
+            scalar minValue = min(field).value();
+            scalar maxValue = max(field).value();
+
             fieldMinMaxFilePtr_() << obr_.time().value() << tab
                 << fieldName << tab << minValue << tab << maxValue << endl;
 

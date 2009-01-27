@@ -244,6 +244,23 @@ void Foam::fvPatchField<Type>::write(Ostream& os) const
 }
 
 
+template<class Type>
+template<class EntryType>
+void Foam::fvPatchField<Type>::writeEntryIfDifferent
+(
+    Ostream& os,
+    const word& entryName,
+    const EntryType& value1,
+    const EntryType& value2
+) const
+{
+    if (value1 != value2)
+    {
+        os.writeKeyword(entryName) << value2 << token::END_STATEMENT << nl;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>

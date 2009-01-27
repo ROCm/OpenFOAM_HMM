@@ -38,7 +38,7 @@ const Foam::septernion Foam::septernion::I(vector::zero, quaternion::I);
 
 Foam::septernion::septernion(Istream& is)
 {
-    operator>>(is, *this);
+    is >> *this;
 }
 
 
@@ -46,9 +46,9 @@ Foam::septernion::septernion(Istream& is)
 
 Foam::word Foam::name(const septernion& s)
 {
-    OStringStream osBuffer;
-    osBuffer << '(' << s.t() << ',' << s.r() << ')';
-    return osBuffer.str();
+    OStringStream buf;
+    buf << '(' << s.t() << ',' << s.r() << ')';
+    return buf.str();
 }
 
 

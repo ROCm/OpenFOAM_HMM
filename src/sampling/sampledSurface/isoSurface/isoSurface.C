@@ -537,7 +537,7 @@ void Foam::isoSurface::calcSnappedCc
 // to a single point
 void Foam::isoSurface::calcSnappedPoint
 (
-    const PackedList<1>& isBoundaryPoint,
+    const PackedBoolList& isBoundaryPoint,
     const labelList& boundaryRegion,
     const volScalarField& cVals,
     const scalarField& pVals,
@@ -1382,7 +1382,7 @@ Foam::isoSurface::isoSurface
 
     // Determine if point is on boundary. Points on boundaries are never
     // snapped. Coupled boundaries are handled explicitly so not marked here.
-    PackedList<1> isBoundaryPoint(mesh_.nPoints());
+    PackedBoolList isBoundaryPoint(mesh_.nPoints());
 
     labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
 

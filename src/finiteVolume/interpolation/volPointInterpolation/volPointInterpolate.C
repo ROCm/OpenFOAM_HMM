@@ -128,7 +128,7 @@ volPointInterpolation::interpolate
             (
                 "volPointInterpolate(" + vf.name() + ')',
                 vf.instance(),
-                vf.db()
+                pMesh.thisDb()
             ),
             pMesh,
             vf.dimensions(),
@@ -168,6 +168,8 @@ volPointInterpolation::interpolate
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
+    const pointMesh& pm = pointMesh::New(vf.mesh());
+
     tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf
     (
         new GeometricField<Type, pointPatchField, pointMesh>
@@ -176,9 +178,9 @@ volPointInterpolation::interpolate
             (
                 "volPointInterpolate(" + vf.name() + ')',
                 vf.instance(),
-                vf.db()
+                pm.thisDb()
             ),
-            pointMesh::New(vf.mesh()),
+            pm,
             vf.dimensions()
         )
     );

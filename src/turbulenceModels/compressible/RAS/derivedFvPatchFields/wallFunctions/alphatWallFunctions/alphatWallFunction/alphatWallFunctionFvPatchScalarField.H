@@ -57,6 +57,11 @@ class alphatWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+    // Private data
+
+        //- Name of turbulent viscosity field
+        word mutName_;
+
 
 public:
 

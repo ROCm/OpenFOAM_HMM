@@ -32,7 +32,7 @@ Description
 
     Note:
     - not possible on patches of type 'empty'. There are no values on
-    'empty' patch fields so even the api would have to change 
+    'empty' patch fields so even the api would have to change
      (no volScalarField as argument). Too messy.
     - in parallel the regularisation (coarsening) always takes place
     and slightly different surfaces will be created compared to non-parallel.
@@ -56,7 +56,7 @@ SourceFiles
 #include "triSurface.H"
 #include "labelPair.H"
 #include "pointIndexHit.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -181,7 +181,7 @@ class isoSurface
         //  point.
         void calcSnappedPoint
         (
-            const PackedList<1>& isBoundaryPoint,
+            const PackedBoolList& isBoundaryPoint,
             const labelList& boundaryRegion,
             const volScalarField& cVals,
             const scalarField& pVals,

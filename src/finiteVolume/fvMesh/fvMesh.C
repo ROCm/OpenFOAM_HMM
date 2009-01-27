@@ -485,17 +485,11 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 template<class Type>
 void MeshObjectMovePoints(const Foam::fvMesh& mesh)
 {
-    if
-    (
-        mesh.db().objectRegistry::foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+    if (mesh.thisDb().foundObject<Type>(Type::typeName))
     {
         const_cast<Type&>
         (
-            mesh.db().objectRegistry::lookupObject<Type>
+            mesh.thisDb().lookupObject<Type>
             (
                 Type::typeName
             )

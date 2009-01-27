@@ -56,7 +56,7 @@ Foam::labelListList Foam::addPatchCellLayer::calcGlobalEdgeFaces
     //// Determine coupled edges just so we don't have to have storage
     //// for all non-coupled edges.
     //
-    //PackedList<1> isCoupledEdge(mesh.nEdges(), 0);
+    //PackedBoolList isCoupledEdge(mesh.nEdges());
     //
     //const polyBoundaryMesh& patches = mesh.boundaryMesh();
     //

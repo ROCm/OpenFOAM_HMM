@@ -61,6 +61,22 @@ const symmTensor symmTensor::one
           1
 );
 
+template<>
+const symmTensor symmTensor::max
+(
+    VGREAT, VGREAT, VGREAT,
+       VGREAT, VGREAT,
+          VGREAT
+);
+
+template<>
+const symmTensor symmTensor::min
+(
+    -VGREAT, -VGREAT, -VGREAT,
+       -VGREAT, -VGREAT,
+          -VGREAT
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

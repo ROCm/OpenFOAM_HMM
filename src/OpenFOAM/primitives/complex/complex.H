@@ -174,8 +174,8 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream& is, complex&);
-        friend Ostream& operator<<(Ostream& os, const complex& C);
+        friend Istream& operator>>(Istream&, complex&);
+        friend Ostream& operator<<(Ostream&, const complex&);
 
 };
 
@@ -186,7 +186,7 @@ public:
 word name(const complex&);
 
 
-//- Specify data associated with complex type is contiguous
+//- Data associated with complex type are contiguous
 template<>
 inline bool contiguous<complex>() {return true;}
 

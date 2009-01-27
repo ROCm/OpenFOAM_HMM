@@ -32,12 +32,25 @@ Description
 #include "error.H"
 
 #include "bool.H"
+#include "Switch.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 {
+    // we could also process everything via Switch
+    // The error messages are the problem: they are from SwitchIO.C
+//    Switch sw(is);
+//
+//    if (is.good())
+//    {
+//        b = sw;
+//    }
+//
+//    return is;
+//
+//
     token t(is);
 
     if (!t.good())
@@ -52,35 +65,32 @@ Foam::Istream& Foam::operator>>(Istream& is, bool& b)
     }
     else if (t.isWord())
     {
-        // use Switch asBool() here?
-        if (t.wordToken() == "true" || t.wordToken() == "on")
-        {
-            b = true;
-        }
-        else if (t.wordToken() == "false" || t.wordToken() == "off")
-        {
-            b = false;
-        }
-        else
+        // allow invalid values, but catch after for correct error message
+        Switch::switchType sw = Switch::asEnum(t.wordToken(), true);
+
+        if (sw == Switch::INVALID)
         {
             is.setBad();
             FatalIOErrorIn("operator>>(Istream&, bool&)", is)
-                << "expected 'true' or 'false', found " << t.wordToken()
+                << "expected 'true/false', 'on/off', found " << t.wordToken()
                 << exit(FatalIOError);
 
             return is;
+        }
+        else
+        {
+            b = Switch::asBool(sw);
         }
     }
     else
     {
         is.setBad();
-        FatalIOErrorIn("operator>>(Istream&, bool&)", is)
+        FatalIOErrorIn("operator>>(Istream&, bool/Switch&)", is)
             << "wrong token type - expected bool found " << t
             << exit(FatalIOError);
 
         return is;
     }
-
 
 
     // Check state of Istream
@@ -92,18 +102,21 @@ Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 {
+    // we could also write as text string without any difficulty
+    // os << Switch::asText(b);
     os.write(label(b));
-    os.check("Ostream& operator<<(Ostream&, const bool&)");
+    os.check("Ostream& operator<<(Ostream&, const bool)");
     return os;
 }
 
 
 bool Foam::readBool(Istream& is)
 {
-    bool b;
-    is >> b;
+    bool val;
+    is >> val;
 
-    return b;
+    return val;
 }
+
 
 // ************************************************************************* //

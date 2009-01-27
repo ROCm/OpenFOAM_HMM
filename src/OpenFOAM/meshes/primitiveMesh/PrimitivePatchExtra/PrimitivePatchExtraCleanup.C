@@ -99,6 +99,11 @@ checkOrientation
     const Field<PointType>& pointLst = this->points();
     const vectorField& normLst = this->faceNormals();
 
+    if (ParentType::debug)
+    {
+        Info<<"checkOrientation:::checkOrientation(bool)" << endl;
+    }
+
     // Check edge normals, face normals, point normals.
     forAll(faceEs, faceI)
     {
@@ -153,8 +158,8 @@ checkOrientation
             (
                 "PrimitivePatchExtra::checkOrientation(bool)"
             )
-                << "Normal calculated from points not consistent with "
-                << "faceNormal" << nl
+                << "Normal calculated from points inconsistent with faceNormal"
+                << nl
                 << "face: " << f << nl
                 << "points: " << p0 << ' ' << p1 << ' ' << p2 << nl
                 << "pointNormal:" << pointNormal << nl
@@ -174,21 +179,18 @@ checkOrientation
     forAll(edgeLst, edgeI)
     {
         const edge& e = edgeLst[edgeI];
-        const labelList& neighbours = eFaces[edgeI];
+        const labelList& neighbouringFaces = eFaces[edgeI];
 
-        if (neighbours.size() == 2)
+        if (neighbouringFaces.size() == 2)
         {
-            const Face& faceA = faceLst[neighbours[0]];
-            const Face& faceB = faceLst[neighbours[1]];
+            // we use localFaces() since edges() are LOCAL
+            // these are both already available
+            const Face& faceA = this->localFaces()[neighbouringFaces[0]];
+            const Face& faceB = this->localFaces()[neighbouringFaces[1]];
 
-            // The edge cannot be going in the same direction if both faces
-            // are oriented counterclockwise.
-            // Thus the next face point *must* different between the faces.
-            if
-            (
-                faceA[faceA.fcIndex(findIndex(faceA, e.start()))]
-             == faceB[faceB.fcIndex(findIndex(faceB, e.start()))]
-            )
+            // If the faces are correctly oriented, the edges must go in
+            // different directions on connected faces.
+            if (faceA.edgeDirection(e) == faceB.edgeDirection(e))
             {
                 borderEdge[edgeI] = true;
                 if (verbose)
@@ -198,14 +200,20 @@ checkOrientation
                         "PrimitivePatchExtra::checkOrientation(bool)"
                     )
                         << "face orientation incorrect." << nl
-                        << "edge[" << edgeI << "] " << e
-                        << " between faces " << neighbours << ":" << nl
-                        << "face[" << neighbours[0] << "] " << faceA << nl
-                        << "face[" << neighbours[1] << "] " << faceB << endl;
+                        << "localEdge[" << edgeI << "] " << e
+                        << " between faces:" << nl
+                        << "  face[" << neighbouringFaces[0] << "] "
+                        << faceLst[neighbouringFaces[0]]
+                        << "   localFace: " << faceA
+                        << nl
+                        << "  face[" << neighbouringFaces[1] << "] "
+                        << faceLst[neighbouringFaces[1]]
+                        << "   localFace: " << faceB
+                        << endl;
                 }
             }
         }
-        else if (neighbours.size() != 1)
+        else if (neighbouringFaces.size() != 1)
         {
             if (verbose)
             {
@@ -217,7 +225,7 @@ checkOrientation
                     << "edge[" << edgeI << "] " << e
                     << " with points:" << locPointsLst[e.start()]
                     << ' ' << locPointsLst[e.end()]
-                    << " has neighbours:" << neighbours << endl;
+                    << " has neighbouringFaces:" << neighbouringFaces << endl;
             }
             borderEdge[edgeI] = true;
         }

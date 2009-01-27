@@ -60,14 +60,6 @@ Foam::Matrix<Form, Type>::~Matrix()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Form, class Type>
-const Foam::Matrix<Form, Type>& Foam::Matrix<Form, Type>::null()
-{
-    Matrix<Form, Type>* nullPtr = reinterpret_cast<Matrix<Form, Type>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class Form, class Type>
 Foam::Matrix<Form, Type>::Matrix(const label n, const label m)
 :
     n_(n),
@@ -356,7 +348,7 @@ Form Foam::operator+(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
     const Type* av = a.v_[0];
     const Type* bv = b.v_[0];
 
-    label nm = a.n_*a.m_;;
+    label nm = a.n_*a.m_;
     for (register label i=0; i<nm; i++)
     {
         abv[i] = av[i] + bv[i];
@@ -395,7 +387,7 @@ Form Foam::operator-(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
     const Type* av = a.v_[0];
     const Type* bv = b.v_[0];
 
-    label nm = a.n_*a.m_;;
+    label nm = a.n_*a.m_;
     for (register label i=0; i<nm; i++)
     {
         abv[i] = av[i] - bv[i];

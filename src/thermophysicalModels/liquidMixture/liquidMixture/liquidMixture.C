@@ -306,7 +306,7 @@ Foam::scalar Foam::liquidMixture::cp
         if (x[i] > SMALL)
         {
             scalar Ti = min(TrMax*properties_[i].Tc(), T);
-            cp += x[i]*properties_[i].cp(p, Ti)*properties_[i].W();;
+            cp += x[i]*properties_[i].cp(p, Ti)*properties_[i].W();
         }
     }
 
