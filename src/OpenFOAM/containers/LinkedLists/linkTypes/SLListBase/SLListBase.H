@@ -247,6 +247,7 @@ public:
         inline const_iterator begin() const;
         inline const const_iterator& end() const;
 
+
 private:
 
         //- iterator returned by end()
@@ -254,7 +255,6 @@ private:
 
         //- const_iterator returned by end()
         static const_iterator endConstIter_;
-
 };
 
 

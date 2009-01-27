@@ -413,6 +413,16 @@ private:
                 labelList& cellToZone
             ) const;
 
+            //- Determines cell zone from cell region information.
+            bool calcRegionToZone
+            (
+                const label surfZoneI,
+                const label ownRegion,
+                const label neiRegion,
+
+                labelList& regionToCellZone
+            ) const;
+
             //- Finds zone per cell. Uses topological walk with all faces
             //  marked in namedSurfaceIndex regarded as blocked.
             void findCellZoneTopo
@@ -421,6 +431,12 @@ private:
                 const labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
+            ) const;
+
+            void makeConsistentFaceIndex
+            (
+                const labelList& cellToZone,
+                labelList& namedSurfaceIndex
             ) const;
 
 

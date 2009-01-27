@@ -94,7 +94,7 @@ void Foam::transform
         }
         else
         {
-            rtf = vector::zero;
+            rtf = tf;
         }
     }
 }
