@@ -46,7 +46,7 @@ const char* Foam::Switch::names[Foam::Switch::INVALID+1] =
 
 Foam::Switch::switchType Foam::Switch::asEnum(const bool val)
 {
-    return val ? Switch::FALSE : Switch::TRUE;
+    return val ? Switch::TRUE : Switch::FALSE;
 }
 
 
