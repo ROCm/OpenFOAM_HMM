@@ -112,10 +112,10 @@ public:
             return GeoMesh<polyMesh>::mesh_.globalData();
         }
 
-        //- Return database (only needed for compilation purposes)
-        const objectRegistry& db() const
+        //- Return database. For now is its polyMesh.
+        const objectRegistry& thisDb() const
         {
-            return GeoMesh<polyMesh>::mesh_.db();
+            return GeoMesh<polyMesh>::mesh_.thisDb();
         }
 
 

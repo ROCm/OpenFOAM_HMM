@@ -39,22 +39,17 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::word Foam::name(const int val)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Return a string representation of an int
-word name(const int i)
-{
-    std::ostringstream osBuffer;
-    osBuffer << i;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf << val;
+    return buf.str();
 }
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, int& i)
+Foam::Istream& Foam::operator>>(Istream& is, int& i)
 {
     token t(is);
 
@@ -85,25 +80,21 @@ Istream& operator>>(Istream& is, int& i)
 }
 
 
-int readInt(Istream& is)
+int Foam::readInt(Istream& is)
 {
-    int ri;
-    is >> ri;
+    int val;
+    is >> val;
 
-    return ri;
+    return val;
 }
 
 
-Ostream& operator<<(Ostream& os, const int i)
+Foam::Ostream& Foam::operator<<(Ostream& os, const int i)
 {
     os.write(label(i));
     os.check("Ostream& operator<<(Ostream&, const int)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -176,7 +176,7 @@ public:
 
     // STL iterator
 
-        //- An STL iterator
+        //- An STL-conforming iterator
         class iterator
         {
             friend class DLListBase;
@@ -193,15 +193,16 @@ public:
                 //- Copy of the link
                 link curLink_;
 
+            // Private Member Functions
+
+            //- Construct for a given SLListBase with NULL element and link.
+            //  Only used to create endIter
+            inline iterator(DLListBase&);
+
         public:
 
             //- Construct for a given DLListBase and link
             inline iterator(DLListBase&, link*);
-
-            //- Construct for a given DLListBase
-            //  setting element and link to NULL.
-            //  Only used to create endIter
-            inline iterator(DLListBase&);
 
             // Member operators
 
@@ -217,16 +218,12 @@ public:
         };
 
         inline iterator begin();
-
-        //- iterator returned by end()
-        static iterator endIter;
-
         inline const iterator& end();
 
 
     // STL const_iterator
 
-        //- An STL const_iterator
+        //- An STL-conforming const_iterator
         class const_iterator
         {
             // Private data
@@ -258,12 +255,20 @@ public:
                 inline const_iterator operator++(int);
         };
 
+        inline const_iterator cbegin() const;
+        inline const const_iterator& cend() const;
+
         inline const_iterator begin() const;
+        inline const const_iterator& end() const;
+
+private:
+
+        //- iterator returned by end()
+        static iterator endIter_;
 
         //- const_iterator returned by end()
-        static const_iterator endConstIter;
+        static const_iterator endConstIter_;
 
-        inline const const_iterator& end() const;
 };
 
 

@@ -1042,17 +1042,11 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     // movePoints function.
 
     // pointMesh
-    if
-    (
-        db().objectRegistry::foundObject<pointMesh>
-        (
-            pointMesh::typeName
-        )
-    )
+    if (thisDb().foundObject<pointMesh>(pointMesh::typeName))
     {
         const_cast<pointMesh&>
         (
-            db().objectRegistry::lookupObject<pointMesh>
+            thisDb().lookupObject<pointMesh>
             (
                 pointMesh::typeName
             )
@@ -1094,7 +1088,7 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
 // Remove all files and some subdirs (eg, sets)
 void Foam::polyMesh::removeFiles(const fileName& instanceDir) const
 {
-    fileName meshFilesPath = db().path()/instanceDir/meshDir();
+    fileName meshFilesPath = thisDb().path()/instanceDir/meshDir();
 
     rm(meshFilesPath/"points");
     rm(meshFilesPath/"faces");

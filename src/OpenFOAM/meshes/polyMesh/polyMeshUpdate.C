@@ -71,17 +71,11 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     // Hack until proper callbacks. Below are all the polyMesh-MeshObjects.
 
     // pointMesh
-    if
-    (
-        db().objectRegistry::foundObject<pointMesh>
-        (
-            pointMesh::typeName
-        )
-    )
+    if (thisDb().foundObject<pointMesh>(pointMesh::typeName))
     {
         const_cast<pointMesh&>
         (
-            db().objectRegistry::lookupObject<pointMesh>
+            thisDb().lookupObject<pointMesh>
             (
                 pointMesh::typeName
             )

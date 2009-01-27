@@ -44,12 +44,19 @@ SourceFiles
 
 namespace Foam
 {
+    //- Return list indices for strings matching the regular expression
+    template<class StringType>
+    labelList findStrings
+    (
+        const char* regexpPattern,
+        const UList<StringType>&
+    );
 
     //- Return list indices for strings matching the regular expression
     template<class StringType>
     labelList findStrings
     (
-        const string& regexpPattern,
+        const std::string& regexpPattern,
         const UList<StringType>&
     );
 

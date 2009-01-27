@@ -64,7 +64,13 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedInternalValueFvPatchField<scalar>(p, iF)
+    fixedInternalValueFvPatchField<scalar>(p, iF),
+    UName_("U"),
+    rhoName_("rho"),
+    kName_("k"),
+    GName_("G"),
+    muName_("mu"),
+    mutName_("mut")
 {
     checkType();
 }
@@ -78,7 +84,13 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper)
+    fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    rhoName_(ptf.rhoName_),
+    kName_(ptf.kName_),
+    GName_(ptf.GName_),
+    muName_(ptf.muName_),
+    mutName_(ptf.mutName_)
 {
     checkType();
 }
@@ -91,7 +103,13 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedInternalValueFvPatchField<scalar>(p, iF, dict)
+    fixedInternalValueFvPatchField<scalar>(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    kName_(dict.lookupOrDefault<word>("k", "k")),
+    GName_(dict.lookupOrDefault<word>("G", "G")),
+    muName_(dict.lookupOrDefault<word>("mu", "mu")),
+    mutName_(dict.lookupOrDefault<word>("mut", "mut"))
 {
     checkType();
 }
@@ -99,10 +117,16 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 (
-    const omegaWallFunctionFvPatchScalarField& ewfpsf
+    const omegaWallFunctionFvPatchScalarField& owfpsf
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ewfpsf)
+    fixedInternalValueFvPatchField<scalar>(owfpsf),
+    UName_(owfpsf.UName_),
+    rhoName_(owfpsf.rhoName_),
+    kName_(owfpsf.kName_),
+    GName_(owfpsf.GName_),
+    muName_(owfpsf.muName_),
+    mutName_(owfpsf.mutName_)
 {
     checkType();
 }
@@ -110,11 +134,17 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 (
-    const omegaWallFunctionFvPatchScalarField& ewfpsf,
+    const omegaWallFunctionFvPatchScalarField& owfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ewfpsf, iF)
+    fixedInternalValueFvPatchField<scalar>(owfpsf, iF),
+    UName_(owfpsf.UName_),
+    rhoName_(owfpsf.rhoName_),
+    kName_(owfpsf.kName_),
+    GName_(owfpsf.GName_),
+    muName_(owfpsf.muName_),
+    mutName_(owfpsf.mutName_)
 {
     checkType();
 }
@@ -135,24 +165,24 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
     const scalarField& y = ras.y()[patch().index()];
 
     volScalarField& G = const_cast<volScalarField&>
-        (db().lookupObject<volScalarField>("G"));
+        (db().lookupObject<volScalarField>(GName_));
 
     volScalarField& omega = const_cast<volScalarField&>
-        (db().lookupObject<volScalarField>("omega"));
+        (db().lookupObject<volScalarField>(dimensionedInternalField().name()));
 
-    const scalarField& k = db().lookupObject<volScalarField>("k");
+    const scalarField& k = db().lookupObject<volScalarField>(kName_);
 
     const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
     const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
 
     const scalarField& mutw =
-        patch().lookupPatchField<volScalarField, scalar>("mut");
+        patch().lookupPatchField<volScalarField, scalar>(mutName_);
 
     const fvPatchVectorField& Uw =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     const scalarField magGradUw = mag(Uw.snGrad());
 
@@ -188,6 +218,12 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fixedInternalValueFvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
+    writeEntryIfDifferent<word>(os, "G", "G", GName_);
+    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
     writeEntry("value", os);
 }
 

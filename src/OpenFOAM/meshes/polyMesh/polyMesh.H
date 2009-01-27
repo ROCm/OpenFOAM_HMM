@@ -343,6 +343,11 @@ public:
             //- Return parallel info
             const globalMeshData& globalData() const;
 
+            //- Return the object registry
+            const objectRegistry& thisDb() const
+            {
+                return *this;
+            }
 
         // Mesh motion
 

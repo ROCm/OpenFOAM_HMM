@@ -171,26 +171,25 @@ calcEdgeOwner() const
     forAll(edgeLst, edgeI)
     {
         const edge& e = edgeLst[edgeI];
+        const labelList& neighbouringFaces = eFaces[edgeI];
 
-        const labelList& myFaces = eFaces[edgeI];
-
-        if (myFaces.size() == 1)
+        if (neighbouringFaces.size() == 1)
         {
-            edgeOwner[edgeI] = myFaces[0];
+            edgeOwner[edgeI] = neighbouringFaces[0];
         }
         else
         {
             // Find the first face whose vertices are aligned with the edge.
-            // (in case of multiply connected edge the best we can do)
+            // with multiply connected edges, this is the best we can do
             edgeOwner[edgeI] = -1;
 
-            forAll(myFaces, i)
+            forAll(neighbouringFaces, i)
             {
-                const Face& f = locFaceLst[myFaces[i]];
+                const Face& f = locFaceLst[neighbouringFaces[i]];
 
-                if (f.findEdge(e) > 0)
+                if (f.edgeDirection(e) > 0)
                 {
-                    edgeOwner[edgeI] = myFaces[i];
+                    edgeOwner[edgeI] = neighbouringFaces[i];
                     break;
                 }
             }
@@ -203,9 +202,9 @@ calcEdgeOwner() const
                     "calcEdgeOwner()"
                 )
                     << "Edge " << edgeI << " vertices:" << e
-                    << " is used by faces " << myFaces
+                    << " is used by faces " << neighbouringFaces
                     << " vertices:"
-                    << IndirectList<Face>(locFaceLst, myFaces)()
+                    << IndirectList<Face>(locFaceLst, neighbouringFaces)()
                     << " none of which use the edge vertices in the same order"
                     << nl << "I give up" << abort(FatalError);
             }

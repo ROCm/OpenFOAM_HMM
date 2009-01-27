@@ -299,7 +299,6 @@ fvMeshSubset::interpolate
 (
     const GeometricField<Type, pointPatchField, pointMesh>& vf,
     const pointMesh& sMesh,
-    const objectRegistry& reg,
     const labelList& patchMap,
     const labelList& pointMap
 )
@@ -385,7 +384,7 @@ fvMeshSubset::interpolate
             (
                 "subset"+vf.name(),
                 vf.time().timeName(),
-                reg,
+                sMesh.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -410,7 +409,6 @@ tmp<GeometricField<Type, pointPatchField, pointMesh> > fvMeshSubset::interpolate
     (
         sf,
         pointMesh::New(subMesh()),     // subsetted point mesh
-        subMesh(),          // registry (pointfields are stored on the polyMesh)
         patchMap(),
         pointMap()
     );

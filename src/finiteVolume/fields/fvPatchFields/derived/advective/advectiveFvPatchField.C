@@ -167,8 +167,8 @@ tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
     fvsPatchField<scalar> phip = this->patch().lookupPatchField
     (
         phiName_,
-        reinterpret_cast<const surfaceScalarField*>(NULL),
-        reinterpret_cast<const scalar*>(NULL)
+        reinterpret_cast<const surfaceScalarField*>(0),
+        reinterpret_cast<const scalar*>(0)
     );
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
@@ -176,8 +176,8 @@ tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
         const fvPatchScalarField& rhop = this->patch().lookupPatchField
         (
             rhoName_,
-            reinterpret_cast<const volScalarField*>(NULL),
-            reinterpret_cast<const scalar*>(NULL)
+            reinterpret_cast<const volScalarField*>(0),
+            reinterpret_cast<const scalar*>(0)
         );
 
         return phip/(rhop*this->patch().magSf());

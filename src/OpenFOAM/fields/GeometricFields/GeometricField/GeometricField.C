@@ -888,16 +888,6 @@ writeData(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-const Foam::GeometricField<Type, PatchField, GeoMesh>&
-Foam::GeometricField<Type, PatchField, GeoMesh>::null()
-{
-    GeometricField<Type, PatchField, GeoMesh>* nullPtr =
-        reinterpret_cast<GeometricField<Type, PatchField, GeoMesh>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh> >
 Foam::GeometricField<Type, PatchField, GeoMesh>::T() const
 {

@@ -28,6 +28,9 @@ Class
 Description
     A 2-tuple.
 
+SeeAlso
+    Foam::Pair for storing two objects of identical types.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Tuple2_H
@@ -67,7 +70,7 @@ inline Ostream& operator<<(Ostream&, const Tuple2<Type1, Type2>&);
 
 
 /*---------------------------------------------------------------------------*\
-                            class Tuple2 Declaration
+                           class Tuple2 Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type1, class Type2>
@@ -97,7 +100,7 @@ public:
         //- Construct from Istream
         inline Tuple2(Istream& is)
         {
-            operator>>(is, *this);
+            is >> *this;
         }
 
 
@@ -186,10 +189,7 @@ inline bool operator==
     const Tuple2<Type1, Type2>& b
 )
 {
-    return
-    (
-        (a.first() == b.first()) && (a.second() == b.second())
-    );
+    return (a.first() == b.first() && a.second() == b.second());
 }
 
 
@@ -200,7 +200,7 @@ inline bool operator!=
     const Tuple2<Type1, Type2>& b
 )
 {
-    return (!(a == b));
+    return !(a == b);
 }
 
 
@@ -224,7 +224,7 @@ inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2)
     os  << token::BEGIN_LIST
         << t2.f_ << token::SPACE << t2.s_
         << token::END_LIST;
-    
+
     return os;
 }
 

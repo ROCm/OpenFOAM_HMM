@@ -57,6 +57,14 @@ class nutWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+    //Private data
+
+        //- Name of turbulence kinetic energy field
+        word kName_;
+
+        //- Name of laminar viscosity field
+        word nuName_;
+
 
 public:
 

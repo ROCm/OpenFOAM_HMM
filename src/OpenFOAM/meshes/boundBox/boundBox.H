@@ -228,7 +228,7 @@ public:
 };
 
 
-//- Specify data associated with boundBox type are contiguous
+//- Data associated with boundBox type are contiguous
 template<>
 inline bool contiguous<boundBox>() {return contiguous<point>();}
 

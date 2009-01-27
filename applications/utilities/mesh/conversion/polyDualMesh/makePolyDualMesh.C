@@ -49,7 +49,7 @@ Description
 #include "mathematicalConstants.H"
 #include "polyTopoChange.H"
 #include "mapPolyMesh.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "meshTools.H"
 #include "OFstream.H"
 #include "meshDualiser.H"
@@ -67,7 +67,7 @@ using namespace Foam;
 void simpleMarkFeatures
 (
     const polyMesh& mesh,
-    const PackedList<1>& isBoundaryEdge,
+    const PackedBoolList& isBoundaryEdge,
     const scalar featureAngle,
     const bool doNotPreserveFaceZones,
 
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     // Mark boundary edges and points.
     // (Note: in 1.4.2 we can use the built-in mesh point ordering
     //  facility instead)
-    PackedList<1> isBoundaryEdge(mesh.nEdges());
+    PackedBoolList isBoundaryEdge(mesh.nEdges());
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         const labelList& fEdges = mesh.faceEdges()[faceI];

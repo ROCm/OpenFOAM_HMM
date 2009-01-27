@@ -86,6 +86,11 @@ public:
         //- Declare friendship with the SubList class
         friend class SubList<T>;
 
+    // Static Member Functions
+
+        //- Return a null UList
+        inline static const UList<T>& null();
+
     // Public classes
 
         //- Less function class that can be used for sorting
@@ -116,10 +121,7 @@ public:
         inline UList(T* __restrict__ v, label size);
 
 
-    // Member functions
-
-        //- Return a null UList
-        static const UList<T>& null();
+    // Member Functions
 
 
         // Access
@@ -213,12 +215,16 @@ public:
         //- Random access iterator for traversing UList.
         typedef const T* const_iterator;
 
-        //- Return a const_iterator to begin traversing the
-        //  constant UList.
+        //- Return const_iterator to begin traversing the constant UList.
+        inline const_iterator cbegin() const;
+
+        //- Return const_iterator to end traversing the constant UList.
+        inline const_iterator cend() const;
+
+        //- Return const_iterator to begin traversing the constant UList.
         inline const_iterator begin() const;
 
-        //- Return a const_iterator to end traversing the
-        //  constant UList.
+        //- Return const_iterator to end traversing the constant UList.
         inline const_iterator end() const;
 
 
@@ -227,12 +233,10 @@ public:
         //- Reverse iterator for reverse traversal of UList.
         typedef T* reverse_iterator;
 
-        //- Return a reverse_iterator to begin reverse traversing the
-        //  UList.
+        //- Return reverse_iterator to begin reverse traversing the UList.
         inline reverse_iterator rbegin();
 
-        //- Return a reverse_iterator to end reverse traversing the
-        //  UList.
+        //- Return reverse_iterator to end reverse traversing the UList.
         inline reverse_iterator rend();
 
 
@@ -241,12 +245,16 @@ public:
         //- Reverse iterator for reverse traversal of constant UList.
         typedef const T* const_reverse_iterator;
 
-        //- Return a const_reverse_iterator to begin reverse traversing the
-        //  UList.
+        //- Return const_reverse_iterator to begin reverse traversing the UList.
+        inline const_reverse_iterator crbegin() const;
+
+        //- Return const_reverse_iterator to end reverse traversing the UList.
+        inline const_reverse_iterator crend() const;
+
+        //- Return const_reverse_iterator to begin reverse traversing the UList.
         inline const_reverse_iterator rbegin() const;
 
-        //- Return a const_reverse_iterator to end reverse traversing the
-        //  UList.
+        //- Return const_reverse_iterator to end reverse traversing the UList.
         inline const_reverse_iterator rend() const;
 
 

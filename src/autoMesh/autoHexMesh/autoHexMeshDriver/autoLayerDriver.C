@@ -2889,12 +2889,12 @@ void Foam::autoLayerDriver::addLayers
                 //mesh.name()+"_layer",
                 mesh.name(),
                 static_cast<polyMesh&>(mesh).instance(),
-                mesh.db(),
+                mesh.time(),  // register with runTime
                 static_cast<polyMesh&>(mesh).readOpt(),
                 static_cast<polyMesh&>(mesh).writeOpt()
-            ),          // io params from original mesh but new name
-            mesh,      // original mesh
-            true        // parallel sync
+            ),              // io params from original mesh but new name
+            mesh,           // original mesh
+            true            // parallel sync
         );
         fvMesh& newMesh = newMeshPtr();
 

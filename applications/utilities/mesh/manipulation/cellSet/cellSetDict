@@ -82,7 +82,7 @@ topoSetSources
     // Cells in cell zone
     zoneToCell
     {
-        name ".*Zone";      // name of cellZone, wildcards allowed.
+        name ".*Zone";      // Name of cellZone, regular expressions allowed
     }
 
     // values of field within certain range
@@ -102,16 +102,16 @@ topoSetSources
     // Select based on surface
     surfaceToCell
     {
-        file                "www.avl.com-geometry.stl";
-        outsidePoints       ((-99 -99 -59));    // definition of outside
-        includeCut          false;              // cells cut by surface
-        includeInside       false;              // cells not on outside of surf
-        includeOutside      false;              // cells on outside of surf
-        nearDistance        -1;                 // cells with centre near surf
-                                                // (set to -1 if not used)
-        curvature           0.9;                // cells within nearDistance
-                                                // and near surf curvature
-                                                // (set to -100 if not used)
+        file            "www.avl.com-geometry.stl";
+        outsidePoints   ((-99 -99 -59));    // definition of outside
+        includeCut      false;              // cells cut by surface
+        includeInside   false;              // cells not on outside of surf
+        includeOutside  false;              // cells on outside of surf
+        nearDistance    -1;                 // cells with centre near surf
+                                            // (set to -1 if not used)
+        curvature       0.9;                // cells within nearDistance
+                                            // and near surf curvature
+                                            // (set to -100 if not used)
     }
 );
 

@@ -327,7 +327,7 @@ public:
 };
 
 
-//- Specify data associated with boundBox type is contiguous
+//- Data associated with treeBoundBox type are contiguous
 template<>
 inline bool contiguous<treeBoundBox>() {return contiguous<boundBox>();}
 

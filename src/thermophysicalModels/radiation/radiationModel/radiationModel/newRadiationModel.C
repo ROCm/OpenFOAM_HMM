@@ -52,8 +52,8 @@ autoPtr<radiationModel> radiationModel::New
             IOobject
             (
                 "radiationProperties",
-                T.mesh().time().constant(),
-                T.mesh().db(),
+                T.time().constant(),
+                T.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )

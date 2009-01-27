@@ -115,6 +115,17 @@ Foam::Ostream& Foam::prefixOSstream::write(const string& val)
 }
 
 
+Foam::Ostream& Foam::prefixOSstream::writeQuoted
+(
+    const std::string& val,
+    const bool quoted
+)
+{
+    checkWritePrefix();
+    return OSstream::writeQuoted(val, quoted);
+}
+
+
 Foam::Ostream& Foam::prefixOSstream::write(const label val)
 {
     checkWritePrefix();

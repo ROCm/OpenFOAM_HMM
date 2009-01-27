@@ -26,7 +26,10 @@ Class
     Foam::toroidalCS
 
 Description
-    Toroidal coordinate system
+    Toroidal coordinate system, always in degrees
+
+Note
+    The maintenance of this class may lag that of the main types.
 
 SourceFiles
     toroidalCS.C
@@ -91,17 +94,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        toroidalCS
-        (
-            const word& name,
-            const point& origin,
-            const vector& axis,
-            const vector& direction,
-            const scalar radius
-        );
-
-        //- Construct from origin and rotation angles
+        //- Construct from origin, rotation and radius
         toroidalCS
         (
             const word& name,
@@ -109,6 +102,7 @@ public:
             const coordinateRotation&,
             const scalar radius
         );
+
 
         //- Construct from dictionary
         toroidalCS(const word& name, const dictionary&);

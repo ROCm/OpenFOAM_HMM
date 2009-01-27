@@ -57,7 +57,6 @@ Description
     @verbatim
         kOmegaSST
         {
-            Cmu         0.09;
             alphaK1     0.85034;
             alphaK2     1.0;
             alphaOmega1 0.5;
@@ -103,33 +102,33 @@ class kOmegaSST
 {
     // Private data
 
-        dimensionedScalar alphaK1_;
-        dimensionedScalar alphaK2_;
+        // Model coefficients
+            dimensionedScalar alphaK1_;
+            dimensionedScalar alphaK2_;
 
-        dimensionedScalar alphaOmega1_;
-        dimensionedScalar alphaOmega2_;
+            dimensionedScalar alphaOmega1_;
+            dimensionedScalar alphaOmega2_;
 
-        dimensionedScalar gamma1_;
-        dimensionedScalar gamma2_;
+            dimensionedScalar gamma1_;
+            dimensionedScalar gamma2_;
 
-        dimensionedScalar beta1_;
-        dimensionedScalar beta2_;
+            dimensionedScalar beta1_;
+            dimensionedScalar beta2_;
 
-        dimensionedScalar betaStar_;
+            dimensionedScalar betaStar_;
 
-        dimensionedScalar a1_;
-        dimensionedScalar c1_;
+            dimensionedScalar a1_;
+            dimensionedScalar c1_;
 
-        dimensionedScalar omega0_;
-        dimensionedScalar omegaSmall_;
-
-        dimensionedScalar Cmu_;
-
+        //- Wall distance field
+        //  Note: different to wall distance in parent RASModel
         wallDist y_;
 
-        volScalarField k_;
-        volScalarField omega_;
-        volScalarField nut_;
+        // Fields
+
+            volScalarField k_;
+            volScalarField omega_;
+            volScalarField nut_;
 
 
     // Private member functions

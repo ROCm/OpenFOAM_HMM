@@ -42,7 +42,7 @@ Foam::PtrList<T>::PtrList()
 template<class T>
 Foam::PtrList<T>::PtrList(const label s)
 :
-    ptrs_(s, reinterpret_cast<T*>(NULL))
+    ptrs_(s, reinterpret_cast<T*>(0))
 {}
 
 
@@ -216,7 +216,7 @@ void Foam::PtrList<T>::reorder(const UList<label>& oldToNew)
             << ")." << abort(FatalError);
     }
 
-    List<T*> newPtrs_(ptrs_.size(), reinterpret_cast<T*>(NULL));
+    List<T*> newPtrs_(ptrs_.size(), reinterpret_cast<T*>(0));
 
     forAll(*this, i)
     {

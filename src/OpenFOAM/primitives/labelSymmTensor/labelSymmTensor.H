@@ -48,7 +48,7 @@ namespace Foam
 
 typedef SymmTensor<label> labelSymmTensor;
 
-//- Specify data associated with labelSymmTensor type is contiguous
+//- Data associated with labelSymmTensor type are contiguous
 template<>
 inline bool contiguous<labelSymmTensor>() {return true;}
 

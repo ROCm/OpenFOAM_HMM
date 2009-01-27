@@ -88,6 +88,12 @@ class Matrix
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null Matrix
+        inline static const Matrix<Form, Type>& null();
+
+
     // Constructors
 
         //- Null constructor.
@@ -115,11 +121,7 @@ public:
         ~Matrix();
 
 
-    // Member functions
-
-        //- Return a null Matrix
-        static const Matrix<Form, Type>& null();
-
+    // Member Functions
 
         // Access
 

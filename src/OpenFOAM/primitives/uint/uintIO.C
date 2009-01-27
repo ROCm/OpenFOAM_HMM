@@ -39,21 +39,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::word Foam::name(const unsigned int val)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-word name(const unsigned int i)
-{
-    std::ostringstream osBuffer;
-    osBuffer << i;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf << val;
+    return buf.str();
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, unsigned int& i)
+Foam::Istream& Foam::operator>>(Istream& is, unsigned int& i)
 {
     token t(is);
 
@@ -84,25 +79,21 @@ Istream& operator>>(Istream& is, unsigned int& i)
 }
 
 
-unsigned int readUint(Istream& is)
+unsigned int Foam::readUint(Istream& is)
 {
-    unsigned int ri;
-    is >> ri;
+    unsigned int val;
+    is >> val;
 
-    return ri;
+    return val;
 }
 
 
-Ostream& operator<<(Ostream& os, const unsigned int i)
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned int i)
 {
     os.write(label(i));
     os.check("Ostream& operator<<(Ostream&, const unsigned int)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

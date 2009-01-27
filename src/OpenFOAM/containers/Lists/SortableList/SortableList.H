@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SortableList Declaration
+                        Class SortableList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -60,7 +60,7 @@ class SortableList
         //- Original indices
         labelList indices_;
 
-        //- Resize and sort the parameter according to the list values
+        //- Resize, fill and sort the parameter according to the list values
         void sortIndices(List<label>&) const;
 
 public:

@@ -198,19 +198,6 @@ kOmegaSST::kOmegaSST
         )
     ),
 
-    omega0_("omega0", dimless/dimTime, SMALL),
-    omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
-
-    Cmu_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "Cmu",
-            coeffDict_,
-            0.09
-        )
-    ),
-
     y_(mesh_),
 
     k_
@@ -331,7 +318,6 @@ bool kOmegaSST::read()
         betaStar_.readIfPresent(coeffDict_);
         a1_.readIfPresent(coeffDict_);
         c1_.readIfPresent(coeffDict_);
-        Cmu_.readIfPresent(coeffDict_);
 
         return true;
     }
