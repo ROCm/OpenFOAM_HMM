@@ -112,6 +112,12 @@ public:
 
     //- Access
 
+        //- Return true if a precompiled expression does not exist
+        inline bool empty() const
+        {
+            return !preg_;
+        }
+
         //- Does a precompiled expression exist?
         inline bool exists() const
         {

@@ -29,15 +29,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::SLListBase::iterator Foam::SLListBase::endIter
+Foam::SLListBase::iterator Foam::SLListBase::endIter_
 (
     const_cast<SLListBase&>(static_cast<const SLListBase&>(SLListBase()))
 );
 
-Foam::SLListBase::const_iterator Foam::SLListBase::endConstIter
+Foam::SLListBase::const_iterator Foam::SLListBase::endConstIter_
 (
     static_cast<const SLListBase&>(SLListBase()),
-    reinterpret_cast<const link*>(NULL)
+    reinterpret_cast<const link*>(0)
 );
 
 

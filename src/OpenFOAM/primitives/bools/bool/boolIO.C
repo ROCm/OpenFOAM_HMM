@@ -32,59 +32,17 @@ Description
 #include "error.H"
 
 #include "bool.H"
+#include "Switch.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 {
-    token t(is);
-
-    if (!t.good())
+    if (is.good())
     {
-        is.setBad();
-        return is;
+        b = Switch(is);
     }
-
-    if (t.isLabel())
-    {
-        b = bool(t.labelToken());
-    }
-    else if (t.isWord())
-    {
-        // use Switch asBool() here?
-        if (t.wordToken() == "true" || t.wordToken() == "on")
-        {
-            b = true;
-        }
-        else if (t.wordToken() == "false" || t.wordToken() == "off")
-        {
-            b = false;
-        }
-        else
-        {
-            is.setBad();
-            FatalIOErrorIn("operator>>(Istream&, bool&)", is)
-                << "expected 'true' or 'false', found " << t.wordToken()
-                << exit(FatalIOError);
-
-            return is;
-        }
-    }
-    else
-    {
-        is.setBad();
-        FatalIOErrorIn("operator>>(Istream&, bool&)", is)
-            << "wrong token type - expected bool found " << t
-            << exit(FatalIOError);
-
-        return is;
-    }
-
-
-
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, bool&)");
 
     return is;
 }
@@ -92,18 +50,21 @@ Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 {
+    // we could also write as text string without any difficulty
+    // os << Switch::asText(b);
     os.write(label(b));
-    os.check("Ostream& operator<<(Ostream&, const bool&)");
+    os.check("Ostream& operator<<(Ostream&, const bool)");
     return os;
 }
 
 
 bool Foam::readBool(Istream& is)
 {
-    bool b;
-    is >> b;
+    bool val;
+    is >> val;
 
-    return b;
+    return val;
 }
+
 
 // ************************************************************************* //

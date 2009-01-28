@@ -10,13 +10,12 @@ cellDist/wallPoint/wallPoint.C
 cellFeatures/cellFeatures.C
 
 coordinateSystems/coordinateSystem.C
+coordinateSystems/coordinateSystemNew.C
 coordinateSystems/coordinateSystems.C
-coordinateSystems/parabolicCylindricalCS.C
-coordinateSystems/toroidalCS.C
-coordinateSystems/cartesianCS.C
-coordinateSystems/newCoordinateSystem.C
 coordinateSystems/cylindricalCS.C
 coordinateSystems/sphericalCS.C
+coordinateSystems/parabolicCylindricalCS.C
+coordinateSystems/toroidalCS.C
 coordinateSystems/coordinateRotation/coordinateRotation.C
 coordinateSystems/coordinateRotation/EulerCoordinateRotation.C
 coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C

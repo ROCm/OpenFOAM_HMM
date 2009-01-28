@@ -30,12 +30,17 @@ Description
     - any face inbetween differing cellZones (-cellZones)
 
     Output is:
-    - mesh with multiple regions
+    - mesh with multiple regions or
     - mesh with cells put into cellZones (-makeCellZones)
 
-    Should work in parallel but cellZone interfaces cannot align with
+    Note:
+    - Should work in parallel but cellZone interfaces cannot align with
     processor boundaries so use the correct option in decomposition to
     preserve those interfaces.
+    - If a cell zone gets split into more than one region it can detect
+    the largest matching region (-sloppyCellZones). This will accept any
+    region that covers more than 50% of the zone. It has to be a subset
+    so cannot have any cells in any other zone.
 
 \*---------------------------------------------------------------------------*/
 
@@ -613,7 +618,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             "fvSchemes",
             mesh.time().system(),
             regionName,
-            mesh.db(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -642,7 +647,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             "fvSolution",
             mesh.time().system(),
             regionName,
-            mesh.db(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -1036,78 +1041,181 @@ EdgeMap<label> addRegionPatches
 }
 
 
-// Checks if regionI in cellRegion corresponds to existing zone.
-label findCorrespondingZone
+//// Checks if regionI in cellRegion is subset of existing cellZone. Returns -1
+//// if no zone found, zone otherwise
+//label findCorrespondingSubZone
+//(
+//    const cellZoneMesh& cellZones,
+//    const labelList& existingZoneID,
+//    const labelList& cellRegion,
+//    const label regionI
+//)
+//{
+//    // Zone corresponding to region. No corresponding zone.
+//    label zoneI = labelMax;
+//
+//    labelList regionCells = findIndices(cellRegion, regionI);
+//
+//    if (regionCells.empty())
+//    {
+//        // My local portion is empty. Maps to any empty cellZone. Mark with
+//        // special value which can get overwritten by other processors.
+//        zoneI = -1;
+//    }
+//    else
+//    {
+//        // Get zone for first element.
+//        zoneI = existingZoneID[regionCells[0]];
+//
+//        if (zoneI == -1)
+//        {
+//            zoneI = labelMax;
+//        }
+//        else
+//        {
+//            // 1. All regionCells in zoneI?
+//            forAll(regionCells, i)
+//            {
+//                if (existingZoneID[regionCells[i]] != zoneI)
+//                {
+//                    zoneI = labelMax;
+//                    break;
+//                }
+//            }
+//        }
+//    }
+//
+//    // Determine same zone over all processors.
+//    reduce(zoneI, maxOp<label>());
+//
+//    if (zoneI == labelMax)
+//    {
+//        // Cells in region that are not in zoneI
+//        zoneI = -1;
+//    }
+//
+//    return zoneI;
+//}
+
+
+//XXXXXXXXX
+// Find region that covers most of cell zone
+label findCorrespondingRegion
 (
-    const cellZoneMesh& cellZones,
-    const labelList& existingZoneID,
-    const labelList& cellRegion,
-    const label regionI
+    const labelList& existingZoneID,    // per cell the (unique) zoneID
+    const regionSplit& cellRegion,
+    const label zoneI,
+    const label minOverlapSize
 )
 {
-    // Zone corresponding to region. No corresponding zone.
-    label zoneI = labelMax;
+    // Per region the number of cells in zoneI
+    labelList cellsInZone(cellRegion.nRegions(), 0);
 
-    labelList regionCells = findIndices(cellRegion, regionI);
-
-    if (regionCells.empty())
+    forAll(cellRegion, cellI)
     {
-        // My local portion is empty. Maps to any empty cellZone. Mark with
-        // special value which can get overwritten by other processors.
-        zoneI = -1;
+        if (existingZoneID[cellI] == zoneI)
+        {
+            cellsInZone[cellRegion[cellI]]++;
+        }
+    }
+
+    Pstream::listCombineGather(cellsInZone, plusEqOp<label>());
+    Pstream::listCombineScatter(cellsInZone);
+
+    // Pick region with largest overlap of zoneI
+    label regionI = findMax(cellsInZone);
+
+
+    if (cellsInZone[regionI] < minOverlapSize)
+    {
+        // Region covers too little of zone. Not good enough.
+        regionI = -1;
     }
     else
     {
-        // Get zone for first element.
-        zoneI = existingZoneID[regionCells[0]];
-
-        if (zoneI == -1)
+        // Check that region contains no cells that aren't in cellZone.
+        forAll(cellRegion, cellI)
         {
-            zoneI = labelMax;
-        }
-        else
-        {
-            // 1. All regionCells in zoneI?
-            forAll(regionCells, i)
+            if (cellRegion[cellI] == regionI && existingZoneID[cellI] != zoneI)
             {
-                if (existingZoneID[regionCells[i]] != zoneI)
-                {
-                    zoneI = labelMax;
-                    break;
-                }
-            }
-        }
-    }
-
-    // Determine same zone over all processors.
-    reduce(zoneI, maxOp<label>());
-
-
-    // 2. All of cellZone present?
-
-    if (zoneI == labelMax)
-    {
-        zoneI = -1;
-    }
-    else if (zoneI != -1)
-    {
-        const cellZone& cz = cellZones[zoneI];
-
-        forAll(cz, i)
-        {
-            if (cellRegion[cz[i]] != regionI)
-            {
-                zoneI = -1;
+                // cellI in regionI but not in zoneI
+                regionI = -1;
                 break;
             }
         }
         // If one in error, all should be in error. Note that branch gets taken
         // on all procs.
-        reduce(zoneI, minOp<label>());
+        reduce(regionI, minOp<label>());
     }
 
-    return zoneI;
+    return regionI;
 }
+//XXXXXXXXX
+
+
+//// Checks if cellZone has corresponding cellRegion.
+//label findCorrespondingRegion
+//(
+//    const cellZoneMesh& cellZones,
+//    const labelList& existingZoneID,    // per cell the (unique) zoneID
+//    const regionSplit& cellRegion,
+//    const label zoneI
+//)
+//{
+//    // Region corresponding to zone. Start off with special value: no
+//    // corresponding region.
+//    label regionI = labelMax;
+//
+//    const cellZone& cz = cellZones[zoneI];
+//
+//    if (cz.empty())
+//    {
+//        // My local portion is empty. Maps to any empty cellZone. Mark with
+//        // special value which can get overwritten by other processors.
+//        regionI = -1;
+//    }
+//    else
+//    {
+//        regionI = cellRegion[cz[0]];
+//
+//        forAll(cz, i)
+//        {
+//            if (cellRegion[cz[i]] != regionI)
+//            {
+//                regionI = labelMax;
+//                break;
+//            }
+//        }
+//    }
+//
+//    // Determine same zone over all processors.
+//    reduce(regionI, maxOp<label>());
+//
+//
+//    // 2. All of region present?
+//
+//    if (regionI == labelMax)
+//    {
+//        regionI = -1;
+//    }
+//    else if (regionI != -1)
+//    {
+//        forAll(cellRegion, cellI)
+//        {
+//            if (cellRegion[cellI] == regionI && existingZoneID[cellI] != zoneI)
+//            {
+//                // cellI in regionI but not in zoneI
+//                regionI = -1;
+//                break;
+//            }
+//        }
+//        // If one in error, all should be in error. Note that branch gets taken
+//        // on all procs.
+//        reduce(regionI, minOp<label>());
+//    }
+//
+//    return regionI;
+//}
 
 
 // Main program:
@@ -1120,6 +1228,8 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("largestOnly", "");
     argList::validOptions.insert("insidePoint", "point");
     argList::validOptions.insert("overwrite", "");
+    argList::validOptions.insert("detectOnly", "");
+    argList::validOptions.insert("sloppyCellZones", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -1134,10 +1244,13 @@ int main(int argc, char *argv[])
             << blockedFacesName << nl << endl;
     }
 
+    bool makeCellZones = args.options().found("makeCellZones");
     bool largestOnly = args.options().found("largestOnly");
     bool insidePoint = args.options().found("insidePoint");
     bool useCellZones = args.options().found("cellZones");
     bool overwrite = args.options().found("overwrite");
+    bool detectOnly = args.options().found("detectOnly");
+    bool sloppyCellZones = args.options().found("sloppyCellZones");
 
     if (insidePoint && largestOnly)
     {
@@ -1281,6 +1394,31 @@ int main(int argc, char *argv[])
         Info<< "Writing region per cell file (for manual decomposition) to "
             << cellToRegion.objectPath() << nl << endl;
     }
+    // Write for postprocessing
+    {
+        volScalarField cellToRegion
+        (
+            IOobject
+            (
+                "cellToRegion",
+                mesh.facesInstance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, 0)
+        );
+        forAll(cellRegion, cellI)
+        {
+            cellToRegion[cellI] = cellRegion[cellI];
+        }
+        cellToRegion.write();
+
+        Info<< "Writing region per cell as volScalarField to "
+            << cellToRegion.objectPath() << nl << endl;
+    }
 
 
     // Sizes per region
@@ -1307,39 +1445,130 @@ int main(int argc, char *argv[])
     Info<< endl;
 
 
+    // Sizes per cellzone
+    // ~~~~~~~~~~~~~~~~~~
+
+    labelList zoneSizes(cellZones.size(), 0);
+    if (useCellZones || makeCellZones || sloppyCellZones)
+    {
+        List<wordList> zoneNames(Pstream::nProcs());
+        zoneNames[Pstream::myProcNo()] = cellZones.names();
+        Pstream::gatherList(zoneNames);
+        Pstream::scatterList(zoneNames);
+
+        forAll(zoneNames, procI)
+        {
+            if (zoneNames[procI] != zoneNames[0])
+            {
+                FatalErrorIn(args.executable())
+                    << "cellZones not synchronised across processors." << endl
+                    << "Master has cellZones " << zoneNames[0] << endl
+                    << "Processor " << procI
+                    << " has cellZones " << zoneNames[procI]
+                    << exit(FatalError);
+            }
+        }
+
+        forAll(cellZones, zoneI)
+        {
+            zoneSizes[zoneI] = returnReduce
+            (
+                cellZones[zoneI].size(),
+                sumOp<label>()
+            );
+        }
+    }
+
+
     // Whether region corresponds to a cellzone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Info<< "Region\tZone\tName" << nl
-        << "------\t----\t----" << endl;
-
     // Region per zone
-    labelList regionToZone(cellRegion.nRegions());
+    labelList regionToZone(cellRegion.nRegions(), -1);
     // Name of region
     wordList regionNames(cellRegion.nRegions());
+    // Zone to region
+    labelList zoneToRegion(cellZones.size(), -1);
+
+    if (sloppyCellZones)
+    {
+        Info<< "Trying to match regions to existing cell zones;"
+            << " region can be subset of cell zone." << nl << endl;
+
+        forAll(cellZones, zoneI)
+        {
+            label regionI = findCorrespondingRegion
+            (
+                zoneID,
+                cellRegion,
+                zoneI,
+                label(0.5*zoneSizes[zoneI]) // minimum overlap
+            );
+
+            if (regionI != -1)
+            {
+                Info<< "Sloppily matched region " << regionI
+                    << " size " << regionSizes[regionI]
+                    << " to zone " << zoneI << " size " << zoneSizes[zoneI]
+                    << endl;
+                zoneToRegion[zoneI] = regionI;
+                regionToZone[regionI] = zoneI;
+                regionNames[regionI] = cellZones[zoneI].name();
+            }
+        }
+    }
+    else
+    {
+        Info<< "Trying to match regions to existing cell zones." << nl << endl;
+
+        forAll(cellZones, zoneI)
+        {
+            label regionI = findCorrespondingRegion
+            (
+                zoneID,
+                cellRegion,
+                zoneI,
+                1               // minimum overlap
+            );
+
+            if (regionI != -1)
+            {
+                zoneToRegion[zoneI] = regionI;
+                regionToZone[regionI] = zoneI;
+                regionNames[regionI] = cellZones[zoneI].name();
+            }
+        }
+    }
+    // Allocate region names for unmatched regions.
     forAll(regionToZone, regionI)
     {
-        regionToZone[regionI] = findCorrespondingZone
-        (
-            cellZones,
-            zoneID,
-            cellRegion,
-            regionI
-        );
-
-        if (regionToZone[regionI] != -1)
-        {
-            regionNames[regionI] = cellZones[regionToZone[regionI]].name();
-        }
-        else
+        if (regionToZone[regionI] == -1)
         {
             regionNames[regionI] = "domain" + Foam::name(regionI);
         }
+    }
 
+
+    // Print region to zone
+    Info<< "Region\tZone\tName" << nl
+        << "------\t----\t----" << endl;
+    forAll(regionToZone, regionI)
+    {
         Info<< regionI << '\t' << regionToZone[regionI] << '\t'
             << regionNames[regionI] << nl;
     }
     Info<< endl;
+
+    //// Print zone to region
+    //Info<< "Zone\tName\tRegion" << nl
+    //    << "----\t----\t------" << endl;
+    //forAll(zoneToRegion, zoneI)
+    //{
+    //    Info<< zoneI << '\t' << cellZones[zoneI].name() << '\t'
+    //        << zoneToRegion[zoneI] << nl;
+    //}
+    //Info<< endl;
+
 
 
     // Since we're going to mess with patches make sure all non-processor ones
@@ -1361,7 +1590,8 @@ int main(int argc, char *argv[])
         interfaceSizes
     );
 
-    Info<< "Region\tRegion\tFaces" << nl
+    Info<< "Sizes inbetween regions:" << nl << nl
+        << "Region\tRegion\tFaces" << nl
         << "------\t------\t-----" << endl;
 
     forAll(interfaces, interI)
@@ -1373,7 +1603,10 @@ int main(int argc, char *argv[])
     Info<< endl;
 
 
-
+    if (detectOnly)
+    {
+        return 0;
+    }
 
 
     // Read objects in time directory
@@ -1423,7 +1656,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Only one region. Doing nothing." << endl;
     }
-    else if (args.options().found("makeCellZones"))
+    else if (makeCellZones)
     {
         Info<< "Putting cells into cellZones instead of splitting mesh."
             << endl;

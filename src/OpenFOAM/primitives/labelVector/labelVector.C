@@ -29,27 +29,20 @@ Description
 
 #include "labelVector.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<>
-const char* const labelVector::typeName = "labelVector";
+const char* const Foam::labelVector::typeName = "labelVector";
 
 template<>
-const char* labelVector::componentNames[] = {"x", "y", "z"};
+const char* Foam::labelVector::componentNames[] = {"x", "y", "z"};
 
 template<>
-const labelVector labelVector::zero(0, 0, 0);
+const Foam::labelVector Foam::labelVector::zero(0, 0, 0);
 
 template<>
-const labelVector labelVector::one(1, 1, 1);
+const Foam::labelVector Foam::labelVector::one(1, 1, 1);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

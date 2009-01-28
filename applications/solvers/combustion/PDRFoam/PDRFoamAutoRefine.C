@@ -119,7 +119,7 @@ scalar StCoNum = 0.0;
             fvc::makeAbsolute(phi, rho, U);
 
             // Test : disable refinement for some cells
-            PackedList<1>& protectedCell =
+            PackedBoolList& protectedCell =
                 refCast<dynamicRefineFvMesh>(mesh).protectedCell();
 
             if (protectedCell.empty())

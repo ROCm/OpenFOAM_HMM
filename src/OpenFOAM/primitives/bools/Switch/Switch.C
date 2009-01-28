@@ -30,6 +30,102 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+// NB: values chosen such that bitwise '&' 0x1 yields the bool value
+// INVALID is also evaluates to false, but don't rely on that
+const char* Foam::Switch::names[Foam::Switch::INVALID+1] =
+{
+    "false", "true",
+    "off",   "on",
+    "no",    "yes",
+    "n",     "y",
+    "invalid"
+};
+
+
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+Foam::Switch::switchType Foam::Switch::asEnum(const bool val)
+{
+    return val ? Switch::TRUE : Switch::FALSE;
+}
+
+
+Foam::Switch::switchType
+Foam::Switch::asEnum
+(
+    const std::string& str,
+    const bool allowInvalid
+)
+{
+    for (int sw = 0; sw < Switch::INVALID; sw++)
+    {
+        if (str == names[sw])
+        {
+            // convert y/n to yes/no (perhaps should deprecate y/n)
+            if (sw == Switch::NO_1)
+            {
+                return Switch::NO;
+            }
+            else if (sw == Switch::YES_1)
+            {
+                return Switch::YES;
+            }
+            else
+            {
+                return switchType(sw);
+            }
+        }
+    }
+
+    if (!allowInvalid)
+    {
+        FatalErrorIn("Switch::asEnum(const std::string&)")
+            << "unknown switch word " << str << nl
+            << abort(FatalError);
+    }
+
+    return INVALID;
+}
+
+
+bool Foam::Switch::asBool(const switchType sw)
+{
+    return (sw & 0x1);
+}
+
+
+bool Foam::Switch::asBool
+(
+    const std::string& str,
+    const bool allowInvalid
+)
+{
+    // allow invalid values, but catch after for correct error message
+    switchType sw = asEnum(str, true);
+
+    if (sw == Switch::INVALID && !allowInvalid)
+    {
+        FatalErrorIn("Switch::asBool(const std::string&)")
+            << "unknown switch word " << str << nl
+            << abort(FatalError);
+    }
+
+    return (sw & 0x1);
+}
+
+
+const char* Foam::Switch::asText(const bool b)
+{
+    return b ? names[Switch::TRUE] : names[Switch::FALSE];
+}
+
+
+const char* Foam::Switch::asText(const switchType sw)
+{
+    return names[sw];
+}
+
+
 Foam::Switch Foam::Switch::lookupOrAddToDict
 (
     const word& name,
@@ -40,55 +136,12 @@ Foam::Switch Foam::Switch::lookupOrAddToDict
     return dict.lookupOrAddDefault<Switch>(name, defaultValue);
 }
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-// NOTE: possible alternative implementation
-// make a direct bool, handle assignments and use switchTypes instead of word
-// for the word representation ...
-//
-//   //- Possible word representions
-//   enum switchTypes
-//   {
-//       OFF = 0, ON = 1,
-//       FALSE = 2, TRUE = 3,
-//       NO = 4, YES = 5
-//   };
-
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-bool Foam::Switch::asBool(const word& val)
-{
-    if (val == "on" || val == "true" || val == "yes" || val == "y")
-    {
-        return true;
-    }
-    else if (val == "off" || val == "false" || val == "no" || val == "n")
-    {
-        return false;
-    }
-    else
-    {
-        FatalErrorIn("Switch::asBool(const word&)")
-            << "unknown switch word " << val
-            << abort(FatalError);
-    }
-
-    return false;
-}
-
-
-Foam::word Foam::Switch::asWord(const bool val)
-{
-    return word((val ? "on" : "off"), false);
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
 
 bool Foam::Switch::readIfPresent(const word& name, const dictionary& dict)
 {
-    return dict.readIfPresent(name, bool_);
+    return dict.readIfPresent<Switch>(name, *this);
 }
 
 

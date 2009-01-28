@@ -58,6 +58,20 @@ const tensor2D tensor2D::one
     1, 1
 );
 
+template<>
+const tensor2D tensor2D::max
+(
+    VGREAT, VGREAT,
+    VGREAT, VGREAT
+);
+
+template<>
+const tensor2D tensor2D::min
+(
+    -VGREAT, -VGREAT,
+    -VGREAT, -VGREAT
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

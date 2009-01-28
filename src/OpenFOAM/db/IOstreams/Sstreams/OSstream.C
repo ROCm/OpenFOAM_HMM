@@ -74,28 +74,26 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
     {
         register char c = *iter;
 
-        switch (c)
+        if (c == '\\')
         {
-            case '\\' :
-                backslash++;
-                // suppress output until we know if other characters follow
-                continue;
-                break;
-
-            case token::NL :
-                lineNumber_++;
-                backslash++;    // backslash escape for newline
-                break;
-
-            case token::END_STRING :
-                backslash++;    // backslash escape for double-quote
-                break;
+            backslash++;
+            // suppress output until we know if other characters follow
+            continue;
+        }
+        else if (c == token::NL)
+        {
+            lineNumber_++;
+            backslash++;    // backslash escape for newline
+        }
+        else if (c == token::END_STRING)
+        {
+            backslash++;    // backslash escape for quote
         }
 
         // output pending backslashes
         while (backslash)
         {
-            os_ << '\\';    // escape for new-line
+            os_ << '\\';
             backslash--;
         }
 
@@ -103,9 +101,71 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
     }
 
     // silently drop any trailing backslashes
-    // they would otherwise appear like an escaped double-quote
+    // they would otherwise appear like an escaped end-quote
 
     os_ << token::END_STRING;
+
+    setState(os_.rdstate());
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OSstream::writeQuoted
+(
+    const std::string& str,
+    const bool quoted
+)
+{
+    if (quoted)
+    {
+        os_ << token::BEGIN_STRING;
+
+        register int backslash = 0;
+        for
+        (
+            string::const_iterator iter = str.begin();
+            iter != str.end();
+            ++iter
+        )
+        {
+            register char c = *iter;
+
+            if (c == '\\')
+            {
+                backslash++;
+                // suppress output until we know if other characters follow
+                continue;
+            }
+            else if (c == token::NL)
+            {
+                lineNumber_++;
+                backslash++;    // backslash escape for newline
+            }
+            else if (c == token::END_STRING)
+            {
+                backslash++;    // backslash escape for quote
+            }
+
+            // output pending backslashes
+            while (backslash)
+            {
+                os_ << '\\';
+                backslash--;
+            }
+
+            os_ << c;
+        }
+
+        // silently drop any trailing backslashes
+        // they would otherwise appear like an escaped end-quote
+        os_ << token::END_STRING;
+    }
+    else
+    {
+        // output unquoted string, only advance line number on newline
+        lineNumber_ += string(str).count(token::NL);
+        os_ << str;
+    }
 
     setState(os_.rdstate());
     return *this;

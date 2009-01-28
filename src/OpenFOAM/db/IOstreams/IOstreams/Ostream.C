@@ -48,17 +48,11 @@ void Foam::Ostream::decrIndent()
 
 
 // Write keyType
+// write regular expression as quoted string
+// write plain word as word (unquoted)
 Foam::Ostream& Foam::Ostream::write(const keyType& kw)
 {
-    // Write as word or string
-    if (kw.isPattern())
-    {
-        return write(static_cast<const string&>(kw));
-    }
-    else
-    {
-        return write(static_cast<const word&>(kw));
-    }
+    return writeQuoted(kw, kw.isPattern());
 }
 
 
@@ -76,6 +70,7 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
         nSpaces -= 2;
     }
 
+    // could also increment by indentSize_ ...
     if (nSpaces < 1)
     {
         nSpaces = 1;

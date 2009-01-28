@@ -254,7 +254,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::extendedStencil::calcDistributeMap
             {
                 Map<label>& globalMap = globalToProc[procI];
 
-                SortableList<label> sorted(globalMap.toc());
+                SortableList<label> sorted(globalMap.toc().xfer());
 
                 forAll(sorted, i)
                 {

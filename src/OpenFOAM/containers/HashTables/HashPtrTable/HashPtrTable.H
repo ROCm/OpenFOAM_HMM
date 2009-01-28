@@ -83,7 +83,7 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        HashPtrTable(label size = 100);
+        HashPtrTable(const label size = 100);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>

@@ -153,12 +153,12 @@ Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
 
 
 // Calculate geometrically collocated points, Requires PackedList to be
-// sizes and initalised!
+// sized and initalised!
 Foam::label Foam::autoSnapDriver::getCollocatedPoints
 (
     const scalar tol,
     const pointField& points,
-    PackedList<1>& isCollocatedPoint
+    PackedBoolList& isCollocatedPoint
 )
 {
     labelList pointMap;
@@ -225,7 +225,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
     const indirectPrimitivePatch& pp = meshMover.patch();
 
     // Calculate geometrically non-manifold points on the patch to be moved.
-    PackedList<1> nonManifoldPoint(pp.nPoints());
+    PackedBoolList nonManifoldPoint(pp.nPoints());
     label nNonManifoldPoints = getCollocatedPoints
     (
         SMALL,
@@ -255,7 +255,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
     const polyMesh& mesh = meshMover.mesh();
 
     // Get labels of faces to count (master of coupled faces and baffle pairs)
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
 
     {
         forAll(baffles, i)
@@ -1374,7 +1374,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
 
 
     // Faces that do not move
-    PackedList<1> isZonedFace(mesh.nFaces(), 0);
+    PackedBoolList isZonedFace(mesh.nFaces(), 0);
     {
         // 1. All faces on zoned surfaces
         const wordList& faceZoneNames = surfaces.faceZoneNames();

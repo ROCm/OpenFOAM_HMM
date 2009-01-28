@@ -81,7 +81,7 @@ Foam::scalar Foam::isoSurfaceCell::isoFraction
 
 Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 (
-    const PackedList<1>& isTet,
+    const PackedBoolList& isTet,
     const scalarField& cellValues,
     const scalarField& pointValues,
     const label cellI
@@ -203,7 +203,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
 void Foam::isoSurfaceCell::calcCutTypes
 (
-    const PackedList<1>& isTet,
+    const PackedBoolList& isTet,
     const scalarField& cVals,
     const scalarField& pVals
 )
@@ -348,7 +348,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
 void Foam::isoSurfaceCell::calcSnappedCc
 (
-    const PackedList<1>& isTet,
+    const PackedBoolList& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
 
@@ -621,8 +621,8 @@ void Foam::isoSurfaceCell::genPointTris
 
 void Foam::isoSurfaceCell::calcSnappedPoint
 (
-    const PackedList<1>& isBoundaryPoint,
-    const PackedList<1>& isTet,
+    const PackedBoolList& isBoundaryPoint,
+    const PackedBoolList& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
 
@@ -1402,7 +1402,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
     mergeDistance_(mergeTol*mesh.bounds().mag())
 {
     // Determine if cell is tet
-    PackedList<1> isTet(mesh_.nCells());
+    PackedBoolList isTet(mesh_.nCells());
     {
         tetMatcher tet;
 
@@ -1417,7 +1417,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
     // Determine if point is on boundary. Points on boundaries are never
     // snapped. Coupled boundaries are handled explicitly so not marked here.
-    PackedList<1> isBoundaryPoint(mesh_.nPoints());
+    PackedBoolList isBoundaryPoint(mesh_.nPoints());
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     forAll(patches, patchI)
     {

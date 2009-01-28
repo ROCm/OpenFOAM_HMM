@@ -50,7 +50,7 @@ namespace Foam
 typedef Vector<scalar> vector;
 
 
-//- Specify data associated with vector type is contiguous
+//- Data associated with vector type are contiguous
 template<>
 inline bool contiguous<vector>() {return true;}
 

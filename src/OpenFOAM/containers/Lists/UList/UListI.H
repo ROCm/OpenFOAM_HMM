@@ -48,6 +48,13 @@ inline Foam::UList<T>::UList(T* __restrict__ v, label size)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline const Foam::UList<T>& Foam::UList<T>::null()
+{
+    return *reinterpret_cast< UList<T>* >(0);
+}
+
+
+template<class T>
 inline Foam::label Foam::UList<T>::fcIndex(const label i) const
 {
     return (i == size()-1 ? 0 : i+1);
@@ -155,6 +162,13 @@ Foam::UList<T>::begin() const
 }
 
 template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::cbegin() const
+{
+    return v_;
+}
+
+template<class T>
 inline typename Foam::UList<T>::iterator
 Foam::UList<T>::end()
 {
@@ -164,6 +178,13 @@ Foam::UList<T>::end()
 template<class T>
 inline typename Foam::UList<T>::const_iterator
 Foam::UList<T>::end() const
+{
+    return &v_[size_];
+}
+
+template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::cend() const
 {
     return &v_[size_];
 }
@@ -183,6 +204,13 @@ Foam::UList<T>::rbegin() const
 }
 
 template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::crbegin() const
+{
+    return &v_[size_-1];
+}
+
+template<class T>
 inline typename Foam::UList<T>::iterator
 Foam::UList<T>::rend()
 {
@@ -192,6 +220,13 @@ Foam::UList<T>::rend()
 template<class T>
 inline typename Foam::UList<T>::const_iterator
 Foam::UList<T>::rend() const
+{
+    return &v_[-1];
+}
+
+template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::crend() const
 {
     return &v_[-1];
 }

@@ -705,6 +705,7 @@ bool Foam::meshWriters::STARCD::writeSurface
         }
     }
     toc.sort();
+    toc.shrink();
     pointHash.clear();
 
     // write points in sorted order

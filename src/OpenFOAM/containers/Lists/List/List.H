@@ -87,6 +87,11 @@ protected:
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null List
+        inline static const List<T>& null();
+
     // Constructors
 
         //- Null constructor.
@@ -145,16 +150,19 @@ public:
         typedef SubList<T> subList;
 
 
-    // Member functions
-
-        //- Return a null List
-        static const List<T>& null();
+    // Member Functions
 
         //- Return the number of elements in the UList.
         inline label size() const;
 
 
         // Edit
+
+            //- Reset size of List.
+            inline void resize(const label);
+
+            //- Reset size of List and value for new elements.
+            inline void resize(const label, const T&);
 
             //- Reset size of List.
             void setSize(const label);

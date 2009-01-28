@@ -880,8 +880,24 @@ Foam::octree<Type>::begin() const
 
 
 template <class Type>
+typename Foam::octree<Type>::const_iterator
+Foam::octree<Type>::cbegin() const
+{
+    return const_iterator(*this, 0);
+}
+
+
+template <class Type>
 const typename Foam::octree<Type>::const_iterator&
 Foam::octree<Type>::end() const
+{
+    return octree<Type>::endConstIter_;
+}
+
+
+template <class Type>
+const typename Foam::octree<Type>::const_iterator&
+Foam::octree<Type>::cend() const
 {
     return octree<Type>::endConstIter_;
 }

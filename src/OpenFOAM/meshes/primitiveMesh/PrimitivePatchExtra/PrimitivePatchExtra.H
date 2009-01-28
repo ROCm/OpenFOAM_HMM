@@ -125,11 +125,8 @@ public:
 
     // Topological data; no mesh required.
 
-        //- Return edge-face addressing sorted
-        //  (for edges with more than 2 faces) according to the
-        //  angle around the edge.
-        //  Orientation is anticlockwise looking from
-        //  edge.vec(localPoints())
+        //- Return edge-face addressing sorted by angle around the edge.
+        //  Orientation is anticlockwise looking from edge.vec(localPoints())
         const labelListList& sortedEdgeFaces() const;
 
         //- If 2 face neighbours: label of face where ordering of edge

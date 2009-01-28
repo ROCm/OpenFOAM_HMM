@@ -27,7 +27,7 @@ Class
 
 Description
     A cartesian coordinate system and the base class for other coordinate
-    system specifications
+    system specifications.
 
     All systems are defined by an origin point and a coordinateRotation.
     For convenience, the dictionary constructor forms allow a few shortcuts:
@@ -38,7 +38,6 @@ Description
     @verbatim
         flipped
         {
-            type    cartesian;
             origin  (0 0 0);
             coordinateRotation
             {
@@ -54,7 +53,6 @@ Description
     @verbatim
         flipped     // the same, specified as axes
         {
-            type    cartesian;
             origin  (0 0 0);
             coordinateRotation
             {
@@ -71,7 +69,7 @@ Description
     @endverbatim
 
     - if a sub-dictionary coordinateSystem is found within the dictionary, it
-      will be used. This provides a convenient means of embedding the
+      will be used. This provides a convenient means of embedding
       coordinateSystem information in another dictionary.
       This is used, for example, in the porousZones:
 
@@ -101,6 +99,7 @@ Description
 
     - additionally, if the coordinateSystem points to a plain entry,
       it can be used to reference one of the global coordinateSystems
+
     @verbatim
         1
         (
@@ -206,21 +205,28 @@ public:
         //- Construct null. This is equivalent to an identity coordinateSystem
         coordinateSystem();
 
+        //- Construct copy with a different name
+        coordinateSystem
+        (
+            const word& name,
+            const coordinateSystem&
+        );
+
+        //- Construct from origin and rotation
+        coordinateSystem
+        (
+            const word& name,
+            const point& origin,
+            const coordinateRotation&
+        );
+
         //- Construct from origin and 2 axes
         coordinateSystem
         (
             const word& name,
             const point& origin,
             const vector& axis,
-            const vector& dir
-        );
-
-        //- Construct from origin and rotation angles
-        coordinateSystem
-        (
-            const word& name,
-            const point& origin,
-            const coordinateRotation&
+            const vector& dirn
         );
 
         //- Construct from dictionary with a given name
@@ -240,15 +246,7 @@ public:
         //- Return clone
         autoPtr<coordinateSystem> clone() const
         {
-            return autoPtr<coordinateSystem>
-            (
-                new coordinateSystem
-                (
-                    name(),
-                    origin(),
-                    rotation()
-                )
-            );
+            return autoPtr<coordinateSystem>(new coordinateSystem(*this));
         }
 
     // Declare run-time constructor selection table
@@ -257,14 +255,12 @@ public:
         (
             autoPtr,
             coordinateSystem,
-            origAxisDir,
+            dictionary,
             (
                 const word& name,
-                const point& origin,
-                const vector& axis,
-                const vector& dir
+                const dictionary& dict
             ),
-            (name, origin, axis, dir)
+            (name, dict)
         );
 
         declareRunTimeSelectionTable
@@ -280,29 +276,13 @@ public:
             (name, origin, cr)
         );
 
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            coordinateSystem,
-            dictionary,
-            (
-                const word& name,
-                const dictionary& dict
-            ),
-            (name, dict)
-        );
-
-
     // Selectors
 
-        //- Select constructed from origin and 2 axes
+        //- Select constructed from dictionary
         static autoPtr<coordinateSystem> New
         (
-            const word& coordType,
             const word& name,
-            const point& origin,
-            const vector& axis,
-            const vector& dir
+            const dictionary&
         );
 
         //- Select constructed from origin and rotation
@@ -312,13 +292,6 @@ public:
             const word& name,
             const point& origin,
             const coordinateRotation&
-        );
-
-        //- Select constructed from dictionary
-        static autoPtr<coordinateSystem> New
-        (
-            const word& name,
-            const dictionary&
         );
 
         //- Select constructed from Istream
@@ -490,7 +463,7 @@ public:
 
         friend bool operator!=
         (
-            const coordinateSystem&, 
+            const coordinateSystem&,
             const coordinateSystem&
         );
 

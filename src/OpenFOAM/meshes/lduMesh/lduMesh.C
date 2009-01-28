@@ -36,9 +36,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::objectRegistry& Foam::lduMesh::db() const
+const Foam::objectRegistry& Foam::lduMesh::thisDb() const
 {
-    notImplemented("lduMesh::db() const");
+    notImplemented("lduMesh::thisDb() const");
     const objectRegistry* orPtr_ = NULL;
     return *orPtr_;
 }

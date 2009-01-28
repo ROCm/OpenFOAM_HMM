@@ -25,10 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "EulerCoordinateRotation.H"
-#include "dictionary.H"
-#include "addToRunTimeSelectionTable.H"
+
 #include "Switch.H"
 #include "mathematicalConstants.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
