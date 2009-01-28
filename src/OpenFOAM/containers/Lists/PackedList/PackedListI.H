@@ -266,6 +266,56 @@ Foam::PackedList<nBits>::iterator::operator++(int)
 
 
 template<int nBits>
+inline typename Foam::PackedList<nBits>::const_iterator&
+Foam::PackedList<nBits>::const_iterator::operator--()
+{
+    if (!offset_)
+    {
+        offset_ = packing();
+        index_--;
+    }
+    offset_--;
+
+    return *this;
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator&
+Foam::PackedList<nBits>::iterator::operator--()
+{
+    if (!this->offset_)
+    {
+        this->offset_ = packing();
+        this->index_--;
+    }
+    this->offset_--;
+
+    return *this;
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::const_iterator
+Foam::PackedList<nBits>::const_iterator::operator--(int)
+{
+    const_iterator old = *this;
+    --*this;
+    return old;
+}
+
+
+template<int nBits>
+inline typename Foam::PackedList<nBits>::iterator
+Foam::PackedList<nBits>::iterator::operator--(int)
+{
+    iterator old = *this;
+    --*this;
+    return old;
+}
+
+
+template<int nBits>
 inline unsigned int
 Foam::PackedList<nBits>::const_iterator::operator*() const
 {
@@ -298,9 +348,10 @@ Foam::PackedList<nBits>::iterator::operator()()
 
 
 template<int nBits>
-inline bool Foam::PackedList<nBits>::iterator::operator=(const unsigned int val)
+inline void
+Foam::PackedList<nBits>::iterator::operator=(const unsigned int val)
 {
-    return set(val);
+    set(val);
 }
 
 
@@ -331,12 +382,12 @@ unsigned int () const
 
 
 template<int nBits>
-inline bool Foam::PackedList<nBits>::iterator::iteratorProxy::operator=
+inline void Foam::PackedList<nBits>::iterator::iteratorProxy::operator=
 (
     const unsigned int val
 )
 {
-    return iter_->set(val);
+    iter_->set(val);
 }
 
 
@@ -420,6 +471,7 @@ inline void Foam::PackedList<nBits>::resize
         {
             // fill value for complete chunks
             unsigned int fill = val;
+
             if (fill & ~max_value())
             {
 #               ifdef DEBUGList
@@ -430,13 +482,15 @@ inline void Foam::PackedList<nBits>::resize
                     << abort(FatalError);
 #               endif
 
-                // treat overflow as max_value
-                fill = max_value();
+                // treat overflow as max_value, fill everything
+                fill = ~0;
             }
-
-            for (unsigned int i = 1; i < packing(); ++i)
+            else
             {
-                fill |= (fill << nBits);
+                for (unsigned int i = 1; i < packing(); ++i)
+                {
+                    fill |= (fill << nBits);
+                }
             }
 
             unsigned begIdx = size_ / packing();
@@ -446,11 +500,7 @@ inline void Foam::PackedList<nBits>::resize
             // partial chunk, preserve existing value
             if (begOff)
             {
-                unsigned int maskOld = max_value();
-                for (unsigned int i = 1; i < begOff; ++i)
-                {
-                    maskOld |= (maskOld << nBits);
-                }
+                unsigned int maskOld = (0x1 << (nBits * begOff)) - 1;
 
                 StorageList::operator[](begIdx) &= maskOld;
                 StorageList::operator[](begIdx) |= ~maskOld & fill;
@@ -552,6 +602,14 @@ inline void Foam::PackedList<nBits>::shrink()
 }
 
 template<int nBits>
+inline Foam::List<unsigned int>&
+Foam::PackedList<nBits>::storage()
+{
+    return static_cast<StorageList&>(*this);
+}
+
+
+template<int nBits>
 inline const Foam::List<unsigned int>&
 Foam::PackedList<nBits>::storage() const
 {
@@ -591,7 +649,14 @@ inline unsigned int Foam::PackedList<nBits>::get(const label i) const
 template<int nBits>
 inline unsigned int Foam::PackedList<nBits>::operator[](const label i) const
 {
-    return const_iterator(this, i).get();
+    if (i < size_)
+    {
+        return const_iterator(this, i).get();
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
@@ -662,7 +727,6 @@ Foam::PackedList<nBits>::operator[](const label i)
 }
 
 
-
 // specialization for nBits=1 isn't worth the bother
 template<int nBits>
 inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
@@ -670,6 +734,7 @@ inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
     if (val)
     {
         unsigned int fill = val;
+
         if (fill & ~max_value())
         {
 #           ifdef DEBUGList
@@ -681,12 +746,14 @@ inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
 #           endif
 
             // treat overflow as max_value
-            fill = max_value();
+            fill = ~0;
         }
-
-        for (unsigned int i = 1; i < packing(); ++i)
+        else
         {
-            fill |= (fill << nBits);
+            for (unsigned int i = 1; i < packing(); ++i)
+            {
+                fill |= (fill << nBits);
+            }
         }
 
         StorageList::operator=(fill);

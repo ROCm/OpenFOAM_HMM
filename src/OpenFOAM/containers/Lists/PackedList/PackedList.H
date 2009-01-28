@@ -37,16 +37,20 @@ Description
 Note
     The iterator '()' dereferencing operator returns a proxy class that handles
     assignment. However, the iterator itself can also handle assignment
-    directly and also returns a bool as per the set() methods.
+    directly, but does not return anything.
     Thus the following bit of code works as expected:
-
     @code
         blist[5] = 4;
-        changed = (blist[5] = 10);
         changed = blist.set(5, 8);
+        changed = (blist[5] = 1);   // ERROR - operator= is 'void'
     @endcode
 
-    Using set() might be more readable (as expected) though.
+    Making the assignment operator void prevents people from trying this type
+    of thing:
+    @code
+        blist[2] = blist[5] = 4; // bad idea, thus ERROR - operator= is 'void'
+        blist[1] = blist[5];     // iterator not value assignment!
+    @endcode
 
 SeeAlso
     Foam::DynamicList
@@ -172,7 +176,18 @@ public:
         inline bool set(const label, const unsigned int val);
 
         //- Return the underlying packed storage
+        inline List<unsigned int>& storage();
+
+        //- Return the underlying packed storage
         inline const List<unsigned int>& storage() const;
+
+        //- Count number of bits set, O(log(n))
+        //  Uses the Hamming weight (population count) method
+        //  http://en.wikipedia.org/wiki/Hamming_weight
+        unsigned int count() const;
+
+        //- Trim any trailing zero elements
+        bool trim();
 
         //- Return the values as a labelList
         labelList values() const;
@@ -216,6 +231,7 @@ public:
         //- Transfer contents to the Xfer container
         inline Xfer<PackedList<nBits> > xfer();
 
+
     // Member operators
 
         //- Append a value at the end of the list
@@ -244,144 +260,148 @@ public:
 
     // Ostream operator
 
-    //  // Write PackedList to Ostream.
-    //  friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+//      // Write PackedList to Ostream.
+//      friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
 
-    //- The const_iterator for PackedList
-    //  Note: data and functions are protected, to allow reuse by iterator.
-    //  Try not to be disturbed by non-const methods such as set(), they are
-    //  just inherited and used by iterator.
-    class const_iterator
-    {
-        friend class PackedList;
-
-    protected:
-
-        // Protected Data
-
-        //- Pointer to original list
-        //  This also lets us use the default bitwise copy/assignment
-        PackedList* list_;
-
-        //- Element index within storage
-        unsigned index_;
-
-        //- Offset within storage element
-        unsigned offset_;
-
-        // Protected Member Functions
-
-        //- Get value as unsigned
-        inline unsigned int get() const;
-
-        //- Set value, returning true if changed
-        //  This is obviously used by iterator and not by const_iterator
-        inline bool set(unsigned int);
-
-    public:
-
-        // Constructors
-
-        //- Construct from base list and position index
-        inline const_iterator(const PackedList*, const label);
-
-        //- Construct from non-const iterator
-        explicit inline const_iterator(const iterator&);
-
-        // Member operators
-
-        inline bool operator==(const const_iterator&) const;
-        inline bool operator!=(const const_iterator&) const;
-
-        //- Return referenced value directly
-        inline unsigned int operator*() const;
-
-        //- Return referenced value directly
-        inline unsigned int operator()() const;
-
-        inline const_iterator& operator++();
-        inline const_iterator operator++(int);
-
-        //- Conversion operator
-        inline operator unsigned int () const;
-
-        //- Print value and information
-        Ostream& print(Ostream&) const;
-    };
-
-
-    //- const_iterator set to the beginning of the PackedList
-    inline const_iterator cbegin() const;
-
-    //- const_iterator set to beyond the end of the PackedList
-    inline const_iterator cend() const;
-
-    //- const_iterator set to the beginning of the PackedList
-    inline const_iterator begin() const;
-
-    //- const_iterator set to beyond the end of the PackedList
-    inline const_iterator end() const;
-
-
-    //- The iterator class used for PackedList
-    class iterator
-    :
-        public const_iterator
-    {
-        friend class PackedList;
-
-        //- A private proxy reference to the iterator, used for setting values
-        //  Also provides a uniform target for the iterator 'operator*'
-        //  and 'operator()' methods
-        class iteratorProxy
+        //- The const_iterator for PackedList
+        //  Note: data and functions are protected, to allow reuse by iterator.
+        //  Try not to be disturbed by non-const methods such as set(), they are
+        //  just inherited and used by iterator.
+        class const_iterator
         {
-            iterator* iter_;
+            friend class PackedList;
+
+        protected:
+
+            // Protected Data
+
+            //- Pointer to original list
+            //  This also lets us use the default bitwise copy/assignment
+            PackedList* list_;
+
+            //- Element index within storage
+            unsigned index_;
+
+            //- Offset within storage element
+            unsigned offset_;
+
+            // Protected Member Functions
+
+            //- Get value as unsigned
+            inline unsigned int get() const;
+
+            //- Set value, returning true if changed
+            //  This is obviously used by iterator and not by const_iterator
+            inline bool set(unsigned int);
+
         public:
 
-            //- Construct from pointer to iterator
-            inline iteratorProxy(iterator*);
+            // Constructors
 
-            //- Assign value, returns true if the value changed
-            inline bool operator=(const unsigned int val);
+            //- Construct from base list and position index
+            inline const_iterator(const PackedList*, const label);
+
+            //- Construct from non-const iterator
+            explicit inline const_iterator(const iterator&);
+
+            // Member operators
+
+            inline bool operator==(const const_iterator&) const;
+            inline bool operator!=(const const_iterator&) const;
+
+            //- Return referenced value directly
+            inline unsigned int operator*() const;
+
+            //- Return referenced value directly
+            inline unsigned int operator()() const;
+
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
+
+            inline const_iterator& operator--();
+            inline const_iterator operator--(int);
 
             //- Conversion operator
             inline operator unsigned int () const;
+
+            //- Print value and information
+            Ostream& print(Ostream&) const;
         };
 
-    public:
 
-        // Constructors
+        //- const_iterator set to the beginning of the PackedList
+        inline const_iterator cbegin() const;
 
-        //- Construct from base list and position index
-        inline iterator(const PackedList*, const label);
+        //- const_iterator set to beyond the end of the PackedList
+        inline const_iterator cend() const;
 
-        // Member Operators
-        inline void operator=(const iterator&);
+        //- const_iterator set to the beginning of the PackedList
+        inline const_iterator begin() const;
 
-        //- Assign value directly, returns true if the value changed
-        inline bool operator=(unsigned int);
+        //- const_iterator set to beyond the end of the PackedList
+        inline const_iterator end() const;
 
-        //- Return value
-        inline unsigned int operator*() const;
 
-        //- Return value
-        inline unsigned int operator()() const;
+        //- The iterator class used for PackedList
+        class iterator
+        :
+            public const_iterator
+        {
+            friend class PackedList;
 
-        //- Return proxy for assigning the referenced value
-        inline iteratorProxy operator*();
+            //- A proxy reference to the iterator, used for setting values.
+            //  Also provides a uniform target for the iterator 'operator*'
+            //  and 'operator()' methods
+            class iteratorProxy
+            {
+                iterator* iter_;
+            public:
 
-        //- Return proxy for assigning the referenced value
-        inline iteratorProxy operator()();
+                //- Construct from pointer to iterator
+                inline iteratorProxy(iterator*);
 
-        inline iterator& operator++();
-        inline iterator operator++(int);
-    };
+                //- Assign value
+                inline void operator=(const unsigned int val);
 
-    //- iterator set to the beginning of the PackedList
-    inline iterator begin();
+                //- Conversion operator
+                inline operator unsigned int () const;
+            };
 
-    //- iterator set to beyond the end of the HashTable
-    inline iterator end();
+        public:
+
+            // Constructors
+
+            //- Construct from base list and position index
+            inline iterator(const PackedList*, const label);
+
+            //- Assign value directly
+            inline void operator=(unsigned int);
+
+            //- Return value
+            inline unsigned int operator*() const;
+
+            //- Return value
+            inline unsigned int operator()() const;
+
+            //- Return proxy for assigning the referenced value
+            inline iteratorProxy operator*();
+
+            //- Return proxy for assigning the referenced value
+            inline iteratorProxy operator()();
+
+            inline iterator& operator++();
+            inline iterator operator++(int);
+
+            inline iterator& operator--();
+            inline iterator operator--(int);
+
+        };
+
+        //- iterator set to the beginning of the PackedList
+        inline iterator begin();
+
+        //- iterator set to beyond the end of the HashTable
+        inline iterator end();
 
 };
 
@@ -392,7 +412,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "PackedListI.H"
+#include "PackedListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

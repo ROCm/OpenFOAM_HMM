@@ -38,7 +38,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    bool changed;
     Info<< "PackedList max_bits() = " << PackedList<0>::max_bits() << nl;
 
     Info<< "\ntest allocation with value\n";
@@ -46,7 +45,42 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest assign uniform value\n";
-    list1 = 4;
+    list1 = 3;
+    list1.print(Info);
+
+    Info<< "\ntest assign uniform value (with overflow)\n";
+    list1 = -1;
+    list1.print(Info);
+
+    Info<< "\ntest assign between references - does not work as expected\n";
+    list1[2] = 3;
+    list1[4] = list1[2];
+    list1.print(Info);
+
+    {
+        const PackedList<3>& constLst = list1;
+        Info<< "\ntest operator[] const with out-of-range index\n";
+        constLst.print(Info);
+        if (!constLst[20])
+        {
+            Info<< "[20] is false, as expected\n";
+        }
+        constLst.print(Info);
+
+        Info<< "\ntest operator[] non-const with out-of-range index\n";
+        if (!list1[20])
+        {
+            Info<< "[20] is false, as expected but list was resized!! (non-const)\n";
+        }
+        list1.print(Info);
+    }
+
+
+    Info<< "\ntest operator[] with out-of-range index\n";
+    if (!list1[20])
+    {
+        Info<< "[20] is false, as expected\n";
+    }
     list1.print(Info);
 
     Info<< "\ntest resize with value (without reallocation)\n";
@@ -111,6 +145,10 @@ int main(int argc, char *argv[])
     list1.setCapacity(24);
     list1.print(Info);
 
+    Info<< "\ntest trim\n";
+    list1.trim();
+    list1.print(Info);
+
     // add in some misc values
     list1[31] = 1;
     list1[32] = 2;
@@ -122,12 +160,10 @@ int main(int argc, char *argv[])
     iter.print(Info) << "\n";
 
     Info<< "\ntest iterator operator=\n";
-    changed = (iter = 5);
+    iter = 2;
 
     Info<< "iterator:" << iter() << "\n";
-    Info<< "changed:" << changed << "\n";
-    changed = (iter = 5);
-    Info<< "changed:" << changed << "\n";
+    iter = 5;
     list1.print(Info);
 
     Info<< "\ntest get() method\n";
@@ -137,12 +173,13 @@ int main(int argc, char *argv[])
     Info<< "\ntest iterator indexing\n";
     Info<< "cend() ";
     list1.cend().print(Info) << "\n";
-
-    for 
+    
+    for
     (
         PackedList<3>::const_iterator cit = list1[30];
         cit != list1.cend();
-        ++cit)
+        ++cit
+    )
     {
         cit.print(Info);
     }
@@ -167,7 +204,7 @@ int main(int argc, char *argv[])
 
     Info<< "\ntest pattern that fills all bits\n";
     PackedList<4> list3(8, 8);
-    
+
     label pos = list3.size() - 1;
 
     list3[pos--] = list3.max_value();

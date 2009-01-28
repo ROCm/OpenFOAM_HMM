@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     std::vector<bool> stlVector(n, true);
 
     labelHashSet emptyHash;
-    labelHashSet fullHash;
+    labelHashSet fullHash(1000);
     for(label i = 0; i < n; i++)
     {
         fullHash.insert(i);
@@ -69,6 +69,35 @@ int main(int argc, char *argv[])
         packed.resize(n, 1);
     }
     Info<< "resize/shrink/resize:" << timer.cpuTimeIncrement() << " s\n\n";
+
+    // set every other bit on:
+    Info<< "set every other bit on and count\n";
+    packed.storage() = 0xAAAAAAAAu;
+
+    // Count packed
+    sum = 0;
+    for (label iter = 0; iter < nIters; iter++)
+    {
+        forAll(packed, i)
+        {
+            sum += packed[i];
+        }
+    }
+    Info<< "Counting brute-force:" << timer.cpuTimeIncrement()
+        << " s" << endl;
+    Info<< "  sum " << sum << endl;
+
+
+    // Count packed
+    sum = 0;
+    for (label iter = 0; iter < nIters; iter++)
+    {
+        sum += packed.count();
+    }
+    Info<< "Counting via count():" << timer.cpuTimeIncrement()
+        << " s" << endl;
+    Info<< "  sum " << sum << endl;
+
 
     // Dummy addition
     sum = 0;
@@ -182,7 +211,7 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; iter++)
     {
-        forAll(packed, i)
+        forAll(unpacked, i)
         {
             sum += emptyHash.found(i);
         }
@@ -196,7 +225,7 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; iter++)
     {
-        forAll(packed, i)
+        forAll(unpacked, i)
         {
             sum += fullHash.found(i);
         }
@@ -204,7 +233,6 @@ int main(int argc, char *argv[])
     Info<< "Reading full labelHashSet:" << timer.cpuTimeIncrement()
         << " s" << endl;
     Info<< "  sum " << sum << endl;
-
 
 
     //
@@ -326,8 +354,7 @@ int main(int argc, char *argv[])
     Info<< "Writing packed<3> uniform 1:" << timer.cpuTimeIncrement()
         << " s" << endl;
 
-
-
+    
     Info << "End\n" << endl;
 
     return 0;

@@ -53,6 +53,115 @@ Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+
+#if (UINT_MAX == 0xFFFFFFFF)
+// 32-bit counting, Hamming weight method
+#   define COUNT_PACKEDBITS(sum, x)                                           \
+{                                                                             \
+    x -= (x >> 1) & 0x55555555;                                               \
+    x = (x & 0x33333333) + ((x >> 2) & 0x33333333);                           \
+    sum += (((x + (x >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;                \
+}
+#elif (UINT_MAX == 0xFFFFFFFFFFFFFFFF)
+// 64-bit counting, Hamming weight method
+#   define COUNT_PACKEDBITS(sum, x)                                           \
+{                                                                             \
+    x -= (x >> 1) & 0x5555555555555555;                                       \
+    x = (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333);           \
+    sum += (((x + (x >> 4)) & 0x0F0F0F0F0F0F0F0F) * 0x0101010101010101) >> 56;\
+}
+#else
+// Arbitrary number of bits, Brian Kernighan's method
+#   define COUNT_PACKEDBITS(sum, x)    for (; x; ++sum) { x &= x - 1; }
+#endif
+
+
+template<int nBits>
+unsigned int Foam::PackedList<nBits>::count() const
+{
+    register unsigned int c = 0;
+
+    if (size_)
+    {
+        // mask value for complete chunks
+        unsigned int mask = (0x1 << (nBits * packing())) - 1;
+
+        unsigned int endIdx = size_ / packing();
+        unsigned int endOff = size_ % packing();
+
+        // count bits in complete elements
+        for (unsigned i = 0; i < endIdx; ++i)
+        {
+            register unsigned int bits = StorageList::operator[](i) & mask;
+            COUNT_PACKEDBITS(c, bits);
+        }
+
+        // count bits in partial chunk
+        if (endOff)
+        {
+            mask = (0x1 << (nBits * endOff)) - 1;
+
+            register unsigned int bits = StorageList::operator[](endIdx) & mask;
+            COUNT_PACKEDBITS(c, bits);
+        }
+    }
+
+    return c;
+}
+
+
+template<int nBits>
+bool Foam::PackedList<nBits>::trim()
+{
+    if (!size_)
+    {
+        return false;
+    }
+
+    // mask value for complete chunks
+    unsigned int mask = (0x1 << (nBits * packing())) - 1;
+
+    label currElem = packedLength(size_) - 1;
+    unsigned int endOff = size_ % packing();
+
+    // clear trailing bits on final segment
+    if (endOff)
+    {
+        StorageList::operator[](currElem) &= ((0x1 << (nBits * endOff)) - 1);
+    }
+
+    // test entire chunk
+    while (currElem > 0 && !(StorageList::operator[](currElem) &= mask))
+    {
+        currElem--;
+    }
+
+    // test segment
+    label newsize = (currElem + 1) * packing();
+
+    // mask for the final segment
+    mask = max_value() << (nBits * (packing() - 1));
+
+    for (endOff = packing(); endOff >= 1; --endOff, --newsize)
+    {
+        if (StorageList::operator[](currElem) & mask)
+        {
+            break;
+        }
+
+        mask >>= nBits;
+    }
+
+    if (size_ == newsize)
+    {
+        return false;
+    }
+
+    size_ = newsize;
+    return false;
+}
+
+
 template<int nBits>
 Foam::labelList Foam::PackedList<nBits>::values() const
 {
@@ -91,41 +200,36 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
         os << get(i) << ' ';
     }
 
-    label packLen = packedLength(size());
+    label packLen = packedLength(size_);
 
     os  << ")\n"
         << "storage: " << packLen << "/" << StorageList::size() << "( ";
 
-    // mask for the valid bits
-    unsigned int validBits = max_value();
-    for (unsigned int i = 1; i < packing(); ++i)
-    {
-        validBits |= (validBits << nBits);
-    }
+    // mask value for complete chunks
+    unsigned int mask = (0x1 << (nBits * packing())) - 1;
 
     for (label i=0; i < packLen; i++)
     {
         const StorageType& rawBits = StorageList::operator[](i);
 
-        // the final storage may not be full, modify validBits accordingly
+        // the final storage may not be full, modify mask accordingly
         if (i+1 == packLen)
         {
-            label junk = size() % packing();
+            unsigned endOff = size_ % packing();
 
-            if (junk)
+            if (endOff)
             {
-                junk = packing() - junk;
+                mask = (0x1 << (nBits * endOff)) - 1;
             }
-
-            for (label j=0; j < junk; j++)
+            else
             {
-                validBits >>= nBits;
+                continue;
             }
         }
 
         for (unsigned int testBit = 0x1 << max_bits(); testBit; testBit >>= 1)
         {
-            if (testBit & validBits)
+            if (testBit & mask)
             {
                 if (rawBits & testBit)
                 {
