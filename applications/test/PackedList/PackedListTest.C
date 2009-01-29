@@ -52,9 +52,13 @@ int main(int argc, char *argv[])
     list1 = -1;
     list1.print(Info);
 
-    Info<< "\ntest assign between references - does not work as expected\n";
+    Info<< "\ntest assign between references\n";
     list1[2] = 3;
     list1[4] = list1[2];
+    list1.print(Info);
+
+    Info<< "\ntest assign between references, with chaining\n";
+    list1[4] = list1[2] = 1;
     list1.print(Info);
 
     {
@@ -63,14 +67,14 @@ int main(int argc, char *argv[])
         constLst.print(Info);
         if (!constLst[20])
         {
-            Info<< "[20] is false, as expected\n";
+            Info<< "[20] is false (expected) list size should be unchanged (const)\n";
         }
         constLst.print(Info);
 
         Info<< "\ntest operator[] non-const with out-of-range index\n";
         if (!list1[20])
         {
-            Info<< "[20] is false, as expected but list was resized!! (non-const)\n";
+            Info<< "[20] is false (expected) but list was resized?? (non-const)\n";
         }
         list1.print(Info);
     }
@@ -145,6 +149,10 @@ int main(int argc, char *argv[])
     list1.setCapacity(24);
     list1.print(Info);
 
+    Info<< "\ntest resize much smaller\n";
+    list1.resize(150);
+    list1.print(Info);
+
     Info<< "\ntest trim\n";
     list1.trim();
     list1.print(Info);
@@ -159,12 +167,15 @@ int main(int argc, char *argv[])
     Info<< "begin():";
     iter.print(Info) << "\n";
 
-    Info<< "\ntest iterator operator=\n";
-    iter = 2;
-
     Info<< "iterator:" << iter() << "\n";
-    iter = 5;
+    iter() = 5;
+    iter.print(Info);
     list1.print(Info);
+
+    iter = list1[31];
+    Info<< "iterator:" << iter() << "\n";
+    iter.print(Info);
+
 
     Info<< "\ntest get() method\n";
     Info<< "get(10):" << list1.get(10) << " and list[10]:" << list1[10] << "\n";
@@ -173,25 +184,34 @@ int main(int argc, char *argv[])
     Info<< "\ntest iterator indexing\n";
     Info<< "cend() ";
     list1.cend().print(Info) << "\n";
-    
+
+    {
+        Info<< "\ntest assignment of iterator\n";
+        list1.print(Info);
+        PackedList<3>::iterator cit = list1[25];
+        cit.print(Info);
+        list1.end().print(Info);
+    }
+
+
     for
     (
-        PackedList<3>::const_iterator cit = list1[30];
-        cit != list1.cend();
+        PackedList<3>::iterator cit = list1[5];
+        cit != list1.end();
         ++cit
     )
     {
         cit.print(Info);
     }
 
-    Info<< "\ntest operator[] auto-vivify\n";
-    const unsigned int val = list1[45];
-
-    Info<< "list[45]:" << val << "\n";
-    list1[45] = list1.max_value();
-    Info<< "list[45]:" << list1[45] << "\n";
-    list1[49] = list1.max_value();
-    list1.print(Info);
+//     Info<< "\ntest operator[] auto-vivify\n";
+//     const unsigned int val = list1[45];
+//
+//     Info<< "list[45]:" << val << "\n";
+//     list1[45] = list1.max_value();
+//     Info<< "list[45]:" << list1[45] << "\n";
+//     list1[49] = list1.max_value();
+//     list1.print(Info);
 
 
     Info<< "\ntest copy constructor + append\n";

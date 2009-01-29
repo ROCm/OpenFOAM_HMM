@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     }
 
     cpuTime timer;
-    
-    for (label iter = 0; iter < nIters; iter++)
+
+    for (label iter = 0; iter < nIters; ++iter)
     {
         packed.resize(40);
         packed.shrink();
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
     // Count packed
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(packed, i)
         {
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
     // Count packed
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         sum += packed.count();
     }
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 
     // Dummy addition
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 
     // Read stl
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         for(unsigned int i = 0; i < stlVector.size(); i++)
         {
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
     // Read unpacked
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
     // Read packed
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(packed, i)
         {
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
     // Read packed
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(packed, i)
         {
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 
     // Read via iterator
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         for
         (
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
     // Read via iterator
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         for
         (
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 
     // Read empty hash
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 
     // Read full hash
     sum = 0;
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
     //
 
     // Write stl
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         for (unsigned int i = 0; i < stlVector.size(); i++)
         {
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
     Info<< "Writing stl:" << timer.cpuTimeIncrement() << " s" << endl;
 
     // Write unpacked
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(packed, i)
         {
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(packed, i)
         {
@@ -283,25 +283,9 @@ int main(int argc, char *argv[])
     Info<< "Writing packed using set:" << timer.cpuTimeIncrement()
         << " s" << endl;
 
-    // Write packed
-    for (label iter = 0; iter < nIters; iter++)
-    {
-        for
-        (
-            PackedBoolList::iterator it = packed.begin();
-            it != packed.end();
-            ++it
-        )
-        {
-            it = 1;
-        }
-    }
-    Info<< "Writing packed using iterator:" << timer.cpuTimeIncrement()
-        << " s" << endl;
-
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         for
         (
@@ -313,12 +297,12 @@ int main(int argc, char *argv[])
             it() = 1;
         }
     }
-    Info<< "Writing packed using iteratorRef:" << timer.cpuTimeIncrement()
+    Info<< "Writing packed using iterator:" << timer.cpuTimeIncrement()
         << " s" << endl;
 
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         packed = 0;
     }
@@ -327,7 +311,7 @@ int main(int argc, char *argv[])
 
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         packed = 1;
     }
@@ -338,7 +322,7 @@ int main(int argc, char *argv[])
     PackedList<3> oddPacked(n, 3);
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         packed = 0;
     }
@@ -347,14 +331,14 @@ int main(int argc, char *argv[])
 
 
     // Write packed
-    for (label iter = 0; iter < nIters; iter++)
+    for (label iter = 0; iter < nIters; ++iter)
     {
         packed = 1;
     }
     Info<< "Writing packed<3> uniform 1:" << timer.cpuTimeIncrement()
         << " s" << endl;
 
-    
+
     Info << "End\n" << endl;
 
     return 0;

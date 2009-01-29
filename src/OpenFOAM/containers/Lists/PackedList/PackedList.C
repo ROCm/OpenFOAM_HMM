@@ -84,7 +84,7 @@ unsigned int Foam::PackedList<nBits>::count() const
     if (size_)
     {
         // mask value for complete chunks
-        unsigned int mask = (0x1 << (nBits * packing())) - 1;
+        unsigned int mask = maskLower(packing());
 
         unsigned int endIdx = size_ / packing();
         unsigned int endOff = size_ % packing();
@@ -99,7 +99,7 @@ unsigned int Foam::PackedList<nBits>::count() const
         // count bits in partial chunk
         if (endOff)
         {
-            mask = (0x1 << (nBits * endOff)) - 1;
+            mask = maskLower(endOff);
 
             register unsigned int bits = StorageList::operator[](endIdx) & mask;
             COUNT_PACKEDBITS(c, bits);
@@ -119,7 +119,7 @@ bool Foam::PackedList<nBits>::trim()
     }
 
     // mask value for complete chunks
-    unsigned int mask = (0x1 << (nBits * packing())) - 1;
+    unsigned int mask = maskLower(packing());
 
     label currElem = packedLength(size_) - 1;
     unsigned int endOff = size_ % packing();
@@ -127,7 +127,7 @@ bool Foam::PackedList<nBits>::trim()
     // clear trailing bits on final segment
     if (endOff)
     {
-        StorageList::operator[](currElem) &= ((0x1 << (nBits * endOff)) - 1);
+        StorageList::operator[](currElem) &= maskLower(endOff);
     }
 
     // test entire chunk
@@ -176,7 +176,7 @@ Foam::labelList Foam::PackedList<nBits>::values() const
 
 
 template<int nBits>
-Foam::Ostream& Foam::PackedList<nBits>::const_iterator::print(Ostream& os) const
+Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::print(Ostream& os) const
 {
     os  << "iterator<" << nBits << "> ["
         << (index_ * packing() + offset_) << "]"
@@ -206,7 +206,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
         << "storage: " << packLen << "/" << StorageList::size() << "( ";
 
     // mask value for complete chunks
-    unsigned int mask = (0x1 << (nBits * packing())) - 1;
+    unsigned int mask = maskLower(packing());
 
     for (label i=0; i < packLen; i++)
     {
@@ -219,7 +219,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
 
             if (endOff)
             {
-                mask = (0x1 << (nBits * endOff)) - 1;
+                mask = maskLower(endOff);
             }
             else
             {
@@ -227,7 +227,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
             }
         }
 
-        for (unsigned int testBit = 0x1 << max_bits(); testBit; testBit >>= 1)
+        for (unsigned int testBit = (1 << max_bits()); testBit; testBit >>= 1)
         {
             if (testBit & mask)
             {
