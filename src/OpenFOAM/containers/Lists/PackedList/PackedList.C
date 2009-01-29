@@ -83,25 +83,25 @@ unsigned int Foam::PackedList<nBits>::count() const
 
     if (size_)
     {
-        // mask value for complete chunks
+        // mask value for complete segments
         unsigned int mask = maskLower(packing());
 
-        unsigned int endIdx = size_ / packing();
-        unsigned int endOff = size_ % packing();
+        const unsigned int endSeg = size_ / packing();
+        const unsigned int endOff = size_ % packing();
 
-        // count bits in complete elements
-        for (unsigned i = 0; i < endIdx; ++i)
+        // count bits in complete segments
+        for (unsigned i = 0; i < endSeg; ++i)
         {
             register unsigned int bits = StorageList::operator[](i) & mask;
             COUNT_PACKEDBITS(c, bits);
         }
 
-        // count bits in partial chunk
+        // count bits in partial segment
         if (endOff)
         {
             mask = maskLower(endOff);
 
-            register unsigned int bits = StorageList::operator[](endIdx) & mask;
+            register unsigned int bits = StorageList::operator[](endSeg) & mask;
             COUNT_PACKEDBITS(c, bits);
         }
     }
@@ -118,7 +118,7 @@ bool Foam::PackedList<nBits>::trim()
         return false;
     }
 
-    // mask value for complete chunks
+    // mask value for complete segments
     unsigned int mask = maskLower(packing());
 
     label currElem = packedLength(size_) - 1;
@@ -130,7 +130,7 @@ bool Foam::PackedList<nBits>::trim()
         StorageList::operator[](currElem) &= maskLower(endOff);
     }
 
-    // test entire chunk
+    // test entire segment
     while (currElem > 0 && !(StorageList::operator[](currElem) &= mask))
     {
         currElem--;
@@ -163,9 +163,21 @@ bool Foam::PackedList<nBits>::trim()
 
 
 template<unsigned nBits>
+void Foam::PackedList<nBits>::flip()
+{
+    label packLen = packedLength(size_);
+
+    for (label i=0; i < packLen; i++)
+    {
+        StorageList::operator[](i) = ~StorageList::operator[](i);
+    }
+}
+
+
+template<unsigned nBits>
 Foam::labelList Foam::PackedList<nBits>::values() const
 {
-    labelList elems(size());
+    labelList elems(size_);
 
     forAll(*this, i)
     {
@@ -178,10 +190,11 @@ Foam::labelList Foam::PackedList<nBits>::values() const
 template<unsigned nBits>
 Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::print(Ostream& os) const
 {
-    os  << "iterator<" << label(nBits) << "> ["
-        << (index_ * packing() + offset_) << "]"
-        << " index:" << index_ << " offset:" << offset_
-        << " value:" << unsigned(*this)
+    os  << "iterator<"  << label(nBits) << "> ["
+        << this->index_ << "]"
+        << " segment:"  << label(this->index_ / packing())
+        << " offset:"   << label(this->index_ % packing())
+        << " value:"    << this->get()
         << nl;
 
     return os;
@@ -194,7 +207,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
     os  << "PackedList<" << label(nBits) << ">"
         << " max_value:" << max_value()
         << " packing:"   << packing() << nl
-        << "values: " << size() << "/" << capacity() << "( ";
+        << "values: " << size_ << "/" << capacity() << "( ";
     forAll(*this, i)
     {
         os << get(i) << ' ';
@@ -205,17 +218,17 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
     os  << ")\n"
         << "storage: " << packLen << "/" << StorageList::size() << "( ";
 
-    // mask value for complete chunks
+    // mask value for complete segments
     unsigned int mask = maskLower(packing());
 
     for (label i=0; i < packLen; i++)
     {
         const StorageType& rawBits = StorageList::operator[](i);
 
-        // the final storage may not be full, modify mask accordingly
+        // the final segment may not be full, modify mask accordingly
         if (i+1 == packLen)
         {
-            unsigned endOff = size_ % packing();
+            unsigned int endOff = size_ % packing();
 
             if (endOff)
             {
@@ -229,7 +242,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
 
         for (unsigned int testBit = (1 << max_bits()); testBit; testBit >>= 1)
         {
-            if (testBit & mask)
+            if (mask & testBit)
             {
                 if (rawBits & testBit)
                 {
