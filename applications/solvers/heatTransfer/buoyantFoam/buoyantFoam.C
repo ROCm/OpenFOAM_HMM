@@ -48,6 +48,9 @@ int main(int argc, char *argv[])
 #   include "readEnvironmentalProperties.H"
 #   include "createFields.H"
 #   include "initContinuityErrs.H"
+#   include "readTimeControls.H"
+#   include "compressibleCourantNo.H"
+#   include "setInitialDeltaT.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,11 +58,13 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
+#       include "readTimeControls.H"
 #       include "readPISOControls.H"
 #       include "compressibleCourantNo.H"
-//#       include "setDeltaT.H"
+#       include "setDeltaT.H"
 
         runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
 #       include "rhoEqn.H"
