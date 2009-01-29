@@ -2342,8 +2342,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
 
 
-    // Make sure namedSurfaceIndex is unset inbetween same cell cell zones.
-    makeConsistentFaceIndex(cellToZone, namedSurfaceIndex);
+    //// Make sure namedSurfaceIndex is unset inbetween same cell cell zones.
+    //makeConsistentFaceIndex(cellToZone, namedSurfaceIndex);
 
 
     // Topochange container
