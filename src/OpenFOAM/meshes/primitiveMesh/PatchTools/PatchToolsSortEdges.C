@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitivePatchTools.H"
+#include "PatchTools.H"
 #include "SortableList.H"
 #include "transform.H"
 

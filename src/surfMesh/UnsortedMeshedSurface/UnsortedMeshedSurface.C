@@ -26,7 +26,6 @@ License
 
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
-#include "PrimitivePatchTools.H"
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Time.H"

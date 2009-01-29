@@ -23,18 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::PrimitivePatchTools
+    Foam::PatchTools
 
 Description
-    A collect of tools for searching, sort PrimitivePatch information.
+    A collection of tools for searching, sorting PrimitivePatch information.
+
+    The class could also be extended to include more that just static methods.
 
 SourceFiles
-    PrimitivePatchTools.C
+    PatchTools.C
+    PatchToolsCheck.C
+    PatchToolsEdgeOwner.C
+    PatchToolsSearch.C
+    PatchToolsSortEdges.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PrimitivePatchTools_H
-#define PrimitivePatchTools_H
+#ifndef PatchTools_H
+#define PatchTools_H
 
 #include "PrimitivePatch.H"
 #include "HashSet.H"
@@ -45,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class PatchTools Declaration
+                         Class PatchTools Declaration
 \*---------------------------------------------------------------------------*/
 
 class PatchTools
@@ -171,7 +177,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PrimitivePatchTools.C"
+#   include "PatchTools.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

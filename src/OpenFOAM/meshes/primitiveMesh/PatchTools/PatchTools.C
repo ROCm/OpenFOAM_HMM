@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitivePatchTools.H"
+#include "PatchTools.H"
 
-#include "PrimitivePatchToolsCheck.C"
-#include "PrimitivePatchToolsEdgeOwner.C"
-#include "PrimitivePatchToolsSearch.C"
-#include "PrimitivePatchToolsSortEdges.C"
+#include "PatchToolsCheck.C"
+#include "PatchToolsEdgeOwner.C"
+#include "PatchToolsSearch.C"
+#include "PatchToolsSortEdges.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -37,7 +37,7 @@ SourceFiles
 #define BasicMeshedSurface_H
 
 #include "PrimitivePatch.H"
-#include "PrimitivePatchTools.H"
+#include "PatchTools.H"
 #include "pointField.H"
 #include "face.H"
 #include "triFace.H"
