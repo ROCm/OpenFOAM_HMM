@@ -86,9 +86,9 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-template<int nBits> class PackedList;
+template<unsigned nBits> class PackedList;
 
-// template<int nBits>
+// template<unsigned nBits>
 // Ostream& operator<<(Ostream&, const PackedList<nBits>&);
 
 
@@ -102,7 +102,7 @@ TemplateName(PackedList);
                          Class PackedList Declaration
 \*---------------------------------------------------------------------------*/
 
-template <int nBits=1>
+template<unsigned nBits=1>
 class PackedList
 :
     private List<unsigned int>

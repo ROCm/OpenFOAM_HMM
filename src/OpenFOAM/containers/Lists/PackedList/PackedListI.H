@@ -30,42 +30,42 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::max_bits()
 {
     return sizeof(StorageType)*CHAR_BIT - 1;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::max_value()
 {
     return (1 << nBits) - 1;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::packing()
 {
     return sizeof(StorageType)*CHAR_BIT / nBits;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::maskLower(unsigned offset)
 {
     return (1 << (nBits * offset)) - 1;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::label Foam::PackedList<nBits>::packedLength(const label nElem)
 {
     return (nElem + packing() - 1) / packing();
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::checkIndex(const label i) const
 {
     if (!size_)
@@ -85,7 +85,7 @@ inline void Foam::PackedList<nBits>::checkIndex(const label i) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList()
 :
     StorageList(),
@@ -93,7 +93,7 @@ inline Foam::PackedList<nBits>::PackedList()
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList(const label size)
 :
     StorageList(packedLength(size), 0u),
@@ -101,7 +101,7 @@ inline Foam::PackedList<nBits>::PackedList(const label size)
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 :
     StorageList(lst),
@@ -109,14 +109,14 @@ inline Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
 {
     transfer(lst());
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::autoPtr<Foam::PackedList<nBits> >
 Foam::PackedList<nBits>::clone() const
 {
@@ -128,7 +128,7 @@ Foam::PackedList<nBits>::clone() const
 
 // iteratorBase
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iteratorBase::iteratorBase()
 :
     list_(0),
@@ -137,7 +137,7 @@ inline Foam::PackedList<nBits>::iteratorBase::iteratorBase()
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iteratorBase::iteratorBase
 (
     const iteratorBase& iter
@@ -149,7 +149,7 @@ inline Foam::PackedList<nBits>::iteratorBase::iteratorBase
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iteratorBase::iteratorBase
 (
     const PackedList<nBits>* lst,
@@ -162,7 +162,7 @@ inline Foam::PackedList<nBits>::iteratorBase::iteratorBase
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int
 Foam::PackedList<nBits>::iteratorBase::get() const
 {
@@ -171,7 +171,7 @@ Foam::PackedList<nBits>::iteratorBase::get() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool
 Foam::PackedList<nBits>::iteratorBase::set(const unsigned int val)
 {
@@ -204,7 +204,7 @@ w            << " out-of-range 0 ... " << label(max_value())
 
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void
 Foam::PackedList<nBits>::iteratorBase::incr()
 {
@@ -217,7 +217,7 @@ Foam::PackedList<nBits>::iteratorBase::incr()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void
 Foam::PackedList<nBits>::iteratorBase::decr()
 {
@@ -230,7 +230,7 @@ Foam::PackedList<nBits>::iteratorBase::decr()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void
 Foam::PackedList<nBits>::iteratorBase::seek
 (
@@ -245,7 +245,7 @@ Foam::PackedList<nBits>::iteratorBase::seek
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool
 Foam::PackedList<nBits>::iteratorBase::valid() const
 {
@@ -254,7 +254,7 @@ Foam::PackedList<nBits>::iteratorBase::valid() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool
 Foam::PackedList<nBits>::iteratorBase::validate()
 {
@@ -276,7 +276,7 @@ Foam::PackedList<nBits>::iteratorBase::validate()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::iteratorBase::operator==
 (
     const iteratorBase& iter
@@ -286,7 +286,7 @@ inline bool Foam::PackedList<nBits>::iteratorBase::operator==
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::iteratorBase::operator!=
 (
     const iteratorBase& iter
@@ -296,7 +296,7 @@ inline bool Foam::PackedList<nBits>::iteratorBase::operator!=
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int
 Foam::PackedList<nBits>::iteratorBase::operator=(const iteratorBase& iter)
 {
@@ -306,7 +306,7 @@ Foam::PackedList<nBits>::iteratorBase::operator=(const iteratorBase& iter)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int
 Foam::PackedList<nBits>::iteratorBase::operator=(const unsigned int val)
 {
@@ -324,7 +324,7 @@ Foam::PackedList<nBits>::iteratorBase::operator=(const unsigned int val)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iteratorBase::operator
 unsigned int () const
 {
@@ -343,21 +343,21 @@ unsigned int () const
 
 // const_iterator, iterator
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iterator::iterator()
 :
     iteratorBase()
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::const_iterator::const_iterator()
 :
     iteratorBase()
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iterator::iterator
 (
     const iteratorBase& iter
@@ -369,7 +369,7 @@ inline Foam::PackedList<nBits>::iterator::iterator
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::const_iterator::const_iterator
 (
     const iteratorBase& iter
@@ -381,7 +381,7 @@ inline Foam::PackedList<nBits>::const_iterator::const_iterator
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::iterator::iterator
 (
     const PackedList<nBits>* lst,
@@ -392,7 +392,7 @@ inline Foam::PackedList<nBits>::iterator::iterator
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::const_iterator::const_iterator
 (
     const PackedList<nBits>* lst,
@@ -403,7 +403,7 @@ inline Foam::PackedList<nBits>::const_iterator::const_iterator
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::const_iterator::const_iterator
 (
     const iterator& iter
@@ -413,7 +413,7 @@ inline Foam::PackedList<nBits>::const_iterator::const_iterator
 {}
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator&
 Foam::PackedList<nBits>::iterator::operator=(const iteratorBase& iter)
 {
@@ -422,7 +422,7 @@ Foam::PackedList<nBits>::iterator::operator=(const iteratorBase& iter)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator&
 Foam::PackedList<nBits>::const_iterator::operator=(const iteratorBase& iter)
 {
@@ -431,7 +431,7 @@ Foam::PackedList<nBits>::const_iterator::operator=(const iteratorBase& iter)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator&
 Foam::PackedList<nBits>::iterator::operator++()
 {
@@ -440,7 +440,7 @@ Foam::PackedList<nBits>::iterator::operator++()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator&
 Foam::PackedList<nBits>::const_iterator::operator++()
 {
@@ -449,7 +449,7 @@ Foam::PackedList<nBits>::const_iterator::operator++()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator
 Foam::PackedList<nBits>::iterator::operator++(int)
 {
@@ -459,7 +459,7 @@ Foam::PackedList<nBits>::iterator::operator++(int)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator
 Foam::PackedList<nBits>::const_iterator::operator++(int)
 {
@@ -469,7 +469,7 @@ Foam::PackedList<nBits>::const_iterator::operator++(int)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator&
 Foam::PackedList<nBits>::iterator::operator--()
 {
@@ -478,7 +478,7 @@ Foam::PackedList<nBits>::iterator::operator--()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator&
 Foam::PackedList<nBits>::const_iterator::operator--()
 {
@@ -487,7 +487,7 @@ Foam::PackedList<nBits>::const_iterator::operator--()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator
 Foam::PackedList<nBits>::iterator::operator--(int)
 {
@@ -497,7 +497,7 @@ Foam::PackedList<nBits>::iterator::operator--(int)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator
 Foam::PackedList<nBits>::const_iterator::operator--(int)
 {
@@ -507,7 +507,7 @@ Foam::PackedList<nBits>::const_iterator::operator--(int)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iteratorBase&
 Foam::PackedList<nBits>::iterator::operator*()
 {
@@ -515,7 +515,7 @@ Foam::PackedList<nBits>::iterator::operator*()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iteratorBase&
 Foam::PackedList<nBits>::iterator::operator()()
 {
@@ -523,7 +523,7 @@ Foam::PackedList<nBits>::iterator::operator()()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int
 Foam::PackedList<nBits>::const_iterator::operator*() const
 {
@@ -531,7 +531,7 @@ Foam::PackedList<nBits>::const_iterator::operator*() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int
 Foam::PackedList<nBits>::const_iterator::operator()() const
 {
@@ -539,7 +539,7 @@ Foam::PackedList<nBits>::const_iterator::operator()() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator
 Foam::PackedList<nBits>::begin()
 {
@@ -547,7 +547,7 @@ Foam::PackedList<nBits>::begin()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator
 Foam::PackedList<nBits>::begin() const
 {
@@ -555,7 +555,7 @@ Foam::PackedList<nBits>::begin() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator
 Foam::PackedList<nBits>::cbegin() const
 {
@@ -563,7 +563,7 @@ Foam::PackedList<nBits>::cbegin() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iterator
 Foam::PackedList<nBits>::end()
 {
@@ -571,7 +571,7 @@ Foam::PackedList<nBits>::end()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator
 Foam::PackedList<nBits>::end() const
 {
@@ -579,7 +579,7 @@ Foam::PackedList<nBits>::end() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::const_iterator
 Foam::PackedList<nBits>::cend() const
 {
@@ -589,21 +589,21 @@ Foam::PackedList<nBits>::cend() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::label Foam::PackedList<nBits>::size() const
 {
     return size_;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::empty() const
 {
     return !size_;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::resize
 (
     const label nElem,
@@ -674,7 +674,7 @@ inline void Foam::PackedList<nBits>::resize
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::setSize
 (
     const label newSize,
@@ -686,14 +686,14 @@ inline void Foam::PackedList<nBits>::setSize
 
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::label Foam::PackedList<nBits>::capacity() const
 {
     return packing() * StorageList::size();
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::setCapacity(const label nElem)
 {
     StorageList::setSize(packedLength(nElem), 0u);
@@ -706,7 +706,7 @@ inline void Foam::PackedList<nBits>::setCapacity(const label nElem)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::reserve
 (
     const label nElem
@@ -722,14 +722,14 @@ inline void Foam::PackedList<nBits>::reserve
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::clear()
 {
     size_ = 0;
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::clearStorage()
 {
     StorageList::clear();
@@ -737,7 +737,7 @@ inline void Foam::PackedList<nBits>::clearStorage()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::shrink()
 {
     label len = packedLength(size_);
@@ -749,7 +749,7 @@ inline void Foam::PackedList<nBits>::shrink()
     }
 }
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::List<unsigned int>&
 Foam::PackedList<nBits>::storage()
 {
@@ -757,7 +757,7 @@ Foam::PackedList<nBits>::storage()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline const Foam::List<unsigned int>&
 Foam::PackedList<nBits>::storage() const
 {
@@ -765,7 +765,7 @@ Foam::PackedList<nBits>::storage() const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
 {
     size_ = lst.size_;
@@ -775,7 +775,7 @@ inline void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline Foam::Xfer< Foam::PackedList<nBits> >
 Foam::PackedList<nBits>::xfer()
 {
@@ -783,7 +783,7 @@ Foam::PackedList<nBits>::xfer()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::get(const label i) const
 {
 #   ifdef DEBUGList
@@ -794,7 +794,7 @@ inline unsigned int Foam::PackedList<nBits>::get(const label i) const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::operator[](const label i) const
 {
     if (i < size_)
@@ -808,7 +808,7 @@ inline unsigned int Foam::PackedList<nBits>::operator[](const label i) const
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::set
 (
     const label i,
@@ -831,7 +831,7 @@ inline bool Foam::PackedList<nBits>::set
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::append(const unsigned int val)
 {
     label elemI = size_;
@@ -842,7 +842,7 @@ inline void Foam::PackedList<nBits>::append(const unsigned int val)
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::remove()
 {
     if (!size_)
@@ -861,7 +861,7 @@ inline unsigned int Foam::PackedList<nBits>::remove()
 }
 
 
-template<int nBits>
+template<unsigned nBits>
 inline typename Foam::PackedList<nBits>::iteratorBase
 Foam::PackedList<nBits>::operator[](const label i)
 {
@@ -870,7 +870,7 @@ Foam::PackedList<nBits>::operator[](const label i)
 
 
 // specialization for nBits=1 isn't worth the bother
-template<int nBits>
+template<unsigned nBits>
 inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
 {
     if (val)
