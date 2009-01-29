@@ -223,7 +223,7 @@ public:
 
         // PackedList versions
 
-            template <int nBits, class CombineOp>
+            template <unsigned nBits, class CombineOp>
             static void syncFaceList
             (
                 const polyMesh& mesh,
@@ -231,14 +231,14 @@ public:
                 const CombineOp& cop
             );
 
-            template <int nBits>
+            template <unsigned nBits>
             static void swapFaceList
             (
                 const polyMesh& mesh,
                 PackedList<nBits>& faceValues
             );
 
-            template <int nBits, class CombineOp>
+            template <unsigned nBits, class CombineOp>
             static void syncPointList
             (
                 const polyMesh& mesh,
@@ -247,7 +247,7 @@ public:
                 const unsigned int nullValue
             );
 
-            template <int nBits, class CombineOp>
+            template <unsigned nBits, class CombineOp>
             static void syncEdgeList
             (
                 const polyMesh& mesh,

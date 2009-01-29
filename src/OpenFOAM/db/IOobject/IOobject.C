@@ -98,6 +98,37 @@ Foam::IOobject::IOobject
 }
 
 
+Foam::IOobject::IOobject
+(
+    const fileName& path,
+    const objectRegistry& registry,
+    readOption ro,
+    writeOption wo,
+    bool registerObject
+)
+:
+    name_(),
+    headerClassName_(typeName),
+    note_(),
+    instance_(),
+    local_(),
+    db_(registry),
+    rOpt_(ro),
+    wOpt_(wo),
+    registerObject_(registerObject),
+    objState_(GOOD)
+{
+    path.IOobjectComponents(instance_, local_, name_);
+
+    if (objectRegistry::debug)
+    {
+        Info<< "Constructing IOobject called " << name_
+            << " of type " << headerClassName_
+            << endl;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 Foam::IOobject::~IOobject()

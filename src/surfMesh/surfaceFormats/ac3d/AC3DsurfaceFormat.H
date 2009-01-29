@@ -31,7 +31,7 @@ Description
     http://www.inivis.com/ac3d/man/ac3dfileformat.html
 
 Note
-   The faces are already organized as patches.
+   The faces are already organized as regions.
    The output is always sorted by regions.
 
 SourceFiles

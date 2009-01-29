@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
     // Read point fields and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    pointMesh pMesh(mesh);
+    const pointMesh& pMesh = pointMesh::New(mesh);
 
     wordList pointScalarNames(objects.names(pointScalarField::typeName));
     PtrList<pointScalarField> pointScalarFlds(pointScalarNames.size());

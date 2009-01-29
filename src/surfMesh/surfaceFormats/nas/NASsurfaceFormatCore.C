@@ -49,7 +49,7 @@ Foam::scalar Foam::fileFormats::NASsurfaceFormatCore::parseNASCoord
         {
             exponent = -exponent;
         }
-        return mantissa*pow(10, exponent);
+        return mantissa * pow(10, exponent);
     }
     else
     {

@@ -36,11 +36,11 @@ SourceFiles
 #ifndef surfaceFormatsCore_H
 #define surfaceFormatsCore_H
 
-#include "surfPatchIdentifierList.H"
-#include "surfGroupList.H"
-#include "labelList.H"
 #include "Map.H"
 #include "HashSet.H"
+#include "labelList.H"
+#include "surfRegionList.H"
+#include "surfRegionIdentifierList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,6 +69,7 @@ public:
     static word meshSubDir;
 
     //- The file extension corresponding to 'native' surface format
+    //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
     static word nativeExt;
 
     // Static Member Functions
@@ -91,12 +92,12 @@ public:
         //- Name of UnsortedMeshedSurface directory to use.
         static fileName findMeshName(const Time&);
 
-        //- Determine the sort order from the region list.
-        //  Returns patch list and sets faceMap to indices within faceLst
-        static surfGroupList sortedPatchRegions
+        //- Determine the sort order from the region ids.
+        //  Returns region list and sets faceMap to indices within faceLst
+        static surfRegionList sortedRegionsById
         (
-            const UList<label>& regionLst,
-            const Map<word>& patchNames,
+            const UList<label>& regionIds,
+            const Map<word>& regionNames,
             labelList& faceMap
         );
 

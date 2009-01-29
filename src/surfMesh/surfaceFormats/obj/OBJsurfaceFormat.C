@@ -75,10 +75,10 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
 
-    // place faces without a group in patch0
+    // place faces without a group in region0
     label regionI = 0;
-    lookup.insert("patch0", regionI);
-    dynNames.append("patch0");
+    lookup.insert("region0", regionI);
+    dynNames.append("region0");
     dynSizes.append(0);
 
     while (is.good())
@@ -204,8 +204,8 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
     sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
 
-    // add patches, culling empty groups
-    this->addPatches(dynSizes, dynNames, true);
+    // add regions, culling empty ones
+    this->addRegions(dynSizes, dynNames, true);
     return true;
 }
 
@@ -218,18 +218,18 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 )
 {
     const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfRegion>& regionLst = surf.regions();
 
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), regionLst);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        const surfGroup& patch = patchLst[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        os << "g " << patch.name() << endl;
+        os << "g " << reg.name() << endl;
 
-        forAll(patch, patchFaceI)
+        forAll(reg, localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -255,19 +255,19 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
 
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), regionLst);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
         // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        os << "g " << patch.name() << endl;
+        os << "g " << reg.name() << endl;
 
-        forAll(patch, patchFaceI)
+        forAll(reg, localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 

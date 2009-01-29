@@ -63,7 +63,7 @@ protected:
         Ostream&,
         const pointField&,
         const label nFaces,
-        const List<surfGroup>&
+        const UList<surfRegion>&
     );
 
 };

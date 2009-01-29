@@ -37,7 +37,7 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
     Ostream& os,
     const pointField& pointLst,
     const Face& f,
-    const label patchI
+    const label regionI
 )
 {
     // simple triangulation about f[0].
@@ -54,7 +54,7 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
             << p1.x() << ' ' << p1.y() << ' ' << p1.z() << ' '
             << p2.x() << ' ' << p2.y() << ' ' << p2.z() << ' '
             // region as colour
-            << "0x" << hex << patchI << dec << endl;
+            << "0x" << hex << regionI << dec << endl;
     }
 }
 
@@ -89,10 +89,10 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 
     // retrieve the original region information
     List<label> sizes(reader.sizes().xfer());
-    List<label> regions(reader.regions().xfer());
+    List<label> regionIds(reader.regionIds().xfer());
 
     // generate the (sorted) faces
-    List<Face> faceLst(regions.size());
+    List<Face> faceLst(regionIds.size());
 
     if (reader.sorted())
     {
@@ -108,7 +108,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         // unsorted - determine the sorted order:
         // avoid SortableList since we discard the main list anyhow
         List<label> faceMap;
-        sortedOrder(regions, faceMap);
+        sortedOrder(regionIds, faceMap);
 
         // generate sorted faces
         forAll(faceMap, faceI)
@@ -117,12 +117,12 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
             faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
         }
     }
-    regions.clear();
+    regionIds.clear();
 
     // transfer:
     this->storedFaces().transfer(faceLst);
 
-    this->addPatches(sizes);
+    this->addRegions(sizes);
     this->stitchFaces(SMALL);
     return true;
 }
@@ -137,15 +137,15 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 {
     const pointField& pointLst = surf.points();
     const List<Face>& faceLst  = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfRegion>& regionLst = surf.regions();
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(regionLst[regionI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
-            writeShell(os, pointLst, f, patchI);
+            writeShell(os, pointLst, f, regionI);
         }
     }
 }
@@ -163,7 +163,7 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 
     bool doSort = false;
     // a single region needs no sorting
-    if (surf.patches().size() == 1)
+    if (surf.regionToc().size() == 1)
     {
         doSort = false;
     }
@@ -171,25 +171,25 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
     if (doSort)
     {
         labelList faceMap;
-        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+        List<surfRegion> regionLst = surf.sortedRegions(faceMap);
 
         label faceIndex = 0;
-        forAll(patchLst, patchI)
+        forAll(regionLst, regionI)
         {
-            forAll(patchLst[patchI], patchFaceI)
+            forAll(regionLst[regionI], localFaceI)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, pointLst, f, patchI);
+                writeShell(os, pointLst, f, regionI);
             }
         }
     }
     else
     {
-        const List<label>& regionLst  = surf.regions();
+        const List<label>& regionIds  = surf.regionIds();
 
         forAll(faceLst, faceI)
         {
-            writeShell(os, pointLst, faceLst[faceI], regionLst[faceI]);
+            writeShell(os, pointLst, faceLst[faceI], regionIds[faceI]);
         }
     }
 }

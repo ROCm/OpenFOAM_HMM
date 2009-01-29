@@ -38,8 +38,10 @@ SourceFiles
 #ifndef sampledIsoSurface_H
 #define sampledIsoSurface_H
 
-#include "sampledSurface.H"
 #include "isoSurface.H"
+#include "sampledSurface.H"
+#include "ZoneIDs.H"
+#include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,14 +64,20 @@ class sampledIsoSurface
         //- iso value
         const scalar isoVal_;
 
+        //- Merge tolerance
+        const scalar mergeTol_;
+
         //- Whether to coarse
         const Switch regularise_;
 
         //- Whether to recalculate cell values as average of point values
         const Switch average_;
 
-        //- zone name (if restricted to zones)
-        word zoneName_;
+        //- zone name/index (if restricted to zones)
+        mutable cellZoneID zoneID_;
+
+        //- for zones: patch to put exposed faces into
+        mutable word exposedPatchName_;
 
         mutable autoPtr<isoSurface> surfPtr_;
 
@@ -90,12 +98,31 @@ class sampledIsoSurface
             mutable autoPtr<pointScalarField> storedPointFieldPtr_;
             mutable const pointScalarField* pointFieldPtr_;
 
+            // And on subsetted mesh
+
+                //- Cached submesh
+                mutable autoPtr<fvMeshSubset> subMeshPtr_;
+
+                //- Cached volfield
+                mutable autoPtr<volScalarField> storedVolSubFieldPtr_;
+                mutable const volScalarField* volSubFieldPtr_;
+
+                //- Cached pointfield
+                mutable autoPtr<pointScalarField> storedPointSubFieldPtr_;
+                mutable const pointScalarField* pointSubFieldPtr_;
+
 
 
     // Private Member Functions
 
         //- Get fields needed to recreate iso surface.
         void getIsoFields() const;
+
+        tmp<volScalarField> average
+        (
+            const fvMesh&,
+            const pointScalarField&
+        ) const;
 
         //- Create iso surface (if time has changed)
         //  Do nothing (and return false) if no update was needed

@@ -29,7 +29,7 @@ Description
     Nastran surface reader.
 
     - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
-      to obtain patch names.
+      to obtain region names.
     - Handles Nastran short and long formats, but not free format.
     - Properly handles the Nastran compact floating point notation: \n
     @verbatim
