@@ -49,7 +49,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SpalartAllmaras Declaration
+                       Class SpalartAllmaras Declaration
 \*---------------------------------------------------------------------------*/
 
 class SpalartAllmaras
@@ -73,6 +73,9 @@ class SpalartAllmaras
 
 
     // Private member functions
+
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields();
 
         tmp<volScalarField> fv1() const;
         tmp<volScalarField> fv2() const;

@@ -45,6 +45,13 @@ addToRunTimeSelectionTable(LESModel, SpalartAllmaras, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+void SpalartAllmaras::updateSubGridScaleFields()
+{
+    muSgs_.internalField() = rho()*fv1()*nuTilda_.internalField();
+    muSgs_.correctBoundaryConditions();
+}
+
+
 tmp<volScalarField> SpalartAllmaras::fv1() const
 {
     volScalarField chi3 = pow3(nuTilda_/(mu()/rho()));
@@ -225,6 +232,8 @@ SpalartAllmaras::SpalartAllmaras
     )
 
 {
+    updateSubGridScaleFields();
+
     printCoeffs();
 }
 
@@ -288,10 +297,9 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& tgradU)
     );
 
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
-
     nuTilda_.correctBoundaryConditions();
-    muSgs_.internalField() = rho()*fv1()*nuTilda_.internalField();
-    muSgs_.correctBoundaryConditions();
+
+    updateSubGridScaleFields();
 }
 
 
