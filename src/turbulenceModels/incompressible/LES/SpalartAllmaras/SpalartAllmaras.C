@@ -41,6 +41,15 @@ namespace LESModels
 defineTypeNameAndDebug(SpalartAllmaras, 0);
 addToRunTimeSelectionTable(LESModel, SpalartAllmaras, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void SpalartAllmaras::updateSubGridScaleFields()
+{
+    nuSgs_.internalField() = fv1()*nuTilda_.internalField();
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<volScalarField> SpalartAllmaras::fv1() const
@@ -266,7 +275,10 @@ SpalartAllmaras::SpalartAllmaras
         ),
         mesh_
     )
-{}
+{
+    updateSubGridScaleFields();
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -306,8 +318,7 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
-    nuSgs_.internalField() = fv1()*nuTilda_.internalField();
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields();
 }
 
 
