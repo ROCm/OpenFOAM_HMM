@@ -23,18 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::CentredFitData
+    Foam::UpwindFitData
 
 Description
-    Data for the quadratic fit correction interpolation scheme
+    Data for the quadratic fit correction interpolation scheme to be used with
+    upwind biased stencil
 
 SourceFiles
-    CentredFitData.C
+    UpwindFitData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CentredFitData_H
-#define CentredFitData_H
+#ifndef UpwindFitData_H
+#define UpwindFitData_H
 
 #include "FitData.H"
 
@@ -43,22 +44,26 @@ SourceFiles
 namespace Foam
 {
 
-class extendedCentredStencil;
+class extendedUpwindStencil;
 
 /*---------------------------------------------------------------------------*\
-                    Class CentredFitData Declaration
+                    Class UpwindFitData Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Polynomial>
-class CentredFitData
+class UpwindFitData
 :
-    public FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>
+    public FitData<UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial>
 {
     // Private data
 
-        //- For each cell in the mesh store the values which multiply the
-        //  values of the stencil to obtain the gradient for each direction
-        List<scalarList> coeffs_;
+        //- For each face of the mesh store the coefficients to multiply the
+        // stencil cell values by if the flow is from the owner
+        List<scalarList> owncoeffs_;
+
+        //- For each face of the mesh store the coefficients to multiply the
+        // stencil cell values by if the flow is from the neighbour
+        List<scalarList> neicoeffs_;
 
 
     // Private member functions
@@ -70,32 +75,38 @@ class CentredFitData
 
 public:
 
-    TypeName("CentredFitData");
+    TypeName("UpwindFitData");
 
 
     // Constructors
 
         //- Construct from components
-        CentredFitData
+        UpwindFitData
         (
             const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
+            const extendedUpwindStencil& stencil,
             const scalar linearLimitFactor,
             const scalar centralWeight
         );
 
 
     //- Destructor
-    virtual ~CentredFitData()
+    virtual ~UpwindFitData()
     {}
 
 
     // Member functions
 
-        //- Return reference to fit coefficients
-        const List<scalarList>& coeffs() const
+        //- Return reference to owner fit coefficients
+        const List<scalarList>& owncoeffs() const
         {
-            return coeffs_;
+            return owncoeffs_;
+        }
+
+        //- Return reference to neighbour fit coefficients
+        const List<scalarList>& neicoeffs() const
+        {
+            return neicoeffs_;
         }
 };
 
@@ -107,7 +118,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "CentredFitData.C"
+#   include "UpwindFitData.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

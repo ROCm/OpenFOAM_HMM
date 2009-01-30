@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,79 +23,73 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::CentredFitData
+    Foam::quadraticUpwindFitPolynomial
 
 Description
-    Data for the quadratic fit correction interpolation scheme
+    Quadratic polynomial for upwind biased interpolation fitting.
 
-SourceFiles
-    CentredFitData.C
+    Can be used with the UpwindFit scheme to crate a quadratic surface
+    interpolation scheme
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CentredFitData_H
-#define CentredFitData_H
+#ifndef quadraticUpwindFitPolynomial_H
+#define quadraticUpwindFitPolynomial_H
 
-#include "FitData.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class extendedCentredStencil;
-
 /*---------------------------------------------------------------------------*\
-                    Class CentredFitData Declaration
+                 Class quadraticUpwindFitPolynomial Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Polynomial>
-class CentredFitData
-:
-    public FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>
+class quadraticUpwindFitPolynomial
 {
-    // Private data
-
-        //- For each cell in the mesh store the values which multiply the
-        //  values of the stencil to obtain the gradient for each direction
-        List<scalarList> coeffs_;
-
-
-    // Private member functions
-
-        //- Calculate the fit for the all the mesh faces
-        //  and set the coefficients
-        void calcFit();
-
-
 public:
-
-    TypeName("CentredFitData");
-
-
-    // Constructors
-
-        //- Construct from components
-        CentredFitData
-        (
-            const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
-            const scalar linearLimitFactor,
-            const scalar centralWeight
-        );
-
-
-    //- Destructor
-    virtual ~CentredFitData()
-    {}
-
 
     // Member functions
 
-        //- Return reference to fit coefficients
-        const List<scalarList>& coeffs() const
+        static label nTerms(const direction dim)
         {
-            return coeffs_;
+            return
+            (
+                dim == 1 ? 3 :
+                dim == 2 ? 6 :
+                dim == 3 ? 9 : 0
+            );
+        }
+
+        static void addCoeffs
+        (
+            scalar* coeffs,
+            const vector& d,
+            const scalar weight,
+            const direction dim
+        )
+        {
+            register label curIdx = 0;
+
+            coeffs[curIdx++] = weight;
+            coeffs[curIdx++] = weight*d.x();
+            coeffs[curIdx++] = weight*sqr(d.x());
+
+            if (dim >= 2)
+            {
+                coeffs[curIdx++] = weight*d.y();
+                coeffs[curIdx++] = weight*d.x()*d.y();
+                //coeffs[curIdx++] = weight*d.x()*sqr(d.y());
+                coeffs[curIdx++] = weight*sqr(d.y());
+            }
+            if (dim == 3)
+            {
+                coeffs[curIdx++] = weight*d.z();
+                coeffs[curIdx++] = weight*d.x()*d.z();
+                coeffs[curIdx++] = weight*sqr(d.z());
+            }
         }
 };
 
@@ -103,12 +97,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "CentredFitData.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
