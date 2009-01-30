@@ -108,7 +108,7 @@ Foam::extendedUpwindStencil::weightedSum
 
             forAll(pSfCorr, i)
             {
-                if (phi[faceI] > 0)
+                if (phi.boundaryField()[patchi][i] > 0)
                 {
                     // Flux out of owner. Use upwind (= owner side) stencil.
                     const List<Type>& stField = ownFld[faceI];
