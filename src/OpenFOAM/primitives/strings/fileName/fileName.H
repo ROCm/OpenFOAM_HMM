@@ -163,15 +163,6 @@ public:
             //- Return a single component of the path
             word component(const size_type, const char delimiter='/') const;
 
-            //- Return path as instance, local, name components for IOobject
-            bool IOobjectComponents
-            (
-                fileName& instance,
-                fileName& local,
-                word& name
-            ) const;
-
-
     // Member operators
 
         // Assignment
