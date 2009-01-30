@@ -26,28 +26,28 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfGroup.H"
+#include "surfRegion.H"
 #include "dictionary.H"
 #include "word.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::surfGroup, 0);
+defineTypeNameAndDebug(Foam::surfRegion, 0);
 
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfGroup::surfGroup()
+Foam::surfRegion::surfRegion()
 :
-    surfPatchIdentifier(),
+    surfRegionIdentifier(),
     size_(0),
     start_(0)
 {}
 
 
 
-Foam::surfGroup::surfGroup
+Foam::surfRegion::surfRegion
 (
     const word& name,
     const label size,
@@ -56,68 +56,68 @@ Foam::surfGroup::surfGroup
     const word& geometricType
 )
 :
-    surfPatchIdentifier(name, index, geometricType),
+    surfRegionIdentifier(name, index, geometricType),
     size_(size),
     start_(start)
 {}
 
 
-Foam::surfGroup::surfGroup(Istream& is, const label index)
+Foam::surfRegion::surfRegion(Istream& is, const label index)
 :
-    surfPatchIdentifier(),
+    surfRegionIdentifier(),
     size_(0),
     start_(0)
 {
     word name(is);
     dictionary dict(is);
 
-    operator=(surfGroup(name, dict, index));
+    operator=(surfRegion(name, dict, index));
 }
 
 
-Foam::surfGroup::surfGroup
+Foam::surfRegion::surfRegion
 (
     const word& name,
     const dictionary& dict,
     const label index
 )
 :
-    surfPatchIdentifier(name, dict, index),
+    surfRegionIdentifier(name, dict, index),
     size_(readLabel(dict.lookup("nFaces"))),
     start_(readLabel(dict.lookup("startFace")))
 {}
 
 
-Foam::surfGroup::surfGroup(const surfGroup& p)
+Foam::surfRegion::surfRegion(const surfRegion& reg)
 :
-    surfPatchIdentifier(p, p.index()),
-    size_(p.size()),
-    start_(p.start())
+    surfRegionIdentifier(reg, reg.index()),
+    size_(reg.size()),
+    start_(reg.start())
 {}
 
 
-Foam::surfGroup::surfGroup(const surfGroup& p, const label index)
+Foam::surfRegion::surfRegion(const surfRegion& reg, const label index)
 :
-    surfPatchIdentifier(p, index),
-    size_(p.size()),
-    start_(p.start())
+    surfRegionIdentifier(reg, index),
+    size_(reg.size()),
+    start_(reg.start())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfGroup::write(Ostream& os) const
+void Foam::surfRegion::write(Ostream& os) const
 {
     writeDict(os);
 }
 
 
-void Foam::surfGroup::writeDict(Ostream& os) const
+void Foam::surfRegion::writeDict(Ostream& os) const
 {
     os  << indent << name() << nl
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
 
-    surfPatchIdentifier::write(os);
+    surfRegionIdentifier::write(os);
     os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
     os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
 
@@ -127,38 +127,38 @@ void Foam::surfGroup::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool Foam::surfGroup::operator!=(const surfGroup& p) const
+bool Foam::surfRegion::operator!=(const surfRegion& reg) const
 {
-    return !(*this == p);
+    return !(*this == reg);
 }
 
 
-bool Foam::surfGroup::operator==(const surfGroup& p) const
+bool Foam::surfRegion::operator==(const surfRegion& reg) const
 {
     return
     (
-        (geometricType() == p.geometricType())
-     && (size() == p.size())
-     && (start() == p.start())
+        (geometricType() == reg.geometricType())
+     && (size() == reg.size())
+     && (start() == reg.start())
     );
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, surfGroup& p)
+Foam::Istream& Foam::operator>>(Istream& is, surfRegion& reg)
 {
-    p = surfGroup(is, 0);
+    reg = surfRegion(is, 0);
 
-    is.check("Istream& operator>>(Istream&, surfGroup&)");
+    is.check("Istream& operator>>(Istream&, surfRegion&)");
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfGroup& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfRegion& reg)
 {
-    p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const surfGroup& p");
+    reg.write(os);
+    os.check("Ostream& operator<<(Ostream&, const surfRegion&");
     return os;
 }
 

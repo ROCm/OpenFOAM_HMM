@@ -26,6 +26,7 @@ License
 
 #include "fileName.H"
 #include "wordList.H"
+#include "DynamicList.H"
 #include "debug.H"
 #include "OSspecific.H"
 
@@ -47,6 +48,30 @@ Foam::fileName::fileName(const wordList& lst)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName::Type Foam::fileName::type() const
+{
+    return ::Foam::type(*this);
+}
+
+
+bool Foam::fileName::exists() const
+{
+    return ::Foam::exists(*this);
+}
+
+
+bool Foam::fileName::isDir() const
+{
+    return ::Foam::dir(*this);
+}
+
+
+bool Foam::fileName::isFile() const
+{
+    return ::Foam::file(*this);
+}
+
 
 //  Return file name (part beyond last /)
 //
@@ -93,13 +118,13 @@ Foam::fileName Foam::fileName::path() const
     {
         return ".";
     }
-    else if (i == 0)
+    else if (i)
     {
-        return "/";
+        return substr(0, i);
     }
     else
     {
-        return substr(0, i);
+        return "/";
     }
 }
 
@@ -145,28 +170,22 @@ Foam::word Foam::fileName::ext() const
 //    -----           ------
 //    "foo"           1("foo")
 //    "/foo"          1("foo")
-//    "foo/bar"       2("foo", "foo")
-//    "/foo/bar"      2("foo", "foo")
+//    "foo/bar"       2("foo", "bar")
+//    "/foo/bar"      2("foo", "bar")
 //    "/foo/bar/"     2("foo", "bar")
 //
 Foam::wordList Foam::fileName::components(const char delimiter) const
 {
-    wordList wrdList(20);
+    DynamicList<word> wrdList(20);
 
     size_type start=0, end=0;
-    label nWords=0;
 
     while ((end = find(delimiter, start)) != npos)
     {
         // avoid empty element (caused by doubled slashes)
         if (start < end)
         {
-            wrdList[nWords++] = substr(start, end-start);
-
-            if (nWords == wrdList.size())
-            {
-                wrdList.setSize(2*wrdList.size());
-            }
+            wrdList.append(substr(start, end-start));
         }
         start = end + 1;
     }
@@ -174,12 +193,11 @@ Foam::wordList Foam::fileName::components(const char delimiter) const
     // avoid empty trailing element
     if (start < size())
     {
-        wrdList[nWords++] = substr(start, npos);
+        wrdList.append(substr(start, npos));
     }
 
-    wrdList.setSize(nWords);
-
-    return wrdList;
+    // transfer to wordList
+    return wordList(wrdList.xfer());
 }
 
 
@@ -194,10 +212,92 @@ Foam::word Foam::fileName::component
 }
 
 
-Foam::fileName::Type Foam::fileName::type() const
+
+// Return components following the IOobject requirements
+//
+//  behaviour
+//    input               IOobject(instance, local, name)
+//    -----               ------
+//    "foo"               ("", "", "foo")
+//    "foo/bar"           ("foo", "", "bar")
+//    "/XXX"              ERROR - no absolute path
+//    "foo/bar/"          ERROR - no name
+//    "foo/xxx/bar"       ("foo", "xxx", "bar")
+//    "foo/xxx/yyy/bar"   ("foo", "xxx/yyy", "bar")
+bool Foam::fileName::IOobjectComponents
+(
+    fileName& instance,
+    fileName& local,
+    word& name
+)
+const
 {
-    return ::Foam::type(*this);
+    instance.clear();
+    local.clear();
+    name.clear();
+
+    // called with directory
+    if (::Foam::dir(*this))
+    {
+        std::cerr
+            << "fileName::IOobjectComponents() called with directory: "
+            << this->c_str() << std::endl;
+        std::abort();
+
+        return false;
+    }
+
+    size_type first = find('/');
+
+    if (first == 0)
+    {
+        // called with absolute path
+        std::cerr
+            << "fileName::IOobjectComponents() called with absolute path: "
+            << this->c_str() << std::endl;
+        std::abort();
+
+        return false;
+    }
+
+    if (first == npos)
+    {
+        // no '/' found - no instance or local
+
+        // check afterwards
+        name.string::operator=(*this);
+    }
+    else
+    {
+        instance = substr(0, first);
+
+        size_type last = rfind('/');
+        if (last > first)
+        {
+            // with local
+            local = substr(first+1, last-first-1);
+        }
+
+        // check afterwards
+        name.string::operator=(substr(last+1));
+    }
+
+
+    // check for valid (and stripped) name, regardless of the debug level
+    if (name.empty() || string::stripInvalid<word>(name))
+    {
+        std::cerr
+            << "fileName::IOobjectComponents() has invalid word for name: "
+            << name.c_str() << "\nwhile processing  "
+            << this->c_str() << std::endl;
+        std::abort();
+
+        return false;
+    }
+
+    return true;
 }
+
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

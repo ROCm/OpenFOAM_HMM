@@ -27,6 +27,7 @@ License
 #include "BasicMeshedSurface.H"
 #include "boundBox.H"
 #include "mergePoints.H"
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
@@ -162,7 +163,7 @@ void Foam::BasicMeshedSurface<Face>::cleanup(const bool verbose)
     stitchFaces(SMALL, verbose);
 
     checkFaces(verbose);
-    this->checkEdges(verbose);
+    this->checkTopology(verbose);
 }
 
 

@@ -56,6 +56,7 @@ Note
 #include "Time.H"
 #include "polyMesh.H"
 #include "triSurface.H"
+#include "PackedBoolList.H"
 
 #include "MeshedSurfaces.H"
 #include "UnsortedMeshedSurfaces.H"
@@ -115,7 +116,7 @@ int main(int argc, char *argv[])
         if (args.options().found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
-            surf.checkOrientation(true);
+            PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
         if (args.options().found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
-            surf.checkOrientation(true);
+            PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
@@ -192,7 +193,7 @@ int main(int argc, char *argv[])
         if (args.options().found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
-            surf.checkOrientation(true);
+            PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
@@ -230,7 +231,7 @@ int main(int argc, char *argv[])
         if (args.options().found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
-            surf.checkOrientation(true);
+            PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 

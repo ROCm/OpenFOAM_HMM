@@ -193,6 +193,16 @@ public:
             bool registerObject=true
         );
 
+        //- Construct from path, registry, io options
+        IOobject
+        (
+            const fileName& path,
+            const objectRegistry& registry,
+            readOption r=NO_READ,
+            writeOption w=NO_WRITE,
+            bool registerObject=true
+        );
+
         //- Clone
         Foam::autoPtr<IOobject> clone() const
         {

@@ -70,7 +70,7 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
     const pointField& pointLst,
     const Face& f,
     const vector& norm,
-    const label patchI
+    const label regionI
 )
 {
     // simple triangulation about f[0].
@@ -86,7 +86,7 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
             p0,
             pointLst[f[fp1]],
             pointLst[f[fp2]],
-            patchI
+            regionI
         );
 
         stlTri.write(os);
@@ -104,22 +104,22 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
 {
     const pointField& pointLst = surf.points();
     const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfRegion>& regionLst = surf.regions();
     const vectorField& normLst = surf.faceNormals();
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
         // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        os << "solid " << patch.name() << endl;
-        forAll(patch, patchFaceI)
+        os << "solid " << reg.name() << endl;
+        forAll(reg, localFaceI)
         {
             const label faceI = faceIndex++;
             writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
         }
-        os << "endsolid " << patch.name() << endl;
+        os << "endsolid " << reg.name() << endl;
     }
 }
 
@@ -136,34 +136,34 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
     const List<Face>& faceLst  = surf.faces();
     const vectorField& normLst = surf.faceNormals();
 
-    if (surf.patches().size() == 1)
+    if (surf.regionToc().size() == 1)
     {
         // a single region - we can skip sorting
-        os << "solid " << surf.patches()[0].name() << endl;
+        os << "solid " << surf.regionToc()[0].name() << endl;
         forAll(faceLst, faceI)
         {
             writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
         }
-        os << "endsolid " << surf.patches()[0].name() << endl;
+        os << "endsolid " << surf.regionToc()[0].name() << endl;
     }
    else
    {
         labelList faceMap;
-        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+        List<surfRegion> regionLst = surf.sortedRegions(faceMap);
 
         label faceIndex = 0;
-        forAll(patchLst, patchI)
+        forAll(regionLst, regionI)
         {
             // Print all faces belonging to this region
-            const surfGroup& patch = patchLst[patchI];
+            const surfRegion& reg = regionLst[regionI];
 
-            os << "solid " << patch.name() << endl;
-            forAll(patch, patchFaceI)
+            os << "solid " << reg.name() << endl;
+            forAll(reg, localFaceI)
             {
                 const label faceI = faceMap[faceIndex++];
                 writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
             }
-            os << "endsolid " << patch.name() << endl;
+            os << "endsolid " << reg.name() << endl;
         }
    }
 }
@@ -177,10 +177,10 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     const MeshedSurface<Face>& surf
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
+    const pointField&  pointLst = surf.points();
+    const List<Face>&  faceLst  = surf.faces();
     const vectorField& normLst = surf.faceNormals();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfRegion>& regionLst = surf.regions();
 
     unsigned int nTris = 0;
     if (surf.isTri())
@@ -200,9 +200,9 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(regionLst[regionI], regionFaceI)
         {
             writeShell
             (
@@ -210,7 +210,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
                 pointLst,
                 faceLst[faceIndex],
                 normLst[faceIndex],
-                patchI
+                regionI
             );
 
             ++faceIndex;
@@ -227,9 +227,9 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    const pointField& pointLst = surf.points();
+    const pointField&  pointLst = surf.points();
     const List<Face>&  faceLst = surf.faces();
-    const List<label>& regionLst = surf.regions();
+    const List<label>& regionIds = surf.regionIds();
     const vectorField& normLst = surf.faceNormals();
 
     unsigned int nTris = 0;
@@ -258,7 +258,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
             pointLst,
             faceLst[faceI],
             normLst[faceI],
-            regionLst[faceI]
+            regionIds[faceI]
         );
     }
 }
@@ -295,10 +295,10 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     // retrieve the original region information
     List<word>  names(reader.names().xfer());
     List<label> sizes(reader.sizes().xfer());
-    List<label> regions(reader.regions().xfer());
+    List<label> regionIds(reader.regionIds().xfer());
 
     // generate the (sorted) faces
-    List<Face> faceLst(regions.size());
+    List<Face> faceLst(regionIds.size());
 
     if (reader.sorted())
     {
@@ -314,7 +314,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
         // unsorted - determine the sorted order:
         // avoid SortableList since we discard the main list anyhow
         List<label> faceMap;
-        sortedOrder(regions, faceMap);
+        sortedOrder(regionIds, faceMap);
 
         // generate sorted faces
         forAll(faceMap, faceI)
@@ -323,18 +323,18 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
             faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
         }
     }
-    regions.clear();
+    regionIds.clear();
 
     // transfer:
     this->storedFaces().transfer(faceLst);
 
     if (names.size())
     {
-        this->addPatches(sizes, names);
+        this->addRegions(sizes, names);
     }
     else
     {
-        this->addPatches(sizes);
+        this->addRegions(sizes);
     }
 
     this->stitchFaces(SMALL);

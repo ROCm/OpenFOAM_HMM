@@ -79,7 +79,7 @@ class STLsurfaceFormat
             const pointField&,
             const Face&,
             const vector&,
-            const label patchI
+            const label regionI
         );
 
 

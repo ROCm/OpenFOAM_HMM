@@ -24,14 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfPatchIdentifier.H"
+#include "surfRegionIdentifier.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfPatchIdentifier::surfPatchIdentifier()
+Foam::surfRegionIdentifier::surfRegionIdentifier()
 :
     name_(word::null),
     boundaryIndex_(0),
@@ -39,7 +39,7 @@ Foam::surfPatchIdentifier::surfPatchIdentifier()
 {}
 
 
-Foam::surfPatchIdentifier::surfPatchIdentifier
+Foam::surfRegionIdentifier::surfRegionIdentifier
 (
     const word& name,
     const label index,
@@ -52,7 +52,7 @@ Foam::surfPatchIdentifier::surfPatchIdentifier
 {}
 
 
-Foam::surfPatchIdentifier::surfPatchIdentifier
+Foam::surfRegionIdentifier::surfRegionIdentifier
 (
     const word& name,
     const dictionary& dict,
@@ -66,9 +66,9 @@ Foam::surfPatchIdentifier::surfPatchIdentifier
 }
 
 
-Foam::surfPatchIdentifier::surfPatchIdentifier
+Foam::surfRegionIdentifier::surfRegionIdentifier
 (
-    const surfPatchIdentifier& p,
+    const surfRegionIdentifier& p,
     const label index
 )
 :
@@ -79,14 +79,14 @@ Foam::surfPatchIdentifier::surfPatchIdentifier
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfPatchIdentifier::~surfPatchIdentifier()
+Foam::surfRegionIdentifier::~surfRegionIdentifier()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void Foam::surfPatchIdentifier::write(Ostream& os) const
+void Foam::surfRegionIdentifier::write(Ostream& os) const
 {
     if (geometricType_.size())
     {
@@ -98,18 +98,18 @@ void Foam::surfPatchIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// bool Foam::surfPatchIdentifier::operator!=
+// bool Foam::surfRegionIdentifier::operator!=
 // (
-//     const surfPatchIdentifier& p
+//     const surfRegionIdentifier& p
 // ) const
 // {
 //     return !(*this == p);
 // }
 //
 //
-// bool Foam::surfPatchIdentifier::operator==
+// bool Foam::surfRegionIdentifier::operator==
 // (
-//     const surfPatchIdentifier& p
+//     const surfRegionIdentifier& p
 // ) const
 // {
 //     return geometricType() == p.geometricType() && name() == p.name();
@@ -118,7 +118,7 @@ void Foam::surfPatchIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// Foam::Istream& Foam::operator>>(Istream& is, surfPatchIdentifier& p)
+// Foam::Istream& Foam::operator>>(Istream& is, surfRegionIdentifier& p)
 // {
 //     is >> p.name_ >> p.geometricType_;
 //
@@ -126,12 +126,12 @@ void Foam::surfPatchIdentifier::write(Ostream& os) const
 // }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfPatchIdentifier& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfRegionIdentifier& p)
 {
     p.write(os);
     os.check
     (
-        "Ostream& operator<<(Ostream&, const surfPatchIdentifier&)"
+        "Ostream& operator<<(Ostream&, const surfRegionIdentifier&)"
     );
     return os;
 }

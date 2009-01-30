@@ -52,6 +52,13 @@ Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& ht)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
+inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
+{
+    return found(key);
+}
+
+
+template<class Key, class Hash>
 bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 {
     // Are all lhs elements in rhs?

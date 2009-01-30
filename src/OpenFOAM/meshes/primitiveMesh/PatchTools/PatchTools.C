@@ -22,34 +22,16 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::surfPatchIdentifierList
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfPatchIdentifierList_H
-#define surfPatchIdentifierList_H
+#include "PatchTools.H"
 
-#include "surfPatchIdentifier.H"
-#include "List.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "PatchToolsCheck.C"
+#include "PatchToolsEdgeOwner.C"
+#include "PatchToolsSearch.C"
+#include "PatchToolsSortEdges.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef List<surfPatchIdentifier>  surfPatchIdentifierList;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

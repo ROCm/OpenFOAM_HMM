@@ -129,6 +129,20 @@ public:
         inline static bool valid(char);
 
 
+        // Interogation
+
+            //- Return the file type: FILE, DIRECTORY or UNDEFINED
+            Type type() const;
+
+            //- Does it exist (as FILE or DIRECTORY) in the file system?
+            bool exists() const;
+
+            //- Does it exist as DIRECTORY in the file system?
+            bool isDir() const;
+
+            //- Does it exist as FILE in the file system?
+            bool isFile() const;
+
         // Decomposition
 
             //- Return file name (part beyond last /)
@@ -146,14 +160,16 @@ public:
             //- Return path components as wordList
             wordList components(const char delimiter='/') const;
 
-            //- Return a component of the path
+            //- Return a single component of the path
             word component(const size_type, const char delimiter='/') const;
 
-
-        // Interogation
-
-            //- Return file type
-            Type type() const;
+            //- Return path as instance, local, name components for IOobject
+            bool IOobjectComponents
+            (
+                fileName& instance,
+                fileName& local,
+                word& name
+            ) const;
 
 
     // Member operators
