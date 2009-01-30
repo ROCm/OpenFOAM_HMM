@@ -23,80 +23,117 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::CentredFitData
+    Foam::FitData
 
 Description
-    Data for the quadratic fit correction interpolation scheme
+    Data for the upwinded and centred polynomial fit interpolation schemes
 
 SourceFiles
-    CentredFitData.C
+    FitData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CentredFitData_H
-#define CentredFitData_H
+#ifndef FitData_H
+#define FitData_H
 
-#include "FitData.H"
+#include "MeshObject.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class extendedCentredStencil;
-
 /*---------------------------------------------------------------------------*\
-                    Class CentredFitData Declaration
+                    Class FitData Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Polynomial>
-class CentredFitData
+template<class FitDataType, class ExtendedStencil, class Polynomial>
+class FitData
 :
-    public FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>
+    public MeshObject<fvMesh, FitDataType>
 {
     // Private data
 
-        //- For each cell in the mesh store the values which multiply the
-        //  values of the stencil to obtain the gradient for each direction
-        List<scalarList> coeffs_;
+        //- The stencil the fit is based on
+        const ExtendedStencil& stencil_;
+
+        //- Factor the fit is allowed to deviate from linear.
+        //  This limits the amount of high-order correction and increases
+        //  stability on bad meshes
+        const scalar linearLimitFactor_;
+
+        //- Weights for central stencil
+        const scalar centralWeight_;
+
+        //- Dimensionality of the geometry
+        const label dim_;
+
+        //- Minimum stencil size
+        const label minSize_;
 
 
     // Private member functions
 
+        //- Find the normal direction (i) and j and k directions for face faci
+        void findFaceDirs
+        (
+            vector& idir,        // value changed in return
+            vector& jdir,        // value changed in return
+            vector& kdir,        // value changed in return
+            const label faci
+        );
+
         //- Calculate the fit for the all the mesh faces
         //  and set the coefficients
-        void calcFit();
+        // virtual void calcFit();
 
 
 public:
 
-    TypeName("CentredFitData");
+    //TypeName("FitData");
 
 
     // Constructors
 
         //- Construct from components
-        CentredFitData
+        FitData
         (
             const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
+            const ExtendedStencil& stencil,
             const scalar linearLimitFactor,
             const scalar centralWeight
         );
 
 
     //- Destructor
-    virtual ~CentredFitData()
+    virtual ~FitData()
     {}
 
 
     // Member functions
 
-        //- Return reference to fit coefficients
-        const List<scalarList>& coeffs() const
+        //- Return reference to the stencil
+        const ExtendedStencil& stencil() const
         {
-            return coeffs_;
+            return stencil_;
         }
+
+        //- Calculate the fit for the specified face and set the coefficients
+        void calcFit
+        (
+            scalarList& coeffsi, // coefficients to be set
+            const List<point>&,  // Stencil points
+            const scalar wLin,   // Linear weight
+            const label faci     // Current face index
+        );
+
+        //- Calculate the fit for all the faces
+        virtual void calcFit() = 0;
+
+
+        //- Delete the data when the mesh moves not implemented
+        bool movePoints();
 };
 
 
@@ -107,7 +144,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "CentredFitData.C"
+#   include "FitData.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
