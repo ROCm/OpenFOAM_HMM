@@ -91,7 +91,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     {
         for (label i = instanceI; i >= 0; --i)
         {
-            if (file(d.path()/ts[i].name()/subdirName/foamName))
+            if (isFile(d.path()/ts[i].name()/subdirName/foamName))
             {
                 return ts[i].name();
             }
@@ -134,7 +134,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
         {
             fileName testName(d.path()/ts[i].name()/subdirName/foamName);
 
-            if (file(testName))
+            if (isFile(testName))
             {
                 return testName;
             }

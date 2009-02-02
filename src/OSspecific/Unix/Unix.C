@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    UNIX versions of the functions declared in OSspecific.H.
+    UNIX versions of the functions declared in OSspecific.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -218,7 +218,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // Search user files:
     // ~~~~~~~~~~~~~~~~~~
     fileName searchDir = home()/".OpenFOAM";
-    if (dir(searchDir))
+    if (isDir(searchDir))
     {
         // Check for user file in ~/.OpenFOAM/VERSION
         fileName fullName = searchDir/FOAMversion/name;
@@ -239,7 +239,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // Search site files:
     // ~~~~~~~~~~~~~~~~~~
     searchDir = getEnv("WM_PROJECT_INST_DIR");
-    if (dir(searchDir))
+    if (isDir(searchDir))
     {
         // Check for site file in $WM_PROJECT_INST_DIR/site/VERSION
         fileName fullName = searchDir/"site"/FOAMversion/name;
@@ -259,7 +259,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // Search installation files:
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     searchDir = getEnv("WM_PROJECT_DIR");
-    if (dir(searchDir))
+    if (isDir(searchDir))
     {
         // Check for shipped OpenFOAM file in $WM_PROJECT_DIR/etc
         fileName fullName = searchDir/"etc"/name;
@@ -476,21 +476,21 @@ Foam::fileName::Type Foam::type(const fileName& name)
 // Does the name exist in the filing system?
 bool Foam::exists(const fileName& name)
 {
-    return mode(name) || file(name);
-}
-
-
-// Does the file exist
-bool Foam::file(const fileName& name)
-{
-    return S_ISREG(mode(name)) || S_ISREG(mode(name + ".gz"));
+    return mode(name) || isFile(name);
 }
 
 
 // Does the directory exist
-bool Foam::dir(const fileName& name)
+bool Foam::isDir(const fileName& name)
 {
     return S_ISDIR(mode(name));
+}
+
+
+// Does the file exist
+bool Foam::isFile(const fileName& name)
+{
+    return S_ISREG(mode(name)) || S_ISREG(mode(name + ".gz"));
 }
 
 
@@ -641,7 +641,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         }
 
         // Make sure the destination directory exists.
-        if (!dir(destFile.path()) && !mkDir(destFile.path()))
+        if (!isDir(destFile.path()) && !mkDir(destFile.path()))
         {
             return false;
         }
@@ -681,7 +681,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         }
 
         // Make sure the destination directory exists.
-        if (!dir(destFile) && !mkDir(destFile))
+        if (!isDir(destFile) && !mkDir(destFile))
         {
             return false;
         }
@@ -806,7 +806,7 @@ bool Foam::rmDir(const fileName& directory)
 {
     if (Unix::debug)
     {
-        Info<< "rmdir(const fileName&) : "
+        Info<< "rmDir(const fileName&) : "
             << "removing directory " << directory << endl;
     }
 
@@ -817,7 +817,7 @@ bool Foam::rmDir(const fileName& directory)
     // Attempt to open directory and set the structure pointer
     if ((source = opendir(directory.c_str())) == NULL)
     {
-        WarningIn("rmdir(const fileName&)")
+        WarningIn("rmDir(const fileName&)")
             << "cannot open directory " << directory << endl;
 
         return false;
@@ -837,7 +837,7 @@ bool Foam::rmDir(const fileName& directory)
                 {
                     if (!rmDir(path))
                     {
-                        WarningIn("rmdir(const fileName&)")
+                        WarningIn("rmDir(const fileName&)")
                             << "failed to remove directory " << fName
                             << " while removing directory " << directory
                             << endl;
@@ -851,7 +851,7 @@ bool Foam::rmDir(const fileName& directory)
                 {
                     if (!rm(path))
                     {
-                        WarningIn("rmdir(const fileName&)")
+                        WarningIn("rmDir(const fileName&)")
                             << "failed to remove file " << fName
                             << " while removing directory " << directory
                             << endl;
@@ -867,7 +867,7 @@ bool Foam::rmDir(const fileName& directory)
 
         if (!rm(directory))
         {
-            WarningIn("rmdir(const fileName&)")
+            WarningIn("rmDir(const fileName&)")
                 << "failed to remove directory " << directory << endl;
 
             closedir(source);

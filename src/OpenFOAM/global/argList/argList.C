@@ -409,7 +409,7 @@ Foam::argList::argList
                     label nProcDirs = 0;
                     while
                     (
-                        dir
+                        isDir
                         (
                             rootPath_/globalCase_/"processor"
                           + name(++nProcDirs)
@@ -697,7 +697,7 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
 bool Foam::argList::checkRootCase() const
 {
-    if (!dir(rootPath()))
+    if (!isDir(rootPath()))
     {
         FatalError
             << executable_
@@ -707,7 +707,7 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    if (!dir(path()) && Pstream::master())
+    if (!isDir(path()) && Pstream::master())
     {
         // Allow slaves on non-existing processor directories, created later
         FatalError

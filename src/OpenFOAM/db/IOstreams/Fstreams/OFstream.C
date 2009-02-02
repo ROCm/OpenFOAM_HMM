@@ -57,7 +57,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
 
     if (compression == IOstream::COMPRESSED)
     {
-        if (file(pathname))
+        if (isFile(pathname))
         {
             rm(pathname);
         }
@@ -66,7 +66,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
     }
     else
     {
-        if (file(pathname + ".gz"))
+        if (isFile(pathname + ".gz"))
         {
             rm(pathname + ".gz");
         }

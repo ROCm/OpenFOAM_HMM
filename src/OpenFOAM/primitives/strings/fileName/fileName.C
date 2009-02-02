@@ -63,13 +63,13 @@ bool Foam::fileName::exists() const
 
 bool Foam::fileName::isDir() const
 {
-    return ::Foam::dir(*this);
+    return ::Foam::isDir(*this);
 }
 
 
 bool Foam::fileName::isFile() const
 {
-    return ::Foam::file(*this);
+    return ::Foam::isFile(*this);
 }
 
 

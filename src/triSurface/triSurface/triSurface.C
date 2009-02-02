@@ -67,7 +67,7 @@ Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
     {
         for (label j=i; j>=0; j--)
         {
-            if (file(d.path()/ts[j].name()/typeName/foamName))
+            if (isFile(d.path()/ts[j].name()/typeName/foamName))
             {
                 if (debug)
                 {

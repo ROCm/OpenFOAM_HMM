@@ -43,7 +43,7 @@ Foam::word Foam::Time::findInstance
     // Is the mesh data in the current time directory ?
     if
     (
-        file(path()/timeName()/dir/name)
+        isFile(path()/timeName()/dir/name)
      && IOobject(name, timeName(), dir, *this).headerOk()
     )
     {
@@ -81,7 +81,7 @@ Foam::word Foam::Time::findInstance
         {
             if
             (
-                file(path()/ts[j].name()/dir/name)
+                isFile(path()/ts[j].name()/dir/name)
              && IOobject(name, ts[j].name(), dir, *this).headerOk()
             )
             {
@@ -109,7 +109,7 @@ Foam::word Foam::Time::findInstance
 
     if
     (
-        file(path()/constant()/dir/name)
+        isFile(path()/constant()/dir/name)
      && IOobject(name, constant(), dir, *this).headerOk()
     )
     {

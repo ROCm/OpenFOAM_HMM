@@ -61,7 +61,7 @@ bool Foam::IOobject::IOobject::fileNameComponents
     name.clear();
 
     // called with directory
-    if (::Foam::dir(path))
+    if (::Foam::isDir(path))
     {
         WarningIn("IOobject::fileNameComponents(const fileName&, ...)")
             << " called with directory: " << path << "\n";
@@ -269,7 +269,7 @@ Foam::fileName Foam::IOobject::filePath() const
     fileName path = this->path();
     fileName objectPath = path/name();
 
-    if (file(objectPath))
+    if (isFile(objectPath))
     {
         return objectPath;
     }
@@ -288,13 +288,13 @@ Foam::fileName Foam::IOobject::filePath() const
                 rootPath()/caseName()
                /".."/instance()/db_.dbDir()/local()/name();
 
-            if (file(parentObjectPath))
+            if (isFile(parentObjectPath))
             {
                 return parentObjectPath;
             }
         }
 
-        if (!dir(path))
+        if (!isDir(path))
         {
             word newInstancePath = time().findInstancePath(instant(instance()));
 
@@ -306,7 +306,7 @@ Foam::fileName Foam::IOobject::filePath() const
                    /newInstancePath/db_.dbDir()/local()/name()
                 );
 
-                if (file(fName))
+                if (isFile(fName))
                 {
                     return fName;
                 }

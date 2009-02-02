@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
-    if (dir(fvPath))
+    if (isDir(fvPath))
     {
         if
         (

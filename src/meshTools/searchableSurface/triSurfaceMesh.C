@@ -562,7 +562,7 @@ bool Foam::triSurfaceMesh::writeObject
 
     triSurface::write(fullPath);
 
-    if (!file(fullPath))
+    if (!isFile(fullPath))
     {
         return false;
     }

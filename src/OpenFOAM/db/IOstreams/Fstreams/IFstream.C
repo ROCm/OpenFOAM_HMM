@@ -54,7 +54,7 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
     ifPtr_ = new ifstream(pathname.c_str());
 
     // If the file is compressed, decompress it before reading.
-    if (!ifPtr_->good() && file(pathname + ".gz"))
+    if (!ifPtr_->good() && isFile(pathname + ".gz"))
     {
         if (IFstream::debug)
         {
@@ -159,7 +159,7 @@ Foam::IFstream& Foam::IFstream::operator()() const
 {
     if (!good())
     {
-        if (!file(pathname_) && !file(pathname_ + ".gz"))
+        if (!isFile(pathname_) && !isFile(pathname_ + ".gz"))
         {
             FatalIOErrorIn("IFstream::operator()", *this)
                 << "file " << pathname_ << " does not exist"
