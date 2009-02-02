@@ -52,8 +52,9 @@
         )
     );
 
-    Info<< "Creating field dpdt\n" << endl;
-    volScalarField dpdt = fvc::ddt(p);
+    Info<< "Creating field DpDt\n" << endl;
+    volScalarField DpDt =
+        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());

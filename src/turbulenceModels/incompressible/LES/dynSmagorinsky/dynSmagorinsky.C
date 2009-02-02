@@ -43,6 +43,13 @@ addToRunTimeSelectionTable(LESModel, dynSmagorinsky, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void dynSmagorinsky::updateSubGridScaleFields(const volSymmTensorField& D)
+{
+    nuSgs_ = cD(D)*sqr(delta())*sqrt(magSqr(D));
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 dimensionedScalar dynSmagorinsky::cD(const volSymmTensorField& D) const
 {
     volSymmTensorField LL = dev(filter_(sqr(U())) - (sqr(filter_(U()))));
@@ -111,6 +118,8 @@ dynSmagorinsky::dynSmagorinsky
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
+    updateSubGridScaleFields(dev(symm(fvc::grad(U))));
+
     printCoeffs();
 }
 
@@ -128,12 +137,10 @@ void dynSmagorinsky::correct(const tmp<volTensorField>& gradU)
     LESModel::correct(gradU);
 
     volSymmTensorField D = dev(symm(gradU));
-    volScalarField magSqrD = magSqr(D);
 
-    k_ = cI(D)*sqr(delta())*magSqrD;
+    k_ = cI(D)*sqr(delta())*magSqr(D);
 
-    nuSgs_ = cD(D)*sqr(delta())*sqrt(magSqrD);
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(D);
 }
 
 

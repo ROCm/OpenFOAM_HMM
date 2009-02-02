@@ -40,7 +40,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 }
 
 p == pd + rho*gh + pRef;
-dpdt = fvc::ddt(p);
+DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"

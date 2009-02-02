@@ -77,6 +77,9 @@ class Smagorinsky
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volTensorField& gradU);
+
         // Disallow default bitwise copy construct and assignment
         Smagorinsky(const Smagorinsky&);
         Smagorinsky& operator=(const Smagorinsky&);

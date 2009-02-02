@@ -96,6 +96,13 @@ class locDynOneEqEddy
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields
+        (
+            const volSymmTensorField& D,
+            const volScalarField& KK
+        );
+
         //- Calculate ck, ce by filtering the velocity field U.
         volScalarField ck
         (
