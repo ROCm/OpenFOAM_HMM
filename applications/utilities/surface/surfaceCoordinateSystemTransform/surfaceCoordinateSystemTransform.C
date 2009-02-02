@@ -34,16 +34,22 @@ Usage
     - surfaceMeshCoordinateSystemTransform inputFile outputFile [OPTION]
 
     @param -clean \n
-    Perform some surface checking/cleanup on the input surface
+    Perform some surface checking/cleanup on the input surface.
 
-    @param -scale \<scale\> \n
-    Specify a scaling factor for writing the files
+    @param -scaleIn \<scale\> \n
+    Specify a scaling factor when reading files.
 
-    @param -triSurface \n
-    Use triSurface library for input/output
+    @param -scaleOut \<scale\> \n
+    Specify a scaling factor when writing files.
 
     @param -dict \<dictionary\> \n
     Specify an alternative dictionary for coordinateSystems.
+
+    @param -from \<coordinateSystem\> \n
+    Specify a coordinate System when reading files.
+
+    @param -to \<coordinateSystem\> \n
+    Specify a coordinate System when writing files.
 
 Note
     The filename extensions are used to determine the file format type.
@@ -55,7 +61,6 @@ Note
 #include "Time.H"
 
 #include "MeshedSurfaces.H"
-#include "UnsortedMeshedSurfaces.H"
 #include "coordinateSystems.H"
 
 using namespace Foam;
@@ -68,18 +73,40 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("unsorted", "");
+    argList::validOptions.insert("clean",  "scale");
+    argList::validOptions.insert("scaleIn",  "scale");
+    argList::validOptions.insert("scaleOut", "scale");
+    argList::validOptions.insert("dict", "coordinateSystemsDict");
     argList::validOptions.insert("from", "sourceCoordinateSystem");
-    argList::validOptions.insert("to", "targetCoordinateSystem");
-    argList::validOptions.insert("dict", "dictionary");
+    argList::validOptions.insert("to",   "targetCoordinateSystem");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
     const stringList& params = args.additionalArgs();
 
-    const word dictName("coordinateSystems");
+    fileName importName(params[0]);
+    fileName exportName(params[1]);
 
+    // disable inplace editing
+    if (importName == exportName)
+    {
+        FatalErrorIn(args.executable())
+            << "Output file " << exportName << " would overwrite input file."
+            << exit(FatalError);
+    }
+
+    // check that reading/writing is supported
+    if
+    (
+        !MeshedSurface<face>::canRead(importName, true)
+     || !MeshedSurface<face>::canWriteType(exportName.ext(), true)
+    )
+    {
+        return 1;
+    }
+
+
+    // get the coordinate transformations
     autoPtr<coordinateSystem> fromCsys;
     autoPtr<coordinateSystem> toCsys;
 
@@ -95,7 +122,7 @@ int main(int argc, char *argv[])
             (
                 new IOobject
                 (
-                    ( dictPath.isDir() ? dictPath/dictName : dictPath ),
+                    ( dictPath.isDir() ? dictPath/coordinateSystems::typeName : dictPath ),
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
@@ -109,7 +136,7 @@ int main(int argc, char *argv[])
             (
                 new IOobject
                 (
-                    dictName,
+                    coordinateSystems::typeName,
                     runTime.constant(),
                     runTime,
                     IOobject::MUST_READ,
@@ -167,34 +194,20 @@ int main(int argc, char *argv[])
         if (fromCsys.valid() && toCsys.valid())
         {
             FatalErrorIn(args.executable())
-                << "Only allowed  -from  or  -to  option at the moment."
+                << "Only allowed  '-from' or '-to' option at the moment."
                 << exit(FatalError);
         }
     }
 
-    scalar scaleFactor = 0;
-    if (args.options().found("scale"))
+    scalar scaleIn = 0;
+    scalar scaleOut = 0;
+    if (args.options().found("scaleIn"))
     {
-        IStringStream(args.options()["scale"])() >> scaleFactor;
+        IStringStream(args.options()["scaleIn"])() >> scaleIn;
     }
-
-    fileName importName(params[0]);
-    fileName exportName(params[1]);
-
-    if (importName == exportName)
+    if (args.options().found("scaleOut"))
     {
-        FatalErrorIn(args.executable())
-            << "Output file " << exportName << " would overwrite input file."
-            << exit(FatalError);
-    }
-
-    if
-    (
-        !meshedSurface::canRead(importName, true)
-     || !meshedSurface::canWriteType(exportName.ext(), true)
-    )
-    {
-        return 1;
+        IStringStream(args.options()["scaleOut"])() >> scaleOut;
     }
 
 
@@ -206,28 +219,33 @@ int main(int argc, char *argv[])
             surf.cleanup(true);
         }
 
+        if (scaleIn > 0)
+        {
+            Info<< " -scaleIn " << scaleIn << endl;
+            surf.scalePoints(scaleIn);
+        }
+
         if (fromCsys.valid())
         {
+            Info<< " -from " << fromCsys().name() << endl;
             tmp<pointField> tpf = fromCsys().localPosition(surf.points());
             surf.movePoints(tpf());
         }
 
         if (toCsys.valid())
         {
+            Info<< " -to " << toCsys().name() << endl;
             tmp<pointField> tpf = toCsys().globalPosition(surf.points());
             surf.movePoints(tpf());
         }
 
+        if (scaleOut > 0)
+        {
+            Info<< " -scaleOut " << scaleOut << endl;
+            surf.scalePoints(scaleOut);
+        }
+
         Info<< "writing " << exportName;
-        if (scaleFactor <= 0)
-        {
-            Info<< " without scaling" << endl;
-        }
-        else
-        {
-            Info<< " with scaling " << scaleFactor << endl;
-            surf.scalePoints(scaleFactor);
-        }
         surf.write(exportName);
     }
 
