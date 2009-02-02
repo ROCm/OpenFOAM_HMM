@@ -62,6 +62,9 @@ class kOmegaSSTSAS
 {
     // Private member functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volScalarField& D);
+
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTSAS(const kOmegaSSTSAS&);
         kOmegaSSTSAS& operator=(const kOmegaSSTSAS&);
@@ -237,7 +240,8 @@ public:
         //  i.e. the additional term in the filtered NSE.
         virtual tmp<fvVectorMatrix> divDevBeff(volVectorField& U) const;
 
-        //- Solve the turbulence equations (k-w) and correct the turbulence viscosity
+        //- Solve the turbulence equations (k-w) and correct the turbulence
+        //  viscosity
         virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read turbulenceProperties dictionary
