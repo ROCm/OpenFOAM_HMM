@@ -9,5 +9,5 @@
     // reference kinematic pressure [m2/s2]
     dimensionedScalar pRef(laminarTransport.lookup("pRef"));
 
-    // Prandtl number
-    dimensionedScalar Pr(laminarTransport.lookup("Pr"));
+    // turbulent Prandtl number
+    dimensionedScalar Prt(laminarTransport.lookup("Prt"));
