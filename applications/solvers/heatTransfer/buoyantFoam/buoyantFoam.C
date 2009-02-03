@@ -47,8 +47,11 @@ int main(int argc, char *argv[])
     #include "readEnvironmentalProperties.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -60,6 +63,7 @@ int main(int argc, char *argv[])
         #include "setDeltaT.H"
 
         runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "rhoEqn.H"

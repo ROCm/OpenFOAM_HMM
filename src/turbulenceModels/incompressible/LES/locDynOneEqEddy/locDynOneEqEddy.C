@@ -43,6 +43,17 @@ addToRunTimeSelectionTable(LESModel, locDynOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void locDynOneEqEddy::updateSubGridScaleFields
+(
+    const volSymmTensorField& D,
+    const volScalarField& KK
+)
+{
+    nuSgs_ = ck(D, KK)*sqrt(k_)*delta();
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 volScalarField locDynOneEqEddy::ck
 (
     const volSymmTensorField& D,
@@ -108,6 +119,9 @@ locDynOneEqEddy::locDynOneEqEddy
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
+    volScalarField KK = 0.5*(filter_(magSqr(U)) - magSqr(filter_(U)));
+    updateSubGridScaleFields(symm(fvc::grad(U)), KK);
+
     printCoeffs();
 }
 
@@ -146,8 +160,7 @@ void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
 
     bound(k_, k0());
 
-    nuSgs_ = ck(D, KK)*sqrt(k_)*delta();
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(D, KK);
 }
 
 

@@ -59,6 +59,9 @@ class SpalartAllmaras
 {
     // Private member functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields();
+
         // Disallow default bitwise copy construct and assignment
         SpalartAllmaras(const SpalartAllmaras&);
         SpalartAllmaras& operator=(const SpalartAllmaras&);
