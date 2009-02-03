@@ -177,6 +177,25 @@ surfaces
         interpolate     false;
         regularise      false;              // do not simplify
     }
+
+    triangleCut
+    {
+        // Cutingplaneusing iso surface
+        type            cuttingPlane;
+        planeType       pointAndNormal;
+        pointAndNormalDict
+        {
+            basePoint       (0.4 0 0.4);
+            normalVector    (1 0.2 0.2);
+        }
+        interpolate     true;
+
+        //zone            ABC;          // Optional: zone only
+        //exposedPatchName fixedWalls;  // Optional: zone only
+
+        // regularise      false;    // Optional: do not simplify
+    }
+
 );
 
 
