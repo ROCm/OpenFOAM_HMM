@@ -194,6 +194,11 @@ void Foam::CV3D::setVertexAlignmentDirections()
                     // Tertiary alignment
                     vector nt = ns ^ np;
 
+                    // this normalisation is not necessary if np and ns are
+                    // perpendicular unit vectors.
+
+                    nt /= mag(nt);
+
                     alignmentDirections.setSize(3);
 
                     alignmentDirections[0] = np;
@@ -676,69 +681,202 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
              || vB->alignmentDirections().size() > 0
             )
             {
-                vector alignmentDir;
+                Field<vector> alignmentDirs;
 
                 if
                 (
-                    vA->alignmentDirections().size() > 0
-                 && vB->alignmentDirections().size() == 0
+                    vA->alignmentDirections().size() == 3
+                 || vB->alignmentDirections().size() == 3
                 )
                 {
-                    alignmentDir = vA->alignmentDirections()[0];
-                }
-                else if
-                (
-                    vA->alignmentDirections().size() == 0
-                 && vB->alignmentDirections().size() > 0
-                )
-                {
-                    alignmentDir = vB->alignmentDirections()[0];
+                    alignmentDirs.setSize(3);
+
+                    if (vB->alignmentDirections().size() == 0)
+                    {
+                        alignmentDirs = vA->alignmentDirections();
+                    }
+                    else if (vA->alignmentDirections().size() == 0)
+                    {
+                        alignmentDirs = vB->alignmentDirections();
+                    }
+                    else if
+                    (
+                        vA->alignmentDirections().size() == 3
+                     && vB->alignmentDirections().size() == 3
+                    )
+                    {
+                        forAll(vA->alignmentDirections(), aA)
+                        {
+                            const vector& a(vA->alignmentDirections()[aA]);
+
+                            scalar maxDotProduct = 0.0;
+
+                            forAll(vB->alignmentDirections(), aB)
+                            {
+                                const vector& b(vB->alignmentDirections()[aB]);
+
+                                if (mag(a & b) > maxDotProduct)
+                                {
+                                    maxDotProduct = mag(a & b);
+
+                                    alignmentDirs[aA] = a + sign(a & b)*b;
+
+                                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // One of the vertices has 3 alignments and the other
+                        // has 1
+
+                        vector otherAlignment;
+
+                        if (vA->alignmentDirections().size() == 3)
+                        {
+                            alignmentDirs = vA->alignmentDirections();
+
+                            otherAlignment = vB->alignmentDirections()[0];
+                        }
+                        else
+                        {
+                            alignmentDirs = vB->alignmentDirections();
+
+                            otherAlignment = vA->alignmentDirections()[0];
+                        }
+
+                        label matchingDirection = -1;
+
+                        scalar maxDotProduct = 0.0;
+
+                        forAll(alignmentDirs, aD)
+                        {
+                            const vector& a(alignmentDirs[aD]);
+
+                            if (mag(a & otherAlignment) > maxDotProduct)
+                            {
+                                maxDotProduct = mag(a & otherAlignment);
+
+                                matchingDirection = aD;
+                            }
+                        }
+
+                        vector& matchingAlignment =
+                        alignmentDirs[matchingDirection];
+
+                        matchingAlignment = matchingAlignment
+                        + sign(matchingAlignment & otherAlignment)
+                        *otherAlignment;
+
+                        matchingAlignment /= mag(matchingAlignment);
+                    }
+
+                    // vector midpoint = 0.5*(dVA + dVB);
+
+                    // Info<< "midpoint " << midpoint
+                    //     << nl << alignmentDirs
+                    //     << nl << "v " << midpoint + alignmentDirs[0]
+                    //     << nl << "v " << midpoint + alignmentDirs[1]
+                    //     << nl << "v " << midpoint + alignmentDirs[2]
+                    //     << nl << "v " << midpoint
+                    //     << nl << "f 4 1"
+                    //     << nl << "f 4 2"
+                    //     << nl << "f 4 3"
+                    //     << nl << endl;
                 }
                 else
                 {
-                    // Both vertices have an alignment
+                    alignmentDirs.setSize(1);
 
-                    alignmentDir = vA->alignmentDirections()[0]
-                    - vB->alignmentDirections()[0];
+                    vector& alignmentDir = alignmentDirs[0];
 
-                    if (mag(alignmentDir) < SMALL)
+                    if
+                    (
+                        vA->alignmentDirections().size() > 0
+                     && vB->alignmentDirections().size() == 0
+                    )
                     {
                         alignmentDir = vA->alignmentDirections()[0];
                     }
+                    else if
+                    (
+                        vA->alignmentDirections().size() == 0
+                     && vB->alignmentDirections().size() > 0
+                    )
+                    {
+                        alignmentDir = vB->alignmentDirections()[0];
+                    }
+                    else
+                    {
+                        // Both vertices have an alignment
 
-                    alignmentDir /= mag(alignmentDir);
+                        const vector& a(vA->alignmentDirections()[0]);
+
+                        const vector& b(vB->alignmentDirections()[0]);
+
+                        Info<< mag(a & b) << endl;
+
+                        if (mag(a & b) < 1 - SMALL)
+                        {
+                            alignmentDirs.setSize(3);
+
+                            alignmentDirs[0] = a + b;
+
+                            alignmentDirs[1] = a - b;
+
+                            alignmentDirs[2] =
+                            alignmentDirs[0] ^ alignmentDirs[1];
+
+                            alignmentDirs /= mag(alignmentDirs);
+                        }
+                        else
+                        {
+                            alignmentDir = a + sign(a & b)*b;
+
+                            alignmentDir /= mag(alignmentDir);
+                        }
+                    }
                 }
+
+                // alignmentDirs found, now apply them
 
                 vector rAB = dVA - dVB;
 
                 scalar rABMag = mag(rAB);
 
-                if ((rAB & alignmentDir) < 0)
+                forAll(alignmentDirs, aD)
                 {
-                    // swap the direction of the alignment so that has the same
-                    // sense as rAB
-                    alignmentDir *= -1;
-                }
+                    vector& alignmentDir = alignmentDirs[aD];
 
-                scalar cosAcceptanceAngle = 0.743;
-
-                if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
-                {
-                    alignmentDir *= 0.5*controls_.minCellSize;
-
-                    vector delta = alignmentDir - 0.5*rAB;
-
-                    scalar faceArea = dualFace.mag(dualVertices);
-
-                    delta *= faceAreaWeight(faceArea);
-
-                    if (vA->internalPoint())
+                    if ((rAB & alignmentDir) < 0)
                     {
-                        displacementAccumulator[vA->index()] += delta;
+                        // swap the direction of the alignment so that has the
+                        // same sense as rAB
+                        alignmentDir *= -1;
                     }
-                    if (vB->internalPoint())
+
+                    // scalar cosAcceptanceAngle = 0.743;
+                    scalar cosAcceptanceAngle = 0.67;
+
+                    if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
                     {
-                        displacementAccumulator[vB->index()] += -delta;
+                        alignmentDir *= 0.5*controls_.minCellSize;
+
+                        vector delta = alignmentDir - 0.5*rAB;
+
+                        scalar faceArea = dualFace.mag(dualVertices);
+
+                        delta *= faceAreaWeight(faceArea);
+
+                        if (vA->internalPoint())
+                        {
+                            displacementAccumulator[vA->index()] += delta;
+                        }
+                        if (vB->internalPoint())
+                        {
+                            displacementAccumulator[vB->index()] += -delta;
+                        }
                     }
                 }
             }
@@ -751,7 +889,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     scalar totalDist = sum(mag(displacementAccumulator));
 
     Info<< "Total displacement = " << totalDisp
-        << " total distance = " << totalDist << endl;
+        << nl << "Total distance = " << totalDist << endl;
 
     displacementAccumulator *= relaxation;
 
