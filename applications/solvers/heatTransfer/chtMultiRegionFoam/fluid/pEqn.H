@@ -1,24 +1,31 @@
 {
-    bool closedVolume = false;
+    bool closedVolume = pd.needReference();
 
     rho = thermo.rho();
 
     volScalarField rUA = 1.0/UEqn().A();
+    surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
+
     U = rUA*UEqn().H();
 
-    phi =
+    surfaceScalarField phiU
+    (
         fvc::interpolate(rho)
        *(
             (fvc::interpolate(U) & mesh.Sf())
           + fvc::ddtPhiCorr(rUA, rho, U, phi)
         )
-      - fvc::interpolate(rho*rUA*gh)*fvc::snGrad(rho)*mesh.magSf();
+    );
+
+    phi = phiU - ghf*fvc::snGrad(rho)*rhorUAf*mesh.magSf();
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pdEqn
         (
-            fvc::ddt(rho)
+            fvm::ddt(psi, pd)
+          + fvc::ddt(psi)*pRef
+          + fvc::ddt(psi, rho)*gh
           + fvc::div(phi)
           - fvm::laplacian(rho*rUA, pd)
         );
@@ -38,8 +45,12 @@
         }
     }
 
+    // Correct velocity field
+    U += rUA*fvc::reconstruct((phi - phiU)/rhorUAf);
+    U.correctBoundaryConditions();
+
     // Update pressure field (including bc)
-    thermo.p() == pd + rho*gh + pRef;
+    p == pd + rho*gh + pRef;
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
     // Solve continuity
@@ -48,23 +59,17 @@
     // Update continuity errors
 #   include "compressibleContinuityErrors.H"
 
-    // Correct velocity field
-    U -= rUA*(fvc::grad(pd) + fvc::grad(rho)*gh);
-    U.correctBoundaryConditions();
-
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
     if (closedVolume)
     {
-        thermo.p() +=
-            (
-                dimensionedScalar("massIni", dimMass, initialMassf[i])
-              - fvc::domainIntegrate(thermo.psi()*thermo.p())
-            )/fvc::domainIntegrate(thermo.psi());
-        pd == thermo.p() - (rho*gh + pRef);
+        p += (massIni - fvc::domainIntegrate(psi*p))/fvc::domainIntegrate(psi);
         rho = thermo.rho();
     }
 
     // Update thermal conductivity
-    K = thermo.Cp()*turb.alphaEff();
+    K = thermoFluid[i].Cp()*turb.alphaEff();
+
+    // Update pd (including bc)
+    pd == p - (rho*gh + pRef);
 }
