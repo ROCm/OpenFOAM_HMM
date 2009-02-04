@@ -24,71 +24,71 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfRegionIOList.H"
+#include "surfZoneIOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::surfRegionIOList, 0);
+defineTypeNameAndDebug(Foam::surfZoneIOList, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfRegionIOList::surfRegionIOList
+Foam::surfZoneIOList::surfZoneIOList
 (
     const IOobject& io
 )
 :
-    surfRegionList(),
+    surfZoneList(),
     regIOobject(io)
 {
     Foam::string functionName =
-        "surfRegionIOList::surfRegionIOList"
+        "surfZoneIOList::surfZoneIOList"
         "(const IOobject& io)";
 
 
     if (readOpt() == IOobject::MUST_READ)
     {
-        surfRegionList& regions = *this;
+        surfZoneList& zones = *this;
 
         // read polyPatchList
         Istream& is = readStream(typeName);
 
         PtrList<entry> dictEntries(is);
-        regions.setSize(dictEntries.size());
+        zones.setSize(dictEntries.size());
 
         label faceI = 0;
-        forAll(regions, regionI)
+        forAll(zones, zoneI)
         {
-            const dictionary& dict = dictEntries[regionI].dict();
+            const dictionary& dict = dictEntries[zoneI].dict();
 
-            label regionSize = readLabel(dict.lookup("nFaces"));
+            label zoneSize = readLabel(dict.lookup("nFaces"));
             label startFaceI = readLabel(dict.lookup("startFace"));
 
-            regions[regionI] = surfRegion
+            zones[zoneI] = surfZone
             (
-                dictEntries[regionI].keyword(),
-                regionSize,
+                dictEntries[zoneI].keyword(),
+                zoneSize,
                 startFaceI,
-                regionI
+                zoneI
             );
 
             word geoType;
             if (dict.readIfPresent("geometricType", geoType))
             {
-                regions[regionI].geometricType() = geoType;
+                zones[zoneI].geometricType() = geoType;
             }
 
             if (startFaceI != faceI)
             {
                 FatalErrorIn(functionName)
-                    << "Regions are not ordered. Start of region " << regionI
-                    << " does not correspond to sum of preceding regions."
+                    << "surfZones are not ordered. Start of zone " << zoneI
+                    << " does not correspond to sum of preceding zones."
                     << endl
                     << "while reading " << io.objectPath()
                     << exit(FatalError);
             }
 
-            faceI += regionSize;
+            faceI += zoneSize;
         }
 
         // Check state of IOstream
@@ -99,20 +99,20 @@ Foam::surfRegionIOList::surfRegionIOList
 }
 
 // Construct from IOObject
-Foam::surfRegionIOList::surfRegionIOList
+Foam::surfZoneIOList::surfZoneIOList
 (
     const IOobject& io,
-    const surfRegionList& regions
+    const surfZoneList& zones
 )
 :
-    surfRegionList(regions),
+    surfZoneList(zones),
     regIOobject(io)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfRegionIOList::~surfRegionIOList()
+Foam::surfZoneIOList::~surfZoneIOList()
 {}
 
 
@@ -120,7 +120,7 @@ Foam::surfRegionIOList::~surfRegionIOList()
 
 
 // writeData member function required by regIOobject
-bool Foam::surfRegionIOList::writeData(Ostream& os) const
+bool Foam::surfZoneIOList::writeData(Ostream& os) const
 {
     os << *this;
     return os.good();
@@ -129,7 +129,7 @@ bool Foam::surfRegionIOList::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfRegionIOList& L)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIOList& L)
 {
     os  << L.size() << nl << token::BEGIN_LIST;
 

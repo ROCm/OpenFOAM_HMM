@@ -124,7 +124,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by regions
+        //  The output is sorted by zones
         static void write
         (
             const fileName&,

@@ -26,18 +26,18 @@ Class
     Foam::UnsortedMeshedSurface
 
 Description
-    A surface geometry mesh, in which the region information is conveyed by
-    the 'regionId' associated with each face.
+    A surface geometry mesh, in which the surface zone information is
+    conveyed by the 'zoneId' associated with each face.
 
     This form of surface description is particularly useful for reading in
     surface meshes from third-party formats (eg, obj, stl, gts, etc.). It
     can also be particularly useful for situations in which the surface
     many be adjusted in an arbitrary manner without worrying about needed
-    to adjust the region information (eg, surface refinement).
+    to adjust the zone information (eg, surface refinement).
 
 See Also
     The Foam::MeshedSurface - which is organized as a surface mesh, but
-    with independent region information.
+    with independent zone information.
 
 SourceFiles
     UnsortedMeshedSurface.C
@@ -48,8 +48,8 @@ SourceFiles
 #define UnsortedMeshedSurface_H
 
 #include "BasicMeshedSurface.H"
-#include "surfRegionIdentifierList.H"
-#include "surfRegionList.H"
+#include "surfZoneIdentifierList.H"
+#include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -93,12 +93,12 @@ private:
 
     // Private Member Data
 
-        //- The region Ids associated with the faces
-        labelList regionIds_;
+        //- The zone Id associated with each face
+        labelList zoneIds_;
 
-        //- Region information (face ordering nFaces/startFace only used
+        //- Zone information (face ordering nFaces/startFace only used
         //  during reading and writing)
-        List<surfRegionIdentifier> regionToc_;
+        List<surfZoneIdentifier> zoneToc_;
 
     // Private member functions
 
@@ -115,19 +115,19 @@ protected:
 
     // Protected Member functions
 
-        //- Return non-const access to the region Ids
-        List<label>& storedRegionIds()
+        //- Return non-const access to the zone Ids
+        List<label>& storedZoneIds()
         {
-            return regionIds_;
+            return zoneIds_;
         }
 
-        //- Return non-const access to the region table-of-contents
-        List<surfRegionIdentifier>& storedRegionToc()
+        //- Return non-const access to the zone table-of-contents
+        List<surfZoneIdentifier>& storedZoneToc()
         {
-            return regionToc_;
+            return zoneToc_;
         }
 
-        //- Set new regions from faceMap
+        //- Set new zones from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:
@@ -155,23 +155,23 @@ public:
         UnsortedMeshedSurface();
 
         //- Construct by transferring components
-        //  (points, faces, region ids, region info).
+        //  (points, faces, zone ids, zone info).
         UnsortedMeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const Xfer<List<label> >& regionIds,
-            const Xfer<surfRegionIdentifierList>&
+            const Xfer<List<label> >& zoneIds,
+            const Xfer<surfZoneIdentifierList>&
         );
 
         //- Construct by transferring points, faces.
-        //  Use region information, or set single default region
+        //  Use zone information, or set single default zone
         UnsortedMeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& regionSizes = UList<label>::null(),
-            const UList<word>& regionNames = UList<word>::null()
+            const UList<label>& zoneSizes = UList<label>::null(),
+            const UList<word>& zoneNames = UList<word>::null()
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -264,37 +264,37 @@ public:
             return ParentType::size();
         }
 
-        //- Reset size of face and region list
+        //- Reset size of face and zone list
         void setSize(const label);
 
-        //- Return const access to the regions ids
-        const List<label>& regionIds() const
+        //- Return const access to the zone ids
+        const List<label>& zoneIds() const
         {
-            return regionIds_;
+            return zoneIds_;
         }
 
-        //- Return const access to the region table-of-contents
-        const List<surfRegionIdentifier>& regionToc() const
+        //- Return const access to the zone table-of-contents
+        const List<surfZoneIdentifier>& zoneToc() const
         {
-            return regionToc_;
+            return zoneToc_;
         }
 
-        //- Sort faces according to region.
-        //  Returns a surfRegionList and sets faceMap to index within faces()
-        surfRegionList sortedRegions(labelList& faceMap) const;
+        //- Sort faces according to zone.
+        //  Returns a surfZoneList and sets faceMap to index within faces()
+        surfZoneList sortedZones(labelList& faceMap) const;
 
-        //- Set regions to 0 and set a single region
+        //- Set zones to 0 and set a single zone
         //  Optionally with a specific name
-        void oneRegion(const word& name = word::null);
+        void oneZone(const word& name = word::null);
 
-        //- Set region ids and regions
-        void setRegions(const surfRegionList&);
+        //- Set zone ids and zones
+        void setZones(const surfZoneList&);
 
-        //- Set region ids and regions
-        void setRegions(const UList<label>& sizes, const UList<word>& names);
+        //- Set zone ids and zones
+        void setZones(const UList<label>& sizes, const UList<word>& names);
 
-        //- Set region ids and set regions with default names
-        void setRegions(const UList<label>& sizes);
+        //- Set zone ids and zones with default names
+        void setZones(const UList<label>& sizes);
 
 
     // Edit
@@ -317,12 +317,12 @@ public:
             const labelHashSet& include
         ) const;
 
-        //- Transfer components (points, faces, region ids).
+        //- Transfer components (points, faces, zone ids).
         virtual void reset
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const Xfer<List<label> >& regionIds = Xfer<List<label> >::null()
+            const Xfer<List<label> >& zoneIds = Xfer<List<label> >::null()
         );
 
         //- Transfer the contents of the argument and annull the argument
@@ -330,6 +330,9 @@ public:
 
         //- Transfer the contents of the argument and annull the argument
         void transfer(MeshedSurface<Face>&);
+
+        //- Transfer contents to the Xfer container
+        Xfer< UnsortedMeshedSurface<Face> > xfer();
 
 
     // Read

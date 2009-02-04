@@ -24,22 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfRegionIdentifier.H"
+#include "surfZoneIdentifier.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfRegionIdentifier::surfRegionIdentifier()
+Foam::surfZoneIdentifier::surfZoneIdentifier()
 :
     name_(word::null),
-    boundaryIndex_(0),
+    index_(0),
     geometricType_(word::null)
 {}
 
 
-Foam::surfRegionIdentifier::surfRegionIdentifier
+Foam::surfZoneIdentifier::surfZoneIdentifier
 (
     const word& name,
     const label index,
@@ -47,12 +47,12 @@ Foam::surfRegionIdentifier::surfRegionIdentifier
 )
 :
     name_(name),
-    boundaryIndex_(index),
+    index_(index),
     geometricType_(geometricType)
 {}
 
 
-Foam::surfRegionIdentifier::surfRegionIdentifier
+Foam::surfZoneIdentifier::surfZoneIdentifier
 (
     const word& name,
     const dictionary& dict,
@@ -60,33 +60,33 @@ Foam::surfRegionIdentifier::surfRegionIdentifier
 )
 :
     name_(name),
-    boundaryIndex_(index)
+    index_(index)
 {
     dict.readIfPresent("geometricType", geometricType_);
 }
 
 
-Foam::surfRegionIdentifier::surfRegionIdentifier
+Foam::surfZoneIdentifier::surfZoneIdentifier
 (
-    const surfRegionIdentifier& p,
+    const surfZoneIdentifier& p,
     const label index
 )
 :
     name_(p.name()),
-    boundaryIndex_(index),
+    index_(index),
     geometricType_(p.geometricType())
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfRegionIdentifier::~surfRegionIdentifier()
+Foam::surfZoneIdentifier::~surfZoneIdentifier()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void Foam::surfRegionIdentifier::write(Ostream& os) const
+void Foam::surfZoneIdentifier::write(Ostream& os) const
 {
     if (geometricType_.size())
     {
@@ -98,18 +98,18 @@ void Foam::surfRegionIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// bool Foam::surfRegionIdentifier::operator!=
+// bool Foam::surfZoneIdentifier::operator!=
 // (
-//     const surfRegionIdentifier& p
+//     const surfZoneIdentifier& p
 // ) const
 // {
 //     return !(*this == p);
 // }
 //
 //
-// bool Foam::surfRegionIdentifier::operator==
+// bool Foam::surfZoneIdentifier::operator==
 // (
-//     const surfRegionIdentifier& p
+//     const surfZoneIdentifier& p
 // ) const
 // {
 //     return geometricType() == p.geometricType() && name() == p.name();
@@ -118,7 +118,7 @@ void Foam::surfRegionIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// Foam::Istream& Foam::operator>>(Istream& is, surfRegionIdentifier& p)
+// Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& p)
 // {
 //     is >> p.name_ >> p.geometricType_;
 //
@@ -126,12 +126,12 @@ void Foam::surfRegionIdentifier::write(Ostream& os) const
 // }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfRegionIdentifier& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& p)
 {
     p.write(os);
     os.check
     (
-        "Ostream& operator<<(Ostream&, const surfRegionIdentifier&)"
+        "Ostream& operator<<(Ostream&, const surfZoneIdentifier&)"
     );
     return os;
 }

@@ -22,35 +22,41 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::surfRegionList
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfRegionList_H
-#define surfRegionList_H
+#include "surfaceRegistry.H"
+#include "Time.H"
 
-#include "surfRegion.H"
-#include "List.H"
-#include "surfRegionIdentifierList.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+defineTypeNameAndDebug(Foam::surfaceRegistry, 0);
 
-namespace Foam
-{
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::surfaceRegistry::surfaceRegistry(const IOobject& io, const word& name)
+:
+    objectRegistry
+    (
+        IOobject
+        (
+            name,
+            ( io.instance().size() ? io.instance() : "constant" ),
+            "surfaces",
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            io.registerObject()
+        )
+    )
+{}
 
-typedef List<surfRegion>  surfRegionList;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::surfaceRegistry::~surfaceRegistry()
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-#endif
 
 // ************************************************************************* //

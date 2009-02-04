@@ -71,13 +71,13 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     DynamicList<label>  pointId;
     DynamicList<point>  dynPoints;
     DynamicList<Face>   dynFaces;
-    DynamicList<label>  dynRegions;
+    DynamicList<label>  dynZones;
     DynamicList<label>  dynSizes;
     Map<label>          lookup;
 
     // assume the types are not intermixed
     bool sorted = true;
-    label regionI = 0;
+    label zoneI = 0;
 
     // Name for face group
     Map<word> nameLookup;
@@ -85,7 +85,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     // Ansa tags. Denoted by $ANSA_NAME.
     // These will appear just before the first use of a type.
     // We read them and store the PSHELL types which are used to name
-    // the regions.
+    // the zones.
     label ansaId = -1;
     word  ansaType, ansaName;
 
@@ -211,28 +211,28 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             fTri[1] = readLabel(IStringStream(line.substr(32,8))());
             fTri[2] = readLabel(IStringStream(line.substr(40,8))());
 
-            // Convert groupID into regionId
+            // Convert groupID into zoneId
             Map<label>::const_iterator fnd = lookup.find(groupId);
             if (fnd != lookup.end())
             {
-                if (regionI != fnd())
+                if (zoneI != fnd())
                 {
                     // pshell types are intermixed
                     sorted = false;
                 }
-                regionI = fnd();
+                zoneI = fnd();
             }
             else
             {
-                regionI = dynSizes.size();
-                lookup.insert(groupId, regionI);
+                zoneI = dynSizes.size();
+                lookup.insert(groupId, zoneI);
                 dynSizes.append(0);
-                // Info<< "region" << regionI << " => group " << groupId <<endl;
+                // Info<< "zone" << zoneI << " => group " << groupId <<endl;
             }
 
             dynFaces.append(fTri);
-            dynRegions.append(regionI);
-            dynSizes[regionI]++;
+            dynZones.append(zoneI);
+            dynSizes[zoneI]++;
         }
         else if (cmd == "CQUAD4")
         {
@@ -245,23 +245,23 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             fQuad[2] = readLabel(IStringStream(line.substr(40,8))());
             fQuad[3] = readLabel(IStringStream(line.substr(48,8))());
 
-            // Convert groupID into regionId
+            // Convert groupID into zoneId
             Map<label>::const_iterator fnd = lookup.find(groupId);
             if (fnd != lookup.end())
             {
-                if (regionI != fnd())
+                if (zoneI != fnd())
                 {
                     // pshell types are intermixed
                     sorted = false;
                 }
-                regionI = fnd();
+                zoneI = fnd();
             }
             else
             {
-                regionI = dynSizes.size();
-                lookup.insert(groupId, regionI);
+                zoneI = dynSizes.size();
+                lookup.insert(groupId, zoneI);
                 dynSizes.append(0);
-                // Info<< "region" << regionI << " => group " << groupId <<endl;
+                // Info<< "zone" << zoneI << " => group " << groupId <<endl;
             }
 
 
@@ -269,15 +269,15 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             {
                 dynFaces.append(triFace(f[0], f[1], f[2]));
                 dynFaces.append(triFace(f[0], f[2], f[3]));
-                dynRegions.append(regionI);
-                dynRegions.append(regionI);
-                dynSizes[regionI] += 2;
+                dynZones.append(zoneI);
+                dynZones.append(zoneI);
+                dynSizes[zoneI] += 2;
             }
             else
             {
                 dynFaces.append(Face(f));
-                dynRegions.append(regionI);
-                dynSizes[regionI]++;
+                dynZones.append(zoneI);
+                dynSizes[zoneI]++;
             }
         }
         else if (cmd == "GRID")
@@ -322,7 +322,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         }
         else if (cmd == "PSHELL")
         {
-            // pshell type for region names with the Ansa extension
+            // pshell type for zone names with the Ansa extension
             label groupId = readLabel(IStringStream(line.substr(8,8))());
 
             if (groupId == ansaId && ansaType == "PSHELL")
@@ -370,29 +370,29 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     mapPointId.clear();
 
 
-    // create default region names, or from ANSA/Hypermesh information
+    // create default zone names, or from ANSA/Hypermesh information
     List<word> names(dynSizes.size());
     forAllConstIter(Map<label>, lookup, iter)
     {
-        const label regionI = iter();
+        const label zoneI = iter();
         const label groupI  = iter.key();
 
         Map<word>::const_iterator fnd = nameLookup.find(groupI);
         if (fnd != nameLookup.end())
         {
-            names[regionI] = fnd();
+            names[zoneI] = fnd();
         }
         else
         {
-            names[regionI] = word("region") + ::Foam::name(regionI);
+            names[zoneI] = word("zone") + ::Foam::name(zoneI);
         }
     }
 
 
-    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
+    sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    // add regions, culling empty ones
-    this->addRegions(dynSizes, names, true);
+    // add zones, culling empty ones
+    this->addZones(dynSizes, names, true);
 
     return true;
 }

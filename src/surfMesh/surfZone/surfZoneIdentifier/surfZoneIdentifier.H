@@ -23,23 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfRegionIdentifier
+    Foam::surfZoneIdentifier
 
 Description
-    An identifier for a region on a meshed surface.
+    An identifier for a surface zone on a meshed surface.
 
     Similar in concept to a faceZone on the surface, but can also have a
-    "geometricType" rather.  Despite the similarity to a 'patch' for
-    volume meshes (with a "physicalType"), the region does not have any
-    patch information per se.
+    "geometricType" as well.
 
 SourceFiles
-    surfRegionIdentifier.C
+    surfZoneIdentifier.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfRegionIdentifier_H
-#define surfRegionIdentifier_H
+#ifndef surfZoneIdentifier_H
+#define surfZoneIdentifier_H
 
 #include "word.H"
 #include "label.H"
@@ -54,24 +52,24 @@ class dictionary;
 
 // Forward declaration of friend functions and operators
 
-class surfRegionIdentifier;
-Ostream& operator<<(Ostream&, const surfRegionIdentifier&);
+class surfZoneIdentifier;
+Ostream& operator<<(Ostream&, const surfZoneIdentifier&);
 
 /*---------------------------------------------------------------------------*\
-                    Class surfRegionIdentifier Declaration
+                    Class surfZoneIdentifier Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfRegionIdentifier
+class surfZoneIdentifier
 {
     // Private data
 
-        //- Name of region
+        //- Name of zone
         word name_;
 
-        //- Index of region in surface mesh
-        label boundaryIndex_;
+        //- Index of zone in surface mesh
+        label index_;
 
-        //- Type name of region
+        //- Type name of zone
         mutable word geometricType_;
 
 public:
@@ -79,10 +77,10 @@ public:
     // Constructors
 
         //- Construct null
-        surfRegionIdentifier();
+        surfZoneIdentifier();
 
         //- Construct from components
-        surfRegionIdentifier
+        surfZoneIdentifier
         (
             const word& name,
             const label index,
@@ -91,24 +89,24 @@ public:
         );
 
         //- Construct from dictionary
-        surfRegionIdentifier
+        surfZoneIdentifier
         (
             const word& name,
             const dictionary&,
             const label index
         );
 
-        //- Construct from another region identifier, resetting the index
-        surfRegionIdentifier
+        //- Construct from another zone identifier, resetting the index
+        surfZoneIdentifier
         (
-            const surfRegionIdentifier&,
+            const surfZoneIdentifier&,
             const label index
         );
 
 
     // Destructor
 
-        virtual ~surfRegionIdentifier();
+        virtual ~surfZoneIdentifier();
 
 
     // Member Functions
@@ -125,42 +123,42 @@ public:
             return name_;
         }
 
-        //- Return the geometric type of the region
+        //- Return the geometric type of the zone
         const word& geometricType() const
         {
             return geometricType_;
         }
 
-        //- Return the geometric type of the region for modification
+        //- Return the geometric type of the zone for modification
         word& geometricType()
         {
             return geometricType_;
         }
 
-        //- Return the index of this region in the surface mesh
+        //- Return the index of this zone in the surface mesh
         label index() const
         {
-            return boundaryIndex_;
+            return index_;
         }
 
-        //- Write surfRegionIdentifier as a dictionary
+        //- Write surfZoneIdentifier as a dictionary
         void write(Ostream&) const;
 
-        //- Write surfRegionIdentifier as a dictionary
+        //- Write surfZoneIdentifier as a dictionary
 //        void writeDict(Ostream&) const;
 
 
     // Member Operators
 
-//        bool operator!=(const surfRegionIdentifier&) const;
+//        bool operator!=(const surfZoneIdentifier&) const;
 //
 //        //- compare.
-//        bool operator==(const surfRegionIdentifier&) const;
+//        bool operator==(const surfZoneIdentifier&) const;
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const surfRegionIdentifier&);
-//        friend Istream& operator>>(Istream&, surfRegionIdentifier&);
+        friend Ostream& operator<<(Ostream&, const surfZoneIdentifier&);
+//        friend Istream& operator>>(Istream&, surfZoneIdentifier&);
 };
 
 

@@ -29,7 +29,7 @@ Description
     Provide a means of reading/writing STL files (ASCII and binary).
 
 Note
-    For efficiency, the regions are sorted before creating the faces.
+    For efficiency, the zones are sorted before creating the faces.
     The class is thus derived from MeshedSurface.
 
 SourceFiles
@@ -79,7 +79,7 @@ class STLsurfaceFormat
             const pointField&,
             const Face&,
             const vector&,
-            const label regionI
+            const label zoneI
         );
 
 
@@ -142,7 +142,7 @@ public:
             const MeshedSurface<Face>&
         );
 
-        //- Write UnsortedMeshedSurface (as ASCII) sorted by region
+        //- Write UnsortedMeshedSurface (as ASCII) sorted by zone
         static void write
         (
             Ostream&,
@@ -150,7 +150,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  ASCII output is sorted by region; binary output is unsorted
+        //  ASCII output is sorted by zone; binary output is unsorted
         static void write
         (
             const fileName&,

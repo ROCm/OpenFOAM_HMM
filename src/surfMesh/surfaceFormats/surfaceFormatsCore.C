@@ -165,89 +165,89 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
 }
 
 
-// Returns region info.
-// Sets faceMap to the indexing according to region numbers.
-// Region numbers start at 0.
-Foam::surfRegionList
-Foam::fileFormats::surfaceFormatsCore::sortedRegionsById
+// Returns zone info.
+// Sets faceMap to the indexing according to zone numbers.
+// Zone numbers start at 0.
+Foam::surfZoneList
+Foam::fileFormats::surfaceFormatsCore::sortedZonesById
 (
-    const UList<label>& regionIds,
-    const Map<word>& regionNames,
+    const UList<label>& zoneIds,
+    const Map<word>& zoneNames,
     labelList& faceMap
 )
 {
-    // determine sort order according to region numbers
+    // determine sort order according to zone numbers
 
     // std::sort() really seems to mix up the order.
     // and std::stable_sort() might take too long / too much memory
 
-    // Assuming that we have relatively fewer regions compared to the
+    // Assuming that we have relatively fewer zones compared to the
     // number of items, just do it ourselves
 
-    // step 1: get region sizes and store (regionId => regionI)
+    // step 1: get zone sizes and store (origId => zoneI)
     Map<label> lookup;
-    forAll(regionIds, faceI)
+    forAll(zoneIds, faceI)
     {
-        const label regId = regionIds[faceI];
+        const label origId = zoneIds[faceI];
 
-        Map<label>::iterator fnd = lookup.find(regId);
+        Map<label>::iterator fnd = lookup.find(origId);
         if (fnd != lookup.end())
         {
             fnd()++;
         }
         else
         {
-            lookup.insert(regId, 1);
+            lookup.insert(origId, 1);
         }
     }
 
-    // step 2: assign start/size (and name) to the newRegions
-    // re-use the lookup to map (regionId => regionI)
-    surfRegionList regionLst(lookup.size());
+    // step 2: assign start/size (and name) to the newZones
+    // re-use the lookup to map (zoneId => zoneI)
+    surfZoneList zoneLst(lookup.size());
     label start = 0;
-    label regionI = 0;
+    label zoneI = 0;
     forAllIter(Map<label>, lookup, iter)
     {
-        label regId = iter.key();
+        label origId = iter.key();
 
         word name;
-        Map<word>::const_iterator fnd = regionNames.find(regId);
-        if (fnd != regionNames.end())
+        Map<word>::const_iterator fnd = zoneNames.find(origId);
+        if (fnd != zoneNames.end())
         {
             name = fnd();
         }
         else
         {
-            name = word("region") + ::Foam::name(regionI);
+            name = word("zone") + ::Foam::name(zoneI);
         }
 
-        regionLst[regionI] = surfRegion
+        zoneLst[zoneI] = surfZone
         (
             name,
             0,           // initialize with zero size
             start,
-            regionI
+            zoneI
         );
 
-        // increment the start for the next region
-        // and save the (regionId => regionI) mapping
+        // increment the start for the next zone
+        // and save the (zoneId => zoneI) mapping
         start += iter();
-        iter() = regionI++;
+        iter() = zoneI++;
     }
 
 
     // step 3: build the re-ordering
-    faceMap.setSize(regionIds.size());
+    faceMap.setSize(zoneIds.size());
 
-    forAll(regionIds, faceI)
+    forAll(zoneIds, faceI)
     {
-        label regionI = lookup[regionIds[faceI]];
+        label zoneI = lookup[zoneIds[faceI]];
         faceMap[faceI] =
-            regionLst[regionI].start() + regionLst[regionI].size()++;
+            zoneLst[zoneI].start() + zoneLst[zoneI].size()++;
     }
 
     // with reordered faces registered in faceMap
-    return regionLst;
+    return zoneLst;
 }
 
 

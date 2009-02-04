@@ -109,7 +109,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             Ostream&,
@@ -117,7 +117,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             const fileName& name,

@@ -36,7 +36,7 @@ See Also
 
 Note
     When reading, the optional @a colorspec is ignored.
-    When writing, it is set to the region number (integer).
+    When writing, it is set to the zone number (integer).
 
 SourceFiles
     OFFsurfaceFormat.C
@@ -122,7 +122,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             Ostream&,
@@ -130,7 +130,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             const fileName& name,

@@ -101,7 +101,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
         pointLst[pointI] = point(x, y, z);
     }
 
-    // Read faces - ignore optional region information
+    // Read faces - ignore optional zone information
     // use a DynamicList for possible on-the-fly triangulation
     DynamicList<Face>  dynFaces(nElems);
 
@@ -145,8 +145,8 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     // transfer to normal lists
     reset(pointLst.xfer(), dynFaces.xfer());
 
-    // no region information
-    this->oneRegion();
+    // no zone information
+    this->oneZone();
     return true;
 }
 
@@ -161,16 +161,16 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
+    List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
-    writeHeader(os, surf.points(), faceLst.size(), regionLst);
+    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        os << "# <region name=\"" << regionLst[regionI].name() << "\">" << endl;
+        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
 
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
@@ -180,10 +180,10 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
                 os << ' ' << f[fp];
             }
 
-            // add optional region information
-            os << ' ' << regionI << endl;
+            // add optional zone information
+            os << ' ' << zoneI << endl;
         }
-        os << "# </region>" << endl;
+        os << "# </zone>" << endl;
     }
     os << "# </faces>" << endl;
 }
@@ -197,16 +197,16 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
 )
 {
     const List<Face>& faceLst = surf.faces();
-    const List<surfRegion>& regionLst = surf.regions();
+    const List<surfZone>& zoneLst = surf.zones();
 
-    writeHeader(os, surf.points(), faceLst.size(), regionLst);
+    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        os << "# <region name=\"" << regionLst[regionI].name() << "\">" << endl;
+        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
 
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -216,10 +216,10 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
                 os << ' ' << f[fp];
             }
 
-            // add optional region information
-            os << ' ' << regionI << endl;
+            // add optional zone information
+            os << ' ' << zoneI << endl;
         }
-        os << "# </region>" << endl;
+        os << "# </zone>" << endl;
     }
     os << "# </faces>" << endl;
 }

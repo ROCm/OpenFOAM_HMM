@@ -23,24 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfRegion
+    Foam::surfZone
 
 Description
-    A region on a meshed surface.
-    Similar in concept to a faceZone on the surface.
+    A surface zone on a MeshedSurface.
+
+    Similar in concept to a faceZone, but the face list is contiguous.
 
 SourceFiles
-    surfRegion.C
+    surfZone.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfRegion_H
-#define surfRegion_H
+#ifndef surfZone_H
+#define surfZone_H
 
 #include "word.H"
 #include "label.H"
 #include "className.H"
-#include "surfRegionIdentifier.H"
+#include "surfZoneIdentifier.H"
 #include "autoPtr.H"
 #include "dictionary.H"
 
@@ -51,18 +52,18 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-class surfRegion;
+class surfZone;
 
-Istream& operator>>(Istream&, surfRegion&);
-Ostream& operator<<(Ostream&, const surfRegion&);
+Istream& operator>>(Istream&, surfZone&);
+Ostream& operator<<(Ostream&, const surfZone&);
 
 /*---------------------------------------------------------------------------*\
-                           Class surfRegion Declaration
+                          Class surfZone Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfRegion
+class surfZone
 :
-    public surfRegionIdentifier
+    public surfZoneIdentifier
 {
     // Private data
 
@@ -75,16 +76,16 @@ class surfRegion
 public:
 
     //- Runtime type information
-    ClassName("surfRegion");
+    ClassName("surfZone");
 
 
     // Constructors
 
         //- Construct null
-        surfRegion();
+        surfZone();
 
         //- Construct from components
-        surfRegion
+        surfZone
         (
             const word& name,
             const label size,
@@ -94,10 +95,10 @@ public:
         );
 
         //- Construct from Istream
-        surfRegion(Istream& is, const label index);
+        surfZone(Istream& is, const label index);
 
         //- Construct from dictionary
-        surfRegion
+        surfZone
         (
             const word& name,
             const dictionary& dict,
@@ -105,48 +106,48 @@ public:
         );
 
         //- Construct as copy
-        surfRegion(const surfRegion&);
+        surfZone(const surfZone&);
 
-        //- Construct from another region, resetting the index
-        surfRegion(const surfRegion&, const label index);
+        //- Construct from another zone, resetting the index
+        surfZone(const surfZone&, const label index);
 
         //- Return clone
-        autoPtr<surfRegion> clone() const
+        autoPtr<surfZone> clone() const
         {
-            notImplemented("autoPtr<surfRegion> clone() const");
-            return autoPtr<surfRegion>(NULL);
+            notImplemented("autoPtr<surfZone> clone() const");
+            return autoPtr<surfZone>(NULL);
         }
 
-        static autoPtr<surfRegion> New(Istream& is)
+        static autoPtr<surfZone> New(Istream& is)
         {
             word name(is);
             dictionary dict(is);
 
-            return autoPtr<surfRegion>(new surfRegion(name, dict, 0));
+            return autoPtr<surfZone>(new surfZone(name, dict, 0));
         }
 
 
     // Member Functions
 
-        //- Return start label of this region in the face list
+        //- Return start label of this zone in the face list
         label start() const
         {
             return start_;
         }
 
-        //- Return start label of this region in the face list
+        //- Return start label of this zone in the face list
         label& start()
         {
             return start_;
         }
 
-        //- Return size of this region in the face list
+        //- Return size of this zone in the face list
         label size() const
         {
             return size_;
         }
 
-        //- Return size of this region in the face list
+        //- Return size of this zone in the face list
         label& size()
         {
             return size_;
@@ -161,15 +162,15 @@ public:
 
     // Member Operators
 
-        bool operator!=(const surfRegion&) const;
+        bool operator!=(const surfZone&) const;
 
         //- compare.
-        bool operator==(const surfRegion&) const;
+        bool operator==(const surfZone&) const;
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, surfRegion&);
-        friend Ostream& operator<<(Ostream&, const surfRegion&);
+        friend Istream& operator>>(Istream&, surfZone&);
+        friend Ostream& operator<<(Ostream&, const surfZone&);
 };
 
 

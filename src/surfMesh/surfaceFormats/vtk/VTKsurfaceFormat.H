@@ -27,7 +27,7 @@ Class
 
 Description
     Provide a means of writing VTK legacy format.
-    The output is never sorted by region.
+    The output is never sorted by zone.
 
 SourceFiles
     VTKsurfaceFormat.C

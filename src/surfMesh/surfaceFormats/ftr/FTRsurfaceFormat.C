@@ -72,31 +72,31 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     List<Keyed<triFace> > facesRead(is);
 
     List<Face>  faceLst(facesRead.size());
-    List<label> regionIds(facesRead.size());
+    List<label> zoneIds(facesRead.size());
 
     // disentangle faces/keys - already triangulated
     forAll(facesRead, faceI)
     {
         // unfortunately cannot transfer to save memory
         faceLst[faceI]   = facesRead[faceI];
-        regionIds[faceI] = facesRead[faceI].key();
+        zoneIds[faceI] = facesRead[faceI].key();
     }
 
     this->storedFaces().transfer(faceLst);
-    this->storedRegionIds().transfer(regionIds);
+    this->storedZoneIds().transfer(zoneIds);
 
-    // change ftrPatch into surfRegionIdentifier
-    List<surfRegionIdentifier> newRegions(ftrPatches.size());
-    forAll(newRegions, regionI)
+    // change ftrPatch into surfZoneIdentifier
+    List<surfZoneIdentifier> newZones(ftrPatches.size());
+    forAll(newZones, zoneI)
     {
-        newRegions[regionI] = surfRegionIdentifier
+        newZones[zoneI] = surfZoneIdentifier
         (
-            ftrPatches[regionI].name(),
-            regionI
+            ftrPatches[zoneI].name(),
+            zoneI
         );
     }
 
-    this->storedRegionToc().transfer(newRegions);
+    this->storedZoneToc().transfer(newZones);
     return true;
 }
 

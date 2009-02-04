@@ -166,7 +166,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     Ostream& os,
     const pointField& pointLst,
     const label nFaces,
-    const UList<surfRegion>& regionLst
+    const UList<surfZone>& zoneLst
 )
 {
     word caseName = os.name().lessExt().name();
@@ -176,11 +176,11 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;
 
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        os  << "ctable " << regionI + 1 << " shell" << nl
-            << "ctname " << regionI + 1 << " "
-            << regionLst[regionI].name() << nl;
+        os  << "ctable " << zoneI + 1 << " shell" << nl
+            << "ctname " << zoneI + 1 << " "
+            << zoneLst[zoneI].name() << nl;
     }
 
     os  << "! ------------------------------" << nl

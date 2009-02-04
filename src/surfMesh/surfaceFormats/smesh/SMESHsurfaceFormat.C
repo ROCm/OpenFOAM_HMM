@@ -46,14 +46,14 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 )
 {
     const List<Face>& faceLst = surf.faces();
-    const List<surfRegion>& regionLst = surf.regions();
+    const List<surfZone>& zoneLst = surf.zones();
 
     writeHeader(os, surf.points(), faceLst.size());
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -62,7 +62,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
             {
                 os << ' ' << f[fp];
             }
-            os << ' ' << regionI << endl;
+            os << ' ' << zoneI << endl;
         }
     }
 
@@ -82,12 +82,12 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
     writeHeader(os, surf.points(), faceLst.size());
 
     labelList faceMap;
-    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
+    List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
@@ -96,7 +96,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
             {
                 os << ' ' << f[fp];
             }
-            os << ' ' << regionI << endl;
+            os << ' ' << zoneI << endl;
         }
     }
 

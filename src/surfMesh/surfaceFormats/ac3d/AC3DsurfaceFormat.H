@@ -31,8 +31,8 @@ Description
     http://www.inivis.com/ac3d/man/ac3dfileformat.html
 
 Note
-   The faces are already organized as regions.
-   The output is always sorted by regions.
+   The faces are already organized as zones.
+   The output is always sorted by zones.
 
 SourceFiles
     AC3DsurfaceFormat.C
@@ -120,7 +120,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is always sorted by regions.
+        //  The output is always sorted by zones.
         static void write
         (
             Ostream&,
@@ -128,7 +128,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is always sorted by regions.
+        //  The output is always sorted by zones.
         static void write
         (
             const fileName& name,

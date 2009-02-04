@@ -64,11 +64,11 @@ protected:
         const pointField&
     );
 
-    //- Write trailing information with region information
-    static void writeTail(Ostream&, const UList<surfRegion>&);
+    //- Write trailing information with zone information
+    static void writeTail(Ostream&, const UList<surfZone>&);
 
-    //- Write trailing information with region Ids
-    static void writeTail(Ostream&, const UList<label>& regionIds);
+    //- Write trailing information with zone Ids
+    static void writeTail(Ostream&, const UList<label>& zoneIds);
 
 };
 

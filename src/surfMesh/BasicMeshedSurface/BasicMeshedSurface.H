@@ -84,7 +84,7 @@ protected:
             return static_cast<List<Face> &>(*this);
         }
 
-        //- Set new regions from faceMap
+        //- Set new zones from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:

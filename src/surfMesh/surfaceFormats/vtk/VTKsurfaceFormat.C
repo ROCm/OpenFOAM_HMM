@@ -66,15 +66,15 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 )
 {
     const List<Face>& faceLst = surf.faces();
-    const List<surfRegion>& regionLst = surf.regions();
+    const List<surfZone>& zoneLst = surf.zones();
 
     writeHeader(os, surf.points());
     writeHeaderPolygons(os, faceLst);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -87,7 +87,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
         }
     }
 
-    writeTail(os, regionLst);
+    writeTail(os, zoneLst);
 }
 
 
@@ -115,7 +115,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
         os << ' ' << nl;
     }
 
-    writeTail(os, surf.regionIds());
+    writeTail(os, surf.zoneIds());
 }
 
 

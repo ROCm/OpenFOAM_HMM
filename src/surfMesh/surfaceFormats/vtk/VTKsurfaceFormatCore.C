@@ -58,25 +58,25 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
 void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 (
     Ostream& os,
-    const UList<surfRegion>& regionLst
+    const UList<surfZone>& zoneLst
 )
 {
     label nFaces = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        nFaces += regionLst[regionI].size();
+        nFaces += zoneLst[zoneI].size();
     }
 
-    // Print region numbers
+    // Print zone numbers
     os  << nl
         << "CELL_DATA " << nFaces << nl
         << "FIELD attributes 1" << nl
-        << "region 1 " << nFaces << " float" << nl;
+        << "zone 1 " << nFaces << " float" << nl;
 
 
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             if (localFaceI)
             {
@@ -89,7 +89,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
                     os << nl;
                 }
             }
-            os  << regionI + 1;
+            os  << zoneI + 1;
         }
         os  << nl;
     }
@@ -99,17 +99,16 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 (
     Ostream& os,
-    const UList<label>& regionIds
+    const UList<label>& zoneIds
 )
 {
-    // Print region numbers
+    // Print zone numbers
     os  << nl
-        << "CELL_DATA " << regionIds.size() << nl
+        << "CELL_DATA " << zoneIds.size() << nl
         << "FIELD attributes 1" << nl
-        << "region 1 " << regionIds.size() << " float" << nl;
+        << "zone 1 " << zoneIds.size() << " float" << nl;
 
-
-    forAll(regionIds, faceI)
+    forAll(zoneIds, faceI)
     {
         if (faceI)
         {
@@ -122,7 +121,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
                 os << nl;
             }
         }
-        os  << regionIds[faceI] + 1;
+        os  << zoneIds[faceI] + 1;
     }
     os  << nl;
 }

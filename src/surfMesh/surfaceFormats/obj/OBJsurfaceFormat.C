@@ -70,15 +70,15 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
     DynamicList<point> dynPoints;
     DynamicList<Face>  dynFaces;
-    DynamicList<label> dynRegions;
+    DynamicList<label> dynZones;
     DynamicList<word>  dynNames;
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
 
-    // place faces without a group in region0
-    label regionI = 0;
-    lookup.insert("region0", regionI);
-    dynNames.append("region0");
+    // place faces without a group in zone0
+    label zoneI = 0;
+    lookup.insert("zone0", zoneI);
+    dynNames.append("zone0");
     dynSizes.append(0);
 
     while (is.good())
@@ -111,17 +111,17 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
             HashTable<label>::const_iterator fnd = lookup.find(name);
             if (fnd != lookup.end())
             {
-                if (regionI != fnd())
+                if (zoneI != fnd())
                 {
                     // group appeared out of order
                     sorted = false;
                 }
-                regionI = fnd();
+                zoneI = fnd();
             }
             else
             {
-                regionI = dynSizes.size();
-                lookup.insert(name, regionI);
+                zoneI = dynSizes.size();
+                lookup.insert(name, zoneI);
                 dynNames.append(name);
                 dynSizes.append(0);
             }
@@ -185,15 +185,15 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                     label fp2 = (fp1 + 1) % f.size();
 
                     dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
-                    dynRegions.append(regionI);
-                    dynSizes[regionI]++;
+                    dynZones.append(zoneI);
+                    dynSizes[zoneI]++;
                 }
             }
             else
             {
                 dynFaces.append(Face(f));
-                dynRegions.append(regionI);
-                dynSizes[regionI]++;
+                dynZones.append(zoneI);
+                dynSizes[zoneI]++;
             }
         }
     }
@@ -202,10 +202,10 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     // transfer to normal lists
     this->storedPoints().transfer(dynPoints);
 
-    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
+    sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    // add regions, culling empty ones
-    this->addRegions(dynSizes, dynNames, true);
+    // add zones, culling empty ones
+    this->addZones(dynSizes, dynNames, true);
     return true;
 }
 
@@ -218,18 +218,18 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 )
 {
     const List<Face>& faceLst = surf.faces();
-    const List<surfRegion>& regionLst = surf.regions();
+    const List<surfZone>& zoneLst = surf.zones();
 
-    writeHeader(os, surf.points(), faceLst.size(), regionLst);
+    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        const surfRegion& reg = regionLst[regionI];
+        const surfZone& zone = zoneLst[zoneI];
 
-        os << "g " << reg.name() << endl;
+        os << "g " << zone.name() << endl;
 
-        forAll(reg, localFaceI)
+        forAll(zone, localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -255,19 +255,19 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
+    List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
-    writeHeader(os, surf.points(), faceLst.size(), regionLst);
+    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        // Print all faces belonging to this region
-        const surfRegion& reg = regionLst[regionI];
+        // Print all faces belonging to this zone
+        const surfZone& zone = zoneLst[zoneI];
 
-        os << "g " << reg.name() << endl;
+        os << "g " << zone.name() << endl;
 
-        forAll(reg, localFaceI)
+        forAll(zone, localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 

@@ -39,8 +39,8 @@ SourceFiles
 #include "Map.H"
 #include "HashSet.H"
 #include "labelList.H"
-#include "surfRegionList.H"
-#include "surfRegionIdentifierList.H"
+#include "surfZoneList.H"
+#include "surfZoneIdentifierList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,12 +92,12 @@ public:
         //- Name of UnsortedMeshedSurface directory to use.
         static fileName findMeshName(const Time&);
 
-        //- Determine the sort order from the region ids.
-        //  Returns region list and sets faceMap to indices within faceLst
-        static surfRegionList sortedRegionsById
+        //- Determine the sort order from the zone ids.
+        //  Returns zone list and sets faceMap to indices within faceLst
+        static surfZoneList sortedZonesById
         (
-            const UList<label>& regionIds,
-            const Map<word>& regionNames,
+            const UList<label>& zoneIds,
+            const Map<word>& zoneNames,
             labelList& faceMap
         );
 

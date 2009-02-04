@@ -29,7 +29,7 @@ Description
     Provide a means of reading/writing .tri format.
 
 Note
-    For efficiency, the regions are sorted before creating the faces.
+    For efficiency, the zones are sorted before creating the faces.
     The class is thus derived from MeshedSurface.
 
 SourceFiles
@@ -69,7 +69,7 @@ class TRIsurfaceFormat
             Ostream&,
             const pointField&,
             const Face&,
-            const label regionI
+            const label zoneI
         );
 
         //- Disallow default bitwise copy construct
@@ -123,7 +123,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions
+        //  By default, the output is not sorted by zones
         static void write
         (
             Ostream&,
@@ -131,7 +131,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions
+        //  By default, the output is not sorted by zones
         static void write
         (
             const fileName& name,

@@ -27,7 +27,7 @@ Class
 
 Description
     Provide a means of reading/writing GTS format.
-    The output is never sorted by region.
+    The output is never sorted by zone.
 
 SourceFiles
     GTSsurfaceFormat.C

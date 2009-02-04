@@ -22,89 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::surfRegionIOList
+Typedef
+    Foam::surfZoneList
 
 Description
-    IOobject for a surfRegionList
-
-SourceFiles
-    surfRegionIOList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfRegionIOList_H
-#define surfRegionIOList_H
+#ifndef surfZoneList_H
+#define surfZoneList_H
 
-#include "surfRegionList.H"
-#include "regIOobject.H"
-#include "faceList.H"
-#include "className.H"
+#include "surfZone.H"
+#include "List.H"
+#include "surfZoneIdentifierList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-/*---------------------------------------------------------------------------*\
-                      Class surfRegionIOList Declaration
-\*---------------------------------------------------------------------------*/
-
-class surfRegionIOList
-:
-    public surfRegionList,
-    public regIOobject
-{
-    // Private data
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        surfRegionIOList(const surfRegionIOList&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const surfRegionIOList&);
-
-
-public:
-
-    //- Runtime type information
-    TypeName("surfRegionIOList");
-
-
-    // Constructors
-
-        //- Construct from IOobject
-        explicit surfRegionIOList(const IOobject&);
-
-        //- Construct from IOobject
-        surfRegionIOList(const IOobject&, const surfRegionList&);
-
-    // Destructor
-
-        ~surfRegionIOList();
-
-
-    // Member Functions
-
-        //- writeData member function required by regIOobject
-        bool writeData(Ostream&) const;
-
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const surfRegionIOList&);
-};
-
+typedef List<surfZone>  surfZoneList;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

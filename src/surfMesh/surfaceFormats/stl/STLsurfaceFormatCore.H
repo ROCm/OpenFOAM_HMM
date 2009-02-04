@@ -63,8 +63,8 @@ class STLsurfaceFormatCore
         //- The points supporting the facets
         pointField points_;
 
-        //- The regions associated with the faces
-        List<label> regionIds_;
+        //- The zones associated with the faces
+        List<label> zoneIds_;
 
         //- The solid names, in the order of their first appearance
         List<word> names_;
@@ -123,7 +123,7 @@ public:
         {
             sorted_ = true;
             points_.clear();
-            regionIds_.clear();
+            zoneIds_.clear();
             names_.clear();
             sizes_.clear();
         }
@@ -134,10 +134,10 @@ public:
             return points_;
         }
 
-        //- Return full access to the regionIds
-        List<label>& regionIds()
+        //- Return full access to the zoneIds
+        List<label>& zoneIds()
         {
-            return regionIds_;
+            return zoneIds_;
         }
 
         //- The list of solid names in the order of their first appearance

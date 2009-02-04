@@ -1,9 +1,15 @@
-surfRegion/surfRegion/surfRegion.C
-surfRegion/surfRegion/surfRegionIOList.C
-surfRegion/surfRegionIdentifier/surfRegionIdentifier.C
+surfZone/surfZone/surfZone.C
+surfZone/surfZone/surfZoneIOList.C
+surfZone/surfZoneIdentifier/surfZoneIdentifier.C
 
 MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
+
+surfaceRegistry/surfaceRegistry.C
+surfFields/surfFields.C
+surfMesh/surfMesh.C
+surfMesh/surfMeshClear.C
+surfMesh/surfMeshIO.C
 
 surfaceFormats = surfaceFormats
 $(surfaceFormats)/surfaceFormatsCore.C

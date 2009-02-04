@@ -22,34 +22,61 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::surfRegionIdentifierList
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfRegionIdentifierList_H
-#define surfRegionIdentifierList_H
-
-#include "surfRegionIdentifier.H"
-#include "List.H"
+#include "surfFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<>
+const word surfLabelField::typeName("surfLabelField");
+
+template<>
+const word surfScalarField::typeName("surfScalarField");
+
+template<>
+const word surfVectorField::typeName("surfVectorField");
+
+template<>
+const word surfSphericalTensorField::typeName("surfSphericalTensorField");
+
+template<>
+const word surfSymmTensorField::typeName("surfSymmTensorField");
+
+template<>
+const word surfTensorField::typeName("surfTensorField");
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef List<surfRegionIdentifier>  surfRegionIdentifierList;
+template<>
+tmp<DimensionedField<scalar, surfMesh> >
+DimensionedField<scalar, surfMesh>::component
+(
+    const direction
+) const
+{
+    return *this;
+}
+
+
+template<>
+void DimensionedField<scalar, surfMesh>::replace
+(
+    const direction,
+    const DimensionedField<scalar, surfMesh>& sf
+)
+{
+    *this == sf;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

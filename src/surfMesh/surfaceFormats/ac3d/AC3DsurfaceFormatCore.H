@@ -77,7 +77,7 @@ protected:
     );
 
     //- Write header with materials
-    static void writeHeader(Ostream&, const UList<surfRegion>&);
+    static void writeHeader(Ostream&, const UList<surfZone>&);
 
 };
 
