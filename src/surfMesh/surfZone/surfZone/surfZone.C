@@ -35,7 +35,6 @@ Description
 defineTypeNameAndDebug(Foam::surfZone, 0);
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfZone::surfZone()
@@ -137,9 +136,9 @@ bool Foam::surfZone::operator==(const surfZone& rhs) const
 {
     return
     (
-        (geometricType() == rhs.geometricType())
-     && (size() == rhs.size())
-     && (start() == rhs.start())
+        size() == rhs.size()
+     && start() == rhs.start()
+     && geometricType() == rhs.geometricType()
     );
 }
 

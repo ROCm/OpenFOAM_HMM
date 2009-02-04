@@ -2,6 +2,7 @@ surfZone/surfZone/surfZone.C
 surfZone/surfZone/surfZoneIOList.C
 surfZone/surfZoneIdentifier/surfZoneIdentifier.C
 
+MeshedSurface/MeshedSurfaceCore.C
 MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 

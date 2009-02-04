@@ -299,6 +299,8 @@ Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Face>

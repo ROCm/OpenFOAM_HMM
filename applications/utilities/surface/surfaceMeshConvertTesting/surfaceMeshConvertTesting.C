@@ -102,8 +102,8 @@ int main(int argc, char *argv[])
 
     if
     (
-        !meshedSurface::canRead(importName, true)
-     || !meshedSurface::canWriteType(exportName.ext(), true)
+        !MeshedSurface<face>::canRead(importName, true)
+     || !MeshedSurface<face>::canWriteType(exportName.ext(), true)
     )
     {
         return 1;

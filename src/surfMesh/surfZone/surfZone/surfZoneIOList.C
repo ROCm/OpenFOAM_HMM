@@ -50,7 +50,6 @@ Foam::surfZoneIOList::surfZoneIOList
     {
         surfZoneList& zones = *this;
 
-        // read polyPatchList
         Istream& is = readStream(typeName);
 
         PtrList<entry> dictEntries(is);
@@ -82,9 +81,8 @@ Foam::surfZoneIOList::surfZoneIOList
             {
                 FatalErrorIn(functionName)
                     << "surfZones are not ordered. Start of zone " << zoneI
-                    << " does not correspond to sum of preceding zones."
-                    << endl
-                    << "while reading " << io.objectPath()
+                    << " does not correspond to sum of preceding zones." << nl
+                    << "while reading " << io.objectPath() << endl
                     << exit(FatalError);
             }
 
@@ -98,11 +96,22 @@ Foam::surfZoneIOList::surfZoneIOList
     }
 }
 
-// Construct from IOObject
+
 Foam::surfZoneIOList::surfZoneIOList
 (
     const IOobject& io,
     const surfZoneList& zones
+)
+:
+    surfZoneList(zones),
+    regIOobject(io)
+{}
+
+
+Foam::surfZoneIOList::surfZoneIOList
+(
+    const IOobject& io,
+    const Xfer<surfZoneList>& zones
 )
 :
     surfZoneList(zones),
@@ -122,7 +131,7 @@ Foam::surfZoneIOList::~surfZoneIOList()
 // writeData member function required by regIOobject
 bool Foam::surfZoneIOList::writeData(Ostream& os) const
 {
-    os << *this;
+    os  << *this;
     return os.good();
 }
 
@@ -131,14 +140,14 @@ bool Foam::surfZoneIOList::writeData(Ostream& os) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIOList& L)
 {
-    os  << L.size() << nl << token::BEGIN_LIST;
+    os  << L.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
     forAll(L, i)
     {
         L[i].writeDict(os);
     }
 
-    os  << token::END_LIST;
+    os  << decrIndent << token::END_LIST;
 
     return os;
 }

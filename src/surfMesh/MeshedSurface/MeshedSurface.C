@@ -225,13 +225,13 @@ Foam::MeshedSurface<Face>::MeshedSurface
         mesh.points()
     );
 
-    // use global/local points
+    // use global/local points:
     const pointField& bPoints =
     (
         useGlobalPoints ? mesh.points() : allBoundary.localPoints()
     );
 
-    // global or local face addressing
+    // global/local face addressing:
     const List<Face>& bFaces =
     (
         useGlobalPoints ? allBoundary : allBoundary.localFaces()
@@ -242,22 +242,29 @@ Foam::MeshedSurface<Face>::MeshedSurface
     surfZoneList newZones(bPatches.size());
 
     label startFaceI = 0;
+    label nZone = 0;
     forAll(bPatches, patchI)
     {
         const polyPatch& p = bPatches[patchI];
 
-        newZones[patchI] = surfZone
-        (
-            p.name(),
-            p.size(),
-            startFaceI,
-            patchI
-        );
+        if (p.size())
+        {
+            newZones[nZone] = surfZone
+            (
+                p.name(),
+                p.size(),
+                startFaceI,
+                nZone
+            );
 
-        startFaceI += p.size();
+            nZone++;
+            startFaceI += p.size();
+        }
     }
 
-    // must create with the same face type as the polyBoundaryMesh
+    newZones.setSize(nZone);
+
+    // same face type as the polyBoundaryMesh
     MeshedSurface<face> surf
     (
         xferCopy(bPoints),
@@ -265,42 +272,14 @@ Foam::MeshedSurface<Face>::MeshedSurface
         xferMove(newZones)
     );
 
-
-    // must triangulate?
-    if (this->isTri())
-    {
-        surf.triangulate();
-        this->storedPoints().transfer(surf.storedPoints());
-
-        // transcribe from face -> triFace
-        List<face>&    origFaces = surf.storedFaces();
-        List<triFace>  newFaces(origFaces.size());
-        forAll(origFaces, faceI)
-        {
-            newFaces[faceI] = Face
-            (
-                static_cast<const UList<label>&>(origFaces[faceI])
-            );
-        }
-        origFaces.clear();
-
-        this->storedFaces().transfer(newFaces);
-        zones_.transfer(surf.zones_);
-    }
-    else
-    {
-        this->transfer(surf);
-    }
+    this->transcribe(surf);
 }
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const surfMesh& mesh
-)
+Foam::MeshedSurface<Face>::MeshedSurface(const surfMesh& mesh)
 {
-    // must create with the same face type as surfMesh
+    // same face type as surfMesh
     MeshedSurface<face> surf
     (
         xferCopy(mesh.points()),
@@ -308,31 +287,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
         xferCopy(mesh.surfZones())
     );
 
-    // must triangulate?
-    if (this->isTri())
-    {
-        surf.triangulate();
-        this->storedPoints().transfer(surf.storedPoints());
-
-        // transcribe from face -> triFace
-        List<face>&    origFaces = surf.storedFaces();
-        List<triFace>  newFaces(origFaces.size());
-        forAll(origFaces, faceI)
-        {
-            newFaces[faceI] = Face
-            (
-                static_cast<const UList<label>&>(origFaces[faceI])
-            );
-        }
-        origFaces.clear();
-
-        this->storedFaces().transfer(newFaces);
-        zones_.transfer(surf.zones_);
-    }
-    else
-    {
-        this->transfer(surf);
-    }
+    this->transcribe(surf);
 }
 
 
@@ -426,6 +381,9 @@ Foam::MeshedSurface<Face>::~MeshedSurface()
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 template<class Face>
 void Foam::MeshedSurface<Face>::oneZone(const word& name)
 {
@@ -447,7 +405,7 @@ void Foam::MeshedSurface<Face>::oneZone(const word& name)
     zones_[0] = surfZone
     (
         zoneName,
-        size(),         // zone size
+        this->size(),   // zone size
         0,              // zone start
         0               // zone index
     );
@@ -583,8 +541,6 @@ void Foam::MeshedSurface<Face>::remapFaces
         }
     }
 }
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

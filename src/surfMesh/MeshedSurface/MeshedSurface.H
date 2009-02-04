@@ -67,7 +67,7 @@ class polyBoundaryMesh;
 class surfMesh;
 
 template<class Face>
-    Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
+Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
 
 /*---------------------------------------------------------------------------*\
                       Class MeshedSurface Declaration
@@ -79,7 +79,14 @@ class MeshedSurface
     public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
-    friend class UnsortedMeshedSurface<Face>;
+    // friends despite different faces
+    template<class Face2>
+    friend class MeshedSurface;
+
+    // friends despite different faces
+    template<class Face2>
+    friend class UnsortedMeshedSurface;
+
     friend class surfMesh;
 
 private:
@@ -98,6 +105,9 @@ private:
 
         //- Read OpenFOAM Surface format
         bool read(Istream&);
+
+        //- Transfer points/zones and transcribe face -> triFace
+        void transcribe(MeshedSurface<face>&);
 
 protected:
 

@@ -83,6 +83,14 @@ class UnsortedMeshedSurface
     public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
+    // friends despite different faces
+    template<class Face2>
+    friend class MeshedSurface;
+
+    // friends despite different faces
+    template<class Face2>
+    friend class UnsortedMeshedSurface;
+
     friend class MeshedSurface<Face>;
 
 private:

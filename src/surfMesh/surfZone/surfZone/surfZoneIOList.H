@@ -72,7 +72,7 @@ class surfZoneIOList
 public:
 
     //- Runtime type information
-    TypeName("surfZoneIOList");
+    TypeName("surfZoneList");
 
 
     // Constructors
@@ -80,8 +80,11 @@ public:
         //- Construct from IOobject
         explicit surfZoneIOList(const IOobject&);
 
-        //- Construct from IOobject
+        //- Construct from IOobject and surfZoneList
         surfZoneIOList(const IOobject&, const surfZoneList&);
+
+        //- Construct from IOobject and surfZoneList
+        surfZoneIOList(const IOobject&, const Xfer<surfZoneList>&);
 
     // Destructor
 

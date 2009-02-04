@@ -532,10 +532,35 @@ void Foam::BasicMeshedSurface<Face>::remapFaces(const UList<label>&)
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::writeStats(Ostream& os) const
 {
-    os  << "points      : " << this->points().size() << nl
-        << (this->isTri() ? "triangles   : " : "faces       : ")
-        << this->size() << nl
-        << "boundingBox : " << boundBox(this->points()) << endl;
+    os  << "points      : " << this->points().size() << nl;
+    if (this->isTri())
+    {
+        os << "triangles   : " << this->size() << nl;
+    }
+    else
+    {
+        label nTri = 0;
+        label nQuad = 0;
+        forAll(*this, i)
+        {
+            const label n = this->operator[](i).size();
+
+            if (n == 3)
+            {
+                nTri++;
+            }
+            else if (n == 4)
+            {
+                nQuad++;
+            }
+        }
+
+        os  << "faces       : " << this->size()
+            << "  (tri:" << nTri << " quad:" << nQuad 
+            << " poly:" << (this->size() - nTri - nQuad ) << ")" << nl;
+    }
+
+    os  << "boundingBox : " << boundBox(this->points()) << endl;
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
