@@ -3,10 +3,9 @@
     {
         solve
         (
-            fvm::ddt(rhosCps[i], Ts[i]) - fvm::laplacian(Ks[i], Ts[i])
+            fvm::ddt(rho*cp, T) - fvm::laplacian(K, T)
         );
     }
 
-    Info<< "Min/max T:" << min(Ts[i]) << ' ' << max(Ts[i])
-        << endl;
+    Info<< "Min/max T:" << min(T) << ' ' << max(T) << endl;
 }

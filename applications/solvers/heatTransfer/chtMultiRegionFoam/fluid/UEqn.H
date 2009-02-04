@@ -1,10 +1,14 @@
-    tmp<fvVectorMatrix> UEqn = solveMomentumEquation
+    // Solve the Momentum equation
+    tmp<fvVectorMatrix> UEqn
     (
-        momentumPredictor,
-        Uf[i],
-        rhof[i],
-        phif[i],
-        pdf[i],
-        ghf[i],
-        turb[i]
+        fvm::ddt(rho, U)
+      + fvm::div(phi, U)
+      + turb.divDevRhoReff(U)
     );
+
+    UEqn().relax();
+
+    if (momentumPredictor)
+    {
+        solve(UEqn() == -fvc::grad(pd) - fvc::grad(rho)*gh);
+    }

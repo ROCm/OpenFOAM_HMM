@@ -12,4 +12,4 @@
     #       include "pEqn.H"
         }
     }
-    turb[i].correct();
+    turb.correct();

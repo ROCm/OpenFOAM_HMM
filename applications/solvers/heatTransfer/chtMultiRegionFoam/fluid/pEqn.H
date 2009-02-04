@@ -1,60 +1,70 @@
 {
     bool closedVolume = false;
 
-    rhof[i] = thermof[i].rho();
+    rho = thermo.rho();
 
     volScalarField rUA = 1.0/UEqn().A();
-    Uf[i] = rUA*UEqn().H();
+    U = rUA*UEqn().H();
 
-    phif[i] =
-        fvc::interpolate(rhof[i])
+    phi =
+        fvc::interpolate(rho)
        *(
-            (fvc::interpolate(Uf[i]) & fluidRegions[i].Sf())
-          + fvc::ddtPhiCorr(rUA, rhof[i], Uf[i], phif[i])
+            (fvc::interpolate(U) & mesh.Sf())
+          + fvc::ddtPhiCorr(rUA, rho, U, phi)
         )
-      - fvc::interpolate(rhof[i]*rUA*ghf[i])
-       *fvc::snGrad(rhof[i])
-       *fluidRegions[i].magSf();
+      - fvc::interpolate(rho*rUA*gh)*fvc::snGrad(rho)*mesh.magSf();
 
-    // Solve pressure difference
-#   include "pdEqn.H"
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    {
+        fvScalarMatrix pdEqn
+        (
+            fvc::ddt(rho)
+          + fvc::div(phi)
+          - fvm::laplacian(rho*rUA, pd)
+        );
+
+        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
+        {
+            pdEqn.solve(mesh.solver(pd.name() + "Final"));
+        }
+        else
+        {
+            pdEqn.solve(mesh.solver(pd.name()));
+        }
+
+        if (nonOrth == nNonOrthCorr)
+        {
+            phi += pdEqn.flux();
+        }
+    }
+
+    // Update pressure field (including bc)
+    thermo.p() == pd + rho*gh + pRef;
+    DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
     // Solve continuity
 #   include "rhoEqn.H"
 
-    // Update pressure field (including bc)
-    thermof[i].p() == pdf[i] + rhof[i]*ghf[i] + pRef;
-    DpDtf[i] = fvc::DDt
-    (
-        surfaceScalarField("phiU", phif[i]/fvc::interpolate(rhof[i])),
-        thermof[i].p()
-    );
-
     // Update continuity errors
-    compressibleContinuityErrors(cumulativeContErr, rhof[i], thermof[i]);
+#   include "compressibleContinuityErrors.H"
 
     // Correct velocity field
-    Uf[i] -= rUA*(fvc::grad(pdf[i]) + fvc::grad(rhof[i])*ghf[i]);
-    Uf[i].correctBoundaryConditions();
+    U -= rUA*(fvc::grad(pd) + fvc::grad(rho)*gh);
+    U.correctBoundaryConditions();
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
     if (closedVolume)
     {
-        thermof[i].p() +=
+        thermo.p() +=
             (
-                dimensionedScalar
-                (
-                    "massIni",
-                    dimMass,
-                    initialMassf[i]
-                )
-              - fvc::domainIntegrate(thermof[i].psi()*thermof[i].p())
-            )/fvc::domainIntegrate(thermof[i].psi());
-        pdf[i] == thermof[i].p() - (rhof[i]*ghf[i] + pRef);
-        rhof[i] = thermof[i].rho();
+                dimensionedScalar("massIni", dimMass, initialMassf[i])
+              - fvc::domainIntegrate(thermo.psi()*thermo.p())
+            )/fvc::domainIntegrate(thermo.psi());
+        pd == thermo.p() - (rho*gh + pRef);
+        rho = thermo.rho();
     }
 
     // Update thermal conductivity
-    Kf[i] = thermof[i].Cp()*turb[i].alphaEff();
+    K = thermo.Cp()*turb.alphaEff();
 }
