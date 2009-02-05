@@ -29,10 +29,10 @@ License
 #include "OFstream.H"
 #include "Time.H"
 #include "SortableList.H"
+#include "surfMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::word Foam::fileFormats::surfaceFormatsCore::meshSubDir("meshedSurface");
 Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -62,13 +62,28 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
 
 
 Foam::fileName
+Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
+{
+    const word name(surfName.size() ? surfName : surfaceRegistry::defaultName);
+
+    return fileName
+    (
+        surfaceRegistry::subInstance
+      / name
+      / surfMesh::meshSubDir
+      / name + "." + nativeExt
+    );
+}
+
+
+Foam::fileName
 Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 (
     const Time& d,
-    const word& subdirName
+    const word& surfName
 )
 {
-    fileName foamName(d.caseName() + "." + nativeExt);
+    fileName localName = localMeshFileName(surfName);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
@@ -91,7 +106,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     {
         for (label i = instanceI; i >= 0; --i)
         {
-            if (isFile(d.path()/ts[i].name()/subdirName/foamName))
+            if (isFile(d.path()/ts[i].name()/localName))
             {
                 return ts[i].name();
             }
@@ -103,13 +118,13 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 
 
 Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshName
+Foam::fileFormats::surfaceFormatsCore::findMeshFile
 (
     const Time& d,
-    const word& subdirName
+    const word& surfName
 )
 {
-    fileName foamName(d.caseName() + "." + nativeExt);
+    fileName localName = localMeshFileName(surfName);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
@@ -132,7 +147,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
     {
         for (label i = instanceI; i >= 0; --i)
         {
-            fileName testName(d.path()/ts[i].name()/subdirName/foamName);
+            fileName testName(d.path()/ts[i].name()/localName);
 
             if (isFile(testName))
             {
@@ -141,27 +156,8 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
         }
     }
 
-    return d.path()/"constant"/subdirName/foamName;
-}
-
-
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshInstance
-(
-    const Time& d
-)
-{
-    return findMeshInstance(d, meshSubDir);
-}
-
-
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshName
-(
-    const Time& d
-)
-{
-    return findMeshName(d, meshSubDir);
+    // fallback to "constant"
+    return d.path()/"constant"/localName;
 }
 
 

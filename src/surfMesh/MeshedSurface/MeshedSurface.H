@@ -204,7 +204,7 @@ public:
         MeshedSurface(Istream&);
 
         //- Construct from objectRegistry
-        MeshedSurface(const Time&);
+        MeshedSurface(const Time&, const word& surfName="");
 
         //- Construct as copy
         MeshedSurface(const MeshedSurface&);
@@ -348,7 +348,7 @@ public:
         }
 
         //- Write to database
-        void write(const Time&) const;
+        void write(const Time&, const word& surfName="") const;
 
 
     // Member operators

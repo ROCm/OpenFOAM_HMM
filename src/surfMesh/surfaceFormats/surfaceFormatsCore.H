@@ -65,9 +65,6 @@ public:
 
     // Static Data
 
-    //- Return the mesh sub-directory name (usually "meshedSurface")
-    static word meshSubDir;
-
     //- The file extension corresponding to 'native' surface format
     //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
     static word nativeExt;
@@ -80,17 +77,14 @@ public:
         //- Read non-comment line
         static string getLineNoComment(IFstream&);
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshInstance(const Time&, const word& subdirName);
+        //- Return the local file name (within time directory)
+        static fileName localMeshFileName(const word& surfName="");
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshName(const Time&, const word& subdirName);
+        //- Find instance with surfName
+        static fileName findMeshInstance(const Time&, const word& surfName="");
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshInstance(const Time&);
-
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshName(const Time&);
+        //- Find mesh file with surfName
+        static fileName findMeshFile(const Time&, const word& surfName="");
 
         //- Determine the sort order from the zone ids.
         //  Returns zone list and sets faceMap to indices within faceLst

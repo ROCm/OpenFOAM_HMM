@@ -83,9 +83,23 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("from", "sourceCoordinateSystem");
     argList::validOptions.insert("to",   "targetCoordinateSystem");
 
-    argList args(argc, argv);
-    Time runTime(args.rootPath(), args.caseName());
+#   include "setRootCase.H"
+#   include "createTime.H"
+
     const stringList& params = args.additionalArgs();
+
+    // try for the latestTime, but create "constant" as needed
+    instantList Times = runTime.times();
+    if (Times.size())
+    {
+        label startTime = Times.size()-1;
+        runTime.setTime(Times[startTime], startTime);
+    }
+    else
+    {
+        runTime.setTime(instant(0, runTime.constant()), 0);
+    }
+
 
     fileName importName(params[0]);
     word exportName("default");
@@ -198,7 +212,6 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
     }
-
 
 
 

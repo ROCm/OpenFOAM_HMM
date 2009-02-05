@@ -31,21 +31,27 @@ License
 
 defineTypeNameAndDebug(Foam::surfaceRegistry, 0);
 
+const Foam::word Foam::surfaceRegistry::subInstance("surfaces");
+Foam::word Foam::surfaceRegistry::defaultName("default");
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceRegistry::surfaceRegistry(const IOobject& io, const word& name)
+Foam::surfaceRegistry::surfaceRegistry
+(
+    const objectRegistry& obr,
+    const word& surfName
+)
 :
     objectRegistry
     (
         IOobject
         (
-            name,
-            ( io.instance().size() ? io.instance() : "constant" ),
-            "surfaces",
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject()
+            ( surfName.size() ? surfName : defaultName ),
+            obr.time().timeName(),
+            subInstance,
+            obr,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
         )
     )
 {}

@@ -49,8 +49,8 @@ Foam::BasicMeshedSurface<Face>::BasicMeshedSurface()
 template<class Face>
 Foam::BasicMeshedSurface<Face>::BasicMeshedSurface
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst
 )
 :
     ParentType(List<Face>(), pointField())
@@ -112,8 +112,8 @@ void Foam::BasicMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::reset
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst
 )
 {
     ParentType::clearOut();
@@ -135,8 +135,8 @@ void Foam::BasicMeshedSurface<Face>::reset
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::reset
 (
-    const Xfer<List<point> >& pointLst,
-    const Xfer<List<Face> >& faceLst
+    const Xfer< List<point> >& pointLst,
+    const Xfer< List<Face> >& faceLst
 )
 {
     ParentType::clearOut();
@@ -556,7 +556,7 @@ void Foam::BasicMeshedSurface<Face>::writeStats(Ostream& os) const
         }
 
         os  << "faces       : " << this->size()
-            << "  (tri:" << nTri << " quad:" << nQuad 
+            << "  (tri:" << nTri << " quad:" << nQuad
             << " poly:" << (this->size() - nTri - nQuad ) << ")" << nl;
     }
 

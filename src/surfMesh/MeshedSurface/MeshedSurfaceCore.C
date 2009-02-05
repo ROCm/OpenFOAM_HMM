@@ -25,17 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
-#include "IFstream.H"
-#include "OFstream.H"
-#include "Time.H"
-#include "ListOps.H"
-#include "polyBoundaryMesh.H"
-#include "polyMesh.H"
-#include "surfMesh.H"
-#include "primitivePatch.H"
-#include "addToRunTimeSelectionTable.H"
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

@@ -63,13 +63,13 @@ class MeshedSurface;
 class surfMeshAllocator
 {
 protected:
-    pointIOField ioPoints_;
-    faceIOList   ioFaces_;
+    pointIOField storedPoints_;
+    faceIOList   storedFaces_;
 
     surfMeshAllocator(const IOobject& ioPoints, const IOobject& ioFaces)
     :
-        ioPoints_(ioPoints),
-        ioFaces_(ioFaces)
+        storedPoints_(ioPoints),
+        storedFaces_(ioFaces)
     {}
 
     surfMeshAllocator
@@ -80,8 +80,8 @@ protected:
         const faceList& faces
     )
     :
-        ioPoints_(ioPoints, points),
-        ioFaces_(ioFaces, faces)
+        storedPoints_(ioPoints, points),
+        storedFaces_(ioFaces, faces)
     {}
 
     surfMeshAllocator
@@ -92,8 +92,8 @@ protected:
         const Xfer<faceList>& faces
     )
     :
-        ioPoints_(ioPoints, points),
-        ioFaces_(ioFaces, faces)
+        storedPoints_(ioPoints, points),
+        storedFaces_(ioFaces, faces)
     {}
 
 };
@@ -160,6 +160,28 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const surfMesh&);
 
+protected:
+
+    // Protected Member Functions
+
+        //- Non-const access to global points
+        pointIOField& storedPoints()
+        {
+            return surfMeshAllocator::storedPoints_;
+        }
+
+        //- Non-const access to the faces
+        faceIOList& storedFaces()
+        {
+            return surfMeshAllocator::storedFaces_;
+        }
+
+        //- Non-const access to the zones
+        surfZoneIOList& storedZones()
+        {
+            return surfZones_;
+        }
+
 public:
 
     // Public typedefs
@@ -170,20 +192,13 @@ public:
     //- Runtime type information
     TypeName("surfMesh");
 
-    //- Return the default surface name
-    static word defaultName;
-
-    //- Return the mesh sub-directory name (usually "surfMesh")
+    //- Return the mesh sub-directory name (normally "surfMesh")
     static word meshSubDir;
-
-    //- Return the default zone name
-    static word defaultZoneName;
-
 
     // Constructors
 
-        //- Construct from IOobject
-        explicit surfMesh(const IOobject& io);
+        //- Construct from IOobject, with alternative surface name
+        explicit surfMesh(const IOobject&, const word& surfName="");
 
         //- Construct by transferring components (points, faces) without zones.
         //  surfZones are added using addZones() member function
@@ -192,23 +207,15 @@ public:
             const IOobject&,
             const Xfer<pointField>&,
             const Xfer<faceList>&,
-            const bool syncPar=true
+            const word& surfName=""
         );
 
-        //- Construct copy from MeshedSurface
-        surfMesh
-        (
-            const IOobject&,
-            const MeshedSurface<face>& surf,
-            const bool syncPar=true
-        );
-
-        //- Construct copy from MeshedSurface
+        //- Construct copy/move from MeshedSurface
         surfMesh
         (
             const IOobject&,
             const Xfer< MeshedSurface<face> >& surf,
-            const bool syncPar=true
+            const word& surfName=""
         );
 
     // Destructor
@@ -224,7 +231,7 @@ public:
             fileName meshDir() const;
 
             //- Return the current instance directory for points
-            //  Used in the consruction of gemometric mesh data dependent
+            //  Used in the consruction of geometric mesh data dependent
             //  on points
             const fileName& pointsInstance() const;
 
@@ -300,6 +307,7 @@ public:
             );
 
 
+            //- Transfer the contents of the argument and annull the argument
             void transfer(MeshedSurface<face>&);
 
         //  Storage management

@@ -340,9 +340,9 @@ Foam::MeshedSurface<Face>::MeshedSurface(Istream& is)
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const Time& d)
+Foam::MeshedSurface<Face>::MeshedSurface(const Time& d, const word& surfName)
 {
-    read(IFstream(findMeshName(d))());
+    read(IFstream(findMeshFile(d, surfName))());
 }
 
 
@@ -822,9 +822,9 @@ bool Foam::MeshedSurface<Face>::read
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::write(const Time& d) const
+void Foam::MeshedSurface<Face>::write(const Time& d, const word& surfName) const
 {
-    write(OFstream(findMeshName(d))());
+    write(OFstream(findMeshFile(d, surfName))());
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

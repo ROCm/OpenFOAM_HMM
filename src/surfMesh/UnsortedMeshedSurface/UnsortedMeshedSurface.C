@@ -253,9 +253,13 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(Istream& is)
 
 
 template<class Face>
-Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(const Time& d)
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    const Time& d,
+    const word& surfName
+)
 {
-    read(IFstream(findMeshName(d))());
+    read(IFstream(findMeshFile(d, surfName))());
 }
 
 
@@ -631,9 +635,13 @@ bool Foam::UnsortedMeshedSurface<Face>::read
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::write(const Time& d) const
+void Foam::UnsortedMeshedSurface<Face>::write
+(
+    const Time& d,
+    const word& surfName
+) const
 {
-    write(OFstream(findMeshName(d))());
+    write(OFstream(findMeshFile(d, surfName))());
 }
 
 

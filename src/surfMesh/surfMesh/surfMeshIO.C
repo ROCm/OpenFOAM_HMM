@@ -37,11 +37,11 @@ void Foam::surfMesh::setInstance(const fileName& inst)
             << "Resetting file instance to " << inst << endl;
     }
 
-    ioPoints_.writeOpt() = IOobject::AUTO_WRITE;
-    ioPoints_.instance() = inst;
+    storedPoints_.writeOpt() = IOobject::AUTO_WRITE;
+    storedPoints_.instance() = inst;
 
-    ioFaces_.writeOpt() = IOobject::AUTO_WRITE;
-    ioFaces_.instance() = inst;
+    storedFaces_.writeOpt() = IOobject::AUTO_WRITE;
+    storedFaces_.instance() = inst;
 
     surfZones_.writeOpt() = IOobject::AUTO_WRITE;
     surfZones_.instance() = inst;
@@ -56,16 +56,16 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             << "Updating mesh based on saved data." << endl;
     }
 
-    // Find the point and cell instance
+    // Find point and face instances
     fileName pointsInst(time().findInstance(meshDir(), "points"));
     fileName facesInst(time().findInstance(meshDir(), "faces"));
 
     if (debug)
     {
-        Info<< "Faces instance: old = " << facesInstance()
-            << " new = " << facesInst << nl
-            << "Points instance: old = " << pointsInstance()
-            << " new = " << pointsInst << endl;
+        Info<< "Points instance: old = " << pointsInstance()
+            << " new = " << pointsInst << nl
+            << "Faces instance: old = " << facesInstance()
+            << " new = " << facesInst << endl;
     }
 
     if (facesInst != facesInstance())
@@ -78,12 +78,12 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 
         clearOut();
 
-        // Set instance to new instance. Note that points instance can differ
-        // from from faces instance.
+        // Set instance to new instance.
+        // Note points instance can differ from faces instance.
         setInstance(facesInst);
-        ioPoints_.instance() = pointsInst;
+        storedPoints_.instance() = pointsInst;
 
-        ioPoints_ = pointIOField
+        storedPoints_ = pointIOField
         (
             IOobject
             (
@@ -97,7 +97,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             )
         );
 
-        ioFaces_ = faceIOList
+        storedFaces_ = faceIOList
         (
             IOobject
             (
@@ -111,10 +111,8 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             )
         );
 
-        // synchronize the sizes
-        MeshReference newMeshRef(ioFaces_, ioPoints_);
-        MeshReference::operator=(newMeshRef);
-
+        // synchronize sizes and references?
+//        MeshReference::operator=(MeshReference(storedFaces_, storedPoints_));
 
         // Reset the surface zones
         surfZoneIOList newZones
@@ -150,27 +148,21 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             }
         }
 
+        surfZones_.transfer(newZones);
+
         if (zonesChanged)
         {
             WarningIn("surfMesh::readUpdateState surfMesh::readUpdate()")
                 << "Number of zones has changed.  This may have "
                 << "unexpected consequences.  Proceed with care." << endl;
 
-            surfZones_.transfer(newZones);
-        }
-        else
-        {
-            surfZones_.transfer(newZones);
-        }
-
-        if (zonesChanged)
-        {
             return surfMesh::TOPO_PATCH_CHANGE;
         }
         else
         {
             return surfMesh::TOPO_CHANGE;
         }
+
     }
     else if (pointsInst != pointsInstance())
     {
@@ -182,9 +174,9 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 
         clearGeom();
 
-        ioPoints_.instance() = pointsInst;
+        storedPoints_.instance() = pointsInst;
 
-        ioPoints_ = pointIOField
+        storedPoints_ = pointIOField
         (
             IOobject
             (
@@ -206,9 +198,9 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         {
             Info << "No change" << endl;
         }
-
-        return surfMesh::UNCHANGED;
     }
+
+    return surfMesh::UNCHANGED;
 }
 
 

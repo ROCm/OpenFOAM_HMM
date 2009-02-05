@@ -208,7 +208,7 @@ public:
         UnsortedMeshedSurface(Istream&);
 
         //- Construct from objectRegistry
-        UnsortedMeshedSurface(const Time&);
+        UnsortedMeshedSurface(const Time&, const word& surfName="");
 
         //- Construct as copy
         UnsortedMeshedSurface(const UnsortedMeshedSurface<Face>&);
@@ -364,7 +364,7 @@ public:
         }
 
         //- Write to database
-        void write(const Time&) const;
+        void write(const Time&, const word& surfName="") const;
 
 
     // Member operators

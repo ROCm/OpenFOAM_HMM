@@ -66,11 +66,16 @@ public:
     //- Runtime type information
     TypeName("surfaceRegistry");
 
+        //- The subInstance (local) to prefix: %surfaces
+        static const word subInstance;
+
+        //- The default surface name: %default
+        static word defaultName;
 
     // Constructors
 
-        //- Construct for the given objectRegistry and named instance
-        explicit surfaceRegistry(const IOobject&, const word& name="default");
+        //- Construct for the given objectRegistry and named surface
+        surfaceRegistry(const objectRegistry&, const word& surfName = "");
 
 
     // Destructor
