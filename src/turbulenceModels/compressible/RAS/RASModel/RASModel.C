@@ -97,7 +97,7 @@ RASModel::RASModel
         dimensioned<scalar>::lookupOrAddToDict
         (
             "E",
-            wallFunctionDict_
+            wallFunctionDict_,
             9.0
         )
     ),
