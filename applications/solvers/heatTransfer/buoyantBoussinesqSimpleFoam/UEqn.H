@@ -1,4 +1,4 @@
-    // Solve the Momentum equation
+    // Solve the momentum equation
 
     tmp<fvVectorMatrix> UEqn
     (
@@ -13,8 +13,13 @@
     (
         UEqn()
       ==
-       -fvc::grad(pd)
-      + beta*gh*fvc::grad(T)
+       -fvc::reconstruct
+        (
+            (
+                fvc::snGrad(pd)
+              - betaghf*fvc::snGrad(T)
+            ) * mesh.magSf()
+        )
     ).initialResidual();
 
     maxResidual = max(eqnResidual, maxResidual);

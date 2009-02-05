@@ -7,6 +7,8 @@ derivedFvPatchFields/solidWallHeatFluxTemperatureCoupled/solidWallHeatFluxTemper
 derivedFvPatchFields/solidWallTemperatureCoupled/solidWallTemperatureCoupledFvPatchScalarField.C
 derivedFvPatchFields/solidWallMixedTemperatureCoupled/solidWallMixedTemperatureCoupledFvPatchScalarField.C
 
+fluid/compressibleCourantNo.C
+
 chtMultiRegionFoam.C
 
 EXE = $(FOAM_APPBIN)/chtMultiRegionFoam

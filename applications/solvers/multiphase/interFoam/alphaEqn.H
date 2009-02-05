@@ -6,7 +6,7 @@
     phic = min(interface.cAlpha()*phic, max(phic));
     surfaceScalarField phir = phic*interface.nHatf();
 
-    for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
+    for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
     {
         surfaceScalarField phiAlpha =
             fvc::flux

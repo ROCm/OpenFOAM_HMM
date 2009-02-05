@@ -23,7 +23,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        pd + rhoEff*gh + pRef
+        pd + rhoEff*(g & mesh.C()) + pRef
     );
     p.write();
 }
