@@ -50,7 +50,7 @@ const Foam::fileName& Foam::triSurfaceMesh::checkFile
     const fileName& objectName
 )
 {
-    if (fName == fileName::null)
+    if (fName.empty())
     {
         FatalErrorIn
         (

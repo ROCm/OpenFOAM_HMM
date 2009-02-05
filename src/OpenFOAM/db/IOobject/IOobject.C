@@ -322,7 +322,7 @@ Foam::Istream* Foam::IOobject::objectStream()
 {
     fileName fName = filePath();
 
-    if (fName != fileName::null)
+    if (fName.size())
     {
         IFstream* isPtr = new IFstream(fName);
 

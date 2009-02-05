@@ -797,7 +797,7 @@ void Foam::chemkinReader::read
     const fileName& thermoFileName
 )
 {
-    if (thermoFileName != fileName::null)
+    if (thermoFileName.size())
     {
         std::ifstream thermoStream(thermoFileName.c_str());
 
