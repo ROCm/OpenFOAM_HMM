@@ -56,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class STARCDsurfaceFormat Declaration
+                     Class STARCDsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -66,6 +66,7 @@ class STARCDsurfaceFormat
     public STARCDsurfaceFormatCore
 {
     // Private Data
+
         //- STAR-CD identifier for shell shapes (2d elements)
         static const int starcdShellShape_ = 3;
 
@@ -115,6 +116,15 @@ public:
 
         //- Read from file
         virtual bool read(const fileName&);
+
+        //- Write surface mesh components
+        static void write
+        (
+            const fileName&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
 
         //- Write MeshedSurface
         static void write

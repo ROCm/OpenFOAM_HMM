@@ -58,7 +58,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class NASsurfaceFormat Declaration
+                      Class NASsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>

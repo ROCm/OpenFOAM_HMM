@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class AC3DfileFormat Declaration
+                    Class AC3DsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class AC3DsurfaceFormatCore

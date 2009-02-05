@@ -22,69 +22,37 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
-
-Description
-    Internal class used by the OBJsurfaceFormat
-
-SourceFiles
-    STARCDsurfaceFormatCore.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
-
-#include "IFstream.H"
-#include "Ostream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+#include "surfPointFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
 
-/*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class STARCDsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
+template<>
+const word surfPointLabelField::typeName("surfPointLabelField");
 
-    static bool readHeader(IFstream&, const word&);
+template<>
+const word surfPointScalarField::typeName("surfPointScalarField");
 
-    static void writeHeader(Ostream&, const char* filetype);
+template<>
+const word surfPointVectorField::typeName("surfPointVectorField");
 
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
+template<>
+const word surfPointSphericalTensorField::typeName("surfPointSphericalTensorField");
 
-    static void writePoints(Ostream&, const pointField&);
+template<>
+const word surfPointSymmTensorField::typeName("surfPointSymmTensorField");
 
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
-
-};
-
+template<>
+const word surfPointTensorField::typeName("surfPointTensorField");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

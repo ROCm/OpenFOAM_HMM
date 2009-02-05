@@ -282,13 +282,11 @@ template<class Face>
 void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst = surf.faces();
-    const List<surfZone>& zoneLst = surf.zones();
-
     writeHeader(os, zoneLst);
 
     forAll(zoneLst, zoneI)
@@ -333,6 +331,17 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 
         os << "kids 0" << endl;
     }
+}
+
+
+template<class Face>
+void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 

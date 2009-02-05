@@ -38,7 +38,6 @@ SourceFiles
 
 #include "point.H"
 #include "Istream.H"
-#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class STLpoint Declaration
+                          Class STLpoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class STLpoint
@@ -83,7 +82,7 @@ public:
 
     // Member Operators
 
-        //- Return point
+        //- Conversion to point
         inline operator point() const
         {
             return point(x(), y(), z());

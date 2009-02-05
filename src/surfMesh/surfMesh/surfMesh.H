@@ -166,6 +166,9 @@ public:
 
     typedef surfMesh Mesh;
 
+    //- Placeholder only, but do not remove - it is needed for GeoMesh
+    typedef bool BoundaryMesh;
+
 
     //- Runtime type information
     TypeName("surfMesh");

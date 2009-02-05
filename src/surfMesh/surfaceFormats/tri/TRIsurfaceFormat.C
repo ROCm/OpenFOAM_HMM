@@ -132,13 +132,11 @@ template<class Face>
 void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
-    const List<surfZone>& zoneLst = surf.zones();
-
     label faceIndex = 0;
     forAll(zoneLst, zoneI)
     {
@@ -148,6 +146,17 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
             writeShell(os, pointLst, f, zoneI);
         }
     }
+}
+
+
+template<class Face>
+void Foam::fileFormats::TRIsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 

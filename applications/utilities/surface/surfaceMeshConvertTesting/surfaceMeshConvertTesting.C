@@ -59,6 +59,7 @@ Note
 #include "triSurface.H"
 #include "surfMesh.H"
 #include "surfFields.H"
+#include "surfPointFields.H"
 #include "PackedBoolList.H"
 
 #include "MeshedSurfaces.H"
@@ -312,6 +313,30 @@ int main(int argc, char *argv[])
             Info<< "write zoneIds (for testing only): "
                 << zoneIds.objectPath() << endl;
             zoneIds.write();
+
+            surfPointLabelField pointIds
+            (
+                IOobject
+                (
+                    "pointIds",
+                    surfOut.instance(),
+                    "pointFields",
+                    surfOut,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                surfOut,
+                dimless
+            );
+
+            forAll(pointIds, i)
+            {
+                pointIds[i] = i;
+            }
+
+            Info<< "write pointIds (for testing only): "
+                << pointIds.objectPath() << endl;
+            pointIds.write();
         }
     }
 

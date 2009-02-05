@@ -56,8 +56,13 @@ class STLtriangle
         //- Attribute is 16-bit
         typedef unsigned short STLattrib;
 
-        STLpoint normal_, a_, b_, c_;
+        //- The face normal, many programs write zore or other junk
+        STLpoint normal_;
 
+        //- The three points defining the triangle
+        STLpoint a_, b_, c_;
+
+        //- The attribute information could for colour or solid id, etc
         STLattrib attrib_;
 
 public:

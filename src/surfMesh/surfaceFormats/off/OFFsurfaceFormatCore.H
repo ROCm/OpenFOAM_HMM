@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class OFFsurfaceFormatCore Declaration
+                    Class OFFsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class OFFsurfaceFormatCore

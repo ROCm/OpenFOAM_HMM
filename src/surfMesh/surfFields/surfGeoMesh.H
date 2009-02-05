@@ -27,14 +27,15 @@ Class
 
 Description
     The surfMesh GeoMesh (for holding fields).
-    Similar to a volGeoMesh  needed to do the Finite Volume discretisation.
+
+    Similar to the volGeoMesh used for the Finite Volume discretization.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef surfGeoMesh_H
 #define surfGeoMesh_H
 
-#include "SurfGeoMesh.H"
+#include "GeoMesh.H"
 #include "surfMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,7 +49,7 @@ namespace Foam
 
 class surfGeoMesh
 :
-    public SurfGeoMesh<surfMesh>
+    public GeoMesh<surfMesh>
 {
 
 public:
@@ -58,7 +59,7 @@ public:
         //- Construct from surfMesh reference
         explicit surfGeoMesh(const surfMesh& mesh)
         :
-            SurfGeoMesh<surfMesh>(mesh)
+            GeoMesh<surfMesh>(mesh)
         {}
 
 

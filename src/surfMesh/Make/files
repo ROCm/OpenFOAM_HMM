@@ -8,6 +8,7 @@ UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 
 surfaceRegistry/surfaceRegistry.C
 surfFields/surfFields.C
+surfPointFields/surfPointFields.C
 surfMesh/surfMesh.C
 surfMesh/surfMeshClear.C
 surfMesh/surfMeshIO.C

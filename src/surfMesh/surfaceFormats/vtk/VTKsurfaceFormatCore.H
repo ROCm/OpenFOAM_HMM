@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class VTKsurfaceFormatCore Declaration
+                    Class VTKsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class VTKsurfaceFormatCore

@@ -52,7 +52,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class OBJsurfaceFormat Declaration
+                      Class OBJsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -97,6 +97,15 @@ public:
 
         //- Read from file
         virtual bool read(const fileName&);
+
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
 
         //- Write MeshedSurface
         static void write

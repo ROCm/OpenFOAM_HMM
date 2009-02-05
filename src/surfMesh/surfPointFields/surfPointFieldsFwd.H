@@ -22,66 +22,41 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
-
-Description
-    Internal class used by the OBJsurfaceFormat
-
-SourceFiles
-    STARCDsurfaceFormatCore.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
+#ifndef surfPointFieldsFwd_H
+#define surfPointFieldsFwd_H
 
-#include "IFstream.H"
-#include "Ostream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
-
-/*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
-
-class STARCDsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
-
-    static bool readHeader(IFstream&, const word&);
-
-    static void writeHeader(Ostream&, const char* filetype);
-
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
-
-    static void writePoints(Ostream&, const pointField&);
-
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
-
-};
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fileFormats
+class surfPointGeoMesh;
+
+template<class Type, class GeoMesh>
+class DimensionedField;
+
+typedef DimensionedField<label, surfPointGeoMesh>
+    surfPointLabelField;
+typedef DimensionedField<scalar, surfPointGeoMesh>
+    surfPointScalarField;
+typedef DimensionedField<vector, surfPointGeoMesh>
+    surfPointVectorField;
+typedef DimensionedField<sphericalTensor, surfPointGeoMesh>
+    surfPointSphericalTensorField;
+typedef DimensionedField<symmTensor, surfPointGeoMesh>
+    surfPointSymmTensorField;
+typedef DimensionedField<tensor, surfPointGeoMesh>
+    surfPointTensorField;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
