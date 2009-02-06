@@ -158,7 +158,7 @@ case Linux:
         setenv WM_CXXFLAGS '-mabi=64 -fPIC'
         setenv WM_LDFLAGS '-mabi=64 -G0'
         setenv WM_MPLIB MPI
-        ;;
+        breaksw
     default:
         echo Unknown processor type `uname -m` for Linux
         breaksw

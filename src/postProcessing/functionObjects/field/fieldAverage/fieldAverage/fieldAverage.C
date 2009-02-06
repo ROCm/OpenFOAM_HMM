@@ -82,7 +82,7 @@ void Foam::fieldAverage::initialise()
     // Add mean fields to the field lists
     forAll(faItems_, i)
     {
-        const word fieldName = faItems_[i].fieldName();
+        const word& fieldName = faItems_[i].fieldName();
         if (obr_.foundObject<volScalarField>(fieldName))
         {
             addMeanField<scalar>(i, meanScalarFields_);
@@ -117,7 +117,7 @@ void Foam::fieldAverage::initialise()
     {
         if (faItems_[i].prime2Mean())
         {
-            const word fieldName = faItems_[i].fieldName();
+            const word& fieldName = faItems_[i].fieldName();
             if (!faItems_[i].mean())
             {
                 FatalErrorIn("Foam::fieldAverage::initialise()")

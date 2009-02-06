@@ -9,4 +9,18 @@
 
     UEqn.relax();
 
-    solve(UEqn == -fvc::grad(pd) - fvc::grad(rho)*gh);
+    if (momentumPredictor)
+    {
+        solve
+        (
+            UEqn
+         ==
+           -fvc::reconstruct
+            (
+                (
+                    fvc::snGrad(pd)
+                  + ghf*fvc::snGrad(rho)
+                ) * mesh.magSf()
+            )
+        );
+    }

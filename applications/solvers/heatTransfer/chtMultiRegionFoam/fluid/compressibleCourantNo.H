@@ -23,34 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Solve enthalpy equation
+    Calculates and outputs the mean and maximum Courant Numbers for the fluid
+    regions
 
 \*---------------------------------------------------------------------------*/
 
-void solveEnthalpyEquation
-(
-    const volScalarField& rho,
-    const volScalarField& DpDt,
-    const surfaceScalarField& phi,
-    const compressible::turbulenceModel& turb,
-    basicThermo& thermo
-)
+#ifndef compressibleCourantNo_H
+#define compressibleCourantNo_H
+
+#include "fvMesh.H"
+
+namespace Foam
 {
-    volScalarField& h = thermo.h();
-
-    tmp<fvScalarMatrix> hEqn
+    scalar compressibleCourantNo
     (
-        fvm::ddt(rho, h)
-      + fvm::div(phi, h)
-      - fvm::laplacian(turb.alphaEff(), h)
-     ==
-        DpDt
+        const fvMesh& mesh,
+        const Time& runTime,
+        const volScalarField& rho,
+        const surfaceScalarField& phi
     );
-    hEqn().relax();
-    hEqn().solve();
-
-    thermo.correct();
-
-    Info<< "Min/max T:" << min(thermo.T()) << ' ' << max(thermo.T())
-        << endl;
 }
+
+#endif
+
+// ************************************************************************* //

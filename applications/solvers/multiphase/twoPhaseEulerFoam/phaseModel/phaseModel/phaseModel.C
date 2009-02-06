@@ -81,17 +81,20 @@ Foam::phaseModel::phaseModel
     {
         Info<< "Reading face flux field " << phiName << endl;
 
-        phiPtr_ = new surfaceScalarField
+        phiPtr_.reset
         (
-            IOobject
+            new surfaceScalarField
             (
-                phiName,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh
+                IOobject
+                (
+                    phiName,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh
+            )
         );
     }
     else
@@ -112,18 +115,21 @@ Foam::phaseModel::phaseModel
             }
         }
 
-        phiPtr_ = new surfaceScalarField
+        phiPtr_.reset
         (
-            IOobject
+            new surfaceScalarField
             (
-                phiName,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            fvc::interpolate(U_) & mesh.Sf(),
-            phiTypes
+                IOobject
+                (
+                    phiName,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                fvc::interpolate(U_) & mesh.Sf(),
+                phiTypes
+            )
         );
     }
 }

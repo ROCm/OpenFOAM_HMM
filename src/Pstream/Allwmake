@@ -6,17 +6,17 @@ wmake libso dummy
 
 case "$WM_MPLIB" in
 GAMMA)
-   wmake libso gamma
-   ;;
+    wmake libso gamma
+    ;;
 
 LAM | *MPI* )
-   export WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
-   set +x
-   echo
-   echo "Note: ignore spurious warnings about missing mpicxx.h headers"
-   set -x
-   wmake libso mpi
-   ;;
+    WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
+    set +x
+    echo
+    echo "Note: ignore spurious warnings about missing mpicxx.h headers"
+    set -x
+    wmake libso mpi
+    ;;
 esac
 
 # ----------------------------------------------------------------- end-of-file

@@ -22,16 +22,41 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Solve continuity equation
-
 \*---------------------------------------------------------------------------*/
 
-void solveContinuityEquation
+template<class Type>
+void Foam::calcTypes::interpolate::writeInterpolateField
 (
-    volScalarField& rho,
-    const surfaceScalarField& phi
+    const IOobject& header,
+    const fvMesh& mesh,
+    bool& processed
 )
 {
-    solve(fvm::ddt(rho) + fvc::div(phi));
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> surfaceFieldType;
+
+    if (header.headerClassName() == fieldType::typeName)
+    {
+        Info<< "    Reading " << header.name() << endl;
+        fieldType field(header, mesh);
+
+        Info<< "    Calculating interpolate" << header.name() << endl;
+        surfaceFieldType interpolateField
+        (
+            IOobject
+            (
+                "interpolate" + header.name(),
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            fvc::interpolate(field)
+        );
+        interpolateField.write();
+
+        processed = true;
+    }
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1,41 +1,49 @@
-volScalarField rUA = 1.0/UEqn().A();
-U = rUA*UEqn().H();
-UEqn.clear();
-
-phi = fvc::interpolate(U) & mesh.Sf();
-adjustPhi(phi, U, pd);
-phi += fvc::interpolate(beta*gh*rUA)*fvc::snGrad(T)*mesh.magSf();
-
-for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
-    fvScalarMatrix pdEqn
-    (
-        fvm::laplacian(rUA, pd) == fvc::div(phi)
-    );
+    volScalarField rUA("rUA", 1.0/UEqn().A());
+    surfaceScalarField rUAf("(1|A(U))", fvc::interpolate(rUA));
 
-    pdEqn.setReference(pdRefCell, pdRefValue);
+    U = rUA*UEqn().H();
+    UEqn.clear();
 
-    // retain the residual from the first iteration
-    if (nonOrth == 0)
+    phi = fvc::interpolate(U) & mesh.Sf();
+    adjustPhi(phi, U, pd);
+    surfaceScalarField buoyancyPhi = -betaghf*fvc::snGrad(T)*rUAf*mesh.magSf();
+    phi -= buoyancyPhi;
+
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        eqnResidual = pdEqn.solve().initialResidual();
-        maxResidual = max(eqnResidual, maxResidual);
-    }
-    else
-    {
-        pdEqn.solve();
+        fvScalarMatrix pdEqn
+        (
+            fvm::laplacian(rUAf, pd) == fvc::div(phi)
+        );
+
+        pdEqn.setReference(pdRefCell, pdRefValue);
+
+        // retain the residual from the first iteration
+        if (nonOrth == 0)
+        {
+            eqnResidual = pdEqn.solve().initialResidual();
+            maxResidual = max(eqnResidual, maxResidual);
+        }
+        else
+        {
+            pdEqn.solve();
+        }
+
+        if (nonOrth == nNonOrthCorr)
+        {
+            // Calculate the conservative fluxes
+            phi -= pdEqn.flux();
+
+            // Explicitly relax pressure for momentum corrector
+            pd.relax();
+
+            // Correct the momentum source with the pressure gradient flux
+            // calculated from the relaxed pressure
+            U -= rUA*fvc::reconstruct((buoyancyPhi + pdEqn.flux())/rUAf);
+            U.correctBoundaryConditions();
+        }
     }
 
-    if (nonOrth == nNonOrthCorr)
-    {
-        phi -= pdEqn.flux();
-    }
+    #include "continuityErrs.H"
 }
-
-#include "continuityErrs.H"
-
-// Explicitly relax pressure for momentum corrector
-pd.relax();
-
-U -= rUA*(fvc::grad(pd) - beta*gh*fvc::grad(T));
-U.correctBoundaryConditions();

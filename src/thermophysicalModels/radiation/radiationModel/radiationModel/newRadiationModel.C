@@ -86,7 +86,7 @@ autoPtr<radiationModel> radiationModel::New
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End radiation
+} // End namespace radiation
 } // End namespace Foam
 
 // ************************************************************************* //

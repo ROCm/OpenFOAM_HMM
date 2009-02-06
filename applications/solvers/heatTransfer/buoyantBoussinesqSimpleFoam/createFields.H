@@ -53,8 +53,8 @@
         incompressible::RASModel::New(U, phi, laminarTransport)
     );
 
-    Info<< "Calculating field g.h\n" << endl;
-    volScalarField gh("gh", g & mesh.C());
+    Info<< "Calculating field beta*(g.h)\n" << endl;
+    surfaceScalarField betaghf("betagh", beta*(g & mesh.Cf()));
 
     label pdRefCell = 0;
     scalar pdRefValue = 0.0;
