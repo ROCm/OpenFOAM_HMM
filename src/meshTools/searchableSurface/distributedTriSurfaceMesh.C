@@ -31,24 +31,34 @@ License
 #include "triangleFuncs.H"
 #include "matchPoints.H"
 #include "globalIndex.H"
-#include "PackedBoolList.H"
 #include "Time.H"
 
+#include "IFstream.H"
+#include "decompositionMethod.H"
+#include "vectorList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
-    addToRunTimeSelectionTable
-    (
-        searchableSurface,
-        distributedTriSurfaceMesh,
-        dict
-    );
 
-    scalar distributedTriSurfaceMesh::mergeDist_ = SMALL;
+defineTypeNameAndDebug(distributedTriSurfaceMesh, 0);
+addToRunTimeSelectionTable(searchableSurface, distributedTriSurfaceMesh, dict);
+
 }
+
+
+template<>
+const char*
+Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>::names[] =
+{
+    "follow",
+    "independent",
+    "frozen"
+};
+
+const Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>
+    Foam::distributedTriSurfaceMesh::distributionTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -56,12 +66,20 @@ namespace Foam
 // Read my additional data from the dictionary
 bool Foam::distributedTriSurfaceMesh::read()
 {
-    // Get bb of all domains
+    // Get bb of all domains.
     procBb_.setSize(Pstream::nProcs());
 
     procBb_[Pstream::myProcNo()] = List<treeBoundBox>(dict_.lookup("bounds"));
     Pstream::gatherList(procBb_);
     Pstream::scatterList(procBb_);
+
+    // Distribution type
+    distType_ = distributionTypeNames_.read(dict_.lookup("distributionType"));
+
+    if (dict_.found("mergeDistance"))
+    {
+        dict_.lookup("mergeDistance") >> mergeDist_;
+    }
 
     return true;
 }
@@ -86,7 +104,69 @@ bool Foam::distributedTriSurfaceMesh::isLocal
 }
 
 
-void Foam::distributedTriSurfaceMesh::splitSegment
+//void Foam::distributedTriSurfaceMesh::splitSegment
+//(
+//    const label segmentI,
+//    const point& start,
+//    const point& end,
+//    const treeBoundBox& bb,
+//
+//    DynamicList<segment>& allSegments,
+//    DynamicList<label>& allSegmentMap,
+//    DynamicList<label> sendMap
+//) const
+//{
+//    // Work points
+//    point clipPt0, clipPt1;
+//
+//    if (bb.contains(start))
+//    {
+//        // start within, trim end to bb
+//        bool clipped = bb.intersects(end, start, clipPt0);
+//
+//        if (clipped)
+//        {
+//            // segment from start to clippedStart passes
+//            // through proc.
+//            sendMap[procI].append(allSegments.size());
+//            allSegmentMap.append(segmentI);
+//            allSegments.append(segment(start, clipPt0));
+//        }
+//    }
+//    else if (bb.contains(end))
+//    {
+//        // end within, trim start to bb
+//        bool clipped = bb.intersects(start, end, clipPt0);
+//
+//        if (clipped)
+//        {
+//            sendMap[procI].append(allSegments.size());
+//            allSegmentMap.append(segmentI);
+//            allSegments.append(segment(clipPt0, end));
+//        }
+//    }
+//    else
+//    {
+//        // trim both
+//        bool clippedStart = bb.intersects(start, end, clipPt0);
+//
+//        if (clippedStart)
+//        {
+//            bool clippedEnd = bb.intersects(end, clipPt0, clipPt1);
+//
+//            if (clippedEnd)
+//            {
+//                // middle part of segment passes through proc.
+//                sendMap[procI].append(allSegments.size());
+//                allSegmentMap.append(segmentI);
+//                allSegments.append(segment(clipPt0, clipPt1));
+//            }
+//        }
+//    }
+//}
+
+
+void Foam::distributedTriSurfaceMesh::distributeSegment
 (
     const label segmentI,
     const point& start,
@@ -98,7 +178,7 @@ void Foam::distributedTriSurfaceMesh::splitSegment
 ) const
 {
     // Work points
-    point clipPt0, clipPt1;
+    point clipPt;
 
 
     // 1. Fully local already handled outside. Note: retest is cheap.
@@ -108,9 +188,9 @@ void Foam::distributedTriSurfaceMesh::splitSegment
     }
 
 
-    // 2. Check if fully inside other processor. Rare occurrence
+    // 2. If fully inside one other processor, then only need to send
+    // to that one processor even if it intersects another. Rare occurrence
     // but cheap to test.
-
     forAll(procBb_, procI)
     {
         if (procI != Pstream::myProcNo())
@@ -119,8 +199,6 @@ void Foam::distributedTriSurfaceMesh::splitSegment
 
             if (isLocal(bbs, start, end))
             {
-                //Pout<< "    Completely remote segment:"
-                //    << start << end << " on proc:" << procI << endl;
                 sendMap[procI].append(allSegments.size());
                 allSegmentMap.append(segmentI);
                 allSegments.append(segment(start, end));
@@ -130,7 +208,8 @@ void Foam::distributedTriSurfaceMesh::splitSegment
     }
 
 
-    // 3. Not contained in single processor. Clip against proc bbs.
+    // 3. If not contained in single processor send to all intersecting
+    // processors.
     forAll(procBb_, procI)
     {
         const List<treeBoundBox>& bbs = procBb_[procI];
@@ -139,67 +218,37 @@ void Foam::distributedTriSurfaceMesh::splitSegment
         {
             const treeBoundBox& bb = bbs[bbI];
 
-            if (bb.contains(start))
+            // Scheme a: any processor that intersects the segment gets
+            // the segment.
+
+            if (bb.intersects(start, end, clipPt))
             {
-                // start within, trim end to bb
-                bool clipped = bb.intersects(end, start, clipPt0);
-
-                if (clipped)
-                {
-                    //Pout<< "    Start of segment:"
-                    //    << start << end << " clips proc:" << procI
-                    //    << " at " << clipPt0 << endl;
-                    // segment from start to clippedStart passes
-                    // through proc.
-                    sendMap[procI].append(allSegments.size());
-                    allSegmentMap.append(segmentI);
-                    allSegments.append(segment(start, clipPt0));
-                }
+                sendMap[procI].append(allSegments.size());
+                allSegmentMap.append(segmentI);
+                allSegments.append(segment(start, end));
             }
-            else if (bb.contains(end))
-            {
-                // end within, trim start to bb
-                bool clipped = bb.intersects(start, end, clipPt0);
 
-                if (clipped)
-                {
-                    //Pout<< "    End of segment:"
-                    //    << start << end << " clips proc:" << procI
-                    //    << " at " << clipPt0 << endl;
-                    sendMap[procI].append(allSegments.size());
-                    allSegmentMap.append(segmentI);
-                    allSegments.append(segment(clipPt0, end));
-                }
-            }
-            else
-            {
-                // trim both
-                bool clippedStart = bb.intersects(start, end, clipPt0);
-
-                if (clippedStart)
-                {
-                    bool clippedEnd = bb.intersects(end, clipPt0, clipPt1);
-
-                    if (clippedEnd)
-                    {
-                        //Pout<< "    Middle of segment:"
-                        //    << start << end << " clips proc:" << procI
-                        //    << " at " << clipPt0 << clipPt1 << endl;
-                        // middle part of segment passes through
-                        // proc.
-                        sendMap[procI].append(allSegments.size());
-                        allSegmentMap.append(segmentI);
-                        allSegments.append(segment(clipPt0, clipPt1));
-                    }
-                }
-            }
+            // Alternative: any processor only gets clipped bit of
+            // segment. This gives small problems with additional
+            // truncation errors.
+            //splitSegment
+            //(
+            //    segmentI,
+            //    start,
+            //    end,
+            //    bb,
+            //
+            //    allSegments,
+            //    allSegmentMap,
+            //   sendMap[procI]
+            //);
         }
     }
 }
 
 
 Foam::autoPtr<Foam::mapDistribute>
-Foam::distributedTriSurfaceMesh::constructSegments
+Foam::distributedTriSurfaceMesh::distributeSegments
 (
     const pointField& start,
     const pointField& end,
@@ -227,7 +276,7 @@ Foam::distributedTriSurfaceMesh::constructSegments
 
         forAll(start, segmentI)
         {
-            splitSegment
+            distributeSegment
             (
                 segmentI,
                 start[segmentI],
@@ -243,11 +292,12 @@ Foam::distributedTriSurfaceMesh::constructSegments
         sendMap.setSize(Pstream::nProcs());
         forAll(sendMap, procI)
         {
+            dynSendMap[procI].shrink();
             sendMap[procI].transfer(dynSendMap[procI]);
         }
 
-        allSegments.transfer(dynAllSegments);
-        allSegmentMap.transfer(dynAllSegmentMap);
+        allSegments.transfer(dynAllSegments.shrink());
+        allSegmentMap.transfer(dynAllSegmentMap.shrink());
     }
 
 
@@ -371,7 +421,7 @@ void Foam::distributedTriSurfaceMesh::findLine
 
         const autoPtr<mapDistribute> mapPtr
         (
-            constructSegments
+            distributeSegments
             (
                 start,
                 end,
@@ -707,12 +757,13 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         sendMap.setSize(Pstream::nProcs());
         forAll(sendMap, procI)
         {
+            dynSendMap[procI].shrink();
             sendMap[procI].transfer(dynSendMap[procI]);
         }
 
-        allCentres.transfer(dynAllCentres);
-        allRadiusSqr.transfer(dynAllRadiusSqr);
-        allSegmentMap.transfer(dynAllSegmentMap);
+        allCentres.transfer(dynAllCentres.shrink());
+        allRadiusSqr.transfer(dynAllRadiusSqr.shrink());
+        allSegmentMap.transfer(dynAllSegmentMap.shrink());
     }
 
 
@@ -766,6 +817,102 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
 }
 
 
+// Find bounding boxes that guarantee a more or less uniform distribution
+// of triangles. Decomposition in here is only used to get the bounding
+// boxes, actual decomposition is done later on.
+// Returns a per processor a list of bounding boxes that most accurately
+// describe the shape. For now just a single bounding box per processor but
+// optimisation might be to determine a better fitting shape.
+Foam::List<Foam::List<Foam::treeBoundBox> >
+Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
+(
+    const triSurface& s
+)
+{
+    if (!decomposer_.valid())
+    {
+        // Use current decomposer.
+        // Note: or always use hierarchical?
+        IOdictionary decomposeDict
+        (
+            IOobject
+            (
+                "decomposeParDict",
+                searchableSurface::time().system(),
+                searchableSurface::time(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+        decomposer_ = decompositionMethod::New(decomposeDict);
+
+        if (!decomposer_().parallelAware())
+        {
+            FatalErrorIn
+            (
+                "distributedTriSurfaceMesh::independentlyDistributedBbs"
+                "(const triSurface&)"
+            )   << "The decomposition method " << decomposer_().typeName
+                << " does not decompose in parallel."
+                << " Please choose one that does." << exit(FatalError);
+        }
+    }
+
+    // Do decomposition according to triangle centre
+    pointField triCentres(s.size());
+    forAll (s, triI)
+    {
+        triCentres[triI] = s[triI].centre(s.points());
+    }
+
+    // Do the actual decomposition
+    labelList distribution(decomposer_->decompose(triCentres));
+
+    // Find bounding box for all triangles on new distribution.
+
+    // Initialise to inverted box (VGREAT, -VGREAT)
+    List<List<treeBoundBox> > bbs(Pstream::nProcs());
+    forAll(bbs, procI)
+    {
+        bbs[procI].setSize(1);
+        //bbs[procI][0] = boundBox::invertedBox;
+        bbs[procI][0].min() = point( VGREAT,  VGREAT,  VGREAT);
+        bbs[procI][0].max() = point(-VGREAT, -VGREAT, -VGREAT); 
+    }
+
+    forAll (s, triI)
+    {
+        point& bbMin = bbs[distribution[triI]][0].min();
+        point& bbMax = bbs[distribution[triI]][0].max();
+
+        const labelledTri& f = s[triI];
+        const point& p0 = s.points()[f[0]];
+        const point& p1 = s.points()[f[1]];
+        const point& p2 = s.points()[f[2]];
+
+        bbMin = min(bbMin, p0);
+        bbMin = min(bbMin, p1);
+        bbMin = min(bbMin, p2);
+
+        bbMax = max(bbMax, p0);
+        bbMax = max(bbMax, p1);
+        bbMax = max(bbMax, p2);
+    }
+
+    // Now combine for all processors and convert to correct format.
+    forAll(bbs, procI)
+    {
+        forAll(bbs[procI], i)
+        {
+            reduce(bbs[procI][i].min(), minOp<point>());
+            reduce(bbs[procI][i].max(), maxOp<point>());
+        }
+    }
+    return bbs;
+}
+
+
 void Foam::distributedTriSurfaceMesh::calcBounds
 (
     boundBox& bb,
@@ -775,10 +922,12 @@ void Foam::distributedTriSurfaceMesh::calcBounds
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves
 
-    PackedBoolList pointIsUsed(points().size());
+    PackedList<1> pointIsUsed(points().size());
+    pointIsUsed = 0U;
 
     nPoints = 0;
-    bb = boundBox::invertedBox;
+    bb.min() = point(VGREAT, VGREAT, VGREAT);
+    bb.max() = point(-VGREAT, -VGREAT, -VGREAT);
 
     const triSurface& s = static_cast<const triSurface&>(*this);
 
@@ -1198,17 +1347,30 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 :
     triSurfaceMesh(io),
+//    triSurfaceMesh
+//    (
+//        IOobject
+//        (
+//            io.name(),
+//            io.db().time().findInstanceDir(io.local()),
+//            io.local(),
+//            io.db(),
+//            io.readOpt(),
+//            io.writeOpt(),
+//            io.registerObject()
+//        )
+//    ),
     dict_
     (
         IOobject
         (
-            io.name() + "Dict",
-            io.instance(),
-            io.local(),
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject()
+            searchableSurface::name() + "Dict",
+            searchableSurface::instance(),
+            searchableSurface::local(),
+            searchableSurface::db(),
+            searchableSurface::readOpt(),
+            searchableSurface::writeOpt(),
+            searchableSurface::registerObject()
         )
     )
 {
@@ -1223,17 +1385,31 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 )
 :
     triSurfaceMesh(io, dict),
+//    triSurfaceMesh
+//    (
+//        IOobject
+//        (
+//            io.name(),
+//            io.db().time().findInstanceDir(io.local()),
+//            io.local(),
+//            io.db(),
+//            io.readOpt(),
+//            io.writeOpt(),
+//            io.registerObject()
+//        ),
+//        dict
+//    ),
     dict_
     (
         IOobject
         (
-            io.name() + "Dict",
-            io.instance(),
-            io.local(),
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject()
+            searchableSurface::name() + "Dict",
+            searchableSurface::instance(),
+            searchableSurface::local(),
+            searchableSurface::db(),
+            searchableSurface::readOpt(),
+            searchableSurface::writeOpt(),
+            searchableSurface::registerObject()
         )
     )
 {
@@ -1260,7 +1436,7 @@ void Foam::distributedTriSurfaceMesh::clearOut()
 
 const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
 {
-    if (globalTris_.empty())
+    if (!globalTris_.valid())
     {
         globalTris_.reset(new globalIndex(triSurface::size()));
     }
@@ -1855,6 +2031,18 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::overlappingSurface
     // Determine what triangles to keep.
     boolList includedFace(s.size(), false);
 
+    // Create a slightly larger bounding box.
+    List<treeBoundBox> bbsX(bbs.size());
+    const scalar eps = 1.0e-4;
+    forAll(bbs, i)
+    {
+        const point mid = 0.5*(bbs[i].min() + bbs[i].max());
+        const vector halfSpan = (1.0+eps)*(bbs[i].max() - mid);
+
+        bbsX[i].min() = mid - halfSpan;
+        bbsX[i].max() = mid + halfSpan;
+    }
+
     forAll(s, triI)
     {
         const labelledTri& f = s[triI];
@@ -1862,7 +2050,7 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::overlappingSurface
         const point& p1 = s.points()[f[1]];
         const point& p2 = s.points()[f[2]];
 
-        if (overlaps(bbs, p0, p1, p2))
+        if (overlaps(bbsX, p0, p1, p2))
         {
             includedFace[triI] = true;
         }
@@ -1880,17 +2068,37 @@ void Foam::distributedTriSurfaceMesh::distribute
     autoPtr<mapDistribute>& pointMap
 )
 {
-    // Get bb of all domains
+    // Get bbs of all domains
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
     {
         List<List<treeBoundBox> > newProcBb(Pstream::nProcs());
-        newProcBb[Pstream::myProcNo()].setSize(bbs.size());
-        forAll(bbs, i)
-        {
-            newProcBb[Pstream::myProcNo()][i] = bbs[i];
-        }
-        Pstream::gatherList(newProcBb);
-        Pstream::scatterList(newProcBb);
 
+        switch(distType_)
+        {
+            case FOLLOW:
+                newProcBb[Pstream::myProcNo()].setSize(bbs.size());
+                forAll(bbs, i)
+                {
+                    newProcBb[Pstream::myProcNo()][i] = bbs[i];
+                }
+                Pstream::gatherList(newProcBb);
+                Pstream::scatterList(newProcBb);
+            break;
+
+            case INDEPENDENT:
+                newProcBb = independentlyDistributedBbs(*this);
+            break;
+
+            case FROZEN:
+                return;
+            break;
+
+            default:
+                FatalErrorIn("distributedTriSurfaceMesh::distribute(..)")
+                    << "Unsupported distribution type." << exit(FatalError);
+            break;
+        }
 
         //if (debug)
         //{
@@ -1930,6 +2138,9 @@ void Foam::distributedTriSurfaceMesh::distribute
         Info<< endl;
     }
 
+
+    // Use procBbs to determine which faces go where
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelListList faceSendMap(Pstream::nProcs());
     labelListList pointSendMap(Pstream::nProcs());
