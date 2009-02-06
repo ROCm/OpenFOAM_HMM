@@ -283,10 +283,11 @@ public:
 
             //- Return the location of "dir" containing the file "name".
             //  (Used in reading mesh data)
+            //  If name is null search for the directory "dir" only
             word findInstance
             (
                 const fileName& dir,
-                const word& name,
+                const word& name = word::null,
                 const IOobject::readOption rOpt = IOobject::MUST_READ
             ) const;
 
