@@ -763,7 +763,8 @@ void createAndWriteRegion
     const regionSplit& cellRegion,
     const wordList& regionNames,
     const EdgeMap<label>& interfaceToPatch,
-    const label regionI
+    const label regionI,
+    const word& newMeshInstance
 )
 {
     Info<< "Creating mesh for region " << regionI
@@ -907,6 +908,7 @@ void createAndWriteRegion
 
     Info<< "Writing new mesh" << endl;
 
+    newMesh().setInstance(newMeshInstance);
     newMesh().write();
 
     // Write addressing files like decomposePar
@@ -1235,6 +1237,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
     if (args.options().found("blockedFaces"))
@@ -1712,12 +1715,16 @@ int main(int argc, char *argv[])
         if (!overwrite)
         {
             runTime++;
+            mesh.setInstance(runTime.timeName());
+        }
+        else
+        {
+            mesh.setInstance(oldInstance);
         }
 
         Info<< "Writing cellZones as new mesh to time " << runTime.timeName()
             << nl << endl;
 
-        mesh.setInstance(runTime.timeName());
         mesh.write();
 
 
@@ -1800,7 +1807,8 @@ int main(int argc, char *argv[])
                 cellRegion,
                 regionNames,
                 interfaceToPatch,
-                regionI
+                regionI,
+                (overwrite ? oldInstance : runTime.timeName())
             );
         }
         else if (largestOnly)
@@ -1817,7 +1825,8 @@ int main(int argc, char *argv[])
                 cellRegion,
                 regionNames,
                 interfaceToPatch,
-                regionI
+                regionI,
+                (overwrite ? oldInstance : runTime.timeName())
             );
         }
         else
@@ -1835,7 +1844,8 @@ int main(int argc, char *argv[])
                     cellRegion,
                     regionNames,
                     interfaceToPatch,
-                    regionI
+                    regionI,
+                    (overwrite ? oldInstance : runTime.timeName())
                 );
             }
         }

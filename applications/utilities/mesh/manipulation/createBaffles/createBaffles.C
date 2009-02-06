@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
     const faceZoneMesh& faceZones = mesh.faceZones();
@@ -247,6 +248,10 @@ int main(int argc, char *argv[])
         mesh.movePoints(map().preMotionPoints());
     }
 
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Pout<< "Writing mesh to " << runTime.timeName() << endl;
 
     mesh.write();

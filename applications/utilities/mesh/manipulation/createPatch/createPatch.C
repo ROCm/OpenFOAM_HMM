@@ -569,6 +569,7 @@ int main(int argc, char *argv[])
 
 
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -908,6 +909,10 @@ int main(int argc, char *argv[])
     if (!overwrite)
     {
         runTime++;
+    }
+    else
+    {
+        mesh.setInstance(oldInstance);
     }
 
     // Write resulting mesh

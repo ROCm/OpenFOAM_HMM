@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word setName(args.additionalArgs()[0]);
     bool overwrite = args.options().found("overwrite");
@@ -331,8 +332,12 @@ int main(int argc, char *argv[])
     {
         runTime++;
     }
+    else
+    {
+        mesh.setInstance(oldInstance);
+    }
 
-    Info<< "Writing subsetted mesh and fields to time " << runTime.value()
+    Info<< "Writing subsetted mesh and fields to time " << runTime.timeName()
         << endl;
     subsetter.subMesh().write();
 

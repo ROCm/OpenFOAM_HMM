@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word setName(args.additionalArgs()[0]);
     word masterPatch(args.additionalArgs()[1]);
@@ -262,7 +263,12 @@ int main(int argc, char *argv[])
 
     splitter.attach();
 
-    Info << nl << "Writing polyMesh" << endl;
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
+
+    Info<< "Writing mesh to " << runTime.timeName() << endl;
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())

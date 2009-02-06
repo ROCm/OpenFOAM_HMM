@@ -334,6 +334,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     bool overwrite = args.options().found("overwrite");
 
@@ -553,9 +554,13 @@ int main(int argc, char *argv[])
         {
             runTime++;
         }
+        else
+        {
+            mesh.setInstance(oldInstance);
+        }
 
         // Write resulting mesh
-        Info << "Writing modified mesh to time " << runTime.value() << endl;
+        Info << "Writing modified mesh to time " << runTime.timeName() << endl;
         mesh.write();
     }
     else if (edgeToPos.size())
@@ -602,9 +607,13 @@ int main(int argc, char *argv[])
         {
             runTime++;
         }
+        else
+        {
+            mesh.setInstance(oldInstance);
+        }
 
         // Write resulting mesh
-        Info << "Writing modified mesh to time " << runTime.value() << endl;
+        Info << "Writing modified mesh to time " << runTime.timeName() << endl;
         mesh.write();
     }
     else
@@ -641,9 +650,13 @@ int main(int argc, char *argv[])
         {
             runTime++;
         }
+        else
+        {
+            mesh.setInstance(oldInstance);
+        }
 
         // Write resulting mesh
-        Info << "Writing modified mesh to time " << runTime.value() << endl;
+        Info << "Writing modified mesh to time " << runTime.timeName() << endl;
         mesh.write();
     }
 
