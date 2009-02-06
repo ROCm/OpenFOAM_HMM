@@ -45,7 +45,7 @@ inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
     const point& p0 = pointLst[f[0]];
     for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
     {
-        label fp2 = (fp1 + 1) % f.size();
+        label fp2 = f.fcIndex(fp1);
 
         const point& p1 = pointLst[f[fp1]];
         const point& p2 = pointLst[f[fp2]];

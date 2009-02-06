@@ -185,7 +185,7 @@ public:
         //- Number of entries.
         inline label size() const;
 
-        //- Return true if the list is empty (i.e., size() == 0).
+        //- Return true if the list is empty (ie, size() is zero).
         inline bool empty() const;
 
         //- Get value at index I.

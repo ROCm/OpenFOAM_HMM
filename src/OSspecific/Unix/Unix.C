@@ -432,7 +432,7 @@ bool Foam::mkDir(const fileName& pathName, mode_t mode)
 
 
 // Set the file mode
-bool Foam::chmod(const fileName& name, const mode_t m)
+bool Foam::chMod(const fileName& name, const mode_t m)
 {
     return ::chmod(name.c_str(), m) == 0;
 }

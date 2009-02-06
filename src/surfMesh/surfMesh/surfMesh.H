@@ -315,6 +315,9 @@ public:
 
         //  Storage management
 
+            //- Transfer contents to the Xfer container as a MeshedSurface
+            Xfer< MeshedSurface<face> > xfer();
+
             //- Clear geometry
             void clearGeom();
 

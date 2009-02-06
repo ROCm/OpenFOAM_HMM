@@ -77,14 +77,22 @@ int main(int argc, char *argv[])
         const PackedList<3>& constLst = list1;
         Info<< "\ntest operator[] const with out-of-range index\n";
         constLst.print(Info);
-        if (!constLst[20])
+        if (constLst[20])
+        {
+            Info<< "[20] is true (unexpected)\n";
+        }
+        else
         {
             Info<< "[20] is false (expected) list size should be unchanged (const)\n";
         }
         constLst.print(Info);
 
         Info<< "\ntest operator[] non-const with out-of-range index\n";
-        if (!list1[20])
+        if (list1[20])
+        {
+            Info<< "[20] is true (unexpected)\n";
+        }
+        else
         {
             Info<< "[20] is false (expected) but list was resized?? (non-const)\n";
         }
@@ -267,6 +275,23 @@ int main(int argc, char *argv[])
 
     Info<< "removed final value: " << list3.remove() << endl;
     list3.print(Info);
+
+
+    List<bool> list4(4, true);
+    {
+        const List<bool>& constLst = list4;
+        Info<< "\ntest operator[] const with out-of-range index\n";
+        Info<< constLst << endl;
+        if (constLst[20])
+        {
+            Info<< "[20] is true (unexpected)\n";
+        }
+        else
+        {
+            Info<< "[20] is false (expected) list size should be unchanged (const)\n";
+        }
+        Info<< constLst << endl;
+    }
 
     Info<< "\n\nDone.\n";
 

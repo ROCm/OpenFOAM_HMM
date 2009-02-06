@@ -241,14 +241,14 @@ void Foam::booleanSurface::propagateEdgeSide
     {
         // Edge (and hence eFaces) in same order as prevVert0.
         // Take next face from sorted list
-        nextInd = (ind + 1) % eFaces.size();
-        prevInd = (ind > 0 ? ind - 1 : eFaces.size()-1);
+        nextInd = eFaces.fcIndex(ind);
+        prevInd = eFaces.rcIndex(ind);
     }
     else
     {
         // Take previous face from sorted neighbours
-        nextInd = (ind > 0 ? ind - 1 : eFaces.size()-1);
-        prevInd = (ind + 1) % eFaces.size();
+        nextInd = eFaces.rcIndex(ind);
+        prevInd = eFaces.fcIndex(ind);
     }
 
 

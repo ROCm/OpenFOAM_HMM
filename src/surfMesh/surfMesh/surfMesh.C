@@ -269,6 +269,22 @@ void Foam::surfMesh::transfer
 }
 
 
+Foam::Xfer< Foam::MeshedSurface<Foam::face> >
+Foam::surfMesh::xfer()
+{
+    Xfer< MeshedSurface<face> > xf;
+
+    xf().storedPoints().transfer(storedPoints_);
+    xf().storedFaces().transfer(storedFaces_);
+    xf().storedZones().transfer(surfZones_);
+
+    // Clear addressing.
+    MeshReference::clearGeom();
+
+    return xf;
+}
+
+
 void Foam::surfMesh::rename(const word& newName)
 {
     FatalErrorIn

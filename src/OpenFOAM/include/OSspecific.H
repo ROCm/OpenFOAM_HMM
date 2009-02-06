@@ -110,7 +110,7 @@ fileName findEtcFile(const fileName&, bool mandatory=false);
 bool mkDir(const fileName&, mode_t=0777);
 
 //- Set the file mode
-bool chmod(const fileName&, const mode_t);
+bool chMod(const fileName&, const mode_t);
 
 //- Return the file mode
 mode_t mode(const fileName&);

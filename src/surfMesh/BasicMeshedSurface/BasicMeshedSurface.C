@@ -473,7 +473,7 @@ Foam::label Foam::BasicMeshedSurface<Face>::triangulate
 
             for (label fp = 1; fp < f.size() - 1; ++fp)
             {
-                label fp1 = (fp + 1) % f.size();
+                label fp1 = f.fcIndex(fp);
 
                 newFaces[newFaceI] = triFace(f[0], f[fp], f[fp1]);
                 faceMap[newFaceI] = faceI;

@@ -227,7 +227,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         // points may be incomplete
                         for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
                         {
-                            label fp2 = (fp1 + 1) % f.size();
+                            label fp2 = f.fcIndex(fp1);
 
                             dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
                             sizes[zoneI]++;

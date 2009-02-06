@@ -117,7 +117,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         {
             if (s)
             {
-                is.read(reinterpret_cast<char*>(L.begin()), s*sizeof(T));
+                is.read(reinterpret_cast<char*>(L.data()), s*sizeof(T));
 
                 is.fatalCheck
                 (

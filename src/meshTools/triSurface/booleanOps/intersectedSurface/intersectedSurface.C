@@ -222,11 +222,11 @@ bool Foam::intersectedSurface::sameEdgeOrder
         {
             // Get prev/next vertex on fA
             label vA1 = fA[(fpA + 1) % 3];
-            label vAMin1 = fA[fpA == 0 ? 2 : fpA-1];
+            label vAMin1 = fA[fpA ? fpA-1 : 2];
 
             // Get prev/next vertex on fB
             label vB1 = fB[(fpB + 1) % 3];
-            label vBMin1 = fB[fpB == 0 ? 2 : fpB-1];
+            label vBMin1 = fB[fpB ? fpB-1 : 2];
 
             if (vA1 == vB1 || vAMin1 == vBMin1)
             {
@@ -1308,14 +1308,14 @@ Foam::intersectedSurface::intersectedSurface
     // Construct mapping back into original surface
     faceMap_.setSize(size());
 
-    for(label faceI = 0; faceI < surf.size()-1; faceI++)
+    for (label faceI = 0; faceI < surf.size()-1; faceI++)
     {
-        for(label triI = startTriI[faceI]; triI < startTriI[faceI+1]; triI++)
+        for (label triI = startTriI[faceI]; triI < startTriI[faceI+1]; triI++)
         {
             faceMap_[triI] = faceI;
         }
     }
-    for(label triI = startTriI[surf.size()-1]; triI < size(); triI++)
+    for (label triI = startTriI[surf.size()-1]; triI < size(); triI++)
     {
         faceMap_[triI] = surf.size()-1;
     }
