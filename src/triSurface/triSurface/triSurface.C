@@ -471,8 +471,7 @@ Foam::boolList Foam::triSurface::checkOrientation(const bool verbose)
 // Read triangles, points from Istream
 bool Foam::triSurface::read(Istream& is)
 {
-    is  >> patches_ >> const_cast<pointField&>(points())
-        >> static_cast<List<labelledTri>&>(*this);
+    is  >> patches_ >> storedPoints() >> storedFaces();
 
     return true;
 }
@@ -724,7 +723,7 @@ void Foam::triSurface::setDefaultPatches()
 
 Foam::triSurface::triSurface()
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(0),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -739,7 +738,7 @@ Foam::triSurface::triSurface
     const pointField& points
 )
 :
-    MeshStorage(triangles, points),
+    ParentType(triangles, points),
     patches_(patches),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -754,7 +753,7 @@ Foam::triSurface::triSurface
     const bool reUse
 )
 :
-    MeshStorage(triangles, points, reUse),
+    ParentType(triangles, points, reUse),
     patches_(patches),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -767,7 +766,7 @@ Foam::triSurface::triSurface
     const pointField& points
 )
 :
-    MeshStorage(triangles, points),
+    ParentType(triangles, points),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -782,7 +781,7 @@ Foam::triSurface::triSurface
     const pointField& points
 )
 :
-    MeshStorage(convertToTri(triangles, 0), points),
+    ParentType(convertToTri(triangles, 0), points),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -793,7 +792,7 @@ Foam::triSurface::triSurface
 
 Foam::triSurface::triSurface(const fileName& name)
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -808,7 +807,7 @@ Foam::triSurface::triSurface(const fileName& name)
 
 Foam::triSurface::triSurface(Istream& is)
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -821,7 +820,7 @@ Foam::triSurface::triSurface(Istream& is)
 
 Foam::triSurface::triSurface(const Time& d)
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -840,7 +839,7 @@ Foam::triSurface::triSurface(const Time& d)
 
 Foam::triSurface::triSurface(const triSurface& ts)
 :
-    MeshStorage(ts, ts.points()),
+    ParentType(ts, ts.points()),
     patches_(ts.patches()),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -859,7 +858,7 @@ Foam::triSurface::~triSurface()
 
 void Foam::triSurface::clearTopology()
 {
-    MeshStorage::clearTopology();
+    ParentType::clearTopology();
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
     deleteDemandDrivenData(edgeOwnerPtr_);
 }
@@ -867,13 +866,13 @@ void Foam::triSurface::clearTopology()
 
 void Foam::triSurface::clearPatchMeshAddr()
 {
-    MeshStorage::clearPatchMeshAddr();
+    ParentType::clearPatchMeshAddr();
 }
 
 
 void Foam::triSurface::clearOut()
 {
-    MeshStorage::clearOut();
+    ParentType::clearOut();
 
     clearTopology();
     clearPatchMeshAddr();
@@ -909,10 +908,10 @@ void Foam::triSurface::movePoints(const pointField& newPoints)
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
 
     // Adapt for new point position
-    MeshStorage::movePoints(newPoints);
+    ParentType::movePoints(newPoints);
 
     // Copy new points
-    const_cast<pointField&>(points()) = newPoints;
+    storedPoints() = newPoints;
 }
 
 
@@ -926,9 +925,9 @@ void Foam::triSurface::scalePoints(const scalar& scaleFactor)
         clearTopology();
 
         // Adapt for new point position
-        MeshStorage::movePoints(pointField());
+        ParentType::movePoints(pointField());
 
-        const_cast<pointField&>(points()) *= scaleFactor;
+        storedPoints() *= scaleFactor;
     }
 }
 
@@ -1240,7 +1239,7 @@ void Foam::triSurface::operator=(const triSurface& ts)
 {
     List<labelledTri>::operator=(ts);
     clearOut();
-    const_cast<pointField&>(points()) = ts.points();
+    storedPoints() = ts.points();
     patches_ = ts.patches();
 }
 

@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class OBJsurfaceFormatCore Declaration
+                    Class OBJsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class OBJsurfaceFormatCore

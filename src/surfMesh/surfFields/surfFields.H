@@ -42,32 +42,6 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<>
-tmp<DimensionedField<scalar, surfMesh> >
-DimensionedField<scalar, surfMesh>::component
-(
-    const direction
-) const;
-
-template<>
-void DimensionedField<scalar, surfMesh>::replace
-(
-    const direction,
-    const DimensionedField<scalar, surfMesh>& sf
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //

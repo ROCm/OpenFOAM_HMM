@@ -54,7 +54,7 @@ bool triSurface::stitchTriangles
                 << " points down to " << newPoints.size() << endl;
         }
 
-        pointField& ps = const_cast<pointField&>(points());
+        pointField& ps = storedPoints();
 
         // Set the coordinates to the merged ones
         ps = newPoints;

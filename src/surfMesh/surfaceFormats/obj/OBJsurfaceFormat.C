@@ -214,13 +214,12 @@ template<class Face>
 void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const List<Face>& faceLst = surf.faces();
-    const List<surfZone>& zoneLst = surf.zones();
-
-    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
+    writeHeader(os, pointLst, faceLst.size(), zoneLst);
 
     label faceIndex = 0;
     forAll(zoneLst, zoneI)
@@ -242,6 +241,17 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
         }
     }
     os << "# </faces>" << endl;
+}
+
+
+template<class Face>
+void Foam::fileFormats::OBJsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 

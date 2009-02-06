@@ -221,17 +221,16 @@ template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
     fileName baseName = filename.lessExt();
 
-    writePoints(OFstream(baseName + ".vrt")(), surf.points());
+    writePoints(OFstream(baseName + ".vrt")(), pointLst);
     OFstream os(baseName + ".cel");
     writeHeader(os, "CELL");
-
-    const List<Face>& faceLst = surf.faces();
-    const List<surfZone>& zoneLst = surf.zones();
 
     label faceIndex = 0;
     forAll(zoneLst, zoneI)
@@ -249,10 +248,22 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeCase
     (
         OFstream(baseName + ".inp")(),
-        surf.points(),
-        surf.size(),
+        pointLst,
+        faceLst.size(),
         zoneLst
     );
+
+}
+
+
+template<class Face>
+void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
+(
+    const fileName& filename,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(filename, surf.points(), surf.faces(), surf.zones());
 }
 
 
@@ -266,7 +277,6 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     fileName baseName = filename.lessExt();
 
     writePoints(OFstream(baseName + ".vrt")(), surf.points());
-
     OFstream os(baseName + ".cel");
     writeHeader(os, "CELL");
 

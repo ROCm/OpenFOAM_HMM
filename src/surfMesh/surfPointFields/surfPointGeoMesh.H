@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SurfGeoMesh
+    Foam::surfPointGeoMesh
 
 Description
-    Generic mesh wrapper used by surfMesh etc.
+    The surfMesh GeoMesh (for holding fields).
 
-    Similar to Foam::GeoMesh, but for meshes without an underlying
-    BoundaryMesh.
+    Similar to surfGeoMesh, but refers to the surface points.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SurfGeoMesh_H
-#define SurfGeoMesh_H
+#ifndef surfPointGeoMesh_H
+#define surfPointGeoMesh_H
 
-#include "objectRegistry.H"
+#include "GeoMesh.H"
+#include "surfMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,53 +44,39 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class SurfGeoMesh Declaration
+                      Class surfPointGeoMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MESH>
-class SurfGeoMesh
+class surfPointGeoMesh
+:
+    public GeoMesh<surfMesh>
 {
-
-protected:
-
-    // Protected data
-
-        //- Reference to Mesh
-        const MESH& mesh_;
 
 public:
 
-    // Public typedefs
-
-        typedef MESH Mesh;
-        // typedef typename MESH::BoundaryMesh BoundaryMesh;
-
-
     // Constructors
 
-        //- Construct from MESH reference
-        explicit SurfGeoMesh(const MESH& mesh)
+        //- Construct from surfMesh reference
+        explicit surfPointGeoMesh(const surfMesh& mesh)
         :
-            mesh_(mesh)
+            GeoMesh<surfMesh>(mesh)
         {}
 
 
     // Member Functions
 
-        //- Return the object registry
-        const objectRegistry& thisDb() const
+        //- Return size
+        static label size(const surfMesh& mesh)
         {
-            return mesh_;
+            return mesh.nPoints();
         }
 
-
-    // Member Operators
-
-        //- Return reference to underlying mesh
-        const MESH& operator()() const
+        //- Return size
+        label size() const
         {
-            return mesh_;
+            return size(mesh_);
         }
+
 };
 
 

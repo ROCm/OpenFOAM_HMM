@@ -56,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class surfaceFormatsCore Declaration
+                     Class surfaceFormatsCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceFormatsCore

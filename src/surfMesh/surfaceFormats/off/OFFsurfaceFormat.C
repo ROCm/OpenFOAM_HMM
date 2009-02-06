@@ -155,6 +155,52 @@ template<class Face>
 void Foam::fileFormats::OFFsurfaceFormat<Face>::write
 (
     Ostream& os,
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
+)
+{
+    writeHeader(os, pointLst, faceLst.size(), zoneLst);
+
+    label faceIndex = 0;
+    forAll(zoneLst, zoneI)
+    {
+        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
+
+        forAll(zoneLst[zoneI], localFaceI)
+        {
+            const Face& f = faceLst[faceIndex++];
+
+            os << f.size();
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp];
+            }
+
+            // add optional zone information
+            os << ' ' << zoneI << endl;
+        }
+        os << "# </zone>" << endl;
+    }
+    os << "# </faces>" << endl;
+}
+
+
+template<class Face>
+void Foam::fileFormats::OFFsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
+}
+
+
+template<class Face>
+void Foam::fileFormats::OFFsurfaceFormat<Face>::write
+(
+    Ostream& os,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
@@ -188,40 +234,5 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     os << "# </faces>" << endl;
 }
 
-
-template<class Face>
-void Foam::fileFormats::OFFsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-    const List<surfZone>& zoneLst = surf.zones();
-
-    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
-
-    label faceIndex = 0;
-    forAll(zoneLst, zoneI)
-    {
-        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
-
-        forAll(zoneLst[zoneI], localFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-
-            os << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-
-            // add optional zone information
-            os << ' ' << zoneI << endl;
-        }
-        os << "# </zone>" << endl;
-    }
-    os << "# </faces>" << endl;
-}
 
 // ************************************************************************* //

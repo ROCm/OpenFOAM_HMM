@@ -23,65 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
+    Foam::surfPointFields
 
 Description
-    Internal class used by the OBJsurfaceFormat
+    Point fields for surfMesh
 
 SourceFiles
-    STARCDsurfaceFormatCore.C
+    surfPointFields.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
+#ifndef surfPointFields_H
+#define surfPointFields_H
 
-#include "IFstream.H"
-#include "Ostream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace fileFormats
-{
-
-/*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
-
-class STARCDsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
-
-    static bool readHeader(IFstream&, const word&);
-
-    static void writeHeader(Ostream&, const char* filetype);
-
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
-
-    static void writePoints(Ostream&, const pointField&);
-
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
-
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fileFormats
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "DimensionedField.H"
+#include "surfPointGeoMesh.H"
+#include "surfPointFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

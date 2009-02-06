@@ -53,30 +53,6 @@ const word surfTensorField::typeName("surfTensorField");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-tmp<DimensionedField<scalar, surfMesh> >
-DimensionedField<scalar, surfMesh>::component
-(
-    const direction
-) const
-{
-    return *this;
-}
-
-
-template<>
-void DimensionedField<scalar, surfMesh>::replace
-(
-    const direction,
-    const DimensionedField<scalar, surfMesh>& sf
-)
-{
-    *this == sf;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
 
 // ************************************************************************* //

@@ -65,11 +65,11 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
 
     List<ftrPatch> ftrPatches(is);
 
-    // read points directly
+    // points read directly
     is >> this->storedPoints();
 
-    // faces read with keys
-    List<Keyed<triFace> > facesRead(is);
+    // triFaces read with attached keys
+    List< Keyed<triFace> > facesRead(is);
 
     List<Face>  faceLst(facesRead.size());
     List<label> zoneIds(facesRead.size());
@@ -78,12 +78,13 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     forAll(facesRead, faceI)
     {
         // unfortunately cannot transfer to save memory
-        faceLst[faceI]   = facesRead[faceI];
+        faceLst[faceI] = facesRead[faceI];
         zoneIds[faceI] = facesRead[faceI].key();
     }
 
     this->storedFaces().transfer(faceLst);
     this->storedZoneIds().transfer(zoneIds);
+    facesRead.clear();
 
     // change ftrPatch into surfZoneIdentifier
     List<surfZoneIdentifier> newZones(ftrPatches.size());

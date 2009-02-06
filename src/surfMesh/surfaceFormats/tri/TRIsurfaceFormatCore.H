@@ -50,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class TRIsurfaceFormatCore Declaration
+                    Class TRIsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class TRIsurfaceFormatCore

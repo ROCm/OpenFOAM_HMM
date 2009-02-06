@@ -62,13 +62,12 @@ template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const List<Face>& faceLst = surf.faces();
-    const List<surfZone>& zoneLst = surf.zones();
-
-    writeHeader(os, surf.points());
+    writeHeader(os, pointLst);
     writeHeaderPolygons(os, faceLst);
 
     label faceIndex = 0;
@@ -88,6 +87,17 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     }
 
     writeTail(os, zoneLst);
+}
+
+
+template<class Face>
+void Foam::fileFormats::VTKsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 
