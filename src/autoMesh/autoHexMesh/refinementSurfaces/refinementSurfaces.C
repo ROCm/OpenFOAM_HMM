@@ -522,8 +522,8 @@ void Foam::refinementSurfaces::setMinLevelFields
                     IOobject
                     (
                         "minLevel",
-                        triMesh.objectRegistry::time().constant(),// directory
-                        "triSurface",               // instance
+                        triMesh.objectRegistry::time().timeName(),  // instance
+                        "triSurface",                               // local
                         triMesh,
                         IOobject::NO_READ,
                         IOobject::AUTO_WRITE
