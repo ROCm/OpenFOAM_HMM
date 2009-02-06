@@ -500,6 +500,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     pointField displacementAccumulator(startOfSurfacePointPairs_, vector::zero);
 
+    //scalarField weightAccumulator(startOfSurfacePointPairs_,0);
+
     label dualVerti = 0;
 
     // Find the dual point of each tetrahedron and assign it an index.
@@ -629,6 +631,20 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     // Rotate faces that are sufficiently large and well enough aligned with the
     // cell alignment direction(s)
 
+    vector n2 = vector(1,1,1);
+
+    n2 /= mag(n2);
+
+    tensor R = rotationTensor(vector(1,0,0), n2);
+
+    List<vector> globalAlignmentDirs(3);
+
+    globalAlignmentDirs[0] = R & vector(1,0,0);
+    globalAlignmentDirs[1] = R & vector(0,1,0);
+    globalAlignmentDirs[2] = R & vector(0,0,1);
+
+    Info<< "globalAlignmentDirs " << globalAlignmentDirs << endl;
+
     for
     (
         Triangulation::Finite_edges_iterator eit = finite_edges_begin();
@@ -675,14 +691,14 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
             point dVA = topoint(vA->point());
             point dVB = topoint(vB->point());
 
+            Field<vector> alignmentDirs;
+
             if
             (
                 vA->alignmentDirections().size() > 0
              || vB->alignmentDirections().size() > 0
             )
             {
-                Field<vector> alignmentDirs;
-
                 if
                 (
                     vA->alignmentDirections().size() == 3
@@ -815,8 +831,6 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                         const vector& b(vB->alignmentDirections()[0]);
 
-                        Info<< mag(a & b) << endl;
-
                         if (mag(a & b) < 1 - SMALL)
                         {
                             alignmentDirs.setSize(3);
@@ -837,46 +851,80 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                             alignmentDir /= mag(alignmentDir);
                         }
                     }
+                    if (alignmentDirs.size() ==1)
+                    {
+                        // Use the least similar of globalAlignmentDirs as the
+                        // 2nd alignment and then generate the third.
+
+                        scalar minDotProduct = 1+SMALL;
+
+                        alignmentDirs.setSize(3);
+
+                        forAll(alignmentDirs, aD)
+                        {
+                            if
+                            (
+                                mag(alignmentDir & globalAlignmentDirs[aD])
+                              < minDotProduct
+                            )
+                            {
+                                minDotProduct = mag
+                                (
+                                    alignmentDir & globalAlignmentDirs[aD]
+                                );
+
+                                alignmentDirs[1] = globalAlignmentDirs[aD];
+                            }
+                        }
+
+                        alignmentDirs[2] = alignmentDirs[0] ^ alignmentDirs[1];
+
+                        alignmentDirs[2] /= mag(alignmentDirs[2]);
+                    }
+                }
+            }
+            else
+            {
+                alignmentDirs = globalAlignmentDirs;
+            }
+
+            // alignmentDirs found, now apply them
+
+            vector rAB = dVA - dVB;
+
+            scalar rABMag = mag(rAB);
+
+            forAll(alignmentDirs, aD)
+            {
+                vector& alignmentDir = alignmentDirs[aD];
+
+                if ((rAB & alignmentDir) < 0)
+                {
+                    // swap the direction of the alignment so that has the
+                    // same sense as rAB
+                    alignmentDir *= -1;
                 }
 
-                // alignmentDirs found, now apply them
+                //scalar cosAcceptanceAngle = 0.743;
+                scalar cosAcceptanceAngle = 0.67;
 
-                vector rAB = dVA - dVB;
-
-                scalar rABMag = mag(rAB);
-
-                forAll(alignmentDirs, aD)
+                if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
                 {
-                    vector& alignmentDir = alignmentDirs[aD];
+                    alignmentDir *= 0.5*controls_.minCellSize;
 
-                    if ((rAB & alignmentDir) < 0)
+                    vector delta = alignmentDir - 0.5*rAB;
+
+                    scalar faceArea = dualFace.mag(dualVertices);
+
+                    delta *= faceAreaWeight(faceArea);
+
+                    if (vA->internalPoint())
                     {
-                        // swap the direction of the alignment so that has the
-                        // same sense as rAB
-                        alignmentDir *= -1;
+                        displacementAccumulator[vA->index()] += delta;
                     }
-
-                    // scalar cosAcceptanceAngle = 0.743;
-                    scalar cosAcceptanceAngle = 0.67;
-
-                    if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
+                    if (vB->internalPoint())
                     {
-                        alignmentDir *= 0.5*controls_.minCellSize;
-
-                        vector delta = alignmentDir - 0.5*rAB;
-
-                        scalar faceArea = dualFace.mag(dualVertices);
-
-                        delta *= faceAreaWeight(faceArea);
-
-                        if (vA->internalPoint())
-                        {
-                            displacementAccumulator[vA->index()] += delta;
-                        }
-                        if (vB->internalPoint())
-                        {
-                            displacementAccumulator[vB->index()] += -delta;
-                        }
+                        displacementAccumulator[vB->index()] += -delta;
                     }
                 }
             }
@@ -884,6 +932,93 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Simple isotropic forcing using tension between the Delaunay vertex and
+    // and the dual face centre
+
+    // for
+    // (
+    //     Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+    //     eit != finite_edges_end();
+    //     ++eit
+    // )
+    // {
+    //     if
+    //     (
+    //         eit->first->vertex(eit->second)->internalOrBoundaryPoint()
+    //      && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
+    //     )
+    //     {
+    //         Cell_circulator ccStart = incident_cells(*eit);
+    //         Cell_circulator cc = ccStart;
+
+    //         DynamicList<label> verticesOnFace;
+
+    //         do
+    //         {
+    //             if (!is_infinite(cc))
+    //             {
+    //                 if (cc->cellIndex() < 0)
+    //                 {
+    //                     FatalErrorIn("Foam::CV3D::relaxPoints")
+    //                         << "Dual face uses circumcenter defined by a "
+    //                         << " Delaunay tetrahedron with no internal "
+    //                         << "or boundary points."
+    //                         << exit(FatalError);
+    //                 }
+
+    //                 verticesOnFace.append(cc->cellIndex());
+    //             }
+    //         } while (++cc != ccStart);
+
+    //         verticesOnFace.shrink();
+
+    //         face dualFace(verticesOnFace);
+
+    //         Cell_handle c = eit->first;
+    //         Vertex_handle vA = c->vertex(eit->second);
+    //         Vertex_handle vB = c->vertex(eit->third);
+
+    //         point dVA = topoint(vA->point());
+    //         point dVB = topoint(vB->point());
+
+    //         scalar faceArea = dualFace.mag(dualVertices);
+
+    //         point dualFaceCentre(dualFace.centre(dualVertices));
+
+    //         if (vA->internalPoint())
+    //         {
+    //             displacementAccumulator[vA->index()] +=
+    //             faceArea*(dualFaceCentre - dVA);
+
+    //             weightAccumulator[vA->index()] += faceArea;
+    //         }
+    //         if (vB->internalPoint())
+    //         {
+    //             displacementAccumulator[vB->index()] +=
+    //             faceArea*(dualFaceCentre - dVB);
+
+    //             weightAccumulator[vB->index()] += faceArea;
+    //         }
+    //     }
+    // }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Cell based looping.
+
+    // Loop over all Delaunay vertices (Dual cells)
+
+    // Pick up all incident vertices to the Dv- check the number to see if this
+    // is a reasonable result
+
+    // Form the edge from the current Dv and iterate around the incident cells,
+    // finding their circumcentres, then form (and store?) the dual face.
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    //displacementAccumulator /= weightAccumulator;
 
     vector totalDisp = sum(displacementAccumulator);
     scalar totalDist = sum(mag(displacementAccumulator));
