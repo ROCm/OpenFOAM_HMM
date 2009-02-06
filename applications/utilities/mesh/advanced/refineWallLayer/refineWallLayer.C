@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word patchName(args.additionalArgs()[0]);
 
@@ -226,8 +227,13 @@ int main(int argc, char *argv[])
     // Update stored labels on meshCutter.
     cutter.updateMesh(morphMap());
 
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
+
     // Write resulting mesh
-    Info << "Writing refined morphMesh to time " << runTime.value() << endl;
+    Info << "Writing refined morphMesh to time " << runTime.timeName() << endl;
 
     mesh.write();
 
