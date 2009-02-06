@@ -129,14 +129,14 @@ int main(int argc, char *argv[])
         Info<< "Reading .face file for boundary information" << nl << endl;
     }
 
-    if (!exists(nodeFile) || !exists(eleFile))
+    if (!isFile(nodeFile) || !isFile(eleFile))
     {
         FatalErrorIn(args.executable())
             << "Cannot read " << nodeFile << " or " << eleFile
             << exit(FatalError);
     }
 
-    if (readFaceFile && !exists(faceFile))
+    if (readFaceFile && !isFile(faceFile))
     {
         FatalErrorIn(args.executable())
             << "Cannot read " << faceFile << endl

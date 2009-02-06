@@ -108,7 +108,11 @@ int main(int argc, char *argv[])
         (
             new IOobject
             (
-                ( dictPath.isDir() ? dictPath/dictName : dictPath ),
+                (
+                    isDir(dictPath)
+                  ? dictPath/dictName 
+                  : dictPath
+                ),
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,

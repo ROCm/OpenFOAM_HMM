@@ -55,24 +55,6 @@ Foam::fileName::Type Foam::fileName::type() const
 }
 
 
-bool Foam::fileName::exists() const
-{
-    return ::Foam::exists(*this);
-}
-
-
-bool Foam::fileName::isDir() const
-{
-    return ::Foam::isDir(*this);
-}
-
-
-bool Foam::fileName::isFile() const
-{
-    return ::Foam::isFile(*this);
-}
-
-
 //  Return file name (part beyond last /)
 //
 //  behaviour compared to /usr/bin/basename:

@@ -57,7 +57,8 @@ Foam::OFstreamAllocator::OFstreamAllocator
 
     if (compression == IOstream::COMPRESSED)
     {
-        if (isFile(pathname))
+        // get identically named uncompressed version out of the way
+        if (isFile(pathname, false))
         {
             rm(pathname);
         }
@@ -66,7 +67,8 @@ Foam::OFstreamAllocator::OFstreamAllocator
     }
     else
     {
-        if (isFile(pathname + ".gz"))
+        // get identically named compressed version out of the way
+        if (isFile(pathname + ".gz", false))
         {
             rm(pathname + ".gz");
         }

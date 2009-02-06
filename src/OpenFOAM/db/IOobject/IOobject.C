@@ -61,7 +61,7 @@ bool Foam::IOobject::IOobject::fileNameComponents
     name.clear();
 
     // called with directory
-    if (::Foam::isDir(path))
+    if (!isDir(path))
     {
         WarningIn("IOobject::fileNameComponents(const fileName&, ...)")
             << " called with directory: " << path << "\n";

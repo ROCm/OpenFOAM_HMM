@@ -122,7 +122,11 @@ int main(int argc, char *argv[])
             (
                 new IOobject
                 (
-                    ( dictPath.isDir() ? dictPath/coordinateSystems::typeName : dictPath ),
+                    (
+                        isDir(dictPath)
+                      ? dictPath/coordinateSystems::typeName
+                      : dictPath
+                    ),
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,

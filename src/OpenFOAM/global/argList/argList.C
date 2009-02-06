@@ -624,7 +624,7 @@ void Foam::argList::displayDoc(bool source) const
             docFile = docDirs[dirI]/executable_ + docExts[extI];
             docFile.expand();
 
-            if (exists(docFile))
+            if (isFile(docFile))
             {
                 found = true;
                 break;

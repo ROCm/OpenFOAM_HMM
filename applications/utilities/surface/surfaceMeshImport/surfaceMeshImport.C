@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
                 new IOobject
                 (
                     (
-                        dictPath.isDir()
+                        isDir(dictPath)
                       ? dictPath/coordinateSystems::typeName
                       : dictPath
                     ),

@@ -488,9 +488,9 @@ bool Foam::isDir(const fileName& name)
 
 
 // Does the file exist
-bool Foam::isFile(const fileName& name)
+bool Foam::isFile(const fileName& name, const bool checkGzip)
 {
-    return S_ISREG(mode(name)) || S_ISREG(mode(name + ".gz"));
+    return S_ISREG(mode(name)) || (checkGzip && S_ISREG(mode(name + ".gz")));
 }
 
 
@@ -719,19 +719,19 @@ bool Foam::cp(const fileName& src, const fileName& dest)
 }
 
 
-// Create a softlink. destFile should not exist. Returns true if successful.
-bool Foam::ln(const fileName& src, const fileName& dest)
+// Create a softlink. dst should not exist. Returns true if successful.
+bool Foam::ln(const fileName& src, const fileName& dst)
 {
     if (Unix::debug)
     {
-        Info<< "Create softlink from : " << src << " to " << dest
+        Info<< "Create softlink from : " << src << " to " << dst
             << endl;
     }
 
-    if (exists(dest))
+    if (exists(dst))
     {
         WarningIn("ln(const fileName&, const fileName&)")
-            << "destination " << dest << " already exists. Not linking."
+            << "destination " << dst << " already exists. Not linking."
             << endl;
         return false;
     }
@@ -743,40 +743,40 @@ bool Foam::ln(const fileName& src, const fileName& dest)
         return false;
     }
 
-    if (symlink(src.c_str(), dest.c_str()) == 0)
+    if (symlink(src.c_str(), dst.c_str()) == 0)
     {
         return true;
     }
     else
     {
         WarningIn("ln(const fileName&, const fileName&)")
-            << "symlink from " << src << " to " << dest << " failed." << endl;
+            << "symlink from " << src << " to " << dst << " failed." << endl;
         return false;
     }
 }
 
 
-// Rename srcFile destFile
-bool Foam::mv(const fileName& srcFile, const fileName& destFile)
+// Rename srcFile dstFile
+bool Foam::mv(const fileName& srcFile, const fileName& dstFile)
 {
     if (Unix::debug)
     {
-        Info<< "Move : " << srcFile << " to " << destFile << endl;
+        Info<< "Move : " << srcFile << " to " << dstFile << endl;
     }
 
     if
     (
-        (destFile.type() == fileName::DIRECTORY)
-     && (srcFile.type() != fileName::DIRECTORY)
+        dstFile.type() == fileName::DIRECTORY
+     && srcFile.type() != fileName::DIRECTORY
     )
     {
-        const fileName destName(destFile/srcFile.name());
+        const fileName dstName(dstFile/srcFile.name());
 
-        return rename(srcFile.c_str(), destName.c_str()) == 0;
+        return rename(srcFile.c_str(), dstName.c_str()) == 0;
     }
     else
     {
-        return rename(srcFile.c_str(), destFile.c_str()) == 0;
+        return rename(srcFile.c_str(), dstFile.c_str()) == 0;
     }
 }
 

@@ -64,7 +64,7 @@ void Foam::stlSurfaceWriter<Type>::write
 {
     fileName surfaceDir(samplePath/timeDir);
 
-    if (!exists(surfaceDir))
+    if (!isDir(surfaceDir))
     {
         mkDir(surfaceDir);
     }

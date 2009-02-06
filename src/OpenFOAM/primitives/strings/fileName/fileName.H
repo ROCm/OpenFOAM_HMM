@@ -134,15 +134,6 @@ public:
             //- Return the file type: FILE, DIRECTORY or UNDEFINED
             Type type() const;
 
-            //- Does it exist (as FILE or DIRECTORY) in the file system?
-            bool exists() const;
-
-            //- Does it exist as DIRECTORY in the file system?
-            bool isDir() const;
-
-            //- Does it exist as FILE in the file system?
-            bool isFile() const;
-
         // Decomposition
 
             //- Return file name (part beyond last /)

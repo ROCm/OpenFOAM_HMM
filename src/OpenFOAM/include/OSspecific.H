@@ -115,17 +115,18 @@ bool chmod(const fileName&, const mode_t);
 //- Return the file mode
 mode_t mode(const fileName&);
 
-//- Return the file type: FILE or DIRECTORY
+//- Return the file type: DIRECTORY or FILE
 fileName::Type type(const fileName&);
 
-//- Does the name exist in the file system?
+//- Does the name exist (as DIRECTORY or FILE) in the file system?
 bool exists(const fileName&);
-
-//- Does the name exist as a FILE in the file system?
-bool isFile(const fileName&);
 
 //- Does the name exist as a DIRECTORY in the file system?
 bool isDir(const fileName&);
+
+//- Does the name exist as a FILE in the file system?
+//  Optionally enable/disable check for gzip file.
+bool isFile(const fileName&, const bool checkGzip=true);
 
 //- Return size of file
 off_t fileSize(const fileName&);
