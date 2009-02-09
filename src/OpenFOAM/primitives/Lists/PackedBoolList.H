@@ -40,7 +40,7 @@ Description
 
 namespace Foam
 {
-    typedef PackedList<1> PackedBoolList;
+    typedef PackedList<> PackedBoolList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

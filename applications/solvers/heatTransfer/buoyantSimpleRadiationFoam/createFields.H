@@ -54,6 +54,7 @@
 
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
+    surfaceScalarField ghf("gh", g & mesh.Cf());
 
     dimensionedScalar pRef("pRef", p.dimensions(), thermo->lookup("pRef"));
 

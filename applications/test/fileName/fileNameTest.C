@@ -31,6 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fileName.H"
+#include "SubList.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
 
@@ -50,19 +51,55 @@ int main()
 
     fileName pathName(wrdList);
 
-    Info<< "pathName = " << pathName << endl;
-    Info<< "pathName.name() = " << pathName.name() << endl;
-    Info<< "pathName.path() = " << pathName.path() << endl;
-    Info<< "pathName.ext() = " << pathName.ext() << endl;
+    Info<< "pathName = " << pathName << nl
+        << "pathName.name() = " << pathName.name() << nl
+        << "pathName.path() = " << pathName.path() << nl
+        << "pathName.ext()  = " << pathName.ext() << endl;
 
-    Info<< "pathName.components() = " << pathName.components() << endl;
-    Info<< "pathName.component(2) = " << pathName.component(2) << endl;
+    Info<< "pathName.components() = " << pathName.components() << nl
+        << "pathName.component(2) = " << pathName.component(2) << nl
+        << endl;
 
+    // try with different combination
+    for (label start = 0; start < wrdList.size(); ++start)
+    {
+        fileName instance, local;
+        word name;
+
+        fileName path(SubList<word>(wrdList, wrdList.size()-start, start));
+        fileName path2 = "." / path;
+
+        path.IOobjectComponents
+        (
+            instance,
+            local,
+            name
+        );
+
+        Info<< "IOobjectComponents for " << path << nl
+            << "  instance = " << instance << nl
+            << "  local    = " << local << nl
+            << "  name     = " << name << endl;
+
+        path2.IOobjectComponents
+        (
+            instance,
+            local,
+            name
+        );
+
+        Info<< "IOobjectComponents for " << path2 << nl
+            << "  instance = " << instance << nl
+            << "  local    = " << local << nl
+            << "  name     = " << name << endl;
+
+    }
 
     // test findEtcFile
     Info<< "\n\nfindEtcFile tests:" << nl
         << " controlDict => " << findEtcFile("controlDict") << nl
         << " badName => " << findEtcFile("badName") << endl;
+
     Info<< "This should emit a fatal error:" << endl;
     Info<< " badName(die) => " << findEtcFile("badName", true) << nl
         << endl;

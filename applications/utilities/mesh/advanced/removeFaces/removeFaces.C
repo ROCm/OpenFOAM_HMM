@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     bool overwrite = args.options().found("overwrite");
 
@@ -166,6 +167,10 @@ int main(int argc, char *argv[])
     if (!overwrite)
     {
         runTime++;
+    }
+    else
+    {
+        mesh.setInstance(oldInstance);
     }
 
     // Take over refinement levels and write to new time directory.

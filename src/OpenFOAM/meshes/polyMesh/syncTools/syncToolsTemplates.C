@@ -1570,7 +1570,7 @@ void Foam::syncTools::swapFaceList
 }
 
 
-template <int nBits, class CombineOp>
+template <unsigned nBits, class CombineOp>
 void Foam::syncTools::syncFaceList
 (
     const polyMesh& mesh,
@@ -1582,7 +1582,7 @@ void Foam::syncTools::syncFaceList
     {
         FatalErrorIn
         (
-            "syncTools<int nBits, class CombineOp>::syncFaceList"
+            "syncTools<unsigned nBits, class CombineOp>::syncFaceList"
             "(const polyMesh&, PackedList<nBits>&, const CombineOp&)"
         )   << "Number of values " << faceValues.size()
             << " is not equal to the number of faces in the mesh "
@@ -1691,7 +1691,7 @@ void Foam::syncTools::syncFaceList
 }
 
 
-template <int nBits>
+template <unsigned nBits>
 void Foam::syncTools::swapFaceList
 (
     const polyMesh& mesh,
@@ -1702,7 +1702,7 @@ void Foam::syncTools::swapFaceList
 }
 
 
-template <int nBits, class CombineOp>
+template <unsigned nBits, class CombineOp>
 void Foam::syncTools::syncPointList
 (
     const polyMesh& mesh,
@@ -1715,7 +1715,7 @@ void Foam::syncTools::syncPointList
     {
         FatalErrorIn
         (
-            "syncTools<int nBits, class CombineOp>::syncPointList"
+            "syncTools<unsigned nBits, class CombineOp>::syncPointList"
             "(const polyMesh&, PackedList<nBits>&, const CombineOp&"
             ", const unsigned int&)"
         )   << "Number of values " << pointValues.size()
@@ -1870,7 +1870,7 @@ void Foam::syncTools::syncPointList
 }
 
 
-template <int nBits, class CombineOp>
+template <unsigned nBits, class CombineOp>
 void Foam::syncTools::syncEdgeList
 (
     const polyMesh& mesh,
@@ -1883,7 +1883,7 @@ void Foam::syncTools::syncEdgeList
     {
         FatalErrorIn
         (
-            "syncTools<int nBits, class CombineOp>::syncEdgeList"
+            "syncTools<unsigned nBits, class CombineOp>::syncEdgeList"
             "(const polyMesh&, PackedList<nBits>&, const CombineOp&"
             ", const unsigned int&)"
         )   << "Number of values " << edgeValues.size()

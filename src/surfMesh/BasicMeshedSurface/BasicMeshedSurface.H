@@ -36,7 +36,8 @@ SourceFiles
 #ifndef BasicMeshedSurface_H
 #define BasicMeshedSurface_H
 
-#include "PrimitivePatchExtra.H"
+#include "PrimitivePatch.H"
+#include "PatchTools.H"
 #include "pointField.H"
 #include "face.H"
 #include "triFace.H"
@@ -55,11 +56,11 @@ namespace Foam
 template<class Face>
 class BasicMeshedSurface
 :
-    public PrimitivePatchExtra<Face, ::Foam::List, pointField, point>
+    public PrimitivePatch<Face, ::Foam::List, pointField, point>
 {
 
     //- Typedefs for convenience
-        typedef PrimitivePatchExtra
+        typedef PrimitivePatch
         <
             Face,
             ::Foam::List,
@@ -83,7 +84,7 @@ protected:
             return static_cast<List<Face> &>(*this);
         }
 
-        //- Set new regions/patches from faceMap
+        //- Set new regions from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:

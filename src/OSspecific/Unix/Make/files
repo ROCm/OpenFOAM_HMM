@@ -8,7 +8,11 @@ fileStat.C
 Unix.C
 cpuTime/cpuTime.C
 clockTime/clockTime.C
+
+#ifndef SunOS64
 printStack.C
-/*dummyPrintStack.C*/
+#else
+dummyPrintStack.C
+#endif
 
 LIB = $(FOAM_LIBBIN)/libOSspecific

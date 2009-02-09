@@ -40,8 +40,7 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     const label cellTableId
 )
 {
-    os
-        << cellId                    // includes 1 offset
+    os  << cellId                    // includes 1 offset
         << " " << starcdShellShape_  // 3(shell) shape
         << " " << f.size()
         << " " << cellTableId
@@ -54,9 +53,7 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     {
         if ((count % 8) == 0)
         {
-            os
-                << nl
-                << "  " << cellId;
+            os  << nl << "  " << cellId;
         }
         os  << " " << f[fp] + 1;
         count++;
@@ -160,7 +157,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
         if (typeId == starcdShellType_)
         {
-            // Convert groupID into patchID
+            // Convert groupID into regionID
             Map<label>::const_iterator fnd = lookup.find(cellTableId);
             if (fnd != lookup.end())
             {
@@ -214,8 +211,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
 
-    // add patches, culling empty groups
-    this->addPatches(dynSizes, dynNames, true);
+    // add regions, culling empty ones
+    this->addRegions(dynSizes, dynNames, true);
     return true;
 }
 
@@ -234,17 +231,17 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeHeader(os, "CELL");
 
     const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfRegion>& regionLst = surf.regions();
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        const surfGroup& patch = patchLst[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        forAll(patch, patchFaceI)
+        forAll(reg, localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
-            writeShell(os, f, faceIndex, patchI + 1);
+            writeShell(os, f, faceIndex, regionI + 1);
         }
     }
 
@@ -254,7 +251,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         OFstream(baseName + ".inp")(),
         surf.points(),
         surf.size(),
-        patchLst
+        regionLst
     );
 }
 
@@ -275,17 +272,17 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
     const List<Face>& faceLst = surf.faces();
     labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        const surfGroup& patch = patchLst[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        forAll(patch, patchFaceI)
+        forAll(reg, localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
-            writeShell(os, f, faceIndex, patchI + 1);
+            writeShell(os, f, faceIndex, regionI + 1);
         }
     }
 
@@ -295,7 +292,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         OFstream(baseName + ".inp")(),
         surf.points(),
         surf.size(),
-        patchLst
+        regionLst
     );
 }
 

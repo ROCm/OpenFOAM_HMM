@@ -29,10 +29,6 @@ Description
 #include "PrimitivePatch.H"
 #include "HashSet.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -43,8 +39,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcBdryPoints()
- const
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcBdryPoints() const
 {
     if (debug)
     {
@@ -90,9 +88,5 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcBdryPoints()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

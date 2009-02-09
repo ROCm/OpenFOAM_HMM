@@ -1,6 +1,6 @@
-surfGroup/surfGroup.C
-surfGroup/surfGroupIOList.C
-surfPatchIdentifier/surfPatchIdentifier.C
+surfRegion/surfRegion/surfRegion.C
+surfRegion/surfRegion/surfRegionIOList.C
+surfRegion/surfRegionIdentifier/surfRegionIdentifier.C
 
 MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C

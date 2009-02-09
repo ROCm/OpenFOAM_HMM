@@ -49,18 +49,18 @@ void Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
     const List<Face>& faceLst = this->faces();
 
     labelList faceMap;
-    List<surfGroup> patchLst = sortedRegions(faceMap);
+    surfRegionList regionLst = sortedRegions(faceMap);
 
     // just emit some information until we get a nice IOobject
     IOobject::writeBanner(os);
     os  << "// OpenFOAM Surface Format" << nl
         << "// ~~~~~~~~~~~~~~~~~~~~~~~" << nl
         << "// regions:" << nl
-        << patchLst.size() << nl << token::BEGIN_LIST << incrIndent << nl;
+        << regionLst.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        patchLst[patchI].writeDict(os);
+        regionLst[regionI].writeDict(os);
     }
     os  << decrIndent << token::END_LIST << nl;
 
@@ -74,12 +74,12 @@ void Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
     os  << faceLst.size() << nl << token::BEGIN_LIST << nl;
 
     label faceI = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
         // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
+        const surfRegion& reg = regionLst[regionI];
 
-        forAll(patch, patchFaceI)
+        forAll(reg, localFaceI)
         {
             os << faceLst[faceMap[faceI++]] << nl;
         }

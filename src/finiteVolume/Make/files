@@ -93,6 +93,7 @@ $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFiel
 $(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/fixedFluxBoussinesqBuoyantPressure/fixedFluxBoussinesqBuoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
@@ -186,8 +187,15 @@ $(schemes)/harmonic/harmonic.C
 $(schemes)/localBlended/localBlended.C
 $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
+
 $(schemes)/linearFit/linearFit.C
+$(schemes)/biLinearFit/biLinearFit.C
 $(schemes)/quadraticLinearFit/quadraticLinearFit.C
+$(schemes)/quadraticFit/quadraticFit.C
+
+$(schemes)/quadraticLinearUpwindFit/quadraticLinearUpwindFit.C
+$(schemes)/quadraticUpwindFit/quadraticUpwindFit.C
+$(schemes)/cubicUpwindFit/cubicUpwindFit.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C

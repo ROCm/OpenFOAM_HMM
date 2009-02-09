@@ -27,6 +27,7 @@ License
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
 #include "ListOps.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -186,6 +187,14 @@ Foam::searchableSurfaces::searchableSurfaces
         // their object name. Maybe have stlTriSurfaceMesh which appends .stl
         // when reading/writing?
         namedIO().rename(key);  // names_[surfI]
+        if (namedIO().local() != word::null)
+        {
+            namedIO().instance() = namedIO().time().findInstance
+            (
+                namedIO().local(),
+                namedIO().name()
+            );
+        }
 
         // Create and hook surface
         set

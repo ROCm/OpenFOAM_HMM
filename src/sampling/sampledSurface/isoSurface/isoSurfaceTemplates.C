@@ -299,7 +299,16 @@ void Foam::isoSurface::generateTriPoints
     )
     {
         FatalErrorIn("isoSurface::generateTriPoints(..)")
-            << "Incorrect size." << abort(FatalError);
+            << "Incorrect size." << endl
+            << "mesh: nCells:" << mesh_.nCells()
+            << " points:" << mesh_.nPoints() << endl
+            << "cVals:" << cVals.size() << endl
+            << "cCoords:" << cCoords.size() << endl
+            << "snappedCc:" << snappedCc.size() << endl
+            << "pVals:" << pVals.size() << endl
+            << "pCoords:" << pCoords.size() << endl
+            << "snappedPoint:" << snappedPoint.size() << endl
+            << abort(FatalError);
     }
 
     // Determine neighbouring snap status

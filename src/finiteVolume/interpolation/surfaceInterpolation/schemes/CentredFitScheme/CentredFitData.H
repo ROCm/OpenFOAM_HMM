@@ -36,8 +36,7 @@ SourceFiles
 #ifndef CentredFitData_H
 #define CentredFitData_H
 
-#include "MeshObject.H"
-#include "fvMesh.H"
+#include "FitData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,26 +52,9 @@ class extendedCentredStencil;
 template<class Polynomial>
 class CentredFitData
 :
-    public MeshObject<fvMesh, CentredFitData<Polynomial> >
+    public FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>
 {
     // Private data
-
-        //- The stencil the fit is based on
-        const extendedCentredStencil& stencil_;
-
-        //- Factor the fit is allowed to deviate from linear.
-        //  This limits the amount of high-order correction and increases
-        //  stability on bad meshes
-        const scalar linearLimitFactor_;
-
-        //- Weights for central stencil
-        const scalar centralWeight_;
-
-        //- Dimensionality of the geometry
-        const label dim_;
-
-        //- Minimum stencil size
-        const label minSize_;
 
         //- For each cell in the mesh store the values which multiply the
         //  values of the stencil to obtain the gradient for each direction
@@ -81,27 +63,9 @@ class CentredFitData
 
     // Private member functions
 
-        //- Find the normal direction and i, j and k directions for face faci
-        static void findFaceDirs
-        (
-            vector& idir,        // value changed in return
-            vector& jdir,        // value changed in return
-            vector& kdir,        // value changed in return
-            const fvMesh& mesh,
-            const label faci
-        );
-
         //- Calculate the fit for the all the mesh faces
         //  and set the coefficients
         void calcFit();
-
-        //- Calculate the fit for the specified face and set the coefficients
-        label calcFit
-        (
-            const List<point>&,  // Stencil points
-            const scalar wLin,   // Linear weight
-            const label faci     // Current face index
-        );
 
 
 public:
@@ -133,9 +97,6 @@ public:
         {
             return coeffs_;
         }
-
-        //- Delete the data when the mesh moves not implemented
-        virtual bool movePoints();
 };
 
 

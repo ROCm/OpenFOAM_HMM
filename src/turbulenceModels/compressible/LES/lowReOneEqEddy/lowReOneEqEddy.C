@@ -41,6 +41,19 @@ namespace LESModels
 defineTypeNameAndDebug(lowReOneEqEddy, 0);
 addToRunTimeSelectionTable(LESModel, lowReOneEqEddy, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void lowReOneEqEddy::updateSubGridScaleFields()
+{
+    // High Re eddy viscosity
+    muSgs_ = ck_*rho()*sqrt(k_)*delta();
+
+    // low Re no corrected eddy viscosity
+    muSgs_ -= (mu()/beta_)*(scalar(1) - exp(-beta_*muSgs_/mu()));
+    muSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 lowReOneEqEddy::lowReOneEqEddy
@@ -73,6 +86,8 @@ lowReOneEqEddy::lowReOneEqEddy
         )
     )
 {
+    updateSubGridScaleFields();
+
     printCoeffs();
 }
 
@@ -101,13 +116,7 @@ void lowReOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     bound(k_, k0());
 
-    // High Re eddy viscosity
-    muSgs_ = ck_*rho()*sqrt(k_)*delta();
-
-    // low Re no corrected eddy viscosity
-    muSgs_ -= (mu()/beta_)*(scalar(1) - exp(-beta_*muSgs_/mu()));
-
-    muSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields();
 }
 
 

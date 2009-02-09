@@ -87,6 +87,9 @@ class dynOneEqEddy
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volSymmTensorField& D);
+
         //- Calculate ck, ce by filtering the velocity field U.
         dimensionedScalar ck(const volSymmTensorField& D) const;
         dimensionedScalar ce(const volSymmTensorField& D) const;

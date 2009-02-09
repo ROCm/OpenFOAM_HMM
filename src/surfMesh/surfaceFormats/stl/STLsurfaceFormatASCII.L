@@ -417,7 +417,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
 
     // transfer to normal lists
     points_.transfer(lexer.points());
-    regions_.transfer(lexer.facets());
+    regionIds_.transfer(lexer.facets());
     names_.transfer(lexer.names());
     sizes_.transfer(lexer.sizes());
 

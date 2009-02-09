@@ -65,7 +65,7 @@ class TRIsurfaceFormatCore
         pointField points_;
 
         //- The regions associated with the faces
-        List<label> regions_;
+        List<label> regionIds_;
 
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
@@ -104,7 +104,7 @@ public:
         {
             sorted_ = true;
             points_.clear();
-            regions_.clear();
+            regionIds_.clear();
             sizes_.clear();
         }
 
@@ -115,9 +115,9 @@ public:
         }
 
         //- Return full access to the regions
-        List<label>& regions()
+        List<label>& regionIds()
         {
-            return regions_;
+            return regionIds_;
         }
 
         //- The list of region sizes in the order of their first appearance

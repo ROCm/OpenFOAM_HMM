@@ -223,10 +223,10 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
             (
                 IOobject
                 (
-                    "abc",                      // dummy name
-                    mesh_.time().timeName(),    // directory
-                    "triSurface",               // instance
-                    mesh_.time(),               // registry
+                    "abc",                                      // dummy name
+                    mesh_.time().findInstance("triSurface", word::null),// inst
+                    "triSurface",                               // local
+                    mesh_.time(),                               // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),

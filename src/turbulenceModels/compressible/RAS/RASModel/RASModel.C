@@ -88,7 +88,7 @@ RASModel::RASModel
         dimensioned<scalar>::lookupOrAddToDict
         (
             "kappa",
-            subDict("wallFunctionCoeffs"),
+            wallFunctionDict_,
             0.4187
         )
     ),
@@ -97,7 +97,7 @@ RASModel::RASModel
         dimensioned<scalar>::lookupOrAddToDict
         (
             "E",
-            subDict("wallFunctionCoeffs"),
+            wallFunctionDict_,
             9.0
         )
     ),

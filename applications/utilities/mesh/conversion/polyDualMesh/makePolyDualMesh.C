@@ -354,6 +354,7 @@ int main(int argc, char *argv[])
     runTime.setTime(Times[startTime], startTime);
 
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     // Mark boundary edges and points.
     // (Note: in 1.4.2 we can use the built-in mesh point ordering
@@ -499,7 +500,10 @@ int main(int argc, char *argv[])
     if (!overwrite)
     {
         runTime++;
-        mesh.setInstance(runTime.timeName());
+    }
+    else
+    {
+        mesh.setInstance(oldInstance);
     }
 
     Info<< "Writing dual mesh to " << runTime.timeName() << endl;

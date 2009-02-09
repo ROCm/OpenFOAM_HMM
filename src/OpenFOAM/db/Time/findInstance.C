@@ -23,7 +23,9 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Return the location of "directory" containing the file "name".
+    If "name" is empty: return the location of "directory"
+    If "name" is not empty: return the location of "directory" containing the
+    file "name".
     Used in reading mesh data.
 
 \*---------------------------------------------------------------------------*/
@@ -43,15 +45,20 @@ Foam::word Foam::Time::findInstance
     // Is the mesh data in the current time directory ?
     if
     (
-        file(path()/timeName()/dir/name)
-     && IOobject(name, timeName(), dir, *this).headerOk()
+        (name.empty() && Foam::dir(path()/timeName()/dir))
+     ||
+        (
+           !name.empty()
+         && file(path()/timeName()/dir/name)
+         && IOobject(name, timeName(), dir, *this).headerOk()
+        )
     )
     {
         if (debug)
         {
-            Info<< "Time::findInstance(const word& dir, const word& name) : "
-                << "reading " << name
-                << " from " << timeName()/dir
+            Info<< "Time::findInstance(const word&, const word&) : "
+                << "found " << name
+                << " in " << timeName()/dir
                 << endl;
         }
 
@@ -81,16 +88,21 @@ Foam::word Foam::Time::findInstance
         {
             if
             (
-                file(path()/ts[j].name()/dir/name)
-             && IOobject(name, ts[j].name(), dir, *this).headerOk()
+                (name.empty() && Foam::dir(path()/ts[j].name()/dir))
+             ||
+                (
+                   !name.empty()
+                 && file(path()/ts[j].name()/dir/name)
+                 && IOobject(name, ts[j].name(), dir, *this).headerOk()
+                )
             )
             {
                 if (debug)
                 {
-                    Info<< "Time::findInstance(const word& dir, "
-                        << "const word& name) : "
-                        << "reading " << name
-                        << " from " << ts[j].name()/dir
+                    Info<< "Time::findInstance(const word&, "
+                        << "const word&) : "
+                        << "found " << name
+                        << " in " << ts[j].name()/dir
                         << endl;
                 }
 
@@ -109,16 +121,20 @@ Foam::word Foam::Time::findInstance
 
     if
     (
-        file(path()/constant()/dir/name)
-     && IOobject(name, constant(), dir, *this).headerOk()
+        (name.empty() && Foam::dir(path()/constant()/dir))
+     || (
+            !name.empty()
+         && file(path()/constant()/dir/name)
+         && IOobject(name, constant(), dir, *this).headerOk()
+        )
     )
     {
         if (debug)
         {
-            Info<< "Time::findInstance(const word& dir, "
-                << "const word& name) : "
-                << "reading " << name
-                << " from " << constant()/dir
+            Info<< "Time::findInstance(const word&, "
+                << "const word&) : "
+                << "found " << name
+                << " in " << constant()/dir
                 << endl;
         }
 
@@ -127,7 +143,7 @@ Foam::word Foam::Time::findInstance
 
     if (rOpt == IOobject::MUST_READ)
     {
-        FatalErrorIn("Time::findInstance(const word& dir, const word& name)")
+        FatalErrorIn("Time::findInstance(const word&, const word&)")
             << "Cannot find file \"" << name << "\" in directory "
             << constant()/dir
             << exit(FatalError);
@@ -135,5 +151,6 @@ Foam::word Foam::Time::findInstance
 
     return constant();
 }
+
 
 // ************************************************************************* //

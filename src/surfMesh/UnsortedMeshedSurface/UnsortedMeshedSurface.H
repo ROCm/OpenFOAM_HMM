@@ -26,18 +26,18 @@ Class
     Foam::UnsortedMeshedSurface
 
 Description
-    A surface geometry mesh, in which the patch information is conveyed by
-    the 'region' associated with each face.
+    A surface geometry mesh, in which the region information is conveyed by
+    the 'regionId' associated with each face.
 
     This form of surface description is particularly useful for reading in
     surface meshes from third-party formats (eg, obj, stl, gts, etc.). It
     can also be particularly useful for situations in which the surface
     many be adjusted in an arbitrary manner without worrying about needed
-    to adjust the patch information (eg, surface refinement).
+    to adjust the region information (eg, surface refinement).
 
 See Also
-    The Foam::meshedSurface - which is organized as a surface mesh, but
-    with independent patch information.
+    The Foam::MeshedSurface - which is organized as a surface mesh, but
+    with independent region information.
 
 SourceFiles
     UnsortedMeshedSurface.C
@@ -48,8 +48,8 @@ SourceFiles
 #define UnsortedMeshedSurface_H
 
 #include "BasicMeshedSurface.H"
-#include "surfPatchIdentifierList.H"
-#include "surfGroupList.H"
+#include "surfRegionIdentifierList.H"
+#include "surfRegionList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -70,7 +70,7 @@ template<class Face> class MeshedSurface;
 class polyBoundaryMesh;
 
 template<class Face>
-    Ostream& operator<<(Ostream&, const UnsortedMeshedSurface<Face>&);
+Ostream& operator<<(Ostream&, const UnsortedMeshedSurface<Face>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -93,12 +93,12 @@ private:
 
     // Private Member Data
 
-        //- The regions associated with the faces
-        labelList regions_;
+        //- The region Ids associated with the faces
+        labelList regionIds_;
 
-        //- Patch information (face ordering nFaces/startFace only used
+        //- Region information (face ordering nFaces/startFace only used
         //  during reading and writing)
-        List<surfPatchIdentifier> patches_;
+        List<surfRegionIdentifier> regionToc_;
 
     // Private member functions
 
@@ -115,16 +115,16 @@ protected:
 
     // Protected Member functions
 
-        //- Return non-const access to the faces
-        List<label>& storedRegions()
+        //- Return non-const access to the region Ids
+        List<label>& storedRegionIds()
         {
-            return regions_;
+            return regionIds_;
         }
 
-        //- Return non-const access to the patches
-        List<surfPatchIdentifier>& storedPatches()
+        //- Return non-const access to the region table-of-contents
+        List<surfRegionIdentifier>& storedRegionToc()
         {
-            return patches_;
+            return regionToc_;
         }
 
         //- Set new regions from faceMap
@@ -155,23 +155,23 @@ public:
         UnsortedMeshedSurface();
 
         //- Construct by transferring components
-        //  (points, faces, region ids, patches).
+        //  (points, faces, region ids, region info).
         UnsortedMeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
             const Xfer<List<label> >& regionIds,
-            const Xfer<surfPatchIdentifierList>&
+            const Xfer<surfRegionIdentifierList>&
         );
 
         //- Construct by transferring points, faces.
-        //  Use patch information, or set single default patch
+        //  Use region information, or set single default region
         UnsortedMeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& patchSizes = UList<label>::null(),
-            const UList<word>& patchNames = UList<word>::null()
+            const UList<label>& regionSizes = UList<label>::null(),
+            const UList<word>& regionNames = UList<word>::null()
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -267,34 +267,34 @@ public:
         //- Reset size of face and region list
         void setSize(const label);
 
-        //- Return const access to the regions
-        const List<label>& regions() const
+        //- Return const access to the regions ids
+        const List<label>& regionIds() const
         {
-            return regions_;
+            return regionIds_;
         }
 
-        //- Return const access to the patches
-        const List<surfPatchIdentifier>& patches() const
+        //- Return const access to the region table-of-contents
+        const List<surfRegionIdentifier>& regionToc() const
         {
-            return patches_;
+            return regionToc_;
         }
 
         //- Sort faces according to region.
-        //  Returns patch list and sets faceMap to index within faces()
-        List<surfGroup> sortedRegions(labelList& faceMap) const;
+        //  Returns a surfRegionList and sets faceMap to index within faces()
+        surfRegionList sortedRegions(labelList& faceMap) const;
 
-        //- Set regions to 0 and set a single patch
+        //- Set regions to 0 and set a single region
         //  Optionally with a specific name
-        void onePatch(const word& name = word::null);
+        void oneRegion(const word& name = word::null);
 
-        //- Set regions and patches
-        void setPatches(const surfGroupList&);
+        //- Set region ids and regions
+        void setRegions(const surfRegionList&);
 
-        //- Set regions and patches
-        void setPatches(const UList<label>& sizes, const UList<word>& names);
+        //- Set region ids and regions
+        void setRegions(const UList<label>& sizes, const UList<word>& names);
 
-        //- Set regions and patches with default names
-        void setPatches(const UList<label>& sizes);
+        //- Set region ids and set regions with default names
+        void setRegions(const UList<label>& sizes);
 
 
     // Edit
@@ -306,7 +306,7 @@ public:
         //  Returns return pointMap, faceMap from subsetMeshMap
         UnsortedMeshedSurface subsetMesh
         (
-            const UList<bool>& include,
+            const labelHashSet& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
@@ -314,7 +314,7 @@ public:
         //- Return new surface.
         UnsortedMeshedSurface subsetMesh
         (
-            const UList<bool>& include
+            const labelHashSet& include
         ) const;
 
         //- Transfer components (points, faces, region ids).

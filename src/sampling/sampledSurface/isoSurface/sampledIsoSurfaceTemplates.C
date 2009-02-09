@@ -52,34 +52,47 @@ Foam::sampledIsoSurface::interpolateField
     const interpolation<Type>& interpolator
 ) const
 {
-    const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
-
     // Get fields to sample. Assume volPointInterpolation!
     const GeometricField<Type, fvPatchField, volMesh>& volFld =
         interpolator.psi();
 
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > tpointFld
-    (
-        volPointInterpolation::New(fvm).interpolate(volFld)
-    );
-
-    const GeometricField<Type, pointPatchField, pointMesh>& pointFld =
-        tpointFld();
-
-    // Get pointers to sampling field (both original and interpolated one)
-    getIsoFields();
-
     // Recreate geometry if time has changed
     updateGeometry();
 
-    // Sample.
-    return surface().interpolate
-    (
-        *volFieldPtr_,
-        *pointFieldPtr_,
-        volFld,
-        pointFld
-    );
+    if (subMeshPtr_.valid())
+    {
+        tmp<GeometricField<Type, fvPatchField, volMesh> > tvolSubFld =
+            subMeshPtr_().interpolate(volFld);
+
+        const GeometricField<Type, fvPatchField, volMesh>& volSubFld =
+            tvolSubFld();
+
+        tmp<GeometricField<Type, pointPatchField, pointMesh> > tpointSubFld =
+            volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
+
+        // Sample.
+        return surface().interpolate
+        (
+            *volSubFieldPtr_,
+            *pointSubFieldPtr_,
+            volSubFld,
+            tpointSubFld()
+        );
+    }
+    else
+    {
+        tmp<GeometricField<Type, pointPatchField, pointMesh> > tpointFld =
+            volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
+
+        // Sample.
+        return surface().interpolate
+        (
+            *volFieldPtr_,
+            *pointFieldPtr_,
+            volFld,
+            tpointFld()
+        );
+    }
 }
 
 

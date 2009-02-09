@@ -71,14 +71,6 @@ class OFFsurfaceFormat
 {
     // Private Member Functions
 
-        static void writeHead
-        (
-            Ostream&,
-            const pointField&,
-            const List<Face>&,
-            const List<surfGroup>&
-        );
-
         //- Disallow default bitwise copy construct
         OFFsurfaceFormat(const OFFsurfaceFormat&);
 

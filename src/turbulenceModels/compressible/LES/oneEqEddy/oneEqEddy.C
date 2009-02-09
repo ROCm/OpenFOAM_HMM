@@ -41,6 +41,15 @@ namespace LESModels
 defineTypeNameAndDebug(oneEqEddy, 0);
 addToRunTimeSelectionTable(LESModel, oneEqEddy, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void oneEqEddy::updateSubGridScaleFields()
+{
+    muSgs_ = ck_*rho()*sqrt(k_)*delta();
+    muSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 oneEqEddy::oneEqEddy
@@ -64,6 +73,8 @@ oneEqEddy::oneEqEddy
         )
     )
 {
+    updateSubGridScaleFields();
+
     printCoeffs();
 }
 
@@ -95,8 +106,7 @@ void oneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     bound(k_, k0());
 
-    muSgs_ = ck_*rho()*sqrt(k_)*delta();
-    muSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields();
 }
 
 

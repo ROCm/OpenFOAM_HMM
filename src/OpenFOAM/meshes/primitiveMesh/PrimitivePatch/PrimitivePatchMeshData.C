@@ -27,10 +27,7 @@ License
 #include "PrimitivePatch.H"
 #include "Map.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -42,7 +39,9 @@ template
     class PointType
 >
 
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcMeshData() const
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcMeshData() const
 {
     if (debug)
     {
@@ -128,8 +127,9 @@ template
     class PointType
 >
 
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcMeshPointMap()
- const
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcMeshPointMap() const
 {
     if (debug)
     {
@@ -179,8 +179,9 @@ template
     class PointType
 >
 
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcLocalPoints()
- const
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcLocalPoints() const
 {
     if (debug)
     {
@@ -231,8 +232,9 @@ template
     class PointType
 >
 
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcPointNormals()
- const
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcPointNormals() const
 {
     if (debug)
     {
@@ -298,8 +300,9 @@ template
     class PointType
 >
 
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcFaceNormals()
- const
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcFaceNormals() const
 {
     if (debug)
     {
@@ -340,9 +343,5 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcFaceNormals()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -133,8 +133,10 @@ public:
             return HashTable<nil, Key, Hash>::insert(key, nil());
         }
 
-
     // Member Operators
+
+        //- Return true if the entry exists, same as found()
+        inline bool operator[](const Key&) const;
 
         //- Equality. Two hashtables are equal when their contents are equal.
         //  Independent of table size or order.

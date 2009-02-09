@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     scalar thickness(readScalar(IStringStream(args.additionalArgs()[0])()));
     bool overwrite = args.options().found("overwrite");
@@ -181,6 +182,10 @@ int main(int argc, char *argv[])
     if (!overwrite)
     {
         runTime++;
+    }
+    else
+    {
+        mesh.setInstance(oldInstance);
     }
 
     // Take over refinement levels and write to new time directory.

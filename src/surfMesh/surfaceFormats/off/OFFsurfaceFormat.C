@@ -146,7 +146,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     reset(pointLst.xfer(), dynFaces.xfer());
 
     // no region information
-    this->onePatch();
+    this->oneRegion();
     return true;
 }
 
@@ -161,16 +161,16 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
 
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), regionLst);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        os << "# <patch name=\"" << patchLst[patchI].name() << "\">" << endl;
+        os << "# <region name=\"" << regionLst[regionI].name() << "\">" << endl;
 
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(regionLst[regionI], localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
@@ -181,9 +181,9 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
             }
 
             // add optional region information
-            os << ' ' << patchI << endl;
+            os << ' ' << regionI << endl;
         }
-        os << "# </patch>" << endl;
+        os << "# </region>" << endl;
     }
     os << "# </faces>" << endl;
 }
@@ -197,16 +197,16 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
 )
 {
     const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfRegion>& regionLst = surf.regions();
 
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), regionLst);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(regionLst, regionI)
     {
-        os << "# <patch name=\"" << patchLst[patchI].name() << "\">" << endl;
+        os << "# <region name=\"" << regionLst[regionI].name() << "\">" << endl;
 
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(regionLst[regionI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -217,9 +217,9 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
             }
 
             // add optional region information
-            os << ' ' << patchI << endl;
+            os << ' ' << regionI << endl;
         }
-        os << "# </patch>" << endl;
+        os << "# </region>" << endl;
     }
     os << "# </faces>" << endl;
 }

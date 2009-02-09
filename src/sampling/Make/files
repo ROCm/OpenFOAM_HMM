@@ -29,6 +29,7 @@ sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/isoSurface/isoSurfaceCell.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
 sampledSurface/distanceSurface/distanceSurface.C
+sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C

@@ -44,6 +44,13 @@ addToRunTimeSelectionTable(LESModel, kOmegaSSTSAS, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void kOmegaSSTSAS::updateSubGridScaleFields(const volScalarField& S2)
+{
+    nuSgs_ == a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 tmp<volScalarField> kOmegaSSTSAS::F1(const volScalarField& CDkOmega) const
 {
     volScalarField CDkOmegaPlus = max
@@ -304,6 +311,8 @@ kOmegaSSTSAS::kOmegaSSTSAS
         mesh_
     )
 {
+    updateSubGridScaleFields(magSqr(symm(fvc::grad(U))));
+
     printCoeffs();
 }
 
@@ -325,7 +334,8 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
     volVectorField gradK = fvc::grad(k_);
     volVectorField gradOmega = fvc::grad(omega_);
     volScalarField L = sqrt(k_)/(pow(Cmu_, 0.25)*(omega_ + omegaSmall_));
-    volScalarField CDkOmega = (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
+    volScalarField CDkOmega =
+        (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
     volScalarField F1 = this->F1(CDkOmega);
     volScalarField G = nuSgs_*2.0*S2;
 
@@ -375,7 +385,8 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
            *max
             (
                 dimensionedScalar("zero",dimensionSet(0, 0 , -2, 0, 0),0. ),
-                zetaTilda2_*kappa_*S2*(L/Lvk2(S2))- 2.0/alphaPhi_*k_*grad_omega_k
+                zetaTilda2_*kappa_*S2*(L/Lvk2(S2))
+              - 2.0/alphaPhi_*k_*grad_omega_k
             )
         );
 
@@ -384,9 +395,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
     }
     bound(omega_, omega0_);
 
-    // Re-calculate viscosity
-    nuSgs_ == a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(S2);
 }
 
 

@@ -77,10 +77,11 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
             (
                 IOobject
                 (
-                    featFileName,           // name
-                    mesh.time().constant(), // directory
-                    "triSurface",           // instance
-                    mesh.time(),            // registry
+                    featFileName,                       // name
+                    mesh.time().findInstance("triSurface", featFileName),
+                                                        // instance
+                    "triSurface",                       // local
+                    mesh.time(),                        // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
                     false

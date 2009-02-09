@@ -111,6 +111,33 @@ int main(int argc, char *argv[])
     Info<< "setD : " << setD << endl;
     Info<< "setB ^ setC ^ setD : " << (setB ^ setC ^ setD) << endl;
 
+    // test operator[]
+
+    Info<< "setD : " << setD << endl;
+    if (setD[0])
+    {
+        Info<< "setD has 0" << endl;
+    }
+    else
+    {
+        Info<< "setD has no 0" << endl;
+    }
+
+
+    if (setD[11])
+    {
+        Info<< "setD has 11" << endl;
+    }
+    else
+    {
+        Info<< "setD has no 0" << endl;
+    }
+
+    Info<< "setD : " << setD << endl;
+
+    // this doesn't work (yet?)
+    // setD[12] = true;
+
     return 0;
 }
 

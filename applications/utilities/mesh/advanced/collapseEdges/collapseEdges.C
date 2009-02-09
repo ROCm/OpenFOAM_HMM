@@ -464,6 +464,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
     scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
@@ -587,8 +588,12 @@ int main(int argc, char *argv[])
         {
             runTime++;
         }
+        else
+        {
+            mesh.setInstance(oldInstance);
+        }
 
-        Info << "Writing collapsed mesh to time " << runTime.value() << endl;
+        Info<< "Writing collapsed mesh to time " << runTime.timeName() << endl;
 
         mesh.write();
     }

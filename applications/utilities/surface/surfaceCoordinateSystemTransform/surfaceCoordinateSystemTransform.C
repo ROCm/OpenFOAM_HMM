@@ -78,56 +78,61 @@ int main(int argc, char *argv[])
     Time runTime(args.rootPath(), args.caseName());
     const stringList& params = args.additionalArgs();
 
-    word dictName("coordinateSystems");
-    fileName dictPath(runTime.constant());
-    fileName dictLocal;
-
-    if (args.options().found("dict"))
-    {
-        wordList elems(fileName(args.options()["dict"]).components());
-        dictName = elems[elems.size()-1];
-        dictPath = elems[0];
-        dictLocal = "";
-
-        if (elems.size() == 1)
-        {
-            dictPath = ".";
-        }
-        else if (elems.size() > 2)
-        {
-            dictLocal = fileName(SubList<word>(elems, elems.size()-2, 1));
-        }
-    }
+    const word dictName("coordinateSystems");
 
     autoPtr<coordinateSystem> fromCsys;
     autoPtr<coordinateSystem> toCsys;
 
     if (args.options().found("from") || args.options().found("to"))
     {
-        IOobject csDictIo
-        (
-            dictName,
-            dictPath,
-            dictLocal,
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
+        autoPtr<IOobject> csDictIoPtr;
 
-        if (!csDictIo.headerOk())
+        if (args.options().found("dict"))
+        {
+            fileName dictPath(args.options()["dict"]);
+
+            csDictIoPtr.set
+            (
+                new IOobject
+                (
+                    ( dictPath.isDir() ? dictPath/dictName : dictPath ),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+        }
+        else
+        {
+            csDictIoPtr.set
+            (
+                new IOobject
+                (
+                    dictName,
+                    runTime.constant(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+        }
+
+
+        if (!csDictIoPtr->headerOk())
         {
             FatalErrorIn(args.executable())
                 << "Cannot open coordinateSystems file\n    "
-                << csDictIo.objectPath() << nl
+                << csDictIoPtr->objectPath() << nl
                 << exit(FatalError);
         }
 
-        coordinateSystems csLst(csDictIo);
+        coordinateSystems csLst(csDictIoPtr());
 
         if (args.options().found("from"))
         {
-            word csName(args.options()["from"]);
+            const word csName(args.options()["from"]);
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -143,7 +148,7 @@ int main(int argc, char *argv[])
 
         if (args.options().found("to"))
         {
-            word csName(args.options()["to"]);
+            const word csName(args.options()["to"]);
 
             label csId = csLst.find(csName);
             if (csId < 0)
