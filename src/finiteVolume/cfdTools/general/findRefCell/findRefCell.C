@@ -52,18 +52,19 @@ void Foam::setRefCell
 
                 if (refCelli < 0 || refCelli >= field.mesh().nCells())
                 {
-                    FatalErrorIn
+                    FatalIOErrorIn
                     (
-                        "void Foam::setRefCell"
-                         "("
-                         "    const volScalarField&,"
-                         "    const dictionary&,"
-                         "    label& scalar&,"
-                         "    bool"
-                         ")"
+                        "void Foam::setRefCell\n"
+                         "(\n"
+                         "    const volScalarField&,\n"
+                         "    const dictionary&,\n"
+                         "    label& scalar&,\n"
+                         "    bool\n"
+                         ")",
+                        dict
                     )   << "Illegal master cellID " << refCelli
                         << ". Should be 0.." << field.mesh().nCells()
-                        << exit(FatalError);
+                        << exit(FatalIOError);
                 }
             }
             else
@@ -79,36 +80,38 @@ void Foam::setRefCell
             label sumHasRef = returnReduce<label>(hasRef, sumOp<label>());
             if (sumHasRef != 1)
             {
-                FatalErrorIn
+                FatalIOErrorIn
                 (
-                    "void Foam::setRefCell"
-                     "("
-                     "    const volScalarField&,"
-                     "    const dictionary&,"
-                     "    label& scalar&,"
-                     "    bool"
-                     ")"
+                    "void Foam::setRefCell\n"
+                     "(\n"
+                     "    const volScalarField&,\n"
+                     "    const dictionary&,\n"
+                     "    label& scalar&,\n"
+                     "    bool\n"
+                     ")",
+                    dict
                 )
                   << "Unable to set reference cell for field " << field.name()
                   << nl << "    Reference point " << refPointName
-                  << " found on multiple domains" << nl << exit(FatalError);
+                  << " found on multiple domains" << nl << exit(FatalIOError);
             }
         }
         else
         {
-            FatalErrorIn
+            FatalIOErrorIn
             (
-                "void Foam::setRefCell"
-                 "("
-                 "    const volScalarField&,"
-                 "    const dictionary&,"
-                 "    label& scalar&,"
-                 "    bool"
-                 ")"
+                "void Foam::setRefCell\n"
+                 "(\n"
+                 "    const volScalarField&,\n"
+                 "    const dictionary&,\n"
+                 "    label& scalar&,\n"
+                 "    bool\n"
+                 ")",
+                dict
             )
               << "Unable to set reference cell for field" << field.name() << nl
               << "    Please supply either " << refCellName
-              << " or " << refPointName << nl << exit(FatalError);
+              << " or " << refPointName << nl << exit(FatalIOError);
         }
 
         refValue = readScalar(dict.lookup(refValueName));
