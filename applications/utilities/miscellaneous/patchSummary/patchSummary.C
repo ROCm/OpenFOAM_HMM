@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         const IOobjectList fieldObjs(mesh, runTime.timeName());
-
         const wordList objNames = fieldObjs.names();
 
         PtrList<volScalarField> vsf(objNames.size());
@@ -99,7 +98,7 @@ int main(int argc, char *argv[])
         const polyBoundaryMesh& bm = mesh.boundaryMesh();
         forAll(bm, patchI)
         {
-            Info<< "Patch: " << bm[patchI].name() << nl;
+            Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
             outputFieldList<scalar>(vsf, patchI);
             outputFieldList<vector>(vvf, patchI);
             outputFieldList<sphericalTensor>(vsptf, patchI);
