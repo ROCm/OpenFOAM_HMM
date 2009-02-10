@@ -58,7 +58,7 @@ Foam::calcTypes::interpolate::~interpolate()
 void Foam::calcTypes::interpolate::init()
 {
     Foam::argList::validArgs.append("interpolate");
-    argList::validArgs.append("fieldName1 .. fieldNameN");
+    argList::validArgs.append("fieldName");
 }
 
 
@@ -68,14 +68,7 @@ void Foam::calcTypes::interpolate::preCalc
     const Time& runTime,
     const fvMesh& mesh
 )
-{
-    if (args.additionalArgs().size() < 2)
-    {
-        Info<< nl << "must specify one or more fields" << nl;
-        args.printUsage();
-        FatalError.exit();
-    }
-}
+{}
 
 
 void Foam::calcTypes::interpolate::calc
@@ -85,49 +78,39 @@ void Foam::calcTypes::interpolate::calc
     const fvMesh& mesh
 )
 {
-    const stringList& params = args.additionalArgs();
+    const word& fieldName = args.additionalArgs()[1];
 
-    for (label fieldi=1; fieldi<params.size(); fieldi++)
+    IOobject fieldHeader
+    (
+        fieldName,
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
+
+    // Check field exists
+    if (fieldHeader.headerOk())
     {
-        const word fieldName(params[fieldi]);
+        bool processed = false;
 
-        IOobject fieldHeader
-        (
-            fieldName,
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        );
+        writeInterpolateField<scalar>(fieldHeader, mesh, processed);
+        writeInterpolateField<vector>(fieldHeader, mesh, processed);
+        writeInterpolateField<sphericalTensor>(fieldHeader, mesh, processed);
+        writeInterpolateField<symmTensor>(fieldHeader, mesh, processed);
+        writeInterpolateField<tensor>(fieldHeader, mesh, processed);
 
-        // Check field exists
-        if (fieldHeader.headerOk())
+        if (!processed)
         {
-            bool processed = false;
-
-            writeInterpolateField<scalar>(fieldHeader, mesh, processed);
-            writeInterpolateField<vector>(fieldHeader, mesh, processed);
-            writeInterpolateField<sphericalTensor>
-            (
-                fieldHeader,
-                mesh,
-                processed
-            );
-            writeInterpolateField<symmTensor>(fieldHeader, mesh, processed);
-            writeInterpolateField<tensor>(fieldHeader, mesh, processed);
-
-            if (!processed)
-            {
-                 FatalError
-                     << "Unable to process " << fieldName << nl
-                     << "No call to interpolate for fields of type "
-                     << fieldHeader.headerClassName() << nl << nl
-                     << exit(FatalError);
-            }
+            FatalError
+                << "Unable to process " << fieldName << nl
+                << "No call to interpolate for fields of type "
+                << fieldHeader.headerClassName() << nl << nl
+                << exit(FatalError);
         }
-        else
-        {
-            Info<< "    No " << fieldName << endl;
-        }
+    }
+    else
+    {
+        Info<< "    No " << fieldName << endl;
     }
 }
 
