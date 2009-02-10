@@ -60,6 +60,7 @@ SourceFiles
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
+#include "SHA1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -209,6 +210,9 @@ public:
 
         //- Return line number of last token in dictionary
         label endLineNumber() const;
+
+        //- Return the SHA1 digest of the dictionary contents
+        SHA1::Digest digest() const;
 
 
         // Search and lookup

@@ -30,8 +30,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "SHA1.H"
-#include "IOstreams.H"
+#include "OSHA1stream.H"
+#include "IStringStream.H"
+#include "dictionary.H"
 
 using namespace Foam;
 
@@ -66,7 +67,7 @@ int main(int argc, char * argv[])
         Info<<"SHA1 digests are different\n";
     }
     Info<<"lhs:" << sha << " rhs:" << shaDig << endl;
-    
+
     // start over:
     sha.clear();
     sha.append(str);
@@ -80,6 +81,55 @@ int main(int argc, char * argv[])
     Info<< "digest1: " << sha_A << nl;
     Info<< "digest2: " << sha << nl;
 
-    
+    // start over:
+    sha.clear();
+    sha.append("\"");
+    sha.append(str);
+    sha.append("\"");
+
+    Info<< "digest3: " << sha << nl;
+
+    // try the output buffer interface
+    {
+        OSHA1stream os;
+
+        os << str;
+        Info<< os.digest() << endl;
+
+        os << str;
+        Info<< os.digest() << endl;
+
+        os.rewind();
+        os << "The quick brown fox jumps over the lazy dog";
+        Info<< os.digest() << endl;
+
+    }
+
+    {
+        dictionary dict
+        (
+            IStringStream
+            (
+                "parent { Default_Boundary_Region { type zeroGradient; } }"
+                "inlet_1 { value inlet_1; }"
+                "inlet_2 { value inlet_2; }"
+                "inlet_3 { value inlet_3; }"
+                "\"inlet_.*\" { value XXX; }"
+            ) ()
+        );
+
+        Info<< "dict:" << endl;
+        dict.write(Info, false);
+
+        dictionary dict2(dict);
+
+        OSHA1stream os;
+        dict.write(os, false);
+        Info<< os.digest() << endl;
+
+        Info<< dict2.digest() << endl;
+    }
+
+
     return 0;
 }
