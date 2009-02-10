@@ -25,60 +25,65 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-void Foam::calcTypes::add::writeAddField
+void Foam::calcTypes::addSubtract::writeAddSubtractValue
 (
     const IOobject& baseHeader,
-    const IOobject& addHeader,
+    const string& valueStr,
     const fvMesh& mesh,
     bool& processed
 )
 {
-    if (resultName_ == "")
-    {
-        resultName_ = baseHeader.name() + "_plus_" + addHeader.name();
-    }
-
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    if
-    (
-        baseHeader.headerClassName() == fieldType::typeName
-     && baseHeader.headerClassName() == addHeader.headerClassName()
-    )
+    if (baseHeader.headerClassName() == fieldType::typeName)
     {
+        if (resultName_ == "")
+        {
+            if (calcMode_ == ADD)
+            {
+                resultName_ = baseHeader.name() + "_add_value";
+            }
+            else
+            {
+                resultName_ = baseHeader.name() + "_subtract_value";
+            }
+        }
+
+        Type value;
+        IStringStream(valueStr)() >> value;
+
         Info<< "    Reading " << baseHeader.name() << endl;
         fieldType baseField(baseHeader, mesh);
 
-        Info<< "    Reading " << addHeader.name() << endl;
-        fieldType addField(addHeader, mesh);
-
-        if (baseField.dimensions() == addField.dimensions())
-        {
-            Info<< "    Calculating " << resultName_ << endl;
-
-            fieldType newField
+        fieldType newField
+        (
+            IOobject
             (
-                IOobject
-                (
-                    resultName_,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                baseField + addField
-            );
-            newField.write();
+                resultName_,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            baseField
+        );
+
+        Info<< "    Calculating " << resultName_ << endl;
+        if (calcMode_ == ADD)
+        {
+            newField == baseField
+                + dimensioned<Type>("value", baseField.dimensions(), value);
         }
         else
         {
-            Info<< "    Cannot calculate " << resultName_ << nl
-                << "    - inconsistent dimensions: "
-                << baseField.dimensions() << " - " << addField.dimensions()
-                << endl;
+            newField == baseField
+                - dimensioned<Type>("value", baseField.dimensions(), value);
         }
+
+        newField.write();
 
         processed = true;
     }
+
 }
 
 

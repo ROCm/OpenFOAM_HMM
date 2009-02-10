@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "add.H"
+#include "addSubtract.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,15 +33,15 @@ namespace Foam
 {
     namespace calcTypes
     {
-        defineTypeNameAndDebug(add, 0);
-        addToRunTimeSelectionTable(calcType, add, dictionary);
+        defineTypeNameAndDebug(addSubtract, 0);
+        addToRunTimeSelectionTable(calcType, addSubtract, dictionary);
     }
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::calcTypes::add::writeAddFields
+void Foam::calcTypes::addSubtract::writeAddSubtractFields
 (
     const Time& runTime,
     const fvMesh& mesh,
@@ -50,48 +50,48 @@ void Foam::calcTypes::add::writeAddFields
 {
     bool processed = false;
 
-    IOobject addFieldHeader
+    IOobject addSubtractFieldHeader
     (
-        addFieldName_,
+        addSubtractFieldName_,
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ
     );
 
-    if (addFieldHeader.headerOk())
+    if (addSubtractFieldHeader.headerOk())
     {
-        writeAddField<scalar>
+        writeAddSubtractField<scalar>
         (
             baseFieldHeader,
-            addFieldHeader,
+            addSubtractFieldHeader,
             mesh,
             processed
         );
-        writeAddField<vector>
+        writeAddSubtractField<vector>
         (
             baseFieldHeader,
-            addFieldHeader,
+            addSubtractFieldHeader,
             mesh,
             processed
         );
-        writeAddField<sphericalTensor>
+        writeAddSubtractField<sphericalTensor>
         (
             baseFieldHeader,
-            addFieldHeader,
+            addSubtractFieldHeader,
             mesh,
             processed
         );
-        writeAddField<symmTensor>
+        writeAddSubtractField<symmTensor>
         (
             baseFieldHeader,
-            addFieldHeader,
+            addSubtractFieldHeader,
             mesh,
             processed
         );
-        writeAddField<tensor>
+        writeAddSubtractField<tensor>
         (
             baseFieldHeader,
-            addFieldHeader,
+            addSubtractFieldHeader,
             mesh,
             processed
         );
@@ -100,23 +100,23 @@ void Foam::calcTypes::add::writeAddFields
         {
             FatalError
                 << "Unable to process " << baseFieldName_
-                << " + " << addFieldName_ << nl
-                << "No call to add for fields of type "
+                << " + " << addSubtractFieldName_ << nl
+                << "No call to addSubtract for fields of type "
                 << baseFieldHeader.headerClassName() << " + "
-                << addFieldHeader.headerClassName() << nl << nl
+                << addSubtractFieldHeader.headerClassName() << nl << nl
                 << exit(FatalError);
         }
     }
     else
     {
-        FatalErrorIn("calcTypes::add::writeAddFields()")
-            << "Unable to read add field: " << addFieldName_
+        FatalErrorIn("calcTypes::addSubtract::writeAddSubtractFields()")
+            << "Unable to read addSubtract field: " << addSubtractFieldName_
             << nl << exit(FatalError);
     }
 }
 
 
-void Foam::calcTypes::add::writeAddValues
+void Foam::calcTypes::addSubtract::writeAddSubtractValues
 (
     const Time& runTime,
     const fvMesh& mesh,
@@ -125,48 +125,48 @@ void Foam::calcTypes::add::writeAddValues
 {
     bool processed = false;
 
-    writeAddValue<scalar>
+    writeAddSubtractValue<scalar>
     (
         baseFieldHeader,
-        addValueStr_,
+        addSubtractValueStr_,
         mesh,
         processed
     );
-    writeAddValue<vector>
+    writeAddSubtractValue<vector>
     (
         baseFieldHeader,
-        addValueStr_,
+        addSubtractValueStr_,
         mesh,
         processed
     );
-    writeAddValue<sphericalTensor>
+    writeAddSubtractValue<sphericalTensor>
     (
         baseFieldHeader,
-        addValueStr_,
+        addSubtractValueStr_,
         mesh,
         processed
     );
-    writeAddValue<symmTensor>
+    writeAddSubtractValue<symmTensor>
     (
         baseFieldHeader,
-        addValueStr_,
+        addSubtractValueStr_,
         mesh,
         processed
     );
-    writeAddValue<tensor>
+    writeAddSubtractValue<tensor>
     (
         baseFieldHeader,
-        addValueStr_,
+        addSubtractValueStr_,
         mesh,
         processed
     );
 
     if (!processed)
     {
-        FatalErrorIn("calcTypes::add::writeAddValues()")
+        FatalErrorIn("calcTypes::addSubtract::writeAddSubtractValue()")
             << "Unable to process " << baseFieldName_
-            << " + " << addValueStr_ << nl
-            << "No call to add for fields of type "
+            << " + " << addSubtractValueStr_ << nl
+            << "No call to addSubtract for fields of type "
             << baseFieldHeader.headerClassName() << nl << nl
             << exit(FatalError);
     }
@@ -175,36 +175,38 @@ void Foam::calcTypes::add::writeAddValues
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::calcTypes::add::add()
+Foam::calcTypes::addSubtract::addSubtract()
 :
     calcType(),
     baseFieldName_(""),
     calcType_(FIELD),
-    addFieldName_(""),
-    addValueStr_(""),
-    resultName_("")
+    addSubtractFieldName_(""),
+    addSubtractValueStr_(""),
+    resultName_(""),
+    calcMode_(ADD)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::calcTypes::add::~add()
+Foam::calcTypes::addSubtract::~addSubtract()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::calcTypes::add::init()
+void Foam::calcTypes::addSubtract::init()
 {
     argList::validArgs.append("add");
     argList::validArgs.append("baseField");
+    argList::validArgs.append("calcMode");
     argList::validOptions.insert("field", "fieldName");
     argList::validOptions.insert("value", "valueString");
     argList::validOptions.insert("resultName", "fieldName");
 }
 
 
-void Foam::calcTypes::add::preCalc
+void Foam::calcTypes::addSubtract::preCalc
 (
     const argList& args,
     const Time& runTime,
@@ -212,21 +214,38 @@ void Foam::calcTypes::add::preCalc
 )
 {
     baseFieldName_ = args.additionalArgs()[1];
+    word calcModeName = args.additionalArgs()[2];
+
+    if (calcModeName == "add")
+    {
+        calcMode_ = ADD;
+    }
+    else if (calcModeName == "subtract")
+    {
+        calcMode_ = SUBTRACT;
+    }
+    else
+    {
+        FatalErrorIn("calcTypes::addSubtract::preCalc")
+            << "Invalid calcMode: " << calcModeName << nl
+            << "    Valid calcModes are add and subtract" << nl
+            << exit(FatalError);
+    }
 
     if (args.options().found("field"))
     {
-        addFieldName_ = args.options()["field"];
+        addSubtractFieldName_ = args.options()["field"];
         calcType_ = FIELD;
     }
     else if (args.options().found("value"))
     {
-        addValueStr_ = args.options()["value"];
+        addSubtractValueStr_ = args.options()["value"];
         calcType_ = VALUE;
     }
     else
     {
-        FatalErrorIn("calcTypes::add::preCalc")
-            << "add requires either -field or -value option"
+        FatalErrorIn("calcTypes::addSubtract::preCalc")
+            << "addSubtract requires either -field or -value option"
             << nl << exit(FatalError);
     }
 
@@ -237,7 +256,7 @@ void Foam::calcTypes::add::preCalc
 }
 
 
-void Foam::calcTypes::add::calc
+void Foam::calcTypes::addSubtract::calc
 (
     const argList& args,
     const Time& runTime,
@@ -258,17 +277,17 @@ void Foam::calcTypes::add::calc
         {
             case FIELD:
             {
-                writeAddFields(runTime, mesh, baseFieldHeader);
+                writeAddSubtractFields(runTime, mesh, baseFieldHeader);
                 break;
             }
             case VALUE:
             {
-                writeAddValues(runTime, mesh, baseFieldHeader);
+                writeAddSubtractValues(runTime, mesh, baseFieldHeader);
                 break;
             }
             default:
             {
-                FatalErrorIn("calcTypes::add::calc")
+                FatalErrorIn("calcTypes::addSubtract::calc")
                     << "unknown calcType " << calcType_ << nl
                     << abort(FatalError);
             }
@@ -276,7 +295,7 @@ void Foam::calcTypes::add::calc
     }
     else
     {
-        FatalErrorIn("calcTypes::add::calc")
+        FatalErrorIn("calcTypes::addSubtract::calc")
             << "Unable to read base field: " << baseFieldName_
             << nl << exit(FatalError);
     }

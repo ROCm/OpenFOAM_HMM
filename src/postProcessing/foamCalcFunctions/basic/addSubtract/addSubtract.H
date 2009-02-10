@@ -23,28 +23,30 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::calcTypes::add
+    Foam::calcTypes::addSubtract
 
 Description
-    Adds and field or value to base field.
+    adds/subtracts a field or value to/from a base field.
 
     New field name specified by -resultName option, or automatically as:
-        <baseFieldName>_plus_<addFieldName>
-        <baseFieldName>_plus_value
+        <baseFieldName>_add_<addSubtractFieldName>
+        <baseFieldName>_add_value
+        <baseFieldName>_subtract_<addSubtractFieldName>
+        <baseFieldName>_subtract_value
 
     Example usage:
-        add p -value 100000 -resultName pAbs
-        add U -field U0
+        addSubtract p add -value 100000 -resultName pAbs
+        addSubtract U subtract -field U0
 
 SourceFiles
-    add.C
-    writeAddField.C
-    writeAddValue.C
+    addSubtract.C
+    writeaddSubtractField.C
+    writeaddSubtractValue.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef add_H
-#define add_H
+#ifndef addSubtract_H
+#define addSubtract_H
 
 #include "calcType.H"
 
@@ -57,10 +59,10 @@ namespace calcTypes
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class add Declaration
+                          Class addSubtract Declaration
 \*---------------------------------------------------------------------------*/
 
-class add
+class addSubtract
 :
     public calcType
 {
@@ -72,41 +74,50 @@ public:
         VALUE
     };
 
+    enum calcModes
+    {
+        ADD,
+        SUBTRACT
+    };
+
 
 private:
 
     // Private data
 
-        //- Name of base field (to add to)
+        //- Name of base field (to addSubtract to)
         word baseFieldName_;
 
         //- Calc type as given by enumerations above
         calcTypes calcType_;
 
-        //- Name of field to add
-        word addFieldName_;
+        //- Name of field to add/subtract
+        word addSubtractFieldName_;
 
-        //- String representation of value to add
-        string addValueStr_;
+        //- String representation of value to add/subtract
+        string addSubtractValueStr_;
 
         //- Name of result field
         word resultName_;
+
+        //- Mode - addSubtract/subtract
+        calcModes calcMode_;
 
 
     // Private Member Functions
 
         // Output
 
-            //- Calc and output field additions
-            void writeAddFields
+            //- Calc and output field addSubtractitions
+            void writeAddSubtractFields
             (
                 const Time& runTime,
                 const fvMesh& mesh,
                 const IOobject& baseFieldHeader
             );
 
-            //- Calc and output field and value additions
-            void writeAddValues
+            //- Calc and output field and value addSubtractitions
+            void writeAddSubtractValues
             (
                 const Time& runTime,
                 const fvMesh& mesh,
@@ -115,10 +126,10 @@ private:
 
 
         //- Disallow default bitwise copy construct
-        add(const add&);
+        addSubtract(const addSubtract&);
 
         //- Disallow default bitwise assignment
-        void operator=(const add&);
+        void operator=(const addSubtract&);
 
 
 protected:
@@ -150,19 +161,19 @@ protected:
 
         // I-O
 
-            //- Write add field
+            //- Write addSubtract field
             template<class Type>
-            void writeAddField
+            void writeAddSubtractField
             (
                 const IOobject& baseHeader,
-                const IOobject& addHeader,
+                const IOobject& addSubtractHeader,
                 const fvMesh& mesh,
                 bool& processed
             );
 
-            //- Write add value
+            //- Write addSubtract value
             template<class Type>
-            void writeAddValue
+            void writeAddSubtractValue
             (
                 const IOobject& baseHeader,
                 const string& valueStr,
@@ -174,18 +185,18 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("add");
+    TypeName("addSubtract");
 
 
     // Constructors
 
         //- Construct null
-        add();
+        addSubtract();
 
 
     // Destructor
 
-        virtual ~add();
+        virtual ~addSubtract();
 };
 
 
@@ -197,8 +208,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "writeAddField.C"
-#   include "writeAddValue.C"
+#   include "writeAddSubtractField.C"
+#   include "writeAddSubtractValue.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
