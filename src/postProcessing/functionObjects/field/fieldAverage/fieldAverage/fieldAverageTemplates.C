@@ -57,7 +57,8 @@ void Foam::fieldAverage::addMeanField
                     obr_.time().timeName(),
                     obr_,
                     IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 baseField
             )
@@ -96,7 +97,8 @@ void Foam::fieldAverage::addPrime2MeanField
                     obr_.time().timeName(),
                     obr_,
                     IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 sqr(baseField) - sqr(meanField)
             )

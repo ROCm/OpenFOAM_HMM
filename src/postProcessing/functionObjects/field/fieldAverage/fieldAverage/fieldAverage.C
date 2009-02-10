@@ -309,7 +309,8 @@ void Foam::fieldAverage::writeAveragingProperties() const
             "uniform",
             obr_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         )
     );
 
