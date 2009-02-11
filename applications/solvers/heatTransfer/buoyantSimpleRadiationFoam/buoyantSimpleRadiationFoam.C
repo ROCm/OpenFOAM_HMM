@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
 #   include "readEnvironmentalProperties.H"
 #   include "createFields.H"
+#   include "createRadiationModel.H"
 #   include "initContinuityErrs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
