@@ -16,6 +16,8 @@ FoamFile
 
 LESModel            oneEqEddy;
 
+turbulence          on;
+
 printCoeffs         on;
 
 delta               vanDriest;

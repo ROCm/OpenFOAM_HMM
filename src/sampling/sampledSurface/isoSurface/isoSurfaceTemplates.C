@@ -369,7 +369,7 @@ void Foam::isoSurface::generateTriPoints
     {
         const polyPatch& pp = patches[patchI];
 
-        if (pp.coupled())
+        if (isA<processorPolyPatch>(pp))
         {
             if (refCast<const processorPolyPatch>(pp).owner())
             {
