@@ -139,7 +139,9 @@ void Foam::CV3D::setVertexAlignmentDirections()
 
                         if (spokeHitDistance < closestSpokeHitDistance)
                         {
-                            closestSpokeHitPoint =  spokeHit.hitPoint();
+                            closestSpokeHitPoint = spokeHit.hitPoint();
+
+                            closestSpokeHitDistance = spokeHitDistance;
 
                             closestSpokeHitDistanceIndex = spokeHit.index();
                         }
@@ -165,6 +167,8 @@ void Foam::CV3D::setVertexAlignmentDirections()
                         if (spokeHitDistance < closestSpokeHitDistance)
                         {
                             closestSpokeHitPoint =  spokeHit.hitPoint();
+
+                            closestSpokeHitDistance = spokeHitDistance;
 
                             closestSpokeHitDistanceIndex = spokeHit.index();
                         }
@@ -629,311 +633,21 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     // Rotate faces that are sufficiently large and well enough aligned with the
     // cell alignment direction(s)
 
-    // vector n2 = vector(1,1,1);
+    Info<< nl << "Dual face looping." << endl;
 
-    // n2 /= mag(n2);
+    vector n2 = vector(1,0,0);
 
-    // tensor R = rotationTensor(vector(1,0,0), n2);
+    n2 /= mag(n2);
 
-    // List<vector> globalAlignmentDirs(3);
+    tensor R = rotationTensor(vector(1,0,0), n2);
 
-    // globalAlignmentDirs[0] = R & vector(1,0,0);
-    // globalAlignmentDirs[1] = R & vector(0,1,0);
-    // globalAlignmentDirs[2] = R & vector(0,0,1);
+    List<vector> globalAlignmentDirs(3);
 
-    // Info<< "globalAlignmentDirs " << globalAlignmentDirs << endl;
+    globalAlignmentDirs[0] = R & vector(1,0,0);
+    globalAlignmentDirs[1] = R & vector(0,1,0);
+    globalAlignmentDirs[2] = R & vector(0,0,1);
 
-    // for
-    // (
-    //     Triangulation::Finite_edges_iterator eit = finite_edges_begin();
-    //     eit != finite_edges_end();
-    //     ++eit
-    // )
-    // {
-    //     if
-    //     (
-    //         eit->first->vertex(eit->second)->internalOrBoundaryPoint()
-    //      && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
-    //     )
-    //     {
-    //         Cell_circulator ccStart = incident_cells(*eit);
-    //         Cell_circulator cc = ccStart;
-
-    //         DynamicList<label> verticesOnFace;
-
-    //         do
-    //         {
-    //             if (!is_infinite(cc))
-    //             {
-    //                 if (cc->cellIndex() < 0)
-    //                 {
-    //                     FatalErrorIn("Foam::CV3D::relaxPoints")
-    //                     << "Dual face uses circumcenter defined by a "
-    //                         << " Delaunay tetrahedron with no internal "
-    //                         << "or boundary points."
-    //                         << exit(FatalError);
-    //                 }
-
-    //                 verticesOnFace.append(cc->cellIndex());
-    //             }
-    //         } while (++cc != ccStart);
-
-    //         verticesOnFace.shrink();
-
-    //         face dualFace(verticesOnFace);
-
-    //         Cell_handle c = eit->first;
-    //         Vertex_handle vA = c->vertex(eit->second);
-    //         Vertex_handle vB = c->vertex(eit->third);
-
-    //         point dVA = topoint(vA->point());
-    //         point dVB = topoint(vB->point());
-
-    //         Field<vector> alignmentDirs;
-
-    //         if
-    //         (
-    //             vA->alignmentDirections().size() > 0
-    //          || vB->alignmentDirections().size() > 0
-    //         )
-    //         {
-    //             if
-    //             (
-    //                 vA->alignmentDirections().size() == 3
-    //              || vB->alignmentDirections().size() == 3
-    //             )
-    //             {
-    //                 alignmentDirs.setSize(3);
-
-    //                 if (vB->alignmentDirections().size() == 0)
-    //                 {
-    //                     alignmentDirs = vA->alignmentDirections();
-    //                 }
-    //                 else if (vA->alignmentDirections().size() == 0)
-    //                 {
-    //                     alignmentDirs = vB->alignmentDirections();
-    //                 }
-    //                 else if
-    //                 (
-    //                     vA->alignmentDirections().size() == 3
-    //                  && vB->alignmentDirections().size() == 3
-    //                 )
-    //                 {
-    //                     forAll(vA->alignmentDirections(), aA)
-    //                     {
-    //                         const vector& a(vA->alignmentDirections()[aA]);
-
-    //                         scalar maxDotProduct = 0.0;
-
-    //                         forAll(vB->alignmentDirections(), aB)
-    //                         {
-    //                             const vector& b(vB->alignmentDirections()[aB]);
-
-    //                             if (mag(a & b) > maxDotProduct)
-    //                             {
-    //                                 maxDotProduct = mag(a & b);
-
-    //                                 alignmentDirs[aA] = a + sign(a & b)*b;
-
-    //                                 alignmentDirs[aA] /= mag(alignmentDirs[aA]);
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //                 else
-    //                 {
-    //                     // One of the vertices has 3 alignments and the other
-    //                     // has 1
-
-    //                     vector otherAlignment;
-
-    //                     if (vA->alignmentDirections().size() == 3)
-    //                     {
-    //                         alignmentDirs = vA->alignmentDirections();
-
-    //                         otherAlignment = vB->alignmentDirections()[0];
-    //                     }
-    //                     else
-    //                     {
-    //                         alignmentDirs = vB->alignmentDirections();
-
-    //                         otherAlignment = vA->alignmentDirections()[0];
-    //                     }
-
-    //                     label matchingDirection = -1;
-
-    //                     scalar maxDotProduct = 0.0;
-
-    //                     forAll(alignmentDirs, aD)
-    //                     {
-    //                         const vector& a(alignmentDirs[aD]);
-
-    //                         if (mag(a & otherAlignment) > maxDotProduct)
-    //                         {
-    //                             maxDotProduct = mag(a & otherAlignment);
-
-    //                             matchingDirection = aD;
-    //                         }
-    //                     }
-
-    //                     vector& matchingAlignment =
-    //                     alignmentDirs[matchingDirection];
-
-    //                     matchingAlignment = matchingAlignment
-    //                     + sign(matchingAlignment & otherAlignment)
-    //                     *otherAlignment;
-
-    //                     matchingAlignment /= mag(matchingAlignment);
-    //                 }
-
-    //                 // vector midpoint = 0.5*(dVA + dVB);
-
-    //                 // Info<< "midpoint " << midpoint
-    //                 //     << nl << alignmentDirs
-    //                 //     << nl << "v " << midpoint + alignmentDirs[0]
-    //                 //     << nl << "v " << midpoint + alignmentDirs[1]
-    //                 //     << nl << "v " << midpoint + alignmentDirs[2]
-    //                 //     << nl << "v " << midpoint
-    //                 //     << nl << "f 4 1"
-    //                 //     << nl << "f 4 2"
-    //                 //     << nl << "f 4 3"
-    //                 //     << nl << endl;
-    //             }
-    //             else
-    //             {
-    //                 alignmentDirs.setSize(1);
-
-    //                 vector& alignmentDir = alignmentDirs[0];
-
-    //                 if
-    //                 (
-    //                     vA->alignmentDirections().size() > 0
-    //                  && vB->alignmentDirections().size() == 0
-    //                 )
-    //                 {
-    //                     alignmentDir = vA->alignmentDirections()[0];
-    //                 }
-    //                 else if
-    //                 (
-    //                     vA->alignmentDirections().size() == 0
-    //                  && vB->alignmentDirections().size() > 0
-    //                 )
-    //                 {
-    //                     alignmentDir = vB->alignmentDirections()[0];
-    //                 }
-    //                 else
-    //                 {
-    //                     // Both vertices have an alignment
-
-    //                     const vector& a(vA->alignmentDirections()[0]);
-
-    //                     const vector& b(vB->alignmentDirections()[0]);
-
-    //                     if (mag(a & b) < 1 - SMALL)
-    //                     {
-    //                         alignmentDirs.setSize(3);
-
-    //                         alignmentDirs[0] = a + b;
-
-    //                         alignmentDirs[1] = a - b;
-
-    //                         alignmentDirs[2] =
-    //                         alignmentDirs[0] ^ alignmentDirs[1];
-
-    //                         alignmentDirs /= mag(alignmentDirs);
-    //                     }
-    //                     else
-    //                     {
-    //                         alignmentDir = a + sign(a & b)*b;
-
-    //                         alignmentDir /= mag(alignmentDir);
-    //                     }
-    //                 }
-    //                 if (alignmentDirs.size() ==1)
-    //                 {
-    //                     // Use the least similar of globalAlignmentDirs as the
-    //                     // 2nd alignment and then generate the third.
-
-    //                     scalar minDotProduct = 1+SMALL;
-
-    //                     alignmentDirs.setSize(3);
-
-    //                     forAll(alignmentDirs, aD)
-    //                     {
-    //                         if
-    //                         (
-    //                             mag(alignmentDir & globalAlignmentDirs[aD])
-    //                           < minDotProduct
-    //                         )
-    //                         {
-    //                             minDotProduct = mag
-    //                             (
-    //                                 alignmentDir & globalAlignmentDirs[aD]
-    //                             );
-
-    //                             alignmentDirs[1] = globalAlignmentDirs[aD];
-    //                         }
-    //                     }
-
-    //                     alignmentDirs[2] = alignmentDirs[0] ^ alignmentDirs[1];
-
-    //                     alignmentDirs[2] /= mag(alignmentDirs[2]);
-    //                 }
-    //             }
-    //         }
-    //         else
-    //         {
-    //             alignmentDirs = globalAlignmentDirs;
-    //         }
-
-    //         // alignmentDirs found, now apply them
-
-    //         vector rAB = dVA - dVB;
-
-    //         scalar rABMag = mag(rAB);
-
-    //         forAll(alignmentDirs, aD)
-    //         {
-    //             vector& alignmentDir = alignmentDirs[aD];
-
-    //             if ((rAB & alignmentDir) < 0)
-    //             {
-    //                 // swap the direction of the alignment so that has the
-    //                 // same sense as rAB
-    //                 alignmentDir *= -1;
-    //             }
-
-    //             //scalar cosAcceptanceAngle = 0.743;
-    //             scalar cosAcceptanceAngle = 0.67;
-
-    //             if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
-    //             {
-    //                 alignmentDir *= 0.5*controls_.minCellSize;
-
-    //                 vector delta = alignmentDir - 0.5*rAB;
-
-    //                 scalar faceArea = dualFace.mag(dualVertices);
-
-    //                 delta *= faceAreaWeight(faceArea);
-
-    //                 if (vA->internalPoint())
-    //                 {
-    //                     displacementAccumulator[vA->index()] += delta;
-    //                 }
-    //                 if (vB->internalPoint())
-    //                 {
-    //                     displacementAccumulator[vB->index()] += -delta;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Simple isotropic forcing using tension between the Delaunay vertex and
-    // and the dual face centre
+    Info<< "globalAlignmentDirs " << globalAlignmentDirs << endl;
 
     for
     (
@@ -960,7 +674,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                     if (cc->cellIndex() < 0)
                     {
                         FatalErrorIn("Foam::CV3D::relaxPoints")
-                            << "Dual face uses circumcenter defined by a "
+                        << "Dual face uses circumcenter defined by a "
                             << " Delaunay tetrahedron with no internal "
                             << "or boundary points."
                             << exit(FatalError);
@@ -981,35 +695,382 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
             point dVA = topoint(vA->point());
             point dVB = topoint(vB->point());
 
-            scalar faceArea = dualFace.mag(dualVertices);
+            Field<vector> alignmentDirs;
+
+            if
+            (
+                vA->alignmentDirections().size() > 0
+             || vB->alignmentDirections().size() > 0
+            )
+            {
+                if
+                (
+                    vA->alignmentDirections().size() == 3
+                 || vB->alignmentDirections().size() == 3
+                )
+                {
+                    alignmentDirs.setSize(3);
+
+                    if (vB->alignmentDirections().size() == 0)
+                    {
+                        alignmentDirs = vA->alignmentDirections();
+                    }
+                    else if (vA->alignmentDirections().size() == 0)
+                    {
+                        alignmentDirs = vB->alignmentDirections();
+                    }
+                    else if
+                    (
+                        vA->alignmentDirections().size() == 3
+                     && vB->alignmentDirections().size() == 3
+                    )
+                    {
+                        forAll(vA->alignmentDirections(), aA)
+                        {
+                            const vector& a(vA->alignmentDirections()[aA]);
+
+                            scalar maxDotProduct = 0.0;
+
+                            forAll(vB->alignmentDirections(), aB)
+                            {
+                                const vector& b(vB->alignmentDirections()[aB]);
+
+                                if (mag(a & b) > maxDotProduct)
+                                {
+                                    maxDotProduct = mag(a & b);
+
+                                    alignmentDirs[aA] = a + sign(a & b)*b;
+
+                                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // One of the vertices has 3 alignments and the other
+                        // has 1
+
+                        vector otherAlignment;
+
+                        if (vA->alignmentDirections().size() == 3)
+                        {
+                            alignmentDirs = vA->alignmentDirections();
+
+                            otherAlignment = vB->alignmentDirections()[0];
+                        }
+                        else
+                        {
+                            alignmentDirs = vB->alignmentDirections();
+
+                            otherAlignment = vA->alignmentDirections()[0];
+                        }
+
+                        label matchingDirection = -1;
+
+                        scalar maxDotProduct = 0.0;
+
+                        forAll(alignmentDirs, aD)
+                        {
+                            const vector& a(alignmentDirs[aD]);
+
+                            if (mag(a & otherAlignment) > maxDotProduct)
+                            {
+                                maxDotProduct = mag(a & otherAlignment);
+
+                                matchingDirection = aD;
+                            }
+                        }
+
+                        vector& matchingAlignment =
+                        alignmentDirs[matchingDirection];
+
+                        matchingAlignment = matchingAlignment
+                        + sign(matchingAlignment & otherAlignment)
+                        *otherAlignment;
+
+                        matchingAlignment /= mag(matchingAlignment);
+                    }
+
+                    // vector midpoint = 0.5*(dVA + dVB);
+
+                    // Info<< "midpoint " << midpoint
+                    //     << nl << alignmentDirs
+                    //     << nl << "v " << midpoint + alignmentDirs[0]
+                    //     << nl << "v " << midpoint + alignmentDirs[1]
+                    //     << nl << "v " << midpoint + alignmentDirs[2]
+                    //     << nl << "v " << midpoint
+                    //     << nl << "f 4 1"
+                    //     << nl << "f 4 2"
+                    //     << nl << "f 4 3"
+                    //     << nl << endl;
+                }
+                else
+                {
+                    alignmentDirs.setSize(1);
+
+                    vector& alignmentDir = alignmentDirs[0];
+
+                    if
+                    (
+                        vA->alignmentDirections().size() > 0
+                     && vB->alignmentDirections().size() == 0
+                    )
+                    {
+                        alignmentDir = vA->alignmentDirections()[0];
+                    }
+                    else if
+                    (
+                        vA->alignmentDirections().size() == 0
+                     && vB->alignmentDirections().size() > 0
+                    )
+                    {
+                        alignmentDir = vB->alignmentDirections()[0];
+                    }
+                    else
+                    {
+                        // Both vertices have an alignment
+
+                        const vector& a(vA->alignmentDirections()[0]);
+
+                        const vector& b(vB->alignmentDirections()[0]);
+
+                        if (mag(a & b) < 1 - SMALL)
+                        {
+                            alignmentDirs.setSize(3);
+
+                            alignmentDirs[0] = a + b;
+
+                            alignmentDirs[1] = a - b;
+
+                            alignmentDirs[2] =
+                            alignmentDirs[0] ^ alignmentDirs[1];
+
+                            alignmentDirs /= mag(alignmentDirs);
+                        }
+                        else
+                        {
+                            alignmentDir = a + sign(a & b)*b;
+
+                            alignmentDir /= mag(alignmentDir);
+                        }
+                    }
+                    if (alignmentDirs.size() ==1)
+                    {
+                        // Use the least similar of globalAlignmentDirs as the
+                        // 2nd alignment and then generate the third.
+
+                        Warning<< "Using supplementary global alignments!"
+                            << endl;
+
+                        scalar minDotProduct = 1+SMALL;
+
+                        alignmentDirs.setSize(3);
+
+                        forAll(alignmentDirs, aD)
+                        {
+                            if
+                            (
+                                mag(alignmentDir & globalAlignmentDirs[aD])
+                              < minDotProduct
+                            )
+                            {
+                                minDotProduct = mag
+                                (
+                                    alignmentDir & globalAlignmentDirs[aD]
+                                );
+
+                                alignmentDirs[1] = globalAlignmentDirs[aD];
+                            }
+                        }
+
+                        alignmentDirs[2] = alignmentDirs[0] ^ alignmentDirs[1];
+
+                        alignmentDirs[2] /= mag(alignmentDirs[2]);
+                    }
+                }
+            }
+            else
+            {
+                Warning<< "Using full global alignments!" << endl;
+
+                alignmentDirs = globalAlignmentDirs;
+            }
+
+            // alignmentDirs found, now apply them
+
+            vector rAB = dVA - dVB;
+
+            scalar rABMag = mag(rAB);
+
+            forAll(alignmentDirs, aD)
+            {
+                vector& alignmentDir = alignmentDirs[aD];
+
+                if ((rAB & alignmentDir) < 0)
+                {
+                    // swap the direction of the alignment so that has the
+                    // same sense as rAB
+                    alignmentDir *= -1;
+                }
+
+                //scalar cosAcceptanceAngle = 0.743;
+                scalar cosAcceptanceAngle = 0.67;
+
+                if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
+                {
+                    // alignmentDir *= 0.5*rABMag;
+                    alignmentDir *= 0.5*controls_.minCellSize;
+
+                    vector delta = alignmentDir - 0.5*rAB;
+
+                    scalar faceArea = dualFace.mag(dualVertices);
+
+                    delta *= faceAreaWeight(faceArea);
+
+                    if (vA->internalPoint())
+                    {
+                        displacementAccumulator[vA->index()] += delta;
+                    }
+                    if (vB->internalPoint())
+                    {
+                        displacementAccumulator[vB->index()] += -delta;
+                    }
+                }
+            }
+
+            // Reworking of CV2D relaxation method.
 
             // point dualFaceCentre(dualFace.centre(dualVertices));
-            point dEMid = 0.5*(dVA + dVB);
 
-            if (vA->internalPoint())
-            {
-                displacementAccumulator[vA->index()] +=
-                faceArea*(dEMid - dVA);
-                //faceArea*(dualFaceCentre - dVA);
+            // vector dualFaceNormal(dualFace.normal(dualVertices));
 
-                weightAccumulator[vA->index()] += faceArea;
-            }
-            if (vB->internalPoint())
-            {
-                displacementAccumulator[vB->index()] +=
-                faceArea*(dEMid - dVB);
-                //faceArea*(dualFaceCentre - dVB);
+            // vector deltaA = dualFaceCentre - dVA;
 
-                weightAccumulator[vB->index()] += faceArea;
-            }
+            // vector deltaB = dualFaceCentre - dVB;
+
+            // scalar weight = mag(deltaA)*magSqr(deltaA & dualFaceNormal);
+
+            // scalar cosAcceptanceAngle = 0.67;
+
+            // forAll(alignmentDirs, aD)
+            // {
+            //     vector& alignmentDir = alignmentDirs[aD];
+
+            //     scalar alignDotDeltaA = alignmentDir & deltaA/mag(deltaA);
+
+            //     scalar alignDotDeltaB = alignmentDir & deltaB/mag(deltaB);
+
+            //     if (mag(alignDotDeltaA) > cosAcceptanceAngle)
+            //     {
+            //         if (vA->internalPoint())
+            //         {
+            //             displacementAccumulator[vA->index()] +=
+            //                 weight*alignDotDeltaA*alignmentDir;
+
+            //             weightAccumulator[vA->index()] += weight;
+            //         }
+            //     }
+            //     if (mag(alignDotDeltaB) > cosAcceptanceAngle)
+            //     {
+            //         if (vB->internalPoint())
+            //         {
+            //             displacementAccumulator[vB->index()] +=
+            //                 weight*alignDotDeltaB*alignmentDir;
+
+            //             weightAccumulator[vB->index()] += weight;
+            //         }
+            //     }
+            // }
         }
     }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Simple isotropic forcing using tension between the Delaunay vertex and
+    // and the dual face centre
+
+    // Info<< nl << "Dual face looping, isotropic forcing." << endl;
+
+    // for
+    // (
+    //     Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+    //     eit != finite_edges_end();
+    //     ++eit
+    // )
+    // {
+    //     if
+    //     (
+    //         eit->first->vertex(eit->second)->internalOrBoundaryPoint()
+    //      && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
+    //     )
+    //     {
+    //         Cell_circulator ccStart = incident_cells(*eit);
+    //         Cell_circulator cc = ccStart;
+
+    //         DynamicList<label> verticesOnFace;
+
+    //         do
+    //         {
+    //             if (!is_infinite(cc))
+    //             {
+    //                 if (cc->cellIndex() < 0)
+    //                 {
+    //                     FatalErrorIn("Foam::CV3D::relaxPoints")
+    //                         << "Dual face uses circumcenter defined by a "
+    //                         << " Delaunay tetrahedron with no internal "
+    //                         << "or boundary points."
+    //                         << exit(FatalError);
+    //                 }
+
+    //                 verticesOnFace.append(cc->cellIndex());
+    //             }
+    //         } while (++cc != ccStart);
+
+    //         verticesOnFace.shrink();
+
+    //         face dualFace(verticesOnFace);
+
+    //         Cell_handle c = eit->first;
+    //         Vertex_handle vA = c->vertex(eit->second);
+    //         Vertex_handle vB = c->vertex(eit->third);
+
+    //         point dVA = topoint(vA->point());
+    //         point dVB = topoint(vB->point());
+
+    //         scalar faceArea = dualFace.mag(dualVertices);
+    //         scalar weight = sqrt(faceArea);
+
+    //         // point dualFaceCentre(dualFace.centre(dualVertices));
+    //         point dEMid = 0.5*(dVA + dVB);
+
+    //         if (vA->internalPoint())
+    //         {
+    //             displacementAccumulator[vA->index()] +=
+    //             weight*(dEMid - dVA);
+    //             //faceArea*(dualFaceCentre - dVA);
+
+    //             weightAccumulator[vA->index()] += weight;
+    //         }
+    //         if (vB->internalPoint())
+    //         {
+    //             displacementAccumulator[vB->index()] +=
+    //             weight*(dEMid - dVB);
+    //             //faceArea*(dualFaceCentre - dVB);
+
+    //             weightAccumulator[vB->index()] += weight;
+    //         }
+    //     }
+    // }
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Cell based looping.
 
     // Loop over all Delaunay vertices (Dual cells)
+
+    // Info<< nl << "Dual cell looping, centroid forcing." << endl;
 
     // for
     // (
@@ -1020,37 +1081,70 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     // {
     //     if (vit->internalOrBoundaryPoint())
     //     {
-    //         std::list<Vertex_handle> incidentVertices;
+    //         std::list<Edge> incidentEdges;
 
-    //         incident_vertices(vit, std::back_inserter(incidentVertices));
+    //         incident_edges(vit, std::back_inserter(incidentEdges));
+
+    //         faceList faces(incidentEdges.size());
+
+    //         label faceI = 0;
+
+    //         labelList faceLabels(incidentEdges.size(),-1);
 
     //         for
     //         (
-    //             std::list<Vertex_handle>::iterator ivit =
-    //                 incidentVertices.begin();
-    //             ivit != incidentVertices.end();
-    //             ++ivit
+    //             std::list<Edge>::iterator eit = incidentEdges.begin();
+    //             eit != incidentEdges.end();
+    //             ++eit
     //         )
     //         {
-    //             // Pick up all incident vertices to the Dv - check the number to
-    //             // see if this is a reasonable result
+    //             Cell_circulator ccStart = incident_cells(*eit);
+    //             Cell_circulator cc = ccStart;
 
-    //             // Form the edge from the current Dv and iterate around the
-    //             // incident cells, finding their circumcentres, then form (and
-    //             // store?) the dual face.
+    //             DynamicList<label> verticesOnFace;
 
-    //             // Wait!
+    //             do
+    //             {
+    //                 if (!is_infinite(cc))
+    //                 {
+    //                     if (cc->cellIndex() < 0)
+    //                     {
+    //                         FatalErrorIn("Foam::CV3D::relaxPoints")
+    //                         << "Dual face uses circumcenter defined by a "
+    //                             << " Delaunay tetrahedron with no internal "
+    //                             << "or boundary points."
+    //                             << exit(FatalError);
+    //                     }
 
-    //             // There is no sensible way in CGAL-3.3.1 to turn the Delaunay
-    //             // vertex in question and the incident vertex into an edge.
-    //             // There is, however, an incident_edges function in CGAL-3.4
+    //                     verticesOnFace.append(cc->cellIndex());
+    //                 }
+    //             } while (++cc != ccStart);
+
+    //             verticesOnFace.shrink();
+
+    //             faces[faceI] = face(verticesOnFace);
+
+    //             faceLabels[faceI] = faceI;
+
+    //             faceI++;
+    //         }
+
+    //         cell dualCell(faceLabels);
+
+    //         point dualCellCentre = dualCell.centre(dualVertices, faces);
+
+    //         point v = topoint(vit->point());
+
+    //         if (vit->internalPoint())
+    //         {
+    //             displacementAccumulator[vit->index()] += dualCellCentre - v;
     //         }
     //     }
     // }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    displacementAccumulator /= weightAccumulator;
+    //displacementAccumulator /= weightAccumulator;
 
     vector totalDisp = sum(displacementAccumulator);
     scalar totalDist = sum(mag(displacementAccumulator));
