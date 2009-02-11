@@ -15,7 +15,6 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application icoFoam;
 
 startFrom       latestTime;
 
