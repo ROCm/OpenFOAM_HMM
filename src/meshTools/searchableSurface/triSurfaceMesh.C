@@ -50,7 +50,7 @@ const Foam::fileName& Foam::triSurfaceMesh::checkFile
     const fileName& objectName
 )
 {
-    if (fName == fileName::null)
+    if (fName.empty())
     {
         FatalErrorIn
         (
@@ -562,7 +562,7 @@ bool Foam::triSurfaceMesh::writeObject
 
     triSurface::write(fullPath);
 
-    if (!file(fullPath))
+    if (!isFile(fullPath))
     {
         return false;
     }

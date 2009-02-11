@@ -28,6 +28,7 @@ License
 #include "primitiveEntry.H"
 #include "dictionaryEntry.H"
 #include "regExp.H"
+#include "OSHA1stream.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -229,6 +230,25 @@ Foam::label Foam::dictionary::endLineNumber() const
     {
         return -1;
     }
+}
+
+
+Foam::SHA1Digest Foam::dictionary::digest() const
+{
+    OSHA1stream os;
+
+    // process entries
+    for
+    (
+        IDLList<entry>::const_iterator iter = begin();
+        iter != end();
+        ++iter
+    )
+    {
+        os << *iter;
+    }
+
+    return os.digest();
 }
 
 

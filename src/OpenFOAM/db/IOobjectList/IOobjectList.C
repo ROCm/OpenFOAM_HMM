@@ -48,7 +48,7 @@ Foam::IOobjectList::IOobjectList
 {
     word newInstance = instance;
 
-    if (!dir(db.path(instance)))
+    if (!isDir(db.path(instance)))
     {
         newInstance = db.time().findInstancePath(instant(instance));
 
@@ -59,7 +59,7 @@ Foam::IOobjectList::IOobjectList
     }
 
     // Create list file names in directory
-    fileNameList ObjectNames = 
+    fileNameList ObjectNames =
         readDir(db.path(newInstance, db.dbDir()/local), fileName::FILE);
 
     forAll(ObjectNames, i)

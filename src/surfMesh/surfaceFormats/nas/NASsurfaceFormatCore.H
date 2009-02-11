@@ -47,7 +47,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class NASsurfaceFormatCore Declaration
+                    Class NASsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class NASsurfaceFormatCore

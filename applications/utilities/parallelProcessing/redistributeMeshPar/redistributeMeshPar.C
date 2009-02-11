@@ -503,7 +503,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 
     // Create processor directory if non-existing
-    if (!Pstream::master() && !dir(args.path()))
+    if (!Pstream::master() && !isDir(args.path()))
     {
         Pout<< "Creating case directory " << args.path() << endl;
         mkDir(args.path());
@@ -525,7 +525,7 @@ int main(int argc, char *argv[])
     const fileName meshDir = runTime.path()/masterInstDir/polyMesh::meshSubDir;
 
     boolList haveMesh(Pstream::nProcs(), false);
-    haveMesh[Pstream::myProcNo()] = dir(meshDir);
+    haveMesh[Pstream::myProcNo()] = isDir(meshDir);
     Pstream::gatherList(haveMesh);
     Pstream::scatterList(haveMesh);
     Info<< "Per processor mesh availability : " << haveMesh << endl;

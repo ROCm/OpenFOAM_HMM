@@ -26,13 +26,16 @@ Class
     Foam::triSurfaceGeoMesh
 
 Description
-    The triSurface geoMesh
+    The triSurface GeoMesh (for holding fields).
+
+    Similar to the volGeoMesh used for the Finite Volume discretization.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef triSurfaceGeoMesh_H
 #define triSurfaceGeoMesh_H
 
+#include "GeoMesh.H"
 #include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,39 +46,22 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 class triSurfaceGeoMesh
+:
+    public GeoMesh<triSurface>
 {
-
-protected:
-
-    // Protected data
-
-        //- Reference to Mesh
-        const triSurface& mesh_;
-
 
 public:
 
-    // Public typedefs
-
-        typedef triSurface Mesh;
-
-
     // Constructors
 
-        //- Construct from Mesh
+        //- Construct from triSurface reference
         explicit triSurfaceGeoMesh(const triSurface& mesh)
         :
-            mesh_(mesh)
+            GeoMesh<triSurface>(mesh)
         {}
 
 
     // Member Functions
-
-        //- Return size
-        label size() const
-        {
-            return size(mesh_);
-        }
 
         //- Return size
         static label size(const triSurface& mesh)
@@ -83,12 +69,10 @@ public:
             return mesh.size();
         }
 
-    // Member Operators
-
-        //- Return reference to triSurface
-        const triSurface& operator()() const
+        //- Return size
+        label size() const
         {
-            return mesh_;
+            return size(mesh_);
         }
 
 };

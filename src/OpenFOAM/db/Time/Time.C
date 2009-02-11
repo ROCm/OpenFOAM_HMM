@@ -31,11 +31,7 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(Time, 0);
-}
-
+defineTypeNameAndDebug(Foam::Time, 0);
 
 template<>
 const char* Foam::NamedEnum<Foam::Time::stopAtControls, 4>::names[] =
@@ -100,9 +96,11 @@ void Foam::Time::adjustDeltaT()
 void Foam::Time::setControls()
 {
     // default is to resume calculation from "latestTime"
-    word startFrom("latestTime");
-
-    controlDict_.readIfPresent("startFrom", startFrom);
+    word startFrom = controlDict_.lookupOrDefault<word>
+    (
+        "startFrom",
+        "latestTime"
+    );
 
     if (startFrom == "startTime")
     {
@@ -421,7 +419,7 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
     label nearestIndex = -1;
     scalar deltaT = GREAT;
 
-    for (label i=1; i<times.size(); i++)
+    for (label i=1; i < times.size(); i++)
     {
         scalar diff = mag(times[i].value() - t);
         if (diff < deltaT)

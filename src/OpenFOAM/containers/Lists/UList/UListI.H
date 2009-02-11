@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
+#include "pTraits.H"
 #include "Swap.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -64,7 +65,7 @@ inline Foam::label Foam::UList<T>::fcIndex(const label i) const
 template<class T>
 inline Foam::label Foam::UList<T>::rcIndex(const label i) const
 {
-    return (i == 0 ? size()-1 : i-1);
+    return (i ? i-1 : size()-1);
 }
 
 
@@ -113,9 +114,24 @@ inline void Foam::UList<T>::checkIndex(const label i) const
 }
 
 
+template<class T>
+inline const T* Foam::UList<T>::cdata() const
+{
+    return v_;
+}
+
+
+template<class T>
+inline T* Foam::UList<T>::data()
+{
+    return v_;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Return subscript-checked element access
+
+// element access
 template<class T>
 inline T& Foam::UList<T>::operator[](const label i)
 {
@@ -126,7 +142,28 @@ inline T& Foam::UList<T>::operator[](const label i)
 }
 
 
-// Return subscript-checked const element access
+namespace Foam
+{
+
+    // Template specialization for bool
+    template<>
+    inline const bool& Foam::UList<bool>::operator[](const label i) const
+    {
+        // lazy evaluation - return false for out-of-range
+        if (i < size_)
+        {
+            return v_[i];
+        }
+        else
+        {
+            return Foam::pTraits<bool>::zero;
+        }
+    }
+
+} // end of namespace Foam
+
+
+// const element access
 template<class T>
 inline const T& Foam::UList<T>::operator[](const label i) const
 {
@@ -248,7 +285,7 @@ inline Foam::label Foam::UList<T>::max_size() const
 template<class T>
 inline bool Foam::UList<T>::empty() const
 {
-    return (size_ == 0);
+    return !size_;
 }
 
 

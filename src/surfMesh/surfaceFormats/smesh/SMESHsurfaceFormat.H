@@ -57,7 +57,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class SMESHsurfaceFormat Declaration
+                     Class SMESHsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -91,6 +91,15 @@ public:
 
     // Member Functions
 
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
+
         //- Write MeshedSurface
         static void write
         (
@@ -109,7 +118,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             Ostream&,
@@ -117,7 +126,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             const fileName& name,

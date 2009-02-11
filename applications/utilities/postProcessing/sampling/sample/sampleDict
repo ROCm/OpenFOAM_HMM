@@ -180,7 +180,7 @@ surfaces
 
     triangleCut
     {
-        // Cutingplaneusing iso surface
+        // Cutingplane using iso surface
         type            cuttingPlane;
         planeType       pointAndNormal;
         pointAndNormalDict

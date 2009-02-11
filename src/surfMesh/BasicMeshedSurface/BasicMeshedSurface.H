@@ -59,7 +59,8 @@ class BasicMeshedSurface
     public PrimitivePatch<Face, ::Foam::List, pointField, point>
 {
 
-    //- Typedefs for convenience
+    // Private typedefs
+
         typedef PrimitivePatch
         <
             Face,
@@ -70,6 +71,7 @@ class BasicMeshedSurface
         ParentType;
 
 protected:
+
     // Protected Member Functions
 
         //- Non-const access to global points
@@ -84,7 +86,7 @@ protected:
             return static_cast<List<Face> &>(*this);
         }
 
-        //- Set new regions from faceMap
+        //- Set new zones from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:
@@ -103,8 +105,8 @@ public:
         //- Construct by transferring components (points, faces).
         BasicMeshedSurface
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face> >&
+            const Xfer< pointField >&,
+            const Xfer< List<Face> >&
         );
 
     // Destructor
@@ -135,15 +137,15 @@ public:
         //- Transfer components (points, faces).
         virtual void reset
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face> >&
+            const Xfer< pointField >&,
+            const Xfer< List<Face> >&
         );
 
         //- Transfer components (points, faces).
         virtual void reset
         (
-            const Xfer<List<point> >&,
-            const Xfer<List<Face> >&
+            const Xfer< List<point> >&,
+            const Xfer< List<Face> >&
         );
 
         //- Remove invalid faces
@@ -160,14 +162,12 @@ public:
             const bool verbose=false
         );
 
-        //- Triangulate in-place
-        //  Returning the number of triangles added
-        //  Optionally returning a map of original face Ids (zero-sized when
-        //  no triangulation was done)
+        //- Triangulate in-place, returning the number of triangles added
         virtual label triangulate();
 
-        //- Triangulate in-place, setting a map of original face Ids
-        //  faceMap is zero-sized when no triangulation was done
+        //- Triangulate in-place, returning the number of triangles added
+        //  and setting a map of original face Ids.
+        //  The faceMap is zero-sized when no triangulation was done.
         virtual label triangulate(List<label>& faceMap);
 
 

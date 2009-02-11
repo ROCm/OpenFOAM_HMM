@@ -83,7 +83,7 @@ inline Foam::label Foam::DLListBase::size() const
 
 inline bool Foam::DLListBase::empty() const
 {
-    return (nElmts_ == 0);
+    return !nElmts_;
 }
 
 

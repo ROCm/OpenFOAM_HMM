@@ -153,7 +153,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
             // Cannot use face::triangulation since no complete points yet.
             for (label fp = 1; fp < verts.size() - 1; fp++)
             {
-                label fp1 = (fp + 1) % verts.size();
+                label fp1 = verts.fcIndex(fp);
 
                 labelledTri tri(verts[0], verts[fp], verts[fp1], groupID);
 

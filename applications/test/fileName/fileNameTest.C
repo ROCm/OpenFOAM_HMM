@@ -32,6 +32,7 @@ Description
 
 #include "fileName.H"
 #include "SubList.H"
+#include "IOobject.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
 
@@ -61,7 +62,8 @@ int main()
         << endl;
 
     // try with different combination
-    for (label start = 0; start < wrdList.size(); ++start)
+    // The final one should emit warnings
+    for (label start = 0; start <= wrdList.size(); ++start)
     {
         fileName instance, local;
         word name;
@@ -69,26 +71,28 @@ int main()
         fileName path(SubList<word>(wrdList, wrdList.size()-start, start));
         fileName path2 = "." / path;
 
-        path.IOobjectComponents
+        IOobject::fileNameComponents
         (
+            path,
             instance,
             local,
             name
         );
 
-        Info<< "IOobjectComponents for " << path << nl
+        Info<< "IOobject::fileNameComponents for " << path << nl
             << "  instance = " << instance << nl
             << "  local    = " << local << nl
             << "  name     = " << name << endl;
 
-        path2.IOobjectComponents
+        IOobject::fileNameComponents
         (
+            path2,
             instance,
             local,
             name
         );
 
-        Info<< "IOobjectComponents for " << path2 << nl
+        Info<< "IOobject::fileNameComponents for " << path2 << nl
             << "  instance = " << instance << nl
             << "  local    = " << local << nl
             << "  name     = " << name << endl;

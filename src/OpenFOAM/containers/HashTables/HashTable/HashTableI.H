@@ -54,7 +54,7 @@ inline Foam::label Foam::HashTable<T, Key, Hash>::size() const
 template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::empty() const
 {
-    return (nElmts_ == 0);
+    return !nElmts_;
 }
 
 

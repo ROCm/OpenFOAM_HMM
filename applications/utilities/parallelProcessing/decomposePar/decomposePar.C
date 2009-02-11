@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     // determine the existing processor count directly
     label nProcs = 0;
-    while (dir(runTime.path()/(word("processor") + name(nProcs))))
+    while (isDir(runTime.path()/(word("processor") + name(nProcs))))
     {
         ++nProcs;
     }
@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
     // Any uniform data to copy/link?
     fileName uniformDir("uniform");
 
-    if (dir(runTime.timePath()/uniformDir))
+    if (isDir(runTime.timePath()/uniformDir))
     {
         Info<< "Detected additional non-decomposed files in "
             << runTime.timePath()/uniformDir

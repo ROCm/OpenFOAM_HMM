@@ -43,7 +43,7 @@ geometricSurfacePatch::geometricSurfacePatch()
 :
     geometricType_("empty"),
     name_("patch"),
-    boundaryIndex_(0)
+    index_(0)
 {}
 
 
@@ -57,7 +57,7 @@ geometricSurfacePatch::geometricSurfacePatch
 :
     geometricType_(geometricType),
     name_(name),
-    boundaryIndex_(index)
+    index_(index)
 
 {
     if (geometricType_.empty())
@@ -72,7 +72,7 @@ geometricSurfacePatch::geometricSurfacePatch(Istream& is, const label index)
 :
     geometricType_(is),
     name_(is),
-    boundaryIndex_(index)
+    index_(index)
 {
     if (geometricType_.empty())
     {
@@ -91,7 +91,7 @@ geometricSurfacePatch::geometricSurfacePatch
 :
     geometricType_(dict.lookup("geometricType")),
     name_(name),
-    boundaryIndex_(index)
+    index_(index)
 {
     if (geometricType_.empty())
     {

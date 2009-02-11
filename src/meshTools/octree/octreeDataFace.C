@@ -440,8 +440,8 @@ Foam::label Foam::octreeDataFace::getSampleType
             // Face intersection point lies on edge between two face triangles
 
             // Calculate edge normal as average of the two triangle normals
-            label fpPrev = (fp == 0 ? f.size()-1 : fp-1);
-            label fpNext = (fp + 1) % f.size();
+            const label fpPrev = f.rcIndex(fp);
+            const label fpNext = f.fcIndex(fp);
 
             vector e = points[f[fp]] - mesh_.faceCentres()[faceI];
             vector ePrev = points[f[fpPrev]] - mesh_.faceCentres()[faceI];
@@ -530,7 +530,7 @@ bool Foam::octreeDataFace::overlaps
 
     forAll(f, fp)
     {
-        label fp1 = (fp == f.size()-1 ? 0 : fp+1);
+        const label fp1 = f.fcIndex(fp);
 
         bool triIntersects = triangleFuncs::intersectBb
         (

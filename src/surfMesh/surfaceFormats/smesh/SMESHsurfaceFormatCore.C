@@ -53,7 +53,7 @@ void Foam::fileFormats::SMESHsurfaceFormatCore::writeHeader
         << nl
         << "# <faces count=\"" << nFaces << "\">" << endl;
 
-    os  << nFaces << " 1" << endl;   // one attribute: region number
+    os  << nFaces << " 1" << endl;   // one attribute: zone number
 }
 
 
