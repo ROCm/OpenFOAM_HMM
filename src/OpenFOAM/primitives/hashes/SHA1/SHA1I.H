@@ -80,13 +80,13 @@ inline Foam::SHA1& Foam::SHA1::append(const char* str)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::SHA1::operator==(const SHA1::Digest& rhs) const
+inline bool Foam::SHA1::operator==(const SHA1Digest& rhs) const
 {
     return this->digest() == rhs;
 }
 
 
-inline bool Foam::SHA1::operator!=(const SHA1::Digest& rhs) const
+inline bool Foam::SHA1::operator!=(const SHA1Digest& rhs) const
 {
     return this->digest() != rhs;
 }
@@ -105,7 +105,7 @@ inline bool Foam::SHA1::operator!=(const SHA1& rhs) const
 
 
 inline Foam::SHA1::operator
-Foam::SHA1::Digest () const
+Foam::SHA1Digest () const
 {
     return digest();
 }

@@ -158,7 +158,7 @@ public:
         :
             OSstream
             (
-                *(new osha1stream()),
+                *(new osha1stream),
                 "OSHA1stream.sinkFile_",
                 format,
                 version
@@ -185,7 +185,7 @@ public:
         }
 
         //- Return SHA1::Digest for the data processed until now
-        Foam::SHA1::Digest digest()
+        Foam::SHA1Digest digest()
         {
             return sha1().digest();
         }

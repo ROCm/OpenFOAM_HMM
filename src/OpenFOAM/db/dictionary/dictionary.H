@@ -60,7 +60,6 @@ SourceFiles
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
-#include "SHA1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,6 +69,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 class regExp;
 class dictionary;
+class SHA1Digest;
+
 Istream& operator>>(Istream&, dictionary&);
 Ostream& operator<<(Ostream&, const dictionary&);
 
@@ -212,7 +213,7 @@ public:
         label endLineNumber() const;
 
         //- Return the SHA1 digest of the dictionary contents
-        SHA1::Digest digest() const;
+        SHA1Digest digest() const;
 
 
         // Search and lookup

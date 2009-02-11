@@ -41,7 +41,7 @@ using namespace Foam;
 int main(int argc, char * argv[])
 {
     SHA1 sha;
-    SHA1::Digest shaDig;
+    SHA1Digest shaDig;
 
     std::string str("The quick brown fox jumps over the lazy dog");
     Info<< shaDig << nl;
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
     sha.clear();
     sha.append(str);
 
-    SHA1::Digest shaDig_A = sha;
+    SHA1Digest shaDig_A = sha;
 
     SHA1 sha_A = sha;
 

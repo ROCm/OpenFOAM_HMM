@@ -31,10 +31,12 @@ Description
 
     Adapted from the gnulib implementation.
 
+SeeAlso
+    Foam::SHA1Digest
+
 SourceFiles
     SHA1I.H
     SHA1.C
-    SHA1Digest.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,6 +46,8 @@ SourceFiles
 #include <string>
 #include <cstddef>
 #include <stdint.h>    // C++0x uses <cstdint>
+
+#include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +59,7 @@ class Ostream;
 
 // Forward declaration of friend functions and operators
 class SHA1;
+class SHA1Digest;
 Ostream& operator<<(Ostream&, const SHA1&);
 
 
@@ -64,42 +69,6 @@ Ostream& operator<<(Ostream&, const SHA1&);
 
 class SHA1
 {
-public:
-
-    // Public classes
-
-        //- The SHA1 digest itself
-        class Digest
-        {
-        public:
-            friend class SHA1;
-
-            //- The length of the digest contents
-            static const unsigned length = 20;
-
-            //- Construct null
-            Digest();
-
-            //- Reset the digest to zero
-            void clear();
-
-            //- Equality operator
-            bool operator==(const Digest&) const;
-
-            //- Inequality operator
-            bool operator!=(const Digest&) const;
-
-            friend Ostream& operator<<(Ostream&, const SHA1::Digest&);
-
-        private:
-
-            //- The digest contents
-            unsigned char v_[length];
-        };
-
-
-private:
-
     // Private data
 
         //- Track if the hashsum has been finalized (added count, etc)
@@ -138,7 +107,7 @@ private:
         void processBytes(const void *data, size_t len);
 
         //- Calculate current digest from appended data.
-        void calcDigest(SHA1::Digest&) const;
+        void calcDigest(SHA1Digest&) const;
 
 public:
 
@@ -172,16 +141,16 @@ public:
 	bool finalize();
 
         //- Calculate current digest from appended data.
-	Digest digest() const;
+	SHA1Digest digest() const;
 
 
     // Member Operators
 
         //- Equality operator
-        inline bool operator==(const SHA1::Digest&) const;
+        inline bool operator==(const SHA1Digest&) const;
 
         //- Inequality operator
-        inline bool operator!=(const SHA1::Digest&) const;
+        inline bool operator!=(const SHA1Digest&) const;
 
         //- Equality operator
         inline bool operator==(const SHA1&) const;
@@ -190,8 +159,7 @@ public:
         inline bool operator!=(const SHA1&) const;
 
         //- Convert to a digest, calculate current digest from appended data.
-        inline operator SHA1::Digest() const;
-
+        inline operator SHA1Digest() const;
 
     // Friend Functions
 

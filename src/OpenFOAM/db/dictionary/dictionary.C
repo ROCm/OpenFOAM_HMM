@@ -233,7 +233,7 @@ Foam::label Foam::dictionary::endLineNumber() const
 }
 
 
-Foam::SHA1::Digest Foam::dictionary::digest() const
+Foam::SHA1Digest Foam::dictionary::digest() const
 {
     OSHA1stream os;
 

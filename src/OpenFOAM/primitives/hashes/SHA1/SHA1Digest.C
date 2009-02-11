@@ -24,80 +24,69 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SHA1.H"
+#include "SHA1Digest.H"
 #include "IOstreams.H"
 
 #include <cstring>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+//! @cond fileScope
+const char hexChars[] = "0123456789abcdef";
+//! @endcond fileScope
 
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SHA1::Digest::Digest()
+Foam::SHA1Digest::SHA1Digest()
 {
     clear();
 }
 
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::SHA1::Digest::clear()
+void Foam::SHA1Digest::clear()
 {
-    memset(v_, '\0', length);
+    memset(v_, 0, length);
 }
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-bool Foam::SHA1::Digest::operator==(const SHA1::Digest& rhs) const
+bool Foam::SHA1Digest::operator==(const SHA1Digest& rhs) const
 {
-    for (size_t i = 0; i < length; ++i)
+    for (unsigned i = 0; i < length; ++i)
     {
         if (v_[i] != rhs.v_[i])
         {
             return false;
         }
     }
+
     return true;
 }
 
 
-bool Foam::SHA1::Digest::operator!=(const SHA1::Digest& rhs) const
+bool Foam::SHA1Digest::operator!=(const SHA1Digest& rhs) const
 {
     return !operator==(rhs);
 }
 
 
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const SHA1::Digest& dig)
+Foam::Ostream& Foam::operator<<(Ostream& os, const SHA1Digest& dig)
 {
-    const char hexChars[] = "0123456789abcdef";
-
     const unsigned char *v = dig.v_;
-    for (size_t i=0; i < dig.length; i++)
+
+    for (unsigned i = 0; i < dig.length; ++i)
     {
         os.write(hexChars[((v[i] >> 4) & 0xF)]);
         os.write(hexChars[(v[i] & 0xF)]);
     }
 
-    os.check("Ostream& operator<<(Ostream&, const SHA1::Digest&)");
+    os.check("Ostream& operator<<(Ostream&, const SHA1Digest&)");
     return os;
 }
 

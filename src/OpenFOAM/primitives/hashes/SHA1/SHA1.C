@@ -47,8 +47,8 @@ Description
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 //! @cond fileScope
-// The bytes used to pad buffer to the next 64-byte boundary.
-// (RFC 1321, 3.1: Step 1)
+//  The bytes used to pad buffer to the next 64-byte boundary.
+//  (RFC 1321, 3.1: Step 1)
 static const unsigned char fillbuf[64] = { 0x80, 0 /* , 0, 0, ...  */ };
 //! @endcond fileScope
 
@@ -324,7 +324,7 @@ Foam::SHA1::processBlock(const void *data, size_t len)
 }
 
 
-void Foam::SHA1::calcDigest(SHA1::Digest& dig) const
+void Foam::SHA1::calcDigest(SHA1Digest& dig) const
 {
     if (bufTotal_[0] || bufTotal_[1])
     {
@@ -411,9 +411,9 @@ bool Foam::SHA1::finalize()
 }
 
 
-Foam::SHA1::Digest Foam::SHA1::digest() const
+Foam::SHA1Digest Foam::SHA1::digest() const
 {
-    SHA1::Digest dig;
+    SHA1Digest dig;
 
     if (finalized_)
     {
