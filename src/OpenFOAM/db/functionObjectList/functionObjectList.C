@@ -97,6 +97,15 @@ Foam::functionObjectList::~functionObjectList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::functionObjectList::clear()
+{
+    PtrList<functionObject>::clear();
+    digests_.clear();
+    indices_.clear();
+    updated_ = false;
+}
+
+
 bool Foam::functionObjectList::start()
 {
     return read();
@@ -157,7 +166,6 @@ bool Foam::functionObjectList::read()
         HashTable<label> newIndices;
 
         label nFunc = 0;
-        label oldIndex = -1;
 
         if (entryPtr->isDict())
         {
@@ -179,6 +187,7 @@ bool Foam::functionObjectList::read()
 
                 newDigs[nFunc] = dict.digest();
 
+                label oldIndex;
                 functionObject* objPtr = remove(key, oldIndex);
                 if (objPtr)
                 {
@@ -220,6 +229,7 @@ bool Foam::functionObjectList::read()
 
                 newDigs[nFunc] = dict.digest();
 
+                label oldIndex;
                 functionObject* objPtr = remove(key, oldIndex);
                 if (objPtr)
                 {
@@ -248,13 +258,13 @@ bool Foam::functionObjectList::read()
 
         // updating the PtrList of functionObjects also deletes any existing,
         // but unused functionObjects
-        this->transfer(newPtrs);
+        PtrList<functionObject>::transfer(newPtrs);
         digests_.transfer(newDigs);
         indices_.transfer(newIndices);
     }
     else
     {
-        this->clear();
+        PtrList<functionObject>::clear();
         digests_.clear();
         indices_.clear();
     }

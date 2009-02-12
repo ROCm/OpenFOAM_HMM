@@ -127,6 +127,16 @@ public:
 
     // Member Functions
 
+        //- Return the number of elements in the List.
+        using PtrList<functionObject>::size;
+
+        //- Return true if the List is empty (ie, size() is zero).
+        using PtrList<functionObject>::empty;
+
+        //- Clear the list of function objects
+        virtual void clear();
+
+
         //- Start is called at the start of the time-loop
         virtual bool start();
 

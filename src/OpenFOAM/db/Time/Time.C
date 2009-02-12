@@ -27,6 +27,8 @@ License
 #include "Time.H"
 #include "PstreamReduceOps.H"
 
+#include <sstream>
+
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::Time, 0);
@@ -350,18 +352,21 @@ Foam::Time::Time
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::Time::~Time()
-{}
+{
+    // destroy function objects first
+    functionObjects_.clear();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::word Foam::Time::timeName(const scalar t)
 {
-    std::ostringstream osBuffer;
-    osBuffer.setf(ios_base::fmtflags(format_), ios_base::floatfield);
-    osBuffer.precision(precision_);
-    osBuffer << t;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf.setf(ios_base::fmtflags(format_), ios_base::floatfield);
+    buf.precision(precision_);
+    buf << t;
+    return buf.str();
 }
 
 
@@ -643,7 +648,7 @@ Foam::Time& Foam::Time::operator++()
         setTime(0.0, timeIndex_);
     }
 
-    switch(writeControl_)
+    switch (writeControl_)
     {
         case wcTimeStep:
             outputTime_ = !(timeIndex_ % label(writeInterval_));

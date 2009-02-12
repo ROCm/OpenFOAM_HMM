@@ -88,22 +88,18 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and Time object
-        outputFilterOutputControl
-        (
-            const Time& time,
-            const dictionary& dict
-        );
+        //- Construct from Time object and dictionary
+        outputFilterOutputControl(const Time&, const dictionary&);
 
 
     // Destructor
-    ~outputFilterOutputControl();
+        ~outputFilterOutputControl();
 
 
     // Member Functions
 
         //- Read from dictionary
-        void read(const dictionary& dict);
+        void read(const dictionary&);
 
         //- Return const access to the Time object
         const Time& time() const

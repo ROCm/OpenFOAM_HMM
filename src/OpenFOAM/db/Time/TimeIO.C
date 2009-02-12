@@ -264,19 +264,8 @@ bool Foam::Time::writeObject
         timeDict.add("deltaT", deltaT_);
         timeDict.add("deltaT0", deltaT0_);
 
-        timeDict.regIOobject::writeObject
-        (
-            fmt,
-            ver,
-            cmp
-        );
-
-        bool writeOK = objectRegistry::writeObject
-        (
-            fmt,
-            ver,
-            cmp
-        );
+        timeDict.regIOobject::writeObject(fmt, ver, cmp);
+        bool writeOK = objectRegistry::writeObject(fmt, ver, cmp);
 
         if (writeOK && purgeWrite_)
         {
@@ -306,7 +295,7 @@ bool Foam::Time::writeNow()
 
 bool Foam::Time::writeAndEnd()
 {
-    stopAt_ = saWriteNow;
+    stopAt_  = saWriteNow;
     endTime_ = value();
 
     return writeNow();
