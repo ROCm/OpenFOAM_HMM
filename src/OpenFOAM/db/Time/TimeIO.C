@@ -61,7 +61,7 @@ void Foam::Time::readDict()
 
     if (oldWriteInterval != writeInterval_)
     {
-        switch(writeControl_)
+        switch (writeControl_)
         {
             case wcRunTime:
             case wcAdjustableRunTime:
@@ -180,11 +180,7 @@ void Foam::Time::readDict()
     }
 
     controlDict_.readIfPresent("graphFormat", graphFormat_);
-
-    if (controlDict_.found("runTimeModifiable"))
-    {
-        runTimeModifiable_ = Switch(controlDict_.lookup("runTimeModifiable"));
-    }
+    controlDict_.readIfPresent("runTimeModifiable", runTimeModifiable_);
 }
 
 
@@ -286,7 +282,7 @@ bool Foam::Time::writeObject
         {
             previousOutputTimes_.push(timeName());
 
-            while(previousOutputTimes_.size() > purgeWrite_)
+            while (previousOutputTimes_.size() > purgeWrite_)
             {
                 rmDir(objectRegistry::path(previousOutputTimes_.pop()));
             }

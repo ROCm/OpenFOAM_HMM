@@ -26,7 +26,7 @@ Class
     Foam::Time
 
 Description
-    Class to control time during FOAM simulations which is also the
+    Class to control time during OpenFOAM simulations that is also the
     top-level objectRegistry.
 
 SourceFiles
@@ -109,7 +109,7 @@ protected:
 
     // Protected data
 
-        label startTimeIndex_;
+        label  startTimeIndex_;
         scalar startTime_;
         scalar endTime_;
 
@@ -121,10 +121,10 @@ protected:
 
         scalar writeInterval_;
 
-        label purgeWrite_;
+        label  purgeWrite_;
         mutable FIFOStack<word> previousOutputTimes_;
 
-        //- Is the time currently being sub-cycled
+        //- Is the time currently being sub-cycled?
         bool subCycling_;
 
         //- Time directory name format
@@ -157,21 +157,21 @@ private:
         //- Default graph format
         word graphFormat_;
 
-        //- Is runtim modification of dictionaries allowed
+        //- Is runtime modification of dictionaries allowed?
         Switch runTimeModifiable_;
 
         //- Instantiate a dummy class to cause the reading of dynamic libraries
         dlLibraryTable::readDlLibrary readLibs_;
 
         //- Function objects executed at start and on ++, +=
-        functionObjectList functionObjects_;
+        mutable functionObjectList functionObjects_;
 
 
 public:
 
     TypeName("time");
 
-    //- The default control dictionary name
+    //- The default control dictionary name (normally "controlDict")
     static word controlDictName;
 
 
@@ -282,8 +282,8 @@ public:
             void readModifiedObjects();
 
             //- Return the location of "dir" containing the file "name".
-            //  (Used in reading mesh data)
-            //  If name is null search for the directory "dir" only
+            //  (eg, used in reading mesh data)
+            //  If name is null, search for the directory "dir" only
             word findInstance
             (
                 const fileName& dir,
@@ -291,7 +291,7 @@ public:
                 const IOobject::readOption rOpt = IOobject::MUST_READ
             ) const;
 
-            //- Search tha case for valid time directories
+            //- Search the case for valid time directories
             instantList times() const;
 
             //- Search the case for the time directory path
@@ -307,9 +307,9 @@ public:
             //- Write using given format, version and compression
             virtual bool writeObject
             (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::streamFormat,
+                IOstream::versionNumber,
+                IOstream::compressionType
             ) const;
 
             //- Write the objects now and continue the run
@@ -409,7 +409,7 @@ public:
         //- Prefix increment
         virtual Time& operator++();
 
-        //- Postfix increment
+        //- Postfix increment, this is identical to the prefix increment
         virtual Time& operator++(int);
 };
 

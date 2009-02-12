@@ -27,8 +27,6 @@ License
 #include "Time.H"
 #include "PstreamReduceOps.H"
 
-#include <sstream>
-
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::Time, 0);
@@ -490,9 +488,13 @@ bool Foam::Time::run() const
 {
     bool running = value() < (endTime_ - 0.5*deltaT_);
 
-    if (!subCycling_ && !running && timeIndex_ != startTimeIndex_)
+    if (!running && !subCycling_)
     {
-        const_cast<functionObjectList&>(functionObjects_).execute();
+        // Note, the execute() also calls an indirect start() if required
+        if (timeIndex_ != startTimeIndex_)
+        {
+            functionObjects_.execute();
+        }
     }
 
     return running;
@@ -610,24 +612,8 @@ Foam::Time& Foam::Time::operator+=(const dimensionedScalar& deltaT)
 
 Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 {
-    readModifiedObjects();
-
-    if (!subCycling_)
-    {
-        if (timeIndex_ == startTimeIndex_)
-        {
-            functionObjects_.start();
-        }
-        else
-        {
-            functionObjects_.execute();
-        }
-    }
-
     setDeltaT(deltaT);
-    operator++();
-
-    return *this;
+    return operator++();
 }
 
 
@@ -660,19 +646,19 @@ Foam::Time& Foam::Time::operator++()
     switch(writeControl_)
     {
         case wcTimeStep:
-            outputTime_ = !(timeIndex_%label(writeInterval_));
+            outputTime_ = !(timeIndex_ % label(writeInterval_));
         break;
 
         case wcRunTime:
         case wcAdjustableRunTime:
         {
-            label outputTimeIndex =
+            label outputIndex =
                 label(((value() - startTime_) + 0.5*deltaT_)/writeInterval_);
 
-            if (outputTimeIndex > outputTimeIndex_)
+            if (outputIndex > outputTimeIndex_)
             {
                 outputTime_ = true;
-                outputTimeIndex_ = outputTimeIndex;
+                outputTimeIndex_ = outputIndex;
             }
             else
             {
@@ -683,13 +669,11 @@ Foam::Time& Foam::Time::operator++()
 
         case wcCpuTime:
         {
-            label outputTimeIndex =
-                label(elapsedCpuTime()/writeInterval_);
-
-            if (outputTimeIndex > outputTimeIndex_)
+            label outputIndex = label(elapsedCpuTime()/writeInterval_);
+            if (outputIndex > outputTimeIndex_)
             {
                 outputTime_ = true;
-                outputTimeIndex_ = outputTimeIndex;
+                outputTimeIndex_ = outputIndex;
             }
             else
             {
@@ -700,11 +684,11 @@ Foam::Time& Foam::Time::operator++()
 
         case wcClockTime:
         {
-            label outputTimeIndex = label(elapsedClockTime()/writeInterval_);
-            if (outputTimeIndex > outputTimeIndex_)
+            label outputIndex = label(elapsedClockTime()/writeInterval_);
+            if (outputIndex > outputTimeIndex_)
             {
                 outputTime_ = true;
-                outputTimeIndex_ = outputTimeIndex;
+                outputTimeIndex_ = outputIndex;
             }
             else
             {
