@@ -29,7 +29,8 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::functionObject* Foam::functionObjectList::remove(const word& key)
+Foam::functionObject*
+Foam::functionObjectList::remove(const word& key, label& oldIndex)
 {
     functionObject* ptr = 0;
 
@@ -38,9 +39,15 @@ Foam::functionObject* Foam::functionObjectList::remove(const word& key)
 
     if (fnd != indices_.end())
     {
-        // remove the pointer from the old list
-        ptr = functions_.set(fnd(), 0).ptr();
+        oldIndex = fnd();
+
+        // retrieve the pointer and remove it from the old list
+        ptr = this->set(oldIndex, 0).ptr();
         indices_.erase(fnd);
+    }
+    else
+    {
+        oldIndex = -1;
     }
 
     return ptr;
@@ -55,7 +62,8 @@ Foam::functionObjectList::functionObjectList
     const bool execution
 )
 :
-    functions_(),
+    PtrList<functionObject>(),
+    digests_(),
     indices_(),
     time_(t),
     parentDict_(t.controlDict()),
@@ -71,7 +79,8 @@ Foam::functionObjectList::functionObjectList
     const bool execution
 )
 :
-    functions_(),
+    PtrList<functionObject>(),
+    digests_(),
     indices_(),
     time_(t),
     parentDict_(parentDict),
@@ -105,7 +114,7 @@ bool Foam::functionObjectList::execute()
             read();
         }
 
-        forAllIter(PtrList<functionObject>, functions_, iter)
+        forAllIter(PtrList<functionObject>, *this, iter)
         {
             ok = iter().execute() && ok;
         }
@@ -123,7 +132,8 @@ void Foam::functionObjectList::on()
 
 void Foam::functionObjectList::off()
 {
-    execution_ = false;
+    // for safety, also force a read() when execution is turned back on
+    updated_ = execution_ = false;
 }
 
 
@@ -143,15 +153,19 @@ bool Foam::functionObjectList::read()
     if (entryPtr)
     {
         PtrList<functionObject> newPtrs;
+        List<SHA1Digest> newDigs;
         HashTable<label> newIndices;
 
         label nFunc = 0;
+        label oldIndex = -1;
 
         if (entryPtr->isDict())
         {
             // a dictionary of functionObjects
             const dictionary& functionDicts = entryPtr->dict();
+
             newPtrs.setSize(functionDicts.size());
+            newDigs.setSize(functionDicts.size());
 
             forAllConstIter(dictionary, functionDicts, iter)
             {
@@ -163,11 +177,16 @@ bool Foam::functionObjectList::read()
                 const word& key = iter().keyword();
                 const dictionary& dict = iter().dict();
 
-                functionObject* objPtr = remove(key);
+                newDigs[nFunc] = dict.digest();
+
+                functionObject* objPtr = remove(key, oldIndex);
                 if (objPtr)
                 {
-                    // existing functionObject
-                    ok = objPtr->read(dict) && ok;
+                    // an existing functionObject, and dictionary changed
+                    if (newDigs[nFunc] != digests_[oldIndex])
+                    {
+                        ok = objPtr->read(dict) && ok;
+                    }
                 }
                 else
                 {
@@ -185,7 +204,9 @@ bool Foam::functionObjectList::read()
         {
             // a list of functionObjects
             PtrList<entry> functionDicts(entryPtr->stream());
+
             newPtrs.setSize(functionDicts.size());
+            newDigs.setSize(functionDicts.size());
 
             forAllIter(PtrList<entry>, functionDicts, iter)
             {
@@ -197,11 +218,16 @@ bool Foam::functionObjectList::read()
                 const word& key = iter().keyword();
                 const dictionary& dict = iter().dict();
 
-                functionObject* objPtr = remove(key);
+                newDigs[nFunc] = dict.digest();
+
+                functionObject* objPtr = remove(key, oldIndex);
                 if (objPtr)
                 {
-                    // existing functionObject
-                    ok = objPtr->read(dict) && ok;
+                    // an existing functionObject, and dictionary changed
+                    if (newDigs[nFunc] != digests_[oldIndex])
+                    {
+                        ok = objPtr->read(dict) && ok;
+                    }
                 }
                 else
                 {
@@ -218,15 +244,18 @@ bool Foam::functionObjectList::read()
 
         // safety:
         newPtrs.setSize(nFunc);
+        newDigs.setSize(nFunc);
 
-        // update PtrList of functionObjects
-        // also deletes existing, unused functionObjects
-        functions_.transfer(newPtrs);
+        // updating the PtrList of functionObjects also deletes any existing,
+        // but unused functionObjects
+        this->transfer(newPtrs);
+        digests_.transfer(newDigs);
         indices_.transfer(newIndices);
     }
     else
     {
-        functions_.clear();
+        this->clear();
+        digests_.clear();
         indices_.clear();
     }
 

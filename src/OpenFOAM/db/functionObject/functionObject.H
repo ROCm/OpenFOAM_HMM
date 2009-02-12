@@ -121,7 +121,7 @@ public:
 
     // Selectors
 
-        //- Select from Time and Istream
+        //- Select from dictionary, based on its "type" entry
         static autoPtr<functionObject> New
         (
             const word& name,
@@ -143,7 +143,7 @@ public:
         //- execute is called at each ++ or += of the time-loop
         virtual bool execute() = 0;
 
-        //- Read and set the function object if its data has changed
+        //- Read and set the function object if its data have changed
         virtual bool read(const dictionary& dict) = 0;
 };
 

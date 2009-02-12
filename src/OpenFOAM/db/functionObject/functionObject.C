@@ -71,10 +71,10 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         FatalErrorIn
         (
             "functionObject::New"
-            "(const word& functionType, const Time&, const dictionary&)"
+            "(const word& name, const Time&, const dictionary&)"
         )   << "Unknown function type "
-            << functionType << endl << endl
-            << "Table of functionObjects is empty"
+            << functionType << nl << nl
+            << "Table of functionObjects is empty" << endl
             << exit(FatalError);
     }
 
@@ -86,11 +86,11 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         FatalErrorIn
         (
             "functionObject::New"
-            "(const word& functionType, const Time&, const dictionary&)"
+            "(const word& name, const Time&, const dictionary&)"
         )   << "Unknown function type "
-            << functionType << endl << endl
-            << "Valid functions are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << functionType << nl << nl
+            << "Valid functions are : " << nl
+            << dictionaryConstructorTablePtr_->toc() << endl
             << exit(FatalError);
     }
 

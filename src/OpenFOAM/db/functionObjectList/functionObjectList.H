@@ -43,6 +43,7 @@ SourceFiles
 #include "functionObject.H"
 #include "HashTable.H"
 #include "PtrList.H"
+#include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,20 +55,20 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class functionObjectList
+:
+    private PtrList<functionObject>
 {
     // Private data
 
-        //- A list of function objects
-        //  Avoid 'is-a' relationship for protection
-        PtrList<functionObject> functions_;
+        //- A list of SHA1 digests for the function object dictionaries
+        List<SHA1Digest> digests_;
 
-        //- Quick lookup of the index into the PtrList<functionObject>
-        //  Currently only used to manage rereading/deletion
-        HashTable<label>  indices_;
+        //- Quick lookup of the index into functions/digests
+        HashTable<label> indices_;
 
         const Time& time_;
 
-        //- Dictionary containing the "functions" entry
+        //- The parent dictionary containing a "functions" entry
         //  This entry can either be a list or a dictionary of
         //  functionObject specifications.
         const dictionary& parentDict_;
@@ -75,15 +76,16 @@ class functionObjectList
         //- Switch for the execution of the functionObjects
         bool execution_;
 
-        //- Tracks if read() was called while execution was turned off
+        //- Tracks if read() was called while execution is on
         bool updated_;
 
 
     // Private Member Functions
 
-        //- Remove and return the function object pointer by name.
-        //  Return NULL if it didn't exist.
-        functionObject* remove(const word&);
+        //- Remove and return the function object pointer by name,
+        //  and returns the old index via the parameter.
+        //  Returns a NULL pointer (and index -1) if it didn't exist.
+        functionObject* remove(const word&, label& oldIndex);
 
         //- Disallow default bitwise copy construct
         functionObjectList(const functionObjectList&);
@@ -105,8 +107,11 @@ public:
         );
 
 
-        //- Construct from Time, dictionary with "functions" entry
-        //  and the execution setting
+        //- Construct from Time, a dictionary with "functions" entry
+        //  and the execution setting.
+        //  @param[in]  parentDict - the parent dictionary containing
+        //    a "functions" entry, which can either be a list or a dictionary
+        //    of functionObject specifications.
         functionObjectList
         (
             const Time&,
