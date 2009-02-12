@@ -400,7 +400,7 @@ void Foam::CV3D::insertPoints(const fileName& pointFileName)
         )
     );
 
-    insertPoints(points, 0.5*controls_.minCellSize2);
+    insertPoints(points, 0.25*controls_.minCellSize2);
 }
 
 
@@ -426,6 +426,8 @@ void Foam::CV3D::insertGrid()
     int nk = int(zR/controls_.minCellSize) + 1;
 
     vector delta(xR/ni, yR/nj, zR/nk);
+
+    // SC lattice, also a simple cubic lattice
 
     delta *= pow((1.0),-(1.0/3.0));
 
@@ -457,11 +459,166 @@ void Foam::CV3D::insertGrid()
                 if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
                 {
                     initialPoints.push_back(Point(p.x(), p.y(), p.z()));
-                    // insert(Point(p.x(), p.y(), p.z()))->index() = nVert++;
                 }
             }
         }
     }
+
+    // BCC lattice, the Voronoi diagram of which is a lattice of bitruncated
+    // octahedron
+
+    // delta *= pow((1.0/2.0),-(1.0/3.0));
+
+    // Random rndGen(1321);
+    // scalar pert = controls_.randomPerturbation*cmptMin(delta);
+
+    // std::vector<Point> initialPoints;
+
+    // for (int i=0; i<ni; i++)
+    // {
+    //     for (int j=0; j<nj; j++)
+    //     {
+    //         for (int k=0; k<nk; k++)
+    //         {
+    //             point p;
+
+    //             p = point
+    //             (
+    //                 x0 + i*delta.x(),
+    //                 y0 + j*delta.y(),
+    //                 z0 + k*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p.x(), p.y(), p.z()));
+    //             }
+
+    //             p = point
+    //             (
+    //                 x0 + (i + 0.5)*delta.x(),
+    //                 y0 + (j + 0.5)*delta.y(),
+    //                 z0 + (k + 0.5)*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p.x(), p.y(), p.z()));
+    //             }
+    //         }
+    //     }
+    // }
+
+    // FCC lattice, the Voronoi diagram of which is a lattice of rhombic
+    // dodecahedra
+
+    // delta *= pow((1.0/4.0),-(1.0/3.0));
+
+    // Random rndGen(1321);
+    // scalar pert = controls_.randomPerturbation*cmptMin(delta);
+
+    // std::vector<Point> initialPoints;
+
+    // for (int i=0; i<ni; i++)
+    // {
+    //     for (int j=0; j<nj; j++)
+    //     {
+    //         for (int k=0; k<nk; k++)
+    //         {
+    //             point p;
+
+    //             p = point
+    //             (
+    //                 x0 + i*delta.x(),
+    //                 y0 + j*delta.y(),
+    //                 z0 + k*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p.x(), p.y(), p.z()));
+    //             }
+
+    //             p = point
+    //             (
+    //                 x0 + i*delta.x(),
+    //                 y0 + (j + 0.5)*delta.y(),
+    //                 z0 + (k + 0.5)*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p.x(), p.y(), p.z()));
+    //             }
+
+    //             p = point
+    //             (
+    //                 x0 + (i + 0.5)*delta.x(),
+    //                 y0 + j*delta.y(),
+    //                 z0 + (k + 0.5)*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p.x(), p.y(), p.z()));
+    //             }
+
+    //             p = point
+    //             (
+    //                 x0 + (i + 0.5)*delta.x(),
+    //                 y0 + (j + 0.5)*delta.y(),
+    //                 z0 + k*delta.z()
+    //             );
+
+    //             if (controls_.randomiseInitialGrid)
+    //             {
+    //                 p.x() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.y() += pert*(rndGen.scalar01() - 0.5);
+    //                 p.z() += pert*(rndGen.scalar01() - 0.5);
+    //             }
+
+    //             if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+    //             {
+    //                 initialPoints.push_back(Point(p.x(), p.y(), p.z()));
+    //             }
+    //         }
+    //     }
+    // }
 
     Info<< nl << initialPoints.size() << " vertices to insert." << endl;
 
@@ -1178,6 +1335,21 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     if (runTime_.outputTime())
     {
         writeMesh(true);
+
+        pointIOField internalDVs
+        (
+            IOobject
+            (
+                "internalDelaunayVertices",
+                runTime_.path()/runTime_.timeName(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            internalDelaunayVertices
+        );
+
+        internalDVs.write();
     }
 
     // Remove the entire triangulation
