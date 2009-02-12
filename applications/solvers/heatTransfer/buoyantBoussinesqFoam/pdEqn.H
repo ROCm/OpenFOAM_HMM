@@ -5,10 +5,13 @@
     U = rUA*UEqn().H();
     UEqn.clear();
 
-    phi =
+    surfaceScalarField phiU
+    (
         (fvc::interpolate(U) & mesh.Sf())
       + fvc::ddtPhiCorr(rUA, U, phi)
-      + betaghf*fvc::snGrad(T)*rUAf*mesh.magSf();
+    );
+
+    phi = phiU + betaghf*fvc::snGrad(T)*rUAf*mesh.magSf();
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
@@ -17,8 +20,7 @@
             fvm::laplacian(rUAf, pd) == fvc::div(phi)
         );
 
-        // retain the residual from the first iteration
-        if (nonOrth == 0)
+        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
         {
             pdEqn.solve(mesh.solver(pd.name() + "Final"));
         }
@@ -29,17 +31,12 @@
 
         if (nonOrth == nNonOrthCorr)
         {
-            // Calculate the conservative fluxes
-            phi -= pdEqn.flux();
-
-            // Correct the momentum source with the pressure gradient flux
-            // calculated from the relaxed pressure
-            U -=
-                rUA
-               *fvc::reconstruct((pdEqn.flux() - betaghf*fvc::snGrad(T))/rUAf);
-            U.correctBoundaryConditions();
+            phi += pdEqn.flux();
         }
     }
+
+    U += rUA*fvc::reconstruct((phi - phiU)/rUAf);
+    U.correctBoundaryConditions();
 
     #include "continuityErrs.H"
 }
